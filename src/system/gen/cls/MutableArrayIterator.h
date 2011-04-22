@@ -61,8 +61,8 @@ class c_MutableArrayIterator : public c_ArrayIterator {
 
   public:
   void init();
-  public: void t___construct(Variant v_array, Variant v_flags = 0LL);
-  public: c_MutableArrayIterator *create(Variant v_array, Variant v_flags = 0LL);
+  public: void t___construct(VRefParam rv_array, Variant v_flags = 0LL);
+  public: c_MutableArrayIterator *create(VRefParam v_array, CVarRef v_flags = 0LL);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);

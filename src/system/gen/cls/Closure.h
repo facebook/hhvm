@@ -63,7 +63,7 @@ class c_Closure : public ExtObjectData {
   public:
   void init();
   public: void t___construct(Variant v_func, Variant v_vars);
-  public: c_Closure *create(Variant v_func, Variant v_vars);
+  public: c_Closure *create(CVarRef v_func, CVarRef v_vars);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);

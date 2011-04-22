@@ -1162,7 +1162,7 @@ void VariableTable::outputCPPGlobalVariablesGetImpl(CodeGenerator &cg,
                                                     AnalysisResultPtr ar) {
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_GETIMPL");
   cg_indentBegin("Variant &GlobalVariables::getImpl(CStrRef s) {\n");
-  cg_printf("GlobalVariables *g __attribute__((__unused__)) = this;\n");
+  cg_printf("GlobalVariables *g ATTRIBUTE_UNUSED = this;\n");
   if (!outputCPPJumpTable(cg, ar, NULL, true, true, EitherStatic,
                           JumpReturnString)) {
     m_emptyJumpTables.insert(JumpTableGlobalGetImpl);
@@ -1176,7 +1176,7 @@ void VariableTable::outputCPPGlobalVariablesExists(CodeGenerator &cg,
                                                    AnalysisResultPtr ar) {
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_EXISTS");
   cg_indentBegin("bool GlobalVariables::exists(CStrRef s) const {\n");
-  cg_printf("const GlobalVariables *g __attribute__((__unused__)) = this;\n");
+  cg_printf("const GlobalVariables *g ATTRIBUTE_UNUSED = this;\n");
   if (!outputCPPJumpTable(cg, ar, NULL, true, false,
                           EitherStatic, JumpInitializedString)) {
     m_emptyJumpTables.insert(JumpTableGlobalExists);
@@ -1193,7 +1193,7 @@ void VariableTable::outputCPPGlobalVariablesGetIndex(CodeGenerator &cg,
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_GETINDEX");
   cg_indentBegin("ssize_t GlobalVariables::getIndex(const char* s, "
                  "int64 hash) const {\n");
-  cg_printf("const GlobalVariables *g __attribute__((__unused__)) = this;\n");
+  cg_printf("const GlobalVariables *g ATTRIBUTE_UNUSED = this;\n");
   if (!outputCPPJumpTable(cg, ar, NULL, false, true, EitherStatic, JumpIndex)) {
     m_emptyJumpTables.insert(JumpTableGlobalGetIndex);
   }
@@ -1209,7 +1209,7 @@ void VariableTable::outputCPPGlobalVariablesMethods(CodeGenerator &cg,
 
   cg_indentBegin("CVarRef GlobalVariables::getRefByIdx(ssize_t idx, "
                  "Variant &k) {\n");
-  cg_printf("GlobalVariables *g __attribute__((__unused__)) = this;\n");
+  cg_printf("GlobalVariables *g ATTRIBUTE_UNUSED = this;\n");
   cg_indentBegin("static const char *names[] = {\n");
   for (int i = 0; i < maxIdx; i++) {
     const string &name = m_symbolVec[i]->getName();
@@ -1235,7 +1235,7 @@ void VariableTable::outputCPPVariableInit(CodeGenerator &cg,
                                           bool inPseudoMain,
                                           const string &name) {
   if (inPseudoMain) {
-    cg_printf(" __attribute__((__unused__)) = ");
+    cg_printf(" ATTRIBUTE_UNUSED = ");
     if (cg.getOutput() != CodeGenerator::SystemCPP) {
       cg_printf("(variables != gVariables) ? variables->get(");
       cg_printString(name, ar, getBlockScope());
@@ -1254,11 +1254,11 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool inPseudoMain = isPseudoMainTable();
   if (inPseudoMain) {
     if (m_forcedVariants) {
-      cg_printf("LVariableTable *gVariables __attribute__((__unused__)) = "
+      cg_printf("LVariableTable *gVariables ATTRIBUTE_UNUSED = "
                 "(LVariableTable *)g;\n");
     } else {
       ASSERT(false);
-      cg_printf("RVariableTable *gVariables __attribute__((__unused__)) = "
+      cg_printf("RVariableTable *gVariables ATTRIBUTE_UNUSED = "
                 "(RVariableTable *)g;\n");
     }
   }
@@ -1282,22 +1282,22 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (ClassScope::NeedStaticArray(getClassScope(), getFunctionScope())) {
         const char *cname = getFunctionScope()->isStatic() ? "cls" :
           "this->o_getClassName()";
-        cg_printf(" &%s%s __attribute__((__unused__)) = "
+        cg_printf(" &%s%s ATTRIBUTE_UNUSED = "
                   "g->%s%s.lvalAt(%s);\n",
                   Option::StaticVariablePrefix, fname.c_str(),
                   Option::StaticVariablePrefix, id.c_str(),
                   cname);
-        cg_printf("Variant &%s%s%s __attribute__((__unused__)) = "
+        cg_printf("Variant &%s%s%s ATTRIBUTE_UNUSED = "
                   "g->%s%s%s.lvalAt(%s);\n",
                   Option::InitPrefix, Option::StaticVariablePrefix,
                   fname.c_str(),
                   Option::InitPrefix, Option::StaticVariablePrefix,
                   id.c_str(), cname);
       } else {
-        cg_printf(" &%s%s __attribute__((__unused__)) = g->%s%s;\n",
+        cg_printf(" &%s%s ATTRIBUTE_UNUSED = g->%s%s;\n",
                   Option::StaticVariablePrefix, fname.c_str(),
                   Option::StaticVariablePrefix, id.c_str());
-        cg_printf("bool &%s%s%s __attribute__((__unused__)) = g->%s%s%s;\n",
+        cg_printf("bool &%s%s%s ATTRIBUTE_UNUSED = g->%s%s%s;\n",
                   Option::InitPrefix, Option::StaticVariablePrefix,
                   fname.c_str(),
                   Option::InitPrefix, Option::StaticVariablePrefix,
@@ -1321,7 +1321,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (sym->isGlobal()) {
       TypePtr type = sym->getFinalType();
       type->outputCPPDecl(cg, ar, getBlockScope());
-      cg_printf(" &%s%s __attribute__((__unused__)) = g->%s;\n",
+      cg_printf(" &%s%s ATTRIBUTE_UNUSED = g->%s;\n",
                 Option::GlobalVariablePrefix, fname.c_str(),
                 getGlobalVariableName(cg, ar, name).c_str());
 
@@ -1485,7 +1485,7 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
     } else {
       cg_indentEnd("} variableTable;\n");
     }
-    cg_printf("%sVariableTable* __attribute__((__unused__)) "
+    cg_printf("%sVariableTable* ATTRIBUTE_UNUSED "
               "variables = &variableTable;\n",
               m_forcedVariants ? "L" : "R");
   } else {

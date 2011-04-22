@@ -27,46 +27,55 @@ namespace HPHP {
 
 inline Variant x_apache_note(CStrRef note_name, CStrRef note_value = null_string) {
   FUNCTION_INJECTION_BUILTIN(apache_note);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_apache_note(note_name, note_value);
 }
 
 inline Array x_apache_request_headers() {
   FUNCTION_INJECTION_BUILTIN(apache_request_headers);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_apache_request_headers();
 }
 
 inline Array x_apache_response_headers() {
   FUNCTION_INJECTION_BUILTIN(apache_response_headers);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_apache_response_headers();
 }
 
 inline bool x_apache_setenv(CStrRef variable, CStrRef value, bool walk_to_top = false) {
   FUNCTION_INJECTION_BUILTIN(apache_setenv);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_apache_setenv(variable, value, walk_to_top);
 }
 
 inline Array x_getallheaders() {
   FUNCTION_INJECTION_BUILTIN(getallheaders);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_getallheaders();
 }
 
 inline bool x_virtual(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(virtual);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_virtual(filename);
 }
 
 inline Variant x_apache_get_config() {
   FUNCTION_INJECTION_BUILTIN(apache_get_config);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_apache_get_config();
 }
 
 inline Variant x_apache_get_scoreboard() {
   FUNCTION_INJECTION_BUILTIN(apache_get_scoreboard);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_apache_get_scoreboard();
 }
 
 inline Variant x_apache_get_rewrite_rules() {
   FUNCTION_INJECTION_BUILTIN(apache_get_rewrite_rules);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_apache_get_rewrite_rules();
 }
 

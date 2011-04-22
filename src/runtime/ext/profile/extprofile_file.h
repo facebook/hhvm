@@ -27,471 +27,565 @@ namespace HPHP {
 
 inline Variant x_fopen(CStrRef filename, CStrRef mode, bool use_include_path = false, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(fopen);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fopen(filename, mode, use_include_path, context);
 }
 
 inline Variant x_popen(CStrRef command, CStrRef mode) {
   FUNCTION_INJECTION_BUILTIN(popen);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_popen(command, mode);
 }
 
 inline bool x_fclose(CObjRef handle) {
   FUNCTION_INJECTION_BUILTIN(fclose);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fclose(handle);
 }
 
 inline Variant x_pclose(CObjRef handle) {
   FUNCTION_INJECTION_BUILTIN(pclose);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pclose(handle);
 }
 
 inline Variant x_fseek(CObjRef handle, int64 offset, int64 whence = k_SEEK_SET) {
   FUNCTION_INJECTION_BUILTIN(fseek);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fseek(handle, offset, whence);
 }
 
 inline bool x_rewind(CObjRef handle) {
   FUNCTION_INJECTION_BUILTIN(rewind);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_rewind(handle);
 }
 
 inline Variant x_ftell(CObjRef handle) {
   FUNCTION_INJECTION_BUILTIN(ftell);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ftell(handle);
 }
 
 inline bool x_feof(CObjRef handle) {
   FUNCTION_INJECTION_BUILTIN(feof);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_feof(handle);
 }
 
 inline Variant x_fstat(CObjRef handle) {
   FUNCTION_INJECTION_BUILTIN(fstat);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fstat(handle);
 }
 
 inline Variant x_fread(CObjRef handle, int64 length) {
   FUNCTION_INJECTION_BUILTIN(fread);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fread(handle, length);
 }
 
 inline Variant x_fgetc(CObjRef handle) {
   FUNCTION_INJECTION_BUILTIN(fgetc);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fgetc(handle);
 }
 
 inline Variant x_fgets(CObjRef handle, int64 length = 0) {
   FUNCTION_INJECTION_BUILTIN(fgets);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fgets(handle, length);
 }
 
 inline Variant x_fgetss(CObjRef handle, int64 length = 0, CStrRef allowable_tags = null_string) {
   FUNCTION_INJECTION_BUILTIN(fgetss);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fgetss(handle, length, allowable_tags);
 }
 
 inline Variant x_fscanf(int _argc, CObjRef handle, CStrRef format, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(fscanf);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fscanf(_argc, handle, format, _argv);
 }
 
 inline Variant x_fpassthru(CObjRef handle) {
   FUNCTION_INJECTION_BUILTIN(fpassthru);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fpassthru(handle);
 }
 
 inline Variant x_fwrite(CObjRef handle, CStrRef data, int64 length = 0) {
   FUNCTION_INJECTION_BUILTIN(fwrite);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fwrite(handle, data, length);
 }
 
 inline Variant x_fputs(CObjRef handle, CStrRef data, int64 length = 0) {
   FUNCTION_INJECTION_BUILTIN(fputs);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fputs(handle, data, length);
 }
 
 inline Variant x_fprintf(int _argc, CObjRef handle, CStrRef format, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(fprintf);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fprintf(_argc, handle, format, _argv);
 }
 
 inline Variant x_vfprintf(CObjRef handle, CStrRef format, CArrRef args) {
   FUNCTION_INJECTION_BUILTIN(vfprintf);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_vfprintf(handle, format, args);
 }
 
 inline bool x_fflush(CObjRef handle) {
   FUNCTION_INJECTION_BUILTIN(fflush);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fflush(handle);
 }
 
 inline bool x_ftruncate(CObjRef handle, int64 size) {
   FUNCTION_INJECTION_BUILTIN(ftruncate);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ftruncate(handle, size);
 }
 
-inline bool x_flock(CObjRef handle, int operation, CVarRef wouldblock = null) {
+inline bool x_flock(CObjRef handle, int operation, VRefParam wouldblock = null) {
   FUNCTION_INJECTION_BUILTIN(flock);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_flock(handle, operation, wouldblock);
 }
 
 inline Variant x_fputcsv(CObjRef handle, CArrRef fields, CStrRef delimiter = ",", CStrRef enclosure = "\"") {
   FUNCTION_INJECTION_BUILTIN(fputcsv);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fputcsv(handle, fields, delimiter, enclosure);
 }
 
 inline Variant x_fgetcsv(CObjRef handle, int64 length = 0, CStrRef delimiter = ",", CStrRef enclosure = "\"") {
   FUNCTION_INJECTION_BUILTIN(fgetcsv);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fgetcsv(handle, length, delimiter, enclosure);
 }
 
 inline Variant x_file_get_contents(CStrRef filename, bool use_include_path = false, CVarRef context = null, int64 offset = 0, int64 maxlen = 0) {
   FUNCTION_INJECTION_BUILTIN(file_get_contents);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_file_get_contents(filename, use_include_path, context, offset, maxlen);
 }
 
 inline Variant x_file_put_contents(CStrRef filename, CVarRef data, int flags = 0, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(file_put_contents);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_file_put_contents(filename, data, flags, context);
 }
 
 inline Variant x_file(CStrRef filename, int flags = 0, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_file(filename, flags, context);
 }
 
 inline Variant x_readfile(CStrRef filename, bool use_include_path = false, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(readfile);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_readfile(filename, use_include_path, context);
 }
 
 inline bool x_move_uploaded_file(CStrRef filename, CStrRef destination) {
   FUNCTION_INJECTION_BUILTIN(move_uploaded_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_move_uploaded_file(filename, destination);
 }
 
 inline Variant x_parse_ini_file(CStrRef filename, bool process_sections = false, int scanner_mode = k_INI_SCANNER_NORMAL) {
   FUNCTION_INJECTION_BUILTIN(parse_ini_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_parse_ini_file(filename, process_sections, scanner_mode);
 }
 
 inline Variant x_parse_ini_string(CStrRef ini, bool process_sections = false, int scanner_mode = k_INI_SCANNER_NORMAL) {
   FUNCTION_INJECTION_BUILTIN(parse_ini_string);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_parse_ini_string(ini, process_sections, scanner_mode);
 }
 
 inline Variant x_parse_hdf_file(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(parse_hdf_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_parse_hdf_file(filename);
 }
 
 inline Variant x_parse_hdf_string(CStrRef input) {
   FUNCTION_INJECTION_BUILTIN(parse_hdf_string);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_parse_hdf_string(input);
 }
 
 inline bool x_write_hdf_file(CArrRef data, CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(write_hdf_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_write_hdf_file(data, filename);
 }
 
 inline String x_write_hdf_string(CArrRef data) {
   FUNCTION_INJECTION_BUILTIN(write_hdf_string);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_write_hdf_string(data);
 }
 
 inline Variant x_md5_file(CStrRef filename, bool raw_output = false) {
   FUNCTION_INJECTION_BUILTIN(md5_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_md5_file(filename, raw_output);
 }
 
 inline Variant x_sha1_file(CStrRef filename, bool raw_output = false) {
   FUNCTION_INJECTION_BUILTIN(sha1_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_sha1_file(filename, raw_output);
 }
 
 inline bool x_chmod(CStrRef filename, int64 mode) {
   FUNCTION_INJECTION_BUILTIN(chmod);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_chmod(filename, mode);
 }
 
 inline bool x_chown(CStrRef filename, CVarRef user) {
   FUNCTION_INJECTION_BUILTIN(chown);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_chown(filename, user);
 }
 
 inline bool x_lchown(CStrRef filename, CVarRef user) {
   FUNCTION_INJECTION_BUILTIN(lchown);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_lchown(filename, user);
 }
 
 inline bool x_chgrp(CStrRef filename, CVarRef group) {
   FUNCTION_INJECTION_BUILTIN(chgrp);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_chgrp(filename, group);
 }
 
 inline bool x_lchgrp(CStrRef filename, CVarRef group) {
   FUNCTION_INJECTION_BUILTIN(lchgrp);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_lchgrp(filename, group);
 }
 
 inline bool x_touch(CStrRef filename, int64 mtime = 0, int64 atime = 0) {
   FUNCTION_INJECTION_BUILTIN(touch);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_touch(filename, mtime, atime);
 }
 
 inline bool x_copy(CStrRef source, CStrRef dest, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(copy);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_copy(source, dest, context);
 }
 
 inline bool x_rename(CStrRef oldname, CStrRef newname, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(rename);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_rename(oldname, newname, context);
 }
 
 inline int x_umask(CVarRef mask = null_variant) {
   FUNCTION_INJECTION_BUILTIN(umask);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_umask(mask);
 }
 
 inline bool x_unlink(CStrRef filename, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(unlink);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_unlink(filename, context);
 }
 
 inline bool x_link(CStrRef target, CStrRef link) {
   FUNCTION_INJECTION_BUILTIN(link);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_link(target, link);
 }
 
 inline bool x_symlink(CStrRef target, CStrRef link) {
   FUNCTION_INJECTION_BUILTIN(symlink);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_symlink(target, link);
 }
 
 inline String x_basename(CStrRef path, CStrRef suffix = null_string) {
   FUNCTION_INJECTION_BUILTIN(basename);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_basename(path, suffix);
 }
 
 inline bool x_fnmatch(CStrRef pattern, CStrRef filename, int flags = 0) {
   FUNCTION_INJECTION_BUILTIN(fnmatch);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fnmatch(pattern, filename, flags);
 }
 
 inline Variant x_glob(CStrRef pattern, int flags = 0) {
   FUNCTION_INJECTION_BUILTIN(glob);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_glob(pattern, flags);
 }
 
 inline Variant x_tempnam(CStrRef dir, CStrRef prefix) {
   FUNCTION_INJECTION_BUILTIN(tempnam);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_tempnam(dir, prefix);
 }
 
 inline Variant x_tmpfile() {
   FUNCTION_INJECTION_BUILTIN(tmpfile);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_tmpfile();
 }
 
 inline Variant x_fileperms(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(fileperms);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fileperms(filename);
 }
 
 inline Variant x_fileinode(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(fileinode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fileinode(filename);
 }
 
 inline Variant x_filesize(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(filesize);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_filesize(filename);
 }
 
 inline Variant x_fileowner(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(fileowner);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fileowner(filename);
 }
 
 inline Variant x_filegroup(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(filegroup);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_filegroup(filename);
 }
 
 inline Variant x_fileatime(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(fileatime);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fileatime(filename);
 }
 
 inline Variant x_filemtime(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(filemtime);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_filemtime(filename);
 }
 
 inline Variant x_filectime(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(filectime);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_filectime(filename);
 }
 
 inline Variant x_filetype(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(filetype);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_filetype(filename);
 }
 
 inline Variant x_linkinfo(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(linkinfo);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_linkinfo(filename);
 }
 
 inline bool x_is_writable(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(is_writable);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_is_writable(filename);
 }
 
 inline bool x_is_writeable(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(is_writeable);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_is_writeable(filename);
 }
 
 inline bool x_is_readable(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(is_readable);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_is_readable(filename);
 }
 
 inline bool x_is_executable(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(is_executable);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_is_executable(filename);
 }
 
 inline bool x_is_file(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(is_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_is_file(filename);
 }
 
 inline bool x_is_dir(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(is_dir);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_is_dir(filename);
 }
 
 inline bool x_is_link(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(is_link);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_is_link(filename);
 }
 
 inline bool x_is_uploaded_file(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(is_uploaded_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_is_uploaded_file(filename);
 }
 
 inline bool x_file_exists(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(file_exists);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_file_exists(filename);
 }
 
 inline Variant x_stat(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(stat);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stat(filename);
 }
 
 inline Variant x_lstat(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(lstat);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_lstat(filename);
 }
 
 inline void x_clearstatcache() {
   FUNCTION_INJECTION_BUILTIN(clearstatcache);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_clearstatcache();
 }
 
 inline Variant x_readlink(CStrRef path) {
   FUNCTION_INJECTION_BUILTIN(readlink);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_readlink(path);
 }
 
 inline Variant x_realpath(CStrRef path) {
   FUNCTION_INJECTION_BUILTIN(realpath);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_realpath(path);
 }
 
 inline Variant x_pathinfo(CStrRef path, int opt = 15) {
   FUNCTION_INJECTION_BUILTIN(pathinfo);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pathinfo(path, opt);
 }
 
 inline Variant x_disk_free_space(CStrRef directory) {
   FUNCTION_INJECTION_BUILTIN(disk_free_space);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_disk_free_space(directory);
 }
 
 inline Variant x_diskfreespace(CStrRef directory) {
   FUNCTION_INJECTION_BUILTIN(diskfreespace);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_diskfreespace(directory);
 }
 
 inline Variant x_disk_total_space(CStrRef directory) {
   FUNCTION_INJECTION_BUILTIN(disk_total_space);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_disk_total_space(directory);
 }
 
 inline bool x_mkdir(CStrRef pathname, int64 mode = 0777, bool recursive = false, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(mkdir);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mkdir(pathname, mode, recursive, context);
 }
 
 inline bool x_rmdir(CStrRef dirname, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(rmdir);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_rmdir(dirname, context);
 }
 
 inline String x_dirname(CStrRef path) {
   FUNCTION_INJECTION_BUILTIN(dirname);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_dirname(path);
 }
 
 inline Variant x_getcwd() {
   FUNCTION_INJECTION_BUILTIN(getcwd);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_getcwd();
 }
 
 inline bool x_chdir(CStrRef directory) {
   FUNCTION_INJECTION_BUILTIN(chdir);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_chdir(directory);
 }
 
 inline bool x_chroot(CStrRef directory) {
   FUNCTION_INJECTION_BUILTIN(chroot);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_chroot(directory);
 }
 
 inline Variant x_dir(CStrRef directory) {
   FUNCTION_INJECTION_BUILTIN(dir);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_dir(directory);
 }
 
 inline Variant x_opendir(CStrRef path, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(opendir);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_opendir(path, context);
 }
 
 inline Variant x_readdir(CObjRef dir_handle) {
   FUNCTION_INJECTION_BUILTIN(readdir);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_readdir(dir_handle);
 }
 
 inline void x_rewinddir(CObjRef dir_handle) {
   FUNCTION_INJECTION_BUILTIN(rewinddir);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_rewinddir(dir_handle);
 }
 
 inline Variant x_scandir(CStrRef directory, bool descending = false, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(scandir);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_scandir(directory, descending, context);
 }
 
 inline void x_closedir(CObjRef dir_handle) {
   FUNCTION_INJECTION_BUILTIN(closedir);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_closedir(dir_handle);
 }
 

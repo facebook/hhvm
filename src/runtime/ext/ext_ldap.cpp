@@ -684,7 +684,7 @@ bool f_ldap_unbind(CObjRef link) {
   return true;
 }
 
-bool f_ldap_get_option(CObjRef link, int option, Variant retval) {
+bool f_ldap_get_option(CObjRef link, int option, VRefParam retval) {
   LdapLink *ld = link.getTyped<LdapLink>();
 
   switch (option) {
@@ -1134,7 +1134,7 @@ Variant f_ldap_next_reference(CObjRef link, CObjRef result_entry) {
 }
 
 bool f_ldap_parse_reference(CObjRef link, CObjRef result_entry,
-                            Variant referrals) {
+                            VRefParam referrals) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResultEntry *entry = result_entry.getTyped<LdapResultEntry>();
 
@@ -1157,10 +1157,10 @@ bool f_ldap_parse_reference(CObjRef link, CObjRef result_entry,
   return true;
 }
 
-bool f_ldap_parse_result(CObjRef link, CObjRef result, Variant errcode,
-                         Variant matcheddn /* = null */,
-                         Variant errmsg /* = null */,
-                         Variant referrals /* = null */) {
+bool f_ldap_parse_result(CObjRef link, CObjRef result, VRefParam errcode,
+                         VRefParam matcheddn /* = null */,
+                         VRefParam errmsg /* = null */,
+                         VRefParam referrals /* = null */) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResult *res = result.getTyped<LdapResult>();
 

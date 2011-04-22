@@ -222,14 +222,21 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
   TypePtr paramType =
     typedWrapper && func->getParamTypeSpec(sym->getParameterIndex()) ?
     Type::Variant : func->getParamType(sym->getParameterIndex());
+  bool wrapper = typedWrapper ||
+    context == CodeGenerator::CppFunctionWrapperImpl ||
+    context == CodeGenerator::CppFunctionWrapperDecl;
 
   bool isCVarRef = false;
-  if (cg.getContext() == CodeGenerator::CppStaticMethodWrapper ||
-      typedWrapper ||
+  const char *prefix = "";
+  if (m_ref) {
+    cg_printf("VRefParam");
+    if (!wrapper) {
+      prefix = "r";
+    }
+  } else if (wrapper ||
       (!variables->isLvalParam(m_name) &&
        !variables->getAttribute(VariableTable::ContainsDynamicVariable) &&
-       !variables->getAttribute(VariableTable::ContainsExtract) &&
-       !m_ref)) {
+       !variables->getAttribute(VariableTable::ContainsExtract))) {
     if (paramType->is(Type::KindOfVariant) ||
         paramType->is(Type::KindOfSome)) {
       cg_printf("CVarRef");
@@ -242,9 +249,11 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
     paramType->outputCPPDecl(cg, ar, getScope());
   }
 
-  cg_printf(" %s%s", Option::VariablePrefix, cg.formatLabel(m_name).c_str());
+  cg_printf(" %s%s%s",
+            prefix, Option::VariablePrefix, cg.formatLabel(m_name).c_str());
   if (m_defaultValue && sym->getParameterIndex() >= func->getMinParamCount()) {
     bool comment = context == CodeGenerator::CppTypedParamsWrapperImpl ||
+      context == CodeGenerator::CppFunctionWrapperImpl ||
       context == CodeGenerator::CppImplementation ||
       (context == CodeGenerator::CppDeclaration && func->isInlined());
     if (comment) {

@@ -27,136 +27,163 @@ namespace HPHP {
 
 inline int x_connection_aborted() {
   FUNCTION_INJECTION_BUILTIN(connection_aborted);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_connection_aborted();
 }
 
 inline int x_connection_status() {
   FUNCTION_INJECTION_BUILTIN(connection_status);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_connection_status();
 }
 
 inline int x_connection_timeout() {
   FUNCTION_INJECTION_BUILTIN(connection_timeout);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_connection_timeout();
 }
 
 inline Variant x_constant(CStrRef name) {
   FUNCTION_INJECTION_BUILTIN(constant);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_constant(name);
 }
 
 inline bool x_define(CStrRef name, CVarRef value, bool case_insensitive = false) {
   FUNCTION_INJECTION_BUILTIN(define);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_define(name, value, case_insensitive);
 }
 
 inline bool x_defined(CStrRef name) {
   FUNCTION_INJECTION_BUILTIN(defined);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_defined(name);
 }
 
 inline Variant x_die(CVarRef status = null_variant) {
   FUNCTION_INJECTION_BUILTIN(die);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_die(status);
 }
 
 inline Variant x_exit(CVarRef status = null_variant) {
   FUNCTION_INJECTION_BUILTIN(exit);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_exit(status);
 }
 
 inline Variant x_eval(CStrRef code_str) {
   FUNCTION_INJECTION_BUILTIN(eval);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_eval(code_str);
 }
 
 inline Variant x_get_browser(CStrRef user_agent = null_string, bool return_array = false) {
   FUNCTION_INJECTION_BUILTIN(get_browser);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_browser(user_agent, return_array);
 }
 
 inline void x___halt_compiler() {
   FUNCTION_INJECTION_BUILTIN(__halt_compiler);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f___halt_compiler();
 }
 
 inline Variant x_highlight_file(CStrRef filename, bool ret = false) {
   FUNCTION_INJECTION_BUILTIN(highlight_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_highlight_file(filename, ret);
 }
 
 inline Variant x_show_source(CStrRef filename, bool ret = false) {
   FUNCTION_INJECTION_BUILTIN(show_source);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_show_source(filename, ret);
 }
 
 inline Variant x_highlight_string(CStrRef str, bool ret = false) {
   FUNCTION_INJECTION_BUILTIN(highlight_string);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_highlight_string(str, ret);
 }
 
 inline int x_ignore_user_abort(bool setting = false) {
   FUNCTION_INJECTION_BUILTIN(ignore_user_abort);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ignore_user_abort(setting);
 }
 
 inline Variant x_pack(int _argc, CStrRef format, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(pack);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pack(_argc, format, _argv);
 }
 
-inline bool x_php_check_syntax(CStrRef filename, CVarRef error_message = null) {
+inline bool x_php_check_syntax(CStrRef filename, VRefParam error_message = null) {
   FUNCTION_INJECTION_BUILTIN(php_check_syntax);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_php_check_syntax(filename, error_message);
 }
 
 inline String x_php_strip_whitespace(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(php_strip_whitespace);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_php_strip_whitespace(filename);
 }
 
 inline int x_sleep(int seconds) {
   FUNCTION_INJECTION_BUILTIN(sleep);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_sleep(seconds);
 }
 
 inline void x_usleep(int micro_seconds) {
   FUNCTION_INJECTION_BUILTIN(usleep);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_usleep(micro_seconds);
 }
 
 inline Variant x_time_nanosleep(int seconds, int nanoseconds) {
   FUNCTION_INJECTION_BUILTIN(time_nanosleep);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_time_nanosleep(seconds, nanoseconds);
 }
 
 inline bool x_time_sleep_until(double timestamp) {
   FUNCTION_INJECTION_BUILTIN(time_sleep_until);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_time_sleep_until(timestamp);
 }
 
 inline String x_uniqid(CStrRef prefix = null_string, bool more_entropy = false) {
   FUNCTION_INJECTION_BUILTIN(uniqid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_uniqid(prefix, more_entropy);
 }
 
 inline Variant x_unpack(CStrRef format, CStrRef data) {
   FUNCTION_INJECTION_BUILTIN(unpack);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_unpack(format, data);
 }
 
 inline Array x_sys_getloadavg() {
   FUNCTION_INJECTION_BUILTIN(sys_getloadavg);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_sys_getloadavg();
 }
 
 inline Array x_token_get_all(CStrRef source) {
   FUNCTION_INJECTION_BUILTIN(token_get_all);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_token_get_all(source);
 }
 
 inline String x_token_name(int64 token) {
   FUNCTION_INJECTION_BUILTIN(token_name);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_token_name(token);
 }
 

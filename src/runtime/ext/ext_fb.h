@@ -26,15 +26,15 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_fb_thrift_serialize(CVarRef thing);
-Variant f_fb_thrift_unserialize(CVarRef thing, Variant success, Variant errcode = null_variant);
+Variant f_fb_thrift_unserialize(CVarRef thing, VRefParam success, VRefParam errcode = null_variant);
 Variant f_fb_serialize(CVarRef thing);
-Variant f_fb_unserialize(CVarRef thing, Variant success, Variant errcode = null_variant);
+Variant f_fb_unserialize(CVarRef thing, VRefParam success, VRefParam errcode = null_variant);
 bool f_fb_intercept(CStrRef name, CVarRef handler, CVarRef data = null_variant);
-Variant f_fb_stubout_intercept_handler(CStrRef name, CVarRef obj, CArrRef params, CVarRef data, Variant done);
-Variant f_fb_rpc_intercept_handler(CStrRef name, CVarRef obj, CArrRef params, CVarRef data, Variant done);
+Variant f_fb_stubout_intercept_handler(CStrRef name, CVarRef obj, CArrRef params, CVarRef data, VRefParam done);
+Variant f_fb_rpc_intercept_handler(CStrRef name, CVarRef obj, CArrRef params, CVarRef data, VRefParam done);
 void f_fb_renamed_functions(CArrRef names);
 bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name);
-bool f_fb_utf8ize(Variant input);
+bool f_fb_utf8ize(VRefParam input);
 Array f_fb_call_user_func_safe(int _argc, CVarRef function, CArrRef _argv = null_array);
 Variant f_fb_call_user_func_safe_return(int _argc, CVarRef function, CVarRef def, CArrRef _argv = null_array);
 Array f_fb_call_user_func_array_safe(CVarRef function, CArrRef params);
@@ -51,8 +51,8 @@ Variant f_xhprof_run_trace(CStrRef, int flags = 0);
 void f_fb_load_local_databases(CArrRef servers);
 Array f_fb_parallel_query(CArrRef sql_map, int max_thread = 50, bool combine_result = true, bool retry_query_on_fail = true, int connect_timeout = -1, int read_timeout = -1, bool timeout_in_ms = false);
 Array f_fb_crossall_query(CStrRef sql, int max_thread = 50, bool retry_query_on_fail = true, int connect_timeout = -1, int read_timeout = -1, bool timeout_in_ms = false);
-void f_fb_set_taint(Variant str, int taint);
-void f_fb_unset_taint(Variant str, int taint);
+void f_fb_set_taint(VRefParam str, int taint);
+void f_fb_unset_taint(VRefParam str, int taint);
 int f_fb_get_taint(CStrRef str);
 Variant f_fb_const_fetch(CVarRef key);
 bool f_fb_output_compression(bool new_value);

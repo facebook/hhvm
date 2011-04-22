@@ -27,16 +27,19 @@ namespace HPHP {
 
 inline bool x_hphpd_install_user_command(CStrRef cmd, CStrRef clsname) {
   FUNCTION_INJECTION_BUILTIN(hphpd_install_user_command);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphpd_install_user_command(cmd, clsname);
 }
 
 inline Array x_hphpd_get_user_commands() {
   FUNCTION_INJECTION_BUILTIN(hphpd_get_user_commands);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphpd_get_user_commands();
 }
 
 inline void x_hphpd_break(bool condition = true) {
   FUNCTION_INJECTION_BUILTIN(hphpd_break);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphpd_break(condition);
 }
 

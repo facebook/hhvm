@@ -95,7 +95,7 @@ String f_hphp_splfileobject_fgetc(CObjRef obj);
 Variant f_hphp_splfileobject_fgetcsv(CObjRef obj, CStrRef delimiter, CStrRef enclosure, CStrRef escape);
 String f_hphp_splfileobject_fgets(CObjRef obj);
 String f_hphp_splfileobject_fgetss(CObjRef obj, CStrRef allowable_tags);
-bool f_hphp_splfileobject_flock(CObjRef obj, Variant wouldblock);
+bool f_hphp_splfileobject_flock(CObjRef obj, VRefParam wouldblock);
 int64 f_hphp_splfileobject_fpassthru(CObjRef obj);
 Variant f_hphp_splfileobject_fscanf(int64 _argc, CObjRef obj, CStrRef format, CVarRef _argv);
 int64 f_hphp_splfileobject_fseek(CObjRef obj, int64 offset, int64 whence);

@@ -27,56 +27,67 @@ namespace HPHP {
 
 inline Variant x_iconv_mime_encode(CStrRef field_name, CStrRef field_value, CVarRef preferences = null_variant) {
   FUNCTION_INJECTION_BUILTIN(iconv_mime_encode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_iconv_mime_encode(field_name, field_value, preferences);
 }
 
 inline Variant x_iconv_mime_decode(CStrRef encoded_string, int mode = 0, CStrRef charset = null_string) {
   FUNCTION_INJECTION_BUILTIN(iconv_mime_decode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_iconv_mime_decode(encoded_string, mode, charset);
 }
 
 inline Variant x_iconv_mime_decode_headers(CStrRef encoded_headers, int mode = 0, CStrRef charset = null_string) {
   FUNCTION_INJECTION_BUILTIN(iconv_mime_decode_headers);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_iconv_mime_decode_headers(encoded_headers, mode, charset);
 }
 
 inline Variant x_iconv_get_encoding(CStrRef type = "all") {
   FUNCTION_INJECTION_BUILTIN(iconv_get_encoding);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_iconv_get_encoding(type);
 }
 
 inline bool x_iconv_set_encoding(CStrRef type, CStrRef charset) {
   FUNCTION_INJECTION_BUILTIN(iconv_set_encoding);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_iconv_set_encoding(type, charset);
 }
 
 inline Variant x_iconv(CStrRef in_charset, CStrRef out_charset, CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(iconv);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_iconv(in_charset, out_charset, str);
 }
 
 inline Variant x_iconv_strlen(CStrRef str, CStrRef charset = null_string) {
   FUNCTION_INJECTION_BUILTIN(iconv_strlen);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_iconv_strlen(str, charset);
 }
 
 inline Variant x_iconv_strpos(CStrRef haystack, CStrRef needle, int offset = 0, CStrRef charset = null_string) {
   FUNCTION_INJECTION_BUILTIN(iconv_strpos);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_iconv_strpos(haystack, needle, offset, charset);
 }
 
 inline Variant x_iconv_strrpos(CStrRef haystack, CStrRef needle, CStrRef charset = null_string) {
   FUNCTION_INJECTION_BUILTIN(iconv_strrpos);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_iconv_strrpos(haystack, needle, charset);
 }
 
 inline Variant x_iconv_substr(CStrRef str, int offset, int length = INT_MAX, CStrRef charset = null_string) {
   FUNCTION_INJECTION_BUILTIN(iconv_substr);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_iconv_substr(str, offset, length, charset);
 }
 
 inline String x_ob_iconv_handler(CStrRef contents, int status) {
   FUNCTION_INJECTION_BUILTIN(ob_iconv_handler);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ob_iconv_handler(contents, status);
 }
 

@@ -27,51 +27,61 @@ namespace HPHP {
 
 inline bool x_bcscale(int64 scale) {
   FUNCTION_INJECTION_BUILTIN(bcscale);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bcscale(scale);
 }
 
 inline String x_bcadd(CStrRef left, CStrRef right, int64 scale = -1) {
   FUNCTION_INJECTION_BUILTIN(bcadd);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bcadd(left, right, scale);
 }
 
 inline String x_bcsub(CStrRef left, CStrRef right, int64 scale = -1) {
   FUNCTION_INJECTION_BUILTIN(bcsub);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bcsub(left, right, scale);
 }
 
 inline int64 x_bccomp(CStrRef left, CStrRef right, int64 scale = -1) {
   FUNCTION_INJECTION_BUILTIN(bccomp);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bccomp(left, right, scale);
 }
 
 inline String x_bcmul(CStrRef left, CStrRef right, int64 scale = -1) {
   FUNCTION_INJECTION_BUILTIN(bcmul);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bcmul(left, right, scale);
 }
 
 inline String x_bcdiv(CStrRef left, CStrRef right, int64 scale = -1) {
   FUNCTION_INJECTION_BUILTIN(bcdiv);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bcdiv(left, right, scale);
 }
 
 inline String x_bcmod(CStrRef left, CStrRef right) {
   FUNCTION_INJECTION_BUILTIN(bcmod);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bcmod(left, right);
 }
 
 inline String x_bcpow(CStrRef left, CStrRef right, int64 scale = -1) {
   FUNCTION_INJECTION_BUILTIN(bcpow);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bcpow(left, right, scale);
 }
 
 inline Variant x_bcpowmod(CStrRef left, CStrRef right, CStrRef modulus, int64 scale = -1) {
   FUNCTION_INJECTION_BUILTIN(bcpowmod);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bcpowmod(left, right, modulus, scale);
 }
 
 inline Variant x_bcsqrt(CStrRef operand, int64 scale = -1) {
   FUNCTION_INJECTION_BUILTIN(bcsqrt);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bcsqrt(operand, scale);
 }
 

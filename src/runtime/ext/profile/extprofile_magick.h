@@ -27,2141 +27,2569 @@ namespace HPHP {
 
 inline String x_magickgetcopyright() {
   FUNCTION_INJECTION_BUILTIN(magickgetcopyright);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetcopyright();
 }
 
 inline String x_magickgethomeurl() {
   FUNCTION_INJECTION_BUILTIN(magickgethomeurl);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgethomeurl();
 }
 
 inline String x_magickgetpackagename() {
   FUNCTION_INJECTION_BUILTIN(magickgetpackagename);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetpackagename();
 }
 
 inline double x_magickgetquantumdepth() {
   FUNCTION_INJECTION_BUILTIN(magickgetquantumdepth);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetquantumdepth();
 }
 
 inline String x_magickgetreleasedate() {
   FUNCTION_INJECTION_BUILTIN(magickgetreleasedate);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetreleasedate();
 }
 
 inline double x_magickgetresourcelimit(int resource_type) {
   FUNCTION_INJECTION_BUILTIN(magickgetresourcelimit);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetresourcelimit(resource_type);
 }
 
 inline Array x_magickgetversion() {
   FUNCTION_INJECTION_BUILTIN(magickgetversion);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetversion();
 }
 
 inline int x_magickgetversionnumber() {
   FUNCTION_INJECTION_BUILTIN(magickgetversionnumber);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetversionnumber();
 }
 
 inline String x_magickgetversionstring() {
   FUNCTION_INJECTION_BUILTIN(magickgetversionstring);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetversionstring();
 }
 
 inline String x_magickqueryconfigureoption(CStrRef option) {
   FUNCTION_INJECTION_BUILTIN(magickqueryconfigureoption);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickqueryconfigureoption(option);
 }
 
 inline Array x_magickqueryconfigureoptions(CStrRef pattern) {
   FUNCTION_INJECTION_BUILTIN(magickqueryconfigureoptions);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickqueryconfigureoptions(pattern);
 }
 
 inline Array x_magickqueryfonts(CStrRef pattern) {
   FUNCTION_INJECTION_BUILTIN(magickqueryfonts);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickqueryfonts(pattern);
 }
 
 inline Array x_magickqueryformats(CStrRef pattern) {
   FUNCTION_INJECTION_BUILTIN(magickqueryformats);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickqueryformats(pattern);
 }
 
 inline bool x_magicksetresourcelimit(int resource_type, double limit) {
   FUNCTION_INJECTION_BUILTIN(magicksetresourcelimit);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetresourcelimit(resource_type, limit);
 }
 
 inline Object x_newdrawingwand() {
   FUNCTION_INJECTION_BUILTIN(newdrawingwand);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_newdrawingwand();
 }
 
 inline Object x_newmagickwand() {
   FUNCTION_INJECTION_BUILTIN(newmagickwand);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_newmagickwand();
 }
 
 inline Object x_newpixeliterator(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(newpixeliterator);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_newpixeliterator(mgck_wnd);
 }
 
 inline Object x_newpixelregioniterator(CObjRef mgck_wnd, int x, int y, int columns, int rows) {
   FUNCTION_INJECTION_BUILTIN(newpixelregioniterator);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_newpixelregioniterator(mgck_wnd, x, y, columns, rows);
 }
 
 inline Object x_newpixelwand(CStrRef imagemagick_col_str = null_string) {
   FUNCTION_INJECTION_BUILTIN(newpixelwand);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_newpixelwand(imagemagick_col_str);
 }
 
 inline Array x_newpixelwandarray(int num_pxl_wnds) {
   FUNCTION_INJECTION_BUILTIN(newpixelwandarray);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_newpixelwandarray(num_pxl_wnds);
 }
 
 inline Array x_newpixelwands(int num_pxl_wnds) {
   FUNCTION_INJECTION_BUILTIN(newpixelwands);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_newpixelwands(num_pxl_wnds);
 }
 
 inline void x_destroydrawingwand(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(destroydrawingwand);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_destroydrawingwand(drw_wnd);
 }
 
 inline void x_destroymagickwand(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(destroymagickwand);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_destroymagickwand(mgck_wnd);
 }
 
 inline void x_destroypixeliterator(CObjRef pxl_iter) {
   FUNCTION_INJECTION_BUILTIN(destroypixeliterator);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_destroypixeliterator(pxl_iter);
 }
 
 inline void x_destroypixelwand(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(destroypixelwand);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_destroypixelwand(pxl_wnd);
 }
 
 inline void x_destroypixelwandarray(CArrRef pxl_wnd_array) {
   FUNCTION_INJECTION_BUILTIN(destroypixelwandarray);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_destroypixelwandarray(pxl_wnd_array);
 }
 
 inline void x_destroypixelwands(CArrRef pxl_wnd_array) {
   FUNCTION_INJECTION_BUILTIN(destroypixelwands);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_destroypixelwands(pxl_wnd_array);
 }
 
 inline bool x_isdrawingwand(CVarRef var) {
   FUNCTION_INJECTION_BUILTIN(isdrawingwand);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_isdrawingwand(var);
 }
 
 inline bool x_ismagickwand(CVarRef var) {
   FUNCTION_INJECTION_BUILTIN(ismagickwand);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ismagickwand(var);
 }
 
 inline bool x_ispixeliterator(CVarRef var) {
   FUNCTION_INJECTION_BUILTIN(ispixeliterator);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ispixeliterator(var);
 }
 
 inline bool x_ispixelwand(CVarRef var) {
   FUNCTION_INJECTION_BUILTIN(ispixelwand);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ispixelwand(var);
 }
 
 inline void x_cleardrawingwand(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(cleardrawingwand);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_cleardrawingwand(drw_wnd);
 }
 
 inline void x_clearmagickwand(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(clearmagickwand);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_clearmagickwand(mgck_wnd);
 }
 
 inline void x_clearpixeliterator(CObjRef pxl_iter) {
   FUNCTION_INJECTION_BUILTIN(clearpixeliterator);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_clearpixeliterator(pxl_iter);
 }
 
 inline void x_clearpixelwand(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(clearpixelwand);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_clearpixelwand(pxl_wnd);
 }
 
 inline Object x_clonedrawingwand(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(clonedrawingwand);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_clonedrawingwand(drw_wnd);
 }
 
 inline Object x_clonemagickwand(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(clonemagickwand);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_clonemagickwand(mgck_wnd);
 }
 
 inline Array x_wandgetexception(CObjRef wnd) {
   FUNCTION_INJECTION_BUILTIN(wandgetexception);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_wandgetexception(wnd);
 }
 
 inline String x_wandgetexceptionstring(CObjRef wnd) {
   FUNCTION_INJECTION_BUILTIN(wandgetexceptionstring);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_wandgetexceptionstring(wnd);
 }
 
 inline int x_wandgetexceptiontype(CObjRef wnd) {
   FUNCTION_INJECTION_BUILTIN(wandgetexceptiontype);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_wandgetexceptiontype(wnd);
 }
 
 inline bool x_wandhasexception(CObjRef wnd) {
   FUNCTION_INJECTION_BUILTIN(wandhasexception);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_wandhasexception(wnd);
 }
 
 inline void x_drawaffine(CObjRef drw_wnd, double sx, double sy, double rx, double ry, double tx, double ty) {
   FUNCTION_INJECTION_BUILTIN(drawaffine);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawaffine(drw_wnd, sx, sy, rx, ry, tx, ty);
 }
 
 inline void x_drawannotation(CObjRef drw_wnd, double x, double y, CStrRef text) {
   FUNCTION_INJECTION_BUILTIN(drawannotation);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawannotation(drw_wnd, x, y, text);
 }
 
 inline void x_drawarc(CObjRef drw_wnd, double sx, double sy, double ex, double ey, double sd, double ed) {
   FUNCTION_INJECTION_BUILTIN(drawarc);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawarc(drw_wnd, sx, sy, ex, ey, sd, ed);
 }
 
 inline void x_drawbezier(CObjRef drw_wnd, CArrRef x_y_points_array) {
   FUNCTION_INJECTION_BUILTIN(drawbezier);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawbezier(drw_wnd, x_y_points_array);
 }
 
 inline void x_drawcircle(CObjRef drw_wnd, double ox, double oy, double px, double py) {
   FUNCTION_INJECTION_BUILTIN(drawcircle);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawcircle(drw_wnd, ox, oy, px, py);
 }
 
 inline void x_drawcolor(CObjRef drw_wnd, double x, double y, int paint_method) {
   FUNCTION_INJECTION_BUILTIN(drawcolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawcolor(drw_wnd, x, y, paint_method);
 }
 
 inline void x_drawcomment(CObjRef drw_wnd, CStrRef comment) {
   FUNCTION_INJECTION_BUILTIN(drawcomment);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawcomment(drw_wnd, comment);
 }
 
 inline bool x_drawcomposite(CObjRef drw_wnd, int composite_operator, double x, double y, double width, double height, CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawcomposite);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawcomposite(drw_wnd, composite_operator, x, y, width, height, mgck_wnd);
 }
 
 inline void x_drawellipse(CObjRef drw_wnd, double ox, double oy, double rx, double ry, double start, double end) {
   FUNCTION_INJECTION_BUILTIN(drawellipse);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawellipse(drw_wnd, ox, oy, rx, ry, start, end);
 }
 
 inline String x_drawgetclippath(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetclippath);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetclippath(drw_wnd);
 }
 
 inline int x_drawgetcliprule(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetcliprule);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetcliprule(drw_wnd);
 }
 
 inline int x_drawgetclipunits(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetclipunits);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetclipunits(drw_wnd);
 }
 
 inline Array x_drawgetexception(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetexception);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetexception(drw_wnd);
 }
 
 inline String x_drawgetexceptionstring(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetexceptionstring);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetexceptionstring(drw_wnd);
 }
 
 inline int x_drawgetexceptiontype(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetexceptiontype);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetexceptiontype(drw_wnd);
 }
 
 inline double x_drawgetfillalpha(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetfillalpha);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetfillalpha(drw_wnd);
 }
 
 inline Object x_drawgetfillcolor(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetfillcolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetfillcolor(drw_wnd);
 }
 
 inline double x_drawgetfillopacity(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetfillopacity);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetfillopacity(drw_wnd);
 }
 
 inline int x_drawgetfillrule(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetfillrule);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetfillrule(drw_wnd);
 }
 
 inline String x_drawgetfont(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetfont);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetfont(drw_wnd);
 }
 
 inline String x_drawgetfontfamily(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetfontfamily);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetfontfamily(drw_wnd);
 }
 
 inline double x_drawgetfontsize(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetfontsize);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetfontsize(drw_wnd);
 }
 
 inline int x_drawgetfontstretch(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetfontstretch);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetfontstretch(drw_wnd);
 }
 
 inline int x_drawgetfontstyle(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetfontstyle);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetfontstyle(drw_wnd);
 }
 
 inline double x_drawgetfontweight(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetfontweight);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetfontweight(drw_wnd);
 }
 
 inline int x_drawgetgravity(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetgravity);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetgravity(drw_wnd);
 }
 
 inline double x_drawgetstrokealpha(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetstrokealpha);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetstrokealpha(drw_wnd);
 }
 
 inline bool x_drawgetstrokeantialias(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetstrokeantialias);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetstrokeantialias(drw_wnd);
 }
 
 inline Object x_drawgetstrokecolor(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetstrokecolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetstrokecolor(drw_wnd);
 }
 
 inline Array x_drawgetstrokedasharray(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetstrokedasharray);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetstrokedasharray(drw_wnd);
 }
 
 inline double x_drawgetstrokedashoffset(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetstrokedashoffset);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetstrokedashoffset(drw_wnd);
 }
 
 inline int x_drawgetstrokelinecap(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetstrokelinecap);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetstrokelinecap(drw_wnd);
 }
 
 inline int x_drawgetstrokelinejoin(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetstrokelinejoin);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetstrokelinejoin(drw_wnd);
 }
 
 inline double x_drawgetstrokemiterlimit(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetstrokemiterlimit);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetstrokemiterlimit(drw_wnd);
 }
 
 inline double x_drawgetstrokeopacity(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetstrokeopacity);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetstrokeopacity(drw_wnd);
 }
 
 inline double x_drawgetstrokewidth(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetstrokewidth);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetstrokewidth(drw_wnd);
 }
 
 inline int x_drawgettextalignment(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgettextalignment);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgettextalignment(drw_wnd);
 }
 
 inline bool x_drawgettextantialias(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgettextantialias);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgettextantialias(drw_wnd);
 }
 
 inline int x_drawgettextdecoration(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgettextdecoration);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgettextdecoration(drw_wnd);
 }
 
 inline String x_drawgettextencoding(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgettextencoding);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgettextencoding(drw_wnd);
 }
 
 inline Object x_drawgettextundercolor(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgettextundercolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgettextundercolor(drw_wnd);
 }
 
 inline String x_drawgetvectorgraphics(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetvectorgraphics);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawgetvectorgraphics(drw_wnd);
 }
 
 inline void x_drawline(CObjRef drw_wnd, double sx, double sy, double ex, double ey) {
   FUNCTION_INJECTION_BUILTIN(drawline);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawline(drw_wnd, sx, sy, ex, ey);
 }
 
 inline void x_drawmatte(CObjRef drw_wnd, double x, double y, int paint_method) {
   FUNCTION_INJECTION_BUILTIN(drawmatte);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawmatte(drw_wnd, x, y, paint_method);
 }
 
 inline void x_drawpathclose(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawpathclose);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathclose(drw_wnd);
 }
 
 inline void x_drawpathcurvetoabsolute(CObjRef drw_wnd, double x1, double y1, double x2, double y2, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(drawpathcurvetoabsolute);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathcurvetoabsolute(drw_wnd, x1, y1, x2, y2, x, y);
 }
 
 inline void x_drawpathcurvetoquadraticbezierabsolute(CObjRef drw_wnd, double x1, double y1, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(drawpathcurvetoquadraticbezierabsolute);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathcurvetoquadraticbezierabsolute(drw_wnd, x1, y1, x, y);
 }
 
 inline void x_drawpathcurvetoquadraticbezierrelative(CObjRef drw_wnd, double x1, double y1, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(drawpathcurvetoquadraticbezierrelative);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathcurvetoquadraticbezierrelative(drw_wnd, x1, y1, x, y);
 }
 
 inline void x_drawpathcurvetoquadraticbeziersmoothabsolute(CObjRef drw_wnd, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(drawpathcurvetoquadraticbeziersmoothabsolute);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathcurvetoquadraticbeziersmoothabsolute(drw_wnd, x, y);
 }
 
 inline void x_drawpathcurvetoquadraticbeziersmoothrelative(CObjRef drw_wnd, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(drawpathcurvetoquadraticbeziersmoothrelative);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathcurvetoquadraticbeziersmoothrelative(drw_wnd, x, y);
 }
 
 inline void x_drawpathcurvetorelative(CObjRef drw_wnd, double x1, double y1, double x2, double y2, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(drawpathcurvetorelative);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathcurvetorelative(drw_wnd, x1, y1, x2, y2, x, y);
 }
 
 inline void x_drawpathcurvetosmoothabsolute(CObjRef drw_wnd, double x2, double y2, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(drawpathcurvetosmoothabsolute);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathcurvetosmoothabsolute(drw_wnd, x2, y2, x, y);
 }
 
 inline void x_drawpathcurvetosmoothrelative(CObjRef drw_wnd, double x2, double y2, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(drawpathcurvetosmoothrelative);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathcurvetosmoothrelative(drw_wnd, x2, y2, x, y);
 }
 
 inline void x_drawpathellipticarcabsolute(CObjRef drw_wnd, double rx, double ry, double x_axis_rotation, bool large_arc_flag, bool sweep_flag, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(drawpathellipticarcabsolute);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathellipticarcabsolute(drw_wnd, rx, ry, x_axis_rotation, large_arc_flag, sweep_flag, x, y);
 }
 
 inline void x_drawpathellipticarcrelative(CObjRef drw_wnd, double rx, double ry, double x_axis_rotation, bool large_arc_flag, bool sweep_flag, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(drawpathellipticarcrelative);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathellipticarcrelative(drw_wnd, rx, ry, x_axis_rotation, large_arc_flag, sweep_flag, x, y);
 }
 
 inline void x_drawpathfinish(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawpathfinish);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathfinish(drw_wnd);
 }
 
 inline void x_drawpathlinetoabsolute(CObjRef drw_wnd, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(drawpathlinetoabsolute);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathlinetoabsolute(drw_wnd, x, y);
 }
 
 inline void x_drawpathlinetohorizontalabsolute(CObjRef drw_wnd, double x) {
   FUNCTION_INJECTION_BUILTIN(drawpathlinetohorizontalabsolute);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathlinetohorizontalabsolute(drw_wnd, x);
 }
 
 inline void x_drawpathlinetohorizontalrelative(CObjRef drw_wnd, double x) {
   FUNCTION_INJECTION_BUILTIN(drawpathlinetohorizontalrelative);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathlinetohorizontalrelative(drw_wnd, x);
 }
 
 inline void x_drawpathlinetorelative(CObjRef drw_wnd, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(drawpathlinetorelative);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathlinetorelative(drw_wnd, x, y);
 }
 
 inline void x_drawpathlinetoverticalabsolute(CObjRef drw_wnd, double y) {
   FUNCTION_INJECTION_BUILTIN(drawpathlinetoverticalabsolute);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathlinetoverticalabsolute(drw_wnd, y);
 }
 
 inline void x_drawpathlinetoverticalrelative(CObjRef drw_wnd, double y) {
   FUNCTION_INJECTION_BUILTIN(drawpathlinetoverticalrelative);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathlinetoverticalrelative(drw_wnd, y);
 }
 
 inline void x_drawpathmovetoabsolute(CObjRef drw_wnd, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(drawpathmovetoabsolute);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathmovetoabsolute(drw_wnd, x, y);
 }
 
 inline void x_drawpathmovetorelative(CObjRef drw_wnd, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(drawpathmovetorelative);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathmovetorelative(drw_wnd, x, y);
 }
 
 inline void x_drawpathstart(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawpathstart);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpathstart(drw_wnd);
 }
 
 inline void x_drawpoint(CObjRef drw_wnd, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(drawpoint);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpoint(drw_wnd, x, y);
 }
 
 inline void x_drawpolygon(CObjRef drw_wnd, CArrRef x_y_points_array) {
   FUNCTION_INJECTION_BUILTIN(drawpolygon);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpolygon(drw_wnd, x_y_points_array);
 }
 
 inline void x_drawpolyline(CObjRef drw_wnd, CArrRef x_y_points_array) {
   FUNCTION_INJECTION_BUILTIN(drawpolyline);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpolyline(drw_wnd, x_y_points_array);
 }
 
 inline void x_drawrectangle(CObjRef drw_wnd, double x1, double y1, double x2, double y2) {
   FUNCTION_INJECTION_BUILTIN(drawrectangle);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawrectangle(drw_wnd, x1, y1, x2, y2);
 }
 
 inline bool x_drawrender(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawrender);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawrender(drw_wnd);
 }
 
 inline void x_drawrotate(CObjRef drw_wnd, double degrees) {
   FUNCTION_INJECTION_BUILTIN(drawrotate);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawrotate(drw_wnd, degrees);
 }
 
 inline void x_drawroundrectangle(CObjRef drw_wnd, double x1, double y1, double x2, double y2, double rx, double ry) {
   FUNCTION_INJECTION_BUILTIN(drawroundrectangle);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawroundrectangle(drw_wnd, x1, y1, x2, y2, rx, ry);
 }
 
 inline void x_drawscale(CObjRef drw_wnd, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(drawscale);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawscale(drw_wnd, x, y);
 }
 
 inline bool x_drawsetclippath(CObjRef drw_wnd, CStrRef clip_path) {
   FUNCTION_INJECTION_BUILTIN(drawsetclippath);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawsetclippath(drw_wnd, clip_path);
 }
 
 inline void x_drawsetcliprule(CObjRef drw_wnd, int fill_rule) {
   FUNCTION_INJECTION_BUILTIN(drawsetcliprule);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetcliprule(drw_wnd, fill_rule);
 }
 
 inline void x_drawsetclipunits(CObjRef drw_wnd, int clip_path_units) {
   FUNCTION_INJECTION_BUILTIN(drawsetclipunits);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetclipunits(drw_wnd, clip_path_units);
 }
 
 inline void x_drawsetfillalpha(CObjRef drw_wnd, double fill_opacity) {
   FUNCTION_INJECTION_BUILTIN(drawsetfillalpha);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetfillalpha(drw_wnd, fill_opacity);
 }
 
 inline void x_drawsetfillcolor(CObjRef drw_wnd, CObjRef fill_pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawsetfillcolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetfillcolor(drw_wnd, fill_pxl_wnd);
 }
 
 inline void x_drawsetfillopacity(CObjRef drw_wnd, double fill_opacity) {
   FUNCTION_INJECTION_BUILTIN(drawsetfillopacity);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetfillopacity(drw_wnd, fill_opacity);
 }
 
 inline bool x_drawsetfillpatternurl(CObjRef drw_wnd, CStrRef fill_url) {
   FUNCTION_INJECTION_BUILTIN(drawsetfillpatternurl);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawsetfillpatternurl(drw_wnd, fill_url);
 }
 
 inline void x_drawsetfillrule(CObjRef drw_wnd, int fill_rule) {
   FUNCTION_INJECTION_BUILTIN(drawsetfillrule);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetfillrule(drw_wnd, fill_rule);
 }
 
 inline bool x_drawsetfont(CObjRef drw_wnd, CStrRef font_file) {
   FUNCTION_INJECTION_BUILTIN(drawsetfont);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawsetfont(drw_wnd, font_file);
 }
 
 inline bool x_drawsetfontfamily(CObjRef drw_wnd, CStrRef font_family) {
   FUNCTION_INJECTION_BUILTIN(drawsetfontfamily);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawsetfontfamily(drw_wnd, font_family);
 }
 
 inline void x_drawsetfontsize(CObjRef drw_wnd, double pointsize) {
   FUNCTION_INJECTION_BUILTIN(drawsetfontsize);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetfontsize(drw_wnd, pointsize);
 }
 
 inline void x_drawsetfontstretch(CObjRef drw_wnd, int stretch_type) {
   FUNCTION_INJECTION_BUILTIN(drawsetfontstretch);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetfontstretch(drw_wnd, stretch_type);
 }
 
 inline void x_drawsetfontstyle(CObjRef drw_wnd, int style_type) {
   FUNCTION_INJECTION_BUILTIN(drawsetfontstyle);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetfontstyle(drw_wnd, style_type);
 }
 
 inline void x_drawsetfontweight(CObjRef drw_wnd, double font_weight) {
   FUNCTION_INJECTION_BUILTIN(drawsetfontweight);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetfontweight(drw_wnd, font_weight);
 }
 
 inline void x_drawsetgravity(CObjRef drw_wnd, int gravity_type) {
   FUNCTION_INJECTION_BUILTIN(drawsetgravity);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetgravity(drw_wnd, gravity_type);
 }
 
 inline void x_drawsetstrokealpha(CObjRef drw_wnd, double stroke_opacity) {
   FUNCTION_INJECTION_BUILTIN(drawsetstrokealpha);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetstrokealpha(drw_wnd, stroke_opacity);
 }
 
 inline void x_drawsetstrokeantialias(CObjRef drw_wnd, bool stroke_antialias = true) {
   FUNCTION_INJECTION_BUILTIN(drawsetstrokeantialias);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetstrokeantialias(drw_wnd, stroke_antialias);
 }
 
 inline void x_drawsetstrokecolor(CObjRef drw_wnd, CObjRef strokecolor_pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawsetstrokecolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetstrokecolor(drw_wnd, strokecolor_pxl_wnd);
 }
 
 inline void x_drawsetstrokedasharray(CObjRef drw_wnd, CArrRef dash_array = null_array) {
   FUNCTION_INJECTION_BUILTIN(drawsetstrokedasharray);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetstrokedasharray(drw_wnd, dash_array);
 }
 
 inline void x_drawsetstrokedashoffset(CObjRef drw_wnd, double dash_offset) {
   FUNCTION_INJECTION_BUILTIN(drawsetstrokedashoffset);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetstrokedashoffset(drw_wnd, dash_offset);
 }
 
 inline void x_drawsetstrokelinecap(CObjRef drw_wnd, int line_cap) {
   FUNCTION_INJECTION_BUILTIN(drawsetstrokelinecap);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetstrokelinecap(drw_wnd, line_cap);
 }
 
 inline void x_drawsetstrokelinejoin(CObjRef drw_wnd, int line_join) {
   FUNCTION_INJECTION_BUILTIN(drawsetstrokelinejoin);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetstrokelinejoin(drw_wnd, line_join);
 }
 
 inline void x_drawsetstrokemiterlimit(CObjRef drw_wnd, double miterlimit) {
   FUNCTION_INJECTION_BUILTIN(drawsetstrokemiterlimit);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetstrokemiterlimit(drw_wnd, miterlimit);
 }
 
 inline void x_drawsetstrokeopacity(CObjRef drw_wnd, double stroke_opacity) {
   FUNCTION_INJECTION_BUILTIN(drawsetstrokeopacity);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetstrokeopacity(drw_wnd, stroke_opacity);
 }
 
 inline bool x_drawsetstrokepatternurl(CObjRef drw_wnd, CStrRef stroke_url) {
   FUNCTION_INJECTION_BUILTIN(drawsetstrokepatternurl);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawsetstrokepatternurl(drw_wnd, stroke_url);
 }
 
 inline void x_drawsetstrokewidth(CObjRef drw_wnd, double stroke_width) {
   FUNCTION_INJECTION_BUILTIN(drawsetstrokewidth);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetstrokewidth(drw_wnd, stroke_width);
 }
 
 inline void x_drawsettextalignment(CObjRef drw_wnd, int align_type) {
   FUNCTION_INJECTION_BUILTIN(drawsettextalignment);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsettextalignment(drw_wnd, align_type);
 }
 
 inline void x_drawsettextantialias(CObjRef drw_wnd, bool text_antialias = true) {
   FUNCTION_INJECTION_BUILTIN(drawsettextantialias);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsettextantialias(drw_wnd, text_antialias);
 }
 
 inline void x_drawsettextdecoration(CObjRef drw_wnd, int decoration_type) {
   FUNCTION_INJECTION_BUILTIN(drawsettextdecoration);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsettextdecoration(drw_wnd, decoration_type);
 }
 
 inline void x_drawsettextencoding(CObjRef drw_wnd, CStrRef encoding) {
   FUNCTION_INJECTION_BUILTIN(drawsettextencoding);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsettextencoding(drw_wnd, encoding);
 }
 
 inline void x_drawsettextundercolor(CObjRef drw_wnd, CObjRef undercolor_pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawsettextundercolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsettextundercolor(drw_wnd, undercolor_pxl_wnd);
 }
 
 inline bool x_drawsetvectorgraphics(CObjRef drw_wnd, CStrRef vector_graphics) {
   FUNCTION_INJECTION_BUILTIN(drawsetvectorgraphics);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_drawsetvectorgraphics(drw_wnd, vector_graphics);
 }
 
 inline void x_drawsetviewbox(CObjRef drw_wnd, double x1, double y1, double x2, double y2) {
   FUNCTION_INJECTION_BUILTIN(drawsetviewbox);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawsetviewbox(drw_wnd, x1, y1, x2, y2);
 }
 
 inline void x_drawskewx(CObjRef drw_wnd, double degrees) {
   FUNCTION_INJECTION_BUILTIN(drawskewx);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawskewx(drw_wnd, degrees);
 }
 
 inline void x_drawskewy(CObjRef drw_wnd, double degrees) {
   FUNCTION_INJECTION_BUILTIN(drawskewy);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawskewy(drw_wnd, degrees);
 }
 
 inline void x_drawtranslate(CObjRef drw_wnd, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(drawtranslate);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawtranslate(drw_wnd, x, y);
 }
 
 inline void x_pushdrawingwand(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(pushdrawingwand);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pushdrawingwand(drw_wnd);
 }
 
 inline void x_drawpushclippath(CObjRef drw_wnd, CStrRef clip_path_id) {
   FUNCTION_INJECTION_BUILTIN(drawpushclippath);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpushclippath(drw_wnd, clip_path_id);
 }
 
 inline void x_drawpushdefs(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawpushdefs);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpushdefs(drw_wnd);
 }
 
 inline void x_drawpushpattern(CObjRef drw_wnd, CStrRef pattern_id, double x, double y, double width, double height) {
   FUNCTION_INJECTION_BUILTIN(drawpushpattern);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpushpattern(drw_wnd, pattern_id, x, y, width, height);
 }
 
 inline void x_popdrawingwand(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(popdrawingwand);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_popdrawingwand(drw_wnd);
 }
 
 inline void x_drawpopclippath(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawpopclippath);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpopclippath(drw_wnd);
 }
 
 inline void x_drawpopdefs(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawpopdefs);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpopdefs(drw_wnd);
 }
 
 inline void x_drawpoppattern(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawpoppattern);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_drawpoppattern(drw_wnd);
 }
 
 inline bool x_magickadaptivethresholdimage(CObjRef mgck_wnd, double width, double height, double offset) {
   FUNCTION_INJECTION_BUILTIN(magickadaptivethresholdimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickadaptivethresholdimage(mgck_wnd, width, height, offset);
 }
 
 inline bool x_magickaddimage(CObjRef mgck_wnd, CObjRef add_wand) {
   FUNCTION_INJECTION_BUILTIN(magickaddimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickaddimage(mgck_wnd, add_wand);
 }
 
 inline bool x_magickaddnoiseimage(CObjRef mgck_wnd, int noise_type) {
   FUNCTION_INJECTION_BUILTIN(magickaddnoiseimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickaddnoiseimage(mgck_wnd, noise_type);
 }
 
 inline bool x_magickaffinetransformimage(CObjRef mgck_wnd, CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickaffinetransformimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickaffinetransformimage(mgck_wnd, drw_wnd);
 }
 
 inline bool x_magickannotateimage(CObjRef mgck_wnd, CObjRef drw_wnd, double x, double y, double angle, CStrRef text) {
   FUNCTION_INJECTION_BUILTIN(magickannotateimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickannotateimage(mgck_wnd, drw_wnd, x, y, angle, text);
 }
 
 inline Object x_magickappendimages(CObjRef mgck_wnd, bool stack_vertical = false) {
   FUNCTION_INJECTION_BUILTIN(magickappendimages);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickappendimages(mgck_wnd, stack_vertical);
 }
 
 inline Object x_magickaverageimages(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickaverageimages);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickaverageimages(mgck_wnd);
 }
 
 inline bool x_magickblackthresholdimage(CObjRef mgck_wnd, CObjRef threshold_pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickblackthresholdimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickblackthresholdimage(mgck_wnd, threshold_pxl_wnd);
 }
 
 inline bool x_magickblurimage(CObjRef mgck_wnd, double radius, double sigma, int channel_type = 0) {
   FUNCTION_INJECTION_BUILTIN(magickblurimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickblurimage(mgck_wnd, radius, sigma, channel_type);
 }
 
 inline bool x_magickborderimage(CObjRef mgck_wnd, CObjRef bordercolor, double width, double height) {
   FUNCTION_INJECTION_BUILTIN(magickborderimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickborderimage(mgck_wnd, bordercolor, width, height);
 }
 
 inline bool x_magickcharcoalimage(CObjRef mgck_wnd, double radius, double sigma) {
   FUNCTION_INJECTION_BUILTIN(magickcharcoalimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickcharcoalimage(mgck_wnd, radius, sigma);
 }
 
 inline bool x_magickchopimage(CObjRef mgck_wnd, double width, double height, int x, int y) {
   FUNCTION_INJECTION_BUILTIN(magickchopimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickchopimage(mgck_wnd, width, height, x, y);
 }
 
 inline bool x_magickclipimage(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickclipimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickclipimage(mgck_wnd);
 }
 
 inline bool x_magickclippathimage(CObjRef mgck_wnd, CStrRef pathname, bool inside) {
   FUNCTION_INJECTION_BUILTIN(magickclippathimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickclippathimage(mgck_wnd, pathname, inside);
 }
 
 inline Object x_magickcoalesceimages(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickcoalesceimages);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickcoalesceimages(mgck_wnd);
 }
 
 inline bool x_magickcolorfloodfillimage(CObjRef mgck_wnd, CObjRef fillcolor_pxl_wnd, double fuzz, CObjRef bordercolor_pxl_wnd, int x, int y) {
   FUNCTION_INJECTION_BUILTIN(magickcolorfloodfillimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickcolorfloodfillimage(mgck_wnd, fillcolor_pxl_wnd, fuzz, bordercolor_pxl_wnd, x, y);
 }
 
 inline bool x_magickcolorizeimage(CObjRef mgck_wnd, CObjRef colorize, CObjRef opacity_pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickcolorizeimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickcolorizeimage(mgck_wnd, colorize, opacity_pxl_wnd);
 }
 
 inline Object x_magickcombineimages(CObjRef mgck_wnd, int channel_type) {
   FUNCTION_INJECTION_BUILTIN(magickcombineimages);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickcombineimages(mgck_wnd, channel_type);
 }
 
 inline bool x_magickcommentimage(CObjRef mgck_wnd, CStrRef comment) {
   FUNCTION_INJECTION_BUILTIN(magickcommentimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickcommentimage(mgck_wnd, comment);
 }
 
 inline Array x_magickcompareimages(CObjRef mgck_wnd, CObjRef reference_wnd, int metric_type, int channel_type = 0) {
   FUNCTION_INJECTION_BUILTIN(magickcompareimages);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickcompareimages(mgck_wnd, reference_wnd, metric_type, channel_type);
 }
 
 inline bool x_magickcompositeimage(CObjRef mgck_wnd, CObjRef composite_wnd, int composite_operator, int x, int y) {
   FUNCTION_INJECTION_BUILTIN(magickcompositeimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickcompositeimage(mgck_wnd, composite_wnd, composite_operator, x, y);
 }
 
 inline bool x_magickconstituteimage(CObjRef mgck_wnd, double columns, double rows, CStrRef smap, int storage_type, CArrRef pixel_array) {
   FUNCTION_INJECTION_BUILTIN(magickconstituteimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickconstituteimage(mgck_wnd, columns, rows, smap, storage_type, pixel_array);
 }
 
 inline bool x_magickcontrastimage(CObjRef mgck_wnd, bool sharpen) {
   FUNCTION_INJECTION_BUILTIN(magickcontrastimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickcontrastimage(mgck_wnd, sharpen);
 }
 
 inline bool x_magickconvolveimage(CObjRef mgck_wnd, CArrRef kernel_array, int channel_type = 0) {
   FUNCTION_INJECTION_BUILTIN(magickconvolveimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickconvolveimage(mgck_wnd, kernel_array, channel_type);
 }
 
 inline bool x_magickcropimage(CObjRef mgck_wnd, double width, double height, int x, int y) {
   FUNCTION_INJECTION_BUILTIN(magickcropimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickcropimage(mgck_wnd, width, height, x, y);
 }
 
 inline bool x_magickcyclecolormapimage(CObjRef mgck_wnd, int num_positions) {
   FUNCTION_INJECTION_BUILTIN(magickcyclecolormapimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickcyclecolormapimage(mgck_wnd, num_positions);
 }
 
 inline Object x_magickdeconstructimages(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickdeconstructimages);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickdeconstructimages(mgck_wnd);
 }
 
 inline String x_magickdescribeimage(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickdescribeimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickdescribeimage(mgck_wnd);
 }
 
 inline bool x_magickdespeckleimage(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickdespeckleimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickdespeckleimage(mgck_wnd);
 }
 
 inline bool x_magickdrawimage(CObjRef mgck_wnd, CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickdrawimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickdrawimage(mgck_wnd, drw_wnd);
 }
 
 inline bool x_magickechoimageblob(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickechoimageblob);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickechoimageblob(mgck_wnd);
 }
 
 inline bool x_magickechoimagesblob(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickechoimagesblob);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickechoimagesblob(mgck_wnd);
 }
 
 inline bool x_magickedgeimage(CObjRef mgck_wnd, double radius) {
   FUNCTION_INJECTION_BUILTIN(magickedgeimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickedgeimage(mgck_wnd, radius);
 }
 
 inline bool x_magickembossimage(CObjRef mgck_wnd, double radius, double sigma) {
   FUNCTION_INJECTION_BUILTIN(magickembossimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickembossimage(mgck_wnd, radius, sigma);
 }
 
 inline bool x_magickenhanceimage(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickenhanceimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickenhanceimage(mgck_wnd);
 }
 
 inline bool x_magickequalizeimage(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickequalizeimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickequalizeimage(mgck_wnd);
 }
 
 inline bool x_magickevaluateimage(CObjRef mgck_wnd, int evaluate_op, double constant, int channel_type = 0) {
   FUNCTION_INJECTION_BUILTIN(magickevaluateimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickevaluateimage(mgck_wnd, evaluate_op, constant, channel_type);
 }
 
 inline Object x_magickflattenimages(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickflattenimages);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickflattenimages(mgck_wnd);
 }
 
 inline bool x_magickflipimage(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickflipimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickflipimage(mgck_wnd);
 }
 
 inline bool x_magickflopimage(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickflopimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickflopimage(mgck_wnd);
 }
 
 inline bool x_magickframeimage(CObjRef mgck_wnd, CObjRef matte_color, double width, double height, int inner_bevel, int outer_bevel) {
   FUNCTION_INJECTION_BUILTIN(magickframeimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickframeimage(mgck_wnd, matte_color, width, height, inner_bevel, outer_bevel);
 }
 
 inline Object x_magickfximage(CObjRef mgck_wnd, CStrRef expression, int channel_type = 0) {
   FUNCTION_INJECTION_BUILTIN(magickfximage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickfximage(mgck_wnd, expression, channel_type);
 }
 
 inline bool x_magickgammaimage(CObjRef mgck_wnd, double gamma, int channel_type = 0) {
   FUNCTION_INJECTION_BUILTIN(magickgammaimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgammaimage(mgck_wnd, gamma, channel_type);
 }
 
 inline bool x_magickgaussianblurimage(CObjRef mgck_wnd, double radius, double sigma, int channel_type = 0) {
   FUNCTION_INJECTION_BUILTIN(magickgaussianblurimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgaussianblurimage(mgck_wnd, radius, sigma, channel_type);
 }
 
 inline double x_magickgetcharheight(CObjRef mgck_wnd, CObjRef drw_wnd, CStrRef txt, bool multiline = false) {
   FUNCTION_INJECTION_BUILTIN(magickgetcharheight);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetcharheight(mgck_wnd, drw_wnd, txt, multiline);
 }
 
 inline double x_magickgetcharwidth(CObjRef mgck_wnd, CObjRef drw_wnd, CStrRef txt, bool multiline = false) {
   FUNCTION_INJECTION_BUILTIN(magickgetcharwidth);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetcharwidth(mgck_wnd, drw_wnd, txt, multiline);
 }
 
 inline Array x_magickgetexception(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetexception);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetexception(mgck_wnd);
 }
 
 inline String x_magickgetexceptionstring(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetexceptionstring);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetexceptionstring(mgck_wnd);
 }
 
 inline int x_magickgetexceptiontype(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetexceptiontype);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetexceptiontype(mgck_wnd);
 }
 
 inline String x_magickgetfilename(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetfilename);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetfilename(mgck_wnd);
 }
 
 inline String x_magickgetformat(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetformat);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetformat(mgck_wnd);
 }
 
 inline Object x_magickgetimage(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimage(mgck_wnd);
 }
 
 inline Object x_magickgetimagebackgroundcolor(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagebackgroundcolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagebackgroundcolor(mgck_wnd);
 }
 
 inline String x_magickgetimageblob(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimageblob);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimageblob(mgck_wnd);
 }
 
 inline Array x_magickgetimageblueprimary(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimageblueprimary);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimageblueprimary(mgck_wnd);
 }
 
 inline Object x_magickgetimagebordercolor(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagebordercolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagebordercolor(mgck_wnd);
 }
 
 inline Array x_magickgetimagechannelmean(CObjRef mgck_wnd, int channel_type) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagechannelmean);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagechannelmean(mgck_wnd, channel_type);
 }
 
 inline Object x_magickgetimagecolormapcolor(CObjRef mgck_wnd, double index) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagecolormapcolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagecolormapcolor(mgck_wnd, index);
 }
 
 inline double x_magickgetimagecolors(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagecolors);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagecolors(mgck_wnd);
 }
 
 inline int x_magickgetimagecolorspace(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagecolorspace);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagecolorspace(mgck_wnd);
 }
 
 inline int x_magickgetimagecompose(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagecompose);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagecompose(mgck_wnd);
 }
 
 inline int x_magickgetimagecompression(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagecompression);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagecompression(mgck_wnd);
 }
 
 inline double x_magickgetimagecompressionquality(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagecompressionquality);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagecompressionquality(mgck_wnd);
 }
 
 inline double x_magickgetimagedelay(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagedelay);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagedelay(mgck_wnd);
 }
 
 inline double x_magickgetimagedepth(CObjRef mgck_wnd, int channel_type = 0) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagedepth);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagedepth(mgck_wnd, channel_type);
 }
 
 inline int x_magickgetimagedispose(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagedispose);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagedispose(mgck_wnd);
 }
 
 inline Array x_magickgetimageextrema(CObjRef mgck_wnd, int channel_type = 0) {
   FUNCTION_INJECTION_BUILTIN(magickgetimageextrema);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimageextrema(mgck_wnd, channel_type);
 }
 
 inline String x_magickgetimagefilename(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagefilename);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagefilename(mgck_wnd);
 }
 
 inline String x_magickgetimageformat(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimageformat);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimageformat(mgck_wnd);
 }
 
 inline double x_magickgetimagegamma(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagegamma);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagegamma(mgck_wnd);
 }
 
 inline Array x_magickgetimagegreenprimary(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagegreenprimary);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagegreenprimary(mgck_wnd);
 }
 
 inline double x_magickgetimageheight(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimageheight);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimageheight(mgck_wnd);
 }
 
 inline Array x_magickgetimagehistogram(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagehistogram);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagehistogram(mgck_wnd);
 }
 
 inline int x_magickgetimageindex(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimageindex);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimageindex(mgck_wnd);
 }
 
 inline int x_magickgetimageinterlacescheme(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimageinterlacescheme);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimageinterlacescheme(mgck_wnd);
 }
 
 inline double x_magickgetimageiterations(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimageiterations);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimageiterations(mgck_wnd);
 }
 
 inline Object x_magickgetimagemattecolor(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagemattecolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagemattecolor(mgck_wnd);
 }
 
 inline String x_magickgetimagemimetype(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagemimetype);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagemimetype(mgck_wnd);
 }
 
 inline Array x_magickgetimagepixels(CObjRef mgck_wnd, int x_offset, int y_offset, double columns, double rows, CStrRef smap, int storage_type) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagepixels);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagepixels(mgck_wnd, x_offset, y_offset, columns, rows, smap, storage_type);
 }
 
 inline String x_magickgetimageprofile(CObjRef mgck_wnd, CStrRef name) {
   FUNCTION_INJECTION_BUILTIN(magickgetimageprofile);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimageprofile(mgck_wnd, name);
 }
 
 inline Array x_magickgetimageredprimary(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimageredprimary);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimageredprimary(mgck_wnd);
 }
 
 inline int x_magickgetimagerenderingintent(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagerenderingintent);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagerenderingintent(mgck_wnd);
 }
 
 inline Array x_magickgetimageresolution(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimageresolution);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimageresolution(mgck_wnd);
 }
 
 inline double x_magickgetimagescene(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagescene);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagescene(mgck_wnd);
 }
 
 inline String x_magickgetimagesignature(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagesignature);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagesignature(mgck_wnd);
 }
 
 inline int x_magickgetimagesize(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagesize);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagesize(mgck_wnd);
 }
 
 inline int x_magickgetimagetype(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagetype);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagetype(mgck_wnd);
 }
 
 inline int x_magickgetimageunits(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimageunits);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimageunits(mgck_wnd);
 }
 
 inline int x_magickgetimagevirtualpixelmethod(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagevirtualpixelmethod);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagevirtualpixelmethod(mgck_wnd);
 }
 
 inline Array x_magickgetimagewhitepoint(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagewhitepoint);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagewhitepoint(mgck_wnd);
 }
 
 inline double x_magickgetimagewidth(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagewidth);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagewidth(mgck_wnd);
 }
 
 inline String x_magickgetimagesblob(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagesblob);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetimagesblob(mgck_wnd);
 }
 
 inline int x_magickgetinterlacescheme(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetinterlacescheme);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetinterlacescheme(mgck_wnd);
 }
 
 inline double x_magickgetmaxtextadvance(CObjRef mgck_wnd, CObjRef drw_wnd, CStrRef txt, bool multiline = false) {
   FUNCTION_INJECTION_BUILTIN(magickgetmaxtextadvance);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetmaxtextadvance(mgck_wnd, drw_wnd, txt, multiline);
 }
 
 inline String x_magickgetmimetype(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetmimetype);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetmimetype(mgck_wnd);
 }
 
 inline double x_magickgetnumberimages(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetnumberimages);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetnumberimages(mgck_wnd);
 }
 
 inline Array x_magickgetsamplingfactors(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetsamplingfactors);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetsamplingfactors(mgck_wnd);
 }
 
 inline Array x_magickgetsize(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetsize);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetsize(mgck_wnd);
 }
 
 inline double x_magickgetstringheight(CObjRef mgck_wnd, CObjRef drw_wnd, CStrRef txt, bool multiline = false) {
   FUNCTION_INJECTION_BUILTIN(magickgetstringheight);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetstringheight(mgck_wnd, drw_wnd, txt, multiline);
 }
 
 inline double x_magickgetstringwidth(CObjRef mgck_wnd, CObjRef drw_wnd, CStrRef txt, bool multiline = false) {
   FUNCTION_INJECTION_BUILTIN(magickgetstringwidth);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetstringwidth(mgck_wnd, drw_wnd, txt, multiline);
 }
 
 inline double x_magickgettextascent(CObjRef mgck_wnd, CObjRef drw_wnd, CStrRef txt, bool multiline = false) {
   FUNCTION_INJECTION_BUILTIN(magickgettextascent);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgettextascent(mgck_wnd, drw_wnd, txt, multiline);
 }
 
 inline double x_magickgettextdescent(CObjRef mgck_wnd, CObjRef drw_wnd, CStrRef txt, bool multiline = false) {
   FUNCTION_INJECTION_BUILTIN(magickgettextdescent);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgettextdescent(mgck_wnd, drw_wnd, txt, multiline);
 }
 
 inline Array x_magickgetwandsize(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetwandsize);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickgetwandsize(mgck_wnd);
 }
 
 inline bool x_magickhasnextimage(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickhasnextimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickhasnextimage(mgck_wnd);
 }
 
 inline bool x_magickhaspreviousimage(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickhaspreviousimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickhaspreviousimage(mgck_wnd);
 }
 
 inline bool x_magickimplodeimage(CObjRef mgck_wnd, double amount) {
   FUNCTION_INJECTION_BUILTIN(magickimplodeimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickimplodeimage(mgck_wnd, amount);
 }
 
 inline bool x_magicklabelimage(CObjRef mgck_wnd, CStrRef label) {
   FUNCTION_INJECTION_BUILTIN(magicklabelimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicklabelimage(mgck_wnd, label);
 }
 
 inline bool x_magicklevelimage(CObjRef mgck_wnd, double black_point, double gamma, double white_point, int channel_type = 0) {
   FUNCTION_INJECTION_BUILTIN(magicklevelimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicklevelimage(mgck_wnd, black_point, gamma, white_point, channel_type);
 }
 
 inline bool x_magickmagnifyimage(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickmagnifyimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickmagnifyimage(mgck_wnd);
 }
 
 inline bool x_magickmapimage(CObjRef mgck_wnd, CObjRef map_wand, bool dither) {
   FUNCTION_INJECTION_BUILTIN(magickmapimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickmapimage(mgck_wnd, map_wand, dither);
 }
 
 inline bool x_magickmattefloodfillimage(CObjRef mgck_wnd, double opacity, double fuzz, CObjRef bordercolor_pxl_wnd, int x, int y) {
   FUNCTION_INJECTION_BUILTIN(magickmattefloodfillimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickmattefloodfillimage(mgck_wnd, opacity, fuzz, bordercolor_pxl_wnd, x, y);
 }
 
 inline bool x_magickmedianfilterimage(CObjRef mgck_wnd, double radius) {
   FUNCTION_INJECTION_BUILTIN(magickmedianfilterimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickmedianfilterimage(mgck_wnd, radius);
 }
 
 inline bool x_magickminifyimage(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickminifyimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickminifyimage(mgck_wnd);
 }
 
 inline bool x_magickmodulateimage(CObjRef mgck_wnd, double brightness, double saturation, double hue) {
   FUNCTION_INJECTION_BUILTIN(magickmodulateimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickmodulateimage(mgck_wnd, brightness, saturation, hue);
 }
 
 inline Object x_magickmontageimage(CObjRef mgck_wnd, CObjRef drw_wnd, CStrRef tile_geometry, CStrRef thumbnail_geometry, int montage_mode, CStrRef frame) {
   FUNCTION_INJECTION_BUILTIN(magickmontageimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickmontageimage(mgck_wnd, drw_wnd, tile_geometry, thumbnail_geometry, montage_mode, frame);
 }
 
 inline Object x_magickmorphimages(CObjRef mgck_wnd, double number_frames) {
   FUNCTION_INJECTION_BUILTIN(magickmorphimages);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickmorphimages(mgck_wnd, number_frames);
 }
 
 inline Object x_magickmosaicimages(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickmosaicimages);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickmosaicimages(mgck_wnd);
 }
 
 inline bool x_magickmotionblurimage(CObjRef mgck_wnd, double radius, double sigma, double angle) {
   FUNCTION_INJECTION_BUILTIN(magickmotionblurimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickmotionblurimage(mgck_wnd, radius, sigma, angle);
 }
 
 inline bool x_magicknegateimage(CObjRef mgck_wnd, bool only_the_gray = false, int channel_type = 0) {
   FUNCTION_INJECTION_BUILTIN(magicknegateimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicknegateimage(mgck_wnd, only_the_gray, channel_type);
 }
 
 inline bool x_magicknewimage(CObjRef mgck_wnd, double width, double height, CStrRef imagemagick_col_str = null_string) {
   FUNCTION_INJECTION_BUILTIN(magicknewimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicknewimage(mgck_wnd, width, height, imagemagick_col_str);
 }
 
 inline bool x_magicknextimage(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magicknextimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicknextimage(mgck_wnd);
 }
 
 inline bool x_magicknormalizeimage(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magicknormalizeimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicknormalizeimage(mgck_wnd);
 }
 
 inline bool x_magickoilpaintimage(CObjRef mgck_wnd, double radius) {
   FUNCTION_INJECTION_BUILTIN(magickoilpaintimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickoilpaintimage(mgck_wnd, radius);
 }
 
 inline bool x_magickpaintopaqueimage(CObjRef mgck_wnd, CObjRef target_pxl_wnd, CObjRef fill_pxl_wnd, double fuzz = 0.0) {
   FUNCTION_INJECTION_BUILTIN(magickpaintopaqueimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickpaintopaqueimage(mgck_wnd, target_pxl_wnd, fill_pxl_wnd, fuzz);
 }
 
 inline bool x_magickpainttransparentimage(CObjRef mgck_wnd, CObjRef target, double opacity = k_MW_TransparentOpacity, double fuzz = 0.0) {
   FUNCTION_INJECTION_BUILTIN(magickpainttransparentimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickpainttransparentimage(mgck_wnd, target, opacity, fuzz);
 }
 
 inline bool x_magickpingimage(CObjRef mgck_wnd, CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(magickpingimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickpingimage(mgck_wnd, filename);
 }
 
 inline bool x_magickposterizeimage(CObjRef mgck_wnd, double levels, bool dither) {
   FUNCTION_INJECTION_BUILTIN(magickposterizeimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickposterizeimage(mgck_wnd, levels, dither);
 }
 
 inline Object x_magickpreviewimages(CObjRef mgck_wnd, int preview) {
   FUNCTION_INJECTION_BUILTIN(magickpreviewimages);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickpreviewimages(mgck_wnd, preview);
 }
 
 inline bool x_magickpreviousimage(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickpreviousimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickpreviousimage(mgck_wnd);
 }
 
 inline bool x_magickprofileimage(CObjRef mgck_wnd, CStrRef name, CStrRef profile = null_string) {
   FUNCTION_INJECTION_BUILTIN(magickprofileimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickprofileimage(mgck_wnd, name, profile);
 }
 
 inline bool x_magickquantizeimage(CObjRef mgck_wnd, double number_colors, int colorspace_type, double treedepth, bool dither, bool measure_error) {
   FUNCTION_INJECTION_BUILTIN(magickquantizeimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickquantizeimage(mgck_wnd, number_colors, colorspace_type, treedepth, dither, measure_error);
 }
 
 inline bool x_magickquantizeimages(CObjRef mgck_wnd, double number_colors, int colorspace_type, double treedepth, bool dither, bool measure_error) {
   FUNCTION_INJECTION_BUILTIN(magickquantizeimages);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickquantizeimages(mgck_wnd, number_colors, colorspace_type, treedepth, dither, measure_error);
 }
 
 inline Array x_magickqueryfontmetrics(CObjRef mgck_wnd, CObjRef drw_wnd, CStrRef txt, bool multiline = false) {
   FUNCTION_INJECTION_BUILTIN(magickqueryfontmetrics);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickqueryfontmetrics(mgck_wnd, drw_wnd, txt, multiline);
 }
 
 inline bool x_magickradialblurimage(CObjRef mgck_wnd, double angle) {
   FUNCTION_INJECTION_BUILTIN(magickradialblurimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickradialblurimage(mgck_wnd, angle);
 }
 
 inline bool x_magickraiseimage(CObjRef mgck_wnd, double width, double height, int x, int y, bool raise) {
   FUNCTION_INJECTION_BUILTIN(magickraiseimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickraiseimage(mgck_wnd, width, height, x, y, raise);
 }
 
 inline bool x_magickreadimage(CObjRef mgck_wnd, CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(magickreadimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickreadimage(mgck_wnd, filename);
 }
 
 inline bool x_magickreadimageblob(CObjRef mgck_wnd, CStrRef blob) {
   FUNCTION_INJECTION_BUILTIN(magickreadimageblob);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickreadimageblob(mgck_wnd, blob);
 }
 
 inline bool x_magickreadimagefile(CObjRef mgck_wnd, CObjRef handle) {
   FUNCTION_INJECTION_BUILTIN(magickreadimagefile);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickreadimagefile(mgck_wnd, handle);
 }
 
 inline bool x_magickreadimages(CObjRef mgck_wnd, CArrRef img_filenames_array) {
   FUNCTION_INJECTION_BUILTIN(magickreadimages);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickreadimages(mgck_wnd, img_filenames_array);
 }
 
 inline bool x_magickreducenoiseimage(CObjRef mgck_wnd, double radius) {
   FUNCTION_INJECTION_BUILTIN(magickreducenoiseimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickreducenoiseimage(mgck_wnd, radius);
 }
 
 inline bool x_magickremoveimage(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickremoveimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickremoveimage(mgck_wnd);
 }
 
 inline String x_magickremoveimageprofile(CObjRef mgck_wnd, CStrRef name) {
   FUNCTION_INJECTION_BUILTIN(magickremoveimageprofile);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickremoveimageprofile(mgck_wnd, name);
 }
 
 inline bool x_magickremoveimageprofiles(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickremoveimageprofiles);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickremoveimageprofiles(mgck_wnd);
 }
 
 inline bool x_magickresampleimage(CObjRef mgck_wnd, double x_resolution, double y_resolution, int filter_type, double blur) {
   FUNCTION_INJECTION_BUILTIN(magickresampleimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickresampleimage(mgck_wnd, x_resolution, y_resolution, filter_type, blur);
 }
 
 inline void x_magickresetiterator(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickresetiterator);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_magickresetiterator(mgck_wnd);
 }
 
 inline bool x_magickresizeimage(CObjRef mgck_wnd, double columns, double rows, int filter_type, double blur) {
   FUNCTION_INJECTION_BUILTIN(magickresizeimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickresizeimage(mgck_wnd, columns, rows, filter_type, blur);
 }
 
 inline bool x_magickrollimage(CObjRef mgck_wnd, int x_offset, int y_offset) {
   FUNCTION_INJECTION_BUILTIN(magickrollimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickrollimage(mgck_wnd, x_offset, y_offset);
 }
 
 inline bool x_magickrotateimage(CObjRef mgck_wnd, CObjRef background, double degrees) {
   FUNCTION_INJECTION_BUILTIN(magickrotateimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickrotateimage(mgck_wnd, background, degrees);
 }
 
 inline bool x_magicksampleimage(CObjRef mgck_wnd, double columns, double rows) {
   FUNCTION_INJECTION_BUILTIN(magicksampleimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksampleimage(mgck_wnd, columns, rows);
 }
 
 inline bool x_magickscaleimage(CObjRef mgck_wnd, double columns, double rows) {
   FUNCTION_INJECTION_BUILTIN(magickscaleimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickscaleimage(mgck_wnd, columns, rows);
 }
 
 inline bool x_magickseparateimagechannel(CObjRef mgck_wnd, int channel_type) {
   FUNCTION_INJECTION_BUILTIN(magickseparateimagechannel);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickseparateimagechannel(mgck_wnd, channel_type);
 }
 
 inline bool x_magicksetcompressionquality(CObjRef mgck_wnd, double quality) {
   FUNCTION_INJECTION_BUILTIN(magicksetcompressionquality);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetcompressionquality(mgck_wnd, quality);
 }
 
 inline bool x_magicksetfilename(CObjRef mgck_wnd, CStrRef filename = null_string) {
   FUNCTION_INJECTION_BUILTIN(magicksetfilename);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetfilename(mgck_wnd, filename);
 }
 
 inline void x_magicksetfirstiterator(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magicksetfirstiterator);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_magicksetfirstiterator(mgck_wnd);
 }
 
 inline bool x_magicksetformat(CObjRef mgck_wnd, CStrRef format) {
   FUNCTION_INJECTION_BUILTIN(magicksetformat);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetformat(mgck_wnd, format);
 }
 
 inline bool x_magicksetimage(CObjRef mgck_wnd, CObjRef replace_wand) {
   FUNCTION_INJECTION_BUILTIN(magicksetimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimage(mgck_wnd, replace_wand);
 }
 
 inline bool x_magicksetimagebackgroundcolor(CObjRef mgck_wnd, CObjRef background_pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagebackgroundcolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagebackgroundcolor(mgck_wnd, background_pxl_wnd);
 }
 
 inline bool x_magicksetimagebias(CObjRef mgck_wnd, double bias) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagebias);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagebias(mgck_wnd, bias);
 }
 
 inline bool x_magicksetimageblueprimary(CObjRef mgck_wnd, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(magicksetimageblueprimary);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimageblueprimary(mgck_wnd, x, y);
 }
 
 inline bool x_magicksetimagebordercolor(CObjRef mgck_wnd, CObjRef border_pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagebordercolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagebordercolor(mgck_wnd, border_pxl_wnd);
 }
 
 inline bool x_magicksetimagecolormapcolor(CObjRef mgck_wnd, double index, CObjRef mapcolor_pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagecolormapcolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagecolormapcolor(mgck_wnd, index, mapcolor_pxl_wnd);
 }
 
 inline bool x_magicksetimagecolorspace(CObjRef mgck_wnd, int colorspace_type) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagecolorspace);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagecolorspace(mgck_wnd, colorspace_type);
 }
 
 inline bool x_magicksetimagecompose(CObjRef mgck_wnd, int composite_operator) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagecompose);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagecompose(mgck_wnd, composite_operator);
 }
 
 inline bool x_magicksetimagecompression(CObjRef mgck_wnd, int compression_type) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagecompression);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagecompression(mgck_wnd, compression_type);
 }
 
 inline bool x_magicksetimagecompressionquality(CObjRef mgck_wnd, double quality) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagecompressionquality);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagecompressionquality(mgck_wnd, quality);
 }
 
 inline bool x_magicksetimagedelay(CObjRef mgck_wnd, double delay) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagedelay);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagedelay(mgck_wnd, delay);
 }
 
 inline bool x_magicksetimagedepth(CObjRef mgck_wnd, int depth, int channel_type = 0) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagedepth);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagedepth(mgck_wnd, depth, channel_type);
 }
 
 inline bool x_magicksetimagedispose(CObjRef mgck_wnd, int dispose_type) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagedispose);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagedispose(mgck_wnd, dispose_type);
 }
 
 inline bool x_magicksetimagefilename(CObjRef mgck_wnd, CStrRef filename = null_string) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagefilename);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagefilename(mgck_wnd, filename);
 }
 
 inline bool x_magicksetimageformat(CObjRef mgck_wnd, CStrRef format) {
   FUNCTION_INJECTION_BUILTIN(magicksetimageformat);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimageformat(mgck_wnd, format);
 }
 
 inline bool x_magicksetimagegamma(CObjRef mgck_wnd, double gamma) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagegamma);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagegamma(mgck_wnd, gamma);
 }
 
 inline bool x_magicksetimagegreenprimary(CObjRef mgck_wnd, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagegreenprimary);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagegreenprimary(mgck_wnd, x, y);
 }
 
 inline bool x_magicksetimageindex(CObjRef mgck_wnd, int index) {
   FUNCTION_INJECTION_BUILTIN(magicksetimageindex);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimageindex(mgck_wnd, index);
 }
 
 inline bool x_magicksetimageinterlacescheme(CObjRef mgck_wnd, int interlace_type) {
   FUNCTION_INJECTION_BUILTIN(magicksetimageinterlacescheme);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimageinterlacescheme(mgck_wnd, interlace_type);
 }
 
 inline bool x_magicksetimageiterations(CObjRef mgck_wnd, double iterations) {
   FUNCTION_INJECTION_BUILTIN(magicksetimageiterations);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimageiterations(mgck_wnd, iterations);
 }
 
 inline bool x_magicksetimagemattecolor(CObjRef mgck_wnd, CObjRef matte_pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagemattecolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagemattecolor(mgck_wnd, matte_pxl_wnd);
 }
 
 inline bool x_magicksetimageoption(CObjRef mgck_wnd, CStrRef format, CStrRef key, CStrRef value) {
   FUNCTION_INJECTION_BUILTIN(magicksetimageoption);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimageoption(mgck_wnd, format, key, value);
 }
 
 inline bool x_magicksetimagepixels(CObjRef mgck_wnd, int x_offset, int y_offset, double columns, double rows, CStrRef smap, int storage_type, CArrRef pixel_array) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagepixels);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagepixels(mgck_wnd, x_offset, y_offset, columns, rows, smap, storage_type, pixel_array);
 }
 
 inline bool x_magicksetimageprofile(CObjRef mgck_wnd, CStrRef name, CStrRef profile) {
   FUNCTION_INJECTION_BUILTIN(magicksetimageprofile);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimageprofile(mgck_wnd, name, profile);
 }
 
 inline bool x_magicksetimageredprimary(CObjRef mgck_wnd, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(magicksetimageredprimary);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimageredprimary(mgck_wnd, x, y);
 }
 
 inline bool x_magicksetimagerenderingintent(CObjRef mgck_wnd, int rendering_intent) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagerenderingintent);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagerenderingintent(mgck_wnd, rendering_intent);
 }
 
 inline bool x_magicksetimageresolution(CObjRef mgck_wnd, double x_resolution, double y_resolution) {
   FUNCTION_INJECTION_BUILTIN(magicksetimageresolution);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimageresolution(mgck_wnd, x_resolution, y_resolution);
 }
 
 inline bool x_magicksetimagescene(CObjRef mgck_wnd, double scene) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagescene);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagescene(mgck_wnd, scene);
 }
 
 inline bool x_magicksetimagetype(CObjRef mgck_wnd, int image_type) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagetype);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagetype(mgck_wnd, image_type);
 }
 
 inline bool x_magicksetimageunits(CObjRef mgck_wnd, int resolution_type) {
   FUNCTION_INJECTION_BUILTIN(magicksetimageunits);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimageunits(mgck_wnd, resolution_type);
 }
 
 inline bool x_magicksetimagevirtualpixelmethod(CObjRef mgck_wnd, int virtual_pixel_method) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagevirtualpixelmethod);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagevirtualpixelmethod(mgck_wnd, virtual_pixel_method);
 }
 
 inline bool x_magicksetimagewhitepoint(CObjRef mgck_wnd, double x, double y) {
   FUNCTION_INJECTION_BUILTIN(magicksetimagewhitepoint);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetimagewhitepoint(mgck_wnd, x, y);
 }
 
 inline bool x_magicksetinterlacescheme(CObjRef mgck_wnd, int interlace_type) {
   FUNCTION_INJECTION_BUILTIN(magicksetinterlacescheme);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetinterlacescheme(mgck_wnd, interlace_type);
 }
 
 inline void x_magicksetlastiterator(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magicksetlastiterator);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_magicksetlastiterator(mgck_wnd);
 }
 
 inline bool x_magicksetpassphrase(CObjRef mgck_wnd, CStrRef passphrase) {
   FUNCTION_INJECTION_BUILTIN(magicksetpassphrase);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetpassphrase(mgck_wnd, passphrase);
 }
 
 inline bool x_magicksetresolution(CObjRef mgck_wnd, double x_resolution, double y_resolution) {
   FUNCTION_INJECTION_BUILTIN(magicksetresolution);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetresolution(mgck_wnd, x_resolution, y_resolution);
 }
 
 inline bool x_magicksetsamplingfactors(CObjRef mgck_wnd, double number_factors, CArrRef sampling_factors) {
   FUNCTION_INJECTION_BUILTIN(magicksetsamplingfactors);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetsamplingfactors(mgck_wnd, number_factors, sampling_factors);
 }
 
 inline bool x_magicksetsize(CObjRef mgck_wnd, int columns, int rows) {
   FUNCTION_INJECTION_BUILTIN(magicksetsize);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetsize(mgck_wnd, columns, rows);
 }
 
 inline bool x_magicksetwandsize(CObjRef mgck_wnd, int columns, int rows) {
   FUNCTION_INJECTION_BUILTIN(magicksetwandsize);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksetwandsize(mgck_wnd, columns, rows);
 }
 
 inline bool x_magicksharpenimage(CObjRef mgck_wnd, double radius, double sigma, int channel_type = 0) {
   FUNCTION_INJECTION_BUILTIN(magicksharpenimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksharpenimage(mgck_wnd, radius, sigma, channel_type);
 }
 
 inline bool x_magickshaveimage(CObjRef mgck_wnd, int columns, int rows) {
   FUNCTION_INJECTION_BUILTIN(magickshaveimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickshaveimage(mgck_wnd, columns, rows);
 }
 
 inline bool x_magickshearimage(CObjRef mgck_wnd, CObjRef background, double x_shear, double y_shear) {
   FUNCTION_INJECTION_BUILTIN(magickshearimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickshearimage(mgck_wnd, background, x_shear, y_shear);
 }
 
 inline bool x_magicksolarizeimage(CObjRef mgck_wnd, double threshold) {
   FUNCTION_INJECTION_BUILTIN(magicksolarizeimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksolarizeimage(mgck_wnd, threshold);
 }
 
 inline bool x_magickspliceimage(CObjRef mgck_wnd, double width, double height, int x, int y) {
   FUNCTION_INJECTION_BUILTIN(magickspliceimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickspliceimage(mgck_wnd, width, height, x, y);
 }
 
 inline bool x_magickspreadimage(CObjRef mgck_wnd, double radius) {
   FUNCTION_INJECTION_BUILTIN(magickspreadimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickspreadimage(mgck_wnd, radius);
 }
 
 inline Object x_magicksteganoimage(CObjRef mgck_wnd, CObjRef watermark_wand, int offset) {
   FUNCTION_INJECTION_BUILTIN(magicksteganoimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicksteganoimage(mgck_wnd, watermark_wand, offset);
 }
 
 inline bool x_magickstereoimage(CObjRef mgck_wnd, CObjRef offset_wand) {
   FUNCTION_INJECTION_BUILTIN(magickstereoimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickstereoimage(mgck_wnd, offset_wand);
 }
 
 inline bool x_magickstripimage(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickstripimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickstripimage(mgck_wnd);
 }
 
 inline bool x_magickswirlimage(CObjRef mgck_wnd, double degrees) {
   FUNCTION_INJECTION_BUILTIN(magickswirlimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickswirlimage(mgck_wnd, degrees);
 }
 
 inline Object x_magicktextureimage(CObjRef mgck_wnd, CObjRef texture_wand) {
   FUNCTION_INJECTION_BUILTIN(magicktextureimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicktextureimage(mgck_wnd, texture_wand);
 }
 
 inline bool x_magickthresholdimage(CObjRef mgck_wnd, double threshold, int channel_type = 0) {
   FUNCTION_INJECTION_BUILTIN(magickthresholdimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickthresholdimage(mgck_wnd, threshold, channel_type);
 }
 
 inline bool x_magicktintimage(CObjRef mgck_wnd, int tint_pxl_wnd, CObjRef opacity_pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(magicktintimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicktintimage(mgck_wnd, tint_pxl_wnd, opacity_pxl_wnd);
 }
 
 inline Object x_magicktransformimage(CObjRef mgck_wnd, CStrRef crop, CStrRef geometry) {
   FUNCTION_INJECTION_BUILTIN(magicktransformimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicktransformimage(mgck_wnd, crop, geometry);
 }
 
 inline bool x_magicktrimimage(CObjRef mgck_wnd, double fuzz) {
   FUNCTION_INJECTION_BUILTIN(magicktrimimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magicktrimimage(mgck_wnd, fuzz);
 }
 
 inline bool x_magickunsharpmaskimage(CObjRef mgck_wnd, double radius, double sigma, double amount, double threshold, int channel_type = 0) {
   FUNCTION_INJECTION_BUILTIN(magickunsharpmaskimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickunsharpmaskimage(mgck_wnd, radius, sigma, amount, threshold, channel_type);
 }
 
 inline bool x_magickwaveimage(CObjRef mgck_wnd, double amplitude, double wave_length) {
   FUNCTION_INJECTION_BUILTIN(magickwaveimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickwaveimage(mgck_wnd, amplitude, wave_length);
 }
 
 inline bool x_magickwhitethresholdimage(CObjRef mgck_wnd, CObjRef threshold_pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickwhitethresholdimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickwhitethresholdimage(mgck_wnd, threshold_pxl_wnd);
 }
 
 inline bool x_magickwriteimage(CObjRef mgck_wnd, CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(magickwriteimage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickwriteimage(mgck_wnd, filename);
 }
 
 inline bool x_magickwriteimagefile(CObjRef mgck_wnd, CObjRef handle) {
   FUNCTION_INJECTION_BUILTIN(magickwriteimagefile);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickwriteimagefile(mgck_wnd, handle);
 }
 
 inline bool x_magickwriteimages(CObjRef mgck_wnd, CStrRef filename = "", bool join_images = false) {
   FUNCTION_INJECTION_BUILTIN(magickwriteimages);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickwriteimages(mgck_wnd, filename, join_images);
 }
 
 inline bool x_magickwriteimagesfile(CObjRef mgck_wnd, CObjRef handle) {
   FUNCTION_INJECTION_BUILTIN(magickwriteimagesfile);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_magickwriteimagesfile(mgck_wnd, handle);
 }
 
 inline double x_pixelgetalpha(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetalpha);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetalpha(pxl_wnd);
 }
 
 inline double x_pixelgetalphaquantum(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetalphaquantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetalphaquantum(pxl_wnd);
 }
 
 inline double x_pixelgetblack(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetblack);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetblack(pxl_wnd);
 }
 
 inline double x_pixelgetblackquantum(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetblackquantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetblackquantum(pxl_wnd);
 }
 
 inline double x_pixelgetblue(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetblue);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetblue(pxl_wnd);
 }
 
 inline double x_pixelgetbluequantum(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetbluequantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetbluequantum(pxl_wnd);
 }
 
 inline String x_pixelgetcolorasstring(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetcolorasstring);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetcolorasstring(pxl_wnd);
 }
 
 inline double x_pixelgetcolorcount(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetcolorcount);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetcolorcount(pxl_wnd);
 }
 
 inline double x_pixelgetcyan(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetcyan);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetcyan(pxl_wnd);
 }
 
 inline double x_pixelgetcyanquantum(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetcyanquantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetcyanquantum(pxl_wnd);
 }
 
 inline Array x_pixelgetexception(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetexception);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetexception(pxl_wnd);
 }
 
 inline String x_pixelgetexceptionstring(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetexceptionstring);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetexceptionstring(pxl_wnd);
 }
 
 inline int x_pixelgetexceptiontype(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetexceptiontype);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetexceptiontype(pxl_wnd);
 }
 
 inline double x_pixelgetgreen(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetgreen);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetgreen(pxl_wnd);
 }
 
 inline double x_pixelgetgreenquantum(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetgreenquantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetgreenquantum(pxl_wnd);
 }
 
 inline double x_pixelgetindex(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetindex);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetindex(pxl_wnd);
 }
 
 inline double x_pixelgetmagenta(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetmagenta);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetmagenta(pxl_wnd);
 }
 
 inline double x_pixelgetmagentaquantum(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetmagentaquantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetmagentaquantum(pxl_wnd);
 }
 
 inline double x_pixelgetopacity(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetopacity);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetopacity(pxl_wnd);
 }
 
 inline double x_pixelgetopacityquantum(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetopacityquantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetopacityquantum(pxl_wnd);
 }
 
 inline Array x_pixelgetquantumcolor(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetquantumcolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetquantumcolor(pxl_wnd);
 }
 
 inline double x_pixelgetred(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetred);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetred(pxl_wnd);
 }
 
 inline double x_pixelgetredquantum(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetredquantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetredquantum(pxl_wnd);
 }
 
 inline double x_pixelgetyellow(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetyellow);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetyellow(pxl_wnd);
 }
 
 inline double x_pixelgetyellowquantum(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetyellowquantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetyellowquantum(pxl_wnd);
 }
 
 inline void x_pixelsetalpha(CObjRef pxl_wnd, double alpha) {
   FUNCTION_INJECTION_BUILTIN(pixelsetalpha);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetalpha(pxl_wnd, alpha);
 }
 
 inline void x_pixelsetalphaquantum(CObjRef pxl_wnd, double alpha) {
   FUNCTION_INJECTION_BUILTIN(pixelsetalphaquantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetalphaquantum(pxl_wnd, alpha);
 }
 
 inline void x_pixelsetblack(CObjRef pxl_wnd, double black) {
   FUNCTION_INJECTION_BUILTIN(pixelsetblack);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetblack(pxl_wnd, black);
 }
 
 inline void x_pixelsetblackquantum(CObjRef pxl_wnd, double black) {
   FUNCTION_INJECTION_BUILTIN(pixelsetblackquantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetblackquantum(pxl_wnd, black);
 }
 
 inline void x_pixelsetblue(CObjRef pxl_wnd, double blue) {
   FUNCTION_INJECTION_BUILTIN(pixelsetblue);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetblue(pxl_wnd, blue);
 }
 
 inline void x_pixelsetbluequantum(CObjRef pxl_wnd, double blue) {
   FUNCTION_INJECTION_BUILTIN(pixelsetbluequantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetbluequantum(pxl_wnd, blue);
 }
 
 inline void x_pixelsetcolor(CObjRef pxl_wnd, CStrRef imagemagick_col_str) {
   FUNCTION_INJECTION_BUILTIN(pixelsetcolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetcolor(pxl_wnd, imagemagick_col_str);
 }
 
 inline void x_pixelsetcolorcount(CObjRef pxl_wnd, int count) {
   FUNCTION_INJECTION_BUILTIN(pixelsetcolorcount);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetcolorcount(pxl_wnd, count);
 }
 
 inline void x_pixelsetcyan(CObjRef pxl_wnd, double cyan) {
   FUNCTION_INJECTION_BUILTIN(pixelsetcyan);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetcyan(pxl_wnd, cyan);
 }
 
 inline void x_pixelsetcyanquantum(CObjRef pxl_wnd, double cyan) {
   FUNCTION_INJECTION_BUILTIN(pixelsetcyanquantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetcyanquantum(pxl_wnd, cyan);
 }
 
 inline void x_pixelsetgreen(CObjRef pxl_wnd, double green) {
   FUNCTION_INJECTION_BUILTIN(pixelsetgreen);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetgreen(pxl_wnd, green);
 }
 
 inline void x_pixelsetgreenquantum(CObjRef pxl_wnd, double green) {
   FUNCTION_INJECTION_BUILTIN(pixelsetgreenquantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetgreenquantum(pxl_wnd, green);
 }
 
 inline void x_pixelsetindex(CObjRef pxl_wnd, double index) {
   FUNCTION_INJECTION_BUILTIN(pixelsetindex);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetindex(pxl_wnd, index);
 }
 
 inline void x_pixelsetmagenta(CObjRef pxl_wnd, double magenta) {
   FUNCTION_INJECTION_BUILTIN(pixelsetmagenta);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetmagenta(pxl_wnd, magenta);
 }
 
 inline void x_pixelsetmagentaquantum(CObjRef pxl_wnd, double magenta) {
   FUNCTION_INJECTION_BUILTIN(pixelsetmagentaquantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetmagentaquantum(pxl_wnd, magenta);
 }
 
 inline void x_pixelsetopacity(CObjRef pxl_wnd, double opacity) {
   FUNCTION_INJECTION_BUILTIN(pixelsetopacity);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetopacity(pxl_wnd, opacity);
 }
 
 inline void x_pixelsetopacityquantum(CObjRef pxl_wnd, double opacity) {
   FUNCTION_INJECTION_BUILTIN(pixelsetopacityquantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetopacityquantum(pxl_wnd, opacity);
 }
 
 inline void x_pixelsetquantumcolor(CObjRef pxl_wnd, double red, double green, double blue, double opacity = 0.0) {
   FUNCTION_INJECTION_BUILTIN(pixelsetquantumcolor);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetquantumcolor(pxl_wnd, red, green, blue, opacity);
 }
 
 inline void x_pixelsetred(CObjRef pxl_wnd, double red) {
   FUNCTION_INJECTION_BUILTIN(pixelsetred);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetred(pxl_wnd, red);
 }
 
 inline void x_pixelsetredquantum(CObjRef pxl_wnd, double red) {
   FUNCTION_INJECTION_BUILTIN(pixelsetredquantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetredquantum(pxl_wnd, red);
 }
 
 inline void x_pixelsetyellow(CObjRef pxl_wnd, double yellow) {
   FUNCTION_INJECTION_BUILTIN(pixelsetyellow);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetyellow(pxl_wnd, yellow);
 }
 
 inline void x_pixelsetyellowquantum(CObjRef pxl_wnd, double yellow) {
   FUNCTION_INJECTION_BUILTIN(pixelsetyellowquantum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelsetyellowquantum(pxl_wnd, yellow);
 }
 
 inline Array x_pixelgetiteratorexception(CObjRef pxl_iter) {
   FUNCTION_INJECTION_BUILTIN(pixelgetiteratorexception);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetiteratorexception(pxl_iter);
 }
 
 inline String x_pixelgetiteratorexceptionstring(CObjRef pxl_iter) {
   FUNCTION_INJECTION_BUILTIN(pixelgetiteratorexceptionstring);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetiteratorexceptionstring(pxl_iter);
 }
 
 inline int x_pixelgetiteratorexceptiontype(CObjRef pxl_iter) {
   FUNCTION_INJECTION_BUILTIN(pixelgetiteratorexceptiontype);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetiteratorexceptiontype(pxl_iter);
 }
 
 inline Array x_pixelgetnextiteratorrow(CObjRef pxl_iter) {
   FUNCTION_INJECTION_BUILTIN(pixelgetnextiteratorrow);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelgetnextiteratorrow(pxl_iter);
 }
 
 inline void x_pixelresetiterator(CObjRef pxl_iter) {
   FUNCTION_INJECTION_BUILTIN(pixelresetiterator);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_pixelresetiterator(pxl_iter);
 }
 
 inline bool x_pixelsetiteratorrow(CObjRef pxl_iter, int row) {
   FUNCTION_INJECTION_BUILTIN(pixelsetiteratorrow);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelsetiteratorrow(pxl_iter, row);
 }
 
 inline bool x_pixelsynciterator(CObjRef pxl_iter) {
   FUNCTION_INJECTION_BUILTIN(pixelsynciterator);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pixelsynciterator(pxl_iter);
 }
 

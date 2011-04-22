@@ -27,11 +27,13 @@ namespace HPHP {
 
 inline String x_json_encode(CVarRef value, bool loose = false) {
   FUNCTION_INJECTION_BUILTIN(json_encode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_json_encode(value, loose);
 }
 
 inline Variant x_json_decode(CStrRef json, bool assoc = false, bool loose = false) {
   FUNCTION_INJECTION_BUILTIN(json_decode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_json_decode(json, assoc, loose);
 }
 

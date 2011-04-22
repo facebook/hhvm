@@ -154,7 +154,7 @@ inline String f_stream_resolve_include_path(CStrRef filename,
   throw NotSupportedException(__func__, "include path is not supported");
 }
 
-Variant f_stream_select(Variant read, Variant write, Variant except,
+Variant f_stream_select(VRefParam read, VRefParam write, VRefParam except,
                         CVarRef vtv_sec, int tv_usec = 0);
 
 bool f_stream_set_blocking(CObjRef stream, int mode);
@@ -171,14 +171,14 @@ inline int f_set_file_buffer(CObjRef stream, int buffer) {
 // stream sockets: ext_socket has better implementation of socket functions
 
 Variant f_stream_socket_accept(CObjRef server_socket, double timeout = 0.0,
-                              Variant peername = null);
+                              VRefParam peername = null);
 
-Variant f_stream_socket_server(CStrRef local_socket, Variant errnum = null,
-                              Variant errstr = null,
+Variant f_stream_socket_server(CStrRef local_socket, VRefParam errnum = null,
+                              VRefParam errstr = null,
                               int flags = 0, CObjRef context = null_object);
 
-Variant f_stream_socket_client(CStrRef remote_socket, Variant errnum = null,
-                              Variant errstr = null, double timeout = 0.0,
+Variant f_stream_socket_client(CStrRef remote_socket, VRefParam errnum = null,
+                              VRefParam errstr = null, double timeout = 0.0,
                               int flags = 0, CObjRef context = null_object);
 
 inline Variant f_stream_socket_enable_crypto(CObjRef stream, bool enable,

@@ -36,8 +36,9 @@ void StrongForEachStatement::eval(VariableEnvironment &env) const {
 
   ENTER_STMT;
   LvalExpression* lvalSource = m_source->cast<LvalExpression>();
-  Variant source(lvalSource ? ref(lvalSource->lval(env)) :
-                              ref(m_source->eval(env)));
+  Variant source(strongBind(lvalSource ?
+                            lvalSource->lval(env) :
+                            (CVarRef)m_source->eval(env)));
   source.escalate(true);
   Variant vTemp;
 

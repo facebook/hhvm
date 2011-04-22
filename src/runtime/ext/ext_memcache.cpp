@@ -221,7 +221,7 @@ bool c_Memcache::t_replace(CStrRef key, CVarRef var, int flag /*= 0*/,
   return (ret == MEMCACHED_SUCCESS);
 }
 
-Variant c_Memcache::t_get(CVarRef key, Variant flags /*= null*/) {
+Variant c_Memcache::t_get(CVarRef key, VRefParam flags /*= null*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::get);
   if (key.is(KindOfArray)) {
     std::vector<const char *> real_keys;
@@ -597,7 +597,7 @@ bool f_memcache_replace(CObjRef memcache, CStrRef key, CVarRef var,
 }
 
 Variant f_memcache_get(CObjRef memcache, CVarRef key,
-                       Variant flags /* = null */) {
+                       VRefParam flags /* = null */) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_get(key, flags);
 }

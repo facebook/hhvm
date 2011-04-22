@@ -409,8 +409,8 @@ Variant f_fb_thrift_serialize(CVarRef thing) {
   return String(buff, len, AttachString);
 }
 
-Variant f_fb_thrift_unserialize(CVarRef thing, Variant success,
-                                Variant errcode /* = null_variant */) {
+Variant f_fb_thrift_unserialize(CVarRef thing, VRefParam success,
+                                VRefParam errcode /* = null_variant */) {
   int pos = 0;
   errcode = null;
   int errcd;
@@ -435,8 +435,8 @@ Variant f_fb_serialize(CVarRef thing) {
   return f_fb_thrift_serialize(thing);
 }
 
-Variant f_fb_unserialize(CVarRef thing, Variant success,
-                         Variant errcode /* = null_variant */) {
+Variant f_fb_unserialize(CVarRef thing, VRefParam success,
+                         VRefParam errcode /* = null_variant */) {
   return f_fb_thrift_unserialize(thing, ref(success), ref(errcode));
 }
 
@@ -583,7 +583,7 @@ Array f_fb_crossall_query(CStrRef sql, int max_thread /* = 50 */,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool f_fb_utf8ize(Variant input) {
+bool f_fb_utf8ize(VRefParam input) {
   String s = input.toString();
   unsigned char *str = (unsigned char *)s.data();
   int len = s.size();
@@ -748,7 +748,7 @@ bool f_fb_intercept(CStrRef name, CVarRef handler,
 
 Variant f_fb_stubout_intercept_handler(CStrRef name, CVarRef obj,
                                        CArrRef params, CVarRef data,
-                                       Variant done) {
+                                       VRefParam done) {
   if (obj.isNull()) {
     return f_call_user_func_array(data, params);
   }
@@ -756,7 +756,7 @@ Variant f_fb_stubout_intercept_handler(CStrRef name, CVarRef obj,
 }
 
 Variant f_fb_rpc_intercept_handler(CStrRef name, CVarRef obj, CArrRef params,
-                                   CVarRef data, Variant done) {
+                                   CVarRef data, VRefParam done) {
   String host = data["host"].toString();
   int port = data["port"].toInt32();
   String auth = data["auth"].toString();
@@ -857,7 +857,7 @@ Variant f_fb_get_code_coverage(bool flush) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void f_fb_set_taint(Variant str, int taint) {
+void f_fb_set_taint(VRefParam str, int taint) {
 #ifdef TAINTED
   if (!str.isString()) {
     // str can be KindOfNull, in which case we can just return
@@ -872,7 +872,7 @@ void f_fb_set_taint(Variant str, int taint) {
 #endif
 }
 
-void f_fb_unset_taint(Variant str, int taint) {
+void f_fb_unset_taint(VRefParam str, int taint) {
 #ifdef TAINTED
   if (!str.isString()) {
     // str can be KindOfNull, in which case we can just return

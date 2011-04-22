@@ -881,7 +881,7 @@ bool f_openssl_csr_export_to_file(CVarRef csr, CStrRef outfilename,
   return true;
 }
 
-bool f_openssl_csr_export(CVarRef csr, Variant out, bool notext /* = true */) {
+bool f_openssl_csr_export(CVarRef csr, VRefParam out, bool notext /* = true */) {
   Object ocsr;
   X509_REQ *pcsr = CSRequest::Get(csr, ocsr);
   if (pcsr == NULL) return false;
@@ -923,7 +923,7 @@ Variant f_openssl_csr_get_subject(CVarRef csr,
   return ret;
 }
 
-Variant f_openssl_csr_new(CArrRef dn, Variant privkey,
+Variant f_openssl_csr_new(CArrRef dn, VRefParam privkey,
                           CVarRef configargs /* = null_variant */,
                           CVarRef extraattribs /* = null_variant */) {
   Variant ret = false;
@@ -1104,7 +1104,7 @@ void f_openssl_free_key(CObjRef key) {
   return f_openssl_pkey_free(key);
 }
 
-bool f_openssl_open(CStrRef sealed_data, Variant open_data, CStrRef env_key,
+bool f_openssl_open(CStrRef sealed_data, VRefParam open_data, CStrRef env_key,
                     CVarRef priv_key_id) {
   Object okey = Key::Get(priv_key_id, false);
   if (okey.isNull()) {
@@ -1206,7 +1206,7 @@ bool f_openssl_pkcs12_export_to_file(CVarRef x509, CStrRef filename,
   return ret;
 }
 
-bool f_openssl_pkcs12_export(CVarRef x509, Variant out, CVarRef priv_key,
+bool f_openssl_pkcs12_export(CVarRef x509, VRefParam out, CVarRef priv_key,
                              CStrRef pass, CVarRef args /* = null_variant */) {
   BIO *bio_out = BIO_new(BIO_s_mem());
   bool ret = openssl_pkcs12_export_impl(x509, bio_out, priv_key, pass, args);
@@ -1219,7 +1219,8 @@ bool f_openssl_pkcs12_export(CVarRef x509, Variant out, CVarRef priv_key,
   return ret;
 }
 
-bool f_openssl_pkcs12_read(CStrRef pkcs12, Variant certs, CStrRef pass) {
+bool f_openssl_pkcs12_read(CStrRef pkcs12, VRefParam certs, CStrRef pass) {
+  Variant &vcerts = certs;
   bool ret = false;
   PKCS12 *p12 = NULL;
 
@@ -1233,12 +1234,12 @@ bool f_openssl_pkcs12_read(CStrRef pkcs12, Variant certs, CStrRef pass) {
     X509 *cert = NULL;
     STACK_OF(X509) *ca = NULL;
     if (PKCS12_parse(p12, pass.data(), &pkey, &cert, &ca)) {
-      certs = Array::Create();
+      vcerts = Array::Create();
       BIO *bio_out = BIO_new(BIO_s_mem());
       if (PEM_write_bio_X509(bio_out, cert)) {
         BUF_MEM *bio_buf;
         BIO_get_mem_ptr(bio_out, &bio_buf);
-        certs.set("cert", String((char*)bio_buf->data, bio_buf->length,
+        vcerts.set("cert", String((char*)bio_buf->data, bio_buf->length,
                                  CopyString));
       }
       BIO_free(bio_out);
@@ -1247,7 +1248,7 @@ bool f_openssl_pkcs12_read(CStrRef pkcs12, Variant certs, CStrRef pass) {
       if (PEM_write_bio_PrivateKey(bio_out, pkey, NULL, NULL, 0, 0, NULL)) {
         BUF_MEM *bio_buf;
         BIO_get_mem_ptr(bio_out, &bio_buf);
-        certs.set("pkey", String((char*)bio_buf->data, bio_buf->length,
+        vcerts.set("pkey", String((char*)bio_buf->data, bio_buf->length,
                                  CopyString));
       }
       BIO_free(bio_out);
@@ -1266,7 +1267,7 @@ bool f_openssl_pkcs12_read(CStrRef pkcs12, Variant certs, CStrRef pass) {
       }
       if (ca) {
         sk_X509_free(ca);
-        certs.set("extracerts", extracerts);
+        vcerts.set("extracerts", extracerts);
       }
       ret = true;
       PKCS12_free(p12);
@@ -1597,7 +1598,7 @@ bool f_openssl_pkey_export_to_file(CVarRef key,
   return ret;
 }
 
-bool f_openssl_pkey_export(CVarRef key, Variant out,
+bool f_openssl_pkey_export(CVarRef key, VRefParam out,
                            CStrRef passphrase /* = null_string */,
                            CVarRef configargs /* = null_variant */) {
   BIO *bio_out = BIO_new(BIO_s_mem());
@@ -1684,7 +1685,7 @@ Object f_openssl_pkey_new(CVarRef configargs /* = null_variant */) {
   return ret;
 }
 
-bool f_openssl_private_decrypt(CStrRef data, Variant decrypted, CVarRef key,
+bool f_openssl_private_decrypt(CStrRef data, VRefParam decrypted, CVarRef key,
                                int padding /* = k_OPENSSL_PKCS1_PADDING */) {
   Object okey = Key::Get(key, false);
   if (okey.isNull()) {
@@ -1723,7 +1724,7 @@ bool f_openssl_private_decrypt(CStrRef data, Variant decrypted, CVarRef key,
   return false;
 }
 
-bool f_openssl_private_encrypt(CStrRef data, Variant crypted, CVarRef key,
+bool f_openssl_private_encrypt(CStrRef data, VRefParam crypted, CVarRef key,
                                int padding /* = k_OPENSSL_PKCS1_PADDING */) {
   Object okey = Key::Get(key, false);
   if (okey.isNull()) {
@@ -1758,7 +1759,7 @@ bool f_openssl_private_encrypt(CStrRef data, Variant crypted, CVarRef key,
   return false;
 }
 
-bool f_openssl_public_decrypt(CStrRef data, Variant decrypted, CVarRef key,
+bool f_openssl_public_decrypt(CStrRef data, VRefParam decrypted, CVarRef key,
                               int padding /* = k_OPENSSL_PKCS1_PADDING */) {
   Object okey = Key::Get(key, true);
   if (okey.isNull()) {
@@ -1797,7 +1798,7 @@ bool f_openssl_public_decrypt(CStrRef data, Variant decrypted, CVarRef key,
   return false;
 }
 
-bool f_openssl_public_encrypt(CStrRef data, Variant crypted, CVarRef key,
+bool f_openssl_public_encrypt(CStrRef data, VRefParam crypted, CVarRef key,
                               int padding /* = k_OPENSSL_PKCS1_PADDING */) {
   Object okey = Key::Get(key, true);
   if (okey.isNull()) {
@@ -1832,7 +1833,7 @@ bool f_openssl_public_encrypt(CStrRef data, Variant crypted, CVarRef key,
   return false;
 }
 
-Variant f_openssl_seal(CStrRef data, Variant sealed_data, Variant env_keys,
+Variant f_openssl_seal(CStrRef data, VRefParam sealed_data, VRefParam env_keys,
                        CArrRef pub_key_ids) {
   int nkeys = pub_key_ids.size();
   if (nkeys == 0) {
@@ -1922,7 +1923,7 @@ static const EVP_MD *php_openssl_get_evp_md_from_algo(long algo) {
   return NULL;
 }
 
-bool f_openssl_sign(CStrRef data, Variant signature, CVarRef priv_key_id,
+bool f_openssl_sign(CStrRef data, VRefParam signature, CVarRef priv_key_id,
                     int signature_alg /* = k_OPENSSL_ALGO_SHA1 */) {
   Object okey = Key::Get(priv_key_id, false);
   if (okey.isNull()) {
@@ -2086,7 +2087,7 @@ bool f_openssl_x509_export_to_file(CVarRef x509, CStrRef outfilename,
   return ret;
 }
 
-bool f_openssl_x509_export(CVarRef x509, Variant output,
+bool f_openssl_x509_export(CVarRef x509, VRefParam output,
                            bool notext /* = true */) {
   BIO *bio_out = BIO_new(BIO_s_mem());
   bool ret = openssl_x509_export_impl(x509, bio_out, notext);
@@ -2257,7 +2258,7 @@ Variant f_openssl_x509_read(CVarRef x509certdata) {
 }
 
 Variant f_openssl_random_pseudo_bytes(int length,
-                                      Variant crypto_strong /* = false */) {
+                                      VRefParam crypto_strong /* = false */) {
   if (length <= 0) {
     return false;
   }

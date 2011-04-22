@@ -27,201 +27,241 @@ namespace HPHP {
 
 inline Variant x_ldap_connect(CStrRef hostname = null_string, int port = 389) {
   FUNCTION_INJECTION_BUILTIN(ldap_connect);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_connect(hostname, port);
 }
 
 inline Variant x_ldap_explode_dn(CStrRef dn, int with_attrib) {
   FUNCTION_INJECTION_BUILTIN(ldap_explode_dn);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_explode_dn(dn, with_attrib);
 }
 
 inline Variant x_ldap_dn2ufn(CStrRef db) {
   FUNCTION_INJECTION_BUILTIN(ldap_dn2ufn);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_dn2ufn(db);
 }
 
 inline String x_ldap_err2str(int errnum) {
   FUNCTION_INJECTION_BUILTIN(ldap_err2str);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_err2str(errnum);
 }
 
 inline bool x_ldap_add(CObjRef link, CStrRef dn, CArrRef entry) {
   FUNCTION_INJECTION_BUILTIN(ldap_add);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_add(link, dn, entry);
 }
 
 inline bool x_ldap_mod_add(CObjRef link, CStrRef dn, CArrRef entry) {
   FUNCTION_INJECTION_BUILTIN(ldap_mod_add);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_mod_add(link, dn, entry);
 }
 
 inline bool x_ldap_mod_del(CObjRef link, CStrRef dn, CArrRef entry) {
   FUNCTION_INJECTION_BUILTIN(ldap_mod_del);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_mod_del(link, dn, entry);
 }
 
 inline bool x_ldap_mod_replace(CObjRef link, CStrRef dn, CArrRef entry) {
   FUNCTION_INJECTION_BUILTIN(ldap_mod_replace);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_mod_replace(link, dn, entry);
 }
 
 inline bool x_ldap_modify(CObjRef link, CStrRef dn, CArrRef entry) {
   FUNCTION_INJECTION_BUILTIN(ldap_modify);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_modify(link, dn, entry);
 }
 
 inline bool x_ldap_bind(CObjRef link, CStrRef bind_rdn = null_string, CStrRef bind_password = null_string) {
   FUNCTION_INJECTION_BUILTIN(ldap_bind);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_bind(link, bind_rdn, bind_password);
 }
 
 inline bool x_ldap_set_rebind_proc(CObjRef link, CVarRef callback) {
   FUNCTION_INJECTION_BUILTIN(ldap_set_rebind_proc);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_set_rebind_proc(link, callback);
 }
 
 inline bool x_ldap_sort(CObjRef link, CObjRef result, CStrRef sortfilter) {
   FUNCTION_INJECTION_BUILTIN(ldap_sort);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_sort(link, result, sortfilter);
 }
 
 inline bool x_ldap_start_tls(CObjRef link) {
   FUNCTION_INJECTION_BUILTIN(ldap_start_tls);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_start_tls(link);
 }
 
 inline bool x_ldap_unbind(CObjRef link) {
   FUNCTION_INJECTION_BUILTIN(ldap_unbind);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_unbind(link);
 }
 
-inline bool x_ldap_get_option(CObjRef link, int option, CVarRef retval) {
+inline bool x_ldap_get_option(CObjRef link, int option, VRefParam retval) {
   FUNCTION_INJECTION_BUILTIN(ldap_get_option);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_get_option(link, option, retval);
 }
 
 inline bool x_ldap_set_option(CVarRef link, int option, CVarRef newval) {
   FUNCTION_INJECTION_BUILTIN(ldap_set_option);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_set_option(link, option, newval);
 }
 
 inline bool x_ldap_close(CObjRef link) {
   FUNCTION_INJECTION_BUILTIN(ldap_close);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_close(link);
 }
 
 inline Variant x_ldap_list(CVarRef link, CVarRef base_dn, CVarRef filter, CArrRef attributes = null_array, int attrsonly = 0, int sizelimit = -1, int timelimit = -1, int deref = -1) {
   FUNCTION_INJECTION_BUILTIN(ldap_list);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_list(link, base_dn, filter, attributes, attrsonly, sizelimit, timelimit, deref);
 }
 
 inline Variant x_ldap_read(CVarRef link, CVarRef base_dn, CVarRef filter, CArrRef attributes = null_array, int attrsonly = 0, int sizelimit = -1, int timelimit = -1, int deref = -1) {
   FUNCTION_INJECTION_BUILTIN(ldap_read);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_read(link, base_dn, filter, attributes, attrsonly, sizelimit, timelimit, deref);
 }
 
 inline Variant x_ldap_search(CVarRef link, CVarRef base_dn, CVarRef filter, CArrRef attributes = null_array, int attrsonly = 0, int sizelimit = -1, int timelimit = -1, int deref = -1) {
   FUNCTION_INJECTION_BUILTIN(ldap_search);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_search(link, base_dn, filter, attributes, attrsonly, sizelimit, timelimit, deref);
 }
 
 inline bool x_ldap_rename(CObjRef link, CStrRef dn, CStrRef newrdn, CStrRef newparent, bool deleteoldrdn) {
   FUNCTION_INJECTION_BUILTIN(ldap_rename);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_rename(link, dn, newrdn, newparent, deleteoldrdn);
 }
 
 inline bool x_ldap_delete(CObjRef link, CStrRef dn) {
   FUNCTION_INJECTION_BUILTIN(ldap_delete);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_delete(link, dn);
 }
 
 inline Variant x_ldap_compare(CObjRef link, CStrRef dn, CStrRef attribute, CStrRef value) {
   FUNCTION_INJECTION_BUILTIN(ldap_compare);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_compare(link, dn, attribute, value);
 }
 
 inline int x_ldap_errno(CObjRef link) {
   FUNCTION_INJECTION_BUILTIN(ldap_errno);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_errno(link);
 }
 
 inline String x_ldap_error(CObjRef link) {
   FUNCTION_INJECTION_BUILTIN(ldap_error);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_error(link);
 }
 
 inline Variant x_ldap_get_dn(CObjRef link, CObjRef result_entry) {
   FUNCTION_INJECTION_BUILTIN(ldap_get_dn);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_get_dn(link, result_entry);
 }
 
 inline int x_ldap_count_entries(CObjRef link, CObjRef result) {
   FUNCTION_INJECTION_BUILTIN(ldap_count_entries);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_count_entries(link, result);
 }
 
 inline Variant x_ldap_get_entries(CObjRef link, CObjRef result) {
   FUNCTION_INJECTION_BUILTIN(ldap_get_entries);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_get_entries(link, result);
 }
 
 inline Variant x_ldap_first_entry(CObjRef link, CObjRef result) {
   FUNCTION_INJECTION_BUILTIN(ldap_first_entry);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_first_entry(link, result);
 }
 
 inline Variant x_ldap_next_entry(CObjRef link, CObjRef result_entry) {
   FUNCTION_INJECTION_BUILTIN(ldap_next_entry);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_next_entry(link, result_entry);
 }
 
 inline Array x_ldap_get_attributes(CObjRef link, CObjRef result_entry) {
   FUNCTION_INJECTION_BUILTIN(ldap_get_attributes);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_get_attributes(link, result_entry);
 }
 
 inline Variant x_ldap_first_attribute(CObjRef link, CObjRef result_entry) {
   FUNCTION_INJECTION_BUILTIN(ldap_first_attribute);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_first_attribute(link, result_entry);
 }
 
 inline Variant x_ldap_next_attribute(CObjRef link, CObjRef result_entry) {
   FUNCTION_INJECTION_BUILTIN(ldap_next_attribute);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_next_attribute(link, result_entry);
 }
 
 inline Variant x_ldap_first_reference(CObjRef link, CObjRef result) {
   FUNCTION_INJECTION_BUILTIN(ldap_first_reference);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_first_reference(link, result);
 }
 
 inline Variant x_ldap_next_reference(CObjRef link, CObjRef result_entry) {
   FUNCTION_INJECTION_BUILTIN(ldap_next_reference);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_next_reference(link, result_entry);
 }
 
-inline bool x_ldap_parse_reference(CObjRef link, CObjRef result_entry, CVarRef referrals) {
+inline bool x_ldap_parse_reference(CObjRef link, CObjRef result_entry, VRefParam referrals) {
   FUNCTION_INJECTION_BUILTIN(ldap_parse_reference);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_parse_reference(link, result_entry, referrals);
 }
 
-inline bool x_ldap_parse_result(CObjRef link, CObjRef result, CVarRef errcode, CVarRef matcheddn = null, CVarRef errmsg = null, CVarRef referrals = null) {
+inline bool x_ldap_parse_result(CObjRef link, CObjRef result, VRefParam errcode, VRefParam matcheddn = null, VRefParam errmsg = null, VRefParam referrals = null) {
   FUNCTION_INJECTION_BUILTIN(ldap_parse_result);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_parse_result(link, result, errcode, matcheddn, errmsg, referrals);
 }
 
 inline bool x_ldap_free_result(CObjRef result) {
   FUNCTION_INJECTION_BUILTIN(ldap_free_result);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_free_result(result);
 }
 
 inline Variant x_ldap_get_values_len(CObjRef link, CObjRef result_entry, CStrRef attribute) {
   FUNCTION_INJECTION_BUILTIN(ldap_get_values_len);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_get_values_len(link, result_entry, attribute);
 }
 
 inline Variant x_ldap_get_values(CObjRef link, CObjRef result_entry, CStrRef attribute) {
   FUNCTION_INJECTION_BUILTIN(ldap_get_values);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ldap_get_values(link, result_entry, attribute);
 }
 

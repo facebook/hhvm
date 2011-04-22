@@ -678,7 +678,7 @@ Variant f_curl_copy_handle(CObjRef ch) {
   return NEWOBJ(CurlResource)(curl);
 }
 
-Variant f_curl_version(int uversion /* = CURLVERSION_NOW */) {
+Variant f_curl_version(int uversion /* = k_CURLVERSION_NOW */) {
   curl_version_info_data *d = curl_version_info((CURLversion)uversion);
   if (d == NULL) {
     return false;
@@ -986,9 +986,9 @@ Variant f_curl_multi_remove_handle(CObjRef mh, CObjRef ch) {
   return curl_multi_remove_handle(curlm->get(), curle->get());
 }
 
-Variant f_curl_multi_exec(CObjRef mh, Variant still_running) {
+Variant f_curl_multi_exec(CObjRef mh, VRefParam still_running) {
   CHECK_MULTI_RESOURCE(curlm);
-  int running = still_running.toInt32();
+  int running = still_running;
   IOStatusHelper io("curl_multi_exec");
   int result = curl_multi_perform(curlm->get(), &running);
   still_running = running;
@@ -1010,7 +1010,7 @@ Variant f_curl_multi_getcontent(CObjRef ch) {
 }
 
 Variant f_curl_multi_info_read(CObjRef mh,
-                               Variant msgs_in_queue /* = null */) {
+                               VRefParam msgs_in_queue /* = null */) {
   CHECK_MULTI_RESOURCE(curlm);
 
   int queued_msgs;

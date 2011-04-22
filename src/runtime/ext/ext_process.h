@@ -35,8 +35,8 @@ bool f_pcntl_setpriority(int priority, int pid = 0,
                          int process_identifier = 0);
 
 bool f_pcntl_signal(int signo, CVarRef handler, bool restart_syscalls = true);
-int f_pcntl_wait(Variant status, int options = 0);
-int f_pcntl_waitpid(int pid, Variant status, int options = 0);
+int f_pcntl_wait(VRefParam status, int options = 0);
+int f_pcntl_waitpid(int pid, VRefParam status, int options = 0);
 
 inline int f_pcntl_wexitstatus(int status) {
   return WEXITSTATUS(status);
@@ -57,14 +57,14 @@ inline int f_pcntl_wtermsig(int status) { return WTERMSIG(status);}
 ///////////////////////////////////////////////////////////////////////////////
 
 String f_shell_exec(CStrRef cmd);
-String f_exec(CStrRef command, Variant output = null,
-              Variant return_var = null);
-void f_passthru(CStrRef command, Variant return_var = null);
-String f_system(CStrRef command, Variant return_var = null);
+String f_exec(CStrRef command, VRefParam output = null,
+              VRefParam return_var = null);
+void f_passthru(CStrRef command, VRefParam return_var = null);
+String f_system(CStrRef command, VRefParam return_var = null);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, Variant pipes,
+Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
                     CStrRef cwd = null_string, CVarRef env = null_variant,
                     CVarRef other_options = null_variant);
 bool f_proc_terminate(CObjRef process, int signal = 0);

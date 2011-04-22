@@ -37,7 +37,7 @@ inline bool x_function_exists(CStrRef function_name) {
   return f_function_exists(function_name);
 }
 
-inline bool x_is_callable(CVarRef v, bool syntax = false, CVarRef name = null) {
+inline bool x_is_callable(CVarRef v, bool syntax = false, VRefParam name = null) {
   FUNCTION_INJECTION_BUILTIN(is_callable);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_is_callable(v, syntax, name);

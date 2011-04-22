@@ -198,9 +198,9 @@ class c_PDOStatement : public ExtObjectData, public Sweepable {
   DECLARE_METHOD_INVOKE_HELPERS(fetchall);
   public: bool t_bindvalue(CVarRef paramno, CVarRef param, int64 type = q_PDO_PARAM_STR);
   DECLARE_METHOD_INVOKE_HELPERS(bindvalue);
-  public: bool t_bindparam(CVarRef paramno, Variant param, int64 type = q_PDO_PARAM_STR, int64 max_value_len = 0, CVarRef driver_params = null);
+  public: bool t_bindparam(CVarRef paramno, VRefParam param, int64 type = q_PDO_PARAM_STR, int64 max_value_len = 0, CVarRef driver_params = null);
   DECLARE_METHOD_INVOKE_HELPERS(bindparam);
-  public: bool t_bindcolumn(CVarRef paramno, Variant param, int64 type = q_PDO_PARAM_STR, int64 max_value_len = 0, CVarRef driver_params = null);
+  public: bool t_bindcolumn(CVarRef paramno, VRefParam param, int64 type = q_PDO_PARAM_STR, int64 max_value_len = 0, CVarRef driver_params = null);
   DECLARE_METHOD_INVOKE_HELPERS(bindcolumn);
   public: int64 t_rowcount();
   DECLARE_METHOD_INVOKE_HELPERS(rowcount);

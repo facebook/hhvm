@@ -200,8 +200,8 @@ void register_variable(Variant &variables, char *name, CVarRef value,
       if (!index) {
         symtable->append(Array::Create());
         gpc_elements.push_back(null);
-        gpc_elements.back() =
-          ref(symtable->lvalAt((int)symtable->toArray().size() - 1));
+        gpc_elements.back().assignRef(
+          symtable->lvalAt((int)symtable->toArray().size() - 1));
       } else {
         String key(index, index_len, CopyString);
         Variant v = symtable->rvalAt(key);

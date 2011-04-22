@@ -135,8 +135,8 @@ int64 f_pagelet_server_task_status(CObjRef task) {
   return PageletServer::TaskStatus(task);
 }
 
-String f_pagelet_server_task_result(CObjRef task, Variant headers,
-                                    Variant code) {
+String f_pagelet_server_task_result(CObjRef task, VRefParam headers,
+                                    VRefParam code) {
   Array rheaders;
   int rcode;
   String response = PageletServer::TaskResult(task, rheaders, rcode);
@@ -162,7 +162,7 @@ void f_pagelet_server_flush() {
 ///////////////////////////////////////////////////////////////////////////////
 // xbox
 
-bool f_xbox_send_message(CStrRef msg, Variant ret, int64 timeout_ms,
+bool f_xbox_send_message(CStrRef msg, VRefParam ret, int64 timeout_ms,
                          CStrRef host /* = "localhost" */) {
   return XboxServer::SendMessage(msg, ret, timeout_ms, host);
 }
@@ -179,7 +179,7 @@ bool f_xbox_task_status(CObjRef task) {
   return XboxServer::TaskStatus(task);
 }
 
-int64 f_xbox_task_result(CObjRef task, int64 timeout_ms, Variant ret) {
+int64 f_xbox_task_result(CObjRef task, int64 timeout_ms, VRefParam ret) {
   return XboxServer::TaskResult(task, timeout_ms, ret);
 }
 

@@ -32,7 +32,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // forward declaration
-CVarRef ref(CVarRef v);
 class ArrayIter;
 class StaticArray;
 

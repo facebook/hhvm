@@ -50,7 +50,7 @@ String f_get_resource_type(CObjRef handle) {
   return "";
 }
 
-bool f_settype(Variant var, CStrRef type) {
+bool f_settype(VRefParam var, CStrRef type) {
   if      (type == "boolean") var = var.toBoolean();
   else if (type == "bool"   ) var = var.toBoolean();
   else if (type == "integer") var = var.toInt64();

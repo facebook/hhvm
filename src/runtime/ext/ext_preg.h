@@ -28,18 +28,18 @@ namespace HPHP {
 
 Variant f_preg_grep(CStrRef pattern, CArrRef input, int flags = 0);
 
-Variant f_preg_match(CStrRef pattern, CStrRef subject, Variant matches = null,
+Variant f_preg_match(CStrRef pattern, CStrRef subject, VRefParam matches = null,
                      int flags = 0, int offset = 0);
 
-Variant f_preg_match_all(CStrRef pattern, CStrRef subject, Variant matches,
+Variant f_preg_match_all(CStrRef pattern, CStrRef subject, VRefParam matches,
                          int flags = 0, int offset = 0);
 
 Variant f_preg_replace(CVarRef pattern, CVarRef replacement, CVarRef subject,
-                       int limit = -1, Variant count = null);
+                       int limit = -1, VRefParam count = null);
 
 Variant f_preg_replace_callback(CVarRef pattern, CVarRef callback,
                                 CVarRef subject, int limit = -1,
-                                Variant count = null);
+                                VRefParam count = null);
 
 Variant f_preg_split(CVarRef pattern, CVarRef subject, int limit = -1,
                      int flags = 0);
@@ -53,8 +53,8 @@ int f_preg_last_error();
 
 String f_ereg_replace(CStrRef pattern, CStrRef replacement, CStrRef str);
 String f_eregi_replace(CStrRef pattern, CStrRef replacement, CStrRef str);
-Variant f_ereg(CStrRef pattern, CStrRef str, Variant regs = null);
-Variant f_eregi(CStrRef pattern, CStrRef str, Variant regs = null);
+Variant f_ereg(CStrRef pattern, CStrRef str, VRefParam regs = null);
+Variant f_eregi(CStrRef pattern, CStrRef str, VRefParam regs = null);
 Variant f_split(CStrRef pattern, CStrRef str, int limit = -1);
 Variant f_spliti(CStrRef pattern, CStrRef str, int limit = -1);
 String f_sql_regcase(CStrRef str);

@@ -501,7 +501,7 @@ bool c_SQLite3Stmt::t_clear() {
   return true;
 }
 
-bool c_SQLite3Stmt::t_bindparam(CVarRef name, Variant parameter,
+bool c_SQLite3Stmt::t_bindparam(CVarRef name, VRefParam parameter,
                                 int64 type /* = k_SQLITE3_TEXT */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Stmt, SQLite3Stmt::bindparam);
   BoundParamPtr param(new BoundParam());

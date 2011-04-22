@@ -107,7 +107,7 @@ void c_XhprofFrame::cloneSet(ObjectData *cl) {
 CallInfo c_XhprofFrame::ci___destruct((void*)&c_XhprofFrame::i___destruct, (void*)&c_XhprofFrame::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_XhprofFrame::ci___construct((void*)&c_XhprofFrame::i___construct, (void*)&c_XhprofFrame::ifa___construct, 1, 4, 0x0000000000000000LL);
 Variant c_XhprofFrame::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_XhprofFrame *self = NULL;
   p_XhprofFrame pobj;
   if (mcp.obj) {
@@ -115,11 +115,11 @@ Variant c_XhprofFrame::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("XhprofFrame::__destruct", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("XhprofFrame::__destruct", 0, 1);
   return (self->t___destruct());
 }
 Variant c_XhprofFrame::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_XhprofFrame *self = NULL;
   p_XhprofFrame pobj;
   if (mcp.obj) {
@@ -127,7 +127,7 @@ Variant c_XhprofFrame::i___construct(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("XhprofFrame::__construct", count, 1, 1, 2);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("XhprofFrame::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -143,7 +143,7 @@ Variant c_XhprofFrame::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("XhprofFrame::__destruct", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("XhprofFrame::__destruct", 0, 1);
   return (self->t___destruct());
 }
 Variant c_XhprofFrame::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -154,12 +154,12 @@ Variant c_XhprofFrame::ifa___construct(MethodCallPackage &mcp, int count, INVOKE
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("XhprofFrame::__construct", count, 1, 1, 2);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("XhprofFrame::__construct", count, 1, 1, 2);
+  CVarRef arg0(a0);
   return (self->t___construct(arg0), null);
 }
 bool c_XhprofFrame::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -181,15 +181,15 @@ bool c_XhprofFrame::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_XhprofFrame *c_XhprofFrame::create(Variant v_name) {
+c_XhprofFrame *c_XhprofFrame::create(CVarRef v_name) {
   CountableHelper h(this);
   init();
   t___construct(v_name);
   return this;
 }
 void c_XhprofFrame::dynConstruct(CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("XhprofFrame::__construct", count, 1, 1, 2);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) throw_wrong_arguments("XhprofFrame::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -213,8 +213,8 @@ void c_XhprofFrame::dynConstructFromEval(Eval::VariableEnvironment &env, const E
   for (; i != params.size(); ++i) {
     params[i]->eval(env);
   }
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("XhprofFrame::__construct", count, 1, 1, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) throw_wrong_arguments("XhprofFrame::__construct", count, 1, 1, 1);
   (t___construct(a0), null);
 }
 struct ObjectStaticCallbacks cw_XhprofFrame = {
@@ -251,7 +251,7 @@ Object coo_XhprofFrame() {
 }
 Variant pm_php$classes$xhprof_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/xhprof.php, pm_php$classes$xhprof_php);
-  LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
+  LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
   return true;
 }
 namespace hphp_impl_splitter {}

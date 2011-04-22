@@ -1322,7 +1322,7 @@ static Variant php_mbfl_convert(CVarRef var,
 }
 
 Variant f_mb_convert_variables(int _argc, CStrRef to_encoding,
-                               CVarRef from_encoding, Variant vars,
+                               CVarRef from_encoding, VRefParam vars,
                                CArrRef _argv /* = null_array */) {
   mbfl_string string, result;
   mbfl_no_encoding _from_encoding, _to_encoding;
@@ -1361,7 +1361,7 @@ Variant f_mb_convert_variables(int _argc, CStrRef to_encoding,
                                         MBSTRG(strict_detection));
     if (identd != NULL) {
       for (int n = -1; n < _argv.size(); n++) {
-        if (php_mbfl_encoding_detect(n < 0 ? vars : _argv[n],
+        if (php_mbfl_encoding_detect(n < 0 ? (Variant&)vars : _argv[n],
                                      identd, &string)) {
           break;
         }
@@ -2115,7 +2115,7 @@ out:
   return from_encoding;
 }
 
-bool f_mb_parse_str(CStrRef encoded_string, Variant result /* = null */) {
+bool f_mb_parse_str(CStrRef encoded_string, VRefParam result /* = null */) {
   php_mb_encoding_handler_info_t info;
   info.data_type              = PARSE_STRING;
   info.separator              = ";&";
@@ -3561,11 +3561,11 @@ static Variant _php_mb_regex_ereg_exec(CVarRef pattern, CStrRef str,
   return match_len;
 }
 
-Variant f_mb_ereg(CVarRef pattern, CStrRef str, Variant regs /* = null */) {
+Variant f_mb_ereg(CVarRef pattern, CStrRef str, VRefParam regs /* = null */) {
   return _php_mb_regex_ereg_exec(pattern, str, regs, 0);
 }
 
-Variant f_mb_eregi(CVarRef pattern, CStrRef str, Variant regs /* = null */) {
+Variant f_mb_eregi(CVarRef pattern, CStrRef str, VRefParam regs /* = null */) {
   return _php_mb_regex_ereg_exec(pattern, str, regs, 1);
 }
 

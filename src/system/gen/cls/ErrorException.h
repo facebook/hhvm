@@ -63,7 +63,7 @@ class c_ErrorException : public c_Exception {
   public:
   void init();
   public: void t___construct(Variant v_message = NAMSTR(s_sys_ss00000000, ""), Variant v_code = 0LL, Variant v_severity = 0LL, Variant v_filename = null, Variant v_lineno = null);
-  public: c_ErrorException *create(Variant v_message = NAMSTR(s_sys_ss00000000, ""), Variant v_code = 0LL, Variant v_severity = 0LL, Variant v_filename = null, Variant v_lineno = null);
+  public: c_ErrorException *create(CVarRef v_message = NAMSTR(s_sys_ss00000000, ""), CVarRef v_code = 0LL, CVarRef v_severity = 0LL, CVarRef v_filename = null_variant, CVarRef v_lineno = null_variant);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);

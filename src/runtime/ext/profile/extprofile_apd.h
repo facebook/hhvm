@@ -27,46 +27,55 @@ namespace HPHP {
 
 inline bool x_override_function(CStrRef name, CStrRef args, CStrRef code) {
   FUNCTION_INJECTION_BUILTIN(override_function);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_override_function(name, args, code);
 }
 
 inline bool x_rename_function(CStrRef orig_name, CStrRef new_name) {
   FUNCTION_INJECTION_BUILTIN(rename_function);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_rename_function(orig_name, new_name);
 }
 
 inline void x_apd_set_browser_trace() {
   FUNCTION_INJECTION_BUILTIN(apd_set_browser_trace);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_apd_set_browser_trace();
 }
 
 inline String x_apd_set_pprof_trace(CStrRef dumpdir = null_string, CStrRef frament = null_string) {
   FUNCTION_INJECTION_BUILTIN(apd_set_pprof_trace);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_apd_set_pprof_trace(dumpdir, frament);
 }
 
 inline bool x_apd_set_session_trace_socket(CStrRef ip_or_filename, int domain, int port, int mask) {
   FUNCTION_INJECTION_BUILTIN(apd_set_session_trace_socket);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_apd_set_session_trace_socket(ip_or_filename, domain, port, mask);
 }
 
 inline void x_apd_stop_trace() {
   FUNCTION_INJECTION_BUILTIN(apd_stop_trace);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_apd_stop_trace();
 }
 
 inline bool x_apd_breakpoint() {
   FUNCTION_INJECTION_BUILTIN(apd_breakpoint);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_apd_breakpoint();
 }
 
 inline bool x_apd_continue() {
   FUNCTION_INJECTION_BUILTIN(apd_continue);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_apd_continue();
 }
 
 inline bool x_apd_echo(CStrRef output) {
   FUNCTION_INJECTION_BUILTIN(apd_echo);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_apd_echo(output);
 }
 

@@ -27,11 +27,13 @@ namespace HPHP {
 
 inline void x_thrift_protocol_write_binary(CObjRef transportobj, CStrRef method_name, int64 msgtype, CObjRef request_struct, int seqid, bool strict_write) {
   FUNCTION_INJECTION_BUILTIN(thrift_protocol_write_binary);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_thrift_protocol_write_binary(transportobj, method_name, msgtype, request_struct, seqid, strict_write);
 }
 
 inline Variant x_thrift_protocol_read_binary(CObjRef transportobj, CStrRef obj_typename, bool strict_read) {
   FUNCTION_INJECTION_BUILTIN(thrift_protocol_read_binary);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_thrift_protocol_read_binary(transportobj, obj_typename, strict_read);
 }
 

@@ -191,7 +191,7 @@ Variant f_pack(int _argc, CStrRef format, CArrRef _argv /* = null_array */) {
   return ZendPack().pack(format, _argv);
 }
 
-bool f_php_check_syntax(CStrRef filename, Variant error_message /* = null */) {
+bool f_php_check_syntax(CStrRef filename, VRefParam error_message /* = null */) {
   throw NotSupportedException(__func__, "PHP specific");
 }
 

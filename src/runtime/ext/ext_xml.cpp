@@ -708,8 +708,8 @@ int f_xml_parse(CObjRef parser, CStrRef data, bool is_final /* = true */) {
   return ret;
 }
 
-int f_xml_parse_into_struct(CObjRef parser, CStrRef data, Variant values,
-                            Variant index /* = null */) {
+int f_xml_parse_into_struct(CObjRef parser, CStrRef data, VRefParam values,
+                            VRefParam index /* = null */) {
   int ret;
   XmlParser * p = parser.getTyped<XmlParser>();
   values = Array::Create();
@@ -842,7 +842,7 @@ bool f_xml_set_notation_decl_handler(CObjRef parser, CVarRef handler) {
   return true;
 }
 
-bool f_xml_set_object(CObjRef parser, Variant object) {
+bool f_xml_set_object(CObjRef parser, VRefParam object) {
   XmlParser * p = parser.getTyped<XmlParser>();
   p->object.assignRef(object);
   return true;

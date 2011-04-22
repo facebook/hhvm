@@ -105,7 +105,7 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
   public: Variant t___call(Variant name, Variant args);
   DECLARE_METHOD_INVOKE_HELPERS(__call);
   public: Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
-  public: Variant t___soapcall(CStrRef name, CArrRef args, CArrRef options = null_array, CVarRef input_headers = null_variant, Variant output_headers = null);
+  public: Variant t___soapcall(CStrRef name, CArrRef args, CArrRef options = null_array, CVarRef input_headers = null_variant, VRefParam output_headers = null);
   DECLARE_METHOD_INVOKE_HELPERS(__soapcall);
   public: Variant t___getlastrequest();
   DECLARE_METHOD_INVOKE_HELPERS(__getlastrequest);

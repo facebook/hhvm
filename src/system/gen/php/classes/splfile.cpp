@@ -170,7 +170,7 @@ CallInfo c_SplFileObject::ci_ftell((void*)&c_SplFileObject::i_ftell, (void*)&c_S
 CallInfo c_SplFileObject::ci_fstat((void*)&c_SplFileObject::i_fstat, (void*)&c_SplFileObject::ifa_fstat, 0, 4, 0x0000000000000000LL);
 CallInfo c_SplFileObject::ci_rewind((void*)&c_SplFileObject::i_rewind, (void*)&c_SplFileObject::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_SplFileObject::i_fscanf(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -178,7 +178,7 @@ Variant c_SplFileObject::i_fscanf(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count < 1) return throw_missing_arguments("SplFileObject::fscanf", count+1, 1);
+  if (UNLIKELY(count < 1)) return throw_missing_arguments("SplFileObject::fscanf", count+1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -188,7 +188,7 @@ Variant c_SplFileObject::i_fscanf(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_SplFileObject::i_next(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -196,11 +196,11 @@ Variant c_SplFileObject::i_next(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::next", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::next", 0, 1);
   return (self->t_next(), null);
 }
 Variant c_SplFileObject::i_fseek(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -208,7 +208,7 @@ Variant c_SplFileObject::i_fseek(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("SplFileObject::fseek", count, 2, 2, 1);
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("SplFileObject::fseek", count, 2, 2, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -218,7 +218,7 @@ Variant c_SplFileObject::i_fseek(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_SplFileObject::i_key(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -226,11 +226,11 @@ Variant c_SplFileObject::i_key(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::key", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::key", 0, 1);
   return (self->t_key());
 }
 Variant c_SplFileObject::i_fgetss(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -238,7 +238,7 @@ Variant c_SplFileObject::i_fgetss(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("SplFileObject::fgetss", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplFileObject::fgetss", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -247,7 +247,7 @@ Variant c_SplFileObject::i_fgetss(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_SplFileObject::i_fgetcsv(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -255,7 +255,7 @@ Variant c_SplFileObject::i_fgetcsv(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 3) return throw_toomany_arguments("SplFileObject::fgetcsv", 3, 1);
+  if (UNLIKELY(count > 3)) return throw_toomany_arguments("SplFileObject::fgetcsv", 3, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -269,7 +269,7 @@ Variant c_SplFileObject::i_fgetcsv(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_SplFileObject::i_valid(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -277,11 +277,11 @@ Variant c_SplFileObject::i_valid(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::valid", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::valid", 0, 1);
   return (self->t_valid());
 }
 Variant c_SplFileObject::i_setcsvcontrol(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -289,7 +289,7 @@ Variant c_SplFileObject::i_setcsvcontrol(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count > 3) return throw_toomany_arguments("SplFileObject::setCsvControl", 3, 1);
+  if (UNLIKELY(count > 3)) return throw_toomany_arguments("SplFileObject::setCsvControl", 3, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -303,7 +303,7 @@ Variant c_SplFileObject::i_setcsvcontrol(MethodCallPackage &mcp, CArrRef params)
   }
 }
 Variant c_SplFileObject::i_getcsvcontrol(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -311,11 +311,11 @@ Variant c_SplFileObject::i_getcsvcontrol(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::getCsvControl", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::getCsvControl", 0, 1);
   return (self->t_getcsvcontrol());
 }
 Variant c_SplFileObject::i_setflags(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -323,7 +323,7 @@ Variant c_SplFileObject::i_setflags(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("SplFileObject::setFlags", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplFileObject::setFlags", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -332,7 +332,7 @@ Variant c_SplFileObject::i_setflags(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_SplFileObject::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -340,7 +340,7 @@ Variant c_SplFileObject::i___construct(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count < 1 || count > 4) return throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
+  if (UNLIKELY(count < 1 || count > 4)) return throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -355,7 +355,7 @@ Variant c_SplFileObject::i___construct(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_SplFileObject::i_setmaxlinelen(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -363,7 +363,7 @@ Variant c_SplFileObject::i_setmaxlinelen(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("SplFileObject::setMaxLineLen", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplFileObject::setMaxLineLen", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -372,7 +372,7 @@ Variant c_SplFileObject::i_setmaxlinelen(MethodCallPackage &mcp, CArrRef params)
   }
 }
 Variant c_SplFileObject::i_getmaxlinelen(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -380,11 +380,11 @@ Variant c_SplFileObject::i_getmaxlinelen(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::getMaxLineLen", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::getMaxLineLen", 0, 1);
   return (self->t_getmaxlinelen());
 }
 Variant c_SplFileObject::i_ftruncate(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -392,7 +392,7 @@ Variant c_SplFileObject::i_ftruncate(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("SplFileObject::ftruncate", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplFileObject::ftruncate", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -401,7 +401,7 @@ Variant c_SplFileObject::i_ftruncate(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_SplFileObject::i_fflush(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -409,11 +409,11 @@ Variant c_SplFileObject::i_fflush(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::fflush", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::fflush", 0, 1);
   return (self->t_fflush());
 }
 Variant c_SplFileObject::i_eof(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -421,11 +421,11 @@ Variant c_SplFileObject::i_eof(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::eof", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::eof", 0, 1);
   return (self->t_eof());
 }
 Variant c_SplFileObject::i_fgetc(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -433,11 +433,11 @@ Variant c_SplFileObject::i_fgetc(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::fgetc", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::fgetc", 0, 1);
   return (self->t_fgetc());
 }
 Variant c_SplFileObject::i_fpassthru(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -445,11 +445,11 @@ Variant c_SplFileObject::i_fpassthru(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::fpassthru", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::fpassthru", 0, 1);
   return (self->t_fpassthru());
 }
 Variant c_SplFileObject::i_haschildren(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -457,11 +457,11 @@ Variant c_SplFileObject::i_haschildren(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::hasChildren", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::hasChildren", 0, 1);
   return (self->t_haschildren());
 }
 Variant c_SplFileObject::i_fgets(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -469,11 +469,11 @@ Variant c_SplFileObject::i_fgets(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::fgets", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::fgets", 0, 1);
   return (self->t_fgets());
 }
 Variant c_SplFileObject::i_seek(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -481,7 +481,7 @@ Variant c_SplFileObject::i_seek(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("SplFileObject::seek", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplFileObject::seek", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -490,7 +490,7 @@ Variant c_SplFileObject::i_seek(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_SplFileObject::i_flock(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -498,18 +498,18 @@ Variant c_SplFileObject::i_flock(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("SplFileObject::flock", count, 2, 2, 1);
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("SplFileObject::flock", count, 2, 2, 1);
   const_cast<Array&>(params).escalate(true);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    VRefParam arg1(vref(ad->getValueRef(pos = ad->iter_advance(pos))));
     return (self->t_flock(arg0, arg1));
   }
 }
 Variant c_SplFileObject::i_getflags(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -517,11 +517,11 @@ Variant c_SplFileObject::i_getflags(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::getFlags", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::getFlags", 0, 1);
   return (self->t_getflags());
 }
 Variant c_SplFileObject::i_getchildren(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -529,11 +529,11 @@ Variant c_SplFileObject::i_getchildren(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::getChildren", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::getChildren", 0, 1);
   return (self->t_getchildren());
 }
 Variant c_SplFileObject::i_current(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -541,11 +541,11 @@ Variant c_SplFileObject::i_current(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::current", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::current", 0, 1);
   return (self->t_current());
 }
 Variant c_SplFileObject::i_fwrite(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -553,7 +553,7 @@ Variant c_SplFileObject::i_fwrite(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("SplFileObject::fwrite", count, 2, 2, 1);
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("SplFileObject::fwrite", count, 2, 2, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -563,7 +563,7 @@ Variant c_SplFileObject::i_fwrite(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_SplFileObject::i_ftell(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -571,11 +571,11 @@ Variant c_SplFileObject::i_ftell(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::ftell", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::ftell", 0, 1);
   return (self->t_ftell());
 }
 Variant c_SplFileObject::i_fstat(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -583,11 +583,11 @@ Variant c_SplFileObject::i_fstat(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::fstat", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::fstat", 0, 1);
   return (self->t_fstat());
 }
 Variant c_SplFileObject::i_rewind(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileObject *self = NULL;
   p_SplFileObject pobj;
   if (mcp.obj) {
@@ -595,7 +595,7 @@ Variant c_SplFileObject::i_rewind(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
 Variant c_SplFileObject::ifa_fscanf(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -606,8 +606,8 @@ Variant c_SplFileObject::ifa_fscanf(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count < 1) return throw_missing_arguments("SplFileObject::fscanf", count+1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count < 1)) return throw_missing_arguments("SplFileObject::fscanf", count+1, 1);
+  CVarRef arg0(a0);
   Array p;
   if (count >= 2) p.append(a1);
   if (count >= 3) p.append(a2);
@@ -624,7 +624,7 @@ Variant c_SplFileObject::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::next", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::next", 0, 1);
   return (self->t_next(), null);
 }
 Variant c_SplFileObject::ifa_fseek(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -635,9 +635,9 @@ Variant c_SplFileObject::ifa_fseek(MethodCallPackage &mcp, int count, INVOKE_FEW
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("SplFileObject::fseek", count, 2, 2, 1);
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("SplFileObject::fseek", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
   return (self->t_fseek(arg0, arg1));
 }
 Variant c_SplFileObject::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -648,7 +648,7 @@ Variant c_SplFileObject::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::key", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::key", 0, 1);
   return (self->t_key());
 }
 Variant c_SplFileObject::ifa_fgetss(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -659,8 +659,8 @@ Variant c_SplFileObject::ifa_fgetss(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("SplFileObject::fgetss", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplFileObject::fgetss", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_fgetss(arg0));
 }
 Variant c_SplFileObject::ifa_fgetcsv(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -671,13 +671,13 @@ Variant c_SplFileObject::ifa_fgetcsv(MethodCallPackage &mcp, int count, INVOKE_F
   } else {
     self = createDummy(pobj);
   }
-  if (count > 3) return throw_toomany_arguments("SplFileObject::fgetcsv", 3, 1);
+  if (UNLIKELY(count > 3)) return throw_toomany_arguments("SplFileObject::fgetcsv", 3, 1);
   if (count <= 0) return (self->t_fgetcsv());
-  CVarRef arg0((a0));
+  CVarRef arg0(a0);
   if (count <= 1) return (self->t_fgetcsv(arg0));
-  CVarRef arg1((a1));
+  CVarRef arg1(a1);
   if (count <= 2) return (self->t_fgetcsv(arg0, arg1));
-  CVarRef arg2((a2));
+  CVarRef arg2(a2);
   return (self->t_fgetcsv(arg0, arg1, arg2));
 }
 Variant c_SplFileObject::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -688,7 +688,7 @@ Variant c_SplFileObject::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::valid", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::valid", 0, 1);
   return (self->t_valid());
 }
 Variant c_SplFileObject::ifa_setcsvcontrol(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -699,13 +699,13 @@ Variant c_SplFileObject::ifa_setcsvcontrol(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count > 3) return throw_toomany_arguments("SplFileObject::setCsvControl", 3, 1);
+  if (UNLIKELY(count > 3)) return throw_toomany_arguments("SplFileObject::setCsvControl", 3, 1);
   if (count <= 0) return (self->t_setcsvcontrol(), null);
-  CVarRef arg0((a0));
+  CVarRef arg0(a0);
   if (count <= 1) return (self->t_setcsvcontrol(arg0), null);
-  CVarRef arg1((a1));
+  CVarRef arg1(a1);
   if (count <= 2) return (self->t_setcsvcontrol(arg0, arg1), null);
-  CVarRef arg2((a2));
+  CVarRef arg2(a2);
   return (self->t_setcsvcontrol(arg0, arg1, arg2), null);
 }
 Variant c_SplFileObject::ifa_getcsvcontrol(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -716,7 +716,7 @@ Variant c_SplFileObject::ifa_getcsvcontrol(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::getCsvControl", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::getCsvControl", 0, 1);
   return (self->t_getcsvcontrol());
 }
 Variant c_SplFileObject::ifa_setflags(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -727,8 +727,8 @@ Variant c_SplFileObject::ifa_setflags(MethodCallPackage &mcp, int count, INVOKE_
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("SplFileObject::setFlags", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplFileObject::setFlags", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_setflags(arg0), null);
 }
 Variant c_SplFileObject::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -739,14 +739,14 @@ Variant c_SplFileObject::ifa___construct(MethodCallPackage &mcp, int count, INVO
   } else {
     self = createDummy(pobj);
   }
-  if (count < 1 || count > 4) return throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count < 1 || count > 4)) return throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
+  CVarRef arg0(a0);
   if (count <= 1) return (self->t___construct(arg0), null);
-  CVarRef arg1((a1));
+  CVarRef arg1(a1);
   if (count <= 2) return (self->t___construct(arg0, arg1), null);
-  CVarRef arg2((a2));
+  CVarRef arg2(a2);
   if (count <= 3) return (self->t___construct(arg0, arg1, arg2), null);
-  CVarRef arg3((a3));
+  CVarRef arg3(a3);
   return (self->t___construct(arg0, arg1, arg2, arg3), null);
 }
 Variant c_SplFileObject::ifa_setmaxlinelen(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -757,8 +757,8 @@ Variant c_SplFileObject::ifa_setmaxlinelen(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("SplFileObject::setMaxLineLen", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplFileObject::setMaxLineLen", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_setmaxlinelen(arg0), null);
 }
 Variant c_SplFileObject::ifa_getmaxlinelen(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -769,7 +769,7 @@ Variant c_SplFileObject::ifa_getmaxlinelen(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::getMaxLineLen", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::getMaxLineLen", 0, 1);
   return (self->t_getmaxlinelen());
 }
 Variant c_SplFileObject::ifa_ftruncate(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -780,8 +780,8 @@ Variant c_SplFileObject::ifa_ftruncate(MethodCallPackage &mcp, int count, INVOKE
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("SplFileObject::ftruncate", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplFileObject::ftruncate", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_ftruncate(arg0));
 }
 Variant c_SplFileObject::ifa_fflush(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -792,7 +792,7 @@ Variant c_SplFileObject::ifa_fflush(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::fflush", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::fflush", 0, 1);
   return (self->t_fflush());
 }
 Variant c_SplFileObject::ifa_eof(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -803,7 +803,7 @@ Variant c_SplFileObject::ifa_eof(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::eof", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::eof", 0, 1);
   return (self->t_eof());
 }
 Variant c_SplFileObject::ifa_fgetc(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -814,7 +814,7 @@ Variant c_SplFileObject::ifa_fgetc(MethodCallPackage &mcp, int count, INVOKE_FEW
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::fgetc", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::fgetc", 0, 1);
   return (self->t_fgetc());
 }
 Variant c_SplFileObject::ifa_fpassthru(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -825,7 +825,7 @@ Variant c_SplFileObject::ifa_fpassthru(MethodCallPackage &mcp, int count, INVOKE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::fpassthru", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::fpassthru", 0, 1);
   return (self->t_fpassthru());
 }
 Variant c_SplFileObject::ifa_haschildren(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -836,7 +836,7 @@ Variant c_SplFileObject::ifa_haschildren(MethodCallPackage &mcp, int count, INVO
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::hasChildren", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::hasChildren", 0, 1);
   return (self->t_haschildren());
 }
 Variant c_SplFileObject::ifa_fgets(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -847,7 +847,7 @@ Variant c_SplFileObject::ifa_fgets(MethodCallPackage &mcp, int count, INVOKE_FEW
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::fgets", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::fgets", 0, 1);
   return (self->t_fgets());
 }
 Variant c_SplFileObject::ifa_seek(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -858,8 +858,8 @@ Variant c_SplFileObject::ifa_seek(MethodCallPackage &mcp, int count, INVOKE_FEW_
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("SplFileObject::seek", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplFileObject::seek", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_seek(arg0), null);
 }
 Variant c_SplFileObject::ifa_flock(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -870,9 +870,9 @@ Variant c_SplFileObject::ifa_flock(MethodCallPackage &mcp, int count, INVOKE_FEW
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("SplFileObject::flock", count, 2, 2, 1);
-  CVarRef arg0((a0));
-  CVarRef arg1(ref(a1));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("SplFileObject::flock", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  VRefParam arg1(vref(a1));
   return (self->t_flock(arg0, arg1));
 }
 Variant c_SplFileObject::ifa_getflags(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -883,7 +883,7 @@ Variant c_SplFileObject::ifa_getflags(MethodCallPackage &mcp, int count, INVOKE_
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::getFlags", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::getFlags", 0, 1);
   return (self->t_getflags());
 }
 Variant c_SplFileObject::ifa_getchildren(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -894,7 +894,7 @@ Variant c_SplFileObject::ifa_getchildren(MethodCallPackage &mcp, int count, INVO
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::getChildren", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::getChildren", 0, 1);
   return (self->t_getchildren());
 }
 Variant c_SplFileObject::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -905,7 +905,7 @@ Variant c_SplFileObject::ifa_current(MethodCallPackage &mcp, int count, INVOKE_F
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::current", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::current", 0, 1);
   return (self->t_current());
 }
 Variant c_SplFileObject::ifa_fwrite(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -916,9 +916,9 @@ Variant c_SplFileObject::ifa_fwrite(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("SplFileObject::fwrite", count, 2, 2, 1);
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("SplFileObject::fwrite", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
   return (self->t_fwrite(arg0, arg1));
 }
 Variant c_SplFileObject::ifa_ftell(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -929,7 +929,7 @@ Variant c_SplFileObject::ifa_ftell(MethodCallPackage &mcp, int count, INVOKE_FEW
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::ftell", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::ftell", 0, 1);
   return (self->t_ftell());
 }
 Variant c_SplFileObject::ifa_fstat(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -940,7 +940,7 @@ Variant c_SplFileObject::ifa_fstat(MethodCallPackage &mcp, int count, INVOKE_FEW
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::fstat", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::fstat", 0, 1);
   return (self->t_fstat());
 }
 Variant c_SplFileObject::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -951,11 +951,11 @@ Variant c_SplFileObject::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
 bool c_SplFileObject::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 0:
@@ -1135,9 +1135,9 @@ bool c_SplFileObject::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_SplFileObject *c_SplFileObject::create(Variant v_filename, Variant v_open_mode //  = NAMSTR(s_sys_ss0d42ecf6, "r")
-, Variant v_use_include_path //  = false
-, Variant v_context //  = null
+c_SplFileObject *c_SplFileObject::create(CVarRef v_filename, CVarRef v_open_mode //  = NAMSTR(s_sys_ss0d42ecf6, "r")
+, CVarRef v_use_include_path //  = false
+, CVarRef v_context //  = null_variant
 ) {
   CountableHelper h(this);
   init();
@@ -1145,8 +1145,8 @@ c_SplFileObject *c_SplFileObject::create(Variant v_filename, Variant v_open_mode
   return this;
 }
 void c_SplFileObject::dynConstruct(CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 4) throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 1 || count > 4)) throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
   do {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1197,8 +1197,8 @@ void c_SplFileObject::dynConstructFromEval(Eval::VariableEnvironment &env, const
   for (; i != params.size(); ++i) {
     params[i]->eval(env);
   }
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 4) throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 1 || count > 4)) throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 1);
   if (count <= 1) (t___construct(a0), null);
   else if (count == 2) (t___construct(a0, a1), null);
   else if (count == 3) (t___construct(a0, a1, a2), null);
@@ -1272,8 +1272,9 @@ String c_SplFileObject::t_fgetss(CVarRef v_allowable_tags) {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splfile.php line 537 */
-bool c_SplFileObject::t_flock(CVarRef v_operation, Variant v_wouldblock) {
+bool c_SplFileObject::t_flock(CVarRef v_operation, VRefParam rv_wouldblock) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::flock);
+  Variant &v_wouldblock ATTRIBUTE_UNUSED = rv_wouldblock;
   return x_hphp_splfileobject_flock(GET_THIS_TYPED(SplFileObject), ref(v_wouldblock));
 }
 namespace hphp_impl_splitter {}
@@ -1537,7 +1538,7 @@ CallInfo c_SplFileInfo::ci_getatime((void*)&c_SplFileInfo::i_getatime, (void*)&c
 CallInfo c_SplFileInfo::ci_openfile((void*)&c_SplFileInfo::i_openfile, (void*)&c_SplFileInfo::ifa_openfile, 3, 4, 0x0000000000000000LL);
 CallInfo c_SplFileInfo::ci_gettype((void*)&c_SplFileInfo::i_gettype, (void*)&c_SplFileInfo::ifa_gettype, 0, 4, 0x0000000000000000LL);
 Variant c_SplFileInfo::i_getperms(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1545,11 +1546,11 @@ Variant c_SplFileInfo::i_getperms(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
   return (self->t_getperms());
 }
 Variant c_SplFileInfo::i_iswritable(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1557,11 +1558,11 @@ Variant c_SplFileInfo::i_iswritable(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
   return (self->t_iswritable());
 }
 Variant c_SplFileInfo::i_getbasename(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1569,7 +1570,7 @@ Variant c_SplFileInfo::i_getbasename(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1579,7 +1580,7 @@ Variant c_SplFileInfo::i_getbasename(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_SplFileInfo::i_getpathname(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1587,11 +1588,11 @@ Variant c_SplFileInfo::i_getpathname(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
   return (self->t_getpathname());
 }
 Variant c_SplFileInfo::i_getgroup(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1599,11 +1600,11 @@ Variant c_SplFileInfo::i_getgroup(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
   return (self->t_getgroup());
 }
 Variant c_SplFileInfo::i_setfileclass(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1611,7 +1612,7 @@ Variant c_SplFileInfo::i_setfileclass(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1621,7 +1622,7 @@ Variant c_SplFileInfo::i_setfileclass(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_SplFileInfo::i_setinfoclass(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1629,7 +1630,7 @@ Variant c_SplFileInfo::i_setinfoclass(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1639,7 +1640,7 @@ Variant c_SplFileInfo::i_setinfoclass(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_SplFileInfo::i___tostring(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1647,11 +1648,11 @@ Variant c_SplFileInfo::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_SplFileInfo::i_getlinktarget(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1659,11 +1660,11 @@ Variant c_SplFileInfo::i_getlinktarget(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
   return (self->t_getlinktarget());
 }
 Variant c_SplFileInfo::i_isreadable(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1671,11 +1672,11 @@ Variant c_SplFileInfo::i_isreadable(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
   return (self->t_isreadable());
 }
 Variant c_SplFileInfo::i_getrealpath(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1683,11 +1684,11 @@ Variant c_SplFileInfo::i_getrealpath(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
   return (self->t_getrealpath());
 }
 Variant c_SplFileInfo::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1695,7 +1696,7 @@ Variant c_SplFileInfo::i___construct(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1704,7 +1705,7 @@ Variant c_SplFileInfo::i___construct(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_SplFileInfo::i_getpathinfo(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1712,7 +1713,7 @@ Variant c_SplFileInfo::i_getpathinfo(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1722,7 +1723,7 @@ Variant c_SplFileInfo::i_getpathinfo(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_SplFileInfo::i_getctime(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1730,11 +1731,11 @@ Variant c_SplFileInfo::i_getctime(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
   return (self->t_getctime());
 }
 Variant c_SplFileInfo::i_getpath(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1742,11 +1743,11 @@ Variant c_SplFileInfo::i_getpath(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
   return (self->t_getpath());
 }
 Variant c_SplFileInfo::i_getinode(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1754,11 +1755,11 @@ Variant c_SplFileInfo::i_getinode(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
   return (self->t_getinode());
 }
 Variant c_SplFileInfo::i_islink(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1766,11 +1767,11 @@ Variant c_SplFileInfo::i_islink(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
   return (self->t_islink());
 }
 Variant c_SplFileInfo::i_getsize(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1778,11 +1779,11 @@ Variant c_SplFileInfo::i_getsize(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
   return (self->t_getsize());
 }
 Variant c_SplFileInfo::i_isfile(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1790,11 +1791,11 @@ Variant c_SplFileInfo::i_isfile(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
   return (self->t_isfile());
 }
 Variant c_SplFileInfo::i_getfilename(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1802,11 +1803,11 @@ Variant c_SplFileInfo::i_getfilename(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
   return (self->t_getfilename());
 }
 Variant c_SplFileInfo::i_getowner(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1814,11 +1815,11 @@ Variant c_SplFileInfo::i_getowner(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
   return (self->t_getowner());
 }
 Variant c_SplFileInfo::i_getmtime(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1826,11 +1827,11 @@ Variant c_SplFileInfo::i_getmtime(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
   return (self->t_getmtime());
 }
 Variant c_SplFileInfo::i_isdir(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1838,11 +1839,11 @@ Variant c_SplFileInfo::i_isdir(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
   return (self->t_isdir());
 }
 Variant c_SplFileInfo::i_getfileinfo(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1850,7 +1851,7 @@ Variant c_SplFileInfo::i_getfileinfo(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1860,7 +1861,7 @@ Variant c_SplFileInfo::i_getfileinfo(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_SplFileInfo::i_isexecutable(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1868,11 +1869,11 @@ Variant c_SplFileInfo::i_isexecutable(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
   return (self->t_isexecutable());
 }
 Variant c_SplFileInfo::i_getatime(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1880,11 +1881,11 @@ Variant c_SplFileInfo::i_getatime(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
   return (self->t_getatime());
 }
 Variant c_SplFileInfo::i_openfile(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1892,7 +1893,7 @@ Variant c_SplFileInfo::i_openfile(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
+  if (UNLIKELY(count > 3)) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1906,7 +1907,7 @@ Variant c_SplFileInfo::i_openfile(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_SplFileInfo::i_gettype(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_SplFileInfo *self = NULL;
   p_SplFileInfo pobj;
   if (mcp.obj) {
@@ -1914,7 +1915,7 @@ Variant c_SplFileInfo::i_gettype(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
   return (self->t_gettype());
 }
 Variant c_SplFileInfo::ifa_getperms(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1925,7 +1926,7 @@ Variant c_SplFileInfo::ifa_getperms(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
   return (self->t_getperms());
 }
 Variant c_SplFileInfo::ifa_iswritable(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1936,7 +1937,7 @@ Variant c_SplFileInfo::ifa_iswritable(MethodCallPackage &mcp, int count, INVOKE_
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
   return (self->t_iswritable());
 }
 Variant c_SplFileInfo::ifa_getbasename(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1947,9 +1948,9 @@ Variant c_SplFileInfo::ifa_getbasename(MethodCallPackage &mcp, int count, INVOKE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
   if (count <= 0) return (self->t_getbasename());
-  CVarRef arg0((a0));
+  CVarRef arg0(a0);
   return (self->t_getbasename(arg0));
 }
 Variant c_SplFileInfo::ifa_getpathname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1960,7 +1961,7 @@ Variant c_SplFileInfo::ifa_getpathname(MethodCallPackage &mcp, int count, INVOKE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
   return (self->t_getpathname());
 }
 Variant c_SplFileInfo::ifa_getgroup(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1971,7 +1972,7 @@ Variant c_SplFileInfo::ifa_getgroup(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
   return (self->t_getgroup());
 }
 Variant c_SplFileInfo::ifa_setfileclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1982,9 +1983,9 @@ Variant c_SplFileInfo::ifa_setfileclass(MethodCallPackage &mcp, int count, INVOK
   } else {
     self = createDummy(pobj);
   }
-  if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
   if (count <= 0) return (self->t_setfileclass(), null);
-  CVarRef arg0((a0));
+  CVarRef arg0(a0);
   return (self->t_setfileclass(arg0), null);
 }
 Variant c_SplFileInfo::ifa_setinfoclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1995,9 +1996,9 @@ Variant c_SplFileInfo::ifa_setinfoclass(MethodCallPackage &mcp, int count, INVOK
   } else {
     self = createDummy(pobj);
   }
-  if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
   if (count <= 0) return (self->t_setinfoclass(), null);
-  CVarRef arg0((a0));
+  CVarRef arg0(a0);
   return (self->t_setinfoclass(arg0), null);
 }
 Variant c_SplFileInfo::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2008,7 +2009,7 @@ Variant c_SplFileInfo::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_SplFileInfo::ifa_getlinktarget(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2019,7 +2020,7 @@ Variant c_SplFileInfo::ifa_getlinktarget(MethodCallPackage &mcp, int count, INVO
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
   return (self->t_getlinktarget());
 }
 Variant c_SplFileInfo::ifa_isreadable(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2030,7 +2031,7 @@ Variant c_SplFileInfo::ifa_isreadable(MethodCallPackage &mcp, int count, INVOKE_
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
   return (self->t_isreadable());
 }
 Variant c_SplFileInfo::ifa_getrealpath(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2041,7 +2042,7 @@ Variant c_SplFileInfo::ifa_getrealpath(MethodCallPackage &mcp, int count, INVOKE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
   return (self->t_getrealpath());
 }
 Variant c_SplFileInfo::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2052,8 +2053,8 @@ Variant c_SplFileInfo::ifa___construct(MethodCallPackage &mcp, int count, INVOKE
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
+  CVarRef arg0(a0);
   return (self->t___construct(arg0), null);
 }
 Variant c_SplFileInfo::ifa_getpathinfo(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2064,9 +2065,9 @@ Variant c_SplFileInfo::ifa_getpathinfo(MethodCallPackage &mcp, int count, INVOKE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
   if (count <= 0) return (self->t_getpathinfo());
-  CVarRef arg0((a0));
+  CVarRef arg0(a0);
   return (self->t_getpathinfo(arg0));
 }
 Variant c_SplFileInfo::ifa_getctime(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2077,7 +2078,7 @@ Variant c_SplFileInfo::ifa_getctime(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
   return (self->t_getctime());
 }
 Variant c_SplFileInfo::ifa_getpath(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2088,7 +2089,7 @@ Variant c_SplFileInfo::ifa_getpath(MethodCallPackage &mcp, int count, INVOKE_FEW
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
   return (self->t_getpath());
 }
 Variant c_SplFileInfo::ifa_getinode(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2099,7 +2100,7 @@ Variant c_SplFileInfo::ifa_getinode(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
   return (self->t_getinode());
 }
 Variant c_SplFileInfo::ifa_islink(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2110,7 +2111,7 @@ Variant c_SplFileInfo::ifa_islink(MethodCallPackage &mcp, int count, INVOKE_FEW_
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
   return (self->t_islink());
 }
 Variant c_SplFileInfo::ifa_getsize(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2121,7 +2122,7 @@ Variant c_SplFileInfo::ifa_getsize(MethodCallPackage &mcp, int count, INVOKE_FEW
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
   return (self->t_getsize());
 }
 Variant c_SplFileInfo::ifa_isfile(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2132,7 +2133,7 @@ Variant c_SplFileInfo::ifa_isfile(MethodCallPackage &mcp, int count, INVOKE_FEW_
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
   return (self->t_isfile());
 }
 Variant c_SplFileInfo::ifa_getfilename(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2143,7 +2144,7 @@ Variant c_SplFileInfo::ifa_getfilename(MethodCallPackage &mcp, int count, INVOKE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
   return (self->t_getfilename());
 }
 Variant c_SplFileInfo::ifa_getowner(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2154,7 +2155,7 @@ Variant c_SplFileInfo::ifa_getowner(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
   return (self->t_getowner());
 }
 Variant c_SplFileInfo::ifa_getmtime(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2165,7 +2166,7 @@ Variant c_SplFileInfo::ifa_getmtime(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
   return (self->t_getmtime());
 }
 Variant c_SplFileInfo::ifa_isdir(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2176,7 +2177,7 @@ Variant c_SplFileInfo::ifa_isdir(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
   return (self->t_isdir());
 }
 Variant c_SplFileInfo::ifa_getfileinfo(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2187,9 +2188,9 @@ Variant c_SplFileInfo::ifa_getfileinfo(MethodCallPackage &mcp, int count, INVOKE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
   if (count <= 0) return (self->t_getfileinfo());
-  CVarRef arg0((a0));
+  CVarRef arg0(a0);
   return (self->t_getfileinfo(arg0));
 }
 Variant c_SplFileInfo::ifa_isexecutable(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2200,7 +2201,7 @@ Variant c_SplFileInfo::ifa_isexecutable(MethodCallPackage &mcp, int count, INVOK
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
   return (self->t_isexecutable());
 }
 Variant c_SplFileInfo::ifa_getatime(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2211,7 +2212,7 @@ Variant c_SplFileInfo::ifa_getatime(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
   return (self->t_getatime());
 }
 Variant c_SplFileInfo::ifa_openfile(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2222,13 +2223,13 @@ Variant c_SplFileInfo::ifa_openfile(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
+  if (UNLIKELY(count > 3)) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
   if (count <= 0) return (self->t_openfile());
-  CVarRef arg0((a0));
+  CVarRef arg0(a0);
   if (count <= 1) return (self->t_openfile(arg0));
-  CVarRef arg1((a1));
+  CVarRef arg1(a1);
   if (count <= 2) return (self->t_openfile(arg0, arg1));
-  CVarRef arg2((a2));
+  CVarRef arg2(a2);
   return (self->t_openfile(arg0, arg1, arg2));
 }
 Variant c_SplFileInfo::ifa_gettype(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2239,11 +2240,11 @@ Variant c_SplFileInfo::ifa_gettype(MethodCallPackage &mcp, int count, INVOKE_FEW
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
   return (self->t_gettype());
 }
 bool c_SplFileInfo::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 5:
@@ -2415,15 +2416,15 @@ bool c_SplFileInfo::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_SplFileInfo *c_SplFileInfo::create(Variant v_file_name) {
+c_SplFileInfo *c_SplFileInfo::create(CVarRef v_file_name) {
   CountableHelper h(this);
   init();
   t___construct(v_file_name);
   return this;
 }
 void c_SplFileInfo::dynConstruct(CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2447,8 +2448,8 @@ void c_SplFileInfo::dynConstructFromEval(Eval::VariableEnvironment &env, const E
   for (; i != params.size(); ++i) {
     params[i]->eval(env);
   }
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 1);
   (t___construct(a0), null);
 }
 struct ObjectStaticCallbacks cw_SplFileInfo = {
@@ -2658,7 +2659,7 @@ Object coo_SplFileInfo() {
 }
 Variant pm_php$classes$splfile_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/splfile.php, pm_php$classes$splfile_php);
-  LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
+  LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
   return true;
 }
 namespace hphp_impl_splitter {}

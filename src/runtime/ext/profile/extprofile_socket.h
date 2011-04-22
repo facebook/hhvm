@@ -27,131 +27,157 @@ namespace HPHP {
 
 inline Variant x_socket_create(int domain, int type, int protocol) {
   FUNCTION_INJECTION_BUILTIN(socket_create);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_create(domain, type, protocol);
 }
 
 inline Variant x_socket_create_listen(int port, int backlog = 128) {
   FUNCTION_INJECTION_BUILTIN(socket_create_listen);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_create_listen(port, backlog);
 }
 
-inline bool x_socket_create_pair(int domain, int type, int protocol, CVarRef fd) {
+inline bool x_socket_create_pair(int domain, int type, int protocol, VRefParam fd) {
   FUNCTION_INJECTION_BUILTIN(socket_create_pair);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_create_pair(domain, type, protocol, fd);
 }
 
 inline Variant x_socket_get_option(CObjRef socket, int level, int optname) {
   FUNCTION_INJECTION_BUILTIN(socket_get_option);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_get_option(socket, level, optname);
 }
 
-inline bool x_socket_getpeername(CObjRef socket, CVarRef address, CVarRef port = null) {
+inline bool x_socket_getpeername(CObjRef socket, VRefParam address, VRefParam port = null) {
   FUNCTION_INJECTION_BUILTIN(socket_getpeername);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_getpeername(socket, address, port);
 }
 
-inline bool x_socket_getsockname(CObjRef socket, CVarRef address, CVarRef port = null) {
+inline bool x_socket_getsockname(CObjRef socket, VRefParam address, VRefParam port = null) {
   FUNCTION_INJECTION_BUILTIN(socket_getsockname);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_getsockname(socket, address, port);
 }
 
 inline bool x_socket_set_block(CObjRef socket) {
   FUNCTION_INJECTION_BUILTIN(socket_set_block);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_set_block(socket);
 }
 
 inline bool x_socket_set_nonblock(CObjRef socket) {
   FUNCTION_INJECTION_BUILTIN(socket_set_nonblock);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_set_nonblock(socket);
 }
 
 inline bool x_socket_set_option(CObjRef socket, int level, int optname, CVarRef optval) {
   FUNCTION_INJECTION_BUILTIN(socket_set_option);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_set_option(socket, level, optname, optval);
 }
 
 inline bool x_socket_connect(CObjRef socket, CStrRef address, int port = 0) {
   FUNCTION_INJECTION_BUILTIN(socket_connect);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_connect(socket, address, port);
 }
 
 inline bool x_socket_bind(CObjRef socket, CStrRef address, int port = 0) {
   FUNCTION_INJECTION_BUILTIN(socket_bind);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_bind(socket, address, port);
 }
 
 inline bool x_socket_listen(CObjRef socket, int backlog = 0) {
   FUNCTION_INJECTION_BUILTIN(socket_listen);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_listen(socket, backlog);
 }
 
-inline Variant x_socket_select(CVarRef read, CVarRef write, CVarRef except, CVarRef vtv_sec, int tv_usec = 0) {
+inline Variant x_socket_select(VRefParam read, VRefParam write, VRefParam except, CVarRef vtv_sec, int tv_usec = 0) {
   FUNCTION_INJECTION_BUILTIN(socket_select);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_select(read, write, except, vtv_sec, tv_usec);
 }
 
-inline Variant x_socket_server(CStrRef hostname, int port = -1, CVarRef errnum = null, CVarRef errstr = null) {
+inline Variant x_socket_server(CStrRef hostname, int port = -1, VRefParam errnum = null, VRefParam errstr = null) {
   FUNCTION_INJECTION_BUILTIN(socket_server);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_server(hostname, port, errnum, errstr);
 }
 
 inline Variant x_socket_accept(CObjRef socket) {
   FUNCTION_INJECTION_BUILTIN(socket_accept);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_accept(socket);
 }
 
 inline Variant x_socket_read(CObjRef socket, int length, int type = 0) {
   FUNCTION_INJECTION_BUILTIN(socket_read);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_read(socket, length, type);
 }
 
 inline Variant x_socket_write(CObjRef socket, CStrRef buffer, int length = 0) {
   FUNCTION_INJECTION_BUILTIN(socket_write);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_write(socket, buffer, length);
 }
 
 inline Variant x_socket_send(CObjRef socket, CStrRef buf, int len, int flags) {
   FUNCTION_INJECTION_BUILTIN(socket_send);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_send(socket, buf, len, flags);
 }
 
 inline Variant x_socket_sendto(CObjRef socket, CStrRef buf, int len, int flags, CStrRef addr, int port = 0) {
   FUNCTION_INJECTION_BUILTIN(socket_sendto);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_sendto(socket, buf, len, flags, addr, port);
 }
 
-inline Variant x_socket_recv(CObjRef socket, CVarRef buf, int len, int flags) {
+inline Variant x_socket_recv(CObjRef socket, VRefParam buf, int len, int flags) {
   FUNCTION_INJECTION_BUILTIN(socket_recv);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_recv(socket, buf, len, flags);
 }
 
-inline Variant x_socket_recvfrom(CObjRef socket, CVarRef buf, int len, int flags, CVarRef name, CVarRef port = 0) {
+inline Variant x_socket_recvfrom(CObjRef socket, VRefParam buf, int len, int flags, VRefParam name, VRefParam port = 0) {
   FUNCTION_INJECTION_BUILTIN(socket_recvfrom);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_recvfrom(socket, buf, len, flags, name, port);
 }
 
 inline bool x_socket_shutdown(CObjRef socket, int how = 0) {
   FUNCTION_INJECTION_BUILTIN(socket_shutdown);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_shutdown(socket, how);
 }
 
 inline void x_socket_close(CObjRef socket) {
   FUNCTION_INJECTION_BUILTIN(socket_close);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_socket_close(socket);
 }
 
 inline String x_socket_strerror(int errnum) {
   FUNCTION_INJECTION_BUILTIN(socket_strerror);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_strerror(errnum);
 }
 
 inline int x_socket_last_error(CObjRef socket = null_object) {
   FUNCTION_INJECTION_BUILTIN(socket_last_error);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_socket_last_error(socket);
 }
 
 inline void x_socket_clear_error(CObjRef socket = null_object) {
   FUNCTION_INJECTION_BUILTIN(socket_clear_error);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_socket_clear_error(socket);
 }
 

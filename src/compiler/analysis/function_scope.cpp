@@ -711,7 +711,13 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   funcName += "()";
 
   /* Typecheck parameters */
-  for (size_t i = 0; i < m_paramTypes.size(); i++) {
+  for (int i = 0; i < m_maxParam; i++) {
+    if (inTypedWrapper <= 0 && isRefParam(i)) {
+      const string &name = getParamName(i);
+      string vname = Option::VariablePrefix + cg.formatLabel(name);
+      cg_printf("Variant &%s ATTRIBUTE_UNUSED = r%s;\n",
+                vname.c_str(), vname.c_str());
+    }
     TypePtr specType = m_paramTypeSpecs[i];
     if (!specType) continue;
     if (inTypedWrapper >= 0) {
@@ -792,9 +798,9 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
 
     if (m_closureVars) {
-      cg_printf("c_Closure *closure __attribute__((__unused__)) = "
-                "(c_Closure*)extra;\n");
       VariableTablePtr variables = getVariables();
+      cg_printf("c_Closure *closure ATTRIBUTE_UNUSED = "
+                "(c_Closure*)extra;\n");
       for (int i = 0; i < m_closureVars->getCount(); i++) {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*m_closureVars)[i]);
@@ -933,8 +939,13 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
     return;
   }
   bool userFunc = isUserFunction();
+  CodeGenerator::Context context = cg.getContext();
   bool isWrapper = !aggregateParams &&
-    Option::HardTypeHints && needsTypeCheckWrapper();
+    (context == CodeGenerator::CppTypedParamsWrapperImpl ||
+     context == CodeGenerator::CppTypedParamsWrapperDecl ||
+     context == CodeGenerator::CppFunctionWrapperImpl ||
+     context == CodeGenerator::CppFunctionWrapperDecl);
+
   MethodStatementPtr stmt;
   ExpressionListPtr params;
   if (userFunc) {
@@ -1099,7 +1110,7 @@ void FunctionScope::OutputCPPEffectiveArguments(ExpressionListPtr params,
 }
 
 void FunctionScope::OutputCPPDynamicInvokeCount(CodeGenerator &cg) {
-  cg_printf("int count __attribute__((__unused__)) = params.size();\n");
+  cg_printf("int count ATTRIBUTE_UNUSED = params.size();\n");
 }
 
 int FunctionScope::outputCPPInvokeArgCountCheck(
@@ -1127,7 +1138,7 @@ int FunctionScope::outputCPPInvokeArgCountCheck(
     for (int i = 0; i < m_minParam; i++) {
       if (TypePtr t = m_paramTypeSpecs[i]) {
         if (m_paramDefaults[i].empty()) {
-          if (i < maxCount) cg_printf("if (count < %d) ", i + 1);
+          if (i < maxCount) cg_printf("if (UNLIKELY(count < %d)) ", i + 1);
           cg_printf("%sthrow_missing_typed_argument(\"%s\", ",
                     fullGuard ? "return " : "", fullname.c_str());
           cg_printf(t->is(Type::KindOfArray) ?
@@ -1147,15 +1158,18 @@ int FunctionScope::outputCPPInvokeArgCountCheck(
 
   if (checkMissing && checkTooMany) {
     if (!variable && m_minParam == m_maxParam) {
-      if (maxCount >= m_minParam) cg_printf("if (count != %d)", m_minParam);
+      if (maxCount >= m_minParam) {
+        cg_printf("if (UNLIKELY(count != %d))", m_minParam);
+      }
       cg_printf(" %sthrow_wrong_arguments(\"%s\", count, %d, %d%s);\n",
                 sysret, fullname.c_str(), m_minParam, m_maxParam, level);
     } else {
       if (maxCount >= m_minParam) {
         if (maxCount <= m_maxParam) {
-          cg_printf("if (count < %d)", m_minParam, m_maxParam);
+          cg_printf("if (UNLIKELY(count < %d))", m_minParam, m_maxParam);
         } else {
-          cg_printf("if (count < %d || count > %d)", m_minParam, m_maxParam);
+          cg_printf("if (UNLIKELY(count < %d || count > %d))",
+                    m_minParam, m_maxParam);
         }
       }
       cg_printf(" %sthrow_wrong_arguments(\"%s\", count, %d, %d%s);\n",
@@ -1163,11 +1177,13 @@ int FunctionScope::outputCPPInvokeArgCountCheck(
                 m_minParam, variable ? -1 : m_maxParam, level);
     }
   } else if (checkMissing) {
-    if (maxCount >= m_minParam) cg_printf("if (count < %d)", m_minParam);
+    if (maxCount >= m_minParam) {
+      cg_printf("if (UNLIKELY(count < %d))", m_minParam);
+    }
     cg_printf(" %sthrow_missing_arguments(\"%s\", count+1%s);\n",
               sysret, fullname.c_str(), level);
   } else if (checkTooMany && maxCount > m_maxParam) {
-    cg_printf("if (count > %d)"
+    cg_printf("if (UNLIKELY(count > %d))"
               " %sthrow_toomany_arguments(\"%s\", %d%s);\n",
               m_maxParam, sysret, fullname.c_str(), m_maxParam, level);
   }
@@ -1220,10 +1236,11 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
   int i = !m_minParam ? -1 : 0;
   while (true) {
     if (i >= 0 && i < m_maxParam) {
+      bool ref = isRefParam(i);
       int defIndex = -1;
       bool defNull = false;
       if (!m_paramDefaults[i].empty() && !useDefaults) {
-        if (fewArgs ? i < maxCount : isRefParam(i)) {
+        if (fewArgs ? i < maxCount : ref) {
           Variant tmp;
           MethodStatementPtr m(dynamic_pointer_cast<MethodStatement>(m_stmt));
           ExpressionListPtr params = m->getParams();
@@ -1233,17 +1250,17 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
           if (p->defaultValue()->isScalar() &&
               p->defaultValue()->getScalarValue(tmp) && tmp.isNull()) {
             defNull = true;
-          } else {
+          } else if (!ref) {
             cg_printf("TypedValue def%d;\n", i);
             defIndex = i;
           }
         }
       }
-      cg_printf("CVarRef arg%d(", i);
+      cg_printf("%s arg%d(", ref ? "VRefParam" : "CVarRef", i);
       if (m_paramDefaults[i].empty()) {
         if (i >= guarded) {
-          if (i < maxCount) cg_printf("count <= %d ? ", i);
-          cg_printf("null_variant");
+          if (i < maxCount) cg_printf("UNLIKELY(count <= %d) ? ", i);
+          cg_printf(ref ? "(VRefParamValue())" : "null_variant");
           if (i < maxCount) cg_printf(" : ");
         }
       } else if (!useDefaults) {
@@ -1255,7 +1272,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
           close = true;
         }
         if (defNull) {
-          cg_printf("null_variant");
+          cg_printf(ref ? "(VRefParamValue())" : "null_variant");
         } else {
           MethodStatementPtr m(dynamic_pointer_cast<MethodStatement>(m_stmt));
           ExpressionListPtr params = m->getParams();
@@ -1268,8 +1285,9 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
           } else {
             TypePtr type = p->defaultValue()->getCPPType();
             bool isVariant = type && type->is(Type::KindOfVariant);
-            cg_printf("%s(", (!fewArgs || i >= maxCount) &&
-                      !isVariant ? "Variant" : "");
+            cg_printf("%s(", ref ? "VRefParamValue" :
+                      (!fewArgs || i >= maxCount) && !isVariant ?
+                      "Variant" : "");
           }
           cg.setContext(CodeGenerator::CppParameterDefaultValueDecl);
           p->defaultValue()->outputCPP(cg, ar);
@@ -1280,11 +1298,11 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
         if (i < maxCount) cg_printf(" : ");
       }
       if (fewArgs) {
-        if (i < maxCount) cg_printf("%s(a%d)", isRefParam(i) ? "ref" : "", i);
+        if (i < maxCount) cg_printf(ref ? "vref(a%d)" : "a%d", i);
       } else {
         cg_printf("%s(ad->getValue%s(pos%s))",
-                  isRefParam(i) ? "ref" : "",
-                  isRefParam(i) ? "Ref" : "",
+                  ref ? "vref" : "",
+                  ref ? "Ref" : "",
                   i ? " = ad->iter_advance(pos)" : "");
       }
       cg_printf(");\n");
@@ -1530,7 +1548,9 @@ void FunctionScope::outputCPPCreateDecl(CodeGenerator &cg,
 
   cg_printf("public: %s%s *create(",
             Option::ClassPrefix, scope->getId(cg).c_str());
-  if (setWrapper) cg.setContext(CodeGenerator::CppTypedParamsWrapperDecl);
+  cg.setContext(setWrapper ?
+                CodeGenerator::CppTypedParamsWrapperDecl :
+                CodeGenerator::CppFunctionWrapperDecl);
   outputCPPParamsDecl(cg, ar,
                       dynamic_pointer_cast<MethodStatement>(getStmt())
                       ->getParams(), true);
@@ -1559,15 +1579,17 @@ void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
 
   cg_printf("%s%s *%s%s::create(",
             Option::ClassPrefix, clsName, Option::ClassPrefix, clsName);
-  if (setWrapper) cg.setContext(CodeGenerator::CppTypedParamsWrapperImpl);
 
+  cg.setContext(setWrapper ?
+                CodeGenerator::CppTypedParamsWrapperImpl :
+                CodeGenerator::CppFunctionWrapperImpl);
   outputCPPParamsImpl(cg, ar);
-  cg.setContext(context);
   cg_indentBegin(") {\n");
   cg_printf("CountableHelper h(this);\n");
   cg_printf("init();\n");
   cg_printf("%s%s(", Option::MethodPrefix, consName);
   outputCPPParamsCall(cg, ar, false);
+  cg.setContext(context);
   cg_printf(");\n");
   cg_printf("return this;\n");
   cg_indentEnd("}\n");

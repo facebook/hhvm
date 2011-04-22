@@ -35,7 +35,7 @@ Variant f_hash_hmac(CStrRef algo, CStrRef data, CStrRef key, bool raw_output = f
 bool f_hash_update_file(CObjRef init_context, CStrRef filename, CObjRef stream_context = null);
 int f_hash_update_stream(CObjRef context, CObjRef handle, int length = -1);
 bool f_hash_update(CObjRef context, CStrRef data);
-int f_furchash_hphp_ext(CStrRef key, int len, int npart);
+int f_furchash_hphp_ext(CStrRef key, int len, int nPart);
 bool f_furchash_hphp_ext_supported();
 
 ///////////////////////////////////////////////////////////////////////////////

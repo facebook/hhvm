@@ -121,7 +121,7 @@ inline Variant x_array_replace(int _argc, CVarRef array1, CArrRef _argv = null_a
   return f_array_replace(_argc, array1, _argv);
 }
 
-inline bool x_array_multisort(int _argc, CVarRef ar1, CArrRef _argv = null_array) {
+inline bool x_array_multisort(int _argc, VRefParam ar1, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(array_multisort);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_array_multisort(_argc, ar1, _argv);
@@ -133,7 +133,7 @@ inline Variant x_array_pad(CVarRef input, int pad_size, CVarRef pad_value) {
   return f_array_pad(input, pad_size, pad_value);
 }
 
-inline Variant x_array_pop(CVarRef array) {
+inline Variant x_array_pop(VRefParam array) {
   FUNCTION_INJECTION_BUILTIN(array_pop);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_array_pop(array);
@@ -145,7 +145,7 @@ inline Variant x_array_product(CVarRef array) {
   return f_array_product(array);
 }
 
-inline Variant x_array_push(int _argc, CVarRef array, CVarRef var, CArrRef _argv = null_array) {
+inline Variant x_array_push(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(array_push);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_array_push(_argc, array, var, _argv);
@@ -175,7 +175,7 @@ inline Variant x_array_search(CVarRef needle, CVarRef haystack, bool strict = fa
   return f_array_search(needle, haystack, strict);
 }
 
-inline Variant x_array_shift(CVarRef array) {
+inline Variant x_array_shift(VRefParam array) {
   FUNCTION_INJECTION_BUILTIN(array_shift);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_array_shift(array);
@@ -187,7 +187,7 @@ inline Variant x_array_slice(CVarRef array, int offset, CVarRef length = null_va
   return f_array_slice(array, offset, length, preserve_keys);
 }
 
-inline Variant x_array_splice(CVarRef input, int offset, CVarRef length = null_variant, CVarRef replacement = null_variant) {
+inline Variant x_array_splice(VRefParam input, int offset, CVarRef length = null_variant, CVarRef replacement = null_variant) {
   FUNCTION_INJECTION_BUILTIN(array_splice);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_array_splice(input, offset, length, replacement);
@@ -205,7 +205,7 @@ inline Variant x_array_unique(CVarRef array, int sort_flags = 2) {
   return f_array_unique(array, sort_flags);
 }
 
-inline int x_array_unshift(int _argc, CVarRef array, CVarRef var, CArrRef _argv = null_array) {
+inline int x_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(array_unshift);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_array_unshift(_argc, array, var, _argv);
@@ -217,13 +217,13 @@ inline Variant x_array_values(CVarRef input) {
   return f_array_values(input);
 }
 
-inline bool x_array_walk_recursive(CVarRef input, CVarRef funcname, CVarRef userdata = null_variant) {
+inline bool x_array_walk_recursive(VRefParam input, CVarRef funcname, CVarRef userdata = null_variant) {
   FUNCTION_INJECTION_BUILTIN(array_walk_recursive);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_array_walk_recursive(input, funcname, userdata);
 }
 
-inline bool x_array_walk(CVarRef input, CVarRef funcname, CVarRef userdata = null_variant) {
+inline bool x_array_walk(VRefParam input, CVarRef funcname, CVarRef userdata = null_variant) {
   FUNCTION_INJECTION_BUILTIN(array_walk);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_array_walk(input, funcname, userdata);
@@ -235,7 +235,7 @@ inline Array x_compact(int _argc, CVarRef varname, CArrRef _argv = null_array) {
   return f_compact(_argc, varname, _argv);
 }
 
-inline bool x_shuffle(CVarRef array) {
+inline bool x_shuffle(VRefParam array) {
   FUNCTION_INJECTION_BUILTIN(shuffle);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_shuffle(array);
@@ -253,7 +253,7 @@ inline int x_sizeof(CVarRef var, bool recursive = false) {
   return f_sizeof(var, recursive);
 }
 
-inline Variant x_each(CVarRef array) {
+inline Variant x_each(VRefParam array) {
   FUNCTION_INJECTION_BUILTIN(each);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_each(array);
@@ -265,49 +265,49 @@ inline Variant x_current(CVarRef array) {
   return f_current(array);
 }
 
-inline Variant x_hphp_current_ref(CVarRef array) {
+inline Variant x_hphp_current_ref(VRefParam array) {
   FUNCTION_INJECTION_BUILTIN(hphp_current_ref);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_current_ref(array);
 }
 
-inline Variant x_next(CVarRef array) {
+inline Variant x_next(VRefParam array) {
   FUNCTION_INJECTION_BUILTIN(next);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_next(array);
 }
 
-inline Variant x_pos(CVarRef array) {
+inline Variant x_pos(VRefParam array) {
   FUNCTION_INJECTION_BUILTIN(pos);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pos(array);
 }
 
-inline Variant x_prev(CVarRef array) {
+inline Variant x_prev(VRefParam array) {
   FUNCTION_INJECTION_BUILTIN(prev);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_prev(array);
 }
 
-inline Variant x_reset(CVarRef array) {
+inline Variant x_reset(VRefParam array) {
   FUNCTION_INJECTION_BUILTIN(reset);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_reset(array);
 }
 
-inline Variant x_end(CVarRef array) {
+inline Variant x_end(VRefParam array) {
   FUNCTION_INJECTION_BUILTIN(end);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_end(array);
 }
 
-inline Variant x_key(CVarRef array) {
+inline Variant x_key(VRefParam array) {
   FUNCTION_INJECTION_BUILTIN(key);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_key(array);
 }
 
-inline Variant x_hphp_get_iterator(CVarRef iterable, bool isMutable) {
+inline Variant x_hphp_get_iterator(VRefParam iterable, bool isMutable) {
   FUNCTION_INJECTION_BUILTIN(hphp_get_iterator);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_get_iterator(iterable, isMutable);
@@ -421,67 +421,67 @@ inline Variant x_array_intersect_ukey(int _argc, CVarRef array1, CVarRef array2,
   return f_array_intersect_ukey(_argc, array1, array2, key_compare_func, _argv);
 }
 
-inline bool x_sort(CVarRef array, int sort_flags = 0, bool use_collator = false) {
+inline bool x_sort(VRefParam array, int sort_flags = 0, bool use_collator = false) {
   FUNCTION_INJECTION_BUILTIN(sort);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_sort(array, sort_flags, use_collator);
 }
 
-inline bool x_rsort(CVarRef array, int sort_flags = 0, bool use_collator = false) {
+inline bool x_rsort(VRefParam array, int sort_flags = 0, bool use_collator = false) {
   FUNCTION_INJECTION_BUILTIN(rsort);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_rsort(array, sort_flags, use_collator);
 }
 
-inline bool x_asort(CVarRef array, int sort_flags = 0, bool use_collator = false) {
+inline bool x_asort(VRefParam array, int sort_flags = 0, bool use_collator = false) {
   FUNCTION_INJECTION_BUILTIN(asort);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_asort(array, sort_flags, use_collator);
 }
 
-inline bool x_arsort(CVarRef array, int sort_flags = 0, bool use_collator = false) {
+inline bool x_arsort(VRefParam array, int sort_flags = 0, bool use_collator = false) {
   FUNCTION_INJECTION_BUILTIN(arsort);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_arsort(array, sort_flags, use_collator);
 }
 
-inline bool x_ksort(CVarRef array, int sort_flags = 0) {
+inline bool x_ksort(VRefParam array, int sort_flags = 0) {
   FUNCTION_INJECTION_BUILTIN(ksort);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ksort(array, sort_flags);
 }
 
-inline bool x_krsort(CVarRef array, int sort_flags = 0) {
+inline bool x_krsort(VRefParam array, int sort_flags = 0) {
   FUNCTION_INJECTION_BUILTIN(krsort);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_krsort(array, sort_flags);
 }
 
-inline bool x_usort(CVarRef array, CVarRef cmp_function) {
+inline bool x_usort(VRefParam array, CVarRef cmp_function) {
   FUNCTION_INJECTION_BUILTIN(usort);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_usort(array, cmp_function);
 }
 
-inline bool x_uasort(CVarRef array, CVarRef cmp_function) {
+inline bool x_uasort(VRefParam array, CVarRef cmp_function) {
   FUNCTION_INJECTION_BUILTIN(uasort);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_uasort(array, cmp_function);
 }
 
-inline bool x_uksort(CVarRef array, CVarRef cmp_function) {
+inline bool x_uksort(VRefParam array, CVarRef cmp_function) {
   FUNCTION_INJECTION_BUILTIN(uksort);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_uksort(array, cmp_function);
 }
 
-inline Variant x_natsort(CVarRef array) {
+inline Variant x_natsort(VRefParam array) {
   FUNCTION_INJECTION_BUILTIN(natsort);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_natsort(array);
 }
 
-inline Variant x_natcasesort(CVarRef array) {
+inline Variant x_natcasesort(VRefParam array) {
   FUNCTION_INJECTION_BUILTIN(natcasesort);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_natcasesort(array);

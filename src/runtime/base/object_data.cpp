@@ -348,15 +348,40 @@ Variant ObjectData::o_setPublic(CStrRef propName, CVarRef v,
   return v;
 }
 
+Variant ObjectData::o_setPublicWithRef(CStrRef propName, CVarRef v,
+                                       bool forInit /* = false */) {
+  if (propName.size() == 0) {
+    throw EmptyObjectPropertyException();
+  }
+
+  bool useSet = !forInit && getAttribute(UseSet);
+  int flags = useSet ? RealPropWrite : RealPropCreate | RealPropWrite;
+  if (forInit) flags |= RealPropUnchecked;
+
+  if (Variant *t = o_realPropPublic(propName, flags)) {
+    if (!useSet || t->isInitialized()) {
+      t->setWithRef(v);
+      return v;
+    }
+  }
+
+  if (useSet) {
+    AttributeClearer a(UseSet, this);
+    t___set(propName, v);
+    return v;
+  }
+
+  o_setError(propName, null_string);
+  return v;
+}
+
 void ObjectData::o_setArray(CArrRef properties) {
-  CStrRef context = o_getClassName();
   for (ArrayIter iter(properties); iter; ++iter) {
     String key = iter.first().toString();
     if (key.empty() || key.charAt(0) != '\0') {
       // non-private property
       CVarRef secondRef = iter.secondRef();
-      o_set(key, secondRef.isReferenced() ? ref(secondRef) : secondRef,
-            false, context);
+      o_setPublicWithRef(key, secondRef, false);
     }
   }
 }

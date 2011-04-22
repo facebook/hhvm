@@ -27,56 +27,67 @@ namespace HPHP {
 
 inline bool x_ctype_alnum(CVarRef text) {
   FUNCTION_INJECTION_BUILTIN(ctype_alnum);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ctype_alnum(text);
 }
 
 inline bool x_ctype_alpha(CVarRef text) {
   FUNCTION_INJECTION_BUILTIN(ctype_alpha);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ctype_alpha(text);
 }
 
 inline bool x_ctype_cntrl(CVarRef text) {
   FUNCTION_INJECTION_BUILTIN(ctype_cntrl);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ctype_cntrl(text);
 }
 
 inline bool x_ctype_digit(CVarRef text) {
   FUNCTION_INJECTION_BUILTIN(ctype_digit);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ctype_digit(text);
 }
 
 inline bool x_ctype_graph(CVarRef text) {
   FUNCTION_INJECTION_BUILTIN(ctype_graph);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ctype_graph(text);
 }
 
 inline bool x_ctype_lower(CVarRef text) {
   FUNCTION_INJECTION_BUILTIN(ctype_lower);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ctype_lower(text);
 }
 
 inline bool x_ctype_print(CVarRef text) {
   FUNCTION_INJECTION_BUILTIN(ctype_print);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ctype_print(text);
 }
 
 inline bool x_ctype_punct(CVarRef text) {
   FUNCTION_INJECTION_BUILTIN(ctype_punct);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ctype_punct(text);
 }
 
 inline bool x_ctype_space(CVarRef text) {
   FUNCTION_INJECTION_BUILTIN(ctype_space);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ctype_space(text);
 }
 
 inline bool x_ctype_upper(CVarRef text) {
   FUNCTION_INJECTION_BUILTIN(ctype_upper);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ctype_upper(text);
 }
 
 inline bool x_ctype_xdigit(CVarRef text) {
   FUNCTION_INJECTION_BUILTIN(ctype_xdigit);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ctype_xdigit(text);
 }
 

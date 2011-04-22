@@ -27,341 +27,409 @@ namespace HPHP {
 
 inline Variant x_imap_8bit(CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(imap_8bit);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_8bit(str);
 }
 
 inline Variant x_imap_alerts() {
   FUNCTION_INJECTION_BUILTIN(imap_alerts);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_alerts();
 }
 
 inline bool x_imap_append(CObjRef imap_stream, CStrRef mailbox, CStrRef message, CStrRef options = "") {
   FUNCTION_INJECTION_BUILTIN(imap_append);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_append(imap_stream, mailbox, message, options);
 }
 
 inline Variant x_imap_base64(CStrRef text) {
   FUNCTION_INJECTION_BUILTIN(imap_base64);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_base64(text);
 }
 
 inline Variant x_imap_binary(CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(imap_binary);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_binary(str);
 }
 
 inline Variant x_imap_body(CObjRef imap_stream, int64 msg_number, int64 options = 0) {
   FUNCTION_INJECTION_BUILTIN(imap_body);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_body(imap_stream, msg_number, options);
 }
 
 inline Variant x_imap_bodystruct(CObjRef imap_stream, int64 msg_number, CStrRef section) {
   FUNCTION_INJECTION_BUILTIN(imap_bodystruct);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_bodystruct(imap_stream, msg_number, section);
 }
 
 inline Variant x_imap_check(CObjRef imap_stream) {
   FUNCTION_INJECTION_BUILTIN(imap_check);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_check(imap_stream);
 }
 
 inline bool x_imap_clearflag_full(CObjRef imap_stream, CStrRef sequence, CStrRef flag, int64 options = 0) {
   FUNCTION_INJECTION_BUILTIN(imap_clearflag_full);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_clearflag_full(imap_stream, sequence, flag, options);
 }
 
 inline bool x_imap_close(CObjRef imap_stream, int64 flag = 0) {
   FUNCTION_INJECTION_BUILTIN(imap_close);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_close(imap_stream, flag);
 }
 
 inline bool x_imap_createmailbox(CObjRef imap_stream, CStrRef mailbox) {
   FUNCTION_INJECTION_BUILTIN(imap_createmailbox);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_createmailbox(imap_stream, mailbox);
 }
 
 inline bool x_imap_delete(CObjRef imap_stream, CStrRef msg_number, int64 options = 0) {
   FUNCTION_INJECTION_BUILTIN(imap_delete);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_delete(imap_stream, msg_number, options);
 }
 
 inline bool x_imap_deletemailbox(CObjRef imap_stream, CStrRef mailbox) {
   FUNCTION_INJECTION_BUILTIN(imap_deletemailbox);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_deletemailbox(imap_stream, mailbox);
 }
 
 inline Variant x_imap_errors() {
   FUNCTION_INJECTION_BUILTIN(imap_errors);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_errors();
 }
 
 inline bool x_imap_expunge(CObjRef imap_stream) {
   FUNCTION_INJECTION_BUILTIN(imap_expunge);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_expunge(imap_stream);
 }
 
 inline Variant x_imap_fetch_overview(CObjRef imap_stream, CStrRef sequence, int64 options = 0) {
   FUNCTION_INJECTION_BUILTIN(imap_fetch_overview);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_fetch_overview(imap_stream, sequence, options);
 }
 
 inline Variant x_imap_fetchbody(CObjRef imap_stream, int64 msg_number, CStrRef section, int64 options = 0) {
   FUNCTION_INJECTION_BUILTIN(imap_fetchbody);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_fetchbody(imap_stream, msg_number, section, options);
 }
 
 inline Variant x_imap_fetchheader(CObjRef imap_stream, int64 msg_number, int64 options = 0) {
   FUNCTION_INJECTION_BUILTIN(imap_fetchheader);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_fetchheader(imap_stream, msg_number, options);
 }
 
 inline Variant x_imap_fetchstructure(CObjRef imap_stream, int64 msg_number, int64 options = 0) {
   FUNCTION_INJECTION_BUILTIN(imap_fetchstructure);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_fetchstructure(imap_stream, msg_number, options);
 }
 
 inline bool x_imap_gc(CObjRef imap_stream, int64 caches) {
   FUNCTION_INJECTION_BUILTIN(imap_gc);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_gc(imap_stream, caches);
 }
 
 inline Variant x_imap_get_quota(CObjRef imap_stream, CStrRef quota_root) {
   FUNCTION_INJECTION_BUILTIN(imap_get_quota);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_get_quota(imap_stream, quota_root);
 }
 
 inline Variant x_imap_get_quotaroot(CObjRef imap_stream, CStrRef quota_root) {
   FUNCTION_INJECTION_BUILTIN(imap_get_quotaroot);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_get_quotaroot(imap_stream, quota_root);
 }
 
 inline Variant x_imap_getacl(CObjRef imap_stream, CStrRef mailbox) {
   FUNCTION_INJECTION_BUILTIN(imap_getacl);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_getacl(imap_stream, mailbox);
 }
 
 inline Variant x_imap_getmailboxes(CObjRef imap_stream, CStrRef ref, CStrRef pattern) {
   FUNCTION_INJECTION_BUILTIN(imap_getmailboxes);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_getmailboxes(imap_stream, ref, pattern);
 }
 
 inline Variant x_imap_getsubscribed(CObjRef imap_stream, CStrRef ref, CStrRef pattern) {
   FUNCTION_INJECTION_BUILTIN(imap_getsubscribed);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_getsubscribed(imap_stream, ref, pattern);
 }
 
 inline Variant x_imap_header(CObjRef imap_stream, int64 msg_number, int64 fromlength = 0, int64 subjectlength = 0, CStrRef defaulthost = "") {
   FUNCTION_INJECTION_BUILTIN(imap_header);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_header(imap_stream, msg_number, fromlength, subjectlength, defaulthost);
 }
 
 inline Variant x_imap_headerinfo(CObjRef imap_stream, int64 msg_number, int64 fromlength = 0, int64 subjectlength = 0, CStrRef defaulthost = "") {
   FUNCTION_INJECTION_BUILTIN(imap_headerinfo);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_headerinfo(imap_stream, msg_number, fromlength, subjectlength, defaulthost);
 }
 
 inline Variant x_imap_headers(CObjRef imap_stream) {
   FUNCTION_INJECTION_BUILTIN(imap_headers);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_headers(imap_stream);
 }
 
 inline Variant x_imap_last_error() {
   FUNCTION_INJECTION_BUILTIN(imap_last_error);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_last_error();
 }
 
 inline Variant x_imap_list(CObjRef imap_stream, CStrRef ref, CStrRef pattern) {
   FUNCTION_INJECTION_BUILTIN(imap_list);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_list(imap_stream, ref, pattern);
 }
 
 inline Variant x_imap_listmailbox(CObjRef imap_stream, CStrRef ref, CStrRef pattern) {
   FUNCTION_INJECTION_BUILTIN(imap_listmailbox);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_listmailbox(imap_stream, ref, pattern);
 }
 
 inline Variant x_imap_listscan(CObjRef imap_stream, CStrRef ref, CStrRef pattern, CStrRef content) {
   FUNCTION_INJECTION_BUILTIN(imap_listscan);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_listscan(imap_stream, ref, pattern, content);
 }
 
 inline Variant x_imap_listsubscribed(CObjRef imap_stream, CStrRef ref, CStrRef pattern) {
   FUNCTION_INJECTION_BUILTIN(imap_listsubscribed);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_listsubscribed(imap_stream, ref, pattern);
 }
 
 inline Variant x_imap_lsub(CObjRef imap_stream, CStrRef ref, CStrRef pattern) {
   FUNCTION_INJECTION_BUILTIN(imap_lsub);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_lsub(imap_stream, ref, pattern);
 }
 
 inline Variant x_imap_mail_compose(CArrRef envelope, CArrRef body) {
   FUNCTION_INJECTION_BUILTIN(imap_mail_compose);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_mail_compose(envelope, body);
 }
 
 inline bool x_imap_mail_copy(CObjRef imap_stream, CStrRef msglist, CStrRef mailbox, int64 options = 0) {
   FUNCTION_INJECTION_BUILTIN(imap_mail_copy);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_mail_copy(imap_stream, msglist, mailbox, options);
 }
 
 inline bool x_imap_mail_move(CObjRef imap_stream, CStrRef msglist, CStrRef mailbox, int64 options = 0) {
   FUNCTION_INJECTION_BUILTIN(imap_mail_move);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_mail_move(imap_stream, msglist, mailbox, options);
 }
 
 inline bool x_imap_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef additional_headers = "", CStrRef cc = "", CStrRef bcc = "", CStrRef rpath = "") {
   FUNCTION_INJECTION_BUILTIN(imap_mail);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_mail(to, subject, message, additional_headers, cc, bcc, rpath);
 }
 
 inline Variant x_imap_mailboxmsginfo(CObjRef imap_stream) {
   FUNCTION_INJECTION_BUILTIN(imap_mailboxmsginfo);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_mailboxmsginfo(imap_stream);
 }
 
 inline Variant x_imap_mime_header_decode(CStrRef text) {
   FUNCTION_INJECTION_BUILTIN(imap_mime_header_decode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_mime_header_decode(text);
 }
 
 inline Variant x_imap_msgno(CObjRef imap_stream, int64 uid) {
   FUNCTION_INJECTION_BUILTIN(imap_msgno);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_msgno(imap_stream, uid);
 }
 
 inline Variant x_imap_num_msg(CObjRef imap_stream) {
   FUNCTION_INJECTION_BUILTIN(imap_num_msg);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_num_msg(imap_stream);
 }
 
 inline Variant x_imap_num_recent(CObjRef imap_stream) {
   FUNCTION_INJECTION_BUILTIN(imap_num_recent);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_num_recent(imap_stream);
 }
 
 inline Variant x_imap_open(CStrRef mailbox, CStrRef username, CStrRef password, int64 options = 0, int64 retries = 0) {
   FUNCTION_INJECTION_BUILTIN(imap_open);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_open(mailbox, username, password, options, retries);
 }
 
 inline bool x_imap_ping(CObjRef imap_stream) {
   FUNCTION_INJECTION_BUILTIN(imap_ping);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_ping(imap_stream);
 }
 
 inline Variant x_imap_qprint(CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(imap_qprint);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_qprint(str);
 }
 
 inline bool x_imap_renamemailbox(CObjRef imap_stream, CStrRef old_mbox, CStrRef new_mbox) {
   FUNCTION_INJECTION_BUILTIN(imap_renamemailbox);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_renamemailbox(imap_stream, old_mbox, new_mbox);
 }
 
 inline bool x_imap_reopen(CObjRef imap_stream, CStrRef mailbox, int64 options = 0, int64 retries = 0) {
   FUNCTION_INJECTION_BUILTIN(imap_reopen);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_reopen(imap_stream, mailbox, options, retries);
 }
 
 inline Variant x_imap_rfc822_parse_adrlist(CStrRef address, CStrRef default_host) {
   FUNCTION_INJECTION_BUILTIN(imap_rfc822_parse_adrlist);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_rfc822_parse_adrlist(address, default_host);
 }
 
 inline Variant x_imap_rfc822_parse_headers(CStrRef headers, CStrRef defaulthost = "") {
   FUNCTION_INJECTION_BUILTIN(imap_rfc822_parse_headers);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_rfc822_parse_headers(headers, defaulthost);
 }
 
 inline Variant x_imap_rfc822_write_address(CStrRef mailbox, CStrRef host, CStrRef personal) {
   FUNCTION_INJECTION_BUILTIN(imap_rfc822_write_address);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_rfc822_write_address(mailbox, host, personal);
 }
 
 inline bool x_imap_savebody(CObjRef imap_stream, CVarRef file, int64 msg_number, CStrRef part_number = "", int64 options = 0) {
   FUNCTION_INJECTION_BUILTIN(imap_savebody);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_savebody(imap_stream, file, msg_number, part_number, options);
 }
 
 inline Variant x_imap_scanmailbox(CObjRef imap_stream, CStrRef ref, CStrRef pattern, CStrRef content) {
   FUNCTION_INJECTION_BUILTIN(imap_scanmailbox);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_scanmailbox(imap_stream, ref, pattern, content);
 }
 
 inline Variant x_imap_search(CObjRef imap_stream, CStrRef criteria, int64 options = 0, CStrRef charset = "") {
   FUNCTION_INJECTION_BUILTIN(imap_search);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_search(imap_stream, criteria, options, charset);
 }
 
 inline bool x_imap_set_quota(CObjRef imap_stream, CStrRef quota_root, int64 quota_limit) {
   FUNCTION_INJECTION_BUILTIN(imap_set_quota);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_set_quota(imap_stream, quota_root, quota_limit);
 }
 
 inline bool x_imap_setacl(CObjRef imap_stream, CStrRef mailbox, CStrRef id, CStrRef rights) {
   FUNCTION_INJECTION_BUILTIN(imap_setacl);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_setacl(imap_stream, mailbox, id, rights);
 }
 
 inline bool x_imap_setflag_full(CObjRef imap_stream, CStrRef sequence, CStrRef flag, int64 options = 0) {
   FUNCTION_INJECTION_BUILTIN(imap_setflag_full);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_setflag_full(imap_stream, sequence, flag, options);
 }
 
 inline Variant x_imap_sort(CObjRef imap_stream, int64 criteria, int64 reverse, int64 options = 0, CStrRef search_criteria = "", CStrRef charset = "") {
   FUNCTION_INJECTION_BUILTIN(imap_sort);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_sort(imap_stream, criteria, reverse, options, search_criteria, charset);
 }
 
 inline Variant x_imap_status(CObjRef imap_stream, CStrRef mailbox, int64 options = 0) {
   FUNCTION_INJECTION_BUILTIN(imap_status);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_status(imap_stream, mailbox, options);
 }
 
 inline bool x_imap_subscribe(CObjRef imap_stream, CStrRef mailbox) {
   FUNCTION_INJECTION_BUILTIN(imap_subscribe);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_subscribe(imap_stream, mailbox);
 }
 
 inline Variant x_imap_thread(CObjRef imap_stream, int64 options = 0) {
   FUNCTION_INJECTION_BUILTIN(imap_thread);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_thread(imap_stream, options);
 }
 
 inline Variant x_imap_timeout(int64 timeout_type, int64 timeout = -1) {
   FUNCTION_INJECTION_BUILTIN(imap_timeout);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_timeout(timeout_type, timeout);
 }
 
 inline Variant x_imap_uid(CObjRef imap_stream, int64 msg_number) {
   FUNCTION_INJECTION_BUILTIN(imap_uid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_uid(imap_stream, msg_number);
 }
 
 inline bool x_imap_undelete(CObjRef imap_stream, CStrRef msg_number, int64 flags = 0) {
   FUNCTION_INJECTION_BUILTIN(imap_undelete);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_undelete(imap_stream, msg_number, flags);
 }
 
 inline bool x_imap_unsubscribe(CObjRef imap_stream, CStrRef mailbox) {
   FUNCTION_INJECTION_BUILTIN(imap_unsubscribe);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_unsubscribe(imap_stream, mailbox);
 }
 
 inline Variant x_imap_utf7_decode(CStrRef text) {
   FUNCTION_INJECTION_BUILTIN(imap_utf7_decode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_utf7_decode(text);
 }
 
 inline Variant x_imap_utf7_encode(CStrRef data) {
   FUNCTION_INJECTION_BUILTIN(imap_utf7_encode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_utf7_encode(data);
 }
 
 inline Variant x_imap_utf8(CStrRef mime_encoded_text) {
   FUNCTION_INJECTION_BUILTIN(imap_utf8);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_imap_utf8(mime_encoded_text);
 }
 

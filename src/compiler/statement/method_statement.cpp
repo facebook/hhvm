@@ -756,7 +756,7 @@ void MethodStatement::outputCPPStaticMethodWrapper(CodeGenerator &cg,
   cg_printf(" %s%s(", needsWrapper && !isWrapper ?
             Option::TypedMethodPrefix : Option::MethodPrefix,
             cg.formatLabel(m_name).c_str());
-  if (!isWrapper) cg.setContext(CodeGenerator::CppStaticMethodWrapper);
+  if (!isWrapper) cg.setContext(CodeGenerator::CppFunctionWrapperDecl);
   funcScope->outputCPPParamsDecl(cg, ar, m_params, true);
   cg_printf(") { %s%s%s(", type ? "return " : "",
             needsWrapper && !isWrapper ?

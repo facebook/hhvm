@@ -109,13 +109,13 @@ inline Variant x_get_object_vars(CVarRef object) {
   return f_get_object_vars(object);
 }
 
-inline Variant x_call_user_method_array(CStrRef method_name, CVarRef obj, CArrRef paramarr) {
+inline Variant x_call_user_method_array(CStrRef method_name, VRefParam obj, CArrRef paramarr) {
   FUNCTION_INJECTION_BUILTIN(call_user_method_array);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_call_user_method_array(method_name, obj, paramarr);
 }
 
-inline Variant x_call_user_method(int _argc, CStrRef method_name, CVarRef obj, CArrRef _argv = null_array) {
+inline Variant x_call_user_method(int _argc, CStrRef method_name, VRefParam obj, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(call_user_method);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_call_user_method(_argc, method_name, obj, _argv);

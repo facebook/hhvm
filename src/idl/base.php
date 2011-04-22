@@ -81,6 +81,13 @@ $REFNAMES = array('String'      => 'CStrRef',
                   'Sequence'    => 'CVarRef',
                   );
 
+$MAGIC_METHODS = array('__get' => 'ObjectData::UseGet',
+                       '__set' => 'ObjectData::UseSet',
+                       '__call' => 'ObjectData::HasCall',
+                       '__callStatic' => 'ObjectData::HasCallStatic',
+                       '__unset' => 'ObjectData::UseUnset',
+                       '__isset' => 0);
+
 function get_idl_name($type, $null = '') {
   global $TYPENAMES;
   if ($type === null) {
@@ -339,13 +346,27 @@ function typename($type, $prefix = true) {
   return 'void';
 }
 
-function param_typename($type, $ref) {
+function param_typename($arg, $forceRef = false) {
+  $type = $arg['type'];
+  $ref = idx($arg, 'ref') ?
+    ($forceRef === null ?
+     "wrap" : ($forceRef === true ? "var" : true)) :
+    ($forceRef === true ? "var" : false);
+
   if (is_string($type)) {
     return 'p_' . $type;
   }
 
   global $REFNAMES;
   $name = typename($type);
+  if ($ref && $name == "Variant") {
+    if ($ref === "wrap")
+      return "VRefParam";
+    else if ($ref === "var")
+      return "Variant";
+    else
+      return "VRefParam";
+  }
   if ($ref || !isset($REFNAMES[$name])) {
     return $name;
   }
@@ -513,8 +534,7 @@ function generateFuncArgsCPPHeader($func, $f, $forceRef = false,
   for ($i = 0; $i < count($args); $i++) {
     $arg = $args[$i];
     if ($static || $i > 0) fprintf($f, ', ');
-    $ref = $forceRef !== null && ($forceRef || idx($arg, 'ref'));
-    fprintf($f, '%s %s', param_typename($arg['type'], $ref),
+    fprintf($f, '%s %s', param_typename($arg, $forceRef),
             $arg['name']);
     if (isset($arg['default'])) {
       fprintf($f, ' = %s', $arg['default']);
@@ -619,6 +639,7 @@ function generateConstCPPHeader($const, $f) {
 }
 
 function generateClassCPPHeader($class, $f) {
+  global $MAGIC_METHODS;
   $clsname = $class['name'];
   foreach ($class['consts'] as $k) {
     $name = typename($k['type']);
@@ -644,16 +665,11 @@ EOT
   }
 
   fprintf($f, "class c_%s", $clsname);
-  $magic_methods = array('__get' => 'ObjectData::UseGet',
-                         '__set' => 'ObjectData::UseSet',
-                         '__call' => 'ObjectData::HasCall',
-                         '__callStatic' => 'ObjectData::HasCallStatic',
-                         '__unset' => 'ObjectData::UseUnset');
   $flags = array();
   foreach ($class['methods'] as $m) {
     $name = $m['name'];
-    if (isset($magic_methods[$name])) {
-      $flags[$name] = $magic_methods[$name];
+    if (isset($MAGIC_METHODS[$name]) && $MAGIC_METHODS[$name]) {
+      $flags[$name] = $MAGIC_METHODS[$name];
     }
   }
 
@@ -727,6 +743,7 @@ EOT
 }
 
 function generateMethodCPPHeader($method, $class, $f) {
+  global $MAGIC_METHODS;
   if ($method['flags'] & IsPrivate) {
     $vis = "private";
   } else if ($method['flags'] & IsProtected) {
@@ -736,8 +753,7 @@ function generateMethodCPPHeader($method, $class, $f) {
   }
   fprintf($f, "  %s: ", $vis);
   generateFuncCPPHeader($method, $f, true,
-                        $method['name'] != "__construct" &&
-                        strpos($method['name'], "__") === 0,
+                        isset($MAGIC_METHODS[$method['name']]),
                         $method['flags'] & IsStatic, $class);
   fprintf($f, "  DECLARE_METHOD_INVOKE_HELPERS(%s);\n",
           strtolower($method['name']));
@@ -800,7 +816,7 @@ function generateFuncCPPImplementation($func, $f) {
   for ($i = 0; $i < count($func['args']); $i++) {
     $arg = $func['args'][$i];
     if ($i > 0) fprintf($f, ', ');
-    fprintf($f, '%s %s', param_typename($arg['type'], idx($arg, 'ref')),
+    fprintf($f, '%s %s', param_typename($arg),
             $arg['name']);
     if (isset($arg['default'])) {
       fprintf($f, ' /* = %s */', $arg['default']);
@@ -839,22 +855,22 @@ function generateFuncCPPImplementation($func, $f) {
 function replaceParams($filename, $header) {
   global $funcs;
 
-  $file = file_get_contents($filename);
+  $orig = $file = file_get_contents($filename);
   foreach ($funcs as &$func) {
     $var_arg = ($func['flags'] & VarArgsMask);
     $args = $func['args'];
 
-    $search = '\w+\s+f_'.$func['name'].'\s*\(\s*';
+    $search = '(?!return\s)\b\w+\s+f_'.$func['name'].'\s*\(\s*';
     if ($var_arg) $search .= '\w+\s+\w+,\s*';
     for ($i = 0; $i < count($args); $i++) {
       $arg = $args[$i];
       $search .= '\w+\s+\w+\s*';
       if (isset($arg['default'])) {
         if ($header) {
-          $search .= '=\s*'.preg_quote($arg['default'], '/').'\s*';
+          $search .= '=\s*(?:'.preg_quote($arg['default'], '/').'|\d+)\s*';
         } else {
-          $search .= '\/\*\s*=\s*'.preg_quote($arg['default'], '/').
-            '\s*\*\/\s*';
+          $search .= '(?:\/\*\s*=\s*(?:'.preg_quote($arg['default'], '/').
+            '|\d+)\s*\*\/\s*)?';
         }
       }
       if ($i < count($args) - 1) {
@@ -865,7 +881,7 @@ function replaceParams($filename, $header) {
       if ($header) {
         $search .= ',\s*\w+\s+\w+\s*=\s*null_array\s*';
       } else {
-        $search .= ',(\s*)\w+\s+\w+\s*\/\*\s*=\s*null_array\s*\*\/\s*';
+        $search .= ',(\s*)\w+\s+\w+\s*(?:\/\*\s*=\s*null_array\s*\*\/\s*)?';
       }
     }
     $search .= '\)';
@@ -874,8 +890,7 @@ function replaceParams($filename, $header) {
     if ($var_arg) $replace .= 'int _argc, ';
     for ($i = 0; $i < count($args); $i++) {
       $arg = $args[$i];
-      $replace .= param_typename($arg['type'],
-                                 idx($arg, 'ref')).' '.$arg['name'];
+      $replace .= param_typename($arg).' '.$arg['name'];
       if (isset($arg['default'])) {
         if ($header) {
           $replace .= ' = '.addcslashes($arg['default'], '\\');
@@ -897,23 +912,26 @@ function replaceParams($filename, $header) {
     }
     $replace .= ')';
 
-    if ($header && preg_match("/inline\s+$search/s", $file)) {
+    if ($header && preg_match("/inline\s+$search/ms", $file)) {
       $func['inlined'] = true;
     }
 
     //var_dump($search, $replace);
-    $count = preg_match_all("/$search/s", $file, $m);
+    $count = preg_match_all("/$search/ms", $file, $m);
     if ($count == 0) {
       if ($header || !isset($func['inlined'])) {
+        var_dump($search, $replace);
         print $func['name']." not found in $filename\n";
       }
     } else if ($count == 1) {
-      $file = preg_replace("/$search/s", $replace, $file);
+      $file = preg_replace("/$search/ms", $replace, $file);
     } else {
       print "skipped ".$func['name']." in $filename\n";
     }
   }
-  file_put_contents($filename, $file);
+  if ($orig != $file) {
+    file_put_contents($filename, $file);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

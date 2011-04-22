@@ -364,12 +364,12 @@ do { \
 // code instrumentation or injections
 
 #define DECLARE_THREAD_INFO                      \
-  ThreadInfo *info __attribute__((__unused__)) = \
+  ThreadInfo *info ATTRIBUTE_UNUSED = \
     ThreadInfo::s_threadInfo.getNoCheck();       \
-  int lc __attribute__((__unused__)) = 0;        \
+  int lc ATTRIBUTE_UNUSED = 0;        \
 
 #define DECLARE_THREAD_INFO_NOINIT               \
-  int lc __attribute__((__unused__)) = 0;        \
+  int lc ATTRIBUTE_UNUSED = 0;        \
 
 #ifdef INFINITE_LOOP_DETECTION
 #define LOOP_COUNTER(n)
@@ -402,10 +402,10 @@ do { \
 
 // Get global variables from thread info.
 #define DECLARE_GLOBAL_VARIABLES_INJECTION(g)       \
-  GlobalVariables *g __attribute__((__unused__)) =  \
+  GlobalVariables *g ATTRIBUTE_UNUSED =  \
     fi.getThreadInfo()->m_globals;
 #define DECLARE_SYSTEM_GLOBALS_INJECTION(g)         \
-  SystemGlobals *g __attribute__((__unused__)) =    \
+  SystemGlobals *g ATTRIBUTE_UNUSED =    \
     (SystemGlobals *)fi.getThreadInfo()->m_globals;
 
 #define CHECK_ONCE(n)                             \

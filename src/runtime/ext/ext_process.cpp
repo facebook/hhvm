@@ -285,7 +285,7 @@ bool f_pcntl_signal(int signo, CVarRef handler,
   return true;
 }
 
-int f_pcntl_wait(Variant status, int options /* = 0 */) {
+int f_pcntl_wait(VRefParam status, int options /* = 0 */) {
   int child_id;
   int nstatus = 0;
   child_id = LightProcess::pcntl_waitpid(-1, &nstatus, options);
@@ -298,8 +298,8 @@ int f_pcntl_wait(Variant status, int options /* = 0 */) {
   return child_id;
 }
 
-int f_pcntl_waitpid(int pid, Variant status, int options /* = 0 */) {
-  int nstatus = status.toInt64();
+int f_pcntl_waitpid(int pid, VRefParam status, int options /* = 0 */) {
+  int nstatus = status;
   pid_t child_id = LightProcess::pcntl_waitpid((pid_t)pid, &nstatus, options);
   status = nstatus;
   return child_id;
@@ -354,8 +354,8 @@ String f_shell_exec(CStrRef cmd) {
   return sbuf.detach();
 }
 
-String f_exec(CStrRef command, Variant output /* = null */,
-              Variant return_var /* = null */) {
+String f_exec(CStrRef command, VRefParam output /* = null */,
+              VRefParam return_var /* = null */) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
   if (!fp) return "";
@@ -384,7 +384,7 @@ String f_exec(CStrRef command, Variant output /* = null */,
   return StringUtil::Trim(lines[count - 1], StringUtil::TrimRight);
 }
 
-void f_passthru(CStrRef command, Variant return_var /* = null */) {
+void f_passthru(CStrRef command, VRefParam return_var /* = null */) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
   if (!fp) return;
@@ -402,7 +402,7 @@ void f_passthru(CStrRef command, Variant return_var /* = null */) {
   return_var = ret;
 }
 
-String f_system(CStrRef command, Variant return_var /* = null */) {
+String f_system(CStrRef command, VRefParam return_var /* = null */) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
   if (!fp) return "";
@@ -669,7 +669,7 @@ static Variant post_proc_open(CStrRef cmd, Variant &pipes,
   return Object(proc);
 }
 
-Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, Variant pipes,
+Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
                     CStrRef cwd /* = null_string */,
                     CVarRef env /* = null_variant */,
                     CVarRef other_options /* = null_variant */) {

@@ -142,7 +142,7 @@ inline Variant f_array_pad(CVarRef input, int pad_size, CVarRef pad_value) {
   return ArrayUtil::Pad(arr_input, pad_value, -pad_size, false);
 }
 
-inline Variant f_array_pop(Variant array) {
+inline Variant f_array_pop(VRefParam array) {
   return array.pop();
 }
 inline Variant f_array_product(CVarRef array) {
@@ -163,7 +163,7 @@ inline Variant f_array_product(CVarRef array) {
   }
 }
 
-Variant f_array_push(int _argc, Variant array, CVarRef var, CArrRef _argv = null_array);
+Variant f_array_push(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array);
 
 inline Variant f_array_rand(CVarRef input, int num_req = 1) {
   if (!input.isArray()) {
@@ -194,7 +194,7 @@ inline Variant f_array_search(CVarRef needle, CVarRef haystack,
   CArrRef arr_haystack = haystack.toArrNR();
   return arr_haystack.key(needle, strict);
 }
-inline Variant f_array_shift(Variant array) {
+inline Variant f_array_shift(VRefParam array) {
   return array.dequeue();
 }
 inline Variant f_array_slice(CVarRef array, int offset,
@@ -208,7 +208,7 @@ inline Variant f_array_slice(CVarRef array, int offset,
   CArrRef arr = array.toArrNR();
   return ArrayUtil::Slice(arr, offset, len, preserve_keys);
 }
-inline Variant f_array_splice(Variant input, int offset,
+inline Variant f_array_splice(VRefParam input, int offset,
                             CVarRef length = null_variant,
                             CVarRef replacement = null_variant) {
   if (!input.isArray()) {
@@ -238,7 +238,7 @@ inline Variant f_array_sum(CVarRef array) {
 
 Variant f_array_unique(CVarRef array, int sort_flags = 2);
 
-int f_array_unshift(int _argc, Variant array, CVarRef var, CArrRef _argv = null_array);
+int f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array);
 
 inline Variant f_array_values(CVarRef input) {
   if (!input.isArray()) {
@@ -249,10 +249,10 @@ inline Variant f_array_values(CVarRef input) {
   return arr_input.values();
 }
 
-bool f_array_walk_recursive(Variant input, CVarRef funcname,
+bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
                             CVarRef userdata = null_variant);
 
-bool f_array_walk(Variant input, CVarRef funcname,
+bool f_array_walk(VRefParam input, CVarRef funcname,
                   CVarRef userdata = null_variant);
 
 /**
@@ -264,7 +264,7 @@ Array compact(RVariableTable *variables, int _argc, CVarRef varname,
 Array compact(LVariableTable *variables, int _argc, CVarRef varname,
               CArrRef _argv = null_array);
 
-inline bool f_shuffle(Variant array) {
+inline bool f_shuffle(VRefParam array) {
   if (!array.isArray()) {
     throw_bad_array_exception();
     return false;
@@ -278,7 +278,7 @@ int f_count(CVarRef var, bool recursive = false);
 inline int f_sizeof(CVarRef var, bool recursive = false) {
   return f_count(var, recursive);
 }
-inline Variant f_each(Variant array) {
+inline Variant f_each(VRefParam array) {
   array.array_iter_dirty_check();
   return array.array_iter_each();
 }
@@ -286,39 +286,39 @@ inline Variant f_current(CVarRef array) {
   array.array_iter_dirty_check();
   return array.array_iter_current();
 }
-inline Variant f_hphp_current_ref(Variant array) {
+inline Variant f_hphp_current_ref(VRefParam array) {
   if (!array.isArray()) {
     throw_bad_array_exception();
     return false;
   }
   return ref(array.array_iter_current_ref());
 }
-inline Variant f_next(Variant array) {
+inline Variant f_next(VRefParam array) {
   array.array_iter_dirty_check();
   return array.array_iter_next();
 }
-inline Variant f_pos(Variant array) {
+inline Variant f_pos(VRefParam array) {
   array.array_iter_dirty_check();
   return array.array_iter_current();
 }
-inline Variant f_prev(Variant array) {
+inline Variant f_prev(VRefParam array) {
   array.array_iter_dirty_check();
   return array.array_iter_prev();
 }
-inline Variant f_reset(Variant array) {
+inline Variant f_reset(VRefParam array) {
   array.array_iter_dirty_reset();
   return array.array_iter_reset();
 }
-inline Variant f_end(Variant array) {
+inline Variant f_end(VRefParam array) {
   array.array_iter_dirty_reset();
   return array.array_iter_end();
 }
-inline Variant f_key(Variant array) {
+inline Variant f_key(VRefParam array) {
   array.array_iter_dirty_check();
   return array.array_iter_key();
 }
 
-Variant f_hphp_get_iterator(Variant iterable, bool isMutable);
+Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable);
 
 inline bool f_in_array(CVarRef needle, CVarRef haystack, bool strict = false) {
   if (!haystack.isArray()) {
@@ -361,19 +361,19 @@ Variant f_array_intersect_key(int _argc, CVarRef array1, CVarRef array2, CArrRef
 Variant f_array_intersect_ukey(int _argc, CVarRef array1, CVarRef array2,
                                CVarRef key_compare_func, CArrRef _argv = null_array);
 
-bool f_sort(Variant array, int sort_flags = 0, bool use_collator = false);
-bool f_rsort(Variant array, int sort_flags = 0, bool use_collator = false);
-bool f_asort(Variant array, int sort_flags = 0, bool use_collator = false);
-bool f_arsort(Variant array, int sort_flags = 0, bool use_collator = false);
-bool f_ksort(Variant array, int sort_flags = 0);
-bool f_krsort(Variant array, int sort_flags = 0);
-bool f_usort(Variant array, CVarRef cmp_function);
-bool f_uasort(Variant array, CVarRef cmp_function);
-bool f_uksort(Variant array, CVarRef cmp_function);
-Variant f_natsort(Variant array);
-Variant f_natcasesort(Variant array);
+bool f_sort(VRefParam array, int sort_flags = 0, bool use_collator = false);
+bool f_rsort(VRefParam array, int sort_flags = 0, bool use_collator = false);
+bool f_asort(VRefParam array, int sort_flags = 0, bool use_collator = false);
+bool f_arsort(VRefParam array, int sort_flags = 0, bool use_collator = false);
+bool f_ksort(VRefParam array, int sort_flags = 0);
+bool f_krsort(VRefParam array, int sort_flags = 0);
+bool f_usort(VRefParam array, CVarRef cmp_function);
+bool f_uasort(VRefParam array, CVarRef cmp_function);
+bool f_uksort(VRefParam array, CVarRef cmp_function);
+Variant f_natsort(VRefParam array);
+Variant f_natcasesort(VRefParam array);
 
-bool f_array_multisort(int _argc, Variant ar1, CArrRef _argv = null_array);
+bool f_array_multisort(int _argc, VRefParam ar1, CArrRef _argv = null_array);
 
 String f_i18n_loc_get_default();
 bool f_i18n_loc_set_default(CStrRef locale);

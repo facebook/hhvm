@@ -63,7 +63,7 @@ class c_Directory : public ExtObjectData {
   public:
   void init();
   public: void t___construct(Variant v_path);
-  public: c_Directory *create(Variant v_path);
+  public: c_Directory *create(CVarRef v_path);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);

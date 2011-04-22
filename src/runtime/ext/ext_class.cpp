@@ -216,12 +216,12 @@ Variant f_get_object_vars(CVarRef object) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_call_user_method_array(CStrRef method_name, Variant obj,
+Variant f_call_user_method_array(CStrRef method_name, VRefParam obj,
                                  CArrRef paramarr) {
   return obj.toObject()->o_invoke(method_name, paramarr, -1);
 }
 
-Variant f_call_user_method(int _argc, CStrRef method_name, Variant obj,
+Variant f_call_user_method(int _argc, CStrRef method_name, VRefParam obj,
                            CArrRef _argv /* = null_array */) {
   return obj.toObject()->o_invoke(method_name, _argv, -1);
 }

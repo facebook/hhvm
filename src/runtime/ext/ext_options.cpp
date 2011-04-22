@@ -597,7 +597,7 @@ Array f_getrusage(int who /* = 0 */) {
                create());
 }
 
-bool f_clock_getres(int clk_id, Variant sec, Variant nsec) {
+bool f_clock_getres(int clk_id, VRefParam sec, VRefParam nsec) {
 #if defined(__APPLE__)
   throw NotSupportedException(__func__, "feature not supported on OSX");
 #else
@@ -609,7 +609,7 @@ bool f_clock_getres(int clk_id, Variant sec, Variant nsec) {
 #endif
 }
 
-bool f_clock_gettime(int clk_id, Variant sec, Variant nsec) {
+bool f_clock_gettime(int clk_id, VRefParam sec, VRefParam nsec) {
 #if defined(__APPLE__)
   throw NotSupportedException(__func__, "feature not supported on OSX");
 #else

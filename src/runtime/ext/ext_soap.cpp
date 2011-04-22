@@ -2407,7 +2407,7 @@ Variant c_SoapClient::t___call(Variant name, Variant args) {
 Variant c_SoapClient::t___soapcall(CStrRef name, CArrRef args,
                                    CArrRef options /* = null_array */,
                                    CVarRef input_headers /* = null_variant */,
-                                   Variant output_headers /* = null */) {
+                                   VRefParam output_headers /* = null */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__soapcall);
   SoapClientScope ss(this);
 

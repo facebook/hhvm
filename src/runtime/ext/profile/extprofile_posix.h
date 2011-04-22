@@ -27,176 +27,211 @@ namespace HPHP {
 
 inline bool x_posix_access(CStrRef file, int mode = 0) {
   FUNCTION_INJECTION_BUILTIN(posix_access);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_access(file, mode);
 }
 
 inline String x_posix_ctermid() {
   FUNCTION_INJECTION_BUILTIN(posix_ctermid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_ctermid();
 }
 
 inline int x_posix_get_last_error() {
   FUNCTION_INJECTION_BUILTIN(posix_get_last_error);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_get_last_error();
 }
 
 inline String x_posix_getcwd() {
   FUNCTION_INJECTION_BUILTIN(posix_getcwd);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_getcwd();
 }
 
 inline int x_posix_getegid() {
   FUNCTION_INJECTION_BUILTIN(posix_getegid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_getegid();
 }
 
 inline int x_posix_geteuid() {
   FUNCTION_INJECTION_BUILTIN(posix_geteuid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_geteuid();
 }
 
 inline int x_posix_getgid() {
   FUNCTION_INJECTION_BUILTIN(posix_getgid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_getgid();
 }
 
 inline Variant x_posix_getgrgid(int gid) {
   FUNCTION_INJECTION_BUILTIN(posix_getgrgid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_getgrgid(gid);
 }
 
 inline Variant x_posix_getgrnam(CStrRef name) {
   FUNCTION_INJECTION_BUILTIN(posix_getgrnam);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_getgrnam(name);
 }
 
 inline Variant x_posix_getgroups() {
   FUNCTION_INJECTION_BUILTIN(posix_getgroups);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_getgroups();
 }
 
 inline Variant x_posix_getlogin() {
   FUNCTION_INJECTION_BUILTIN(posix_getlogin);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_getlogin();
 }
 
 inline Variant x_posix_getpgid(int pid) {
   FUNCTION_INJECTION_BUILTIN(posix_getpgid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_getpgid(pid);
 }
 
 inline int x_posix_getpgrp() {
   FUNCTION_INJECTION_BUILTIN(posix_getpgrp);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_getpgrp();
 }
 
 inline int x_posix_getpid() {
   FUNCTION_INJECTION_BUILTIN(posix_getpid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_getpid();
 }
 
 inline int x_posix_getppid() {
   FUNCTION_INJECTION_BUILTIN(posix_getppid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_getppid();
 }
 
 inline Variant x_posix_getpwnam(CStrRef username) {
   FUNCTION_INJECTION_BUILTIN(posix_getpwnam);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_getpwnam(username);
 }
 
 inline Variant x_posix_getpwuid(int uid) {
   FUNCTION_INJECTION_BUILTIN(posix_getpwuid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_getpwuid(uid);
 }
 
 inline Variant x_posix_getrlimit() {
   FUNCTION_INJECTION_BUILTIN(posix_getrlimit);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_getrlimit();
 }
 
 inline Variant x_posix_getsid(int pid) {
   FUNCTION_INJECTION_BUILTIN(posix_getsid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_getsid(pid);
 }
 
 inline int x_posix_getuid() {
   FUNCTION_INJECTION_BUILTIN(posix_getuid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_getuid();
 }
 
 inline bool x_posix_initgroups(CStrRef name, int base_group_id) {
   FUNCTION_INJECTION_BUILTIN(posix_initgroups);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_initgroups(name, base_group_id);
 }
 
 inline bool x_posix_isatty(CVarRef fd) {
   FUNCTION_INJECTION_BUILTIN(posix_isatty);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_isatty(fd);
 }
 
 inline bool x_posix_kill(int pid, int sig) {
   FUNCTION_INJECTION_BUILTIN(posix_kill);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_kill(pid, sig);
 }
 
 inline bool x_posix_mkfifo(CStrRef pathname, int mode) {
   FUNCTION_INJECTION_BUILTIN(posix_mkfifo);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_mkfifo(pathname, mode);
 }
 
 inline bool x_posix_mknod(CStrRef pathname, int mode, int major = 0, int minor = 0) {
   FUNCTION_INJECTION_BUILTIN(posix_mknod);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_mknod(pathname, mode, major, minor);
 }
 
 inline bool x_posix_setegid(int gid) {
   FUNCTION_INJECTION_BUILTIN(posix_setegid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_setegid(gid);
 }
 
 inline bool x_posix_seteuid(int uid) {
   FUNCTION_INJECTION_BUILTIN(posix_seteuid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_seteuid(uid);
 }
 
 inline bool x_posix_setgid(int gid) {
   FUNCTION_INJECTION_BUILTIN(posix_setgid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_setgid(gid);
 }
 
 inline bool x_posix_setpgid(int pid, int pgid) {
   FUNCTION_INJECTION_BUILTIN(posix_setpgid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_setpgid(pid, pgid);
 }
 
 inline int x_posix_setsid() {
   FUNCTION_INJECTION_BUILTIN(posix_setsid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_setsid();
 }
 
 inline bool x_posix_setuid(int uid) {
   FUNCTION_INJECTION_BUILTIN(posix_setuid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_setuid(uid);
 }
 
 inline String x_posix_strerror(int errnum) {
   FUNCTION_INJECTION_BUILTIN(posix_strerror);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_strerror(errnum);
 }
 
 inline Variant x_posix_times() {
   FUNCTION_INJECTION_BUILTIN(posix_times);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_times();
 }
 
 inline Variant x_posix_ttyname(CVarRef fd) {
   FUNCTION_INJECTION_BUILTIN(posix_ttyname);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_ttyname(fd);
 }
 
 inline Variant x_posix_uname() {
   FUNCTION_INJECTION_BUILTIN(posix_uname);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_posix_uname();
 }
 

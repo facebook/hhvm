@@ -27,41 +27,49 @@ namespace HPHP {
 
 inline Variant x_simplexml_load_string(CStrRef data, CStrRef class_name = "SimpleXMLElement", int64 options = 0, CStrRef ns = "", bool is_prefix = false) {
   FUNCTION_INJECTION_BUILTIN(simplexml_load_string);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_simplexml_load_string(data, class_name, options, ns, is_prefix);
 }
 
 inline Variant x_simplexml_load_file(CStrRef filename, CStrRef class_name = "SimpleXMLElement", int64 options = 0, CStrRef ns = "", bool is_prefix = false) {
   FUNCTION_INJECTION_BUILTIN(simplexml_load_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_simplexml_load_file(filename, class_name, options, ns, is_prefix);
 }
 
 inline Variant x_libxml_get_errors() {
   FUNCTION_INJECTION_BUILTIN(libxml_get_errors);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_libxml_get_errors();
 }
 
 inline Variant x_libxml_get_last_error() {
   FUNCTION_INJECTION_BUILTIN(libxml_get_last_error);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_libxml_get_last_error();
 }
 
 inline void x_libxml_clear_errors() {
   FUNCTION_INJECTION_BUILTIN(libxml_clear_errors);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_libxml_clear_errors();
 }
 
 inline bool x_libxml_use_internal_errors(CVarRef use_errors = null_variant) {
   FUNCTION_INJECTION_BUILTIN(libxml_use_internal_errors);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_libxml_use_internal_errors(use_errors);
 }
 
 inline void x_libxml_set_streams_context(CObjRef streams_context) {
   FUNCTION_INJECTION_BUILTIN(libxml_set_streams_context);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_libxml_set_streams_context(streams_context);
 }
 
 inline bool x_libxml_disable_entity_loader(bool disable = true) {
   FUNCTION_INJECTION_BUILTIN(libxml_disable_entity_loader);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_libxml_disable_entity_loader(disable);
 }
 

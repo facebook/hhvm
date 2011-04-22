@@ -27,101 +27,121 @@ namespace HPHP {
 
 inline void x_session_set_cookie_params(int64 lifetime, CStrRef path = null_string, CStrRef domain = null_string, CVarRef secure = null, CVarRef httponly = null) {
   FUNCTION_INJECTION_BUILTIN(session_set_cookie_params);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_session_set_cookie_params(lifetime, path, domain, secure, httponly);
 }
 
 inline Array x_session_get_cookie_params() {
   FUNCTION_INJECTION_BUILTIN(session_get_cookie_params);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_session_get_cookie_params();
 }
 
 inline String x_session_name(CStrRef newname = null_string) {
   FUNCTION_INJECTION_BUILTIN(session_name);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_session_name(newname);
 }
 
 inline Variant x_session_module_name(CStrRef newname = null_string) {
   FUNCTION_INJECTION_BUILTIN(session_module_name);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_session_module_name(newname);
 }
 
 inline bool x_session_set_save_handler(CStrRef open, CStrRef close, CStrRef read, CStrRef write, CStrRef destroy, CStrRef gc) {
   FUNCTION_INJECTION_BUILTIN(session_set_save_handler);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_session_set_save_handler(open, close, read, write, destroy, gc);
 }
 
 inline String x_session_save_path(CStrRef newname = null_string) {
   FUNCTION_INJECTION_BUILTIN(session_save_path);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_session_save_path(newname);
 }
 
 inline String x_session_id(CStrRef newid = null_string) {
   FUNCTION_INJECTION_BUILTIN(session_id);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_session_id(newid);
 }
 
 inline bool x_session_regenerate_id(bool delete_old_session = false) {
   FUNCTION_INJECTION_BUILTIN(session_regenerate_id);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_session_regenerate_id(delete_old_session);
 }
 
 inline String x_session_cache_limiter(CStrRef new_cache_limiter = null_string) {
   FUNCTION_INJECTION_BUILTIN(session_cache_limiter);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_session_cache_limiter(new_cache_limiter);
 }
 
 inline int64 x_session_cache_expire(CStrRef new_cache_expire = null_string) {
   FUNCTION_INJECTION_BUILTIN(session_cache_expire);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_session_cache_expire(new_cache_expire);
 }
 
 inline Variant x_session_encode() {
   FUNCTION_INJECTION_BUILTIN(session_encode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_session_encode();
 }
 
 inline bool x_session_decode(CStrRef data) {
   FUNCTION_INJECTION_BUILTIN(session_decode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_session_decode(data);
 }
 
 inline bool x_session_start() {
   FUNCTION_INJECTION_BUILTIN(session_start);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_session_start();
 }
 
 inline bool x_session_destroy() {
   FUNCTION_INJECTION_BUILTIN(session_destroy);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_session_destroy();
 }
 
 inline Variant x_session_unset() {
   FUNCTION_INJECTION_BUILTIN(session_unset);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_session_unset();
 }
 
 inline void x_session_commit() {
   FUNCTION_INJECTION_BUILTIN(session_commit);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_session_commit();
 }
 
 inline void x_session_write_close() {
   FUNCTION_INJECTION_BUILTIN(session_write_close);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_session_write_close();
 }
 
 inline bool x_session_register(int _argc, CVarRef var_names, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(session_register);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_session_register(_argc, var_names, _argv);
 }
 
 inline bool x_session_unregister(CStrRef varname) {
   FUNCTION_INJECTION_BUILTIN(session_unregister);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_session_unregister(varname);
 }
 
 inline bool x_session_is_registered(CStrRef varname) {
   FUNCTION_INJECTION_BUILTIN(session_is_registered);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_session_is_registered(varname);
 }
 

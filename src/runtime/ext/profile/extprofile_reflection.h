@@ -26,50 +26,62 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline Array x_hphp_get_extension_info(CStrRef name) {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_get_extension_info(name);
 }
 
 inline Array x_hphp_get_class_info(CVarRef name) {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_get_class_info(name);
 }
 
 inline Array x_hphp_get_function_info(CStrRef name) {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_get_function_info(name);
 }
 
 inline Variant x_hphp_invoke(CStrRef name, CArrRef params) {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_invoke(name, params);
 }
 
 inline Variant x_hphp_invoke_method(CVarRef obj, CStrRef cls, CStrRef name, CArrRef params) {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_invoke_method(obj, cls, name, params);
 }
 
 inline bool x_hphp_instanceof(CObjRef obj, CStrRef name) {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_instanceof(obj, name);
 }
 
 inline Object x_hphp_create_object(CStrRef name, CArrRef params) {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_create_object(name, params);
 }
 
 inline Variant x_hphp_get_property(CObjRef obj, CStrRef cls, CStrRef prop) {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_get_property(obj, cls, prop);
 }
 
 inline void x_hphp_set_property(CObjRef obj, CStrRef cls, CStrRef prop, CVarRef value) {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_set_property(obj, cls, prop, value);
 }
 
 inline Variant x_hphp_get_static_property(CStrRef cls, CStrRef prop) {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_get_static_property(cls, prop);
 }
 
 inline void x_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value) {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_set_static_property(cls, prop, value);
 }
 
 inline String x_hphp_get_original_class_name(CStrRef name) {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_get_original_class_name(name);
 }
 

@@ -27,81 +27,97 @@ namespace HPHP {
 
 inline bool x_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef additional_headers = null_string, CStrRef additional_parameters = null_string) {
   FUNCTION_INJECTION_BUILTIN(mail);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mail(to, subject, message, additional_headers, additional_parameters);
 }
 
 inline int x_ezmlm_hash(CStrRef addr) {
   FUNCTION_INJECTION_BUILTIN(ezmlm_hash);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ezmlm_hash(addr);
 }
 
 inline Object x_mailparse_msg_create() {
   FUNCTION_INJECTION_BUILTIN(mailparse_msg_create);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mailparse_msg_create();
 }
 
 inline bool x_mailparse_msg_free(CObjRef mimemail) {
   FUNCTION_INJECTION_BUILTIN(mailparse_msg_free);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mailparse_msg_free(mimemail);
 }
 
 inline Variant x_mailparse_msg_parse_file(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(mailparse_msg_parse_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mailparse_msg_parse_file(filename);
 }
 
 inline bool x_mailparse_msg_parse(CObjRef mimemail, CStrRef data) {
   FUNCTION_INJECTION_BUILTIN(mailparse_msg_parse);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mailparse_msg_parse(mimemail, data);
 }
 
 inline Variant x_mailparse_msg_extract_part_file(CObjRef mimemail, CVarRef filename, CVarRef callbackfunc = "") {
   FUNCTION_INJECTION_BUILTIN(mailparse_msg_extract_part_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mailparse_msg_extract_part_file(mimemail, filename, callbackfunc);
 }
 
 inline Variant x_mailparse_msg_extract_whole_part_file(CObjRef mimemail, CVarRef filename, CVarRef callbackfunc = "") {
   FUNCTION_INJECTION_BUILTIN(mailparse_msg_extract_whole_part_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mailparse_msg_extract_whole_part_file(mimemail, filename, callbackfunc);
 }
 
 inline Variant x_mailparse_msg_extract_part(CObjRef mimemail, CVarRef msgbody, CVarRef callbackfunc = "") {
   FUNCTION_INJECTION_BUILTIN(mailparse_msg_extract_part);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mailparse_msg_extract_part(mimemail, msgbody, callbackfunc);
 }
 
 inline Array x_mailparse_msg_get_part_data(CObjRef mimemail) {
   FUNCTION_INJECTION_BUILTIN(mailparse_msg_get_part_data);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mailparse_msg_get_part_data(mimemail);
 }
 
 inline Variant x_mailparse_msg_get_part(CObjRef mimemail, CStrRef mimesection) {
   FUNCTION_INJECTION_BUILTIN(mailparse_msg_get_part);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mailparse_msg_get_part(mimemail, mimesection);
 }
 
 inline Array x_mailparse_msg_get_structure(CObjRef mimemail) {
   FUNCTION_INJECTION_BUILTIN(mailparse_msg_get_structure);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mailparse_msg_get_structure(mimemail);
 }
 
 inline Array x_mailparse_rfc822_parse_addresses(CStrRef addresses) {
   FUNCTION_INJECTION_BUILTIN(mailparse_rfc822_parse_addresses);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mailparse_rfc822_parse_addresses(addresses);
 }
 
 inline bool x_mailparse_stream_encode(CObjRef sourcefp, CObjRef destfp, CStrRef encoding) {
   FUNCTION_INJECTION_BUILTIN(mailparse_stream_encode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mailparse_stream_encode(sourcefp, destfp, encoding);
 }
 
 inline Variant x_mailparse_uudecode_all(CObjRef fp) {
   FUNCTION_INJECTION_BUILTIN(mailparse_uudecode_all);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mailparse_uudecode_all(fp);
 }
 
 inline Variant x_mailparse_determine_best_xfer_encoding(CObjRef fp) {
   FUNCTION_INJECTION_BUILTIN(mailparse_determine_best_xfer_encoding);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mailparse_determine_best_xfer_encoding(fp);
 }
 

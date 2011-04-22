@@ -114,6 +114,11 @@ class Variant {
     setUninitNull();
   }
 
+  enum NullInit { nullInit };
+  Variant(NullInit) { _count = 0; m_type = KindOfNull; }
+  enum NoInit { noInit };
+  Variant(NoInit) {}
+
   void destruct();
 
   ~Variant() { if (IS_REFCOUNTED_TYPE(m_type)) destruct(); }
@@ -153,22 +158,23 @@ class Variant {
   Variant(ObjectData *v);
   Variant(Variant *v);
 
-  template<typename T>
-  Variant(const SmartObject<T> &v) : _count(0) { init((ObjectData *)v.get()); }
-
   inline ALWAYS_INLINE void VariantHelper(CVarRef v) {
-    setUninitNull();
-    if (v.isContagious()) {
-      assignContagious(v);
+    if (UNLIKELY(v.isContagious())) {
+      v.clearContagious();
+      constructRefHelper(v);
       return;
     }
-    bind(v);
+    constructValHelper(v);
   }
 
 #ifdef INLINE_VARIANT_HELPER
   inline ALWAYS_INLINE Variant(CVarRef v) { VariantHelper(v);}
+  Variant(CVarWeakBind v) { constructValHelper(variant(v)); }
+  Variant(CVarStrongBind v) { constructRefHelper(variant(v)); }
 #else
   Variant(CVarRef v);
+  Variant(CVarWeakBind v);
+  Variant(CVarStrongBind v);
 #endif
 
  private:
@@ -372,6 +378,10 @@ class Variant {
   Variant &operator=(CVarRef v) {
     return assign(v);
   }
+  Variant &operator=(RefResult v) { return assignRef(variant(v)); }
+  Variant &operator=(CVarStrongBind v) { return assignRef(variant(v)); }
+  Variant &operator=(CVarWeakBind v) { return assignVal(variant(v)); }
+
   Variant &operator=(const StaticString &v) {
     set(v);
     return *this;
@@ -894,15 +904,7 @@ class Variant {
   }
   Variant *getVariantData() const {
     // Wrap into a referenceable form, if it isn't already.
-    if (m_type != KindOfVariant) {
-      Variant *shared = NEW(Variant)();
-      shared->bindNoVariant(*this);
-      shared->_count = 1;
-
-      _count = 0;
-      m_data.pvar = shared;
-      m_type = KindOfVariant;
-    }
+    PromoteToVariant(*this);
     ASSERT(m_type == KindOfVariant);
     return m_data.pvar;
   }
@@ -1021,97 +1023,6 @@ class Variant {
   // only called from constructor
   void init(ObjectData *v);
 
-  void bindNoVariant(CVarRef v) {
-    ASSERT(v.m_type != KindOfVariant);
-    m_type = v.m_type;
-    m_data.num = v.m_data.num;
-    if (IS_REFCOUNTED_TYPE(v.m_type)) {
-#ifdef FAST_REFCOUNT_FOR_VARIANT
-      m_data.pvar->incRefCount();
-#else
-      switch (m_type) {
-      case KindOfString:
-        ASSERT(m_data.pstr);
-        m_data.pstr->incRefCount();
-        break;
-      case KindOfArray:
-        ASSERT(m_data.parr);
-        m_data.parr->incRefCount();
-        break;
-      case KindOfObject:
-        ASSERT(m_data.pobj);
-        m_data.pobj->incRefCount();
-        break;
-      default:
-        ASSERT(false);
-      }
-#endif
-    } else if (m_type == KindOfUninit) {
-      m_type = KindOfNull; // drop uninit
-    }
-  }
-
-  // Internal helper for weakly binding a variable. m_type should be viewed
-  // as KindOfNull and for complex types the old data already released.
-  void bind(CVarRef v) {
-    if (!IS_REFCOUNTED_TYPE(v.m_type)) {
-      m_type = v.m_type;
-      if (m_type == KindOfUninit) m_type = KindOfNull; // drop uninit
-      m_data.num = v.m_data.num;
-      return;
-    }
-#ifdef FAST_REFCOUNT_FOR_VARIANT
-    Variant *var = v.m_data.pvar;
-    ASSERT(var);
-    if (v.m_type != KindOfVariant) {
-      m_type = v.m_type;
-      m_data.pvar = var;
-      /**
-       * This is safe because we have compile time assertions that
-       * guarantee that the _count field will always be exactly
-       * FAST_REFCOUNT_OFFSET bytes from the beginning of the object
-       * for the StringData, ArrayData, ObjectData, and Variant classes.
-       */
-      var->incRefCount();
-    } else {
-      bindNoVariant(*var);
-    }
-#else
-    switch (v.m_type) {
-    // copy-on-write: ref counting complex types
-    case KindOfString: {
-      StringData *str = v.m_data.pstr;
-      ASSERT(str);
-      m_type = KindOfString;
-      m_data.pstr = str;
-      str->incRefCount();
-      break;
-    }
-    case KindOfArray: {
-      ArrayData *arr = v.m_data.parr;
-      ASSERT(arr);
-      m_type = KindOfArray;
-      m_data.parr = arr;
-      arr->incRefCount();
-      break;
-    }
-    case KindOfObject: {
-      ObjectData *obj = v.m_data.pobj;
-      ASSERT(obj);
-      m_type = KindOfObject;
-      m_data.pobj = obj;
-      obj->incRefCount();
-      break;
-    }
-    case KindOfVariant:
-      bindNoVariant(*v.m_data.pvar);
-      break;
-    default:
-      ASSERT(false);
-    }
-#endif
-  }
-
   static void AssignValHelper(Variant *self, const Variant *other) {
     ASSERT(!self->isContagious() && !other->isContagious());
     if (self->m_type == KindOfVariant) self = self->m_data.pvar;
@@ -1160,9 +1071,11 @@ class Variant {
     }
   }
 
-  void assignRefHelper(CVarRef v) {
+  static inline ALWAYS_INLINE void PromoteToVariant(CVarRef v) {
+    ASSERT(!v.isVarNR());
+    ASSERT(&v != &null_variant);
     if (v.m_type != KindOfVariant) {
-      Variant *shared = NEW(Variant)();
+      Variant *shared = NEW(Variant)(noInit);
       if (v.m_type == KindOfUninit) {
         shared->m_type = KindOfNull;
       } else {
@@ -1172,7 +1085,49 @@ class Variant {
       const_cast<Variant&>(v).m_type = KindOfVariant;
       const_cast<Variant&>(v).m_data.pvar = shared;
     }
+  }
+
+  void assignRefHelper(CVarRef v) {
+    PromoteToVariant(v);
     strongBind(v.m_data.pvar);
+  }
+
+  void constructRefHelper(CVarRef v) {
+    PromoteToVariant(v);
+    v.m_data.pvar->incRefCount();
+    m_data.pvar = v.m_data.pvar;
+    m_type = KindOfVariant;
+    _count = 0;
+  }
+
+  void constructValHelper(CVarRef v) {
+    const Variant *other = v.m_type == KindOfVariant ? v.m_data.pvar : &v;
+    ASSERT(this != other);
+    if (IS_REFCOUNTED_TYPE(other->m_type)) {
+#ifdef FAST_REFCOUNT_FOR_VARIANT
+      other->m_data.pvar->incRefCount();
+#else
+      switch (other->m_type) {
+        case KindOfString:
+          ASSERT(other->m_data.pstr);
+          other->m_data.pstr->incRefCount();
+          break;
+        case KindOfArray:
+          ASSERT(other->m_data.parr);
+          other->m_data.parr->incRefCount();
+          break;
+        case KindOfObject:
+          ASSERT(other->m_data.pobj);
+          other->m_data.pobj->incRefCount();
+          break;
+        default:
+          ASSERT(false);
+      }
+#endif
+    }
+    _count = 0;
+    m_type = other->m_type != KindOfUninit ? other->m_type : KindOfNull;
+    m_data = other->m_data;
   }
 
   // Internal helper for handling contagious assignment
@@ -1261,6 +1216,96 @@ class Variant {
   DataType convertToNumeric(int64 *lval, double *dval) const;
 };
 
+class RefResultValue {
+public:
+  operator CVarRef() const { m_var.setContagious(); return m_var; }
+  CVarRef get() const { return m_var; }
+private:
+  Variant m_var;
+};
+
+class VRefParamValue {
+public:
+  template <class T> VRefParamValue(const T &v) : m_var(v) {}
+
+  VRefParamValue() : m_var(Variant::nullInit) {}
+  VRefParamValue(RefResult v) : m_var(strongBind(v)) {}
+  template <typename T>
+  Variant &operator=(const T &v) const {
+    m_var = v;
+    return m_var;
+  }
+  VRefParamValue &operator=(const VRefParamValue &v) const {
+    m_var = v.m_var;
+    return *const_cast<VRefParamValue*>(this);
+  }
+  operator Variant&() const { return m_var; }
+  Variant *operator&() const { return &m_var; }
+  Variant *operator->() const { return &m_var; }
+
+  operator bool   () const { return m_var.toBoolean();}
+  operator int    () const { return m_var.toInt32();}
+  operator int64  () const { return m_var.toInt64();}
+  operator double () const { return m_var.toDouble();}
+  operator String () const { return m_var.toString();}
+  operator Array  () const { return m_var.toArray();}
+  operator Object () const { return m_var.toObject();}
+
+  bool is(DataType type) const { return m_var.is(type); }
+  bool isObject() const { return m_var.isObject(); }
+  bool isReferenced() const { return m_var.isReferenced(); }
+  bool isNull() const { return m_var.isNull(); }
+
+  bool toBoolean() const { return m_var.toBoolean(); }
+  int64 toInt64() const { return m_var.toInt64(); }
+  double toDouble() const { return m_var.toDouble(); }
+  String toString() const { return m_var.toString(); }
+  Array toArray() const { return m_var.toArray(); }
+  Object toObject() const { return m_var.toObject(); }
+  ObjectData *getObjectData() const { return m_var.getObjectData(); }
+
+  CVarRef append(CVarRef v) const { return m_var.append(v); }
+
+  Variant pop() const { return m_var.pop(); }
+  Variant dequeue() const { return m_var.dequeue(); }
+  void prepend(CVarRef v) const { m_var.prepend(v); }
+
+  bool isArray() const { return m_var.isArray(); }
+  ArrNR toArrNR() const { return m_var.toArrNR(); }
+
+  Variant array_iter_reset() const { return m_var.array_iter_reset(); }
+  Variant array_iter_prev() const { return m_var.array_iter_prev(); }
+  Variant array_iter_current() const { return m_var.array_iter_current(); }
+  Variant array_iter_current_ref() const {
+    return m_var.array_iter_current_ref();
+  }
+  Variant array_iter_next() const { return m_var.array_iter_next(); }
+  Variant array_iter_end() const { return m_var.array_iter_end(); }
+  Variant array_iter_key() const { return m_var.array_iter_key(); }
+  Variant array_iter_each() const { return m_var.array_iter_each(); }
+
+  void array_iter_dirty_set() const { return m_var.array_iter_dirty_set(); }
+  void array_iter_dirty_reset() const { return m_var.array_iter_dirty_reset(); }
+  void array_iter_dirty_check() const { return m_var.array_iter_dirty_check(); }
+private:
+  mutable Variant m_var;
+};
+
+inline VRefParamValue vref(CVarRef v) {
+  return strongBind(v);
+}
+
+inline VRefParam directRef(CVarRef v) {
+  return *(VRefParamValue*)&v;
+}
+
+/*
+  these two classes are just to help choose the correct
+  override.
+*/
+class VariantWeakBind : private Variant {};
+class VariantStrongBind : private Variant {};
+
 template<int op> class AssignOp {
 public:
   static Variant assign(Variant &var, CVarRef val);
@@ -1324,7 +1369,7 @@ private:
   bool checkRefCount() {
     if (m_type == KindOfVariant) return false;
     if (!IS_REFCOUNTED_TYPE(m_type)) return true;
-    if (!((Variant*)this)->isVarNR()) return false;
+    if (!isVarNR()) return false;
     switch (m_type) {
     case KindOfArray:
       return m_data.parr->getCount() > 0;
@@ -1348,7 +1393,7 @@ CVarRef Array::setImpl(const T &key, CVarRef v) {
     ArrayData *data = ArrayData::Create(key, v);
     SmartPtr<ArrayData>::operator=(data);
   } else {
-    if (v.isContagious()) {
+    if (UNLIKELY(v.isContagious())) {
       escalate();
     }
     ArrayData *escalated =
@@ -1366,7 +1411,7 @@ CVarRef Array::addImpl(const T &key, CVarRef v) {
     ArrayData *data = ArrayData::Create(key, v);
     SmartPtr<ArrayData>::operator=(data);
   } else {
-    if (v.isContagious()) escalate();
+    if (UNLIKELY(v.isContagious())) escalate();
     ArrayData *escalated = m_px->add(key, v, (m_px->getCount() > 1));
     if (escalated) {
       SmartPtr<ArrayData>::operator=(escalated);

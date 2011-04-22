@@ -55,10 +55,9 @@ class c_SpoofChecker : public ExtObjectData {
   public: ~c_SpoofChecker();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  public: bool t_issuspicious(CStrRef text, Variant issuesFound = null);
+  public: bool t_issuspicious(CStrRef text, VRefParam issuesFound = null);
   DECLARE_METHOD_INVOKE_HELPERS(issuspicious);
-  public: bool t_areconfusable(CStrRef s1, CStrRef s2,
-                               Variant issuesFound = null);
+  public: bool t_areconfusable(CStrRef s1, CStrRef s2, VRefParam issuesFound = null);
   DECLARE_METHOD_INVOKE_HELPERS(areconfusable);
   public: void t_setallowedlocales(CStrRef localesList);
   DECLARE_METHOD_INVOKE_HELPERS(setallowedlocales);

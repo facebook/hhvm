@@ -132,7 +132,7 @@ CallInfo c_ReflectionFunctionAbstract::ci_getclosure((void*)&c_ReflectionFunctio
 CallInfo c_ReflectionFunctionAbstract::ci_getname((void*)&c_ReflectionFunctionAbstract::i_getname, (void*)&c_ReflectionFunctionAbstract::ifa_getname, 0, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionFunctionAbstract::ci_isinternal((void*)&c_ReflectionFunctionAbstract::i_isinternal, (void*)&c_ReflectionFunctionAbstract::ifa_isinternal, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionFunctionAbstract::i_getnumberofrequiredparameters(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionFunctionAbstract *self = NULL;
   p_ReflectionFunctionAbstract pobj;
   if (mcp.obj) {
@@ -140,11 +140,11 @@ Variant c_ReflectionFunctionAbstract::i_getnumberofrequiredparameters(MethodCall
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
   return (self->t_getnumberofrequiredparameters());
 }
 Variant c_ReflectionFunctionAbstract::i_isuserdefined(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionFunctionAbstract *self = NULL;
   p_ReflectionFunctionAbstract pobj;
   if (mcp.obj) {
@@ -152,11 +152,11 @@ Variant c_ReflectionFunctionAbstract::i_isuserdefined(MethodCallPackage &mcp, CA
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
   return (self->t_isuserdefined());
 }
 Variant c_ReflectionFunctionAbstract::i_getnumberofparameters(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionFunctionAbstract *self = NULL;
   p_ReflectionFunctionAbstract pobj;
   if (mcp.obj) {
@@ -164,11 +164,11 @@ Variant c_ReflectionFunctionAbstract::i_getnumberofparameters(MethodCallPackage 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
   return (self->t_getnumberofparameters());
 }
 Variant c_ReflectionFunctionAbstract::i_getendline(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionFunctionAbstract *self = NULL;
   p_ReflectionFunctionAbstract pobj;
   if (mcp.obj) {
@@ -176,11 +176,11 @@ Variant c_ReflectionFunctionAbstract::i_getendline(MethodCallPackage &mcp, CArrR
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
   return (self->t_getendline());
 }
 Variant c_ReflectionFunctionAbstract::i_getstaticvariables(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionFunctionAbstract *self = NULL;
   p_ReflectionFunctionAbstract pobj;
   if (mcp.obj) {
@@ -188,11 +188,11 @@ Variant c_ReflectionFunctionAbstract::i_getstaticvariables(MethodCallPackage &mc
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
   return (self->t_getstaticvariables());
 }
 Variant c_ReflectionFunctionAbstract::i_getparameters(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionFunctionAbstract *self = NULL;
   p_ReflectionFunctionAbstract pobj;
   if (mcp.obj) {
@@ -200,11 +200,11 @@ Variant c_ReflectionFunctionAbstract::i_getparameters(MethodCallPackage &mcp, CA
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
   return (self->t_getparameters());
 }
 Variant c_ReflectionFunctionAbstract::i_returnsreference(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionFunctionAbstract *self = NULL;
   p_ReflectionFunctionAbstract pobj;
   if (mcp.obj) {
@@ -212,11 +212,11 @@ Variant c_ReflectionFunctionAbstract::i_returnsreference(MethodCallPackage &mcp,
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
   return (self->t_returnsreference());
 }
 Variant c_ReflectionFunctionAbstract::i_getfilename(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionFunctionAbstract *self = NULL;
   p_ReflectionFunctionAbstract pobj;
   if (mcp.obj) {
@@ -224,11 +224,11 @@ Variant c_ReflectionFunctionAbstract::i_getfilename(MethodCallPackage &mcp, CArr
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
   return (self->t_getfilename());
 }
 Variant c_ReflectionFunctionAbstract::i_getstartline(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionFunctionAbstract *self = NULL;
   p_ReflectionFunctionAbstract pobj;
   if (mcp.obj) {
@@ -236,11 +236,11 @@ Variant c_ReflectionFunctionAbstract::i_getstartline(MethodCallPackage &mcp, CAr
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
   return (self->t_getstartline());
 }
 Variant c_ReflectionFunctionAbstract::i_getdoccomment(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionFunctionAbstract *self = NULL;
   p_ReflectionFunctionAbstract pobj;
   if (mcp.obj) {
@@ -248,11 +248,11 @@ Variant c_ReflectionFunctionAbstract::i_getdoccomment(MethodCallPackage &mcp, CA
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
   return (self->t_getdoccomment());
 }
 Variant c_ReflectionFunctionAbstract::i_getclosure(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionFunctionAbstract *self = NULL;
   p_ReflectionFunctionAbstract pobj;
   if (mcp.obj) {
@@ -260,11 +260,11 @@ Variant c_ReflectionFunctionAbstract::i_getclosure(MethodCallPackage &mcp, CArrR
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
   return (self->t_getclosure());
 }
 Variant c_ReflectionFunctionAbstract::i_getname(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionFunctionAbstract *self = NULL;
   p_ReflectionFunctionAbstract pobj;
   if (mcp.obj) {
@@ -272,11 +272,11 @@ Variant c_ReflectionFunctionAbstract::i_getname(MethodCallPackage &mcp, CArrRef 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
   return (self->t_getname());
 }
 Variant c_ReflectionFunctionAbstract::i_isinternal(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionFunctionAbstract *self = NULL;
   p_ReflectionFunctionAbstract pobj;
   if (mcp.obj) {
@@ -284,7 +284,7 @@ Variant c_ReflectionFunctionAbstract::i_isinternal(MethodCallPackage &mcp, CArrR
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
   return (self->t_isinternal());
 }
 Variant c_ReflectionFunctionAbstract::ifa_getnumberofrequiredparameters(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -295,7 +295,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getnumberofrequiredparameters(MethodCa
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
   return (self->t_getnumberofrequiredparameters());
 }
 Variant c_ReflectionFunctionAbstract::ifa_isuserdefined(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -306,7 +306,7 @@ Variant c_ReflectionFunctionAbstract::ifa_isuserdefined(MethodCallPackage &mcp, 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
   return (self->t_isuserdefined());
 }
 Variant c_ReflectionFunctionAbstract::ifa_getnumberofparameters(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -317,7 +317,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getnumberofparameters(MethodCallPackag
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
   return (self->t_getnumberofparameters());
 }
 Variant c_ReflectionFunctionAbstract::ifa_getendline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -328,7 +328,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getendline(MethodCallPackage &mcp, int
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
   return (self->t_getendline());
 }
 Variant c_ReflectionFunctionAbstract::ifa_getstaticvariables(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -339,7 +339,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getstaticvariables(MethodCallPackage &
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
   return (self->t_getstaticvariables());
 }
 Variant c_ReflectionFunctionAbstract::ifa_getparameters(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -350,7 +350,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getparameters(MethodCallPackage &mcp, 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
   return (self->t_getparameters());
 }
 Variant c_ReflectionFunctionAbstract::ifa_returnsreference(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -361,7 +361,7 @@ Variant c_ReflectionFunctionAbstract::ifa_returnsreference(MethodCallPackage &mc
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
   return (self->t_returnsreference());
 }
 Variant c_ReflectionFunctionAbstract::ifa_getfilename(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -372,7 +372,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getfilename(MethodCallPackage &mcp, in
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
   return (self->t_getfilename());
 }
 Variant c_ReflectionFunctionAbstract::ifa_getstartline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -383,7 +383,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getstartline(MethodCallPackage &mcp, i
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
   return (self->t_getstartline());
 }
 Variant c_ReflectionFunctionAbstract::ifa_getdoccomment(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -394,7 +394,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getdoccomment(MethodCallPackage &mcp, 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
   return (self->t_getdoccomment());
 }
 Variant c_ReflectionFunctionAbstract::ifa_getclosure(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -405,7 +405,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getclosure(MethodCallPackage &mcp, int
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
   return (self->t_getclosure());
 }
 Variant c_ReflectionFunctionAbstract::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -416,7 +416,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getname(MethodCallPackage &mcp, int co
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
   return (self->t_getname());
 }
 Variant c_ReflectionFunctionAbstract::ifa_isinternal(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -427,11 +427,11 @@ Variant c_ReflectionFunctionAbstract::ifa_isinternal(MethodCallPackage &mcp, int
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
   return (self->t_isinternal());
 }
 bool c_ReflectionFunctionAbstract::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 0:
@@ -647,7 +647,7 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
             MethodCallPackage mcp1;
             CVarRef obj1 = v_param;
             mcp1.methodCall((obj1), NAMSTR(s_sys_ss6d9ef7e5, "isOptional"), 0x2D6EF48BBAB22735LL);
-            const CallInfo *cit1 __attribute__((__unused__)) = mcp1.ci;
+            const CallInfo *cit1 ATTRIBUTE_UNUSED = mcp1.ci;
             tmp0 = (toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0)));
           }
           if (tmp0) {
@@ -745,8 +745,8 @@ void c_ReflectionObject::cloneSet(ObjectData *cl) {
 }
 CallInfo c_ReflectionObject::ci_export((void*)&c_ReflectionObject::i_export, (void*)&c_ReflectionObject::ifa_export, 2, 12, 0x0000000000000000LL);
 Variant c_ReflectionObject::i_export(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
   CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
@@ -757,14 +757,14 @@ Variant c_ReflectionObject::i_export(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ReflectionObject::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
   CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
   return (c_ReflectionObject::ti_export(c, arg0, arg1));
 }
 bool c_ReflectionObject::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 1) {
     case 0:
@@ -882,7 +882,7 @@ void c_ReflectionException::cloneSet(ObjectData *cl) {
   c_Exception::cloneSet(clone);
 }
 bool c_ReflectionException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   return c_Exception::os_get_call_info(mcp, hash);
 }
 bool c_ReflectionException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -1070,7 +1070,7 @@ CallInfo c_ReflectionClass::ci_getname((void*)&c_ReflectionClass::i_getname, (vo
 CallInfo c_ReflectionClass::ci_getproperty((void*)&c_ReflectionClass::i_getproperty, (void*)&c_ReflectionClass::ifa_getproperty, 1, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionClass::ci_isinternal((void*)&c_ReflectionClass::i_isinternal, (void*)&c_ReflectionClass::ifa_isinternal, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionClass::i_getmethods(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1078,7 +1078,7 @@ Variant c_ReflectionClass::i_getmethods(MethodCallPackage &mcp, CArrRef params) 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1088,7 +1088,7 @@ Variant c_ReflectionClass::i_getmethods(MethodCallPackage &mcp, CArrRef params) 
   }
 }
 Variant c_ReflectionClass::i_isiterateable(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1096,11 +1096,11 @@ Variant c_ReflectionClass::i_isiterateable(MethodCallPackage &mcp, CArrRef param
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
   return (self->t_isiterateable());
 }
 Variant c_ReflectionClass::i_getstaticpropertyvalue(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1108,7 +1108,7 @@ Variant c_ReflectionClass::i_getstaticpropertyvalue(MethodCallPackage &mcp, CArr
   } else {
     self = createDummy(pobj);
   }
-  if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1119,7 +1119,7 @@ Variant c_ReflectionClass::i_getstaticpropertyvalue(MethodCallPackage &mcp, CArr
   }
 }
 Variant c_ReflectionClass::i_isuserdefined(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1127,11 +1127,11 @@ Variant c_ReflectionClass::i_isuserdefined(MethodCallPackage &mcp, CArrRef param
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
   return (self->t_isuserdefined());
 }
 Variant c_ReflectionClass::i_newinstance(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1143,7 +1143,7 @@ Variant c_ReflectionClass::i_newinstance(MethodCallPackage &mcp, CArrRef params)
   return (self->t_newinstance(count, p));
 }
 Variant c_ReflectionClass::i_getextension(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1151,11 +1151,11 @@ Variant c_ReflectionClass::i_getextension(MethodCallPackage &mcp, CArrRef params
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
   return (self->t_getextension());
 }
 Variant c_ReflectionClass::i_getconstructor(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1163,11 +1163,11 @@ Variant c_ReflectionClass::i_getconstructor(MethodCallPackage &mcp, CArrRef para
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
   return (self->t_getconstructor());
 }
 Variant c_ReflectionClass::i___tostring(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1175,11 +1175,11 @@ Variant c_ReflectionClass::i___tostring(MethodCallPackage &mcp, CArrRef params) 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_ReflectionClass::i_newinstanceargs(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1187,7 +1187,7 @@ Variant c_ReflectionClass::i_newinstanceargs(MethodCallPackage &mcp, CArrRef par
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1196,7 +1196,7 @@ Variant c_ReflectionClass::i_newinstanceargs(MethodCallPackage &mcp, CArrRef par
   }
 }
 Variant c_ReflectionClass::i_getendline(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1204,11 +1204,11 @@ Variant c_ReflectionClass::i_getendline(MethodCallPackage &mcp, CArrRef params) 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
   return (self->t_getendline());
 }
 Variant c_ReflectionClass::i_isinstance(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1216,7 +1216,7 @@ Variant c_ReflectionClass::i_isinstance(MethodCallPackage &mcp, CArrRef params) 
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1225,7 +1225,7 @@ Variant c_ReflectionClass::i_isinstance(MethodCallPackage &mcp, CArrRef params) 
   }
 }
 Variant c_ReflectionClass::i_hasmethod(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1233,7 +1233,7 @@ Variant c_ReflectionClass::i_hasmethod(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1242,7 +1242,7 @@ Variant c_ReflectionClass::i_hasmethod(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ReflectionClass::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1250,7 +1250,7 @@ Variant c_ReflectionClass::i___construct(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1259,7 +1259,7 @@ Variant c_ReflectionClass::i___construct(MethodCallPackage &mcp, CArrRef params)
   }
 }
 Variant c_ReflectionClass::i_isfinal(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1267,11 +1267,11 @@ Variant c_ReflectionClass::i_isfinal(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
   return (self->t_isfinal());
 }
 Variant c_ReflectionClass::i_getmodifiers(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1279,12 +1279,12 @@ Variant c_ReflectionClass::i_getmodifiers(MethodCallPackage &mcp, CArrRef params
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
   return (self->t_getmodifiers());
 }
 Variant c_ReflectionClass::i_export(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
   CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
@@ -1295,7 +1295,7 @@ Variant c_ReflectionClass::i_export(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ReflectionClass::i_getproperties(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1303,7 +1303,7 @@ Variant c_ReflectionClass::i_getproperties(MethodCallPackage &mcp, CArrRef param
   } else {
     self = createDummy(pobj);
   }
-  if (count > 1) return throw_toomany_arguments("ReflectionClass::getProperties", 1, 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("ReflectionClass::getProperties", 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1313,7 +1313,7 @@ Variant c_ReflectionClass::i_getproperties(MethodCallPackage &mcp, CArrRef param
   }
 }
 Variant c_ReflectionClass::i_hasconstant(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1321,7 +1321,7 @@ Variant c_ReflectionClass::i_hasconstant(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1330,7 +1330,7 @@ Variant c_ReflectionClass::i_hasconstant(MethodCallPackage &mcp, CArrRef params)
   }
 }
 Variant c_ReflectionClass::i_getmethod(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1338,7 +1338,7 @@ Variant c_ReflectionClass::i_getmethod(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1347,7 +1347,7 @@ Variant c_ReflectionClass::i_getmethod(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ReflectionClass::i_getextensionname(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1355,11 +1355,11 @@ Variant c_ReflectionClass::i_getextensionname(MethodCallPackage &mcp, CArrRef pa
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
   return (self->t_getextensionname());
 }
 Variant c_ReflectionClass::i_getparentclass(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1367,11 +1367,11 @@ Variant c_ReflectionClass::i_getparentclass(MethodCallPackage &mcp, CArrRef para
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
   return (self->t_getparentclass());
 }
 Variant c_ReflectionClass::i_getfilename(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1379,11 +1379,11 @@ Variant c_ReflectionClass::i_getfilename(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
   return (self->t_getfilename());
 }
 Variant c_ReflectionClass::i_implementsinterface(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1391,7 +1391,7 @@ Variant c_ReflectionClass::i_implementsinterface(MethodCallPackage &mcp, CArrRef
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1400,7 +1400,7 @@ Variant c_ReflectionClass::i_implementsinterface(MethodCallPackage &mcp, CArrRef
   }
 }
 Variant c_ReflectionClass::i_getinterfacenames(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1408,11 +1408,11 @@ Variant c_ReflectionClass::i_getinterfacenames(MethodCallPackage &mcp, CArrRef p
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
   return (self->t_getinterfacenames());
 }
 Variant c_ReflectionClass::i_getconstant(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1420,7 +1420,7 @@ Variant c_ReflectionClass::i_getconstant(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1429,7 +1429,7 @@ Variant c_ReflectionClass::i_getconstant(MethodCallPackage &mcp, CArrRef params)
   }
 }
 Variant c_ReflectionClass::i_getstartline(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1437,11 +1437,11 @@ Variant c_ReflectionClass::i_getstartline(MethodCallPackage &mcp, CArrRef params
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
   return (self->t_getstartline());
 }
 Variant c_ReflectionClass::i_getconstants(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1449,11 +1449,11 @@ Variant c_ReflectionClass::i_getconstants(MethodCallPackage &mcp, CArrRef params
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
   return (self->t_getconstants());
 }
 Variant c_ReflectionClass::i_getdoccomment(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1461,11 +1461,11 @@ Variant c_ReflectionClass::i_getdoccomment(MethodCallPackage &mcp, CArrRef param
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
   return (self->t_getdoccomment());
 }
 Variant c_ReflectionClass::i_isinterface(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1473,11 +1473,11 @@ Variant c_ReflectionClass::i_isinterface(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
   return (self->t_isinterface());
 }
 Variant c_ReflectionClass::i_issubclassof(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1485,7 +1485,7 @@ Variant c_ReflectionClass::i_issubclassof(MethodCallPackage &mcp, CArrRef params
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1494,7 +1494,7 @@ Variant c_ReflectionClass::i_issubclassof(MethodCallPackage &mcp, CArrRef params
   }
 }
 Variant c_ReflectionClass::i_hasproperty(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1502,7 +1502,7 @@ Variant c_ReflectionClass::i_hasproperty(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1511,7 +1511,7 @@ Variant c_ReflectionClass::i_hasproperty(MethodCallPackage &mcp, CArrRef params)
   }
 }
 Variant c_ReflectionClass::i_getstaticproperties(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1519,11 +1519,11 @@ Variant c_ReflectionClass::i_getstaticproperties(MethodCallPackage &mcp, CArrRef
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
   return (self->t_getstaticproperties());
 }
 Variant c_ReflectionClass::i_test(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1531,7 +1531,7 @@ Variant c_ReflectionClass::i_test(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1541,7 +1541,7 @@ Variant c_ReflectionClass::i_test(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ReflectionClass::i_getdefaultproperties(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1549,11 +1549,11 @@ Variant c_ReflectionClass::i_getdefaultproperties(MethodCallPackage &mcp, CArrRe
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
   return (self->t_getdefaultproperties());
 }
 Variant c_ReflectionClass::i_setstaticpropertyvalue(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1561,7 +1561,7 @@ Variant c_ReflectionClass::i_setstaticpropertyvalue(MethodCallPackage &mcp, CArr
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1571,7 +1571,7 @@ Variant c_ReflectionClass::i_setstaticpropertyvalue(MethodCallPackage &mcp, CArr
   }
 }
 Variant c_ReflectionClass::i_isinstantiable(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1579,11 +1579,11 @@ Variant c_ReflectionClass::i_isinstantiable(MethodCallPackage &mcp, CArrRef para
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
   return (self->t_isinstantiable());
 }
 Variant c_ReflectionClass::i_getinterfaces(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1591,11 +1591,11 @@ Variant c_ReflectionClass::i_getinterfaces(MethodCallPackage &mcp, CArrRef param
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
   return (self->t_getinterfaces());
 }
 Variant c_ReflectionClass::i_fetch(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1603,7 +1603,7 @@ Variant c_ReflectionClass::i_fetch(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1612,7 +1612,7 @@ Variant c_ReflectionClass::i_fetch(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ReflectionClass::i_isabstract(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1620,11 +1620,11 @@ Variant c_ReflectionClass::i_isabstract(MethodCallPackage &mcp, CArrRef params) 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
   return (self->t_isabstract());
 }
 Variant c_ReflectionClass::i_getname(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1632,11 +1632,11 @@ Variant c_ReflectionClass::i_getname(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
   return (self->t_getname());
 }
 Variant c_ReflectionClass::i_getproperty(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1644,7 +1644,7 @@ Variant c_ReflectionClass::i_getproperty(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1653,7 +1653,7 @@ Variant c_ReflectionClass::i_getproperty(MethodCallPackage &mcp, CArrRef params)
   }
 }
 Variant c_ReflectionClass::i_isinternal(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionClass *self = NULL;
   p_ReflectionClass pobj;
   if (mcp.obj) {
@@ -1661,7 +1661,7 @@ Variant c_ReflectionClass::i_isinternal(MethodCallPackage &mcp, CArrRef params) 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
   return (self->t_isinternal());
 }
 Variant c_ReflectionClass::ifa_getmethods(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1672,9 +1672,9 @@ Variant c_ReflectionClass::ifa_getmethods(MethodCallPackage &mcp, int count, INV
   } else {
     self = createDummy(pobj);
   }
-  if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
   if (count <= 0) return (self->t_getmethods());
-  CVarRef arg0((a0));
+  CVarRef arg0(a0);
   return (self->t_getmethods(arg0));
 }
 Variant c_ReflectionClass::ifa_isiterateable(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1685,7 +1685,7 @@ Variant c_ReflectionClass::ifa_isiterateable(MethodCallPackage &mcp, int count, 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
   return (self->t_isiterateable());
 }
 Variant c_ReflectionClass::ifa_getstaticpropertyvalue(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1696,10 +1696,10 @@ Variant c_ReflectionClass::ifa_getstaticpropertyvalue(MethodCallPackage &mcp, in
   } else {
     self = createDummy(pobj);
   }
-  if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
+  CVarRef arg0(a0);
   if (count <= 1) return (self->t_getstaticpropertyvalue(arg0));
-  CVarRef arg1((a1));
+  CVarRef arg1(a1);
   return (self->t_getstaticpropertyvalue(arg0, arg1));
 }
 Variant c_ReflectionClass::ifa_isuserdefined(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1710,7 +1710,7 @@ Variant c_ReflectionClass::ifa_isuserdefined(MethodCallPackage &mcp, int count, 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
   return (self->t_isuserdefined());
 }
 Variant c_ReflectionClass::ifa_newinstance(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1738,7 +1738,7 @@ Variant c_ReflectionClass::ifa_getextension(MethodCallPackage &mcp, int count, I
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
   return (self->t_getextension());
 }
 Variant c_ReflectionClass::ifa_getconstructor(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1749,7 +1749,7 @@ Variant c_ReflectionClass::ifa_getconstructor(MethodCallPackage &mcp, int count,
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
   return (self->t_getconstructor());
 }
 Variant c_ReflectionClass::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1760,7 +1760,7 @@ Variant c_ReflectionClass::ifa___tostring(MethodCallPackage &mcp, int count, INV
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_ReflectionClass::ifa_newinstanceargs(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1771,8 +1771,8 @@ Variant c_ReflectionClass::ifa_newinstanceargs(MethodCallPackage &mcp, int count
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_newinstanceargs(arg0));
 }
 Variant c_ReflectionClass::ifa_getendline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1783,7 +1783,7 @@ Variant c_ReflectionClass::ifa_getendline(MethodCallPackage &mcp, int count, INV
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
   return (self->t_getendline());
 }
 Variant c_ReflectionClass::ifa_isinstance(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1794,8 +1794,8 @@ Variant c_ReflectionClass::ifa_isinstance(MethodCallPackage &mcp, int count, INV
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_isinstance(arg0));
 }
 Variant c_ReflectionClass::ifa_hasmethod(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1806,8 +1806,8 @@ Variant c_ReflectionClass::ifa_hasmethod(MethodCallPackage &mcp, int count, INVO
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_hasmethod(arg0));
 }
 Variant c_ReflectionClass::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1818,8 +1818,8 @@ Variant c_ReflectionClass::ifa___construct(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
+  CVarRef arg0(a0);
   return (self->t___construct(arg0), null);
 }
 Variant c_ReflectionClass::ifa_isfinal(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1830,7 +1830,7 @@ Variant c_ReflectionClass::ifa_isfinal(MethodCallPackage &mcp, int count, INVOKE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
   return (self->t_isfinal());
 }
 Variant c_ReflectionClass::ifa_getmodifiers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1841,14 +1841,14 @@ Variant c_ReflectionClass::ifa_getmodifiers(MethodCallPackage &mcp, int count, I
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
   return (self->t_getmodifiers());
 }
 Variant c_ReflectionClass::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
   CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
   return (c_ReflectionClass::ti_export(c, arg0, arg1));
 }
 Variant c_ReflectionClass::ifa_getproperties(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1859,9 +1859,9 @@ Variant c_ReflectionClass::ifa_getproperties(MethodCallPackage &mcp, int count, 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 1) return throw_toomany_arguments("ReflectionClass::getProperties", 1, 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("ReflectionClass::getProperties", 1, 1);
   if (count <= 0) return (self->t_getproperties());
-  CVarRef arg0((a0));
+  CVarRef arg0(a0);
   return (self->t_getproperties(arg0));
 }
 Variant c_ReflectionClass::ifa_hasconstant(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1872,8 +1872,8 @@ Variant c_ReflectionClass::ifa_hasconstant(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_hasconstant(arg0));
 }
 Variant c_ReflectionClass::ifa_getmethod(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1884,8 +1884,8 @@ Variant c_ReflectionClass::ifa_getmethod(MethodCallPackage &mcp, int count, INVO
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_getmethod(arg0));
 }
 Variant c_ReflectionClass::ifa_getextensionname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1896,7 +1896,7 @@ Variant c_ReflectionClass::ifa_getextensionname(MethodCallPackage &mcp, int coun
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
   return (self->t_getextensionname());
 }
 Variant c_ReflectionClass::ifa_getparentclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1907,7 +1907,7 @@ Variant c_ReflectionClass::ifa_getparentclass(MethodCallPackage &mcp, int count,
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
   return (self->t_getparentclass());
 }
 Variant c_ReflectionClass::ifa_getfilename(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1918,7 +1918,7 @@ Variant c_ReflectionClass::ifa_getfilename(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
   return (self->t_getfilename());
 }
 Variant c_ReflectionClass::ifa_implementsinterface(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1929,8 +1929,8 @@ Variant c_ReflectionClass::ifa_implementsinterface(MethodCallPackage &mcp, int c
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_implementsinterface(arg0));
 }
 Variant c_ReflectionClass::ifa_getinterfacenames(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1941,7 +1941,7 @@ Variant c_ReflectionClass::ifa_getinterfacenames(MethodCallPackage &mcp, int cou
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
   return (self->t_getinterfacenames());
 }
 Variant c_ReflectionClass::ifa_getconstant(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1952,8 +1952,8 @@ Variant c_ReflectionClass::ifa_getconstant(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_getconstant(arg0));
 }
 Variant c_ReflectionClass::ifa_getstartline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1964,7 +1964,7 @@ Variant c_ReflectionClass::ifa_getstartline(MethodCallPackage &mcp, int count, I
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
   return (self->t_getstartline());
 }
 Variant c_ReflectionClass::ifa_getconstants(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1975,7 +1975,7 @@ Variant c_ReflectionClass::ifa_getconstants(MethodCallPackage &mcp, int count, I
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
   return (self->t_getconstants());
 }
 Variant c_ReflectionClass::ifa_getdoccomment(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1986,7 +1986,7 @@ Variant c_ReflectionClass::ifa_getdoccomment(MethodCallPackage &mcp, int count, 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
   return (self->t_getdoccomment());
 }
 Variant c_ReflectionClass::ifa_isinterface(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1997,7 +1997,7 @@ Variant c_ReflectionClass::ifa_isinterface(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
   return (self->t_isinterface());
 }
 Variant c_ReflectionClass::ifa_issubclassof(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2008,8 +2008,8 @@ Variant c_ReflectionClass::ifa_issubclassof(MethodCallPackage &mcp, int count, I
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_issubclassof(arg0));
 }
 Variant c_ReflectionClass::ifa_hasproperty(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2020,8 +2020,8 @@ Variant c_ReflectionClass::ifa_hasproperty(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_hasproperty(arg0));
 }
 Variant c_ReflectionClass::ifa_getstaticproperties(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2032,7 +2032,7 @@ Variant c_ReflectionClass::ifa_getstaticproperties(MethodCallPackage &mcp, int c
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
   return (self->t_getstaticproperties());
 }
 Variant c_ReflectionClass::ifa_test(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2043,9 +2043,9 @@ Variant c_ReflectionClass::ifa_test(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
   return (self->t_test(arg0, arg1));
 }
 Variant c_ReflectionClass::ifa_getdefaultproperties(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2056,7 +2056,7 @@ Variant c_ReflectionClass::ifa_getdefaultproperties(MethodCallPackage &mcp, int 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
   return (self->t_getdefaultproperties());
 }
 Variant c_ReflectionClass::ifa_setstaticpropertyvalue(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2067,9 +2067,9 @@ Variant c_ReflectionClass::ifa_setstaticpropertyvalue(MethodCallPackage &mcp, in
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
   return (self->t_setstaticpropertyvalue(arg0, arg1), null);
 }
 Variant c_ReflectionClass::ifa_isinstantiable(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2080,7 +2080,7 @@ Variant c_ReflectionClass::ifa_isinstantiable(MethodCallPackage &mcp, int count,
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
   return (self->t_isinstantiable());
 }
 Variant c_ReflectionClass::ifa_getinterfaces(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2091,7 +2091,7 @@ Variant c_ReflectionClass::ifa_getinterfaces(MethodCallPackage &mcp, int count, 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
   return (self->t_getinterfaces());
 }
 Variant c_ReflectionClass::ifa_fetch(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2102,8 +2102,8 @@ Variant c_ReflectionClass::ifa_fetch(MethodCallPackage &mcp, int count, INVOKE_F
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_fetch(arg0));
 }
 Variant c_ReflectionClass::ifa_isabstract(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2114,7 +2114,7 @@ Variant c_ReflectionClass::ifa_isabstract(MethodCallPackage &mcp, int count, INV
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
   return (self->t_isabstract());
 }
 Variant c_ReflectionClass::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2125,7 +2125,7 @@ Variant c_ReflectionClass::ifa_getname(MethodCallPackage &mcp, int count, INVOKE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
   return (self->t_getname());
 }
 Variant c_ReflectionClass::ifa_getproperty(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2136,8 +2136,8 @@ Variant c_ReflectionClass::ifa_getproperty(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_getproperty(arg0));
 }
 Variant c_ReflectionClass::ifa_isinternal(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2148,11 +2148,11 @@ Variant c_ReflectionClass::ifa_isinternal(MethodCallPackage &mcp, int count, INV
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
   return (self->t_isinternal());
 }
 bool c_ReflectionClass::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 127) {
     case 4:
@@ -2406,15 +2406,15 @@ bool c_ReflectionClass::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_ReflectionClass *c_ReflectionClass::create(Variant v_name) {
+c_ReflectionClass *c_ReflectionClass::create(CVarRef v_name) {
   CountableHelper h(this);
   init();
   t___construct(v_name);
   return this;
 }
 void c_ReflectionClass::dynConstruct(CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2438,8 +2438,8 @@ void c_ReflectionClass::dynConstructFromEval(Eval::VariableEnvironment &env, con
   for (; i != params.size(); ++i) {
     params[i]->eval(env);
   }
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 1);
   (t___construct(a0), null);
 }
 struct ObjectStaticCallbacks cw_ReflectionClass = {
@@ -3085,7 +3085,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
         MethodCallPackage mcp0;
         CVarRef obj0 = v_cls;
         mcp0.methodCall((obj0), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
-        const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
+        const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
         Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, VarNR(NAMSTR(s_sys_ssdc3cbddc, "name")))));
         v_cls.assignVal(tmp1);
       }
@@ -3141,7 +3141,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
     MethodCallPackage mcp0;
     CVarRef obj0 = t_getparentclass();
     mcp0.methodCall((obj0), NAMSTR(s_sys_ssdd355b2b, "isSubclassOf"), 0x373333991926C97ELL);
-    const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
+    const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
     return wrap_variant((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_cls));
   }
 }
@@ -3166,7 +3166,7 @@ Array c_ReflectionClass::t_getstaticproperties() {
             MethodCallPackage mcp1;
             CVarRef obj1 = v_prop;
             mcp1.methodCall((obj1), NAMSTR(s_sys_ss404bf1b4, "isStatic"), 0x7A15DC56E8CC0B19LL);
-            const CallInfo *cit1 __attribute__((__unused__)) = mcp1.ci;
+            const CallInfo *cit1 ATTRIBUTE_UNUSED = mcp1.ci;
             tmp0 = (toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0)));
           }
           if (tmp0) {
@@ -3233,7 +3233,7 @@ Array c_ReflectionClass::t_getdefaultproperties() {
             MethodCallPackage mcp1;
             CVarRef obj1 = v_prop;
             mcp1.methodCall((obj1), NAMSTR(s_sys_ss9dad4367, "isDefault"), 0x384A52597AB11F15LL);
-            const CallInfo *cit1 __attribute__((__unused__)) = mcp1.ci;
+            const CallInfo *cit1 ATTRIBUTE_UNUSED = mcp1.ci;
             tmp0 = (toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0)));
           }
           if (tmp0) {
@@ -3270,7 +3270,7 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
         MethodCallPackage mcp0;
         CVarRef obj0 = v_cls;
         mcp0.methodCall((obj0), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
-        const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
+        const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
         Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, VarNR(NAMSTR(s_sys_ssdc3cbddc, "name")))));
         v_cls.assignVal(tmp1);
       }
@@ -3335,7 +3335,7 @@ Variant c_ReflectionClass::t_getextensionname() {
     MethodCallPackage mcp0;
     CVarRef obj0 = t_fetch(VarNR(NAMSTR(s_sys_sse9bf4500, "extension")));
     mcp0.methodCall((obj0), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
-    const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
+    const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
     return wrap_variant((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
   }
 }
@@ -3462,7 +3462,7 @@ CallInfo c_ReflectionExtension::ci_getversion((void*)&c_ReflectionExtension::i_g
 CallInfo c_ReflectionExtension::ci_getname((void*)&c_ReflectionExtension::i_getname, (void*)&c_ReflectionExtension::ifa_getname, 0, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionExtension::ci_getclasses((void*)&c_ReflectionExtension::i_getclasses, (void*)&c_ReflectionExtension::ifa_getclasses, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionExtension::i___tostring(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionExtension *self = NULL;
   p_ReflectionExtension pobj;
   if (mcp.obj) {
@@ -3470,11 +3470,11 @@ Variant c_ReflectionExtension::i___tostring(MethodCallPackage &mcp, CArrRef para
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_ReflectionExtension::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionExtension *self = NULL;
   p_ReflectionExtension pobj;
   if (mcp.obj) {
@@ -3482,7 +3482,7 @@ Variant c_ReflectionExtension::i___construct(MethodCallPackage &mcp, CArrRef par
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -3491,7 +3491,7 @@ Variant c_ReflectionExtension::i___construct(MethodCallPackage &mcp, CArrRef par
   }
 }
 Variant c_ReflectionExtension::i_getfunctions(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionExtension *self = NULL;
   p_ReflectionExtension pobj;
   if (mcp.obj) {
@@ -3499,12 +3499,12 @@ Variant c_ReflectionExtension::i_getfunctions(MethodCallPackage &mcp, CArrRef pa
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
   return (self->t_getfunctions());
 }
 Variant c_ReflectionExtension::i_export(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
   CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
@@ -3515,7 +3515,7 @@ Variant c_ReflectionExtension::i_export(MethodCallPackage &mcp, CArrRef params) 
   }
 }
 Variant c_ReflectionExtension::i_info(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionExtension *self = NULL;
   p_ReflectionExtension pobj;
   if (mcp.obj) {
@@ -3523,11 +3523,11 @@ Variant c_ReflectionExtension::i_info(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
   return (self->t_info());
 }
 Variant c_ReflectionExtension::i_getinientries(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionExtension *self = NULL;
   p_ReflectionExtension pobj;
   if (mcp.obj) {
@@ -3535,11 +3535,11 @@ Variant c_ReflectionExtension::i_getinientries(MethodCallPackage &mcp, CArrRef p
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
   return (self->t_getinientries());
 }
 Variant c_ReflectionExtension::i_getconstants(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionExtension *self = NULL;
   p_ReflectionExtension pobj;
   if (mcp.obj) {
@@ -3547,11 +3547,11 @@ Variant c_ReflectionExtension::i_getconstants(MethodCallPackage &mcp, CArrRef pa
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
   return (self->t_getconstants());
 }
 Variant c_ReflectionExtension::i_getclassnames(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionExtension *self = NULL;
   p_ReflectionExtension pobj;
   if (mcp.obj) {
@@ -3559,11 +3559,11 @@ Variant c_ReflectionExtension::i_getclassnames(MethodCallPackage &mcp, CArrRef p
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
   return (self->t_getclassnames());
 }
 Variant c_ReflectionExtension::i_getversion(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionExtension *self = NULL;
   p_ReflectionExtension pobj;
   if (mcp.obj) {
@@ -3571,11 +3571,11 @@ Variant c_ReflectionExtension::i_getversion(MethodCallPackage &mcp, CArrRef para
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
   return (self->t_getversion());
 }
 Variant c_ReflectionExtension::i_getname(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionExtension *self = NULL;
   p_ReflectionExtension pobj;
   if (mcp.obj) {
@@ -3583,11 +3583,11 @@ Variant c_ReflectionExtension::i_getname(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
   return (self->t_getname());
 }
 Variant c_ReflectionExtension::i_getclasses(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionExtension *self = NULL;
   p_ReflectionExtension pobj;
   if (mcp.obj) {
@@ -3595,7 +3595,7 @@ Variant c_ReflectionExtension::i_getclasses(MethodCallPackage &mcp, CArrRef para
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
   return (self->t_getclasses());
 }
 Variant c_ReflectionExtension::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -3606,7 +3606,7 @@ Variant c_ReflectionExtension::ifa___tostring(MethodCallPackage &mcp, int count,
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_ReflectionExtension::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -3617,8 +3617,8 @@ Variant c_ReflectionExtension::ifa___construct(MethodCallPackage &mcp, int count
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
+  CVarRef arg0(a0);
   return (self->t___construct(arg0), null);
 }
 Variant c_ReflectionExtension::ifa_getfunctions(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -3629,14 +3629,14 @@ Variant c_ReflectionExtension::ifa_getfunctions(MethodCallPackage &mcp, int coun
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
   return (self->t_getfunctions());
 }
 Variant c_ReflectionExtension::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
   CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
   return (c_ReflectionExtension::ti_export(c, arg0, arg1));
 }
 Variant c_ReflectionExtension::ifa_info(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -3647,7 +3647,7 @@ Variant c_ReflectionExtension::ifa_info(MethodCallPackage &mcp, int count, INVOK
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
   return (self->t_info());
 }
 Variant c_ReflectionExtension::ifa_getinientries(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -3658,7 +3658,7 @@ Variant c_ReflectionExtension::ifa_getinientries(MethodCallPackage &mcp, int cou
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
   return (self->t_getinientries());
 }
 Variant c_ReflectionExtension::ifa_getconstants(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -3669,7 +3669,7 @@ Variant c_ReflectionExtension::ifa_getconstants(MethodCallPackage &mcp, int coun
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
   return (self->t_getconstants());
 }
 Variant c_ReflectionExtension::ifa_getclassnames(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -3680,7 +3680,7 @@ Variant c_ReflectionExtension::ifa_getclassnames(MethodCallPackage &mcp, int cou
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
   return (self->t_getclassnames());
 }
 Variant c_ReflectionExtension::ifa_getversion(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -3691,7 +3691,7 @@ Variant c_ReflectionExtension::ifa_getversion(MethodCallPackage &mcp, int count,
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
   return (self->t_getversion());
 }
 Variant c_ReflectionExtension::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -3702,7 +3702,7 @@ Variant c_ReflectionExtension::ifa_getname(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
   return (self->t_getname());
 }
 Variant c_ReflectionExtension::ifa_getclasses(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -3713,11 +3713,11 @@ Variant c_ReflectionExtension::ifa_getclasses(MethodCallPackage &mcp, int count,
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
   return (self->t_getclasses());
 }
 bool c_ReflectionExtension::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 2:
@@ -3791,15 +3791,15 @@ bool c_ReflectionExtension::o_get_call_info(MethodCallPackage &mcp, int64 hash) 
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_ReflectionExtension *c_ReflectionExtension::create(Variant v_name) {
+c_ReflectionExtension *c_ReflectionExtension::create(CVarRef v_name) {
   CountableHelper h(this);
   init();
   t___construct(v_name);
   return this;
 }
 void c_ReflectionExtension::dynConstruct(CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -3823,8 +3823,8 @@ void c_ReflectionExtension::dynConstructFromEval(Eval::VariableEnvironment &env,
   for (; i != params.size(); ++i) {
     params[i]->eval(env);
   }
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 1);
   (t___construct(a0), null);
 }
 struct ObjectStaticCallbacks cw_ReflectionExtension = {
@@ -3931,7 +3931,7 @@ Array c_ReflectionExtension::t_getclassnames() {
           MethodCallPackage mcp0;
           CVarRef obj0 = v_cls;
           mcp0.methodCall((obj0), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
-          const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
+          const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
           Variant tmp1(((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0)));
           v_ret.append((tmp1));
         }
@@ -4093,7 +4093,7 @@ CallInfo c_ReflectionMethod::ci_isdestructor((void*)&c_ReflectionMethod::i_isdes
 CallInfo c_ReflectionMethod::ci_getclosure((void*)&c_ReflectionMethod::i_getclosure, (void*)&c_ReflectionMethod::ifa_getclosure, 0, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionMethod::ci_isabstract((void*)&c_ReflectionMethod::i_isabstract, (void*)&c_ReflectionMethod::ifa_isabstract, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionMethod::i_isprivate(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionMethod *self = NULL;
   p_ReflectionMethod pobj;
   if (mcp.obj) {
@@ -4101,11 +4101,11 @@ Variant c_ReflectionMethod::i_isprivate(MethodCallPackage &mcp, CArrRef params) 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
   return (self->t_isprivate());
 }
 Variant c_ReflectionMethod::i___tostring(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionMethod *self = NULL;
   p_ReflectionMethod pobj;
   if (mcp.obj) {
@@ -4113,11 +4113,11 @@ Variant c_ReflectionMethod::i___tostring(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_ReflectionMethod::i_isprotected(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionMethod *self = NULL;
   p_ReflectionMethod pobj;
   if (mcp.obj) {
@@ -4125,11 +4125,11 @@ Variant c_ReflectionMethod::i_isprotected(MethodCallPackage &mcp, CArrRef params
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
   return (self->t_isprotected());
 }
 Variant c_ReflectionMethod::i_isstatic(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionMethod *self = NULL;
   p_ReflectionMethod pobj;
   if (mcp.obj) {
@@ -4137,11 +4137,11 @@ Variant c_ReflectionMethod::i_isstatic(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
   return (self->t_isstatic());
 }
 Variant c_ReflectionMethod::i_getdeclaringclass(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionMethod *self = NULL;
   p_ReflectionMethod pobj;
   if (mcp.obj) {
@@ -4149,11 +4149,11 @@ Variant c_ReflectionMethod::i_getdeclaringclass(MethodCallPackage &mcp, CArrRef 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
   return (self->t_getdeclaringclass());
 }
 Variant c_ReflectionMethod::i_isconstructor(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionMethod *self = NULL;
   p_ReflectionMethod pobj;
   if (mcp.obj) {
@@ -4161,11 +4161,11 @@ Variant c_ReflectionMethod::i_isconstructor(MethodCallPackage &mcp, CArrRef para
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
   return (self->t_isconstructor());
 }
 Variant c_ReflectionMethod::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionMethod *self = NULL;
   p_ReflectionMethod pobj;
   if (mcp.obj) {
@@ -4173,7 +4173,7 @@ Variant c_ReflectionMethod::i___construct(MethodCallPackage &mcp, CArrRef params
   } else {
     self = createDummy(pobj);
   }
-  if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionMethod::__construct", count, 1, 2, 2);
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("ReflectionMethod::__construct", count, 1, 2, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -4184,7 +4184,7 @@ Variant c_ReflectionMethod::i___construct(MethodCallPackage &mcp, CArrRef params
   }
 }
 Variant c_ReflectionMethod::i_isfinal(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionMethod *self = NULL;
   p_ReflectionMethod pobj;
   if (mcp.obj) {
@@ -4192,11 +4192,11 @@ Variant c_ReflectionMethod::i_isfinal(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
   return (self->t_isfinal());
 }
 Variant c_ReflectionMethod::i_invokeargs(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionMethod *self = NULL;
   p_ReflectionMethod pobj;
   if (mcp.obj) {
@@ -4204,7 +4204,7 @@ Variant c_ReflectionMethod::i_invokeargs(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -4214,7 +4214,7 @@ Variant c_ReflectionMethod::i_invokeargs(MethodCallPackage &mcp, CArrRef params)
   }
 }
 Variant c_ReflectionMethod::i_getmodifiers(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionMethod *self = NULL;
   p_ReflectionMethod pobj;
   if (mcp.obj) {
@@ -4222,12 +4222,12 @@ Variant c_ReflectionMethod::i_getmodifiers(MethodCallPackage &mcp, CArrRef param
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
   return (self->t_getmodifiers());
 }
 Variant c_ReflectionMethod::i_export(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 3)) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
   CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
@@ -4239,7 +4239,7 @@ Variant c_ReflectionMethod::i_export(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ReflectionMethod::i_invoke(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionMethod *self = NULL;
   p_ReflectionMethod pobj;
   if (mcp.obj) {
@@ -4247,7 +4247,7 @@ Variant c_ReflectionMethod::i_invoke(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count < 1) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
+  if (UNLIKELY(count < 1)) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -4257,7 +4257,7 @@ Variant c_ReflectionMethod::i_invoke(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ReflectionMethod::i_ispublic(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionMethod *self = NULL;
   p_ReflectionMethod pobj;
   if (mcp.obj) {
@@ -4265,11 +4265,11 @@ Variant c_ReflectionMethod::i_ispublic(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
   return (self->t_ispublic());
 }
 Variant c_ReflectionMethod::i_isdestructor(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionMethod *self = NULL;
   p_ReflectionMethod pobj;
   if (mcp.obj) {
@@ -4277,11 +4277,11 @@ Variant c_ReflectionMethod::i_isdestructor(MethodCallPackage &mcp, CArrRef param
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
   return (self->t_isdestructor());
 }
 Variant c_ReflectionMethod::i_getclosure(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionMethod *self = NULL;
   p_ReflectionMethod pobj;
   if (mcp.obj) {
@@ -4289,11 +4289,11 @@ Variant c_ReflectionMethod::i_getclosure(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
   return (self->t_getclosure());
 }
 Variant c_ReflectionMethod::i_isabstract(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionMethod *self = NULL;
   p_ReflectionMethod pobj;
   if (mcp.obj) {
@@ -4301,7 +4301,7 @@ Variant c_ReflectionMethod::i_isabstract(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
   return (self->t_isabstract());
 }
 Variant c_ReflectionMethod::ifa_isprivate(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -4312,7 +4312,7 @@ Variant c_ReflectionMethod::ifa_isprivate(MethodCallPackage &mcp, int count, INV
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
   return (self->t_isprivate());
 }
 Variant c_ReflectionMethod::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -4323,7 +4323,7 @@ Variant c_ReflectionMethod::ifa___tostring(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_ReflectionMethod::ifa_isprotected(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -4334,7 +4334,7 @@ Variant c_ReflectionMethod::ifa_isprotected(MethodCallPackage &mcp, int count, I
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
   return (self->t_isprotected());
 }
 Variant c_ReflectionMethod::ifa_isstatic(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -4345,7 +4345,7 @@ Variant c_ReflectionMethod::ifa_isstatic(MethodCallPackage &mcp, int count, INVO
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
   return (self->t_isstatic());
 }
 Variant c_ReflectionMethod::ifa_getdeclaringclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -4356,7 +4356,7 @@ Variant c_ReflectionMethod::ifa_getdeclaringclass(MethodCallPackage &mcp, int co
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
   return (self->t_getdeclaringclass());
 }
 Variant c_ReflectionMethod::ifa_isconstructor(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -4367,7 +4367,7 @@ Variant c_ReflectionMethod::ifa_isconstructor(MethodCallPackage &mcp, int count,
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
   return (self->t_isconstructor());
 }
 Variant c_ReflectionMethod::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -4378,10 +4378,10 @@ Variant c_ReflectionMethod::ifa___construct(MethodCallPackage &mcp, int count, I
   } else {
     self = createDummy(pobj);
   }
-  if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionMethod::__construct", count, 1, 2, 2);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("ReflectionMethod::__construct", count, 1, 2, 2);
+  CVarRef arg0(a0);
   if (count <= 1) return (self->t___construct(arg0), null);
-  CVarRef arg1((a1));
+  CVarRef arg1(a1);
   return (self->t___construct(arg0, arg1), null);
 }
 Variant c_ReflectionMethod::ifa_isfinal(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -4392,7 +4392,7 @@ Variant c_ReflectionMethod::ifa_isfinal(MethodCallPackage &mcp, int count, INVOK
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
   return (self->t_isfinal());
 }
 Variant c_ReflectionMethod::ifa_invokeargs(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -4403,9 +4403,9 @@ Variant c_ReflectionMethod::ifa_invokeargs(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
   return (self->t_invokeargs(arg0, arg1));
 }
 Variant c_ReflectionMethod::ifa_getmodifiers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -4416,15 +4416,15 @@ Variant c_ReflectionMethod::ifa_getmodifiers(MethodCallPackage &mcp, int count, 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
   return (self->t_getmodifiers());
 }
 Variant c_ReflectionMethod::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
+  if (UNLIKELY(count != 3)) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
   CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
-  CVarRef arg2((a2));
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  CVarRef arg2(a2);
   return (c_ReflectionMethod::ti_export(c, arg0, arg1, arg2));
 }
 Variant c_ReflectionMethod::ifa_invoke(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -4435,8 +4435,8 @@ Variant c_ReflectionMethod::ifa_invoke(MethodCallPackage &mcp, int count, INVOKE
   } else {
     self = createDummy(pobj);
   }
-  if (count < 1) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count < 1)) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
+  CVarRef arg0(a0);
   Array p;
   if (count >= 2) p.append(a1);
   if (count >= 3) p.append(a2);
@@ -4453,7 +4453,7 @@ Variant c_ReflectionMethod::ifa_ispublic(MethodCallPackage &mcp, int count, INVO
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
   return (self->t_ispublic());
 }
 Variant c_ReflectionMethod::ifa_isdestructor(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -4464,7 +4464,7 @@ Variant c_ReflectionMethod::ifa_isdestructor(MethodCallPackage &mcp, int count, 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
   return (self->t_isdestructor());
 }
 Variant c_ReflectionMethod::ifa_getclosure(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -4475,7 +4475,7 @@ Variant c_ReflectionMethod::ifa_getclosure(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
   return (self->t_getclosure());
 }
 Variant c_ReflectionMethod::ifa_isabstract(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -4486,11 +4486,11 @@ Variant c_ReflectionMethod::ifa_isabstract(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
   return (self->t_isabstract());
 }
 bool c_ReflectionMethod::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 2:
@@ -4596,7 +4596,7 @@ bool c_ReflectionMethod::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_ReflectionMethod *c_ReflectionMethod::create(Variant v_cls, Variant v_name //  = NAMSTR(s_sys_ss00000000, "")
+c_ReflectionMethod *c_ReflectionMethod::create(CVarRef v_cls, CVarRef v_name //  = NAMSTR(s_sys_ss00000000, "")
 ) {
   CountableHelper h(this);
   init();
@@ -4604,8 +4604,8 @@ c_ReflectionMethod *c_ReflectionMethod::create(Variant v_cls, Variant v_name // 
   return this;
 }
 void c_ReflectionMethod::dynConstruct(CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 2) throw_wrong_arguments("ReflectionMethod::__construct", count, 1, 2, 2);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("ReflectionMethod::__construct", count, 1, 2, 2);
   do {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -4638,8 +4638,8 @@ void c_ReflectionMethod::dynConstructFromEval(Eval::VariableEnvironment &env, co
   for (; i != params.size(); ++i) {
     params[i]->eval(env);
   }
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 2) throw_wrong_arguments("ReflectionMethod::__construct", count, 1, 2, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("ReflectionMethod::__construct", count, 1, 2, 1);
   if (count <= 1) (t___construct(a0), null);
   else (t___construct(a0, a1), null);
 }
@@ -4716,7 +4716,7 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMST
         MethodCallPackage mcp0;
         CVarRef obj0 = v_cls;
         mcp0.methodCall((obj0), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
-        const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
+        const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
         Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_name)));
         v_method.assignVal(tmp1);
       }
@@ -4776,7 +4776,7 @@ Variant c_ReflectionMethod::ti_export(CStrRef cls, Variant v_cls, CVarRef v_name
     MethodCallPackage mcp0;
     CVarRef obj0 = v_cls;
     mcp0.methodCall((obj0), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
-    const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
+    const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
     Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_name)));
     v_obj.assignVal(tmp1);
   }
@@ -5042,7 +5042,7 @@ CallInfo c_ReflectionProperty::ci_getdoccomment((void*)&c_ReflectionProperty::i_
 CallInfo c_ReflectionProperty::ci_setvalue((void*)&c_ReflectionProperty::i_setvalue, (void*)&c_ReflectionProperty::ifa_setvalue, 2, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionProperty::ci_getname((void*)&c_ReflectionProperty::i_getname, (void*)&c_ReflectionProperty::ifa_getname, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionProperty::i_isprivate(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionProperty *self = NULL;
   p_ReflectionProperty pobj;
   if (mcp.obj) {
@@ -5050,11 +5050,11 @@ Variant c_ReflectionProperty::i_isprivate(MethodCallPackage &mcp, CArrRef params
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
   return (self->t_isprivate());
 }
 Variant c_ReflectionProperty::i_getvalue(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionProperty *self = NULL;
   p_ReflectionProperty pobj;
   if (mcp.obj) {
@@ -5062,7 +5062,7 @@ Variant c_ReflectionProperty::i_getvalue(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count > 1) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5072,7 +5072,7 @@ Variant c_ReflectionProperty::i_getvalue(MethodCallPackage &mcp, CArrRef params)
   }
 }
 Variant c_ReflectionProperty::i___tostring(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionProperty *self = NULL;
   p_ReflectionProperty pobj;
   if (mcp.obj) {
@@ -5080,11 +5080,11 @@ Variant c_ReflectionProperty::i___tostring(MethodCallPackage &mcp, CArrRef param
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_ReflectionProperty::i_isprotected(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionProperty *self = NULL;
   p_ReflectionProperty pobj;
   if (mcp.obj) {
@@ -5092,11 +5092,11 @@ Variant c_ReflectionProperty::i_isprotected(MethodCallPackage &mcp, CArrRef para
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
   return (self->t_isprotected());
 }
 Variant c_ReflectionProperty::i_isstatic(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionProperty *self = NULL;
   p_ReflectionProperty pobj;
   if (mcp.obj) {
@@ -5104,11 +5104,11 @@ Variant c_ReflectionProperty::i_isstatic(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
   return (self->t_isstatic());
 }
 Variant c_ReflectionProperty::i_getdeclaringclass(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionProperty *self = NULL;
   p_ReflectionProperty pobj;
   if (mcp.obj) {
@@ -5116,11 +5116,11 @@ Variant c_ReflectionProperty::i_getdeclaringclass(MethodCallPackage &mcp, CArrRe
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
   return (self->t_getdeclaringclass());
 }
 Variant c_ReflectionProperty::i_isdefault(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionProperty *self = NULL;
   p_ReflectionProperty pobj;
   if (mcp.obj) {
@@ -5128,11 +5128,11 @@ Variant c_ReflectionProperty::i_isdefault(MethodCallPackage &mcp, CArrRef params
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
   return (self->t_isdefault());
 }
 Variant c_ReflectionProperty::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionProperty *self = NULL;
   p_ReflectionProperty pobj;
   if (mcp.obj) {
@@ -5140,7 +5140,7 @@ Variant c_ReflectionProperty::i___construct(MethodCallPackage &mcp, CArrRef para
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5150,7 +5150,7 @@ Variant c_ReflectionProperty::i___construct(MethodCallPackage &mcp, CArrRef para
   }
 }
 Variant c_ReflectionProperty::i_getmodifiers(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionProperty *self = NULL;
   p_ReflectionProperty pobj;
   if (mcp.obj) {
@@ -5158,12 +5158,12 @@ Variant c_ReflectionProperty::i_getmodifiers(MethodCallPackage &mcp, CArrRef par
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
   return (self->t_getmodifiers());
 }
 Variant c_ReflectionProperty::i_export(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 3)) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
   CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
@@ -5175,7 +5175,7 @@ Variant c_ReflectionProperty::i_export(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ReflectionProperty::i_ispublic(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionProperty *self = NULL;
   p_ReflectionProperty pobj;
   if (mcp.obj) {
@@ -5183,11 +5183,11 @@ Variant c_ReflectionProperty::i_ispublic(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
   return (self->t_ispublic());
 }
 Variant c_ReflectionProperty::i_setaccessible(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionProperty *self = NULL;
   p_ReflectionProperty pobj;
   if (mcp.obj) {
@@ -5195,7 +5195,7 @@ Variant c_ReflectionProperty::i_setaccessible(MethodCallPackage &mcp, CArrRef pa
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionProperty::setAccessible", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionProperty::setAccessible", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5204,7 +5204,7 @@ Variant c_ReflectionProperty::i_setaccessible(MethodCallPackage &mcp, CArrRef pa
   }
 }
 Variant c_ReflectionProperty::i_getdoccomment(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionProperty *self = NULL;
   p_ReflectionProperty pobj;
   if (mcp.obj) {
@@ -5212,11 +5212,11 @@ Variant c_ReflectionProperty::i_getdoccomment(MethodCallPackage &mcp, CArrRef pa
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
   return (self->t_getdoccomment());
 }
 Variant c_ReflectionProperty::i_setvalue(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionProperty *self = NULL;
   p_ReflectionProperty pobj;
   if (mcp.obj) {
@@ -5224,7 +5224,7 @@ Variant c_ReflectionProperty::i_setvalue(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5234,7 +5234,7 @@ Variant c_ReflectionProperty::i_setvalue(MethodCallPackage &mcp, CArrRef params)
   }
 }
 Variant c_ReflectionProperty::i_getname(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionProperty *self = NULL;
   p_ReflectionProperty pobj;
   if (mcp.obj) {
@@ -5242,7 +5242,7 @@ Variant c_ReflectionProperty::i_getname(MethodCallPackage &mcp, CArrRef params) 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
   return (self->t_getname());
 }
 Variant c_ReflectionProperty::ifa_isprivate(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -5253,7 +5253,7 @@ Variant c_ReflectionProperty::ifa_isprivate(MethodCallPackage &mcp, int count, I
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
   return (self->t_isprivate());
 }
 Variant c_ReflectionProperty::ifa_getvalue(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -5264,9 +5264,9 @@ Variant c_ReflectionProperty::ifa_getvalue(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count > 1) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
   if (count <= 0) return (self->t_getvalue());
-  CVarRef arg0((a0));
+  CVarRef arg0(a0);
   return (self->t_getvalue(arg0));
 }
 Variant c_ReflectionProperty::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -5277,7 +5277,7 @@ Variant c_ReflectionProperty::ifa___tostring(MethodCallPackage &mcp, int count, 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_ReflectionProperty::ifa_isprotected(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -5288,7 +5288,7 @@ Variant c_ReflectionProperty::ifa_isprotected(MethodCallPackage &mcp, int count,
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
   return (self->t_isprotected());
 }
 Variant c_ReflectionProperty::ifa_isstatic(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -5299,7 +5299,7 @@ Variant c_ReflectionProperty::ifa_isstatic(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
   return (self->t_isstatic());
 }
 Variant c_ReflectionProperty::ifa_getdeclaringclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -5310,7 +5310,7 @@ Variant c_ReflectionProperty::ifa_getdeclaringclass(MethodCallPackage &mcp, int 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
   return (self->t_getdeclaringclass());
 }
 Variant c_ReflectionProperty::ifa_isdefault(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -5321,7 +5321,7 @@ Variant c_ReflectionProperty::ifa_isdefault(MethodCallPackage &mcp, int count, I
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
   return (self->t_isdefault());
 }
 Variant c_ReflectionProperty::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -5332,9 +5332,9 @@ Variant c_ReflectionProperty::ifa___construct(MethodCallPackage &mcp, int count,
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
   return (self->t___construct(arg0, arg1), null);
 }
 Variant c_ReflectionProperty::ifa_getmodifiers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -5345,15 +5345,15 @@ Variant c_ReflectionProperty::ifa_getmodifiers(MethodCallPackage &mcp, int count
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
   return (self->t_getmodifiers());
 }
 Variant c_ReflectionProperty::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
+  if (UNLIKELY(count != 3)) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
   CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
-  CVarRef arg2((a2));
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  CVarRef arg2(a2);
   return (c_ReflectionProperty::ti_export(c, arg0, arg1, arg2));
 }
 Variant c_ReflectionProperty::ifa_ispublic(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -5364,7 +5364,7 @@ Variant c_ReflectionProperty::ifa_ispublic(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
   return (self->t_ispublic());
 }
 Variant c_ReflectionProperty::ifa_setaccessible(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -5375,8 +5375,8 @@ Variant c_ReflectionProperty::ifa_setaccessible(MethodCallPackage &mcp, int coun
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionProperty::setAccessible", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionProperty::setAccessible", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_setaccessible(arg0), null);
 }
 Variant c_ReflectionProperty::ifa_getdoccomment(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -5387,7 +5387,7 @@ Variant c_ReflectionProperty::ifa_getdoccomment(MethodCallPackage &mcp, int coun
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
   return (self->t_getdoccomment());
 }
 Variant c_ReflectionProperty::ifa_setvalue(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -5398,9 +5398,9 @@ Variant c_ReflectionProperty::ifa_setvalue(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
   return (self->t_setvalue(arg0, arg1), null);
 }
 Variant c_ReflectionProperty::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -5411,11 +5411,11 @@ Variant c_ReflectionProperty::ifa_getname(MethodCallPackage &mcp, int count, INV
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
   return (self->t_getname());
 }
 bool c_ReflectionProperty::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 2:
@@ -5513,15 +5513,15 @@ bool c_ReflectionProperty::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_ReflectionProperty *c_ReflectionProperty::create(Variant v_cls, Variant v_name) {
+c_ReflectionProperty *c_ReflectionProperty::create(CVarRef v_cls, CVarRef v_name) {
   CountableHelper h(this);
   init();
   t___construct(v_cls, v_name);
   return this;
 }
 void c_ReflectionProperty::dynConstruct(CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 2)) throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5550,8 +5550,8 @@ void c_ReflectionProperty::dynConstructFromEval(Eval::VariableEnvironment &env, 
   for (; i != params.size(); ++i) {
     params[i]->eval(env);
   }
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 2)) throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 1);
   (t___construct(a0, a1), null);
 }
 struct ObjectStaticCallbacks cw_ReflectionProperty = {
@@ -5598,7 +5598,7 @@ void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
         MethodCallPackage mcp0;
         CVarRef obj0 = v_cls;
         mcp0.methodCall((obj0), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
-        const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
+        const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
         Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_name)));
         v_prop.assignVal(tmp1);
       }
@@ -5658,7 +5658,7 @@ Variant c_ReflectionProperty::ti_export(CStrRef cls, Variant v_cls, CVarRef v_na
     MethodCallPackage mcp0;
     CVarRef obj0 = v_cls;
     mcp0.methodCall((obj0), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
-    const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
+    const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
     Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_name)));
     v_obj.assignVal(tmp1);
   }
@@ -5878,7 +5878,7 @@ CallInfo c_ReflectionFunction::ci_invokeargs((void*)&c_ReflectionFunction::i_inv
 CallInfo c_ReflectionFunction::ci_export((void*)&c_ReflectionFunction::i_export, (void*)&c_ReflectionFunction::ifa_export, 2, 12, 0x0000000000000000LL);
 CallInfo c_ReflectionFunction::ci_invoke((void*)&c_ReflectionFunction::i_invoke, (void*)&c_ReflectionFunction::ifa_invoke, 0, 5, 0x0000000000000000LL);
 Variant c_ReflectionFunction::i___tostring(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionFunction *self = NULL;
   p_ReflectionFunction pobj;
   if (mcp.obj) {
@@ -5886,11 +5886,11 @@ Variant c_ReflectionFunction::i___tostring(MethodCallPackage &mcp, CArrRef param
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_ReflectionFunction::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionFunction *self = NULL;
   p_ReflectionFunction pobj;
   if (mcp.obj) {
@@ -5898,7 +5898,7 @@ Variant c_ReflectionFunction::i___construct(MethodCallPackage &mcp, CArrRef para
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5907,7 +5907,7 @@ Variant c_ReflectionFunction::i___construct(MethodCallPackage &mcp, CArrRef para
   }
 }
 Variant c_ReflectionFunction::i_invokeargs(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionFunction *self = NULL;
   p_ReflectionFunction pobj;
   if (mcp.obj) {
@@ -5915,7 +5915,7 @@ Variant c_ReflectionFunction::i_invokeargs(MethodCallPackage &mcp, CArrRef param
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5924,8 +5924,8 @@ Variant c_ReflectionFunction::i_invokeargs(MethodCallPackage &mcp, CArrRef param
   }
 }
 Variant c_ReflectionFunction::i_export(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
   CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
@@ -5936,7 +5936,7 @@ Variant c_ReflectionFunction::i_export(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ReflectionFunction::i_invoke(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionFunction *self = NULL;
   p_ReflectionFunction pobj;
   if (mcp.obj) {
@@ -5955,7 +5955,7 @@ Variant c_ReflectionFunction::ifa___tostring(MethodCallPackage &mcp, int count, 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_ReflectionFunction::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -5966,8 +5966,8 @@ Variant c_ReflectionFunction::ifa___construct(MethodCallPackage &mcp, int count,
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
+  CVarRef arg0(a0);
   return (self->t___construct(arg0), null);
 }
 Variant c_ReflectionFunction::ifa_invokeargs(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -5978,15 +5978,15 @@ Variant c_ReflectionFunction::ifa_invokeargs(MethodCallPackage &mcp, int count, 
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_invokeargs(arg0));
 }
 Variant c_ReflectionFunction::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
   CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
   return (c_ReflectionFunction::ti_export(c, arg0, arg1));
 }
 Variant c_ReflectionFunction::ifa_invoke(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -6007,7 +6007,7 @@ Variant c_ReflectionFunction::ifa_invoke(MethodCallPackage &mcp, int count, INVO
   return (self->t_invoke(count, p));
 }
 bool c_ReflectionFunction::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 2:
@@ -6049,15 +6049,15 @@ bool c_ReflectionFunction::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_ReflectionFunction *c_ReflectionFunction::create(Variant v_name) {
+c_ReflectionFunction *c_ReflectionFunction::create(CVarRef v_name) {
   CountableHelper h(this);
   init();
   t___construct(v_name);
   return this;
 }
 void c_ReflectionFunction::dynConstruct(CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -6081,8 +6081,8 @@ void c_ReflectionFunction::dynConstructFromEval(Eval::VariableEnvironment &env, 
   for (; i != params.size(); ++i) {
     params[i]->eval(env);
   }
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 1);
   (t___construct(a0), null);
 }
 struct ObjectStaticCallbacks cw_ReflectionFunction = {
@@ -6271,7 +6271,7 @@ CallInfo c_ReflectionParameter::ci_getdefaultvalue((void*)&c_ReflectionParameter
 CallInfo c_ReflectionParameter::ci_getname((void*)&c_ReflectionParameter::i_getname, (void*)&c_ReflectionParameter::ifa_getname, 0, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionParameter::ci_ispassedbyreference((void*)&c_ReflectionParameter::i_ispassedbyreference, (void*)&c_ReflectionParameter::ifa_ispassedbyreference, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionParameter::i___tostring(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionParameter *self = NULL;
   p_ReflectionParameter pobj;
   if (mcp.obj) {
@@ -6279,11 +6279,11 @@ Variant c_ReflectionParameter::i___tostring(MethodCallPackage &mcp, CArrRef para
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_ReflectionParameter::i_getdeclaringclass(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionParameter *self = NULL;
   p_ReflectionParameter pobj;
   if (mcp.obj) {
@@ -6291,11 +6291,11 @@ Variant c_ReflectionParameter::i_getdeclaringclass(MethodCallPackage &mcp, CArrR
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
   return (self->t_getdeclaringclass());
 }
 Variant c_ReflectionParameter::i_isdefaultvalueavailable(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionParameter *self = NULL;
   p_ReflectionParameter pobj;
   if (mcp.obj) {
@@ -6303,11 +6303,11 @@ Variant c_ReflectionParameter::i_isdefaultvalueavailable(MethodCallPackage &mcp,
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
   return (self->t_isdefaultvalueavailable());
 }
 Variant c_ReflectionParameter::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionParameter *self = NULL;
   p_ReflectionParameter pobj;
   if (mcp.obj) {
@@ -6315,7 +6315,7 @@ Variant c_ReflectionParameter::i___construct(MethodCallPackage &mcp, CArrRef par
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -6325,7 +6325,7 @@ Variant c_ReflectionParameter::i___construct(MethodCallPackage &mcp, CArrRef par
   }
 }
 Variant c_ReflectionParameter::i_getclass(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionParameter *self = NULL;
   p_ReflectionParameter pobj;
   if (mcp.obj) {
@@ -6333,12 +6333,12 @@ Variant c_ReflectionParameter::i_getclass(MethodCallPackage &mcp, CArrRef params
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
   return (self->t_getclass());
 }
 Variant c_ReflectionParameter::i_export(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 3)) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
   CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
@@ -6350,7 +6350,7 @@ Variant c_ReflectionParameter::i_export(MethodCallPackage &mcp, CArrRef params) 
   }
 }
 Variant c_ReflectionParameter::i_allowsnull(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionParameter *self = NULL;
   p_ReflectionParameter pobj;
   if (mcp.obj) {
@@ -6358,11 +6358,11 @@ Variant c_ReflectionParameter::i_allowsnull(MethodCallPackage &mcp, CArrRef para
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
   return (self->t_allowsnull());
 }
 Variant c_ReflectionParameter::i_getposition(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionParameter *self = NULL;
   p_ReflectionParameter pobj;
   if (mcp.obj) {
@@ -6370,11 +6370,11 @@ Variant c_ReflectionParameter::i_getposition(MethodCallPackage &mcp, CArrRef par
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
   return (self->t_getposition());
 }
 Variant c_ReflectionParameter::i_isarray(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionParameter *self = NULL;
   p_ReflectionParameter pobj;
   if (mcp.obj) {
@@ -6382,11 +6382,11 @@ Variant c_ReflectionParameter::i_isarray(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
   return (self->t_isarray());
 }
 Variant c_ReflectionParameter::i_isoptional(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionParameter *self = NULL;
   p_ReflectionParameter pobj;
   if (mcp.obj) {
@@ -6394,11 +6394,11 @@ Variant c_ReflectionParameter::i_isoptional(MethodCallPackage &mcp, CArrRef para
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
   return (self->t_isoptional());
 }
 Variant c_ReflectionParameter::i_getdefaultvalue(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionParameter *self = NULL;
   p_ReflectionParameter pobj;
   if (mcp.obj) {
@@ -6406,11 +6406,11 @@ Variant c_ReflectionParameter::i_getdefaultvalue(MethodCallPackage &mcp, CArrRef
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
   return (self->t_getdefaultvalue());
 }
 Variant c_ReflectionParameter::i_getname(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionParameter *self = NULL;
   p_ReflectionParameter pobj;
   if (mcp.obj) {
@@ -6418,11 +6418,11 @@ Variant c_ReflectionParameter::i_getname(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
   return (self->t_getname());
 }
 Variant c_ReflectionParameter::i_ispassedbyreference(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ReflectionParameter *self = NULL;
   p_ReflectionParameter pobj;
   if (mcp.obj) {
@@ -6430,7 +6430,7 @@ Variant c_ReflectionParameter::i_ispassedbyreference(MethodCallPackage &mcp, CAr
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
   return (self->t_ispassedbyreference());
 }
 Variant c_ReflectionParameter::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -6441,7 +6441,7 @@ Variant c_ReflectionParameter::ifa___tostring(MethodCallPackage &mcp, int count,
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_ReflectionParameter::ifa_getdeclaringclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -6452,7 +6452,7 @@ Variant c_ReflectionParameter::ifa_getdeclaringclass(MethodCallPackage &mcp, int
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
   return (self->t_getdeclaringclass());
 }
 Variant c_ReflectionParameter::ifa_isdefaultvalueavailable(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -6463,7 +6463,7 @@ Variant c_ReflectionParameter::ifa_isdefaultvalueavailable(MethodCallPackage &mc
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
   return (self->t_isdefaultvalueavailable());
 }
 Variant c_ReflectionParameter::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -6474,9 +6474,9 @@ Variant c_ReflectionParameter::ifa___construct(MethodCallPackage &mcp, int count
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
   return (self->t___construct(arg0, arg1), null);
 }
 Variant c_ReflectionParameter::ifa_getclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -6487,15 +6487,15 @@ Variant c_ReflectionParameter::ifa_getclass(MethodCallPackage &mcp, int count, I
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
   return (self->t_getclass());
 }
 Variant c_ReflectionParameter::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
+  if (UNLIKELY(count != 3)) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
   CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
-  CVarRef arg2((a2));
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  CVarRef arg2(a2);
   return (c_ReflectionParameter::ti_export(c, arg0, arg1, arg2));
 }
 Variant c_ReflectionParameter::ifa_allowsnull(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -6506,7 +6506,7 @@ Variant c_ReflectionParameter::ifa_allowsnull(MethodCallPackage &mcp, int count,
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
   return (self->t_allowsnull());
 }
 Variant c_ReflectionParameter::ifa_getposition(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -6517,7 +6517,7 @@ Variant c_ReflectionParameter::ifa_getposition(MethodCallPackage &mcp, int count
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
   return (self->t_getposition());
 }
 Variant c_ReflectionParameter::ifa_isarray(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -6528,7 +6528,7 @@ Variant c_ReflectionParameter::ifa_isarray(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
   return (self->t_isarray());
 }
 Variant c_ReflectionParameter::ifa_isoptional(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -6539,7 +6539,7 @@ Variant c_ReflectionParameter::ifa_isoptional(MethodCallPackage &mcp, int count,
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
   return (self->t_isoptional());
 }
 Variant c_ReflectionParameter::ifa_getdefaultvalue(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -6550,7 +6550,7 @@ Variant c_ReflectionParameter::ifa_getdefaultvalue(MethodCallPackage &mcp, int c
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
   return (self->t_getdefaultvalue());
 }
 Variant c_ReflectionParameter::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -6561,7 +6561,7 @@ Variant c_ReflectionParameter::ifa_getname(MethodCallPackage &mcp, int count, IN
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
   return (self->t_getname());
 }
 Variant c_ReflectionParameter::ifa_ispassedbyreference(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -6572,11 +6572,11 @@ Variant c_ReflectionParameter::ifa_ispassedbyreference(MethodCallPackage &mcp, i
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
   return (self->t_ispassedbyreference());
 }
 bool c_ReflectionParameter::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 3:
@@ -6662,15 +6662,15 @@ bool c_ReflectionParameter::o_get_call_info(MethodCallPackage &mcp, int64 hash) 
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_ReflectionParameter *c_ReflectionParameter::create(Variant v_func, Variant v_param) {
+c_ReflectionParameter *c_ReflectionParameter::create(CVarRef v_func, CVarRef v_param) {
   CountableHelper h(this);
   init();
   t___construct(v_func, v_param);
   return this;
 }
 void c_ReflectionParameter::dynConstruct(CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 2)) throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -6699,8 +6699,8 @@ void c_ReflectionParameter::dynConstructFromEval(Eval::VariableEnvironment &env,
   for (; i != params.size(); ++i) {
     params[i]->eval(env);
   }
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 2)) throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 1);
   (t___construct(a0, a1), null);
 }
 struct ObjectStaticCallbacks cw_ReflectionParameter = {
@@ -6727,7 +6727,7 @@ void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
         MethodCallPackage mcp0;
         CVarRef obj0 = v_func;
         mcp0.methodCall((obj0), NAMSTR(s_sys_ss1902bc14, "getParameters"), 0x3E62225132C2A32DLL);
-        const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
+        const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
         Variant tmp1(((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0)));
         v_params.assignVal(tmp1);
       }
@@ -6944,7 +6944,7 @@ Object coo_ReflectionParameter() {
 }
 Variant pm_php$classes$reflection_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/reflection.php, pm_php$classes$reflection_php);
-  LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
+  LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
   return true;
 }
 namespace hphp_impl_splitter {}

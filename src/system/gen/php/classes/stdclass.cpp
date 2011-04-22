@@ -97,7 +97,7 @@ void c_stdClass::cloneSet(ObjectData *cl) {
   ObjectData::cloneSet(clone);
 }
 bool c_stdClass::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_stdClass::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -182,7 +182,7 @@ void c___PHP_Incomplete_Class::cloneSet(ObjectData *cl) {
   ObjectData::cloneSet(clone);
 }
 bool c___PHP_Incomplete_Class::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c___PHP_Incomplete_Class::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -217,7 +217,7 @@ Object coo___PHP_Incomplete_Class() {
 }
 Variant pm_php$classes$stdclass_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/stdclass.php, pm_php$classes$stdclass_php);
-  LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
+  LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
   return true;
 }
 namespace hphp_impl_splitter {}

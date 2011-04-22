@@ -27,6 +27,7 @@ namespace HPHP {
 
 inline Array x_pdo_drivers() {
   FUNCTION_INJECTION_BUILTIN(pdo_drivers);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pdo_drivers();
 }
 

@@ -32,7 +32,7 @@ bool f_mb_check_encoding(CStrRef var = null_string, CStrRef encoding = null_stri
 Variant f_mb_convert_case(CStrRef str, int mode, CStrRef encoding = null_string);
 Variant f_mb_convert_encoding(CStrRef str, CStrRef to_encoding, CVarRef from_encoding = null_variant);
 Variant f_mb_convert_kana(CStrRef str, CStrRef option = null_string, CStrRef encoding = null_string);
-Variant f_mb_convert_variables(int _argc, CStrRef to_encoding, CVarRef from_encoding, Variant vars, CArrRef _argv = null_array);
+Variant f_mb_convert_variables(int _argc, CStrRef to_encoding, CVarRef from_encoding, VRefParam vars, CArrRef _argv = null_array);
 Variant f_mb_decode_mimeheader(CStrRef str);
 Variant f_mb_decode_numericentity(CStrRef str, CVarRef convmap, CStrRef encoding = null_string);
 Variant f_mb_detect_encoding(CStrRef str, CVarRef encoding_list = null_variant, CVarRef strict = null_variant);
@@ -48,16 +48,16 @@ Variant f_mb_ereg_search_pos(CStrRef pattern = null_string, CStrRef option = nul
 Variant f_mb_ereg_search_regs(CStrRef pattern = null_string, CStrRef option = null_string);
 bool f_mb_ereg_search_setpos(int position);
 Variant f_mb_ereg_search(CStrRef pattern = null_string, CStrRef option = null_string);
-Variant f_mb_ereg(CVarRef pattern, CStrRef str, Variant regs = null);
+Variant f_mb_ereg(CVarRef pattern, CStrRef str, VRefParam regs = null);
 Variant f_mb_eregi_replace(CVarRef pattern, CStrRef replacement, CStrRef str, CStrRef option = null_string);
-Variant f_mb_eregi(CVarRef pattern, CStrRef str, Variant regs = null);
+Variant f_mb_eregi(CVarRef pattern, CStrRef str, VRefParam regs = null);
 Variant f_mb_get_info(CStrRef type = null_string);
 Variant f_mb_http_input(CStrRef type = null_string);
 Variant f_mb_http_output(CStrRef encoding = null_string);
 Variant f_mb_internal_encoding(CStrRef encoding = null_string);
 Variant f_mb_language(CStrRef language = null_string);
 String f_mb_output_handler(CStrRef contents, int status);
-bool f_mb_parse_str(CStrRef encoded_string, Variant result = null);
+bool f_mb_parse_str(CStrRef encoded_string, VRefParam result = null);
 Variant f_mb_preferred_mime_name(CStrRef encoding);
 Variant f_mb_regex_encoding(CStrRef encoding = null_string);
 String f_mb_regex_set_options(CStrRef options = null_string);

@@ -27,101 +27,121 @@ namespace HPHP {
 
 inline Object x_memcache_connect(CStrRef host, int port = 0, int timeout = 0, int timeoutms = 0) {
   FUNCTION_INJECTION_BUILTIN(memcache_connect);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_connect(host, port, timeout, timeoutms);
 }
 
 inline Object x_memcache_pconnect(CStrRef host, int port = 0, int timeout = 0, int timeoutms = 0) {
   FUNCTION_INJECTION_BUILTIN(memcache_pconnect);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_pconnect(host, port, timeout, timeoutms);
 }
 
 inline bool x_memcache_add(CObjRef memcache, CStrRef key, CVarRef var, int flag = 0, int expire = 0) {
   FUNCTION_INJECTION_BUILTIN(memcache_add);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_add(memcache, key, var, flag, expire);
 }
 
 inline bool x_memcache_set(CObjRef memcache, CStrRef key, CVarRef var, int flag = 0, int expire = 0) {
   FUNCTION_INJECTION_BUILTIN(memcache_set);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_set(memcache, key, var, flag, expire);
 }
 
 inline bool x_memcache_replace(CObjRef memcache, CStrRef key, CVarRef var, int flag = 0, int expire = 0) {
   FUNCTION_INJECTION_BUILTIN(memcache_replace);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_replace(memcache, key, var, flag, expire);
 }
 
-inline Variant x_memcache_get(CObjRef memcache, CVarRef key, CVarRef flags = null) {
+inline Variant x_memcache_get(CObjRef memcache, CVarRef key, VRefParam flags = null) {
   FUNCTION_INJECTION_BUILTIN(memcache_get);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_get(memcache, key, flags);
 }
 
 inline bool x_memcache_delete(CObjRef memcache, CStrRef key, int expire = 0) {
   FUNCTION_INJECTION_BUILTIN(memcache_delete);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_delete(memcache, key, expire);
 }
 
 inline int64 x_memcache_increment(CObjRef memcache, CStrRef key, int offset = 1) {
   FUNCTION_INJECTION_BUILTIN(memcache_increment);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_increment(memcache, key, offset);
 }
 
 inline int64 x_memcache_decrement(CObjRef memcache, CStrRef key, int offset = 1) {
   FUNCTION_INJECTION_BUILTIN(memcache_decrement);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_decrement(memcache, key, offset);
 }
 
 inline bool x_memcache_close(CObjRef memcache) {
   FUNCTION_INJECTION_BUILTIN(memcache_close);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_close(memcache);
 }
 
 inline bool x_memcache_debug(bool onoff) {
   FUNCTION_INJECTION_BUILTIN(memcache_debug);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_debug(onoff);
 }
 
 inline Variant x_memcache_get_version(CObjRef memcache) {
   FUNCTION_INJECTION_BUILTIN(memcache_get_version);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_get_version(memcache);
 }
 
 inline bool x_memcache_flush(CObjRef memcache, int timestamp = 0) {
   FUNCTION_INJECTION_BUILTIN(memcache_flush);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_flush(memcache, timestamp);
 }
 
 inline bool x_memcache_setoptimeout(CObjRef memcache, int timeoutms) {
   FUNCTION_INJECTION_BUILTIN(memcache_setoptimeout);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_setoptimeout(memcache, timeoutms);
 }
 
 inline int x_memcache_get_server_status(CObjRef memcache, CStrRef host, int port = 0) {
   FUNCTION_INJECTION_BUILTIN(memcache_get_server_status);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_get_server_status(memcache, host, port);
 }
 
 inline bool x_memcache_set_compress_threshold(CObjRef memcache, int threshold, double min_savings = 0.2) {
   FUNCTION_INJECTION_BUILTIN(memcache_set_compress_threshold);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_set_compress_threshold(memcache, threshold, min_savings);
 }
 
 inline Array x_memcache_get_stats(CObjRef memcache, CStrRef type = null_string, int slabid = 0, int limit = 100) {
   FUNCTION_INJECTION_BUILTIN(memcache_get_stats);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_get_stats(memcache, type, slabid, limit);
 }
 
 inline Array x_memcache_get_extended_stats(CObjRef memcache, CStrRef type = null_string, int slabid = 0, int limit = 100) {
   FUNCTION_INJECTION_BUILTIN(memcache_get_extended_stats);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_get_extended_stats(memcache, type, slabid, limit);
 }
 
 inline bool x_memcache_set_server_params(CObjRef memcache, CStrRef host, int port = 11211, int timeout = 0, int retry_interval = 0, bool status = true, CVarRef failure_callback = null_variant) {
   FUNCTION_INJECTION_BUILTIN(memcache_set_server_params);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_set_server_params(memcache, host, port, timeout, retry_interval, status, failure_callback);
 }
 
 inline bool x_memcache_add_server(CObjRef memcache, CStrRef host, int port = 11211, bool persistent = false, int weight = 0, int timeout = 0, int retry_interval = 0, bool status = true, CVarRef failure_callback = null_variant, int timeoutms = 0) {
   FUNCTION_INJECTION_BUILTIN(memcache_add_server);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memcache_add_server(memcache, host, port, persistent, weight, timeout, retry_interval, status, failure_callback, timeoutms);
 }
 

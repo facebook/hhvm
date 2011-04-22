@@ -27,11 +27,11 @@ namespace HPHP {
 
 bool f_apc_add(CStrRef key, CVarRef var, int64 ttl = 0, int64 cache_id = 0);
 bool f_apc_store(CStrRef key, CVarRef var, int64 ttl = 0, int64 cache_id = 0);
-Variant f_apc_fetch(CVarRef key, Variant success = null, int64 cache_id = 0);
+Variant f_apc_fetch(CVarRef key, VRefParam success = null, int64 cache_id = 0);
 Variant f_apc_delete(CVarRef key, int64 cache_id = 0);
 bool f_apc_clear_cache(int64 cache_id = 0);
-Variant f_apc_inc(CStrRef key, int64 step = 1, Variant success = null, int64 cache_id = 0);
-Variant f_apc_dec(CStrRef key, int64 step = 1, Variant success = null, int64 cache_id = 0);
+Variant f_apc_inc(CStrRef key, int64 step = 1, VRefParam success = null, int64 cache_id = 0);
+Variant f_apc_dec(CStrRef key, int64 step = 1, VRefParam success = null, int64 cache_id = 0);
 bool f_apc_cas(CStrRef key, int64 old_cas, int64 new_cas, int64 cache_id = 0);
 Variant f_apc_exists(CVarRef key, int64 cache_id = 0);
 

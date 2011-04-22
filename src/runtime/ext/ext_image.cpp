@@ -1547,7 +1547,7 @@ String f_image_type_to_extension(int imagetype,
   }
 }
 
-Variant f_getimagesize(CStrRef filename, Variant imageinfo /* = null */) {
+Variant f_getimagesize(CStrRef filename, VRefParam imageinfo /* = null */) {
   int itype = 0;
   struct gfxinfo *result = NULL;
   if (imageinfo.isReferenced()) {
@@ -7911,9 +7911,9 @@ Variant f_read_exif_data(CStrRef filename,
   return f_exif_read_data(filename, sections, arrays, thumbnail);
 }
 
-Variant f_exif_thumbnail(CStrRef filename, Variant width /* = null */,
-                         Variant height /* = null */,
-                         Variant imagetype /* = null */) {
+Variant f_exif_thumbnail(CStrRef filename, VRefParam width /* = null */,
+                         VRefParam height /* = null */,
+                         VRefParam imagetype /* = null */) {
   image_info_type ImageInfo;
 
   memset(&ImageInfo, 0, sizeof(ImageInfo));

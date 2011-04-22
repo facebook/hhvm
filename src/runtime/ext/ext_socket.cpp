@@ -355,7 +355,7 @@ Variant f_socket_create_listen(int port, int backlog /* = 128 */) {
   return ret;
 }
 
-bool f_socket_create_pair(int domain, int type, int protocol, Variant fd) {
+bool f_socket_create_pair(int domain, int type, int protocol, VRefParam fd) {
   check_socket_parameters(domain, type);
 
   int fds_array[2];
@@ -421,8 +421,8 @@ Variant f_socket_get_option(CObjRef socket, int level, int optname) {
   return ret;
 }
 
-bool f_socket_getpeername(CObjRef socket, Variant address,
-                          Variant port /* = null */) {
+bool f_socket_getpeername(CObjRef socket, VRefParam address,
+                          VRefParam port /* = null */) {
   Socket *sock = socket.getTyped<Socket>();
 
   sockaddr_storage sa_storage;
@@ -435,8 +435,8 @@ bool f_socket_getpeername(CObjRef socket, Variant address,
   return get_sockaddr(sa, address, port);
 }
 
-bool f_socket_getsockname(CObjRef socket, Variant address,
-                          Variant port /* = null */) {
+bool f_socket_getsockname(CObjRef socket, VRefParam address,
+                          VRefParam port /* = null */) {
   Socket *sock = socket.getTyped<Socket>();
 
   sockaddr_storage sa_storage;
@@ -598,7 +598,7 @@ bool f_socket_listen(CObjRef socket, int backlog /* = 0 */) {
   return true;
 }
 
-Variant f_socket_select(Variant read, Variant write, Variant except,
+Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
                         CVarRef vtv_sec, int tv_usec /* = 0 */) {
   int count = 0;
   if (!read.isNull()) {
@@ -653,8 +653,8 @@ Variant f_socket_select(Variant read, Variant write, Variant except,
 }
 
 Variant f_socket_server(CStrRef hostname, int port /* = -1 */,
-                        Variant errnum /* = null */,
-                        Variant errstr /* = null */) {
+                        VRefParam errnum /* = null */,
+                        VRefParam errstr /* = null */) {
   Object ret;
   Socket *sock = NULL;
   const char *name = hostname.data();
@@ -813,7 +813,7 @@ Variant f_socket_sendto(CObjRef socket, CStrRef buf, int len, int flags,
   return retval;
 }
 
-Variant f_socket_recv(CObjRef socket, Variant buf, int len, int flags) {
+Variant f_socket_recv(CObjRef socket, VRefParam buf, int len, int flags) {
   if (len <= 0) {
     return false;
   }
@@ -836,8 +836,8 @@ Variant f_socket_recv(CObjRef socket, Variant buf, int len, int flags) {
   return retval;
 }
 
-Variant f_socket_recvfrom(CObjRef socket, Variant buf, int len, int flags,
-                      Variant name, Variant port /* = 0 */) {
+Variant f_socket_recvfrom(CObjRef socket, VRefParam buf, int len, int flags,
+                      VRefParam name, VRefParam port /* = 0 */) {
   if (len <= 0) {
     return false;
   }
@@ -1079,13 +1079,15 @@ static Variant sockopen_impl(CStrRef hostname, int port, Variant &errnum,
 }
 
 Variant f_fsockopen(CStrRef hostname, int port /* = -1 */,
-                    Variant errnum /* = null */, Variant errstr /* = null */,
+                    VRefParam errnum /* = null */,
+                    VRefParam errstr /* = null */,
                     double timeout /* = 0.0 */) {
   return sockopen_impl(hostname, port, errnum, errstr, timeout, false);
 }
 
 Variant f_pfsockopen(CStrRef hostname, int port /* = -1 */,
-                     Variant errnum /* = null */, Variant errstr /* = null */,
+                     VRefParam errnum /* = null */,
+                     VRefParam errstr /* = null */,
                      double timeout /* = 0.0 */) {
   // TODO: persistent socket handling
   return sockopen_impl(hostname, port, errnum, errstr, timeout, true);

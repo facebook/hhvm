@@ -372,7 +372,7 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
   } else {
     cg_printf("mth%d, -1);\n", m_ciTemp);
   }
-  cg_printf("const CallInfo *cit%d __attribute__((__unused__)) = mcp%d.ci;\n",
+  cg_printf("const CallInfo *cit%d ATTRIBUTE_UNUSED = mcp%d.ci;\n",
             m_ciTemp, m_ciTemp);
 
   if (m_params && m_params->getCount() > 0) {

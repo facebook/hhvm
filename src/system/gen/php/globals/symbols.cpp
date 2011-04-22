@@ -31,19 +31,19 @@ extern CallInfo ci_;
 /* preface finishes */
 Variant pm_php$globals$symbols_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::globals/symbols.php, pm_php$globals$symbols_php);
-  LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
-  Variant &v_argc __attribute__((__unused__)) = g->GV(argc);
-  Variant &v_argv __attribute__((__unused__)) = g->GV(argv);
-  Variant &v__SERVER __attribute__((__unused__)) = g->GV(_SERVER);
-  Variant &v__GET __attribute__((__unused__)) = g->GV(_GET);
-  Variant &v__POST __attribute__((__unused__)) = g->GV(_POST);
-  Variant &v__COOKIE __attribute__((__unused__)) = g->GV(_COOKIE);
-  Variant &v__FILES __attribute__((__unused__)) = g->GV(_FILES);
-  Variant &v__ENV __attribute__((__unused__)) = g->GV(_ENV);
-  Variant &v__REQUEST __attribute__((__unused__)) = g->GV(_REQUEST);
-  Variant &v__SESSION __attribute__((__unused__)) = g->GV(_SESSION);
-  Variant &v_HTTP_RAW_POST_DATA __attribute__((__unused__)) = g->GV(HTTP_RAW_POST_DATA);
-  Variant &v_http_response_header __attribute__((__unused__)) = g->GV(http_response_header);
+  LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
+  Variant &v_argc ATTRIBUTE_UNUSED = g->GV(argc);
+  Variant &v_argv ATTRIBUTE_UNUSED = g->GV(argv);
+  Variant &v__SERVER ATTRIBUTE_UNUSED = g->GV(_SERVER);
+  Variant &v__GET ATTRIBUTE_UNUSED = g->GV(_GET);
+  Variant &v__POST ATTRIBUTE_UNUSED = g->GV(_POST);
+  Variant &v__COOKIE ATTRIBUTE_UNUSED = g->GV(_COOKIE);
+  Variant &v__FILES ATTRIBUTE_UNUSED = g->GV(_FILES);
+  Variant &v__ENV ATTRIBUTE_UNUSED = g->GV(_ENV);
+  Variant &v__REQUEST ATTRIBUTE_UNUSED = g->GV(_REQUEST);
+  Variant &v__SESSION ATTRIBUTE_UNUSED = g->GV(_SESSION);
+  Variant &v_HTTP_RAW_POST_DATA ATTRIBUTE_UNUSED = g->GV(HTTP_RAW_POST_DATA);
+  Variant &v_http_response_header ATTRIBUTE_UNUSED = g->GV(http_response_header);
 
   setNull(v_argc);
   setNull(v_argv);

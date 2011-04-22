@@ -1646,6 +1646,9 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       if (pcount) {
         cg_printf("%d, ", pcount);
         cg.pushCallInfo(m_ciTemp);
+        for (int i = 0; i < pcount; i++) {
+          (*m_params)[i]->setContext(NoRefWrapper);
+        }
         FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, 0,
                                           false);
         cg.popCallInfo();

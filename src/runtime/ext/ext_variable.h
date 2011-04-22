@@ -231,7 +231,7 @@ inline double f_doubleval(CVarRef v) { return v.toDouble();}
 inline double f_floatval(CVarRef v) { return v.toDouble();}
 inline String f_strval(CVarRef v) { return v.toString();}
 
-bool f_settype(Variant var, CStrRef type);
+bool f_settype(VRefParam var, CStrRef type);
 
 ///////////////////////////////////////////////////////////////////////////////
 // input/output

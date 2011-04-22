@@ -2888,7 +2888,7 @@ bool c_PDOStatement::t_bindvalue(CVarRef paramno, CVarRef param,
   return register_bound_param(paramno, param, type, 0, null, m_stmt, true);
 }
 
-bool c_PDOStatement::t_bindparam(CVarRef paramno, Variant param,
+bool c_PDOStatement::t_bindparam(CVarRef paramno, VRefParam param,
                                  int64 type /* = q_PDO_PARAM_STR */,
                                  int64 max_value_len /* = 0 */,
                                  CVarRef driver_params /*= null */) {
@@ -2897,7 +2897,7 @@ bool c_PDOStatement::t_bindparam(CVarRef paramno, Variant param,
                               driver_params, m_stmt, true);
 }
 
-bool c_PDOStatement::t_bindcolumn(CVarRef paramno, Variant param,
+bool c_PDOStatement::t_bindcolumn(CVarRef paramno, VRefParam param,
                                   int64 type /* = q_PDO_PARAM_STR */,
                                   int64 max_value_len /* = 0 */,
                                   CVarRef driver_params /* = null */) {

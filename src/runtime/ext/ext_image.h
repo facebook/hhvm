@@ -50,7 +50,7 @@ private:
 };
 
 Array f_gd_info();
-Variant f_getimagesize(CStrRef filename, Variant imageinfo = null);
+Variant f_getimagesize(CStrRef filename, VRefParam imageinfo = null);
 String f_image_type_to_extension(int imagetype, bool include_dot = true);
 String f_image_type_to_mime_type(int imagetype);
 bool f_image2wbmp(CObjRef image, CStrRef filename = null_string, int threshold = -1);
@@ -155,7 +155,7 @@ Variant f_exif_imagetype(CStrRef filename);
 Variant f_exif_read_data(CStrRef filename, CStrRef sections = null_string, bool arrays = false, bool thumbnail = false);
 Variant f_read_exif_data(CStrRef filename, CStrRef sections = null_string, bool arrays = false, bool thumbnail = false);
 Variant f_exif_tagname(int index);
-Variant f_exif_thumbnail(CStrRef filename, Variant width = null, Variant height = null, Variant imagetype = null);
+Variant f_exif_thumbnail(CStrRef filename, VRefParam width = null, VRefParam height = null, VRefParam imagetype = null);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

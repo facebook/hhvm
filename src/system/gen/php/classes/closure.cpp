@@ -132,7 +132,7 @@ CallInfo c_Closure::ci_getvars((void*)&c_Closure::i_getvars, (void*)&c_Closure::
 CallInfo c_Closure::ci___construct((void*)&c_Closure::i___construct, (void*)&c_Closure::ifa___construct, 2, 4, 0x0000000000000000LL);
 CallInfo c_Closure::ci_setvars((void*)&c_Closure::i_setvars, (void*)&c_Closure::ifa_setvars, 1, 4, 0x0000000000000000LL);
 Variant c_Closure::i___tostring(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Closure *self = NULL;
   p_Closure pobj;
   if (mcp.obj) {
@@ -140,11 +140,11 @@ Variant c_Closure::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Closure::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Closure::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_Closure::i_getvars(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Closure *self = NULL;
   p_Closure pobj;
   if (mcp.obj) {
@@ -152,11 +152,11 @@ Variant c_Closure::i_getvars(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Closure::getVars", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Closure::getVars", 0, 1);
   return (self->t_getvars());
 }
 Variant c_Closure::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Closure *self = NULL;
   p_Closure pobj;
   if (mcp.obj) {
@@ -164,7 +164,7 @@ Variant c_Closure::i___construct(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("Closure::__construct", count, 2, 2, 2);
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("Closure::__construct", count, 2, 2, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -174,7 +174,7 @@ Variant c_Closure::i___construct(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_Closure::i_setvars(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Closure *self = NULL;
   p_Closure pobj;
   if (mcp.obj) {
@@ -182,7 +182,7 @@ Variant c_Closure::i_setvars(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("Closure::setVars", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("Closure::setVars", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -198,7 +198,7 @@ Variant c_Closure::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Closure::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Closure::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_Closure::ifa_getvars(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -209,7 +209,7 @@ Variant c_Closure::ifa_getvars(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Closure::getVars", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Closure::getVars", 0, 1);
   return (self->t_getvars());
 }
 Variant c_Closure::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -220,9 +220,9 @@ Variant c_Closure::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW
   } else {
     self = createDummy(pobj);
   }
-  if (count != 2) return throw_wrong_arguments("Closure::__construct", count, 2, 2, 2);
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("Closure::__construct", count, 2, 2, 2);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
   return (self->t___construct(arg0, arg1), null);
 }
 Variant c_Closure::ifa_setvars(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -233,12 +233,12 @@ Variant c_Closure::ifa_setvars(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("Closure::setVars", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("Closure::setVars", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_setvars(arg0), null);
 }
 bool c_Closure::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 2:
@@ -274,15 +274,15 @@ bool c_Closure::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_Closure *c_Closure::create(Variant v_func, Variant v_vars) {
+c_Closure *c_Closure::create(CVarRef v_func, CVarRef v_vars) {
   CountableHelper h(this);
   init();
   t___construct(v_func, v_vars);
   return this;
 }
 void c_Closure::dynConstruct(CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) throw_wrong_arguments("Closure::__construct", count, 2, 2, 2);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 2)) throw_wrong_arguments("Closure::__construct", count, 2, 2, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -311,8 +311,8 @@ void c_Closure::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval:
   for (; i != params.size(); ++i) {
     params[i]->eval(env);
   }
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) throw_wrong_arguments("Closure::__construct", count, 2, 2, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 2)) throw_wrong_arguments("Closure::__construct", count, 2, 2, 1);
   (t___construct(a0, a1), null);
 }
 struct ObjectStaticCallbacks cw_Closure = {
@@ -544,7 +544,7 @@ CallInfo c_Continuation::ci_send((void*)&c_Continuation::i_send, (void*)&c_Conti
 CallInfo c_Continuation::ci_rewind((void*)&c_Continuation::i_rewind, (void*)&c_Continuation::ifa_rewind, 0, 4, 0x0000000000000000LL);
 CallInfo c_Continuation::ci_update((void*)&c_Continuation::i_update, (void*)&c_Continuation::ifa_update, 3, 4, 0x0000000000000000LL);
 Variant c_Continuation::i_next(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Continuation *self = NULL;
   p_Continuation pobj;
   if (mcp.obj) {
@@ -552,11 +552,11 @@ Variant c_Continuation::i_next(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::next", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::next", 0, 1);
   return (self->t_next(), null);
 }
 Variant c_Continuation::i_key(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Continuation *self = NULL;
   p_Continuation pobj;
   if (mcp.obj) {
@@ -564,11 +564,11 @@ Variant c_Continuation::i_key(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::key", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::key", 0, 1);
   return (self->t_key());
 }
 Variant c_Continuation::i_getlabel(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Continuation *self = NULL;
   p_Continuation pobj;
   if (mcp.obj) {
@@ -576,11 +576,11 @@ Variant c_Continuation::i_getlabel(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::getLabel", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::getLabel", 0, 1);
   return (self->t_getlabel());
 }
 Variant c_Continuation::i_valid(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Continuation *self = NULL;
   p_Continuation pobj;
   if (mcp.obj) {
@@ -588,11 +588,11 @@ Variant c_Continuation::i_valid(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::valid", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::valid", 0, 1);
   return (self->t_valid());
 }
 Variant c_Continuation::i_get_args(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Continuation *self = NULL;
   p_Continuation pobj;
   if (mcp.obj) {
@@ -600,11 +600,11 @@ Variant c_Continuation::i_get_args(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::get_args", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::get_args", 0, 1);
   return (self->t_get_args());
 }
 Variant c_Continuation::i_nextimpl(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Continuation *self = NULL;
   p_Continuation pobj;
   if (mcp.obj) {
@@ -612,11 +612,11 @@ Variant c_Continuation::i_nextimpl(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::nextImpl", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::nextImpl", 0, 1);
   return (self->t_nextimpl(), null);
 }
 Variant c_Continuation::i_get_arg(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Continuation *self = NULL;
   p_Continuation pobj;
   if (mcp.obj) {
@@ -624,7 +624,7 @@ Variant c_Continuation::i_get_arg(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("Continuation::get_arg", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("Continuation::get_arg", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -633,7 +633,7 @@ Variant c_Continuation::i_get_arg(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_Continuation::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Continuation *self = NULL;
   p_Continuation pobj;
   if (mcp.obj) {
@@ -641,7 +641,7 @@ Variant c_Continuation::i___construct(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count < 2 || count > 4) return throw_wrong_arguments("Continuation::__construct", count, 2, 4, 2);
+  if (UNLIKELY(count < 2 || count > 4)) return throw_wrong_arguments("Continuation::__construct", count, 2, 4, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -655,7 +655,7 @@ Variant c_Continuation::i___construct(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_Continuation::i_done(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Continuation *self = NULL;
   p_Continuation pobj;
   if (mcp.obj) {
@@ -663,11 +663,11 @@ Variant c_Continuation::i_done(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::done", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::done", 0, 1);
   return (self->t_done(), null);
 }
 Variant c_Continuation::i_num_args(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Continuation *self = NULL;
   p_Continuation pobj;
   if (mcp.obj) {
@@ -675,11 +675,11 @@ Variant c_Continuation::i_num_args(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::num_args", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::num_args", 0, 1);
   return (self->t_num_args());
 }
 Variant c_Continuation::i_receive(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Continuation *self = NULL;
   p_Continuation pobj;
   if (mcp.obj) {
@@ -687,11 +687,11 @@ Variant c_Continuation::i_receive(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::receive", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::receive", 0, 1);
   return (self->t_receive());
 }
 Variant c_Continuation::i_current(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Continuation *self = NULL;
   p_Continuation pobj;
   if (mcp.obj) {
@@ -699,11 +699,11 @@ Variant c_Continuation::i_current(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::current", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::current", 0, 1);
   return (self->t_current());
 }
 Variant c_Continuation::i_send(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Continuation *self = NULL;
   p_Continuation pobj;
   if (mcp.obj) {
@@ -711,7 +711,7 @@ Variant c_Continuation::i_send(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("Continuation::send", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("Continuation::send", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -720,7 +720,7 @@ Variant c_Continuation::i_send(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_Continuation::i_rewind(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Continuation *self = NULL;
   p_Continuation pobj;
   if (mcp.obj) {
@@ -728,11 +728,11 @@ Variant c_Continuation::i_rewind(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::rewind", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
 Variant c_Continuation::i_update(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Continuation *self = NULL;
   p_Continuation pobj;
   if (mcp.obj) {
@@ -740,7 +740,7 @@ Variant c_Continuation::i_update(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 3) return throw_wrong_arguments("Continuation::update", count, 3, 3, 1);
+  if (UNLIKELY(count != 3)) return throw_wrong_arguments("Continuation::update", count, 3, 3, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -758,7 +758,7 @@ Variant c_Continuation::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::next", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::next", 0, 1);
   return (self->t_next(), null);
 }
 Variant c_Continuation::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -769,7 +769,7 @@ Variant c_Continuation::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::key", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::key", 0, 1);
   return (self->t_key());
 }
 Variant c_Continuation::ifa_getlabel(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -780,7 +780,7 @@ Variant c_Continuation::ifa_getlabel(MethodCallPackage &mcp, int count, INVOKE_F
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::getLabel", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::getLabel", 0, 1);
   return (self->t_getlabel());
 }
 Variant c_Continuation::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -791,7 +791,7 @@ Variant c_Continuation::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::valid", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::valid", 0, 1);
   return (self->t_valid());
 }
 Variant c_Continuation::ifa_get_args(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -802,7 +802,7 @@ Variant c_Continuation::ifa_get_args(MethodCallPackage &mcp, int count, INVOKE_F
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::get_args", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::get_args", 0, 1);
   return (self->t_get_args());
 }
 Variant c_Continuation::ifa_nextimpl(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -813,7 +813,7 @@ Variant c_Continuation::ifa_nextimpl(MethodCallPackage &mcp, int count, INVOKE_F
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::nextImpl", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::nextImpl", 0, 1);
   return (self->t_nextimpl(), null);
 }
 Variant c_Continuation::ifa_get_arg(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -824,8 +824,8 @@ Variant c_Continuation::ifa_get_arg(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("Continuation::get_arg", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("Continuation::get_arg", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_get_arg(arg0));
 }
 Variant c_Continuation::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -836,13 +836,13 @@ Variant c_Continuation::ifa___construct(MethodCallPackage &mcp, int count, INVOK
   } else {
     self = createDummy(pobj);
   }
-  if (count < 2 || count > 4) return throw_wrong_arguments("Continuation::__construct", count, 2, 4, 2);
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
+  if (UNLIKELY(count < 2 || count > 4)) return throw_wrong_arguments("Continuation::__construct", count, 2, 4, 2);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
   if (count <= 2) return (self->t___construct(arg0, arg1), null);
-  CVarRef arg2((a2));
+  CVarRef arg2(a2);
   if (count <= 3) return (self->t___construct(arg0, arg1, arg2), null);
-  CVarRef arg3((a3));
+  CVarRef arg3(a3);
   return (self->t___construct(arg0, arg1, arg2, arg3), null);
 }
 Variant c_Continuation::ifa_done(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -853,7 +853,7 @@ Variant c_Continuation::ifa_done(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::done", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::done", 0, 1);
   return (self->t_done(), null);
 }
 Variant c_Continuation::ifa_num_args(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -864,7 +864,7 @@ Variant c_Continuation::ifa_num_args(MethodCallPackage &mcp, int count, INVOKE_F
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::num_args", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::num_args", 0, 1);
   return (self->t_num_args());
 }
 Variant c_Continuation::ifa_receive(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -875,7 +875,7 @@ Variant c_Continuation::ifa_receive(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::receive", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::receive", 0, 1);
   return (self->t_receive());
 }
 Variant c_Continuation::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -886,7 +886,7 @@ Variant c_Continuation::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::current", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::current", 0, 1);
   return (self->t_current());
 }
 Variant c_Continuation::ifa_send(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -897,8 +897,8 @@ Variant c_Continuation::ifa_send(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("Continuation::send", count, 1, 1, 1);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("Continuation::send", count, 1, 1, 1);
+  CVarRef arg0(a0);
   return (self->t_send(arg0), null);
 }
 Variant c_Continuation::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -909,7 +909,7 @@ Variant c_Continuation::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Continuation::rewind", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Continuation::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
 Variant c_Continuation::ifa_update(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -920,14 +920,14 @@ Variant c_Continuation::ifa_update(MethodCallPackage &mcp, int count, INVOKE_FEW
   } else {
     self = createDummy(pobj);
   }
-  if (count != 3) return throw_wrong_arguments("Continuation::update", count, 3, 3, 1);
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
-  CVarRef arg2((a2));
+  if (UNLIKELY(count != 3)) return throw_wrong_arguments("Continuation::update", count, 3, 3, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  CVarRef arg2(a2);
   return (self->t_update(arg0, arg1, arg2), null);
 }
 bool c_Continuation::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 0:
@@ -1023,8 +1023,8 @@ bool c_Continuation::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_Continuation *c_Continuation::create(Variant v_func, Variant v_vars, Variant v_obj //  = null
-, Variant v_args //  = s_sys_sa00000000
+c_Continuation *c_Continuation::create(CVarRef v_func, CVarRef v_vars, CVarRef v_obj //  = null_variant
+, CVarRef v_args //  = s_sys_sa00000000
 ) {
   CountableHelper h(this);
   init();
@@ -1032,8 +1032,8 @@ c_Continuation *c_Continuation::create(Variant v_func, Variant v_vars, Variant v
   return this;
 }
 void c_Continuation::dynConstruct(CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 2 || count > 4) throw_wrong_arguments("Continuation::__construct", count, 2, 4, 2);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 2 || count > 4)) throw_wrong_arguments("Continuation::__construct", count, 2, 4, 2);
   do {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1080,8 +1080,8 @@ void c_Continuation::dynConstructFromEval(Eval::VariableEnvironment &env, const 
   for (; i != params.size(); ++i) {
     params[i]->eval(env);
   }
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 2 || count > 4) throw_wrong_arguments("Continuation::__construct", count, 2, 4, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 2 || count > 4)) throw_wrong_arguments("Continuation::__construct", count, 2, 4, 1);
   if (count <= 2) (t___construct(a0, a1), null);
   else if (count == 3) (t___construct(a0, a1, a2), null);
   else (t___construct(a0, a1, a2, a3), null);
@@ -1235,7 +1235,7 @@ void c_Continuation::t_nextimpl() {
           CVarRef obj0 = m_obj;
           CStrRef mth0 = toString(v_func);
           mcp0.methodCall((obj0), mth0, -1);
-          const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
+          const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
           (mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, GET_THIS_TYPED(Continuation));
         }
       }
@@ -1306,7 +1306,7 @@ Object coo_Continuation() {
 }
 Variant pm_php$classes$closure_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/closure.php, pm_php$classes$closure_php);
-  LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
+  LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
   return true;
 }
 namespace hphp_impl_splitter {}

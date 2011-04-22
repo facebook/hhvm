@@ -284,7 +284,7 @@ bool f_ftruncate(CObjRef handle, int64 size) {
 
 static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 
-bool f_flock(CObjRef handle, int operation, Variant wouldblock /* = null */) {
+bool f_flock(CObjRef handle, int operation, VRefParam wouldblock /* = null */) {
   CHECK_HANDLE(handle, f);
   bool block = false;
   int act;

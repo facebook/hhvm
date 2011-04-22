@@ -109,11 +109,11 @@ const char* getHphpCompilerId();
 } // namespace HPHP
 
 #define DECLARE_SYSTEM_GLOBALS(sg)                      \
-  SystemGlobals *sg __attribute__((__unused__)) =       \
+  SystemGlobals *sg ATTRIBUTE_UNUSED =       \
     (SystemGlobals*)get_global_variables();
 
 #define DECLARE_GLOBAL_VARIABLES(g)                     \
-  GlobalVariables *g __attribute__((__unused__)) =      \
+  GlobalVariables *g ATTRIBUTE_UNUSED =      \
     get_global_variables();
 
 // code generated file that defines all system global variables

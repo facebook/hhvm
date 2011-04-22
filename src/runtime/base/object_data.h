@@ -188,6 +188,7 @@ class ObjectData : public CountableNF {
   Variant o_set(CStrRef s, CVarRef v, bool forInit = false,
                 CStrRef context = null_string);
   Variant o_setPublic(CStrRef s, CVarRef v, bool forInit = false);
+  Variant o_setPublicWithRef(CStrRef s, CVarRef v, bool forInit = false);
   Variant &o_lval(CStrRef s, CVarRef tmpForGet, CStrRef context = null_string);
   Variant &o_unsetLval(CStrRef s, CVarRef tmpForGet,
                        CStrRef context = null_string) {

@@ -28,7 +28,7 @@ namespace HPHP {
 Object f_xml_parser_create(CStrRef encoding = null_string);
 bool f_xml_parser_free(CObjRef parser);
 int f_xml_parse(CObjRef parser, CStrRef data, bool is_final = true);
-int f_xml_parse_into_struct(CObjRef parser, CStrRef data, Variant values, Variant index = null);
+int f_xml_parse_into_struct(CObjRef parser, CStrRef data, VRefParam values, VRefParam index = null);
 Object f_xml_parser_create_ns(CStrRef encoding = null_string, CStrRef separator = null_string);
 Variant f_xml_parser_get_option(CObjRef parser, int option);
 bool f_xml_parser_set_option(CObjRef parser, int option, CVarRef value);
@@ -41,7 +41,7 @@ bool f_xml_set_end_namespace_decl_handler(CObjRef parser, CVarRef handler);
 bool f_xml_set_unparsed_entity_decl_handler(CObjRef parser, CVarRef handler);
 bool f_xml_set_external_entity_ref_handler(CObjRef parser, CVarRef handler);
 bool f_xml_set_notation_decl_handler(CObjRef parser, CVarRef handler);
-bool f_xml_set_object(CObjRef parser, Variant object);
+bool f_xml_set_object(CObjRef parser, VRefParam object);
 int f_xml_get_current_byte_index(CObjRef parser);
 int f_xml_get_current_column_number(CObjRef parser);
 int f_xml_get_current_line_number(CObjRef parser);

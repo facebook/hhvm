@@ -130,7 +130,7 @@ class c_SQLite3Stmt : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(reset);
   public: bool t_clear();
   DECLARE_METHOD_INVOKE_HELPERS(clear);
-  public: bool t_bindparam(CVarRef name, Variant parameter, int64 type = k_SQLITE3_TEXT);
+  public: bool t_bindparam(CVarRef name, VRefParam parameter, int64 type = k_SQLITE3_TEXT);
   DECLARE_METHOD_INVOKE_HELPERS(bindparam);
   public: bool t_bindvalue(CVarRef name, CVarRef parameter, int64 type = k_SQLITE3_TEXT);
   DECLARE_METHOD_INVOKE_HELPERS(bindvalue);

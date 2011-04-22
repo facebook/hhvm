@@ -27,51 +27,61 @@ namespace HPHP {
 
 inline Variant x_bzclose(CObjRef bz) {
   FUNCTION_INJECTION_BUILTIN(bzclose);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bzclose(bz);
 }
 
 inline Variant x_bzopen(CStrRef filename, CStrRef mode) {
   FUNCTION_INJECTION_BUILTIN(bzopen);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bzopen(filename, mode);
 }
 
 inline Variant x_bzread(CObjRef bz, int length = 1024) {
   FUNCTION_INJECTION_BUILTIN(bzread);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bzread(bz, length);
 }
 
 inline Variant x_bzwrite(CObjRef bz, CStrRef data, int length = 0) {
   FUNCTION_INJECTION_BUILTIN(bzwrite);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bzwrite(bz, data, length);
 }
 
 inline Variant x_bzflush(CObjRef bz) {
   FUNCTION_INJECTION_BUILTIN(bzflush);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bzflush(bz);
 }
 
 inline String x_bzerrstr(CObjRef bz) {
   FUNCTION_INJECTION_BUILTIN(bzerrstr);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bzerrstr(bz);
 }
 
 inline Variant x_bzerror(CObjRef bz) {
   FUNCTION_INJECTION_BUILTIN(bzerror);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bzerror(bz);
 }
 
 inline int x_bzerrno(CObjRef bz) {
   FUNCTION_INJECTION_BUILTIN(bzerrno);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bzerrno(bz);
 }
 
 inline Variant x_bzcompress(CStrRef source, int blocksize = 4, int workfactor = 0) {
   FUNCTION_INJECTION_BUILTIN(bzcompress);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bzcompress(source, blocksize, workfactor);
 }
 
 inline Variant x_bzdecompress(CStrRef source, int small = 0) {
   FUNCTION_INJECTION_BUILTIN(bzdecompress);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_bzdecompress(source, small);
 }
 

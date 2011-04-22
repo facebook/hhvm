@@ -130,7 +130,7 @@ CallInfo c_Directory::ci_close((void*)&c_Directory::i_close, (void*)&c_Directory
 CallInfo c_Directory::ci_read((void*)&c_Directory::i_read, (void*)&c_Directory::ifa_read, 0, 4, 0x0000000000000000LL);
 CallInfo c_Directory::ci_rewind((void*)&c_Directory::i_rewind, (void*)&c_Directory::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_Directory::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Directory *self = NULL;
   p_Directory pobj;
   if (mcp.obj) {
@@ -138,7 +138,7 @@ Variant c_Directory::i___construct(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -147,7 +147,7 @@ Variant c_Directory::i___construct(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_Directory::i_close(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Directory *self = NULL;
   p_Directory pobj;
   if (mcp.obj) {
@@ -155,11 +155,11 @@ Variant c_Directory::i_close(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Directory::close", 0, 1);
   return (self->t_close(), null);
 }
 Variant c_Directory::i_read(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Directory *self = NULL;
   p_Directory pobj;
   if (mcp.obj) {
@@ -167,11 +167,11 @@ Variant c_Directory::i_read(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Directory::read", 0, 1);
   return (self->t_read());
 }
 Variant c_Directory::i_rewind(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Directory *self = NULL;
   p_Directory pobj;
   if (mcp.obj) {
@@ -179,7 +179,7 @@ Variant c_Directory::i_rewind(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Directory::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
 Variant c_Directory::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -190,8 +190,8 @@ Variant c_Directory::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
-  CVarRef arg0((a0));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
+  CVarRef arg0(a0);
   return (self->t___construct(arg0), null);
 }
 Variant c_Directory::ifa_close(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -202,7 +202,7 @@ Variant c_Directory::ifa_close(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Directory::close", 0, 1);
   return (self->t_close(), null);
 }
 Variant c_Directory::ifa_read(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -213,7 +213,7 @@ Variant c_Directory::ifa_read(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Directory::read", 0, 1);
   return (self->t_read());
 }
 Variant c_Directory::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -224,11 +224,11 @@ Variant c_Directory::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Directory::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
 bool c_Directory::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 1:
@@ -262,15 +262,15 @@ bool c_Directory::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_Directory *c_Directory::create(Variant v_path) {
+c_Directory *c_Directory::create(CVarRef v_path) {
   CountableHelper h(this);
   init();
   t___construct(v_path);
   return this;
 }
 void c_Directory::dynConstruct(CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -294,8 +294,8 @@ void c_Directory::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   for (; i != params.size(); ++i) {
     params[i]->eval(env);
   }
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("Directory::__construct", count, 1, 1, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) throw_wrong_arguments("Directory::__construct", count, 1, 1, 1);
   (t___construct(a0), null);
 }
 struct ObjectStaticCallbacks cw_Directory = {
@@ -350,7 +350,7 @@ Object coo_Directory() {
 }
 Variant pm_php$classes$directory_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/directory.php, pm_php$classes$directory_php);
-  LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
+  LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
   return true;
 }
 namespace hphp_impl_splitter {}

@@ -30,7 +30,7 @@ namespace HPHP {
 
 Variant f_curl_init(CStrRef url = null_string);
 Variant f_curl_copy_handle(CObjRef ch);
-Variant f_curl_version(int uversion = CURLVERSION_NOW);
+Variant f_curl_version(int uversion = k_CURLVERSION_NOW);
 bool f_curl_setopt(CObjRef ch, int option, CVarRef value);
 bool f_curl_setopt_array(CObjRef ch, CArrRef options);
 Variant f_curl_exec(CObjRef ch);
@@ -41,10 +41,10 @@ Variant f_curl_close(CObjRef ch);
 Object f_curl_multi_init();
 Variant f_curl_multi_add_handle(CObjRef mh, CObjRef ch);
 Variant f_curl_multi_remove_handle(CObjRef mh, CObjRef ch);
-Variant f_curl_multi_exec(CObjRef mh, Variant still_running);
+Variant f_curl_multi_exec(CObjRef mh, VRefParam still_running);
 Variant f_curl_multi_select(CObjRef mh, double timeout = 1.0);
 Variant f_curl_multi_getcontent(CObjRef ch);
-Variant f_curl_multi_info_read(CObjRef mh, Variant msgs_in_queue = null);
+Variant f_curl_multi_info_read(CObjRef mh, VRefParam msgs_in_queue = null);
 Variant f_curl_multi_close(CObjRef mh);
 void f_evhttp_set_cache(CStrRef address, int max_conn, int port = 80);
 Variant f_evhttp_get(CStrRef url, CArrRef headers = null_array, int timeout = 5);

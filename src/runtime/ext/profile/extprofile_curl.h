@@ -27,121 +27,145 @@ namespace HPHP {
 
 inline Variant x_curl_init(CStrRef url = null_string) {
   FUNCTION_INJECTION_BUILTIN(curl_init);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_init(url);
 }
 
 inline Variant x_curl_copy_handle(CObjRef ch) {
   FUNCTION_INJECTION_BUILTIN(curl_copy_handle);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_copy_handle(ch);
 }
 
 inline Variant x_curl_version(int uversion = k_CURLVERSION_NOW) {
   FUNCTION_INJECTION_BUILTIN(curl_version);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_version(uversion);
 }
 
 inline bool x_curl_setopt(CObjRef ch, int option, CVarRef value) {
   FUNCTION_INJECTION_BUILTIN(curl_setopt);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_setopt(ch, option, value);
 }
 
 inline bool x_curl_setopt_array(CObjRef ch, CArrRef options) {
   FUNCTION_INJECTION_BUILTIN(curl_setopt_array);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_setopt_array(ch, options);
 }
 
 inline Variant x_curl_exec(CObjRef ch) {
   FUNCTION_INJECTION_BUILTIN(curl_exec);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_exec(ch);
 }
 
 inline Variant x_curl_getinfo(CObjRef ch, int opt = 0) {
   FUNCTION_INJECTION_BUILTIN(curl_getinfo);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_getinfo(ch, opt);
 }
 
 inline Variant x_curl_errno(CObjRef ch) {
   FUNCTION_INJECTION_BUILTIN(curl_errno);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_errno(ch);
 }
 
 inline Variant x_curl_error(CObjRef ch) {
   FUNCTION_INJECTION_BUILTIN(curl_error);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_error(ch);
 }
 
 inline Variant x_curl_close(CObjRef ch) {
   FUNCTION_INJECTION_BUILTIN(curl_close);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_close(ch);
 }
 
 inline Object x_curl_multi_init() {
   FUNCTION_INJECTION_BUILTIN(curl_multi_init);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_multi_init();
 }
 
 inline Variant x_curl_multi_add_handle(CObjRef mh, CObjRef ch) {
   FUNCTION_INJECTION_BUILTIN(curl_multi_add_handle);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_multi_add_handle(mh, ch);
 }
 
 inline Variant x_curl_multi_remove_handle(CObjRef mh, CObjRef ch) {
   FUNCTION_INJECTION_BUILTIN(curl_multi_remove_handle);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_multi_remove_handle(mh, ch);
 }
 
-inline Variant x_curl_multi_exec(CObjRef mh, CVarRef still_running) {
+inline Variant x_curl_multi_exec(CObjRef mh, VRefParam still_running) {
   FUNCTION_INJECTION_BUILTIN(curl_multi_exec);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_multi_exec(mh, still_running);
 }
 
 inline Variant x_curl_multi_select(CObjRef mh, double timeout = 1.0) {
   FUNCTION_INJECTION_BUILTIN(curl_multi_select);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_multi_select(mh, timeout);
 }
 
 inline Variant x_curl_multi_getcontent(CObjRef ch) {
   FUNCTION_INJECTION_BUILTIN(curl_multi_getcontent);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_multi_getcontent(ch);
 }
 
-inline Variant x_curl_multi_info_read(CObjRef mh, CVarRef msgs_in_queue = null) {
+inline Variant x_curl_multi_info_read(CObjRef mh, VRefParam msgs_in_queue = null) {
   FUNCTION_INJECTION_BUILTIN(curl_multi_info_read);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_multi_info_read(mh, msgs_in_queue);
 }
 
 inline Variant x_curl_multi_close(CObjRef mh) {
   FUNCTION_INJECTION_BUILTIN(curl_multi_close);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_curl_multi_close(mh);
 }
 
 inline void x_evhttp_set_cache(CStrRef address, int max_conn, int port = 80) {
   FUNCTION_INJECTION_BUILTIN(evhttp_set_cache);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_evhttp_set_cache(address, max_conn, port);
 }
 
 inline Variant x_evhttp_get(CStrRef url, CArrRef headers = null_array, int timeout = 5) {
   FUNCTION_INJECTION_BUILTIN(evhttp_get);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_evhttp_get(url, headers, timeout);
 }
 
 inline Variant x_evhttp_post(CStrRef url, CStrRef data, CArrRef headers = null_array, int timeout = 5) {
   FUNCTION_INJECTION_BUILTIN(evhttp_post);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_evhttp_post(url, data, headers, timeout);
 }
 
 inline Variant x_evhttp_async_get(CStrRef url, CArrRef headers = null_array, int timeout = 5) {
   FUNCTION_INJECTION_BUILTIN(evhttp_async_get);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_evhttp_async_get(url, headers, timeout);
 }
 
 inline Variant x_evhttp_async_post(CStrRef url, CStrRef data, CArrRef headers = null_array, int timeout = 5) {
   FUNCTION_INJECTION_BUILTIN(evhttp_async_post);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_evhttp_async_post(url, data, headers, timeout);
 }
 
 inline Variant x_evhttp_recv(CObjRef handle) {
   FUNCTION_INJECTION_BUILTIN(evhttp_recv);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_evhttp_recv(handle);
 }
 

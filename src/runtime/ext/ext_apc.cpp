@@ -56,7 +56,7 @@ bool f_apc_add(CStrRef key, CVarRef var, int64 ttl /* = 0 */,
   return sharedStore.store(key, var, ttl, false);
 }
 
-Variant f_apc_fetch(CVarRef key, Variant success /* = null */,
+Variant f_apc_fetch(CVarRef key, VRefParam success /* = null */,
                     int64 cache_id /* = 0 */) {
   if (!RuntimeOption::EnableApc) return false;
 
@@ -134,7 +134,7 @@ bool f_apc_clear_cache(int64 cache_id /* = 0 */) {
 }
 
 Variant f_apc_inc(CStrRef key, int64 step /* = 1 */,
-                  Variant success /* = null */, int64 cache_id /* = 0 */) {
+                  VRefParam success /* = null */, int64 cache_id /* = 0 */) {
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -148,7 +148,7 @@ Variant f_apc_inc(CStrRef key, int64 step /* = 1 */,
 }
 
 Variant f_apc_dec(CStrRef key, int64 step /* = 1 */,
-                  Variant success /* = null */, int64 cache_id /* = 0 */) {
+                  VRefParam success /* = null */, int64 cache_id /* = 0 */) {
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {

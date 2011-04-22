@@ -27,201 +27,241 @@ namespace HPHP {
 
 inline Object x_stream_context_create(CArrRef options = null_array, CArrRef params = null_array) {
   FUNCTION_INJECTION_BUILTIN(stream_context_create);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_context_create(options, params);
 }
 
 inline Object x_stream_context_get_default(CArrRef options = null_array) {
   FUNCTION_INJECTION_BUILTIN(stream_context_get_default);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_context_get_default(options);
 }
 
 inline Variant x_stream_context_get_options(CObjRef stream_or_context) {
   FUNCTION_INJECTION_BUILTIN(stream_context_get_options);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_context_get_options(stream_or_context);
 }
 
 inline bool x_stream_context_set_option(CObjRef stream_or_context, CVarRef wrapper, CStrRef option = null_string, CVarRef value = null_variant) {
   FUNCTION_INJECTION_BUILTIN(stream_context_set_option);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_context_set_option(stream_or_context, wrapper, option, value);
 }
 
 inline bool x_stream_context_set_param(CObjRef stream_or_context, CArrRef params) {
   FUNCTION_INJECTION_BUILTIN(stream_context_set_param);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_context_set_param(stream_or_context, params);
 }
 
 inline Variant x_stream_copy_to_stream(CObjRef source, CObjRef dest, int maxlength = -1, int offset = 0) {
   FUNCTION_INJECTION_BUILTIN(stream_copy_to_stream);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_copy_to_stream(source, dest, maxlength, offset);
 }
 
 inline bool x_stream_encoding(CObjRef stream, CStrRef encoding = null_string) {
   FUNCTION_INJECTION_BUILTIN(stream_encoding);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_encoding(stream, encoding);
 }
 
 inline void x_stream_bucket_append(CObjRef brigade, CObjRef bucket) {
   FUNCTION_INJECTION_BUILTIN(stream_bucket_append);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_stream_bucket_append(brigade, bucket);
 }
 
 inline void x_stream_bucket_prepend(CObjRef brigade, CObjRef bucket) {
   FUNCTION_INJECTION_BUILTIN(stream_bucket_prepend);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_stream_bucket_prepend(brigade, bucket);
 }
 
 inline Object x_stream_bucket_make_writeable(CObjRef brigade) {
   FUNCTION_INJECTION_BUILTIN(stream_bucket_make_writeable);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_bucket_make_writeable(brigade);
 }
 
 inline Object x_stream_bucket_new(CObjRef stream, CStrRef buffer) {
   FUNCTION_INJECTION_BUILTIN(stream_bucket_new);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_bucket_new(stream, buffer);
 }
 
 inline bool x_stream_filter_register(CStrRef filtername, CStrRef classname) {
   FUNCTION_INJECTION_BUILTIN(stream_filter_register);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_filter_register(filtername, classname);
 }
 
 inline bool x_stream_filter_remove(CObjRef stream_filter) {
   FUNCTION_INJECTION_BUILTIN(stream_filter_remove);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_filter_remove(stream_filter);
 }
 
 inline Object x_stream_filter_append(CObjRef stream, CStrRef filtername, int read_write = 0, CVarRef params = null_variant) {
   FUNCTION_INJECTION_BUILTIN(stream_filter_append);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_filter_append(stream, filtername, read_write, params);
 }
 
 inline Object x_stream_filter_prepend(CObjRef stream, CStrRef filtername, int read_write = 0, CVarRef params = null_variant) {
   FUNCTION_INJECTION_BUILTIN(stream_filter_prepend);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_filter_prepend(stream, filtername, read_write, params);
 }
 
 inline Variant x_stream_get_contents(CObjRef handle, int maxlen = 0, int offset = 0) {
   FUNCTION_INJECTION_BUILTIN(stream_get_contents);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_get_contents(handle, maxlen, offset);
 }
 
 inline Array x_stream_get_filters() {
   FUNCTION_INJECTION_BUILTIN(stream_get_filters);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_get_filters();
 }
 
 inline Variant x_stream_get_line(CObjRef handle, int length = 0, CStrRef ending = null_string) {
   FUNCTION_INJECTION_BUILTIN(stream_get_line);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_get_line(handle, length, ending);
 }
 
 inline Variant x_stream_get_meta_data(CObjRef stream) {
   FUNCTION_INJECTION_BUILTIN(stream_get_meta_data);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_get_meta_data(stream);
 }
 
 inline Array x_stream_get_transports() {
   FUNCTION_INJECTION_BUILTIN(stream_get_transports);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_get_transports();
 }
 
 inline Array x_stream_get_wrappers() {
   FUNCTION_INJECTION_BUILTIN(stream_get_wrappers);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_get_wrappers();
 }
 
 inline bool x_stream_register_wrapper(CStrRef protocol, CStrRef classname) {
   FUNCTION_INJECTION_BUILTIN(stream_register_wrapper);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_register_wrapper(protocol, classname);
 }
 
 inline bool x_stream_wrapper_register(CStrRef protocol, CStrRef classname) {
   FUNCTION_INJECTION_BUILTIN(stream_wrapper_register);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_wrapper_register(protocol, classname);
 }
 
 inline bool x_stream_wrapper_restore(CStrRef protocol) {
   FUNCTION_INJECTION_BUILTIN(stream_wrapper_restore);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_wrapper_restore(protocol);
 }
 
 inline bool x_stream_wrapper_unregister(CStrRef protocol) {
   FUNCTION_INJECTION_BUILTIN(stream_wrapper_unregister);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_wrapper_unregister(protocol);
 }
 
 inline String x_stream_resolve_include_path(CStrRef filename, CObjRef context = null_object) {
   FUNCTION_INJECTION_BUILTIN(stream_resolve_include_path);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_resolve_include_path(filename, context);
 }
 
-inline Variant x_stream_select(CVarRef read, CVarRef write, CVarRef except, CVarRef vtv_sec, int tv_usec = 0) {
+inline Variant x_stream_select(VRefParam read, VRefParam write, VRefParam except, CVarRef vtv_sec, int tv_usec = 0) {
   FUNCTION_INJECTION_BUILTIN(stream_select);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_select(read, write, except, vtv_sec, tv_usec);
 }
 
 inline bool x_stream_set_blocking(CObjRef stream, int mode) {
   FUNCTION_INJECTION_BUILTIN(stream_set_blocking);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_set_blocking(stream, mode);
 }
 
 inline bool x_stream_set_timeout(CObjRef stream, int seconds, int microseconds = 0) {
   FUNCTION_INJECTION_BUILTIN(stream_set_timeout);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_set_timeout(stream, seconds, microseconds);
 }
 
 inline int x_stream_set_write_buffer(CObjRef stream, int buffer) {
   FUNCTION_INJECTION_BUILTIN(stream_set_write_buffer);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_set_write_buffer(stream, buffer);
 }
 
 inline int x_set_file_buffer(CObjRef stream, int buffer) {
   FUNCTION_INJECTION_BUILTIN(set_file_buffer);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_set_file_buffer(stream, buffer);
 }
 
-inline Variant x_stream_socket_accept(CObjRef server_socket, double timeout = 0.0, CVarRef peername = null) {
+inline Variant x_stream_socket_accept(CObjRef server_socket, double timeout = 0.0, VRefParam peername = null) {
   FUNCTION_INJECTION_BUILTIN(stream_socket_accept);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_socket_accept(server_socket, timeout, peername);
 }
 
-inline Variant x_stream_socket_server(CStrRef local_socket, CVarRef errnum = null, CVarRef errstr = null, int flags = 0, CObjRef context = null_object) {
+inline Variant x_stream_socket_server(CStrRef local_socket, VRefParam errnum = null, VRefParam errstr = null, int flags = 0, CObjRef context = null_object) {
   FUNCTION_INJECTION_BUILTIN(stream_socket_server);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_socket_server(local_socket, errnum, errstr, flags, context);
 }
 
-inline Variant x_stream_socket_client(CStrRef remote_socket, CVarRef errnum = null, CVarRef errstr = null, double timeout = 0.0, int flags = 0, CObjRef context = null_object) {
+inline Variant x_stream_socket_client(CStrRef remote_socket, VRefParam errnum = null, VRefParam errstr = null, double timeout = 0.0, int flags = 0, CObjRef context = null_object) {
   FUNCTION_INJECTION_BUILTIN(stream_socket_client);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_socket_client(remote_socket, errnum, errstr, timeout, flags, context);
 }
 
 inline Variant x_stream_socket_enable_crypto(CObjRef stream, bool enable, int crypto_type = 0, CObjRef session_stream = null_object) {
   FUNCTION_INJECTION_BUILTIN(stream_socket_enable_crypto);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_socket_enable_crypto(stream, enable, crypto_type, session_stream);
 }
 
 inline Variant x_stream_socket_get_name(CObjRef handle, bool want_peer) {
   FUNCTION_INJECTION_BUILTIN(stream_socket_get_name);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_socket_get_name(handle, want_peer);
 }
 
 inline Variant x_stream_socket_pair(int domain, int type, int protocol) {
   FUNCTION_INJECTION_BUILTIN(stream_socket_pair);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_socket_pair(domain, type, protocol);
 }
 
 inline Variant x_stream_socket_recvfrom(CObjRef socket, int length, int flags = 0, CStrRef address = null_string) {
   FUNCTION_INJECTION_BUILTIN(stream_socket_recvfrom);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_socket_recvfrom(socket, length, flags, address);
 }
 
 inline Variant x_stream_socket_sendto(CObjRef socket, CStrRef data, int flags = 0, CStrRef address = null_string) {
   FUNCTION_INJECTION_BUILTIN(stream_socket_sendto);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_socket_sendto(socket, data, flags, address);
 }
 
 inline bool x_stream_socket_shutdown(CObjRef stream, int how) {
   FUNCTION_INJECTION_BUILTIN(stream_socket_shutdown);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_stream_socket_shutdown(stream, how);
 }
 

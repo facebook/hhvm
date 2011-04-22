@@ -30,10 +30,10 @@ Variant f_msg_get_queue(int64 key, int64 perms = 0666);
 bool f_msg_queue_exists(int64 key);
 bool f_msg_send(CObjRef queue, int64 msgtype, CVarRef message,
                 bool serialize = true, bool blocking = true,
-                Variant errorcode = null);
-bool f_msg_receive(CObjRef queue, int64 desiredmsgtype, Variant msgtype,
-                   int64 maxsize, Variant message, bool unserialize = true,
-                   int64 flags = 0, Variant errorcode = null);
+                VRefParam errorcode = null);
+bool f_msg_receive(CObjRef queue, int64 desiredmsgtype, VRefParam msgtype,
+                   int64 maxsize, VRefParam message, bool unserialize = true,
+                   int64 flags = 0, VRefParam errorcode = null);
 bool f_msg_remove_queue(CObjRef queue);
 bool f_msg_set_queue(CObjRef queue, CArrRef data);
 Array f_msg_stat_queue(CObjRef queue);

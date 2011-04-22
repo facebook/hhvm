@@ -31,7 +31,7 @@ Variant f_preg_grep(CStrRef pattern, CArrRef input, int flags /* = 0 */) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_preg_match(CStrRef pattern, CStrRef subject,
-                     Variant matches /* = null */, int flags /* = 0 */,
+                     VRefParam matches /* = null */, int flags /* = 0 */,
                      int offset /* = 0 */) {
   if (matches.isReferenced()) {
     return preg_match(pattern, subject, matches, flags, offset);
@@ -40,7 +40,7 @@ Variant f_preg_match(CStrRef pattern, CStrRef subject,
   }
 }
 
-Variant f_preg_match_all(CStrRef pattern, CStrRef subject, Variant matches,
+Variant f_preg_match_all(CStrRef pattern, CStrRef subject, VRefParam matches,
                          int flags /* = 0 */, int offset /* = 0 */) {
   if (matches.isReferenced()) {
     return preg_match_all(pattern, subject, matches, flags, offset);
@@ -53,13 +53,13 @@ Variant f_preg_match_all(CStrRef pattern, CStrRef subject, Variant matches,
 
 
 Variant f_preg_replace(CVarRef pattern, CVarRef replacement, CVarRef subject,
-                       int limit /* = -1 */, Variant count /* = null */) {
+                       int limit /* = -1 */, VRefParam count /* = null */) {
   return preg_replace_impl(pattern, replacement, subject, limit, count, false);
 }
 
 Variant f_preg_replace_callback(CVarRef pattern, CVarRef callback,
                                 CVarRef subject, int limit /* = -1 */,
-                                Variant count /* = null */) {
+                                VRefParam count /* = null */) {
   return preg_replace_impl(pattern, callback, subject, limit, count, true);
 }
 
@@ -91,11 +91,11 @@ String f_eregi_replace(CStrRef pattern, CStrRef replacement, CStrRef str) {
   return f_mb_eregi_replace(pattern, replacement, str);
 }
 
-Variant f_ereg(CStrRef pattern, CStrRef str, Variant regs /* = null */) {
+Variant f_ereg(CStrRef pattern, CStrRef str, VRefParam regs /* = null */) {
   return f_mb_ereg(pattern, str, ref(regs));
 }
 
-Variant f_eregi(CStrRef pattern, CStrRef str, Variant regs /* = null */) {
+Variant f_eregi(CStrRef pattern, CStrRef str, VRefParam regs /* = null */) {
   return f_mb_eregi(pattern, str, ref(regs));
 }
 

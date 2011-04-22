@@ -150,6 +150,14 @@ Variant::Variant(CVarRef v) {
   VariantHelper(v);
 }
 
+Variant::Variant(CVarWeakBind v) {
+  constructValHelper(variant(v));
+}
+
+Variant::Variant(CVarStrongBind v) {
+  constructRefHelper(variant(v));
+}
+
 void Variant::reset() {
   m_type = KindOfNull;
 }
@@ -3575,7 +3583,7 @@ void Variant::unserialize(VariableUnserializer *uns) {
       if (v == NULL) {
         throw Exception("Id %ld out of range", id);
       }
-      operator=(ref(*v));
+      assignRef(*v);
     }
     break;
   case 'b': { int64 v = uns->readInt(); operator=((bool)v); } break;

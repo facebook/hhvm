@@ -272,6 +272,7 @@ struct file_closer {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Non-gcc compat
+#define ATTRIBUTE_UNUSED __attribute__((unused))
 #if (__GNUC__ == 4 && __GNUC_MINOR__ >= 3) || __ICC >= 1200 || __GNUC__ > 4
 #define ATTRIBUTE_COLD __attribute__((cold))
 #else

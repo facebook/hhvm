@@ -101,7 +101,7 @@ void c_UnexpectedValueException::cloneSet(ObjectData *cl) {
   c_RuntimeException::cloneSet(clone);
 }
 bool c_UnexpectedValueException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   return c_RuntimeException::os_get_call_info(mcp, hash);
 }
 bool c_UnexpectedValueException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -191,7 +191,7 @@ void c_OverflowException::cloneSet(ObjectData *cl) {
   c_RuntimeException::cloneSet(clone);
 }
 bool c_OverflowException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   return c_RuntimeException::os_get_call_info(mcp, hash);
 }
 bool c_OverflowException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -281,7 +281,7 @@ void c_OutOfBoundsException::cloneSet(ObjectData *cl) {
   c_RuntimeException::cloneSet(clone);
 }
 bool c_OutOfBoundsException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   return c_RuntimeException::os_get_call_info(mcp, hash);
 }
 bool c_OutOfBoundsException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -370,7 +370,7 @@ void c_LogicException::cloneSet(ObjectData *cl) {
   c_Exception::cloneSet(clone);
 }
 bool c_LogicException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   return c_Exception::os_get_call_info(mcp, hash);
 }
 bool c_LogicException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -460,7 +460,7 @@ void c_RangeException::cloneSet(ObjectData *cl) {
   c_RuntimeException::cloneSet(clone);
 }
 bool c_RangeException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   return c_RuntimeException::os_get_call_info(mcp, hash);
 }
 bool c_RangeException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -552,7 +552,7 @@ void c_InvalidArgumentException::cloneSet(ObjectData *cl) {
   c_LogicException::cloneSet(clone);
 }
 bool c_InvalidArgumentException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   return c_LogicException::os_get_call_info(mcp, hash);
 }
 bool c_InvalidArgumentException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -640,7 +640,7 @@ void c_UnderflowException::cloneSet(ObjectData *cl) {
   c_RuntimeException::cloneSet(clone);
 }
 bool c_UnderflowException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   return c_RuntimeException::os_get_call_info(mcp, hash);
 }
 bool c_UnderflowException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -730,7 +730,7 @@ void c_OutOfRangeException::cloneSet(ObjectData *cl) {
   c_LogicException::cloneSet(clone);
 }
 bool c_OutOfRangeException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   return c_LogicException::os_get_call_info(mcp, hash);
 }
 bool c_OutOfRangeException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -825,7 +825,7 @@ void c_BadMethodCallException::cloneSet(ObjectData *cl) {
   c_BadFunctionCallException::cloneSet(clone);
 }
 bool c_BadMethodCallException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   return c_BadFunctionCallException::os_get_call_info(mcp, hash);
 }
 bool c_BadMethodCallException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -912,7 +912,7 @@ void c_RuntimeException::cloneSet(ObjectData *cl) {
   c_Exception::cloneSet(clone);
 }
 bool c_RuntimeException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   return c_Exception::os_get_call_info(mcp, hash);
 }
 bool c_RuntimeException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -1073,7 +1073,7 @@ CallInfo c_Exception::ci_getfile((void*)&c_Exception::i_getfile, (void*)&c_Excep
 CallInfo c_Exception::ci_gettraceasstring((void*)&c_Exception::i_gettraceasstring, (void*)&c_Exception::ifa_gettraceasstring, 0, 4, 0x0000000000000000LL);
 CallInfo c_Exception::ci_gettrace((void*)&c_Exception::i_gettrace, (void*)&c_Exception::ifa_gettrace, 0, 4, 0x0000000000000000LL);
 Variant c_Exception::i_getmessage(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Exception *self = NULL;
   p_Exception pobj;
   if (mcp.obj) {
@@ -1081,11 +1081,11 @@ Variant c_Exception::i_getmessage(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getMessage", 0, 1);
   return (self->t_getmessage());
 }
 Variant c_Exception::i___tostring(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Exception *self = NULL;
   p_Exception pobj;
   if (mcp.obj) {
@@ -1093,11 +1093,11 @@ Variant c_Exception::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_Exception::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Exception *self = NULL;
   p_Exception pobj;
   if (mcp.obj) {
@@ -1105,7 +1105,7 @@ Variant c_Exception::i___construct(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 3) return throw_toomany_arguments("Exception::__construct", 3, 2);
+  if (UNLIKELY(count > 3)) return throw_toomany_arguments("Exception::__construct", 3, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1119,7 +1119,7 @@ Variant c_Exception::i___construct(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_Exception::i_getcode(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Exception *self = NULL;
   p_Exception pobj;
   if (mcp.obj) {
@@ -1127,11 +1127,11 @@ Variant c_Exception::i_getcode(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getCode", 0, 1);
   return (self->t_getcode());
 }
 Variant c_Exception::i_getprevious(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Exception *self = NULL;
   p_Exception pobj;
   if (mcp.obj) {
@@ -1139,11 +1139,11 @@ Variant c_Exception::i_getprevious(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::getPrevious", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getPrevious", 0, 1);
   return (self->t_getprevious());
 }
 Variant c_Exception::i_getline(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Exception *self = NULL;
   p_Exception pobj;
   if (mcp.obj) {
@@ -1151,11 +1151,11 @@ Variant c_Exception::i_getline(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getLine", 0, 1);
   return (self->t_getline());
 }
 Variant c_Exception::i___init__(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Exception *self = NULL;
   p_Exception pobj;
   if (mcp.obj) {
@@ -1163,11 +1163,11 @@ Variant c_Exception::i___init__(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::__init__", 0, 1);
   return (self->t___init__(), null);
 }
 Variant c_Exception::i_getfile(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Exception *self = NULL;
   p_Exception pobj;
   if (mcp.obj) {
@@ -1175,11 +1175,11 @@ Variant c_Exception::i_getfile(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getFile", 0, 1);
   return (self->t_getfile());
 }
 Variant c_Exception::i_gettraceasstring(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Exception *self = NULL;
   p_Exception pobj;
   if (mcp.obj) {
@@ -1187,11 +1187,11 @@ Variant c_Exception::i_gettraceasstring(MethodCallPackage &mcp, CArrRef params) 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
   return (self->t_gettraceasstring());
 }
 Variant c_Exception::i_gettrace(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_Exception *self = NULL;
   p_Exception pobj;
   if (mcp.obj) {
@@ -1199,7 +1199,7 @@ Variant c_Exception::i_gettrace(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getTrace", 0, 1);
   return (self->t_gettrace());
 }
 Variant c_Exception::ifa_getmessage(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1210,7 +1210,7 @@ Variant c_Exception::ifa_getmessage(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getMessage", 0, 1);
   return (self->t_getmessage());
 }
 Variant c_Exception::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1221,7 +1221,7 @@ Variant c_Exception::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FE
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::__toString", 0, 1);
   return (self->t___tostring());
 }
 Variant c_Exception::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1232,13 +1232,13 @@ Variant c_Exception::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
   } else {
     self = createDummy(pobj);
   }
-  if (count > 3) return throw_toomany_arguments("Exception::__construct", 3, 2);
+  if (UNLIKELY(count > 3)) return throw_toomany_arguments("Exception::__construct", 3, 2);
   if (count <= 0) return (self->t___construct(), null);
-  CVarRef arg0((a0));
+  CVarRef arg0(a0);
   if (count <= 1) return (self->t___construct(arg0), null);
-  CVarRef arg1((a1));
+  CVarRef arg1(a1);
   if (count <= 2) return (self->t___construct(arg0, arg1), null);
-  CVarRef arg2((a2));
+  CVarRef arg2(a2);
   return (self->t___construct(arg0, arg1, arg2), null);
 }
 Variant c_Exception::ifa_getcode(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1249,7 +1249,7 @@ Variant c_Exception::ifa_getcode(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getCode", 0, 1);
   return (self->t_getcode());
 }
 Variant c_Exception::ifa_getprevious(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1260,7 +1260,7 @@ Variant c_Exception::ifa_getprevious(MethodCallPackage &mcp, int count, INVOKE_F
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::getPrevious", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getPrevious", 0, 1);
   return (self->t_getprevious());
 }
 Variant c_Exception::ifa_getline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1271,7 +1271,7 @@ Variant c_Exception::ifa_getline(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getLine", 0, 1);
   return (self->t_getline());
 }
 Variant c_Exception::ifa___init__(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1282,7 +1282,7 @@ Variant c_Exception::ifa___init__(MethodCallPackage &mcp, int count, INVOKE_FEW_
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::__init__", 0, 1);
   return (self->t___init__(), null);
 }
 Variant c_Exception::ifa_getfile(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1293,7 +1293,7 @@ Variant c_Exception::ifa_getfile(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getFile", 0, 1);
   return (self->t_getfile());
 }
 Variant c_Exception::ifa_gettraceasstring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1304,7 +1304,7 @@ Variant c_Exception::ifa_gettraceasstring(MethodCallPackage &mcp, int count, INV
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
   return (self->t_gettraceasstring());
 }
 Variant c_Exception::ifa_gettrace(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1315,11 +1315,11 @@ Variant c_Exception::ifa_gettrace(MethodCallPackage &mcp, int count, INVOKE_FEW_
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getTrace", 0, 1);
   return (self->t_gettrace());
 }
 bool c_Exception::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 0:
@@ -1391,9 +1391,9 @@ bool c_Exception::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_Exception *c_Exception::create(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
-, Variant v_code //  = 0LL
-, Variant v_previous //  = null
+c_Exception *c_Exception::create(CVarRef v_message //  = NAMSTR(s_sys_ss00000000, "")
+, CVarRef v_code //  = 0LL
+, CVarRef v_previous //  = null_variant
 ) {
   CountableHelper h(this);
   init();
@@ -1401,8 +1401,8 @@ c_Exception *c_Exception::create(Variant v_message //  = NAMSTR(s_sys_ss00000000
   return this;
 }
 void c_Exception::dynConstruct(CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 3) throw_toomany_arguments("Exception::__construct", 3, 2);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 3)) throw_toomany_arguments("Exception::__construct", 3, 2);
   do {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1448,8 +1448,8 @@ void c_Exception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   for (; i != params.size(); ++i) {
     params[i]->eval(env);
   }
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 3) throw_toomany_arguments("Exception::__construct", 3, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 3)) throw_toomany_arguments("Exception::__construct", 3, 1);
   if (count <= 0) (t___construct(), null);
   else if (count == 1) (t___construct(a0), null);
   else if (count == 2) (t___construct(a0, a1), null);
@@ -1762,7 +1762,7 @@ void c_ErrorException::cloneSet(ObjectData *cl) {
 CallInfo c_ErrorException::ci___construct((void*)&c_ErrorException::i___construct, (void*)&c_ErrorException::ifa___construct, 5, 4, 0x0000000000000000LL);
 CallInfo c_ErrorException::ci_getseverity((void*)&c_ErrorException::i_getseverity, (void*)&c_ErrorException::ifa_getseverity, 0, 4, 0x0000000000000000LL);
 Variant c_ErrorException::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ErrorException *self = NULL;
   p_ErrorException pobj;
   if (mcp.obj) {
@@ -1770,7 +1770,7 @@ Variant c_ErrorException::i___construct(MethodCallPackage &mcp, CArrRef params) 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
+  if (UNLIKELY(count > 5)) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1788,7 +1788,7 @@ Variant c_ErrorException::i___construct(MethodCallPackage &mcp, CArrRef params) 
   }
 }
 Variant c_ErrorException::i_getseverity(MethodCallPackage &mcp, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
+  int count ATTRIBUTE_UNUSED = params.size();
   c_ErrorException *self = NULL;
   p_ErrorException pobj;
   if (mcp.obj) {
@@ -1796,7 +1796,7 @@ Variant c_ErrorException::i_getseverity(MethodCallPackage &mcp, CArrRef params) 
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
   return (self->t_getseverity());
 }
 Variant c_ErrorException::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1807,17 +1807,17 @@ Variant c_ErrorException::ifa___construct(MethodCallPackage &mcp, int count, INV
   } else {
     self = createDummy(pobj);
   }
-  if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
+  if (UNLIKELY(count > 5)) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
   if (count <= 0) return (self->t___construct(), null);
-  CVarRef arg0((a0));
+  CVarRef arg0(a0);
   if (count <= 1) return (self->t___construct(arg0), null);
-  CVarRef arg1((a1));
+  CVarRef arg1(a1);
   if (count <= 2) return (self->t___construct(arg0, arg1), null);
-  CVarRef arg2((a2));
+  CVarRef arg2(a2);
   if (count <= 3) return (self->t___construct(arg0, arg1, arg2), null);
-  CVarRef arg3((a3));
+  CVarRef arg3(a3);
   if (count <= 4) return (self->t___construct(arg0, arg1, arg2, arg3), null);
-  CVarRef arg4((a4));
+  CVarRef arg4(a4);
   return (self->t___construct(arg0, arg1, arg2, arg3, arg4), null);
 }
 Variant c_ErrorException::ifa_getseverity(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -1828,11 +1828,11 @@ Variant c_ErrorException::ifa_getseverity(MethodCallPackage &mcp, int count, INV
   } else {
     self = createDummy(pobj);
   }
-  if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
   return (self->t_getseverity());
 }
 bool c_ErrorException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -1854,11 +1854,11 @@ bool c_ErrorException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_ErrorException *c_ErrorException::create(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
-, Variant v_code //  = 0LL
-, Variant v_severity //  = 0LL
-, Variant v_filename //  = null
-, Variant v_lineno //  = null
+c_ErrorException *c_ErrorException::create(CVarRef v_message //  = NAMSTR(s_sys_ss00000000, "")
+, CVarRef v_code //  = 0LL
+, CVarRef v_severity //  = 0LL
+, CVarRef v_filename //  = null_variant
+, CVarRef v_lineno //  = null_variant
 ) {
   CountableHelper h(this);
   init();
@@ -1866,8 +1866,8 @@ c_ErrorException *c_ErrorException::create(Variant v_message //  = NAMSTR(s_sys_
   return this;
 }
 void c_ErrorException::dynConstruct(CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 5) throw_toomany_arguments("ErrorException::__construct", 5, 2);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 5)) throw_toomany_arguments("ErrorException::__construct", 5, 2);
   do {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1931,8 +1931,8 @@ void c_ErrorException::dynConstructFromEval(Eval::VariableEnvironment &env, cons
   for (; i != params.size(); ++i) {
     params[i]->eval(env);
   }
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 5) throw_toomany_arguments("ErrorException::__construct", 5, 1);
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 5)) throw_toomany_arguments("ErrorException::__construct", 5, 1);
   if (count <= 0) (t___construct(), null);
   else if (count == 1) (t___construct(a0), null);
   else if (count == 2) (t___construct(a0, a1), null);
@@ -2056,7 +2056,7 @@ void c_BadFunctionCallException::cloneSet(ObjectData *cl) {
   c_LogicException::cloneSet(clone);
 }
 bool c_BadFunctionCallException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   return c_LogicException::os_get_call_info(mcp, hash);
 }
 bool c_BadFunctionCallException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -2146,7 +2146,7 @@ void c_LengthException::cloneSet(ObjectData *cl) {
   c_LogicException::cloneSet(clone);
 }
 bool c_LengthException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   return c_LogicException::os_get_call_info(mcp, hash);
 }
 bool c_LengthException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -2236,7 +2236,7 @@ void c_DomainException::cloneSet(ObjectData *cl) {
   c_LogicException::cloneSet(clone);
 }
 bool c_DomainException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (*mcp.name);
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
   return c_LogicException::os_get_call_info(mcp, hash);
 }
 bool c_DomainException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -2376,7 +2376,7 @@ Object coo_DomainException() {
 }
 Variant pm_php$classes$exception_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/exception.php, pm_php$classes$exception_php);
-  LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
+  LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
   return true;
 }
 namespace hphp_impl_splitter {}

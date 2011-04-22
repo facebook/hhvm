@@ -65,7 +65,7 @@ c_SpoofChecker::~c_SpoofChecker() {
 void c_SpoofChecker::t___construct() {
 }
 
-bool c_SpoofChecker::t_issuspicious(CStrRef text, Variant issuesFound) {
+bool c_SpoofChecker::t_issuspicious(CStrRef text, VRefParam issuesFound) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SpoofChecker, SpoofChecker::issuspicious);
   UErrorCode status = U_ZERO_ERROR;
   int32_t ret = uspoof_checkUTF8(
@@ -86,7 +86,7 @@ bool c_SpoofChecker::t_issuspicious(CStrRef text, Variant issuesFound) {
 bool c_SpoofChecker::t_areconfusable(
   CStrRef s1,
   CStrRef s2,
-  Variant issuesFound) {
+  VRefParam issuesFound) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SpoofChecker, SpoofChecker::areconfusable);
   UErrorCode status = U_ZERO_ERROR;
   int32_t ret = uspoof_areConfusableUTF8(

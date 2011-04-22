@@ -224,7 +224,7 @@ String f_hphp_splfileobject_fgetss(CObjRef obj, CStrRef allowable_tags) {
   throw NotImplementedException(__func__);
 }
 
-bool f_hphp_splfileobject_flock(CObjRef obj, Variant wouldblock) {
+bool f_hphp_splfileobject_flock(CObjRef obj, VRefParam wouldblock) {
   throw NotImplementedException(__func__);
 }
 

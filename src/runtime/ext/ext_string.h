@@ -102,9 +102,9 @@ inline Variant f_chunk_split(CStrRef body, int chunklen = 76,
 Variant f_strtok(CStrRef str, CVarRef token = null_variant);
 
 Variant f_str_replace(CVarRef search, CVarRef replace, CVarRef subject,
-                      Variant count = null);
+                      VRefParam count = null);
 Variant f_str_ireplace(CVarRef search, CVarRef replace, CVarRef subject,
-                       Variant count = null);
+                       VRefParam count = null);
 Variant f_substr_replace(CVarRef str, CVarRef replacement, CVarRef start,
                          CVarRef length = 0x7FFFFFFF);
 
@@ -323,7 +323,7 @@ inline int f_levenshtein(CStrRef str1, CStrRef str2, int cost_ins = 1,
   return string_levenshtein(str1, str1.size(), str2, str2.size(),
                             cost_ins, cost_rep, cost_del);
 }
-inline int f_similar_text(CStrRef first, CStrRef second, Variant percent = null) {
+inline int f_similar_text(CStrRef first, CStrRef second, VRefParam percent = null) {
   float p;
   int ret = string_similar_text(first, first.size(), second, second.size(),
                                 &p);
@@ -345,7 +345,7 @@ inline Variant f_metaphone(CStrRef str, int phones = 0) {
 ///////////////////////////////////////////////////////////////////////////////
 // special
 
-void f_parse_str(CStrRef str, Variant arr = null);
+void f_parse_str(CStrRef str, VRefParam arr = null);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

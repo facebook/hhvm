@@ -686,7 +686,7 @@ Variant ArrayUtil::RegularSortUnique(CArrRef input) {
 ///////////////////////////////////////////////////////////////////////////////
 // iterations
 
-void ArrayUtil::Walk(Variant input, PFUNC_WALK walk_function,
+void ArrayUtil::Walk(VRefParam input, PFUNC_WALK walk_function,
                      const void *data, bool recursive /* = false */,
                      PointerSet *seen /* = NULL */,
                      CVarRef userdata /* = null_variant */) {
@@ -694,8 +694,8 @@ void ArrayUtil::Walk(Variant input, PFUNC_WALK walk_function,
 
   Variant k;
   Variant v;
-  input.escalate(true);
-  for (MutableArrayIter iter = input.begin(&k, v); iter.advance(); ) {
+  input->escalate(true);
+  for (MutableArrayIter iter = input->begin(&k, v); iter.advance(); ) {
     if (recursive && v.is(KindOfArray)) {
       ASSERT(seen);
       ArrayData *arr = v.getArrayData();
@@ -708,9 +708,9 @@ void ArrayUtil::Walk(Variant input, PFUNC_WALK walk_function,
         seen->insert((void*)arr);
       }
 
-      Walk(ref(v), walk_function, data, recursive, seen, userdata);
+      Walk(directRef(v), walk_function, data, recursive, seen, userdata);
     } else {
-      walk_function(ref(v), k, userdata, data);
+      walk_function(directRef(v), k, userdata, data);
     }
   }
 }

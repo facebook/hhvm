@@ -373,12 +373,12 @@ String f_hash_final(CObjRef context, bool raw_output /* = false */) {
   return StringUtil::HexEncode(raw);
 }
 
-int f_furchash_hphp_ext(CStrRef key, int len, int npart) {
+int f_furchash_hphp_ext(CStrRef key, int len, int nPart) {
   if (len > key.size()) {
     len = key.size();
   }
 
-  return furc_hash(key, len, npart);
+  return furc_hash(key, len, nPart);
 }
 
 bool f_furchash_hphp_ext_supported() {

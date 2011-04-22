@@ -27,256 +27,307 @@ namespace HPHP {
 
 inline Variant x_mysql_connect(CStrRef server = null_string, CStrRef username = null_string, CStrRef password = null_string, bool new_link = false, int client_flags = 0, int connect_timeout_ms = -1, int query_timeout_ms = -1) {
   FUNCTION_INJECTION_BUILTIN(mysql_connect);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_connect(server, username, password, new_link, client_flags, connect_timeout_ms, query_timeout_ms);
 }
 
 inline Variant x_mysql_pconnect(CStrRef server = null_string, CStrRef username = null_string, CStrRef password = null_string, int client_flags = 0, int connect_timeout_ms = -1, int query_timeout_ms = -1) {
   FUNCTION_INJECTION_BUILTIN(mysql_pconnect);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_pconnect(server, username, password, client_flags, connect_timeout_ms, query_timeout_ms);
 }
 
 inline Variant x_mysql_connect_with_db(CStrRef server = null_string, CStrRef username = null_string, CStrRef password = null_string, CStrRef database = null_string, bool new_link = false, int client_flags = 0, int connect_timeout_ms = -1, int query_timeout_ms = -1) {
   FUNCTION_INJECTION_BUILTIN(mysql_connect_with_db);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_connect_with_db(server, username, password, database, new_link, client_flags, connect_timeout_ms, query_timeout_ms);
 }
 
 inline Variant x_mysql_pconnect_with_db(CStrRef server = null_string, CStrRef username = null_string, CStrRef password = null_string, CStrRef database = null_string, int client_flags = 0, int connect_timeout_ms = -1, int query_timeout_ms = -1) {
   FUNCTION_INJECTION_BUILTIN(mysql_pconnect_with_db);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_pconnect_with_db(server, username, password, database, client_flags, connect_timeout_ms, query_timeout_ms);
 }
 
 inline Variant x_mysql_set_charset(CStrRef charset, CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_set_charset);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_set_charset(charset, link_identifier);
 }
 
 inline Variant x_mysql_ping(CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_ping);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_ping(link_identifier);
 }
 
 inline String x_mysql_escape_string(CStrRef unescaped_string) {
   FUNCTION_INJECTION_BUILTIN(mysql_escape_string);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_escape_string(unescaped_string);
 }
 
 inline Variant x_mysql_real_escape_string(CStrRef unescaped_string, CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_real_escape_string);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_real_escape_string(unescaped_string, link_identifier);
 }
 
 inline Variant x_mysql_client_encoding(CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_client_encoding);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_client_encoding(link_identifier);
 }
 
 inline Variant x_mysql_close(CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_close);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_close(link_identifier);
 }
 
 inline Variant x_mysql_errno(CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_errno);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_errno(link_identifier);
 }
 
 inline Variant x_mysql_error(CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_error);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_error(link_identifier);
 }
 
 inline String x_mysql_get_client_info() {
   FUNCTION_INJECTION_BUILTIN(mysql_get_client_info);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_get_client_info();
 }
 
 inline Variant x_mysql_get_host_info(CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_get_host_info);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_get_host_info(link_identifier);
 }
 
 inline Variant x_mysql_get_proto_info(CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_get_proto_info);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_get_proto_info(link_identifier);
 }
 
 inline Variant x_mysql_get_server_info(CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_get_server_info);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_get_server_info(link_identifier);
 }
 
 inline Variant x_mysql_info(CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_info);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_info(link_identifier);
 }
 
 inline Variant x_mysql_insert_id(CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_insert_id);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_insert_id(link_identifier);
 }
 
 inline Variant x_mysql_stat(CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_stat);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_stat(link_identifier);
 }
 
 inline Variant x_mysql_thread_id(CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_thread_id);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_thread_id(link_identifier);
 }
 
 inline Variant x_mysql_create_db(CStrRef db, CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_create_db);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_create_db(db, link_identifier);
 }
 
 inline Variant x_mysql_select_db(CStrRef db, CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_select_db);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_select_db(db, link_identifier);
 }
 
 inline Variant x_mysql_drop_db(CStrRef db, CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_drop_db);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_drop_db(db, link_identifier);
 }
 
 inline Variant x_mysql_affected_rows(CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_affected_rows);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_affected_rows(link_identifier);
 }
 
 inline bool x_mysql_set_timeout(int query_timeout_ms = -1, CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_set_timeout);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_set_timeout(query_timeout_ms, link_identifier);
 }
 
 inline Variant x_mysql_query(CStrRef query, CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_query);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_query(query, link_identifier);
 }
 
 inline Variant x_mysql_unbuffered_query(CStrRef query, CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_unbuffered_query);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_unbuffered_query(query, link_identifier);
 }
 
 inline Variant x_mysql_db_query(CStrRef database, CStrRef query, CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_db_query);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_db_query(database, query, link_identifier);
 }
 
 inline Variant x_mysql_list_dbs(CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_list_dbs);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_list_dbs(link_identifier);
 }
 
 inline Variant x_mysql_list_tables(CStrRef database, CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_list_tables);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_list_tables(database, link_identifier);
 }
 
 inline Variant x_mysql_list_fields(CStrRef database_name, CStrRef table_name, CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_list_fields);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_list_fields(database_name, table_name, link_identifier);
 }
 
 inline Variant x_mysql_list_processes(CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_list_processes);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_list_processes(link_identifier);
 }
 
 inline Variant x_mysql_db_name(CVarRef result, int row, CVarRef field = null_variant) {
   FUNCTION_INJECTION_BUILTIN(mysql_db_name);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_db_name(result, row, field);
 }
 
 inline Variant x_mysql_tablename(CVarRef result, int i) {
   FUNCTION_INJECTION_BUILTIN(mysql_tablename);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_tablename(result, i);
 }
 
 inline Variant x_mysql_num_fields(CVarRef result) {
   FUNCTION_INJECTION_BUILTIN(mysql_num_fields);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_num_fields(result);
 }
 
 inline Variant x_mysql_num_rows(CVarRef result) {
   FUNCTION_INJECTION_BUILTIN(mysql_num_rows);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_num_rows(result);
 }
 
 inline Variant x_mysql_free_result(CVarRef result) {
   FUNCTION_INJECTION_BUILTIN(mysql_free_result);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_free_result(result);
 }
 
 inline bool x_mysql_data_seek(CVarRef result, int row) {
   FUNCTION_INJECTION_BUILTIN(mysql_data_seek);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_data_seek(result, row);
 }
 
 inline Variant x_mysql_fetch_row(CVarRef result) {
   FUNCTION_INJECTION_BUILTIN(mysql_fetch_row);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_fetch_row(result);
 }
 
 inline Variant x_mysql_fetch_assoc(CVarRef result) {
   FUNCTION_INJECTION_BUILTIN(mysql_fetch_assoc);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_fetch_assoc(result);
 }
 
 inline Variant x_mysql_fetch_array(CVarRef result, int result_type = 3) {
   FUNCTION_INJECTION_BUILTIN(mysql_fetch_array);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_fetch_array(result, result_type);
 }
 
 inline Variant x_mysql_fetch_lengths(CVarRef result) {
   FUNCTION_INJECTION_BUILTIN(mysql_fetch_lengths);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_fetch_lengths(result);
 }
 
 inline Variant x_mysql_fetch_object(CVarRef result, CStrRef class_name = "stdClass", CArrRef params = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_fetch_object);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_fetch_object(result, class_name, params);
 }
 
 inline Variant x_mysql_result(CVarRef result, int row, CVarRef field = null_variant) {
   FUNCTION_INJECTION_BUILTIN(mysql_result);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_result(result, row, field);
 }
 
 inline Variant x_mysql_fetch_field(CVarRef result, int field = -1) {
   FUNCTION_INJECTION_BUILTIN(mysql_fetch_field);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_fetch_field(result, field);
 }
 
 inline bool x_mysql_field_seek(CVarRef result, int field = 0) {
   FUNCTION_INJECTION_BUILTIN(mysql_field_seek);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_field_seek(result, field);
 }
 
 inline Variant x_mysql_field_name(CVarRef result, int field = 0) {
   FUNCTION_INJECTION_BUILTIN(mysql_field_name);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_field_name(result, field);
 }
 
 inline Variant x_mysql_field_table(CVarRef result, int field = 0) {
   FUNCTION_INJECTION_BUILTIN(mysql_field_table);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_field_table(result, field);
 }
 
 inline Variant x_mysql_field_len(CVarRef result, int field = 0) {
   FUNCTION_INJECTION_BUILTIN(mysql_field_len);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_field_len(result, field);
 }
 
 inline Variant x_mysql_field_type(CVarRef result, int field = 0) {
   FUNCTION_INJECTION_BUILTIN(mysql_field_type);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_field_type(result, field);
 }
 
 inline Variant x_mysql_field_flags(CVarRef result, int field = 0) {
   FUNCTION_INJECTION_BUILTIN(mysql_field_flags);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_mysql_field_flags(result, field);
 }
 

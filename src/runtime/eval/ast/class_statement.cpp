@@ -671,7 +671,7 @@ void ClassStatement::toArray(Array &props, Array &vals) const {
       }
       if (vals.exists(pname)) {
         Variant &p = vals.lvalAt(pname, AccessFlags::Key);
-        props.set(pname, p.isReferenced() ? ref(p) : p);
+        props.lvalAt(pname, AccessFlags::Key).setWithRef(p);
       }
     }
   }

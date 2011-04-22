@@ -65,7 +65,8 @@ public:
     CppClassConstantsDecl,
     CppClassConstantsImpl,
     CppConstantsDecl,           // we are generating constant declarations
-    CppStaticMethodWrapper,     // Only used to force parameters to use C*Ref
+    CppFunctionWrapperImpl,     // Only used to force parameters to use C*Ref
+    CppFunctionWrapperDecl,
     CppParameterDefaultValueDecl,
     CppParameterDefaultValueImpl,
     CppTypedParamsWrapperImpl,

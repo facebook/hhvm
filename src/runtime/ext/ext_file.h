@@ -54,7 +54,7 @@ Variant f_fprintf(int _argc, CObjRef handle, CStrRef format, CArrRef _argv = nul
 Variant f_vfprintf(CObjRef handle, CStrRef format, CArrRef args);
 bool f_fflush(CObjRef handle);
 bool f_ftruncate(CObjRef handle, int64 size);
-bool f_flock(CObjRef handle, int operation, Variant wouldblock = null);
+bool f_flock(CObjRef handle, int operation, VRefParam wouldblock = null);
 Variant f_fputcsv(CObjRef handle, CArrRef fields, CStrRef delimiter = ",",
                   CStrRef enclosure = "\"");
 Variant f_fgetcsv(CObjRef handle, int64 length = 0, CStrRef delimiter = ",",

@@ -49,8 +49,8 @@ int f_getmypid();
 int f_getmyuid();
 Array f_getopt(CStrRef options, CVarRef longopts = null_variant);
 Array f_getrusage(int who = 0);
-bool f_clock_getres(int clk_id, Variant sec, Variant nsec);
-bool f_clock_gettime(int clk_id, Variant sec, Variant nsec);
+bool f_clock_getres(int clk_id, VRefParam sec, VRefParam nsec);
+bool f_clock_gettime(int clk_id, VRefParam sec, VRefParam nsec);
 bool f_clock_settime(int clk_id, int64 sec, int64 nsec);
 inline int f_cpu_get_count() { return Process::GetCPUCount();}
 inline String f_cpu_get_model() { return Process::GetCPUModel();}

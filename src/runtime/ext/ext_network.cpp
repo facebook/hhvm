@@ -580,8 +580,8 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
 }
 
 Variant f_dns_get_record(CStrRef hostname, int type /* = -1 */,
-                         Variant authns /* = null */,
-                         Variant addtl /* = null */) {
+                         VRefParam authns /* = null */,
+                         VRefParam addtl /* = null */) {
   IOStatusHelper io("dns_get_record", hostname.data(), type);
   if (type < 0) type = PHP_DNS_ALL;
   if (type & ~PHP_DNS_ALL && type != PHP_DNS_ANY) {
@@ -713,8 +713,8 @@ Variant f_dns_get_record(CStrRef hostname, int type /* = -1 */,
   return ret;
 }
 
-bool f_dns_get_mx(CStrRef hostname, Variant mxhosts,
-                  Variant weights /* = null */) {
+bool f_dns_get_mx(CStrRef hostname, VRefParam mxhosts,
+                  VRefParam weights /* = null */) {
   IOStatusHelper io("dns_get_mx", hostname.data());
   int count, qdc;
   unsigned short type, weight;
@@ -856,7 +856,7 @@ Array f_headers_list() {
   return Array();
 }
 
-bool f_headers_sent(Variant file /* = null */, Variant line /* = null */) {
+bool f_headers_sent(VRefParam file /* = null */, VRefParam line /* = null */) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     file = String(transport->getFirstHeaderFile());

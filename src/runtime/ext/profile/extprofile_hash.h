@@ -27,61 +27,73 @@ namespace HPHP {
 
 inline Variant x_hash(CStrRef algo, CStrRef data, bool raw_output = false) {
   FUNCTION_INJECTION_BUILTIN(hash);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hash(algo, data, raw_output);
 }
 
 inline Array x_hash_algos() {
   FUNCTION_INJECTION_BUILTIN(hash_algos);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hash_algos();
 }
 
 inline Variant x_hash_init(CStrRef algo, int options = 0, CStrRef key = null_string) {
   FUNCTION_INJECTION_BUILTIN(hash_init);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hash_init(algo, options, key);
 }
 
 inline Variant x_hash_file(CStrRef algo, CStrRef filename, bool raw_output = false) {
   FUNCTION_INJECTION_BUILTIN(hash_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hash_file(algo, filename, raw_output);
 }
 
 inline String x_hash_final(CObjRef context, bool raw_output = false) {
   FUNCTION_INJECTION_BUILTIN(hash_final);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hash_final(context, raw_output);
 }
 
 inline Variant x_hash_hmac_file(CStrRef algo, CStrRef filename, CStrRef key, bool raw_output = false) {
   FUNCTION_INJECTION_BUILTIN(hash_hmac_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hash_hmac_file(algo, filename, key, raw_output);
 }
 
 inline Variant x_hash_hmac(CStrRef algo, CStrRef data, CStrRef key, bool raw_output = false) {
   FUNCTION_INJECTION_BUILTIN(hash_hmac);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hash_hmac(algo, data, key, raw_output);
 }
 
 inline bool x_hash_update_file(CObjRef init_context, CStrRef filename, CObjRef stream_context = null) {
   FUNCTION_INJECTION_BUILTIN(hash_update_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hash_update_file(init_context, filename, stream_context);
 }
 
 inline int x_hash_update_stream(CObjRef context, CObjRef handle, int length = -1) {
   FUNCTION_INJECTION_BUILTIN(hash_update_stream);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hash_update_stream(context, handle, length);
 }
 
 inline bool x_hash_update(CObjRef context, CStrRef data) {
   FUNCTION_INJECTION_BUILTIN(hash_update);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hash_update(context, data);
 }
 
 inline int x_furchash_hphp_ext(CStrRef key, int len, int nPart) {
   FUNCTION_INJECTION_BUILTIN(furchash_hphp_ext);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_furchash_hphp_ext(key, len, nPart);
 }
 
 inline bool x_furchash_hphp_ext_supported() {
   FUNCTION_INJECTION_BUILTIN(furchash_hphp_ext_supported);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_furchash_hphp_ext_supported();
 }
 

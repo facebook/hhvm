@@ -127,7 +127,7 @@ inline String x_strval(CVarRef v) {
   return f_strval(v);
 }
 
-inline bool x_settype(CVarRef var, CStrRef type) {
+inline bool x_settype(VRefParam var, CStrRef type) {
   FUNCTION_INJECTION_BUILTIN(settype);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_settype(var, type);

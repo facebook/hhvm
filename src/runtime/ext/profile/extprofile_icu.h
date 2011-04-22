@@ -27,6 +27,7 @@ namespace HPHP {
 
 inline String x_icu_transliterate(CStrRef str, bool remove_accents) {
   FUNCTION_INJECTION_BUILTIN(icu_transliterate);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_icu_transliterate(str, remove_accents);
 }
 

@@ -30,7 +30,7 @@ Object f_memcache_pconnect(CStrRef host, int port = 0, int timeout = 0, int time
 bool f_memcache_add(CObjRef memcache, CStrRef key, CVarRef var, int flag = 0, int expire = 0);
 bool f_memcache_set(CObjRef memcache, CStrRef key, CVarRef var, int flag = 0, int expire = 0);
 bool f_memcache_replace(CObjRef memcache, CStrRef key, CVarRef var, int flag = 0, int expire = 0);
-Variant f_memcache_get(CObjRef memcache, CVarRef key, Variant flags = null);
+Variant f_memcache_get(CObjRef memcache, CVarRef key, VRefParam flags = null);
 bool f_memcache_delete(CObjRef memcache, CStrRef key, int expire = 0);
 int64 f_memcache_increment(CObjRef memcache, CStrRef key, int offset = 1);
 int64 f_memcache_decrement(CObjRef memcache, CStrRef key, int offset = 1);
@@ -71,7 +71,7 @@ class c_Memcache : public ExtObjectData, public Sweepable {
   DECLARE_METHOD_INVOKE_HELPERS(set);
   public: bool t_replace(CStrRef key, CVarRef var, int flag = 0, int expire = 0);
   DECLARE_METHOD_INVOKE_HELPERS(replace);
-  public: Variant t_get(CVarRef key, Variant flags = null);
+  public: Variant t_get(CVarRef key, VRefParam flags = null);
   DECLARE_METHOD_INVOKE_HELPERS(get);
   public: bool t_delete(CStrRef key, int expire = 0);
   DECLARE_METHOD_INVOKE_HELPERS(delete);

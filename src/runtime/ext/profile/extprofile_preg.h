@@ -27,76 +27,91 @@ namespace HPHP {
 
 inline Variant x_preg_grep(CStrRef pattern, CArrRef input, int flags = 0) {
   FUNCTION_INJECTION_BUILTIN(preg_grep);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_preg_grep(pattern, input, flags);
 }
 
-inline Variant x_preg_match(CStrRef pattern, CStrRef subject, CVarRef matches = null, int flags = 0, int offset = 0) {
+inline Variant x_preg_match(CStrRef pattern, CStrRef subject, VRefParam matches = null, int flags = 0, int offset = 0) {
   FUNCTION_INJECTION_BUILTIN(preg_match);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_preg_match(pattern, subject, matches, flags, offset);
 }
 
-inline Variant x_preg_match_all(CStrRef pattern, CStrRef subject, CVarRef matches, int flags = 0, int offset = 0) {
+inline Variant x_preg_match_all(CStrRef pattern, CStrRef subject, VRefParam matches, int flags = 0, int offset = 0) {
   FUNCTION_INJECTION_BUILTIN(preg_match_all);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_preg_match_all(pattern, subject, matches, flags, offset);
 }
 
-inline Variant x_preg_replace(CVarRef pattern, CVarRef replacement, CVarRef subject, int limit = -1, CVarRef count = null) {
+inline Variant x_preg_replace(CVarRef pattern, CVarRef replacement, CVarRef subject, int limit = -1, VRefParam count = null) {
   FUNCTION_INJECTION_BUILTIN(preg_replace);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_preg_replace(pattern, replacement, subject, limit, count);
 }
 
-inline Variant x_preg_replace_callback(CVarRef pattern, CVarRef callback, CVarRef subject, int limit = -1, CVarRef count = null) {
+inline Variant x_preg_replace_callback(CVarRef pattern, CVarRef callback, CVarRef subject, int limit = -1, VRefParam count = null) {
   FUNCTION_INJECTION_BUILTIN(preg_replace_callback);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_preg_replace_callback(pattern, callback, subject, limit, count);
 }
 
 inline Variant x_preg_split(CVarRef pattern, CVarRef subject, int limit = -1, int flags = 0) {
   FUNCTION_INJECTION_BUILTIN(preg_split);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_preg_split(pattern, subject, limit, flags);
 }
 
 inline String x_preg_quote(CStrRef str, CStrRef delimiter = null_string) {
   FUNCTION_INJECTION_BUILTIN(preg_quote);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_preg_quote(str, delimiter);
 }
 
 inline int x_preg_last_error() {
   FUNCTION_INJECTION_BUILTIN(preg_last_error);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_preg_last_error();
 }
 
 inline String x_ereg_replace(CStrRef pattern, CStrRef replacement, CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(ereg_replace);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ereg_replace(pattern, replacement, str);
 }
 
 inline String x_eregi_replace(CStrRef pattern, CStrRef replacement, CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(eregi_replace);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_eregi_replace(pattern, replacement, str);
 }
 
-inline Variant x_ereg(CStrRef pattern, CStrRef str, CVarRef regs = null) {
+inline Variant x_ereg(CStrRef pattern, CStrRef str, VRefParam regs = null) {
   FUNCTION_INJECTION_BUILTIN(ereg);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ereg(pattern, str, regs);
 }
 
-inline Variant x_eregi(CStrRef pattern, CStrRef str, CVarRef regs = null) {
+inline Variant x_eregi(CStrRef pattern, CStrRef str, VRefParam regs = null) {
   FUNCTION_INJECTION_BUILTIN(eregi);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_eregi(pattern, str, regs);
 }
 
 inline Variant x_split(CStrRef pattern, CStrRef str, int limit = -1) {
   FUNCTION_INJECTION_BUILTIN(split);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_split(pattern, str, limit);
 }
 
 inline Variant x_spliti(CStrRef pattern, CStrRef str, int limit = -1) {
   FUNCTION_INJECTION_BUILTIN(spliti);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_spliti(pattern, str, limit);
 }
 
 inline String x_sql_regcase(CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(sql_regcase);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_sql_regcase(str);
 }
 

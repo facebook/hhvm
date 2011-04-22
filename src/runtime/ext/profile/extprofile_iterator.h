@@ -27,141 +27,169 @@ namespace HPHP {
 
 inline Object x_hphp_recursiveiteratoriterator___construct(CObjRef obj, CObjRef iterator, int64 mode, int64 flags) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursiveiteratoriterator___construct);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_recursiveiteratoriterator___construct(obj, iterator, mode, flags);
 }
 
 inline Object x_hphp_recursiveiteratoriterator_getinneriterator(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursiveiteratoriterator_getinneriterator);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_recursiveiteratoriterator_getinneriterator(obj);
 }
 
 inline Variant x_hphp_recursiveiteratoriterator_current(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursiveiteratoriterator_current);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_recursiveiteratoriterator_current(obj);
 }
 
 inline Variant x_hphp_recursiveiteratoriterator_key(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursiveiteratoriterator_key);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_recursiveiteratoriterator_key(obj);
 }
 
 inline void x_hphp_recursiveiteratoriterator_next(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursiveiteratoriterator_next);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_recursiveiteratoriterator_next(obj);
 }
 
 inline void x_hphp_recursiveiteratoriterator_rewind(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursiveiteratoriterator_rewind);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_recursiveiteratoriterator_rewind(obj);
 }
 
 inline bool x_hphp_recursiveiteratoriterator_valid(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursiveiteratoriterator_valid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_recursiveiteratoriterator_valid(obj);
 }
 
 inline bool x_hphp_directoryiterator___construct(CObjRef obj, CStrRef path) {
   FUNCTION_INJECTION_BUILTIN(hphp_directoryiterator___construct);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_directoryiterator___construct(obj, path);
 }
 
 inline Variant x_hphp_directoryiterator_key(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_directoryiterator_key);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_directoryiterator_key(obj);
 }
 
 inline void x_hphp_directoryiterator_next(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_directoryiterator_next);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_directoryiterator_next(obj);
 }
 
 inline void x_hphp_directoryiterator_rewind(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_directoryiterator_rewind);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_directoryiterator_rewind(obj);
 }
 
 inline void x_hphp_directoryiterator_seek(CObjRef obj, int64 position) {
   FUNCTION_INJECTION_BUILTIN(hphp_directoryiterator_seek);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_directoryiterator_seek(obj, position);
 }
 
 inline Variant x_hphp_directoryiterator_current(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_directoryiterator_current);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_directoryiterator_current(obj);
 }
 
 inline String x_hphp_directoryiterator___tostring(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_directoryiterator___tostring);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_directoryiterator___tostring(obj);
 }
 
 inline bool x_hphp_directoryiterator_valid(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_directoryiterator_valid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_directoryiterator_valid(obj);
 }
 
 inline bool x_hphp_directoryiterator_isdot(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_directoryiterator_isdot);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_directoryiterator_isdot(obj);
 }
 
 inline bool x_hphp_recursivedirectoryiterator___construct(CObjRef obj, CStrRef path, int64 flags) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursivedirectoryiterator___construct);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_recursivedirectoryiterator___construct(obj, path, flags);
 }
 
 inline Variant x_hphp_recursivedirectoryiterator_key(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursivedirectoryiterator_key);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_recursivedirectoryiterator_key(obj);
 }
 
 inline void x_hphp_recursivedirectoryiterator_next(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursivedirectoryiterator_next);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_recursivedirectoryiterator_next(obj);
 }
 
 inline void x_hphp_recursivedirectoryiterator_rewind(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursivedirectoryiterator_rewind);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_recursivedirectoryiterator_rewind(obj);
 }
 
 inline void x_hphp_recursivedirectoryiterator_seek(CObjRef obj, int64 position) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursivedirectoryiterator_seek);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_recursivedirectoryiterator_seek(obj, position);
 }
 
 inline Variant x_hphp_recursivedirectoryiterator_current(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursivedirectoryiterator_current);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_recursivedirectoryiterator_current(obj);
 }
 
 inline String x_hphp_recursivedirectoryiterator___tostring(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursivedirectoryiterator___tostring);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_recursivedirectoryiterator___tostring(obj);
 }
 
 inline bool x_hphp_recursivedirectoryiterator_valid(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursivedirectoryiterator_valid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_recursivedirectoryiterator_valid(obj);
 }
 
 inline bool x_hphp_recursivedirectoryiterator_haschildren(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursivedirectoryiterator_haschildren);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_recursivedirectoryiterator_haschildren(obj);
 }
 
 inline Object x_hphp_recursivedirectoryiterator_getchildren(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursivedirectoryiterator_getchildren);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_recursivedirectoryiterator_getchildren(obj);
 }
 
 inline String x_hphp_recursivedirectoryiterator_getsubpath(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursivedirectoryiterator_getsubpath);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_recursivedirectoryiterator_getsubpath(obj);
 }
 
 inline String x_hphp_recursivedirectoryiterator_getsubpathname(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursivedirectoryiterator_getsubpathname);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_recursivedirectoryiterator_getsubpathname(obj);
 }
 

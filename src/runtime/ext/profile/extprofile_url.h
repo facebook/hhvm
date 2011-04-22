@@ -27,51 +27,61 @@ namespace HPHP {
 
 inline Variant x_base64_decode(CStrRef data, bool strict = false) {
   FUNCTION_INJECTION_BUILTIN(base64_decode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_base64_decode(data, strict);
 }
 
 inline String x_base64_encode(CStrRef data) {
   FUNCTION_INJECTION_BUILTIN(base64_encode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_base64_encode(data);
 }
 
 inline Variant x_get_headers(CStrRef url, int format = 0) {
   FUNCTION_INJECTION_BUILTIN(get_headers);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_headers(url, format);
 }
 
 inline Array x_get_meta_tags(CStrRef filename, bool use_include_path = false) {
   FUNCTION_INJECTION_BUILTIN(get_meta_tags);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_meta_tags(filename, use_include_path);
 }
 
 inline Variant x_http_build_query(CVarRef formdata, CStrRef numeric_prefix = null_string, CStrRef arg_separator = null_string) {
   FUNCTION_INJECTION_BUILTIN(http_build_query);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_http_build_query(formdata, numeric_prefix, arg_separator);
 }
 
 inline Variant x_parse_url(CStrRef url, int component = -1) {
   FUNCTION_INJECTION_BUILTIN(parse_url);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_parse_url(url, component);
 }
 
 inline String x_rawurldecode(CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(rawurldecode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_rawurldecode(str);
 }
 
 inline String x_rawurlencode(CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(rawurlencode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_rawurlencode(str);
 }
 
 inline String x_urldecode(CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(urldecode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_urldecode(str);
 }
 
 inline String x_urlencode(CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(urlencode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_urlencode(str);
 }
 

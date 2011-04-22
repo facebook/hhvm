@@ -6365,7 +6365,6 @@ bool TestCodeRun::TestReference() {
        "fiz($w);"
        "var_dump($w);");
 
-  // https://www.intern.facebook.com/intern/tasks/?t=169731
   MVCR("<?php "
        "$x = 0;\n"
        "$foo0 = isset($g) ? \"ref\" : \"val\";\n"
@@ -6375,7 +6374,27 @@ bool TestCodeRun::TestReference() {
        "$foo0($x, $x = 5);\n"
        "$foo1($x, $x = 5);\n");
 
- return true;
+  MVCR("<?php ;"
+       "function foo($a, &$b, $c) {"
+       "  $a+=1;"
+       "  $b+=2;"
+       "  $c+=3;"
+       "  var_dump($a,$b,$c);"
+       "}"
+       "function bar(&$a, &$b, &$c) {"
+       "  $a+=1;"
+       "  $b+=2;"
+       "  $c+=3;"
+       "  var_dump($a,$b,$c);"
+       "}"
+       "function test($fn, $arg) {"
+       "  $fn($arg, $arg, $arg);"
+       "  var_dump($arg);"
+       "}"
+       "test('foo', 1);"
+       "test('bar', 1);");
+
+  return true;
 }
 
 bool TestCodeRun::TestDynamicConstants() {

@@ -27,276 +27,331 @@ namespace HPHP {
 
 inline Object x_hphp_splfileinfo___construct(CObjRef obj, CStrRef file_name) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo___construct);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo___construct(obj, file_name);
 }
 
 inline int64 x_hphp_splfileinfo_getatime(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_getatime);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_getatime(obj);
 }
 
 inline String x_hphp_splfileinfo_getbasename(CObjRef obj, CStrRef suffix) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_getbasename);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_getbasename(obj, suffix);
 }
 
 inline int64 x_hphp_splfileinfo_getctime(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_getctime);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_getctime(obj);
 }
 
 inline Object x_hphp_splfileinfo_getfileinfo(CObjRef obj, CStrRef class_name) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_getfileinfo);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_getfileinfo(obj, class_name);
 }
 
 inline String x_hphp_splfileinfo_getfilename(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_getfilename);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_getfilename(obj);
 }
 
 inline int64 x_hphp_splfileinfo_getgroup(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_getgroup);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_getgroup(obj);
 }
 
 inline int64 x_hphp_splfileinfo_getinode(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_getinode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_getinode(obj);
 }
 
 inline String x_hphp_splfileinfo_getlinktarget(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_getlinktarget);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_getlinktarget(obj);
 }
 
 inline int64 x_hphp_splfileinfo_getmtime(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_getmtime);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_getmtime(obj);
 }
 
 inline int64 x_hphp_splfileinfo_getowner(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_getowner);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_getowner(obj);
 }
 
 inline String x_hphp_splfileinfo_getpath(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_getpath);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_getpath(obj);
 }
 
 inline Object x_hphp_splfileinfo_getpathinfo(CObjRef obj, CStrRef class_name) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_getpathinfo);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_getpathinfo(obj, class_name);
 }
 
 inline String x_hphp_splfileinfo_getpathname(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_getpathname);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_getpathname(obj);
 }
 
 inline int64 x_hphp_splfileinfo_getperms(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_getperms);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_getperms(obj);
 }
 
 inline Variant x_hphp_splfileinfo_getrealpath(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_getrealpath);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_getrealpath(obj);
 }
 
 inline int64 x_hphp_splfileinfo_getsize(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_getsize);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_getsize(obj);
 }
 
 inline String x_hphp_splfileinfo_gettype(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_gettype);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_gettype(obj);
 }
 
 inline bool x_hphp_splfileinfo_isdir(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_isdir);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_isdir(obj);
 }
 
 inline bool x_hphp_splfileinfo_isexecutable(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_isexecutable);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_isexecutable(obj);
 }
 
 inline bool x_hphp_splfileinfo_isfile(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_isfile);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_isfile(obj);
 }
 
 inline bool x_hphp_splfileinfo_islink(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_islink);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_islink(obj);
 }
 
 inline bool x_hphp_splfileinfo_isreadable(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_isreadable);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_isreadable(obj);
 }
 
 inline bool x_hphp_splfileinfo_iswritable(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_iswritable);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_iswritable(obj);
 }
 
 inline Object x_hphp_splfileinfo_openfile(CObjRef obj, CStrRef open_mode, bool use_include_path, CVarRef context) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_openfile);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo_openfile(obj, open_mode, use_include_path, context);
 }
 
 inline void x_hphp_splfileinfo_setfileclass(CObjRef obj, CStrRef class_name) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_setfileclass);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_splfileinfo_setfileclass(obj, class_name);
 }
 
 inline void x_hphp_splfileinfo_setinfoclass(CObjRef obj, CStrRef class_name) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo_setinfoclass);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_splfileinfo_setinfoclass(obj, class_name);
 }
 
 inline String x_hphp_splfileinfo___tostring(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileinfo___tostring);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileinfo___tostring(obj);
 }
 
 inline Object x_hphp_splfileobject___construct(CObjRef obj, CStrRef filename, CStrRef open_mode, bool use_include_path, CVarRef context) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject___construct);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject___construct(obj, filename, open_mode, use_include_path, context);
 }
 
 inline Variant x_hphp_splfileobject_current(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_current);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_current(obj);
 }
 
 inline bool x_hphp_splfileobject_eof(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_eof);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_eof(obj);
 }
 
 inline bool x_hphp_splfileobject_fflush(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_fflush);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_fflush(obj);
 }
 
 inline String x_hphp_splfileobject_fgetc(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_fgetc);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_fgetc(obj);
 }
 
 inline Variant x_hphp_splfileobject_fgetcsv(CObjRef obj, CStrRef delimiter, CStrRef enclosure, CStrRef escape) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_fgetcsv);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_fgetcsv(obj, delimiter, enclosure, escape);
 }
 
 inline String x_hphp_splfileobject_fgets(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_fgets);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_fgets(obj);
 }
 
 inline String x_hphp_splfileobject_fgetss(CObjRef obj, CStrRef allowable_tags) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_fgetss);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_fgetss(obj, allowable_tags);
 }
 
-inline bool x_hphp_splfileobject_flock(CObjRef obj, CVarRef wouldblock) {
+inline bool x_hphp_splfileobject_flock(CObjRef obj, VRefParam wouldblock) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_flock);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_flock(obj, wouldblock);
 }
 
 inline int64 x_hphp_splfileobject_fpassthru(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_fpassthru);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_fpassthru(obj);
 }
 
 inline Variant x_hphp_splfileobject_fscanf(int64 _argc, CObjRef obj, CStrRef format, CVarRef _argv) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_fscanf);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_fscanf(_argc, obj, format, _argv);
 }
 
 inline int64 x_hphp_splfileobject_fseek(CObjRef obj, int64 offset, int64 whence) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_fseek);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_fseek(obj, offset, whence);
 }
 
 inline Variant x_hphp_splfileobject_fstat(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_fstat);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_fstat(obj);
 }
 
 inline int64 x_hphp_splfileobject_ftell(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_ftell);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_ftell(obj);
 }
 
 inline bool x_hphp_splfileobject_ftruncate(CObjRef obj, int64 size) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_ftruncate);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_ftruncate(obj, size);
 }
 
 inline int64 x_hphp_splfileobject_fwrite(CObjRef obj, CStrRef str, int64 length) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_fwrite);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_fwrite(obj, str, length);
 }
 
 inline Variant x_hphp_splfileobject_getcvscontrol(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_getcvscontrol);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_getcvscontrol(obj);
 }
 
 inline int64 x_hphp_splfileobject_getflags(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_getflags);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_getflags(obj);
 }
 
 inline int64 x_hphp_splfileobject_getmaxlinelen(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_getmaxlinelen);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_getmaxlinelen(obj);
 }
 
 inline int64 x_hphp_splfileobject_key(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_key);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_key(obj);
 }
 
 inline void x_hphp_splfileobject_next(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_next);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_splfileobject_next(obj);
 }
 
 inline void x_hphp_splfileobject_rewind(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_rewind);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_splfileobject_rewind(obj);
 }
 
 inline bool x_hphp_splfileobject_valid(CObjRef obj) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_valid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_splfileobject_valid(obj);
 }
 
 inline void x_hphp_splfileobject_seek(CObjRef obj, int64 line_pos) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_seek);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_splfileobject_seek(obj, line_pos);
 }
 
 inline void x_hphp_splfileobject_setcsvcontrol(CObjRef obj, CStrRef delimiter, CStrRef enclosure, CStrRef escape) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_setcsvcontrol);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_splfileobject_setcsvcontrol(obj, delimiter, enclosure, escape);
 }
 
 inline void x_hphp_splfileobject_setflags(CObjRef obj, int64 flags) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_setflags);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_splfileobject_setflags(obj, flags);
 }
 
 inline void x_hphp_splfileobject_setmaxlinelen(CObjRef obj, int64 max_len) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_setmaxlinelen);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_hphp_splfileobject_setmaxlinelen(obj, max_len);
 }
 

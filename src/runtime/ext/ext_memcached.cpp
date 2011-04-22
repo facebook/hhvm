@@ -210,15 +210,14 @@ Variant c_Memcached::t___destruct() {
 }
 
 Variant c_Memcached::t_get(CStrRef key, CVarRef cache_cb /*= null_variant*/,
-                           Variant cas_token /*= null_variant*/) {
+                           VRefParam cas_token /*= null_variant*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::get);
-  if (cas_token.isReferenced()) cas_token.setContagious();
   return t_getbykey(null_string, key, cache_cb, cas_token);
 }
 
 Variant c_Memcached::t_getbykey(CStrRef server_key, CStrRef key,
                                 CVarRef cache_cb /*= null_variant*/,
-                                Variant cas_token /*= null_variant*/) {
+                                VRefParam cas_token /*= null_variant*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getbykey);
   m_impl->rescode = q_Memcached_RES_SUCCESS;
   if (key.empty()) {
@@ -261,14 +260,15 @@ Variant c_Memcached::t_getbykey(CStrRef server_key, CStrRef key,
 }
 
 Variant c_Memcached::t_getmulti(CArrRef keys,
-    Variant cas_tokens /*= null_variant*/, int flags /*= 0*/) {
+                                VRefParam cas_tokens /*= null_variant*/,
+                                int flags /*= 0*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getmulti);
-  if (cas_tokens.isReferenced()) cas_tokens.setContagious();
   return t_getmultibykey(null_string, keys, cas_tokens, flags);
 }
 
 Variant c_Memcached::t_getmultibykey(CStrRef server_key, CArrRef keys,
-    Variant cas_tokens /*= null_variant*/, int flags /*= 0*/) {
+                                     VRefParam cas_tokens /*= null_variant*/,
+                                     int flags /*= 0*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getmultibykey);
   m_impl->rescode = q_Memcached_RES_SUCCESS;
 
@@ -294,7 +294,7 @@ Variant c_Memcached::t_getmultibykey(CStrRef server_key, CArrRef keys,
     returnValue.set(sKey, value, true);
     if (cas_tokens.isReferenced()) {
       double cas = (double) memcached_result_cas(&result.value);
-      cas_tokens.set(sKey, cas, true);
+      cas_tokens->set(sKey, cas, true);
     }
   }
 

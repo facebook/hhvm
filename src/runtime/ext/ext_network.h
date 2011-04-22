@@ -44,24 +44,24 @@ inline bool f_checkdnsrr(CStrRef host, CStrRef type = null_string) {
   return f_dns_check_record(host, type);
 }
 
-Variant f_dns_get_record(CStrRef hostname, int type = -1, Variant authns = null,
-                         Variant addtl = null);
+Variant f_dns_get_record(CStrRef hostname, int type = -1, VRefParam authns = null,
+                         VRefParam addtl = null);
 
-bool f_dns_get_mx(CStrRef hostname, Variant mxhosts, Variant weights = null);
+bool f_dns_get_mx(CStrRef hostname, VRefParam mxhosts, VRefParam weights = null);
 
-inline bool f_getmxrr(CStrRef hostname, Variant mxhosts,
-                      Variant weight = null) {
+inline bool f_getmxrr(CStrRef hostname, VRefParam mxhosts,
+                      VRefParam weight = null) {
   return f_dns_get_mx(hostname, ref(mxhosts), weight);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // socket
 
-Variant f_fsockopen(CStrRef hostname, int port = -1, Variant errnum = null,
-                    Variant errstr = null, double timeout = 0.0);
+Variant f_fsockopen(CStrRef hostname, int port = -1, VRefParam errnum = null,
+                    VRefParam errstr = null, double timeout = 0.0);
 
-Variant f_pfsockopen(CStrRef hostname, int port = -1, Variant errnum = null,
-                     Variant errstr = null, double timeout = 0.0);
+Variant f_pfsockopen(CStrRef hostname, int port = -1, VRefParam errnum = null,
+                     VRefParam errstr = null, double timeout = 0.0);
 
 inline Variant f_socket_get_status(CObjRef stream) {
   return f_stream_get_meta_data(stream);
@@ -83,7 +83,7 @@ void f_header(CStrRef str, bool replace = true, int http_response_code = 0);
 
 Array f_headers_list();
 
-bool f_headers_sent(Variant file = null, Variant line = null);
+bool f_headers_sent(VRefParam file = null, VRefParam line = null);
 
 void f_header_remove(CStrRef name = null_string);
 

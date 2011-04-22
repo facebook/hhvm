@@ -135,7 +135,7 @@ void c_Collator::t___construct(CStrRef locale) {
   }
 }
 
-bool c_Collator::t_asort(Variant arr,
+bool c_Collator::t_asort(VRefParam arr,
                          int64 sort_flag /* = q_Collator_SORT_REGULAR */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::asort);
   if (!arr.isArray()) {
@@ -304,7 +304,7 @@ static int collator_cmp_sort_keys(const void* p1, const void* p2, const void*) {
   return strcmp( key1, key2 );
 }
 
-bool c_Collator::t_sortwithsortkeys(Variant arr) {
+bool c_Collator::t_sortwithsortkeys(VRefParam arr) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::sortwithsortkeys);
   char*       sortKeyBuf = NULL; /* buffer to store sort keys */
   int32_t     sortKeyBufSize = DEF_SORT_KEYS_BUF_SIZE; /* buffer size */
@@ -442,7 +442,7 @@ bool c_Collator::t_sortwithsortkeys(Variant arr) {
   return true;
 }
 
-bool c_Collator::t_sort(Variant arr,
+bool c_Collator::t_sort(VRefParam arr,
                         int64 sort_flag /* = q_Collator_SORT_REGULAR */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::sort);
   if (!arr.isArray()) {
@@ -481,7 +481,8 @@ Variant c_Collator::t___destruct() {
     return false;                                          \
   }                                                        \
 
-Variant f_collator_asort(CVarRef obj, Variant arr, int64 sort_flag /* = 0 */) {
+Variant f_collator_asort(CVarRef obj, VRefParam arr,
+                         int64 sort_flag /* = q_Collator_SORT_REGULAR */) {
   CHECK_COLL(obj);
   return coll->t_asort(ref(arr), sort_flag);
 }
@@ -530,12 +531,13 @@ Variant f_collator_set_strength(CVarRef obj, int64 strength) {
   return coll->t_setstrength(strength);
 }
 
-Variant f_collator_sort_with_sort_keys(CVarRef obj, Variant arr) {
+Variant f_collator_sort_with_sort_keys(CVarRef obj, VRefParam arr) {
   CHECK_COLL(obj);
   return coll->t_sortwithsortkeys(ref(arr));
 }
 
-Variant f_collator_sort(CVarRef obj, Variant arr, int64 sort_flag /* = 0 */) {
+Variant f_collator_sort(CVarRef obj, VRefParam arr,
+                        int64 sort_flag /* = q_Collator_SORT_REGULAR */) {
   CHECK_COLL(obj);
   return coll->t_sort(ref(arr), sort_flag);
 }
@@ -818,15 +820,15 @@ Variant php_intl_idn_to(CStrRef domain, Variant errorcode, int mode) {
   return String(converted_utf8, converted_utf8_len, AttachString);
 }
 
-Variant f_idn_to_ascii(CStrRef domain, Variant errorcode /* = null */) {
+Variant f_idn_to_ascii(CStrRef domain, VRefParam errorcode /* = null */) {
   return php_intl_idn_to(domain, ref(errorcode), INTL_IDN_TO_ASCII);
 }
 
-Variant f_idn_to_unicode(CStrRef domain, Variant errorcode /* = null */) {
+Variant f_idn_to_unicode(CStrRef domain, VRefParam errorcode /* = null */) {
   return php_intl_idn_to(domain, ref(errorcode), INTL_IDN_TO_UTF8);
 }
 
-Variant f_idn_to_utf8(CStrRef domain, Variant errorcode /* = null */) {
+Variant f_idn_to_utf8(CStrRef domain, VRefParam errorcode /* = null */) {
   return php_intl_idn_to(domain, ref(errorcode), INTL_IDN_TO_UTF8);
 }
 

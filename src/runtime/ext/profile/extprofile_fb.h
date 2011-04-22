@@ -31,7 +31,7 @@ inline Variant x_fb_thrift_serialize(CVarRef thing) {
   return f_fb_thrift_serialize(thing);
 }
 
-inline Variant x_fb_thrift_unserialize(CVarRef thing, CVarRef success, CVarRef errcode = null_variant) {
+inline Variant x_fb_thrift_unserialize(CVarRef thing, VRefParam success, VRefParam errcode = null_variant) {
   FUNCTION_INJECTION_BUILTIN(fb_thrift_unserialize);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fb_thrift_unserialize(thing, success, errcode);
@@ -43,7 +43,7 @@ inline Variant x_fb_serialize(CVarRef thing) {
   return f_fb_serialize(thing);
 }
 
-inline Variant x_fb_unserialize(CVarRef thing, CVarRef success, CVarRef errcode = null_variant) {
+inline Variant x_fb_unserialize(CVarRef thing, VRefParam success, VRefParam errcode = null_variant) {
   FUNCTION_INJECTION_BUILTIN(fb_unserialize);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fb_unserialize(thing, success, errcode);
@@ -55,13 +55,13 @@ inline bool x_fb_intercept(CStrRef name, CVarRef handler, CVarRef data = null_va
   return f_fb_intercept(name, handler, data);
 }
 
-inline Variant x_fb_stubout_intercept_handler(CStrRef name, CVarRef obj, CArrRef params, CVarRef data, CVarRef done) {
+inline Variant x_fb_stubout_intercept_handler(CStrRef name, CVarRef obj, CArrRef params, CVarRef data, VRefParam done) {
   FUNCTION_INJECTION_BUILTIN(fb_stubout_intercept_handler);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fb_stubout_intercept_handler(name, obj, params, data, done);
 }
 
-inline Variant x_fb_rpc_intercept_handler(CStrRef name, CVarRef obj, CArrRef params, CVarRef data, CVarRef done) {
+inline Variant x_fb_rpc_intercept_handler(CStrRef name, CVarRef obj, CArrRef params, CVarRef data, VRefParam done) {
   FUNCTION_INJECTION_BUILTIN(fb_rpc_intercept_handler);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fb_rpc_intercept_handler(name, obj, params, data, done);
@@ -79,7 +79,7 @@ inline bool x_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) 
   return f_fb_rename_function(orig_func_name, new_func_name);
 }
 
-inline bool x_fb_utf8ize(CVarRef input) {
+inline bool x_fb_utf8ize(VRefParam input) {
   FUNCTION_INJECTION_BUILTIN(fb_utf8ize);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fb_utf8ize(input);
@@ -179,13 +179,13 @@ inline Array x_fb_crossall_query(CStrRef sql, int max_thread = 50, bool retry_qu
   return f_fb_crossall_query(sql, max_thread, retry_query_on_fail, connect_timeout, read_timeout, timeout_in_ms);
 }
 
-inline void x_fb_set_taint(CVarRef str, int taint) {
+inline void x_fb_set_taint(VRefParam str, int taint) {
   FUNCTION_INJECTION_BUILTIN(fb_set_taint);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_fb_set_taint(str, taint);
 }
 
-inline void x_fb_unset_taint(CVarRef str, int taint) {
+inline void x_fb_unset_taint(VRefParam str, int taint) {
   FUNCTION_INJECTION_BUILTIN(fb_unset_taint);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_fb_unset_taint(str, taint);

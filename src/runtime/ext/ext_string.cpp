@@ -168,7 +168,7 @@ static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
 }
 
 Variant f_str_replace(CVarRef search, CVarRef replace, CVarRef subject,
-                      Variant count /* = null */) {
+                      VRefParam count /* = null */) {
   int nCount;
   Variant ret = str_replace(search, replace, subject, nCount, true);
   count = nCount;
@@ -176,7 +176,7 @@ Variant f_str_replace(CVarRef search, CVarRef replace, CVarRef subject,
 }
 
 Variant f_str_ireplace(CVarRef search, CVarRef replace, CVarRef subject,
-                       Variant count /* = null */) {
+                       VRefParam count /* = null */) {
   int nCount;
   Variant ret = str_replace(search, replace, subject, nCount, false);
   count = nCount;
@@ -666,7 +666,7 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
   return result.detach();
 }
 
-void f_parse_str(CStrRef str, Variant arr /* = null */) {
+void f_parse_str(CStrRef str, VRefParam arr /* = null */) {
   arr = Array::Create();
   HttpProtocol::DecodeParameters(arr, str.data(), str.size());
 }

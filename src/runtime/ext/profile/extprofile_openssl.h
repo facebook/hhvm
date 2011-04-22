@@ -27,216 +27,259 @@ namespace HPHP {
 
 inline bool x_openssl_csr_export_to_file(CVarRef csr, CStrRef outfilename, bool notext = true) {
   FUNCTION_INJECTION_BUILTIN(openssl_csr_export_to_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_csr_export_to_file(csr, outfilename, notext);
 }
 
-inline bool x_openssl_csr_export(CVarRef csr, CVarRef out, bool notext = true) {
+inline bool x_openssl_csr_export(CVarRef csr, VRefParam out, bool notext = true) {
   FUNCTION_INJECTION_BUILTIN(openssl_csr_export);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_csr_export(csr, out, notext);
 }
 
 inline Variant x_openssl_csr_get_public_key(CVarRef csr) {
   FUNCTION_INJECTION_BUILTIN(openssl_csr_get_public_key);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_csr_get_public_key(csr);
 }
 
 inline Variant x_openssl_csr_get_subject(CVarRef csr, bool use_shortnames = true) {
   FUNCTION_INJECTION_BUILTIN(openssl_csr_get_subject);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_csr_get_subject(csr, use_shortnames);
 }
 
-inline Variant x_openssl_csr_new(CArrRef dn, CVarRef privkey, CVarRef configargs = null_variant, CVarRef extraattribs = null_variant) {
+inline Variant x_openssl_csr_new(CArrRef dn, VRefParam privkey, CVarRef configargs = null_variant, CVarRef extraattribs = null_variant) {
   FUNCTION_INJECTION_BUILTIN(openssl_csr_new);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_csr_new(dn, privkey, configargs, extraattribs);
 }
 
 inline Variant x_openssl_csr_sign(CVarRef csr, CVarRef cacert, CVarRef priv_key, int days, CVarRef configargs = null_variant, int serial = 0) {
   FUNCTION_INJECTION_BUILTIN(openssl_csr_sign);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_csr_sign(csr, cacert, priv_key, days, configargs, serial);
 }
 
 inline Variant x_openssl_error_string() {
   FUNCTION_INJECTION_BUILTIN(openssl_error_string);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_error_string();
 }
 
-inline bool x_openssl_open(CStrRef sealed_data, CVarRef open_data, CStrRef env_key, CVarRef priv_key_id) {
+inline bool x_openssl_open(CStrRef sealed_data, VRefParam open_data, CStrRef env_key, CVarRef priv_key_id) {
   FUNCTION_INJECTION_BUILTIN(openssl_open);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_open(sealed_data, open_data, env_key, priv_key_id);
 }
 
 inline bool x_openssl_pkcs12_export_to_file(CVarRef x509, CStrRef filename, CVarRef priv_key, CStrRef pass, CVarRef args = null_variant) {
   FUNCTION_INJECTION_BUILTIN(openssl_pkcs12_export_to_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_pkcs12_export_to_file(x509, filename, priv_key, pass, args);
 }
 
-inline bool x_openssl_pkcs12_export(CVarRef x509, CVarRef out, CVarRef priv_key, CStrRef pass, CVarRef args = null_variant) {
+inline bool x_openssl_pkcs12_export(CVarRef x509, VRefParam out, CVarRef priv_key, CStrRef pass, CVarRef args = null_variant) {
   FUNCTION_INJECTION_BUILTIN(openssl_pkcs12_export);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_pkcs12_export(x509, out, priv_key, pass, args);
 }
 
-inline bool x_openssl_pkcs12_read(CStrRef pkcs12, CVarRef certs, CStrRef pass) {
+inline bool x_openssl_pkcs12_read(CStrRef pkcs12, VRefParam certs, CStrRef pass) {
   FUNCTION_INJECTION_BUILTIN(openssl_pkcs12_read);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_pkcs12_read(pkcs12, certs, pass);
 }
 
 inline bool x_openssl_pkcs7_decrypt(CStrRef infilename, CStrRef outfilename, CVarRef recipcert, CVarRef recipkey = null_variant) {
   FUNCTION_INJECTION_BUILTIN(openssl_pkcs7_decrypt);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_pkcs7_decrypt(infilename, outfilename, recipcert, recipkey);
 }
 
 inline bool x_openssl_pkcs7_encrypt(CStrRef infilename, CStrRef outfilename, CVarRef recipcerts, CArrRef headers, int flags = 0, int cipherid = k_OPENSSL_CIPHER_RC2_40) {
   FUNCTION_INJECTION_BUILTIN(openssl_pkcs7_encrypt);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_pkcs7_encrypt(infilename, outfilename, recipcerts, headers, flags, cipherid);
 }
 
 inline bool x_openssl_pkcs7_sign(CStrRef infilename, CStrRef outfilename, CVarRef signcert, CVarRef privkey, CVarRef headers, int flags = k_PKCS7_DETACHED, CStrRef extracerts = null_string) {
   FUNCTION_INJECTION_BUILTIN(openssl_pkcs7_sign);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_pkcs7_sign(infilename, outfilename, signcert, privkey, headers, flags, extracerts);
 }
 
 inline Variant x_openssl_pkcs7_verify(CStrRef filename, int flags, CStrRef outfilename = null_string, CArrRef cainfo = null_array, CStrRef extracerts = null_string, CStrRef content = null_string) {
   FUNCTION_INJECTION_BUILTIN(openssl_pkcs7_verify);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_pkcs7_verify(filename, flags, outfilename, cainfo, extracerts, content);
 }
 
 inline bool x_openssl_pkey_export_to_file(CVarRef key, CStrRef outfilename, CStrRef passphrase = null_string, CVarRef configargs = null_variant) {
   FUNCTION_INJECTION_BUILTIN(openssl_pkey_export_to_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_pkey_export_to_file(key, outfilename, passphrase, configargs);
 }
 
-inline bool x_openssl_pkey_export(CVarRef key, CVarRef out, CStrRef passphrase = null_string, CVarRef configargs = null_variant) {
+inline bool x_openssl_pkey_export(CVarRef key, VRefParam out, CStrRef passphrase = null_string, CVarRef configargs = null_variant) {
   FUNCTION_INJECTION_BUILTIN(openssl_pkey_export);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_pkey_export(key, out, passphrase, configargs);
 }
 
 inline void x_openssl_pkey_free(CObjRef key) {
   FUNCTION_INJECTION_BUILTIN(openssl_pkey_free);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_openssl_pkey_free(key);
 }
 
 inline void x_openssl_free_key(CObjRef key) {
   FUNCTION_INJECTION_BUILTIN(openssl_free_key);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_openssl_free_key(key);
 }
 
 inline Array x_openssl_pkey_get_details(CObjRef key) {
   FUNCTION_INJECTION_BUILTIN(openssl_pkey_get_details);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_pkey_get_details(key);
 }
 
 inline Variant x_openssl_pkey_get_private(CVarRef key, CStrRef passphrase = null_string) {
   FUNCTION_INJECTION_BUILTIN(openssl_pkey_get_private);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_pkey_get_private(key, passphrase);
 }
 
 inline Variant x_openssl_get_privatekey(CVarRef key, CStrRef passphrase = null_string) {
   FUNCTION_INJECTION_BUILTIN(openssl_get_privatekey);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_get_privatekey(key, passphrase);
 }
 
 inline Variant x_openssl_pkey_get_public(CVarRef certificate) {
   FUNCTION_INJECTION_BUILTIN(openssl_pkey_get_public);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_pkey_get_public(certificate);
 }
 
 inline Variant x_openssl_get_publickey(CVarRef certificate) {
   FUNCTION_INJECTION_BUILTIN(openssl_get_publickey);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_get_publickey(certificate);
 }
 
 inline Object x_openssl_pkey_new(CVarRef configargs = null_variant) {
   FUNCTION_INJECTION_BUILTIN(openssl_pkey_new);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_pkey_new(configargs);
 }
 
-inline bool x_openssl_private_decrypt(CStrRef data, CVarRef decrypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING) {
+inline bool x_openssl_private_decrypt(CStrRef data, VRefParam decrypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING) {
   FUNCTION_INJECTION_BUILTIN(openssl_private_decrypt);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_private_decrypt(data, decrypted, key, padding);
 }
 
-inline bool x_openssl_private_encrypt(CStrRef data, CVarRef crypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING) {
+inline bool x_openssl_private_encrypt(CStrRef data, VRefParam crypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING) {
   FUNCTION_INJECTION_BUILTIN(openssl_private_encrypt);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_private_encrypt(data, crypted, key, padding);
 }
 
-inline bool x_openssl_public_decrypt(CStrRef data, CVarRef decrypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING) {
+inline bool x_openssl_public_decrypt(CStrRef data, VRefParam decrypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING) {
   FUNCTION_INJECTION_BUILTIN(openssl_public_decrypt);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_public_decrypt(data, decrypted, key, padding);
 }
 
-inline bool x_openssl_public_encrypt(CStrRef data, CVarRef crypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING) {
+inline bool x_openssl_public_encrypt(CStrRef data, VRefParam crypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING) {
   FUNCTION_INJECTION_BUILTIN(openssl_public_encrypt);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_public_encrypt(data, crypted, key, padding);
 }
 
-inline Variant x_openssl_seal(CStrRef data, CVarRef sealed_data, CVarRef env_keys, CArrRef pub_key_ids) {
+inline Variant x_openssl_seal(CStrRef data, VRefParam sealed_data, VRefParam env_keys, CArrRef pub_key_ids) {
   FUNCTION_INJECTION_BUILTIN(openssl_seal);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_seal(data, sealed_data, env_keys, pub_key_ids);
 }
 
-inline bool x_openssl_sign(CStrRef data, CVarRef signature, CVarRef priv_key_id, int signature_alg = k_OPENSSL_ALGO_SHA1) {
+inline bool x_openssl_sign(CStrRef data, VRefParam signature, CVarRef priv_key_id, int signature_alg = k_OPENSSL_ALGO_SHA1) {
   FUNCTION_INJECTION_BUILTIN(openssl_sign);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_sign(data, signature, priv_key_id, signature_alg);
 }
 
 inline Variant x_openssl_verify(CStrRef data, CStrRef signature, CVarRef pub_key_id, int signature_alg = k_OPENSSL_ALGO_SHA1) {
   FUNCTION_INJECTION_BUILTIN(openssl_verify);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_verify(data, signature, pub_key_id, signature_alg);
 }
 
 inline bool x_openssl_x509_check_private_key(CVarRef cert, CVarRef key) {
   FUNCTION_INJECTION_BUILTIN(openssl_x509_check_private_key);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_x509_check_private_key(cert, key);
 }
 
 inline int x_openssl_x509_checkpurpose(CVarRef x509cert, int purpose, CArrRef cainfo = null_array, CStrRef untrustedfile = null_string) {
   FUNCTION_INJECTION_BUILTIN(openssl_x509_checkpurpose);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_x509_checkpurpose(x509cert, purpose, cainfo, untrustedfile);
 }
 
 inline bool x_openssl_x509_export_to_file(CVarRef x509, CStrRef outfilename, bool notext = true) {
   FUNCTION_INJECTION_BUILTIN(openssl_x509_export_to_file);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_x509_export_to_file(x509, outfilename, notext);
 }
 
-inline bool x_openssl_x509_export(CVarRef x509, CVarRef output, bool notext = true) {
+inline bool x_openssl_x509_export(CVarRef x509, VRefParam output, bool notext = true) {
   FUNCTION_INJECTION_BUILTIN(openssl_x509_export);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_x509_export(x509, output, notext);
 }
 
 inline void x_openssl_x509_free(CObjRef x509cert) {
   FUNCTION_INJECTION_BUILTIN(openssl_x509_free);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_openssl_x509_free(x509cert);
 }
 
 inline Variant x_openssl_x509_parse(CVarRef x509cert, bool shortnames = true) {
   FUNCTION_INJECTION_BUILTIN(openssl_x509_parse);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_x509_parse(x509cert, shortnames);
 }
 
 inline Variant x_openssl_x509_read(CVarRef x509certdata) {
   FUNCTION_INJECTION_BUILTIN(openssl_x509_read);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_x509_read(x509certdata);
 }
 
-inline Variant x_openssl_random_pseudo_bytes(int length, CVarRef crypto_strong = false) {
+inline Variant x_openssl_random_pseudo_bytes(int length, VRefParam crypto_strong = false) {
   FUNCTION_INJECTION_BUILTIN(openssl_random_pseudo_bytes);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_random_pseudo_bytes(length, crypto_strong);
 }
 
 inline Variant x_openssl_cipher_iv_length(CStrRef method) {
   FUNCTION_INJECTION_BUILTIN(openssl_cipher_iv_length);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_cipher_iv_length(method);
 }
 
 inline Variant x_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password, bool raw_output = false, CStrRef iv = null_string) {
   FUNCTION_INJECTION_BUILTIN(openssl_encrypt);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_encrypt(data, method, password, raw_output, iv);
 }
 
 inline Variant x_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password, bool raw_input = false, CStrRef iv = null_string) {
   FUNCTION_INJECTION_BUILTIN(openssl_decrypt);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_openssl_decrypt(data, method, password, raw_input, iv);
 }
 

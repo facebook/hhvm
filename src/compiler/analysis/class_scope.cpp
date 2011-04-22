@@ -989,7 +989,7 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl
     cg_printf("return get_call_info_static_method_no_index%s(mcp);\n",
         system ? "_builtin" : "");
   } else {
-    cg_printf("StringData *s __attribute__((__unused__)) (mcp.rootCls);\n");
+    cg_printf("StringData *s ATTRIBUTE_UNUSED (mcp.rootCls);\n");
 
     if (!system && Option::EnableEval == Option::FullEval) {
       cg_printf("bool foundClass = false;\n");
@@ -1045,7 +1045,7 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl
       "(MethodCallPackage &mcp, MethodIndex mi) {\n",
       system ? "_builtin" : "");
   if (Option::UseMethodIndex) {
-    cg_printf("StringData *s __attribute__((__unused__)) (mcp.rootCls);\n");
+    cg_printf("StringData *s ATTRIBUTE_UNUSED (mcp.rootCls);\n");
 
     if (!system && Option::EnableEval == Option::FullEval) {
       cg_printf("bool foundClass = false;\n");
@@ -1982,7 +1982,7 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
       cg_indentBegin("bool %s%s(MethodCallPackage &mcp, %sint64 hash) {\n",
           scope.c_str(), invokeName.c_str(),
           Option::UseMethodIndex ? "MethodIndex mi, " : "");
-      cg_printf("CStrRef s __attribute__((__unused__)) (*mcp.name);\n");
+      cg_printf("CStrRef s ATTRIBUTE_UNUSED (*mcp.name);\n");
       break;
     default: ASSERT(false);
   }

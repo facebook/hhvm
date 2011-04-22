@@ -55,7 +55,7 @@ inline int64 x_pagelet_server_task_status(CObjRef task) {
   return f_pagelet_server_task_status(task);
 }
 
-inline String x_pagelet_server_task_result(CObjRef task, CVarRef headers, CVarRef code) {
+inline String x_pagelet_server_task_result(CObjRef task, VRefParam headers, VRefParam code) {
   FUNCTION_INJECTION_BUILTIN(pagelet_server_task_result);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_pagelet_server_task_result(task, headers, code);
@@ -67,7 +67,7 @@ inline void x_pagelet_server_flush() {
   f_pagelet_server_flush();
 }
 
-inline bool x_xbox_send_message(CStrRef msg, CVarRef ret, int64 timeout_ms, CStrRef host = "localhost") {
+inline bool x_xbox_send_message(CStrRef msg, VRefParam ret, int64 timeout_ms, CStrRef host = "localhost") {
   FUNCTION_INJECTION_BUILTIN(xbox_send_message);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_xbox_send_message(msg, ret, timeout_ms, host);
@@ -91,7 +91,7 @@ inline bool x_xbox_task_status(CObjRef task) {
   return f_xbox_task_status(task);
 }
 
-inline int64 x_xbox_task_result(CObjRef task, int64 timeout_ms, CVarRef ret) {
+inline int64 x_xbox_task_result(CObjRef task, int64 timeout_ms, VRefParam ret) {
   FUNCTION_INJECTION_BUILTIN(xbox_task_result);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_xbox_task_result(task, timeout_ms, ret);

@@ -161,7 +161,7 @@ const {
       for (ArrayIter it2(it.second()); !it2.end(); it2.next()) {
         CVarRef v = it2.secondRef();
         if (v.isInitialized()) {
-          props.set(prefix + it2.first(), v.isReferenced() ? ref(v) : v);
+          props.lvalAt(prefix + it2.first()).setWithRef(v);
         }
       }
     }

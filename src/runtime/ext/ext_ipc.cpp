@@ -157,7 +157,7 @@ Array f_msg_stat_queue(CObjRef queue) {
 
 bool f_msg_send(CObjRef queue, int64 msgtype, CVarRef message,
                 bool serialize /* = true */, bool blocking /* = true */,
-                Variant errorcode /* = null */) {
+                VRefParam errorcode /* = null */) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -190,10 +190,10 @@ bool f_msg_send(CObjRef queue, int64 msgtype, CVarRef message,
   return true;
 }
 
-bool f_msg_receive(CObjRef queue, int64 desiredmsgtype, Variant msgtype,
-                   int64 maxsize, Variant message,
+bool f_msg_receive(CObjRef queue, int64 desiredmsgtype, VRefParam msgtype,
+                   int64 maxsize, VRefParam message,
                    bool unserialize /* = true */,
-                   int64 flags /* = 0 */, Variant errorcode /* = null */) {
+                   int64 flags /* = 0 */, VRefParam errorcode /* = null */) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
   if (!q) {
     raise_warning("Invalid message queue was specified");

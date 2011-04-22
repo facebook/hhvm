@@ -27,259 +27,311 @@ namespace HPHP {
 
 inline Variant x_assert_options(int what, CVarRef value = null_variant) {
   FUNCTION_INJECTION_BUILTIN(assert_options);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_assert_options(what, value);
 }
 
 inline Variant x_assert(CVarRef assertion) {
   FUNCTION_INJECTION_BUILTIN(assert);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_assert(assertion);
 }
 
 inline int x_dl(CStrRef library) {
   FUNCTION_INJECTION_BUILTIN(dl);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_dl(library);
 }
 
 inline bool x_extension_loaded(CStrRef name) {
   FUNCTION_INJECTION_BUILTIN(extension_loaded);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_extension_loaded(name);
 }
 
 inline Array x_get_loaded_extensions(bool zend_extensions = false) {
   FUNCTION_INJECTION_BUILTIN(get_loaded_extensions);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_loaded_extensions(zend_extensions);
 }
 
 inline Array x_get_extension_funcs(CStrRef module_name) {
   FUNCTION_INJECTION_BUILTIN(get_extension_funcs);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_extension_funcs(module_name);
 }
 
 inline String x_get_cfg_var(CStrRef option) {
   FUNCTION_INJECTION_BUILTIN(get_cfg_var);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_cfg_var(option);
 }
 
 inline String x_get_current_user() {
   FUNCTION_INJECTION_BUILTIN(get_current_user);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_current_user();
 }
 
 inline Array x_get_defined_constants(CVarRef categorize = null_variant) {
   FUNCTION_INJECTION_BUILTIN(get_defined_constants);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_defined_constants(categorize);
 }
 
 inline String x_get_include_path() {
   FUNCTION_INJECTION_BUILTIN(get_include_path);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_include_path();
 }
 
 inline void x_restore_include_path() {
   FUNCTION_INJECTION_BUILTIN(restore_include_path);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_restore_include_path();
 }
 
 inline String x_set_include_path(CStrRef new_include_path) {
   FUNCTION_INJECTION_BUILTIN(set_include_path);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_set_include_path(new_include_path);
 }
 
 inline Array x_get_included_files() {
   FUNCTION_INJECTION_BUILTIN(get_included_files);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_included_files();
 }
 
 inline Array x_inclued_get_data() {
   FUNCTION_INJECTION_BUILTIN(inclued_get_data);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_inclued_get_data();
 }
 
 inline int x_get_magic_quotes_gpc() {
   FUNCTION_INJECTION_BUILTIN(get_magic_quotes_gpc);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_magic_quotes_gpc();
 }
 
 inline int x_get_magic_quotes_runtime() {
   FUNCTION_INJECTION_BUILTIN(get_magic_quotes_runtime);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_magic_quotes_runtime();
 }
 
 inline Array x_get_required_files() {
   FUNCTION_INJECTION_BUILTIN(get_required_files);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_required_files();
 }
 
 inline Variant x_getenv(CStrRef varname) {
   FUNCTION_INJECTION_BUILTIN(getenv);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_getenv(varname);
 }
 
 inline int x_getlastmod() {
   FUNCTION_INJECTION_BUILTIN(getlastmod);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_getlastmod();
 }
 
 inline int x_getmygid() {
   FUNCTION_INJECTION_BUILTIN(getmygid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_getmygid();
 }
 
 inline int x_getmyinode() {
   FUNCTION_INJECTION_BUILTIN(getmyinode);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_getmyinode();
 }
 
 inline int x_getmypid() {
   FUNCTION_INJECTION_BUILTIN(getmypid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_getmypid();
 }
 
 inline int x_getmyuid() {
   FUNCTION_INJECTION_BUILTIN(getmyuid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_getmyuid();
 }
 
 inline Array x_getopt(CStrRef options, CVarRef longopts = null_variant) {
   FUNCTION_INJECTION_BUILTIN(getopt);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_getopt(options, longopts);
 }
 
 inline Array x_getrusage(int who = 0) {
   FUNCTION_INJECTION_BUILTIN(getrusage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_getrusage(who);
 }
 
-inline bool x_clock_getres(int clk_id, CVarRef sec, CVarRef nsec) {
+inline bool x_clock_getres(int clk_id, VRefParam sec, VRefParam nsec) {
   FUNCTION_INJECTION_BUILTIN(clock_getres);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_clock_getres(clk_id, sec, nsec);
 }
 
-inline bool x_clock_gettime(int clk_id, CVarRef sec, CVarRef nsec) {
+inline bool x_clock_gettime(int clk_id, VRefParam sec, VRefParam nsec) {
   FUNCTION_INJECTION_BUILTIN(clock_gettime);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_clock_gettime(clk_id, sec, nsec);
 }
 
 inline bool x_clock_settime(int clk_id, int64 sec, int64 nsec) {
   FUNCTION_INJECTION_BUILTIN(clock_settime);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_clock_settime(clk_id, sec, nsec);
 }
 
 inline int x_cpu_get_count() {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_cpu_get_count();
 }
 
 inline String x_cpu_get_model() {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_cpu_get_model();
 }
 
 inline String x_ini_alter(CStrRef varname, CStrRef newvalue) {
   FUNCTION_INJECTION_BUILTIN(ini_alter);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ini_alter(varname, newvalue);
 }
 
 inline Array x_ini_get_all(CStrRef extension = null_string) {
   FUNCTION_INJECTION_BUILTIN(ini_get_all);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ini_get_all(extension);
 }
 
 inline String x_ini_get(CStrRef varname) {
   FUNCTION_INJECTION_BUILTIN(ini_get);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ini_get(varname);
 }
 
 inline void x_ini_restore(CStrRef varname) {
   FUNCTION_INJECTION_BUILTIN(ini_restore);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_ini_restore(varname);
 }
 
 inline String x_ini_set(CStrRef varname, CStrRef newvalue) {
   FUNCTION_INJECTION_BUILTIN(ini_set);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ini_set(varname, newvalue);
 }
 
 inline int64 x_memory_get_peak_usage(bool real_usage = false) {
   FUNCTION_INJECTION_BUILTIN(memory_get_peak_usage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memory_get_peak_usage(real_usage);
 }
 
 inline int64 x_memory_get_usage(bool real_usage = false) {
   FUNCTION_INJECTION_BUILTIN(memory_get_usage);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_memory_get_usage(real_usage);
 }
 
 inline String x_php_ini_scanned_files() {
   FUNCTION_INJECTION_BUILTIN(php_ini_scanned_files);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_php_ini_scanned_files();
 }
 
 inline String x_php_logo_guid() {
   FUNCTION_INJECTION_BUILTIN(php_logo_guid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_php_logo_guid();
 }
 
 inline String x_php_sapi_name() {
   FUNCTION_INJECTION_BUILTIN(php_sapi_name);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_php_sapi_name();
 }
 
 inline String x_php_uname(CStrRef mode = null_string) {
   FUNCTION_INJECTION_BUILTIN(php_uname);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_php_uname(mode);
 }
 
 inline bool x_phpcredits(int flag = 0) {
   FUNCTION_INJECTION_BUILTIN(phpcredits);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_phpcredits(flag);
 }
 
 inline bool x_phpinfo(int what = 0) {
   FUNCTION_INJECTION_BUILTIN(phpinfo);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_phpinfo(what);
 }
 
 inline String x_phpversion(CStrRef extension = null_string) {
   FUNCTION_INJECTION_BUILTIN(phpversion);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_phpversion(extension);
 }
 
 inline bool x_putenv(CStrRef setting) {
   FUNCTION_INJECTION_BUILTIN(putenv);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_putenv(setting);
 }
 
 inline bool x_set_magic_quotes_runtime(bool new_setting) {
   FUNCTION_INJECTION_BUILTIN(set_magic_quotes_runtime);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_set_magic_quotes_runtime(new_setting);
 }
 
 inline void x_set_time_limit(int seconds) {
   FUNCTION_INJECTION_BUILTIN(set_time_limit);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_set_time_limit(seconds);
 }
 
 inline String x_sys_get_temp_dir() {
   FUNCTION_INJECTION_BUILTIN(sys_get_temp_dir);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_sys_get_temp_dir();
 }
 
 inline Variant x_version_compare(CStrRef version1, CStrRef version2, CStrRef sop = null_string) {
   FUNCTION_INJECTION_BUILTIN(version_compare);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_version_compare(version1, version2, sop);
 }
 
 inline String x_zend_logo_guid() {
   FUNCTION_INJECTION_BUILTIN(zend_logo_guid);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_zend_logo_guid();
 }
 
 inline int x_zend_thread_id() {
   FUNCTION_INJECTION_BUILTIN(zend_thread_id);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_zend_thread_id();
 }
 
 inline String x_zend_version() {
   FUNCTION_INJECTION_BUILTIN(zend_version);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_zend_version();
 }
 

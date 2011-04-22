@@ -118,7 +118,7 @@ Variant f_stream_get_line(CObjRef handle, int length /* = 0 */,
   return file->readRecord(ending, length);
 }
 
-Variant f_stream_select(Variant read, Variant write, Variant except,
+Variant f_stream_select(VRefParam read, VRefParam write, VRefParam except,
                         CVarRef vtv_sec, int tv_usec /* = 0 */) {
   return f_socket_select(ref(read), ref(write), ref(except), vtv_sec, tv_usec);
 }
@@ -258,7 +258,7 @@ static String get_sockaddr_name(struct sockaddr *sa, socklen_t sl) {
 
 Variant f_stream_socket_accept(CObjRef server_socket,
                                double timeout /* = 0.0 */,
-                               Variant peername /* = null */) {
+                               VRefParam peername /* = null */) {
   Socket *sock = server_socket.getTyped<Socket>();
   pollfd p;
   int n;
@@ -279,8 +279,8 @@ Variant f_stream_socket_accept(CObjRef server_socket,
 }
 
 Variant f_stream_socket_server(CStrRef local_socket,
-                               Variant errnum /* = null */,
-                               Variant errstr /* = null */,
+                               VRefParam errnum /* = null */,
+                               VRefParam errstr /* = null */,
                                int flags /* = 0 */,
                                CObjRef context /* = null_object */) {
   String protocol, host; int port;
@@ -289,8 +289,8 @@ Variant f_stream_socket_server(CStrRef local_socket,
 }
 
 Variant f_stream_socket_client(CStrRef remote_socket,
-                               Variant errnum /* = null */,
-                               Variant errstr /* = null */,
+                               VRefParam errnum /* = null */,
+                               VRefParam errstr /* = null */,
                                double timeout /* = 0.0 */,
                                int flags /* = 0 */,
                                CObjRef context /* = null_object */) {

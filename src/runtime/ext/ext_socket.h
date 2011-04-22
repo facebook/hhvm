@@ -25,12 +25,12 @@ namespace HPHP {
 
 Variant f_socket_create(int domain, int type, int protocol);
 Variant f_socket_create_listen(int port, int backlog = 128);
-bool f_socket_create_pair(int domain, int type, int protocol, Variant fd);
+bool f_socket_create_pair(int domain, int type, int protocol, VRefParam fd);
 Variant f_socket_get_option(CObjRef socket, int level, int optname);
-bool f_socket_getpeername(CObjRef socket, Variant address,
-                          Variant port = null);
-bool f_socket_getsockname(CObjRef socket, Variant address,
-                          Variant port = null);
+bool f_socket_getpeername(CObjRef socket, VRefParam address,
+                          VRefParam port = null);
+bool f_socket_getsockname(CObjRef socket, VRefParam address,
+                          VRefParam port = null);
 bool f_socket_set_block(CObjRef socket);
 bool f_socket_set_nonblock(CObjRef socket);
 bool f_socket_set_option(CObjRef socket, int level, int optname,
@@ -38,19 +38,19 @@ bool f_socket_set_option(CObjRef socket, int level, int optname,
 bool f_socket_connect(CObjRef socket, CStrRef address, int port = 0);
 bool f_socket_bind(CObjRef socket, CStrRef address, int port = 0);
 bool f_socket_listen(CObjRef socket, int backlog = 0);
-Variant f_socket_select(Variant read, Variant write, Variant except,
+Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
                         CVarRef vtv_sec, int tv_usec = 0);
-Variant f_socket_server(CStrRef hostname, int port = -1, Variant errnum = null,
-                        Variant errstr = null);
+Variant f_socket_server(CStrRef hostname, int port = -1, VRefParam errnum = null,
+                        VRefParam errstr = null);
 Variant f_socket_accept(CObjRef socket);
 Variant f_socket_read(CObjRef socket, int length, int type = 0);
 Variant f_socket_write(CObjRef socket, CStrRef buffer, int length = 0);
 Variant f_socket_send(CObjRef socket, CStrRef buf, int len, int flags);
 Variant f_socket_sendto(CObjRef socket, CStrRef buf, int len, int flags,
                         CStrRef addr, int port = 0);
-Variant f_socket_recv(CObjRef socket, Variant buf, int len, int flags);
-Variant f_socket_recvfrom(CObjRef socket, Variant buf, int len, int flags,
-                          Variant name, Variant port = 0);
+Variant f_socket_recv(CObjRef socket, VRefParam buf, int len, int flags);
+Variant f_socket_recvfrom(CObjRef socket, VRefParam buf, int len, int flags,
+                          VRefParam name, VRefParam port = 0);
 bool f_socket_shutdown(CObjRef socket, int how = 0);
 void f_socket_close(CObjRef socket);
 String f_socket_strerror(int errnum);

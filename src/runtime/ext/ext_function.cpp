@@ -46,7 +46,7 @@ bool f_function_exists(CStrRef function_name) {
 }
 
 bool f_is_callable(CVarRef v, bool syntax /* = false */,
-                   Variant name /* = null */) {
+                   VRefParam name /* = null */) {
   if (v.isString()) {
     if (name.isReferenced()) name = v;
     if (syntax) return true;

@@ -66,7 +66,7 @@ class c_SplFileObject : public c_SplFileInfo {
   public:
   void init();
   public: void t___construct(Variant v_filename, Variant v_open_mode = NAMSTR(s_sys_ss0d42ecf6, "r"), Variant v_use_include_path = false, Variant v_context = null);
-  public: c_SplFileObject *create(Variant v_filename, Variant v_open_mode = NAMSTR(s_sys_ss0d42ecf6, "r"), Variant v_use_include_path = false, Variant v_context = null);
+  public: c_SplFileObject *create(CVarRef v_filename, CVarRef v_open_mode = NAMSTR(s_sys_ss0d42ecf6, "r"), CVarRef v_use_include_path = false, CVarRef v_context = null_variant);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
@@ -77,7 +77,7 @@ class c_SplFileObject : public c_SplFileInfo {
   public: Variant t_fgetcsv(CVarRef v_delimiter = NAMSTR(s_sys_ssd332baa7, ","), CVarRef v_enclosure = NAMSTR(s_sys_ss7e5fc106, "\""), CVarRef v_escape = NAMSTR(s_sys_ssd59e789f, "\\"));
   public: String t_fgets();
   public: String t_fgetss(CVarRef v_allowable_tags);
-  public: bool t_flock(CVarRef v_operation, Variant v_wouldblock);
+  public: bool t_flock(CVarRef v_operation, VRefParam rv_wouldblock);
   public: int64 t_fpassthru();
   public: Variant t_fscanf(int num_args, CVarRef v_format, Array args = Array());
   public: int64 t_fseek(CVarRef v_offset, CVarRef v_whence);

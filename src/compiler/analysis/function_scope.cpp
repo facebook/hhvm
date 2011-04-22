@@ -916,6 +916,8 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
     return;
   }
   bool userFunc = isUserFunction();
+  bool isWrapper = !aggregateParams &&
+    Option::HardTypeHints && needsTypeCheckWrapper();
   MethodStatementPtr stmt;
   ExpressionListPtr params;
   if (userFunc) {
@@ -936,7 +938,7 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
     if (userFunc) {
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*params)[i]);
-      isRef = param->isRef();
+      isRef = !isWrapper && param->isRef();
       if (aggregateParams) {
         cg_printf("set(v_%s", param->getName().c_str());
       } else {
@@ -945,7 +947,7 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
                   isRef ? ")" : "");
       }
     } else {
-      isRef = isRefParam(i);
+      isRef = !isWrapper && isRefParam(i);
       if (aggregateParams) {
         ASSERT(false);
         cg_printf("set(a%d", i);

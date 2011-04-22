@@ -45,17 +45,17 @@ do {                                                                    \
   if ((element)->pListLast != NULL) {                                   \
     (element)->pListLast->pListNext = (element);                        \
   }                                                                     \
+} while (false)
+
+#define CONNECT_TO_GLOBAL_DLLIST(element)                               \
+do {                                                                    \
+  CONNECT_TO_GLOBAL_DLLIST_INIT(element);                               \
   if (!m_pListHead) {                                                   \
     m_pListHead = (element);                                            \
   }                                                                     \
   if (m_pos == 0) {                                                     \
     m_pos = (ssize_t)(element);                                         \
   }                                                                     \
-} while (false)
-
-#define CONNECT_TO_GLOBAL_DLLIST(element)                               \
-do {                                                                    \
-  CONNECT_TO_GLOBAL_DLLIST_INIT(element);                               \
   /* If there could be any strong iterators that are past the end, */   \
   /* we need to a pass and update these iterators to point to the */    \
   /* newly added element. */                                            \
@@ -116,7 +116,8 @@ ZendArray::ZendArray(uint nSize /* = 0 */) :
 
 ZendArray::ZendArray(uint nSize, int64 n, Bucket *bkts[]) :
   m_nNumOfElements(nSize), m_nNextFreeElement(n),
-  m_pListHead(NULL), m_pListTail(NULL), m_flag(0) {
+  m_pListHead(bkts[0]), m_pListTail(NULL), m_flag(0) {
+  m_pos = (ssize_t)(m_pListHead);
 
   if (nSize >= 0x80000000) {
     m_nTableSize = 0x80000000; // prevent overflow

@@ -1003,10 +1003,12 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
       if (Option::GenArrayCreate &&
           cg.getOutput() != CodeGenerator::SystemCPP) {
         if (!params->hasNonArrayCreateValue(false, i)) {
-          ar->m_arrayIntegerKeySizes.insert(paramCount - i);
+          if (ar->m_arrayIntegerKeyMaxSize < paramCount - i) {
+            ar->m_arrayIntegerKeyMaxSize  = paramCount - i;
+          }
           cg_printf("Array(");
-          params->outputCPPUniqLitKeyArrayInit(cg, ar, paramCount - i,
-                                               false, i);
+          params->outputCPPUniqLitKeyArrayInit(cg, ar, false,
+                                               paramCount - i, false, i);
           cg_printf(")");
           return;
         }

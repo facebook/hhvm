@@ -604,18 +604,19 @@ bool MethodStatement::hasRefParam() {
 void MethodStatement::outputParamArrayCreate(CodeGenerator &cg, bool checkRef) {
   int n = m_params->getCount();
   ASSERT(n > 0);
-  cg_printf("array_create%d(%d, ", n, n);
+  cg_printf("array_createvi(%d, ", n);
   for (int i = 0; i < n; i++) {
     ParameterExpressionPtr param =
       dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
     const string &paramName = param->getName();
-    cg_printf("%d, ", i);
+    cg_printf("toVPOD(");
     if (checkRef && param->isRef()) {
       ASSERT(false);
       cg_printf("ref(%s%s)", Option::VariablePrefix, paramName.c_str());
     } else {
       cg_printf("%s%s", Option::VariablePrefix, paramName.c_str());
     }
+    cg_printf(")");
     if (i < n - 1) {
       cg_printf(", ");
     } else {
@@ -632,9 +633,10 @@ void MethodStatement::outputCPPArgInjections(CodeGenerator &cg,
   if (cg.getOutput() != CodeGenerator::SystemCPP) {
     if (m_params) {
       int n = m_params->getCount();
+      ASSERT(n >= 0);
       cg_printf("INTERCEPT_INJECTION(\"%s\", ", name);
       if (Option::GenArrayCreate && !hasRefParam()) {
-        ar->m_arrayIntegerKeySizes.insert(n);
+        if (ar->m_arrayIntegerKeyMaxSize < n) ar->m_arrayIntegerKeyMaxSize = n;
         outputParamArrayCreate(cg, true);
         cg_printf(", %s);\n", funcScope->isRefReturn() ? "ref(r)" : "r");
       } else {

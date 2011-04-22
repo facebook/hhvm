@@ -89,6 +89,7 @@ public:
                               unsigned int start = 0) const;
   void outputCPPUniqLitKeyArrayInit(CodeGenerator &cg,
                                     AnalysisResultPtr ar,
+                                    bool litstrKeys,
                                     int64 max,
                                     bool arrayElements = true,
                                     unsigned int start = 0);
@@ -102,7 +103,6 @@ public:
 private:
   void optimize(AnalysisResultConstPtr ar);
   unsigned int checkLitstrKeys() const;
-  unsigned int checkIntegerKeys(int64 &max) const;
   bool outputCPPArrayCreate(CodeGenerator &cg, AnalysisResultPtr ar,
                             bool isVector, bool pre);
   bool outputCPPInternal(CodeGenerator &cg,

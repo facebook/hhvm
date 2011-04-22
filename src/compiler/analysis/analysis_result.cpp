@@ -60,6 +60,7 @@ using namespace boost;
 
 AnalysisResult::AnalysisResult()
   : BlockScope("Root", "", StatementPtr(), BlockScope::ProgramScope),
+    m_arrayLitstrKeyMaxSize(0), m_arrayIntegerKeyMaxSize(0),
     m_package(NULL), m_parseOnDemand(false), m_phase(ParseAllFiles),
     m_dynamicClass(false), m_dynamicFunction(false),
     m_scalarArraysCounter(0), m_paramRTTICounter(0),
@@ -2339,101 +2340,61 @@ void AnalysisResult::outputConcatImpl(CodeGenerator &cg) {
   }
 }
 
-void AnalysisResult::outputArrayCreateNumDecl(CodeGenerator &cg, int num,
-                                              const char *type) {
-  cg_printf("ArrayData *array_create%d(unsigned long n, ", num);
-  for (int i = 1; i <= num; i++) {
-    cg_printf("%s k%d, CVarRef v%d", type, i, i);
-    if (i < num) {
-      cg_printf(", ");
-    } else {
-      cg_printf(")");
-    }
-  }
-}
-
 void AnalysisResult::outputArrayCreateDecl(CodeGenerator &cg) {
-  for (set<int>::const_iterator iter = m_arrayLitstrKeySizes.begin();
-       iter != m_arrayLitstrKeySizes.end(); ++iter) {
-    int num = *iter;
-    ASSERT(num > 0);
-    outputArrayCreateNumDecl(cg, num, "CStrRef");
-    cg_printf(";\n");
+  if (m_arrayLitstrKeyMaxSize > 0) {
+    cg_printf("ArrayData *array_createvs(int64 n, ...);\n");
   }
-  for (set<int>::const_iterator iter = m_arrayIntegerKeySizes.begin();
-       iter != m_arrayIntegerKeySizes.end(); ++iter) {
-    int num = *iter;
-    ASSERT(num > 0);
-    outputArrayCreateNumDecl(cg, num, "int64");
-    cg_printf(";\n");
+  if (m_arrayIntegerKeyMaxSize > 0) {
+    cg_printf("ArrayData *array_createvi(int64 n, ...);\n");
   }
 }
 
 void AnalysisResult::outputArrayCreateImpl(CodeGenerator &cg) {
-  for (set<int>::const_iterator iter = m_arrayLitstrKeySizes.begin();
-       iter != m_arrayLitstrKeySizes.end(); ++iter) {
-    int num = *iter;
-    ASSERT(num > 0);
-    outputArrayCreateNumDecl(cg, num, "CStrRef");
-    cg_indentBegin(" {\n");
-    if (num <= SmallArray::SARR_SIZE) {
-      cg_indentBegin("if (RuntimeOption::UseSmallArray) {\n");
-      cg_indentBegin("StringData *keys[] = {\n");
-      for (int i = 1; i <= num; i++) {
-        cg_printf("k%d.get(), ", i);
-      }
-      cg_indentEnd("NULL,\n");
-      cg_printf("};\n");
-      cg_indentBegin("const Variant *values[] = {\n");
-      for (int i = 1; i <= num; i++) {
-        cg_printf("&v%d, ", i);
-      }
-      cg_indentEnd("NULL,\n");
-      cg_printf("};\n");
-      cg_printf("return NEW(SmallArray)(%d, n, keys, values);\n", num);
-      cg_indentEnd("}\n");
-    }
-    cg_indentBegin("ZendArray::Bucket *p[] = {\n");
-    for (int i = 1; i <= num; i++) {
-      cg_printf("NEW(ZendArray::Bucket)(k%d.get(), v%d), ",
-                i, i);
-    }
-    cg_indentEnd("NULL,\n");
-    cg_printf("};\n");
-    cg_printf("return NEW(ZendArray)(%d, n, p);\n", num);
-    cg_indentEnd("}\n");
+  ASSERT(cg.getCurrentIndentation() == 0);
+  const char text1[] =
+    "ArrayData *array_createvs(int64 n, ...) {\n"
+    "  va_list ap;\n"
+    "  va_start(ap, n);\n"
+    "  ZendArray::Bucket *p[%d], **pp = p;\n"
+    "  SmartAllocator<HPHP::ZendArray::Bucket, SmartAllocatorImpl::Bucket,\n"
+    "    SmartAllocatorImpl::NoCallbacks> *a =\n"
+    "      ZendArray::Bucket::AllocatorType::getNoCheck();\n"
+    "  for (int64 k = 0; k < n; k++) {\n"
+    "    const Variant *v = va_arg(ap, const Variant *);\n"
+    "    const String *k = va_arg(ap, const String *);\n"
+    "    *pp++ = new (a) ZendArray::Bucket(k->get(), *v);\n"
+    "  }\n"
+    "  *pp = NULL;\n"
+    "  va_end(ap);\n"
+    "  return NEW(ZendArray)(n, 0, p);\n"
+    "}\n";
+  const char text2[] =
+    "ArrayData *array_createvi(int64 n, ...) {\n"
+    "  va_list ap;\n"
+    "  va_start(ap, n);\n"
+    "  ZendArray::Bucket *p[%d], **pp = p;\n"
+    "  SmartAllocator<HPHP::ZendArray::Bucket, SmartAllocatorImpl::Bucket,\n"
+    "    SmartAllocatorImpl::NoCallbacks> *a =\n"
+    "      ZendArray::Bucket::AllocatorType::getNoCheck();\n"
+    "  for (int64 k = 0; k < n; k++) {\n"
+    "    const Variant *v = va_arg(ap, const Variant *);\n"
+    "    *pp++ = new (a) ZendArray::Bucket(k, *v);\n"
+    "  }\n"
+    "  *pp = NULL;\n"
+    "  va_end(ap);\n"
+    "  return NEW(ZendArray)(n, n, p);\n"
+    "}\n";
+  if (m_arrayLitstrKeyMaxSize > 0) {
+    cg_printf(text1,
+              m_arrayLitstrKeyMaxSize + 1,
+              m_arrayLitstrKeyMaxSize,
+              m_arrayLitstrKeyMaxSize + 1);
   }
-  for (set<int>::const_iterator iter = m_arrayIntegerKeySizes.begin();
-       iter != m_arrayIntegerKeySizes.end(); ++iter) {
-    int num = *iter;
-    ASSERT(num > 0);
-    outputArrayCreateNumDecl(cg, num, "int64");
-    cg_indentBegin(" {\n");
-    if (num <= SmallArray::SARR_SIZE) {
-      cg_indentBegin("if (RuntimeOption::UseSmallArray) {\n");
-      cg_indentBegin("int64 keys[] = {\n");
-      for (int i = 1; i <= num; i++) {
-        cg_printf("k%d, ", i);
-      }
-      cg_printf("};\n");
-      cg_indentBegin("const Variant *values[] = {\n");
-      for (int i = 1; i <= num; i++) {
-        cg_printf("&v%d, ", i);
-      }
-      cg_indentEnd("NULL,\n");
-      cg_printf("};\n");
-      cg_printf("return NEW(SmallArray)(%d, n, keys, values);\n", num);
-      cg_indentEnd("}\n");
-    }
-    cg_indentBegin("ZendArray::Bucket *p[] = {\n");
-    for (int i = 1; i <= num; i++) {
-      cg_printf("NEW(ZendArray::Bucket)(k%d, v%d), ",
-                i, i);
-    }
-    cg_indentEnd("NULL,\n");
-    cg_printf("};\n");
-    cg_printf("return NEW(ZendArray)(%d, n, p);\n", num);
-    cg_indentEnd("}\n");
+  if (m_arrayIntegerKeyMaxSize > 0) {
+    cg_printf(text2,
+              m_arrayIntegerKeyMaxSize + 1,
+              m_arrayIntegerKeyMaxSize,
+              m_arrayIntegerKeyMaxSize + 1);
   }
 }
 

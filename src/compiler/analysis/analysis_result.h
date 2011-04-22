@@ -348,8 +348,8 @@ public:
 
   std::set<std::string> m_variableTableFunctions;
   std::set<int> m_concatLengths;
-  std::set<int> m_arrayLitstrKeySizes;
-  std::set<int> m_arrayIntegerKeySizes;
+  int m_arrayLitstrKeyMaxSize;
+  int m_arrayIntegerKeyMaxSize;
 
   void setSystem() { m_system = true; }
   bool isSystem() const { return m_system; }
@@ -572,7 +572,6 @@ private:
   void outputConcatNumDecl(CodeGenerator &cg, int num);
   void outputConcatDecl(CodeGenerator &cg);
   void outputConcatImpl(CodeGenerator &cg);
-  void outputArrayCreateNumDecl(CodeGenerator &cg, int num, const char *type);
   void outputArrayCreateDecl(CodeGenerator &cg);
   void outputArrayCreateImpl(CodeGenerator &cg);
   void outputCPPHashTableInvokeFile(CodeGenerator &cg,

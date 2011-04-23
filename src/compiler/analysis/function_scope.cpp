@@ -737,7 +737,7 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printString(specType->getName(), ar, shared_from_this());
       cg_indentBegin(")) {\n");
       cg_printf("throw_unexpected_argument_type(%d,\"%s\",\"%s\",%s%s);\n",
-                i + 1, funcName.c_str(), specType->getName().c_str(),
+                i + 1, funcName.c_str(), cg.escapeLabel(specType->getName()).c_str(),
                 Option::VariablePrefix, param->getName().c_str());
       if (Option::HardTypeHints) {
         cg_printf("return%s;\n", getReturnType() ? " null" : "");
@@ -1635,7 +1635,7 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
       m_paramTypeSpecs[i]->getPHPName() : "";
     cg_printf("(const char *)0x%04X, \"%s\", \"%s\", ",
               attr, m_paramNames[i].c_str(),
-              Util::toLower(tname).c_str());
+              Util::toLower(cg.escapeLabel(tname)).c_str());
 
     if (i >= m_minParam) {
       MethodStatementPtr m =

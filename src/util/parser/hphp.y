@@ -839,7 +839,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 }
 %}
 
-%expect 14
+%expect 16
 %define api.pure
 %parse-param {HPHP::HPHP_PARSER_NS::Parser *_p}
 
@@ -1309,9 +1309,8 @@ non_empty_parameter_list:
     '=' static_scalar                  { _p->onParam($$,&$1,$3,$4,0,&$6);}
 ;
 non_empty_type_decl:
-    T_STRING                           { $$ = $1;}
+    fully_qualified_class_name         { $$ = $1;}
   | T_ARRAY                            { $$.setText("array");}
-  | T_XHP_LABEL                        { $1.xhpLabel(); $$ = $1;}
 ;
 type_decl:
     non_empty_type_decl                { $$ = $1;}

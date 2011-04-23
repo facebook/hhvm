@@ -3855,7 +3855,7 @@ void AnalysisResult::outputCPPFiberGlobalState() {
   for (int i = 0; i < GlobalSymbolTypeCount; i++) {
     StringPairVec &names = symbols[i];
     for (unsigned int j = 0; j < names.size(); j++) {
-      cg_printf("\"%s\",\n", names[j].first.c_str());
+      cg_printf("\"%s\",\n", cg.escapeLabel(names[j].first).c_str());
       index++;
     }
   }

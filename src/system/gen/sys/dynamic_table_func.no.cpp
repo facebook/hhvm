@@ -28692,10 +28692,11 @@ Variant ifa_hphp_get_status(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 }
 Variant i_xhprof_enable(void *extra, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 2) return throw_wrong_arguments("xhprof_enable", count, 1, 2, 1);
+  if (count > 2) return throw_toomany_arguments("xhprof_enable", 2, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) return (x_xhprof_enable(), null);
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (x_xhprof_enable(arg0), null);
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
@@ -28703,7 +28704,8 @@ Variant i_xhprof_enable(void *extra, CArrRef params) {
   }
 }
 Variant ifa_xhprof_enable(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count < 1 || count > 2) return throw_wrong_arguments("xhprof_enable", count, 1, 2, 1);
+  if (count > 2) return throw_toomany_arguments("xhprof_enable", 2, 1);
+  if (count <= 0) return (x_xhprof_enable(), null);
   CVarRef arg0((a0));
   if (count <= 1) return (x_xhprof_enable(arg0), null);
   CVarRef arg1((a1));

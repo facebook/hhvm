@@ -109,7 +109,7 @@ inline Variant x_fb_get_code_coverage(bool flush) {
   return f_fb_get_code_coverage(flush);
 }
 
-inline void x_xhprof_enable(int flags, CArrRef args = null_array) {
+inline void x_xhprof_enable(int flags = 0, CArrRef args = null_array) {
   FUNCTION_INJECTION_BUILTIN(xhprof_enable);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_xhprof_enable(flags, args);

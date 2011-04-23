@@ -468,6 +468,7 @@ DefineFunction(
       array(
         'name'   => "flags",
         'type'   => Int32,
+        'value'  => "0",
         'desc'   => "One of those XHPROF_FLAGS_ constant to specify what to profile.",
       ),
       array(

@@ -106,8 +106,24 @@ void ConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
       !(m_context & LValue)) {
     if (!m_dynamic) {
       ConstantTablePtr constants = ar->getConstants();
+
+      bool namespaced = (m_name[0] == '\\');
+      if (namespaced) {
+         m_name = m_name.substr(1);
+      }
+
       if (!constants->getValue(m_name)) {
         BlockScopePtr block = ar->findConstantDeclarer(m_name);
+
+
+        if (!block && namespaced) {
+           int pos = m_name.rfind('\\');
+           m_name = m_name.substr(pos + 1);
+
+           if (constants->getValue(m_name)) return;
+           block = ar->findConstantDeclarer(m_name);
+        }
+
         if (block) {
           Symbol *sym = block->getConstants()->getSymbol(m_name);
           assert(sym);

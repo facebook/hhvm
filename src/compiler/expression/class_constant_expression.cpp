@@ -268,7 +268,7 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
     }
     cg_printf("%s->%s%s->os_constant(\"%s\")", cg.getGlobals(ar),
               Option::ClassStaticsObjectPrefix,
-              m_className.c_str(), m_varName.c_str());
+              cg.escapeLabel(m_className).c_str(), m_varName.c_str());
     if (outsideClass) {
       ClassScope::OutputVolatileCheckEnd(cg);
     }
@@ -277,6 +277,6 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
               m_defScope->getId(cg).c_str(), m_varName.c_str());
   } else {
     cg_printf("throw_fatal(\"unknown class constant %s::%s\")",
-              m_className.c_str(), m_varName.c_str());
+              cg.escapeLabel(m_className).c_str(), m_varName.c_str());
   }
 }

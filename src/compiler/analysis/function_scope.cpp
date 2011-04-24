@@ -1105,7 +1105,7 @@ int FunctionScope::outputCPPInvokeArgCountCheck(
         if (m_paramDefaults[i].empty()) {
           if (i < maxCount) cg_printf("if (count < %d) ", i + 1);
           cg_printf("%sthrow_missing_typed_argument(\"%s\", ",
-                    fullGuard ? "return " : "", fullname.c_str());
+                    fullGuard ? "return " : "", cg.escapeLabel(fullname).c_str());
           cg_printf(t->is(Type::KindOfArray) ?
                     "0" : "\"%s\"", cg.escapeLabel(t->getName()).c_str());
           cg_printf(", %d);\n", i + 1);
@@ -1125,7 +1125,7 @@ int FunctionScope::outputCPPInvokeArgCountCheck(
     if (!variable && m_minParam == m_maxParam) {
       if (maxCount >= m_minParam) cg_printf("if (count != %d)", m_minParam);
       cg_printf(" %sthrow_wrong_arguments(\"%s\", count, %d, %d%s);\n",
-                sysret, fullname.c_str(), m_minParam, m_maxParam, level);
+                sysret, cg.escapeLabel(fullname).c_str(), m_minParam, m_maxParam, level);
     } else {
       if (maxCount >= m_minParam) {
         if (maxCount <= m_maxParam) {
@@ -1135,17 +1135,17 @@ int FunctionScope::outputCPPInvokeArgCountCheck(
         }
       }
       cg_printf(" %sthrow_wrong_arguments(\"%s\", count, %d, %d%s);\n",
-                sysret, fullname.c_str(),
+                sysret, cg.escapeLabel(fullname).c_str(),
                 m_minParam, variable ? -1 : m_maxParam, level);
     }
   } else if (checkMissing) {
     if (maxCount >= m_minParam) cg_printf("if (count < %d)", m_minParam);
     cg_printf(" %sthrow_missing_arguments(\"%s\", count+1%s);\n",
-              sysret, fullname.c_str(), level);
+              sysret, cg.escapeLabel(fullname).c_str(), level);
   } else if (checkTooMany && maxCount > m_maxParam) {
     cg_printf("if (count > %d)"
               " %sthrow_toomany_arguments(\"%s\", %d%s);\n",
-              m_maxParam, sysret, fullname.c_str(), m_maxParam, level);
+              m_maxParam, sysret, cg.escapeLabel(fullname).c_str(), m_maxParam, level);
   }
   return guarded;
 }

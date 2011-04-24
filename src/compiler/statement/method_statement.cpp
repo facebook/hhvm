@@ -524,17 +524,17 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
               (cg.getOutput() == CodeGenerator::SystemCPP ? "_BUILTIN" : "");
             if (m_modifiers->isStatic()) {
               cg_printf("STATIC_METHOD_INJECTION%s(%s, %s);\n", sys,
-                        scope->getOriginalName().c_str(),
-                        origFuncName.c_str());
+                        cg.escapeLabel(scope->getOriginalName()).c_str(),
+                        cg.escapeLabel(origFuncName).c_str());
             } else if (cg.getOutput() != CodeGenerator::SystemCPP &&
                        !scope->isRedeclaring() && !scope->derivedByDynamic()) {
               cg_printf("INSTANCE_METHOD_INJECTION_ROOTLESS(%s, %s);\n",
-                        scope->getOriginalName().c_str(),
-                        origFuncName.c_str());
+                        cg.escapeLabel(scope->getOriginalName()).c_str(),
+                        cg.escapeLabel(origFuncName).c_str());
             } else if (scope->getOriginalName() != "XhprofFrame") {
               cg_printf("INSTANCE_METHOD_INJECTION%s(%s, %s);\n", sys,
-                        scope->getOriginalName().c_str(),
-                        origFuncName.c_str());
+                        cg.escapeLabel(scope->getOriginalName()).c_str(),
+                        cg.escapeLabel(origFuncName).c_str());
             }
           }
           outputCPPArgInjections(cg, ar, origFuncName.c_str(),

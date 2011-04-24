@@ -1097,9 +1097,8 @@ namespace hphp_impl_splitter {}
 bool c_ArrayIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::valid);
   {
-    const Variant &tmp0((x_key(ref(m_arr))));
-    bool tmp1((x_is_null(tmp0)));
-    return !(tmp1);
+    const Variant &tmp0((x_current(m_arr)));
+    return !same(tmp0, false);
   }
 }
 namespace hphp_impl_splitter {}

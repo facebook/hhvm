@@ -459,7 +459,7 @@ void c_SplObjectStorage::init() {
 /* SRC: classes/splobjectstorage.php line 24 */
 void c_SplObjectStorage::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::rewind);
-  x_rewind(toObject(m_storage));
+  x_reset(ref(m_storage));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splobjectstorage.php line 37 */

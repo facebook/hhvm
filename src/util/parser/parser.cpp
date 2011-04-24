@@ -238,6 +238,10 @@ std::string ParserBase::nsDecl(const std::string &name) {
 }
 
 std::string ParserBase::resolve(const std::string &ns, bool cls) {
+  if (ns == "self" || ns == "parent") {
+    return ns;
+  }
+
   // try import rules first
   string alias = ns;
   size_t pos = ns.find(NAMESPACE_SEP);

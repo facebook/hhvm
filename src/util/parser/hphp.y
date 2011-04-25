@@ -994,7 +994,7 @@ use_declaration:
   | T_NS_SEPARATOR namespace_name      { _p->onUse($1.text(),"");}
   | namespace_name T_AS T_STRING       { _p->onUse($1.text(),$3.text());}
   | T_NS_SEPARATOR namespace_name
-    T_AS T_STRING                      { _p->onUse($1.text(),$3.text());}
+    T_AS T_STRING                      { _p->onUse($2.text(),$4.text());}
 ;
 namespace_name:
     T_STRING                           { $$ = $1;}

@@ -4980,7 +4980,7 @@ yyreduce:
 
 /* Line 1464 of yacc.c  */
 #line 994 "../../../../src/util/parser/hphp.y"
-    { _p->onUse((yyvsp[(1) - (2)]).text(),"");;}
+    { _p->onUse((yyvsp[(2) - (2)]).text(),"");;}
     break;
 
   case 20:

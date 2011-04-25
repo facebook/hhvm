@@ -19,6 +19,8 @@
 #include <php/classes/splobjectstorage.fws.h>
 
 // Dependencies
+#include <php/classes/arrayaccess.h>
+#include <php/classes/exception.h>
 #include <php/classes/iterator.h>
 #include <runtime/ext/ext.h>
 #include <runtime/eval/eval.h>
@@ -35,14 +37,18 @@ extern CallInfo ci_;
 Variant c_SplObjectStorage::os_getInit(CStrRef s) {
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = s->hash();
-  switch (hash & 3) {
+  switch (hash & 7) {
     case 2:
-      HASH_RETURN_NAMSTR(0x4B27521443880CAELL, NAMSTR(s_sys_ssc0ff3081, "index"),
-                         0LL, 5);
+      HASH_RETURN_NAMSTR(0x5898FBEF0B1B6ECALL, NAMSTR(s_sys_ssf657a18f, "dataStorage"),
+                         s_sys_sa00000000, 11);
       break;
     case 3:
-      HASH_RETURN_NAMSTR(0x17AC96477E2B6DC3LL, NAMSTR(s_sys_ss64fc2cb1, "storage"),
-                         s_sys_sa00000000, 7);
+      HASH_RETURN_NAMSTR(0x51F3B33193D1C223LL, NAMSTR(s_sys_ssacd5c2f9, "objectStorage"),
+                         s_sys_sa00000000, 13);
+      break;
+    case 6:
+      HASH_RETURN_NAMSTR(0x4B27521443880CAELL, NAMSTR(s_sys_ssc0ff3081, "index"),
+                         0LL, 5);
       break;
     default:
       break;
@@ -62,14 +68,16 @@ Variant &c_SplObjectStorage::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplObjectStorage
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SplObjectStorage
 void c_SplObjectStorage::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_storage)) props.lvalAt(NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage"), AccessFlags::Key).setWithRef(m_storage);
+  if (!pubOnly) if (isInitialized(m_objectStorage)) props.lvalAt(NAMSTR(s_sys_ss49092738, "\000SplObjectStorage\000objectStorage"), AccessFlags::Key).setWithRef(m_objectStorage);
+  if (!pubOnly) if (isInitialized(m_dataStorage)) props.lvalAt(NAMSTR(s_sys_ss498fcdae, "\000SplObjectStorage\000dataStorage"), AccessFlags::Key).setWithRef(m_dataStorage);
   if (!pubOnly) props.add(NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index"), m_index, true);
   c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SplObjectStorage
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SplObjectStorage
 void c_SplObjectStorage::o_setArray(CArrRef props) {
-  props->load(NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage"), m_storage);
+  props->load(NAMSTR(s_sys_ss49092738, "\000SplObjectStorage\000objectStorage"), m_objectStorage);
+  props->load(NAMSTR(s_sys_ss498fcdae, "\000SplObjectStorage\000dataStorage"), m_dataStorage);
   if (props->exists(NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index"))) m_index = props->get(NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index"));
   c_ObjectData::o_setArray(props);
 }
@@ -97,12 +105,15 @@ Variant * c_SplObjectStorage::o_realPropPublic(CStrRef s, int flags) const {
 Variant * c_SplObjectStorage::o_realPropPrivate(CStrRef s, int flags) const {
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = s->hash();
-  switch (hash & 3) {
+  switch (hash & 7) {
     case 2:
-      HASH_REALPROP_TYPED_STRING(0x4B27521443880CAELL, "index", 5, index);
+      HASH_REALPROP_STRING(0x5898FBEF0B1B6ECALL, "dataStorage", 11, dataStorage);
       break;
     case 3:
-      HASH_REALPROP_STRING(0x17AC96477E2B6DC3LL, "storage", 7, storage);
+      HASH_REALPROP_STRING(0x51F3B33193D1C223LL, "objectStorage", 13, objectStorage);
+      break;
+    case 6:
+      HASH_REALPROP_TYPED_STRING(0x4B27521443880CAELL, "index", 5, index);
       break;
     default:
       break;
@@ -118,15 +129,18 @@ Variant c_SplObjectStorage::os_constant(const char *s) {
 IMPLEMENT_CLASS(SplObjectStorage)
 bool c_SplObjectStorage::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
-  switch (hash & 7) {
+  switch (hash & 15) {
     case 1:
       HASH_INSTANCEOF(0x795F86375EE263D1LL, NAMSTR(s_sys_ss5b753b53, "Countable"));
       HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss22bfe43e, "Traversable"));
       break;
-    case 6:
+    case 11:
+      HASH_INSTANCEOF(0x3BDD11EABFCD6F0BLL, NAMSTR(s_sys_ss92306c9b, "ArrayAccess"));
+      break;
+    case 14:
       HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ssc64ebfff, "Iterator"));
       break;
-    case 7:
+    case 15:
       HASH_INSTANCEOF(0x5BA243B9FBA7A64FLL, NAMSTR(s_sys_ss0ec14ee2, "SplObjectStorage"));
       break;
     default:
@@ -142,17 +156,27 @@ ObjectData *c_SplObjectStorage::cloneImpl() {
 void c_SplObjectStorage::cloneSet(ObjectData *cl) {
   c_SplObjectStorage *clone = static_cast<c_SplObjectStorage*>(cl);
   ObjectData::cloneSet(clone);
-  clone->m_storage.setWithRef(m_storage);
+  clone->m_objectStorage.setWithRef(m_objectStorage);
+  clone->m_dataStorage.setWithRef(m_dataStorage);
   clone->m_index = m_index;
 }
 CallInfo c_SplObjectStorage::ci_next((void*)&c_SplObjectStorage::i_next, (void*)&c_SplObjectStorage::ifa_next, 0, 4, 0x0000000000000000LL);
 CallInfo c_SplObjectStorage::ci_detach((void*)&c_SplObjectStorage::i_detach, (void*)&c_SplObjectStorage::ifa_detach, 1, 4, 0x0000000000000000LL);
-CallInfo c_SplObjectStorage::ci_attach((void*)&c_SplObjectStorage::i_attach, (void*)&c_SplObjectStorage::ifa_attach, 1, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_attach((void*)&c_SplObjectStorage::i_attach, (void*)&c_SplObjectStorage::ifa_attach, 2, 4, 0x0000000000000000LL);
 CallInfo c_SplObjectStorage::ci_count((void*)&c_SplObjectStorage::i_count, (void*)&c_SplObjectStorage::ifa_count, 0, 4, 0x0000000000000000LL);
 CallInfo c_SplObjectStorage::ci_key((void*)&c_SplObjectStorage::i_key, (void*)&c_SplObjectStorage::ifa_key, 0, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_addall((void*)&c_SplObjectStorage::i_addall, (void*)&c_SplObjectStorage::ifa_addall, 1, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_removeall((void*)&c_SplObjectStorage::i_removeall, (void*)&c_SplObjectStorage::ifa_removeall, 1, 4, 0x0000000000000000LL);
 CallInfo c_SplObjectStorage::ci_valid((void*)&c_SplObjectStorage::i_valid, (void*)&c_SplObjectStorage::ifa_valid, 0, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_getinfo((void*)&c_SplObjectStorage::i_getinfo, (void*)&c_SplObjectStorage::ifa_getinfo, 0, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_offsetexists((void*)&c_SplObjectStorage::i_offsetexists, (void*)&c_SplObjectStorage::ifa_offsetexists, 1, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_offsetget((void*)&c_SplObjectStorage::i_offsetget, (void*)&c_SplObjectStorage::ifa_offsetget, 1, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_removeallexcept((void*)&c_SplObjectStorage::i_removeallexcept, (void*)&c_SplObjectStorage::ifa_removeallexcept, 1, 4, 0x0000000000000000LL);
 CallInfo c_SplObjectStorage::ci_contains((void*)&c_SplObjectStorage::i_contains, (void*)&c_SplObjectStorage::ifa_contains, 1, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_offsetunset((void*)&c_SplObjectStorage::i_offsetunset, (void*)&c_SplObjectStorage::ifa_offsetunset, 1, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_setinfo((void*)&c_SplObjectStorage::i_setinfo, (void*)&c_SplObjectStorage::ifa_setinfo, 1, 4, 0x0000000000000000LL);
 CallInfo c_SplObjectStorage::ci_current((void*)&c_SplObjectStorage::i_current, (void*)&c_SplObjectStorage::ifa_current, 0, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_offsetset((void*)&c_SplObjectStorage::i_offsetset, (void*)&c_SplObjectStorage::ifa_offsetset, 2, 4, 0x0000000000000000LL);
 CallInfo c_SplObjectStorage::ci_rewind((void*)&c_SplObjectStorage::i_rewind, (void*)&c_SplObjectStorage::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_SplObjectStorage::i_next(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
@@ -192,12 +216,14 @@ Variant c_SplObjectStorage::i_attach(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 1, 1);
+  if (count < 1 || count > 2) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 2, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    return (self->t_attach(arg0), null);
+    if (count <= 1) return (self->t_attach(arg0), null);
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_attach(arg0, arg1), null);
   }
 }
 Variant c_SplObjectStorage::i_count(MethodCallPackage &mcp, CArrRef params) {
@@ -224,6 +250,42 @@ Variant c_SplObjectStorage::i_key(MethodCallPackage &mcp, CArrRef params) {
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::key", 0, 1);
   return (self->t_key());
 }
+Variant c_SplObjectStorage::i_addall(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1) return throw_missing_typed_argument("SplObjectStorage::addAll", "splobjectstorage", 1);
+  if (count > 1) return throw_toomany_arguments("SplObjectStorage::addAll", 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_addall(arg0), null);
+  }
+}
+Variant c_SplObjectStorage::i_removeall(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1) return throw_missing_typed_argument("SplObjectStorage::removeAll", "splobjectstorage", 1);
+  if (count > 1) return throw_toomany_arguments("SplObjectStorage::removeAll", 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_removeall(arg0), null);
+  }
+}
 Variant c_SplObjectStorage::i_valid(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_SplObjectStorage *self = NULL;
@@ -235,6 +297,70 @@ Variant c_SplObjectStorage::i_valid(MethodCallPackage &mcp, CArrRef params) {
   }
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::valid", 0, 1);
   return (self->t_valid());
+}
+Variant c_SplObjectStorage::i_getinfo(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("SplObjectStorage::getInfo", 0, 1);
+  return (self->t_getinfo());
+}
+Variant c_SplObjectStorage::i_offsetexists(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("SplObjectStorage::offsetExists", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_offsetexists(arg0));
+  }
+}
+Variant c_SplObjectStorage::i_offsetget(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("SplObjectStorage::offsetGet", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_offsetget(arg0));
+  }
+}
+Variant c_SplObjectStorage::i_removeallexcept(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1) return throw_missing_typed_argument("SplObjectStorage::removeAllExcept", "splobjectstorage", 1);
+  if (count > 1) return throw_toomany_arguments("SplObjectStorage::removeAllExcept", 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_removeallexcept(arg0), null);
+  }
 }
 Variant c_SplObjectStorage::i_contains(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
@@ -253,6 +379,40 @@ Variant c_SplObjectStorage::i_contains(MethodCallPackage &mcp, CArrRef params) {
     return (self->t_contains(arg0));
   }
 }
+Variant c_SplObjectStorage::i_offsetunset(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("SplObjectStorage::offsetUnset", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_offsetunset(arg0));
+  }
+}
+Variant c_SplObjectStorage::i_setinfo(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("SplObjectStorage::setInfo", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_setinfo(arg0), null);
+  }
+}
 Variant c_SplObjectStorage::i_current(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_SplObjectStorage *self = NULL;
@@ -264,6 +424,25 @@ Variant c_SplObjectStorage::i_current(MethodCallPackage &mcp, CArrRef params) {
   }
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::current", 0, 1);
   return (self->t_current());
+}
+Variant c_SplObjectStorage::i_offsetset(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 2) return throw_wrong_arguments("SplObjectStorage::offsetSet", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (self->t_offsetset(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_offsetset(arg0, arg1));
+  }
 }
 Variant c_SplObjectStorage::i_rewind(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
@@ -308,9 +487,11 @@ Variant c_SplObjectStorage::ifa_attach(MethodCallPackage &mcp, int count, INVOKE
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 1, 1);
+  if (count < 1 || count > 2) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 2, 1);
   CVarRef arg0((a0));
-  return (self->t_attach(arg0), null);
+  if (count <= 1) return (self->t_attach(arg0), null);
+  CVarRef arg1((a1));
+  return (self->t_attach(arg0, arg1), null);
 }
 Variant c_SplObjectStorage::ifa_count(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_SplObjectStorage *self = NULL;
@@ -334,6 +515,32 @@ Variant c_SplObjectStorage::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FE
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::key", 0, 1);
   return (self->t_key());
 }
+Variant c_SplObjectStorage::ifa_addall(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1) return throw_missing_typed_argument("SplObjectStorage::addAll", "splobjectstorage", 1);
+  if (count > 1) return throw_toomany_arguments("SplObjectStorage::addAll", 1, 1);
+  CVarRef arg0((a0));
+  return (self->t_addall(arg0), null);
+}
+Variant c_SplObjectStorage::ifa_removeall(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1) return throw_missing_typed_argument("SplObjectStorage::removeAll", "splobjectstorage", 1);
+  if (count > 1) return throw_toomany_arguments("SplObjectStorage::removeAll", 1, 1);
+  CVarRef arg0((a0));
+  return (self->t_removeall(arg0), null);
+}
 Variant c_SplObjectStorage::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_SplObjectStorage *self = NULL;
   p_SplObjectStorage pobj;
@@ -344,6 +551,54 @@ Variant c_SplObjectStorage::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_
   }
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::valid", 0, 1);
   return (self->t_valid());
+}
+Variant c_SplObjectStorage::ifa_getinfo(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("SplObjectStorage::getInfo", 0, 1);
+  return (self->t_getinfo());
+}
+Variant c_SplObjectStorage::ifa_offsetexists(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("SplObjectStorage::offsetExists", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (self->t_offsetexists(arg0));
+}
+Variant c_SplObjectStorage::ifa_offsetget(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("SplObjectStorage::offsetGet", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (self->t_offsetget(arg0));
+}
+Variant c_SplObjectStorage::ifa_removeallexcept(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1) return throw_missing_typed_argument("SplObjectStorage::removeAllExcept", "splobjectstorage", 1);
+  if (count > 1) return throw_toomany_arguments("SplObjectStorage::removeAllExcept", 1, 1);
+  CVarRef arg0((a0));
+  return (self->t_removeallexcept(arg0), null);
 }
 Variant c_SplObjectStorage::ifa_contains(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_SplObjectStorage *self = NULL;
@@ -357,6 +612,30 @@ Variant c_SplObjectStorage::ifa_contains(MethodCallPackage &mcp, int count, INVO
   CVarRef arg0((a0));
   return (self->t_contains(arg0));
 }
+Variant c_SplObjectStorage::ifa_offsetunset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("SplObjectStorage::offsetUnset", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (self->t_offsetunset(arg0));
+}
+Variant c_SplObjectStorage::ifa_setinfo(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("SplObjectStorage::setInfo", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (self->t_setinfo(arg0), null);
+}
 Variant c_SplObjectStorage::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_SplObjectStorage *self = NULL;
   p_SplObjectStorage pobj;
@@ -367,6 +646,20 @@ Variant c_SplObjectStorage::ifa_current(MethodCallPackage &mcp, int count, INVOK
   }
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::current", 0, 1);
   return (self->t_current());
+}
+Variant c_SplObjectStorage::ifa_offsetset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_SplObjectStorage *self = NULL;
+  p_SplObjectStorage pobj;
+  if (mcp.obj) {
+    self = static_cast<c_SplObjectStorage*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 2) return throw_wrong_arguments("SplObjectStorage::offsetSet", count, 1, 2, 1);
+  CVarRef arg0((a0));
+  if (count <= 1) return (self->t_offsetset(arg0));
+  CVarRef arg1((a1));
+  return (self->t_offsetset(arg0, arg1));
 }
 Variant c_SplObjectStorage::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_SplObjectStorage *self = NULL;
@@ -382,22 +675,34 @@ Variant c_SplObjectStorage::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE
 bool c_SplObjectStorage::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
+  switch (hash & 63) {
+    case 0:
+      HASH_GUARD_LITSTR(0x3E6BCFB9742FC700LL, NAMSTR(s_sys_ss6cc6b367, "offsetExists")) {
+        mcp.ci = &c_SplObjectStorage::ci_offsetexists;
+        return true;
+      }
+      break;
     case 4:
       HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss9943cbf4, "valid")) {
         mcp.ci = &c_SplObjectStorage::ci_valid;
         return true;
       }
       break;
-    case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss941ca25f, "rewind")) {
-        mcp.ci = &c_SplObjectStorage::ci_rewind;
+    case 7:
+      HASH_GUARD_LITSTR(0x2D9D1E897828CA07LL, NAMSTR(s_sys_ssd9dc1368, "getInfo")) {
+        mcp.ci = &c_SplObjectStorage::ci_getinfo;
         return true;
       }
       break;
-    case 12:
-      HASH_GUARD_LITSTR(0x62DD82BFEB88A4ACLL, NAMSTR(s_sys_ss8e95cc19, "attach")) {
-        mcp.ci = &c_SplObjectStorage::ci_attach;
+    case 10:
+      HASH_GUARD_LITSTR(0x2CDA6B454BEC094ALL, NAMSTR(s_sys_ssc0b153b3, "setInfo")) {
+        mcp.ci = &c_SplObjectStorage::ci_setinfo;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x73281B3808017C0FLL, NAMSTR(s_sys_ssd3a91e58, "removeAllExcept")) {
+        mcp.ci = &c_SplObjectStorage::ci_removeallexcept;
         return true;
       }
       break;
@@ -424,14 +729,52 @@ bool c_SplObjectStorage::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
-        mcp.ci = &c_SplObjectStorage::ci_next;
+      HASH_GUARD_LITSTR(0x044DED3E886FE5D8LL, NAMSTR(s_sys_ssf1c9d9aa, "removeAll")) {
+        mcp.ci = &c_SplObjectStorage::ci_removeall;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x61D11ECEF4404498LL, NAMSTR(s_sys_ss9d68a010, "offsetGet")) {
+        mcp.ci = &c_SplObjectStorage::ci_offsetget;
         return true;
       }
       break;
     case 28:
       HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ssb3a5c1b3, "current")) {
         mcp.ci = &c_SplObjectStorage::ci_current;
+        return true;
+      }
+      break;
+    case 42:
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss941ca25f, "rewind")) {
+        mcp.ci = &c_SplObjectStorage::ci_rewind;
+        return true;
+      }
+      break;
+    case 44:
+      HASH_GUARD_LITSTR(0x62DD82BFEB88A4ACLL, NAMSTR(s_sys_ss8e95cc19, "attach")) {
+        mcp.ci = &c_SplObjectStorage::ci_attach;
+        return true;
+      }
+      break;
+    case 56:
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
+        mcp.ci = &c_SplObjectStorage::ci_next;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x0957F693A48AF738LL, NAMSTR(s_sys_ssbe2ba1ac, "offsetSet")) {
+        mcp.ci = &c_SplObjectStorage::ci_offsetset;
+        return true;
+      }
+      break;
+    case 58:
+      HASH_GUARD_LITSTR(0x08329980E6369ABALL, NAMSTR(s_sys_sse590286e, "offsetUnset")) {
+        mcp.ci = &c_SplObjectStorage::ci_offsetunset;
+        return true;
+      }
+      break;
+    case 60:
+      HASH_GUARD_LITSTR(0x44D72490D249BE7CLL, NAMSTR(s_sys_ss65824f5c, "addAll")) {
+        mcp.ci = &c_SplObjectStorage::ci_addall;
         return true;
       }
       break;
@@ -453,50 +796,68 @@ struct ObjectStaticCallbacks cw_SplObjectStorage = {
   c_SplObjectStorage::os_get_call_info
 };
 void c_SplObjectStorage::init() {
-  m_storage = s_sys_sa00000000;
+  m_objectStorage = s_sys_sa00000000;
+  m_dataStorage = s_sys_sa00000000;
   m_index = 0LL;
 }
-/* SRC: classes/splobjectstorage.php line 24 */
+/* SRC: classes/splobjectstorage.php line 25 */
 void c_SplObjectStorage::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::rewind);
-  x_reset(ref(m_storage));
+  x_reset(ref(m_objectStorage));
+  x_reset(ref(m_dataStorage));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 37 */
+/* SRC: classes/splobjectstorage.php line 39 */
 bool c_SplObjectStorage::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::valid);
   {
-    const Variant &tmp0((x_key(ref(m_storage))));
+    const Variant &tmp0((x_key(ref(m_objectStorage))));
     return !same(tmp0, false);
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 50 */
+/* SRC: classes/splobjectstorage.php line 52 */
 int64 c_SplObjectStorage::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::key);
   return m_index;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 62 */
+/* SRC: classes/splobjectstorage.php line 64 */
 Variant c_SplObjectStorage::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::current);
-  return x_current(m_storage);
+  return x_current(m_objectStorage);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 74 */
+/* SRC: classes/splobjectstorage.php line 76 */
 void c_SplObjectStorage::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::next);
-  x_next(ref(m_storage));
+  x_next(ref(m_objectStorage));
+  x_next(ref(m_dataStorage));
   m_index++;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 87 */
+/* SRC: classes/splobjectstorage.php line 90 */
 int c_SplObjectStorage::t_count() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::count);
-  return x_count(m_storage);
+  return x_count(m_objectStorage);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 102 */
+/* SRC: classes/splobjectstorage.php line 94 */
+Variant c_SplObjectStorage::t_getinfo() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::getInfo);
+  return x_current(m_dataStorage);
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/splobjectstorage.php line 98 */
+void c_SplObjectStorage::t_setinfo(CVarRef v_data) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::setInfo);
+  {
+    const Variant &tmp0((x_key(ref(m_dataStorage))));
+    m_dataStorage.set(tmp0, (v_data));
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/splobjectstorage.php line 114 */
 bool c_SplObjectStorage::t_contains(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::contains);
   Variant v_object;
@@ -505,7 +866,7 @@ bool c_SplObjectStorage::t_contains(CVarRef v_obj) {
     {
       {
         LOOP_COUNTER(1);
-        Variant map2 = m_storage;
+        Variant map2 = m_objectStorage;
         for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
           LOOP_COUNTER_CHECK(1);
           iter3.second(v_object);
@@ -523,8 +884,9 @@ bool c_SplObjectStorage::t_contains(CVarRef v_obj) {
   return false;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 124 */
-void c_SplObjectStorage::t_attach(CVarRef v_obj) {
+/* SRC: classes/splobjectstorage.php line 136 */
+void c_SplObjectStorage::t_attach(CVarRef v_obj, CVarRef v_data //  = null_variant
+) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::attach);
   {
     bool tmp0;
@@ -538,13 +900,14 @@ void c_SplObjectStorage::t_attach(CVarRef v_obj) {
     }
     if (tmp0) {
       {
-        m_storage.append((v_obj));
+        m_objectStorage.append((v_obj));
+        m_dataStorage.append((v_data));
       }
     }
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 140 */
+/* SRC: classes/splobjectstorage.php line 153 */
 void c_SplObjectStorage::t_detach(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::detach);
   Primitive v_idx = 0;
@@ -554,7 +917,7 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
     {
       {
         LOOP_COUNTER(1);
-        Variant map2 = m_storage;
+        Variant map2 = m_objectStorage;
         for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
           LOOP_COUNTER_CHECK(1);
           iter3.second(v_object);
@@ -562,7 +925,8 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
           {
             if (same(v_object, v_obj)) {
               {
-                m_storage.weakRemove(v_idx);
+                m_objectStorage.weakRemove(v_idx);
+                m_dataStorage.weakRemove(v_idx);
                 {
                   MethodCallPackage mcp0;
                   mcp0.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
@@ -577,6 +941,154 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
       }
     }
   }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/splobjectstorage.php line 167 */
+void c_SplObjectStorage::t_addall(CVarRef v_storage) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::addAll);
+  if(!v_storage.instanceof(NAMSTR(s_sys_ssb5dda8cc, "splobjectstorage"))) {
+    throw_unexpected_argument_type(1,"SplObjectStorage::addAll()","splobjectstorage",v_storage);
+    return;
+  }
+  Variant v_keys;
+  Variant v_key;
+
+  {
+    const Variant &tmp0((v_storage.o_get(NAMSTR(s_sys_ssacd5c2f9, "objectStorage"), true)));
+    const Variant &tmp1((x_array_keys(tmp0)));
+    v_keys = tmp1;
+  }
+  {
+    LOOP_COUNTER(1);
+    for (ArrayIter iter3 = v_keys.begin(s_class_name, true); !iter3.end(); ++iter3) {
+      LOOP_COUNTER_CHECK(1);
+      iter3.second(v_key);
+      {
+        {
+          Variant tmp0((v_storage.o_get(NAMSTR(s_sys_ssacd5c2f9, "objectStorage"), true).rvalAt(v_key, AccessFlags::Error)));
+          Variant tmp1((v_storage.o_get(NAMSTR(s_sys_ssf657a18f, "dataStorage"), true).rvalAt(v_key, AccessFlags::Error)));
+          t_attach(tmp0, tmp1);
+        }
+      }
+    }
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/splobjectstorage.php line 175 */
+void c_SplObjectStorage::t_removeall(CVarRef v_storage) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::removeAll);
+  if(!v_storage.instanceof(NAMSTR(s_sys_ssb5dda8cc, "splobjectstorage"))) {
+    throw_unexpected_argument_type(1,"SplObjectStorage::removeAll()","splobjectstorage",v_storage);
+    return;
+  }
+  Variant v_object;
+
+  {
+    LOOP_COUNTER(1);
+    Variant map2 = v_storage.o_get(NAMSTR(s_sys_ssacd5c2f9, "objectStorage"), true);
+    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
+      LOOP_COUNTER_CHECK(1);
+      iter3.second(v_object);
+      {
+        t_detach(v_object);
+      }
+    }
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/splobjectstorage.php line 181 */
+void c_SplObjectStorage::t_removeallexcept(CVarRef v_storage) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::removeAllExcept);
+  if(!v_storage.instanceof(NAMSTR(s_sys_ssb5dda8cc, "splobjectstorage"))) {
+    throw_unexpected_argument_type(1,"SplObjectStorage::removeAllExcept()","splobjectstorage",v_storage);
+    return;
+  }
+  Variant v_object;
+
+  {
+    LOOP_COUNTER(1);
+    Variant map2 = m_objectStorage;
+    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
+      LOOP_COUNTER_CHECK(1);
+      iter3.second(v_object);
+      {
+        {
+          bool tmp0;
+          {
+            MethodCallPackage mcp1;
+            CVarRef obj1 = v_storage;
+            mcp1.methodCall((obj1), NAMSTR(s_sys_ss3382a209, "contains"), 0x61B94551FA22D290LL);
+            const CallInfo *cit1 __attribute__((__unused__)) = mcp1.ci;
+            tmp0 = (!(toBoolean((mcp1.bindClass(fi)->getMeth1Args())(mcp1, 1, v_object))));
+          }
+          if (tmp0) {
+            {
+              t_detach(v_object);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/splobjectstorage.php line 189 */
+bool c_SplObjectStorage::t_offsetexists(CVarRef v_obj) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::offsetExists);
+  return t_contains(v_obj);
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/splobjectstorage.php line 193 */
+Variant c_SplObjectStorage::t_offsetget(Variant v_obj) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::offsetGet);
+  Primitive v_idx = 0;
+  Variant v_object;
+
+  if (x_is_object(v_obj)) {
+    {
+      {
+        LOOP_COUNTER(1);
+        Variant map2 = m_objectStorage;
+        for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
+          LOOP_COUNTER_CHECK(1);
+          iter3.second(v_object);
+          v_idx = iter3.first();
+          {
+            if (same(v_object, v_obj)) {
+              {
+                return m_dataStorage.rvalAt(v_idx, AccessFlags::Error);
+              }
+            }
+          }
+        }
+      }
+      throw_exception(p_UnexpectedValueException((NEWOBJ(c_UnexpectedValueException)())->create(NAMSTR(s_sys_ss7fc24dba, "Object not found"))));
+    }
+  }
+  return null;
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/splobjectstorage.php line 193 */
+Variant &c_SplObjectStorage::___offsetget_lval(Variant v_obj) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::offsetGet);
+  Variant &v = get_system_globals()->__lvalProxy;
+  v = t_offsetget(v_obj);
+  return v;
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/splobjectstorage.php line 205 */
+Variant c_SplObjectStorage::t_offsetset(CVarRef v_obj, CVarRef v_data //  = null_variant
+) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::offsetSet);
+  t_attach(v_obj, v_data);
+  return null;
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/splobjectstorage.php line 209 */
+Variant c_SplObjectStorage::t_offsetunset(CVarRef v_obj) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::offsetUnset);
+  t_detach(v_obj);
+  return null;
 }
 namespace hphp_impl_splitter {}
 Object co_SplObjectStorage(CArrRef params, bool init /* = true */) {

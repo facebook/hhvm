@@ -21,6 +21,7 @@
 #include <cls/SplObjectStorage.fw.h>
 #include <cls/Iterator.h>
 #include <cls/Countable.h>
+#include <cls/ArrayAccess.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,7 +32,8 @@ class c_SplObjectStorage : public ExtObjectData {
   public:
 
   // Properties
-  Variant m_storage;
+  Variant m_objectStorage;
+  Variant m_dataStorage;
   int64 m_index;
 
   // Class Map
@@ -71,17 +73,36 @@ class c_SplObjectStorage : public ExtObjectData {
   public: Variant t_current();
   public: void t_next();
   public: int t_count();
+  public: Variant t_getinfo();
+  public: void t_setinfo(CVarRef v_data);
   public: bool t_contains(CVarRef v_obj);
-  public: void t_attach(CVarRef v_obj);
+  public: void t_attach(CVarRef v_obj, CVarRef v_data = null_variant);
   public: void t_detach(CVarRef v_obj);
+  public: void t_addall(CVarRef v_storage);
+  public: void t_removeall(CVarRef v_storage);
+  public: void t_removeallexcept(CVarRef v_storage);
+  public: bool t_offsetexists(CVarRef v_obj);
+  public: Variant t_offsetget(Variant v_obj);
+  public: virtual Variant &___offsetget_lval(Variant v_obj);
+  public: Variant t_offsetset(CVarRef v_obj, CVarRef v_data = null_variant);
+  public: Variant t_offsetunset(CVarRef v_obj);
   DECLARE_METHOD_INVOKE_HELPERS(next);
   DECLARE_METHOD_INVOKE_HELPERS(detach);
   DECLARE_METHOD_INVOKE_HELPERS(attach);
   DECLARE_METHOD_INVOKE_HELPERS(count);
   DECLARE_METHOD_INVOKE_HELPERS(key);
+  DECLARE_METHOD_INVOKE_HELPERS(addall);
+  DECLARE_METHOD_INVOKE_HELPERS(removeall);
   DECLARE_METHOD_INVOKE_HELPERS(valid);
+  DECLARE_METHOD_INVOKE_HELPERS(getinfo);
+  DECLARE_METHOD_INVOKE_HELPERS(offsetexists);
+  DECLARE_METHOD_INVOKE_HELPERS(offsetget);
+  DECLARE_METHOD_INVOKE_HELPERS(removeallexcept);
   DECLARE_METHOD_INVOKE_HELPERS(contains);
+  DECLARE_METHOD_INVOKE_HELPERS(offsetunset);
+  DECLARE_METHOD_INVOKE_HELPERS(setinfo);
   DECLARE_METHOD_INVOKE_HELPERS(current);
+  DECLARE_METHOD_INVOKE_HELPERS(offsetset);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_SplObjectStorage;

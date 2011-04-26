@@ -6336,6 +6336,16 @@ bool TestCodeRun::TestReference() {
        "fiz($w);"
        "var_dump($w);");
 
+  // https://www.intern.facebook.com/intern/tasks/?t=169731
+  MVCR("<?php "
+       "$x = 0;\n"
+       "$foo0 = isset($g) ? \"ref\" : \"val\";\n"
+       "$foo1 = isset($g) ? \"val\" : \"ref\";\n"
+       "function ref(&$a, $b) { echo \"$a $b\"; }\n"
+       "function val($a, $b)  { echo \"$a $b\"; }\n"
+       "$foo0($x, $x = 5);\n"
+       "$foo1($x, $x = 5);\n");
+
  return true;
 }
 

@@ -16077,6 +16077,27 @@ bool TestCodeRun::TestLateStaticBinding() {
         "bool(false)\n"
         "bool(true)\n");
 
+  MVCRO("<?php\n"
+        "class TestA {\n"
+        "protected static function doSomething() {\n"
+        "echo \"TestA::doSomething\\n\";\n"
+        "}\n"
+        "protected static function test() {\n"
+        "static::doSomething();\n"
+        "}\n"
+        "public static function nativeTest($obj) {\n"
+        "$obj->bar();\n"
+        "self::test();\n"
+        "}\n"
+        "}\n"
+        "class Foo {\n"
+        "public function bar() {}\n"
+        "}\n"
+        "$obj = new Foo();\n"
+        "TestA::nativeTest($obj);\n",
+
+        "TestA::doSomething\n");
+
   return true;
 }
 

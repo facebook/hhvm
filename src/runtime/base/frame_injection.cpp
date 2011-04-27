@@ -337,7 +337,7 @@ static inline void hotProfilerFini(ThreadInfo *info) {
 
 FrameInjectionFunction::FrameInjectionFunction(const char *name, int fs)
   : FrameInjection(name, fs) {
-  ASSERT(fs & Function);
+  ASSERT(fs & (Function|EvalFrame));
   hotProfilerInit(m_info, name);
 }
 

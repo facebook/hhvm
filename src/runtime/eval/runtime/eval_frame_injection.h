@@ -25,7 +25,7 @@ namespace Eval {
 class VariableEnvironment;
 class Construct;
 
-class EvalFrameInjection : public FrameInjection {
+class EvalFrameInjection : public FrameInjectionFunction {
 public:
   class EvalStaticClassNameHelper {
   public:
@@ -39,7 +39,7 @@ public:
   EvalFrameInjection(CStrRef cls, const char *name,
                      VariableEnvironment &env, const char *file,
                      ObjectData *obj = NULL, int fs = 0)
-    : FrameInjection(name, fs | FrameInjection::EvalFrame),
+    : FrameInjectionFunction(name, fs | FrameInjection::EvalFrame),
       m_class(cls), m_env(env), m_file(file) {
         m_object = obj ? obj->getRoot() : NULL;
         if (m_object) {

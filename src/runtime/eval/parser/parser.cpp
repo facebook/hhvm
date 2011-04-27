@@ -489,12 +489,10 @@ void Parser::onRefDim(Token &out, Token &var, Token &offset) {
 
 ExpressionPtr Parser::getDynamicVariable(ExpressionPtr exp, bool encap) {
   if (encap) {
-    ConstantExpressionPtr var = exp->unsafe_cast<ConstantExpression>();
-    NamePtr n;
+    ConstantExpression *var = exp->cast<ConstantExpression>();
     if (var) {
-      n = Name::fromString(this, var->getName());
+      return NEW_EXP(Variable, Name::fromString(this, var->getName()));
     }
-    return NEW_EXP(Variable, n);
   }
 
   return createDynamicVariable(exp);

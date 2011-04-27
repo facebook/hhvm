@@ -339,7 +339,15 @@ Variant f_stream_socket_sendto(CObjRef socket, CStrRef data,
                                int flags /* = 0 */,
                                CStrRef address /* = null_string */) {
   String host; int port;
-  parse_host(address, host, port);
+
+  if (address == null_string) {
+    Socket *sock = socket.getTyped<Socket>();
+    host = sock->getAddress();
+    port = sock->getPort();
+  } else {
+    parse_host(address, host, port);
+  }
+
   return f_socket_sendto(socket, data, data.size(), flags, host, port);
 }
 

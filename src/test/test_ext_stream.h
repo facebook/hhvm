@@ -66,6 +66,7 @@ class TestExtStream : public TestCppExt {
   bool test_stream_socket_pair();
   bool test_stream_socket_recvfrom();
   bool test_stream_socket_sendto();
+  bool test_stream_socket_sendto_issue324();
   bool test_stream_socket_shutdown();
 };
 

@@ -68,6 +68,8 @@ public:
 
   bool setBlocking(bool blocking);
 
+  std::string getAddress() const { return m_address; }
+  int         getPort() const    { return m_port; }
 protected:
   std::string m_address;
   int m_port;

@@ -65,6 +65,7 @@ bool TestExtStream::RunTests(const std::string &which) {
   RUN_TEST(test_stream_socket_pair);
   RUN_TEST(test_stream_socket_recvfrom);
   RUN_TEST(test_stream_socket_sendto);
+  RUN_TEST(test_stream_socket_sendto_issue324);
   RUN_TEST(test_stream_socket_shutdown);
 
   return ret;
@@ -442,6 +443,23 @@ bool TestExtStream::test_stream_socket_recvfrom() {
 
 bool TestExtStream::test_stream_socket_sendto() {
   // tested in test_stream_socket_recvfrom
+  return Count(true);
+}
+
+bool TestExtStream::test_stream_socket_sendto_issue324() {
+  int port = get_random_port();
+  const string address = "127.0.0.1:" + boost::lexical_cast<string>(port);
+
+  Variant server = f_stream_socket_server(address);
+  Variant client = f_stream_socket_client(address);
+
+  Variant s = f_stream_socket_accept(server);
+  String text = "testing";
+  VERIFY(f_stream_socket_sendto(client, text, 0, null_string));
+
+  Variant buffer = f_stream_socket_recvfrom(s, 100);
+  VS(buffer, "testing");
+
   return Count(true);
 }
 

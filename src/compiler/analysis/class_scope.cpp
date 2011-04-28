@@ -740,7 +740,7 @@ void ClassScope::outputCPPHashTableClassVarInit
     "  public: SysCTDTableInitializer() {\n"
     "    const char *ctdMapData[] = {\n";
 
-  const char text1u[] = 
+  const char text1u[] =
     "class hashNodeCTD {\n"
     "public:\n"
     "  hashNodeCTD() {}\n"
@@ -1788,15 +1788,23 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
   for (; jt->ready(); jt->next()) {
     const char *name = jt->key();
     string lname = cg.formatLabel(name);
-    StringToFunctionScopePtrVecMap::const_iterator iterFuncs;
-    iterFuncs = funcScopes.find(name);
-    ASSERT(iterFuncs != funcScopes.end());
-    FunctionScopePtr func = iterFuncs->second[0];
-    string id = func->getContainingClass()->getId(cg);
+    StringToFunctionScopePtrVecMap::const_iterator iterFuncs =
+      funcScopes.find(name);
+    FunctionScopePtr func;
+    string origName;
+    if (iterFuncs == funcScopes.end()) {
+      assert(classNameCtor() && !strcmp(name, "__construct"));
+      func = findConstructor(ar, false);
+      lname = cg.formatLabel(func->getName());
+      origName = name;
+    } else {
+      func = iterFuncs->second[0];
+      origName = func->getOriginalName();
+    }
     if (fewArgs &&
         func->getMinParamCount() > Option::InvokeFewArgsCount)
       continue;
-    string origName = func->getOriginalName();
+    string id = func->getContainingClass()->getId(cg);
     if (useMethodIndex) {
       const MethodSlot* ms = ar->getMethodSlot(name);
       cg_indentBegin("if (mi.m_overloadIndex == 0x%x) { \n",
@@ -1804,7 +1812,8 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
     } else  {
       int index = -1;
       cg.checkLiteralString(origName, index, ar, shared_from_this());
-      cg_indentBegin("HASH_GUARD_LITSTR(0x%016llXLL, ", hash_string_i(name));
+      cg_indentBegin("HASH_GUARD_LITSTR(0x%016llXLL, ",
+                     hash_string_i(origName.c_str()));
       cg_printString(origName, ar, shared_from_this());
       cg_printf(") {\n");
     }
@@ -1933,6 +1942,12 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
           (staticOnly && !func->isStatic()) ||
           !(system || func->isDynamic() || func->isVirtual())) continue;
       funcs.push_back(iter->first.c_str());
+    }
+  }
+
+  if (type == CallInfo) {
+    if (classNameCtor()) {
+      funcs.push_back("__construct");
     }
   }
 

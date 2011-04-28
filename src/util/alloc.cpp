@@ -48,8 +48,14 @@ void safe_free(void *ptr) {
 void flush_thread_caches() {
 #ifndef NO_JEMALLOC
   if (mallctl) {
-    mallctl("tcache.flush", NULL, NULL, NULL, 0);
-  } else
+    unsigned arena;
+    size_t usz = sizeof(unsigned);
+    if (mallctl("tcache.flush", NULL, NULL, NULL, 0)
+        || mallctl("thread.arena", &arena, &usz, NULL, 0)
+        || mallctl("arenas.purge", NULL, NULL, &arena, usz)) {
+      // Error; do nothing.
+    }
+  }
 #endif
 #ifndef NO_TCMALLOC
   if (MallocExtensionInstance) {

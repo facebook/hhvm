@@ -22,85 +22,125 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool IpBlockMap::ReadIPv4Address(const char *ip, unsigned int &start,
-                                 unsigned int &end) {
-  start = end = 0;
-  const char *p = ip;
+IpBlockMap::Acl::Acl() : m_networks(true) {}
 
-  bool saw_digit = false;
-  int octets = 0;
-  unsigned int tp = 0;
-  char ch;
-  while ((ch = *p++) != '\0') {
-    if (ch >= '0' && ch <= '9') {
-      tp = tp * 10 + (unsigned int)(ch - '0');
-      if (tp > 255) {
-        Logger::Error("octet larger than 255: %s", ip);
-        return false;
-      }
-      if (!saw_digit) {
-        if (++octets > 4) {
-          Logger::Error("more than 4 octets: %s", ip);
-          return false;
-        }
-        saw_digit = true;
-      }
-    } else if (ch == '.' && saw_digit) {
-      if (octets == 4) {
-        Logger::Error("dot after 4 octet bits: %s", ip);
-        return false;
-      }
-      start <<= 8;
-      start += tp;
-      tp = 0;
-      saw_digit = false;
-    } else if (ch == '/') {
-      break;
+IpBlockMap::BinaryPrefixTrie::BinaryPrefixTrie(bool allow) {
+  m_children[0] = m_children[1] = NULL;
+  setAllowed(allow);
+}
+
+void IpBlockMap::BinaryPrefixTrie::setAllowed(bool allow) {
+  m_allow = allow;
+}
+
+bool IpBlockMap::BinaryPrefixTrie::isAllowed(
+    const void *search,
+    const int num_bits) {
+  return isAllowedImpl(search, num_bits, 0);
+}
+
+bool IpBlockMap::BinaryPrefixTrie::isAllowedImpl(
+    const void *search,
+    const int num_bits,
+    const int bit_offset) {
+  const unsigned char *search_bytes = (const unsigned char *)search;
+  BinaryPrefixTrie *child;
+
+  if (bit_offset > num_bits) {
+    // This should never happen because the trie should only ever contain
+    // prefixes of fixed-size network addresses, so the trie should never be
+    // any deeper than the network address size.
+    Logger::Error("trie depth exceeds search depth");
+    return false;
+  }
+
+  child = m_children[(*search_bytes >> (7 - bit_offset)) & 1];
+  if (child) {
+    if (bit_offset < 7) {
+      return child->isAllowedImpl(search_bytes, num_bits, bit_offset + 1);
     } else {
-      Logger::Error("invalid character: %s", ip);
-      return false;
+      return child->isAllowedImpl(search_bytes + 1, num_bits - 8, 0);
     }
   }
-  if (octets < 4) {
-    Logger::Error("less than 4 octets: %s", ip);
-    return false;
-  }
-  start <<= 8;
-  start += tp;
 
-  if (ch == '\0') {
-    end = start;
-    return true;
-  }
+  return m_allow;
+}
 
-  ASSERT(ch == '/');
-  ch = *p++;
-  if (ch == '\0') {
-    Logger::Error("missing mask: %s", ip);
-    return false;
+void IpBlockMap::BinaryPrefixTrie::InsertNewPrefix(
+    BinaryPrefixTrie *root,
+    const void *value,
+    const int num_bits,
+    bool allow) {
+  const unsigned char *bytes = (const unsigned char *)value;
+  BinaryPrefixTrie *node = root;
+  int curr_bit_num = 0;
+  int curr_bit_val;
+  bool next_allow = root->m_allow;
+
+  while (curr_bit_num < num_bits) {
+    // Peel off the bit at the current position
+    curr_bit_val = (bytes[curr_bit_num / 8] >> (7 - (curr_bit_num & 7))) & 1;
+    curr_bit_num++;
+    if (!node->m_children[curr_bit_val]) {
+      // When inserting the leaf node, stop inheriting the "allow" value
+      // from ancestor nodes.
+      if (curr_bit_num == num_bits) {
+        next_allow = allow;
+      }
+      BinaryPrefixTrie *new_node = new BinaryPrefixTrie(next_allow);
+      node->m_children[curr_bit_val] = new_node;
+    }
+
+    node = node->m_children[curr_bit_val];
+    next_allow = node->m_allow;
   }
-  if (ch < '0' || ch > '9') {
-    Logger::Error("non-digit mask: %s", ip);
-    return false;
-  }
-  tp = (unsigned int)(ch - '0');
-  ch = *p++;
-  if (ch != '\0') {
-    if (ch < '0' || ch > '9') {
-      Logger::Error("non-digit mask: %s", ip);
+}
+
+bool IpBlockMap::ReadIPv6Address(const char *text,
+                                 struct in6_addr *output,
+                                 int &significant_bits) {
+#define STRING_IPV4_ADDR_MAX_LENGTH 15
+#define STRING_IPV6_ADDR_MAX_LENGTH 39
+  char address[STRING_IPV6_ADDR_MAX_LENGTH + 1];
+  int address_len;
+  char *slash;
+  bool is_ipv6 = (NULL != strchr(text, ':'));
+
+  // Find the bit count, if any.
+  slash = strchr(text, '/');
+
+  if (slash) {
+    significant_bits = atoi(slash + 1);
+    if (!significant_bits) {
+      Logger::Error("invalid bit count: %s", text);
       return false;
     }
-    tp = tp * 10 + (unsigned int)(ch - '0');
-    ch = *p++;
+    address_len = slash - text;
+  } else {
+    significant_bits = is_ipv6 ? 128 : 32;
+    address_len = strlen(text);
   }
-  if (ch != '\0' || tp > 31 || tp == 0) {
-    Logger::Error("invalid mask: %s", ip);
+
+  if (is_ipv6) {
+    memcpy(address, text, address_len);
+    address[address_len] = '\0';
+  } else {
+    // An IPv4 mapped address.
+    if (address_len > STRING_IPV4_ADDR_MAX_LENGTH) {
+      Logger::Error("invalid IPv4 address: %s", text);
+      return false;
+    }
+    memcpy(address, "::ffff:", 7);
+    memcpy(address + 7, text, address_len);
+    address[address_len + 7] = '\0';
+    significant_bits += 96;
+  }
+
+  if (inet_pton(AF_INET6, address, output) <= 0) {
+    Logger::Error("invalid IPv6 address: %s", address);
     return false;
   }
 
-  unsigned int mask = (1 << (32 - tp)) - 1;
-  start &= ~mask;
-  end = start | mask;
   return true;
 }
 
@@ -108,20 +148,13 @@ void IpBlockMap::LoadIpList(AclPtr acl, Hdf hdf, bool allow) {
   for (Hdf child = hdf.firstChild(); child.exists(); child = child.next()) {
     string ip = child.getString();
 
-    unsigned int start, end;
-    if (ReadIPv4Address(ip.c_str(), start, end)) {
-      ASSERT(end >= start);
-      if (end - start < 1024) {
-        for (unsigned int i = start; i <= end; i++) {
-          acl->ips[i] = allow;
-        }
-      } else {
-        acl->ranges.resize(acl->ranges.size() + 1);
-        IpRange &range = acl->ranges.back();
-        range.start = start;
-        range.end = end;
-        range.allow = allow;
-      }
+    int bits;
+    struct in6_addr address;
+    if (ReadIPv6Address(ip.c_str(), &address, bits)) {
+      BinaryPrefixTrie::InsertNewPrefix(&acl->m_networks,
+                                        &address,
+                                        bits,
+                                        allow);
     }
   }
 }
@@ -129,11 +162,16 @@ void IpBlockMap::LoadIpList(AclPtr acl, Hdf hdf, bool allow) {
 IpBlockMap::IpBlockMap(Hdf config) {
   for (Hdf hdf = config.firstChild(); hdf.exists(); hdf = hdf.next()) {
     AclPtr acl(new Acl());
+    // sgrimm note: not sure AllowFirst is relevant with my implementation
+    // since we always search for the narrowest matching rule -- it really
+    // just sets whether we deny or allow by default, I think.
     bool allow = hdf["AllowFirst"].getBool(false);
     if (allow) {
+      acl->m_networks.setAllowed(true);
       LoadIpList(acl, hdf["Ip.Deny"], false);
       LoadIpList(acl, hdf["Ip.Allow"], true);
     } else {
+      acl->m_networks.setAllowed(false);
       LoadIpList(acl, hdf["Ip.Allow"], true);
       LoadIpList(acl, hdf["Ip.Deny"], false);
     }
@@ -149,8 +187,8 @@ IpBlockMap::IpBlockMap(Hdf config) {
 bool IpBlockMap::isBlocking(const std::string &command,
                             const std::string &ip) const {
   bool translated = false;
-  unsigned int start = 0;
-  unsigned int end = 0;
+  struct in6_addr address;
+  int bits;
 
   for (StringToAclPtrMap::const_iterator iter = m_acls.begin();
        iter != m_acls.end(); ++iter) {
@@ -159,24 +197,12 @@ bool IpBlockMap::isBlocking(const std::string &command,
         strncmp(command.c_str(), path.c_str(), path.size()) == 0) {
 
       if (!translated) {
-        ReadIPv4Address(ip.c_str(), start, end);
-        ASSERT(start == end);
+        ReadIPv6Address(ip.c_str(), &address, bits);
+        ASSERT(bits == 128);
         translated = true;
       }
 
-      IpMap &ips = iter->second->ips;
-      IpMap::const_iterator iter2 = ips.find(start);
-      if (iter2 != ips.end()) {
-        return !iter2->second;
-      }
-
-      IpRangeVec &ranges = iter->second->ranges;
-      for (unsigned int i = 0; i < ranges.size(); i++) {
-        IpRange &range = ranges[i];
-        if (start >= range.start && start <= range.end) {
-          return !range.allow;
-        }
-      }
+      return !iter->second->m_networks.isAllowed(&address);
     }
   }
   return false;

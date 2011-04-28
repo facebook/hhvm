@@ -959,15 +959,76 @@ bool TestCppBase::TestMemoryManager() {
 }
 
 bool TestCppBase::TestIpBlockMap() {
-  unsigned int start, end;
+  struct in6_addr addr;
+  int bits;
 
-  VERIFY(IpBlockMap::ReadIPv4Address("204.15.21.0/22", start, end));
-  VS((int)start, (int)0xCC0F1400);
-  VS((int)end, (int)0xCC0F17FF);
+  VERIFY(IpBlockMap::ReadIPv6Address("204.15.21.0/22", &addr, bits));
+  VS(bits, 118);
+  VS((long)addr.s6_addr32[0], (long)htonl(0x00000000));
+  VS((long)addr.s6_addr32[1], (long)htonl(0x00000000));
+  VS((long)addr.s6_addr32[2], (long)htonl(0x0000FFFF));
+  VS((long)addr.s6_addr32[3], (long)htonl(0xCC0F1500));
 
-  VERIFY(IpBlockMap::ReadIPv4Address("127.0.0.1", start, end));
-  VS((int)start, 0x7F000001);
-  VS((int)end, 0x7F000001);
+  VERIFY(IpBlockMap::ReadIPv6Address("127.0.0.1", &addr, bits));
+  VS(bits, 128);
+  VS((long)addr.s6_addr32[0], (long)htonl(0x00000000));
+  VS((long)addr.s6_addr32[1], (long)htonl(0x00000000));
+  VS((long)addr.s6_addr32[2], (long)htonl(0x0000FFFF));
+  VS((long)addr.s6_addr32[3], (long)htonl(0x7F000001));
+
+  VERIFY(IpBlockMap::ReadIPv6Address(
+    "1111:2222:3333:4444:5555:6666:789a:bcde", &addr, bits));
+  VS(bits, 128);
+  VS((long)addr.s6_addr32[0], (long)htonl(0x11112222));
+  VS((long)addr.s6_addr32[1], (long)htonl(0x33334444));
+  VS((long)addr.s6_addr32[2], (long)htonl(0x55556666));
+  VS((long)addr.s6_addr32[3], (long)htonl(0x789abcde));
+
+  VERIFY(IpBlockMap::ReadIPv6Address(
+    "1111:2222:3333:4444:5555:6666:789a:bcde/68", &addr, bits));
+  VS(bits, 68);
+  VS((long)addr.s6_addr32[0], (long)htonl(0x11112222));
+  VS((long)addr.s6_addr32[1], (long)htonl(0x33334444));
+  VS((long)addr.s6_addr32[2], (long)htonl(0x55556666));
+  VS((long)addr.s6_addr32[3], (long)htonl(0x789abcde));
+
+  IpBlockMap::BinaryPrefixTrie root(true);
+  unsigned char value[16];
+
+  // Default value with no additional nodes
+  memset(value, 0, 16);
+  VERIFY(root.isAllowed(value, 1));
+  value[0] = 0x80;
+  VERIFY(root.isAllowed(value));
+
+  // Inheritance of parent allow value through multiple levels of new nodes
+  IpBlockMap::BinaryPrefixTrie::InsertNewPrefix(&root, value, 1, false);
+  value[0] = 0xf0;
+  IpBlockMap::BinaryPrefixTrie::InsertNewPrefix(&root, value, 4, true);
+  VERIFY(root.isAllowed(value));
+  value[0] = 0xe0;
+  VERIFY(!root.isAllowed(value));
+  value[0] = 0xc0;
+  VERIFY(!root.isAllowed(value));
+  value[0] = 0x80;
+  VERIFY(!root.isAllowed(value));
+  value[0] = 0;
+  VERIFY(root.isAllowed(value));
+
+  // > 1 byte in address
+  value[2] = 0xff;
+  IpBlockMap::BinaryPrefixTrie::InsertNewPrefix(&root, value, 24, false);
+  VERIFY(!root.isAllowed(value));
+  value[3] = 0xff;
+  VERIFY(!root.isAllowed(value));
+  value[2] = 0xfe;
+  VERIFY(root.isAllowed(value));
+
+  // Exact address match
+  value[2]  = 0xff;
+  value[15] = 1;
+  IpBlockMap::BinaryPrefixTrie::InsertNewPrefix(&root, value, 128, true);
+  VERIFY(root.isAllowed(value));
 
   Hdf hdf;
   hdf.fromString(
@@ -980,6 +1041,7 @@ bool TestCppBase::TestIpBlockMap() {
     "     }\n"
     "     Deny {\n"
     "       * = 8.32.0.0/24\n"
+    "       * = aaaa:bbbb:cccc:dddd:eeee:ffff:1111::/80\n"
     "     }\n"
     "    }\n"
     "  }\n"
@@ -988,6 +1050,10 @@ bool TestCppBase::TestIpBlockMap() {
   IpBlockMap ibm(hdf);
   VERIFY(!ibm.isBlocking("test/blah.php", "127.0.0.1"));
   VERIFY(ibm.isBlocking("test/blah.php", "8.32.0.104"));
+  VERIFY(ibm.isBlocking("test/blah.php",
+                        "aaaa:bbbb:cccc:dddd:eeee:9999:8888:7777"));
+  VERIFY(!ibm.isBlocking("test/blah.php",
+                         "aaaa:bbbb:cccc:dddd:eee3:4444:3333:2222"));
 
   return Count(true);
 }

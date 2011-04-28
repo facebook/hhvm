@@ -19,35 +19,70 @@
 
 #include <util/hdf.h>
 #include <runtime/base/types.h>
+#include <netinet/in.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// Blacklisted IP address range support. Loads a set of networks from
+// configuration, then is used to test candidate addresses to see if they
+// fall into one of the forbidden networks for a particular request type.
 
 DECLARE_BOOST_TYPES(IpBlockMap);
 class IpBlockMap {
 public:
-  static bool ReadIPv4Address(const char *ip, unsigned int &start,
-                              unsigned int &end);
+  // Reads a textual IPv4 or IPv6 address, possibly including a bit count,
+  // and turns it into an IPv6 address and a number of significant bits.
+  // IPv4 addresses are turned into mapped IPv6 addresses.
+  static bool ReadIPv6Address(const char *text,
+                              struct in6_addr *output,
+                              int &significant_bits);
 
 public:
   IpBlockMap(Hdf config);
 
   bool isBlocking(const std::string &command, const std::string &ip) const;
 
-private:
-  struct IpRange {
-    unsigned int start;
-    unsigned int end;
-    bool allow;
-  };
-  typedef hphp_hash_map<unsigned int, bool> IpMap;
-  typedef std::vector<IpRange> IpRangeVec;
+  /////////////////////////////////////////////////////////////////////////////
+  // We put all the network addresses (which are simply strings of bits) in a
+  // trie that we can match against a candidate network address. Each trie
+  // node has a flag to indicate whether matching addresses are allowed or
+  // disallowed. The value at the deepest trie node that matches a prefix of
+  // the candidate address is the value for that address's network.
+  class BinaryPrefixTrie {
+  public:
+    BinaryPrefixTrie(bool allow);
 
+    // Returns the "allow" value of the longest matching prefix of the
+    // search value.
+    bool isAllowed(const void *search,
+                   const int search_bits = 128);
+
+    void setAllowed(bool allow);
+
+    // Inserts a new prefix into the trie with an allow value at the leaf node.
+    // Nodes other than the new leaf will inherit the allow setting of the
+    // longest existing prefix.
+    static void InsertNewPrefix(BinaryPrefixTrie *root,
+                                const void *value,
+                                const int num_bits,
+                                const bool allow);
+
+  private:
+    bool isAllowedImpl(const void *search,
+                       const int search_bits,
+                       const int bit_offset);
+
+    BinaryPrefixTrie *m_children[2];
+    bool m_allow;
+  };
+
+private:
   DECLARE_BOOST_TYPES(Acl);
   class Acl {
   public:
-    IpMap ips; // ip => true: allow; false: deny
-    IpRangeVec ranges; // (start, end) => true: allow; false: deny
+    Acl();
+
+    BinaryPrefixTrie m_networks; // prefix => true: allow; false: deny
   };
   StringToAclPtrMap m_acls; // location => acl
 

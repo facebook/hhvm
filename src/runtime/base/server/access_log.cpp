@@ -22,6 +22,7 @@
 #include <runtime/base/server/request_uri.h>
 #include <util/process.h>
 #include <util/atomic.h>
+#include <util/compatibility.h>
 #include <util/util.h>
 
 namespace HPHP {
@@ -334,6 +335,20 @@ bool AccessLog::genField(ostringstream &out, const char* &format,
       } else {
         out << sname;
       }
+    }
+    break;
+  case 'D':
+    {
+      struct timespec now;
+      gettime(CLOCK_MONOTONIC, &now);
+      out << gettime_diff_us(transport->getWallTime(), now);
+    }
+    break;
+  case 'd':
+    {
+      struct timespec now;
+      gettime(CLOCK_THREAD_CPUTIME_ID, &now);
+      out << gettime_diff_us(transport->getCpuTime(), now);
     }
     break;
   default:

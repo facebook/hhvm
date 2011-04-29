@@ -37,6 +37,8 @@ public:
                    CStrRef remoteHost, const set<string> &rfc1867UploadedFiles,
                    CArrRef files)
     : m_refCount(0), m_done(false), m_code(0) {
+
+    gettime(CLOCK_MONOTONIC, &m_queueTime);
     m_threadType = PageletThread;
 
     m_url.append(url.data(), url.size());
@@ -191,6 +193,7 @@ public:
     }
   }
 
+  timespec getStartTimer() const { return m_queueTime; }
 private:
   int m_refCount;
 
@@ -216,6 +219,7 @@ class PageletWorker : public JobQueueWorker<PageletTransport*> {
 public:
   virtual void doJob(PageletTransport *job) {
     try {
+      job->onRequestStart(job->getStartTimer());
       HttpRequestHandler().handleRequest(job);
       job->decRefCount();
     } catch (...) {

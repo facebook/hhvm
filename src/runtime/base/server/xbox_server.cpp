@@ -32,9 +32,13 @@ namespace HPHP {
 class XboxTransport : public Transport, public Synchronizable {
 public:
   XboxTransport(CStrRef message) : m_refCount(0), m_done(false), m_code(0) {
+    gettime(CLOCK_MONOTONIC, &m_queueTime);
+
     m_message.append(message.data(), message.size());
     disableCompression(); // so we don't have to decompress during sendImpl()
   }
+
+  timespec getStartTimer() const { return m_queueTime; }
 
   /**
    * Implementing Transport...
@@ -139,6 +143,7 @@ class XboxWorker : public JobQueueWorker<XboxTransport*, true> {
 public:
   virtual void doJob(XboxTransport *job) {
     try {
+      job->onRequestStart(job->getStartTimer());
       createRequestHandler()->handleRequest(job);
       job->decRefCount();
     } catch (...) {
@@ -335,7 +340,7 @@ StaticString XboxTask::s_class_name("XboxTask");
 bool XboxServer::Available() {
   return s_dispatcher->getActiveWorker() <
          RuntimeOption::XboxServerThreadCount ||
-         s_dispatcher->getQueuedJobs() < 
+         s_dispatcher->getQueuedJobs() <
          RuntimeOption::XboxServerMaxQueueLength;
 }
 

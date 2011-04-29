@@ -105,6 +105,7 @@ const char *BuiltinSymbols::SystemClasses[] = {
   "splfile",
   "debugger",
   "xhprof",
+  "directoryiterator",
   NULL
 };
 

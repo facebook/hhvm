@@ -1799,6 +1799,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
           if (SimpleVariablePtr sv = dpc(SimpleVariable, e)) {
             if (Symbol *sym = sv->getSymbol()) {
               sym->setReferenced();
+              sym->setReseated();
               if (skind == Statement::KindOfGlobalStatement) {
                 sym->setGlobal();
               } else if (!m_variables->isPseudoMainTable()) {
@@ -1886,6 +1887,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
           if (val->getContext() & Expression::RefValue) {
             if (Symbol *sym = spc(SimpleVariable, var)->getSymbol()) {
               sym->setReferenced();
+              sym->setReseated();
               sym->setUsed();
             }
           } else {
@@ -1926,6 +1928,10 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
           if ((context & (Expression::RefValue|Expression::RefAssignmentLHS)) ||
               sym->isRefClosureVar()) {
             sym->setReferenced();
+          }
+          if ((context & Expression::UnsetContext) &&
+              (context & Expression::LValue)) {
+            sym->setReseated();
           }
           if (!(context & (Expression::AssignmentLHS |
                            Expression::UnsetContext))) {

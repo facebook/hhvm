@@ -241,7 +241,7 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
     paramType->outputCPPDecl(cg, ar, getScope());
   }
 
-  cg_printf(" %s%s", Option::VariablePrefix, m_name.c_str());
+  cg_printf(" %s%s", Option::VariablePrefix, cg.formatLabel(m_name).c_str());
   if (m_defaultValue && sym->getParameterIndex() >= func->getMinParamCount()) {
     bool comment = context == CodeGenerator::CppTypedParamsWrapperImpl ||
       context == CodeGenerator::CppImplementation ||

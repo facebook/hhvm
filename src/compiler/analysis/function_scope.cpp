@@ -774,6 +774,23 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (inTypedWrapper <= 0) {
     BlockScope::outputCPP(cg, ar);
 
+    if (isVariableArgument()) {
+      VariableTablePtr variables = getVariables();
+      for (int i = 0; i < m_maxParam; i++) {
+        const string &name = getParamName(i);
+        Symbol *sym = variables->getSymbol(name);
+        bool ref = isRefParam(i);
+        if (ref ? sym->isReseated() : sym->isLvalParam()) {
+          sym->setStashedVal();
+          TypePtr paramType = getParamType(i);
+          paramType->outputCPPDecl(cg, ar, shared_from_this());
+          string vname = Option::VariablePrefix + cg.formatLabel(name);
+          cg_printf(ref ? " v%s = ref(%s);\n" : " v%s = %s;\n",
+                    vname.c_str(), vname.c_str());
+        }
+      }
+    }
+
     if (m_closureVars) {
       cg_printf("c_Closure *closure __attribute__((__unused__)) = "
                 "(c_Closure*)extra;\n");
@@ -925,6 +942,7 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
     params = stmt->getParams();
   }
 
+  VariableTablePtr variables = getVariables();
   if (aggregateParams) {
     cg_printf("Array(");
     if (m_maxParam) {
@@ -940,10 +958,14 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
         dynamic_pointer_cast<ParameterExpression>((*params)[i]);
       isRef = !isWrapper && param->isRef();
       if (aggregateParams) {
-        cg_printf("set(v_%s", param->getName().c_str());
+        cg_printf("set(%s%s%s",
+                  variables->getSymbol(param->getName())->isStashedVal() ?
+                  "v" : "",
+                  Option::VariablePrefix, param->getName().c_str());
       } else {
-        cg_printf("%sv_%s%s",
-                  isRef ? "ref(" : "", param->getName().c_str(),
+        cg_printf("%s%s%s%s",
+                  isRef ? "ref(" : "",
+                  Option::VariablePrefix, param->getName().c_str(),
                   isRef ? ")" : "");
       }
     } else {

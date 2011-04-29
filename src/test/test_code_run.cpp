@@ -764,6 +764,25 @@ bool TestCodeRun::TestVariableArgument() {
        "var_dump($x->buz);"
        "unset($x);");
 
+  MVCR("<?php "
+       "function foo($a, $b, $c = 5) {"
+       "  if ($a) $b++;"
+       "  var_dump(func_get_args());"
+       "}"
+       "foo(1,2,3,4,5);"
+       "function bar($a, &$b, $c = 5) {"
+       "  if ($a) $b++;"
+       "  var_dump(func_get_args());"
+       "}"
+       "$b = 2;"
+       "bar(1,$b,3,4,5);"
+       "function baz($a, &$b, $c = 5) {"
+       "  if ($a) unset($b);"
+       "  var_dump(func_get_args());"
+       "}"
+       "$b = 2;"
+       "baz(1,$b,3,4,5);");
+
   return true;
 }
 

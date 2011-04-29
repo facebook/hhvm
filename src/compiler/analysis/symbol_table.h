@@ -109,6 +109,8 @@ public:
   bool isRefClosureVar() const { return m_flags.m_refClosureVar; }
   bool isClassName() const { return m_flags.m_className; }
   bool isShrinkWrapped() const { return m_flags.m_shrinkWrapped; }
+  bool isStashedVal() const { return m_flags.m_stashedVal; }
+  bool isReseated() const { return m_flags. m_reseated; }
 
   void setParameterIndex(int ix) { m_parameter = ix; }
   void setProtected() { m_flags.m_protected = true; }
@@ -131,11 +133,14 @@ public:
   void setRefClosureVar() { m_flags.m_refClosureVar = true; }
   void setClassName() { m_flags.m_className = true; }
   void setShrinkWrapped() { m_flags.m_shrinkWrapped = true; }
+  void setStashedVal() { m_flags.m_stashedVal = true; }
+  void setReseated() { m_flags.m_reseated = true; }
 
   void clearGlobal() { m_flags.m_global = false; }
   void clearUsed() { m_flags.m_used = false; }
   void clearNeeded() { m_flags.m_needed = false; }
   void clearReferenced() { m_flags.m_referenced = false; }
+  void clearReseated() { m_flags.m_reseated = false; }
 
   void update(Symbol *src) {
     m_flags_val = src->m_flags_val;
@@ -198,6 +203,8 @@ private:
       unsigned m_refClosureVar : 1;
       unsigned m_className : 1;
       unsigned m_shrinkWrapped : 1;
+      unsigned m_stashedVal : 1;
+      unsigned m_reseated : 1;
     } m_flags;
   };
   ConstructPtr        m_declaration;

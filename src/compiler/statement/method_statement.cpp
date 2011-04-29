@@ -605,16 +605,22 @@ void MethodStatement::outputParamArrayCreate(CodeGenerator &cg, bool checkRef) {
   int n = m_params->getCount();
   ASSERT(n > 0);
   cg_printf("array_createvi(%d, ", n);
+  VariableTablePtr variables = getFunctionScope()->getVariables();
   for (int i = 0; i < n; i++) {
     ParameterExpressionPtr param =
       dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
     const string &paramName = param->getName();
     cg_printf("toVPOD(");
+    const char *pre = "";
+    if (!checkRef && variables->getSymbol(paramName)->isStashedVal()) {
+      pre = "v";
+    }
+    string name = pre + (Option::VariablePrefix + cg.formatLabel(paramName));
     if (checkRef && param->isRef()) {
       ASSERT(false);
-      cg_printf("ref(%s%s)", Option::VariablePrefix, paramName.c_str());
+      cg_printf("ref(%s)", name.c_str());
     } else {
-      cg_printf("%s%s", Option::VariablePrefix, paramName.c_str());
+      cg_printf("%s", name.c_str());
     }
     cg_printf(")");
     if (i < n - 1) {

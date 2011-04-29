@@ -157,6 +157,24 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "get_class_constants",
+    'desc'   => "Get the constants of the given class.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => VariantMap,
+      'desc'   => "Returns an associative array of constants with their values."
+    ),
+    'args'   => array(
+      array(
+        'name'   => "class_name",
+        'type'   => String,
+        'desc'   => "The class name",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "get_class",
     'desc'   => "Gets the name of the class of the given object.",
     'flags'  =>  HasDocComment,

@@ -27,76 +27,97 @@ namespace HPHP {
 
 inline Array x_get_declared_classes() {
   FUNCTION_INJECTION_BUILTIN(get_declared_classes);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_declared_classes();
 }
 
 inline Array x_get_declared_interfaces() {
   FUNCTION_INJECTION_BUILTIN(get_declared_interfaces);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_declared_interfaces();
 }
 
 inline bool x_class_exists(CStrRef class_name, bool autoload = true) {
   FUNCTION_INJECTION_BUILTIN(class_exists);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_class_exists(class_name, autoload);
 }
 
 inline bool x_interface_exists(CStrRef interface_name, bool autoload = true) {
   FUNCTION_INJECTION_BUILTIN(interface_exists);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_interface_exists(interface_name, autoload);
 }
 
 inline Array x_get_class_methods(CVarRef class_or_object) {
   FUNCTION_INJECTION_BUILTIN(get_class_methods);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_class_methods(class_or_object);
 }
 
 inline Array x_get_class_vars(CStrRef class_name) {
   FUNCTION_INJECTION_BUILTIN(get_class_vars);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_class_vars(class_name);
+}
+
+inline Array x_get_class_constants(CStrRef class_name) {
+  FUNCTION_INJECTION_BUILTIN(get_class_constants);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_get_class_constants(class_name);
 }
 
 inline Variant x_get_class(CVarRef object = null_variant) {
   FUNCTION_INJECTION_BUILTIN(get_class);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_class(object);
 }
 
 inline Variant x_get_parent_class(CVarRef object = null_variant) {
   FUNCTION_INJECTION_BUILTIN(get_parent_class);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_parent_class(object);
 }
 
 inline bool x_is_a(CObjRef object, CStrRef class_name) {
   FUNCTION_INJECTION_BUILTIN(is_a);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_is_a(object, class_name);
 }
 
 inline bool x_is_subclass_of(CVarRef class_or_object, CStrRef class_name) {
   FUNCTION_INJECTION_BUILTIN(is_subclass_of);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_is_subclass_of(class_or_object, class_name);
 }
 
 inline bool x_method_exists(CVarRef class_or_object, CStrRef method_name) {
   FUNCTION_INJECTION_BUILTIN(method_exists);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_method_exists(class_or_object, method_name);
 }
 
 inline bool x_property_exists(CVarRef class_or_object, CStrRef property) {
   FUNCTION_INJECTION_BUILTIN(property_exists);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_property_exists(class_or_object, property);
 }
 
 inline Variant x_get_object_vars(CVarRef object) {
   FUNCTION_INJECTION_BUILTIN(get_object_vars);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_get_object_vars(object);
 }
 
 inline Variant x_call_user_method_array(CStrRef method_name, CVarRef obj, CArrRef paramarr) {
   FUNCTION_INJECTION_BUILTIN(call_user_method_array);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_call_user_method_array(method_name, obj, paramarr);
 }
 
 inline Variant x_call_user_method(int _argc, CStrRef method_name, CVarRef obj, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(call_user_method);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_call_user_method(_argc, method_name, obj, _argv);
 }
 

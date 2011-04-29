@@ -31582,6 +31582,21 @@ Variant ifa_hphp_recursivedirectoryiterator_key(void *extra, int count, INVOKE_F
   CVarRef arg0((a0));
   return (x_hphp_recursivedirectoryiterator_key(arg0));
 }
+Variant i_get_class_constants(void *extra, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("get_class_constants", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (x_get_class_constants(arg0));
+  }
+}
+Variant ifa_get_class_constants(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("get_class_constants", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (x_get_class_constants(arg0));
+}
 Variant i_mysql_create_db(void *extra, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) return throw_wrong_arguments("mysql_create_db", count, 1, 2, 1);
@@ -39264,6 +39279,7 @@ CallInfo ci_get_meta_tags((void*)&i_get_meta_tags, (void*)&ifa_get_meta_tags, 2,
 CallInfo ci_bzopen((void*)&i_bzopen, (void*)&ifa_bzopen, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magicknextimage((void*)&i_magicknextimage, (void*)&ifa_magicknextimage, 1, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_recursivedirectoryiterator_key((void*)&i_hphp_recursivedirectoryiterator_key, (void*)&ifa_hphp_recursivedirectoryiterator_key, 1, 0, 0x0000000000000000LL);
+CallInfo ci_get_class_constants((void*)&i_get_class_constants, (void*)&ifa_get_class_constants, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_create_db((void*)&i_mysql_create_db, (void*)&ifa_mysql_create_db, 2, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_stat((void*)&i_mysql_stat, (void*)&ifa_mysql_stat, 1, 0, 0x0000000000000000LL);
 CallInfo ci_get_object_vars((void*)&i_get_object_vars, (void*)&ifa_get_object_vars, 1, 0, 0x0000000000000000LL);
@@ -49009,6 +49025,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 6249:
       HASH_GUARD(0x246EC2B1844DB869LL, pixelgetexception) {
         ci = &ci_pixelgetexception;
+        return true;
+      }
+      break;
+    case 6254:
+      HASH_GUARD(0x0A7B34839099D86ELL, get_class_constants) {
+        ci = &ci_get_class_constants;
         return true;
       }
       break;

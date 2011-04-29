@@ -29,6 +29,7 @@ bool f_class_exists(CStrRef class_name, bool autoload = true);
 bool f_interface_exists(CStrRef interface_name, bool autoload = true);
 Array f_get_class_methods(CVarRef class_or_object);
 Array f_get_class_vars(CStrRef class_name);
+Array f_get_class_constants(CStrRef class_name);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -28,6 +28,7 @@ bool TestExtClass::RunTests(const std::string &which) {
   RUN_TEST(test_interface_exists);
   RUN_TEST(test_get_class_methods);
   RUN_TEST(test_get_class_vars);
+  RUN_TEST(test_get_class_constants);
   RUN_TEST(test_get_class);
   RUN_TEST(test_get_parent_class);
   RUN_TEST(test_is_a);
@@ -75,6 +76,12 @@ bool TestExtClass::test_get_class_methods() {
 bool TestExtClass::test_get_class_vars() {
   Array properties = f_get_class_vars("TEst");
   VS(properties, CREATE_MAP1("foo", null));
+  return Count(true);
+}
+
+bool TestExtClass::test_get_class_constants() {
+  Array constants = f_get_class_constants("test");
+  VS(constants, CREATE_MAP1("const_foo", "f"));
   return Count(true);
 }
 

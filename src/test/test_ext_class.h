@@ -33,6 +33,7 @@ class TestExtClass : public TestCppExt {
   bool test_interface_exists();
   bool test_get_class_methods();
   bool test_get_class_vars();
+  bool test_get_class_constants();
   bool test_get_class();
   bool test_get_parent_class();
   bool test_is_a();

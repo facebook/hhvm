@@ -99,6 +99,7 @@ const char *g_class_map[] = {
   (const char *)ClassInfo::IsPrivate,   "bar",
   NULL,
   /* constants */
+  "const_foo", (const char*)ClassInfo::IsInterface, "s:1:\"f\";",
   NULL,
 
   /* header */ (const char *)ClassInfo::IsInterface,
@@ -303,7 +304,7 @@ void init_static_variables() { SystemScalarArrays::initialize();}
 
 class GlobalVariables : public SystemGlobals {};
 static IMPLEMENT_THREAD_LOCAL(GlobalVariables, g_variables);
-GlobalVariables *get_global_variables_check() { return NULL;} 
+GlobalVariables *get_global_variables_check() { return NULL;}
 GlobalVariables *get_global_variables() { return g_variables.get();}
 LVariableTable *get_variable_table() { return g_variables.get(); }
 Globals *get_globals() { return g_variables.get(); }

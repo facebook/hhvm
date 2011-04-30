@@ -32,8 +32,7 @@ class c_SplObjectStorage : public ExtObjectData {
   public:
 
   // Properties
-  Variant m_objectStorage;
-  Variant m_dataStorage;
+  Variant m_storage;
   int64 m_index;
 
   // Class Map

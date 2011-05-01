@@ -37,14 +37,16 @@ extern CallInfo ci_;
 Variant c_SplObjectStorage::os_getInit(CStrRef s) {
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = s->hash();
-  switch (hash & 3) {
-    case 2:
-      HASH_RETURN_NAMSTR(0x4B27521443880CAELL, NAMSTR(s_sys_ssc0ff3081, "index"),
-                         0LL, 5);
-      break;
+  switch (hash & 7) {
     case 3:
       HASH_RETURN_NAMSTR(0x17AC96477E2B6DC3LL, NAMSTR(s_sys_ss64fc2cb1, "storage"),
                          s_sys_sa00000000, 7);
+      HASH_RETURN_NAMSTR(0x71E1A6F1ACA9872BLL, NAMSTR(s_sys_ssf45b9a33, "isValid"),
+                         false, 7);
+      break;
+    case 6:
+      HASH_RETURN_NAMSTR(0x4B27521443880CAELL, NAMSTR(s_sys_ssc0ff3081, "index"),
+                         0LL, 5);
       break;
     default:
       break;
@@ -66,6 +68,7 @@ Variant &c_SplObjectStorage::os_lval(CStrRef s) {
 void c_SplObjectStorage::o_getArray(Array &props, bool pubOnly) const {
   if (!pubOnly) if (isInitialized(m_storage)) props.lvalAt(NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage"), AccessFlags::Key).setWithRef(m_storage);
   if (!pubOnly) props.add(NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index"), m_index, true);
+  if (!pubOnly) props.add(NAMSTR(s_sys_ssa9f706a2, "\000SplObjectStorage\000isValid"), m_isValid, true);
   c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SplObjectStorage
@@ -73,6 +76,7 @@ void c_SplObjectStorage::o_getArray(Array &props, bool pubOnly) const {
 void c_SplObjectStorage::o_setArray(CArrRef props) {
   props->load(NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage"), m_storage);
   if (props->exists(NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index"))) m_index = props->get(NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index"));
+  if (props->exists(NAMSTR(s_sys_ssa9f706a2, "\000SplObjectStorage\000isValid"))) m_isValid = props->get(NAMSTR(s_sys_ssa9f706a2, "\000SplObjectStorage\000isValid"));
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SplObjectStorage
@@ -99,12 +103,13 @@ Variant * c_SplObjectStorage::o_realPropPublic(CStrRef s, int flags) const {
 Variant * c_SplObjectStorage::o_realPropPrivate(CStrRef s, int flags) const {
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = s->hash();
-  switch (hash & 3) {
-    case 2:
-      HASH_REALPROP_TYPED_STRING(0x4B27521443880CAELL, "index", 5, index);
-      break;
+  switch (hash & 7) {
     case 3:
       HASH_REALPROP_STRING(0x17AC96477E2B6DC3LL, "storage", 7, storage);
+      HASH_REALPROP_TYPED_STRING(0x71E1A6F1ACA9872BLL, "isValid", 7, isValid);
+      break;
+    case 6:
+      HASH_REALPROP_TYPED_STRING(0x4B27521443880CAELL, "index", 5, index);
       break;
     default:
       break;
@@ -149,6 +154,7 @@ void c_SplObjectStorage::cloneSet(ObjectData *cl) {
   ObjectData::cloneSet(clone);
   clone->m_storage.setWithRef(m_storage);
   clone->m_index = m_index;
+  clone->m_isValid = m_isValid;
 }
 CallInfo c_SplObjectStorage::ci_next((void*)&c_SplObjectStorage::i_next, (void*)&c_SplObjectStorage::ifa_next, 0, 4, 0x0000000000000000LL);
 CallInfo c_SplObjectStorage::ci_detach((void*)&c_SplObjectStorage::i_detach, (void*)&c_SplObjectStorage::ifa_detach, 1, 4, 0x0000000000000000LL);
@@ -788,76 +794,154 @@ struct ObjectStaticCallbacks cw_SplObjectStorage = {
 void c_SplObjectStorage::init() {
   m_storage = s_sys_sa00000000;
   m_index = 0LL;
+  m_isValid = false;
 }
-/* SRC: classes/splobjectstorage.php line 24 */
+/* SRC: classes/splobjectstorage.php line 25 */
 void c_SplObjectStorage::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::rewind);
   x_reset(ref(m_storage));
-}
-namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 37 */
-bool c_SplObjectStorage::t_valid() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::valid);
+  m_index = 0LL;
   {
-    const Variant &tmp0((x_key(ref(m_storage))));
-    return !same(tmp0, false);
+    int tmp0((x_count(m_storage)));
+    bool tmp1((more(tmp0, 0LL)));
+    m_isValid = tmp1;
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 50 */
+/* SRC: classes/splobjectstorage.php line 40 */
+bool c_SplObjectStorage::t_valid() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::valid);
+  {
+    bool tmp0 = (m_isValid);
+    if (tmp0) {
+      const Variant &tmp1((x_key(ref(m_storage))));
+      bool tmp2((x_is_null(tmp1)));
+      tmp0 = (!(tmp2));
+    }
+    return tmp0;
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/splobjectstorage.php line 53 */
 int64 c_SplObjectStorage::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::key);
   return m_index;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 62 */
+/* SRC: classes/splobjectstorage.php line 65 */
 Variant c_SplObjectStorage::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::current);
   Variant v_entry;
 
   {
-    const Variant &tmp0((x_current(m_storage)));
-    v_entry = tmp0;
+    bool tmp0;
+    {
+      MethodCallPackage mcp1;
+      mcp1.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
+      const CallInfo *cit1 __attribute__((__unused__)) = mcp1.ci;
+      tmp0 = (toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0)));
+    }
+    if (tmp0) {
+      {
+        {
+          const Variant &tmp0((x_current(m_storage)));
+          v_entry = tmp0;
+        }
+        return v_entry.rvalAt(NAMSTR(s_sys_ss0f61bd03, "obj"), AccessFlags::Error_Key);
+      }
+    }
+    else {
+      {
+        return null;
+      }
+    }
   }
-  return v_entry.rvalAt(NAMSTR(s_sys_ss0f61bd03, "obj"), AccessFlags::Error_Key);
+  return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 75 */
+/* SRC: classes/splobjectstorage.php line 82 */
 void c_SplObjectStorage::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::next);
   x_next(ref(m_storage));
   m_index++;
+  {
+    bool tmp0;
+    {
+      MethodCallPackage mcp1;
+      mcp1.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
+      const CallInfo *cit1 __attribute__((__unused__)) = mcp1.ci;
+      bool tmp2((toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0))));
+      tmp0 = (!(tmp2));
+    }
+    if (tmp0) {
+      {
+        m_isValid = false;
+      }
+    }
+  }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 88 */
+/* SRC: classes/splobjectstorage.php line 99 */
 int c_SplObjectStorage::t_count() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::count);
   return x_count(m_storage);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 92 */
+/* SRC: classes/splobjectstorage.php line 103 */
 Variant c_SplObjectStorage::t_getinfo() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::getInfo);
   Variant v_entry;
 
   {
-    const Variant &tmp0((x_current(m_storage)));
-    v_entry = tmp0;
+    bool tmp0;
+    {
+      MethodCallPackage mcp1;
+      mcp1.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
+      const CallInfo *cit1 __attribute__((__unused__)) = mcp1.ci;
+      tmp0 = (toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0)));
+    }
+    if (tmp0) {
+      {
+        {
+          const Variant &tmp0((x_current(m_storage)));
+          v_entry = tmp0;
+        }
+        return v_entry.rvalAt(NAMSTR(s_sys_ss75638ddd, "inf"), AccessFlags::Error_Key);
+      }
+    }
+    else {
+      {
+        return null;
+      }
+    }
   }
-  return v_entry.rvalAt(NAMSTR(s_sys_ss75638ddd, "inf"), AccessFlags::Error_Key);
+  return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 97 */
+/* SRC: classes/splobjectstorage.php line 112 */
 void c_SplObjectStorage::t_setinfo(CVarRef v_data) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::setInfo);
   {
-    const Variant &tmp0((x_key(ref(m_storage))));
-    Variant tmp1((v_data));
-    lval(m_storage.lvalAt(tmp0, AccessFlags::CheckExist)).set(NAMSTR(s_sys_ss75638ddd, "inf"), (tmp1), true);
+    bool tmp0;
+    {
+      MethodCallPackage mcp1;
+      mcp1.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
+      const CallInfo *cit1 __attribute__((__unused__)) = mcp1.ci;
+      tmp0 = (toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0)));
+    }
+    if (tmp0) {
+      {
+        {
+          const Variant &tmp0((x_key(ref(m_storage))));
+          Variant tmp1((v_data));
+          lval(m_storage.lvalAt(tmp0, AccessFlags::CheckExist)).set(NAMSTR(s_sys_ss75638ddd, "inf"), (tmp1), true);
+        }
+      }
+    }
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 113 */
+/* SRC: classes/splobjectstorage.php line 130 */
 bool c_SplObjectStorage::t_contains(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::contains);
   Variant v_entry;
@@ -891,7 +975,7 @@ bool c_SplObjectStorage::t_contains(CVarRef v_obj) {
   return false;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 135 */
+/* SRC: classes/splobjectstorage.php line 152 */
 void c_SplObjectStorage::t_attach(CVarRef v_obj, CVarRef v_data //  = null_variant
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::attach);
@@ -913,7 +997,7 @@ void c_SplObjectStorage::t_attach(CVarRef v_obj, CVarRef v_data //  = null_varia
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 151 */
+/* SRC: classes/splobjectstorage.php line 168 */
 void c_SplObjectStorage::t_detach(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::detach);
   Primitive v_idx = 0;
@@ -955,7 +1039,7 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 164 */
+/* SRC: classes/splobjectstorage.php line 181 */
 void c_SplObjectStorage::t_addall(CVarRef v_storage) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::addAll);
   if(!v_storage.instanceof(NAMSTR(s_sys_ssb5dda8cc, "splobjectstorage"))) {
@@ -981,7 +1065,7 @@ void c_SplObjectStorage::t_addall(CVarRef v_storage) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 170 */
+/* SRC: classes/splobjectstorage.php line 187 */
 void c_SplObjectStorage::t_removeall(CVarRef v_storage) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::removeAll);
   if(!v_storage.instanceof(NAMSTR(s_sys_ssb5dda8cc, "splobjectstorage"))) {
@@ -1003,7 +1087,7 @@ void c_SplObjectStorage::t_removeall(CVarRef v_storage) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 176 */
+/* SRC: classes/splobjectstorage.php line 193 */
 void c_SplObjectStorage::t_removeallexcept(CVarRef v_storage) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::removeAllExcept);
   if(!v_storage.instanceof(NAMSTR(s_sys_ssb5dda8cc, "splobjectstorage"))) {
@@ -1039,13 +1123,13 @@ void c_SplObjectStorage::t_removeallexcept(CVarRef v_storage) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 184 */
+/* SRC: classes/splobjectstorage.php line 201 */
 bool c_SplObjectStorage::t_offsetexists(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::offsetExists);
   return t_contains(v_obj);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 188 */
+/* SRC: classes/splobjectstorage.php line 205 */
 Variant c_SplObjectStorage::t_offsetget(Variant v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::offsetGet);
   Variant v_entry;
@@ -1080,7 +1164,7 @@ Variant c_SplObjectStorage::t_offsetget(Variant v_obj) {
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 188 */
+/* SRC: classes/splobjectstorage.php line 205 */
 Variant &c_SplObjectStorage::___offsetget_lval(Variant v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::offsetGet);
   Variant &v = get_system_globals()->__lvalProxy;
@@ -1088,7 +1172,7 @@ Variant &c_SplObjectStorage::___offsetget_lval(Variant v_obj) {
   return v;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 200 */
+/* SRC: classes/splobjectstorage.php line 217 */
 Variant c_SplObjectStorage::t_offsetset(CVarRef v_obj, CVarRef v_data //  = null_variant
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::offsetSet);
@@ -1096,7 +1180,7 @@ Variant c_SplObjectStorage::t_offsetset(CVarRef v_obj, CVarRef v_data //  = null
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/splobjectstorage.php line 204 */
+/* SRC: classes/splobjectstorage.php line 221 */
 Variant c_SplObjectStorage::t_offsetunset(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::offsetUnset);
   t_detach(v_obj);

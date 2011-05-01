@@ -127,6 +127,7 @@ StaticString s_sys_ssa7f86c5a("commit");
 StaticString s_sys_ssa812760b("isPrivate");
 StaticString s_sys_ssa93e2205("flush");
 StaticString s_sys_ssa9a8d951("isExecutable");
+StaticString s_sys_ssa9f706a2("\000SplObjectStorage\000isValid", 25);
 StaticString s_sys_ssaa14dfdd("detect");
 StaticString s_sys_ssaa916331("lasterrorcode");
 StaticString s_sys_ssab7a1dec("code");

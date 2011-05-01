@@ -34,6 +34,7 @@ class c_SplObjectStorage : public ExtObjectData {
   // Properties
   Variant m_storage;
   int64 m_index;
+  bool m_isValid;
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;

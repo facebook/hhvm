@@ -27,6 +27,7 @@ namespace HPHP {
 int64 f_ftok(CStrRef pathname, CStrRef proj);
 
 Variant f_msg_get_queue(int64 key, int64 perms = 0666);
+bool f_msg_queue_exists(int64 key);
 bool f_msg_send(CObjRef queue, int64 msgtype, CVarRef message,
                 bool serialize = true, bool blocking = true,
                 Variant errorcode = null);
@@ -53,6 +54,7 @@ Variant f_shm_attach(int64 shm_key, int64 shm_size = 10000, int64 shm_flag = 066
 bool f_shm_detach(int64 shm_identifier);
 bool f_shm_remove(int64 shm_identifier);
 Variant f_shm_get_var(int64 shm_identifier, int64 variable_key);
+bool f_shm_has_var(int64 shm_identifier, int64 variable_key);
 bool f_shm_put_var(int64 shm_identifier, int64 variable_key, CVarRef variable);
 bool f_shm_remove_var(int64 shm_identifier, int64 variable_key);
 

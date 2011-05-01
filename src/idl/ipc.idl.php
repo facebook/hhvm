@@ -98,6 +98,24 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "msg_queue_exists",
+    'desc'   => "msg_queue_exists() checks whether a message queue exists",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "Returns TRUE on success or FALSE on failure.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "key",
+        'type'   => Int64,
+        'desc'   => "Queue key.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "msg_send",
     'desc'   => "msg_send() sends a message of type msgtype (which MUST be greater than 0) to the message queue specified by queue.",
     'flags'  =>  HasDocComment,
@@ -415,6 +433,29 @@ DefineFunction(
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the variable with the given key.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "shm_identifier",
+        'type'   => Int64,
+        'desc'   => "Shared memory segment, obtained from shm_attach().",
+      ),
+      array(
+        'name'   => "variable_key",
+        'type'   => Int64,
+        'desc'   => "The variable key.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "shm_has_var",
+    'desc'   => "shm_has_var() checks whether a specific key exists inside a shared memory segment.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "Returns TRUE if the entry exists, otherwise FALSE",
     ),
     'args'   => array(
       array(

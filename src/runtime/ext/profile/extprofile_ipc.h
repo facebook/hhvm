@@ -35,6 +35,11 @@ inline Variant x_msg_get_queue(int64 key, int64 perms = 0666) {
   return f_msg_get_queue(key, perms);
 }
 
+inline bool x_msg_queue_exists(int64 key) {
+  FUNCTION_INJECTION_BUILTIN(msg_queue_exists);
+  return f_msg_queue_exists(key);
+}
+
 inline bool x_msg_send(CObjRef queue, int64 msgtype, CVarRef message, bool serialize = true, bool blocking = true, CVarRef errorcode = null) {
   FUNCTION_INJECTION_BUILTIN(msg_send);
   return f_msg_send(queue, msgtype, message, serialize, blocking, errorcode);
@@ -98,6 +103,11 @@ inline bool x_shm_remove(int64 shm_identifier) {
 inline Variant x_shm_get_var(int64 shm_identifier, int64 variable_key) {
   FUNCTION_INJECTION_BUILTIN(shm_get_var);
   return f_shm_get_var(shm_identifier, variable_key);
+}
+
+inline bool x_shm_has_var(int64 shm_identifier, int64 variable_key) {
+  FUNCTION_INJECTION_BUILTIN(shm_has_var);
+  return f_shm_has_var(shm_identifier, variable_key);
 }
 
 inline bool x_shm_put_var(int64 shm_identifier, int64 variable_key, CVarRef variable) {

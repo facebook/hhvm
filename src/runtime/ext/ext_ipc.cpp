@@ -90,6 +90,10 @@ Variant f_msg_get_queue(int64 key, int64 perms /* = 0666 */) {
   return Object(q);
 }
 
+bool f_msg_queue_exists(int64 key) {
+  return msgget(key, 0) >= 0;
+}
+
 bool f_msg_remove_queue(CObjRef queue) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
   if (!q) {
@@ -675,6 +679,19 @@ Variant f_shm_get_var(int64 shm_identifier, int64 variable_key) {
   sysvshm_chunk *shm_var =
     (sysvshm_chunk*)((char *)shm_list_ptr->ptr + shm_varpos);
   return f_unserialize(String(&shm_var->mem, shm_var->length, AttachLiteral));
+}
+
+bool f_shm_has_var(int64 shm_identifier, int64 variable_key) {
+  Lock lock(g_shm_mutex);
+  set<sysvshm_shm*>::iterator iter = g_shms.find((sysvshm_shm*)shm_identifier);
+  if (iter == g_shms.end()) {
+    raise_warning("%lld is not a SysV shared memory index", shm_identifier);
+    return false;
+  }
+  sysvshm_shm *shm_list_ptr = *iter;
+
+  long shm_varpos = check_shm_data(shm_list_ptr->ptr, variable_key);
+  return shm_varpos >= 0;
 }
 
 bool f_shm_put_var(int64 shm_identifier, int64 variable_key,

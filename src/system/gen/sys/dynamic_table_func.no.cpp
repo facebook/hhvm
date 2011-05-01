@@ -9455,7 +9455,7 @@ Variant ifa_curl_errno(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 }
 Variant i_pagelet_server_task_start(void *extra, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 3) return throw_wrong_arguments("pagelet_server_task_start", count, 1, 3, 1);
+  if (count < 1 || count > 4) return throw_wrong_arguments("pagelet_server_task_start", count, 1, 4, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -9464,17 +9464,21 @@ Variant i_pagelet_server_task_start(void *extra, CArrRef params) {
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (x_pagelet_server_task_start(arg0, arg1));
     CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    return (x_pagelet_server_task_start(arg0, arg1, arg2));
+    if (count <= 3) return (x_pagelet_server_task_start(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (x_pagelet_server_task_start(arg0, arg1, arg2, arg3));
   }
 }
 Variant ifa_pagelet_server_task_start(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count < 1 || count > 3) return throw_wrong_arguments("pagelet_server_task_start", count, 1, 3, 1);
+  if (count < 1 || count > 4) return throw_wrong_arguments("pagelet_server_task_start", count, 1, 4, 1);
   CVarRef arg0((a0));
   if (count <= 1) return (x_pagelet_server_task_start(arg0));
   CVarRef arg1((a1));
   if (count <= 2) return (x_pagelet_server_task_start(arg0, arg1));
   CVarRef arg2((a2));
-  return (x_pagelet_server_task_start(arg0, arg1, arg2));
+  if (count <= 3) return (x_pagelet_server_task_start(arg0, arg1, arg2));
+  CVarRef arg3((a3));
+  return (x_pagelet_server_task_start(arg0, arg1, arg2, arg3));
 }
 Variant i_hash_init(void *extra, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
@@ -23895,6 +23899,21 @@ Variant ifa_drawsetstrokeopacity(void *extra, int count, INVOKE_FEW_ARGS_IMPL_AR
   CVarRef arg1((a1));
   return (x_drawsetstrokeopacity(arg0, arg1), null);
 }
+Variant i_msg_queue_exists(void *extra, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("msg_queue_exists", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (x_msg_queue_exists(arg0));
+  }
+}
+Variant ifa_msg_queue_exists(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("msg_queue_exists", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (x_msg_queue_exists(arg0));
+}
 Variant i_drawroundrectangle(void *extra, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 7) return throw_wrong_arguments("drawroundrectangle", count, 7, 7, 1);
@@ -27406,6 +27425,23 @@ Variant ifa_intl_get_error_code(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARG
   if (count > 0) return throw_toomany_arguments("intl_get_error_code", 0, 1);
   return (x_intl_get_error_code());
 }
+Variant i_shm_has_var(void *extra, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("shm_has_var", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (x_shm_has_var(arg0, arg1));
+  }
+}
+Variant ifa_shm_has_var(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("shm_has_var", count, 2, 2, 1);
+  CVarRef arg0((a0));
+  CVarRef arg1((a1));
+  return (x_shm_has_var(arg0, arg1));
+}
 Variant i_imagestringup(void *extra, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 6) return throw_wrong_arguments("imagestringup", count, 6, 6, 1);
@@ -27455,6 +27491,27 @@ Variant ifa_magickgetresourcelimit(void *extra, int count, INVOKE_FEW_ARGS_IMPL_
   CVarRef arg0((a0));
   return (x_magickgetresourcelimit(arg0));
 }
+Variant i_imagecolorexact(void *extra, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 4) return throw_wrong_arguments("imagecolorexact", count, 4, 4, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (x_imagecolorexact(arg0, arg1, arg2, arg3));
+  }
+}
+Variant ifa_imagecolorexact(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 4) return throw_wrong_arguments("imagecolorexact", count, 4, 4, 1);
+  CVarRef arg0((a0));
+  CVarRef arg1((a1));
+  CVarRef arg2((a2));
+  CVarRef arg3((a3));
+  return (x_imagecolorexact(arg0, arg1, arg2, arg3));
+}
 Variant i_hphp_current_ref(void *extra, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) return throw_wrong_arguments("hphp_current_ref", count, 1, 1, 1);
@@ -27485,27 +27542,6 @@ Variant ifa_hphp_splfileinfo_getlinktarget(void *extra, int count, INVOKE_FEW_AR
   if (count != 1) return throw_wrong_arguments("hphp_splfileinfo_getlinktarget", count, 1, 1, 1);
   CVarRef arg0((a0));
   return (x_hphp_splfileinfo_getlinktarget(arg0));
-}
-Variant i_imagecolorexact(void *extra, CArrRef params) {
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 4) return throw_wrong_arguments("imagecolorexact", count, 4, 4, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-    return (x_imagecolorexact(arg0, arg1, arg2, arg3));
-  }
-}
-Variant ifa_imagecolorexact(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 4) return throw_wrong_arguments("imagecolorexact", count, 4, 4, 1);
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
-  CVarRef arg2((a2));
-  CVarRef arg3((a3));
-  return (x_imagecolorexact(arg0, arg1, arg2, arg3));
 }
 Variant i_hphp_recursivedirectoryiterator_current(void *extra, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
@@ -38035,7 +38071,7 @@ CallInfo ci_hphp_splfileinfo_getmtime((void*)&i_hphp_splfileinfo_getmtime, (void
 CallInfo ci_fmod((void*)&i_fmod, (void*)&ifa_fmod, 2, 0, 0x0000000000000000LL);
 CallInfo ci_qlzcompress((void*)&i_qlzcompress, (void*)&ifa_qlzcompress, 2, 0, 0x0000000000000000LL);
 CallInfo ci_curl_errno((void*)&i_curl_errno, (void*)&ifa_curl_errno, 1, 0, 0x0000000000000000LL);
-CallInfo ci_pagelet_server_task_start((void*)&i_pagelet_server_task_start, (void*)&ifa_pagelet_server_task_start, 3, 0, 0x0000000000000000LL);
+CallInfo ci_pagelet_server_task_start((void*)&i_pagelet_server_task_start, (void*)&ifa_pagelet_server_task_start, 4, 0, 0x0000000000000000LL);
 CallInfo ci_hash_init((void*)&i_hash_init, (void*)&ifa_hash_init, 3, 0, 0x0000000000000000LL);
 CallInfo ci_mb_strripos((void*)&i_mb_strripos, (void*)&ifa_mb_strripos, 4, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_fetch_row((void*)&i_mysql_fetch_row, (void*)&ifa_mysql_fetch_row, 1, 0, 0x0000000000000000LL);
@@ -38845,6 +38881,7 @@ CallInfo ci_pcntl_wifsignaled((void*)&i_pcntl_wifsignaled, (void*)&ifa_pcntl_wif
 CallInfo ci_openssl_pkcs7_encrypt((void*)&i_openssl_pkcs7_encrypt, (void*)&ifa_openssl_pkcs7_encrypt, 6, 0, 0x0000000000000000LL);
 CallInfo ci_read_exif_data((void*)&i_read_exif_data, (void*)&ifa_read_exif_data, 4, 0, 0x0000000000000000LL);
 CallInfo ci_drawsetstrokeopacity((void*)&i_drawsetstrokeopacity, (void*)&ifa_drawsetstrokeopacity, 2, 0, 0x0000000000000000LL);
+CallInfo ci_msg_queue_exists((void*)&i_msg_queue_exists, (void*)&ifa_msg_queue_exists, 1, 0, 0x0000000000000000LL);
 CallInfo ci_drawroundrectangle((void*)&i_drawroundrectangle, (void*)&ifa_drawroundrectangle, 7, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_directoryiterator_isdot((void*)&i_hphp_directoryiterator_isdot, (void*)&ifa_hphp_directoryiterator_isdot, 1, 0, 0x0000000000000000LL);
 CallInfo ci_drawgetstrokewidth((void*)&i_drawgetstrokewidth, (void*)&ifa_drawgetstrokewidth, 1, 0, 0x0000000000000000LL);
@@ -39039,12 +39076,13 @@ CallInfo ci_fileowner((void*)&i_fileowner, (void*)&ifa_fileowner, 1, 0, 0x000000
 CallInfo ci_imagecopymerge((void*)&i_imagecopymerge, (void*)&ifa_imagecopymerge, 9, 0, 0x0000000000000000LL);
 CallInfo ci_magickclipimage((void*)&i_magickclipimage, (void*)&ifa_magickclipimage, 1, 0, 0x0000000000000000LL);
 CallInfo ci_intl_get_error_code((void*)&i_intl_get_error_code, (void*)&ifa_intl_get_error_code, 0, 0, 0x0000000000000000LL);
+CallInfo ci_shm_has_var((void*)&i_shm_has_var, (void*)&ifa_shm_has_var, 2, 0, 0x0000000000000000LL);
 CallInfo ci_imagestringup((void*)&i_imagestringup, (void*)&ifa_imagestringup, 6, 0, 0x0000000000000000LL);
 CallInfo ci_mt_getrandmax((void*)&i_mt_getrandmax, (void*)&ifa_mt_getrandmax, 0, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetresourcelimit((void*)&i_magickgetresourcelimit, (void*)&ifa_magickgetresourcelimit, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imagecolorexact((void*)&i_imagecolorexact, (void*)&ifa_imagecolorexact, 4, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_current_ref((void*)&i_hphp_current_ref, (void*)&ifa_hphp_current_ref, 1, 0, 0x0000000000000001LL);
 CallInfo ci_hphp_splfileinfo_getlinktarget((void*)&i_hphp_splfileinfo_getlinktarget, (void*)&ifa_hphp_splfileinfo_getlinktarget, 1, 0, 0x0000000000000000LL);
-CallInfo ci_imagecolorexact((void*)&i_imagecolorexact, (void*)&ifa_imagecolorexact, 4, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_recursivedirectoryiterator_current((void*)&i_hphp_recursivedirectoryiterator_current, (void*)&ifa_hphp_recursivedirectoryiterator_current, 1, 0, 0x0000000000000000LL);
 CallInfo ci_setcookie((void*)&i_setcookie, (void*)&ifa_setcookie, 7, 0, 0x0000000000000000LL);
 CallInfo ci_fileatime((void*)&i_fileatime, (void*)&ifa_fileatime, 1, 0, 0x0000000000000000LL);
@@ -40393,6 +40431,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 591:
       HASH_GUARD(0x1D8FE8E68F7EA24FLL, pixelsetiteratorrow) {
         ci = &ci_pixelsetiteratorrow;
+        return true;
+      }
+      break;
+    case 595:
+      HASH_GUARD(0x0C9D52DBDCC18253LL, msg_queue_exists) {
+        ci = &ci_msg_queue_exists;
         return true;
       }
       break;
@@ -43725,6 +43769,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 2795:
       HASH_GUARD(0x528D41A17B8FCAEBLL, imap_set_quota) {
         ci = &ci_imap_set_quota;
+        return true;
+      }
+      break;
+    case 2807:
+      HASH_GUARD(0x654E7E6002508AF7LL, shm_has_var) {
+        ci = &ci_shm_has_var;
         return true;
       }
       break;

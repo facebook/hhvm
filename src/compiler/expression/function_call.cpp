@@ -654,7 +654,7 @@ void FunctionCall::outputDynamicCall(CodeGenerator &cg,
 void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   optimizeArgArray(ar);
   bool staticClassName = false;
-  if (!m_noStatic && !m_className.empty() && m_cppTemp.empty() &&
+  if (!m_noStatic && (m_class || !m_className.empty()) && m_cppTemp.empty() &&
       !isSelf() && !isParent() && !isStatic()) {
     if (!m_className.empty()) {
       cg_printf("STATIC_CLASS_NAME_CALL(");

@@ -16146,6 +16146,26 @@ bool TestCodeRun::TestLateStaticBinding() {
 
         "TestA::doSomething\n");
 
+  MVCRO("<?php "
+        "class X {"
+        "  public function foo($y) {"
+        "    $y::foo();"
+        "  }"
+        "}"
+        "class Y {"
+        "  public static function foo() {"
+        "    var_dump(__METHOD__);"
+        "    static::bar();"
+        "  }"
+        "  public static function bar() {"
+        "    var_dump(__METHOD__);"
+        "  }"
+        "}"
+        "$x = new X;"
+        "$x->foo('y');",
+        "string(6) \"Y::foo\"\n"
+        "string(6) \"Y::bar\"\n");
+
   return true;
 }
 

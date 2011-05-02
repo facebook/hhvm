@@ -1059,10 +1059,6 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
 
   if (m_arrayParams && func && !m_builtinFunction) func->setDirectInvoke();
 
-  if (!m_valid && m_params) {
-    m_params->markParams(canInvokeFewArgs());
-  }
-
   if (m_safe) {
     TypePtr atype = getActualType();
     if (m_safe > 0 && !m_safeDef) {

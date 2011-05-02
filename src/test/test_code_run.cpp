@@ -16157,6 +16157,7 @@ bool TestCodeRun::TestLateStaticBinding() {
   MVCRO("<?php "
         "class X {"
         "  public function foo($y) {"
+        "    call_user_func(array($y, 'foo'));"
         "    $y::foo();"
         "  }"
         "}"
@@ -16170,7 +16171,14 @@ bool TestCodeRun::TestLateStaticBinding() {
         "  }"
         "}"
         "$x = new X;"
-        "$x->foo('y');",
+        "$x->foo('y');"
+        "$x->foo(new Y);",
+        "string(6) \"Y::foo\"\n"
+        "string(6) \"Y::bar\"\n"
+        "string(6) \"Y::foo\"\n"
+        "string(6) \"Y::bar\"\n"
+        "string(6) \"Y::foo\"\n"
+        "string(6) \"Y::bar\"\n"
         "string(6) \"Y::foo\"\n"
         "string(6) \"Y::bar\"\n");
 

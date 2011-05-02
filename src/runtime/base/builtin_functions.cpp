@@ -115,10 +115,16 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
         } else if (cls->same(s_parent.get())) {
           cls = FrameInjection::GetParentClassName(true);
         }
-        return classname.toObject()->o_invoke_ex
+        return classname.getObjectData()->o_invoke_ex
           (cls, method.substr(c + 2), params, false);
       }
-      return classname.getObjectData()->o_invoke(method, params, -1, false);
+      ObjectData *obj = classname.getObjectData();
+#ifdef ENABLE_LATE_STATIC_BINDING
+      FrameInjection::StaticClassNameHelper scn(
+        ThreadInfo::s_threadInfo.getNoCheck(),
+        bound ? FrameInjection::GetClassName(true) : obj->o_getClassName());
+#endif
+      return obj->o_invoke(method, params, -1, false);
     } else {
       if (!classname.isString()) {
         throw_invalid_argument("function: classname not string");

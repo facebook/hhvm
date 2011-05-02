@@ -894,13 +894,37 @@ class Variant {
     ASSERT(getType() == KindOfString || getType() == KindOfStaticString);
     return m_type == KindOfVariant ? m_data.pvar->m_data.pstr : m_data.pstr;
   }
+  StringData *getStringDataOrNull() const {
+    // This is a necessary evil because getStringData() returns 
+    // an undefined result if this is a null variant
+    ASSERT(isNull() || is(KindOfString) || is(KindOfStaticString));
+    return m_type == KindOfVariant ?
+      (m_data.pvar->m_type <= KindOfNull ? NULL : m_data.pvar->m_data.pstr) : 
+      (m_type <= KindOfNull ? NULL : m_data.pstr);
+  }
   ArrayData *getArrayData() const {
     ASSERT(is(KindOfArray));
     return m_type == KindOfVariant ? m_data.pvar->m_data.parr : m_data.parr;
   }
+  ArrayData *getArrayDataOrNull() const {
+    // This is a necessary evil because getArrayData() returns 
+    // an undefined result if this is a null variant
+    ASSERT(isNull() || is(KindOfArray));
+    return m_type == KindOfVariant ?
+      (m_data.pvar->m_type <= KindOfNull ? NULL : m_data.pvar->m_data.parr) : 
+      (m_type <= KindOfNull ? NULL : m_data.parr);
+  }
   ObjectData *getObjectData() const {
     ASSERT(is(KindOfObject));
     return m_type == KindOfVariant ? m_data.pvar->m_data.pobj : m_data.pobj;
+  }
+  ObjectData *getObjectDataOrNull() const {
+    // This is a necessary evil because getObjectData() returns 
+    // an undefined result if this is a null variant
+    ASSERT(isNull() || is(KindOfObject));
+    return m_type == KindOfVariant ?
+      (m_data.pvar->m_type <= KindOfNull ? NULL : m_data.pvar->m_data.pobj) : 
+      (m_type <= KindOfNull ? NULL : m_data.pobj);
   }
   Variant *getVariantData() const {
     // Wrap into a referenceable form, if it isn't already.

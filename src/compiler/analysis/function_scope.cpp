@@ -16,6 +16,7 @@
 
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/analysis_result.h>
+#include <compiler/expression/constant_expression.h>
 #include <compiler/expression/modifier_expression.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/analysis/code_error.h>
@@ -394,7 +395,7 @@ void FunctionScope::setPerfectVirtual() {
 
 bool FunctionScope::needsTypeCheckWrapper() const {
   for (int i = 0; i < m_maxParam; i++) {
-    if (isRefParam(i) || !m_paramDefaults[i].empty()) continue;
+    if (isRefParam(i)) continue;
     if (TypePtr spec = m_paramTypeSpecs[i]) {
       if (Type::SameType(spec, m_paramTypes[i])) {
         return true;
@@ -413,7 +414,7 @@ const char *FunctionScope::getPrefix(ExpressionListPtr params) {
     if (count >= m_minParam) {
       for (int i = 0; i < count; i++) {
         if (i == m_maxParam) break;
-        if (isRefParam(i) || !m_paramDefaults[i].empty()) continue;
+        if (isRefParam(i)) continue;
         if (TypePtr spec = m_paramTypeSpecs[i]) {
           if (Type::SameType(spec, m_paramTypes[i])) {
             ExpressionPtr p = (*params)[i];
@@ -720,19 +721,41 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
     TypePtr specType = m_paramTypeSpecs[i];
     if (!specType) continue;
-    if (inTypedWrapper >= 0) {
-      TypePtr infType = m_paramTypes[i];
-      bool typed = !isRefParam(i) &&
-        m_paramDefaults[i].empty() &&
-        Type::SameType(specType, infType);
-      if (!typed == inTypedWrapper) continue;
-    }
 
     ParameterExpressionPtr param =
       dynamic_pointer_cast<ParameterExpression>((*params)[i]);
 
+    ConstantExpressionPtr constPtr;
+    bool isDefaultNull = 
+      param->defaultValue() && 
+      (constPtr = dynamic_pointer_cast<ConstantExpression>(
+                    param->defaultValue())) &&
+      constPtr->isNull();
+    TypePtr infType = m_paramTypes[i];
+
+    if (inTypedWrapper >= 0) {
+      bool typed = !isRefParam(i) && 
+          (Type::SameType(specType, infType) ||
+          (infType && infType->isStandardObject() && isDefaultNull));
+      // if the infType is a standard object + 
+      // we have a default null parameter, then we need to
+      // do some special runtime checks
+      if (!typed == inTypedWrapper) continue;
+    }
+
     /* Insert runtime checks. */
-    if (specType->is(Type::KindOfObject)) {
+    if (infType && infType->isStandardObject() && isDefaultNull) {
+      cg_indentBegin("if(!%s%s.isNull() && !%s%s.isObject()) {\n",
+                     Option::VariablePrefix, param->getName().c_str(),
+                     Option::VariablePrefix, param->getName().c_str());
+      cg_printf("throw_unexpected_argument_type(%d,\"%s\",\"%s\",%s%s);\n",
+                i + 1, funcName.c_str(), specType->getName().c_str(),
+                Option::VariablePrefix, param->getName().c_str());
+      if (Option::HardTypeHints) {
+        cg_printf("return%s;\n", getReturnType() ? " null" : "");
+      }
+      cg_indentEnd("}\n");
+    } else if (specType->is(Type::KindOfObject)) {
       cg_printf("if(");
       if (!m_paramDefaults[i].empty()) {
         cg_printf("!f_is_null(%s%s) && ",
@@ -751,7 +774,8 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_indentEnd("}\n");
     } else {
       cg_printf("if(");
-      if (!m_paramDefaults[i].empty()) {
+      if (!m_paramDefaults[i].empty() && 
+          (isRefParam(i) || isDefaultNull)) {
         cg_printf("!f_is_null(%s%s) && ",
                   Option::VariablePrefix, param->getName().c_str());
       }
@@ -1238,41 +1262,41 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
     if (i >= 0 && i < m_maxParam) {
       bool ref = isRefParam(i);
       int defIndex = -1;
-      bool defNull = false;
+      bool wantNullVariantNotNull = fewArgs ? i < maxCount : ref;
+      bool dftNull = false;
       if (!m_paramDefaults[i].empty() && !useDefaults) {
-        if (fewArgs ? i < maxCount : ref) {
-          Variant tmp;
-          MethodStatementPtr m(dynamic_pointer_cast<MethodStatement>(m_stmt));
-          ExpressionListPtr params = m->getParams();
-          assert(params && params->getCount() > i);
-          ParameterExpressionPtr p(
-            dynamic_pointer_cast<ParameterExpression>((*params)[i]));
-          if (p->defaultValue()->isScalar() &&
-              p->defaultValue()->getScalarValue(tmp) && tmp.isNull()) {
-            defNull = true;
-          } else if (!ref) {
-            cg_printf("TypedValue def%d;\n", i);
-            defIndex = i;
-          }
+        Variant tmp;
+        MethodStatementPtr m(dynamic_pointer_cast<MethodStatement>(m_stmt));
+        ExpressionListPtr params = m->getParams();
+        assert(params && params->getCount() > i);
+        ParameterExpressionPtr p(
+          dynamic_pointer_cast<ParameterExpression>((*params)[i]));
+        dftNull = p->defaultValue()->isScalar() &&
+          p->defaultValue()->getScalarValue(tmp) && tmp.isNull();
+        if (wantNullVariantNotNull && !dftNull && !ref) {
+          cg_printf("TypedValue def%d;\n", i);
+          defIndex = i;
         }
       }
       cg_printf("%s arg%d(", ref ? "VRefParam" : "CVarRef", i);
       if (m_paramDefaults[i].empty()) {
         if (i >= guarded) {
           if (i < maxCount) cg_printf("UNLIKELY(count <= %d) ? ", i);
-          cg_printf(ref ? "(VRefParamValue())" : "null_variant");
+          cg_printf(ref ? "(VRefParamValue())" : 
+              (wantNullVariantNotNull ? "null_variant" : "null"));
           if (i < maxCount) cg_printf(" : ");
         }
       } else if (!useDefaults) {
         bool close = false;
         if (i < maxCount) {
           cg_printf("count <= %d ? ", i);
-        } else if (!defNull && defIndex < 0) {
+        } else if (defIndex < 0) {
           cg_printf("(");
           close = true;
         }
-        if (defNull) {
-          cg_printf(ref ? "(VRefParamValue())" : "null_variant");
+        if (dftNull) {
+          cg_printf(ref ? "(VRefParamValue())" : 
+              (wantNullVariantNotNull ? "null_variant" : "null"));
         } else {
           MethodStatementPtr m(dynamic_pointer_cast<MethodStatement>(m_stmt));
           ExpressionListPtr params = m->getParams();

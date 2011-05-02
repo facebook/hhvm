@@ -118,32 +118,51 @@ void ParameterExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
+TypePtr ParameterExpression::getTypeSpecForClass(AnalysisResultPtr ar,
+                                                 bool forInference) {
+  TypePtr ret;
+  if (forInference) {
+    ClassScopePtr cls = ar->findClass(m_type);
+    if (Option::SystemGen ||
+        !cls || cls->isRedeclaring() || cls->derivedByDynamic()) {
+      if (!cls && getScope()->isFirstPass()) {
+        ConstructPtr self = shared_from_this();
+        Compiler::Error(Compiler::UnknownClass, self);
+      }
+      ret = Type::Variant;
+    }
+  }
+  if (!ret) {
+    ret = Type::CreateObjectType(m_type);
+  }
+  assert(ret);
+  return ret;
+}
+
 TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar,
                                          bool forInference) {
   const Type::TypePtrMap &types = Type::GetTypeHintTypes();
   Type::TypePtrMap::const_iterator iter;
 
   TypePtr ret;
-  if (m_type.empty() || (forInference && m_defaultValue)) {
+  if (m_type.empty()) {
     ret = Type::Some;
   } else if ((iter = types.find(m_type)) != types.end()) {
     ret = iter->second;
   } else {
-    if (forInference) {
-      ClassScopePtr cls = ar->findClass(m_type);
-      if (Option::SystemGen ||
-          !cls || cls->isRedeclaring() || cls->derivedByDynamic()) {
-        if (!cls && getScope()->isFirstPass()) {
-          ConstructPtr self = shared_from_this();
-          Compiler::Error(Compiler::UnknownClass, self);
-        }
-        ret = Type::Variant;
-      }
-    }
-    if (!ret) {
-      ret = Type::CreateObjectType(m_type);
-    }
+    ret = getTypeSpecForClass(ar, forInference);
   }
+
+  ConstantExpressionPtr p;
+  if (ret->isPrimitive() && 
+      m_defaultValue &&
+      (p = dynamic_pointer_cast<ConstantExpression>(m_defaultValue)) &&
+      p->isNull())
+    // if we have a primitive type on the LHS w/ a default 
+    // of null, then don't bother to infer it's type, since we will
+    // not specialize for this case
+    ret = Type::Some;
+
   // we still want the above to run, so to record errors and infer defaults
   if (m_ref && forInference) {
     ret = Type::Variant;
@@ -262,9 +281,25 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
     cg_printf(" = ");
     ConstantExpressionPtr con =
       dynamic_pointer_cast<ConstantExpression>(m_defaultValue);
-    if (isCVarRef && con && con->isNull()) {
-      cg_printf("null_variant");
-    } else {
+
+    bool done = false;
+    if (con && con->isNull()) {
+      done = true;
+      if (isCVarRef)
+        cg_printf("null_variant");
+      else if (paramType->is(Type::KindOfVariant) ||
+               paramType->is(Type::KindOfSome))
+        cg_printf("null");
+      else if (paramType->is(Type::KindOfObject))
+        cg_printf("Object()");
+      else if (paramType->is(Type::KindOfArray))
+        cg_printf("Array()");
+      else if (paramType->is(Type::KindOfString))
+        cg_printf("String()");
+      else 
+        done = false;
+    }
+    if (!done) {
       if (comment) {
         cg.setContext(CodeGenerator::CppParameterDefaultValueImpl);
       } else {

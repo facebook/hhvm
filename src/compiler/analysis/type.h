@@ -175,6 +175,7 @@ public:
   }
   KindOf getKindOf() const { return m_kindOf;}
   bool isInteger() const;
+  bool isStandardObject() const;
   bool isSpecificObject() const;
   bool isNonConvertibleType() const; // other types cannot convert to them
   bool isPrimitive() const {

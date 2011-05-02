@@ -48,6 +48,8 @@ public:
   void parseHandler(AnalysisResultConstPtr ar, FunctionScopePtr func,
                     ClassScopePtr cls);
 private:
+  TypePtr getTypeSpecForClass(AnalysisResultPtr ar, bool forInference);
+
   std::string m_type;
   std::string m_originalType;
   std::string m_name;

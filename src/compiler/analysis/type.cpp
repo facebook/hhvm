@@ -393,6 +393,10 @@ bool Type::isInteger() const {
   return false;
 }
 
+bool Type::isStandardObject() const {
+  return m_kindOf == KindOfObject && m_name.empty();
+}
+
 bool Type::isSpecificObject() const {
   return m_kindOf == KindOfObject && !m_name.empty();
 }

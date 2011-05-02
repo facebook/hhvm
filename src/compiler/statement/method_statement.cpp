@@ -817,24 +817,46 @@ void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
     ParameterExpressionPtr param =
       dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
     ASSERT(param);
+    ConstantExpressionPtr con =
+      dynamic_pointer_cast<ConstantExpression>(param->defaultValue());
+    bool needsNullGet = con && con->isNull();
     if (i) cg_printf(", ");
     cg_printf("%s%s", Option::VariablePrefix,
               param->getName().c_str());
     if (TypePtr spec = funcScope->getParamTypeSpec(i)) {
       if (Type::SameType(spec, funcScope->getParamType(i))) {
         if (spec->is(Type::KindOfArray)) {
-          cg_printf(".getArrayData()");
+          if (needsNullGet)
+            cg_printf(".getArrayDataOrNull()");
+          else
+            cg_printf(".getArrayData()");
         } else if (spec->is(Type::KindOfString)) {
-          cg_printf(".getStringData()");
+          if (needsNullGet)
+            cg_printf(".getStringDataOrNull()");
+          else
+            cg_printf(".getStringData()");
         } else if (spec->isSpecificObject()) {
           ClassScopePtr cls = ar->findClass(spec->getName());
           assert(cls && !cls->isRedeclaring());
-          cg_printf(".getObjectData()");
+          if (needsNullGet)
+            cg_printf(".getObjectDataOrNull()");
+          else
+            cg_printf(".getObjectData()");
         } else if (spec->isExactType()) {
           cg_printf(".");
           spec->outputCPPCast(cg, ar, funcScope);
           cg_printf("()");
         }
+      } else if (needsNullGet && 
+                 funcScope->getParamType(i)->isStandardObject()) {
+        // a standard object can only be inferred if the spec type is
+        // a specific object - also, we only do this if we have 
+        // a default value of null specified since otherwise, 
+        // the passed in parameter cannot be null anyways
+        // and we do not have to generate a special type 
+        // check in the wrapper
+        ASSERT(spec->isSpecificObject());
+        cg_printf(".getObjectDataOrNull()");
       }
     }
   }

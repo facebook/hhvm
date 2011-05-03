@@ -342,7 +342,12 @@ void ClassStatement::addVariable(ClassVariablePtr v) {
                               v->name().c_str());
   }
 
-  m_variables[v->name()] = v;
+  ClassVariablePtr &cv = m_variables[v->name()];
+  if (cv) {
+    throw FatalErrorException(0, "Cannot redeclare %s::$%s",
+                              name().c_str(), v->name().c_str());
+  }
+  cv = v;
   m_variablesVec.push_back(v);
 }
 

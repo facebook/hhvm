@@ -1115,6 +1115,8 @@ void Parser::onClassVariable(Token &out, Token *exprs, Token &name,
   if (val) {
     v = (*val)->exp();
   }
+  ParserFrameInjection fi("include", m_fileName);
+  fi.setLine(line1());
   cs->addVariable(ClassVariablePtr(
     new ClassVariable(this, name.text(), m_classVarMods, v,
                       m_scanner.detachDocComment(), cs.get())));

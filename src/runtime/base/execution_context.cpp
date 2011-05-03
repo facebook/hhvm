@@ -620,7 +620,19 @@ void ExecutionContext::handleError(const std::string &msg,
     try {
       if (!Eval::Debugger::InterruptException(String(msg))) return;
     } catch (const Eval::DebuggerClientExitException &e) {}
-    Logger::Log(true, prefix.c_str(), ee);
+
+    const char *file = NULL;
+    int line = 0;
+    if (RuntimeOption::InjectedStackTrace) {
+      ArrayPtr bt = ee.getBackTrace();
+      if (!bt->empty()) {
+        Array top = bt->rvalAt(0).toArray();
+        if (top.exists("file")) file = top.rvalAt("file").toString();
+        if (top.exists("line")) line = top.rvalAt("line");
+      }
+    }
+
+    Logger::Log(true, prefix.c_str(), ee, file, line);
   }
 }
 

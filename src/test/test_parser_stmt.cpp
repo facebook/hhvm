@@ -662,10 +662,6 @@ bool TestParserStmt::TestYieldStatement() {
   Option::EnableHipHopSyntax = true;
 
   V("<?php function foo() { yield break;}",
-    "function foo() {\n"
-    "return new Continuation('02316968161694270338_1', "
-                            "get_defined_vars());\n"
-    "}\n"
     "function (Continuation $" CONTINUATION_OBJECT_NAME ") {\n"
     "extract($" CONTINUATION_OBJECT_NAME "->getVars(), EXTR_REFS);\n"
     "switch ($" CONTINUATION_OBJECT_NAME "->getLabel()) {\n"
@@ -678,14 +674,14 @@ bool TestParserStmt::TestYieldStatement() {
     YIELD_LABEL_PREFIX "1:\n"
     "$" CONTINUATION_OBJECT_NAME "->done();\n"
     "}\n"
-   );
-
-  V("<?php function foo() { yield 123;}",
-
     "function foo() {\n"
     "return new Continuation('02316968161694270338_1', "
                             "get_defined_vars());\n"
     "}\n"
+   );
+
+  V("<?php function foo() { yield 123;}",
+
     "function (Continuation $" CONTINUATION_OBJECT_NAME ") {\n"
     "extract($" CONTINUATION_OBJECT_NAME "->getVars(), EXTR_REFS);\n"
     "switch ($" CONTINUATION_OBJECT_NAME "->getLabel()) {\n"
@@ -696,6 +692,10 @@ bool TestParserStmt::TestYieldStatement() {
     "return;\n"
     YIELD_LABEL_PREFIX "1:\n"
     "$" CONTINUATION_OBJECT_NAME "->done();\n"
+    "}\n"
+    "function foo() {\n"
+    "return new Continuation('02316968161694270338_1', "
+                            "get_defined_vars());\n"
     "}\n"
    );
 

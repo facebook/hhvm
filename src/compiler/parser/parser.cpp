@@ -161,7 +161,7 @@ Parser::Parser(Scanner &scanner, const char *fileName,
   Lock lock(m_ar->getMutex());
   m_ar->addFileScope(m_file);
 
-  m_pendingStatements.push_back(vector<StatementPtr>());
+  m_prependingStatements.push_back(vector<StatementPtr>());
 }
 
 void Parser::error(const char* fmt, ...) {
@@ -619,7 +619,7 @@ void Parser::onFunctionStart(Token &name) {
   newScope();
   m_generators.push_back(0);
   m_foreaches.push_back(0);
-  m_pendingStatements.push_back(vector<StatementPtr>());
+  m_prependingStatements.push_back(vector<StatementPtr>());
   m_funcName = name.text();
   m_hasCallToGetArgs.push_back(false);
   m_staticVars.push_back(StringToExpressionPtrVecMap());
@@ -678,7 +678,7 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
   int yieldCount = m_generators.back();
   m_generators.pop_back();
   m_foreaches.pop_back();
-  m_pendingStatements.pop_back();
+  m_prependingStatements.pop_back();
 
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
@@ -703,9 +703,9 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
     if (func->ignored()) {
       out->stmt = NEW_STMT0(StatementList);
     } else {
-      ASSERT(!m_pendingStatements.empty());
-      vector<StatementPtr> &pending = m_pendingStatements.back();
-      pending.push_back(func);
+      ASSERT(!m_prependingStatements.empty());
+      vector<StatementPtr> &prepending = m_prependingStatements.back();
+      prepending.push_back(func);
 
       create_generator(this, out, params, name, closureName, NULL, NULL,
                        hasCallToGetArgs);
@@ -856,7 +856,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   int yieldCount = m_generators.back();
   m_generators.pop_back();
   m_foreaches.pop_back();
-  m_pendingStatements.pop_back();
+  m_prependingStatements.pop_back();
 
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
@@ -940,17 +940,18 @@ void Parser::addStatement(Token &out, Token &stmts, Token &new_stmt) {
   } else {
     out->stmt = stmts->stmt;
   }
+
+  ASSERT(!m_prependingStatements.empty());
+  vector<StatementPtr> &prepending = m_prependingStatements.back();
+  if (!prepending.empty()) {
+    ASSERT(prepending.size() == 1);
+    for (unsigned i = 0; i < prepending.size(); i++) {
+      out->stmt->addElement(prepending[i]);
+    }
+    prepending.clear();
+  }
   if (new_stmt->stmt) {
     out->stmt->addElement(new_stmt->stmt);
-  }
-
-  ASSERT(!m_pendingStatements.empty());
-  vector<StatementPtr> &pending = m_pendingStatements.back();
-  if (!pending.empty()) {
-    for (unsigned i = 0; i < pending.size(); i++) {
-      out->stmt->addElement(pending[i]);
-    }
-    pending.clear();
   }
 }
 

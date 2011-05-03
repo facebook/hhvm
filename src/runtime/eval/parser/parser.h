@@ -308,7 +308,7 @@ private:
   void pushFunc(FunctionStatementPtr fs);
   void popFunc();
   std::vector<bool> m_hasCallToGetArgs;
-  std::vector<std::vector<StatementPtr> > m_pendingStatements;
+  std::vector<std::vector<StatementPtr> > m_prependingStatements;
 
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);

@@ -17086,6 +17086,23 @@ bool TestCodeRun::TestYield() {
         "int(2)\n"
         "int(4)\n");
 
+  MVCRO("<?php\n"
+        "class A {"
+        "  public function foo() {"
+        "    $this->bar(function() {yield 1; yield 2; yield 3;});"
+        "  }"
+        "  public function bar(Closure $c) {"
+        "    $a = $c();"
+        "    foreach ($a as $b) {"
+        "      echo $b.\"\\n\";"
+        "    }"
+        "  }"
+        "}"
+        "$a = new A();"
+        "$a->foo();",
+        "1\n"
+        "2\n"
+        "3\n");
   return true;
 }
 

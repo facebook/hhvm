@@ -6070,6 +6070,16 @@ bool TestCodeRun::TestUnset() {
        "var_dump((unset)$a);"
        "var_dump($a);");
 
+  MVCR("<?php "
+       "function return_true() { return true; }\n"
+       "function f(&$x, $y) {\n"
+       "  $x = $y;\n"
+       "  if (return_true())\n"
+       "    unset($x);\n"
+       "  $x = 0;\n"
+       "}\n"
+       "$myvar = 10;f($myvar, 30);var_dump($myvar);");
+
   return true;
 }
 

@@ -531,8 +531,8 @@ void AliasManager::cleanRefs(ExpressionPtr e,
             if (depth < 0) return;
           } else if (p->is(Expression::KindOfAssignmentExpression) ||
               (p->is(Expression::KindOfSimpleVariable) &&
-               (p->getContext() & Expression::Declaration) ==
-               Expression::Declaration)) {
+               ((p->getContext() & Expression::Declaration) == Expression::Declaration ||
+                (p->getContext() & (Expression::LValue | Expression::UnsetContext)) == (Expression::LValue | Expression::UnsetContext)))) {
             if (checkInterf(var, p, pIsLoad, depth, effects) == SameAccess) {
               m_accessList.erase(it, end);
               continue;

@@ -156,17 +156,10 @@ void SwitchStatement::inferTypes(AnalysisResultPtr ar) {
     allInteger = allString = false;
   }
 
-  TypePtr ret;
-  if (allInteger) {
-    ret = m_exp->inferAndCheck(ar, Type::Int64, false);
-  } else if (allString) {
-    // We're not able to do this, because switch($obj) may work on an object
-    // that didn't implement __toString(), throwing an exception, which isn't
-    // consistent with PHP.
-    //ret = m_exp->inferAndCheck(ar, Type::String, false);
-    ret = m_exp->inferAndCheck(ar, Type::Some, false);
-  } else {
-    ret = m_exp->inferAndCheck(ar, Type::Some, false);
+  TypePtr ret = m_exp->inferAndCheck(ar, Type::Some, false);
+  // these are the cases where toInt64(x) is OK for the switch statement
+  if (allInteger && (ret->is(Type::KindOfInt32) || ret->is(Type::KindOfInt64))) {
+    m_exp->setExpectedType(Type::Int64);
   }
   if (ret->is(Type::KindOfObject) && ret->isSpecificObject()) {
     m_exp->setExpectedType(Type::Object);
@@ -203,10 +196,15 @@ void SwitchStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   int labelId = cg.createNewLocalId(shared_from_this());
 
+  // if isStaticInt, then we can avoid calling hashForIntSwitch() in static case
+  bool isStaticInt = m_exp->getType()->isInteger();
+
+  bool hasSentinel   = true;
+  uint64 sentinel    = 0;
+  int64 firstNonZero = 0;
+
   bool staticCases = true;
-  if (!m_exp->getType()->isInteger()) {
-    staticCases = false;
-  } else if (m_cases) {
+  if (m_cases) {
     bool seenDefault = false;
     set<int64> seenNums;
     for (int i = 0; i < m_cases->getCount(); i++) {
@@ -218,18 +216,49 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           break;
         }
 
-        // detecting duplicate case value
         int64 num = stmt->getLiteralInteger();
+        if (num != 0 && firstNonZero == 0)
+          firstNonZero = num;
+
+        // detecting duplicate case value
         if (seenNums.find(num) != seenNums.end()) {
           staticCases = false;
           break;
         }
+
         seenNums.insert(num);
       } else {
         seenDefault = true;
       }
     }
+
+    // now scan for an available sentinel value - we only have to do this
+    // if we care (which is we will do static cases and our operand isn't
+    // known to be an int)
+    if (staticCases && !isStaticInt) {
+      while (sentinel < ULLONG_MAX) {
+        if (seenNums.find((int64)sentinel) == seenNums.end()) {
+          break;
+        }
+        sentinel++;
+      }
+      if (sentinel == ULLONG_MAX && 
+          seenNums.find((int64)sentinel) != seenNums.end())
+        hasSentinel = false;
+    }
   }
+
+  // if theres no non-zero match, then we use the sentinel to create a no-match 
+  if (firstNonZero == 0) {
+    ASSERT(!staticCases || isStaticInt || hasSentinel);
+    firstNonZero = sentinel;
+  }
+
+  // if we somehow managed to enumerate all 2^64 int literals + 
+  // we don't have statically known int switch operand, then sorry
+  // we are out of luck
+  if (staticCases && !isStaticInt && !hasSentinel)
+    staticCases = false;
 
   labelId |= CodeGenerator::InsideSwitch;
   if (staticCases) labelId |= CodeGenerator::StaticCases;
@@ -255,10 +284,40 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (staticCases) {
     cg_printf("switch (");
-    if (!var.empty()) {
-      cg_printf("%s", var.c_str());
+    if (isStaticInt) {
+      if (!var.empty()) {
+        cg_printf("%s", var.c_str());
+      } else {
+        m_exp->outputCPP(cg, ar);
+      }
     } else {
-      m_exp->outputCPP(cg, ar);
+      assert(hasSentinel);
+
+      if (m_exp->getType()->is(Type::KindOfDouble)) {
+        // double we must special case
+        cg_printf("Variant::DoubleHashForIntSwitch(");
+      }
+
+      if (!var.empty()) {
+        cg_printf("%s", var.c_str());
+      } else {
+        cg_printf("(");
+        m_exp->outputCPP(cg, ar);
+        cg_printf(")");
+      }
+
+      if (m_exp->getType()->is(Type::KindOfBoolean)) {
+        // boolean we must special case
+        cg_printf(" ? %ld : 0", firstNonZero);
+      } else if (m_exp->getType()->is(Type::KindOfDouble)) {
+        cg_printf(", %ld)", (int64) sentinel);
+      } else {
+        // at this point we must be dealing with a variable
+        // which implements hashForIntSwitch()
+        cg_printf(".hashForIntSwitch(%ld, %ld)",
+                  firstNonZero,
+                  (int64) sentinel);
+      }
     }
     cg_printf(") {\n");
     if (m_cases) m_cases->outputCPP(cg, ar);

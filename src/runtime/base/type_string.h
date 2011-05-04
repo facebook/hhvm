@@ -122,6 +122,10 @@ public:
     return m_px ? m_px->isLiteral() : true;
   }
 
+  int64 hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
+    return m_px ? m_px->hashForIntSwitch(firstNonZero, noMatch) : 0;
+  }
+
   /**
    * Take a sub-string from start with specified length. Note, read
    * http://www.php.net/substr about meanings of negative start or length.

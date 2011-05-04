@@ -91,6 +91,10 @@ class Array : public SmartPtr<ArrayData> {
   Array keys(CVarRef search_value = null_variant, bool strict = false) const;
   Array values() const;
 
+  int64 hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
+    return m_px ? noMatch : 0; 
+  }
+
   /**
    * Operators
    */

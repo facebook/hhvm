@@ -490,6 +490,44 @@ void Variant::split() {
   }
 }
 
+int64 Variant::hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
+  switch (m_type) {
+  case KindOfInt32:
+  case KindOfInt64:
+    return m_data.num;
+  case KindOfBoolean:
+    return m_data.num ? firstNonZero : 0; 
+  case KindOfDouble:
+    return Variant::DoubleHashForIntSwitch(m_data.dbl, noMatch);
+  case KindOfUninit:
+  case KindOfNull:
+    // take care of the NULLs here, so below we can assume
+    // a non null m_data field
+    return 0;
+  case KindOfStaticString:
+  case KindOfString:
+    return m_data.pstr->hashForIntSwitch(firstNonZero, noMatch);
+  case KindOfArray:
+    return noMatch;
+  case KindOfObject:
+    return m_data.pobj->o_toInt64();
+  case KindOfVariant:
+    return m_data.pvar->hashForIntSwitch(firstNonZero, noMatch);
+  default:
+    break;
+  }
+  ASSERT(false);
+  return 0;
+}
+
+int64 Variant::DoubleHashForIntSwitch(double dbl, int64 noMatch) {
+  // only matches an int if it is integral, ie
+  // "50.00" -> 50
+  // "50.12" -> no match
+  int64 t = (int64) dbl;
+  return t == dbl ? t : noMatch;
+}
+
 int Variant::getRefCount() const {
   switch (m_type) {
   case KindOfString:  return m_data.pstr->getCount();

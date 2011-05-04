@@ -412,6 +412,24 @@ bool StringData::isValidVariableName() const {
   return is_valid_var_name(data(), size());
 }
 
+int64 StringData::hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
+  int64 lval; double dval;
+  DataType ret = isNumericWithVal(lval, dval, 1);
+  switch (ret) {
+  case KindOfNull:   
+    // if the string is not a number, it matches 0
+    return 0;
+  case KindOfInt64:
+    return lval;
+  case KindOfDouble: 
+    return Variant::DoubleHashForIntSwitch(dval, noMatch);
+  default:
+    break;
+  }
+  ASSERT(false);
+  return 0;
+}
+
 bool StringData::toBoolean() const {
   return !empty() && !isZero();
 }

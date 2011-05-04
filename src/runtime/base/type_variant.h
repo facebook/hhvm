@@ -316,6 +316,16 @@ class Variant {
   bool isContagious() const { return _count == -1;}
 
   /**
+   * This method is for optimizing switch cases with all int literal
+   * cases. firstNonZero refers to the case statement which is the
+   * first non zero case in the statements. noMatch refers to a case
+   * statement which does NOT exist in the statements.
+   */
+  int64 hashForIntSwitch(int64 firstNonZero, int64 noMatch) const;
+
+  static int64 DoubleHashForIntSwitch(double dbl, int64 noMatch); 
+
+  /**
    * Whether or not there are at least two variables that are strongly bound.
    */
   bool isReferenced() const {

@@ -127,6 +127,8 @@ class StringData {
   bool isZero() const { return size() == 1 && m_data[0] == '0'; }
   bool isValidVariableName() const;
 
+  int64 hashForIntSwitch(int64 firstNonZero, int64 noMatch) const; 
+
 #ifdef TAINTED
   TaintData* getTaintData() { return &m_taint_data; }
   const TaintData& getTaintDataRef() const { return m_taint_data; }

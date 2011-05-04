@@ -73,6 +73,9 @@ class Object : public SmartPtr<ObjectData> {
   bool instanceof(CStrRef s) const {
     return m_px && m_px->o_instanceof(s);
   }
+  int64 hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
+    return m_px ? m_px->o_toInt64() : 0;
+  }
 
   ArrayIter begin(CStrRef context = null_string,
                   bool setIterDirty = false) const;

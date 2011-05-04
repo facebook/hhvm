@@ -41,13 +41,34 @@ namespace Eval {
 using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
+bool Parameter::checkTypeHint(DataType hint, DataType type) const {
+  switch (hint) {
+  case KindOfObject:
+    return type == KindOfNull;
+  case KindOfArray:
+    return (type == hint || type == KindOfNull);
+  case KindOfInt64:
+    return (type == KindOfInt64 || type == KindOfInt32);
+  case KindOfString:
+    return (type == KindOfString || type == KindOfStaticString);
+  case KindOfBoolean:
+    return type == KindOfBoolean;
+  case KindOfDouble:
+    return type == KindOfDouble;
+  default:
+    ASSERT(false);
+    break;
+  }
+  return hint == type;
+}
+
 Parameter::Parameter(CONSTRUCT_ARGS, const string &type,
                      const string &name, int idx, bool ref,
                      ExpressionPtr defVal, int argNum)
   : Construct(CONSTRUCT_PASS), m_type(type),
     m_name(Name::fromString(CONSTRUCT_PASS, name)), m_defVal(defVal),
     m_idx(idx), m_kind(KindOfNull), m_argNum(argNum),
-    m_ref(ref), m_nullDefault(false) {
+    m_ref(ref), m_nullDefault(false), m_correct(false) {
   if (!type.empty()) {
     if (parser->haveFunc()) {
       m_fnName = parser->peekFunc()->fullName();
@@ -65,34 +86,28 @@ Parameter::Parameter(CONSTRUCT_ARGS, const string &type,
       }
     }
     if (m_defVal) {
-      ScalarExpressionPtr s = m_defVal->unsafe_cast<ScalarExpression>();
-      bool correct = false;
-      if (s) {
-        DataType dtype = s->getValue().getType();
+      DummyVariableEnvironment env;
+      Variant v;
+      if (m_defVal->evalStaticScalar(env, v)) {
+        DataType dtype = v.getType();
         ASSERT(dtype != KindOfUninit);
-        m_nullDefault = dtype == KindOfNull;
-        if (m_kind == KindOfObject) {
-          correct = m_nullDefault;
-        } else if (m_kind == KindOfArray) {
-          correct = (dtype == m_kind || dtype == KindOfNull);
-        } else {
-          correct = dtype == m_kind;
-        }
-      } else {
-        ArrayExpressionPtr a = m_defVal->unsafe_cast<ArrayExpression>();
-        correct = a && m_kind == KindOfArray;
-      }
-      if (!correct) {
-        if (m_kind == KindOfArray) {
-          parser->error("Default value with array type hint can only be "
-                        "an array or NULL");
-        } else if (m_kind == KindOfObject) {
-          parser->error("Default value with a class type hint can only be "
-                        "NULL");
-        } else {
-          ASSERT(RuntimeOption::EnableHipHopSyntax);
-          parser->error("Default value need to have the same type as "
-                        "the type hint");
+        m_nullDefault = (dtype == KindOfNull &&
+                         m_defVal->unsafe_cast<ScalarExpression>());
+        if (!checkTypeHint(m_kind, dtype)) {
+          if (m_kind == KindOfArray) {
+            parser->error("Default value with array type hint can only be "
+                          "an array or NULL");
+          } else if (m_kind == KindOfObject) {
+            parser->error("Default value with a class type hint can only be "
+                          "NULL");
+          } else {
+            ASSERT(RuntimeOption::EnableHipHopSyntax);
+            parser->error("Default value need to have the same type as "
+                          "the type hint");
+          }
+        } else if (m_defVal->unsafe_cast<ScalarExpression>() ||
+                   m_defVal->unsafe_cast<ArrayExpression>()) {
+          m_correct = true;
         }
       }
     }
@@ -121,8 +136,25 @@ void Parameter::bind(VariableEnvironment &env, CVarRef val,
 
 void Parameter::bindDefault(VariableEnvironment &env) const {
   if (m_defVal) {
-    Variant val = m_defVal->eval(env);
-    *env.getIdx(m_idx) = val;
+    Variant v = m_defVal->eval(env);
+    if (hasTypeHint() && !m_correct) {
+      DataType dtype = v.getType();
+      ASSERT(dtype != KindOfUninit);
+      if (!checkTypeHint(m_kind, dtype)) {
+        if (m_kind == KindOfArray) {
+          raise_error("Default value with array type hint can only be "
+                      "an array or NULL");
+        } else if (m_kind == KindOfObject) {
+          raise_error("Default value with a class type hint can only be "
+                      "NULL");
+        } else {
+          ASSERT(RuntimeOption::EnableHipHopSyntax);
+          raise_error("Default value need to have the same type as "
+                      "the type hint");
+        }
+      }
+    }
+    *env.getIdx(m_idx) = v;
   }
 }
 

@@ -68,6 +68,9 @@ private:
   int m_argNum;
   bool m_ref;
   bool m_nullDefault;
+  bool m_correct;
+private:
+  bool checkTypeHint(DataType hint, DataType type) const;
 };
 
 class FunctionStatement : public Statement, public Block, public Function {

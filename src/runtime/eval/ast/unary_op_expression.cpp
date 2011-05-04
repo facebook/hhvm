@@ -61,6 +61,22 @@ Variant UnaryOpExpression::eval(VariableEnvironment &env) const {
   }
 }
 
+bool UnaryOpExpression::evalStaticScalar(VariableEnvironment &env, Variant &r)
+  const {
+  ASSERT(m_exp);
+  Variant exp;
+  if (!m_exp->evalStaticScalar(env, exp)) return false;
+  switch (m_op) {
+  case '+':           r = +exp;
+  case '-':           r = negate(exp);
+  default:
+    ASSERT(false);
+    r = null;
+    return false;
+  }
+  return true;
+}
+
 Variant UnaryOpExpression::refval(VariableEnvironment &env,
     int strict /* = 2 */) const {
   return ref(Expression::refval(env, strict));

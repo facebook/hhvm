@@ -15,8 +15,11 @@
 */
 
 #include <runtime/eval/ast/class_constant_expression.h>
+#include <runtime/eval/ast/class_statement.h>
 #include <runtime/eval/runtime/eval_state.h>
+#include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/eval/ast/name.h>
+#include <runtime/eval/eval.h>
 
 using namespace std;
 
@@ -33,6 +36,15 @@ Variant ClassConstantExpression::eval(VariableEnvironment &env) const {
   check_recursion(info);
   String cls = m_class->get(env);
   return get_class_constant(cls.c_str(), m_constant.c_str());
+}
+
+bool ClassConstantExpression::evalStaticScalar(VariableEnvironment &env,
+                                               Variant &r) const {
+  String cls = m_class->get(env);
+  const char *s = cls.c_str();
+  const char *constant = m_constant.c_str();
+  if (eval_get_class_constant_hook(r, s, constant)) return true;
+  return false;
 }
 
 void ClassConstantExpression::dump(std::ostream &out) const {

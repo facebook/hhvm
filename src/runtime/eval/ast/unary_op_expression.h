@@ -29,6 +29,7 @@ class UnaryOpExpression : public Expression {
 public:
   UnaryOpExpression(EXPRESSION_ARGS, ExpressionPtr exp, int op, bool front);
   virtual Variant eval(VariableEnvironment &env) const;
+  virtual bool evalStaticScalar(VariableEnvironment &env, Variant &r) const;
   virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
   virtual void dump(std::ostream &out) const;
   int getOp() const { return m_op; }

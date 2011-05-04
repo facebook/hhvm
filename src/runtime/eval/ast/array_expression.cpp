@@ -101,6 +101,21 @@ Variant ArrayExpression::eval(VariableEnvironment &env) const {
   return arr;
 }
 
+bool ArrayExpression::evalStaticScalar(VariableEnvironment &env, Variant &r)
+  const {
+  Array arr(Array::Create());
+  for (std::vector<ArrayPairPtr>::const_iterator it = m_elems.begin();
+       it != m_elems.end(); ++it) {
+    if (!(*it)->checkStaticScalar(env)) {
+      r = null;
+      return false;
+    }
+    (*it)->set(env, arr);
+  }
+  r = arr;
+  return true;
+}
+
 void ArrayExpression::dump(std::ostream &out) const {
   out << "array(";
   dumpVector(out, m_elems);

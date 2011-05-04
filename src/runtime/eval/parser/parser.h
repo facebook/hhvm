@@ -288,6 +288,7 @@ public:
   const Block::VariableIndices &varIndices() const {
     return m_fileBlock.varIndices();
   }
+
 private:
   Block m_fileBlock; // for pseudomain variables
   std::vector<ExpressionPtr> m_objects; // for parsing obj prop/method calls

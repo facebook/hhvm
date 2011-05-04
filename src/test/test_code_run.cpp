@@ -17142,7 +17142,17 @@ bool TestCodeRun::TestHint() {
         "}",
         "string(16) \"l, d-M-y H:i:s T\"\n"
         "int(0)\n");
-
+  MVCRO("<?php\n"
+        "class Foo {"
+        "  const BAR = 1;"
+        "}"
+        "function test(int $a = -Foo::BAR) {"
+        "return $a;"
+        "}"
+        "var_dump(test());"
+        "var_dump(test(2));",
+        "int(-1)\n"
+        "int(2)\n");
   return true;
 }
 

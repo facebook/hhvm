@@ -37,6 +37,9 @@ public:
   Expression(const Location *loc) : Construct(loc) {}
   virtual ~Expression() {}
   virtual Variant eval(VariableEnvironment &env) const = 0;
+  virtual bool evalStaticScalar(VariableEnvironment &env, Variant &r) const {
+    throw FatalErrorException("evalStaticScalar not implemented.");
+  }
   virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
   virtual bool exist(VariableEnvironment &env, int op) const;
   virtual Variant evalExist(VariableEnvironment &env) const;

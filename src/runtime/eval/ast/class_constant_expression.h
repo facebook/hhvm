@@ -31,6 +31,7 @@ public:
  ClassConstantExpression(EXPRESSION_ARGS, const NamePtr &cls,
                          const std::string &constant);
   virtual Variant eval(VariableEnvironment &env) const;
+  virtual bool evalStaticScalar(VariableEnvironment &env, Variant &r) const;
   virtual void dump(std::ostream &out) const;
 private:
   NamePtr m_class;

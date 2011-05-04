@@ -817,6 +817,7 @@ static int execute_program_impl(int argc, char **argv) {
   }
 
   if (!po.parse.empty()) {
+    hphp_process_init();
     std::vector<Eval::StaticStatementPtr> statics;
     Eval::Block::VariableIndices variableIndices;
     Eval::Parser::Reset();

@@ -16,6 +16,7 @@
 
 #include <runtime/eval/ast/constant_expression.h>
 #include <runtime/base/externals.h>
+#include <runtime/ext/ext_misc.h>
 
 namespace HPHP {
 namespace Eval {
@@ -28,6 +29,15 @@ ConstantExpression::ConstantExpression(EXPRESSION_ARGS,
 
 Variant ConstantExpression::eval(VariableEnvironment &env) const {
   return get_constant(m_constant);
+}
+
+bool ConstantExpression::evalStaticScalar(VariableEnvironment &env,
+  Variant &r) const {
+  if (f_defined(m_constant)) {
+    r = get_constant(m_constant);
+    return true;
+  }
+  return false;
 }
 
 void ConstantExpression::dump(std::ostream &out) const {

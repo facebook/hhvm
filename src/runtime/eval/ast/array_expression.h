@@ -33,6 +33,8 @@ public:
   ArrayPair(CONSTRUCT_ARGS);
   ArrayPair(CONSTRUCT_ARGS, ExpressionPtr key);
   virtual void set(VariableEnvironment &env, Array &arr) const = 0;
+  virtual bool checkStaticScalar(VariableEnvironment &env) const
+    = 0;
 protected:
   ExpressionPtr m_key;
   Variant key(VariableEnvironment &env) const;
@@ -44,6 +46,11 @@ public:
   ArrayPairVal(CONSTRUCT_ARGS, ExpressionPtr val);
   virtual void set(VariableEnvironment &env, Array &arr) const;
   virtual void dump(std::ostream &out) const;
+  virtual bool checkStaticScalar(VariableEnvironment &env) const {
+    Variant r; 
+    return (!m_key || m_key->evalStaticScalar(env, r)) &&
+           m_val->evalStaticScalar(env, r);
+  }
 private:
   ExpressionPtr m_val;
   Variant val(VariableEnvironment &env) const;
@@ -55,6 +62,9 @@ public:
   ArrayPairRef(CONSTRUCT_ARGS, LvalExpressionPtr val);
   virtual void set(VariableEnvironment &env, Array &arr) const;
   virtual void dump(std::ostream &out) const;
+  virtual bool checkStaticScalar(VariableEnvironment &env) const {
+    throw FatalErrorException("evalStaticScalar not implemented.");
+  }
 private:
   LvalExpressionPtr m_val;
   Variant &val(VariableEnvironment &env) const;
@@ -64,6 +74,7 @@ class ArrayExpression : public Expression {
 public:
   ArrayExpression(EXPRESSION_ARGS, const std::vector<ArrayPairPtr> &elems);
   virtual Variant eval(VariableEnvironment &env) const;
+  virtual bool evalStaticScalar(VariableEnvironment &env, Variant &r) const;
   virtual void dump(std::ostream &out) const;
 private:
   std::vector<ArrayPairPtr> m_elems;

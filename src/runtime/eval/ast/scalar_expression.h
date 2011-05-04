@@ -35,6 +35,10 @@ public:
   ScalarExpression(EXPRESSION_ARGS, int type, const std::string &val,
                    int subtype = 0);
   virtual Variant eval(VariableEnvironment &env) const;
+  virtual bool evalStaticScalar(VariableEnvironment &env, Variant &r) const {
+    r = eval(env);
+    return true;
+  }
   Variant getValue() const;
   virtual void dump(std::ostream &out) const;
 private:

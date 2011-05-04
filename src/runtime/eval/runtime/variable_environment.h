@@ -19,6 +19,7 @@
 
 #include <runtime/eval/runtime/assoc_list.h>
 #include <runtime/eval/base/eval_base.h>
+#include <runtime/eval/ast/class_statement.h>
 #include <stack>
 
 namespace HPHP {

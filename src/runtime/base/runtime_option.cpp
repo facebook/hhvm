@@ -98,6 +98,7 @@ std::string RuntimeOption::DefaultServerNameSuffix;
 std::string RuntimeOption::ServerIP;
 std::string RuntimeOption::ServerPrimaryIP;
 int RuntimeOption::ServerPort;
+int RuntimeOption::ServerPortFd = -1;
 int RuntimeOption::ServerBacklog = 128;
 int RuntimeOption::ServerConnectionLimit = 0;
 int RuntimeOption::ServerThreadCount = 50;
@@ -150,6 +151,7 @@ int RuntimeOption::RequestBodyReadLimit = -1;
 
 bool RuntimeOption::EnableSSL = false;
 int RuntimeOption::SSLPort = 443;
+int RuntimeOption::SSLPortFd = -1;
 std::string RuntimeOption::SSLCertificateFile;
 std::string RuntimeOption::SSLCertificateKeyFile;
 

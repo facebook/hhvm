@@ -48,6 +48,9 @@ public:
   bool TestRequestHandling();
   bool TestLibeventServer();
 
+  // test inheriting server fd
+  bool TestInheritFdServer();
+
   // test HttpClient class that proxy server uses
   bool TestHttpClient();
 
@@ -69,6 +72,8 @@ protected:
                             bool responseHeader,
                             const char *file = "", int line = 0,
                             int port = 0);
+  bool PreBindSocket();
+  void CleanupPreBoundSocket();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -104,6 +109,12 @@ protected:
   if (!Count(VerifyServerResponse(input, output, url, method, header,   \
                                   postdata, false, __FILE__,__LINE__))) \
     return false;
+
+#define WITH_PREBOUND_SOCKET(action) \
+  if (!PreBindSocket()) \
+    return false; \
+  action \
+  CleanupPreBoundSocket();
 
 ///////////////////////////////////////////////////////////////////////////////
 

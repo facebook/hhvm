@@ -78,6 +78,8 @@ struct ProgramOptions {
   string     config;
   StringVec  confStrings;
   int        port;
+  int        portfd;
+  int        sslportfd;
   int        admin_port;
   string     user;
   string     file;
@@ -650,6 +652,10 @@ static int execute_program_impl(int argc, char **argv) {
      "name can be any valid configuration for a config file")
     ("port,p", value<int>(&po.port)->default_value(-1),
      "start an HTTP server at specified port")
+    ("port-fd", value<int>(&po.portfd)->default_value(-1),
+     "use specified fd instead of creating a socket")
+    ("ssl-port-fd", value<int>(&po.sslportfd)->default_value(-1),
+     "use specified fd for SSL instead of creating a socket")
     ("admin-port", value<int>(&po.admin_port)->default_value(-1),
      "start admin listener at specified port")
     ("debug-host,h", value<string>(&po.debugger_options.host),
@@ -765,6 +771,12 @@ static int execute_program_impl(int argc, char **argv) {
   RuntimeOption::BuildId = po.buildId;
   if (po.port != -1) {
     RuntimeOption::ServerPort = po.port;
+  }
+  if (po.portfd != -1) {
+    RuntimeOption::ServerPortFd = po.portfd;
+  }
+  if (po.sslportfd != -1) {
+    RuntimeOption::SSLPortFd = po.sslportfd;
   }
   if (po.admin_port != -1) {
     RuntimeOption::AdminServerPort = po.admin_port;

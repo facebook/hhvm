@@ -16,6 +16,7 @@
 
 #include <runtime/base/server/http_server.h>
 #include <runtime/base/server/libevent_server.h>
+#include <runtime/base/server/libevent_server_with_fd.h>
 #include <runtime/base/server/libevent_server_with_takeover.h>
 #include <runtime/base/server/http_request_handler.h>
 #include <runtime/base/server/admin_request_handler.h>
@@ -60,7 +61,16 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
   // enabling mutex profiling, but it's not turned on
   LockProfiler::s_pfunc_profile = server_stats_log_mutex;
 
-  if (RuntimeOption::TakeoverFilename.empty()) {
+  if (RuntimeOption::ServerPortFd != -1 || RuntimeOption::SSLPortFd != -1) {
+    LibEventServerWithFd* server =
+      (new TypedServer<LibEventServerWithFd, HttpRequestHandler>
+       (RuntimeOption::ServerIP, RuntimeOption::ServerPort,
+        RuntimeOption::ServerThreadCount,
+        RuntimeOption::RequestTimeoutSeconds));
+    server->setServerSocketFd(RuntimeOption::ServerPortFd);
+    server->setSSLSocketFd(RuntimeOption::SSLPortFd);
+    m_pageServer = ServerPtr(server);
+  } else if (RuntimeOption::TakeoverFilename.empty()) {
     m_pageServer = ServerPtr
       (new TypedServer<LibEventServer, HttpRequestHandler>
        (RuntimeOption::ServerIP, RuntimeOption::ServerPort,

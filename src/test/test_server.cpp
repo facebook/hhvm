@@ -43,6 +43,7 @@ TestServer::TestServer() {
 }
 
 static int s_server_port = 0;
+static int inherit_fd = -1;
 
 bool TestServer::VerifyServerResponse(const char *input, const char *output,
                                       const char *url, const char *method,
@@ -130,16 +131,18 @@ bool TestServer::VerifyServerResponse(const char *input, const char *output,
 void TestServer::RunServer() {
   string out, err;
   string portConfig = "Server.Port=" + lexical_cast<string>(s_server_port);
+  string fd = lexical_cast<string>(inherit_fd);
+
   if (Option::EnableEval < Option::FullEval) {
     const char *argv[] = {"", "--mode=server",
                           "--config=test/config-server.hdf", "-v",
-                          portConfig.c_str(), NULL};
+                          portConfig.c_str(), "--port-fd", fd.c_str(), NULL};
     Process::Exec("runtime/tmp/TestServer/test", argv, NULL, out, &err);
   } else {
     const char *argv[] = {"", "--file=/unittest/rootdoc/string",
                           "--mode=server", portConfig.c_str(), "-v",
                           "--config=test/config-eval.hdf",
-                          portConfig.c_str(), NULL};
+                          portConfig.c_str(), "--port-fd", fd.c_str(), NULL};
     Process::Exec("hphpi/hphpi", argv, NULL, out, &err);
   }
 }
@@ -169,6 +172,7 @@ bool TestServer::RunTests(const std::string &which) {
   // This needs to be the 1st, so to find a good server port.
   RUN_TEST(TestLibeventServer);
 
+  RUN_TEST(TestInheritFdServer);
   RUN_TEST(TestSanity);
   RUN_TEST(TestServerVariables);
   RUN_TEST(TestGet);
@@ -420,6 +424,64 @@ bool TestServer::TestLibeventServer() {
     }
   }
   return Count(true);
+}
+
+static bool PreBindSocketHelper(struct addrinfo *info) {
+  if (info->ai_family != AF_INET && info->ai_family != AF_INET6) {
+    printf("No IPV4/6 interface found.\n");
+    return false;
+  }
+
+  int fd = socket(info->ai_family, SOCK_STREAM, IPPROTO_TCP);
+  if (fd < 0) {
+    printf("Error creating socket: %s\n", strerror(errno));
+    return false;
+  }
+
+  int ret = bind(fd, info->ai_addr, info->ai_addrlen);
+  if (ret < 0) {
+    printf("Error binding socket to port %d: %s\n", s_server_port,
+        strerror(errno));
+    return false;
+  }
+
+  inherit_fd = fd;
+  return true;
+}
+
+bool TestServer::PreBindSocket() {
+  struct addrinfo hints, *res, *res0;
+  std::memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_flags = AI_PASSIVE | AI_ADDRCONFIG;
+
+  if (getaddrinfo(NULL, lexical_cast<string>(s_server_port).c_str(),
+                  &hints, &res0) < 0) {
+    printf("Error in getaddrinfo(): %s\n", strerror(errno));
+    return false;
+  }
+
+  for (res = res0; res; res = res->ai_next) {
+    if (res->ai_family == AF_INET6 || res->ai_next == NULL) {
+      break;
+    }
+  }
+
+  bool ret = PreBindSocketHelper(res);
+  freeaddrinfo(res0);
+  return ret;
+}
+
+void TestServer::CleanupPreBoundSocket() {
+  close(inherit_fd);
+  inherit_fd = -1;
+}
+
+bool TestServer::TestInheritFdServer() {
+  WITH_PREBOUND_SOCKET(VSR("<?php print 'Hello, World!';",
+      "Hello, World!"));
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

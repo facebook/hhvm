@@ -26,5 +26,9 @@ Object toObject(ArrayData *v) {
   return v ? v->toObject() : Object(SystemLib::AllocStdClassObject());
 }
 
+Object toObject(ObjectData *v) {
+  return v ? v : SystemLib::AllocStdClassObject();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

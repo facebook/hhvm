@@ -131,12 +131,12 @@ inline String toString(int     v) { return (int64)v;}
 inline String toString(int64   v) { return v;}
 inline String toString(double  v) { return v;}
 inline String toString(litstr  v) { return v;}
-inline String toString(StringData *v) { return v;}
-inline String toString(CStrRef v) { return v;}
+inline String toString(StringData *v) { return v ? String(v) : String("");}
+inline String toString(CStrRef v) { return toString(v.get());}
 inline String toString(const ArrayData *v) { return v ? "Array" : "";}
 inline String toString(CArrRef v) { return toString(v.get());}
 inline String toString(ObjectData *v) {
-  return v ? v->t___tostring() : String();
+  return v ? v->t___tostring() : String("");
 }
 inline String toString(CObjRef v) { return toString(v.get());}
 inline String toString(CVarRef v) { return v.toString();}
@@ -148,12 +148,14 @@ inline Array toArray(int     v) { return Array::Create(v);}
 inline Array toArray(int64   v) { return Array::Create(v);}
 inline Array toArray(double  v) { return Array::Create(v);}
 inline Array toArray(litstr  v) { return Array::Create(v);}
-inline Array toArray(StringData *v) { return Array::Create(v);}
-inline Array toArray(CStrRef v) { return Array::Create(v);}
-inline Array toArray(ArrayData *v) { return v;}
-inline Array toArray(CArrRef v) { return v;}
+inline Array toArray(StringData *v) {
+  return v ? Array::Create(v) : Array::Create();
+}
+inline Array toArray(CStrRef v) { return toArray(v.get());}
+inline Array toArray(ArrayData *v) { return v ? Array(v) : Array::Create();}
+inline Array toArray(CArrRef v) { return toArray(v.get());}
 inline Array toArray(const ObjectData *v) {
-  return v ? v->o_toArray() : Array();
+  return v ? v->o_toArray() : Array::Create();
 }
 inline Array toArray(CObjRef v) { return toArray(v.get());}
 inline Array toArray(CVarRef v) { return v.toArray();}
@@ -169,8 +171,8 @@ inline Object toObject(const StringData *v) { return Variant(v).toObject();}
 inline Object toObject(CStrRef v) { return Variant(v).toObject();}
 Object toObject(ArrayData *v);
 inline Object toObject(CArrRef v) { return toObject(v.get());}
-inline Object toObject(ObjectData *v) { return v;}
-inline Object toObject(CObjRef v) { return v;}
+Object toObject(ObjectData *v);
+inline Object toObject(CObjRef v) { return toObject(v.get());}
 inline Object toObject(CVarRef v) { return v.toObject();}
 
 inline const String *const toSPOD(CStrRef v) { return &v;}

@@ -693,69 +693,81 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     return;
   }
 
+  const char *cstr = 0;
   if (m_front) {
     switch (m_op) {
-    case T_CLONE:         cg_printf("f_clone(");   break;
-    case T_INC:           cg_printf("++");         break;
-    case T_DEC:           cg_printf("--");         break;
-    case '+':             cg_printf("+");          break;
-    case '-':             cg_printf("negate(");    break;
-    case '!':             cg_printf("!(");         break;
-    case '~':             cg_printf("~");          break;
-    case T_INT_CAST:      cg_printf("(");          break;
-    case T_DOUBLE_CAST:   cg_printf("(");          break;
-    case T_STRING_CAST:   cg_printf("(");          break;
-    case T_ARRAY_CAST:    cg_printf("(");          break;
-    case T_OBJECT_CAST:   cg_printf("(");          break;
-    case T_BOOL_CAST:     cg_printf("(");          break;
-    case T_UNSET_CAST:
-      if (m_exp->isScalar()) {
-        cg_printf("(null)");
-        return;
-      }
-      if (m_exp->hasCPPTemp()) {
-        cg_printf("(id(");
-      } else {
-        cg_printf("(");
-      }
-      break;
-    case T_EXIT:          cg_printf("f_exit(");    break;
-    case T_ARRAY:
-      cg_printf("Array(");
-      break;
-    case T_PRINT:         cg_printf("print(");     break;
-    case T_EVAL:
-      if (Option::EnableEval > Option::NoEval) {
-        bool instance;
-        if (getClassScope()) {
-          FunctionScopePtr fs = getFunctionScope();
-          instance = fs && !fs->isStatic();
+      case T_CLONE:         cg_printf("f_clone(");   break;
+      case T_INC:           cg_printf("++");         break;
+      case T_DEC:           cg_printf("--");         break;
+      case '+':             cg_printf("+");          break;
+      case '-':             cg_printf("negate(");    break;
+      case '!':             cg_printf("!(");         break;
+      case '~':             cg_printf("~");          break;
+      case T_INT_CAST:      cg_printf("(");          break;
+      case T_DOUBLE_CAST:   cg_printf("(");          break;
+      case T_STRING_CAST:   cstr = "String"; goto null_cast;
+      case T_ARRAY_CAST:    cstr = "Array"; goto null_cast;
+      case T_OBJECT_CAST:   cstr = "Object"; goto null_cast;
+      null_cast: {
+        TypePtr at = m_exp->getActualType();
+        TypePtr et = m_exp->getType();
+        TypePtr it = m_exp->getCPPType();
+        if (at && Type::SameType(at, et) && Type::SameType(it, at)) {
+          cg_printf("to%s(", cstr);
         } else {
-          instance = false;
+          cg_printf("(");
         }
-        cg_printf("eval(%s, Object(%s), ",
-                  getScope()->inPseudoMain() ?
-                  "get_variable_table()" : "variables",
-                  instance ? "this" : "");
-      } else {
-        cg_printf("f_eval(");
+        break;
       }
-      break;
-    case '@':
-      if (m_silencer >= 0) {
-        cg_printf("(%s%d.enable(),%s%d.disable(",
-                  Option::SilencerPrefix, m_silencer,
-                  Option::SilencerPrefix, m_silencer);
-      }
-      break;
-    case T_FILE:
-      cg_printf("get_source_filename(\"%s\")", getLocation()->file);
-      break;
-    case T_DIR:
-      cg_printf("get_source_filename(\"%s\", true)", getLocation()->file);
-      break;
-    default:
-      ASSERT(false);
+      case T_BOOL_CAST:     cg_printf("(");          break;
+      case T_UNSET_CAST:
+        if (m_exp->isScalar()) {
+          cg_printf("(null)");
+          return;
+        }
+        if (m_exp->hasCPPTemp()) {
+          cg_printf("(id(");
+        } else {
+          cg_printf("(");
+        }
+        break;
+      case T_EXIT:          cg_printf("f_exit(");    break;
+      case T_ARRAY:
+        cg_printf("Array(");
+        break;
+      case T_PRINT:         cg_printf("print(");     break;
+      case T_EVAL:
+        if (Option::EnableEval > Option::NoEval) {
+          bool instance;
+          if (getClassScope()) {
+            FunctionScopePtr fs = getFunctionScope();
+            instance = fs && !fs->isStatic();
+          } else {
+            instance = false;
+          }
+          cg_printf("eval(%s, Object(%s), ",
+                    getScope()->inPseudoMain() ?
+                    "get_variable_table()" : "variables",
+                    instance ? "this" : "");
+        } else {
+          cg_printf("f_eval(");
+        }
+        break;
+      case '@':
+        if (m_silencer >= 0) {
+          cg_printf("(%s%d.enable(),%s%d.disable(",
+                    Option::SilencerPrefix, m_silencer,
+                    Option::SilencerPrefix, m_silencer);
+        }
+        break;
+      case T_FILE:
+        cg_printf("get_source_filename(\"%s\")", getLocation()->file);
+        break;
+      case T_DIR:
+        cg_printf("get_source_filename(\"%s\", true)", getLocation()->file);
+        break;
+      default:
+        ASSERT(false);
     }
   }
 

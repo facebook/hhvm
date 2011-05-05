@@ -5961,6 +5961,16 @@ bool TestCodeRun::TestComparisons() {
        "  var_dump($obj == $a);"
        "}"
        "foo(false);");
+
+  MVCR("<?php\n"
+       "$x = (object)null;\n"
+       "var_dump ($x == 1 && 1 == $x);\n"
+       "var_dump ($x == 1.0 && 1.0 == $x);\n"
+       "var_dump ($x > 0);\n"
+       "var_dump ($x >= 1);\n"
+       "var_dump ($x < 5);\n"
+       "var_dump ($x <= 1);\n");
+
   return true;
 }
 

@@ -1333,6 +1333,7 @@ void MethodCallPackage::methodCall(ObjectData *self, CStrRef method,
   self->o_get_call_info(*this, prehash);
 }
 
+__attribute__ ((section (".text.hot")))
 void MethodCallPackage::methodCall(CVarRef self, CStrRef method,
                                    int64 prehash /* = -1 */) {
   isObj = true;
@@ -1464,6 +1465,7 @@ void MethodCallPackage::lateStaticBind(ThreadInfo *ti) {
 #endif
 }
 
+__attribute__ ((section (".text.hot")))
 const CallInfo *MethodCallPackage::bindClass(FrameInjection &fi) {
 #ifdef ENABLE_LATE_STATIC_BINDING
   if (ci->m_flags & CallInfo::StaticMethod) {

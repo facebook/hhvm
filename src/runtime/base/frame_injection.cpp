@@ -333,33 +333,39 @@ ObjectData *FrameInjectionFunction::getThisForArrow() {
   throw FatalErrorException("Using $this when not in object context");
 }
 
+__attribute__ ((section (".text.hot")))
 FIFunctionMem::FIFunctionMem(const char *name)
   : FrameInjectionFunction(name, 0) {
   // Do nothing
 }
 
+__attribute__ ((section (".text.hot")))
 FIFunctionMem::~FIFunctionMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
 #endif
 }
 
+__attribute__ ((section (".text.hot")))
 FIFunctionNoMem::FIFunctionNoMem(const char *name)
   : FrameInjectionFunction(name, 0) {
   // Do nothing
 }
 
+__attribute__ ((section (".text.hot")))
 FIFunctionNoMem::~FIFunctionNoMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout_nomemcheck(m_info);
 #endif
 }
 
+__attribute__ ((section (".text.hot")))
 FIFunctionFS::FIFunctionFS(const char *name, int fs)
   : FrameInjectionFunction(name, fs) {
   // Do nothing
 }
 
+__attribute__ ((section (".text.hot")))
 FIFunctionFS::~FIFunctionFS() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
@@ -368,22 +374,26 @@ FIFunctionFS::~FIFunctionFS() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+__attribute__ ((section (".text.hot")))
 FIStaticMethodMem::FIStaticMethodMem(const char *name)
   : FrameInjectionStaticMethod(name) {
   // Do nothing
 }
 
+__attribute__ ((section (".text.hot")))
 FIStaticMethodMem::~FIStaticMethodMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
 #endif
 }
 
+__attribute__ ((section (".text.hot")))
 FIStaticMethodNoMem::FIStaticMethodNoMem(const char *name)
   : FrameInjectionStaticMethod(name) {
   // Do nothing
 }
 
+__attribute__ ((section (".text.hot")))
 FIStaticMethodNoMem::~FIStaticMethodNoMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout_nomemcheck(m_info);
@@ -406,22 +416,26 @@ ObjectData *FrameInjectionObjectMethod::getThisForArrow() {
   throw FatalErrorException("Using $this when not in object context");
 }
 
+__attribute__ ((section (".text.hot")))
 FIObjectMethodMem::FIObjectMethodMem(const char *name, ObjectData *obj)
  : FrameInjectionObjectMethod(name, obj) {
   // Do nothing
 }
 
+__attribute__ ((section (".text.hot")))
 FIObjectMethodMem::~FIObjectMethodMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
 #endif
 }
 
+__attribute__ ((section (".text.hot")))
 FIObjectMethodNoMem::FIObjectMethodNoMem(const char *name, ObjectData *obj)
  : FrameInjectionObjectMethod(name, obj) {
   // Do nothing
 }
 
+__attribute__ ((section (".text.hot")))
 FIObjectMethodNoMem::~FIObjectMethodNoMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout_nomemcheck(m_info);

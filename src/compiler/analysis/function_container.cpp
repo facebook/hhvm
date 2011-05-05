@@ -18,6 +18,7 @@
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/class_scope.h>
+#include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/statement/statement_list.h>
 #include <compiler/option.h>
@@ -70,8 +71,8 @@ void FunctionContainer::outputCPPJumpTableDecl(CodeGenerator &cg,
         cg_printf("Variant %s%s(void *extra, CArrRef params);\n",
                   Option::InvokePrefix, func->getId(cg).c_str());
         cg_printf("Variant %s%s(void *extra, int count, "
-            "INVOKE_FEW_ARGS_IMPL_ARGS);\n", Option::InvokeFewArgsPrefix,
-            func->getId(cg).c_str());
+                  "INVOKE_FEW_ARGS_IMPL_ARGS);\n",
+                  Option::InvokeFewArgsPrefix, func->getId(cg).c_str());
       }
     }
   }
@@ -127,11 +128,22 @@ void FunctionContainer::outputCPPJumpTableSupportMethod
   func->outputCPPDynamicInvoke(cg, ar, funcPrefix, cname);
   cg_indentEnd("}\n");
 
-  cg_indentBegin("Variant %s%s(void *extra, int count, "
-      "INVOKE_FEW_ARGS_IMPL_ARGS) {\n",
-      Option::InvokeFewArgsPrefix, cname);
+  string origName = !func->inPseudoMain() ? func->getOriginalName() :
+                    ("run_init::" + func->getContainingFile()->getName());
+  cg_printf("Variant");
+  if (Option::FunctionSections.find(origName) !=
+      Option::FunctionSections.end()) {
+    string funcSection = Option::FunctionSections[origName];
+    if (!funcSection.empty()) {
+      cg_printf(" __attribute__ ((section (\".text.%s\")))",
+          funcSection.c_str());
+    }
+  }
+  cg_indentBegin(" %s%s(void *extra, int count, "
+                 "INVOKE_FEW_ARGS_IMPL_ARGS) {\n",
+                 Option::InvokeFewArgsPrefix, cname);
   func->outputCPPDynamicInvoke(cg, ar, funcPrefix, cname, false,
-      true);
+                               true);
   cg_indentEnd("}\n");
 }
 

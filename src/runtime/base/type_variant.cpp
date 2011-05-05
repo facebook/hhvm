@@ -86,6 +86,7 @@ Variant::Variant(const std::string & v) : _count(0), m_type(KindOfString) {
   s->incRefCount();
 }
 
+__attribute__ ((section (".text.hot")))
 Variant::Variant(CArrRef v) : _count(0), m_type(KindOfArray) {
   ArrayData *a = v.get();
   if (a) {
@@ -146,6 +147,7 @@ Variant::Variant(Variant *v) : _count(0), m_type(KindOfVariant) {
 }
 
 // the version of the high frequency function that is not inlined
+__attribute__ ((section (".text.hot")))
 Variant::Variant(CVarRef v) {
   VariantHelper(v);
 }
@@ -172,6 +174,7 @@ static void (*destructors[4])(void *) =
   {destructString, destructArray, destructObject, destructVariant};
 #endif
 
+__attribute__ ((section (".text.hot")))
 void Variant::destruct() {
   ASSERT(!isPrimitive());
 #ifdef FAST_REFCOUNT_FOR_VARIANT
@@ -217,6 +220,7 @@ void Variant::destruct() {
 #endif
 }
 
+__attribute__ ((section (".text.hot")))
 Variant &Variant::assign(CVarRef v) {
   // otherwise our code generation is wrong
   ASSERT(!isContagious() || this == &v);
@@ -1587,6 +1591,7 @@ void Variant::escalate(bool mutableIteration /* = false */) {
 ///////////////////////////////////////////////////////////////////////////////
 // type conversions
 
+__attribute__ ((section (".text.hot")))
 bool Variant::toBooleanHelper() const {
   ASSERT(m_type > KindOfInt64);
   switch (m_type) {
@@ -1698,6 +1703,7 @@ Object Variant::toObjectHelper() const {
   return Object(SystemLib::AllocStdClassObject());
 }
 
+__attribute__ ((section (".text.hot")))
 VarNR Variant::toKey() const {
   if (m_type == KindOfString || m_type == KindOfStaticString) {
     int64 n;
@@ -3017,6 +3023,7 @@ CVarRef Variant::set(CStrRef key, CVarRef v, bool isString /* = false */) {
   return v;
 }
 
+__attribute__ ((section (".text.hot")))
 CVarRef Variant::set(CVarRef key, CVarRef v) {
   if (m_type == KindOfArray) {
     VarNR k(ToKey(key));

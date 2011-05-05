@@ -1732,11 +1732,20 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
       instance = "self->";
       prefix += Option::MethodPrefix;
     }
-    cg_indentBegin("Variant %s%s::%s%s(MethodCallPackage &mcp, ",
-        Option::ClassPrefix, id.c_str(),
-        fewArgs ? Option::InvokeFewArgsPrefix : Option::InvokePrefix,
-        lname.c_str());
-
+    string origName = func->getOriginalFullName();
+    cg_printf("Variant");
+    if (fewArgs && Option::FunctionSections.find(origName) !=
+                   Option::FunctionSections.end()) {
+      string funcSection = Option::FunctionSections[origName];
+      if (!funcSection.empty()) {
+        cg_printf(" __attribute__ ((section (\".text.%s\")))",
+                  funcSection.c_str());
+      }
+    }
+    cg_indentBegin(" %s%s::%s%s(MethodCallPackage &mcp, ",
+                   Option::ClassPrefix, id.c_str(),
+                   fewArgs ? Option::InvokeFewArgsPrefix : Option::InvokePrefix,
+                   lname.c_str());
     if (fewArgs) {
       cg_printf("int count, INVOKE_FEW_ARGS_IMPL_ARGS");
     } else {

@@ -165,6 +165,7 @@ SmartAllocatorImpl::~SmartAllocatorImpl() {
 ///////////////////////////////////////////////////////////////////////////////
 // alloc/dealloc helpers
 
+__attribute__ ((section (".text.hot")))
 void *SmartAllocatorImpl::alloc() {
 #ifdef SMART_ALLOCATOR_STACKTRACE
   {

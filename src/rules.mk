@@ -439,6 +439,10 @@ ifndef NO_RPATH
 LDFLAGS += -Wl,-rpath -Wl,/usr/local/hphp/lib
 endif
 
+ifdef LINKER_SCRIPT
+LDFLAGS += -Wl,--script=$(LINKER_SCRIPT)
+endif
+
 # Add library search paths here.
 LDFLAGS	+= \
   -L$(LIB_DIR) \

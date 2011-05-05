@@ -34,7 +34,7 @@ public:
   ZendArray(uint nSize = 0);
   virtual ~ZendArray();
 
-  virtual ssize_t size() const { return m_nNumOfElements;}
+  virtual ssize_t size() const;
 
   virtual Variant getKey(ssize_t pos) const;
   virtual Variant getValue(ssize_t pos) const;

@@ -155,6 +155,11 @@ ZendArray::~ZendArray() {
 ///////////////////////////////////////////////////////////////////////////////
 // iterations
 
+__attribute__ ((section (".text.hot")))
+ssize_t ZendArray::size() const {
+  return m_nNumOfElements;
+}
+
 void ZendArray::iter_dirty_set() const {
   m_flag |= IterationDirty;
 }
@@ -409,6 +414,7 @@ bool ZendArray::idxExists(ssize_t idx) const {
   return (idx && idx != ArrayData::invalid_index);
 }
 
+__attribute__ ((section (".text.hot")))
 CVarRef ZendArray::get(int64 k, bool error /* = false */) const {
   Bucket *p = find(k);
   if (p) {
@@ -432,6 +438,7 @@ CVarRef ZendArray::get(litstr k, bool error /* = false */) const {
   return null_variant;
 }
 
+__attribute__ ((section (".text.hot")))
 CVarRef ZendArray::get(CStrRef k, bool error /* = false */) const {
   StringData *key = k.get();
   int64 prehash = key->hash();
@@ -543,6 +550,7 @@ void ZendArray::rehash() {
   }
 }
 
+__attribute__ ((section (".text.hot")))
 bool ZendArray::nextInsert(CVarRef data) {
   if (m_nNextFreeElement < 0) {
     raise_warning("Cannot add element to the array as the next element is "
@@ -1139,6 +1147,7 @@ ArrayData *ZendArray::copy() const {
   return copyImpl();
 }
 
+__attribute__ ((section (".text.hot")))
 ZendArray *ZendArray::copyImpl() const {
   ZendArray *target = NEW(ZendArray)(m_nNumOfElements);
   Bucket *last = NULL;
@@ -1187,6 +1196,7 @@ ZendArray *ZendArray::copyImpl() const {
   return target;
 }
 
+__attribute__ ((section (".text.hot")))
 ArrayData *ZendArray::append(CVarRef v, bool copy) {
   if (copy) {
     ZendArray *a = copyImpl();

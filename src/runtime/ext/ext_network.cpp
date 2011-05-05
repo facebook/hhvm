@@ -309,7 +309,7 @@ static void php_dns_free_res(struct __res_state res) {
 static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
                                   int type_to_fetch, bool store,
                                   Array &subarray) {
-  unsigned short type, dlen;
+  unsigned short type, cls, dlen;
   unsigned long ttl;
   int64 n, i;
   unsigned short s;
@@ -324,6 +324,7 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
   cp += n;
 
   GETSHORT(type, cp);
+  GETSHORT(cls, cp);
   GETLONG(ttl, cp);
   GETSHORT(dlen, cp);
   if (type_to_fetch != T_ANY && type != type_to_fetch) {

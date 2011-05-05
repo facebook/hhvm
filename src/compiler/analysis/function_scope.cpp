@@ -1384,134 +1384,6 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
   }
 }
 
-void FunctionScope::outputCPPEvalInvoke(CodeGenerator &cg,
-    AnalysisResultPtr ar, const char *funcPrefix, const char *name,
-    const char *extraArg /* = NULL */, bool ret /* = true */,
-    bool constructor /* = false */) {
-  const char *voidWrapper = m_returnType  ? "" : ", null";
-  const char *retrn = ret ? "return " : "";
-  int maxParam = m_maxParam;
-  bool variable = isVariableArgument();
-  stringstream callss;
-  callss << retrn << ((ret && m_refReturn) ? "ref(" : "(") << funcPrefix <<
-    name << "(";
-  if (extraArg) {
-    callss << extraArg;
-    if (variable) {
-      callss << ",";
-    }
-  }
-  if (variable) {
-    callss << "count";
-  }
-
-  bool preArgs = variable || extraArg;
-  // Build temps
-  for (int i = 0; i < m_maxParam; i++) {
-    cg_printf("Variant a%d;\n", i);
-  }
-  cg_printf("const std::vector<Eval::ExpressionPtr> &params = "
-            "caller->params();\n");
-  cg_printf("unsigned int i = 0;\n");
-  cg_indentBegin("do {\n");
-  for (int i = 0; i < m_maxParam; i++) {
-    cg_printf("if (i == params.size()) break;\n");
-    if (i < m_minParam && (preArgs || i > 0)) {
-      callss << ", ";
-    }
-    if (isRefParam(i)) {
-      if (i < m_minParam) callss << "ref(a" << i << ")";
-      cg_printf("a%d.assignRef(params[i]->refval(env));\n", i);
-    } else {
-      if (i < m_minParam) callss << "a" << i;
-      cg_printf("a%d.assignVal(params[i]->eval(env));\n", i);
-    }
-    cg_printf("i++;\n");
-  }
-  cg_indentEnd("} while(false);\n");
-  // Put extra args into vargs or just eval them
-  if (variable) {
-    cg_printf("Array vargs;\n");
-  }
-  cg_indentBegin("for (; i != params.size(); ++i) {\n");
-  const char *paramEval = "params[i]->eval(env)";
-  if (isMixedVariableArgument()) {
-    paramEval = "ref(params[i]->refval(env, 0))";
-  } else if (isReferenceVariableArgument()) {
-    paramEval = "ref(params[i]->refval(env))";
-  }
-  if (variable) cg_printf("vargs.append(");
-  cg_printf(paramEval);
-  if (variable) cg_printf(")");
-  cg_printf(";\n");
-  cg_indentEnd("}\n");
-
-  FunctionScope::OutputCPPDynamicInvokeCount(cg);
-  outputCPPInvokeArgCountCheck(cg, ar, ret, constructor, INT_MAX);
-
-  if (m_attributeClassInfo & ClassInfo::AllowIntercept) {
-    ClassScopePtr cls = getContainingClass();
-    if (cls) {
-      cg_printf("INTERCEPT_INJECTION_ALWAYS(\"%s::%s\", \"%s::%s\", ",
-                cls->getName().c_str(), name, cls->getName().c_str(), name);
-    } else {
-      cg_printf("INTERCEPT_INJECTION_ALWAYS(\"%s\", \"%s\", ", name, name);
-    }
-    if (variable) {
-      cg_printf("vargs");
-    } else if (m_maxParam) {
-      cg_printf("ArrayUtil::Slice(Array(ArrayInit(%d, true)", m_maxParam);
-      for (int i = 0; i < m_maxParam; i++) {
-        cg_printf(".set%s(%d, a%d)", (isRefParam(i) ? "Ref" : ""), i, i);
-      }
-      cg_printf(".create()), 0, count, false)");
-    } else {
-      cg_printf("null_array");
-    }
-    cg_printf(", %s);\n", ret ? (m_refReturn ? "ref(r)" : "r") : "");
-  }
-
-  if (variable || getOptionalParamCount()) {
-    cg_printf("if (count <= %d) ", m_minParam);
-  }
-
-  // No optional args
-  string call = callss.str();
-  cg_printf("%s", call.c_str());
-  cg_printf(")%s);\n", voidWrapper);
-
-  // Optional args
-  for (int iMax = m_minParam + 1; iMax <= maxParam; iMax++) {
-    cg_printf("else ");
-    if (iMax < maxParam || variable) {
-      cg_printf("if (count == %d) ", iMax);
-    }
-    cg_printf("%s", call.c_str());
-    for (int i = m_minParam; i < iMax; i++) {
-      if (i > 0 || preArgs) cg_printf(", ");
-      if (isRefParam(i)) {
-        cg_printf("ref(a%d)", i);
-      } else {
-        cg_printf("a%d", i);
-      }
-    }
-    cg_printf(")%s);\n", voidWrapper);
-  }
-
-  // Var args
-  if (variable) {
-    cg_printf("%s,", call.c_str());
-    for (int i = m_minParam; i < maxParam; i++) {
-      if (isRefParam(i)) {
-        cg_printf("ref(a%d), ", i);
-      } else {
-        cg_printf("a%d, ", i);
-      }
-    }
-    cg_printf("vargs)%s);\n", voidWrapper);
-  }
-}
-
 void FunctionScope::serialize(JSON::OutputStream &out) const {
   JSON::MapStream ms(out);
   int vis = 0;
@@ -1559,11 +1431,6 @@ void FunctionScope::outputCPPCreateDecl(CodeGenerator &cg,
   cg_printf("public: void dynConstruct(CArrRef params);\n");
   if (isDynamic()) {
     cg_printf("public: void getConstructor(MethodCallPackage &mcp);\n");
-    if (cg.getOutput() == CodeGenerator::SystemCPP ||
-        Option::EnableEval >= Option::LimitedEval) {
-      cg_printf("public: void dynConstructFromEval(Eval::VariableEnvironment "
-                "&env, const Eval::FunctionCallExpression *call);\n");
-    }
   }
 }
 
@@ -1607,16 +1474,6 @@ void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
               Option::CallInfoPrefix, cg.formatLabel(consName).c_str());
     cg_printf("mcp.obj = this;\n");
     cg_indentEnd("}\n");
-    if (cg.getOutput() == CodeGenerator::SystemCPP ||
-        Option::EnableEval >= Option::LimitedEval) {
-      cg_indentBegin("void %s%s::dynConstructFromEval("
-                     "Eval::VariableEnvironment &env, "
-                     "const Eval::FunctionCallExpression *caller) {\n",
-                     Option::ClassPrefix, clsName);
-      outputCPPEvalInvoke(cg, ar, Option::MethodPrefix,
-                          cg.formatLabel(consName).c_str(), NULL, false);
-      cg_indentEnd("}\n");
-    }
   }
 }
 

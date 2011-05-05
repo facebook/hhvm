@@ -33,8 +33,6 @@ public:
   EvalObjectData(ClassEvalState &cls, const char* pname,
                  ObjectData *r = NULL);
   void dynConstruct(CArrRef params);
-  void dynConstructFromEval(VariableEnvironment &env,
-                            const FunctionCallExpression *call);
   virtual void dynConstructUnchecked(CArrRef params);
   virtual void getConstructor(MethodCallPackage &mcp);
   virtual void init();
@@ -54,6 +52,7 @@ public:
    // methods
   virtual CStrRef o_getClassName() const;
   virtual const MethodStatement *getMethodStatement(const char* name) const;
+  virtual const MethodStatement *getConstructorStatement() const;
 
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
   virtual bool o_get_call_info_ex(const char *clsname,

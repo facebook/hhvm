@@ -71,7 +71,6 @@ class c_Exception : public ExtObjectData {
   public: c_Exception *create(CVarRef v_message = NAMSTR(s_sys_ss00000000, ""), CVarRef v_code = 0LL, CVarRef v_previous = null_variant);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: Variant t_getmessage();
   public: Variant t_getprevious();
   public: Variant t_getcode();

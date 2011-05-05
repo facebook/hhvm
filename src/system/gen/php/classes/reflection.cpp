@@ -2426,22 +2426,6 @@ void c_ReflectionClass::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionClass::ci___construct;
   mcp.obj = this;
 }
-void c_ReflectionClass::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 1);
-  (t___construct(a0), null);
-}
 struct ObjectStaticCallbacks cw_ReflectionClass = {
   c_ReflectionClass::os_getInit,
   c_ReflectionClass::os_get,
@@ -3811,22 +3795,6 @@ void c_ReflectionExtension::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionExtension::ci___construct;
   mcp.obj = this;
 }
-void c_ReflectionExtension::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 1);
-  (t___construct(a0), null);
-}
 struct ObjectStaticCallbacks cw_ReflectionExtension = {
   c_ReflectionExtension::os_getInit,
   c_ReflectionExtension::os_get,
@@ -4621,27 +4589,6 @@ void c_ReflectionMethod::dynConstruct(CArrRef params) {
 void c_ReflectionMethod::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionMethod::ci___construct;
   mcp.obj = this;
-}
-void c_ReflectionMethod::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("ReflectionMethod::__construct", count, 1, 2, 1);
-  if (count <= 1) (t___construct(a0), null);
-  else (t___construct(a0, a1), null);
 }
 struct ObjectStaticCallbacks cw_ReflectionMethod = {
   c_ReflectionMethod::os_getInit,
@@ -5534,26 +5481,6 @@ void c_ReflectionProperty::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionProperty::ci___construct;
   mcp.obj = this;
 }
-void c_ReflectionProperty::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 2)) throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 1);
-  (t___construct(a0, a1), null);
-}
 struct ObjectStaticCallbacks cw_ReflectionProperty = {
   c_ReflectionProperty::os_getInit,
   c_ReflectionProperty::os_get,
@@ -6068,22 +5995,6 @@ void c_ReflectionFunction::dynConstruct(CArrRef params) {
 void c_ReflectionFunction::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionFunction::ci___construct;
   mcp.obj = this;
-}
-void c_ReflectionFunction::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 1);
-  (t___construct(a0), null);
 }
 struct ObjectStaticCallbacks cw_ReflectionFunction = {
   c_ReflectionFunction::os_getInit,
@@ -6682,26 +6593,6 @@ void c_ReflectionParameter::dynConstruct(CArrRef params) {
 void c_ReflectionParameter::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionParameter::ci___construct;
   mcp.obj = this;
-}
-void c_ReflectionParameter::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 2)) throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 1);
-  (t___construct(a0, a1), null);
 }
 struct ObjectStaticCallbacks cw_ReflectionParameter = {
   c_ReflectionParameter::os_getInit,

@@ -66,8 +66,6 @@ class c_SoapServer : public ExtObjectData {
   // implemented by HPHP
   public: c_SoapServer *create(Variant wsdl, Array options = null_array);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -133,8 +131,6 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
   // implemented by HPHP
   public: c_SoapClient *create(Variant wsdl, Array options = null_array);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -194,8 +190,6 @@ class c_SoapVar : public ExtObjectData {
   // implemented by HPHP
   public: c_SoapVar *create(Variant data, Variant type, String type_name = null_string, String type_namespace = null_string, String node_name = null_string, String node_namespace = null_string);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -231,8 +225,6 @@ class c_SoapFault : public c_Exception {
   // implemented by HPHP
   public: c_SoapFault *create(Variant code, String message, String actor = null_string, Variant detail = null, String name = null_string, Variant header = null);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -266,8 +258,6 @@ class c_SoapParam : public ExtObjectData {
   // implemented by HPHP
   public: c_SoapParam *create(Variant data, String name);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -296,8 +286,6 @@ class c_SoapHeader : public ExtObjectData {
   // implemented by HPHP
   public: c_SoapHeader *create(String ns, String name, Variant data = null, bool mustunderstand = false, Variant actor = null);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 

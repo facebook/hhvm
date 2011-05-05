@@ -56,16 +56,6 @@ void EvalObjectData::dynConstruct(CArrRef params) {
   }
 }
 
-void EvalObjectData::dynConstructFromEval(VariableEnvironment &env,
-                                          const FunctionCallExpression *call) {
-  const MethodStatement *ms = m_cls.getConstructor();
-  if (ms) {
-    ms->invokeInstanceDirect(Object(root), env, call);
-  } else {
-    DynamicObjectData::dynConstructFromEval(env, call);
-  }
-}
-
 void EvalObjectData::dynConstructUnchecked(CArrRef params) {
   const MethodStatement *ms = m_cls.getConstructor();
   if (ms) {
@@ -82,7 +72,7 @@ void EvalObjectData::getConstructor(MethodCallPackage &mcp) {
     mcp.obj = this;
     mcp.ci = ms->getCallInfo();
   } else {
-    ObjectData::getConstructor(mcp);
+    DynamicObjectData::getConstructor(mcp);
   }
 }
 
@@ -198,6 +188,10 @@ CStrRef EvalObjectData::o_getClassName() const {
 const MethodStatement
 *EvalObjectData::getMethodStatement(const char* name) const {
   return m_cls.getMethod(name);
+}
+
+const MethodStatement* EvalObjectData::getConstructorStatement() const {
+  return m_cls.getConstructor();
 }
 
 bool EvalObjectData::o_instanceof(CStrRef s) const {

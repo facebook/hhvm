@@ -55,8 +55,6 @@ class c_DebuggerProxy : public ExtObjectData {
   // implemented by HPHP
   public: c_DebuggerProxy *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -151,8 +149,6 @@ class c_DebuggerClient : public ExtObjectData {
   // implemented by HPHP
   public: c_DebuggerClient *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 

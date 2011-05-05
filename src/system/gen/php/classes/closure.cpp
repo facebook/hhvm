@@ -295,26 +295,6 @@ void c_Closure::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Closure::ci___construct;
   mcp.obj = this;
 }
-void c_Closure::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 2)) throw_wrong_arguments("Closure::__construct", count, 2, 2, 1);
-  (t___construct(a0, a1), null);
-}
 struct ObjectStaticCallbacks cw_Closure = {
   c_Closure::os_getInit,
   c_Closure::os_get,
@@ -1055,36 +1035,6 @@ void c_Continuation::dynConstruct(CArrRef params) {
 void c_Continuation::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Continuation::ci___construct;
   mcp.obj = this;
-}
-void c_Continuation::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  Variant a2;
-  Variant a3;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a2.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a3.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 2 || count > 4)) throw_wrong_arguments("Continuation::__construct", count, 2, 4, 1);
-  if (count <= 2) (t___construct(a0, a1), null);
-  else if (count == 3) (t___construct(a0, a1, a2), null);
-  else (t___construct(a0, a1, a2, a3), null);
 }
 struct ObjectStaticCallbacks cw_Continuation = {
   c_Continuation::os_getInit,

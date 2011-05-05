@@ -68,7 +68,6 @@ class c_ReflectionProperty : public ExtObjectData {
   public: c_ReflectionProperty *create(CVarRef v_cls, CVarRef v_name);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: String t___tostring();
   public: static Variant ti_export(CStrRef cls, Variant v_cls, CVarRef v_name, CVarRef v_ret);
   public: Variant t_getname();

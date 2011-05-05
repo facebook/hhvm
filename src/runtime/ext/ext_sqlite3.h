@@ -90,8 +90,6 @@ class c_SQLite3 : public ExtObjectData {
   // implemented by HPHP
   public: c_SQLite3 *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -142,8 +140,6 @@ class c_SQLite3Stmt : public ExtObjectData {
   // implemented by HPHP
   public: c_SQLite3Stmt *create(Object dbobject, String statement);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -192,8 +188,6 @@ class c_SQLite3Result : public ExtObjectData {
   // implemented by HPHP
   public: c_SQLite3Result *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 

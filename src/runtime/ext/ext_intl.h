@@ -121,7 +121,6 @@ class c_Collator : public ExtObjectData, public Sweepable {
   // implemented by HPHP
   public: c_Collator *create(String locale);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -154,8 +153,6 @@ class c_Locale : public ExtObjectData {
   // implemented by HPHP
   public: c_Locale *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -201,8 +198,6 @@ class c_Normalizer : public ExtObjectData, public Sweepable {
   // implemented by HPHP
   public: c_Normalizer *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 

@@ -159,8 +159,6 @@ class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSe
   // implemented by HPHP
   public: c_DOMNode *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -201,8 +199,6 @@ class c_DOMAttr : public c_DOMNode {
   // implemented by HPHP
   public: c_DOMAttr *create(String name, String value = null_string);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -246,8 +242,6 @@ class c_DOMCharacterData : public c_DOMNode {
   // implemented by HPHP
   public: c_DOMCharacterData *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -275,8 +269,6 @@ class c_DOMComment : public c_DOMCharacterData {
   // implemented by HPHP
   public: c_DOMComment *create(String value = null_string);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -314,8 +306,6 @@ class c_DOMText : public c_DOMCharacterData {
   // implemented by HPHP
   public: c_DOMText *create(String value = null_string);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -343,8 +333,6 @@ class c_DOMCDATASection : public c_DOMText {
   // implemented by HPHP
   public: c_DOMCDATASection *create(String value);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -438,8 +426,6 @@ class c_DOMDocument : public c_DOMNode, public Sweepable {
   // implemented by HPHP
   public: c_DOMDocument *create(String version = null_string, String encoding = null_string);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -481,8 +467,6 @@ class c_DOMDocumentFragment : public c_DOMNode {
   // implemented by HPHP
   public: c_DOMDocumentFragment *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -516,8 +500,6 @@ class c_DOMDocumentType : public c_DOMNode {
   // implemented by HPHP
   public: c_DOMDocumentType *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -587,8 +569,6 @@ class c_DOMElement : public c_DOMNode {
   // implemented by HPHP
   public: c_DOMElement *create(String name, String value = null_string, String namespaceuri = null_string);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -622,8 +602,6 @@ class c_DOMEntity : public c_DOMNode {
   // implemented by HPHP
   public: c_DOMEntity *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -651,8 +629,6 @@ class c_DOMEntityReference : public c_DOMNode {
   // implemented by HPHP
   public: c_DOMEntityReference *create(String name);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -686,8 +662,6 @@ class c_DOMNotation : public c_DOMNode {
   // implemented by HPHP
   public: c_DOMNotation *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -721,8 +695,6 @@ class c_DOMProcessingInstruction : public c_DOMNode {
   // implemented by HPHP
   public: c_DOMProcessingInstruction *create(String name, String value = null_string);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -760,8 +732,6 @@ class c_DOMNodeIterator : public ExtObjectData, public Sweepable {
   // implemented by HPHP
   public: c_DOMNodeIterator *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -810,8 +780,6 @@ class c_DOMNamedNodeMap : public ExtObjectDataFlags<ObjectData::UseGet|ObjectDat
   // implemented by HPHP
   public: c_DOMNamedNodeMap *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -849,8 +817,6 @@ class c_DOMNodeList : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::U
   // implemented by HPHP
   public: c_DOMNodeList *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -878,8 +844,6 @@ class c_DOMException : public c_Exception {
   // implemented by HPHP
   public: c_DOMException *create(String message = "", int64 code = 0);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -912,8 +876,6 @@ class c_DOMImplementation : public ExtObjectData {
   // implemented by HPHP
   public: c_DOMImplementation *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -954,8 +916,6 @@ class c_DOMXPath : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseS
   // implemented by HPHP
   public: c_DOMXPath *create(Variant doc);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 

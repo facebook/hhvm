@@ -1173,37 +1173,6 @@ void c_SplFileObject::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SplFileObject::ci___construct;
   mcp.obj = this;
 }
-void c_SplFileObject::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  Variant a2;
-  Variant a3;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a2.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a3.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 4)) throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 1);
-  if (count <= 1) (t___construct(a0), null);
-  else if (count == 2) (t___construct(a0, a1), null);
-  else if (count == 3) (t___construct(a0, a1, a2), null);
-  else (t___construct(a0, a1, a2, a3), null);
-}
 struct ObjectStaticCallbacks cw_SplFileObject = {
   c_SplFileObject::os_getInit,
   c_SplFileObject::os_get,
@@ -2435,22 +2404,6 @@ void c_SplFileInfo::dynConstruct(CArrRef params) {
 void c_SplFileInfo::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SplFileInfo::ci___construct;
   mcp.obj = this;
-}
-void c_SplFileInfo::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 1);
-  (t___construct(a0), null);
 }
 struct ObjectStaticCallbacks cw_SplFileInfo = {
   c_SplFileInfo::os_getInit,

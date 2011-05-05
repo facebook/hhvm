@@ -66,7 +66,6 @@ class c_SplFileInfo : public ExtObjectData {
   public: c_SplFileInfo *create(CVarRef v_file_name);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: String t_getpath();
   public: String t_getfilename();
   public: Object t_getfileinfo(CVarRef v_class_name = NAMSTR(s_sys_ss00000000, ""));

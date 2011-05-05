@@ -69,7 +69,6 @@ class c_SplFileObject : public c_SplFileInfo {
   public: c_SplFileObject *create(CVarRef v_filename, CVarRef v_open_mode = NAMSTR(s_sys_ss0d42ecf6, "r"), CVarRef v_use_include_path = false, CVarRef v_context = null_variant);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: Variant t_current();
   public: bool t_eof();
   public: bool t_fflush();

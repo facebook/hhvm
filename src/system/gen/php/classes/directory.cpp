@@ -282,22 +282,6 @@ void c_Directory::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Directory::ci___construct;
   mcp.obj = this;
 }
-void c_Directory::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("Directory::__construct", count, 1, 1, 1);
-  (t___construct(a0), null);
-}
 struct ObjectStaticCallbacks cw_Directory = {
   c_Directory::os_getInit,
   c_Directory::os_get,

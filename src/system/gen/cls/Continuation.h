@@ -75,7 +75,6 @@ class c_Continuation : public c_Closure {
   public: c_Continuation *create(CVarRef v_func, CVarRef v_vars, CVarRef v_obj = null_variant, CVarRef v_args = s_sys_sa00000000);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: void t_update(CVarRef v_label, CVarRef v_value, CVarRef v_vars);
   public: void t_done();
   public: Variant t_getlabel();

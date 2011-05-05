@@ -75,8 +75,6 @@ class c_DateTime : public ExtObjectData {
   public: c_DateTime *create(String time = "now",
                              Object timezone = null_object);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
@@ -154,8 +152,6 @@ class c_DateTimeZone : public ExtObjectData {
   // implemented by HPHP
   public: c_DateTimeZone *create(String timezone);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 

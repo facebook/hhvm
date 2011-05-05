@@ -895,27 +895,6 @@ void c_ArrayIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ArrayIterator::ci___construct;
   mcp.obj = this;
 }
-void c_ArrayIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("ArrayIterator::__construct", count, 1, 2, 1);
-  if (count <= 1) (t___construct(a0), null);
-  else (t___construct(a0, a1), null);
-}
 struct ObjectStaticCallbacks cw_ArrayIterator = {
   c_ArrayIterator::os_getInit,
   c_ArrayIterator::os_get,
@@ -1521,18 +1500,6 @@ void c_AppendIterator::dynConstruct(CArrRef params) {
 void c_AppendIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_AppendIterator::ci___construct;
   mcp.obj = this;
-}
-void c_AppendIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("AppendIterator::__construct", 0, 1);
-  (t___construct(), null);
 }
 struct ObjectStaticCallbacks cw_AppendIterator = {
   c_AppendIterator::os_getInit,
@@ -2206,32 +2173,6 @@ void c_RecursiveIteratorIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_RecursiveIteratorIterator::ci___construct;
   mcp.obj = this;
 }
-void c_RecursiveIteratorIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  Variant a2;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a2.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 3)) throw_wrong_arguments("RecursiveIteratorIterator::__construct", count, 1, 3, 1);
-  if (count <= 1) (t___construct(a0), null);
-  else if (count == 2) (t___construct(a0, a1), null);
-  else (t___construct(a0, a1, a2), null);
-}
 struct ObjectStaticCallbacks cw_RecursiveIteratorIterator = {
   c_RecursiveIteratorIterator::os_getInit,
   c_RecursiveIteratorIterator::os_get,
@@ -2478,27 +2419,6 @@ void c_MutableArrayIterator::dynConstruct(CArrRef params) {
 void c_MutableArrayIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_MutableArrayIterator::ci___construct;
   mcp.obj = this;
-}
-void c_MutableArrayIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignRef(params[i]->refval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("MutableArrayIterator::__construct", count, 1, 2, 1);
-  if (count <= 1) (t___construct(ref(a0)), null);
-  else (t___construct(ref(a0), a1), null);
 }
 struct ObjectStaticCallbacks cw_MutableArrayIterator = {
   c_MutableArrayIterator::os_getInit,

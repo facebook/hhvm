@@ -60,8 +60,6 @@ ObjectData::~ObjectData() {
 }
 
 void ObjectData::dynConstruct(CArrRef params) {}
-void ObjectData::dynConstructFromEval(Eval::VariableEnvironment &env,
-    const Eval::FunctionCallExpression *call) {}
 
 static CallInfo s_ObjectData_null_constructor(
     (void*)ObjectData::NullConstructor,
@@ -88,8 +86,11 @@ int64 ObjectData::o_toInt64() const {
   return 1;
 }
 
-const Eval::MethodStatement *ObjectData::getMethodStatement(const char* name)
+const Eval::MethodStatement* ObjectData::getMethodStatement(const char* name)
   const {
+  return NULL;
+}
+const Eval::MethodStatement* ObjectData::getConstructorStatement() const {
   return NULL;
 }
 

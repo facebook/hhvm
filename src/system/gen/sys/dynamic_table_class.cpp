@@ -687,18 +687,6 @@ void c_PDOException::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_PDOException::ci___construct;
   mcp.obj = this;
 }
-void c_PDOException::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
-}
 struct ObjectStaticCallbacks cw_PDOException = {
   c_PDOException::os_getInit,
   c_PDOException::os_get,
@@ -901,18 +889,6 @@ void c_DOMDocumentFragment::dynConstruct(CArrRef params) {
 void c_DOMDocumentFragment::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMDocumentFragment::ci___construct;
   mcp.obj = this;
-}
-void c_DOMDocumentFragment::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
 }
 struct ObjectStaticCallbacks cw_DOMDocumentFragment = {
   c_DOMDocumentFragment::os_getInit,
@@ -1271,23 +1247,6 @@ void c_DOMText::dynConstruct(CArrRef params) {
 void c_DOMText::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMText::ci___construct;
   mcp.obj = this;
-}
-void c_DOMText::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 1)) throw_toomany_arguments("__construct", 1, 1);
-  if (count <= 0) (t___construct(), null);
-  else (t___construct(a0), null);
 }
 struct ObjectStaticCallbacks cw_DOMText = {
   c_DOMText::os_getInit,
@@ -2493,18 +2452,6 @@ void c_DebuggerClient::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DebuggerClient::ci___construct;
   mcp.obj = this;
 }
-void c_DebuggerClient::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
-}
 struct ObjectStaticCallbacks cw_DebuggerClient = {
   c_DebuggerClient::os_getInit,
   c_DebuggerClient::os_get,
@@ -2800,18 +2747,6 @@ void c_EncodingDetector::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_EncodingDetector::ci___construct;
   mcp.obj = this;
 }
-void c_EncodingDetector::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
-}
 struct ObjectStaticCallbacks cw_EncodingDetector = {
   c_EncodingDetector::os_getInit,
   c_EncodingDetector::os_get,
@@ -2988,22 +2923,6 @@ void c_DOMCDATASection::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMCDATASection::ci___construct;
   mcp.obj = this;
 }
-void c_DOMCDATASection::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("__construct", count, 1, 1, 1);
-  (t___construct(a0), null);
-}
 struct ObjectStaticCallbacks cw_DOMCDATASection = {
   c_DOMCDATASection::os_getInit,
   c_DOMCDATASection::os_get,
@@ -3177,18 +3096,6 @@ void c_Locale::dynConstruct(CArrRef params) {
 void c_Locale::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Locale::ci___construct;
   mcp.obj = this;
-}
-void c_Locale::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
 }
 struct ObjectStaticCallbacks cw_Locale = {
   c_Locale::os_getInit,
@@ -3464,18 +3371,6 @@ void c_DOMDocumentType::dynConstruct(CArrRef params) {
 void c_DOMDocumentType::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMDocumentType::ci___construct;
   mcp.obj = this;
-}
-void c_DOMDocumentType::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
 }
 struct ObjectStaticCallbacks cw_DOMDocumentType = {
   c_DOMDocumentType::os_getInit,
@@ -3893,26 +3788,6 @@ void c_SQLite3Stmt::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SQLite3Stmt::ci___construct;
   mcp.obj = this;
 }
-void c_SQLite3Stmt::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 2)) throw_wrong_arguments("__construct", count, 2, 2, 1);
-  (t___construct(a0, a1), null);
-}
 struct ObjectStaticCallbacks cw_SQLite3Stmt = {
   c_SQLite3Stmt::os_getInit,
   c_SQLite3Stmt::os_get,
@@ -4252,18 +4127,6 @@ void c_DOMNodeList::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMNodeList::ci___construct;
   mcp.obj = this;
 }
-void c_DOMNodeList::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
-}
 struct ObjectStaticCallbacks cw_DOMNodeList = {
   c_DOMNodeList::os_getInit,
   c_DOMNodeList::os_get,
@@ -4512,18 +4375,6 @@ void c_Normalizer::dynConstruct(CArrRef params) {
 void c_Normalizer::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Normalizer::ci___construct;
   mcp.obj = this;
-}
-void c_Normalizer::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
 }
 struct ObjectStaticCallbacks cw_Normalizer = {
   c_Normalizer::os_getInit,
@@ -4992,18 +4843,6 @@ void c_DOMCharacterData::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMCharacterData::ci___construct;
   mcp.obj = this;
 }
-void c_DOMCharacterData::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
-}
 struct ObjectStaticCallbacks cw_DOMCharacterData = {
   c_DOMCharacterData::os_getInit,
   c_DOMCharacterData::os_get,
@@ -5179,22 +5018,6 @@ void c_DOMEntityReference::dynConstruct(CArrRef params) {
 void c_DOMEntityReference::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMEntityReference::ci___construct;
   mcp.obj = this;
-}
-void c_DOMEntityReference::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("__construct", count, 1, 1, 1);
-  (t___construct(a0), null);
 }
 struct ObjectStaticCallbacks cw_DOMEntityReference = {
   c_DOMEntityReference::os_getInit,
@@ -5512,18 +5335,6 @@ void c_SimpleXMLElementIterator::dynConstruct(CArrRef params) {
 void c_SimpleXMLElementIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SimpleXMLElementIterator::ci___construct;
   mcp.obj = this;
-}
-void c_SimpleXMLElementIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
 }
 struct ObjectStaticCallbacks cw_SimpleXMLElementIterator = {
   c_SimpleXMLElementIterator::os_getInit,
@@ -5876,22 +5687,6 @@ void c_DateTimeZone::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DateTimeZone::ci___construct;
   mcp.obj = this;
 }
-void c_DateTimeZone::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("__construct", count, 1, 1, 1);
-  (t___construct(a0), null);
-}
 struct ObjectStaticCallbacks cw_DateTimeZone = {
   c_DateTimeZone::os_getInit,
   c_DateTimeZone::os_get,
@@ -6209,18 +6004,6 @@ void c_DOMNodeIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMNodeIterator::ci___construct;
   mcp.obj = this;
 }
-void c_DOMNodeIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
-}
 struct ObjectStaticCallbacks cw_DOMNodeIterator = {
   c_DOMNodeIterator::os_getInit,
   c_DOMNodeIterator::os_get,
@@ -6514,18 +6297,6 @@ void c_DOMImplementation::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMImplementation::ci___construct;
   mcp.obj = this;
 }
-void c_DOMImplementation::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
-}
 struct ObjectStaticCallbacks cw_DOMImplementation = {
   c_DOMImplementation::os_getInit,
   c_DOMImplementation::os_get,
@@ -6731,41 +6502,6 @@ void c_SoapHeader::dynConstruct(CArrRef params) {
 void c_SoapHeader::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapHeader::ci___construct;
   mcp.obj = this;
-}
-void c_SoapHeader::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  Variant a2;
-  Variant a3;
-  Variant a4;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a2.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a3.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a4.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 2 || count > 5)) throw_wrong_arguments("__construct", count, 2, 5, 1);
-  if (count <= 2) (t___construct(a0, a1), null);
-  else if (count == 3) (t___construct(a0, a1, a2), null);
-  else if (count == 4) (t___construct(a0, a1, a2, a3), null);
-  else (t___construct(a0, a1, a2, a3, a4), null);
 }
 struct ObjectStaticCallbacks cw_SoapHeader = {
   c_SoapHeader::os_getInit,
@@ -7042,18 +6778,6 @@ void c_DOMNotation::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMNotation::ci___construct;
   mcp.obj = this;
 }
-void c_DOMNotation::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
-}
 struct ObjectStaticCallbacks cw_DOMNotation = {
   c_DOMNotation::os_getInit,
   c_DOMNotation::os_get,
@@ -7286,18 +7010,6 @@ void c_DebuggerProxy::dynConstruct(CArrRef params) {
 void c_DebuggerProxy::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DebuggerProxy::ci___construct;
   mcp.obj = this;
-}
-void c_DebuggerProxy::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
 }
 struct ObjectStaticCallbacks cw_DebuggerProxy = {
   c_DebuggerProxy::os_getInit,
@@ -9083,23 +8795,6 @@ void c_Memcached::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Memcached::ci___construct;
   mcp.obj = this;
 }
-void c_Memcached::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 1)) throw_toomany_arguments("__construct", 1, 1);
-  if (count <= 0) (t___construct(), null);
-  else (t___construct(a0), null);
-}
 struct ObjectStaticCallbacks cw_Memcached = {
   c_Memcached::os_getInit,
   c_Memcached::os_get,
@@ -9281,23 +8976,6 @@ void c_DOMComment::dynConstruct(CArrRef params) {
 void c_DOMComment::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMComment::ci___construct;
   mcp.obj = this;
-}
-void c_DOMComment::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 1)) throw_toomany_arguments("__construct", 1, 1);
-  if (count <= 0) (t___construct(), null);
-  else (t___construct(a0), null);
 }
 struct ObjectStaticCallbacks cw_DOMComment = {
   c_DOMComment::os_getInit,
@@ -10038,18 +9716,6 @@ void c_SQLite3::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SQLite3::ci___construct;
   mcp.obj = this;
 }
-void c_SQLite3::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
-}
 struct ObjectStaticCallbacks cw_SQLite3 = {
   c_SQLite3::os_getInit,
   c_SQLite3::os_get,
@@ -10375,27 +10041,6 @@ void c_DOMAttr::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMAttr::ci___construct;
   mcp.obj = this;
 }
-void c_DOMAttr::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("__construct", count, 1, 2, 1);
-  if (count <= 1) (t___construct(a0), null);
-  else (t___construct(a0, a1), null);
-}
 struct ObjectStaticCallbacks cw_DOMAttr = {
   c_DOMAttr::os_getInit,
   c_DOMAttr::os_get,
@@ -10610,46 +10255,6 @@ void c_SoapVar::dynConstruct(CArrRef params) {
 void c_SoapVar::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapVar::ci___construct;
   mcp.obj = this;
-}
-void c_SoapVar::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  Variant a2;
-  Variant a3;
-  Variant a4;
-  Variant a5;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a2.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a3.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a4.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a5.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 2 || count > 6)) throw_wrong_arguments("__construct", count, 2, 6, 1);
-  if (count <= 2) (t___construct(a0, a1), null);
-  else if (count == 3) (t___construct(a0, a1, a2), null);
-  else if (count == 4) (t___construct(a0, a1, a2, a3), null);
-  else if (count == 5) (t___construct(a0, a1, a2, a3, a4), null);
-  else (t___construct(a0, a1, a2, a3, a4, a5), null);
 }
 struct ObjectStaticCallbacks cw_SoapVar = {
   c_SoapVar::os_getInit,
@@ -11068,18 +10673,6 @@ void c_DOMNamedNodeMap::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMNamedNodeMap::ci___construct;
   mcp.obj = this;
 }
-void c_DOMNamedNodeMap::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
-}
 struct ObjectStaticCallbacks cw_DOMNamedNodeMap = {
   c_DOMNamedNodeMap::os_getInit,
   c_DOMNamedNodeMap::os_get,
@@ -11446,18 +11039,6 @@ void c_SQLite3Result::dynConstruct(CArrRef params) {
 void c_SQLite3Result::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SQLite3Result::ci___construct;
   mcp.obj = this;
-}
-void c_SQLite3Result::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
 }
 struct ObjectStaticCallbacks cw_SQLite3Result = {
   c_SQLite3Result::os_getInit,
@@ -12440,42 +12021,6 @@ void c_SimpleXMLElement::dynConstruct(CArrRef params) {
 void c_SimpleXMLElement::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SimpleXMLElement::ci___construct;
   mcp.obj = this;
-}
-void c_SimpleXMLElement::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  Variant a2;
-  Variant a3;
-  Variant a4;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a2.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a3.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a4.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 5)) throw_wrong_arguments("__construct", count, 1, 5, 1);
-  if (count <= 1) (t___construct(a0), null);
-  else if (count == 2) (t___construct(a0, a1), null);
-  else if (count == 3) (t___construct(a0, a1, a2), null);
-  else if (count == 4) (t___construct(a0, a1, a2, a3), null);
-  else (t___construct(a0, a1, a2, a3, a4), null);
 }
 struct ObjectStaticCallbacks cw_SimpleXMLElement = {
   c_SimpleXMLElement::os_getInit,
@@ -13461,18 +13006,6 @@ void c_Memcache::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Memcache::ci___construct;
   mcp.obj = this;
 }
-void c_Memcache::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
-}
 struct ObjectStaticCallbacks cw_Memcache = {
   c_Memcache::os_getInit,
   c_Memcache::os_get,
@@ -13767,27 +13300,6 @@ void c_DOMProcessingInstruction::dynConstruct(CArrRef params) {
 void c_DOMProcessingInstruction::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMProcessingInstruction::ci___construct;
   mcp.obj = this;
-}
-void c_DOMProcessingInstruction::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("__construct", count, 1, 2, 1);
-  if (count <= 1) (t___construct(a0), null);
-  else (t___construct(a0, a1), null);
 }
 struct ObjectStaticCallbacks cw_DOMProcessingInstruction = {
   c_DOMProcessingInstruction::os_getInit,
@@ -14101,18 +13613,6 @@ void c_EncodingMatch::dynConstruct(CArrRef params) {
 void c_EncodingMatch::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_EncodingMatch::ci___construct;
   mcp.obj = this;
-}
-void c_EncodingMatch::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
 }
 struct ObjectStaticCallbacks cw_EncodingMatch = {
   c_EncodingMatch::os_getInit,
@@ -15202,18 +14702,6 @@ void c_PDOStatement::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_PDOStatement::ci___construct;
   mcp.obj = this;
 }
-void c_PDOStatement::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
-}
 struct ObjectStaticCallbacks cw_PDOStatement = {
   c_PDOStatement::os_getInit,
   c_PDOStatement::os_get,
@@ -15827,27 +15315,6 @@ void c_SoapClient::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapClient::ci___construct;
   mcp.obj = this;
 }
-void c_SoapClient::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("__construct", count, 1, 2, 1);
-  if (count <= 1) (t___construct(a0), null);
-  else (t___construct(a0, a1), null);
-}
 struct ObjectStaticCallbacks cw_SoapClient = {
   c_SoapClient::os_getInit,
   c_SoapClient::os_get,
@@ -16026,26 +15493,6 @@ void c_SoapParam::dynConstruct(CArrRef params) {
 void c_SoapParam::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapParam::ci___construct;
   mcp.obj = this;
-}
-void c_SoapParam::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 2)) throw_wrong_arguments("__construct", count, 2, 2, 1);
-  (t___construct(a0, a1), null);
 }
 struct ObjectStaticCallbacks cw_SoapParam = {
   c_SoapParam::os_getInit,
@@ -16559,28 +16006,6 @@ void c_DateTime::dynConstruct(CArrRef params) {
 void c_DateTime::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DateTime::ci___construct;
   mcp.obj = this;
-}
-void c_DateTime::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 2)) throw_toomany_arguments("__construct", 2, 1);
-  if (count <= 0) (t___construct(), null);
-  else if (count == 1) (t___construct(a0), null);
-  else (t___construct(a0, a1), null);
 }
 struct ObjectStaticCallbacks cw_DateTime = {
   c_DateTime::os_getInit,
@@ -17241,22 +16666,6 @@ void c_Collator::dynConstruct(CArrRef params) {
 void c_Collator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Collator::ci___construct;
   mcp.obj = this;
-}
-void c_Collator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("__construct", count, 1, 1, 1);
-  (t___construct(a0), null);
 }
 struct ObjectStaticCallbacks cw_Collator = {
   c_Collator::os_getInit,
@@ -18187,37 +17596,6 @@ void c_PDO::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_PDO::ci___construct;
   mcp.obj = this;
 }
-void c_PDO::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  Variant a2;
-  Variant a3;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a2.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a3.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 4)) throw_wrong_arguments("__construct", count, 1, 4, 1);
-  if (count <= 1) (t___construct(a0), null);
-  else if (count == 2) (t___construct(a0, a1), null);
-  else if (count == 3) (t___construct(a0, a1, a2), null);
-  else (t___construct(a0, a1, a2, a3), null);
-}
 struct ObjectStaticCallbacks cw_PDO = {
   c_PDO::os_getInit,
   c_PDO::os_get,
@@ -18777,18 +18155,6 @@ void c_ImageSprite::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ImageSprite::ci___construct;
   mcp.obj = this;
 }
-void c_ImageSprite::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
-}
 struct ObjectStaticCallbacks cw_ImageSprite = {
   c_ImageSprite::os_getInit,
   c_ImageSprite::os_get,
@@ -19063,18 +18429,6 @@ void c_DOMEntity::dynConstruct(CArrRef params) {
 void c_DOMEntity::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMEntity::ci___construct;
   mcp.obj = this;
-}
-void c_DOMEntity::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
 }
 struct ObjectStaticCallbacks cw_DOMEntity = {
   c_DOMEntity::os_getInit,
@@ -20753,18 +20107,6 @@ void c_XMLWriter::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_XMLWriter::ci___construct;
   mcp.obj = this;
 }
-void c_XMLWriter::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
-}
 struct ObjectStaticCallbacks cw_XMLWriter = {
   c_XMLWriter::os_getInit,
   c_XMLWriter::os_get,
@@ -20955,28 +20297,6 @@ void c_DOMException::dynConstruct(CArrRef params) {
 void c_DOMException::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMException::ci___construct;
   mcp.obj = this;
-}
-void c_DOMException::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 2)) throw_toomany_arguments("__construct", 2, 1);
-  if (count <= 0) (t___construct(), null);
-  else if (count == 1) (t___construct(a0), null);
-  else (t___construct(a0, a1), null);
 }
 struct ObjectStaticCallbacks cw_DOMException = {
   c_DOMException::os_getInit,
@@ -21419,22 +20739,6 @@ void c_DOMXPath::dynConstruct(CArrRef params) {
 void c_DOMXPath::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMXPath::ci___construct;
   mcp.obj = this;
-}
-void c_DOMXPath::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("__construct", count, 1, 1, 1);
-  (t___construct(a0), null);
 }
 struct ObjectStaticCallbacks cw_DOMXPath = {
   c_DOMXPath::os_getInit,
@@ -21925,27 +21229,6 @@ void c_SoapServer::dynConstruct(CArrRef params) {
 void c_SoapServer::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapServer::ci___construct;
   mcp.obj = this;
-}
-void c_SoapServer::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("__construct", count, 1, 2, 1);
-  if (count <= 1) (t___construct(a0), null);
-  else (t___construct(a0, a1), null);
 }
 struct ObjectStaticCallbacks cw_SoapServer = {
   c_SoapServer::os_getInit,
@@ -22838,18 +22121,6 @@ void c_DOMNode::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMNode::ci___construct;
   mcp.obj = this;
 }
-void c_DOMNode::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
-}
 struct ObjectStaticCallbacks cw_DOMNode = {
   c_DOMNode::os_getInit,
   c_DOMNode::os_get,
@@ -23196,18 +22467,6 @@ void c_SpoofChecker::dynConstruct(CArrRef params) {
 void c_SpoofChecker::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SpoofChecker::ci___construct;
   mcp.obj = this;
-}
-void c_SpoofChecker::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
 }
 struct ObjectStaticCallbacks cw_SpoofChecker = {
   c_SpoofChecker::os_getInit,
@@ -24600,28 +23859,6 @@ void c_DOMDocument::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMDocument::ci___construct;
   mcp.obj = this;
 }
-void c_DOMDocument::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 2)) throw_toomany_arguments("__construct", 2, 1);
-  if (count <= 0) (t___construct(), null);
-  else if (count == 1) (t___construct(a0), null);
-  else (t___construct(a0, a1), null);
-}
 struct ObjectStaticCallbacks cw_DOMDocument = {
   c_DOMDocument::os_getInit,
   c_DOMDocument::os_get,
@@ -24786,18 +24023,6 @@ void c_LibXMLError::dynConstruct(CArrRef params) {
 void c_LibXMLError::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_LibXMLError::ci___construct;
   mcp.obj = this;
-}
-void c_LibXMLError::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 1);
-  (t___construct(), null);
 }
 struct ObjectStaticCallbacks cw_LibXMLError = {
   c_LibXMLError::os_getInit,
@@ -25043,46 +24268,6 @@ void c_SoapFault::dynConstruct(CArrRef params) {
 void c_SoapFault::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapFault::ci___construct;
   mcp.obj = this;
-}
-void c_SoapFault::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  Variant a2;
-  Variant a3;
-  Variant a4;
-  Variant a5;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a2.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a3.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a4.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a5.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 2 || count > 6)) throw_wrong_arguments("__construct", count, 2, 6, 1);
-  if (count <= 2) (t___construct(a0, a1), null);
-  else if (count == 3) (t___construct(a0, a1, a2), null);
-  else if (count == 4) (t___construct(a0, a1, a2, a3), null);
-  else if (count == 5) (t___construct(a0, a1, a2, a3, a4), null);
-  else (t___construct(a0, a1, a2, a3, a4, a5), null);
 }
 struct ObjectStaticCallbacks cw_SoapFault = {
   c_SoapFault::os_getInit,
@@ -26051,32 +25236,6 @@ void c_DOMElement::dynConstruct(CArrRef params) {
 void c_DOMElement::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMElement::ci___construct;
   mcp.obj = this;
-}
-void c_DOMElement::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  Variant a2;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a2.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 3)) throw_wrong_arguments("__construct", count, 1, 3, 1);
-  if (count <= 1) (t___construct(a0), null);
-  else if (count == 2) (t___construct(a0, a1), null);
-  else (t___construct(a0, a1, a2), null);
 }
 struct ObjectStaticCallbacks cw_DOMElement = {
   c_DOMElement::os_getInit,

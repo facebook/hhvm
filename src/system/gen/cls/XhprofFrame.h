@@ -65,7 +65,6 @@ class c_XhprofFrame : public ExtObjectData {
   public: c_XhprofFrame *create(CVarRef v_name);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);

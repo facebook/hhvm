@@ -30,8 +30,6 @@ class DynamicObjectData : public ObjectData {
 
   virtual void init();
   virtual void dynConstruct(CArrRef params);
-  virtual void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   virtual void getConstructor(MethodCallPackage &mcp);
 
   virtual void destruct();

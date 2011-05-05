@@ -71,7 +71,6 @@ class c_AppendIterator : public ExtObjectData {
   public: c_AppendIterator *create();
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: void t_append(CVarRef v_it);
   public: Variant t_getinneriterator();
   public: void t_rewind();

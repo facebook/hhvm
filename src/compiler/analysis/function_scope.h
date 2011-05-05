@@ -323,9 +323,6 @@ public:
                               bool constructor = false,
                               const char *instance = NULL,
                               const char *class_name = "");
-  void outputCPPEvalInvoke(CodeGenerator &cg, AnalysisResultPtr ar,
-      const char *funcPrefix, const char *name, const char *extraArg = NULL,
-      bool ret = true, bool constructor = false);
 
   /**
    * ...so ClassStatement can call them for classes that don't have

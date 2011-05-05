@@ -1428,33 +1428,6 @@ void c_Exception::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Exception::ci___construct;
   mcp.obj = this;
 }
-void c_Exception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  Variant a2;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a2.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 3)) throw_toomany_arguments("Exception::__construct", 3, 1);
-  if (count <= 0) (t___construct(), null);
-  else if (count == 1) (t___construct(a0), null);
-  else if (count == 2) (t___construct(a0, a1), null);
-  else (t___construct(a0, a1, a2), null);
-}
 struct ObjectStaticCallbacks cw_Exception = {
   c_Exception::os_getInit,
   c_Exception::os_get,
@@ -1902,43 +1875,6 @@ void c_ErrorException::dynConstruct(CArrRef params) {
 void c_ErrorException::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ErrorException::ci___construct;
   mcp.obj = this;
-}
-void c_ErrorException::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  Variant a2;
-  Variant a3;
-  Variant a4;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a2.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a3.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a4.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 5)) throw_toomany_arguments("ErrorException::__construct", 5, 1);
-  if (count <= 0) (t___construct(), null);
-  else if (count == 1) (t___construct(a0), null);
-  else if (count == 2) (t___construct(a0, a1), null);
-  else if (count == 3) (t___construct(a0, a1, a2), null);
-  else if (count == 4) (t___construct(a0, a1, a2, a3), null);
-  else (t___construct(a0, a1, a2, a3, a4), null);
 }
 struct ObjectStaticCallbacks cw_ErrorException = {
   c_ErrorException::os_getInit,

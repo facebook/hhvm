@@ -68,7 +68,6 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   public: c_RecursiveIteratorIterator *create(CVarRef v_iterator, CVarRef v_mode = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */, CVarRef v_flags = 0LL);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: Object t_getinneriterator();
   public: Variant t_current();
   public: Variant t_key();

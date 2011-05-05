@@ -31,10 +31,31 @@ NewObjectExpression::NewObjectExpression(EXPRESSION_ARGS, NamePtr name,
 
 Variant NewObjectExpression::eval(VariableEnvironment &env) const {
   String name(m_name->get(env));
-  Object o(create_object(name.data(), Array(), false));
-  o->init();
+  Object o(create_object_only(name.data()));
   SET_LINE;
-  o->dynConstructFromEval(env, this);
+
+  const MethodStatement* ms = o.get()->getConstructorStatement();
+  if (ms) {
+    ms->invokeInstanceDirect(o, env, this);
+    return o;
+  }
+
+  // Handle builtins 
+  MethodCallPackage mcp1;
+  mcp1.construct(o);
+  const CallInfo* cit1 = mcp1.ci;
+  ASSERT(cit1);
+  ArrayInit ai(m_params.size(), true);
+  for (unsigned int i = 0; i < m_params.size(); ++i) {
+    if (cit1->mustBeRef(i)) {
+      ai.setRef(m_params[i]->refval(env));
+    } else if (cit1->isRef(i)) {
+      ai.setRef(m_params[i]->refval(env, 0));
+    } else {
+      ai.set(m_params[i]->eval(env));
+    }
+  }
+  (cit1->getMeth())(mcp1, Array(ai.create()));
   return o;
 }
 

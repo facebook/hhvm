@@ -68,7 +68,6 @@ class c_DirectoryIterator : public c_SplFileInfo {
   public: c_DirectoryIterator *create(CVarRef v_path);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: Variant t_current();
   public: Variant t_key();
   public: void t_next();

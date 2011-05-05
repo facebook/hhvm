@@ -66,7 +66,6 @@ class c_ErrorException : public c_Exception {
   public: c_ErrorException *create(CVarRef v_message = NAMSTR(s_sys_ss00000000, ""), CVarRef v_code = 0LL, CVarRef v_severity = 0LL, CVarRef v_filename = null_variant, CVarRef v_lineno = null_variant);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: Variant t_getseverity();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   DECLARE_METHOD_INVOKE_HELPERS(getseverity);

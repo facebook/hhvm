@@ -105,8 +105,6 @@ class c_Memcache : public ExtObjectData, public Sweepable {
   // implemented by HPHP
   public: c_Memcache *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 

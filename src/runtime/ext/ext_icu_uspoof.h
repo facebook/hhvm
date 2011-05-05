@@ -69,8 +69,6 @@ class c_SpoofChecker : public ExtObjectData {
   // implemented by HPHP
   public: c_SpoofChecker *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 

@@ -150,15 +150,14 @@ class ObjectData : public CountableNF {
     return this;
   }
   virtual void dynConstruct(CArrRef params);
-  virtual void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
   virtual void dynConstructUnchecked(CArrRef params);
   virtual void getConstructor(MethodCallPackage &mcp);
   virtual void release() { destruct(); delete this; } // for SmartPtr<T>
   virtual void destruct() {}
 
-  virtual const
-    Eval::MethodStatement *getMethodStatement(const char* name) const;
+  virtual const Eval::MethodStatement* getConstructorStatement() const;
+  virtual const Eval::MethodStatement* getMethodStatement(const char* name)
+      const;
 
   static Variant os_getInit(CStrRef s);
   // static methods and properties

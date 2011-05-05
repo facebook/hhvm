@@ -566,27 +566,6 @@ void c_RecursiveDirectoryIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_RecursiveDirectoryIterator::ci___construct;
   mcp.obj = this;
 }
-void c_RecursiveDirectoryIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-    if (i == params.size()) break;
-    a1.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("RecursiveDirectoryIterator::__construct", count, 1, 2, 1);
-  if (count <= 1) (t___construct(a0), null);
-  else (t___construct(a0, a1), null);
-}
 struct ObjectStaticCallbacks cw_RecursiveDirectoryIterator = {
   c_RecursiveDirectoryIterator::os_getInit,
   c_RecursiveDirectoryIterator::os_get,
@@ -1087,22 +1066,6 @@ void c_DirectoryIterator::dynConstruct(CArrRef params) {
 void c_DirectoryIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DirectoryIterator::ci___construct;
   mcp.obj = this;
-}
-void c_DirectoryIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  unsigned int i = 0;
-  do {
-    if (i == params.size()) break;
-    a0.assignVal(params[i]->eval(env));
-    i++;
-  } while(false);
-  for (; i != params.size(); ++i) {
-    params[i]->eval(env);
-  }
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("DirectoryIterator::__construct", count, 1, 1, 1);
-  (t___construct(a0), null);
 }
 struct ObjectStaticCallbacks cw_DirectoryIterator = {
   c_DirectoryIterator::os_getInit,

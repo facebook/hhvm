@@ -68,7 +68,6 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   public: c_ReflectionMethod *create(CVarRef v_cls, CVarRef v_name = NAMSTR(s_sys_ss00000000, ""));
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: String t___tostring();
   public: static Variant ti_export(CStrRef cls, Variant v_cls, CVarRef v_name, CVarRef v_ret);
   public: Variant t_invoke(int num_args, CVarRef v_obj, Array args = Array());

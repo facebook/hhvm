@@ -56,14 +56,6 @@ void DynamicObjectData::getConstructor(MethodCallPackage &mcp) {
   }
 }
 
-void DynamicObjectData::
-dynConstructFromEval(Eval::VariableEnvironment &env,
-                    const Eval::FunctionCallExpression *call) {
-  if (!parent.isNull()) {
-    parent->dynConstructFromEval(env, call);
-  }
-}
-
 void DynamicObjectData::destruct() {
   if (!parent.isNull()) {
     if (inCtorDtor()) {

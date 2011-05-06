@@ -172,27 +172,23 @@ bool ScalarExpression::canonCompare(ExpressionPtr e) const {
 }
 
 ExpressionPtr ScalarExpression::postOptimize(AnalysisResultConstPtr ar) {
-  if (!m_expectedType)
-    return ExpressionPtr();
-
-  Variant orig = getVariant();
-  Variant cast;
-  bool match = false;
-
-  switch (m_expectedType->getKindOf()) {
-  case Type::KindOfBoolean: match = true; cast = orig.toBoolean(); break;
-  case Type::KindOfInt64:   match = true; cast = orig.toInt64();   break;
-  case Type::KindOfDouble:  match = true; cast = orig.toDouble();  break;
-  case Type::KindOfString:  match = true; cast = orig.toString();  break;
+  switch (m_type) {
+  case T_LINE:
+  case T_LNUMBER:
+    if (m_expectedType && m_expectedType->is(Type::KindOfString)) {
+      Variant value = getVariant();
+      string svalue(value.toString()->data(), value.toString()->size());
+      ScalarExpressionPtr sc
+        (new ScalarExpression(getScope(), getLocation(),
+                              Expression::KindOfScalarExpression,
+                              T_STRING, svalue, true));
+      sc->setActualType(Type::String);
+      return sc;
+    }
+  default:
+    break;
   }
-
-  if (!match || same(orig, cast))
-    // no changes need to be made
-    return ExpressionPtr();
-  
-  ExpressionPtr p = makeScalarExpression(ar, cast);
-  p->setActualType(m_expectedType);
-  return p;
+  return ExpressionPtr();
 }
 
 TypePtr ScalarExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,

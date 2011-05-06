@@ -1218,8 +1218,9 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     break;
   case T_SL:
   case T_SR:
-    ASSERT(first->getType()->is(Type::KindOfInt64));
+    cg_printf("toInt64(");
     first->outputCPP(cg, ar);
+    cg_printf(")");
     break;
   default:
     first->outputCPP(cg, ar);

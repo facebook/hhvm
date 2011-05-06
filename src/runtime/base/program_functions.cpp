@@ -689,24 +689,49 @@ static int execute_program_impl(int argc, char **argv) {
     ("xhprof-flags", value<int>(&po.xhprofFlags)->default_value(0),
      "Set XHProf flags")
     ;
-
   positional_options_description p;
   p.add("arg", -1);
   variables_map vm;
+  int ac = argc;
+  char **av = argv;
   try {
-    store(command_line_parser(argc, argv).options(desc).positional(p).run(),
+    int i;
+    assert(argc > 0);
+    for (i = 0; i < argc; i++) {
+      if (strcmp(argv[i], "--") == 0) break;
+    }
+    if (i < argc) {
+      // boost command_line_parser treats anything after the first "--"
+      // on the command line literally as positional options, which are
+      // associated with "arg" but no including the first "--" itself.
+      // We want to preserve the first "--" itself also as a positional
+      // option for better matching of php command line behavior by
+      // replicating the first "--".
+      av = (char **)malloc(sizeof(char *) * (argc + 2));
+      memcpy(av, argv, sizeof(char *) * i);
+      av[i] = argv[i];
+      av[i+1] = argv[i];
+      memcpy(av + i + 2, argv + i + 1, sizeof(char *) * (argc - i));
+      av[argc + 1] = NULL;
+      ac++;
+    }
+    
+    store(command_line_parser(ac, av).options(desc).positional(p).run(),
           vm);
     notify(vm);
     if (po.mode == "d") po.mode = "debug";
     if (po.mode == "s") po.mode = "server";
     if (po.mode == "t") po.mode = "translate";
+    if (av != argv) free(av);
   } catch (error &e) {
     Logger::Error("Error in command line: %s\n\n", e.what());
     cout << desc << "\n";
+    if (av != argv) free(av);
     return -1;
   } catch (...) {
     Logger::Error("Error in command line:\n\n");
     cout << desc << "\n";
+    if (av != argv) free(av);
     return -1;
   }
   if (vm.count("help")) {

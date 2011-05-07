@@ -10024,6 +10024,29 @@ bool TestCodeRun::TestLogicalOperators() {
 
   MVCR("<?php var_dump($a || null);");
 
+  MVCR("<?php ;"
+       "function f($a) { var_dump('f:'.$a); return $a; }"
+       "function foo($a) {"
+       "  var_dump($a && true);"
+       "  var_dump(f($a) && true);"
+       "  var_dump(true && $a);"
+       "  var_dump(true && f($a));"
+       "  var_dump($a && false);"
+       "  var_dump(f($a) && false);"
+       "  var_dump(false && $a);"
+       "  var_dump(false && f($a));"
+       "  var_dump($a || true);"
+       "  var_dump(f($a) || true);"
+       "  var_dump(true || $a);"
+       "  var_dump(true || f($a));"
+       "  var_dump($a || false);"
+       "  var_dump(f($a) || false);"
+       "  var_dump(false || $a);"
+       "  var_dump(false || f($a));"
+       "}"
+       "foo(34);"
+       "foo(0);");
+
   return true;
 }
 
@@ -17379,7 +17402,7 @@ bool TestCodeRun::TestHint() {
         "var_dump(test(2));",
         "int(-1)\n"
         "int(2)\n");
-  
+
   MVCRO("<?php\n"
         "class C{}\n"
         "function f1(string $x = null) {"
@@ -17427,7 +17450,7 @@ bool TestCodeRun::TestHint() {
         "var_dump(call_user_func_array(rf3(true), array(null)));\n"
         "var_dump(call_user_func_array(rf4(true), array(null)));\n"
         "var_dump(call_user_func_array(rf5(true), array(null)));\n"
-        "var_dump(call_user_func_array(rf6(true), array(null)));\n", 
+        "var_dump(call_user_func_array(rf6(true), array(null)));\n",
 
         "string(0) \"\"\n"
         "string(0) \"\"\n"

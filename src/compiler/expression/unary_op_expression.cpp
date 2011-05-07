@@ -297,11 +297,48 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
       return replaceValue(makeScalarExpression(ar, result));
     }
   } else if (m_op != T_ARRAY &&
-      m_exp &&
-      m_exp->isScalar() &&
-      m_exp->getScalarValue(value) &&
-      preCompute(value, result)) {
+             m_exp &&
+             m_exp->isScalar() &&
+             m_exp->getScalarValue(value) &&
+             preCompute(value, result)) {
     return replaceValue(makeScalarExpression(ar, result));
+  } else if (m_op == T_BOOL_CAST) {
+    switch (m_exp->getKindOf()) {
+      default: break;
+      case KindOfBinaryOpExpression: {
+        int op = static_pointer_cast<BinaryOpExpression>(m_exp)->getOp();
+        switch (op) {
+          case T_LOGICAL_OR:
+          case T_BOOLEAN_OR:
+          case T_LOGICAL_AND:
+          case T_BOOLEAN_AND:
+          case T_LOGICAL_XOR:
+          case T_INSTANCEOF:
+          case '<':
+          case T_IS_SMALLER_OR_EQUAL:
+          case '>':
+          case T_IS_GREATER_OR_EQUAL:
+          case T_IS_IDENTICAL:
+          case T_IS_NOT_IDENTICAL:
+          case T_IS_EQUAL:
+          case T_IS_NOT_EQUAL:
+            return m_exp;
+        }
+        break;
+      }
+      case KindOfUnaryOpExpression: {
+        int op = static_pointer_cast<UnaryOpExpression>(m_exp)->getOp();
+        switch (op) {
+          case T_BOOL_CAST:
+          case '!':
+          case T_ISSET:
+          case T_EMPTY:
+          case T_PRINT:
+            return m_exp;
+        }
+        break;
+      }
+    }
   }
   return ExpressionPtr();
 }
@@ -324,6 +361,10 @@ ExpressionPtr UnaryOpExpression::postOptimize(AnalysisResultConstPtr ar) {
              !static_pointer_cast<ExpressionList>(m_exp)->getCount()) {
     recomputeEffects();
     return CONSTANT("null");
+  } else if (m_op == T_BOOL_CAST) {
+    if (m_exp->getActualType()->is(Type::KindOfBoolean)) {
+      return replaceValue(m_exp);
+    }
   }
 
   return ExpressionPtr();

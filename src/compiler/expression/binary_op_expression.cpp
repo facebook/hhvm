@@ -177,59 +177,10 @@ void BinaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 ExpressionPtr BinaryOpExpression::simplifyLogical(AnalysisResultConstPtr ar) {
-  if (m_exp1->is(Expression::KindOfConstantExpression)) {
-    ConstantExpressionPtr con =
-      dynamic_pointer_cast<ConstantExpression>(m_exp1);
-    if (con->isBoolean()) {
-      if (con->getBooleanValue()) {
-        if (ar->getPhase() >= AnalysisResult::PostOptimize) {
-          // true && v (true AND v) => v
-          ASSERT(m_exp2->getType()->is(Type::KindOfBoolean));
-          if (m_op == T_BOOLEAN_AND || m_op == T_LOGICAL_AND) return m_exp2;
-        }
-        // true || v (true OR v) => true
-        if (m_op == T_BOOLEAN_OR || m_op == T_LOGICAL_OR) {
-          return CONSTANT("true");
-        }
-      } else {
-        if (ar->getPhase() >= AnalysisResult::PostOptimize) {
-          ASSERT(m_exp2->getType()->is(Type::KindOfBoolean));
-          // false || v (false OR v) => v
-          if (m_op == T_BOOLEAN_OR || m_op == T_LOGICAL_OR) return m_exp2;
-        }
-        // false && v (false AND v) => false
-        if (m_op == T_BOOLEAN_AND || m_op == T_LOGICAL_AND) {
-          return CONSTANT("false");
-        }
-      }
-    }
-  }
-  if (m_exp2->is(Expression::KindOfConstantExpression)) {
-    ConstantExpressionPtr con =
-      dynamic_pointer_cast<ConstantExpression>(m_exp2);
-    if (con->isBoolean()) {
-      if (con->getBooleanValue()) {
-        if (ar->getPhase() >= AnalysisResult::PostOptimize) {
-          ASSERT(m_exp1->getType()->is(Type::KindOfBoolean));
-          // v && true (v AND true) => v
-          if (m_op == T_BOOLEAN_AND || m_op == T_LOGICAL_AND) return m_exp1;
-        }
-        // v || true (v OR true) => true when v does not have effect
-        if (m_op == T_BOOLEAN_OR || m_op == T_LOGICAL_OR) {
-          if (!m_exp1->hasEffect()) return CONSTANT("true");
-        }
-      } else {
-        if (ar->getPhase() >= AnalysisResult::PostOptimize) {
-          ASSERT(m_exp1->getType()->is(Type::KindOfBoolean));
-          // v || false (v OR false) => v
-          if (m_op == T_BOOLEAN_OR || m_op == T_LOGICAL_OR) return m_exp1;
-        }
-        // v && false (v AND false) => false when v does not have effect
-        if (m_op == T_BOOLEAN_AND || m_op == T_LOGICAL_AND) {
-          if (!m_exp1->hasEffect()) return CONSTANT("false");
-        }
-      }
-    }
+  try {
+    ExpressionPtr rep = foldConst(ar);
+    if (rep) return replaceValue(rep);
+  } catch (Exception e) {
   }
   return ExpressionPtr();
 }
@@ -415,6 +366,20 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
                               m_op == T_IS_NOT_IDENTICAL);
           }
           break;
+        case T_LOGICAL_AND:
+        case T_BOOLEAN_AND:
+        case T_LOGICAL_OR:
+        case T_BOOLEAN_OR: {
+          ExpressionPtr rep =
+            v1.toBoolean() == (m_op == T_LOGICAL_AND ||
+                               m_op == T_BOOLEAN_AND) ? m_exp2 : m_exp1;
+          rep = ExpressionPtr(
+              new UnaryOpExpression(
+                getScope(), getLocation(), KindOfUnaryOpExpression,
+                rep, T_BOOL_CAST, true));
+          rep->setActualType(Type::Boolean);
+          return replaceValue(rep);
+        }
         case '+':
         case '.':
         case '*':
@@ -516,6 +481,31 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
     }
   } else {
     switch (m_op) {
+      case T_LOGICAL_AND:
+      case T_BOOLEAN_AND:
+      case T_LOGICAL_OR:
+      case T_BOOLEAN_OR: {
+        bool useFirst = v2.toBoolean() == (m_op == T_LOGICAL_AND ||
+                                           m_op == T_BOOLEAN_AND);
+        ExpressionPtr rep = useFirst ? m_exp1 : m_exp2;
+        rep = ExpressionPtr(
+          new UnaryOpExpression(
+            getScope(), getLocation(), KindOfUnaryOpExpression,
+            rep, T_BOOL_CAST, true));
+        rep->setActualType(Type::Boolean);
+        if (!useFirst) {
+          ExpressionListPtr l(
+            new ExpressionList(
+              getScope(), getLocation(), KindOfExpressionList,
+              ExpressionList::ListKindComma));
+          l->addElement(m_exp1);
+          l->addElement(rep);
+          l->setActualType(Type::Boolean);
+          rep = l;
+        }
+        rep->setExpectedType(getExpectedType());
+        return replaceValue(rep);
+      }
       case T_LOGICAL_XOR:
       case '|':
       case '&':
@@ -523,10 +513,6 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
       case '.':
       case '+':
       case '*':
-      case T_BOOLEAN_OR:
-      case T_BOOLEAN_AND:
-      case T_LOGICAL_OR:
-      case T_LOGICAL_AND:
         optExp = foldRightAssoc(ar);
         if (optExp) return optExp;
         break;

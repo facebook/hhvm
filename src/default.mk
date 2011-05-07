@@ -16,17 +16,16 @@ unexport SUB_CLEAN_DIRS
 .PHONY: clobber
 clobber:
 	$(V)$(RM) $(SUB_INTERMEDIATE_FILES) $(SUB_OBJECTS) $(SUB_OBJECTS:.o=.d)
-	$(V)$(RM) *.merge-left.* *.merge-right.* *.working www.pid
-	$(V)$(RM) $(OUT_DIR)lib$(PROJECT_NAME).so $(OUT_DIR)lib$(PROJECT_NAME).a
-	$(V)$(RM) $(filter-out $(SUB_PROGRAMS) $(SUB_LIB_TARGETS), $(TARGETS))
-	$(V)$(RM) $(shell echo `find $(OUT_DIR) -name "*.o"`)
-	$(V)$(RM) $(shell echo `find $(OUT_DIR) -name "*.d"`)
-	$(V)$(RM) $(shell echo `find . -name "*~"`)
 	$(V)$(RMDIR) gen-cpp
 	$(V)for mdir in $(dir $(wildcard $(addsuffix /Makefile, \
 		$(SUB_CLEAN_DIRS) $(SUB_PROGRAMS) $(SUB_LIB_TARGETS)))); \
 		do $(MAKE) -C $$mdir clobber; done
 	$(V)for mdir in $(INTERMEDIATE_DIRS); do rm -fR $$mdir; done
+	$(V)$(RM) *.merge-left.* *.merge-right.* *.working www.pid
+	$(V)$(RM) $(OUT_DIR)lib$(PROJECT_NAME).so $(OUT_DIR)lib$(PROJECT_NAME).a
+	$(V)$(RM) $(filter-out $(SUB_PROGRAMS) $(SUB_LIB_TARGETS), $(TARGETS))
+	$(V)find $(OUT_DIR) -name "*.[od]" | xargs $(RM)
+	$(V)find . -name "*~" | xargs $(RM)
 
 .PHONY: clean
 clean: clobber

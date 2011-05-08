@@ -48,13 +48,17 @@ bool Parameter::checkTypeHint(DataType hint, DataType type) const {
   case KindOfArray:
     return (type == hint || type == KindOfNull);
   case KindOfInt64:
-    return (type == KindOfInt64 || type == KindOfInt32);
+    return (type == KindOfInt64 || 
+            type == KindOfInt32 || 
+            type == KindOfNull);
   case KindOfString:
-    return (type == KindOfString || type == KindOfStaticString);
+    return (type == KindOfString || 
+            type == KindOfStaticString ||
+            type == KindOfNull);
   case KindOfBoolean:
-    return type == KindOfBoolean;
+    return type == KindOfBoolean || type == KindOfNull;
   case KindOfDouble:
-    return type == KindOfDouble;
+    return type == KindOfDouble || type == KindOfNull;
   default:
     ASSERT(false);
     break;

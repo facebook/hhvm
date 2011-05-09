@@ -103,7 +103,7 @@ bool IpBlockMap::ReadIPv6Address(const char *text,
 #define STRING_IPV6_ADDR_MAX_LENGTH 39
   char address[STRING_IPV6_ADDR_MAX_LENGTH + 1];
   int address_len;
-  char *slash;
+  const char *slash;
   bool is_ipv6 = (NULL != strchr(text, ':'));
 
   // Find the bit count, if any.

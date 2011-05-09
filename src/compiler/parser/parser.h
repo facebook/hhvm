@@ -225,6 +225,7 @@ private:
   std::vector<bool> m_hasCallToGetArgs;
   std::vector<StringToExpressionPtrVecMap> m_staticVars;
   bool m_lambdaMode;
+  bool m_closureGenerator;
 
   void pushComment();
   std::string popComment();

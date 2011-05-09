@@ -61,6 +61,7 @@ ExpressionPtr ClosureExpression::clone() {
   Expression::deepCopy(exp);
   exp->m_func = Clone(m_func);
   exp->m_vars = Clone(m_vars);
+  exp->m_values = Clone(m_values);
   return exp;
 }
 

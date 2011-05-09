@@ -61,6 +61,7 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
       m_inlineAsExpr(false), m_inlineSameContext(false),
       m_contextSensitive(false),
       m_directInvoke(false), m_needsRefTemp(false), m_needsCheckMem(false),
+      m_closureGenerator(false),
       m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0) {
   bool canInline = true;
   if (inPseudoMain) {
@@ -146,6 +147,7 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_inlineAsExpr(false), m_inlineSameContext(false),
       m_contextSensitive(false),
       m_directInvoke(false), m_needsRefTemp(false),
+      m_closureGenerator(false),
       m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0) {
   m_dynamic = Option::IsDynamicFunction(method, m_name);
   m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
@@ -726,18 +728,18 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
       dynamic_pointer_cast<ParameterExpression>((*params)[i]);
 
     ConstantExpressionPtr constPtr;
-    bool isDefaultNull = 
-      param->defaultValue() && 
+    bool isDefaultNull =
+      param->defaultValue() &&
       (constPtr = dynamic_pointer_cast<ConstantExpression>(
                     param->defaultValue())) &&
       constPtr->isNull();
     TypePtr infType = m_paramTypes[i];
 
     if (inTypedWrapper >= 0) {
-      bool typed = !isRefParam(i) && 
+      bool typed = !isRefParam(i) &&
           (Type::SameType(specType, infType) ||
           (infType && infType->isStandardObject() && isDefaultNull));
-      // if the infType is a standard object + 
+      // if the infType is a standard object +
       // we have a default null parameter, then we need to
       // do some special runtime checks
       if (!typed == inTypedWrapper) continue;
@@ -774,7 +776,7 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_indentEnd("}\n");
     } else {
       cg_printf("if(");
-      if (!m_paramDefaults[i].empty() && 
+      if (!m_paramDefaults[i].empty() &&
           (isRefParam(i) || isDefaultNull)) {
         cg_printf("!f_is_null(%s%s) && ",
                   Option::VariablePrefix, param->getName().c_str());
@@ -825,17 +827,22 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
       VariableTablePtr variables = getVariables();
       cg_printf("c_Closure *closure ATTRIBUTE_UNUSED = "
                 "(c_Closure*)extra;\n");
-      for (int i = 0; i < m_closureVars->getCount(); i++) {
-        ParameterExpressionPtr param =
-          dynamic_pointer_cast<ParameterExpression>((*m_closureVars)[i]);
-        string name = param->getName();
-        if (variables->isPresent(name)) {
-          if (param->isRef()) {
-            cg_printf("%s%s.assignRef(closure->m_vars.lvalAt(\"%s\"));\n",
-                      Option::VariablePrefix, name.c_str(), name.c_str());
-          } else {
-            cg_printf("%s%s.assignVal(closure->m_vars[\"%s\"]);\n",
-                      Option::VariablePrefix, name.c_str(), name.c_str());
+      if (m_closureGenerator) {
+        cg_printf("extract(variables, closure->t_getvars(), 256);\n");
+      } else {
+        VariableTablePtr variables = getVariables();
+        for (int i = 0; i < m_closureVars->getCount(); i++) {
+          ParameterExpressionPtr param =
+            dynamic_pointer_cast<ParameterExpression>((*m_closureVars)[i]);
+          string name = param->getName();
+          if (variables->isPresent(name)) {
+            if (param->isRef()) {
+              cg_printf("%s%s.assignRef(closure->m_vars.lvalAt(\"%s\"));\n",
+                        Option::VariablePrefix, name.c_str(), name.c_str());
+            } else {
+              cg_printf("%s%s.assignVal(closure->m_vars[\"%s\"]);\n",
+                        Option::VariablePrefix, name.c_str(), name.c_str());
+            }
           }
         }
       }
@@ -1282,7 +1289,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
       if (m_paramDefaults[i].empty()) {
         if (i >= guarded) {
           if (i < maxCount) cg_printf("UNLIKELY(count <= %d) ? ", i);
-          cg_printf(ref ? "(VRefParamValue())" : 
+          cg_printf(ref ? "(VRefParamValue())" :
               (wantNullVariantNotNull ? "null_variant" : "null"));
           if (i < maxCount) cg_printf(" : ");
         }
@@ -1295,7 +1302,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
           close = true;
         }
         if (dftNull) {
-          cg_printf(ref ? "(VRefParamValue())" : 
+          cg_printf(ref ? "(VRefParamValue())" :
               (wantNullVariantNotNull ? "null_variant" : "null"));
         } else {
           MethodStatementPtr m(dynamic_pointer_cast<MethodStatement>(m_stmt));

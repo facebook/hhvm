@@ -17360,6 +17360,21 @@ bool TestCodeRun::TestYield() {
         "1\n"
         "2\n"
         "3\n");
+
+  MVCRO("<?php "
+        "function foo($t) {"
+        "  $x = function() use ($t) {"
+        "    var_dump($t);"
+        "    yield 1;"
+        "  };"
+        "  foreach ($x() as $y) {"
+        "    var_dump($y);"
+        "  }"
+        "}"
+        "foo(42);",
+        "int(42)\n"
+        "int(1)\n");
+
   return true;
 }
 

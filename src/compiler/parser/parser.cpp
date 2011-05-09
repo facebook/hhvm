@@ -152,7 +152,8 @@ StatementListPtr Parser::ParseString(const char *input, AnalysisResultPtr ar,
 
 Parser::Parser(Scanner &scanner, const char *fileName,
                AnalysisResultPtr ar, int fileSize /* = 0 */)
-    : ParserBase(scanner, fileName), m_ar(ar), m_lambdaMode(false) {
+    : ParserBase(scanner, fileName), m_ar(ar), m_lambdaMode(false),
+      m_closureGenerator(false) {
   m_file = FileScopePtr(new FileScope(m_fileName, fileSize));
 
   newScope();
@@ -707,8 +708,10 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
       vector<StatementPtr> &prepending = m_prependingStatements.back();
       prepending.push_back(func);
 
+      if (name->text().empty()) m_closureGenerator = true;
       create_generator(this, out, params, name, closureName, NULL, NULL,
                        hasCallToGetArgs);
+      m_closureGenerator = false;
     }
 
   } else {
@@ -727,6 +730,9 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
       func->onParse(m_ar, m_file);
     }
     completeScope(func->getFunctionScope());
+    if (m_closureGenerator) {
+      func->getFunctionScope()->setClosureGenerator();
+    }
     func->setLocation(loc);
     if (func->ignored()) {
       out->stmt = NEW_STMT0(StatementList);

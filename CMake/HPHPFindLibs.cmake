@@ -247,6 +247,12 @@ include_directories(${READLINE_INCLUDE_DIR})
 find_package(CClient REQUIRED)
 include_directories(${CCLIENT_INCLUDE_PATH})
 
+CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/utf8.h" U8T_DECOMPOSE RECENT_CCLIENT)
+if (NOT RECENT_CCLIENT)
+	unset(RECENT_CCLIENT CACHE)
+	message(FATAL_ERROR "Your version of c-client is too old, you need 2007")
+endif()
+
 CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.h" auth_gss CCLIENT_NEEDS_PAM)
 
 if (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.c")

@@ -156,6 +156,11 @@ bool ArrayElementExpression::appendClass(ExpressionPtr cls) {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
+bool ArrayElementExpression::isTemporary() const {
+  return !m_global &&
+    !(m_context & (AccessContext|LValue|RefValue|UnsetContext));
+}
+
 void ArrayElementExpression::analyzeProgram(AnalysisResultPtr ar) {
   m_variable->analyzeProgram(ar);
   if (m_offset) m_offset->analyzeProgram(ar);

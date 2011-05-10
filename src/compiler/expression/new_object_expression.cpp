@@ -161,6 +161,7 @@ void NewObjectExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void NewObjectExpression::preOutputStash(CodeGenerator &cg,
                                          AnalysisResultPtr ar, int state) {
+  if (hasCPPTemp()) return;
   if (!m_receiverTemp.empty()) {
     TypePtr e = getExpectedType();
     if (!e || !Type::IsCastNeeded(ar, getActualType(), e)) {

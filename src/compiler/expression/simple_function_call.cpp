@@ -1811,7 +1811,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                 cg_printf(")");
               }
             }
-            cg_printf(".create()))");
+            cg_printf(".create())).toArray()");
             return;
           }
           cg_printf("%s(", m_name.c_str());

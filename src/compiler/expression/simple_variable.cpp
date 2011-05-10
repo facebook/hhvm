@@ -262,6 +262,7 @@ void SimpleVariable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                                     int state)
 {
+  if (hasCPPTemp()) return;
   if (hasContext(InvokeArgument) && !hasContext(AccessContext)) {
     Expression::preOutputStash(cg, ar, state);
     const string& ref_temp = cppTemp();
@@ -269,8 +270,8 @@ void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
     string arg_temp = genCPPTemp(cg, ar);
     const char *prefix =
       getScope()->getVariables()->getVariablePrefix(m_sym);
-    cg_printf("const Variant %s = %s%s;\n", 
-              copy_temp.c_str(), 
+    cg_printf("const Variant %s = %s%s;\n",
+              copy_temp.c_str(),
               prefix,
               cg.formatLabel(m_name).c_str());
     cg_printf("const Variant &%s = cit%d->isRef(%d) ? %s : %s;\n",

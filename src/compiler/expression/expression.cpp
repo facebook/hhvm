@@ -824,11 +824,14 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         if (k->hasEffect()) {
           lastEffect = i;
           lastExpr = k;
+          if (!j && k->isTemporary()) {
+            j++;
+          }
         }
         j++;
       }
     }
-    if (lastEffect >= 0 && (j > 1 || lastExpr->isTemporary())) {
+    if (lastEffect >= 0 && j > 1) {
       kidState |= FixOrder;
       if (stashAll) {
         lastEffect = n - 1;

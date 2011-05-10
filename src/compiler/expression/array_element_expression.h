@@ -33,6 +33,7 @@ public:
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
   virtual int getLocalEffects() const { return m_localEffects; }
   virtual bool isRefable(bool checkError = false) const { return true;}
+  bool isTemporary() const;
 
   ExpressionPtr getVariable() const { return m_variable;}
   ExpressionPtr getOffset() const { return m_offset;}

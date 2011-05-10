@@ -575,8 +575,7 @@ bool ExpressionList::hasNonArrayCreateValue(
       value = ap->getValue();
     }
     ASSERT(value);
-    if (value->hasContext(RefValue) ||
-        (value->hasEffect() && !value->isTemporary())) {
+    if (value->hasContext(RefValue)) {
       return true;
     }
   }
@@ -644,11 +643,7 @@ bool ExpressionList::outputCPPArrayCreate(CodeGenerator &cg,
     return false;
   }
   if (pre) {
-    for (unsigned i = 0; i < m_exps.size(); i++) {
-      if (ExpressionPtr exp = m_exps[i]) {
-        exp->preOutputCPP(cg, ar, 0);
-      }
-    }
+    Expression::preOutputCPP(cg, ar, StashKidVars);
     cg_printf("ArrayInit %s(", m_cppTemp.c_str());
     outputCPPUniqLitKeyArrayInit(cg, ar, uniqLitstrKeys, n);
     cg_printf(");\n");

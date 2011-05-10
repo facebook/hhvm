@@ -324,22 +324,20 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         SETTOKEN;
         errno = 0;
         long ret = strtoll(yytext, NULL, 0);
-	if (errno == ERANGE) {
+        if (errno == ERANGE || ret < 0) {
                 _scanner->error("Dec number is too big: %s", yytext);
-                return T_LNUMBER;
         }
-        return ret < 0 ? T_DNUMBER : T_LNUMBER;
+        return T_LNUMBER;
 }
 
 <ST_IN_SCRIPTING>{HNUM} {
         SETTOKEN;
-	errno = 0;
+        errno = 0;
         long ret = strtoull(yytext, NULL, 16);
-	if (errno == ERANGE) {
+        if (errno == ERANGE || ret < 0) {
                 _scanner->error("Hex number is too big: %s", yytext);
-                return T_LNUMBER;
         }
-        return ret < 0 ? T_DNUMBER : T_LNUMBER;
+        return T_LNUMBER;
 }
 
 <ST_VAR_OFFSET>0|([1-9][0-9]*) { /* Offset could be treated as a long */

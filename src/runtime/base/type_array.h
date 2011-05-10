@@ -94,6 +94,18 @@ class Array : public SmartPtr<ArrayData> {
     return m_px ? noMatch : 0; 
   }
 
+  int64 hashForStringSwitch(
+      int64 firstTrueCaseHash,
+      int64 firstNullCaseHash,
+      int64 firstFalseCaseHash,
+      int64 firstZeroCaseHash,
+      int64 firstHash,
+      int64 noMatchHash,
+      bool &needsOrder) const {
+    needsOrder = false;
+    return m_px ? noMatchHash : firstNullCaseHash;
+  }
+
   /**
    * Operators
    */

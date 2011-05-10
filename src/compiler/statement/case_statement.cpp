@@ -67,6 +67,13 @@ int64 CaseStatement::getLiteralInteger() const {
   return exp->getLiteralInteger();
 }
 
+string CaseStatement::getLiteralString() const {
+  ASSERT(m_condition->is(Expression::KindOfScalarExpression));
+  ScalarExpressionPtr exp =
+    dynamic_pointer_cast<ScalarExpression>(m_condition);
+  return exp->getLiteralString();
+}
+
 void CaseStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   if (m_condition) m_condition->analyzeProgram(ar);
   if (m_stmt) m_stmt->analyzeProgram(ar);

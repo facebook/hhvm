@@ -24,6 +24,8 @@
 #include <compiler/expression/simple_variable.h>
 #include <compiler/expression/scalar_expression.h>
 
+#include <runtime/base/comparisons.h>
+
 using namespace HPHP;
 using namespace std;
 using namespace boost;
@@ -203,31 +205,58 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   uint64 sentinel    = 0;
   int64 firstNonZero = 0;
 
-  bool staticCases = true;
+  bool staticIntCases    = true;
+  bool staticStringCases = true;
+
+  uint64 numDistinctLabels   = 0;
+  uint64 numNonDefaultLabels = 0;
+  uint64 tableSize           = 0;
   if (m_cases) {
     bool seenDefault = false;
     set<int64> seenNums;
-    for (int i = 0; i < m_cases->getCount(); i++) {
+    set<string> seenStrs;
+    for (int i = 0; 
+         i < m_cases->getCount() && (staticIntCases || staticStringCases); 
+         i++) {
       CaseStatementPtr stmt =
         dynamic_pointer_cast<CaseStatement>((*m_cases)[i]);
       if (stmt->getCondition()) {
-        if (!stmt->isLiteralInteger() || seenDefault) {
-          staticCases = false;
+        numNonDefaultLabels++;
+        Variant v;
+        bool hasValue = stmt->getScalarConditionValue(v);
+        if (hasValue && v.isInteger()) {
+          staticStringCases = false;
+          numDistinctLabels++;
+          int64 num = v.toInt64();
+          if (num != 0 && firstNonZero == 0) {
+            firstNonZero = num;
+          }
+          // detecting duplicate case value
+          if (seenNums.find(num) != seenNums.end()) {
+            staticIntCases = false;
+            break;
+          }
+          seenNums.insert(num);
+        } else if (hasValue && v.isString()) {
+          staticIntCases = false;
+          string str(v.toString());
+          // static string optimization can handle duplicate
+          // cases, since they will just hash to the same bucket
+          // anyways
+          if (seenStrs.find(str) == seenStrs.end()) {
+            numDistinctLabels++;
+            seenStrs.insert(str);
+          }
+        } else {
+          staticIntCases = staticStringCases = false;
           break;
         }
-
-        int64 num = stmt->getLiteralInteger();
-        if (num != 0 && firstNonZero == 0)
-          firstNonZero = num;
-
-        // detecting duplicate case value
-        if (seenNums.find(num) != seenNums.end()) {
-          staticCases = false;
-          break;
-        }
-
-        seenNums.insert(num);
       } else {
+        if (seenDefault) {
+          // don't want to optimize > 1 default cases for static int cases
+          staticIntCases = false;
+          break;
+        }
         seenDefault = true;
       }
     }
@@ -235,7 +264,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     // now scan for an available sentinel value - we only have to do this
     // if we care (which is we will do static cases and our operand isn't
     // known to be an int)
-    if (staticCases && !isStaticInt) {
+    if (staticIntCases && !isStaticInt) {
       while (sentinel < ULLONG_MAX) {
         if (seenNums.find((int64)sentinel) == seenNums.end()) {
           break;
@@ -243,46 +272,76 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         sentinel++;
       }
       if (sentinel == ULLONG_MAX && 
-          seenNums.find((int64)sentinel) != seenNums.end())
+          seenNums.find((int64)sentinel) != seenNums.end()) {
         hasSentinel = false;
+      }
     }
   }
 
   // if theres no non-zero match, then we use the sentinel to create a no-match 
   if (firstNonZero == 0) {
-    ASSERT(!staticCases || isStaticInt || hasSentinel);
+    ASSERT(!staticIntCases || isStaticInt || hasSentinel);
     firstNonZero = sentinel;
   }
 
   // if we somehow managed to enumerate all 2^64 int literals + 
   // we don't have statically known int switch operand, then sorry
   // we are out of luck
-  if (staticCases && !isStaticInt && !hasSentinel)
-    staticCases = false;
+  if (staticIntCases && !isStaticInt && !hasSentinel) {
+    staticIntCases = false;
+  }
+
+  // in the degenerate case of no labels, then treat it as
+  // a static int case, or if there is only 1 (non-default) case, then also
+  // no point to do static string case optimization
+  if ((staticIntCases && staticStringCases) || 
+      (staticStringCases && numNonDefaultLabels <= 1)) {
+    staticStringCases = false;
+  }
+
+  if (staticStringCases) {
+    ASSERT(numDistinctLabels > 0);
+    tableSize = Util::roundUpToPowerOfTwo(numDistinctLabels * 2);
+    if (tableSize == ULLONG_MAX) {
+      // we cannot guarantee a no match value in this case
+      staticStringCases = false;
+    }
+  }
 
   labelId |= CodeGenerator::InsideSwitch;
-  if (staticCases) labelId |= CodeGenerator::StaticCases;
+  if (staticIntCases) labelId |= CodeGenerator::StaticCases;
   cg.pushBreakScope(labelId, false);
   labelId &= ~CodeGenerator::BreakScopeBitMask;
-  cg_indentBegin("{\n");
 
   string var;
   int varId = -1;
+  bool closeBrace = false; 
 
-  if (m_exp->preOutputCPP(cg, ar, 0)) {
+  bool needsPreOutput = m_exp->preOutputCPP(cg, ar, 0);
+  if (staticStringCases || needsPreOutput) {
+    closeBrace = true;
+    cg_indentBegin("{\n");
+
     varId = cg.createNewLocalId(shared_from_this());
-    var = string(Option::SwitchPrefix) + lexical_cast<string>(varId);
-    m_exp->getType()->outputCPPDecl(cg, ar, getScope());
-    cg_printf(" %s;\n", var.c_str());
+    if (!needsPreOutput &&
+        m_exp->hasContext(Expression::LValue) &&
+        m_exp->is(Expression::KindOfSimpleVariable)) {
+      var = getScope()->getVariables()->getVariableName(
+        cg, ar, static_pointer_cast<SimpleVariable>(m_exp)->getName());
+    } else {
+      var = string(Option::SwitchPrefix) + lexical_cast<string>(varId);
+      m_exp->getType()->outputCPPDecl(cg, ar, getScope());
+      cg_printf(" %s;\n", var.c_str());
 
-    m_exp->outputCPPBegin(cg, ar);
-    cg_printf("%s = (", var.c_str());
-    m_exp->outputCPP(cg, ar);
-    cg_printf(");\n");
-    m_exp->outputCPPEnd(cg, ar);
+      m_exp->outputCPPBegin(cg, ar);
+      cg_printf("%s = (", var.c_str());
+      m_exp->outputCPP(cg, ar);
+      cg_printf(");\n");
+      m_exp->outputCPPEnd(cg, ar);
+    }
   }
 
-  if (staticCases) {
+  if (staticIntCases) {
     cg_printf("switch (");
     if (isStaticInt) {
       if (!var.empty()) {
@@ -308,13 +367,13 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
       if (m_exp->getType()->is(Type::KindOfBoolean)) {
         // boolean we must special case
-        cg_printf(" ? %ld : 0", firstNonZero);
+        cg_printf(" ? %lldLL : 0LL", firstNonZero);
       } else if (m_exp->getType()->is(Type::KindOfDouble)) {
-        cg_printf(", %ld)", (int64) sentinel);
+        cg_printf(", %lldLL)", (int64) sentinel);
       } else {
         // at this point we must be dealing with a variable
         // which implements hashForIntSwitch()
-        cg_printf(".hashForIntSwitch(%ld, %ld)",
+        cg_printf(".hashForIntSwitch(%lldLL, %lldLL)",
                   firstNonZero,
                   (int64) sentinel);
       }
@@ -322,6 +381,247 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf(") {\n");
     if (m_cases) m_cases->outputCPP(cg, ar);
     cg_printf("}\n");
+    if (closeBrace)
+      cg_indentEnd("}\n");
+  } else if (staticStringCases) {
+    ASSERT(!var.empty());
+    ASSERT(tableSize > 0);
+
+    // create cases
+    MapIntToStatementPtrWithPosVec caseMap;
+    int64 
+      firstTrueCaseHash  = 0,
+      firstNullCaseHash  = 0,
+      firstFalseCaseHash = 0,
+      firstZeroCaseHash  = 0,
+      firstHash          = 0,
+      noMatchHash        = 0;
+    bool
+      hasFirstTrue  = false,
+      hasFirstNull  = false,
+      hasFirstFalse = false,
+      hasFirstZero  = false;
+
+    CaseStatementPtr defaultCase;
+    int defaultCaseNum = -1;
+    int maxHashCase    = -1;
+    set<int64> defaultCases;
+    if (m_cases) {
+      for (int i = 0; i < m_cases->getCount(); i++) {
+        CaseStatementPtr stmt =
+          static_pointer_cast<CaseStatement>((*m_cases)[i]);
+        ASSERT(stmt);
+        if (stmt->getCondition()) {
+          Variant v;
+          int64 condHash;
+          bool hasValue = stmt->getScalarConditionValue(v);
+          ASSERT(hasValue && !v.isNull());
+
+          int64 lval; double dval;
+          // allow errors, since we want "1abc" to match 1
+          DataType type = v.getStringData()->isNumericWithVal(lval, dval, 1);
+
+          switch (type) {
+          case KindOfInt64:
+            condHash = lval;
+            break;
+          case KindOfDouble:
+            condHash = (int64) dval;
+            break;
+          case KindOfNull: 
+            {
+              string l(v.toString());
+              condHash = hash_string(l.c_str());
+            }
+            break;
+          default:
+            ASSERT(false);
+            break;
+          }
+
+          if (!hasFirstTrue && equal(v, true)) {
+            hasFirstTrue = true;
+            firstTrueCaseHash = condHash;
+          }
+          if (!hasFirstNull && equal(v, null)) {
+            hasFirstNull = true;
+            firstNullCaseHash = condHash;
+          }
+          if (!hasFirstFalse && equal(v, false)) {
+            hasFirstFalse = true;
+            firstFalseCaseHash = condHash;
+          }
+          if (!hasFirstZero && equal(v, 0)) {
+            hasFirstZero = true;
+            firstZeroCaseHash = condHash;
+          }
+          if (i == 0) firstHash = condHash;
+
+          uint64 bucket = ((uint64)condHash) % tableSize;
+          MapIntToStatementPtrWithPosVec::iterator it(caseMap.find(bucket));
+          if (it == caseMap.end()) {
+            shared_ptr<StatementPtrWithPosVec> 
+              list(new StatementPtrWithPosVec());
+            list->push_back(StatementPtrWithPos(i, stmt));
+            caseMap[bucket] = list;
+          } else {
+            it->second->push_back(StatementPtrWithPos(i, stmt));
+          }
+          maxHashCase = max(maxHashCase, i);
+        } else {
+          // we only care about the *last* default case, so we let it be
+          // overriden each time
+          defaultCase = stmt;
+          defaultCaseNum = i;
+          defaultCases.insert(i);
+        }
+      }
+      // compute the no match hash
+      noMatchHash = tableSize;
+    }
+
+    cg_printf("bool needsOrder;\n");
+    cg_printf("int64 hash;\n");
+    switch (m_exp->getType()->getKindOf()) {
+    case Type::KindOfBoolean:
+      cg_printf("needsOrder = false;\n");
+      cg_printf("hash = %s ? %lldLL : %lldLL;\n",
+                var.c_str(), 
+                firstTrueCaseHash,
+                firstFalseCaseHash);
+      break;
+    case Type::KindOfInt64:
+      cg_printf("needsOrder = false;\n");
+      cg_printf("hash = %s == 0 ? %lldLL : %s;\n", 
+                var.c_str(),
+                firstZeroCaseHash,
+                var.c_str());
+      break;
+    case Type::KindOfDouble:
+      cg_printf("needsOrder = false;\n");
+      cg_printf("hash = %s == 0 ? %lldLL : ((int64)%s);\n", 
+                var.c_str(),
+                firstZeroCaseHash,
+                var.c_str());
+      break;
+    default:
+      cg_printf("hash = %s.hashForStringSwitch("
+                "%lldLL, %lldLL, %lldLL, %lldLL, %lldLL, %lldLL, needsOrder);\n",
+                var.c_str(),
+                firstTrueCaseHash,
+                firstNullCaseHash,
+                firstFalseCaseHash,
+                firstZeroCaseHash,
+                firstHash,
+                noMatchHash);
+      break;
+    }
+
+    cg_printf("switch (((uint64) hash) & %lluUL) {\n", tableSize - 1);
+
+    // need to precompute which hash labels will be jumped to,
+    // thanks to no __attribute__((unused)) decls allowed after labels:
+    // http://gcc.gnu.org/bugzilla/show_bug.cgi?id=11613
+    size_t bucketIdx = 0;
+    MapIntToStatementPtrWithPosVec::iterator it(caseMap.begin());
+    set<int> willJumpTo;
+    for (; it != caseMap.end(); ++it, ++bucketIdx) {
+      StatementPtrWithPosVecPtr cases = it->second;
+      StatementPtrWithPosVec::iterator caseIt(cases->begin());
+      for (; caseIt != cases->end(); ++caseIt) {
+        StatementPtrWithPos p = *caseIt;
+        if (p.first < maxHashCase) { 
+          int c = p.first + 1;
+          while (defaultCases.find(c) != defaultCases.end()) c++;
+          ASSERT(c <= maxHashCase);
+          if (caseIt + 1 == cases->end() || 
+              (*(caseIt + 1)).first != c) {
+            willJumpTo.insert(c);
+          }
+        }
+      }
+    }
+
+    bucketIdx = 0;
+    it = caseMap.begin();
+    for (; it != caseMap.end(); ++it, ++bucketIdx) {
+      uint64 bucket = it->first;
+      StatementPtrWithPosVecPtr cases = it->second;
+      
+      size_t caseNum = 0;
+      StatementPtrWithPosVec::iterator caseIt(cases->begin());
+      for (; caseIt != cases->end(); ++caseIt, ++caseNum) {
+
+        StatementPtrWithPos p = *caseIt;
+
+        // emit case_h_s{i} label if necessary
+        if (willJumpTo.find(p.first) != willJumpTo.end()) {
+          cg_printf("case_%d_h_s%d:\n", varId, p.first);
+        }
+        if (caseNum == 0) {
+          // emit bucket case label
+          cg_printf("case %lluUL:\n", bucket);
+        }
+
+        ASSERT(p.second->getCondition());
+
+        // emit equality check
+        cg.indentBegin("");
+        p.second->getCondition()->outputCPPBegin(cg, ar);
+        cg_printf("if (equal(%s, (", var.c_str());
+        p.second->getCondition()->outputCPP(cg, ar);
+        cg_printf("))) goto case_%d_%d;\n", varId, p.first);
+        p.second->getCondition()->outputCPPEnd(cg, ar);
+
+        // emit jump check if necessary
+        if (p.first < maxHashCase) { 
+          int c = p.first + 1;
+          while (defaultCases.find(c) != defaultCases.end()) c++;
+          ASSERT(c <= maxHashCase);
+          
+          // see if the next hash case to jump to 
+          // is the next in the bucket chain, if so, no need to jump
+          if (caseIt + 1 == cases->end() || 
+              (*(caseIt + 1)).first != c) {
+            ASSERT(willJumpTo.find(c) != willJumpTo.end());
+            cg_printf("if (UNLIKELY(needsOrder)) goto case_%d_h_s%d;\n",
+                      varId, c);
+          }
+        }
+        cg.indentEnd("");
+      }
+      // emit jump to default:
+      cg.indentBegin("");
+      if (defaultCaseNum >= 0) {
+        cg_printf("goto case_%d_%d;\n", varId, defaultCaseNum);
+      } else {
+        cg_printf("goto break%d;\n", labelId);
+      }
+      cg.indentEnd("");
+    }
+
+    if (defaultCaseNum >= 0) {
+      cg_printf("default: goto case_%d_%d;\n", varId, defaultCaseNum);
+    } else {
+      cg_printf("default: goto break%d;\n", labelId);
+      cg.addLabelId("break", labelId);
+    }
+
+    cg_printf("}\n");
+
+    if (closeBrace)
+      cg_indentEnd("}\n");
+
+    // now emit the cases
+    if (m_cases) {
+      for (int i = 0; i < m_cases->getCount(); i++) {
+        CaseStatementPtr stmt =
+          static_pointer_cast<CaseStatement>((*m_cases)[i]);
+        stmt->outputCPPByNumber(cg, ar, varId,
+                                !stmt->getCondition() && defaultCaseNum != i ?
+                                -1 : i);
+      }
+    }
   } else {
     if (var.empty()) {
       varId = cg.createNewLocalId(shared_from_this());
@@ -357,6 +657,8 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf("goto break%d;\n", labelId);
         cg.addLabelId("break", labelId);
       }
+      if (closeBrace)
+        cg_indentEnd("}\n");
       cg_printf("\n");
       for (int i = 0; i < m_cases->getCount(); i++) {
         CaseStatementPtr stmt =
@@ -376,6 +678,5 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (cg.findLabelId("break", labelId)) {
     cg_printf("break%d:;\n", labelId);
   }
-  cg_indentEnd("}\n");
   cg.popBreakScope();
 }

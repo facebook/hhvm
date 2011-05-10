@@ -76,6 +76,21 @@ class Object : public SmartPtr<ObjectData> {
   int64 hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
     return m_px ? m_px->o_toInt64() : 0;
   }
+  int64 hashForStringSwitch(
+      int64 firstTrueCaseHash,
+      int64 firstNullCaseHash,
+      int64 firstFalseCaseHash,
+      int64 firstZeroCaseHash,
+      int64 firstHash,
+      int64 noMatchHash,
+      bool &needsOrder) const {
+    if (!m_px) {
+      needsOrder = false;
+      return firstNullCaseHash;
+    }
+    needsOrder = true;
+    return firstHash;
+  }
 
   ArrayIter begin(CStrRef context = null_string,
                   bool setIterDirty = false) const;

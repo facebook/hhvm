@@ -43,6 +43,12 @@ public:
   bool isLiteralInteger() const;
   bool isLiteralString() const;
   int64 getLiteralInteger() const;
+  std::string getLiteralString() const;
+
+  bool getScalarConditionValue(Variant &v) const {
+    if (!m_condition || !m_condition->getScalarValue(v)) return false;
+    return true;
+  }
 
   /**
    * SwitchStatement needs to inspect this expression.

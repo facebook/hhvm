@@ -18,6 +18,7 @@
 #define __SWITCH_STATEMENT_H__
 
 #include <compiler/statement/statement.h>
+#include <compiler/statement/case_statement.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,6 +39,12 @@ public:
   ExpressionPtr getExp() const { return m_exp; }
   StatementListPtr getCases() const { return m_cases; }
 private:
+  typedef std::pair<int, CaseStatementPtr> StatementPtrWithPos;
+  typedef std::vector<StatementPtrWithPos> StatementPtrWithPosVec;
+  typedef boost::shared_ptr<StatementPtrWithPosVec> 
+    StatementPtrWithPosVecPtr;
+	typedef std::map<uint64, StatementPtrWithPosVecPtr> 
+    MapIntToStatementPtrWithPosVec; 
   ExpressionPtr m_exp;
   StatementListPtr m_cases;
 };

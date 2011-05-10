@@ -430,6 +430,31 @@ int64 StringData::hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
   return 0;
 }
 
+int64 StringData::hashForStringSwitch(
+    int64 firstTrueCaseHash,
+    int64 firstNullCaseHash,
+    int64 firstFalseCaseHash,
+    int64 firstZeroCaseHash,
+    int64 firstHash,
+    int64 noMatchHash,
+    bool &needsOrder) const {
+  int64 lval; double dval;
+  DataType ret = isNumericWithVal(lval, dval, 1);
+  needsOrder = false;
+  switch (ret) {
+  case KindOfNull:   
+    return empty() ? firstNullCaseHash : hash();
+  case KindOfInt64:
+    return lval;
+  case KindOfDouble: 
+    return (int64) dval;
+  default:
+    break;
+  }
+  ASSERT(false);
+  return 0;
+}
+
 bool StringData::toBoolean() const {
   return !empty() && !isZero();
 }

@@ -540,6 +540,53 @@ int64 Variant::DoubleHashForIntSwitch(double dbl, int64 noMatch) {
   return t == dbl ? t : noMatch;
 }
 
+int64 Variant::hashForStringSwitch(
+    int64 firstTrueCaseHash,
+    int64 firstNullCaseHash,
+    int64 firstFalseCaseHash,
+    int64 firstZeroCaseHash,
+    int64 firstHash,
+    int64 noMatchHash,
+    bool &needsOrder) const {
+  switch (m_type) {
+  case KindOfInt32:
+  case KindOfInt64:
+    needsOrder = false;
+    return m_data.num == 0 ? firstZeroCaseHash : m_data.num;
+  case KindOfBoolean:
+    needsOrder = false;
+    return m_data.num ? firstTrueCaseHash : firstFalseCaseHash;
+  case KindOfDouble: 
+    needsOrder = false;
+    return m_data.dbl == 0 ? firstZeroCaseHash : toInt64();
+  case KindOfUninit:
+  case KindOfNull:
+    // take care of the NULLs here, so below we can assume
+    // a non null m_data field
+    needsOrder = false;
+    return firstNullCaseHash;
+  case KindOfStaticString:
+  case KindOfString:
+    return m_data.pstr->hashForStringSwitch(
+        firstTrueCaseHash, firstNullCaseHash, firstFalseCaseHash,
+        firstZeroCaseHash, firstHash, noMatchHash, needsOrder);
+  case KindOfArray:
+    needsOrder = false;
+    return noMatchHash;
+  case KindOfObject:
+    needsOrder = true;
+    return firstHash;
+  case KindOfVariant:
+    return m_data.pvar->hashForStringSwitch(
+        firstTrueCaseHash, firstNullCaseHash, firstFalseCaseHash,
+        firstZeroCaseHash, firstHash, noMatchHash, needsOrder);
+  default:
+    break;
+  }
+  ASSERT(false);
+  return 0;
+}
+
 int Variant::getRefCount() const {
   switch (m_type) {
   case KindOfString:  return m_data.pstr->getCount();

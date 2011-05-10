@@ -128,6 +128,14 @@ class StringData {
   bool isValidVariableName() const;
 
   int64 hashForIntSwitch(int64 firstNonZero, int64 noMatch) const; 
+  int64 hashForStringSwitch(
+      int64 firstTrueCaseHash,
+      int64 firstNullCaseHash,
+      int64 firstFalseCaseHash,
+      int64 firstZeroCaseHash,
+      int64 firstHash,
+      int64 noMatchHash,
+      bool &needsOrder) const; 
 
 #ifdef TAINTED
   TaintData* getTaintData() { return &m_taint_data; }

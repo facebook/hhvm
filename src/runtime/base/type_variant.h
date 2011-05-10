@@ -331,6 +331,15 @@ class Variant {
 
   static int64 DoubleHashForIntSwitch(double dbl, int64 noMatch); 
 
+  int64 hashForStringSwitch(
+      int64 firstTrueCaseHash,
+      int64 firstNullCaseHash,
+      int64 firstFalseCaseHash,
+      int64 firstZeroCaseHash,
+      int64 firstHash,
+      int64 noMatchHash,
+      bool &needsOrder) const;
+
   /**
    * Whether or not there are at least two variables that are strongly bound.
    */

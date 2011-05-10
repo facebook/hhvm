@@ -61,16 +61,18 @@ Variant &ObjectPropertyExpression::lval(VariableEnvironment &env) const {
   // How annoying. Sometimes object is an lval and should be treated as such
   // and sometimes it isn't eg method call.
   const LvalExpression *lobj = m_obj->toLval();
+  Variant &proxy = get_globals()->__lvalProxy;
   if (lobj) {
     Variant &lv = lobj->lval(env);
     String name(m_name->get(env));
     SET_LINE;
-    return lv.o_lval(name, get_globals()->__lvalProxy);
+    return lv.o_lval(name, proxy);
   } else {
     Variant obj(m_obj->eval(env));
     String name(m_name->get(env));
     SET_LINE;
-    return obj.o_lval(name, get_globals()->__lvalProxy);
+    proxy = ref(obj.o_lval(name, proxy));
+    return proxy;
   }
 }
 

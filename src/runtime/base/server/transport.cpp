@@ -539,9 +539,9 @@ bool Transport::setCookie(CStrRef name, CStrRef value, int64 expire /* = 0 */,
     /*
      * MSIE doesn't delete a cookie when you set it to a null value
      * so in order to force cookies to be deleted, even on MSIE, we
-     * pick an expiry date 1 year and 1 second in the past
+     * pick an expiry date in the past
      */
-    String sdt = DateTime(time(NULL) - 31536001, true)
+    String sdt = DateTime(1, true)
       .toString(DateTime::Cookie);
     cookie += name.data();
     cookie += "=deleted; expires=";

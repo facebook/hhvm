@@ -15,8 +15,8 @@
 
 #undef YY_READ_BUF_SIZE
 #undef YY_BUF_SIZE
-#define YY_READ_BUF_SIZE 1024*32 /* for reading from input */
-#define YY_BUF_SIZE 1024*16 /* for pattern matching */
+#define YY_READ_BUF_SIZE 1024*128 /* for reading from input */
+#define YY_BUF_SIZE 1024*64 /* for pattern matching */
 
 #define DECLARE_YYCURSOR \
   char *&cursor = yyg->yy_c_buf_p; *cursor = yyg->yy_hold_char;

@@ -63,5 +63,6 @@
 #include "url.inc"
 #include "variable.inc"
 #include "xml.inc"
+#include "xmlreader.inc"
 #include "xmlwriter.inc"
 #include "zlib.inc"

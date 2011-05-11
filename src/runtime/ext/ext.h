@@ -80,5 +80,6 @@
 #include <runtime/ext/profile/extprofile_url.h>
 #include <runtime/ext/profile/extprofile_variable.h>
 #include <runtime/ext/profile/extprofile_xml.h>
+#include <runtime/ext/profile/extprofile_xmlreader.h>
 #include <runtime/ext/profile/extprofile_xmlwriter.h>
 #include <runtime/ext/profile/extprofile_zlib.h>

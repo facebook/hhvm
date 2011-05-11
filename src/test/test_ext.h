@@ -78,5 +78,6 @@
 #include <test/test_ext_url.h>
 #include <test/test_ext_variable.h>
 #include <test/test_ext_xml.h>
+#include <test/test_ext_xmlreader.h>
 #include <test/test_ext_xmlwriter.h>
 #include <test/test_ext_zlib.h>

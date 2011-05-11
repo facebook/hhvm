@@ -63,5 +63,6 @@ RUN_TESTSUITE(TestExtThrift);
 RUN_TESTSUITE(TestExtUrl);
 RUN_TESTSUITE(TestExtVariable);
 RUN_TESTSUITE(TestExtXml);
+RUN_TESTSUITE(TestExtXmlreader);
 RUN_TESTSUITE(TestExtXmlwriter);
 RUN_TESTSUITE(TestExtZlib);

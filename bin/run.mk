@@ -43,6 +43,7 @@ RUNTIME_DIRS := $(wildcard \
 	$(HPHP_LIB)/src/runtime/ext \
 	$(HPHP_LIB)/src/runtime/eval \
 	$(HPHP_LIB)/src/system/gen \
+	$(HPHP_LIB)/src/system/lib \
 	$(HPHP_LIB)/src/util)
 
 ifeq ($(strip $(RUNTIME_DIRS)),)
@@ -51,6 +52,7 @@ RUNTIME_DIRS = \
 	$(HPHP_OBJ_DIR)/src/runtime/ext \
 	$(HPHP_OBJ_DIR)/src/runtime/eval \
 	$(HPHP_OBJ_DIR)/src/system/gen \
+	$(HPHP_OBJ_DIR)/src/system/lib \
 	$(HPHP_OBJ_DIR)/src/util
 endif
 

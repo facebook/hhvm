@@ -318,71 +318,106 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool closeBrace = false; 
 
   bool needsPreOutput = m_exp->preOutputCPP(cg, ar, 0);
+  TypePtr staticIntSwitchOpnd = m_exp->getType();
   if (staticStringCases || needsPreOutput) {
-    closeBrace = true;
-    cg_indentBegin("{\n");
-
     varId = cg.createNewLocalId(shared_from_this());
     if (!needsPreOutput &&
         m_exp->hasContext(Expression::LValue) &&
         m_exp->is(Expression::KindOfSimpleVariable)) {
+      // use existing variable
       var = getScope()->getVariables()->getVariableName(
         cg, ar, static_pointer_cast<SimpleVariable>(m_exp)->getName());
     } else {
       var = string(Option::SwitchPrefix) + lexical_cast<string>(varId);
-      m_exp->getType()->outputCPPDecl(cg, ar, getScope());
-      cg_printf(" %s;\n", var.c_str());
+      string var0; // holds the variable name to call outputCPP on
+
+      bool needsDecl = true;
+      if (staticIntCases) {
+        ASSERT(hasSentinel);
+        switch (m_exp->getType()->getKindOf()) {
+        case Type::KindOfInt64:
+        case Type::KindOfBoolean:
+        case Type::KindOfDouble:
+          m_exp->getType()->outputCPPDecl(cg, ar, getScope());
+          cg_printf(" %s;\n", var.c_str());
+          needsDecl = false;
+          var0 = var;
+          break;
+        default:
+          cg_printf("int64 %s;\n", var.c_str());
+          // we must do extra work here
+          var0 = string(Option::SwitchPrefix) +
+            lexical_cast<string>(cg.createNewLocalId(shared_from_this()));
+          staticIntSwitchOpnd = Type::Int64;
+          break;
+        }
+      } else var0 = var;
+
+      closeBrace = true;
+      cg_indentBegin("{\n");
+
+      if (needsDecl) {
+        m_exp->getType()->outputCPPDecl(cg, ar, getScope());
+        cg_printf(" %s;\n", var0.c_str());
+      }
 
       m_exp->outputCPPBegin(cg, ar);
-      cg_printf("%s = (", var.c_str());
+      cg_printf("%s = (", var0.c_str());
       m_exp->outputCPP(cg, ar);
       cg_printf(");\n");
       m_exp->outputCPPEnd(cg, ar);
+
+      if (staticIntCases) {
+        if (needsDecl) {
+          // copy var0 over to var
+          cg_printf("%s = %s.hashForIntSwitch(%lldLL, %lldLL);\n",
+                    var.c_str(),
+                    var0.c_str(),
+                    firstNonZero,
+                    (int64) sentinel);
+        }
+        cg_indentEnd("}\n");
+        closeBrace = false;
+      }
     }
   }
 
   if (staticIntCases) {
+    ASSERT(!closeBrace);
+    ASSERT(hasSentinel);
+    ASSERT(!needsPreOutput || !var.empty());
+    ASSERT(staticIntSwitchOpnd);
+
     cg_printf("switch (");
-    if (isStaticInt) {
-      if (!var.empty()) {
-        cg_printf("%s", var.c_str());
-      } else {
-        m_exp->outputCPP(cg, ar);
-      }
-    } else {
-      assert(hasSentinel);
-
-      if (m_exp->getType()->is(Type::KindOfDouble)) {
-        // double we must special case
-        cg_printf("Variant::DoubleHashForIntSwitch(");
-      }
-
-      if (!var.empty()) {
-        cg_printf("%s", var.c_str());
-      } else {
-        cg_printf("(");
-        m_exp->outputCPP(cg, ar);
-        cg_printf(")");
-      }
-
-      if (m_exp->getType()->is(Type::KindOfBoolean)) {
-        // boolean we must special case
-        cg_printf(" ? %lldLL : 0LL", firstNonZero);
-      } else if (m_exp->getType()->is(Type::KindOfDouble)) {
-        cg_printf(", %lldLL)", (int64) sentinel);
-      } else {
-        // at this point we must be dealing with a variable
-        // which implements hashForIntSwitch()
-        cg_printf(".hashForIntSwitch(%lldLL, %lldLL)",
-                  firstNonZero,
-                  (int64) sentinel);
-      }
+    if (staticIntSwitchOpnd->is(Type::KindOfDouble)) {
+      // double we must special case
+      cg_printf("Variant::DoubleHashForIntSwitch(");
     }
+
+    if (!var.empty()) {
+      cg_printf("%s", var.c_str());
+    } else {
+      cg_printf("(");
+      m_exp->outputCPP(cg, ar);
+      cg_printf(")");
+    }
+
+    if (staticIntSwitchOpnd->is(Type::KindOfBoolean)) {
+      // boolean we must special case
+      cg_printf(" ? %lldLL : 0LL", firstNonZero);
+    } else if (staticIntSwitchOpnd->is(Type::KindOfDouble)) {
+      cg_printf(", %lldLL)", (int64) sentinel);
+    } else if (!staticIntSwitchOpnd->is(Type::KindOfInt64)) {
+      // at this point we must be dealing with a variable
+      // which implements hashForIntSwitch()
+      cg_printf(".hashForIntSwitch(%lldLL, %lldLL)",
+                firstNonZero,
+                (int64) sentinel);
+    }
+
     cg_printf(") {\n");
     if (m_cases) m_cases->outputCPP(cg, ar);
     cg_printf("}\n");
-    if (closeBrace)
-      cg_indentEnd("}\n");
   } else if (staticStringCases) {
     ASSERT(!var.empty());
     ASSERT(tableSize > 0);

@@ -17523,6 +17523,26 @@ bool TestCodeRun::TestYield() {
         "int(42)\n"
         "int(1)\n");
 
+  MVCRO("<?php\n"
+        "function f($x) {\n"
+        "  switch ($x++ + ++$x) {\n"
+        "  case 1:\n"
+        "    yield 1;\n"
+        "  case 2:\n"
+        "    yield 2;\n"
+        "  case 3:\n"
+        "    yield 3;\n"
+        "  case 4:\n"
+        "    yield 4;\n"
+        "  }\n"
+        "}\n"
+        "foreach (f(0) as $x) { var_dump($x); }\n"
+        "foreach (f(1) as $x) { var_dump($x); }\n",
+        "int(2)\n"
+        "int(3)\n"
+        "int(4)\n"
+        "int(4)\n");
+
   return true;
 }
 

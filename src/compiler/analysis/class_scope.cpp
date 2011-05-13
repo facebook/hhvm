@@ -261,9 +261,9 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
           BOOST_FOREACH(ClassScopePtr cls, classes) {
             cls->m_derivedByDynamic = true;
             StringToFunctionScopePtrMap cur(pristine);
-            inheritedMagicMethods(cls);
-            cls->collectMethods(ar, cur, false, forInvoke);
             derivedMagicMethods(cls);
+            cls->collectMethods(ar, cur, false, forInvoke);
+            inheritedMagicMethods(cls);
             funcs.insert(cur.begin(), cur.end());
           }
           m_derivesFromRedeclaring = DirectFromRedeclared;
@@ -274,9 +274,9 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
         }
         setVolatile();
       } else {
-        inheritedMagicMethods(super);
-        super->collectMethods(ar, funcs, false, forInvoke);
         derivedMagicMethods(super);
+        super->collectMethods(ar, funcs, false, forInvoke);
+        inheritedMagicMethods(super);
         if (super->derivesFromRedeclaring()) {
           if (base == m_parent) {
             m_derivesFromRedeclaring = IndirectFromRedeclared;

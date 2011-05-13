@@ -2741,7 +2741,7 @@ void AnalysisResult::outputCPPHashTableGetConstant(
     hphp_const_char_map<bool>::const_iterator it = dyns.find(name);
     bool dyn = it != dyns.end() && it->second;
     if (dyn) {
-      const char *globals = 
+      const char *globals =
         system ? "SystemGlobals" : "GlobalVariables";
       cg_printf("      (const char *)\"%s\", "
                 "(const char *)"
@@ -4781,7 +4781,6 @@ AnalysisResult::getOrAddMethodSlot(const std::string &mname,
   StringToMethodSlotMap::const_iterator method =
     stringToMethodSlotMap.find(mname);
   if (method == stringToMethodSlotMap.end()) {
-    Compiler::Error(Compiler::UnknownObjectMethod, self, mname);
     // too late to add to stringToMethodSlotMap, getMethodSlot already done
     return errorMethodSlot;
   };

@@ -127,9 +127,9 @@ bool TestCodeError::TestUnknownObjectMethod() {
   VEN(UnknownObjectMethod,
       "<?php class T { function __call($name, $args) {} } "
       "function t() { $a = new T(); print $a->a(); }");
-/*  VEN(UnknownObjectMethod,
+  VEN(UnknownObjectMethod,
       "<?php class T { function __call($name, $args) {}} class R extends T {} "
-      "function test(R $a) { print $a->a();}"); */
+      "function test(R $a) { print $a->a();}");
   return true;
 }
 

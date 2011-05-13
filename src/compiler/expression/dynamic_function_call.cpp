@@ -88,7 +88,9 @@ TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                         bool coerce) {
   reset();
   ConstructPtr self = shared_from_this();
-  if (!m_className.empty()) {
+  if (m_class) {
+    m_class->inferAndCheck(ar, Type::Any, false);
+  } else if (!m_className.empty()) {
     ClassScopePtr cls = resolveClass();
     if (!cls) {
       if (isRedeclared()) {
@@ -104,9 +106,6 @@ TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
 
   ar->containsDynamicFunctionCall();
 
-  if (m_class) {
-    m_class->inferAndCheck(ar, Type::Any, false);
-  }
   m_nameExp->inferAndCheck(ar, Type::String, false);
   if (m_params) {
     for (int i = 0; i < m_params->getCount(); i++) {

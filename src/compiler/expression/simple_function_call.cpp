@@ -978,7 +978,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         ->setAttribute(VariableTable::NeedGlobalPointer);
     }
     if (!cls) {
-      if (!isRedeclared() && getScope()->isFirstPass()) {
+      if (!m_class && !isRedeclared() && getScope()->isFirstPass()) {
         Compiler::Error(Compiler::UnknownClass, self);
       }
       if (m_params) {

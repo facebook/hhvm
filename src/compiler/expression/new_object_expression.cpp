@@ -87,7 +87,7 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   m_classScope.reset();
   m_funcScope.reset();
   ConstructPtr self = shared_from_this();
-  if (!m_name.empty()) {
+  if (!m_name.empty() && !isStatic()) {
     ClassScopePtr cls = resolveClass();
     m_name = m_className;
 

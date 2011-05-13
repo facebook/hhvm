@@ -143,7 +143,7 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
         if (getScope()->inPseudoMain()) {
           Compiler::Error(Compiler::UseUndeclaredGlobalVariable,
                           shared_from_this());
-        } else {
+        } else if (!m_sym->isClosureVar()) {
           Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
         }
       }

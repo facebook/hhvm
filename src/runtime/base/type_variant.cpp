@@ -401,24 +401,14 @@ CVarRef Variant::set(litstr v) {
 }
 
 CVarRef Variant::set(StringData *v) {
-  if (isPrimitive()) {
-    // do nothing
-  } else if (m_type == KindOfVariant) {
-    m_data.pvar->set(v);
-    return *this;
+  Variant *self = m_type == KindOfVariant ? m_data.pvar : this;
+  if (UNLIKELY(!v)) {
+    self->setNull();
   } else {
-    destruct();
-  }
-  if (v) {
-    m_data.pstr = v;
-    if (v->isStatic()) {
-      m_type = KindOfStaticString;
-    } else {
-      m_type = KindOfString;
-      v->incRefCount();
-    }
-  } else {
-    m_type = KindOfNull;
+    v->incRefCount();
+    if (IS_REFCOUNTED_TYPE(self->m_type)) self->destruct();
+    self->m_type = v->isStatic() ? KindOfStaticString : KindOfString;
+    self->m_data.pstr = v;
   }
   return *this;
 }
@@ -440,36 +430,27 @@ CVarRef Variant::set(const StaticString & v) {
 }
 
 CVarRef Variant::set(ArrayData *v) {
-  if (m_type == KindOfVariant) {
-    m_data.pvar->set(v);
-    return *this;
-  }
-  if (IS_REFCOUNTED_TYPE(m_type)) destruct();
-  if (v) {
-    m_type = KindOfArray;
-    m_data.parr = v;
-    v->incRefCount();
+  Variant *self = m_type == KindOfVariant ? m_data.pvar : this;
+  if (UNLIKELY(!v)) {
+    self->setNull();
   } else {
-    m_type = KindOfNull;
+    v->incRefCount();
+    if (IS_REFCOUNTED_TYPE(self->m_type)) self->destruct();
+    self->m_type = KindOfArray;
+    self->m_data.parr = v;
   }
   return *this;
 }
 
 CVarRef Variant::set(ObjectData *v) {
-  if (isPrimitive()) {
-    // do nothing
-  } else if (m_type == KindOfVariant) {
-    m_data.pvar->set(v);
-    return *this;
+  Variant *self = m_type == KindOfVariant ? m_data.pvar : this;
+  if (UNLIKELY(!v)) {
+    self->setNull();
   } else {
-    destruct();
-  }
-  if (v) {
-    m_type = KindOfObject;
-    m_data.pobj = v;
     v->incRefCount();
-  } else {
-    m_type = KindOfNull;
+    if (IS_REFCOUNTED_TYPE(self->m_type)) self->destruct();
+    self->m_type = KindOfObject;
+    self->m_data.pobj = v;
   }
   return *this;
 }
@@ -508,7 +489,7 @@ int64 Variant::hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
   case KindOfInt64:
     return m_data.num;
   case KindOfBoolean:
-    return m_data.num ? firstNonZero : 0; 
+    return m_data.num ? firstNonZero : 0;
   case KindOfDouble:
     return Variant::DoubleHashForIntSwitch(m_data.dbl, noMatch);
   case KindOfUninit:
@@ -556,7 +537,7 @@ int64 Variant::hashForStringSwitch(
   case KindOfBoolean:
     needsOrder = false;
     return m_data.num ? firstTrueCaseHash : firstFalseCaseHash;
-  case KindOfDouble: 
+  case KindOfDouble:
     needsOrder = false;
     return m_data.dbl == 0 ? firstZeroCaseHash : toInt64();
   case KindOfUninit:

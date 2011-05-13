@@ -169,7 +169,7 @@ public:
       // that we do not use an atomic operation here means that we could get a
       // stale read, but in practice that poses no problems for how we are
       // using the value.
-      if (*m_cactive > m_cactiveLimit) {
+      if (s_stats_enabled && *m_cactive > m_cactiveLimit) {
         refreshStatsHelperStop();
       }
 #endif

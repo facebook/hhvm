@@ -1060,6 +1060,7 @@ static bool hphp_warmup(ExecutionContext *context,
 }
 
 void hphp_session_init(bool blank_warmup /* = false */) {
+  init_thread_locals();
   ThreadInfo::s_threadInfo->onSessionInit();
   MemoryManager::TheMemoryManager()->resetStats();
 

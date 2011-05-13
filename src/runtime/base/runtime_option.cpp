@@ -203,6 +203,9 @@ std::set<std::string> RuntimeOption::ForbiddenFileExtensions;
 std::set<std::string> RuntimeOption::StaticFileGenerators;
 FilesMatchPtrVec RuntimeOption::FilesMatches;
 
+bool RuntimeOption::WritelistExec = false;
+std::vector<std::string> RuntimeOption::AllowedExecCmds;
+
 std::string RuntimeOption::TakeoverFilename;
 int RuntimeOption::AdminServerPort;
 int RuntimeOption::AdminThreadCount = 1;
@@ -684,6 +687,10 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
         RuntimeOption::AllowedDirectories.push_back(resolved_path);
       }
     }
+
+    WritelistExec = server["WritelistExec"].getBool();
+    server["AllowedExecCmds"].get(AllowedExecCmds);
+
     server["AllowedFiles"].get(AllowedFiles);
 
     server["ForbiddenFileExtensions"].get(ForbiddenFileExtensions);

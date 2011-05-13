@@ -26,6 +26,7 @@
 #include <util/lock.h>
 #include <runtime/base/file/plain_file.h>
 #include <util/light_process.h>
+#include <util/logger.h>
 #include <runtime/base/util/request_local.h>
 
 #if !defined(_NSIG) && defined(NSIG)
@@ -327,6 +328,10 @@ public:
 
   FILE *exec(const char *cmd) {
     ASSERT(m_proc == NULL);
+    if (RuntimeOption::WritelistExec && !checkCmd(cmd)) {
+      Logger::Warning("Command %s not in the whitelist", cmd);
+      return NULL;
+    }
     m_proc = LightProcess::popen(cmd, "r", g_context->getCwd().data());
     if (m_proc == NULL) {
       raise_warning("Unable to execute '%s'", cmd);
@@ -343,7 +348,29 @@ public:
 private:
   void (*m_sig_handler)(int);
   FILE *m_proc;
+  bool checkCmd(const char *cmd);
 };
+
+bool ShellExecContext::checkCmd(const char *cmd) {
+  bool ret = false;
+  char *space = strchr(cmd, ' ');
+  // if found a space, temporarily put '\0' there for strcmp
+  if (space) {
+    *space = '\0';
+  }
+  for (unsigned int i = 0; i < RuntimeOption::AllowedExecCmds.size(); i++) {
+    std::string &allowedCmd = RuntimeOption::AllowedExecCmds[i];
+    if (strcmp(allowedCmd.c_str(), cmd) == 0) {
+      ret = true;
+      break;
+    }
+  }
+  // restore space
+  if (space) {
+    *space = ' ';
+  }
+  return ret;
+}
 
 String f_shell_exec(CStrRef cmd) {
   ShellExecContext ctx;

@@ -190,6 +190,9 @@ public:
   static std::set<std::string> StaticFileGenerators;
   static FilesMatchPtrVec FilesMatches;
 
+  static bool WritelistExec;
+  static std::vector<std::string> AllowedExecCmds;
+
   static std::string TakeoverFilename;
   static int AdminServerPort;
   static int AdminThreadCount;

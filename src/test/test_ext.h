@@ -50,8 +50,8 @@
 #include <test/test_ext_math.h>
 #include <test/test_ext_mb.h>
 #include <test/test_ext_mcrypt.h>
-#include <test/test_ext_memcache.h>
 #include <test/test_ext_memcached.h>
+#include <test/test_ext_memcache.h>
 #include <test/test_ext_misc.h>
 #include <test/test_ext_mysql.h>
 #include <test/test_ext_network.h>
@@ -68,8 +68,8 @@
 #include <test/test_ext_simplexml.h>
 #include <test/test_ext_soap.h>
 #include <test/test_ext_socket.h>
-#include <test/test_ext_spl.h>
 #include <test/test_ext_splfile.h>
+#include <test/test_ext_spl.h>
 #include <test/test_ext_sqlite3.h>
 #include <test/test_ext_stream.h>
 #include <test/test_ext_string.h>

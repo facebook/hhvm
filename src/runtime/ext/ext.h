@@ -52,8 +52,8 @@
 #include <runtime/ext/profile/extprofile_math.h>
 #include <runtime/ext/profile/extprofile_mb.h>
 #include <runtime/ext/profile/extprofile_mcrypt.h>
-#include <runtime/ext/profile/extprofile_memcache.h>
 #include <runtime/ext/profile/extprofile_memcached.h>
+#include <runtime/ext/profile/extprofile_memcache.h>
 #include <runtime/ext/profile/extprofile_misc.h>
 #include <runtime/ext/profile/extprofile_mysql.h>
 #include <runtime/ext/profile/extprofile_network.h>
@@ -70,8 +70,8 @@
 #include <runtime/ext/profile/extprofile_simplexml.h>
 #include <runtime/ext/profile/extprofile_soap.h>
 #include <runtime/ext/profile/extprofile_socket.h>
-#include <runtime/ext/profile/extprofile_spl.h>
 #include <runtime/ext/profile/extprofile_splfile.h>
+#include <runtime/ext/profile/extprofile_spl.h>
 #include <runtime/ext/profile/extprofile_sqlite3.h>
 #include <runtime/ext/profile/extprofile_stream.h>
 #include <runtime/ext/profile/extprofile_string.h>

@@ -7446,6 +7446,39 @@ Variant ifa_array_map(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count >= 6) p.append(a5);
   return (x_array_map(count, arg0, arg1, p));
 }
+Variant i_getaddrinfo(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 2 || count > 6)) return throw_wrong_arguments("getaddrinfo", count, 2, 6, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (x_getaddrinfo(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (x_getaddrinfo(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 4) return (x_getaddrinfo(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 5) return (x_getaddrinfo(arg0, arg1, arg2, arg3, arg4));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    return (x_getaddrinfo(arg0, arg1, arg2, arg3, arg4, arg5));
+  }
+}
+Variant ifa_getaddrinfo(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count < 2)) return throw_wrong_arguments("getaddrinfo", count, 2, 6, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  if (count <= 2) return (x_getaddrinfo(arg0, arg1));
+  CVarRef arg2(a2);
+  if (count <= 3) return (x_getaddrinfo(arg0, arg1, arg2));
+  CVarRef arg3(a3);
+  if (count <= 4) return (x_getaddrinfo(arg0, arg1, arg2, arg3));
+  CVarRef arg4(a4);
+  if (count <= 5) return (x_getaddrinfo(arg0, arg1, arg2, arg3, arg4));
+  CVarRef arg5(a5);
+  return (x_getaddrinfo(arg0, arg1, arg2, arg3, arg4, arg5));
+}
 Variant i_magicksharpenimage(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count < 3 || count > 4)) return throw_wrong_arguments("magicksharpenimage", count, 3, 4, 1);
@@ -37959,6 +37992,7 @@ CallInfo ci_hphp_splfileobject_ftell((void*)&i_hphp_splfileobject_ftell, (void*)
 CallInfo ci_pcntl_wifexited((void*)&i_pcntl_wifexited, (void*)&ifa_pcntl_wifexited, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magicksetformat((void*)&i_magicksetformat, (void*)&ifa_magicksetformat, 2, 0, 0x0000000000000000LL);
 CallInfo ci_array_map((void*)&i_array_map, (void*)&ifa_array_map, 2, 1, 0x0000000000000000LL);
+CallInfo ci_getaddrinfo((void*)&i_getaddrinfo, (void*)&ifa_getaddrinfo, 6, 0, 0x0000000000000000LL);
 CallInfo ci_magicksharpenimage((void*)&i_magicksharpenimage, (void*)&ifa_magicksharpenimage, 4, 0, 0x0000000000000000LL);
 CallInfo ci_is_infinite((void*)&i_is_infinite, (void*)&ifa_is_infinite, 1, 0, 0x0000000000000000LL);
 CallInfo ci_date_timezone_set((void*)&i_date_timezone_set, (void*)&ifa_date_timezone_set, 2, 0, 0x0000000000000000LL);
@@ -43787,6 +43821,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 2810:
       HASH_GUARD(0x3C32181DDB860AFALL, imap_getacl) {
         ci = &ci_imap_getacl;
+        return true;
+      }
+      break;
+    case 2811:
+      HASH_GUARD(0x12FDE503AB422AFBLL, getaddrinfo) {
+        ci = &ci_getaddrinfo;
         return true;
       }
       break;

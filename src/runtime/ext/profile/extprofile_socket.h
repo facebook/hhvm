@@ -181,6 +181,12 @@ inline void x_socket_clear_error(CObjRef socket = null_object) {
   f_socket_clear_error(socket);
 }
 
+inline Variant x_getaddrinfo(CStrRef host, CStrRef port, int family = 0, int socktype = 0, int protocol = 0, int flags = 0) {
+  FUNCTION_INJECTION_BUILTIN(getaddrinfo);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_getaddrinfo(host, port, family, socktype, protocol, flags);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

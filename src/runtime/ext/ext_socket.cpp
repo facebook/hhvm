@@ -1093,5 +1093,96 @@ Variant f_pfsockopen(CStrRef hostname, int port /* = -1 */,
   return sockopen_impl(hostname, port, errnum, errstr, timeout, true);
 }
 
+String ipaddr_convert(struct sockaddr *addr, int addrlen) {
+  char buffer[NI_MAXHOST];
+  int error = getnameinfo(addr, addrlen, buffer, sizeof(buffer), NULL, 0, NI_NUMERICHOST);
+
+  if (error) {
+    raise_warning(gai_strerror(error));
+    return "";
+  }
+  return String(buffer, CopyString);
+}
+
+Variant f_getaddrinfo(CStrRef host, CStrRef port, int family /* = 0 */,
+                      int socktype /* = 0 */, int protocol /* = 0 */,
+                      int flags /* = 0 */) {
+  const char *hptr = NULL, *pptr = NULL;
+  if (!host.empty()) {
+    hptr = host.c_str();
+  }
+  if (!port.empty()) {
+    pptr = port.c_str();
+  }
+
+  struct addrinfo hints, *res;
+  struct addrinfo *res0 = NULL;
+  int error;
+
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = family;
+  hints.ai_socktype = socktype;
+  hints.ai_protocol = protocol;
+  hints.ai_flags = flags;
+  error = getaddrinfo(host, port, &hints, &res0);
+
+  if (error) {
+    raise_warning(gai_strerror(error));
+
+    if (res0) {
+      freeaddrinfo(res0);
+    }
+    return false;
+  }
+
+  Array ret = Array::Create();
+
+  for (res = res0; res; res = res->ai_next) {
+    Array data = Array::Create();
+    Array sockinfo = Array::Create();
+
+    data.set("family", res->ai_family);
+    data.set("socktype", res->ai_socktype);
+    data.set("protocol", res->ai_protocol);
+
+    switch (res->ai_addr->sa_family) {
+      case AF_INET:
+      {
+        struct sockaddr_in *a;
+        String buffer = ipaddr_convert(res->ai_addr, sizeof(*a));
+        if (!buffer.empty()) {
+          a = (struct sockaddr_in *)res->ai_addr;
+          sockinfo.set("address", buffer);
+          sockinfo.set("port", ntohs(a->sin_port));
+        }
+        break;
+      }
+      case AF_INET6:
+      {
+        struct sockaddr_in6 *a;
+        String buffer = ipaddr_convert(res->ai_addr, sizeof(*a));
+        if (!buffer.empty()) {
+          a = (struct sockaddr_in6 *)res->ai_addr;
+          sockinfo.set("address", buffer);
+          sockinfo.set("port", ntohs(a->sin6_port));
+          sockinfo.set("flow_info", (int32)a->sin6_flowinfo);
+          sockinfo.set("scope_id", (int32)a->sin6_scope_id);
+        }
+        break;
+      }
+    }
+
+    data.set("sockaddr", (sockinfo.empty() ? NULL : sockinfo));
+
+    ret.append(data);
+  }
+
+  if (res0) {
+    freeaddrinfo(res0);
+  }
+
+  return ret;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

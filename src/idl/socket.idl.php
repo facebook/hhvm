@@ -761,6 +761,45 @@ DefineFunction(
     ),
   ));
 
+DefineFunction(
+  array(
+    'name'   => "getaddrinfo",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "host",
+        'type'   => String,
+      ),
+      array(
+        'name'   => "port",
+        'type'   => String,
+      ),
+      array(
+        'name'   => "family",
+        'type'   => Int32,
+        'value'  => "0",
+      ),
+      array(
+        'name'   => "socktype",
+        'type'   => Int32,
+        'value'  => "0",
+      ),
+      array(
+        'name'   => "protocol",
+        'type'   => Int32,
+        'value'  => "0",
+      ),
+      array(
+        'name'   => "flags",
+        'type'   => Int32,
+        'value'  => "0",
+      ),
+    ),
+  ));
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes

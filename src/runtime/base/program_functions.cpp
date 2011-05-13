@@ -1055,6 +1055,10 @@ void hphp_session_init(bool blank_warmup /* = false */) {
   }
 }
 
+void hphp_thread_init() {
+  init_thread_locals();
+}
+
 bool hphp_is_warmup_enabled() {
   return s_warmup_state->enabled;
 }
@@ -1170,6 +1174,10 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
   }
   context->obProtect(false);
   context->obEndAll();
+}
+
+void hphp_thread_exit() {
+  finish_thread_locals();
 }
 
 void hphp_session_exit() {

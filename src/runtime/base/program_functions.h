@@ -65,6 +65,7 @@ class ExecutionContext;
 
 void hphp_process_init() ATTRIBUTE_COLD;
 void hphp_session_init(bool blank_warmup = false);
+void hphp_thread_init();
 
 ExecutionContext *hphp_context_init();
 bool hphp_invoke_simple(const std::string &filename, bool warmupOnly = false);
@@ -77,6 +78,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
 void hphp_context_exit(ExecutionContext *context, bool psp,
                        bool shutdown = true, const char *program = NULL);
 
+void hphp_thread_exit();
 void hphp_session_exit();
 void hphp_process_exit() ATTRIBUTE_COLD;
 bool hphp_is_warmup_enabled();

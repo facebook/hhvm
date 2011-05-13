@@ -45,8 +45,8 @@ void init_thread_locals(void *arg /* = NULL */) {
 }
 
 void finish_thread_locals(void *arg /* = NULL */) {
-  g_context.destroy();
-  g_persistentObjects.destroy();
+  if (g_context.getNoCheck()) g_context.destroy();
+  if (g_persistentObjects.getNoCheck()) g_persistentObjects.destroy();
 }
 
 static class SetThreadInitFini {

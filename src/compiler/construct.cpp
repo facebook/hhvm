@@ -313,7 +313,15 @@ void Construct::dumpNode(int spc, AnalysisResultConstPtr ar) {
     sef = " (" + sef.substr(1) + ")";
   }
 
-  std::cout << type_info << nkid << scontext << sef;
+  string localtered;
+  if (Expression *e = dynamic_cast<Expression*>(this)) {
+    localtered = e->isLocalExprAltered() ? "LocalAltered" : "NotLocalAltered";
+  }
+  if (localtered != "") {
+    localtered = " (" + localtered + ")";
+  }
+
+  std::cout << type_info << nkid << scontext << sef << localtered;
   if (m_loc) {
     std::cout << " " << m_loc->file << ":" <<
       m_loc->line1 << "@" << m_loc->char1;

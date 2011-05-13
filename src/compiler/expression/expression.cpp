@@ -668,6 +668,7 @@ std::string Expression::genCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar) {
 void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                                 int state) {
   if (hasCPPTemp() || isScalar()) return;
+  if (!isLocalExprAltered() && !hasEffect()) return;
 
   bool killCast = false;
 

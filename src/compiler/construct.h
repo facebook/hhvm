@@ -112,6 +112,9 @@ public:
   void setAvailable() { m_flags.available = true; }
   void clearAvailable() { m_flags.available = false; }
   bool isAvailable() const { return m_flags.available; }
+  void setLocalExprAltered() { m_flags.localExprAltered = true; }
+  void clearLocalExprAltered() { m_flags.localExprAltered = false; }
+  bool isLocalExprAltered() const { return m_flags.localExprAltered; }
 
   BlockScopeRawPtr getScope() const { return m_blockScope; }
   void setBlockScope(BlockScopeRawPtr scope) { m_blockScope = scope; }
@@ -215,6 +218,8 @@ private:
       unsigned visited : 1;   // general purpose visited flag for walks
       unsigned anticipated : 1;
       unsigned available : 1;
+      unsigned localExprAltered : 1; // whether this node can be 
+                                     // altered in this expression
     } m_flags;
   };
 protected:

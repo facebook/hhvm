@@ -65,7 +65,7 @@ AliasManager::AliasManager(int opt) :
     m_wildRefs(false), m_nrvoFix(0), m_inlineAsExpr(true),
     m_noAdd(false), m_preOpt(opt<0), m_postOpt(opt>0),
     m_cleared(false), m_inPseudoMain(false), m_genAttrs(false),
-    m_hasDeadStore(false), m_graph(0) {
+    m_hasDeadStore(false), m_graph(0), m_exprIdx(-1) {
 }
 
 AliasManager::~AliasManager() {
@@ -310,6 +310,13 @@ void AliasManager::dumpAccessChain() {
   BucketMapEntry &lvs = m_accessList;
   ExpressionPtrList::reverse_iterator it = lvs.rbegin(), end = lvs.rend();
 
+  if (isInExpression()) {
+    std::cout << "m_exprIdx: " << m_exprIdx << std::endl;
+    std::cout << "parent: "; m_exprParent->dumpNode(0, m_arp);
+  } else {
+    std::cout << "Not in expression" << std::endl;
+  }
+
   while (it != end) {
     ExpressionPtr e = *it;
     e->dump(0, m_arp);
@@ -450,7 +457,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
       }
     case Expression::KindOfSimpleFunctionCall:
     case Expression::KindOfIncludeExpression:
-      if (k1 == Expression::KindOfSimpleVariable) {
+      if (k2 == Expression::KindOfSimpleVariable) {
         break;
       }
     default:
@@ -980,6 +987,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
     case Expression::KindOfNewObjectExpression:
     case Expression::KindOfIncludeExpression:
     case Expression::KindOfListAssignment:
+      markAllLocalExprAltered(e);
       add(m_accessList, e);
       break;
 
@@ -989,7 +997,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
         e->recomputeEffects();
         return ae->replaceValue(ae->getValue());
       }
-
+      markAllLocalExprAltered(ae->getVariable());
       ExpressionPtr rep;
       int interf = findInterf(ae->getVariable(), false, rep);
       if (interf == SameAccess) {
@@ -1099,6 +1107,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
     case Expression::KindOfStaticMemberExpression:
       if (e->hasContext(Expression::UnsetContext) &&
           e->hasContext(Expression::LValue)) {
+        markAllLocalExprAltered(e);
         if (Option::EliminateDeadCode) {
           ExpressionPtr rep;
           int interf = findInterf(e, false, rep);
@@ -1336,6 +1345,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
                                   lhs, rhs, rop))));
       }
       if (rop) {
+        markAllLocalExprAltered(bop);
         ExpressionPtr lhs = bop->getExp1();
         ExpressionPtr alt;
         int flags = 0;
@@ -1435,29 +1445,31 @@ ExpressionPtr AliasManager::canonicalizeNode(
       UnaryOpExpressionPtr uop = spc(UnaryOpExpression, e);
       switch (uop->getOp()) {
         case T_INC:
-        case T_DEC: {
-          ExpressionPtr alt;
-          int interf = findInterf(uop->getExpression(), true, alt);
-          if (interf == SameAccess) {
-            switch (alt->getKindOf()) {
-              case Expression::KindOfAssignmentExpression:
-                alt = spc(AssignmentExpression,alt)->getVariable();
-                break;
-              case Expression::KindOfBinaryOpExpression:
-                alt = spc(BinaryOpExpression,alt)->getExp1();
-                break;
-              case Expression::KindOfUnaryOpExpression:
-                alt = spc(UnaryOpExpression,alt)->getExpression();
-                break;
-              default:
-                break;
+        case T_DEC: 
+          {
+            markAllLocalExprAltered(e);
+            ExpressionPtr alt;
+            int interf = findInterf(uop->getExpression(), true, alt);
+            if (interf == SameAccess) {
+              switch (alt->getKindOf()) {
+                case Expression::KindOfAssignmentExpression:
+                  alt = spc(AssignmentExpression,alt)->getVariable();
+                  break;
+                case Expression::KindOfBinaryOpExpression:
+                  alt = spc(BinaryOpExpression,alt)->getExp1();
+                  break;
+                case Expression::KindOfUnaryOpExpression:
+                  alt = spc(UnaryOpExpression,alt)->getExpression();
+                  break;
+                default:
+                  break;
+              }
+              assert(alt->getKindOf() == uop->getExpression()->getKindOf());
+              uop->getExpression()->setCanonID(alt->getCanonID());
+            } else {
+              uop->getExpression()->setCanonID(m_nextID++);
             }
-            assert(alt->getKindOf() == uop->getExpression()->getKindOf());
-            uop->getExpression()->setCanonID(alt->getCanonID());
-          } else {
-            uop->getExpression()->setCanonID(m_nextID++);
           }
-        }
           add(m_accessList, e);
           break;
         default:
@@ -1489,10 +1501,14 @@ ExpressionPtr AliasManager::canonicalizeNode(
 
 void AliasManager::canonicalizeKid(ConstructPtr c, ExpressionPtr kid, int i) {
   if (kid) {
+    StatementPtr sp(dpc(Statement, c));
+    if (sp) beginInExpression(sp);
     kid = canonicalizeRecur(kid);
+    if (sp) endInExpression(sp);
     if (kid) {
       c->setNthKid(i, kid);
       c->recomputeEffects();
+      kid->computeLocalExprAltered();
       setChanged();
     }
   }
@@ -1711,7 +1727,11 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
       EchoStatementPtr es(spc(EchoStatement, s));
       ExpressionListPtr exprs = es->getExpressionList();
       for (int i = 0; i < exprs->getCount(); i++) {
-        canonicalizeKid(exprs, exprs->getNthExpr(i), i);
+        beginInExpression(es);
+        ExpressionPtr kid(exprs->getNthExpr(i));
+        canonicalizeKid(exprs, kid, i);
+        endInExpression(es);
+        kid->computeLocalExprAltered();
         ExpressionPtr e(new ScalarExpression(BlockScopePtr(), LocationPtr(),
                                              Expression::KindOfScalarExpression,
                                              T_STRING, string("io")));
@@ -2499,5 +2519,42 @@ void AliasManager::stringOptsRecur(StatementPtr s) {
   }
   if (pop) {
     popStringScope(s);
+  }
+}
+
+void AliasManager::beginInExpression(StatementPtr parent) {
+  ASSERT(parent);
+  if (m_exprIdx == -1) {
+    ASSERT(!m_exprParent);
+    m_exprIdx    = m_accessList.size();
+    m_exprParent = parent;
+  }
+}
+
+void AliasManager::endInExpression(StatementPtr requestor) {
+  ASSERT(requestor);
+  if (m_exprIdx != -1) {
+    ASSERT(m_exprIdx >= 0 && m_exprParent);
+    if (requestor == m_exprParent) {
+      m_exprIdx = -1;
+      m_exprParent.reset();
+    }
+  }
+}
+
+void AliasManager::markAllLocalExprAltered(ExpressionPtr e) {
+  ASSERT(isInExpression());
+  ASSERT(m_exprIdx <= (int)m_accessList.size());
+  e->setLocalExprAltered();
+  ExpressionPtrList::reverse_iterator it(m_accessList.rbegin());
+  int curIdx = m_accessList.size() - 1;
+  for (; curIdx >= m_exprIdx; --curIdx, ++it) {
+    ExpressionPtr p(*it);
+    bool isLoad; int depth, effects;
+    int interf = checkAnyInterf(e, p, isLoad, depth, effects);
+    if (interf == InterfAccess ||
+        interf == SameAccess) {
+      p->setLocalExprAltered();
+    }
   }
 }

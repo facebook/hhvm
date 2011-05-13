@@ -338,6 +338,12 @@ public:
   void setUnused(bool u) { m_unused = u; }
   ExpressionPtr fetchReplacement();
   void setReplacement(ExpressionPtr rep) { m_replacement = rep; }
+
+  /**
+   * Correctly compute the local expression altered bit
+   */
+  virtual void computeLocalExprAltered() { /* no-op */ }
+
 protected:
   static bool IsIdentifier(const std::string &value);
 

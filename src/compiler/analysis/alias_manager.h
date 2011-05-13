@@ -186,6 +186,21 @@ class AliasManager {
   void stringOptsRecur(StatementPtr s);
   void stringOptsRecur(ExpressionPtr s, bool ok);
 
+  void beginInExpression(StatementPtr parent);
+  void endInExpression(StatementPtr requestor);
+  bool isInExpression() const { 
+    ASSERT((m_exprIdx >=  0 && m_exprParent) ||
+           (m_exprIdx == -1 && !m_exprParent));
+    return m_exprIdx != -1; 
+  }
+  
+  /**
+   * Take e and walk down the expression chain, marking all
+   * interferences as "altered". It is assumed that e is
+   * a store (has modifications)
+   */
+  void markAllLocalExprAltered(ExpressionPtr e);
+
   BucketMapEntry            m_accessList;
   BucketMap                 m_bucketMap;
   BucketMapEntry            *m_bucketList;
@@ -218,6 +233,9 @@ class AliasManager {
 
   ControlFlowGraph          *m_graph;
   std::map<std::string,int> m_gidMap;
+
+  int                       m_exprIdx;
+  StatementPtr              m_exprParent;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -43,6 +43,7 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
   m_reqInitFunc = hdf["RequestInitFunction"].getString("");
   m_reqInitDoc = hdf["RequestInitDocument"].getString("");
   m_password = hdf["Password"].getString("");
+  hdf["Passwords"].get(m_passwords);
   m_alwaysReset = hdf["AlwaysReset"].getBool(false);
 
   string type = hdf["Type"];

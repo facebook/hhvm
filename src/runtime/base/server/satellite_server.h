@@ -83,6 +83,7 @@ public:
   const std::string &getReqInitFunc() const { return m_reqInitFunc;}
   const std::string &getReqInitDoc() const { return m_reqInitDoc;}
   const std::string &getPassword() const { return m_password;}
+  const std::set<std::string> &getPasswords() const { return m_passwords;}
   bool alwaysReset() const { return m_alwaysReset;}
 
 protected:
@@ -98,6 +99,7 @@ protected:
   std::string m_reqInitFunc;
   std::string m_reqInitDoc;
   std::string m_password;
+  std::set<std::string> m_passwords;
   bool m_alwaysReset;
 };
 

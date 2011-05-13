@@ -156,6 +156,7 @@ public:
   static std::string XboxServerInfoReqInitDoc;
   static std::string XboxProcessMessageFunc;
   static std::string XboxPassword;
+  static std::set<std::string> XboxPasswords;
 
   static std::string SourceRoot;
   static std::vector<std::string> IncludeSearchPaths;
@@ -193,6 +194,7 @@ public:
   static int AdminServerPort;
   static int AdminThreadCount;
   static std::string AdminPassword;
+  static std::set<std::string> AdminPasswords;
 
   static std::string ProxyOrigin;
   static int ProxyRetry;

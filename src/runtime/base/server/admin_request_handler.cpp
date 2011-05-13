@@ -223,10 +223,19 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
 
-    if (!RuntimeOption::AdminPassword.empty() &&
-        RuntimeOption::AdminPassword != transport->getParam("auth")) {
-      transport->sendString("Unauthorized", 401);
-      break;
+    if (!RuntimeOption::AdminPasswords.empty()) {
+      std::set<std::string>::const_iterator iter =
+        RuntimeOption::AdminPasswords.find(transport->getParam("auth"));
+      if (iter == RuntimeOption::AdminPasswords.end()) {
+        transport->sendString("Unauthorized", 401);
+        break;
+      }
+    } else {
+      if (!RuntimeOption::AdminPassword.empty() &&
+          RuntimeOption::AdminPassword != transport->getParam("auth")) {
+        transport->sendString("Unauthorized", 401);
+        break;
+      }
     }
 
     if (cmd == "stop") {

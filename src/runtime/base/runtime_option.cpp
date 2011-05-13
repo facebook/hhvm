@@ -169,6 +169,7 @@ std::string RuntimeOption::XboxServerInfoReqInitFunc;
 std::string RuntimeOption::XboxServerInfoReqInitDoc;
 std::string RuntimeOption::XboxProcessMessageFunc = "xbox_process_message";
 std::string RuntimeOption::XboxPassword;
+std::set<std::string> RuntimeOption::XboxPasswords;
 
 std::string RuntimeOption::SourceRoot;
 std::vector<std::string> RuntimeOption::IncludeSearchPaths;
@@ -206,6 +207,7 @@ std::string RuntimeOption::TakeoverFilename;
 int RuntimeOption::AdminServerPort;
 int RuntimeOption::AdminThreadCount = 1;
 std::string RuntimeOption::AdminPassword;
+std::set<std::string> RuntimeOption::AdminPasswords;
 
 std::string RuntimeOption::ProxyOrigin;
 int RuntimeOption::ProxyRetry = 3;
@@ -802,6 +804,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
         SatelliteServerInfos.push_back(satellite);
         if (satellite->getType() == SatelliteServer::KindOfRPCServer) {
           XboxPassword = satellite->getPassword();
+          XboxPasswords = satellite->getPasswords();
         }
       }
     }
@@ -852,6 +855,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     AdminServerPort = admin["Port"].getInt16(8088);
     AdminThreadCount = admin["ThreadCount"].getInt32(1);
     AdminPassword = admin["Password"].getString();
+    admin["Passwords"].get(AdminPasswords);
   }
   {
     Hdf proxy = config["Proxy"];

@@ -64,11 +64,22 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   StackTraceNoHeap::AddExtraLogging("RPC-URL", transport->getUrl());
 
   // authentication
-  const string &password = m_serverInfo->getPassword();
-  if (!password.empty() && password != transport->getParam("auth")) {
-    transport->sendString("Unauthorized", 401);
-    transport->onSendEnd();
-    return;
+  const set<string> &passwords = m_serverInfo->getPasswords();
+  if (!passwords.empty()) {
+    set<string>::const_iterator iter =
+      passwords.find(transport->getParam("auth"));
+    if (iter == passwords.end()) {
+      transport->sendString("Unauthorized", 401);
+      transport->onSendEnd();
+      return;
+    }
+  } else {
+    const string &password = m_serverInfo->getPassword();
+    if (!password.empty() && password != transport->getParam("auth")) {
+      transport->sendString("Unauthorized", 401);
+      transport->onSendEnd();
+      return;
+    }
   }
 
   // resolve virtual host

@@ -122,11 +122,23 @@ Variant f_call_user_func(int _argc, CVarRef function, CArrRef _argv /* = null_ar
 }
 
 Object f_call_user_func_array_async(CVarRef function, CArrRef params) {
-  return f_call_user_func_async(0, function, params);
+#ifdef CUFA_ASYNC_DEPRECATION_MSG
+  raise_warning(CUFA_ASYNC_DEPRECATION_MSG);
+#else
+  raise_warning("call_user_func_array_async() is deprecated");
+#endif
+
+  return FiberAsyncFunc::Start(function, params);
 }
 
 Object f_call_user_func_async(int _argc, CVarRef function,
                                CArrRef _argv /* = null_array */) {
+#ifdef CUF_ASYNC_DEPRECATION_MSG
+  raise_warning(CUF_ASYNC_DEPRECATION_MSG);
+#else
+  raise_warning("call_user_func_async() is deprecated");
+#endif
+
   return FiberAsyncFunc::Start(function, _argv);
 }
 

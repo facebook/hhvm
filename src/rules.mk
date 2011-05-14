@@ -409,6 +409,8 @@ endif
 
 # facebook specific stuff
 CPPFLAGS += -DFACEBOOK -DHAVE_QUICKLZ
+CPPFLAGS += -DCUF_ASYNC_DEPRECATION_MSG='"call_user_func_async() is deprecated, please use fb_call_user_func_async() instead"'
+CPPFLAGS += -DCUFA_ASYNC_DEPRECATION_MSG='"call_user_func_array_async() is deprecated, please use fb_call_user_func_array_async() instead"'
 
 MYSQL_UNIX_SOCK_ADDR := $(shell mysql_config --socket)
 ifneq ($(MYSQL_UNIX_SOCK_ADDR), "")

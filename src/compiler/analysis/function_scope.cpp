@@ -1357,9 +1357,17 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
           extra = ", p";
         }
       } else {
-        cg_printf("const Array &p(count > %d ? "
-                  "params.slice(%d, count - %d, false) : Array());\n",
-                  m_maxParam, m_maxParam, m_maxParam);
+        if (m_maxParam) {
+          cg_printf("const Array &p(count > %d ? "
+                    "params.slice(%d, count - %d, false) : Array());\n",
+                    m_maxParam, m_maxParam, m_maxParam);
+        } else {
+          // in this case, avoid the un-necessary call to params.slice(),
+          // since we want the entire params array anyways
+          ASSERT(m_maxParam == 0);
+          cg_printf("const Array &p(count > 0 ? "
+                    "params : Array());\n");
+        }
         extra = ", p";
       }
     }

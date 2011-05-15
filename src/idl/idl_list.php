@@ -13,6 +13,7 @@ switch ($format) {
 }
 
 exec('ls *.idl.php', $files);
+sort($files);
 foreach ($files as $file) {
   preg_match('/^(.*)\.idl\.php$/', $file, $matches);
   $name = $matches[1];

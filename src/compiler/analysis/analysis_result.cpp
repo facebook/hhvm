@@ -2732,8 +2732,8 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
     "\n";
 
   const char text3[] =
-    "  pm_t ptr = findFile(s.c_str(), s->hash());\n"
-    "  if (ptr) return ptr(once, variables, get_globals());\n";
+    "pm_t ptr = findFile(s.c_str(), s->hash());\n"
+    "if (ptr) return ptr(once, variables, get_globals());\n";
 
   const char text4[] =
   "  return throw_missing_file(s.c_str());\n"
@@ -2750,14 +2750,10 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
   }
   cg_printf(text2, tableSize - 1, tableSize - 1);
   outputCPPInvokeFileHeader(cg);
-  if (needEvalHook) outputCPPEvalHook(cg);
-  cg_indentEnd("");
   cg_printf(text3);
-  if (entries.size() == 1) {
-    cg_indentBegin("\n");
-    outputCPPDefaultInvokeFile(cg, entries[0]);
-    cg_indentEnd("");
-  }
+  if (needEvalHook) outputCPPEvalHook(cg);
+  if (entries.size() == 1) outputCPPDefaultInvokeFile(cg, entries[0]);
+  cg_indentEnd("");
   cg_printf(text4);
 }
 
@@ -3195,8 +3191,6 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
       fTable.close();
     } else {
       outputCPPInvokeFileHeader(cg);
-      // See if there's an eval'd version
-      if (needEvalHook) outputCPPEvalHook(cg);
 
       string root;
 
@@ -3208,6 +3202,8 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
                   Option::MangleFilename(file, true).c_str());
       }
 
+      // See if there's an eval'd version
+      if (needEvalHook) outputCPPEvalHook(cg);
 
       // when we only have one file, we default to running the file
       if (entries.size() == 1) outputCPPDefaultInvokeFile(cg, entries[0]);

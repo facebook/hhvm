@@ -589,10 +589,63 @@ Variant &Array::lvalAt(CVarRef key, ACCESSPARAMS_IMPL) {
   return Variant::lvalBlackHole();
 }
 
+template<typename T>
+inline ALWAYS_INLINE
+CVarRef Array::setImpl(const T &key, CVarRef v) {
+  if (!m_px) {
+    ArrayData *data = ArrayData::Create(key, v);
+    SmartPtr<ArrayData>::operator=(data);
+  } else {
+    ArrayData *escalated =
+      m_px->set(key, v, (m_px->getCount() > 1));
+    if (escalated) {
+      SmartPtr<ArrayData>::operator=(escalated);
+    }
+  }
+  return v;
+}
+
+template<typename T>
+inline ALWAYS_INLINE
+CVarRef Array::setRefImpl(const T &key, CVarRef v) {
+  if (!m_px) {
+    ArrayData *data = ArrayData::CreateRef(key, v);
+    SmartPtr<ArrayData>::operator=(data);
+  } else {
+    escalate();
+    ArrayData *escalated =
+      m_px->setRef(key, v, (m_px->getCount() > 1));
+    if (escalated) {
+      SmartPtr<ArrayData>::operator=(escalated);
+    }
+  }
+  return v;
+}
+
+template<typename T>
+inline ALWAYS_INLINE
+CVarRef Array::addImpl(const T &key, CVarRef v) {
+  if (!m_px) {
+    ArrayData *data = ArrayData::Create(key, v);
+    SmartPtr<ArrayData>::operator=(data);
+  } else {
+    ArrayData *escalated = m_px->add(key, v, (m_px->getCount() > 1));
+    if (escalated) {
+      SmartPtr<ArrayData>::operator=(escalated);
+    }
+  }
+  return v;
+}
+
+CVarRef Array::set(int64   key, CVarRef v) {
+  return setImpl(key, v);
+}
+
 CVarRef Array::set(litstr  key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return setImpl(String(key), v);
   return setImpl(String(key).toKey(), v);
 }
+
 CVarRef Array::set(CStrRef key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return setImpl(key, v);
   return setImpl(key.toKey(), v);
@@ -610,6 +663,9 @@ CVarRef Array::set(CVarRef key, CVarRef v, bool isKey /* = false */) {
   return Variant::lvalBlackHole();
 }
 
+CVarRef Array::setRef(int64   key, CVarRef v) {
+  return setRefImpl(key, v);
+}
 CVarRef Array::setRef(litstr  key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return setRefImpl(String(key), v);
   return setRefImpl(String(key).toKey(), v);
@@ -626,21 +682,22 @@ CVarRef Array::setRef(CVarRef key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return setRefImpl(key, v);
   VarNR k(key.toKey());
   if (!k.isNull()) {
-    return setRefImpl(k, v);
+    return setRefImpl<Variant>(k, v);
   }
   return Variant::lvalBlackHole();
 }
 
+CVarRef Array::add(int64   key, CVarRef v) {
+  return addImpl(key, v);
+}
 CVarRef Array::add(litstr  key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return addImpl(String(key), v);
   return addImpl(String(key).toKey(), v);
 }
-
 CVarRef Array::add(CStrRef key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return addImpl(key, v);
   return addImpl(key.toKey(), v);
 }
-
 CVarRef Array::add(CVarRef key, CVarRef v, bool isKey /* = false */) {
   if (key.getRawType() == KindOfInt64) {
     return addImpl(key.getNumData(), v);
@@ -683,7 +740,7 @@ Variant Array::argvalAt(bool byRef, CStrRef key, bool isString /* = false */) {
   if (byRef) {
     return strongBind(lvalAt(key, AccessFlags::IsKey(isString)));
   } else {
-    return weakBind(rvalAtRef(key));
+    return rvalAtRef(key);
   }
 }
 

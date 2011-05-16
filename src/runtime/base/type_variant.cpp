@@ -152,10 +152,6 @@ Variant::Variant(CVarRef v) {
   constructValHelper(v);
 }
 
-Variant::Variant(CVarWeakBind v) {
-  constructValHelper(variant(v));
-}
-
 Variant::Variant(CVarStrongBind v) {
   constructRefHelper(variant(v));
 }
@@ -231,7 +227,6 @@ Variant &Variant::assign(CVarRef v) {
 }
 
 Variant &Variant::assignRef(CVarRef v) {
-  ASSERT(!isContagious() && !v.isContagious());
   assignRefHelper(v);
   return *this;
 }
@@ -2857,7 +2852,6 @@ Variant &Variant::o_unsetLval(CStrRef propName, CVarRef tmpForGet,
 check_array:                                                            \
   if (m_type == KindOfArray) {                                          \
     Variant *cv = NULL;                                                 \
-    ASSERT(!v.isContagious());                                          \
     ArrayData *escalated =                                              \
       m_data.parr->lval(ToKey(key), cv, (m_data.parr->getCount() > 1)); \
     if (escalated) {                                                    \
@@ -2907,7 +2901,6 @@ check_array:                                                            \
 template <typename T>
 inline ALWAYS_INLINE CVarRef Variant::SetImpl(Variant *self, T key,
                                               CVarRef v, bool isKey) {
-  ASSERT(!v.isContagious());
   retry:
   if (LIKELY(self->m_type == KindOfArray)) {
     ArrayData *escalated;
@@ -2987,7 +2980,6 @@ CVarRef Variant::set(CVarRef key, CVarRef v) {
 }
 
 CVarRef Variant::append(CVarRef v) {
-  ASSERT(!v.isContagious());
   switch (m_type) {
   case KindOfUninit:
   case KindOfNull:
@@ -3033,7 +3025,6 @@ CVarRef Variant::append(CVarRef v) {
 template <typename T>
 inline ALWAYS_INLINE CVarRef Variant::SetRefImpl(Variant *self, T key,
                                                  CVarRef v, bool isKey) {
-  ASSERT(!v.isContagious());
   retry:
   if (LIKELY(self->m_type == KindOfArray)) {
     ArrayData *escalated;
@@ -3109,7 +3100,6 @@ CVarRef Variant::setRef(CVarRef key, CVarRef v) {
 }
 
 CVarRef Variant::appendRef(CVarRef v) {
-  ASSERT(!v.isContagious());
   switch (m_type) {
   case KindOfUninit:
   case KindOfNull:
@@ -3168,7 +3158,6 @@ CVarRef Variant::setOpEqual(int op, CStrRef key, CVarRef v,
 check_array:
   if (m_type == KindOfArray) {
     Variant *cv = NULL;
-    ASSERT(!v.isContagious());
     ArrayData *escalated;
     if (isString) {
       escalated =
@@ -3233,7 +3222,6 @@ CVarRef Variant::setOpEqual(int op, CVarRef key, CVarRef v) {
 check_array:
   if (m_type == KindOfArray) {
     Variant *cv = NULL;
-    ASSERT(!v.isContagious());
     VarNR k(ToKey(key));
     if (k.isNull()) return lvalBlackHole();
     ArrayData *escalated =

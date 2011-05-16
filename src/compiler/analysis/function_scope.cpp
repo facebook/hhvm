@@ -817,11 +817,11 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
           TypePtr paramType = getParamType(i);
           paramType->outputCPPDecl(cg, ar, shared_from_this());
           string vname = Option::VariablePrefix + cg.formatLabel(name);
-          if (paramType->isExactType()) {
+          if (!ref || paramType->isExactType()) {
             cg_printf(" v%s = %s;\n", vname.c_str(), vname.c_str());
           } else {
-            cg_printf(" v%s = %sBind(%s);\n",
-                      vname.c_str(), ref ? "strong" : "weak", vname.c_str());
+            cg_printf(" v%s = strongBind(%s);\n",
+                      vname.c_str(), vname.c_str());
           }
         }
       }

@@ -1549,7 +1549,7 @@ Variant c_AppendIterator::t_getinneriterator() {
     CVarRef obj0 = m_iterators;
     mcp0.methodCall((obj0), NAMSTR(s_sys_ssb3a5c1b3, "current"), 0x5B3A4A72846B21DCLL);
     const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
-    return weakBind((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
+    return wrap_variant((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
   }
 }
 namespace hphp_impl_splitter {}

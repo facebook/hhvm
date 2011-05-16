@@ -156,13 +156,10 @@ typedef const Variant & CVarRef;
 
 typedef const class VRefParamValue    &VRefParam;
 typedef const class RefResultValue    &RefResult;
-typedef const class VariantWeakBind   &CVarWeakBind;
 typedef const class VariantStrongBind &CVarStrongBind;
 typedef const class VariantWithRefBind&CVarWithRefBind;
 typedef VRefParam                     VRefParamWrap;
 
-inline CVarWeakBind
-weakBind(CVarRef v)       { return *(VariantWeakBind*)&v; }
 inline CVarStrongBind
 strongBind(CVarRef v)     { return *(VariantStrongBind*)&v; }
 inline CVarStrongBind
@@ -170,8 +167,6 @@ strongBind(RefResult v)   { return *(VariantStrongBind*)&v; }
 inline CVarWithRefBind
 withRefBind(CVarRef v)    { return *(VariantWithRefBind*)&v; }
 
-inline CVarRef
-variant(CVarWeakBind v)   { return *(Variant*)&v; }
 inline CVarRef
 variant(CVarStrongBind v) { return *(Variant*)&v; }
 inline CVarRef
@@ -182,14 +177,11 @@ inline CVarRef
 variant(CVarRef v)        { return v; }
 
 /**
- * ref() sets contagious flag, so that next assignment will make both sides
- * strongly bind to the same underlying variant data. For example,
+ * ref() can be used to cause strong binding
  *
  *   a = ref(b); // strong binding: now both a and b point to the same data
  *   a = b;      // weak binding: a will copy or copy-on-write
  *
- * The case of VarNR is only supposed to show up in ifa_ calls where it
- * it should be made no effect.
  */
 inline RefResult ref(CVarRef v) {
   return *(RefResultValue*)&v;

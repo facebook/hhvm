@@ -376,7 +376,7 @@ Variant FunctionStatement::evalBody(VariableEnvironment &env) const {
       if (m_ref) {
         return strongBind(ret);
       }
-      return weakBind(ret);
+      return ret;
     }
   }
 
@@ -397,7 +397,7 @@ Variant FunctionStatement::evalBody(VariableEnvironment &env) const {
       if (m_ref) {
         return strongBind(ret);
       }
-      return weakBind(ret);
+      return ret;
     } else if (env.isBreaking()) {
       throw FatalErrorException("Cannot break/continue out of function");
     }

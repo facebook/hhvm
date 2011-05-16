@@ -322,22 +322,14 @@ class Array : public SmartPtr<ArrayData> {
   CVarRef setRefImpl(const T &key, CVarRef v);
 
   CVarRef set(bool    key, CVarRef v) {
-    return setImpl(key ? 1LL : 0LL, v);
-  }
-  CVarRef set(char    key, CVarRef v) {
-    return setImpl((int64)key, v);
-  }
-  CVarRef set(short   key, CVarRef v) {
-    return setImpl((int64)key, v);
+    return set(key ? 1LL : 0LL, v);
   }
   CVarRef set(int     key, CVarRef v) {
-    return setImpl((int64)key, v);
+    return set((int64)key, v);
   }
-  CVarRef set(int64   key, CVarRef v) {
-    return setImpl(key, v);
-  }
+  CVarRef set(int64   key, CVarRef v);
   CVarRef set(double  key, CVarRef v) {
-    return setImpl((int64)key, v);
+    return set((int64)key, v);
   }
 
   CVarRef set(litstr  key, CVarRef v, bool isKey = false);
@@ -362,22 +354,14 @@ class Array : public SmartPtr<ArrayData> {
   }
 
   CVarRef setRef(bool    key, CVarRef v) {
-    return setRefImpl(key ? 1LL : 0LL, v);
-  }
-  CVarRef setRef(char    key, CVarRef v) {
-    return setRefImpl((int64)key, v);
-  }
-  CVarRef setRef(short   key, CVarRef v) {
-    return setRefImpl((int64)key, v);
+    return setRef((int64)key, v);
   }
   CVarRef setRef(int     key, CVarRef v) {
-    return setRefImpl((int64)key, v);
+    return setRef((int64)key, v);
   }
-  CVarRef setRef(int64   key, CVarRef v) {
-    return setRefImpl(key, v);
-  }
+  CVarRef setRef(int64   key, CVarRef v);
   CVarRef setRef(double  key, CVarRef v) {
-    return setRefImpl((int64)key, v);
+    return setRef((int64)key, v);
   }
 
   CVarRef setRef(litstr  key, CVarRef v, bool isKey = false);
@@ -389,22 +373,14 @@ class Array : public SmartPtr<ArrayData> {
   CVarRef addImpl(const T &key, CVarRef v);
 
   CVarRef add(bool    key, CVarRef v) {
-    return addImpl(key ? 1LL : 0LL, v);
-  }
-  CVarRef add(char    key, CVarRef v) {
-    return addImpl((int64)key, v);
-  }
-  CVarRef add(short   key, CVarRef v) {
-    return addImpl((int64)key, v);
+    return add((int64)key, v);
   }
   CVarRef add(int     key, CVarRef v) {
-    return addImpl((int64)key, v);
+    return add((int64)key, v);
   }
-  CVarRef add(int64   key, CVarRef v) {
-    return addImpl(key, v);
-  }
+  CVarRef add(int64   key, CVarRef v);
   CVarRef add(double  key, CVarRef v) {
-    return addImpl((int64)key, v);
+    return add((int64)key, v);
   }
 
   CVarRef add(litstr  key, CVarRef v, bool isKey = false);

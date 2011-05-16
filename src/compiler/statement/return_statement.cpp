@@ -214,7 +214,7 @@ void ReturnStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("strongBind(");
       close = true;
     } else if (checkCopyElision(func, m_exp)) {
-      cg_printf("weakBind(");
+      cg_printf("wrap_variant(");
       close = true;
     }
     m_exp->outputCPP(cg, ar);

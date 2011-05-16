@@ -362,7 +362,7 @@ inline ALWAYS_INLINE Variant ObjectData::o_setPublicImpl(CStrRef propName,
 
   if (useSet) {
     AttributeClearer a(UseSet, this);
-    t___set(propName, weakBind(variant(v)));
+    t___set(propName, variant(v));
     return variant(v);
   }
 
@@ -372,7 +372,7 @@ inline ALWAYS_INLINE Variant ObjectData::o_setPublicImpl(CStrRef propName,
 
 Variant ObjectData::o_setPublic(CStrRef propName, CVarRef v,
                                 bool forInit /* = false */) {
-  return o_setPublicImpl<CVarWeakBind>(propName, weakBind(v), forInit);
+  return o_setPublicImpl<CVarRef>(propName, v, forInit);
 }
 
 Variant ObjectData::o_setPublic(CStrRef propName, RefResult v,

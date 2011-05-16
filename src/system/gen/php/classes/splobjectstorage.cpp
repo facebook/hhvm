@@ -505,7 +505,7 @@ bool c_SplObjectStorage::t_contains(CVarRef v_obj) {
     {
       {
         LOOP_COUNTER(1);
-        Variant map2 = weakBind(m_storage);
+        Variant map2 = m_storage;
         for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
           LOOP_COUNTER_CHECK(1);
           iter3.second(v_object);
@@ -554,7 +554,7 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
     {
       {
         LOOP_COUNTER(1);
-        Variant map2 = weakBind(m_storage);
+        Variant map2 = m_storage;
         for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
           LOOP_COUNTER_CHECK(1);
           iter3.second(v_object);

@@ -152,8 +152,6 @@ class Variant {
 #ifdef INLINE_VARIANT_HELPER
   inline ALWAYS_INLINE Variant(CVarRef v) { constructValHelper(v); }
   inline ALWAYS_INLINE
-  Variant(CVarWeakBind v) { constructValHelper(variant(v)); }
-  inline ALWAYS_INLINE
   Variant(CVarStrongBind v) { constructRefHelper(variant(v)); }
   inline ALWAYS_INLINE
   Variant(CVarWithRefBind v) {
@@ -161,7 +159,6 @@ class Variant {
   }
 #else
   Variant(CVarRef v);
-  Variant(CVarWeakBind v);
   Variant(CVarStrongBind v);
   Variant(CVarWithRefBind v);
 #endif
@@ -297,7 +294,6 @@ class Variant {
   }
   bool isResource() const;
   bool instanceof(CStrRef s) const;
-  bool isContagious() const { return _count == -1;}
 
   /**
    * This method is for optimizing switch cases with all int literal
@@ -367,7 +363,6 @@ class Variant {
   }
   Variant &operator=(RefResult v) { return assignRef(variant(v)); }
   Variant &operator=(CVarStrongBind v) { return assignRef(variant(v)); }
-  Variant &operator=(CVarWeakBind v) { return assignVal(variant(v)); }
   Variant &operator=(CVarWithRefBind v) { return setWithRef(variant(v)); }
 
   Variant &operator=(const StaticString &v) {
@@ -1072,7 +1067,6 @@ class Variant {
 
   static inline ALWAYS_INLINE
   void AssignValHelper(Variant *self, const Variant *other) {
-    ASSERT(!self->isContagious() && !other->isContagious());
     if (self->m_type == KindOfVariant) self = self->m_data.pvar;
     if (other->m_type == KindOfVariant) other = other->m_data.pvar;
     if (self != other) {
@@ -1178,7 +1172,7 @@ public:
 
   inline ALWAYS_INLINE
   void setWithRefHelper(CVarRef v, const ArrayData *arr, bool destroy) {
-    ASSERT(!isContagious() && this != &v && !v.isContagious());
+    ASSERT(this != &v);
 
     CVarRef rhs = v.m_type == KindOfVariant && v.m_data.pvar->getCount() <= 1 &&
       (!arr || v.m_data.pvar->m_data.parr != arr) ?
@@ -1396,9 +1390,8 @@ inline VRefParam directRef(CVarRef v) {
 
 /*
   these two classes are just to help choose the correct
-  override.
+  overload.
 */
-class VariantWeakBind { private: Variant m_var; };
 class VariantStrongBind { private: Variant m_var; };
 class VariantWithRefBind { private: Variant m_var; };
 
@@ -1484,53 +1477,6 @@ private:
 // breaking circular dependencies
 
 template<typename T>
-CVarRef Array::setImpl(const T &key, CVarRef v) {
-  ASSERT(!v.isContagious());
-  if (!m_px) {
-    ArrayData *data = ArrayData::Create(key, v);
-    SmartPtr<ArrayData>::operator=(data);
-  } else {
-    ArrayData *escalated =
-      m_px->set(key, v, (m_px->getCount() > 1));
-    if (escalated) {
-      SmartPtr<ArrayData>::operator=(escalated);
-    }
-  }
-  return v;
-}
-
-template<typename T>
-CVarRef Array::setRefImpl(const T &key, CVarRef v) {
-  ASSERT(!v.isContagious());
-  if (!m_px) {
-    ArrayData *data = ArrayData::CreateRef(key, v);
-    SmartPtr<ArrayData>::operator=(data);
-  } else {
-    escalate();
-    ArrayData *escalated =
-      m_px->setRef(key, v, (m_px->getCount() > 1));
-    if (escalated) {
-      SmartPtr<ArrayData>::operator=(escalated);
-    }
-  }
-  return v;
-}
-
-template<typename T>
-CVarRef Array::addImpl(const T &key, CVarRef v) {
-  if (!m_px) {
-    ArrayData *data = ArrayData::Create(key, v);
-    SmartPtr<ArrayData>::operator=(data);
-  } else {
-    ArrayData *escalated = m_px->add(key, v, (m_px->getCount() > 1));
-    if (escalated) {
-      SmartPtr<ArrayData>::operator=(escalated);
-    }
-  }
-  return v;
-}
-
-template<typename T>
 Variant Array::refvalAt(const T &key) {
   return strongBind(lvalAt(key));
 }
@@ -1540,7 +1486,7 @@ Variant Array::argvalAt(bool byRef, const T &key) {
   if (byRef) {
     return strongBind(lvalAt(key));
   } else {
-    return weakBind(rvalAtRef(key));
+    return rvalAtRef(key);
   }
 }
 

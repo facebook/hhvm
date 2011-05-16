@@ -198,8 +198,6 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (m_ref) {
       m_array->setContext(Expression::NoRefWrapper);
       cg_printf("strongBind(");
-    } else if (!m_array->isTemporary()) {
-      cg_printf("weakBind(");
     } else {
       close = "";
     }

@@ -3163,7 +3163,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
     CVarRef obj0 = t_getparentclass();
     mcp0.methodCall((obj0), NAMSTR(s_sys_ssdd355b2b, "isSubclassOf"), 0x373333991926C97ELL);
     const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
-    return weakBind((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_cls));
+    return wrap_variant((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_cls));
   }
 }
 namespace hphp_impl_splitter {}
@@ -3357,7 +3357,7 @@ Variant c_ReflectionClass::t_getextensionname() {
     CVarRef obj0 = t_fetch(VarNR(NAMSTR(s_sys_sse9bf4500, "extension")));
     mcp0.methodCall((obj0), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
     const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
-    return weakBind((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
+    return wrap_variant((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
   }
 }
 namespace hphp_impl_splitter {}

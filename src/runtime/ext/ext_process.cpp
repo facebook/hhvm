@@ -353,21 +353,21 @@ private:
 
 bool ShellExecContext::checkCmd(const char *cmd) {
   bool ret = false;
-  char *space = strchr(cmd, ' ');
-  // if found a space, temporarily put '\0' there for strcmp
+  const char *space = strchr(cmd, ' ');
+  unsigned int cmd_len = strlen(cmd);
   if (space) {
-    *space = '\0';
+    cmd_len = space - cmd;
   }
+
   for (unsigned int i = 0; i < RuntimeOption::AllowedExecCmds.size(); i++) {
     std::string &allowedCmd = RuntimeOption::AllowedExecCmds[i];
-    if (strcmp(allowedCmd.c_str(), cmd) == 0) {
+    if (allowedCmd.size() != cmd_len) {
+      continue;
+    }
+    if (strncmp(allowedCmd.c_str(), cmd, allowedCmd.size()) == 0) {
       ret = true;
       break;
     }
-  }
-  // restore space
-  if (space) {
-    *space = ' ';
   }
   return ret;
 }

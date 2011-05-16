@@ -30,11 +30,11 @@ static bool setInitialCapabilities() {
   cap_t cap_d = cap_init();
   if (cap_d != NULL) {
     cap_value_t cap_list[] = {CAP_NET_BIND_SERVICE, CAP_SYS_RESOURCE,
-                              CAP_SETUID};
+                              CAP_SETUID, CAP_SETGID};
     cap_clear(cap_d);
 
-    if (cap_set_flag(cap_d, CAP_PERMITTED, 3, cap_list, CAP_SET) < 0 ||
-        cap_set_flag(cap_d, CAP_EFFECTIVE, 3, cap_list, CAP_SET) < 0) {
+    if (cap_set_flag(cap_d, CAP_PERMITTED, 4, cap_list, CAP_SET) < 0 ||
+        cap_set_flag(cap_d, CAP_EFFECTIVE, 4, cap_list, CAP_SET) < 0) {
       Logger::Error("cap_set_flag failed");
       return false;
     }
@@ -91,8 +91,20 @@ static bool setMinimalCapabilities() {
 
 bool Capability::ChangeUnixUser(uid_t uid) {
   if (setInitialCapabilities()) {
-    if (setuid(uid) < 0) {
-      Logger::Error("unable to drop privs: %s", strerror(errno));
+    struct passwd *pw;
+
+    if ((pw = getpwuid(uid)) == NULL) {
+      Logger::Error("unable to getpwuid(%d): %s", uid, strerror(errno));
+      return false;
+    }
+
+    if (pw->pw_gid == 0 || setgid(pw->pw_gid) < 0) {
+      Logger::Error("unable to drop gid privs: %s", strerror(errno));
+      return false;
+    }
+
+    if (uid == 0 || setuid(uid) < 0) {
+      Logger::Error("unable to drop uid privs: %s", strerror(errno));
       return false;
     }
 

@@ -255,8 +255,13 @@ static void do_change_user(FILE *fin, FILE *fout) {
   read_buf(fin, uname);
   if (strlen(uname) > 0) {
     struct passwd *pw = getpwnam(uname);
-    if (pw && pw->pw_uid) {
-      setuid(pw->pw_uid);
+    if (pw) {
+      if (pw->pw_gid) {
+        setgid(pw->pw_gid);
+      }
+      if (pw->pw_uid) {
+        setuid(pw->pw_uid);
+      }
     }
   }
 }

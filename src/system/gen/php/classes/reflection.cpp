@@ -1145,7 +1145,7 @@ Variant c_ReflectionClass::i_newinstance(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  const Array &p(count > 0 ? params : Array());
+  const Array &p(count > 0 ? ArrayUtil::EnsureIntKeys(params) : Array());
   return (self->t_newinstance(count, p));
 }
 Variant c_ReflectionClass::i_getextension(MethodCallPackage &mcp, CArrRef params) {
@@ -5942,7 +5942,7 @@ Variant c_ReflectionFunction::i_invoke(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  const Array &p(count > 0 ? params : Array());
+  const Array &p(count > 0 ? ArrayUtil::EnsureIntKeys(params) : Array());
   return (self->t_invoke(count, p));
 }
 Variant c_ReflectionFunction::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {

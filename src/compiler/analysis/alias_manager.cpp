@@ -977,6 +977,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
   }
 
   e->setVisited();
+  e->clearLocalExprAltered();
   e->setCanonPtr(ExpressionPtr());
   e->setCanonID(0);
 
@@ -1445,7 +1446,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
       UnaryOpExpressionPtr uop = spc(UnaryOpExpression, e);
       switch (uop->getOp()) {
         case T_INC:
-        case T_DEC: 
+        case T_DEC:
           {
             markAllLocalExprAltered(e);
             ExpressionPtr alt;
@@ -2543,6 +2544,7 @@ void AliasManager::endInExpression(StatementPtr requestor) {
 }
 
 void AliasManager::markAllLocalExprAltered(ExpressionPtr e) {
+  if (!m_postOpt) return;
   ASSERT(isInExpression());
   ASSERT(m_exprIdx <= (int)m_accessList.size());
   e->setLocalExprAltered();

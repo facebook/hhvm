@@ -1461,7 +1461,7 @@ void c_Exception::t___init__() {
       LOOP_COUNTER_CHECK(1);
       {
         {
-          Variant tmp0((m_trace.rvalAt(0LL, AccessFlags::Error)));
+          const Variant &tmp0((m_trace.rvalAt(0LL, AccessFlags::Error)));
           v_top.assignVal(tmp0);
         }
         {
@@ -1469,24 +1469,32 @@ void c_Exception::t___init__() {
           {
             bool tmp1 = (empty(v_top, NAMSTR(s_sys_ssc82dbd12, "class"), true));
             if (!tmp1) {
-              bool tmp2 = ((toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key)), NAMSTR(s_sys_ssa26bedd7, "__init__"))) && toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key)), NAMSTR(s_sys_ssa1b87da7, "__construct")))));
-              if (tmp2) {
-                const String &tmp3((toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key))));
-                const String &tmp4((toString(v_top.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
-                tmp2 = (toBoolean(x_strcasecmp(tmp3, tmp4)));
+              const String &tmp2((toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key))));
+              bool tmp3 = (toBoolean(x_strcasecmp(tmp2, NAMSTR(s_sys_ssa26bedd7, "__init__"))));
+              if (tmp3) {
+                const String &tmp4((toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key))));
+                tmp3 = (toBoolean(x_strcasecmp(tmp4, NAMSTR(s_sys_ssa1b87da7, "__construct"))));
               }
-              tmp1 = (tmp2);
-            }
-            bool tmp5 = (tmp1);
-            if (!tmp5) {
-              bool tmp6 = (toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key)), NAMSTR(s_sys_ssae8717ad, "exception"))));
-              if (tmp6) {
-                bool tmp7((x_is_subclass_of(v_top.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key), NAMSTR(s_sys_ssae8717ad, "exception"))));
-                tmp6 = (!(tmp7));
+              bool tmp5 = (tmp3);
+              if (tmp5) {
+                const String &tmp6((toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key))));
+                const String &tmp7((toString(v_top.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
+                tmp5 = (toBoolean(x_strcasecmp(tmp6, tmp7)));
               }
-              tmp5 = (tmp6);
+              tmp1 = (tmp5);
             }
-            tmp0 = (tmp5);
+            bool tmp8 = (tmp1);
+            if (!tmp8) {
+              const String &tmp9((toString(v_top.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
+              bool tmp10 = (toBoolean(x_strcasecmp(tmp9, NAMSTR(s_sys_ssae8717ad, "exception"))));
+              if (tmp10) {
+                const Variant &tmp11((v_top.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key)));
+                bool tmp12((x_is_subclass_of(tmp11, NAMSTR(s_sys_ssae8717ad, "exception"))));
+                tmp10 = (!(tmp12));
+              }
+              tmp8 = (tmp10);
+            }
+            tmp0 = (tmp8);
           }
           if (tmp0) {
             {
@@ -1501,16 +1509,28 @@ void c_Exception::t___init__() {
       }
     }
   }
-  if (isset(v_frame, NAMSTR(s_sys_ss8ce7db5b, "file"), true)) {
+  {
+    bool tmp0;
     {
-      Variant tmp0((v_frame.rvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), AccessFlags::Error_Key)));
-      m_file.assignVal(tmp0);
+      tmp0 = (isset(v_frame, NAMSTR(s_sys_ss8ce7db5b, "file"), true));
+    }
+    if (tmp0) {
+      {
+        const Variant &tmp0((v_frame.rvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), AccessFlags::Error_Key)));
+        m_file.assignVal(tmp0);
+      }
     }
   }
-  if (isset(v_frame, NAMSTR(s_sys_ssddf8728c, "line"), true)) {
+  {
+    bool tmp0;
     {
-      Variant tmp0((v_frame.rvalAt(NAMSTR(s_sys_ssddf8728c, "line"), AccessFlags::Error_Key)));
-      m_line.assignVal(tmp0);
+      tmp0 = (isset(v_frame, NAMSTR(s_sys_ssddf8728c, "line"), true));
+    }
+    if (tmp0) {
+      {
+        const Variant &tmp0((v_frame.rvalAt(NAMSTR(s_sys_ssddf8728c, "line"), AccessFlags::Error_Key)));
+        m_line.assignVal(tmp0);
+      }
     }
   }
 }

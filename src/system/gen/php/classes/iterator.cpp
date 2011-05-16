@@ -987,7 +987,9 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 496 */
 bool c_ArrayIterator::t_offsetexists(CVarRef v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetExists);
-  return isset(m_arr, v_index);
+  {
+    return isset(m_arr, v_index);
+  }
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 511 */

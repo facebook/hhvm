@@ -1177,7 +1177,7 @@ void c_Continuation::t_nextimpl() {
           v_tokens.assignVal(tmp0);
         }
         {
-          Variant tmp0((v_tokens.rvalAt(1LL, AccessFlags::Error)));
+          const Variant &tmp0((v_tokens.rvalAt(1LL, AccessFlags::Error)));
           v_func.assignVal(tmp0);
         }
         {

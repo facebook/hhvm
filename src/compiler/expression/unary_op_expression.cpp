@@ -365,8 +365,15 @@ ExpressionPtr UnaryOpExpression::postOptimize(AnalysisResultConstPtr ar) {
     if (m_exp->getActualType()->is(Type::KindOfBoolean)) {
       return replaceValue(m_exp);
     }
+  } else if (m_op != T_ARRAY &&
+             m_exp &&
+             m_exp->isScalar()) {
+    Variant value;
+    Variant result;
+    if (m_exp->getScalarValue(value) && preCompute(value, result)) {
+      return replaceValue(makeScalarExpression(ar, result));
+    }
   }
-
   return ExpressionPtr();
 }
 

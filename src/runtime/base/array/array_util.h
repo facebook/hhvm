@@ -109,6 +109,13 @@ public:
    */
   static Variant CountValues(CArrRef input);
 
+  /**
+   * Returns input as a numerically indexed array starting from zero
+   * with no gaps. Is optimized for the case where input is already 
+   * correct. Assumes input is not null.
+   */
+  static Array EnsureIntKeys(CArrRef input);
+
   /////////////////////////////////////////////////////////////////////////////
   // Manipulations. Note, all these functions will create a new array than
   // modifying input, although names of these functions sound like mutating.

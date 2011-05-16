@@ -783,6 +783,20 @@ bool TestCodeRun::TestVariableArgument() {
        "$b = 2;"
        "baz(1,$b,3,4,5);");
 
+  MVCR("<?php\n"
+       "function f() {\n"
+       "  var_dump(func_get_args());\n"
+       "}\n"
+       "function g($x) {\n"
+       "  if ($x) $f = 'f';\n"
+       "  else    $f = '__nocall__';\n"
+       "  call_user_func_array($f, "
+       "    array('x' => 10, 'y' => 20, 'z' => 30, 'j' => 40));\n"
+       "  call_user_func_array($f, "
+       "    array(3 => 10, 80 => 20, 10 => 30, 30 => 40));\n"
+       "}\n"
+       "g(10);\n");
+
   return true;
 }
 

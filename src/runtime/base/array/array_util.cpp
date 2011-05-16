@@ -462,6 +462,14 @@ Variant ArrayUtil::CountValues(CArrRef input) {
   return ret;
 }
 
+Array ArrayUtil::EnsureIntKeys(CArrRef input) {
+  ASSERT(!input.isNull());
+  if (!input.getArrayData()->isVectorData()) {
+    return input.values();
+  }
+  return input;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // manipulations
 

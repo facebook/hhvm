@@ -1370,7 +1370,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
           // since we want the entire params array anyways
           ASSERT(m_maxParam == 0);
           cg_printf("const Array &p(count > 0 ? "
-                    "params : Array());\n");
+                    "ArrayUtil::EnsureIntKeys(params) : Array());\n");
         }
         extra = ", p";
       }

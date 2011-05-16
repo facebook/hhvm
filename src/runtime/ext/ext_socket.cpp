@@ -1098,7 +1098,7 @@ String ipaddr_convert(struct sockaddr *addr, int addrlen) {
   int error = getnameinfo(addr, addrlen, buffer, sizeof(buffer), NULL, 0, NI_NUMERICHOST);
 
   if (error) {
-    raise_warning(gai_strerror(error));
+    raise_warning("%s", gai_strerror(error));
     return "";
   }
   return String(buffer, CopyString);
@@ -1127,7 +1127,7 @@ Variant f_getaddrinfo(CStrRef host, CStrRef port, int family /* = 0 */,
   error = getaddrinfo(host, port, &hints, &res0);
 
   if (error) {
-    raise_warning(gai_strerror(error));
+    raise_warning("%s", gai_strerror(error));
 
     if (res0) {
       freeaddrinfo(res0);

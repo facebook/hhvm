@@ -1569,7 +1569,7 @@ char *string_quoted_printable_encode(const char *input, int &len) {
   return (char*)ret;
 }
 
-char *string_quoted_printable_decode(const char *input, int &len) {
+char *string_quoted_printable_decode(const char *input, int &len, bool is_q) {
   ASSERT(input);
   if (len == 0) {
     return NULL;
@@ -1609,6 +1609,14 @@ char *string_quoted_printable_decode(const char *input, int &len) {
         else {
           str_out[j++] = str_in[i++];
         }
+      }
+      break;
+    case '_':
+      if (is_q) {
+        str_out[j++] = ' ';
+        i++;
+      } else {
+        str_out[j++] = str_in[i++];
       }
       break;
     default:

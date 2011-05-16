@@ -230,7 +230,7 @@ char *string_addslashes(const char *str, int &length);
 char *string_stripslashes(const char *input, int &l);
 char *string_quotemeta(const char *input, int &len);
 char *string_quoted_printable_encode(const char *input, int &len);
-char *string_quoted_printable_decode(const char *input, int &len);
+char *string_quoted_printable_decode(const char *input, int &len, bool is_q);
 char *string_uuencode(const char *src, int src_len, int &dest_len);
 char *string_uudecode(const char *src, int src_len, int &dest_len);
 char *string_base64_encode(const char *input, int &len);

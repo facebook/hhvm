@@ -365,7 +365,7 @@ String StringUtil::QuotedPrintableEncode(CStrRef input) {
 String StringUtil::QuotedPrintableDecode(CStrRef input) {
   if (input.empty()) return input;
   int len = input.size();
-  char *ret = string_quoted_printable_decode(input, len);
+  char *ret = string_quoted_printable_decode(input, len, false);
   return String(ret, len, AttachString);
 }
 

@@ -63,6 +63,14 @@ bool TestExtIconv::test_iconv_mime_decode() {
                          0, "ISO-8859-1"),
      "Subject: Pr\xDC""fung Pr\xDC""fung");
 
+  VS(f_iconv_mime_decode(
+       "Subject: =?utf-8?Q?JS_typeahead_should_normalize_Polish_=C5=82_=3C-=3E_"
+       "l_?=\n =?utf-8?Q?=28S=C5=82awek_Biel=29?=",
+       0,
+       "UTF-8"),
+     "Subject: JS typeahead should normalize Polish \u0142 <-> l (S\u0142awek "
+     "Biel)");
+
   return Count(true);
 }
 

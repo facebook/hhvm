@@ -462,15 +462,15 @@ bool c_XMLReader::t_setschema(CStrRef source) {
 
 bool c_XMLReader::t_setparserproperty(int64 property, bool value) {
   INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::setparserproperty);
-  int ret;
   if (m_ptr) {
-    ret = xmlTextReaderSetParserProp(m_ptr, property, value);
+    int ret = xmlTextReaderSetParserProp(m_ptr, property, value);
+    if (ret == -1) {
+      raise_warning("Invalid parser property");
+      return false;
+    }
+    return true;
   }
-  if (ret) {
-    raise_warning("Invalid parser property");
-    return false;
-  }
-  return true;
+  return false;
 }
 
 bool c_XMLReader::set_relaxng_schema(String source, int type) {

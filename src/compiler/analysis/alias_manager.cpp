@@ -1505,12 +1505,16 @@ void AliasManager::canonicalizeKid(ConstructPtr c, ExpressionPtr kid, int i) {
     StatementPtr sp(dpc(Statement, c));
     if (sp) beginInExpression(sp);
     kid = canonicalizeRecur(kid);
-    if (sp) endInExpression(sp);
     if (kid) {
       c->setNthKid(i, kid);
       c->recomputeEffects();
-      kid->computeLocalExprAltered();
       setChanged();
+    }
+    if (sp) {
+      endInExpression(sp);
+      ExpressionPtr kid0(dpc(Expression, c->getNthKid(i)));
+      ASSERT(kid0);
+      kid0->computeLocalExprAltered();
     }
   }
 }

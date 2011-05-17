@@ -1323,12 +1323,3 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
 
   if (wrapped) cg_printf(")");
 }
-
-void BinaryOpExpression::computeLocalExprAltered() {
-  getExp1()->computeLocalExprAltered();
-  getExp2()->computeLocalExprAltered();
-  if (getExp1()->isLocalExprAltered() ||
-      getExp2()->isLocalExprAltered()) {
-    setLocalExprAltered();
-  }
-}

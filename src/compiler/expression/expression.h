@@ -342,7 +342,7 @@ public:
   /**
    * Correctly compute the local expression altered bit
    */
-  virtual void computeLocalExprAltered() { /* no-op */ }
+  void computeLocalExprAltered(); 
 
 protected:
   static bool IsIdentifier(const std::string &value);

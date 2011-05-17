@@ -542,6 +542,21 @@ ExpressionPtr Expression::fetchReplacement() {
   return t;
 }
 
+void Expression::computeLocalExprAltered() {
+  // if no kids, do nothing
+  if (getKidCount() == 0) return;
+
+  bool res = false;
+  for (int i = 0; i < getKidCount(); i++) {
+    ExpressionPtr k = getNthExpr(i);
+    k->computeLocalExprAltered();
+    res |= k->isLocalExprAltered();
+  }
+  if (res) {
+    setLocalExprAltered();
+  }
+}
+
 bool Expression::isUnquotedScalar() const {
   if (!is(KindOfScalarExpression)) return false;
   return !((ScalarExpression*)this)->isQuoted();

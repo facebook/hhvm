@@ -240,6 +240,8 @@ String getUndefinedConstant(CStrRef name);
 
 inline bool isset(CVarRef v) { return !v.isNull();}
 inline bool isset(CObjRef v) { return !v.isNull();}
+inline bool isset(CStrRef v) { return !v.isNull();}
+inline bool isset(CArrRef v) { return !v.isNull();}
 
 bool isset(CVarRef v, bool    offset);
 bool isset(CVarRef v, int64   offset);
@@ -250,6 +252,16 @@ bool isset(CVarRef v, CObjRef offset);
 bool isset(CVarRef v, CVarRef offset);
 bool isset(CVarRef v, litstr  offset, bool isString = false);
 bool isset(CVarRef v, CStrRef offset, bool isString = false);
+
+bool isset(CArrRef v, int64   offset);
+inline bool isset(CArrRef v, bool   offset) { return isset(v, (int64)offset); }
+inline bool isset(CArrRef v, int    offset) { return isset(v, (int64)offset); }
+inline bool isset(CArrRef v, double offset) { return isset(v, (int64)offset); }
+bool isset(CArrRef v, CArrRef offset);
+bool isset(CArrRef v, CObjRef offset);
+bool isset(CArrRef v, CVarRef offset);
+bool isset(CArrRef v, litstr  offset, bool isString = false);
+bool isset(CArrRef v, CStrRef offset, bool isString = false);
 
 inline Variant unset(Variant &v)               { v.unset();   return null;}
 inline Variant unset(CVarRef v)                {              return null;}

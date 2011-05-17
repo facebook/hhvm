@@ -986,6 +986,9 @@ class Variant {
     ASSERT(acc && acc->m_type == KindOfDouble);
     return acc->m_data.dbl;
   }
+  static bool IsString(TypedValueAccessor acc) {
+    return acc->m_type == KindOfString || acc->m_type == KindOfStaticString;
+  }
   static StringData *GetStringData(TypedValueAccessor acc) {
     ASSERT(acc);
     ASSERT(acc->m_type == KindOfString || acc->m_type == KindOfStaticString);
@@ -998,6 +1001,18 @@ class Variant {
   static ObjectData *GetObjectData(TypedValueAccessor acc) {
     ASSERT(acc && acc->m_type == KindOfObject);
     return acc->m_data.pobj;
+  }
+  static ObjectData *GetArrayAccess(TypedValueAccessor acc) {
+    ASSERT(acc && acc->m_type == KindOfObject);
+    ObjectData *obj = acc->m_data.pobj;
+    if (!obj->o_instanceof("ArrayAccess")) {
+      throw InvalidOperandException("not ArrayAccess objects");
+    }
+    return obj;
+  }
+  static CArrRef GetAsArray(TypedValueAccessor acc) {
+    ASSERT(acc && acc->m_type == KindOfArray);
+    return *(Array*)acc;
   }
 
   static void RuntimeCheck();

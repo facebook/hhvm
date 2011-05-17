@@ -37,6 +37,8 @@ CHECK_FUNCTION_EXISTS("setlocale" HAVE_SETLOCALE)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/timelib_config.h.cmake ${CMAKE_CURRENT_SOURCE_DIR}/timelib_config.h)
 
+add_definitions(-DNDEBUG)
+
 add_library(timelib STATIC astro.c dow.c parse_date.c parse_tz.c 
 	timelib.c tm2unixtime.c unixtime2tm.c)
 

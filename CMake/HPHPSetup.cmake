@@ -117,5 +117,13 @@ else()
 	set(CMAKE_CXX_FLAGS "-fno-gcse -fno-omit-frame-pointer -ftemplate-depth-60 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names")
 endif()
 
+IF(CMAKE_COMPILER_IS_GNUCC)
+	SET (CMAKE_C_FLAGS_RELEASE "-O3")
+ENDIF()
+
+IF(CMAKE_COMPILER_IS_GNUCXX)
+	SET (CMAKE_CXX_FLAGS_RELEASE "-O3")
+ENDIF()
+
 include_directories(${HPHP_HOME}/src)
 include_directories(${HPHP_HOME}/src/lib/system/gen)

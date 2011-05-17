@@ -1815,17 +1815,63 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
             cg_printf(".create()))%s", isGetArgs ? ".toArray()" : "");
             return;
           }
-          if (isGetArgs && func->getMaxParamCount() == 0) {
+          if (isGetArgs &&
+              func->getMaxParamCount() == 0 &&
+              (!m_params || m_params->getCount() == 0)) {
             // in the special case of calling func_get_args() for
             // a function with no explicit params, bypass the call
             // to func_get_args() and simply use the passed in args
             // array or the empty array
             if (func->isVariableArgument()) {
-              cg_printf("args.isNull() ? Array::Create() : args");
+              cg_printf("(args.isNull() ? Array::Create() : args)");
             } else {
               cg_printf("Array::Create()");
             }
             return;
+          } else if (m_name == "func_get_arg" && 
+                     m_params && 
+                     m_params->getCount() == 1) {
+            Variant v;
+            ExpressionPtr p((*m_params)[0]);
+            if (p->getScalarValue(v) && v.isInteger()) {
+              // if func_get_arg is called with a scalar int, then
+              // optimize the call to func_get_arg away
+              int64 idx = v.toInt64();
+              if (idx < 0) {
+                cg_printf("Variant(false)");
+                return;
+              }
+              if (idx >= func->getMaxParamCount()) {
+                if (func->isVariableArgument()) {
+                  int64 idx0 = idx - func->getMaxParamCount();
+                  cg_printf("(%lldLL < num_args ? "
+                            "args.rvalAt(%lldLL) : Variant(false))",
+                            idx, idx0);
+                } else {
+                  cg_printf("Variant(false)");
+                }
+                return;
+              }
+              const string& funcName = func->getParamName(idx);
+              bool needsCast = 
+                !func->getParamType(idx)->is(Type::KindOfVariant) &&
+                !func->getParamType(idx)->is(Type::KindOfSome); 
+              bool isStashed = 
+                func->getVariables()->getSymbol(funcName)->isStashedVal();
+              if (func->isVariableArgument()) {
+                cg_printf("(%lldLL < num_args ? ", idx);
+              }
+              if (needsCast) cg_printf("Variant(");
+              cg_printf("%s%s%s",
+                        isStashed ? "v" : "",
+                        Option::VariablePrefix, 
+                        funcName.c_str());
+              if (needsCast) cg_printf(")");
+              if (func->isVariableArgument()) {
+                cg_printf(" : Variant(false))");
+              }
+              return;
+            }
           }
           cg_printf("%s(", m_name.c_str());
           func->outputCPPParamsCall(cg, ar, true);

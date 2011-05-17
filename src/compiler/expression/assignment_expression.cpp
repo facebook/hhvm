@@ -297,10 +297,17 @@ static void wrapValue(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_printf("wrap_variant(");
     close = true;
   } else if (varnr && exp->getCPPType()->isExactType()) {
-    cg_printf("VarNR(");
-    close = true;
+    bool isScalar = exp->isScalar();
+    if (!isScalar || !Option::UseScalarVariant) {
+      cg_printf("VarNR(");
+      close = true;
+    } else if (isScalar) {
+      ASSERT(!cg.hasScalarVariant());
+      cg.setScalarVariant();
+    }
   }
   exp->outputCPP(cg, ar);
+  cg.clearScalarVariant();
   if (close) cg_printf(")");
 }
 
@@ -434,10 +441,8 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
   }
 
   if (m_variable->is(Expression::KindOfSimpleVariable) &&
-      m_value->is(Expression::KindOfConstantExpression)) {
-    ConstantExpressionPtr exp =
-      dynamic_pointer_cast<ConstantExpression>(m_value);
-    if (exp->isNull()) setNull = true;
+      m_value->isLiteralNull()) {
+    setNull = true;
   }
 
   bool wrapped = true;

@@ -1000,6 +1000,8 @@ class Variant {
     return acc->m_data.pobj;
   }
 
+  static void RuntimeCheck();
+
   /**
    * The order of the data members is significant. The _count field must
    * be exactly FAST_REFCOUNT_OFFSET bytes from the beginning of the object.

@@ -42,6 +42,7 @@ class Array;
 class Object;
 template<typename T> class SmartObject;
 class Variant;
+class VarNR;
 typedef Variant Numeric;
 typedef Variant Primitive;
 typedef Variant PlusOperand;
@@ -51,7 +52,13 @@ typedef Variant Sequence;
  * Macros related to Variant that are needed by StringData, ObjectData,
  * and ArrayData.
  */
-extern const Variant null_variant;
+extern const Variant &null_variant;
+extern const VarNR &null_varNR;
+extern const VarNR &true_varNR;
+extern const VarNR &false_varNR;
+extern const VarNR &INF_varNR;
+extern const VarNR &NEGINF_varNR;
+extern const VarNR &NAN_varNR;
 extern const String null_string;
 extern const Array null_array;
 #if defined(__GNUC__) && defined(WORDSIZE_IS_64)

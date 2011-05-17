@@ -1101,19 +1101,29 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
       // use VarNR to avoid unnecessary ref-counting because we know
       // the actual argument will always has a ref in the callee.
       bool wrap = false;
+      bool scalar = param->isScalar();
       if (!param->hasContext(Expression::RefValue) &&
           param->getExpectedType() &&
           param->getExpectedType()->is(Type::KindOfVariant) &&
           (param->getCPPType()->is(Type::KindOfArray) ||
            param->getCPPType()->is(Type::KindOfString) ||
            param->getCPPType()->is(Type::KindOfObject) ||
-           param->getCPPType()->isPrimitive())) {
-        wrap = true;
+           param->getCPPType()->isPrimitive() ||
+           scalar)) {
+        if (scalar) {
+          ASSERT(!cg.hasScalarVariant());
+          cg.setScalarVariant();
+        }
+        if (!scalar ||
+            (!Option::UseScalarVariant && !param->isLiteralNull())) {
+          wrap = true;
+        }
         if (func && i < func->getMaxParamCount()) {
           VariableTablePtr variables = func->getVariables();
           if (variables->isLvalParam(func->getParamName(i))) {
             // Callee expects a Variant instead of CVarRef
             wrap = false;
+            if (scalar) cg.clearScalarVariant();
           }
         }
       }
@@ -1121,6 +1131,8 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
         cg_printf("VarNR(");
       }
       param->outputCPP(cg, ar);
+      if (scalar) cg.clearScalarVariant();
+      ASSERT(!cg.hasScalarVariant());
       if (wrap) {
         cg_printf(")");
       }
@@ -1275,6 +1287,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
       int defIndex = -1;
       bool wantNullVariantNotNull = fewArgs ? i < maxCount : ref;
       bool dftNull = false;
+      bool isCVarRef = false;
       if (!m_paramDefaults[i].empty() && !useDefaults) {
         Variant tmp;
         MethodStatementPtr m(dynamic_pointer_cast<MethodStatement>(m_stmt));
@@ -1282,9 +1295,11 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
         assert(params && params->getCount() > i);
         ParameterExpressionPtr p(
           dynamic_pointer_cast<ParameterExpression>((*params)[i]));
-        dftNull = p->defaultValue()->isScalar() &&
-          p->defaultValue()->getScalarValue(tmp) && tmp.isNull();
-        if (wantNullVariantNotNull && !dftNull && !ref) {
+        ExpressionPtr defVal = p->defaultValue();
+        bool isScalar = defVal->isScalar();
+        if (Option::UseScalarVariant && isScalar && !ref && fewArgs) isCVarRef = true;
+        dftNull = isScalar && defVal->getScalarValue(tmp) && tmp.isNull();
+        if (!isCVarRef && wantNullVariantNotNull && !dftNull && !ref) {
           cg_printf("TypedValue def%d;\n", i);
           defIndex = i;
         }
@@ -1316,16 +1331,26 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
             dynamic_pointer_cast<ParameterExpression>((*params)[i]));
 
           if (defIndex >= 0) {
-            cg_printf("*new (&def%d) Variant(", defIndex);
+            if (!isCVarRef) cg_printf("*new (&def%d) Variant(", defIndex);
           } else {
+            ExpressionPtr defVal = p->defaultValue();
+            bool isScalar = defVal->isScalar();
+            if (Option::UseScalarVariant && isScalar && !ref && fewArgs) isCVarRef = true;
             TypePtr type = p->defaultValue()->getCPPType();
             bool isVariant = type && type->is(Type::KindOfVariant);
             cg_printf("%s(", ref ? "VRefParamValue" :
-                      (!fewArgs || i >= maxCount) && !isVariant ?
+                      (!fewArgs || i >= maxCount) && !isVariant && !isCVarRef ?
                       "Variant" : "");
           }
           cg.setContext(CodeGenerator::CppParameterDefaultValueDecl);
-          p->defaultValue()->outputCPP(cg, ar);
+          ExpressionPtr defVal = p->defaultValue();
+          if (isCVarRef) {
+            ASSERT(!cg.hasScalarVariant());
+            cg.setScalarVariant();
+          }
+          defVal->outputCPP(cg, ar);
+          if (isCVarRef) cg.clearScalarVariant();
+          ASSERT(!cg.hasScalarVariant());
           cg.setContext(context);
           cg_printf(")");
         }

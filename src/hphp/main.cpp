@@ -456,6 +456,7 @@ cout << "Compiler: " << COMPILER_ID << "\n";
     Option::AnalyzePerfectVirtuals = false;
   }
   Option::SystemGen = (po.target == "cpp" && po.format == "sys") ;
+  if (Option::SystemGen) Option::UseScalarVariant = false;
 
   Option::ProgramName = po.program;
   Option::PreprocessedPartitionConfig = po.ppp;

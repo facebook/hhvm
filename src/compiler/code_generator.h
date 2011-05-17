@@ -216,11 +216,16 @@ public:
   void translatePredefined(bool flag) { m_translatePredefined = flag; }
 
   int checkLiteralString(const std::string &str, int &index,
-                         AnalysisResultPtr ar, BlockScopePtr bs);
-  void printString(const std::string &str, AnalysisResultPtr ar,
-                   BlockScopeRawPtr check, bool stringWrapper = true);
-  void printString(const std::string &str, AnalysisResultPtr ar,
-                   ConstructPtr check, bool stringWrapper = true);
+                         AnalysisResultPtr ar, BlockScopePtr bs,
+                         bool scalarVariant = false);
+  std::string printNamedString(const std::string &str,
+                               const std::string &escaped,
+                               AnalysisResultPtr ar, BlockScopeRawPtr bs,
+                               bool print);
+  std::string printString(const std::string &str, AnalysisResultPtr ar,
+                          BlockScopeRawPtr check, bool stringWrapper = true);
+  std::string printString(const std::string &str, AnalysisResultPtr ar,
+                          ConstructPtr check, bool stringWrapper = true);
   int getCurrentIndentation() const { return m_indentation[m_curStream];}
 
   bool inExpression() { return m_inExpression[m_curStream]; }
@@ -246,6 +251,10 @@ public:
   void collectHoistedClasses(bool flag);
   void addHoistedClass(const std::string &cls);
   bool checkHoistedClass(const std::string &cls);
+
+  void setScalarVariant() { m_scalarVariant = true; }
+  bool hasScalarVariant() { return m_scalarVariant; }
+  void clearScalarVariant() { m_scalarVariant = false; }
 private:
   std::string m_filename;
   Stream m_curStream;
@@ -283,6 +292,7 @@ private:
   int m_phpLineNo;
 
   bool m_translatePredefined; // translate predefined constants in PHP output
+  bool m_scalarVariant;
 
   void print(const char *fmt, va_list ap);
   void print(const char *msg, bool indent = true);

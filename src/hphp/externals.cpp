@@ -42,6 +42,7 @@ Globals *get_globals() { return NULL; }
 class SystemGlobals;
 SystemGlobals *get_system_globals() { return NULL;}
 void init_global_variables() {}
+void init_literal_varstrings() {}
 void init_builtin_constant_table() {}
 void init_constant_table() {}
 void init_static_variables() {}

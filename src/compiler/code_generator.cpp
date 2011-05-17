@@ -76,6 +76,7 @@ CodeGenerator::CodeGenerator(std::ostream *primary,
 
   if (filename) m_filename = *filename;
   m_translatePredefined = false;
+  m_scalarVariant = false;
   m_inFileOrClassHeader = false;
   m_inNamespace = false;
 }
@@ -280,6 +281,10 @@ void CodeGenerator::printBasicIncludes() {
                  "literal_strings_remap.h");
     printInclude(string(Option::SystemFilePrefix) +
                  "scalar_arrays_remap.h");
+    if (Option::UseScalarVariant) {
+      printInclude(string(Option::SystemFilePrefix) +
+                   "scalar_integers_remap.h");
+    }
     printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
     if (Option::GenConcat || Option::GenArrayCreate) {
       printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
@@ -290,6 +295,10 @@ void CodeGenerator::printBasicIncludes() {
                  "literal_strings_remap.h");
     printInclude(string(Option::SystemFilePrefix) +
                  "scalar_arrays_remap.h");
+    if (Option::UseScalarVariant) {
+      printInclude(string(Option::SystemFilePrefix) +
+                   "scalar_integers_remap.h");
+    }
   }
 }
 
@@ -535,7 +544,8 @@ bool CodeGenerator::findLabelId(const char *name, int labelId) {
 }
 
 int CodeGenerator::checkLiteralString(const std::string &str, int &index,
-                                      AnalysisResultPtr ar, BlockScopePtr bs) {
+                                      AnalysisResultPtr ar, BlockScopePtr bs,
+                                      bool scalarVariant /* = false */) {
   if (getContext() == CodeGenerator::CppConstantsDecl ||
       getContext() == CodeGenerator::CppClassConstantsImpl) {
     assert(false);
@@ -545,12 +555,15 @@ int CodeGenerator::checkLiteralString(const std::string &str, int &index,
     FileScopePtr fs = bs->getContainingFile();
     if (fs) {
       fs->addUsedLiteralString(str);
+      if (scalarVariant) fs->addUsedLitVarString(str);
       if (isFileOrClassHeader()) {
         ClassScopePtr cs = bs->getContainingClass();
         if (cs) {
           cs->addUsedLiteralStringHeader(str);
+          if (scalarVariant) cs->addUsedLitVarStringHeader(str);
         } else {
           fs->addUsedLiteralStringHeader(str);
+          if (scalarVariant) fs->addUsedLitVarStringHeader(str);
         }
       }
     }
@@ -558,18 +571,29 @@ int CodeGenerator::checkLiteralString(const std::string &str, int &index,
   return stringId;
 }
 
-void CodeGenerator::printString(const std::string &str, AnalysisResultPtr ar,
-                                BlockScopeRawPtr bs,
-                                bool stringWrapper /* = true */) {
+string CodeGenerator::printNamedString(const string &str,
+  const string &escaped, AnalysisResultPtr ar, BlockScopeRawPtr bs,
+  bool print) {
   int index = -1;
+  bool scalarVariant = !print;
+  int stringId = checkLiteralString(str, index, ar, bs, scalarVariant);
+  assert(index >= 0);
+  string lisnam = ar->getLiteralStringName(stringId, index);
+  if (print) {
+    printf("NAMSTR(%s, \"%s\")", lisnam.c_str(), escaped.c_str());
+  }
+  return lisnam;
+}
+
+string CodeGenerator::printString(const string &str, AnalysisResultPtr ar,
+                                  BlockScopeRawPtr bs,
+                                  bool stringWrapper /* = true */) {
   bool isBinary = false;
   string escaped = escapeLabel(str, &isBinary);
   if (bs) {
-    int stringId = checkLiteralString(str, index, ar, bs);
-    assert(index >= 0);
-    string lisnam = ar->getLiteralStringName(stringId, index);
-    printf("NAMSTR(%s, \"%s\")", lisnam.c_str(), escaped.c_str());
-  } else if (isBinary) {
+    return printNamedString(str, escaped, ar, bs, true);
+  }
+  if (isBinary) {
     if (stringWrapper) {
       printf("String(\"%s\", %d, AttachLiteral)",
              escaped.c_str(), str.length());
@@ -579,12 +603,13 @@ void CodeGenerator::printString(const std::string &str, AnalysisResultPtr ar,
   } else {
     printf("\"%s\"", escaped.c_str());
   }
+  return "";
 }
 
-void CodeGenerator::printString(const std::string &str, AnalysisResultPtr ar,
-                                ConstructPtr cs,
-                                bool stringWrapper /* = true */) {
-  printString(str, ar, (BlockScopePtr)cs->getScope(), stringWrapper);
+string CodeGenerator::printString(const std::string &str, AnalysisResultPtr ar,
+                                  ConstructPtr cs,
+                                  bool stringWrapper /* = true */) {
+  return printString(str, ar, (BlockScopePtr)cs->getScope(), stringWrapper);
 }
 
 void CodeGenerator::beginHoistedClasses() {

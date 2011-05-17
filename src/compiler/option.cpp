@@ -130,6 +130,15 @@ const char *Option::EvalOrderTempPrefix = "eo_";
 const char *Option::CallInfoPrefix = "ci_";
 const char *Option::SilencerPrefix = "sil_";
 
+const char *Option::ScalarPrefix = "s_";
+const char *Option::SysScalarPrefix = "s_sys_";
+const char *Option::StaticStringPrefix = "ss";
+const char *Option::StaticArrayPrefix = "sa";
+const char *Option::StaticVarIntPrefix = "svi";
+const char *Option::StaticVarDblPrefix = "svd";
+const char *Option::StaticVarStrPrefix = "svs";
+const char *Option::StaticVarArrPrefix = "sva";
+
 const char *Option::FFIFnPrefix = "ffi_";
 
 const char *Option::TempPrefix = "tmp";
@@ -173,6 +182,7 @@ bool Option::GenHashTableInvokeFile = true;
 bool Option::GenHashTableInvokeFunc = true;
 bool Option::GenHashTableDynClass= true;
 bool Option::GenHashTableGetConstant = true;
+bool Option::UseScalarVariant = true;
 bool Option::KeepStatementsWithNoEffect = false;
 
 int Option::ConditionalIncludeExpandLevel = 1;

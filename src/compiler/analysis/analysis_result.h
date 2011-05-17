@@ -180,6 +180,15 @@ public:
 
   std::string getScalarArrayCompressedText();
   std::string getScalarArrayName(int hash, int index);
+  std::string getScalarVarArrayName(int hash, int index);
+
+  int checkScalarVarInteger(int64 val, int &index);
+  std::string getScalarVarIntegerName(int hash, int index);
+  void outputCPPNamedScalarVarIntegers(const std::string &file);
+
+  int checkScalarVarDouble(double dval, int &index);
+  std::string getScalarVarDoubleName(int hash, int index);
+  void outputCPPNamedScalarVarDoubles(const std::string &file);
 
   /**
    * Force all class variables to be variants, since l-val or reference
@@ -214,11 +223,14 @@ public:
   void outputCPPScalarArrayDecl(CodeGenerator &cg);
   void outputCPPScalarArrayImpl(CodeGenerator &cg);
   void outputCPPScalarArrayInit(CodeGenerator &cg, int fileCount, int part);
-  void outputCPPScalarArrayId(CodeGenerator &cg, int id, int hash, int index);
+  void outputCPPScalarArrayId(CodeGenerator &cg, int id, int hash, int index,
+                              bool scalarVariant = false);
   void outputCPPClassStaticInitializerFlags(CodeGenerator &cg,
                                             Type2SymbolListMap &type2names);
   void outputCPPClassDeclaredFlags(CodeGenerator &cg,
                                    Type2SymbolListMap &type2names);
+
+  void outputCPPFiniteDouble(CodeGenerator &cg, double dval);
 
   /**
    * Parser creates a FileScope upon parsing a new file.
@@ -314,6 +326,7 @@ public:
    * Literal string to String precomputation
    */
   std::string getLiteralStringName(int64 hash, int index);
+  std::string getLitVarStringName(int64 hash, int index);
   int getLiteralStringId(const std::string &s, int &index);
 
   /**
@@ -356,6 +369,10 @@ public:
   void setSepExtension() { m_sepExtension = true; }
   bool isSepExtension() { return m_sepExtension; }
 
+  std::string getHashedName(int64 hash, int index, const char *prefix,
+                            bool longName = false);
+  void addNamedLiteralVarString(const std::string &s);
+  void addNamedScalarVarArray(const std::string &s);
 private:
   Package *m_package;
   bool m_parseOnDemand;
@@ -386,8 +403,16 @@ private:
   std::map<std::string, int> m_scalarArrays;
   Mutex m_namedScalarArraysMutex;
   std::map<int, std::vector<std::string> > m_namedScalarArrays;
+  std::set<std::string> m_namedScalarVarArrays;
   int m_scalarArraysCounter;
   std::vector<ExpressionPtr> m_scalarArrayIds;
+
+  Mutex m_namedScalarVarIntegersMutex;
+  std::map<int, std::vector<std::string> > m_namedScalarVarIntegers;
+
+  Mutex m_namedScalarVarDoublesMutex;
+  std::map<int, std::vector<std::string> > m_namedScalarVarDoubles;
+
   std::map<std::string, int> m_paramRTTIs;
   std::set<std::string> m_rttiFuncs;
   int m_paramRTTICounter;
@@ -451,8 +476,6 @@ private:
                    std::map<std::string, FileScopePtr> &trueDeps);
   void clusterByFileSizes(StringToFileScopePtrVecMap &clusters,
                           int clusterCount);
-  std::string getHashedName(int64 hash, int index, const char *prefix,
-                            bool longName = false);
   void renameStaticNames(std::map<int, std::vector<std::string> > &names,
                          const char *file, const char *prefix);
 
@@ -470,6 +493,7 @@ private:
 
   Mutex m_namedStringLiteralsMutex;
   std::map<int, std::vector<std::string> > m_namedStringLiterals;
+  std::set<std::string> m_namedVarStringLiterals;
 
   int m_funcTableSize;
   CodeGenerator::MapIntToStringVec m_funcTable;
@@ -584,7 +608,11 @@ private:
                                      const hphp_const_char_map<bool> &dyns);
   void cloneRTTIFuncs(ClassScopePtr cls,
                       const StringToFunctionScopePtrVecMap &functions);
+  void outputInitLiteralVarStrings(CodeGenerator &cg, int fileIndex,
+         std::vector<int> &litVarStrFileIndices,
+         std::vector<std::pair<int, int> > &litVarStrs);
 
+  void outputInitLiteralVarStrings();
   StringToMethodSlotMap stringToMethodSlotMap;
   CallIndexVectSet callIndexVectSet; // set of methods at this callIndex
   friend class MethodSlot;

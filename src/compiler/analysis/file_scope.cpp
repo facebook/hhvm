@@ -318,6 +318,39 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   }
 
   first = true;
+  BOOST_FOREACH(const int64 &val, m_usedScalarVarIntegersHeader) {
+    int index = -1;
+    int hash = ar->checkScalarVarInteger(val, index);
+    assert(index != -1);
+    string name = ar->getScalarVarIntegerName(hash, index);
+    if (!cg.ensureInNamespace() && first) cg_printf("\n");
+    first = false;
+    cg_printf("extern const VarNR &%s;\n", name.c_str());
+  }
+
+  first = true;
+  BOOST_FOREACH(const double &val, m_usedScalarVarDoublesHeader) {
+    int index = -1;
+    int hash = ar->checkScalarVarDouble(val, index);
+    assert(index != -1);
+    string name = ar->getScalarVarDoubleName(hash, index);
+    if (!cg.ensureInNamespace() && first) cg_printf("\n");
+    first = false;
+    cg_printf("extern const VarNR &%s;\n", name.c_str());
+  }
+
+  first = true;
+  BOOST_FOREACH(const string &str, m_usedLitVarStringsHeader) {
+    int index = -1;
+    int stringId = cg.checkLiteralString(str, index, ar, BlockScopePtr());
+    assert(index != -1);
+    string lisnam = ar->getLitVarStringName(stringId, index);
+    if (!cg.ensureInNamespace() && first) cg_printf("\n");
+    first = false;
+    cg_printf("extern VarNR %s;\n", lisnam.c_str());
+  }
+
+  first = true;
   BOOST_FOREACH(const string &str, m_usedDefaultValueScalarArrays) {
     int index = -1;
     int hash = ar->checkScalarArray(str, index);
@@ -326,6 +359,17 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
     if (!cg.ensureInNamespace() && first) cg_printf("\n");
     first = false;
     cg_printf("extern StaticArray %s;\n", name.c_str());
+  }
+
+  first = true;
+  BOOST_FOREACH(const string &str, m_usedDefaultValueScalarVarArrays) {
+    int index = -1;
+    int hash = ar->checkScalarArray(str, index);
+    assert(hash != -1 && index != -1);
+    string name = ar->getScalarVarArrayName(hash, index);
+    if (!cg.ensureInNamespace() && first) cg_printf("\n");
+    first = false;
+    cg_printf("extern VarNR %s;\n", name.c_str());
   }
 
   first = true;
@@ -461,6 +505,60 @@ void FileScope::outputCPPForwardStaticDecl(CodeGenerator &cg,
     assert(hash != -1 && index != -1);
     string name = ar->getScalarArrayName(hash, index);
     cg_printf("extern StaticArray %s;\n", name.c_str());
+  }
+  if (Option::UseScalarVariant) {
+    cg_printf("\n");
+    cg.printSection("3. Static Variants", false);
+    int64 val;
+    BOOST_FOREACH(val, m_usedScalarVarIntegers) {
+      if (m_usedScalarVarIntegersHeader.find(val) !=
+          m_usedScalarVarIntegersHeader.end()) {
+        continue;
+      }
+      int index = -1;
+      int hash = ar->checkScalarVarInteger(val, index);
+      assert(index != -1);
+      string name = ar->getScalarVarIntegerName(hash, index);
+      cg_printf("extern const VarNR &%s;\n", name.c_str());
+    }
+    cg_printf("\n");
+    double dval;
+    BOOST_FOREACH(dval, m_usedScalarVarDoubles) {
+      if (m_usedScalarVarDoublesHeader.find(dval) !=
+          m_usedScalarVarDoublesHeader.end()) {
+        continue;
+      }
+      int index = -1;
+      int hash = ar->checkScalarVarDouble(dval, index);
+      assert(index != -1);
+      string name = ar->getScalarVarDoubleName(hash, index);
+      cg_printf("extern const VarNR &%s;\n", name.c_str());
+    }
+    cg_printf("\n");
+    BOOST_FOREACH(str, m_usedLitVarStrings) {
+      if (m_usedLitVarStringsHeader.find(str) !=
+          m_usedLitVarStringsHeader.end()) {
+        continue;
+      }
+      int index = -1;
+      int stringId = cg.checkLiteralString(str, index, ar, BlockScopePtr());
+      assert(index != -1);
+      string lisnam = ar->getLitVarStringName(stringId, index);
+      cg_printf("extern VarNR %s;\n", lisnam.c_str());
+    }
+    cg_printf("\n");
+    BOOST_FOREACH(str, m_usedScalarVarArrays) {
+      if (m_usedDefaultValueScalarVarArrays.find(str) !=
+          m_usedDefaultValueScalarVarArrays.end()) {
+        continue;
+      }
+      int index = -1;
+      int hash = ar->checkScalarArray(str, index);
+      assert(hash != -1 && index != -1);
+      string name = ar->getScalarVarArrayName(hash, index);
+      cg_printf("extern VarNR %s;\n", name.c_str());
+    }
+    cg_printf("\n");
   }
   cg.namespaceEnd();
   cg_printf("\n");

@@ -32,8 +32,47 @@ using namespace std;
 
 namespace HPHP {
 
-const Variant null_variant = Variant();
-const VarNR null_varNR = VarNR();
+static const int64 cvValues[] = {
+  0x0000000000000000LL, 0x0000000000000000LL, // null_variant
+};
+static const int64 cnValues[] = {
+  0x0000000000000000LL, 0x0000000000000000LL, // null_varNR
+  0x0000000000000001LL, 0x0000000220000000LL, // true_varNR
+  0x0000000000000000LL, 0x0000000220000000LL, // false_varNR
+  0x7ff0000000000000LL, 0x0000000520000000LL, // INF_varNR
+  0xfff0000000000000LL, 0x0000000520000000LL, // NEGINF_varNR
+  0x7ff8000000000000LL, 0x0000000520000000LL, // NAN_varNR
+};
+const Variant &null_variant = *(const Variant *)(cvValues);
+const VarNR &null_varNR = *(const VarNR*)(cnValues);
+const VarNR &true_varNR = *(const VarNR*)(cnValues + 2);
+const VarNR &false_varNR = *(const VarNR*)(cnValues + 4);
+const VarNR &INF_varNR = *(const VarNR*)(cnValues + 6);
+const VarNR &NEGINF_varNR = *(const VarNR*)(cnValues + 8);
+const VarNR &NAN_varNR = *(const VarNR*)(cnValues + 10);
+
+void Variant::RuntimeCheck() {
+  const VarNR &tmp_true_varNR = VarNR(true);
+  const VarNR &tmp_false_varNR = VarNR(false);
+  const VarNR &tmp_INF_varNR =
+    VarNR(std::numeric_limits<double>::infinity());
+  const VarNR &tmp_NEGINF_varNR =
+    VarNR(-std::numeric_limits<double>::infinity());
+  const VarNR &tmp_NAN_varNR =
+    VarNR(std::numeric_limits<double>::quiet_NaN());
+
+  if (memcmp(&tmp_true_varNR, &true_varNR, sizeof(VarNR)) != 0 ||
+      memcmp(&tmp_false_varNR, &false_varNR, sizeof(VarNR)) != 0 ||
+      memcmp(&tmp_INF_varNR, &INF_varNR, sizeof(VarNR)) != 0 ||
+      memcmp(&tmp_NEGINF_varNR, &NEGINF_varNR, sizeof(VarNR)) != 0 ||
+      memcmp(&tmp_NAN_varNR, &NAN_varNR, sizeof(VarNR) != 0)) {
+    assert(false);
+  }
+
+  // the first 8 bytes of null_variant or null_varNR isn't initialized
+  if (null_variant.isInitialized()) assert(false);
+  if (((Variant*)(&null_varNR))->isInitialized()) assert(false);
+}
 
 IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(Variant);
 

@@ -44,6 +44,7 @@
 #include <runtime/base/rtti_info.h>
 #include <runtime/base/array/small_array.h>
 #include <runtime/ext/ext_json.h>
+#include <runtime/base/zend/zend_printf.h>
 #include <util/logger.h>
 #include <util/util.h>
 #include <util/hash.h>
@@ -1336,6 +1337,7 @@ void AnalysisResult::outputCPPNamedScalarArrays(const std::string &file) {
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude("<sys/scalar_arrays_remap.h>");
+  if (Option::UseScalarVariant) cg_printInclude("<sys/scalar_integers_remap.h>");
   if (!Option::SystemGen) {
     cg_printInclude("<sys/global_variables.h>");
   }
@@ -1345,10 +1347,14 @@ void AnalysisResult::outputCPPNamedScalarArrays(const std::string &file) {
        m_namedScalarArrays.begin(); it != m_namedScalarArrays.end();
        it++) {
     int hash = it->first;
-    vector<string> &strings = m_namedScalarArrays[hash];
+    const vector<string> &strings = it->second;
     for (unsigned int i = 0; i < strings.size(); i++) {
       string name = getScalarArrayName(hash, i);
       cg_printf("StaticArray %s;\n", name.c_str());
+      if (m_namedScalarVarArrays.find(strings[i]) !=
+          m_namedScalarVarArrays.end()) {
+        cg_printf("VarNR %s;\n", getScalarVarArrayName(hash, i).c_str());
+      }
     }
   }
   cg_printf("\n");
@@ -1361,15 +1367,183 @@ void AnalysisResult::outputCPPNamedScalarArrays(const std::string &file) {
        m_namedScalarArrays.begin(); it != m_namedScalarArrays.end();
        it++) {
     int hash = it->first;
-    vector<string> &strings = m_namedScalarArrays[hash];
+    const vector<string> &strings = it->second;
     for (unsigned int i = 0; i < strings.size(); i++) {
       string name = getScalarArrayName(hash, i);
       int id = getScalarArrayId(strings[i]);
       cg_printf("%s = %s[%d];\n", name.c_str(), prefix, id);
+      if (m_namedScalarVarArrays.find(strings[i]) !=
+          m_namedScalarVarArrays.end()) {
+        cg_printf("%s = %s;\n",
+                  getScalarVarArrayName(hash, i).c_str(), name.c_str());
+      }
     }
   }
   cg_indentEnd("}\n");
   cg.namespaceEnd();
+}
+
+void AnalysisResult::outputCPPNamedScalarVarIntegers(const std::string &file) {
+  AnalysisResultPtr ar = shared_from_this();
+
+  string filename = file + ".cpp";
+  ofstream f(filename.c_str());
+  CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
+
+  cg_printf("\n");
+  cg_printInclude("<runtime/base/hphp.h>");
+  if (Option::UseScalarVariant) cg_printInclude("<sys/scalar_integers_remap.h>");
+  if (!Option::SystemGen) {
+    cg_printInclude("<sys/global_variables.h>");
+  }
+  cg_printf("\n");
+  cg.namespaceBegin();
+  if ((sizeof(VarNR) % sizeof(int64) != 0)) assert(false);
+  int multiple = (sizeof(VarNR) / sizeof(int64));
+  cg_indentBegin("static const int64 ivalues[] = {\n");
+  for (map<int, vector<string> >::const_iterator it =
+       m_namedScalarVarIntegers.begin(); it != m_namedScalarVarIntegers.end();
+       it++) {
+    const vector<string> &strings = it->second;
+    for (unsigned int i = 0; i < strings.size(); i++) {
+      int64 val;
+      sscanf(strings[i].c_str(), "%llx", &val);
+      Variant v(val);
+      int64 *startp = (int64 *)&v;
+      int64 *endp = (startp + multiple);
+      for (int64 *p = startp; p < endp; p++) {
+        cg_printf("0x%016llxLL, ", *p);
+      }
+      cg_printf("// %lld\n", val);
+    }
+  }
+  cg_indentEnd("};\n");
+  int count = 0;
+  for (map<int, vector<string> >::const_iterator it =
+       m_namedScalarVarIntegers.begin(); it != m_namedScalarVarIntegers.end();
+       it++) {
+    int hash = it->first;
+    const vector<string> &strings = it->second;
+    for (unsigned int i = 0; i < strings.size(); i++) {
+      string name = getScalarVarIntegerName(hash, i);
+      cg_printf("const VarNR &%s = *(const VarNR*)(ivalues + %d);\n",
+                name.c_str(), count * multiple);
+      count++;
+    }
+  }
+  cg_printf("\n");
+  cg.namespaceEnd();
+}
+
+void AnalysisResult::outputCPPFiniteDouble(CodeGenerator &cg, double dval) {
+  ASSERT(finite(dval));
+  char *buf = NULL;
+  if (dval == 0.0) dval = 0.0; // so to avoid "-0" output
+  // 17 to ensure lossless conversion
+  vspprintf(&buf, 0, "%.*G", 17, dval);
+  ASSERT(buf);
+  cg_printf("%s", buf);
+  if (round(dval) == dval && !strchr(buf, '.') && !strchr(buf, 'E')) {
+    cg.printf(".0"); // for integer value, cg_printf would break 0.0 token
+  }
+  free(buf);
+}
+
+void AnalysisResult::outputCPPNamedScalarVarDoubles(const std::string &file) {
+  AnalysisResultPtr ar = shared_from_this();
+
+  string filename = file + ".cpp";
+  ofstream f(filename.c_str());
+  CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
+
+  cg_printf("\n");
+  cg_printInclude("<runtime/base/hphp.h>");
+  if (!Option::SystemGen) {
+    cg_printInclude("<sys/global_variables.h>");
+  }
+  cg_printf("\n");
+  cg.namespaceBegin();
+  if ((sizeof(int64) != sizeof(double))) assert(false);
+  if ((sizeof(VarNR) % sizeof(double) != 0)) assert(false);
+  int multiple = (sizeof(VarNR) / sizeof(double));
+  cg_indentBegin("static const int64 dvalues[] = {\n");
+  for (map<int, vector<string> >::const_iterator it =
+       m_namedScalarVarDoubles.begin(); it != m_namedScalarVarDoubles.end();
+       it++) {
+    const vector<string> &strings = it->second;
+    for (unsigned int i = 0; i < strings.size(); i++) {
+      double val;
+      sscanf(strings[i].c_str(), "%llx", (int64*)(&val));
+      Variant v(val);
+      int64 *startp = (int64 *)&v;
+      int64 *endp = (startp + multiple);
+      for (int64 *p = startp; p < endp; p++) {
+        cg_printf("0x%016llxLL, ", *p);
+      }
+      cg_printf("// ");
+      outputCPPFiniteDouble(cg, val);
+      cg_printf("\n");
+    }
+  }
+  cg_indentEnd("};\n");
+  int count = 0;
+  for (map<int, vector<string> >::const_iterator it =
+       m_namedScalarVarDoubles.begin(); it != m_namedScalarVarDoubles.end();
+       it++) {
+    int hash = it->first;
+    const vector<string> &strings = it->second;
+    for (unsigned int i = 0; i < strings.size(); i++) {
+      string name = getScalarVarDoubleName(hash, i);
+      cg_printf("const VarNR &%s = *(const VarNR*)(dvalues + %d);\n",
+                name.c_str(), count * multiple);
+      count++;
+    }
+  }
+  cg_printf("\n");
+  cg.namespaceEnd();
+}
+
+int AnalysisResult::checkScalarVarInteger(int64 val, int &index) {
+  Lock lock(m_namedScalarVarIntegersMutex);
+
+  assert(Option::UseScalarVariant);
+  int hash = hash_int64(val);
+  vector<string> &integers = m_namedScalarVarIntegers[hash];
+  unsigned int i = 0;
+  string hexval = boost::str(boost::format("%016x") % val);
+  for (; i < integers.size(); i++) {
+    if (integers[i] == hexval) break;
+  }
+  bool notFound = (i == integers.size());
+  if (notFound) integers.push_back(hexval);
+  index = i;
+  return hash;
+}
+
+string AnalysisResult::getScalarVarIntegerName(int hash, int index) {
+  return getHashedName(hash, index, Option::StaticVarIntPrefix);
+}
+
+int AnalysisResult::checkScalarVarDouble(double dval, int &index) {
+  Lock lock(m_namedScalarVarDoublesMutex);
+
+  assert(Option::UseScalarVariant);
+  int64 ival = *(int64*)(&dval);
+  int hash = hash_int64(ival);
+  vector<string> &integers = m_namedScalarVarDoubles[hash];
+  unsigned int i = 0;
+  string hexval = boost::str(boost::format("%016x") % ival);
+  for (; i < integers.size(); i++) {
+    if (integers[i] == hexval) break;
+  }
+  bool notFound = (i == integers.size());
+  if (notFound) integers.push_back(hexval);
+  index = i;
+  return hash;
+}
+
+string AnalysisResult::getScalarVarDoubleName(int hash, int index) {
+  return getHashedName(hash, index, Option::StaticVarDblPrefix);
 }
 
 string AnalysisResult::prepareFile(const char *root, const string &fileName,
@@ -1681,6 +1855,16 @@ void AnalysisResult::renameStaticNames(map<int, vector<string> > &names,
         string name = getHashedName(hash, i, prefix);
         string newName = getHashedName(newHash, j, prefix, true);
         cg_printf("#define %s %s\n", name.c_str(), newName.c_str());
+
+        if (!strcmp(prefix, Option::StaticStringPrefix)) {
+          if (m_namedVarStringLiterals.find(name) !=
+              m_namedVarStringLiterals.end()) {
+            name = getHashedName(hash, i, Option::StaticVarStrPrefix);
+            newName = getHashedName(newHash, j,
+                                    Option::StaticVarStrPrefix, true);
+            cg_printf("#define %s %s\n", name.c_str(), newName.c_str());
+          }
+        }
       }
     }
   }
@@ -1989,8 +2173,14 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
   }
 
   // 3rd round code generation
-  renameStaticNames(m_namedStringLiterals, "literal_strings_remap.h", "ss");
-  renameStaticNames(m_namedScalarArrays, "scalar_arrays_remap.h", "sa");
+  renameStaticNames(m_namedStringLiterals, "literal_strings_remap.h",
+                    Option::StaticStringPrefix);
+  renameStaticNames(m_namedScalarArrays, "scalar_arrays_remap.h",
+                    Option::StaticArrayPrefix);
+  if (Option::UseScalarVariant) {
+    renameStaticNames(m_namedScalarVarIntegers, "scalar_integers_remap.h",
+                      Option::StaticVarIntPrefix);
+  }
 
   {
     string file = m_outputPath + "/" + Option::SystemFilePrefix +
@@ -2000,6 +2190,14 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
       string file = m_outputPath + "/" + Option::SystemFilePrefix +
         "scalar_arrays";
       outputCPPNamedScalarArrays(file);
+    }
+    if (Option::UseScalarVariant) {
+      string file = m_outputPath + "/" + Option::SystemFilePrefix +
+        "scalar_integers";
+      outputCPPNamedScalarVarIntegers(file);
+      file = m_outputPath + "/" + Option::SystemFilePrefix +
+        "scalar_doubles";
+      outputCPPNamedScalarVarDoubles(file);
     }
   }
 }
@@ -3316,7 +3514,8 @@ string AnalysisResult::getHashedName(int64 hash, int index,
                                      const char *prefix,
                                      bool longName /* = false */) {
   assert(index >= 0);
-  string name(Option::SystemGen ? "s_sys_" : "s_");
+  string name(Option::SystemGen ? Option::SysScalarPrefix
+                                : Option::ScalarPrefix);
   name += prefix;
   name += longName ? boost::str(boost::format("%016x") % hash)
                    : boost::str(boost::format("%08x") % (int)hash);
@@ -3325,13 +3524,19 @@ string AnalysisResult::getHashedName(int64 hash, int index,
 }
 
 string AnalysisResult::getScalarArrayName(int hash, int index) {
-  return getHashedName(hash, index, "sa");
+  return getHashedName(hash, index, Option::StaticArrayPrefix);
+}
+
+string AnalysisResult::getScalarVarArrayName(int hash, int index) {
+  return getHashedName(hash, index, Option::StaticVarArrPrefix);
 }
 
 void AnalysisResult::outputCPPScalarArrayId(CodeGenerator &cg, int id,
-                                            int hash, int index) {
+                                            int hash, int index,
+                                            bool scalarVariant /* = false */) {
   if (Option::UseNamedScalarArray) {
-    string name = getScalarArrayName(hash, index);
+    string name = scalarVariant ? getScalarVarArrayName(hash, index)
+                                : getScalarArrayName(hash, index);
     cg_printf("%s", name.c_str());
     return;
   }
@@ -4464,7 +4669,11 @@ void AnalysisResult::outputSwigFFIStubs() {
  * Literal string to String precomputation
  */
 string AnalysisResult::getLiteralStringName(int64 hash, int index) {
-  return getHashedName(hash, index, "ss");
+  return getHashedName(hash, index, Option::StaticStringPrefix);
+}
+
+string AnalysisResult::getLitVarStringName(int64 hash, int index) {
+  return getHashedName(hash, index, Option::StaticVarStrPrefix);
 }
 
 int AnalysisResult::getLiteralStringId(const std::string &s, int &index) {
@@ -4481,6 +4690,16 @@ int AnalysisResult::getLiteralStringId(const std::string &s, int &index) {
   }
   index = i;
   return hash;
+}
+
+void AnalysisResult::addNamedLiteralVarString(const std::string &s) {
+  Lock lock(m_namedStringLiteralsMutex);
+  m_namedVarStringLiterals.insert(s);
+}
+
+void AnalysisResult::addNamedScalarVarArray(const std::string &s) {
+  Lock lock(m_namedScalarArraysMutex);
+  m_namedScalarVarArrays.insert(s);
 }
 
 string AnalysisResult::getFuncId(ClassScopePtr cls, FunctionScopePtr func) {
@@ -4552,6 +4771,23 @@ void AnalysisResult::cloneRTTIFuncs(const char *RTTIDirectory) {
   }
 }
 
+void AnalysisResult::outputInitLiteralVarStrings(CodeGenerator &cg,
+  int fileIndex, vector<int> &litVarStrFileIndices,
+  vector<pair<int, int> > &litVarStrs) {
+  if (litVarStrs.size() >  0) {
+    cg_indentBegin("void init_literal_varstrings_%d() {\n", fileIndex);
+    for (unsigned int i = 0; i < litVarStrs.size(); i++) {
+      int hash = litVarStrs[i].first;
+      int index = litVarStrs[i].second;
+      cg_printf("%s = %s;\n",
+                getLitVarStringName(hash, index).c_str(),
+                getLiteralStringName(hash, index).c_str());
+    }
+    cg_indentEnd("}\n");
+    litVarStrFileIndices.push_back(fileIndex);
+  }
+  litVarStrs.clear();
+}
 
 void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
                                                   const string &file) {
@@ -4574,7 +4810,7 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
        m_namedStringLiterals.begin(); it != m_namedStringLiterals.end();
        it++) {
     int hash = it->first;
-    vector<string> &strings = m_namedStringLiterals[hash];
+    const vector<string> &strings = it->second;
     for (unsigned int i = 0; i < strings.size(); i++) {
       string name = getLiteralStringName(hash, i);
       if (genStatic) {
@@ -4583,6 +4819,11 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
         cg_printf(");\n");
       } else {
         cg_printf("extern StaticString %s;\n", name.c_str());
+      }
+      if (m_namedVarStringLiterals.find(name) !=
+          m_namedVarStringLiterals.end()) {
+        cg_printf(genStatic ? "static " : "extern ");
+        cg_printf("VarNR %s;\n", getLitVarStringName(hash, i).c_str());
       }
     }
     nstrings += strings.size();
@@ -4603,20 +4844,25 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
   }
   int count = 0;
 
+  vector<int> litVarStrFileIndices;
+  vector<pair<int, int> > litVarStrs;
+  int fileIndex = 0;
   for (map<int, vector<string> >::const_iterator it =
        m_namedStringLiterals.begin(); it != m_namedStringLiterals.end();
        it++) {
     int hash = it->first;
-    vector<string> &strings = m_namedStringLiterals[hash];
+    const vector<string> &strings = it->second;
     for (unsigned int i = 0; i < strings.size(); i++) {
       string name = getLiteralStringName(hash, i);
       if (count % chunkSize == 0) {
         if (count != 0) {
+          outputInitLiteralVarStrings(cg, fileIndex, litVarStrFileIndices,
+                                      litVarStrs);
           cg.namespaceEnd();
           f.close();
         }
-        int index = count / chunkSize;
-        filename = file + "_" + lexical_cast<string>(index) + ".no.cpp";
+        fileIndex = count / chunkSize;
+        filename = file + "_" + lexical_cast<string>(fileIndex) + ".no.cpp";
         f.open(filename.c_str());
         cg_printf("\n");
         cg_printInclude("<runtime/base/complex_types.h>");
@@ -4628,7 +4874,26 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
       cg_printf("StaticString %s(", name.c_str());
       cg_printString(strings[i], ar, BlockScopePtr(), false);
       cg_printf(");\n");
+      if (m_namedVarStringLiterals.find(name) !=
+          m_namedVarStringLiterals.end()) {
+        cg_printf("VarNR %s;\n", getLitVarStringName(hash, i).c_str());
+        litVarStrs.push_back(pair<int, int>(hash, i));
+      }
     }
+  }
+  if (Option::UseScalarVariant) {
+    cg_printf("\n");
+    for (unsigned int i = 0; i < litVarStrFileIndices.size(); i++) {
+      cg_printf("extern void init_literal_varstrings_%d();\n",
+                litVarStrFileIndices[i]);
+    }
+    outputInitLiteralVarStrings(cg, fileIndex, litVarStrFileIndices,
+                                litVarStrs);
+    cg_indentBegin("void init_literal_varstrings() {\n");
+    for (unsigned int i = 0; i < litVarStrFileIndices.size(); i++) {
+      cg_printf("init_literal_varstrings_%d();\n", litVarStrFileIndices[i]);
+    }
+    cg_indentEnd("}\n");
   }
   cg.namespaceEnd();
   f.close();

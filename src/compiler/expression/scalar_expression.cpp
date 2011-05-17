@@ -31,9 +31,8 @@
 #include <runtime/base/string_data.h>
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
-#include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/zend/zend_printf.h>
 #include <runtime/ext/ext_variable.h>
+#include <compiler/analysis/file_scope.h>
 
 using namespace HPHP;
 using namespace std;
@@ -201,8 +200,8 @@ TypePtr ScalarExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   return TypePtr();
 }
 
-TypePtr ScalarExpression::inferenceImpl(AnalysisResultConstPtr ar, TypePtr type,
-                                        bool coerce) {
+TypePtr ScalarExpression::inferenceImpl(AnalysisResultConstPtr ar,
+                                        TypePtr type, bool coerce) {
   TypePtr actualType;
   switch (m_type) {
   case T_STRING:
@@ -404,6 +403,29 @@ std::string ScalarExpression::getCPPLiteralString(CodeGenerator &cg,
   return output;
 }
 
+void ScalarExpression::outputCPPString(const string &str,
+  CodeGenerator &cg, AnalysisResultPtr ar, bool constant) {
+  if (!cg.hasScalarVariant() || !Option::UseScalarVariant) {
+    cg_printString(str, ar, shared_from_this(), constant);
+    return;
+  }
+
+  bool isBinary = false;
+  string escaped = cg.escapeLabel(str, &isBinary);
+  string fullName = cg.printNamedString(str, escaped, ar, getScope(), false);
+  ASSERT(!fullName.empty());
+  string prefix(Option::SystemGen ? Option::SysScalarPrefix
+                                  : Option::ScalarPrefix);
+  size_t pos = fullName.find(prefix);
+  ASSERT(pos == 0);
+  string name =
+    fullName.substr(prefix.size() + strlen(Option::StaticStringPrefix));
+  cg.printf("NAMVAR(%s%s%s, \"%s\")",
+            prefix.c_str(), Option::StaticVarStrPrefix,
+            name.c_str(), escaped.c_str());
+  ar->addNamedLiteralVarString(fullName);
+}
+
 void ScalarExpression::outputCPPString(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
   switch (m_type) {
@@ -416,8 +438,9 @@ void ScalarExpression::outputCPPString(CodeGenerator &cg,
       bool constant =
         (cg.getContext() == CodeGenerator::CppConstantsDecl) ||
         (cg.getContext() == CodeGenerator::CppClassConstantsImpl);
-      cg_printString(output, ar, shared_from_this(), constant);
+      outputCPPString(output, cg, ar, constant);
     } else {
+      assert(false);
       cg_printf("%s", m_value.c_str());
     }
     break;
@@ -426,10 +449,84 @@ void ScalarExpression::outputCPPString(CodeGenerator &cg,
   case T_NS_C:
   case T_METHOD_C:
   case T_FUNC_C:
-    cg_printString(m_translated, ar, shared_from_this());
+    outputCPPString(m_translated, cg, ar, false);
     break;
   default:
     ASSERT(false);
+  }
+}
+
+void ScalarExpression::outputCPPNamedInteger(CodeGenerator &cg,
+                                             AnalysisResultPtr ar) {
+  Variant v = getVariant();
+  ASSERT(v.isInteger());
+  int index = -1;
+  int64 val = v.toInt64();
+  int intId = ar->checkScalarVarInteger(val, index);
+  assert(index != -1);
+  string name = ar->getScalarVarIntegerName(intId, index);
+  cg_printf("NAMVAR(%s, %lldLL)", name.c_str(), val);
+
+  getFileScope()->addUsedScalarVarInteger(val);
+  if (cg.isFileOrClassHeader()) {
+    if (getClassScope()) {
+      getClassScope()->addUsedScalarVarIntegerHeader(val);
+    } else {
+      getFileScope()->addUsedScalarVarIntegerHeader(val);
+    }
+  }
+}
+
+void ScalarExpression::outputCPPInteger(CodeGenerator &cg,
+                                        AnalysisResultPtr ar) {
+  Variant v = getVariant();
+  ASSERT(v.isInteger());
+  if (v.toInt64() == LONG_MIN) {
+    cg_printf("(int64)0x%llxLL", LONG_MIN);
+  } else {
+    cg_printf("%lldLL", v.toInt64());
+  }
+}
+
+void ScalarExpression::outputCPPNamedDouble(CodeGenerator &cg,
+                                            AnalysisResultPtr ar) {
+  double dval = getVariant().getDouble();
+  if (finite(dval)) {
+    int index = -1;
+    int dblId = ar->checkScalarVarDouble(dval, index);
+    assert(index != -1);
+    string name = ar->getScalarVarDoubleName(dblId, index);
+    cg_printf("NAMVAR(%s, ", name.c_str());
+    ar->outputCPPFiniteDouble(cg, dval);
+    cg_printf(")");
+    getFileScope()->addUsedScalarVarDouble(dval);
+    if (cg.isFileOrClassHeader()) {
+      if (getClassScope()) {
+        getClassScope()->addUsedScalarVarDoubleHeader(dval);
+      } else {
+        getFileScope()->addUsedScalarVarDoubleHeader(dval);
+      }
+    }
+  } else if (isnan(dval)) {
+    cg_printf("NAN_varNR");
+  } else if (dval > 0) {
+    cg_printf("INF_varNR");
+  } else {
+    cg_printf("NEGINF_varNR", Option::ConstantPrefix);
+  }
+}
+
+void ScalarExpression::outputCPPDouble(CodeGenerator &cg,
+                                       AnalysisResultPtr ar) {
+  double dval = getVariant().getDouble();
+  if (finite(dval)) {
+    ar->outputCPPFiniteDouble(cg, dval);
+  } else if (isnan(dval)) {
+    cg_printf("%sNAN", Option::ConstantPrefix);
+  } else if (dval > 0) {
+    cg_printf("%sINF", Option::ConstantPrefix);
+  } else {
+    cg_printf("-%sINF", Option::ConstantPrefix);
   }
 }
 
@@ -460,38 +557,20 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
     break;
   }
-  case T_LNUMBER: {
-    Variant v = getVariant();
-    ASSERT(v.isInteger());
-    if (v.toInt64() == LONG_MIN) {
-      cg_printf("(int64)0x%llxLL", LONG_MIN);
+  case T_LNUMBER:
+    if (cg.hasScalarVariant() && Option::UseScalarVariant) {
+      outputCPPNamedInteger(cg, ar);
     } else {
-      cg_printf("%lldLL", v.toInt64());
+      outputCPPInteger(cg, ar);
     }
     break;
-  }
-  case T_DNUMBER: {
-    double dval = getVariant().getDouble();
-    if (finite(dval)) {
-      char *buf = NULL;
-      if (dval == 0.0) dval = 0.0; // so to avoid "-0" output
-      // 17 to ensure lossless conversion
-      vspprintf(&buf, 0, "%.*G", 17, dval);
-      ASSERT(buf);
-      cg_printf("%s", buf);
-      if (round(dval) == dval && !strchr(buf, '.') && !strchr(buf, 'E')) {
-        cg.printf(".0"); // for integer value, cg_printf would break 0.0 token
-      }
-      free(buf);
-    } else if (isnan(dval)) {
-      cg_printf("%sNAN", Option::ConstantPrefix);
-    } else if (dval > 0) {
-      cg_printf("%sINF", Option::ConstantPrefix);
+  case T_DNUMBER:
+    if (cg.hasScalarVariant() && Option::UseScalarVariant) {
+      outputCPPNamedDouble(cg, ar);
     } else {
-      cg_printf("-%sINF", Option::ConstantPrefix);
+      outputCPPDouble(cg, ar);
     }
     break;
-  }
   default:
     ASSERT(false);
   }

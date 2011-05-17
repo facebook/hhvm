@@ -115,7 +115,7 @@ public:
                                  // eg $b in &$b['foo']
     AccessContext = 0x80000,     // ArrayElementExpression::m_variable or
                                  // ObjectPropertyExpression::m_object
-    RefAssignmentLHS = 0x100000  // LHS of a reference assignment
+    RefAssignmentLHS = 0x100000, // LHS of a reference assignment
   };
 
   enum Order {
@@ -225,6 +225,7 @@ public:
   }
   virtual bool isThis() const { return false;}
   virtual bool isLiteralString() const { return false;}
+  virtual bool isLiteralNull() const { return false;}
   bool isUnquotedScalar() const;
   virtual std::string getLiteralString() const { return "";}
   virtual bool containsDynamicConstant(AnalysisResultPtr ar) const {

@@ -66,6 +66,8 @@ public:
   const std::string getComment() { return m_comment;}
 
   void outputCPPString(CodeGenerator &cg, AnalysisResultPtr ar);
+  void outputCPPInteger(CodeGenerator &cg, AnalysisResultPtr ar);
+  void outputCPPDouble(CodeGenerator &cg, AnalysisResultPtr ar);
 
   std::string getCPPLiteralString(CodeGenerator &cg, bool *binary = NULL);
 
@@ -81,6 +83,10 @@ private:
   std::string m_translated;
   bool m_quoted;
   std::string m_comment; // for inlined constant name
+  void outputCPPString(const std::string &str, CodeGenerator &cg,
+                       AnalysisResultPtr ar, bool constant);
+  void outputCPPNamedInteger(CodeGenerator &cg, AnalysisResultPtr ar);
+  void outputCPPNamedDouble(CodeGenerator &cg, AnalysisResultPtr ar);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -103,17 +103,50 @@ public:
   void addUsedLiteralString(std::string s) {
     m_usedLiteralStrings.insert(s);
   }
+  void addUsedLitVarString(std::string s) {
+    m_usedLitVarStrings.insert(s);
+  }
   std::set<std::string> &getUsedLiteralStrings() {
     return m_usedLiteralStrings;
+  }
+  std::set<std::string> &getUsedLitVarStrings() {
+    return m_usedLitVarStrings;
   }
   void addUsedLiteralStringHeader(std::string s) {
     m_usedLiteralStringsHeader.insert(s);
   }
+  void addUsedLitVarStringHeader(std::string s) {
+    m_usedLitVarStringsHeader.insert(s);
+  }
+  void addUsedScalarVarInteger(int64 i) {
+    m_usedScalarVarIntegers.insert(i);
+  }
+  std::set<int64> &getUsedScalarVarIntegers() {
+    return m_usedScalarVarIntegers;
+  }
+  void addUsedScalarVarIntegerHeader(int64 i) {
+    m_usedScalarVarIntegersHeader.insert(i);
+  }
+  void addUsedScalarVarDouble(double d) {
+    m_usedScalarVarDoubles.insert(d);
+  }
+  std::set<double> &getUsedScalarVarDoubles() {
+    return m_usedScalarVarDoubles;
+  }
+  void addUsedScalarVarDoubleHeader(double d) {
+    m_usedScalarVarDoublesHeader.insert(d);
+  }
   void addUsedScalarArray(std::string s) {
     m_usedScalarArrays.insert(s);
   }
+  void addUsedScalarVarArray(std::string s) {
+    m_usedScalarVarArrays.insert(s);
+  }
   void addUsedDefaultValueScalarArray(std::string s) {
     m_usedDefaultValueScalarArrays.insert(s);
+  }
+  void addUsedDefaultValueScalarVarArray(std::string s) {
+    m_usedDefaultValueScalarVarArrays.insert(s);
   }
 
   void addUsedConstHeader(const std::string &s) {
@@ -228,9 +261,17 @@ private:
   std::set<UsedClassConst> m_usedClassConstsHeader;
   std::set<std::string> m_usedIncludesInline;
   std::set<std::string> m_usedLiteralStrings;
+  std::set<std::string> m_usedLitVarStrings;
   std::set<std::string> m_usedLiteralStringsHeader;
+  std::set<std::string> m_usedLitVarStringsHeader;
+  std::set<int64> m_usedScalarVarIntegers;
+  std::set<int64> m_usedScalarVarIntegersHeader;
+  std::set<double> m_usedScalarVarDoubles;
+  std::set<double> m_usedScalarVarDoublesHeader;
   std::set<std::string> m_usedScalarArrays;
+  std::set<std::string> m_usedScalarVarArrays;
   std::set<std::string> m_usedDefaultValueScalarArrays;
+  std::set<std::string> m_usedDefaultValueScalarVarArrays;
   std::string m_pseudoMainName;
   std::set<std::string> m_pseudoMainVariables;
 

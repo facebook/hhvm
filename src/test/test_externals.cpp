@@ -314,6 +314,7 @@ void init_global_variables() {
   GlobalVariables::initialize();
 }
 void free_global_variables() { g_variables.destroy();}
+void init_literal_varstrings() {}
 bool has_eval_support = true;
 Variant invoke_file(CStrRef path, bool once /* = false */,
                     LVariableTable* variables /* = NULL */,

@@ -55,6 +55,10 @@ bool ConstantExpression::isScalar() const {
   return lower == "true" || lower == "false" || lower == "null";
 }
 
+bool ConstantExpression::isLiteralNull() const {
+  return isNull();
+}
+
 bool ConstantExpression::isBoolean() const {
   string lower = Util::toLower(m_name);
   return (lower == "true" || lower == "false");
@@ -253,16 +257,28 @@ void ConstantExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 void ConstantExpression::outputCPPImpl(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
   // special cases: STDIN, STDOUT, STDERR, INF, and NAN
-  if (m_name == "STDIN" || m_name == "STDOUT" || m_name == "STDERR" ||
-      m_name == "INF" || m_name == "NAN") {
+  if (m_name == "STDIN" || m_name == "STDOUT" || m_name == "STDERR") {
     cg_printf("%s%s", Option::ConstantPrefix, m_name.c_str());
+    return;
+  }
+
+  if (m_name == "INF" || m_name == "NAN") {
+    if (cg.hasScalarVariant() && Option::UseScalarVariant) {
+      cg_printf("%s_varNR", m_name.c_str());
+    } else {
+      cg_printf("%s%s", Option::ConstantPrefix, m_name.c_str());
+    }
     return;
   }
 
   string lower = Util::toLower(m_name);
   bool requireFwDeclaration = false;
   if (lower == "true" || lower == "false" || lower == "null") {
-    cg_printf("%s", lower.c_str());
+    if (cg.hasScalarVariant()) {
+      cg_printf((Option::UseScalarVariant ? "%s_varNR" : "%s"), lower.c_str());
+    } else {
+      cg_printf("%s", lower.c_str());
+    }
   } else if (m_valid) {
     if (m_dynamic) {
       cg_printf("getDynamicConstant(%s->%s%s, ",

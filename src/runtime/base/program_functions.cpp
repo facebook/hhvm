@@ -963,10 +963,12 @@ public:
 static IMPLEMENT_THREAD_LOCAL(WarmupState, s_warmup_state);
 
 void hphp_process_init() {
+  Variant::RuntimeCheck();
   init_thread_locals();
   ClassInfo::Load();
   Process::InitProcessStatics();
   init_static_variables();
+  init_literal_varstrings();
   PageletServer::Restart();
   XboxServer::Restart();
   FiberAsyncFunc::Restart();

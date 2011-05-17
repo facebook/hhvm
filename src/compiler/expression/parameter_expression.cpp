@@ -305,7 +305,14 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
       } else {
         cg.setContext(CodeGenerator::CppParameterDefaultValueDecl);
       }
+      bool isScalar = m_defaultValue->isScalar();
+      if (isCVarRef && isScalar) {
+        ASSERT(!cg.hasScalarVariant());
+        cg.setScalarVariant();
+      }
       m_defaultValue->outputCPP(cg, ar);
+      if (isCVarRef && isScalar) cg.clearScalarVariant();
+      ASSERT(!cg.hasScalarVariant());
       cg.setContext(context);
     }
     if (comment) {

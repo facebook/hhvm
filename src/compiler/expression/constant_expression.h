@@ -34,6 +34,7 @@ public:
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
   virtual bool isScalar() const;
+  virtual bool isLiteralNull() const;
   virtual int getLocalEffects() const { return NoEffect; }
   virtual bool getScalarValue(Variant &value);
   virtual bool containsDynamicConstant(AnalysisResultPtr ar) const {

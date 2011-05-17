@@ -599,7 +599,14 @@ void ExpressionList::outputCPPUniqLitKeyArrayInit(
         value = ap->getValue();
       }
       cg_printf("toVPOD(");
-      value->outputCPP(cg, ar);
+      if (value->isScalar()) {
+        ASSERT(!cg.hasScalarVariant());
+        cg.setScalarVariant();
+        value->outputCPP(cg, ar);
+        cg.clearScalarVariant();
+      } else {
+        value->outputCPP(cg, ar);
+      }
       cg_printf(")");
       if (name) {
         ASSERT(litstrKeys);

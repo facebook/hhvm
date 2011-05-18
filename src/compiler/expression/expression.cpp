@@ -549,8 +549,10 @@ void Expression::computeLocalExprAltered() {
   bool res = false;
   for (int i = 0; i < getKidCount(); i++) {
     ExpressionPtr k = getNthExpr(i);
-    k->computeLocalExprAltered();
-    res |= k->isLocalExprAltered();
+    if (k) {
+      k->computeLocalExprAltered();
+      res |= k->isLocalExprAltered();
+    }
   }
   if (res) {
     setLocalExprAltered();

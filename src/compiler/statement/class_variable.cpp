@@ -233,7 +233,7 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           cg_printf(", ");
           value->outputCPP(cg, ar);
           cg_printf(")");
-        } else if (value->isLiteralNull() && Option::UseScalarVariant) {
+        } else if (value->isLiteralNull()) {
           cg_printf("setNull(%s%s)", Option::PropertyPrefix,
                     var->getName().c_str());
         } else {
@@ -250,7 +250,7 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           cg_printf(", null_variant);\n");
         } else {
           type = scope->getVariables()->getFinalType(var->getName());
-          if (type->is(Type::KindOfVariant) && Option::UseScalarVariant) {
+          if (type->is(Type::KindOfVariant)) {
             cg_printf("setNull(%s%s);\n", Option::PropertyPrefix,
                       var->getName().c_str());
           } else {
@@ -280,7 +280,7 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           if (value->containsDynamicConstant(ar)) continue;
           Symbol *sym = scope->getVariables()->getSymbol(var->getName());
           if (sym->isOverride()) continue;
-          if (value->isLiteralNull() && Option::UseScalarVariant) {
+          if (value->isLiteralNull()) {
             cg_printf("setNull(g->%s%s%s%s)",
                       Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
                       Option::IdPrefix.c_str(), var->getName().c_str());

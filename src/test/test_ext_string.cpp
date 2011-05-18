@@ -457,6 +457,7 @@ bool TestExtString::test_html_entity_decode() {
   VS(f_bin2hex(f_html_entity_decode("&nbsp;", 3, "UTF-8")), "c2a0");
 
   VS(f_html_entity_decode("&amp; & &amp;", k_ENT_QUOTES, "UTF-8"), "& & &");
+  VS(f_html_entity_decode("&#00000000000000097; test &amp;", k_ENT_QUOTES, "UTF-8"), "a test &");
 
   VS(f_bin2hex(f_html_entity_decode("&Egrave;")), "c8");
   VS(f_bin2hex(f_html_entity_decode("&Egrave;", 3, "UTF-8")), "c388");

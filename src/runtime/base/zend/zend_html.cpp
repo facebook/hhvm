@@ -699,12 +699,16 @@ char *string_html_decode(const char *input, int &len,
 
     bool found = false;
     for (const char *t = p; *t; t++) {
-      int l = t - p;
-      if (l > 10) break;
-
       if (*t == ';') {
+        int l = t - p;
         if (l > 0) {
-          char buf[16];
+          char sbuf[16] = {0};
+          char *buf;
+          if (l > 10) {
+            buf = (char* )malloc(l + 1);
+          } else {
+            buf = sbuf;
+          }
           memcpy(buf, p, l);
           buf[l] = '\0';
           if (decode_entity(buf, &l, charset, all, xhp)) {
@@ -712,6 +716,9 @@ char *string_html_decode(const char *input, int &len,
             found = true;
             p = t;
             q += l;
+          }
+          if (buf != sbuf) {
+            free(buf);
           }
         }
         break;

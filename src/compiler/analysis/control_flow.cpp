@@ -380,7 +380,7 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
           case Statement::KindOfLabelStatement: {
             LabelStatementPtr l(static_pointer_cast<LabelStatement>(s));
             m_labelInfoMap[l->label()].first = l;
-            cfi(l).m_isTarget[AfterConstruct] = true;
+            cfi(l).m_isTarget[BeforeConstruct] = true;
             break;
           }
 

@@ -414,8 +414,8 @@ void ScalarExpression::outputCPPString(const string &str,
   string escaped = cg.escapeLabel(str, &isBinary);
   string fullName = cg.printNamedString(str, escaped, ar, getScope(), false);
   ASSERT(!fullName.empty());
-  string prefix(Option::SystemGen ? Option::SysScalarPrefix
-                                  : Option::ScalarPrefix);
+  string prefix(Option::ScalarPrefix);
+  if (Option::SystemGen) prefix += Option::SysPrefix;
   size_t pos = fullName.find(prefix);
   ASSERT(pos == 0);
   string name =

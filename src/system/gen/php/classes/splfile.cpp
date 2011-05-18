@@ -1135,8 +1135,8 @@ bool c_SplFileObject::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_SplFileObject *c_SplFileObject::create(CVarRef v_filename, CVarRef v_open_mode //  = NAMSTR(s_sys_ss0d42ecf6, "r")
-, CVarRef v_use_include_path //  = false
+c_SplFileObject *c_SplFileObject::create(CVarRef v_filename, CVarRef v_open_mode //  = NAMVAR(s_sys_svs0d42ecf6, "r")
+, CVarRef v_use_include_path //  = false_varNR
 , CVarRef v_context //  = null_variant
 ) {
   CountableHelper h(this);
@@ -1220,9 +1220,9 @@ String c_SplFileObject::t_fgetc() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splfile.php line 482 */
-Variant c_SplFileObject::t_fgetcsv(CVarRef v_delimiter //  = NAMSTR(s_sys_ssd332baa7, ",")
-, CVarRef v_enclosure //  = NAMSTR(s_sys_ss7e5fc106, "\"")
-, CVarRef v_escape //  = NAMSTR(s_sys_ssd59e789f, "\\")
+Variant c_SplFileObject::t_fgetcsv(CVarRef v_delimiter //  = NAMVAR(s_sys_svsd332baa7, ",")
+, CVarRef v_enclosure //  = NAMVAR(s_sys_svs7e5fc106, "\"")
+, CVarRef v_escape //  = NAMVAR(s_sys_svsd59e789f, "\\")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fgetcsv);
   return x_hphp_splfileobject_fgetcsv(GET_THIS_TYPED(SplFileObject), toString(v_delimiter), toString(v_enclosure), toString(v_escape));
@@ -1355,9 +1355,9 @@ void c_SplFileObject::t_seek(CVarRef v_line_pos) {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splfile.php line 809 */
-void c_SplFileObject::t_setcsvcontrol(CVarRef v_delimiter //  = NAMSTR(s_sys_ssd332baa7, ",")
-, CVarRef v_enclosure //  = NAMSTR(s_sys_ss7e5fc106, "\"")
-, CVarRef v_escape //  = NAMSTR(s_sys_ssd59e789f, "\\")
+void c_SplFileObject::t_setcsvcontrol(CVarRef v_delimiter //  = NAMVAR(s_sys_svsd332baa7, ",")
+, CVarRef v_enclosure //  = NAMVAR(s_sys_svs7e5fc106, "\"")
+, CVarRef v_escape //  = NAMVAR(s_sys_svsd59e789f, "\\")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::setCsvControl);
   x_hphp_splfileobject_setcsvcontrol(GET_THIS_TYPED(SplFileObject), toString(v_delimiter), toString(v_enclosure), toString(v_escape));
@@ -2414,7 +2414,7 @@ struct ObjectStaticCallbacks cw_SplFileInfo = {
   c_SplFileInfo::os_get_call_info
 };
 void c_SplFileInfo::init() {
-  m_rsrc = null;
+  setNull(m_rsrc);
 }
 /* SRC: classes/splfile.php line 14 */
 void c_SplFileInfo::t___construct(Variant v_file_name) {
@@ -2437,14 +2437,14 @@ String c_SplFileInfo::t_getfilename() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splfile.php line 53 */
-Object c_SplFileInfo::t_getfileinfo(CVarRef v_class_name //  = NAMSTR(s_sys_ss00000000, "")
+Object c_SplFileInfo::t_getfileinfo(CVarRef v_class_name //  = NAMVAR(s_sys_svs00000000, "")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getFileInfo);
   return x_hphp_splfileinfo_getfileinfo(GET_THIS_TYPED(SplFileInfo), toString(v_class_name));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splfile.php line 68 */
-String c_SplFileInfo::t_getbasename(CVarRef v_suffix //  = NAMSTR(s_sys_ss00000000, "")
+String c_SplFileInfo::t_getbasename(CVarRef v_suffix //  = NAMVAR(s_sys_svs00000000, "")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getBasename);
   return x_hphp_splfileinfo_getbasename(GET_THIS_TYPED(SplFileInfo), toString(v_suffix));
@@ -2457,7 +2457,7 @@ String c_SplFileInfo::t_getpathname() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splfile.php line 95 */
-Object c_SplFileInfo::t_getpathinfo(CVarRef v_class_name //  = NAMSTR(s_sys_ss00000000, "")
+Object c_SplFileInfo::t_getpathinfo(CVarRef v_class_name //  = NAMVAR(s_sys_svs00000000, "")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getPathInfo);
   return x_hphp_splfileinfo_getpathinfo(GET_THIS_TYPED(SplFileInfo), toString(v_class_name));
@@ -2572,8 +2572,8 @@ String c_SplFileInfo::t___tostring() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splfile.php line 338 */
-Object c_SplFileInfo::t_openfile(CVarRef v_mode //  = NAMSTR(s_sys_ss0d42ecf6, "r")
-, CVarRef v_use_include_path //  = false
+Object c_SplFileInfo::t_openfile(CVarRef v_mode //  = NAMVAR(s_sys_svs0d42ecf6, "r")
+, CVarRef v_use_include_path //  = false_varNR
 , CVarRef v_context //  = null_variant
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::openFile);
@@ -2581,14 +2581,14 @@ Object c_SplFileInfo::t_openfile(CVarRef v_mode //  = NAMSTR(s_sys_ss0d42ecf6, "
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splfile.php line 356 */
-void c_SplFileInfo::t_setfileclass(CVarRef v_class_name //  = NAMSTR(s_sys_ss5d909898, "SplFileObject")
+void c_SplFileInfo::t_setfileclass(CVarRef v_class_name //  = NAMVAR(s_sys_svs5d909898, "SplFileObject")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::setFileClass);
   x_hphp_splfileinfo_setfileclass(GET_THIS_TYPED(SplFileInfo), toString(v_class_name));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splfile.php line 372 */
-void c_SplFileInfo::t_setinfoclass(CVarRef v_class_name //  = NAMSTR(s_sys_ss914a58e9, "SplFileInfo")
+void c_SplFileInfo::t_setinfoclass(CVarRef v_class_name //  = NAMVAR(s_sys_svs914a58e9, "SplFileInfo")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::setInfoClass);
   x_hphp_splfileinfo_setinfoclass(GET_THIS_TYPED(SplFileInfo), toString(v_class_name));

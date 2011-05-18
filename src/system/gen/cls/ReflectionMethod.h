@@ -65,7 +65,7 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   public:
   void init();
   public: void t___construct(Variant v_cls, Variant v_name = NAMSTR(s_sys_ss00000000, ""));
-  public: c_ReflectionMethod *create(CVarRef v_cls, CVarRef v_name = NAMSTR(s_sys_ss00000000, ""));
+  public: c_ReflectionMethod *create(CVarRef v_cls, CVarRef v_name = NAMVAR(s_sys_svs00000000, ""));
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: String t___tostring();

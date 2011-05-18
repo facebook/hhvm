@@ -65,7 +65,7 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   public:
   void init();
   public: void t___construct(Variant v_iterator, Variant v_mode = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */, Variant v_flags = 0LL);
-  public: c_RecursiveIteratorIterator *create(CVarRef v_iterator, CVarRef v_mode = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */, CVarRef v_flags = 0LL);
+  public: c_RecursiveIteratorIterator *create(CVarRef v_iterator, CVarRef v_mode = NAMVAR(s_sys_svif01bca90, 0LL) /* RecursiveIteratorIterator::LEAVES_ONLY */, CVarRef v_flags = NAMVAR(s_sys_svif01bca90, 0LL));
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: Object t_getinneriterator();

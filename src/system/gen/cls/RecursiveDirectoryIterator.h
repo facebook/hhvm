@@ -64,7 +64,7 @@ class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   public:
   void init();
   public: void t___construct(Variant v_path, Variant v_flags = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */);
-  public: c_RecursiveDirectoryIterator *create(CVarRef v_path, CVarRef v_flags = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */);
+  public: c_RecursiveDirectoryIterator *create(CVarRef v_path, CVarRef v_flags = NAMVAR(s_sys_svi86af027e, 16LL) /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: Variant t_current();

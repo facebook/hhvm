@@ -131,7 +131,7 @@ const char *Option::CallInfoPrefix = "ci_";
 const char *Option::SilencerPrefix = "sil_";
 
 const char *Option::ScalarPrefix = "s_";
-const char *Option::SysScalarPrefix = "s_sys_";
+const char *Option::SysPrefix = "sys_";
 const char *Option::StaticStringPrefix = "ss";
 const char *Option::StaticArrayPrefix = "sa";
 const char *Option::StaticVarIntPrefix = "svi";

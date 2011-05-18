@@ -72,7 +72,7 @@ class c_Continuation : public c_Closure {
   public:
   void init();
   public: void t___construct(Variant v_func, Variant v_vars, Variant v_obj = null, Variant v_args = s_sys_sa00000000);
-  public: c_Continuation *create(CVarRef v_func, CVarRef v_vars, CVarRef v_obj = null_variant, CVarRef v_args = s_sys_sa00000000);
+  public: c_Continuation *create(CVarRef v_func, CVarRef v_vars, CVarRef v_obj = null_variant, CVarRef v_args = s_sys_sva00000000);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: void t_update(CVarRef v_label, CVarRef v_value, CVarRef v_vars);

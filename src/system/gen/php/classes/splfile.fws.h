@@ -95,6 +95,19 @@ extern StaticString s_sys_ss9943cbf4;
 
 // 2. Static Arrays
 
+// 3. Static Variants
+
+
+extern VarNR s_sys_svs00000000;
+extern VarNR s_sys_svs7e5fc106;
+extern VarNR s_sys_svsd332baa7;
+extern VarNR s_sys_svs914a58e9;
+extern VarNR s_sys_svs5d909898;
+extern VarNR s_sys_svsd59e789f;
+extern VarNR s_sys_svs0d42ecf6;
+
+
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

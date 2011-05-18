@@ -75,6 +75,13 @@ extern StaticString s_sys_ss0f30800a;
 // 2. Static Arrays
 extern StaticArray s_sys_sa00000000;
 
+// 3. Static Variants
+
+
+
+extern VarNR s_sys_sva00000000;
+
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

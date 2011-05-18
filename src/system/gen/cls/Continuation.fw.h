@@ -27,6 +27,8 @@ namespace HPHP {
 
 extern StaticArray s_sys_sa00000000;
 
+extern VarNR s_sys_sva00000000;
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -295,10 +295,6 @@ void CodeGenerator::printBasicIncludes() {
                  "literal_strings_remap.h");
     printInclude(string(Option::SystemFilePrefix) +
                  "scalar_arrays_remap.h");
-    if (Option::UseScalarVariant) {
-      printInclude(string(Option::SystemFilePrefix) +
-                   "scalar_integers_remap.h");
-    }
   }
 }
 

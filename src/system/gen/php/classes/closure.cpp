@@ -1004,7 +1004,7 @@ bool c_Continuation::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return os_get_call_info(mcp, hash);
 }
 c_Continuation *c_Continuation::create(CVarRef v_func, CVarRef v_vars, CVarRef v_obj //  = null_variant
-, CVarRef v_args //  = s_sys_sa00000000
+, CVarRef v_args //  = s_sys_sva00000000
 ) {
   CountableHelper h(this);
   init();
@@ -1046,14 +1046,14 @@ struct ObjectStaticCallbacks cw_Continuation = {
 };
 void c_Continuation::init() {
   c_Closure::init();
-  m_obj = null;
-  m_args = null;
+  setNull(m_obj);
+  setNull(m_args);
   m_label = 0LL;
   m_done = false;
   m_index = -1LL;
-  m_value = null;
+  setNull(m_value);
   m_running = false;
-  m_received = null;
+  setNull(m_received);
 }
 /* SRC: classes/closure.php line 41 */
 void c_Continuation::t___construct(Variant v_func, Variant v_vars, Variant v_obj //  = null

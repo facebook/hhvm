@@ -25,6 +25,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+extern const VarNR &s_sys_svi5830e7c6;
+
 FORWARD_DECLARE_CLASS(ReflectionMethod);
 FORWARD_DECLARE_CLASS(ReflectionProperty);
 

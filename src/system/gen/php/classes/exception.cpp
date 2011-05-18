@@ -1391,8 +1391,8 @@ bool c_Exception::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_Exception *c_Exception::create(CVarRef v_message //  = NAMSTR(s_sys_ss00000000, "")
-, CVarRef v_code //  = 0LL
+c_Exception *c_Exception::create(CVarRef v_message //  = NAMVAR(s_sys_svs00000000, "")
+, CVarRef v_code //  = NAMVAR(s_sys_svif01bca90, 0LL)
 , CVarRef v_previous //  = null_variant
 ) {
   CountableHelper h(this);
@@ -1439,10 +1439,10 @@ struct ObjectStaticCallbacks cw_Exception = {
 void c_Exception::init() {
   m_message = NAMSTR(s_sys_ss00000000, "");
   m_code = 0LL;
-  m_previous = null;
-  m_file = null;
-  m_line = null;
-  m_trace = null;
+  setNull(m_previous);
+  setNull(m_file);
+  setNull(m_line);
+  setNull(m_trace);
   {CountableHelper h(this); t___init__();}
 }
 /* SRC: classes/exception.php line 24 */
@@ -1847,9 +1847,9 @@ bool c_ErrorException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_ErrorException *c_ErrorException::create(CVarRef v_message //  = NAMSTR(s_sys_ss00000000, "")
-, CVarRef v_code //  = 0LL
-, CVarRef v_severity //  = 0LL
+c_ErrorException *c_ErrorException::create(CVarRef v_message //  = NAMVAR(s_sys_svs00000000, "")
+, CVarRef v_code //  = NAMVAR(s_sys_svif01bca90, 0LL)
+, CVarRef v_severity //  = NAMVAR(s_sys_svif01bca90, 0LL)
 , CVarRef v_filename //  = null_variant
 , CVarRef v_lineno //  = null_variant
 ) {
@@ -1906,7 +1906,7 @@ struct ObjectStaticCallbacks cw_ErrorException = {
 };
 void c_ErrorException::init() {
   c_Exception::init();
-  m_severity = null;
+  setNull(m_severity);
 }
 /* SRC: classes/exception.php line 288 */
 void c_ErrorException::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")

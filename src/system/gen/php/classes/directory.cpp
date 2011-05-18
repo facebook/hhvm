@@ -291,8 +291,8 @@ struct ObjectStaticCallbacks cw_Directory = {
   c_Directory::os_get_call_info
 };
 void c_Directory::init() {
-  m_path = null;
-  m_handle = null;
+  setNull(m_path);
+  setNull(m_handle);
 }
 /* SRC: classes/directory.php line 7 */
 void c_Directory::t___construct(Variant v_path) {

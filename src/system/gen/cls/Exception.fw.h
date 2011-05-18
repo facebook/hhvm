@@ -27,6 +27,10 @@ namespace HPHP {
 
 extern StaticString s_sys_ss00000000;
 
+extern const VarNR &s_sys_svif01bca90;
+
+extern VarNR s_sys_svs00000000;
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

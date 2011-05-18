@@ -1337,7 +1337,9 @@ void AnalysisResult::outputCPPNamedScalarArrays(const std::string &file) {
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude("<sys/scalar_arrays_remap.h>");
-  if (Option::UseScalarVariant) cg_printInclude("<sys/scalar_integers_remap.h>");
+  if (Option::UseScalarVariant && !Option::SystemGen) {
+    cg_printInclude("<sys/scalar_integers_remap.h>");
+  }
   if (!Option::SystemGen) {
     cg_printInclude("<sys/global_variables.h>");
   }
@@ -1384,6 +1386,8 @@ void AnalysisResult::outputCPPNamedScalarArrays(const std::string &file) {
 }
 
 void AnalysisResult::outputCPPNamedScalarVarIntegers(const std::string &file) {
+  if (m_namedScalarVarIntegers.size() == 0) return;
+
   AnalysisResultPtr ar = shared_from_this();
 
   string filename = file + ".cpp";
@@ -1392,7 +1396,9 @@ void AnalysisResult::outputCPPNamedScalarVarIntegers(const std::string &file) {
 
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
-  if (Option::UseScalarVariant) cg_printInclude("<sys/scalar_integers_remap.h>");
+  if (Option::UseScalarVariant && !Option::SystemGen) {
+    cg_printInclude("<sys/scalar_integers_remap.h>");
+  }
   if (!Option::SystemGen) {
     cg_printInclude("<sys/global_variables.h>");
   }
@@ -1450,6 +1456,8 @@ void AnalysisResult::outputCPPFiniteDouble(CodeGenerator &cg, double dval) {
 }
 
 void AnalysisResult::outputCPPNamedScalarVarDoubles(const std::string &file) {
+  if (m_namedScalarVarDoubles.size() == 0) return;
+
   AnalysisResultPtr ar = shared_from_this();
 
   string filename = file + ".cpp";
@@ -2177,7 +2185,7 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
                     Option::StaticStringPrefix);
   renameStaticNames(m_namedScalarArrays, "scalar_arrays_remap.h",
                     Option::StaticArrayPrefix);
-  if (Option::UseScalarVariant) {
+  if (Option::UseScalarVariant && !Option::SystemGen) {
     renameStaticNames(m_namedScalarVarIntegers, "scalar_integers_remap.h",
                       Option::StaticVarIntPrefix);
   }
@@ -3510,8 +3518,8 @@ string AnalysisResult::getHashedName(int64 hash, int index,
                                      const char *prefix,
                                      bool longName /* = false */) {
   assert(index >= 0);
-  string name(Option::SystemGen ? Option::SysScalarPrefix
-                                : Option::ScalarPrefix);
+  string name(Option::ScalarPrefix);
+  if (Option::SystemGen) name += Option::SysPrefix;
   name += prefix;
   name += longName ? boost::str(boost::format("%016x") % hash)
                    : boost::str(boost::format("%08x") % (int)hash);
@@ -4771,7 +4779,8 @@ void AnalysisResult::outputInitLiteralVarStrings(CodeGenerator &cg,
   int fileIndex, vector<int> &litVarStrFileIndices,
   vector<pair<int, int> > &litVarStrs) {
   if (litVarStrs.size() >  0) {
-    cg_indentBegin("void init_literal_varstrings_%d() {\n", fileIndex);
+    cg_indentBegin("void %sinit_literal_varstrings_%d() {\n",
+                   (Option::SystemGen ? Option::SysPrefix : ""),  fileIndex);
     for (unsigned int i = 0; i < litVarStrs.size(); i++) {
       int hash = litVarStrs[i].first;
       int index = litVarStrs[i].second;
@@ -4880,16 +4889,27 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
   if (Option::UseScalarVariant) {
     cg_printf("\n");
     for (unsigned int i = 0; i < litVarStrFileIndices.size(); i++) {
-      cg_printf("extern void init_literal_varstrings_%d();\n",
+      cg_printf("extern void %sinit_literal_varstrings_%d();\n",
+                (Option::SystemGen ? Option::SysPrefix : ""),
                 litVarStrFileIndices[i]);
     }
     outputInitLiteralVarStrings(cg, fileIndex, litVarStrFileIndices,
                                 litVarStrs);
-    cg_indentBegin("void init_literal_varstrings() {\n");
+    cg_indentBegin("void %sinit_literal_varstrings() {\n",
+                   Option::SystemGen ? Option::SysPrefix : "");
+    if (!Option::SystemGen) {
+      cg_printf("extern void %sinit_literal_varstrings();\n",
+                Option::SysPrefix);
+      cg_printf("%sinit_literal_varstrings();\n", Option::SysPrefix);
+    }
     for (unsigned int i = 0; i < litVarStrFileIndices.size(); i++) {
-      cg_printf("init_literal_varstrings_%d();\n", litVarStrFileIndices[i]);
+      cg_printf("%sinit_literal_varstrings_%d();\n",
+                (Option::SystemGen ? Option::SysPrefix : ""),
+                litVarStrFileIndices[i]);
     }
     cg_indentEnd("}\n");
+  } else if (!Option::SystemGen) {
+    cg_printf("void init_literal_varstrings() {}\n");
   }
   cg.namespaceEnd();
   f.close();

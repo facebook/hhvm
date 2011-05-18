@@ -22,4 +22,12 @@
 #include <sys/literal_strings_remap.h>
 #include <sys/scalar_arrays_remap.h>
 
+namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+extern const VarNR &s_sys_svi86af027e;
+
+///////////////////////////////////////////////////////////////////////////////
+}
+
 #endif // __GENERATED_cls_RecursiveDirectoryIterator_fw_he35a991a__

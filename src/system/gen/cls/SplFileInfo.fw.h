@@ -30,6 +30,11 @@ extern StaticString s_sys_ss914a58e9;
 extern StaticString s_sys_ss5d909898;
 extern StaticString s_sys_ss0d42ecf6;
 
+extern VarNR s_sys_svs00000000;
+extern VarNR s_sys_svs914a58e9;
+extern VarNR s_sys_svs5d909898;
+extern VarNR s_sys_svs0d42ecf6;
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

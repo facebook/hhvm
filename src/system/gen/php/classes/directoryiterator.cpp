@@ -540,7 +540,7 @@ bool c_RecursiveDirectoryIterator::o_get_call_info(MethodCallPackage &mcp, int64
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_RecursiveDirectoryIterator *c_RecursiveDirectoryIterator::create(CVarRef v_path, CVarRef v_flags //  = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */
+c_RecursiveDirectoryIterator *c_RecursiveDirectoryIterator::create(CVarRef v_path, CVarRef v_flags //  = NAMVAR(s_sys_svi86af027e, 16LL) /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */
 ) {
   CountableHelper h(this);
   init();

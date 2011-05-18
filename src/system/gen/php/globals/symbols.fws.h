@@ -27,6 +27,12 @@ namespace HPHP {
 // 2. Static Arrays
 extern StaticArray s_sys_sa00000000;
 
+// 3. Static Variants
+
+
+
+
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

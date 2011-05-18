@@ -252,8 +252,8 @@ public:
   static const char *EvalOrderTempPrefix;
   static const char *SilencerPrefix;
   static const char *CallInfoPrefix;
+  static const char *SysPrefix;
   static const char *ScalarPrefix;
-  static const char *SysScalarPrefix;
   static const char *StaticStringPrefix;
   static const char *StaticArrayPrefix;
   static const char *StaticVarIntPrefix;

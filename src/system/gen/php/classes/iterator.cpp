@@ -869,7 +869,7 @@ bool c_ArrayIterator::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_ArrayIterator *c_ArrayIterator::create(CVarRef v_array, CVarRef v_flags //  = 0LL
+c_ArrayIterator *c_ArrayIterator::create(CVarRef v_array, CVarRef v_flags //  = NAMVAR(s_sys_svif01bca90, 0LL)
 ) {
   CountableHelper h(this);
   init();
@@ -904,8 +904,8 @@ struct ObjectStaticCallbacks cw_ArrayIterator = {
   c_ArrayIterator::os_get_call_info
 };
 void c_ArrayIterator::init() {
-  m_arr = null;
-  m_flags = null;
+  setNull(m_arr);
+  setNull(m_flags);
 }
 /* SRC: classes/iterator.php line 333 */
 void c_ArrayIterator::t___construct(Variant v_array, Variant v_flags //  = 0LL
@@ -1512,7 +1512,7 @@ struct ObjectStaticCallbacks cw_AppendIterator = {
   c_AppendIterator::os_get_call_info
 };
 void c_AppendIterator::init() {
-  m_iterators = null;
+  setNull(m_iterators);
 }
 /* SRC: classes/iterator.php line 700 */
 void c_AppendIterator::t___construct() {
@@ -2143,8 +2143,8 @@ bool c_RecursiveIteratorIterator::o_get_call_info(MethodCallPackage &mcp, int64 
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_RecursiveIteratorIterator *c_RecursiveIteratorIterator::create(CVarRef v_iterator, CVarRef v_mode //  = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */
-, CVarRef v_flags //  = 0LL
+c_RecursiveIteratorIterator *c_RecursiveIteratorIterator::create(CVarRef v_iterator, CVarRef v_mode //  = NAMVAR(s_sys_svif01bca90, 0LL) /* RecursiveIteratorIterator::LEAVES_ONLY */
+, CVarRef v_flags //  = NAMVAR(s_sys_svif01bca90, 0LL)
 ) {
   CountableHelper h(this);
   init();
@@ -2184,7 +2184,7 @@ struct ObjectStaticCallbacks cw_RecursiveIteratorIterator = {
   c_RecursiveIteratorIterator::os_get_call_info
 };
 void c_RecursiveIteratorIterator::init() {
-  m_rsrc = null;
+  setNull(m_rsrc);
 }
 /* SRC: classes/iterator.php line 237 */
 void c_RecursiveIteratorIterator::t___construct(Variant v_iterator, Variant v_mode //  = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */
@@ -2395,7 +2395,7 @@ bool c_MutableArrayIterator::o_get_call_info(MethodCallPackage &mcp, int64 hash)
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_MutableArrayIterator *c_MutableArrayIterator::create(VRefParam v_array, CVarRef v_flags //  = 0LL
+c_MutableArrayIterator *c_MutableArrayIterator::create(VRefParam v_array, CVarRef v_flags //  = NAMVAR(s_sys_svif01bca90, 0LL)
 ) {
   CountableHelper h(this);
   init();

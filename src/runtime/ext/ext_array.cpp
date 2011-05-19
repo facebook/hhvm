@@ -61,6 +61,41 @@ const int64 k_UCOL_STRENGTH = UCOL_STRENGTH;
 const int64 k_UCOL_HIRAGANA_QUATERNARY_MODE = UCOL_HIRAGANA_QUATERNARY_MODE;
 const int64 k_UCOL_NUMERIC_COLLATION = UCOL_NUMERIC_COLLATION;
 
+#define getCheckedArrayRetType(input, fail, type)                       \
+  Variant::TypedValueAccessor tva_##input = input.getTypedAccessor();   \
+  if (UNLIKELY(Variant::GetAccessorType(tva_##input) != KindOfArray)) { \
+    throw_bad_array_exception();                                        \
+    return fail;                                                        \
+  }                                                                     \
+  type arr_##input = Variant::GetAsArray(tva_##input);
+
+#define getCheckedArrayRet(input, fail) \
+  getCheckedArrayRetType(input, fail, CArrRef)
+#define getCheckedArray(input) getCheckedArrayRet(input, null)
+
+Variant f_array_change_key_case(CVarRef input, bool upper /* = false */) {
+  getCheckedArrayRet(input, false);
+  return ArrayUtil::ChangeKeyCase(arr_input, !upper);
+}
+Variant f_array_chunk(CVarRef input, int size,
+                      bool preserve_keys /* = false */) {
+  getCheckedArray(input);
+  return ArrayUtil::Chunk(arr_input, size, preserve_keys);
+}
+Variant f_array_combine(CVarRef keys, CVarRef values) {
+  getCheckedArray(keys);
+  getCheckedArray(values);
+  return ArrayUtil::Combine(arr_keys, arr_values);
+}
+Variant f_array_count_values(CVarRef input) {
+  getCheckedArray(input);
+  return ArrayUtil::CountValues(arr_input);
+}
+Variant f_array_fill_keys(CVarRef keys, CVarRef value) {
+  getCheckedArray(keys);
+  return ArrayUtil::CreateArray(arr_keys, value);
+}
+
 static bool filter_func(CVarRef value, const void *data) {
   MethodCallPackage *mcp = (MethodCallPackage *)data;
   if (mcp->m_isFunc) {
@@ -76,11 +111,8 @@ static bool filter_func(CVarRef value, const void *data) {
   }
 }
 Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
-  if (!input.isArray()) {
-    throw_bad_array_exception();
-    return null;
-  }
-  CArrRef arr_input = input.toArrNR();
+  getCheckedArray(input);
+
   if (callback.isNull()) {
     return ArrayUtil::Filter(arr_input);
   }
@@ -90,6 +122,11 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
     return null;
   }
   return ArrayUtil::Filter(arr_input, filter_func, &mcp);
+}
+
+Variant f_array_flip(CVarRef trans) {
+  getCheckedArrayRet(trans, false);
+  return ArrayUtil::Flip(arr_trans);
 }
 
 bool f_array_key_exists(CVarRef key, CVarRef search) {
@@ -115,6 +152,12 @@ bool f_array_key_exists(CVarRef key, CVarRef search) {
   }
   raise_warning("Array key should be either a string or an integer");
   return false;
+}
+
+Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
+                     bool strict /* = false */) {
+  getCheckedArray(input);
+  return arr_input.keys(search_value, strict);
 }
 
 static Variant map_func(CArrRef params, const void *data) {
@@ -189,11 +232,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
 
 Variant f_array_merge(int _argc, CVarRef array1,
                       CArrRef _argv /* = null_array */) {
-  if (!array1.isArray()) {
-    throw_bad_array_exception();
-    return null;
-  }
-  CArrRef arr_array1 = array1.toArrNR();
+  getCheckedArray(array1);
   Array ret = Array::Create();
   php_array_merge(ret, arr_array1);
   for (ArrayIter iter(_argv); iter; ++iter) {
@@ -202,7 +241,7 @@ Variant f_array_merge(int _argc, CVarRef array1,
       throw_bad_array_exception();
       return null;
     }
-    CArrRef arr_v = v.toArrNR();
+    CArrRef arr_v = v.asCArrRef();
     php_array_merge(ret, arr_v);
   }
   return ret;
@@ -210,11 +249,7 @@ Variant f_array_merge(int _argc, CVarRef array1,
 
 Variant f_array_merge_recursive(int _argc, CVarRef array1,
                                 CArrRef _argv /* = null_array */) {
-  if (!array1.isArray()) {
-    throw_bad_array_exception();
-    return null;
-  }
-  CArrRef arr_array1 = array1.toArrNR();
+  getCheckedArray(array1);
   Array ret = Array::Create();
   PointerSet seen;
   php_array_merge_recursive(seen, false, ret, arr_array1);
@@ -225,7 +260,7 @@ Variant f_array_merge_recursive(int _argc, CVarRef array1,
       throw_bad_array_exception();
       return null;
     }
-    CArrRef arr_v = v.toArrNR();
+    CArrRef arr_v = v.asCArrRef();
     php_array_merge_recursive(seen, false, ret, arr_v);
     ASSERT(seen.empty());
   }
@@ -276,20 +311,12 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
 
 Variant f_array_replace(int _argc, CVarRef array1,
                         CArrRef _argv /* = null_array */) {
-  if (!array1.isArray()) {
-    throw_bad_array_exception();
-    return null;
-  }
-  CArrRef arr_array1 = array1.toArrNR();
+  getCheckedArray(array1);
   Array ret = Array::Create();
   php_array_replace(ret, arr_array1);
   for (ArrayIter iter(_argv); iter; ++iter) {
     CVarRef v = iter.secondRef();
-    if (!v.isArray()) {
-      throw_bad_array_exception();
-      return null;
-    }
-    CArrRef arr_v = v.toArrNR();
+    getCheckedArray(v);
     php_array_replace(ret, arr_v);
   }
   return ret;
@@ -297,38 +324,54 @@ Variant f_array_replace(int _argc, CVarRef array1,
 
 Variant f_array_replace_recursive(int _argc, CVarRef array1,
                                   CArrRef _argv /* = null_array */) {
-  if (!array1.isArray()) {
-    throw_bad_array_exception();
-    return null;
-  }
-  CArrRef arr_array1 = array1.toArrNR();
+  getCheckedArray(array1);
   Array ret = Array::Create();
   PointerSet seen;
   php_array_replace_recursive(seen, false, ret, arr_array1);
   ASSERT(seen.empty());
   for (ArrayIter iter(_argv); iter; ++iter) {
     CVarRef v = iter.secondRef();
-    if (!v.isArray()) {
-      throw_bad_array_exception();
-      return null;
-    }
-    CArrRef arr_v = v.toArrNR();
+    getCheckedArray(v);
     php_array_replace_recursive(seen, false, ret, arr_v);
     ASSERT(seen.empty());
   }
   return ret;
 }
 
+Variant f_array_pad(CVarRef input, int pad_size, CVarRef pad_value) {
+  getCheckedArray(input);
+  if (pad_size > 0) {
+    return ArrayUtil::Pad(arr_input, pad_value, pad_size, true);
+  }
+  return ArrayUtil::Pad(arr_input, pad_value, -pad_size, false);
+}
+
+Variant f_array_product(CVarRef array) {
+  getCheckedArray(array);
+  if (arr_array.empty()) {
+    return 0; // to be consistent with PHP
+  }
+  int64 i;
+  double d;
+  if (ArrayUtil::Product(arr_array, &i, &d) == KindOfInt64) {
+    return i;
+  } else {
+    return d;
+  }
+}
+
 Variant f_array_push(int _argc, VRefParam array, CVarRef var, CArrRef _argv /* = null_array */) {
-  if (!array.isArray()) {
-    throw_bad_array_exception();
-    return false;
-  }
-  array.append(var);
+  getCheckedArrayRetType(array, null, Array &);
+  arr_array.append(var);
   for (ArrayIter iter(_argv); iter; ++iter) {
-    array.append(iter.second());
+    arr_array.append(iter.second());
   }
-  return array.toArrNR().size();
+  return arr_array.size();
+}
+
+Variant f_array_rand(CVarRef input, int num_req /* = 1 */) {
+  getCheckedArray(input);
+  return ArrayUtil::RandomKeys(arr_input, num_req);
 }
 
 static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
@@ -347,17 +390,51 @@ static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
 }
 Variant f_array_reduce(CVarRef input, CVarRef callback,
                        CVarRef initial /* = null_variant */) {
-  if (!input.isArray()) {
-    throw_bad_array_exception();
-    return null;
-  }
-  CArrRef arr_input = input.toArrNR();
+  getCheckedArray(input);
   MethodCallPackage mcp;
   String classname, methodname;
   if (!get_user_func_handler(callback, mcp, classname, methodname)) {
     return null;
   }
   return ArrayUtil::Reduce(arr_input, reduce_func, &mcp, initial);
+}
+
+Variant f_array_reverse(CVarRef array, bool preserve_keys /* = false */) {
+  getCheckedArray(array);
+  return ArrayUtil::Reverse(arr_array, preserve_keys);
+}
+
+Variant f_array_search(CVarRef needle, CVarRef haystack,
+                       bool strict /* = false */) {
+  getCheckedArrayRet(haystack, false);
+  return arr_haystack.key(needle, strict);
+}
+
+Variant f_array_slice(CVarRef array, int offset,
+                      CVarRef length /* = null_variant */,
+                      bool preserve_keys /* = false */) {
+  getCheckedArray(array);
+  int64 len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
+  return ArrayUtil::Slice(arr_array, offset, len, preserve_keys);
+}
+Variant f_array_splice(VRefParam input, int offset,
+                       CVarRef length /* = null_variant */,
+                       CVarRef replacement /* = null_variant */) {
+  getCheckedArray(input);
+  Array ret(Array::Create());
+  int64 len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
+  input = ArrayUtil::Splice(arr_input, offset, len, replacement, &ret);
+  return ret;
+}
+Variant f_array_sum(CVarRef array) {
+  getCheckedArray(array);
+  int64 i;
+  double d;
+  if (ArrayUtil::Sum(arr_array, &i, &d) == KindOfInt64) {
+    return i;
+  } else {
+    return d;
+  }
 }
 
 int f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv /* = null_array */) {
@@ -397,6 +474,11 @@ int f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv /* = 
     }
   }
   return array.toArray().size();
+}
+
+Variant f_array_values(CVarRef input) {
+  getCheckedArray(input);
+  return arr_input.values();
 }
 
 static void walk_func(VRefParam value, CVarRef key, CVarRef userdata,
@@ -454,7 +536,7 @@ bool f_array_walk(VRefParam input, CVarRef funcname,
   if (!get_user_func_handler(funcname, mcp, classname, methodname)) {
     return null;
   }
-  ArrayUtil::Walk(ref(input), walk_func, &mcp, false, NULL, userdata);
+  ArrayUtil::Walk(input, walk_func, &mcp, false, NULL, userdata);
   return true;
 }
 
@@ -465,7 +547,7 @@ Array f_compact(int _argc, CVarRef varname, CArrRef _argv /* = null_array */) {
 template<typename T>
 static void compact(T *variables, Array &ret, CVarRef var) {
   if (var.isArray()) {
-    CArrRef vars = var.toArrNR();
+    CArrRef vars = var.toCArrRef();
     for (ArrayIter iter(vars); iter; ++iter) {
       compact(variables, ret, iter.second());
     }
@@ -500,11 +582,20 @@ static int php_count_recursive(CArrRef array) {
   for (ArrayIter iter(array); iter; ++iter) {
     Variant value = iter.second();
     if (value.isArray()) {
-      CArrRef arr_value = value.toArrNR();
+      CArrRef arr_value = value.asCArrRef();
       cnt += php_count_recursive(arr_value);
     }
   }
   return cnt;
+}
+
+bool f_shuffle(VRefParam array) {
+  if (!array.isArray()) {
+    throw_bad_array_exception();
+    return false;
+  }
+  array = ArrayUtil::Shuffle(array);
+  return true;
 }
 
 int f_count(CVarRef var, bool recursive /* = false */) {
@@ -522,7 +613,7 @@ int f_count(CVarRef var, bool recursive /* = false */) {
     break;
   case KindOfArray:
     if (recursive) {
-      CArrRef arr_var = var.toArrNR();
+      CArrRef arr_var = var.toCArrRef();
       return php_count_recursive(arr_var);
     }
     return var.getArrayData()->size();
@@ -577,6 +668,11 @@ Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
   }
   raise_warning("Invalid argument supplied for iteration");
   return null;
+}
+
+bool f_in_array(CVarRef needle, CVarRef haystack, bool strict /* = false */) {
+  getCheckedArrayRet(haystack, false);
+  return arr_haystack.valueExists(needle, strict);
 }
 
 Variant f_range(CVarRef low, CVarRef high, CVarRef step /* = 1 */) {
@@ -645,19 +741,14 @@ static int cmp_func(CVarRef v1, CVarRef v2, const void *data) {
 
 #define COMMA ,
 #define diff_intersect_body(type,intersect_params,user_setup)   \
-  if (!array1.isArray()) {                                      \
-    throw_bad_array_exception();                                \
-    return null;                                                \
-  }                                                             \
-  Array ret = array1.getArrayData();                            \
+  getCheckedArray(array1);                                      \
+  if (!arr_array1.size()) return arr_array1;                    \
+  user_setup                                                    \
+  Array ret = arr_array1.type(array2, intersect_params);        \
   if (ret.size()) {                                             \
-    user_setup                                                  \
-    ret = ret.type(array2, intersect_params);                   \
-    if (ret.size()) {                                           \
-      for (ArrayIter iter(_argv); iter; ++iter) {               \
-        ret = ret.type(iter.second(), intersect_params);        \
-        if (!ret.size()) break;                                 \
-      }                                                         \
+    for (ArrayIter iter(_argv); iter; ++iter) {                 \
+      ret = ret.type(iter.second(), intersect_params);          \
+      if (!ret.size()) break;                                   \
     }                                                           \
   }                                                             \
   return ret;
@@ -766,8 +857,6 @@ Variant f_array_uintersect(int _argc, CVarRef array1, CVarRef array2,
                         extra.prepend(func);
                         func = extra.pop();
                       });
-
-  return ret;
 }
 
 Variant f_array_intersect_assoc(int _argc, CVarRef array1, CVarRef array2,
@@ -944,10 +1033,7 @@ static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
 
 bool f_sort(VRefParam array, int sort_flags /* = 0 */,
             bool use_collator /* = false */) {
-  if (!array.isArray()) {
-    throw_bad_array_exception();
-    return false;
-  }
+  getCheckedArrayRetType(array, false, Array &);
   if (use_collator && sort_flags != SORT_LOCALE_STRING) {
     UCollator *coll = s_collator->getCollator();
     if (coll) {
@@ -955,18 +1041,13 @@ bool f_sort(VRefParam array, int sort_flags /* = 0 */,
       return collator_sort(array, sort_flags, true, coll, &errcode);
     }
   }
-  Array temp = array.toArray();
-  temp.sort(get_cmp_func(sort_flags, true), false, true);
-  array = temp;
+  arr_array.sort(get_cmp_func(sort_flags, true), false, true);
   return true;
 }
 
 bool f_rsort(VRefParam array, int sort_flags /* = 0 */,
              bool use_collator /* = false */) {
-  if (!array.isArray()) {
-    throw_bad_array_exception();
-    return false;
-  }
+  getCheckedArrayRetType(array, false, Array &);
   if (use_collator && sort_flags != SORT_LOCALE_STRING) {
     UCollator *coll = s_collator->getCollator();
     if (coll) {
@@ -974,18 +1055,13 @@ bool f_rsort(VRefParam array, int sort_flags /* = 0 */,
       return collator_sort(array, sort_flags, false, coll, &errcode);
     }
   }
-  Array temp = array.toArray();
-  temp.sort(get_cmp_func(sort_flags, false), false, true);
-  array = temp;
+  arr_array.sort(get_cmp_func(sort_flags, false), false, true);
   return true;
 }
 
 bool f_asort(VRefParam array, int sort_flags /* = 0 */,
              bool use_collator /* = false */) {
-  if (!array.isArray()) {
-    throw_bad_array_exception();
-    return false;
-  }
+  getCheckedArrayRetType(array, false, Array &);
   if (use_collator && sort_flags != SORT_LOCALE_STRING) {
     UCollator *coll = s_collator->getCollator();
     if (coll) {
@@ -993,18 +1069,13 @@ bool f_asort(VRefParam array, int sort_flags /* = 0 */,
       return collator_asort(array, sort_flags, true, coll, &errcode);
     }
   }
-  Array temp = array.toArray();
-  temp.sort(get_cmp_func(sort_flags, true), false, false);
-  array = temp;
+  arr_array.sort(get_cmp_func(sort_flags, true), false, false);
   return true;
 }
 
 bool f_arsort(VRefParam array, int sort_flags /* = 0 */,
               bool use_collator /* = false */) {
-  if (!array.isArray()) {
-    throw_bad_array_exception();
-    return false;
-  }
+  getCheckedArrayRetType(array, false, Array &);
   if (use_collator && sort_flags != SORT_LOCALE_STRING) {
     UCollator *coll = s_collator->getCollator();
     if (coll) {
@@ -1012,106 +1083,66 @@ bool f_arsort(VRefParam array, int sort_flags /* = 0 */,
       return collator_asort(array, sort_flags, false, coll, &errcode);
     }
   }
-  Array temp = array.toArray();
-  temp.sort(get_cmp_func(sort_flags, false), false, false);
-  array = temp;
+  arr_array.sort(get_cmp_func(sort_flags, false), false, false);
   return true;
 }
 
 bool f_ksort(VRefParam array, int sort_flags /* = 0 */) {
-  if (!array.isArray()) {
-    throw_bad_array_exception();
-    return false;
-  }
-  Array temp = array.toArray();
-  temp.sort(get_cmp_func(sort_flags, true), true, false);
-  array = temp;
+  getCheckedArrayRetType(array, false, Array &);
+  arr_array.sort(get_cmp_func(sort_flags, true), true, false);
   return true;
 }
 
 bool f_krsort(VRefParam array, int sort_flags /* = 0 */) {
-  if (!array.isArray()) {
-    throw_bad_array_exception();
-    return false;
-  }
-  Array temp = array.toArray();
-  temp.sort(get_cmp_func(sort_flags, false), true, false);
-  array = temp;
+  getCheckedArrayRetType(array, false, Array &);
+  arr_array.sort(get_cmp_func(sort_flags, false), true, false);
   return true;
 }
 
 bool f_usort(VRefParam array, CVarRef cmp_function) {
-  if (!array.isArray()) {
-    throw_bad_array_exception();
-    return false;
-  }
-  Array temp = array.toArray();
-  temp.sort(cmp_func, false, true, &cmp_function);
-  array = temp;
+  getCheckedArrayRetType(array, false, Array &);
+  arr_array.sort(cmp_func, false, true, &cmp_function);
   return true;
 }
 
 bool f_uasort(VRefParam array, CVarRef cmp_function) {
-  if (!array.isArray()) {
-    throw_bad_array_exception();
-    return false;
-  }
-  Array temp = array.toArray();
-  temp.sort(cmp_func, false, false, &cmp_function);
-  array = temp;
+  getCheckedArrayRetType(array, false, Array &);
+  arr_array.sort(cmp_func, false, false, &cmp_function);
   return true;
 }
 
 bool f_uksort(VRefParam array, CVarRef cmp_function) {
-  if (!array.isArray()) {
-    throw_bad_array_exception();
-    return false;
-  }
-  Array temp = array.toArray();
-  temp.sort(cmp_func, true, false, &cmp_function);
-  array = temp;
+  getCheckedArrayRetType(array, false, Array &);
+  arr_array.sort(cmp_func, true, false, &cmp_function);
   return true;
 }
 
 Variant f_natsort(VRefParam array) {
   // NOTE, PHP natsort accepts ArrayAccess objects as well,
   // which does not make much sense, and which is not supported here.
-  if (!array.isArray()) {
-    throw_bad_array_exception();
-    return null;
-  }
-  Array temp = array.toArray();
-  temp.sort(Array::SortNatural, false, false);
-  array = temp;
+  getCheckedArrayRetType(array, false, Array &);
+  arr_array.sort(Array::SortNatural, false, false);
   return true;
 }
 
 Variant f_natcasesort(VRefParam array) {
   // NOTE, PHP natcasesort accepts ArrayAccess objects as well,
   // which does not make much sense, and which is not supported here.
-  if (!array.isArray()) {
-    throw_bad_array_exception();
-    return null;
-  }
-  Array temp = array.toArray();
-  temp.sort(Array::SortNaturalCase, false, false);
-  array = temp;
+  getCheckedArrayRetType(array, false, Array &);
+  arr_array.sort(Array::SortNaturalCase, false, false);
   return true;
 }
 
 bool f_array_multisort(int _argc, VRefParam ar1,
                        CArrRef _argv /* = null_array */) {
-  if (!ar1.isArray()) {
-    throw_bad_array_exception();
-    return false;
-  }
+  getCheckedArrayRet(ar1, false);
   std::vector<Array::SortData> data;
   std::vector<Array> arrays;
   arrays.reserve(1 + _argv.size()); // so no resize would happen
 
   Array::SortData sd;
   sd.original = &ar1;
-  arrays.push_back(ar1.toArray());
+  arrays.push_back(arr_ar1);
   sd.array = &arrays.back();
   sd.by_key = false;
 
@@ -1119,7 +1150,8 @@ bool f_array_multisort(int _argc, VRefParam ar1,
   bool ascending = true;
   for (int i = 0; i < _argv.size(); i++) {
     Variant *v = &((Array&)_argv).lvalAt(i);
-    if (v->isArray()) {
+    Variant::TypedValueAccessor tva = v->getTypedAccessor();
+    if (Variant::GetAccessorType(tva) == KindOfArray) {
       sd.cmp_func = get_cmp_func(sort_flags, ascending);
       data.push_back(sd);
 
@@ -1127,7 +1159,7 @@ bool f_array_multisort(int _argc, VRefParam ar1,
       ascending = true;
 
       sd.original = v;
-      arrays.push_back(sd.original->toArray());
+      arrays.push_back(Variant::GetAsArray(tva));
       sd.array = &arrays.back();
     } else {
       int n = v->toInt32();
@@ -1150,20 +1182,16 @@ bool f_array_multisort(int _argc, VRefParam ar1,
 Variant f_array_unique(CVarRef array, int sort_flags /* = 2 */) {
   // NOTE, PHP array_unique accepts ArrayAccess objects as well,
   // which is not supported here.
-  if (!array.isArray()) {
-    throw_bad_array_exception();
-    return false;
-  }
-  CArrRef input = array.toArrNR();
+  getCheckedArray(array);
   switch (sort_flags) {
   case SORT_STRING:
   case SORT_LOCALE_STRING:
-    return ArrayUtil::StringUnique(input);
+    return ArrayUtil::StringUnique(arr_array);
   case SORT_NUMERIC:
-    return ArrayUtil::NumericUnique(input);
+    return ArrayUtil::NumericUnique(arr_array);
   case SORT_REGULAR:
   default:
-    return ArrayUtil::RegularSortUnique(input);
+    return ArrayUtil::RegularSortUnique(arr_array);
   }
 }
 

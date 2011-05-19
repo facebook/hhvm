@@ -212,6 +212,11 @@ class Variant {
     return *(const Array*)(this);
   }
 
+  const Array & toCArrRef() const {
+    ASSERT(is(KindOfArray));
+    return *(Array*)(LIKELY(m_type == KindOfArray) ? this : this->m_data.pvar);
+  }
+
   Array & asArrRef() {
     ASSERT(m_type == KindOfArray);
     return *(Array*)(this);
@@ -1010,7 +1015,7 @@ class Variant {
     }
     return obj;
   }
-  static CArrRef GetAsArray(TypedValueAccessor acc) {
+  static Array &GetAsArray(TypedValueAccessor acc) {
     ASSERT(acc && acc->m_type == KindOfArray);
     return *(Array*)acc;
   }
@@ -1393,6 +1398,10 @@ public:
   void array_iter_dirty_set() const { return m_var.array_iter_dirty_set(); }
   void array_iter_dirty_reset() const { return m_var.array_iter_dirty_reset(); }
   void array_iter_dirty_check() const { return m_var.array_iter_dirty_check(); }
+
+  Variant::TypedValueAccessor getTypedAccessor() const {
+    return m_var.getTypedAccessor();
+  }
 private:
   mutable Variant m_var;
 };

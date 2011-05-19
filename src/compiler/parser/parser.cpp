@@ -663,8 +663,8 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
                         Token &params, Token &stmt) {
   const string &retType = ret.text();
   if (!retType.empty() && !ret.check()) {
-    raise_error("Return type hint is not supported yet: %s",
-                getMessage().c_str());
+    Logger::Error("Return type hint is not supported yet: %s",
+                  getMessage().c_str());
   }
   if (!stmt->stmt) {
     stmt->stmt = NEW_STMT0(StatementList);

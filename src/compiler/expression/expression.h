@@ -144,7 +144,17 @@ public:
   ExpressionPtr replaceValue(ExpressionPtr rep);
   void clearContext();
   int getContext() const { return m_context;}
-  bool hasContext(Context context) const { return m_context & context; }
+  bool hasContext(Context context) const { return (m_context & context) == context; }
+  bool hasAnyContext(int context) const {
+    if ((context & Declaration) == Declaration) {
+      // special case Declaration because it is 2 bit fields
+      if (hasContext(Declaration)) return true;
+      // clear Declaration since we already checked for it
+      context &= ~Declaration;  
+    }
+    return m_context & context; 
+  }
+  bool hasAllContext(int context) const { return (m_context & context) == context; }
   bool hasSubExpr(ExpressionPtr sub) const;
   virtual void setComment(const std::string &) {}
   /**
@@ -203,7 +213,7 @@ public:
   unsigned getCanonID() const { return m_canon_id; }
   void setCanonPtr(ExpressionPtr e) { m_canonPtr = e; }
   ExpressionPtr getCanonPtr() const {
-    return m_context & (LValue|RefValue|UnsetContext) ?
+    return m_context & (LValue|RefValue|UnsetContext|DeepReference) ?
       ExpressionPtr() : m_canonPtr;
   }
   ExpressionPtr getCanonLVal() const {
@@ -331,6 +341,7 @@ public:
   static void CheckPassByReference(AnalysisResultPtr ar,
                                    ExpressionPtr param);
 
+  static bool CheckNeededRHS(ExpressionPtr value);
   static bool CheckNeeded(ExpressionPtr variable, ExpressionPtr value);
 
   void fixExpectedType(AnalysisResultConstPtr ar);

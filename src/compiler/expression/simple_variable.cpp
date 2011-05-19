@@ -70,7 +70,10 @@ void SimpleVariable::updateSymbol(SimpleVariablePtr src) {
 bool SimpleVariable::couldBeAliased() const {
   if (m_globals || m_superGlobal) return true;
   assert(m_sym);
-  return m_sym->isReferenced() || m_sym->isGlobal() || m_sym->isStatic();
+  if (m_sym->isGlobal() || m_sym->isStatic()) return true;
+  if (getScope()->inPseudoMain()) return true;
+  if (isReferencedValid()) return isReferenced();
+  return m_sym->isReferenced(); 
 }
 
 void SimpleVariable::coalesce(SimpleVariablePtr other) {
@@ -95,7 +98,10 @@ bool SimpleVariable::canKill(bool isref) const {
     return isref && !getScope()->inPseudoMain();
   }
 
-  return isref || !m_sym->isReferenced();
+  return isref || (
+    isReferencedValid() ? 
+      !isReferenced() : !m_sym->isReferenced()
+    );
 }
 
 void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
@@ -263,9 +269,11 @@ void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                                     int state)
 {
   if (hasCPPTemp()) return;
-  if (hasContext(InvokeArgument) && !hasContext(AccessContext)) {
+  if (hasContext(InvokeArgument) && !hasContext(AccessContext) && 
+      (isLocalExprAltered() || hasEffect())) {
     Expression::preOutputStash(cg, ar, state);
     const string& ref_temp = cppTemp();
+    ASSERT(!ref_temp.empty());
     string copy_temp = genCPPTemp(cg, ar);
     string arg_temp = genCPPTemp(cg, ar);
     const char *prefix =

@@ -48,6 +48,7 @@
 #include <compiler/analysis/dictionary.h>
 #include <compiler/analysis/expr_dict.h>
 #include <compiler/analysis/live_dict.h>
+#include <compiler/analysis/ref_dict.h>
 
 #include <util/parser/hphp.tab.hpp>
 #include <util/util.h>
@@ -1128,12 +1129,20 @@ ExpressionPtr AliasManager::canonicalizeNode(
                     Handling unset of a variable which hasnt been
                     used since it was last assigned
                   */
-                  if (!e->is(Expression::KindOfSimpleVariable) ||
-                      spc(SimpleVariable, e)->couldBeAliased()) {
+                  if (!e->is(Expression::KindOfSimpleVariable)) {
                     break;
                   }
 
                   AssignmentExpressionPtr a = spc(AssignmentExpression, rep);
+
+                  assert(
+                    a->getVariable()->is(Expression::KindOfSimpleVariable));
+                  SimpleVariablePtr variable = 
+                    spc(SimpleVariable, a->getVariable());
+                  if (variable->couldBeAliased()) {
+                    break;
+                  }
+
                   ExpressionPtr value = a->getValue();
                   if (value->getContext() & Expression::RefValue) {
                     break;
@@ -2206,8 +2215,48 @@ void AliasManager::doFinal(MethodStatementPtr m) {
   }
 }
 
+void AliasManager::performReferencedAndNeededAnalysis(MethodStatementPtr m) {
+  assert(m_graph != NULL);
+
+  // bail out for pseudomain context
+  if (m->getScope()->inPseudoMain()) return;
+
+  if (Option::DumpAst) {
+    printf("----- Before reference + needed analysis -----\n");
+    m_graph->dump(m_arp);
+  }
+
+  RefDict rd(*this);
+  rd.build(m);
+  AttributeTagger<RefDict> rt(m_graph, rd);
+  RefDictWalker rdw(m_graph);
+
+  // referenced analysis
+  rd.updateParams();
+  rt.walk();
+  DataFlow::ComputePartialReferenced(*m_graph);
+  rdw.walk();
+
+  rd.togglePass();
+  rdw.togglePass();
+
+  // needed analysis
+  rd.updateParams();
+  rt.walk();
+  DataFlow::ComputePartialNeeded(*m_graph);
+  rdw.walk();
+
+  if (Option::DumpAst) {
+    printf("----- After reference + needed analysis -----\n");
+    m_graph->dump(m_arp);
+  }
+}
+
 int AliasManager::copyProp(MethodStatementPtr m) {
   m_graph = ControlFlowGraph::buildControlFlow(m);
+
+  performReferencedAndNeededAnalysis(m);
+
   ExprDict ed(*this);
   m_genAttrs = true;
   ed.build(m);
@@ -2280,6 +2329,9 @@ void AliasManager::finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m) {
     if (Option::VariableCoalescing &&
         !m_inPseudoMain &&
         !m_variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
+
+      performReferencedAndNeededAnalysis(m);
+
       LiveDict ld(*this);
       m_genAttrs = true;
       ld.build(m);

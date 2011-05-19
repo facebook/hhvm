@@ -109,12 +109,30 @@ public:
   void setAnticipated() { m_flags.anticipated = true; }
   void clearAnticipated() { m_flags.anticipated = false; }
   bool isAnticipated() const { return m_flags.anticipated; }
+
   void setAvailable() { m_flags.available = true; }
   void clearAvailable() { m_flags.available = false; }
   bool isAvailable() const { return m_flags.available; }
+
   void setLocalExprAltered() { m_flags.localExprNotAltered = false; }
   void clearLocalExprAltered() { m_flags.localExprNotAltered = true; }
   bool isLocalExprAltered() const { return !m_flags.localExprNotAltered; }
+
+  void setReferencedValid() { m_flags.referenced_valid = true; }
+  void clearReferencedValid() { m_flags.referenced_valid = false; }
+  bool isReferencedValid() const { return m_flags.referenced_valid; }
+
+  void setReferenced() { m_flags.referenced = true; }
+  void clearReferenced() { m_flags.referenced = false; }
+  bool isReferenced() const { return m_flags.referenced; }
+
+  void setNeededValid() { m_flags.needed_valid = true; }
+  void clearNeededValid() { m_flags.needed_valid = false; }
+  bool isNeededValid() const { return m_flags.needed_valid; }
+
+  void setNeeded() { m_flags.needed = true; }
+  void clearNeeded() { m_flags.needed = false; }
+  bool isNeeded() const { return m_flags.needed; }
 
   BlockScopeRawPtr getScope() const { return m_blockScope; }
   void setBlockScope(BlockScopeRawPtr scope) { m_blockScope = scope; }
@@ -220,6 +238,10 @@ private:
       unsigned available : 1;
       unsigned localExprNotAltered : 1; // whether this node can be
                                         // altered in this expression
+      unsigned referenced : 1;
+      unsigned referenced_valid : 1; // whether or not the above flag is valid
+      unsigned needed : 1;
+      unsigned needed_valid : 1; // whether or not the above flag is valid
     } m_flags;
   };
 protected:

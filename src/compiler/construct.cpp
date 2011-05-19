@@ -321,7 +321,35 @@ void Construct::dumpNode(int spc, AnalysisResultConstPtr ar) {
     localtered = " (" + localtered + ")";
   }
 
-  std::cout << type_info << nkid << scontext << sef << localtered;
+  string refstr;
+  if (dynamic_cast<SimpleVariable*>(this) != NULL) {
+    if (isReferencedValid()) {
+      if (isReferenced()) {
+        refstr += "Referenced";
+      } else {
+        refstr += "NotReferenced";
+      }
+    } else {
+      refstr = "NoRefInfo";
+    }
+  }
+  if (refstr != "") refstr = " (" + refstr + ")";
+
+  string objstr;
+  if (dynamic_cast<SimpleVariable*>(this) != NULL) {
+    if (isNeededValid()) {
+      if (isNeeded()) {
+        objstr += "Object";
+      } else {
+        objstr += "NotObject";
+      }
+    } else {
+      objstr = "NoObjInfo";
+    }
+  }
+  if (objstr != "") objstr = " (" + objstr + ")";
+
+  std::cout << type_info << nkid << scontext << sef << localtered << refstr << objstr;
   if (m_loc) {
     std::cout << " " << m_loc->file << ":" <<
       m_loc->line1 << "@" << m_loc->char1;

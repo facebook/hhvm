@@ -126,6 +126,8 @@ class AliasManager {
     ExpressionPtrList   m_exprs;
   };
 
+  void performReferencedAndNeededAnalysis(MethodStatementPtr m);
+
   typedef std::set<std::string> StringSet;
 
   class LoopInfo {

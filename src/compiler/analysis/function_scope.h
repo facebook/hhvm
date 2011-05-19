@@ -367,6 +367,10 @@ public:
     m_closureVars = closureVars;
   }
 
+  ExpressionListPtr getClosureVars() const {
+    return m_closureVars;
+  }
+
   void addCaller(BlockScopePtr caller);
   ReadWriteMutex &getInlineMutex() { return m_inlineMutex; }
 

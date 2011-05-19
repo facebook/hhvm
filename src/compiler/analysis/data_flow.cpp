@@ -179,6 +179,20 @@ void DataFlow::ComputePartialAnticipated(const ControlFlowGraph &g) {
     DataFlow::PAntIn, DataFlow::PAntOut);
 }
 
+void DataFlow::ComputePartialReferenced(const ControlFlowGraph &g) {
+  DataFlow::ComputeForwards(
+    BitOps::bit_or, g,
+    DataFlow::Referenced, DataFlow::Killed,
+    DataFlow::PRefIn, DataFlow::PRefOut);
+}
+
+void DataFlow::ComputePartialNeeded(const ControlFlowGraph &g) {
+  DataFlow::ComputeForwards(
+    BitOps::bit_or, g,
+    DataFlow::Object, DataFlow::NotObject,
+    DataFlow::PObjIn, DataFlow::PObjOut);
+}
+
 void DataFlow::ComputeUsed(const ControlFlowGraph &g) {
   int num = g.getNumBlocks();
   size_t width = g.bitWidth();

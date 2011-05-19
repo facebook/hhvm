@@ -75,6 +75,9 @@ void StaticStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
       variable = assignment_exp->getVariable();
       value = assignment_exp->getValue();
       SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
+      // set the Declaration context here instead of all over this file - this phase
+      // is the first to run
+      var->setContext(Expression::Declaration);
       Symbol *sym = var->getSymbol();
       sym->setStaticInitVal(value);
     }
@@ -137,7 +140,7 @@ void StaticStatement::inferTypes(AnalysisResultPtr ar) {
         if (variable->is(Expression::KindOfSimpleVariable)) {
           SimpleVariablePtr var =
             dynamic_pointer_cast<SimpleVariable>(variable);
-          var->setContext(Expression::Declaration);
+          assert(var->hasContext(Expression::Declaration));
           scope->getVariables()->forceVariant(ar, var->getName(),
                                               VariableTable::AnyStaticVars);
         } else {
@@ -161,7 +164,7 @@ void StaticStatement::inferTypes(AnalysisResultPtr ar) {
       ExpressionPtr variable = assignment_exp->getVariable();
       if (variable->is(Expression::KindOfSimpleVariable)) {
         SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
-        var->setContext(Expression::Declaration);
+        assert(var->hasContext(Expression::Declaration));
         const std::string &name = var->getName();
         /* If we have already seen this variable in the current scope and
            it is not a static variable, record this variable as "redeclared"
@@ -229,7 +232,7 @@ void StaticStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         dynamic_pointer_cast<AssignmentExpression>(exp);
       ExpressionPtr variable = assignment_exp->getVariable();
       SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
-      var->setContext(Expression::Declaration);
+      assert(var->hasContext(Expression::Declaration));
       const std::string &name = var->getName();
 
       if (variables->needLocalCopy(name)) {

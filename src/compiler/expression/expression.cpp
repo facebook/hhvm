@@ -387,24 +387,29 @@ void Expression::setDynamicByIdentifier(AnalysisResultPtr ar,
   }
 }
 
+bool Expression::CheckNeededRHS(ExpressionPtr value) {
+  bool needed = true;
+  assert(value);
+  while (value->is(KindOfAssignmentExpression)) {
+    value = dynamic_pointer_cast<AssignmentExpression>(value)->getValue();
+  }
+  if (value->isScalar()) {
+    needed = false;
+  } else {
+    TypePtr type = value->getType();
+    if (type && (type->is(Type::KindOfSome) || type->is(Type::KindOfAny))) {
+      type = value->getActualType();
+    }
+    if (type && type->isNoObjectInvolved()) needed = false;
+  }
+  return needed;
+}
+
 bool Expression::CheckNeeded(ExpressionPtr variable, ExpressionPtr value) {
   // if the value may involve object, consider the variable as "needed"
   // so that objects are not destructed prematurely.
   bool needed = true;
-  if (value) {
-    while (value->is(KindOfAssignmentExpression)) {
-      value = dynamic_pointer_cast<AssignmentExpression>(value)->getValue();
-    }
-    if (value->isScalar()) {
-      needed = false;
-    } else {
-      TypePtr type = value->getType();
-      if (type && (type->is(Type::KindOfSome) || type->is(Type::KindOfAny))) {
-        type = value->getActualType();
-      }
-      if (type && type->isNoObjectInvolved()) needed = false;
-    }
-  }
+  if (value) needed = CheckNeededRHS(value);
   if (variable->is(Expression::KindOfSimpleVariable)) {
     SimpleVariablePtr var =
       dynamic_pointer_cast<SimpleVariable>(variable);

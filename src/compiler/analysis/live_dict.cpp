@@ -228,11 +228,19 @@ void LiveDict::updateAccess(ExpressionPtr e) {
     SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(e));
     bool use = false, kill = false, def = false;
     Symbol *sym = sv->getSymbol();
+    bool isReferenced = 
+      e->isReferencedValid() ?
+        e->isReferenced() :
+        sym && sym->isReferenced();
+    bool isNeeded =
+      e->isNeededValid() ?
+        e->isNeeded() :
+        sym && sym->isNeeded();
     if (unset) {
       kill = true;
     } else if (store) {
       if (context & Expression::RefAssignmentLHS ||
-          (!m_am.hasWildRefs() && sym && !sym->isReferenced())) {
+          (!m_am.hasWildRefs() && !isReferenced)) {
         kill = true;
       }
       def = true;
@@ -248,7 +256,7 @@ void LiveDict::updateAccess(ExpressionPtr e) {
     } else {
       use = true;
     }
-    if (kill && (!sym || sym->isNeeded() || sym->isReferenced()) &&
+    if (kill && (!sym || isNeeded || isReferenced) &&
         !BitOps::get_bit(eid, m_altered) &&
         !BitOps::get_bit(eid, m_available)) {
       BitOps::set_bit(eid, m_dying, true);

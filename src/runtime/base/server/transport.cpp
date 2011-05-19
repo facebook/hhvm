@@ -450,7 +450,7 @@ bool Transport::cookieExists(const char *name) {
   int len = strlen(name);
   bool hasValue = (strchr(name, '=') != NULL);
   for (size_t pos = header.find(name); pos != string::npos;
-       pos = header.find(name, pos)) {
+       pos = header.find(name, pos + 1)) {
     if (pos == 0 || isspace(header[pos-1]) || header[pos-1] == ';') {
       pos += len;
       if (hasValue) {

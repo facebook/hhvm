@@ -17,6 +17,7 @@
 
 #include <runtime/ext/ext_openssl.h>
 #include <runtime/base/file/ssl_socket.h>
+#include <runtime/base/zend/zend_string.h>
 #include <util/logger.h>
 
 #include <openssl/evp.h>
@@ -61,6 +62,10 @@ enum php_openssl_cipher_type {
   PHP_OPENSSL_CIPHER_3DES,
   PHP_OPENSSL_CIPHER_DEFAULT = PHP_OPENSSL_CIPHER_RC2_40
 };
+
+// bitfields
+const int k_OPENSSL_RAW_DATA = 1;
+const int k_OPENSSL_ZERO_PADDING = 2;
 
 static char default_ssl_conf_filename[PATH_MAX];
 
@@ -1854,7 +1859,7 @@ Variant f_openssl_seal(CStrRef data, VRefParam sealed_data, VRefParam env_keys,
   for (ArrayIter iter(pub_key_ids); iter; ++iter, ++i) {
     Object okey = Key::Get(iter.second(), true);
     if (okey.isNull()) {
-      raise_warning("not a public key (%dth member of pubkeys)", i);
+      raise_warning("not a public key (%dth member of pubkeys)", i + 1);
       ret = false;
       goto clean_exit;
     }
@@ -2330,7 +2335,7 @@ static String php_openssl_validate_iv(String piv, int iv_required_len) {
 }
 
 Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password,
-                          bool raw_output /* = false */,
+                          int options /* = 0 */,
                           CStrRef iv /* = null_string */) {
   const EVP_CIPHER *cipher_type = EVP_get_cipherbyname(method);
   if (!cipher_type) {
@@ -2365,6 +2370,9 @@ Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password,
   EVP_CIPHER_CTX cipher_ctx;
   EVP_EncryptInit(&cipher_ctx, cipher_type, key,
                   (unsigned char *)new_iv.data());
+  if (options & k_OPENSSL_ZERO_PADDING) {
+    EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
+  }
   EVP_EncryptUpdate(&cipher_ctx, outbuf, &result_len,
                     (unsigned char *)data.data(), data.size());
   outlen = result_len;
@@ -2374,20 +2382,21 @@ Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password,
     outlen += result_len;
     outbuf[outlen] = '\0';
     String rv = String((char*)outbuf, outlen, AttachString);
-
-    if (raw_output) {
+    EVP_CIPHER_CTX_cleanup(&cipher_ctx);
+    if (options & k_OPENSSL_RAW_DATA) {
       return rv;
     } else {
       return StringUtil::Base64Encode(rv);
     }
   }
 
+  EVP_CIPHER_CTX_cleanup(&cipher_ctx);
   free(outbuf);
   return false;
 }
 
 Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password,
-                          bool raw_input /* = false */,
+                          int options /* = 0 */,
                           CStrRef iv /* = null_string */) {
   const EVP_CIPHER *cipher_type = EVP_get_cipherbyname(method);
   if (!cipher_type) {
@@ -2397,7 +2406,7 @@ Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password,
 
   String decoded_data = data;
 
-  if (!raw_input) {
+  if (!(options & k_OPENSSL_RAW_DATA)) {
     decoded_data = StringUtil::Base64Decode(data);
   }
 
@@ -2423,6 +2432,9 @@ Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password,
   EVP_CIPHER_CTX cipher_ctx;
   EVP_DecryptInit(&cipher_ctx, cipher_type, key,
                   (unsigned char *)new_iv.data());
+  if (options & k_OPENSSL_ZERO_PADDING) {
+    EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
+  }
   EVP_DecryptUpdate(&cipher_ctx, outbuf, &result_len,
                     (unsigned char *)decoded_data.data(), decoded_data.size());
   outlen = result_len;
@@ -2431,11 +2443,72 @@ Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password,
                        &result_len)) {
     outlen += result_len;
     outbuf[outlen] = '\0';
+    EVP_CIPHER_CTX_cleanup(&cipher_ctx);
     return String((char*)outbuf, outlen, AttachString);
   } else {
+    EVP_CIPHER_CTX_cleanup(&cipher_ctx);
     free(outbuf);
     return false;
   }
+}
+
+Variant f_openssl_digest(CStrRef data, CStrRef method,
+                         bool raw_output /* = false */) {
+  const EVP_MD *mdtype = EVP_get_digestbyname(method);
+  
+  if (!mdtype) {
+    raise_warning("Unknown signature algorithm");
+    return false;
+  }
+  int siglen = EVP_MD_size(mdtype);
+  unsigned char *sigbuf = (unsigned char *)malloc(siglen + 1);
+  EVP_MD_CTX md_ctx;
+
+  EVP_DigestInit(&md_ctx, mdtype);
+  EVP_DigestUpdate(&md_ctx, (unsigned char *)data.data(), data.size());
+  if (EVP_DigestFinal(&md_ctx, (unsigned char *)sigbuf, (unsigned int *)&siglen)) {
+    if (raw_output) {
+      sigbuf[siglen] = '\0';
+      return String((char*)sigbuf, siglen, AttachString);
+    } else {
+      String digest_str = string_bin2hex((char*)sigbuf, siglen);
+      free(sigbuf);
+      return String(digest_str, AttachString);
+    }
+  } else {
+    free(sigbuf);
+    return false;
+  }
+}
+
+static void openssl_add_method_or_alias(const OBJ_NAME *name, void *arg)
+{
+  Array *ret = (Array*)arg;
+  ret->append(String((char *)name->name, CopyString));
+}
+
+static void openssl_add_method(const OBJ_NAME *name, void *arg)
+{
+  if (name->alias == 0) {
+    Array *ret = (Array*)arg;
+    ret->append(String((char *)name->name, CopyString));
+  }
+}
+
+Array f_openssl_get_cipher_methods(bool aliases /* = false */) {
+  Array ret = Array::Create();
+  OBJ_NAME_do_all_sorted(OBJ_NAME_TYPE_CIPHER_METH,
+    aliases ? openssl_add_method_or_alias: openssl_add_method, 
+    &ret);
+  return ret;
+}
+
+Array f_openssl_get_md_methods(bool aliases /* = false */) {
+  Array ret = Array::Create();
+  OBJ_NAME_do_all_sorted(OBJ_NAME_TYPE_MD_METH,
+    aliases ? openssl_add_method_or_alias: openssl_add_method, 
+    &ret);
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

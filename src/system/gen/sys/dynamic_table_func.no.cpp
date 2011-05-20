@@ -13094,6 +13094,27 @@ Variant ifa_drawsetvectorgraphics(void *extra, int count, INVOKE_FEW_ARGS_IMPL_A
   CVarRef arg1(a1);
   return (x_drawsetvectorgraphics(arg0, arg1));
 }
+Variant i_openssl_digest(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 2 || count > 3)) return throw_wrong_arguments("openssl_digest", count, 2, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (x_openssl_digest(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (x_openssl_digest(arg0, arg1, arg2));
+  }
+}
+Variant ifa_openssl_digest(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count < 2 || count > 3)) return throw_wrong_arguments("openssl_digest", count, 2, 3, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  if (count <= 2) return (x_openssl_digest(arg0, arg1));
+  CVarRef arg2(a2);
+  return (x_openssl_digest(arg0, arg1, arg2));
+}
 Variant i_ctype_upper(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ctype_upper", count, 1, 1, 1);
@@ -22220,6 +22241,23 @@ Variant ifa_drawgetfillrule(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg0(a0);
   return (x_drawgetfillrule(arg0));
 }
+Variant i_openssl_get_md_methods(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("openssl_get_md_methods", 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) return (x_openssl_get_md_methods());
+    CVarRef arg0((ad->getValue(pos)));
+    return (x_openssl_get_md_methods(arg0));
+  }
+}
+Variant ifa_openssl_get_md_methods(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("openssl_get_md_methods", 1, 1);
+  if (count <= 0) return (x_openssl_get_md_methods());
+  CVarRef arg0(a0);
+  return (x_openssl_get_md_methods(arg0));
+}
 Variant i_parse_hdf_string(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("parse_hdf_string", count, 1, 1, 1);
@@ -30305,6 +30343,23 @@ Variant ifa_extension_loaded(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) 
   CVarRef arg0(a0);
   return (x_extension_loaded(arg0));
 }
+Variant i_openssl_get_cipher_methods(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("openssl_get_cipher_methods", 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) return (x_openssl_get_cipher_methods());
+    CVarRef arg0((ad->getValue(pos)));
+    return (x_openssl_get_cipher_methods(arg0));
+  }
+}
+Variant ifa_openssl_get_cipher_methods(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("openssl_get_cipher_methods", 1, 1);
+  if (count <= 0) return (x_openssl_get_cipher_methods());
+  CVarRef arg0(a0);
+  return (x_openssl_get_cipher_methods(arg0));
+}
 Variant i_mb_detect_order(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 1)) return throw_toomany_arguments("mb_detect_order", 1, 1);
@@ -38311,6 +38366,7 @@ CallInfo ci_pixelsetred((void*)&i_pixelsetred, (void*)&ifa_pixelsetred, 2, 0, 0x
 CallInfo ci_mailparse_uudecode_all((void*)&i_mailparse_uudecode_all, (void*)&ifa_mailparse_uudecode_all, 1, 0, 0x0000000000000000LL);
 CallInfo ci_spl_autoload_call((void*)&i_spl_autoload_call, (void*)&ifa_spl_autoload_call, 1, 0, 0x0000000000000000LL);
 CallInfo ci_drawsetvectorgraphics((void*)&i_drawsetvectorgraphics, (void*)&ifa_drawsetvectorgraphics, 2, 0, 0x0000000000000000LL);
+CallInfo ci_openssl_digest((void*)&i_openssl_digest, (void*)&ifa_openssl_digest, 3, 0, 0x0000000000000000LL);
 CallInfo ci_ctype_upper((void*)&i_ctype_upper, (void*)&ifa_ctype_upper, 1, 0, 0x0000000000000000LL);
 CallInfo ci_get_declared_classes((void*)&i_get_declared_classes, (void*)&ifa_get_declared_classes, 0, 0, 0x0000000000000000LL);
 CallInfo ci_drawgetstrokelinejoin((void*)&i_drawgetstrokelinejoin, (void*)&ifa_drawgetstrokelinejoin, 1, 0, 0x0000000000000000LL);
@@ -38814,6 +38870,7 @@ CallInfo ci_stream_context_set_option((void*)&i_stream_context_set_option, (void
 CallInfo ci_drawpathcurvetorelative((void*)&i_drawpathcurvetorelative, (void*)&ifa_drawpathcurvetorelative, 7, 0, 0x0000000000000000LL);
 CallInfo ci_phpcredits((void*)&i_phpcredits, (void*)&ifa_phpcredits, 1, 0, 0x0000000000000000LL);
 CallInfo ci_drawgetfillrule((void*)&i_drawgetfillrule, (void*)&ifa_drawgetfillrule, 1, 0, 0x0000000000000000LL);
+CallInfo ci_openssl_get_md_methods((void*)&i_openssl_get_md_methods, (void*)&ifa_openssl_get_md_methods, 1, 0, 0x0000000000000000LL);
 CallInfo ci_parse_hdf_string((void*)&i_parse_hdf_string, (void*)&ifa_parse_hdf_string, 1, 0, 0x0000000000000000LL);
 CallInfo ci_xmlwriter_end_cdata((void*)&i_xmlwriter_end_cdata, (void*)&ifa_xmlwriter_end_cdata, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetversionstring((void*)&i_magickgetversionstring, (void*)&ifa_magickgetversionstring, 0, 0, 0x0000000000000000LL);
@@ -39272,6 +39329,7 @@ CallInfo ci_mcrypt_enc_get_algorithms_name((void*)&i_mcrypt_enc_get_algorithms_n
 CallInfo ci_hphp_splfileobject_rewind((void*)&i_hphp_splfileobject_rewind, (void*)&ifa_hphp_splfileobject_rewind, 1, 0, 0x0000000000000000LL);
 CallInfo ci_fprintf((void*)&i_fprintf, (void*)&ifa_fprintf, 2, 1, 0x0000000000000000LL);
 CallInfo ci_extension_loaded((void*)&i_extension_loaded, (void*)&ifa_extension_loaded, 1, 0, 0x0000000000000000LL);
+CallInfo ci_openssl_get_cipher_methods((void*)&i_openssl_get_cipher_methods, (void*)&ifa_openssl_get_cipher_methods, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mb_detect_order((void*)&i_mb_detect_order, (void*)&ifa_mb_detect_order, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickmapimage((void*)&i_magickmapimage, (void*)&ifa_magickmapimage, 3, 0, 0x0000000000000000LL);
 CallInfo ci_get_magic_quotes_runtime((void*)&i_get_magic_quotes_runtime, (void*)&ifa_get_magic_quotes_runtime, 0, 0, 0x0000000000000000LL);
@@ -46234,6 +46292,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 4338:
+      HASH_GUARD(0x509C9542BE5E50F2LL, openssl_get_md_methods) {
+        ci = &ci_openssl_get_md_methods;
+        return true;
+      }
+      break;
     case 4339:
       HASH_GUARD(0x315CCBC8C5C7D0F3LL, xmlwriter_write_raw) {
         ci = &ci_xmlwriter_write_raw;
@@ -47734,6 +47798,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 5269:
+      HASH_GUARD(0x7E1803843F88B495LL, openssl_get_cipher_methods) {
+        ci = &ci_openssl_get_cipher_methods;
+        return true;
+      }
+      break;
     case 5271:
       HASH_GUARD(0x353E2A635A47F497LL, evhttp_get) {
         ci = &ci_evhttp_get;
@@ -48913,6 +48983,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 6128:
       HASH_GUARD(0x14F700DD189DB7F0LL, drawsetclipunits) {
         ci = &ci_drawsetclipunits;
+        return true;
+      }
+      break;
+    case 6130:
+      HASH_GUARD(0x42D2B3B62D8FD7F2LL, openssl_digest) {
+        ci = &ci_openssl_digest;
         return true;
       }
       break;

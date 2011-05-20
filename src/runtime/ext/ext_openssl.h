@@ -66,8 +66,13 @@ Variant f_openssl_x509_parse(CVarRef x509cert, bool shortnames = true);
 Variant f_openssl_x509_read(CVarRef x509certdata);
 Variant f_openssl_random_pseudo_bytes(int length, VRefParam crypto_strong = false);
 Variant f_openssl_cipher_iv_length(CStrRef method);
-Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password, bool raw_output = false, CStrRef iv = null_string);
-Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password, bool raw_input = false, CStrRef iv = null_string);
+Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password, int options = 0, CStrRef iv = null_string);
+Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password, int options = 0, CStrRef iv = null_string);
+Variant f_openssl_digest(CStrRef data, CStrRef method, bool raw_output = false);
+Array f_openssl_get_cipher_methods(bool aliases = false);
+Array f_openssl_get_md_methods(bool aliases = false);
+extern const int k_OPENSSL_RAW_DATA;
+extern const int k_OPENSSL_ZERO_PADDING;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

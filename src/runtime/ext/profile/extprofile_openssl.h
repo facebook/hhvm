@@ -271,16 +271,34 @@ inline Variant x_openssl_cipher_iv_length(CStrRef method) {
   return f_openssl_cipher_iv_length(method);
 }
 
-inline Variant x_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password, bool raw_output = false, CStrRef iv = null_string) {
+inline Variant x_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password, int options = 0, CStrRef iv = null_string) {
   FUNCTION_INJECTION_BUILTIN(openssl_encrypt);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  return f_openssl_encrypt(data, method, password, raw_output, iv);
+  return f_openssl_encrypt(data, method, password, options, iv);
 }
 
-inline Variant x_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password, bool raw_input = false, CStrRef iv = null_string) {
+inline Variant x_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password, int options = 0, CStrRef iv = null_string) {
   FUNCTION_INJECTION_BUILTIN(openssl_decrypt);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  return f_openssl_decrypt(data, method, password, raw_input, iv);
+  return f_openssl_decrypt(data, method, password, options, iv);
+}
+
+inline Variant x_openssl_digest(CStrRef data, CStrRef method, bool raw_output = false) {
+  FUNCTION_INJECTION_BUILTIN(openssl_digest);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_openssl_digest(data, method, raw_output);
+}
+
+inline Array x_openssl_get_cipher_methods(bool aliases = false) {
+  FUNCTION_INJECTION_BUILTIN(openssl_get_cipher_methods);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_openssl_get_cipher_methods(aliases);
+}
+
+inline Array x_openssl_get_md_methods(bool aliases = false) {
+  FUNCTION_INJECTION_BUILTIN(openssl_get_md_methods);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_openssl_get_md_methods(aliases);
 }
 
 

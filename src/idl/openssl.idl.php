@@ -27,6 +27,18 @@ CPP
 //   'note' => additional note about this constant's schema
 // )
 
+DefineConstant(
+  array(
+    'name'   => "OPENSSL_RAW_DATA",
+    'type'   => Int32,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "OPENSSL_ZERO_PADDING",
+    'type'   => Int32,
+  ));
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Functions
@@ -1209,9 +1221,9 @@ DefineFunction(
         'desc'   => "The password.",
       ),
       array(
-        'name'   => "raw_output",
-        'type'   => Boolean,
-        'value'  => "false",
+        'name'   => "options",
+        'type'   => Int32,
+        'value'  => "0",
         'desc'   => "Setting to TRUE will return as raw output data, otherwise the return value is base64 encoded.",
       ),
       array(
@@ -1249,9 +1261,9 @@ DefineFunction(
         'desc'   => "The password.",
       ),
       array(
-        'name'   => "raw_input",
-        'type'   => Boolean,
-        'value'  => "false",
+        'name'   => "options",
+        'type'   => Int32,
+        'value'  => "0",
         'desc'   => "Setting to TRUE will take a raw encoded string, otherwise a base64 string is assumed for the data parameter.",
       ),
       array(
@@ -1259,6 +1271,73 @@ DefineFunction(
         'type'   => String,
         'value'  => "null_string",
         'desc'   => "The initialisation vector.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "openssl_digest",
+    'desc'   => "Computes digest hash value for given data using given method, returns raw or binhex encoded string.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Returns the digested hash value on success or FALSE on failure.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "data",
+        'type'   => String,
+        'desc'   => "The data.",
+      ),
+      array(
+        'name'   => "method",
+        'type'   => String,
+        'desc'   => "The digest method.",
+      ),
+      array(
+        'name'   => "raw_output",
+        'type'   => Boolean,
+        'value'  => "false",
+        'desc'   => "Setting to TRUE will return as raw output data, otherwise the return value is binhex encoded.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "openssl_get_cipher_methods",
+    'desc'   => "Gets a list of available cipher methods.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => StringVec,
+      'desc'   => "An array of available cipher methods.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "aliases",
+        'type'   => Boolean,
+        'value'  => "false",
+        'desc'   => "Set to TRUE if cipher aliases should be included within the returned array.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "openssl_get_md_methods",
+    'desc'   => "Gets a list of available digest methods.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => StringVec,
+      'desc'   => "An array of available digest methods.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "aliases",
+        'type'   => Boolean,
+        'value'  => "false",
+        'desc'   => "Set to TRUE if digest aliases should be included within the returned array.",
       ),
     ),
   ));

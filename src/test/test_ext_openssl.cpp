@@ -17,6 +17,7 @@
 #include <test/test_ext_openssl.h>
 #include <runtime/ext/ext_openssl.h>
 #include <runtime/ext/ext_file.h>
+#include <runtime/ext/ext_string.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -63,6 +64,7 @@ bool TestExtOpenssl::RunTests(const std::string &which) {
   RUN_TEST(test_openssl_x509_parse);
   RUN_TEST(test_openssl_x509_read);
   RUN_TEST(test_openssl_encrypt);
+  RUN_TEST(test_openssl_digest);
   return ret;
 }
 
@@ -530,10 +532,18 @@ bool TestExtOpenssl::test_openssl_encrypt() {
   int iv_len = f_openssl_cipher_iv_length(cipher);
   String iv = f_openssl_random_pseudo_bytes(iv_len);
 
-  Variant data = f_openssl_encrypt(test, cipher, secret, false, iv);
-  VS(test, f_openssl_decrypt(data, cipher, secret, false, iv));
+  Variant data = f_openssl_encrypt(test, cipher, secret, 0, iv);
+  VS(test, f_openssl_decrypt(data, cipher, secret, 0, iv));
 
-  data = f_openssl_encrypt(test, cipher, secret, true, iv);
-  VS(test, f_openssl_decrypt(data, cipher, secret, true, iv));
+  data = f_openssl_encrypt(test, cipher, secret, k_OPENSSL_RAW_DATA, iv);
+  VS(test, f_openssl_decrypt(data, cipher, secret, k_OPENSSL_RAW_DATA, iv));
+  return Count(true);
+}
+
+bool TestExtOpenssl::test_openssl_digest() {
+  String test = "OpenSSL is also good for hashing things";
+
+  VS(f_md5(test), f_openssl_digest(test, "md5"));
+
   return Count(true);
 }

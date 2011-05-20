@@ -329,7 +329,6 @@ public:
   FILE *exec(const char *cmd) {
     ASSERT(m_proc == NULL);
     if (RuntimeOption::WritelistExec && !checkCmd(cmd)) {
-      Logger::Warning("Command %s not in the whitelist", cmd);
       return NULL;
     }
     m_proc = LightProcess::popen(cmd, "r", g_context->getCwd().data());
@@ -352,24 +351,36 @@ private:
 };
 
 bool ShellExecContext::checkCmd(const char *cmd) {
-  bool ret = false;
-  const char *space = strchr(cmd, ' ');
-  unsigned int cmd_len = strlen(cmd);
-  if (space) {
-    cmd_len = space - cmd;
-  }
-
-  for (unsigned int i = 0; i < RuntimeOption::AllowedExecCmds.size(); i++) {
-    std::string &allowedCmd = RuntimeOption::AllowedExecCmds[i];
-    if (allowedCmd.size() != cmd_len) {
-      continue;
+  const char *cmd_tmp = cmd;
+  while (true) {
+    bool allow = false;
+    while (isblank(*cmd_tmp)) cmd_tmp++;
+    const char *space = strchr(cmd_tmp, ' ');
+    unsigned int cmd_len = strlen(cmd_tmp);
+    if (space) {
+      cmd_len = space - cmd_tmp;
     }
-    if (strncmp(allowedCmd.c_str(), cmd, allowedCmd.size()) == 0) {
-      ret = true;
-      break;
+    for (unsigned int i = 0; i < RuntimeOption::AllowedExecCmds.size(); i++) {
+      std::string &allowedCmd = RuntimeOption::AllowedExecCmds[i];
+      if (allowedCmd.size() != cmd_len) {
+        continue;
+      }
+      if (strncmp(allowedCmd.c_str(), cmd_tmp, allowedCmd.size()) == 0) {
+        allow = true;
+        break;
+      }
     }
+    if (!allow) {
+      Logger::Warning("Command %s not in the whitelist", cmd_tmp);
+      return false;
+    }
+    const char *bar = strchr(cmd_tmp, '|');
+    if (!bar) { // no pipe, we are done
+      return true;
+    }
+    cmd_tmp = bar + 1;
   }
-  return ret;
+  return false;
 }
 
 String f_shell_exec(CStrRef cmd) {

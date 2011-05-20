@@ -96,6 +96,7 @@ public:
   void setNeedsCheckMem() { m_needsCheckMem = true; }
   bool needsCheckMem() const { return m_needsCheckMem; }
   void setClosureGenerator() { m_closureGenerator = true; }
+  bool needsClassParam();
 
   void setInlineSameContext(bool f) { m_inlineSameContext = f; }
   bool getInlineSameContext() const { return m_inlineSameContext; }

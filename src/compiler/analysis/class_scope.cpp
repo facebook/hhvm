@@ -1770,8 +1770,12 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
       prefix += Option::ClassPrefix;
       prefix += id;
       prefix += "::";
-      prefix += Option::MethodImplPrefix;
-      extra = "c";
+      if (func->needsClassParam()) {
+        prefix += Option::MethodImplPrefix;
+        extra = "c";
+      } else {
+        prefix += Option::MethodPrefix;
+      }
     } else {
       instance = "self->";
       prefix += Option::MethodPrefix;
@@ -1810,7 +1814,7 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
       cg_indentBegin("} else {\n");
       cg_printf("self = createDummy(pobj);\n");
       cg_indentEnd("}\n");
-    } else {
+    } else if (func->needsClassParam()) {
       // If mcp contains an object, was a static method invoked instance style.
       // Use rootObj's class name as invoking class
       class_name =

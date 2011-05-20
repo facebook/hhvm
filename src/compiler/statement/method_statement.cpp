@@ -444,12 +444,18 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf(" &___offsetget_lval(");
       } else if (m_modifiers->isStatic() && m_stmt) {
         // Static method wrappers get generated as support methods
-        cg_printf(" %s%s(CStrRef cls%s",
-                  needsWrapper && !isWrapper ?
-                  Option::TypedMethodImplPrefix : Option::MethodImplPrefix,
-                  cg.formatLabel(m_name).c_str(),
-                  funcScope->isVariableArgument() ||
-                  (m_params && m_params->getCount()) ? ", " : "");
+        bool needsClassParam = funcScope->needsClassParam();
+        const char *prefix = needsWrapper && !isWrapper ?
+          (needsClassParam ?
+           Option::TypedMethodImplPrefix : Option::TypedMethodPrefix) :
+          (needsClassParam ? Option::MethodImplPrefix : Option::MethodPrefix);
+        cg_printf(" %s%s(", prefix,
+                  cg.formatLabel(m_name).c_str());
+        if (needsClassParam) {
+          cg_printf("CStrRef cls%s",
+                    funcScope->isVariableArgument() ||
+                    (m_params && m_params->getCount()) ? ", " : "");
+        }
       } else {
         cg_printf(" %s%s(", prefix, cg.formatLabel(m_name).c_str());
       }
@@ -504,13 +510,19 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           cg_printf(" &%s%s::___offsetget_lval(",
                     Option::ClassPrefix, scope->getId(cg).c_str());
         } else if (m_modifiers->isStatic()) {
-          cg_printf(" %s%s::%s%s(CStrRef cls%s", Option::ClassPrefix,
-                    scope->getId(cg).c_str(),
-                    needsWrapper && !isWrapper ?
-                    Option::TypedMethodImplPrefix : Option::MethodImplPrefix,
-                    cg.formatLabel(m_name).c_str(),
-                    funcScope->isVariableArgument() ||
-                    (m_params && m_params->getCount()) ? ", " : "");
+          bool needsClassParam = funcScope->needsClassParam();
+          const char *prefix = needsWrapper && !isWrapper ?
+            (needsClassParam ?
+             Option::TypedMethodImplPrefix : Option::TypedMethodPrefix) :
+            (needsClassParam ? Option::MethodImplPrefix : Option::MethodPrefix);
+          cg_printf(" %s%s::%s%s(", Option::ClassPrefix,
+                    scope->getId(cg).c_str(), prefix,
+                    cg.formatLabel(m_name).c_str());
+          if (needsClassParam) {
+            cg_printf("CStrRef cls%s",
+                      funcScope->isVariableArgument() ||
+                      (m_params && m_params->getCount()) ? ", " : "");
+          }
         } else {
           cg_printf(" %s%s::%s%s(", Option::ClassPrefix,
                     scope->getId(cg).c_str(),
@@ -739,6 +751,7 @@ void MethodStatement::outputCPPStaticMethodWrapper(CodeGenerator &cg,
 
   CodeGenerator::Context context = cg.getContext();
   FunctionScopeRawPtr funcScope = getFunctionScope();
+  if (!funcScope->needsClassParam()) return;
 
   bool isWrapper = context == CodeGenerator::CppTypedParamsWrapperDecl ||
     context == CodeGenerator::CppTypedParamsWrapperImpl;
@@ -795,16 +808,17 @@ void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
 
   funcScope->outputCPP(cg, ar);
   cg_printf("%s%s%s(", type ? "return " : "",
-            (isMethod ? (m_modifiers->isStatic() ?
-                         Option::TypedMethodImplPrefix :
-                         Option::TypedMethodPrefix) :
+            (isMethod ?
+             (m_modifiers->isStatic() && funcScope->needsClassParam() ?
+              Option::TypedMethodImplPrefix :
+              Option::TypedMethodPrefix) :
              Option::TypedFunctionPrefix),
             fname.c_str());
   if (!isMethod) {
     if (fname[0] == '0') {
       cg_printf("extra, ");
     }
-  } else if (m_modifiers->isStatic()) {
+  } else if (m_modifiers->isStatic() && funcScope->needsClassParam()) {
     cg_printf("cls, ");
   }
   if (funcScope->isVariableArgument()) {
@@ -847,13 +861,13 @@ void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
           spec->outputCPPCast(cg, ar, funcScope);
           cg_printf("()");
         }
-      } else if (needsNullGet && 
+      } else if (needsNullGet &&
                  funcScope->getParamType(i)->isStandardObject()) {
         // a standard object can only be inferred if the spec type is
-        // a specific object - also, we only do this if we have 
-        // a default value of null specified since otherwise, 
+        // a specific object - also, we only do this if we have
+        // a default value of null specified since otherwise,
         // the passed in parameter cannot be null anyways
-        // and we do not have to generate a special type 
+        // and we do not have to generate a special type
         // check in the wrapper
         ASSERT(spec->isSpecificObject());
         cg_printf(".getObjectDataOrNull()");

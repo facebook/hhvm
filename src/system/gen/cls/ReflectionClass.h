@@ -71,7 +71,7 @@ class c_ReflectionClass : public ExtObjectData {
   public: Variant t_fetch(CVarRef v_what);
   public: bool t_test(CVarRef v_what, CVarRef v_name);
   public: String t___tostring();
-  public: static Variant ti_export(CStrRef cls, CVarRef v_name, CVarRef v_ret);
+  public: static Variant t_export(CVarRef v_name, CVarRef v_ret);
   public: Variant t_getname();
   public: Variant t_isinternal();
   public: bool t_isuserdefined();
@@ -109,7 +109,6 @@ class c_ReflectionClass : public ExtObjectData {
   public: bool t_implementsinterface(Variant v_cls);
   public: Variant t_getextension();
   public: Variant t_getextensionname();
-  public: static Variant t_export(CVarRef v_name, CVarRef v_ret) { return ti_export(c_ReflectionClass::s_class_name, v_name, v_ret); }
   DECLARE_METHOD_INVOKE_HELPERS(getmethods);
   DECLARE_METHOD_INVOKE_HELPERS(isiterateable);
   DECLARE_METHOD_INVOKE_HELPERS(getstaticpropertyvalue);

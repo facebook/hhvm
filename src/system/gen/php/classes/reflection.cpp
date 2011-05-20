@@ -753,21 +753,19 @@ CallInfo c_ReflectionObject::ci_export((void*)&c_ReflectionObject::i_export, (vo
 Variant c_ReflectionObject::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (c_ReflectionObject::ti_export(c, arg0, arg1));
+    return (c_ReflectionObject::t_export(arg0, arg1));
   }
 }
 Variant c_ReflectionObject::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0(a0);
   CVarRef arg1(a1);
-  return (c_ReflectionObject::ti_export(c, arg0, arg1));
+  return (c_ReflectionObject::t_export(arg0, arg1));
 }
 bool c_ReflectionObject::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
@@ -800,7 +798,7 @@ void c_ReflectionObject::init() {
   c_ReflectionClass::init();
 }
 /* SRC: classes/reflection.php line 1299 */
-Variant c_ReflectionObject::ti_export(CStrRef cls, Variant v_obj, CVarRef v_ret) {
+Variant c_ReflectionObject::t_export(Variant v_obj, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionObject, ReflectionObject::export);
   String v_str;
 
@@ -1291,13 +1289,12 @@ Variant c_ReflectionClass::i_getmodifiers(MethodCallPackage &mcp, CArrRef params
 Variant c_ReflectionClass::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (c_ReflectionClass::ti_export(c, arg0, arg1));
+    return (c_ReflectionClass::t_export(arg0, arg1));
   }
 }
 Variant c_ReflectionClass::i_getproperties(MethodCallPackage &mcp, CArrRef params) {
@@ -1852,10 +1849,9 @@ Variant c_ReflectionClass::ifa_getmodifiers(MethodCallPackage &mcp, int count, I
 }
 Variant c_ReflectionClass::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0(a0);
   CVarRef arg1(a1);
-  return (c_ReflectionClass::ti_export(c, arg0, arg1));
+  return (c_ReflectionClass::t_export(arg0, arg1));
 }
 Variant c_ReflectionClass::ifa_getproperties(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_ReflectionClass *self = NULL;
@@ -2606,7 +2602,7 @@ String c_ReflectionClass::t___tostring() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 610 */
-Variant c_ReflectionClass::ti_export(CStrRef cls, CVarRef v_name, CVarRef v_ret) {
+Variant c_ReflectionClass::t_export(CVarRef v_name, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::export);
   p_ReflectionClass v_obj;
   String v_str;
@@ -3526,13 +3522,12 @@ Variant c_ReflectionExtension::i_getfunctions(MethodCallPackage &mcp, CArrRef pa
 Variant c_ReflectionExtension::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (c_ReflectionExtension::ti_export(c, arg0, arg1));
+    return (c_ReflectionExtension::t_export(arg0, arg1));
   }
 }
 Variant c_ReflectionExtension::i_info(MethodCallPackage &mcp, CArrRef params) {
@@ -3655,10 +3650,9 @@ Variant c_ReflectionExtension::ifa_getfunctions(MethodCallPackage &mcp, int coun
 }
 Variant c_ReflectionExtension::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0(a0);
   CVarRef arg1(a1);
-  return (c_ReflectionExtension::ti_export(c, arg0, arg1));
+  return (c_ReflectionExtension::t_export(arg0, arg1));
 }
 Variant c_ReflectionExtension::ifa_info(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_ReflectionExtension *self = NULL;
@@ -3862,7 +3856,7 @@ String c_ReflectionExtension::t___tostring() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1861 */
-Variant c_ReflectionExtension::ti_export(CStrRef cls, CVarRef v_name, CVarRef v_ret) {
+Variant c_ReflectionExtension::t_export(CVarRef v_name, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::export);
   p_ReflectionExtension v_obj;
   String v_str;
@@ -4233,14 +4227,13 @@ Variant c_ReflectionMethod::i_getmodifiers(MethodCallPackage &mcp, CArrRef param
 Variant c_ReflectionMethod::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 3)) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    return (c_ReflectionMethod::ti_export(c, arg0, arg1, arg2));
+    return (c_ReflectionMethod::t_export(arg0, arg1, arg2));
   }
 }
 Variant c_ReflectionMethod::i_invoke(MethodCallPackage &mcp, CArrRef params) {
@@ -4426,11 +4419,10 @@ Variant c_ReflectionMethod::ifa_getmodifiers(MethodCallPackage &mcp, int count, 
 }
 Variant c_ReflectionMethod::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 3)) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0(a0);
   CVarRef arg1(a1);
   CVarRef arg2(a2);
-  return (c_ReflectionMethod::ti_export(c, arg0, arg1, arg2));
+  return (c_ReflectionMethod::t_export(arg0, arg1, arg2));
 }
 Variant c_ReflectionMethod::ifa_invoke(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_ReflectionMethod *self = NULL;
@@ -4732,7 +4724,7 @@ String c_ReflectionMethod::t___tostring() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1628 */
-Variant c_ReflectionMethod::ti_export(CStrRef cls, Variant v_cls, CVarRef v_name, CVarRef v_ret) {
+Variant c_ReflectionMethod::t_export(Variant v_cls, CVarRef v_name, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::export);
   Variant v_obj;
   String v_str;
@@ -5166,14 +5158,13 @@ Variant c_ReflectionProperty::i_getmodifiers(MethodCallPackage &mcp, CArrRef par
 Variant c_ReflectionProperty::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 3)) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    return (c_ReflectionProperty::ti_export(c, arg0, arg1, arg2));
+    return (c_ReflectionProperty::t_export(arg0, arg1, arg2));
   }
 }
 Variant c_ReflectionProperty::i_ispublic(MethodCallPackage &mcp, CArrRef params) {
@@ -5352,11 +5343,10 @@ Variant c_ReflectionProperty::ifa_getmodifiers(MethodCallPackage &mcp, int count
 }
 Variant c_ReflectionProperty::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 3)) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0(a0);
   CVarRef arg1(a1);
   CVarRef arg2(a2);
-  return (c_ReflectionProperty::ti_export(c, arg0, arg1, arg2));
+  return (c_ReflectionProperty::t_export(arg0, arg1, arg2));
 }
 Variant c_ReflectionProperty::ifa_ispublic(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_ReflectionProperty *self = NULL;
@@ -5612,7 +5602,7 @@ String c_ReflectionProperty::t___tostring() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1362 */
-Variant c_ReflectionProperty::ti_export(CStrRef cls, Variant v_cls, CVarRef v_name, CVarRef v_ret) {
+Variant c_ReflectionProperty::t_export(Variant v_cls, CVarRef v_name, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::export);
   Variant v_obj;
   String v_str;
@@ -5924,13 +5914,12 @@ Variant c_ReflectionFunction::i_invokeargs(MethodCallPackage &mcp, CArrRef param
 Variant c_ReflectionFunction::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (c_ReflectionFunction::ti_export(c, arg0, arg1));
+    return (c_ReflectionFunction::t_export(arg0, arg1));
   }
 }
 Variant c_ReflectionFunction::i_invoke(MethodCallPackage &mcp, CArrRef params) {
@@ -5982,10 +5971,9 @@ Variant c_ReflectionFunction::ifa_invokeargs(MethodCallPackage &mcp, int count, 
 }
 Variant c_ReflectionFunction::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0(a0);
   CVarRef arg1(a1);
-  return (c_ReflectionFunction::ti_export(c, arg0, arg1));
+  return (c_ReflectionFunction::t_export(arg0, arg1));
 }
 Variant c_ReflectionFunction::ifa_invoke(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_ReflectionFunction *self = NULL;
@@ -6104,7 +6092,7 @@ String c_ReflectionFunction::t___tostring() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 492 */
-Variant c_ReflectionFunction::ti_export(CStrRef cls, CVarRef v_name, CVarRef v_ret) {
+Variant c_ReflectionFunction::t_export(CVarRef v_name, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::export);
   p_ReflectionFunction v_obj;
   String v_str;
@@ -6321,14 +6309,13 @@ Variant c_ReflectionParameter::i_getclass(MethodCallPackage &mcp, CArrRef params
 Variant c_ReflectionParameter::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 3)) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    return (c_ReflectionParameter::ti_export(c, arg0, arg1, arg2));
+    return (c_ReflectionParameter::t_export(arg0, arg1, arg2));
   }
 }
 Variant c_ReflectionParameter::i_allowsnull(MethodCallPackage &mcp, CArrRef params) {
@@ -6474,11 +6461,10 @@ Variant c_ReflectionParameter::ifa_getclass(MethodCallPackage &mcp, int count, I
 }
 Variant c_ReflectionParameter::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 3)) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0(a0);
   CVarRef arg1(a1);
   CVarRef arg2(a2);
-  return (c_ReflectionParameter::ti_export(c, arg0, arg1, arg2));
+  return (c_ReflectionParameter::t_export(arg0, arg1, arg2));
 }
 Variant c_ReflectionParameter::ifa_allowsnull(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_ReflectionParameter *self = NULL;
@@ -6710,7 +6696,7 @@ String c_ReflectionParameter::t___tostring() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 75 */
-Variant c_ReflectionParameter::ti_export(CStrRef cls, CVarRef v_func, CVarRef v_param, CVarRef v_ret) {
+Variant c_ReflectionParameter::t_export(CVarRef v_func, CVarRef v_param, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::export);
   p_ReflectionParameter v_obj;
   String v_str;

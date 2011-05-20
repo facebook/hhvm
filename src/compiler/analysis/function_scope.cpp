@@ -407,6 +407,15 @@ bool FunctionScope::needsTypeCheckWrapper() const {
   return false;
 }
 
+bool FunctionScope::needsClassParam() {
+  if (!isStatic()) return false;
+  ClassScopeRawPtr cls = getContainingClass();
+  if (!ClassScope::NeedStaticArray(cls, FunctionScopeRawPtr(this))) {
+    return false;
+  }
+  return getVariables()->hasStatic();
+}
+
 const char *FunctionScope::getPrefix(ExpressionListPtr params) {
   bool isMethod = getContainingClass();
   bool callInner = false;

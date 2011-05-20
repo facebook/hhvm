@@ -147,6 +147,7 @@ public:
   bool isPseudoMainTable() const;
   bool hasPrivate() const;
   bool hasNonStaticPrivate() const;
+  bool hasStatic() const { return m_hasStatic; }
 
   virtual bool isInherited(const std::string &name) const;
 

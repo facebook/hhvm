@@ -4280,27 +4280,25 @@ Variant c_Normalizer::i___construct(MethodCallPackage &mcp, CArrRef params) {
 Variant c_Normalizer::i_normalize(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("normalize", count, 1, 2, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) return (c_Normalizer::ti_normalize(c, arg0));
+    if (count <= 1) return (c_Normalizer::t_normalize(arg0));
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (c_Normalizer::ti_normalize(c, arg0, arg1));
+    return (c_Normalizer::t_normalize(arg0, arg1));
   }
 }
 Variant c_Normalizer::i_isnormalized(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) return (c_Normalizer::ti_isnormalized(c, arg0));
+    if (count <= 1) return (c_Normalizer::t_isnormalized(arg0));
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (c_Normalizer::ti_isnormalized(c, arg0, arg1));
+    return (c_Normalizer::t_isnormalized(arg0, arg1));
   }
 }
 Variant c_Normalizer::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -4327,19 +4325,17 @@ Variant c_Normalizer::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_
 }
 Variant c_Normalizer::ifa_normalize(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("normalize", count, 1, 2, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0(a0);
-  if (count <= 1) return (c_Normalizer::ti_normalize(c, arg0));
+  if (count <= 1) return (c_Normalizer::t_normalize(arg0));
   CVarRef arg1(a1);
-  return (c_Normalizer::ti_normalize(c, arg0, arg1));
+  return (c_Normalizer::t_normalize(arg0, arg1));
 }
 Variant c_Normalizer::ifa_isnormalized(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0(a0);
-  if (count <= 1) return (c_Normalizer::ti_isnormalized(c, arg0));
+  if (count <= 1) return (c_Normalizer::t_isnormalized(arg0));
   CVarRef arg1(a1);
-  return (c_Normalizer::ti_isnormalized(c, arg0, arg1));
+  return (c_Normalizer::t_isnormalized(arg0, arg1));
 }
 bool c_Normalizer::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
@@ -5497,8 +5493,7 @@ Variant c_DateTimeZone::i_gettransitions(MethodCallPackage &mcp, CArrRef params)
 Variant c_DateTimeZone::i_listidentifiers(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("listidentifiers", 0, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
-  return (c_DateTimeZone::ti_listidentifiers(c));
+  return (c_DateTimeZone::t_listidentifiers());
 }
 Variant c_DateTimeZone::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5549,8 +5544,7 @@ Variant c_DateTimeZone::i___construct(MethodCallPackage &mcp, CArrRef params) {
 Variant c_DateTimeZone::i_listabbreviations(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("listabbreviations", 0, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
-  return (c_DateTimeZone::ti_listabbreviations(c));
+  return (c_DateTimeZone::t_listabbreviations());
 }
 Variant c_DateTimeZone::i_getname(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5577,8 +5571,7 @@ Variant c_DateTimeZone::ifa_gettransitions(MethodCallPackage &mcp, int count, IN
 }
 Variant c_DateTimeZone::ifa_listidentifiers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("listidentifiers", 0, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
-  return (c_DateTimeZone::ti_listidentifiers(c));
+  return (c_DateTimeZone::t_listidentifiers());
 }
 Variant c_DateTimeZone::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_DateTimeZone *self = NULL;
@@ -5617,8 +5610,7 @@ Variant c_DateTimeZone::ifa___construct(MethodCallPackage &mcp, int count, INVOK
 }
 Variant c_DateTimeZone::ifa_listabbreviations(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("listabbreviations", 0, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
-  return (c_DateTimeZone::ti_listabbreviations(c));
+  return (c_DateTimeZone::t_listabbreviations());
 }
 Variant c_DateTimeZone::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_DateTimeZone *self = NULL;
@@ -17450,12 +17442,11 @@ Variant c_Collator::i_setstrength(MethodCallPackage &mcp, CArrRef params) {
 Variant c_Collator::i_create(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("create", count, 1, 1, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    return (c_Collator::ti_create(c, arg0));
+    return (c_Collator::t_create(arg0));
   }
 }
 Variant c_Collator::i_setattribute(MethodCallPackage &mcp, CArrRef params) {
@@ -17635,9 +17626,8 @@ Variant c_Collator::ifa_setstrength(MethodCallPackage &mcp, int count, INVOKE_FE
 }
 Variant c_Collator::ifa_create(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("create", count, 1, 1, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0(a0);
-  return (c_Collator::ti_create(c, arg0));
+  return (c_Collator::t_create(arg0));
 }
 Variant c_Collator::ifa_setattribute(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_Collator *self = NULL;
@@ -18287,8 +18277,7 @@ Variant c_PDO::i_commit(MethodCallPackage &mcp, CArrRef params) {
 Variant c_PDO::i_getavailabledrivers(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("getavailabledrivers", 0, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
-  return (c_PDO::ti_getavailabledrivers(c));
+  return (c_PDO::t_getavailabledrivers());
 }
 Variant c_PDO::i_quote(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
@@ -18506,8 +18495,7 @@ Variant c_PDO::ifa_commit(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMP
 }
 Variant c_PDO::ifa_getavailabledrivers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("getavailabledrivers", 0, 1);
-  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
-  return (c_PDO::ti_getavailabledrivers(c));
+  return (c_PDO::t_getavailabledrivers());
 }
 Variant c_PDO::ifa_quote(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_PDO *self = NULL;

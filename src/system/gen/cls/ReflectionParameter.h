@@ -67,7 +67,7 @@ class c_ReflectionParameter : public ExtObjectData {
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: String t___tostring();
-  public: static Variant ti_export(CStrRef cls, CVarRef v_func, CVarRef v_param, CVarRef v_ret);
+  public: static Variant t_export(CVarRef v_func, CVarRef v_param, CVarRef v_ret);
   public: Variant t_getname();
   public: Variant t_ispassedbyreference();
   public: Variant t_getdeclaringclass();
@@ -78,7 +78,6 @@ class c_ReflectionParameter : public ExtObjectData {
   public: bool t_isdefaultvalueavailable();
   public: Variant t_getdefaultvalue();
   public: Variant t_getposition();
-  public: static Variant t_export(CVarRef v_func, CVarRef v_param, CVarRef v_ret) { return ti_export(c_ReflectionParameter::s_class_name, v_func, v_param, v_ret); }
   DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   DECLARE_METHOD_INVOKE_HELPERS(getdeclaringclass);
   DECLARE_METHOD_INVOKE_HELPERS(isdefaultvalueavailable);

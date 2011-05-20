@@ -141,11 +141,7 @@ void RefDict::updateParams() {
           isRef = sym->isRefClosureVar();
         }
         if (first_pass) {
-          if (isRef ||
-              (sym->isParameter() && paramType && 
-               !paramType->isNoObjectInvolved())) {
-            // attempt to support call time pass by reference
-            // for non-primitive types
+          if (isRef || sym->isCallTimeRef()) {
             BitOps::set_bit(i, refbv, true);
           }
         } else {

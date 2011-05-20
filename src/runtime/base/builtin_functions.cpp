@@ -1202,11 +1202,7 @@ bool AutoloadHandler::invokeHandler(CStrRef className, bool checkDeclared,
   bool l_running = m_running;
   m_running = true;
   if (m_handlers.empty()) {
-
-    if (checkDeclared) {
-      autoloadExists = function_exists(s___autoload);
-    }
-    if (autoloadExists) {
+    if (function_exists(s___autoload)) {
       invoke(s___autoload, params, -1, true, false);
       m_running = l_running;
       return true;
@@ -1300,31 +1296,30 @@ void checkClassExists(CStrRef name, Globals *g, bool nothrow /* = false */) {
   }
 }
 
-bool checkClassExists(CStrRef name, const bool *declared, bool autoloadExists,
-                      bool nothrow /* = false */) {
-  if (declared && *declared) return true;
-  AutoloadHandler::s_instance->invokeHandler(name, false, declared,
-                                             autoloadExists);
-  if (declared && *declared) return true;
-  if (nothrow) return false;
+bool autoloadClassThrow(CStrRef name, bool *declared) {
+  if (autoloadClassNoThrow(name, declared)) return true;
   string msg = "unknown class ";
   msg += name.c_str();
   throw_fatal(msg.c_str());
   return false;
 }
 
-bool checkInterfaceExists(CStrRef name, const bool *declared,
-                          bool autoloadExists, bool nothrow /* = false */) {
-  if (*declared) return true;
-  AutoloadHandler::s_instance->invokeHandler(name, false, declared,
-                                             autoloadExists);
-  if (!*declared) {
-    if (nothrow) return false;
-    string msg = "unknown interface ";
-    msg += name.c_str();
-    throw_fatal(msg.c_str());
-  }
-  return true;
+bool autoloadClassNoThrow(CStrRef name, bool *declared) {
+  AutoloadHandler::s_instance->invokeHandler(name, false, declared);
+  return declared && *declared;
+}
+
+bool autoloadInterfaceThrow(CStrRef name, bool *declared) {
+  if (autoloadInterfaceNoThrow(name, declared)) return true;
+  string msg = "unknown interface ";
+  msg += name.c_str();
+  throw_fatal(msg.c_str());
+  return false;
+}
+
+bool autoloadInterfaceNoThrow(CStrRef name, bool *declared) {
+  AutoloadHandler::s_instance->invokeHandler(name, false, declared);
+  return declared && *declared;
 }
 
 Variant &get_static_property_lval(const char *s, const char *prop) {

@@ -357,12 +357,11 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         if (cg.checkHoistedClass(*it)) continue;
         ClassScopePtr base = ar->findClass(*it);
         if (base && base->isVolatile()) {
-          cg_printf("checkClassExists(");
+          cg_printf("checkClassExistsThrow(");
           cg_printString(base->getOriginalName(), ar, shared_from_this());
           string lname = Util::toLower(base->getOriginalName());
-          cg_printf(", &%s->CDEC(%s), %s->FVF(__autoload));\n",
-                    cg.getGlobals(ar), cg.formatLabel(lname).c_str(),
-                    cg.getGlobals(ar));
+          cg_printf(", &%s->CDEC(%s));\n",
+                    cg.getGlobals(ar), cg.formatLabel(lname).c_str());
         }
       }
     }

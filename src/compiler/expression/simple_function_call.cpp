@@ -1828,8 +1828,8 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
               cg_printf("Array::Create()");
             }
             return;
-          } else if (m_name == "func_get_arg" && 
-                     m_params && 
+          } else if (m_name == "func_get_arg" &&
+                     m_params &&
                      m_params->getCount() == 1) {
             Variant v;
             ExpressionPtr p((*m_params)[0]);
@@ -1853,10 +1853,10 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                 return;
               }
               const string& funcName = func->getParamName(idx);
-              bool needsCast = 
+              bool needsCast =
                 !func->getParamType(idx)->is(Type::KindOfVariant) &&
-                !func->getParamType(idx)->is(Type::KindOfSome); 
-              bool isStashed = 
+                !func->getParamType(idx)->is(Type::KindOfSome);
+              bool isStashed =
                 func->getVariables()->getSymbol(funcName)->isStashedVal();
               if (func->isVariableArgument()) {
                 cg_printf("(%lldLL < num_args ? ", idx);
@@ -1864,7 +1864,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
               if (needsCast) cg_printf("Variant(");
               cg_printf("%s%s%s",
                         isStashed ? "v" : "",
-                        Option::VariablePrefix, 
+                        Option::VariablePrefix,
                         funcName.c_str());
               if (needsCast) cg_printf(")");
               if (func->isVariableArgument()) {
@@ -1952,15 +1952,14 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                   cg_printf("true");
                 } else {
                   if (m_type == ClassExistsFunction) {
-                    cg_printf("checkClassExists(");
+                    cg_printf("checkClassExistsNoThrow(");
                   } else {
-                    cg_printf("checkInterfaceExists(");
+                    cg_printf("checkInterfaceExistsNoThrow(");
                   }
                   cg_printString(symbol, ar, shared_from_this());
-                  cg_printf(", &%s->CDEC(%s), %s->FVF(__autoload), true)",
+                  cg_printf(", &%s->CDEC(%s))",
                             cg.getGlobals(ar),
-                            cg.formatLabel(lname).c_str(),
-                            cg.getGlobals(ar));
+                            cg.formatLabel(lname).c_str());
                 }
               } else {
                 if (m_type == ClassExistsFunction) {

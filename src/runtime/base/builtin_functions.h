@@ -534,10 +534,35 @@ private:
 };
 
 void checkClassExists(CStrRef name, Globals *g, bool nothrow = false);
-bool checkClassExists(CStrRef name, const bool *declared, bool autoloadExists,
-                      bool nothrow = false);
-bool checkInterfaceExists(CStrRef name, const bool *declared,
-                          bool autoloadExists, bool nothrow = false);
+
+bool autoloadClassThrow(CStrRef name, bool *declared);
+bool autoloadClassNoThrow(CStrRef name, bool *declared);
+bool autoloadInterfaceThrow(CStrRef name, bool *declared);
+bool autoloadInterfaceNoThrow(CStrRef name, bool *declared);
+
+inline ALWAYS_INLINE bool checkClassExistsThrow(CStrRef name,
+                                                bool *declared) {
+  if (LIKELY(*declared)) return true;
+  return autoloadClassThrow(name, declared);
+}
+
+inline ALWAYS_INLINE bool checkClassExistsNoThrow(CStrRef name,
+                                                  bool *declared) {
+  if (LIKELY(*declared)) return true;
+  return autoloadClassNoThrow(name, declared);
+}
+
+inline ALWAYS_INLINE bool checkInterfaceExistsThrow(CStrRef name,
+                                                    bool *declared) {
+  if (LIKELY(*declared)) return true;
+  return autoloadInterfaceThrow(name, declared);
+}
+
+inline ALWAYS_INLINE bool checkInterfaceExistsNoThrow(CStrRef name,
+                                                      bool *declared) {
+  if (LIKELY(*declared)) return true;
+  return autoloadInterfaceNoThrow(name, declared);
+}
 
 class CallInfo;
 

@@ -2119,16 +2119,17 @@ void ClassScope::OutputVolatileCheck(CodeGenerator &cg, AnalysisResultPtr ar,
                                      BlockScopePtr bs, const string &origName,
                                      bool noThrow) {
   string lwrName(Util::toLower(origName));
-  cg_printf("checkClassExists(");
+  bool exist = ar->findClass(lwrName);
+  cg_printf("%s%s(",
+            exist ? "checkClassExists" : "autoloadClass",
+            noThrow ? "NoThrow" : "Throw");
   cg_printString(origName, ar, bs);
-  if (ar->findClass(lwrName)) {
-    cg_printf(", &%s->CDEC(%s)",
+  if (exist) {
+    cg_printf(", &%s->CDEC(%s))",
               cg.getGlobals(ar), cg.formatLabel(lwrName).c_str());
   } else {
-    cg_printf(", (bool*)0");
+    cg_printf(", (bool*)0)");
   }
-  cg_printf(", %s->FVF(__autoload)%s)", cg.getGlobals(ar),
-      noThrow ? ", true" : "");
 }
 
 void ClassScope::outputMethodWrappers(CodeGenerator &cg,

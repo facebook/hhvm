@@ -1169,13 +1169,11 @@ int DepthFirstVisitor<PostOptVisitor>::visit(BlockScopeRawPtr scope) {
       dynamic_pointer_cast<MethodStatement>(stmt)) {
 
     AliasManager am(1);
+    if (am.optimize(this->m_data.m_ar, m)) {
+      scope->addUpdates(BlockScope::UseKindCaller);
+    }
     if (Option::LocalCopyProp || Option::EliminateDeadCode) {
       done = true;
-      if (am.optimize(this->m_data.m_ar, m)) {
-        scope->addUpdates(BlockScope::UseKindCaller);
-      }
-    } else {
-      am.optimize(this->m_data.m_ar, m);
     }
   }
 

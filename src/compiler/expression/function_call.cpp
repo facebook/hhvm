@@ -570,8 +570,14 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
 bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                 int state) {
   optimizeArgArray(ar);
-  if (m_noStatic || isUnused() || m_className.empty() ||
-      isSelf() || isParent()) {
+  bool noLSB = m_noStatic || (!m_class && m_className.empty()) ||
+    isSelf() || isParent();
+  if (!noLSB) {
+    if (m_funcScope && !m_funcScope->usesLSB()) {
+      noLSB = true;
+    }
+  }
+  if (noLSB || isUnused()) {
     return Expression::preOutputCPP(cg, ar, state);
   }
 
@@ -657,8 +663,15 @@ void FunctionCall::outputDynamicCall(CodeGenerator &cg,
 void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   optimizeArgArray(ar);
   bool staticClassName = false;
-  if (!m_noStatic && (m_class || !m_className.empty()) && m_cppTemp.empty() &&
-      !isSelf() && !isParent() && !isStatic()) {
+  bool noLSB = !m_cppTemp.empty() || m_noStatic ||
+    (!m_class && m_className.empty()) ||
+    isSelf() || isParent() || isStatic();
+  if (!noLSB) {
+    if (m_funcScope && !m_funcScope->usesLSB()) {
+      noLSB = true;
+    }
+  }
+  if (!noLSB) {
     if (!m_className.empty()) {
       cg_printf("STATIC_CLASS_NAME_CALL(");
       if (m_classScope) {

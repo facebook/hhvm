@@ -1137,7 +1137,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
 
                   assert(
                     a->getVariable()->is(Expression::KindOfSimpleVariable));
-                  SimpleVariablePtr variable = 
+                  SimpleVariablePtr variable =
                     spc(SimpleVariable, a->getVariable());
                   if (variable->couldBeAliased()) {
                     break;
@@ -1928,8 +1928,9 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
     }
     e->setUnused(unused);
     int context = e->getContext();
-    switch (e->getKindOf()) {
-    case Expression::KindOfAssignmentExpression:
+    int ekind = e->getKindOf();
+    switch (ekind) {
+      case Expression::KindOfAssignmentExpression:
       {
         AssignmentExpressionPtr ae = spc(AssignmentExpression, e);
         ExpressionPtr var = ae->getVariable();
@@ -1947,7 +1948,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         }
       }
       break;
-    case Expression::KindOfListAssignment:
+      case Expression::KindOfListAssignment:
       {
         ListAssignmentPtr la = spc(ListAssignment, e);
         ExpressionListPtr vars = la->getVariables();
@@ -1962,7 +1963,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         }
       }
       break;
-    case Expression::KindOfSimpleVariable:
+      case Expression::KindOfSimpleVariable:
       {
         SimpleVariablePtr sv(spc(SimpleVariable, e));
         if (Symbol *sym = sv->getSymbol()) {
@@ -1991,17 +1992,17 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         }
       }
       break;
-    case Expression::KindOfDynamicVariable:
-      m_variables->setAttribute(VariableTable::ContainsDynamicVariable);
-      if (context & (Expression::RefValue|
-                     Expression::LValue)) {
-        m_variables->setAttribute(VariableTable::ContainsLDynamicVariable);
-        if (context & Expression::RefValue) {
-          m_wildRefs = true;
+      case Expression::KindOfDynamicVariable:
+        m_variables->setAttribute(VariableTable::ContainsDynamicVariable);
+        if (context & (Expression::RefValue|
+                       Expression::LValue)) {
+          m_variables->setAttribute(VariableTable::ContainsLDynamicVariable);
+          if (context & Expression::RefValue) {
+            m_wildRefs = true;
+          }
         }
-      }
-      break;
-    case Expression::KindOfIncludeExpression:
+        break;
+      case Expression::KindOfIncludeExpression:
       {
         IncludeExpressionPtr inc(spc(IncludeExpression, e));
         if (!inc->getPrivateScope()) {
@@ -2009,7 +2010,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         }
       }
       break;
-    case Expression::KindOfArrayElementExpression:
+      case Expression::KindOfArrayElementExpression:
       {
         int n = 1;
         while (n < 10 &&
@@ -2026,7 +2027,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         }
       }
       break;
-    case Expression::KindOfObjectPropertyExpression:
+      case Expression::KindOfObjectPropertyExpression:
       {
         e = spc(ObjectPropertyExpression, e)->getObject();
         if (e->is(Expression::KindOfSimpleVariable)) {
@@ -2039,32 +2040,60 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         }
       }
       break;
-    case Expression::KindOfSimpleFunctionCall:
-      spc(SimpleFunctionCall, e)->updateVtFlags();
-    case Expression::KindOfDynamicFunctionCall:
-    case Expression::KindOfClassConstantExpression:
-    case Expression::KindOfStaticMemberExpression:
-    case Expression::KindOfNewObjectExpression:
-      if (m_graph) {
+      case Expression::KindOfSimpleFunctionCall:
+        spc(SimpleFunctionCall, e)->updateVtFlags();
+      case Expression::KindOfDynamicFunctionCall:
+      case Expression::KindOfClassConstantExpression:
+      case Expression::KindOfStaticMemberExpression:
+      case Expression::KindOfNewObjectExpression: {
         StaticClassName *p = dynamic_cast<StaticClassName*>(e.get());
         assert(p);
-        const std::string &name = p->getClassName();
-        if (!name.empty()) {
-          int &id = m_gidMap[name];
-          if (!id) id = m_gidMap.size();
-          e->setCanonID(id);
+        bool useLSB = false;
+        if (p->isStatic()) {
+          useLSB = true;
+        } else if (ekind == Expression::KindOfDynamicFunctionCall) {
+          if ((p->getClassName().empty() && !p->getClass()) ||
+              p->isParent() || p->isSelf()) {
+            useLSB = true;
+          }
         }
+        if (useLSB) {
+          m_scope->getContainingFunction()->setNextLSB(true);
+        }
+        if (m_graph) {
+          const std::string &name = p->getClassName();
+          if (!name.empty()) {
+            int &id = m_gidMap[name];
+            if (!id) id = m_gidMap.size();
+            e->setCanonID(id);
+          }
+        }
+        break;
       }
-      break;
 
-    case Expression::KindOfUnaryOpExpression:
-      if (Option::EnableEval > Option::NoEval && spc(UnaryOpExpression, e)->
-          getOp() == T_EVAL) {
-        m_variables->setAttribute(VariableTable::ContainsLDynamicVariable);
+      case Expression::KindOfUnaryOpExpression:
+        if (Option::EnableEval > Option::NoEval && spc(UnaryOpExpression, e)->
+            getOp() == T_EVAL) {
+          m_variables->setAttribute(VariableTable::ContainsLDynamicVariable);
+        }
+        break;
+
+      case Expression::KindOfBinaryOpExpression: {
+        BinaryOpExpressionPtr b(spc(BinaryOpExpression, e));
+        if (b->getOp() == T_INSTANCEOF) {
+          ExpressionPtr s = b->getExp2();
+          if (s->is(Expression::KindOfScalarExpression)) {
+            ScalarExpressionPtr scalar(spc(ScalarExpression, s));
+            if (!scalar->isQuoted() && scalar->getString() == "static") {
+              m_scope->getContainingFunction()->setNextLSB(true);
+            }
+          }
+        }
+        break;
       }
-      break;
-    default:
-      break;
+
+      default:
+        break;
     }
   }
   return kidCost;
@@ -2100,6 +2129,7 @@ void AliasManager::gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m) {
   func->setContainsThis(false);
   func->setContainsBareThis(false);
   func->setInlineSameContext(false);
+  func->setNextLSB(false);
 
   int i, nkid = m->getKidCount(), cost = 0;
   for (i = 0; i < nkid; i++) {
@@ -2125,6 +2155,13 @@ void AliasManager::gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m) {
     }
   }
   func->setInlineAsExpr(m_inlineAsExpr);
+
+  if (!func->nextLSB()) {
+    if (func->usesLSB()) {
+      func->clearUsesLSB();
+      m_changes = true;
+    }
+  }
 }
 
 static void markAvailable(ExpressionRawPtr e) {

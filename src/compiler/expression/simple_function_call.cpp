@@ -77,6 +77,8 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
     FunctionTypeMap["get_defined_vars"]     = GetDefinedVarsFunction;
 
     FunctionTypeMap["fb_call_user_func_safe"] = FBCallUserFuncSafeFunction;
+    FunctionTypeMap["fb_call_user_func_array_safe"] =
+      FBCallUserFuncSafeFunction;
     FunctionTypeMap["fb_call_user_func_safe_return"] =
       FBCallUserFuncSafeFunction;
   }
@@ -436,9 +438,23 @@ bool SimpleFunctionCall::writesLocals() const {
 }
 
 void SimpleFunctionCall::updateVtFlags() {
-  if (m_funcScope && m_funcScope->getContextSensitive()) {
-    if (FunctionScopeRawPtr f = getFunctionScope()) {
-      f->setInlineSameContext(true);
+  FunctionScopeRawPtr f = getFunctionScope();
+  if (f) {
+    if (m_funcScope) {
+      if (m_funcScope->getContextSensitive()) {
+        f->setInlineSameContext(true);
+      }
+      if ((m_classScope && (isSelf() || isParent()) &&
+           m_funcScope->usesLSB()) ||
+          isStatic() ||
+          m_type == FBCallUserFuncSafeFunction ||
+          m_name == "call_user_func" ||
+          m_name == "call_user_func_array" ||
+          m_name == "forward_static_call" ||
+          m_name == "forward_static_call_array" ||
+          m_name == "get_called_class") {
+        f->setNextLSB(true);
+      }
     }
   }
   if (m_type != UnknownType) {
@@ -777,13 +793,13 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             if (Option::DynamicInvokeFunctions.find(lname) ==
                 Option::DynamicInvokeFunctions.end()) {
               FunctionScopePtr func = ar->findFunction(lname);
-              if (!func) {
+              if (!func && m_type == FunctionExistsFunction) {
                 return CONSTANT("false");
               }
               if (func->isUserFunction()) {
                 func->setVolatile();
               }
-              if (!func->isVolatile()) {
+              if (!func->isVolatile() && m_type == FunctionExistsFunction) {
                 return CONSTANT("true");
               }
             }

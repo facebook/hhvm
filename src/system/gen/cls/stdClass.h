@@ -32,7 +32,7 @@ class c_stdClass : public ExtObjectData {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(stdClass, stdClass)
+  DECLARE_CLASS_COMMON_NO_SWEEP(stdClass, stdClass)
   DECLARE_INVOKE_EX(stdClass, stdClass, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
@@ -62,8 +62,8 @@ class c_stdClass : public ExtObjectData {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_stdClass;
-Object co_stdClass(CArrRef params, bool init = true);
-Object coo_stdClass();
+Object co_stdClass(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_stdClass() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

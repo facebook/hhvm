@@ -33,7 +33,7 @@ class c_ReflectionException : public c_Exception {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(ReflectionException, ReflectionException)
+  DECLARE_CLASS_COMMON_NO_SWEEP(ReflectionException, ReflectionException)
   DECLARE_INVOKE_EX(ReflectionException, ReflectionException, Exception)
 
   // DECLARE_STATIC_PROP_OPS
@@ -63,8 +63,8 @@ class c_ReflectionException : public c_Exception {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_ReflectionException;
-Object co_ReflectionException(CArrRef params, bool init = true);
-Object coo_ReflectionException();
+Object co_ReflectionException(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_ReflectionException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

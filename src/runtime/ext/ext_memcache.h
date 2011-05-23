@@ -49,7 +49,7 @@ bool f_memcache_add_server(CObjRef memcache, CStrRef host, int port = 11211, boo
 ///////////////////////////////////////////////////////////////////////////////
 // class Memcache
 
-FORWARD_DECLARE_CLASS(Memcache);
+FORWARD_DECLARE_CLASS_BUILTIN(Memcache);
 class c_Memcache : public ExtObjectData, public Sweepable {
  public:
   BEGIN_CLASS_MAP(Memcache)

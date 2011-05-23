@@ -36,7 +36,7 @@ class c_SplFileObject : public c_SplFileInfo {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(SplFileObject, SplFileObject)
+  DECLARE_CLASS_COMMON_NO_SWEEP(SplFileObject, SplFileObject)
   DECLARE_INVOKE_EX(SplFileObject, SplFileObject, SplFileInfo)
 
   // DECLARE_STATIC_PROP_OPS
@@ -127,13 +127,13 @@ class c_SplFileObject : public c_SplFileInfo {
   DECLARE_METHOD_INVOKE_HELPERS(fstat);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
+extern struct ObjectStaticCallbacks cw_SplFileObject;
+Object co_SplFileObject(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_SplFileObject() NEVER_INLINE;
 extern const int64 q_SplFileObject_DROP_NEW_LINE;
 extern const int64 q_SplFileObject_READ_AHEAD;
 extern const int64 q_SplFileObject_SKIP_EMPTY;
 extern const int64 q_SplFileObject_READ_CSV;
-extern struct ObjectStaticCallbacks cw_SplFileObject;
-Object co_SplFileObject(CArrRef params, bool init = true);
-Object coo_SplFileObject();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -40,7 +40,7 @@ extern const int64 k_SQLITE3_OPEN_CREATE;
 ///////////////////////////////////////////////////////////////////////////////
 // class SQLite3
 
-FORWARD_DECLARE_CLASS(SQLite3);
+FORWARD_DECLARE_CLASS_BUILTIN(SQLite3);
 class c_SQLite3 : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(SQLite3)
@@ -108,7 +108,7 @@ class c_SQLite3 : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class SQLite3Stmt
 
-FORWARD_DECLARE_CLASS(SQLite3Stmt);
+FORWARD_DECLARE_CLASS_BUILTIN(SQLite3Stmt);
 class c_SQLite3Stmt : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(SQLite3Stmt)
@@ -158,7 +158,7 @@ class c_SQLite3Stmt : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class SQLite3Result
 
-FORWARD_DECLARE_CLASS(SQLite3Result);
+FORWARD_DECLARE_CLASS_BUILTIN(SQLite3Result);
 class c_SQLite3Result : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(SQLite3Result)

@@ -34,7 +34,7 @@ class c_Directory : public ExtObjectData {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(Directory, Directory)
+  DECLARE_CLASS_COMMON_NO_SWEEP(Directory, Directory)
   DECLARE_INVOKE_EX(Directory, Directory, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
@@ -75,8 +75,8 @@ class c_Directory : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_Directory;
-Object co_Directory(CArrRef params, bool init = true);
-Object coo_Directory();
+Object co_Directory(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_Directory() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

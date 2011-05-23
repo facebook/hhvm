@@ -43,7 +43,7 @@ extern const int q_SpoofChecker_CHAR_LIMIT;
 ///////////////////////////////////////////////////////////////////////////////
 // class SpoofChecker
 
-FORWARD_DECLARE_CLASS(SpoofChecker);
+FORWARD_DECLARE_CLASS_BUILTIN(SpoofChecker);
 class c_SpoofChecker : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(SpoofChecker)

@@ -50,6 +50,18 @@ Variant Object::toKey() const {
     : String();
 }
 
+Object Object::CreateDummy(Object(*cooFunc)()) {
+  Object r(cooFunc());
+  r.get()->setDummy();
+  return r;
+}
+
+Object Object::CreateDummy(Object(*cooFunc)(ObjectData *)) {
+  Object r(cooFunc(NULL));
+  r.get()->setDummy();
+  return r;
+}
+
 bool Object::equal(CObjRef v2) const {
   if (m_px == v2.get()) {
     return true;

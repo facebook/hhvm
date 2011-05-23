@@ -35,7 +35,7 @@ class c_DirectoryIterator : public c_SplFileInfo {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(DirectoryIterator, DirectoryIterator)
+  DECLARE_CLASS_COMMON_NO_SWEEP(DirectoryIterator, DirectoryIterator)
   DECLARE_INVOKE_EX(DirectoryIterator, DirectoryIterator, SplFileInfo)
 
   // DECLARE_STATIC_PROP_OPS
@@ -87,8 +87,8 @@ class c_DirectoryIterator : public c_SplFileInfo {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_DirectoryIterator;
-Object co_DirectoryIterator(CArrRef params, bool init = true);
-Object coo_DirectoryIterator();
+Object co_DirectoryIterator(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_DirectoryIterator() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

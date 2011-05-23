@@ -76,20 +76,11 @@ bool eval_get_class_var_init_hook(Variant &res, const char *s,
   }
   return false;
 }
-bool eval_create_object_hook(Variant &res, const char *s, CArrRef params,
-                             bool init, ObjectData *root) {
-  Eval::ClassEvalState *ce = Eval::RequestEvalState::findClassState(s, true);
-  if (ce) {
-    res = ce->getClass()->create(*ce, params, init, root);
-    return true;
-  }
-  return false;
-}
 bool eval_create_object_only_hook(Variant &res, const char *s,
-    ObjectData *root) {
+                                  ObjectData *root) {
   Eval::ClassEvalState *ce = Eval::RequestEvalState::findClassState(s, true);
   if (ce) {
-    res = ce->getClass()->create(*ce, null_array, false, root);
+    res = ce->getClass()->create(*ce, root);
     return true;
   }
   return false;

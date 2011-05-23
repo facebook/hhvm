@@ -39,7 +39,7 @@ extern const StaticString q_DateTime_RFC3339;
 extern const StaticString q_DateTime_RSS;
 extern const StaticString q_DateTime_W3C;
 
-FORWARD_DECLARE_CLASS(DateTime);
+FORWARD_DECLARE_CLASS_BUILTIN(DateTime);
 class c_DateTime : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(DateTime)
@@ -118,7 +118,7 @@ extern const int64 q_DateTimeZone_ALL;
 extern const int64 q_DateTimeZone_ALL_WITH_BC;
 extern const int64 q_DateTimeZone_PER_COUNTRY;
 
-FORWARD_DECLARE_CLASS(DateTimeZone);
+FORWARD_DECLARE_CLASS_BUILTIN(DateTimeZone);
 class c_DateTimeZone : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(DateTimeZone)

@@ -33,7 +33,7 @@ class c_UnderflowException : public c_RuntimeException {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(UnderflowException, UnderflowException)
+  DECLARE_CLASS_COMMON_NO_SWEEP(UnderflowException, UnderflowException)
   DECLARE_INVOKE_EX(UnderflowException, UnderflowException, RuntimeException)
 
   // DECLARE_STATIC_PROP_OPS
@@ -63,8 +63,8 @@ class c_UnderflowException : public c_RuntimeException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_UnderflowException;
-Object co_UnderflowException(CArrRef params, bool init = true);
-Object coo_UnderflowException();
+Object co_UnderflowException(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_UnderflowException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

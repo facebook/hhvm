@@ -33,7 +33,7 @@ class c_DomainException : public c_LogicException {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(DomainException, DomainException)
+  DECLARE_CLASS_COMMON_NO_SWEEP(DomainException, DomainException)
   DECLARE_INVOKE_EX(DomainException, DomainException, LogicException)
 
   // DECLARE_STATIC_PROP_OPS
@@ -63,8 +63,8 @@ class c_DomainException : public c_LogicException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_DomainException;
-Object co_DomainException(CArrRef params, bool init = true);
-Object coo_DomainException();
+Object co_DomainException(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_DomainException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

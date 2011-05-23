@@ -36,7 +36,7 @@ class c_SplObjectStorage : public ExtObjectData {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(SplObjectStorage, SplObjectStorage)
+  DECLARE_CLASS_COMMON_NO_SWEEP(SplObjectStorage, SplObjectStorage)
   DECLARE_INVOKE_EX(SplObjectStorage, SplObjectStorage, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
@@ -85,8 +85,8 @@ class c_SplObjectStorage : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_SplObjectStorage;
-Object co_SplObjectStorage(CArrRef params, bool init = true);
-Object coo_SplObjectStorage();
+Object co_SplObjectStorage(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_SplObjectStorage() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

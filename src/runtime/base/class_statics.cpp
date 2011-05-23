@@ -68,7 +68,8 @@ Variant ClassStatics::os_invoke(const char *c, const char *s,
 
 Object ClassStatics::create(CArrRef params, bool init /* = true */,
                             ObjectData* root /* = NULL */) {
-  Object o(createOnly(root));
+  Object o(createOnlyNoInit(root));
+  o.get()->init();
   if (init) {
     MethodCallPackage mcp;
     mcp.construct(o);
@@ -79,9 +80,15 @@ Object ClassStatics::create(CArrRef params, bool init /* = true */,
   return o;
 }
 
-Object ClassStatics::createOnly(ObjectData* root /* = NULL */) {
+Object ClassStatics::createOnlyNoInit(ObjectData* root /* = NULL */) {
   throwUnknownClass();
   return null_object;
+}
+
+Object ClassStatics::createOnly(ObjectData* root /* = NULL */) {
+  Object o(createOnlyNoInit(root));
+  o.get()->init();
+  return o;
 }
 
 Variant ClassStatics::os_constant(const char *s) {

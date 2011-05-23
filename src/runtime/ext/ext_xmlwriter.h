@@ -74,7 +74,7 @@ String f_xmlwriter_output_memory(CObjRef xmlwriter, bool flush = true);
 ///////////////////////////////////////////////////////////////////////////////
 // class XMLWriter
 
-FORWARD_DECLARE_CLASS(XMLWriter);
+FORWARD_DECLARE_CLASS_BUILTIN(XMLWriter);
 class c_XMLWriter : public ExtObjectData, public Sweepable {
  public:
   BEGIN_CLASS_MAP(XMLWriter)

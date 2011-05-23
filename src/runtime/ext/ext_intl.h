@@ -76,7 +76,7 @@ extern const int64 q_Collator_UPPER_FIRST;
 ///////////////////////////////////////////////////////////////////////////////
 // class Collator
 
-FORWARD_DECLARE_CLASS(Collator);
+FORWARD_DECLARE_CLASS_BUILTIN(Collator);
 class c_Collator : public ExtObjectData, public Sweepable {
  public:
   BEGIN_CLASS_MAP(Collator)
@@ -135,7 +135,7 @@ extern const int64 q_Locale_VALID_LOCALE;
 ///////////////////////////////////////////////////////////////////////////////
 // class Locale
 
-FORWARD_DECLARE_CLASS(Locale);
+FORWARD_DECLARE_CLASS_BUILTIN(Locale);
 class c_Locale : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(Locale)
@@ -170,7 +170,7 @@ extern const int64 q_Normalizer_NFKC;
 ///////////////////////////////////////////////////////////////////////////////
 // class Normalizer
 
-FORWARD_DECLARE_CLASS(Normalizer);
+FORWARD_DECLARE_CLASS_BUILTIN(Normalizer);
 class c_Normalizer : public ExtObjectData, public Sweepable {
  public:
   BEGIN_CLASS_MAP(Normalizer)

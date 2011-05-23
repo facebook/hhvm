@@ -31,7 +31,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class ImageSprite
 
-FORWARD_DECLARE_CLASS(ImageSprite);
+FORWARD_DECLARE_CLASS_BUILTIN(ImageSprite);
 class c_ImageSprite : public ExtObjectData, public Sweepable {
  public:
   BEGIN_CLASS_MAP(ImageSprite)

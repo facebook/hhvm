@@ -33,7 +33,7 @@ class c_SplFileInfo : public ExtObjectData {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(SplFileInfo, SplFileInfo)
+  DECLARE_CLASS_COMMON_NO_SWEEP(SplFileInfo, SplFileInfo)
   DECLARE_INVOKE_EX(SplFileInfo, SplFileInfo, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
@@ -123,8 +123,8 @@ class c_SplFileInfo : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(gettype);
 };
 extern struct ObjectStaticCallbacks cw_SplFileInfo;
-Object co_SplFileInfo(CArrRef params, bool init = true);
-Object coo_SplFileInfo();
+Object co_SplFileInfo(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_SplFileInfo() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

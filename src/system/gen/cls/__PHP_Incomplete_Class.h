@@ -32,7 +32,7 @@ class c___PHP_Incomplete_Class : public ExtObjectData {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(__PHP_Incomplete_Class, __PHP_Incomplete_Class)
+  DECLARE_CLASS_COMMON_NO_SWEEP(__PHP_Incomplete_Class, __PHP_Incomplete_Class)
   DECLARE_INVOKE_EX(__PHP_Incomplete_Class, __PHP_Incomplete_Class, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
@@ -62,8 +62,8 @@ class c___PHP_Incomplete_Class : public ExtObjectData {
   void init();
 };
 extern struct ObjectStaticCallbacks cw___PHP_Incomplete_Class;
-Object co___PHP_Incomplete_Class(CArrRef params, bool init = true);
-Object coo___PHP_Incomplete_Class();
+Object co___PHP_Incomplete_Class(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo___PHP_Incomplete_Class() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

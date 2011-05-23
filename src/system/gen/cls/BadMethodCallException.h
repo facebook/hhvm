@@ -33,7 +33,7 @@ class c_BadMethodCallException : public c_BadFunctionCallException {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(BadMethodCallException, BadMethodCallException)
+  DECLARE_CLASS_COMMON_NO_SWEEP(BadMethodCallException, BadMethodCallException)
   DECLARE_INVOKE_EX(BadMethodCallException, BadMethodCallException, BadFunctionCallException)
 
   // DECLARE_STATIC_PROP_OPS
@@ -63,8 +63,8 @@ class c_BadMethodCallException : public c_BadFunctionCallException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_BadMethodCallException;
-Object co_BadMethodCallException(CArrRef params, bool init = true);
-Object coo_BadMethodCallException();
+Object co_BadMethodCallException(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_BadMethodCallException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

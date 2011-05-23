@@ -33,7 +33,7 @@ class c_LogicException : public c_Exception {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(LogicException, LogicException)
+  DECLARE_CLASS_COMMON_NO_SWEEP(LogicException, LogicException)
   DECLARE_INVOKE_EX(LogicException, LogicException, Exception)
 
   // DECLARE_STATIC_PROP_OPS
@@ -63,8 +63,8 @@ class c_LogicException : public c_Exception {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_LogicException;
-Object co_LogicException(CArrRef params, bool init = true);
-Object coo_LogicException();
+Object co_LogicException(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_LogicException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

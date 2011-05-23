@@ -36,7 +36,7 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(ReflectionMethod, ReflectionMethod)
+  DECLARE_CLASS_COMMON_NO_SWEEP(ReflectionMethod, ReflectionMethod)
   DECLARE_INVOKE_EX(ReflectionMethod, ReflectionMethod, ReflectionFunctionAbstract)
 
   // DECLARE_STATIC_PROP_OPS
@@ -100,15 +100,15 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   DECLARE_METHOD_INVOKE_HELPERS(getclosure);
   DECLARE_METHOD_INVOKE_HELPERS(isabstract);
 };
+extern struct ObjectStaticCallbacks cw_ReflectionMethod;
+Object co_ReflectionMethod(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_ReflectionMethod() NEVER_INLINE;
 extern const int64 q_ReflectionMethod_IS_STATIC;
 extern const int64 q_ReflectionMethod_IS_PUBLIC;
 extern const int64 q_ReflectionMethod_IS_PROTECTED;
 extern const int64 q_ReflectionMethod_IS_PRIVATE;
 extern const int64 q_ReflectionMethod_IS_ABSTRACT;
 extern const int64 q_ReflectionMethod_IS_FINAL;
-extern struct ObjectStaticCallbacks cw_ReflectionMethod;
-Object co_ReflectionMethod(CArrRef params, bool init = true);
-Object coo_ReflectionMethod();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

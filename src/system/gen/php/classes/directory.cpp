@@ -102,7 +102,7 @@ Variant c_Directory::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Directory
-IMPLEMENT_CLASS(Directory)
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(Directory)
 bool c_Directory::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 1) {
@@ -115,7 +115,7 @@ bool c_Directory::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_Directory::cloneImpl() {
-  c_Directory *obj = NEWOBJ(c_Directory)();
+  ObjectData *obj = coo_Directory().detach();
   c_Directory::cloneSet(obj);
   return obj;
 }
@@ -130,14 +130,11 @@ CallInfo c_Directory::ci_close((void*)&c_Directory::i_close, (void*)&c_Directory
 CallInfo c_Directory::ci_read((void*)&c_Directory::i_read, (void*)&c_Directory::ifa_read, 0, 4, 0x0000000000000000LL);
 CallInfo c_Directory::ci_rewind((void*)&c_Directory::i_rewind, (void*)&c_Directory::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_Directory::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_Directory *self = NULL;
-  p_Directory pobj;
-  if (mcp.obj) {
-    self = static_cast<c_Directory*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i___construct, coo_Directory);
   }
+  c_Directory *self ATTRIBUTE_UNUSED (static_cast<c_Directory*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
@@ -147,83 +144,62 @@ Variant c_Directory::i___construct(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_Directory::i_close(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_Directory *self = NULL;
-  p_Directory pobj;
-  if (mcp.obj) {
-    self = static_cast<c_Directory*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_close, coo_Directory);
   }
+  c_Directory *self ATTRIBUTE_UNUSED (static_cast<c_Directory*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Directory::close", 0, 1);
   return (self->t_close(), null);
 }
 Variant c_Directory::i_read(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_Directory *self = NULL;
-  p_Directory pobj;
-  if (mcp.obj) {
-    self = static_cast<c_Directory*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_read, coo_Directory);
   }
+  c_Directory *self ATTRIBUTE_UNUSED (static_cast<c_Directory*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Directory::read", 0, 1);
   return (self->t_read());
 }
 Variant c_Directory::i_rewind(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_Directory *self = NULL;
-  p_Directory pobj;
-  if (mcp.obj) {
-    self = static_cast<c_Directory*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_rewind, coo_Directory);
   }
+  c_Directory *self ATTRIBUTE_UNUSED (static_cast<c_Directory*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Directory::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
 Variant c_Directory::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_Directory *self = NULL;
-  p_Directory pobj;
-  if (mcp.obj) {
-    self = static_cast<c_Directory*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_Directory);
   }
+  c_Directory *self ATTRIBUTE_UNUSED (static_cast<c_Directory*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
   CVarRef arg0(a0);
   return (self->t___construct(arg0), null);
 }
 Variant c_Directory::ifa_close(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_Directory *self = NULL;
-  p_Directory pobj;
-  if (mcp.obj) {
-    self = static_cast<c_Directory*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_close, coo_Directory);
   }
+  c_Directory *self ATTRIBUTE_UNUSED (static_cast<c_Directory*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Directory::close", 0, 1);
   return (self->t_close(), null);
 }
 Variant c_Directory::ifa_read(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_Directory *self = NULL;
-  p_Directory pobj;
-  if (mcp.obj) {
-    self = static_cast<c_Directory*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_read, coo_Directory);
   }
+  c_Directory *self ATTRIBUTE_UNUSED (static_cast<c_Directory*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Directory::read", 0, 1);
   return (self->t_read());
 }
 Variant c_Directory::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_Directory *self = NULL;
-  p_Directory pobj;
-  if (mcp.obj) {
-    self = static_cast<c_Directory*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_rewind, coo_Directory);
   }
+  c_Directory *self ATTRIBUTE_UNUSED (static_cast<c_Directory*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Directory::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
@@ -324,12 +300,12 @@ void c_Directory::t_close() {
   x_closedir(toObject(m_handle));
 }
 namespace hphp_impl_splitter {}
-Object co_Directory(CArrRef params, bool init /* = true */) {
-  return Object((NEWOBJ(c_Directory)())->dynCreate(params, init));
-}
 Object coo_Directory() {
-  Object r(NEWOBJ(c_Directory)());
-  r->init();
+  return NEWOBJ(c_Directory)();
+}
+Object co_Directory(CArrRef params, bool init /* = true */) {
+  Object r(coo_Directory());
+  r.get()->dynCreate(params, init);
   return r;
 }
 Variant pm_php$classes$directory_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {

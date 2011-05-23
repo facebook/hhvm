@@ -127,7 +127,7 @@ class StringData {
   bool isZero() const { return size() == 1 && m_data[0] == '0'; }
   bool isValidVariableName() const;
 
-  int64 hashForIntSwitch(int64 firstNonZero, int64 noMatch) const; 
+  int64 hashForIntSwitch(int64 firstNonZero, int64 noMatch) const;
   int64 hashForStringSwitch(
       int64 firstTrueCaseHash,
       int64 firstNullCaseHash,
@@ -135,7 +135,7 @@ class StringData {
       int64 firstZeroCaseHash,
       int64 firstHash,
       int64 noMatchHash,
-      bool &needsOrder) const; 
+      bool &needsOrder) const;
 
 #ifdef TAINTED
   TaintData* getTaintData() { return &m_taint_data; }
@@ -243,7 +243,7 @@ class StringData {
   void removeChar(int offset);
 
   int64 getSharedStringHash() const;
-  int64 hashHelper() const __attribute__((noinline));
+  int64 hashHelper() const NEVER_INLINE;
 
   void assignHelper(const char *data, int len, StringDataMode mode);
   void assign(const char *data, int len, StringDataMode mode);

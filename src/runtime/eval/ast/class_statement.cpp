@@ -276,14 +276,13 @@ void ClassStatement::evalImpl(VariableEnvironment &env) const {
   }
 }
 
-Object ClassStatement::create(ClassEvalState &ce, CArrRef params,
-    bool init, ObjectData* root /* = NULL*/) const {
+Object ClassStatement::create(ClassEvalState &ce,
+                              ObjectData* root /* = NULL*/) const {
   if (getModifiers() & Abstract) {
     throw FatalErrorException(0, "Cannot instantiate abstract class %s",
                               name().c_str());
   }
 
-  EvalObjectData *eo;
   ce.initializeInstance();
 
   // Only need a parent for the dynamic class if the parent
@@ -299,14 +298,7 @@ Object ClassStatement::create(ClassEvalState &ce, CArrRef params,
     cls = pcls;
   }
 
-  eo = NEWOBJ(EvalObjectData)(ce, builtinParent, root);
-
-  Object o(eo);
-  eo->init();
-  if (init) {
-    o->dynConstruct(params);
-  }
-  return o;
+  return NEWOBJ(EvalObjectData)(ce, builtinParent, root);
 }
 
 void ClassStatement::initializeObject(EvalObjectData *obj) const {

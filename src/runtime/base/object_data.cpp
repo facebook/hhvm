@@ -106,6 +106,44 @@ void ObjectData::setDummy() {
   o_id = 0; // for isset($this) to tell whether this is a fake obj
 }
 
+Variant ObjectData::ifa_dummy(MethodCallPackage &mcp, int count,
+                              INVOKE_FEW_ARGS_IMPL_ARGS,
+                              Variant (*ifa)(MethodCallPackage &mcp, int count,
+                                             INVOKE_FEW_ARGS_IMPL_ARGS),
+                              Object (*coo)(ObjectData*)) {
+  Object obj(Object::CreateDummy(coo));
+  mcp.obj = obj.get();
+  return ifa(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS);
+}
+
+Variant ObjectData::i_dummy(MethodCallPackage &mcp, CArrRef params,
+                            Variant (*i)(MethodCallPackage &mcp,
+                                         CArrRef params),
+                              Object (*coo)(ObjectData*)) {
+  Object obj(Object::CreateDummy(coo));
+  mcp.obj = obj.get();
+  return i(mcp, params);
+}
+
+Variant ObjectData::ifa_dummy(MethodCallPackage &mcp, int count,
+                              INVOKE_FEW_ARGS_IMPL_ARGS,
+                              Variant (*ifa)(MethodCallPackage &mcp, int count,
+                                             INVOKE_FEW_ARGS_IMPL_ARGS),
+                              Object (*coo)()) {
+  Object obj(Object::CreateDummy(coo));
+  mcp.obj = obj.get();
+  return ifa(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS);
+}
+
+Variant ObjectData::i_dummy(MethodCallPackage &mcp, CArrRef params,
+                            Variant (*i)(MethodCallPackage &mcp,
+                                         CArrRef params),
+                              Object (*coo)()) {
+  Object obj(Object::CreateDummy(coo));
+  mcp.obj = obj.get();
+  return i(mcp, params);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // static methods and properties
 

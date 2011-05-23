@@ -34,7 +34,7 @@ class c_Closure : public ExtObjectData {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(Closure, Closure)
+  DECLARE_CLASS_COMMON_NO_SWEEP(Closure, Closure)
   DECLARE_INVOKE_EX(Closure, Closure, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
@@ -75,8 +75,8 @@ class c_Closure : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(setvars);
 };
 extern struct ObjectStaticCallbacks cw_Closure;
-Object co_Closure(CArrRef params, bool init = true);
-Object coo_Closure();
+Object co_Closure(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_Closure() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

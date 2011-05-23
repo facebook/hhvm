@@ -33,7 +33,7 @@ class c_InvalidArgumentException : public c_LogicException {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(InvalidArgumentException, InvalidArgumentException)
+  DECLARE_CLASS_COMMON_NO_SWEEP(InvalidArgumentException, InvalidArgumentException)
   DECLARE_INVOKE_EX(InvalidArgumentException, InvalidArgumentException, LogicException)
 
   // DECLARE_STATIC_PROP_OPS
@@ -63,8 +63,8 @@ class c_InvalidArgumentException : public c_LogicException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_InvalidArgumentException;
-Object co_InvalidArgumentException(CArrRef params, bool init = true);
-Object coo_InvalidArgumentException();
+Object co_InvalidArgumentException(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_InvalidArgumentException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

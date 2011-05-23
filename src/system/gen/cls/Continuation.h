@@ -42,7 +42,7 @@ class c_Continuation : public c_Closure {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(Continuation, Continuation)
+  DECLARE_CLASS_COMMON_NO_SWEEP(Continuation, Continuation)
   DECLARE_INVOKE_EX(Continuation, Continuation, Closure)
 
   // DECLARE_STATIC_PROP_OPS
@@ -106,8 +106,8 @@ class c_Continuation : public c_Closure {
   DECLARE_METHOD_INVOKE_HELPERS(update);
 };
 extern struct ObjectStaticCallbacks cw_Continuation;
-Object co_Continuation(CArrRef params, bool init = true);
-Object coo_Continuation();
+Object co_Continuation(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_Continuation() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -34,7 +34,7 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(ReflectionFunction, ReflectionFunction)
+  DECLARE_CLASS_COMMON_NO_SWEEP(ReflectionFunction, ReflectionFunction)
   DECLARE_INVOKE_EX(ReflectionFunction, ReflectionFunction, ReflectionFunctionAbstract)
 
   // DECLARE_STATIC_PROP_OPS
@@ -76,10 +76,10 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   DECLARE_METHOD_INVOKE_HELPERS(export);
   DECLARE_METHOD_INVOKE_HELPERS(invoke);
 };
-extern const int64 q_ReflectionFunction_IS_DEPRECATED;
 extern struct ObjectStaticCallbacks cw_ReflectionFunction;
-Object co_ReflectionFunction(CArrRef params, bool init = true);
-Object coo_ReflectionFunction();
+Object co_ReflectionFunction(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_ReflectionFunction() NEVER_INLINE;
+extern const int64 q_ReflectionFunction_IS_DEPRECATED;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

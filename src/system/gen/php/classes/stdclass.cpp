@@ -75,7 +75,7 @@ Variant c_stdClass::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_stdClass
-IMPLEMENT_CLASS(stdClass)
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(stdClass)
 bool c_stdClass::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 1) {
@@ -88,7 +88,7 @@ bool c_stdClass::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_stdClass::cloneImpl() {
-  c_stdClass *obj = NEWOBJ(c_stdClass)();
+  ObjectData *obj = coo_stdClass().detach();
   c_stdClass::cloneSet(obj);
   return obj;
 }
@@ -160,7 +160,7 @@ Variant c___PHP_Incomplete_Class::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT___PHP_Incomplete_Class
-IMPLEMENT_CLASS(__PHP_Incomplete_Class)
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(__PHP_Incomplete_Class)
 bool c___PHP_Incomplete_Class::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 1) {
@@ -173,7 +173,7 @@ bool c___PHP_Incomplete_Class::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c___PHP_Incomplete_Class::cloneImpl() {
-  c___PHP_Incomplete_Class *obj = NEWOBJ(c___PHP_Incomplete_Class)();
+  ObjectData *obj = coo___PHP_Incomplete_Class().detach();
   c___PHP_Incomplete_Class::cloneSet(obj);
   return obj;
 }
@@ -199,20 +199,20 @@ struct ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
 };
 void c___PHP_Incomplete_Class::init() {
 }
-Object co_stdClass(CArrRef params, bool init /* = true */) {
-  return Object((NEWOBJ(c_stdClass)())->dynCreate(params, init));
-}
 Object coo_stdClass() {
-  Object r(NEWOBJ(c_stdClass)());
-  r->init();
+  return NEWOBJ(c_stdClass)();
+}
+Object co_stdClass(CArrRef params, bool init /* = true */) {
+  Object r(coo_stdClass());
+  r.get()->dynCreate(params, init);
   return r;
 }
-Object co___PHP_Incomplete_Class(CArrRef params, bool init /* = true */) {
-  return Object((NEWOBJ(c___PHP_Incomplete_Class)())->dynCreate(params, init));
-}
 Object coo___PHP_Incomplete_Class() {
-  Object r(NEWOBJ(c___PHP_Incomplete_Class)());
-  r->init();
+  return NEWOBJ(c___PHP_Incomplete_Class)();
+}
+Object co___PHP_Incomplete_Class(CArrRef params, bool init /* = true */) {
+  Object r(coo___PHP_Incomplete_Class());
+  r.get()->dynCreate(params, init);
   return r;
 }
 Variant pm_php$classes$stdclass_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {

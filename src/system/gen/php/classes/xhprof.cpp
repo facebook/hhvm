@@ -75,7 +75,7 @@ Variant c_XhprofFrame::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_XhprofFrame
-IMPLEMENT_CLASS(XhprofFrame)
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(XhprofFrame)
 void c_XhprofFrame::destruct() {
   if (!inCtorDtor()) {
     incRefCount();
@@ -96,7 +96,7 @@ bool c_XhprofFrame::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_XhprofFrame::cloneImpl() {
-  c_XhprofFrame *obj = NEWOBJ(c_XhprofFrame)();
+  ObjectData *obj = coo_XhprofFrame().detach();
   c_XhprofFrame::cloneSet(obj);
   return obj;
 }
@@ -107,26 +107,20 @@ void c_XhprofFrame::cloneSet(ObjectData *cl) {
 CallInfo c_XhprofFrame::ci___destruct((void*)&c_XhprofFrame::i___destruct, (void*)&c_XhprofFrame::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_XhprofFrame::ci___construct((void*)&c_XhprofFrame::i___construct, (void*)&c_XhprofFrame::ifa___construct, 1, 4, 0x0000000000000000LL);
 Variant c_XhprofFrame::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_XhprofFrame *self = NULL;
-  p_XhprofFrame pobj;
-  if (mcp.obj) {
-    self = static_cast<c_XhprofFrame*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i___destruct, coo_XhprofFrame);
   }
+  c_XhprofFrame *self ATTRIBUTE_UNUSED (static_cast<c_XhprofFrame*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("XhprofFrame::__destruct", 0, 1);
   return (self->t___destruct());
 }
 Variant c_XhprofFrame::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_XhprofFrame *self = NULL;
-  p_XhprofFrame pobj;
-  if (mcp.obj) {
-    self = static_cast<c_XhprofFrame*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i___construct, coo_XhprofFrame);
   }
+  c_XhprofFrame *self ATTRIBUTE_UNUSED (static_cast<c_XhprofFrame*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("XhprofFrame::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
@@ -136,24 +130,18 @@ Variant c_XhprofFrame::i___construct(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_XhprofFrame::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_XhprofFrame *self = NULL;
-  p_XhprofFrame pobj;
-  if (mcp.obj) {
-    self = static_cast<c_XhprofFrame*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_XhprofFrame);
   }
+  c_XhprofFrame *self ATTRIBUTE_UNUSED (static_cast<c_XhprofFrame*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("XhprofFrame::__destruct", 0, 1);
   return (self->t___destruct());
 }
 Variant c_XhprofFrame::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_XhprofFrame *self = NULL;
-  p_XhprofFrame pobj;
-  if (mcp.obj) {
-    self = static_cast<c_XhprofFrame*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_XhprofFrame);
   }
+  c_XhprofFrame *self ATTRIBUTE_UNUSED (static_cast<c_XhprofFrame*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("XhprofFrame::__construct", count, 1, 1, 2);
   CVarRef arg0(a0);
   return (self->t___construct(arg0), null);
@@ -225,12 +213,12 @@ Variant c_XhprofFrame::t___destruct() {
   return null;
 }
 namespace hphp_impl_splitter {}
-Object co_XhprofFrame(CArrRef params, bool init /* = true */) {
-  return Object((NEWOBJ(c_XhprofFrame)())->dynCreate(params, init));
-}
 Object coo_XhprofFrame() {
-  Object r(NEWOBJ(c_XhprofFrame)());
-  r->init();
+  return NEWOBJ(c_XhprofFrame)();
+}
+Object co_XhprofFrame(CArrRef params, bool init /* = true */) {
+  Object r(coo_XhprofFrame());
+  r.get()->dynCreate(params, init);
   return r;
 }
 Variant pm_php$classes$xhprof_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {

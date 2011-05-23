@@ -55,7 +55,7 @@ struct RequestLocal {
     return m_node.m_p;
   }
 
-  void create() __attribute__((noinline));
+  void create() NEVER_INLINE;
 
   static void OnThreadExit(void * p) {
     ThreadLocalNode<T> * pNode = (ThreadLocalNode<T>*)p;

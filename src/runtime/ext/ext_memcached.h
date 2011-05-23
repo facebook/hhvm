@@ -85,7 +85,7 @@ extern const int q_Memcached_RES_PAYLOAD_FAILURE;
 ///////////////////////////////////////////////////////////////////////////////
 // class Memcached
 
-FORWARD_DECLARE_CLASS(Memcached);
+FORWARD_DECLARE_CLASS_BUILTIN(Memcached);
 class c_Memcached : public ExtObjectData, public Sweepable {
  public:
   BEGIN_CLASS_MAP(Memcached)

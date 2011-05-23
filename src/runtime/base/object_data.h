@@ -138,6 +138,24 @@ class ObjectData : public CountableNF {
 #endif
 
   void setDummy();
+  static Variant ifa_dummy(MethodCallPackage &mcp, int count,
+                           INVOKE_FEW_ARGS_IMPL_ARGS,
+                           Variant (*ifa)(MethodCallPackage &mcp, int count,
+                                          INVOKE_FEW_ARGS_IMPL_ARGS),
+                           Object (*coo)(ObjectData*));
+  static Variant i_dummy(MethodCallPackage &mcp, CArrRef params,
+                         Variant (*i)(MethodCallPackage &mcp,
+                                      CArrRef params),
+                         Object (*coo)(ObjectData*));
+  static Variant ifa_dummy(MethodCallPackage &mcp, int count,
+                           INVOKE_FEW_ARGS_IMPL_ARGS,
+                           Variant (*ifa)(MethodCallPackage &mcp, int count,
+                                          INVOKE_FEW_ARGS_IMPL_ARGS),
+                           Object (*coo)());
+  static Variant i_dummy(MethodCallPackage &mcp, CArrRef params,
+                         Variant (*i)(MethodCallPackage &mcp,
+                                      CArrRef params),
+                         Object (*coo)());
 
   virtual void init() {}
   ObjectData *create() { CountableHelper h(this); init(); return this;}

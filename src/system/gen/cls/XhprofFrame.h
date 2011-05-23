@@ -32,7 +32,7 @@ class c_XhprofFrame : public ExtObjectData {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(XhprofFrame, XhprofFrame)
+  DECLARE_CLASS_COMMON_NO_SWEEP(XhprofFrame, XhprofFrame)
   DECLARE_INVOKE_EX(XhprofFrame, XhprofFrame, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
@@ -70,8 +70,8 @@ class c_XhprofFrame : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
 };
 extern struct ObjectStaticCallbacks cw_XhprofFrame;
-Object co_XhprofFrame(CArrRef params, bool init = true);
-Object coo_XhprofFrame();
+Object co_XhprofFrame(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_XhprofFrame() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

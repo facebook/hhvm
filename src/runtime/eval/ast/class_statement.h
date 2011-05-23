@@ -93,8 +93,7 @@ public:
   virtual void eval(VariableEnvironment &env) const;
   void evalImpl(VariableEnvironment &env) const;
   // Called by create_class
-  Object create(ClassEvalState &ce, CArrRef params, bool init,
-                ObjectData* root = NULL) const;
+  Object create(ClassEvalState &ce, ObjectData* root = NULL) const;
   void initializeObject(EvalObjectData *obj) const;
   void initializeStatics(LVariableTable &statics) const;
 

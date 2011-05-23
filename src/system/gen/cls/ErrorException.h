@@ -34,7 +34,7 @@ class c_ErrorException : public c_Exception {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(ErrorException, ErrorException)
+  DECLARE_CLASS_COMMON_NO_SWEEP(ErrorException, ErrorException)
   DECLARE_INVOKE_EX(ErrorException, ErrorException, Exception)
 
   // DECLARE_STATIC_PROP_OPS
@@ -71,8 +71,8 @@ class c_ErrorException : public c_Exception {
   DECLARE_METHOD_INVOKE_HELPERS(getseverity);
 };
 extern struct ObjectStaticCallbacks cw_ErrorException;
-Object co_ErrorException(CArrRef params, bool init = true);
-Object coo_ErrorException();
+Object co_ErrorException(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_ErrorException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

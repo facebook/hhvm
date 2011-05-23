@@ -32,9 +32,13 @@ namespace HPHP {
 #define GET_THIS_VALID()   fi.getThisForArrow()
 #define GET_THIS_ARROW()   fi.getThisForArrow()->
 
-#define FORWARD_DECLARE_CLASS(cls)                      \
+#define FORWARD_DECLARE_CLASS(cls)                 \
   class c_##cls;                                        \
   typedef SmartObject<c_##cls> p_##cls;                 \
+
+#define FORWARD_DECLARE_CLASS_BUILTIN(cls)                      \
+  FORWARD_DECLARE_CLASS(cls)                       \
+  extern Object coo_##cls();                            \
 
 #define FORWARD_DECLARE_INTERFACE(cls)                  \
   class c_##cls;                                        \
@@ -151,6 +155,16 @@ namespace HPHP {
     return c_##parent::o_get_call_info_with_index_ex(clsname, mcp, mi, h);\
   }                                                                     \
 
+#define DECLARE_CLASS_COMMON_NO_SWEEP(cls, originalName) \
+  DECLARE_OBJECT_ALLOCATION_NO_SWEEP(c_##cls)                           \
+  protected:                                                            \
+  ObjectData *cloneImpl();                                              \
+  void cloneSet(ObjectData *cl);                                        \
+  public:                                                               \
+  static const char *GetClassName() { return #originalName; }           \
+  static StaticString s_class_name;                                     \
+  virtual CStrRef o_getClassName() const { return s_class_name; }       \
+
 #define DECLARE_CLASS_COMMON(cls, originalName) \
   DECLARE_OBJECT_ALLOCATION(c_##cls)                                    \
   protected:                                                            \
@@ -160,7 +174,15 @@ namespace HPHP {
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \
   virtual CStrRef o_getClassName() const { return s_class_name; }       \
-  static c_##cls *createDummy(p_##cls &pobj);                           \
+
+#define DECLARE_CLASS_NO_SWEEP(cls, originalName, parent)               \
+  DECLARE_CLASS_COMMON_NO_SWEEP(cls, originalName)                      \
+  DECLARE_STATIC_PROP_OPS                                               \
+  DECLARE_INSTANCE_PROP_OPS                                             \
+  DECLARE_INSTANCE_PUBLIC_PROP_OPS                                      \
+  DECLARE_COMMON_INVOKES                                                \
+  DECLARE_INVOKE_EX(cls, originalName, parent)                          \
+  public:                                                               \
 
 #define DECLARE_CLASS(cls, originalName, parent)                        \
   DECLARE_CLASS_COMMON(cls, originalName)                               \
@@ -172,7 +194,7 @@ namespace HPHP {
   public:                                                               \
 
 #define DECLARE_DYNAMIC_CLASS(cls, originalName, parent)                \
-  DECLARE_CLASS_COMMON(cls, originalName)                               \
+  DECLARE_CLASS_COMMON_NO_SWEEP(cls, originalName)                      \
   DECLARE_STATIC_PROP_OPS                                               \
   DECLARE_INSTANCE_PROP_OPS                                             \
   DECLARE_COMMON_INVOKES                                                \
@@ -183,12 +205,6 @@ namespace HPHP {
 
 #define IMPLEMENT_CLASS_COMMON(cls)                                     \
   StaticString c_##cls::s_class_name(c_##cls::GetClassName());          \
-  c_##cls *c_##cls::createDummy(p_##cls &pobj) {                        \
-    pobj = NEWOBJ(c_##cls)();                                              \
-    pobj->init();                                                       \
-    pobj->setDummy();                                                   \
-    return pobj.get();                                                  \
-  }                                                                     \
 
 #define IMPLEMENT_CLASS(cls)                                            \
   IMPLEMENT_CLASS_COMMON(cls)                                           \
@@ -341,7 +357,7 @@ do { \
     return CLASS_CHECK(coo_ ## f())
 #define HASH_CREATE_OBJECT_ONLY_REDECLARED(code, f)                     \
   if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(g->cso_ ## f->createOnly(root))
+    return CLASS_CHECK(g->cso_ ## f->createOnlyNoInit(root))
 #define HASH_INCLUDE(code, file, fun)                                   \
   if (hash == code && !strcmp(file, s.c_str())) {                       \
     return pm_ ## fun(once, variables);                                 \

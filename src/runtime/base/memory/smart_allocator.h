@@ -182,7 +182,7 @@ public:
    * Allocation/deallocation of object memory.
    */
   void *alloc();
-  void *allocHelper() __attribute__((noinline));
+  void *allocHelper() NEVER_INLINE;
   void dealloc(void *obj) {
 #ifdef SMART_ALLOCATOR_STACKTRACE
     if (!isValid(obj)) {
@@ -378,11 +378,14 @@ void *SmartAllocatorInitSetup() {
 // NS::T::s_T_initializer allows private inner classes to be initialized,
 // this is completely hidden by using a nested private llocatorInitializer
 
-#define DECLARE_OBJECT_ALLOCATION(T)                                    \
+#define DECLARE_OBJECT_ALLOCATION_NO_SWEEP(T)                           \
   public:                                                               \
   static void *ObjAllocatorInitSetup;                                   \
   virtual void release();                                               \
-  virtual void sweep();
+
+#define DECLARE_OBJECT_ALLOCATION(T)                                    \
+  DECLARE_OBJECT_ALLOCATION_NO_SWEEP(T)                                 \
+  virtual void sweep();                                                 \
 
 #define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T)          \
   void *NS::T::ObjAllocatorInitSetup =                                  \

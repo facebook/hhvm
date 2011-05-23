@@ -20,6 +20,7 @@
 #include <pthread.h>
 #include "exception.h"
 #include <errno.h>
+#include <util/util.h>
 
 namespace HPHP {
 
@@ -115,7 +116,7 @@ struct ThreadLocal {
     return m_node.m_p;
   }
 
-  void create() __attribute__((noinline));
+  void create() NEVER_INLINE;
 
   bool isNull() const { return m_node.m_p == NULL; }
 
@@ -148,13 +149,13 @@ void ThreadLocal<T>::create() {
 
 template<typename T>
 struct ThreadLocalNoCheck {
-  T *getCheck() const ATTRIBUTE_COLD __attribute__((noinline));
+  T *getCheck() const ATTRIBUTE_COLD NEVER_INLINE;
   T* getNoCheck() const {
     ASSERT(m_node.m_p);
     return m_node.m_p;
   }
 
-  void create() __attribute__((noinline));
+  void create() NEVER_INLINE;
 
   bool isNull() const { return m_node.m_p == NULL; }
 
@@ -207,7 +208,7 @@ class ThreadLocalSingleton {
 public:
   ThreadLocalSingleton() { getKey(); }
 
-  static T *getCheck() ATTRIBUTE_COLD __attribute__((noinline));
+  static T *getCheck() ATTRIBUTE_COLD NEVER_INLINE;
 
   static T* getNoCheck() {
     T *& p = s_singleton;
@@ -215,7 +216,7 @@ public:
     return p;
   }
 
-  static void create(T *& p) __attribute__((noinline));
+  static void create(T *& p) NEVER_INLINE;
 
   static bool isNull() { return s_singleton == NULL; }
 
@@ -390,7 +391,7 @@ public:
     ThreadLocalCreateKey(&m_key, ThreadLocalOnThreadExit<T>);
   }
 
-  T *getCheck() const ATTRIBUTE_COLD __attribute__((noinline));
+  T *getCheck() const ATTRIBUTE_COLD NEVER_INLINE;
 
   T* getNoCheck() const {
     T *obj = (T*)pthread_getspecific(m_key);
@@ -444,7 +445,7 @@ class ThreadLocalSingleton {
 public:
   ThreadLocalSingleton() { getKey(); }
 
-  static T *getCheck() ATTRIBUTE_COLD __attribute__((noinline));
+  static T *getCheck() ATTRIBUTE_COLD NEVER_INLINE;
   static T* getNoCheck() {
     T *obj = (T*)pthread_getspecific(s_key);
     ASSERT(obj);

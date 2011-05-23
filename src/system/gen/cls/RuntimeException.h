@@ -33,7 +33,7 @@ class c_RuntimeException : public c_Exception {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(RuntimeException, RuntimeException)
+  DECLARE_CLASS_COMMON_NO_SWEEP(RuntimeException, RuntimeException)
   DECLARE_INVOKE_EX(RuntimeException, RuntimeException, Exception)
 
   // DECLARE_STATIC_PROP_OPS
@@ -63,8 +63,8 @@ class c_RuntimeException : public c_Exception {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_RuntimeException;
-Object co_RuntimeException(CArrRef params, bool init = true);
-Object coo_RuntimeException();
+Object co_RuntimeException(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_RuntimeException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -663,28 +663,36 @@ void ClassScope::serialize(JSON::OutputStream &out) const {
 void ClassScope::outputCPPDynamicClassDecl(CodeGenerator &cg) {
   string clsStr = getId(cg);
   const char *clsName = clsStr.c_str();
-  cg_printf("Object %s%s(CArrRef params, bool init = true);\n",
+  cg_printf("Object %s%s(CArrRef params, bool init = true) NEVER_INLINE;\n",
             Option::CreateObjectPrefix, clsName);
-  cg_printf("Object %s%s();\n",
-            Option::CreateObjectOnlyPrefix, clsName);
+  cg_printf("Object %s%s(%s) NEVER_INLINE;\n",
+            Option::CreateObjectOnlyPrefix, clsName,
+            isRedeclaring() ? "ObjectData *root = NULL" : "");
 }
 
 void ClassScope::outputCPPDynamicClassCreateDecl(CodeGenerator &cg) {
-  cg_printf("Object create_object_only(const char *s, ObjectData *root);\n");
+  cg_printf("Object create_object_only("
+            "const char *s, ObjectData *root);\n");
+  cg_printf("Object create_object_only_no_init("
+            "const char *s, ObjectData *root);\n");
 }
 
 void ClassScope::outputCPPDynamicClassImpl(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
   string clsStr = getId(cg);
   const char *clsName = clsStr.c_str();
+  cg_indentBegin("Object %s%s(%s) {\n",
+                 Option::CreateObjectOnlyPrefix, clsName,
+                 isRedeclaring() ? "ObjectData *root /* = NULL */" : "");
+  cg_printf("return NEWOBJ(%s%s)(%s);\n",
+            Option::ClassPrefix, clsName,
+            isRedeclaring() ? "root" : "");
+  cg_indentEnd("}\n");
   cg_indentBegin("Object %s%s(CArrRef params, bool init /* = true */) {\n",
                  Option::CreateObjectPrefix, clsName);
-  cg_printf("return Object((NEWOBJ(%s%s)())->dynCreate(params, init));\n",
+  cg_printf("Object r(%s%s());\n", Option::CreateObjectOnlyPrefix, clsName);
+  cg_printf("r.get()->dynCreate(params, init);\n",
             Option::ClassPrefix, clsName);
-  cg_indentEnd("}\n");
-  cg_indentBegin("Object %s%s() {\n", Option::CreateObjectOnlyPrefix, clsName);
-  cg_printf("Object r(NEWOBJ(%s%s)());\n", Option::ClassPrefix, clsName);
-  cg_printf("r->init();\n");
   cg_printf("return r;\n");
   cg_indentEnd("}\n");
 }
@@ -934,9 +942,10 @@ void ClassScope::outputCPPDynamicClassCreateImpl
   bool withEval = !system && Option::EnableEval == Option::FullEval;
   bool useHashTable = (Option::GenHashTableDynClass && classes.size() > 0);
 
-  // output create_object_only()
-  cg_indentBegin("Object create%s_object_only(const char *s, "
-      "ObjectData* root /* = NULL*/) {\n", system ?  "_builtin" : "");
+  // output create_object_only_no_init()
+  cg_indentBegin("Object create%s_object_only_no_init(const char *s, "
+                 "ObjectData* root /* = NULL*/) {\n",
+                 system ?  "_builtin" : "");
   if (withEval) {
     // See if there's an eval'd version
     cg_indentBegin("{\n");
@@ -958,13 +967,13 @@ void ClassScope::outputCPPDynamicClassCreateImpl
     } else {
       cg.printDeclareGlobals();
       cg_printf("const hashNodeCTD *p = findCTD(s, hash_string(s));\n"
-                "if (!p) return create_builtin_object_only(s, root);\n"
+                "if (!p) return create_builtin_object_only_no_init(s, root);\n"
                 "int64 off = p->off;\n"
                 "if (off == 0) return ((Object(*)())(p->ptr2))();\n"
                 "checkClassExists(s, g);\n"
                 "if (off < 0) return ((Object(*)())(p->ptr2))(); "
                 "// volatile class\n"
-                "return g->tgv_ClassStaticsPtr[off-1]->createOnly(root); "
+                "return g->tgv_ClassStaticsPtr[off-1]->createOnlyNoInit(root); "
                 "// redeclared class\n");
     }
   }
@@ -972,9 +981,18 @@ void ClassScope::outputCPPDynamicClassCreateImpl
     if (system) {
       cg_printf("return throw_missing_class(s);\n");
     } else {
-      cg_printf("return create_builtin_object_only(s, root);\n");
+      cg_printf("return create_builtin_object_only_no_init(s, root);\n");
     }
   }
+  cg_indentEnd("}\n");
+  // output create_object_only()
+  cg_indentBegin("Object create%s_object_only(const char *s, "
+                 "ObjectData* root /* = NULL*/) {\n",
+                 system ?  "_builtin" : "");
+  cg_printf("Object r(create%s_object_only_no_init(s, root));\n",
+            system ? "_builtin" : "");
+  cg_printf("r->init();\n");
+  cg_printf("return r;\n");
   cg_indentEnd("}\n");
 }
 
@@ -1348,10 +1366,6 @@ void ClassScope::outputCPPHeader(CodeGenerator &old_cg, AnalysisResultPtr ar,
   cg.setContext(CodeGenerator::CppDeclaration);
   getStmt()->outputCPP(cg, ar);
 
-  if (!isInterface()) {
-    outputCPPDynamicClassDecl(cg);
-  }
-
   cg.namespaceEnd();
 
   cg.headerEnd(filename);
@@ -1519,14 +1533,12 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
       cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_CONSTANT_%s", clsName);
     }
 
-    if (m_attributeClassInfo & ClassInfo::NoDefaultSweep) {
+    if ((isUserClass() && !isSepExtension()) ||
+        m_attributeClassInfo & ClassInfo::NoDefaultSweep) {
       cg_printf("IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(%s)\n", clsName);
     } else {
       cg_printf("IMPLEMENT_CLASS(%s)\n", clsName);
     }
-  }
-
-  if (Option::GenerateCPPMacros) {
   }
 
   // Destruct method
@@ -1574,8 +1586,8 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
   // Cloning
   cg_indentBegin("ObjectData *%s%s::cloneImpl() {\n",
                  Option::ClassPrefix, clsName);
-  cg_printf("%s%s *obj = NEWOBJ(%s%s)();\n", Option::ClassPrefix, clsName,
-            Option::ClassPrefix, clsName);
+  cg_printf("ObjectData *obj = %s%s().detach();\n",
+            Option::CreateObjectOnlyPrefix, clsName);
   cg_printf("%s%s::cloneSet(obj);\n", Option::ClassPrefix, clsName);
   cg_printf("return obj;\n");
   cg_indentEnd("}\n");
@@ -1800,20 +1812,25 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
       cg_printf("CArrRef params");
     }
     cg_printf(") {\n");
-    if (!fewArgs) FunctionScope::OutputCPPDynamicInvokeCount(cg);
     const char *class_name = "";
     if (!func->isStatic()) {
-      cg_printf("%s%s *self = NULL;\n", Option::ClassPrefix, id.c_str());
-      cg_printf("%s%s pobj;\n", Option::SmartPtrPrefix, id.c_str());
       // Instance method called as such
-      cg_indentBegin("if (mcp.obj) {\n");
-      cg_printf("self = static_cast<%s%s*>(mcp.obj);\n",
-          Option::ClassPrefix, id.c_str());
-      cg_indentEnd("");
-      // Instance method called statically
-      cg_indentBegin("} else {\n");
-      cg_printf("self = createDummy(pobj);\n");
+      cg_indentBegin("if (UNLIKELY(mcp.obj == 0)) {\n");
+      cg_printf("return %sdummy(mcp, ",
+                fewArgs ? Option::InvokeFewArgsPrefix : Option::InvokePrefix);
+      if (fewArgs) {
+        cg_printf("count, INVOKE_FEW_ARGS_PASS_ARGS");
+      } else {
+        cg_printf("params");
+      }
+      cg_printf(", %s%s, %s%s);\n",
+                fewArgs ? Option::InvokeFewArgsPrefix : Option::InvokePrefix,
+                lname.c_str(),
+                Option::CreateObjectOnlyPrefix, id.c_str());
       cg_indentEnd("}\n");
+      cg_printf("%s%s *self ATTRIBUTE_UNUSED (static_cast<%s%s*>(mcp.obj));\n",
+                Option::ClassPrefix, id.c_str(),
+                Option::ClassPrefix, id.c_str());
     } else if (func->needsClassParam()) {
       // If mcp contains an object, was a static method invoked instance style.
       // Use rootObj's class name as invoking class
@@ -1822,6 +1839,7 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
         " ? mcp.rootObj->o_getClassName()"
         " : String(mcp.rootCls));\n";
     }
+    if (!fewArgs) FunctionScope::OutputCPPDynamicInvokeCount(cg);
     func->outputCPPDynamicInvoke(cg, ar, prefix.c_str(),
                                  lname.c_str(), false, fewArgs, true, extra,
                                  func->isConstructor(self), instance,

@@ -33,7 +33,7 @@ class c_FilterIterator : public ExtObjectData {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(FilterIterator, FilterIterator)
+  DECLARE_CLASS_COMMON_NO_SWEEP(FilterIterator, FilterIterator)
   DECLARE_INVOKE_EX(FilterIterator, FilterIterator, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
@@ -63,8 +63,8 @@ class c_FilterIterator : public ExtObjectData {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_FilterIterator;
-Object co_FilterIterator(CArrRef params, bool init = true);
-Object coo_FilterIterator();
+Object co_FilterIterator(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_FilterIterator() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

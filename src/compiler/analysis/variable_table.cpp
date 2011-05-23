@@ -769,7 +769,8 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     if (!sgi->func && !sgi->sym->isOverride()) {
       TypePtr varType = sgi->sym->getFinalType();
       if (varType->isSpecificObject()) {
-        cg_printf("FORWARD_DECLARE_CLASS(%s);\n", varType->getName().c_str());
+        cg_printf("FORWARD_DECLARE_CLASS(%s);\n",
+                  varType->getName().c_str());
       }
     }
   }

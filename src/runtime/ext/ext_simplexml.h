@@ -37,7 +37,7 @@ bool f_libxml_disable_entity_loader(bool disable = true);
 ///////////////////////////////////////////////////////////////////////////////
 // class SimpleXMLElement
 
-FORWARD_DECLARE_CLASS(SimpleXMLElement);
+FORWARD_DECLARE_CLASS_BUILTIN(SimpleXMLElement);
 class c_SimpleXMLElement :
       public ExtObjectDataFlags<ObjectData::UseGet|
                                 ObjectData::UseSet|
@@ -128,7 +128,7 @@ class c_SimpleXMLElement :
 ///////////////////////////////////////////////////////////////////////////////
 // class LibXMLError
 
-FORWARD_DECLARE_CLASS(LibXMLError);
+FORWARD_DECLARE_CLASS_BUILTIN(LibXMLError);
 class c_LibXMLError : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(LibXMLError)
@@ -154,7 +154,7 @@ class c_LibXMLError : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class SimpleXMLElementIterator
 
-FORWARD_DECLARE_CLASS(SimpleXMLElementIterator);
+FORWARD_DECLARE_CLASS_BUILTIN(SimpleXMLElementIterator);
 class c_SimpleXMLElementIterator : public ExtObjectData, public Sweepable {
  public:
   BEGIN_CLASS_MAP(SimpleXMLElementIterator)

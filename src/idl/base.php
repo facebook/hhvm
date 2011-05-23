@@ -659,7 +659,7 @@ function generateClassCPPHeader($class, $f) {
 EOT
           );
 
-  fprintf($f, "FORWARD_DECLARE_CLASS(%s);\n", $clsname);
+  fprintf($f, "FORWARD_DECLARE_CLASS_BUILTIN(%s);\n", $clsname);
   foreach ($class['properties'] as $p) {
     generatePropertyCPPForwardDeclarations($p, $f);
   }
@@ -778,7 +778,7 @@ function generatePropertyCPPHeader($property, $f) {
 
 function generatePropertyCPPForwardDeclarations($property, $f) {
   if (is_string($property['type'])) {
-    fprintf($f, "FORWARD_DECLARE_CLASS(%s);\n",
+    fprintf($f, "FORWARD_DECLARE_CLASS_BUILTIN(%s);\n",
             typename($property['type'], false));
   }
 }

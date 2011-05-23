@@ -34,7 +34,7 @@ class c_AppendIterator : public ExtObjectData {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(AppendIterator, AppendIterator)
+  DECLARE_CLASS_COMMON_NO_SWEEP(AppendIterator, AppendIterator)
   DECLARE_INVOKE_EX(AppendIterator, AppendIterator, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
@@ -90,8 +90,8 @@ class c_AppendIterator : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_AppendIterator;
-Object co_AppendIterator(CArrRef params, bool init = true);
-Object coo_AppendIterator();
+Object co_AppendIterator(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_AppendIterator() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

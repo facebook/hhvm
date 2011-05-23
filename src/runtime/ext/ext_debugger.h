@@ -33,7 +33,7 @@ void f_hphpd_break(bool condition = true);
 ///////////////////////////////////////////////////////////////////////////////
 // class DebuggerProxy
 
-FORWARD_DECLARE_CLASS(DebuggerProxy);
+FORWARD_DECLARE_CLASS_BUILTIN(DebuggerProxy);
 class c_DebuggerProxy : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(DebuggerProxy)
@@ -75,7 +75,7 @@ extern const int64 q_DebuggerClient_AUTO_COMPLETE_CODE;
 ///////////////////////////////////////////////////////////////////////////////
 // class DebuggerClient
 
-FORWARD_DECLARE_CLASS(DebuggerClient);
+FORWARD_DECLARE_CLASS_BUILTIN(DebuggerClient);
 class c_DebuggerClient : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(DebuggerClient)

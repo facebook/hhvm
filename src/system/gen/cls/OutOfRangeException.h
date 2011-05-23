@@ -33,7 +33,7 @@ class c_OutOfRangeException : public c_LogicException {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(OutOfRangeException, OutOfRangeException)
+  DECLARE_CLASS_COMMON_NO_SWEEP(OutOfRangeException, OutOfRangeException)
   DECLARE_INVOKE_EX(OutOfRangeException, OutOfRangeException, LogicException)
 
   // DECLARE_STATIC_PROP_OPS
@@ -63,8 +63,8 @@ class c_OutOfRangeException : public c_LogicException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_OutOfRangeException;
-Object co_OutOfRangeException(CArrRef params, bool init = true);
-Object coo_OutOfRangeException();
+Object co_OutOfRangeException(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_OutOfRangeException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

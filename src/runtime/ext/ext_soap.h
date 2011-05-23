@@ -32,7 +32,7 @@ bool f_is_soap_fault(CVarRef fault);
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapServer
 
-FORWARD_DECLARE_CLASS(SoapServer);
+FORWARD_DECLARE_CLASS_BUILTIN(SoapServer);
 class c_SoapServer : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(SoapServer)
@@ -88,7 +88,7 @@ class c_SoapServer : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapClient
 
-FORWARD_DECLARE_CLASS(SoapClient);
+FORWARD_DECLARE_CLASS_BUILTIN(SoapClient);
 class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
  public:
   BEGIN_CLASS_MAP(SoapClient)
@@ -172,7 +172,7 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapVar
 
-FORWARD_DECLARE_CLASS(SoapVar);
+FORWARD_DECLARE_CLASS_BUILTIN(SoapVar);
 class c_SoapVar : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(SoapVar)
@@ -204,7 +204,7 @@ class c_SoapVar : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapFault
 
-FORWARD_DECLARE_CLASS(SoapFault);
+FORWARD_DECLARE_CLASS_BUILTIN(SoapFault);
 class c_SoapFault : public c_Exception {
  public:
   BEGIN_CLASS_MAP(SoapFault)
@@ -240,7 +240,7 @@ class c_SoapFault : public c_Exception {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapParam
 
-FORWARD_DECLARE_CLASS(SoapParam);
+FORWARD_DECLARE_CLASS_BUILTIN(SoapParam);
 class c_SoapParam : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(SoapParam)
@@ -268,7 +268,7 @@ class c_SoapParam : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapHeader
 
-FORWARD_DECLARE_CLASS(SoapHeader);
+FORWARD_DECLARE_CLASS_BUILTIN(SoapHeader);
 class c_SoapHeader : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(SoapHeader)

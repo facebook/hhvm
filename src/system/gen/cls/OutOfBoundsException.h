@@ -33,7 +33,7 @@ class c_OutOfBoundsException : public c_RuntimeException {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(OutOfBoundsException, OutOfBoundsException)
+  DECLARE_CLASS_COMMON_NO_SWEEP(OutOfBoundsException, OutOfBoundsException)
   DECLARE_INVOKE_EX(OutOfBoundsException, OutOfBoundsException, RuntimeException)
 
   // DECLARE_STATIC_PROP_OPS
@@ -63,8 +63,8 @@ class c_OutOfBoundsException : public c_RuntimeException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_OutOfBoundsException;
-Object co_OutOfBoundsException(CArrRef params, bool init = true);
-Object coo_OutOfBoundsException();
+Object co_OutOfBoundsException(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_OutOfBoundsException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -33,7 +33,7 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(ReflectionFunctionAbstract, ReflectionFunctionAbstract)
+  DECLARE_CLASS_COMMON_NO_SWEEP(ReflectionFunctionAbstract, ReflectionFunctionAbstract)
   DECLARE_INVOKE_EX(ReflectionFunctionAbstract, ReflectionFunctionAbstract, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
@@ -89,8 +89,8 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(isinternal);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionFunctionAbstract;
-Object co_ReflectionFunctionAbstract(CArrRef params, bool init = true);
-Object coo_ReflectionFunctionAbstract();
+Object co_ReflectionFunctionAbstract(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_ReflectionFunctionAbstract() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

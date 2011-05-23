@@ -104,7 +104,7 @@ Variant c_ArrayIterator::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ArrayIterator
-IMPLEMENT_CLASS(ArrayIterator)
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ArrayIterator)
 bool c_ArrayIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 15) {
@@ -128,7 +128,7 @@ bool c_ArrayIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ArrayIterator::cloneImpl() {
-  c_ArrayIterator *obj = NEWOBJ(c_ArrayIterator)();
+  ObjectData *obj = coo_ArrayIterator().detach();
   c_ArrayIterator::cloneSet(obj);
   return obj;
 }
@@ -161,86 +161,65 @@ CallInfo c_ArrayIterator::ci_uasort((void*)&c_ArrayIterator::i_uasort, (void*)&c
 CallInfo c_ArrayIterator::ci_rewind((void*)&c_ArrayIterator::i_rewind, (void*)&c_ArrayIterator::ifa_rewind, 0, 4, 0x0000000000000000LL);
 CallInfo c_ArrayIterator::ci_offsetset((void*)&c_ArrayIterator::i_offsetset, (void*)&c_ArrayIterator::ifa_offsetset, 2, 4, 0x0000000000000000LL);
 Variant c_ArrayIterator::i_getarraycopy(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_getarraycopy, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::getArrayCopy", 0, 1);
   return (self->t_getarraycopy());
 }
 Variant c_ArrayIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_next, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::next", 0, 1);
   return (self->t_next(), null);
 }
 Variant c_ArrayIterator::i_count(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_count, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::count", 0, 1);
   return (self->t_count());
 }
 Variant c_ArrayIterator::i_natsort(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_natsort, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::natsort", 0, 1);
   return (self->t_natsort(), null);
 }
 Variant c_ArrayIterator::i_key(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_key, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::key", 0, 1);
   return (self->t_key());
 }
 Variant c_ArrayIterator::i_valid(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_valid, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::valid", 0, 1);
   return (self->t_valid());
 }
 Variant c_ArrayIterator::i_append(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_append, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ArrayIterator::append", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
@@ -250,14 +229,11 @@ Variant c_ArrayIterator::i_append(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ArrayIterator::i_setflags(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_setflags, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ArrayIterator::setFlags", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
@@ -267,14 +243,11 @@ Variant c_ArrayIterator::i_setflags(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ArrayIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i___construct, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("ArrayIterator::__construct", count, 1, 2, 2);
   {
     ArrayData *ad(params.get());
@@ -286,14 +259,11 @@ Variant c_ArrayIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ArrayIterator::i_offsetexists(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_offsetexists, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ArrayIterator::offsetExists", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
@@ -303,14 +273,11 @@ Variant c_ArrayIterator::i_offsetexists(MethodCallPackage &mcp, CArrRef params) 
   }
 }
 Variant c_ArrayIterator::i_uksort(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_uksort, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ArrayIterator::uksort", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
@@ -320,14 +287,11 @@ Variant c_ArrayIterator::i_uksort(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ArrayIterator::i_offsetget(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_offsetget, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ArrayIterator::offsetGet", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
@@ -337,38 +301,29 @@ Variant c_ArrayIterator::i_offsetget(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ArrayIterator::i_natcasesort(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_natcasesort, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::natcasesort", 0, 1);
   return (self->t_natcasesort(), null);
 }
 Variant c_ArrayIterator::i_asort(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_asort, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::asort", 0, 1);
   return (self->t_asort(), null);
 }
 Variant c_ArrayIterator::i_offsetunset(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_offsetunset, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ArrayIterator::offsetUnset", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
@@ -378,14 +333,11 @@ Variant c_ArrayIterator::i_offsetunset(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ArrayIterator::i_seek(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_seek, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ArrayIterator::seek", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
@@ -395,50 +347,38 @@ Variant c_ArrayIterator::i_seek(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ArrayIterator::i_getflags(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_getflags, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::getFlags", 0, 1);
   return (self->t_getflags());
 }
 Variant c_ArrayIterator::i_current(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_current, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::current", 0, 1);
   return (self->t_current());
 }
 Variant c_ArrayIterator::i_ksort(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_ksort, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::ksort", 0, 1);
   return (self->t_ksort(), null);
 }
 Variant c_ArrayIterator::i_uasort(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_uasort, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ArrayIterator::uasort", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
@@ -448,26 +388,20 @@ Variant c_ArrayIterator::i_uasort(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ArrayIterator::i_rewind(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_rewind, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
 Variant c_ArrayIterator::i_offsetset(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_offsetset, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("ArrayIterator::offsetSet", count, 2, 2, 1);
   {
     ArrayData *ad(params.get());
@@ -478,103 +412,76 @@ Variant c_ArrayIterator::i_offsetset(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ArrayIterator::ifa_getarraycopy(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getarraycopy, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::getArrayCopy", 0, 1);
   return (self->t_getarraycopy());
 }
 Variant c_ArrayIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_next, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::next", 0, 1);
   return (self->t_next(), null);
 }
 Variant c_ArrayIterator::ifa_count(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_count, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::count", 0, 1);
   return (self->t_count());
 }
 Variant c_ArrayIterator::ifa_natsort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_natsort, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::natsort", 0, 1);
   return (self->t_natsort(), null);
 }
 Variant c_ArrayIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_key, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::key", 0, 1);
   return (self->t_key());
 }
 Variant c_ArrayIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_valid, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::valid", 0, 1);
   return (self->t_valid());
 }
 Variant c_ArrayIterator::ifa_append(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_append, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ArrayIterator::append", count, 1, 1, 1);
   CVarRef arg0(a0);
   return (self->t_append(arg0), null);
 }
 Variant c_ArrayIterator::ifa_setflags(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_setflags, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ArrayIterator::setFlags", count, 1, 1, 1);
   CVarRef arg0(a0);
   return (self->t_setflags(arg0), null);
 }
 Variant c_ArrayIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("ArrayIterator::__construct", count, 1, 2, 2);
   CVarRef arg0(a0);
   if (count <= 1) return (self->t___construct(arg0), null);
@@ -582,151 +489,112 @@ Variant c_ArrayIterator::ifa___construct(MethodCallPackage &mcp, int count, INVO
   return (self->t___construct(arg0, arg1), null);
 }
 Variant c_ArrayIterator::ifa_offsetexists(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_offsetexists, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ArrayIterator::offsetExists", count, 1, 1, 1);
   CVarRef arg0(a0);
   return (self->t_offsetexists(arg0));
 }
 Variant c_ArrayIterator::ifa_uksort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_uksort, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ArrayIterator::uksort", count, 1, 1, 1);
   CVarRef arg0(a0);
   return (self->t_uksort(arg0), null);
 }
 Variant c_ArrayIterator::ifa_offsetget(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_offsetget, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ArrayIterator::offsetGet", count, 1, 1, 1);
   CVarRef arg0(a0);
   return (self->t_offsetget(arg0));
 }
 Variant c_ArrayIterator::ifa_natcasesort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_natcasesort, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::natcasesort", 0, 1);
   return (self->t_natcasesort(), null);
 }
 Variant c_ArrayIterator::ifa_asort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_asort, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::asort", 0, 1);
   return (self->t_asort(), null);
 }
 Variant c_ArrayIterator::ifa_offsetunset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_offsetunset, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ArrayIterator::offsetUnset", count, 1, 1, 1);
   CVarRef arg0(a0);
   return (self->t_offsetunset(arg0));
 }
 Variant c_ArrayIterator::ifa_seek(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_seek, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ArrayIterator::seek", count, 1, 1, 1);
   CVarRef arg0(a0);
   return (self->t_seek(arg0), null);
 }
 Variant c_ArrayIterator::ifa_getflags(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getflags, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::getFlags", 0, 1);
   return (self->t_getflags());
 }
 Variant c_ArrayIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_current, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::current", 0, 1);
   return (self->t_current());
 }
 Variant c_ArrayIterator::ifa_ksort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_ksort, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::ksort", 0, 1);
   return (self->t_ksort(), null);
 }
 Variant c_ArrayIterator::ifa_uasort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_uasort, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ArrayIterator::uasort", count, 1, 1, 1);
   CVarRef arg0(a0);
   return (self->t_uasort(arg0), null);
 }
 Variant c_ArrayIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_rewind, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
 Variant c_ArrayIterator::ifa_offsetset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_ArrayIterator *self = NULL;
-  p_ArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_ArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_offsetset, coo_ArrayIterator);
   }
+  c_ArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_ArrayIterator*>(mcp.obj));
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("ArrayIterator::offsetSet", count, 2, 2, 1);
   CVarRef arg0(a0);
   CVarRef arg1(a1);
@@ -1157,7 +1025,7 @@ Variant c_AppendIterator::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_AppendIterator
-IMPLEMENT_CLASS(AppendIterator)
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(AppendIterator)
 bool c_AppendIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
@@ -1179,7 +1047,7 @@ bool c_AppendIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_AppendIterator::cloneImpl() {
-  c_AppendIterator *obj = NEWOBJ(c_AppendIterator)();
+  ObjectData *obj = coo_AppendIterator().detach();
   c_AppendIterator::cloneSet(obj);
   return obj;
 }
@@ -1201,62 +1069,47 @@ CallInfo c_AppendIterator::ci_current((void*)&c_AppendIterator::i_current, (void
 CallInfo c_AppendIterator::ci___call((void*)&c_AppendIterator::i___call, (void*)&c_AppendIterator::ifa___call, 2, 4, 0x0000000000000000LL);
 CallInfo c_AppendIterator::ci_rewind((void*)&c_AppendIterator::i_rewind, (void*)&c_AppendIterator::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_AppendIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_next, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::next", 0, 1);
   return (self->t_next(), null);
 }
 Variant c_AppendIterator::i_key(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_key, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::key", 0, 1);
   return (self->t_key());
 }
 Variant c_AppendIterator::i_valid(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_valid, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::valid", 0, 1);
   return (self->t_valid());
 }
 Variant c_AppendIterator::i_getinneriterator(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_getinneriterator, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::getInnerIterator", 0, 1);
   return (self->t_getinneriterator());
 }
 Variant c_AppendIterator::i_append(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_append, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count < 1)) return throw_missing_typed_argument("AppendIterator::append", "iterator", 1);
   if (UNLIKELY(count > 1)) return throw_toomany_arguments("AppendIterator::append", 1, 1);
   {
@@ -1267,38 +1120,29 @@ Variant c_AppendIterator::i_append(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_AppendIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i___construct, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::__construct", 0, 2);
   return (self->t___construct(), null);
 }
 Variant c_AppendIterator::i_current(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_current, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::current", 0, 1);
   return (self->t_current());
 }
 Variant c_AppendIterator::i___call(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i___call, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("AppendIterator::__call", count, 2, 2, 1);
   {
     ArrayData *ad(params.get());
@@ -1309,117 +1153,87 @@ Variant c_AppendIterator::i___call(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_AppendIterator::i_rewind(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_rewind, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
 Variant c_AppendIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_next, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::next", 0, 1);
   return (self->t_next(), null);
 }
 Variant c_AppendIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_key, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::key", 0, 1);
   return (self->t_key());
 }
 Variant c_AppendIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_valid, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::valid", 0, 1);
   return (self->t_valid());
 }
 Variant c_AppendIterator::ifa_getinneriterator(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getinneriterator, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::getInnerIterator", 0, 1);
   return (self->t_getinneriterator());
 }
 Variant c_AppendIterator::ifa_append(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_append, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
   if (UNLIKELY(count < 1)) return throw_missing_typed_argument("AppendIterator::append", "iterator", 1);
   if (UNLIKELY(count > 1)) return throw_toomany_arguments("AppendIterator::append", 1, 1);
   CVarRef arg0(a0);
   return (self->t_append(arg0), null);
 }
 Variant c_AppendIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::__construct", 0, 2);
   return (self->t___construct(), null);
 }
 Variant c_AppendIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_current, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::current", 0, 1);
   return (self->t_current());
 }
 Variant c_AppendIterator::ifa___call(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___call, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("AppendIterator::__call", count, 2, 2, 1);
   CVarRef arg0(a0);
   CVarRef arg1(a1);
   return (self->t___call(arg0, arg1));
 }
 Variant c_AppendIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_AppendIterator *self = NULL;
-  p_AppendIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_AppendIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_rewind, coo_AppendIterator);
   }
+  c_AppendIterator *self ATTRIBUTE_UNUSED (static_cast<c_AppendIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
@@ -1519,7 +1333,7 @@ void c_AppendIterator::t___construct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__construct);
   bool oldInCtor = gasInCtor(true);
   {
-    const p_ArrayIterator &tmp0((p_ArrayIterator((NEWOBJ(c_ArrayIterator)())->create(s_sys_sa00000000))));
+    const p_ArrayIterator &tmp0((((c_ArrayIterator*)((c_ArrayIterator*)(coo_ArrayIterator().get()))->create(s_sys_sa00000000))));
     m_iterators = tmp0;
   }
   gasInCtor(oldInCtor);
@@ -1877,7 +1691,7 @@ Variant c_RecursiveIteratorIterator::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_RecursiveIteratorIterator
-IMPLEMENT_CLASS(RecursiveIteratorIterator)
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(RecursiveIteratorIterator)
 bool c_RecursiveIteratorIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
@@ -1899,7 +1713,7 @@ bool c_RecursiveIteratorIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_RecursiveIteratorIterator::cloneImpl() {
-  c_RecursiveIteratorIterator *obj = NEWOBJ(c_RecursiveIteratorIterator)();
+  ObjectData *obj = coo_RecursiveIteratorIterator().detach();
   c_RecursiveIteratorIterator::cloneSet(obj);
   return obj;
 }
@@ -1916,62 +1730,47 @@ CallInfo c_RecursiveIteratorIterator::ci___construct((void*)&c_RecursiveIterator
 CallInfo c_RecursiveIteratorIterator::ci_current((void*)&c_RecursiveIteratorIterator::i_current, (void*)&c_RecursiveIteratorIterator::ifa_current, 0, 4, 0x0000000000000000LL);
 CallInfo c_RecursiveIteratorIterator::ci_rewind((void*)&c_RecursiveIteratorIterator::i_rewind, (void*)&c_RecursiveIteratorIterator::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_RecursiveIteratorIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_RecursiveIteratorIterator *self = NULL;
-  p_RecursiveIteratorIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_next, coo_RecursiveIteratorIterator);
   }
+  c_RecursiveIteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveIteratorIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveIteratorIterator::next", 0, 1);
   return (self->t_next(), null);
 }
 Variant c_RecursiveIteratorIterator::i_key(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_RecursiveIteratorIterator *self = NULL;
-  p_RecursiveIteratorIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_key, coo_RecursiveIteratorIterator);
   }
+  c_RecursiveIteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveIteratorIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveIteratorIterator::key", 0, 1);
   return (self->t_key());
 }
 Variant c_RecursiveIteratorIterator::i_valid(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_RecursiveIteratorIterator *self = NULL;
-  p_RecursiveIteratorIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_valid, coo_RecursiveIteratorIterator);
   }
+  c_RecursiveIteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveIteratorIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveIteratorIterator::valid", 0, 1);
   return (self->t_valid());
 }
 Variant c_RecursiveIteratorIterator::i_getinneriterator(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_RecursiveIteratorIterator *self = NULL;
-  p_RecursiveIteratorIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_getinneriterator, coo_RecursiveIteratorIterator);
   }
+  c_RecursiveIteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveIteratorIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveIteratorIterator::getInnerIterator", 0, 1);
   return (self->t_getinneriterator());
 }
 Variant c_RecursiveIteratorIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_RecursiveIteratorIterator *self = NULL;
-  p_RecursiveIteratorIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i___construct, coo_RecursiveIteratorIterator);
   }
+  c_RecursiveIteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveIteratorIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count < 1 || count > 3)) return throw_wrong_arguments("RecursiveIteratorIterator::__construct", count, 1, 3, 2);
   {
     ArrayData *ad(params.get());
@@ -1985,81 +1784,60 @@ Variant c_RecursiveIteratorIterator::i___construct(MethodCallPackage &mcp, CArrR
   }
 }
 Variant c_RecursiveIteratorIterator::i_current(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_RecursiveIteratorIterator *self = NULL;
-  p_RecursiveIteratorIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_current, coo_RecursiveIteratorIterator);
   }
+  c_RecursiveIteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveIteratorIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveIteratorIterator::current", 0, 1);
   return (self->t_current());
 }
 Variant c_RecursiveIteratorIterator::i_rewind(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_RecursiveIteratorIterator *self = NULL;
-  p_RecursiveIteratorIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_rewind, coo_RecursiveIteratorIterator);
   }
+  c_RecursiveIteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveIteratorIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveIteratorIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
 Variant c_RecursiveIteratorIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_RecursiveIteratorIterator *self = NULL;
-  p_RecursiveIteratorIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_next, coo_RecursiveIteratorIterator);
   }
+  c_RecursiveIteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveIteratorIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveIteratorIterator::next", 0, 1);
   return (self->t_next(), null);
 }
 Variant c_RecursiveIteratorIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_RecursiveIteratorIterator *self = NULL;
-  p_RecursiveIteratorIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_key, coo_RecursiveIteratorIterator);
   }
+  c_RecursiveIteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveIteratorIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveIteratorIterator::key", 0, 1);
   return (self->t_key());
 }
 Variant c_RecursiveIteratorIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_RecursiveIteratorIterator *self = NULL;
-  p_RecursiveIteratorIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_valid, coo_RecursiveIteratorIterator);
   }
+  c_RecursiveIteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveIteratorIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveIteratorIterator::valid", 0, 1);
   return (self->t_valid());
 }
 Variant c_RecursiveIteratorIterator::ifa_getinneriterator(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_RecursiveIteratorIterator *self = NULL;
-  p_RecursiveIteratorIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getinneriterator, coo_RecursiveIteratorIterator);
   }
+  c_RecursiveIteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveIteratorIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveIteratorIterator::getInnerIterator", 0, 1);
   return (self->t_getinneriterator());
 }
 Variant c_RecursiveIteratorIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_RecursiveIteratorIterator *self = NULL;
-  p_RecursiveIteratorIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_RecursiveIteratorIterator);
   }
+  c_RecursiveIteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveIteratorIterator*>(mcp.obj));
   if (UNLIKELY(count < 1 || count > 3)) return throw_wrong_arguments("RecursiveIteratorIterator::__construct", count, 1, 3, 2);
   CVarRef arg0(a0);
   if (count <= 1) return (self->t___construct(arg0), null);
@@ -2069,24 +1847,18 @@ Variant c_RecursiveIteratorIterator::ifa___construct(MethodCallPackage &mcp, int
   return (self->t___construct(arg0, arg1, arg2), null);
 }
 Variant c_RecursiveIteratorIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_RecursiveIteratorIterator *self = NULL;
-  p_RecursiveIteratorIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_current, coo_RecursiveIteratorIterator);
   }
+  c_RecursiveIteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveIteratorIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveIteratorIterator::current", 0, 1);
   return (self->t_current());
 }
 Variant c_RecursiveIteratorIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_RecursiveIteratorIterator *self = NULL;
-  p_RecursiveIteratorIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_rewind, coo_RecursiveIteratorIterator);
   }
+  c_RecursiveIteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveIteratorIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveIteratorIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
@@ -2278,7 +2050,7 @@ Variant c_MutableArrayIterator::os_constant(const char *s) {
   return c_ArrayIterator::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_MutableArrayIterator
-IMPLEMENT_CLASS(MutableArrayIterator)
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(MutableArrayIterator)
 bool c_MutableArrayIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 15) {
@@ -2305,7 +2077,7 @@ bool c_MutableArrayIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_MutableArrayIterator::cloneImpl() {
-  c_MutableArrayIterator *obj = NEWOBJ(c_MutableArrayIterator)();
+  ObjectData *obj = coo_MutableArrayIterator().detach();
   c_MutableArrayIterator::cloneSet(obj);
   return obj;
 }
@@ -2316,26 +2088,20 @@ void c_MutableArrayIterator::cloneSet(ObjectData *cl) {
 CallInfo c_MutableArrayIterator::ci_currentref((void*)&c_MutableArrayIterator::i_currentref, (void*)&c_MutableArrayIterator::ifa_currentref, 0, 4, 0x0000000000000000LL);
 CallInfo c_MutableArrayIterator::ci___construct((void*)&c_MutableArrayIterator::i___construct, (void*)&c_MutableArrayIterator::ifa___construct, 2, 4, 0x0000000000000001LL);
 Variant c_MutableArrayIterator::i_currentref(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_MutableArrayIterator *self = NULL;
-  p_MutableArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_MutableArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_currentref, coo_MutableArrayIterator);
   }
+  c_MutableArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_MutableArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("MutableArrayIterator::currentRef", 0, 1);
   return strongBind(self->t_currentref());
 }
 Variant c_MutableArrayIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  c_MutableArrayIterator *self = NULL;
-  p_MutableArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_MutableArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i___construct, coo_MutableArrayIterator);
   }
+  c_MutableArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_MutableArrayIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("MutableArrayIterator::__construct", count, 1, 2, 2);
   const_cast<Array&>(params).escalate(true);
   {
@@ -2348,24 +2114,18 @@ Variant c_MutableArrayIterator::i___construct(MethodCallPackage &mcp, CArrRef pa
   }
 }
 Variant c_MutableArrayIterator::ifa_currentref(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_MutableArrayIterator *self = NULL;
-  p_MutableArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_MutableArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_currentref, coo_MutableArrayIterator);
   }
+  c_MutableArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_MutableArrayIterator*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("MutableArrayIterator::currentRef", 0, 1);
   return strongBind(self->t_currentref());
 }
 Variant c_MutableArrayIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  c_MutableArrayIterator *self = NULL;
-  p_MutableArrayIterator pobj;
-  if (mcp.obj) {
-    self = static_cast<c_MutableArrayIterator*>(mcp.obj);
-  } else {
-    self = createDummy(pobj);
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_MutableArrayIterator);
   }
+  c_MutableArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_MutableArrayIterator*>(mcp.obj));
   if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("MutableArrayIterator::__construct", count, 1, 2, 2);
   VRefParam arg0(vref(a0));
   if (count <= 1) return (self->t___construct(arg0), null);
@@ -2497,7 +2257,7 @@ Variant c_FilterIterator::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_FilterIterator
-IMPLEMENT_CLASS(FilterIterator)
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(FilterIterator)
 bool c_FilterIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
@@ -2517,7 +2277,7 @@ bool c_FilterIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_FilterIterator::cloneImpl() {
-  c_FilterIterator *obj = NEWOBJ(c_FilterIterator)();
+  ObjectData *obj = coo_FilterIterator().detach();
   c_FilterIterator::cloneSet(obj);
   return obj;
 }
@@ -2543,44 +2303,44 @@ struct ObjectStaticCallbacks cw_FilterIterator = {
 };
 void c_FilterIterator::init() {
 }
-Object co_ArrayIterator(CArrRef params, bool init /* = true */) {
-  return Object((NEWOBJ(c_ArrayIterator)())->dynCreate(params, init));
-}
 Object coo_ArrayIterator() {
-  Object r(NEWOBJ(c_ArrayIterator)());
-  r->init();
-  return r;
+  return NEWOBJ(c_ArrayIterator)();
 }
-Object co_AppendIterator(CArrRef params, bool init /* = true */) {
-  return Object((NEWOBJ(c_AppendIterator)())->dynCreate(params, init));
+Object co_ArrayIterator(CArrRef params, bool init /* = true */) {
+  Object r(coo_ArrayIterator());
+  r.get()->dynCreate(params, init);
+  return r;
 }
 Object coo_AppendIterator() {
-  Object r(NEWOBJ(c_AppendIterator)());
-  r->init();
-  return r;
+  return NEWOBJ(c_AppendIterator)();
 }
-Object co_RecursiveIteratorIterator(CArrRef params, bool init /* = true */) {
-  return Object((NEWOBJ(c_RecursiveIteratorIterator)())->dynCreate(params, init));
+Object co_AppendIterator(CArrRef params, bool init /* = true */) {
+  Object r(coo_AppendIterator());
+  r.get()->dynCreate(params, init);
+  return r;
 }
 Object coo_RecursiveIteratorIterator() {
-  Object r(NEWOBJ(c_RecursiveIteratorIterator)());
-  r->init();
-  return r;
+  return NEWOBJ(c_RecursiveIteratorIterator)();
 }
-Object co_MutableArrayIterator(CArrRef params, bool init /* = true */) {
-  return Object((NEWOBJ(c_MutableArrayIterator)())->dynCreate(params, init));
+Object co_RecursiveIteratorIterator(CArrRef params, bool init /* = true */) {
+  Object r(coo_RecursiveIteratorIterator());
+  r.get()->dynCreate(params, init);
+  return r;
 }
 Object coo_MutableArrayIterator() {
-  Object r(NEWOBJ(c_MutableArrayIterator)());
-  r->init();
+  return NEWOBJ(c_MutableArrayIterator)();
+}
+Object co_MutableArrayIterator(CArrRef params, bool init /* = true */) {
+  Object r(coo_MutableArrayIterator());
+  r.get()->dynCreate(params, init);
   return r;
 }
-Object co_FilterIterator(CArrRef params, bool init /* = true */) {
-  return Object((NEWOBJ(c_FilterIterator)())->dynCreate(params, init));
-}
 Object coo_FilterIterator() {
-  Object r(NEWOBJ(c_FilterIterator)());
-  r->init();
+  return NEWOBJ(c_FilterIterator)();
+}
+Object co_FilterIterator(CArrRef params, bool init /* = true */) {
+  Object r(coo_FilterIterator());
+  r.get()->dynCreate(params, init);
   return r;
 }
 Variant pm_php$classes$iterator_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {

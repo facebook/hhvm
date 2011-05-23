@@ -101,7 +101,7 @@ Variant f_dom_xpath_register_php_functions(CVarRef obj, CVarRef funcs = null);
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMNode
 
-FORWARD_DECLARE_CLASS(DOMNode);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMNode);
 class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet> {
  public:
   BEGIN_CLASS_MAP(DOMNode)
@@ -172,7 +172,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMAttr
 
-FORWARD_DECLARE_CLASS(DOMAttr);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMAttr);
 class c_DOMAttr : public c_DOMNode {
  public:
   BEGIN_CLASS_MAP(DOMAttr)
@@ -207,7 +207,7 @@ class c_DOMAttr : public c_DOMNode {
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMCharacterData
 
-FORWARD_DECLARE_CLASS(DOMCharacterData);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMCharacterData);
 class c_DOMCharacterData : public c_DOMNode {
  public:
   BEGIN_CLASS_MAP(DOMCharacterData)
@@ -250,7 +250,7 @@ class c_DOMCharacterData : public c_DOMNode {
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMComment
 
-FORWARD_DECLARE_CLASS(DOMComment);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMComment);
 class c_DOMComment : public c_DOMCharacterData {
  public:
   BEGIN_CLASS_MAP(DOMComment)
@@ -277,7 +277,7 @@ class c_DOMComment : public c_DOMCharacterData {
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMText
 
-FORWARD_DECLARE_CLASS(DOMText);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMText);
 class c_DOMText : public c_DOMCharacterData {
  public:
   BEGIN_CLASS_MAP(DOMText)
@@ -314,7 +314,7 @@ class c_DOMText : public c_DOMCharacterData {
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMCDATASection
 
-FORWARD_DECLARE_CLASS(DOMCDATASection);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMCDATASection);
 class c_DOMCDATASection : public c_DOMText {
  public:
   BEGIN_CLASS_MAP(DOMCDATASection)
@@ -341,7 +341,7 @@ class c_DOMCDATASection : public c_DOMText {
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMDocument
 
-FORWARD_DECLARE_CLASS(DOMDocument);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMDocument);
 class c_DOMDocument : public c_DOMNode, public Sweepable {
  public:
   BEGIN_CLASS_MAP(DOMDocument)
@@ -446,7 +446,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMDocumentFragment
 
-FORWARD_DECLARE_CLASS(DOMDocumentFragment);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMDocumentFragment);
 class c_DOMDocumentFragment : public c_DOMNode {
  public:
   BEGIN_CLASS_MAP(DOMDocumentFragment)
@@ -475,7 +475,7 @@ class c_DOMDocumentFragment : public c_DOMNode {
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMDocumentType
 
-FORWARD_DECLARE_CLASS(DOMDocumentType);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMDocumentType);
 class c_DOMDocumentType : public c_DOMNode {
  public:
   BEGIN_CLASS_MAP(DOMDocumentType)
@@ -508,7 +508,7 @@ class c_DOMDocumentType : public c_DOMNode {
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMElement
 
-FORWARD_DECLARE_CLASS(DOMElement);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMElement);
 class c_DOMElement : public c_DOMNode {
  public:
   BEGIN_CLASS_MAP(DOMElement)
@@ -577,7 +577,7 @@ class c_DOMElement : public c_DOMNode {
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMEntity
 
-FORWARD_DECLARE_CLASS(DOMEntity);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMEntity);
 class c_DOMEntity : public c_DOMNode {
  public:
   BEGIN_CLASS_MAP(DOMEntity)
@@ -610,7 +610,7 @@ class c_DOMEntity : public c_DOMNode {
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMEntityReference
 
-FORWARD_DECLARE_CLASS(DOMEntityReference);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMEntityReference);
 class c_DOMEntityReference : public c_DOMNode {
  public:
   BEGIN_CLASS_MAP(DOMEntityReference)
@@ -637,7 +637,7 @@ class c_DOMEntityReference : public c_DOMNode {
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMNotation
 
-FORWARD_DECLARE_CLASS(DOMNotation);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMNotation);
 class c_DOMNotation : public c_DOMNode {
  public:
   BEGIN_CLASS_MAP(DOMNotation)
@@ -670,7 +670,7 @@ class c_DOMNotation : public c_DOMNode {
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMProcessingInstruction
 
-FORWARD_DECLARE_CLASS(DOMProcessingInstruction);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMProcessingInstruction);
 class c_DOMProcessingInstruction : public c_DOMNode {
  public:
   BEGIN_CLASS_MAP(DOMProcessingInstruction)
@@ -703,7 +703,7 @@ class c_DOMProcessingInstruction : public c_DOMNode {
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMNodeIterator
 
-FORWARD_DECLARE_CLASS(DOMNodeIterator);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMNodeIterator);
 class c_DOMNodeIterator : public ExtObjectData, public Sweepable {
  public:
   BEGIN_CLASS_MAP(DOMNodeIterator)
@@ -747,7 +747,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMNamedNodeMap
 
-FORWARD_DECLARE_CLASS(DOMNamedNodeMap);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMNamedNodeMap);
 class c_DOMNamedNodeMap : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>, public dom_iterable {
  public:
   BEGIN_CLASS_MAP(DOMNamedNodeMap)
@@ -788,7 +788,7 @@ class c_DOMNamedNodeMap : public ExtObjectDataFlags<ObjectData::UseGet|ObjectDat
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMNodeList
 
-FORWARD_DECLARE_CLASS(DOMNodeList);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMNodeList);
 class c_DOMNodeList : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>, public dom_iterable {
  public:
   BEGIN_CLASS_MAP(DOMNodeList)
@@ -825,7 +825,7 @@ class c_DOMNodeList : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::U
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMException
 
-FORWARD_DECLARE_CLASS(DOMException);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMException);
 class c_DOMException : public c_Exception {
  public:
   BEGIN_CLASS_MAP(DOMException)
@@ -852,7 +852,7 @@ class c_DOMException : public c_Exception {
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMImplementation
 
-FORWARD_DECLARE_CLASS(DOMImplementation);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMImplementation);
 class c_DOMImplementation : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(DOMImplementation)
@@ -884,7 +884,7 @@ class c_DOMImplementation : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMXPath
 
-FORWARD_DECLARE_CLASS(DOMXPath);
+FORWARD_DECLARE_CLASS_BUILTIN(DOMXPath);
 class c_DOMXPath : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>, public Sweepable {
  public:
   BEGIN_CLASS_MAP(DOMXPath)

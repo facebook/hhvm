@@ -33,7 +33,7 @@ class c_MutableArrayIterator : public c_ArrayIterator {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(MutableArrayIterator, MutableArrayIterator)
+  DECLARE_CLASS_COMMON_NO_SWEEP(MutableArrayIterator, MutableArrayIterator)
   DECLARE_INVOKE_EX(MutableArrayIterator, MutableArrayIterator, ArrayIterator)
 
   // DECLARE_STATIC_PROP_OPS
@@ -70,8 +70,8 @@ class c_MutableArrayIterator : public c_ArrayIterator {
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
 };
 extern struct ObjectStaticCallbacks cw_MutableArrayIterator;
-Object co_MutableArrayIterator(CArrRef params, bool init = true);
-Object coo_MutableArrayIterator();
+Object co_MutableArrayIterator(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_MutableArrayIterator() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

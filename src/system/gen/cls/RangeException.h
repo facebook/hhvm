@@ -33,7 +33,7 @@ class c_RangeException : public c_RuntimeException {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(RangeException, RangeException)
+  DECLARE_CLASS_COMMON_NO_SWEEP(RangeException, RangeException)
   DECLARE_INVOKE_EX(RangeException, RangeException, RuntimeException)
 
   // DECLARE_STATIC_PROP_OPS
@@ -63,8 +63,8 @@ class c_RangeException : public c_RuntimeException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_RangeException;
-Object co_RangeException(CArrRef params, bool init = true);
-Object coo_RangeException();
+Object co_RangeException(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_RangeException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

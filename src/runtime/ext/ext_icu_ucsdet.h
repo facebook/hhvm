@@ -36,7 +36,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class EncodingDetector
 
-FORWARD_DECLARE_CLASS(EncodingDetector);
+FORWARD_DECLARE_CLASS_BUILTIN(EncodingDetector);
 class c_EncodingDetector : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(EncodingDetector)
@@ -71,7 +71,7 @@ class c_EncodingDetector : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class EncodingMatch
 
-FORWARD_DECLARE_CLASS(EncodingMatch);
+FORWARD_DECLARE_CLASS_BUILTIN(EncodingMatch);
 class c_EncodingMatch : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(EncodingMatch)

@@ -48,17 +48,6 @@ class Object : public SmartPtr<ObjectData> {
    * Constructors
    */
   Object(ObjectData *data) : SmartPtr<ObjectData>(data) { }
-  template <typename T>
-  Object(T *data) : SmartPtr<ObjectData>() {
-    // Assert that casting does not adjust the 'this' pointer
-    ASSERT((void*)dynamic_cast<ObjectData*>(data) == (void*)data);
-
-    // Performs an implicit cast from T* to ObjectData*. This will
-    // cause a compile time failure if T is not a descendent of ObjectData
-    // in the inheritance hierarchy
-    SmartPtr<ObjectData>::operator=(data);
-  }
-
   Object(CObjRef src) : SmartPtr<ObjectData>(src.m_px) { }
 
   /**
@@ -91,6 +80,9 @@ class Object : public SmartPtr<ObjectData> {
     needsOrder = true;
     return firstHash;
   }
+
+  static Object CreateDummy(Object(*cooFunc)());
+  static Object CreateDummy(Object(*cooFunc)(ObjectData*));
 
   ArrayIter begin(CStrRef context = null_string,
                   bool setIterDirty = false) const;
@@ -204,6 +196,13 @@ class Object : public SmartPtr<ObjectData> {
   Object fiberMarshal(FiberReferenceMap &refMap) const;
   Object fiberUnmarshal(FiberReferenceMap &refMap) const;
 
+  /* detatch the ObjectData without freeing */
+  ObjectData *detach() {
+    ObjectData *ret = m_px;
+    ret->decRefCount();
+    m_px = NULL;
+    return ret;
+  }
  private:
   static void compileTimeAssertions() {
     CT_ASSERT(offsetof(Object, m_px) == offsetof(Value, m_data));

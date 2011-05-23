@@ -33,7 +33,7 @@ class c_BadFunctionCallException : public c_LogicException {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(BadFunctionCallException, BadFunctionCallException)
+  DECLARE_CLASS_COMMON_NO_SWEEP(BadFunctionCallException, BadFunctionCallException)
   DECLARE_INVOKE_EX(BadFunctionCallException, BadFunctionCallException, LogicException)
 
   // DECLARE_STATIC_PROP_OPS
@@ -63,8 +63,8 @@ class c_BadFunctionCallException : public c_LogicException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_BadFunctionCallException;
-Object co_BadFunctionCallException(CArrRef params, bool init = true);
-Object coo_BadFunctionCallException();
+Object co_BadFunctionCallException(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_BadFunctionCallException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

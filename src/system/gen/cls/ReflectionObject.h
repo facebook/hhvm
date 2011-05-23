@@ -33,7 +33,7 @@ class c_ReflectionObject : public c_ReflectionClass {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(ReflectionObject, ReflectionObject)
+  DECLARE_CLASS_COMMON_NO_SWEEP(ReflectionObject, ReflectionObject)
   DECLARE_INVOKE_EX(ReflectionObject, ReflectionObject, ReflectionClass)
 
   // DECLARE_STATIC_PROP_OPS
@@ -66,8 +66,8 @@ class c_ReflectionObject : public c_ReflectionClass {
   DECLARE_METHOD_INVOKE_HELPERS(export);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionObject;
-Object co_ReflectionObject(CArrRef params, bool init = true);
-Object coo_ReflectionObject();
+Object co_ReflectionObject(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_ReflectionObject() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

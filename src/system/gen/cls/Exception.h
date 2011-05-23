@@ -38,7 +38,7 @@ class c_Exception : public ExtObjectData {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(Exception, Exception)
+  DECLARE_CLASS_COMMON_NO_SWEEP(Exception, Exception)
   DECLARE_INVOKE_EX(Exception, Exception, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
@@ -91,8 +91,8 @@ class c_Exception : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(gettrace);
 };
 extern struct ObjectStaticCallbacks cw_Exception;
-Object co_Exception(CArrRef params, bool init = true);
-Object coo_Exception();
+Object co_Exception(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_Exception() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

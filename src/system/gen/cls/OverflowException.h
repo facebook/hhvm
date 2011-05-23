@@ -33,7 +33,7 @@ class c_OverflowException : public c_RuntimeException {
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
-  DECLARE_CLASS_COMMON(OverflowException, OverflowException)
+  DECLARE_CLASS_COMMON_NO_SWEEP(OverflowException, OverflowException)
   DECLARE_INVOKE_EX(OverflowException, OverflowException, RuntimeException)
 
   // DECLARE_STATIC_PROP_OPS
@@ -63,8 +63,8 @@ class c_OverflowException : public c_RuntimeException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_OverflowException;
-Object co_OverflowException(CArrRef params, bool init = true);
-Object coo_OverflowException();
+Object co_OverflowException(CArrRef params, bool init = true) NEVER_INLINE;
+Object coo_OverflowException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

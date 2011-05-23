@@ -111,7 +111,7 @@ extern const int64 q_PDO_MYSQL_ATTR_IGNORE_SPACE;
 ///////////////////////////////////////////////////////////////////////////////
 // class PDO
 
-FORWARD_DECLARE_CLASS(PDO);
+FORWARD_DECLARE_CLASS_BUILTIN(PDO);
 class c_PDO : public ExtObjectData, public Sweepable {
  public:
   BEGIN_CLASS_MAP(PDO)
@@ -171,7 +171,7 @@ class c_PDO : public ExtObjectData, public Sweepable {
 ///////////////////////////////////////////////////////////////////////////////
 // class PDOStatement
 
-FORWARD_DECLARE_CLASS(PDOStatement);
+FORWARD_DECLARE_CLASS_BUILTIN(PDOStatement);
 class c_PDOStatement : public ExtObjectData, public Sweepable {
  public:
   BEGIN_CLASS_MAP(PDOStatement)
@@ -253,7 +253,7 @@ class c_PDOStatement : public ExtObjectData, public Sweepable {
 ///////////////////////////////////////////////////////////////////////////////
 // class PDOException
 
-FORWARD_DECLARE_CLASS(PDOException);
+FORWARD_DECLARE_CLASS_BUILTIN(PDOException);
 class c_PDOException : public c_Exception {
  public:
   BEGIN_CLASS_MAP(PDOException)

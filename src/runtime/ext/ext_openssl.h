@@ -71,8 +71,8 @@ Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password, int op
 Variant f_openssl_digest(CStrRef data, CStrRef method, bool raw_output = false);
 Array f_openssl_get_cipher_methods(bool aliases = false);
 Array f_openssl_get_md_methods(bool aliases = false);
-extern const int k_OPENSSL_RAW_DATA;
-extern const int k_OPENSSL_ZERO_PADDING;
+extern const int64 k_OPENSSL_RAW_DATA;
+extern const int64 k_OPENSSL_ZERO_PADDING;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

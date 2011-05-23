@@ -64,8 +64,8 @@ enum php_openssl_cipher_type {
 };
 
 // bitfields
-const int k_OPENSSL_RAW_DATA = 1;
-const int k_OPENSSL_ZERO_PADDING = 2;
+const int64 k_OPENSSL_RAW_DATA = 1;
+const int64 k_OPENSSL_ZERO_PADDING = 2;
 
 static char default_ssl_conf_filename[PATH_MAX];
 

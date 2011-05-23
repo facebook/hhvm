@@ -30,13 +30,13 @@ CPP
 DefineConstant(
   array(
     'name'   => "OPENSSL_RAW_DATA",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPENSSL_ZERO_PADDING",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 

@@ -97,6 +97,8 @@ extern const int64 k_FB_UNSERIALIZE_UNEXPECTED_END;
 extern const int64 k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE;
 extern const double k_INF;
 extern const double k_NAN;
+extern const int64 k_OPENSSL_RAW_DATA;
+extern const int64 k_OPENSSL_ZERO_PADDING;
 extern const int64 k_PAGELET_DONE;
 extern const int64 k_PAGELET_NOT_READY;
 extern const int64 k_PAGELET_READY;

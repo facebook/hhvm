@@ -2983,7 +2983,9 @@ void AnalysisResult::outputCPPHashTableGetConstant(
           assert(false);
         }
         break;
-      default: assert(false);
+      default:
+        throw Exception("During code gen, constant with type %s is not expected",
+                        type->toString().c_str());
       }
     }
   }

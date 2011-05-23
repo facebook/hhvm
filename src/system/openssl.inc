@@ -49,8 +49,8 @@
 "openssl_get_md_methods", T(Array), S(0), "aliases", T(Boolean), "b:0;", "false", S(0), NULL, S(16384), "/**\n * ( excerpt from\n * http://php.net/manual/en/function.openssl-get-md-methods.php )\n *\n * Gets a list of available digest methods.\n *\n * @aliases    bool    Set to TRUE if digest aliases should be included\n *                     within the returned array.\n *\n * @return     vector  An array of available digest methods.\n */", 
 
 #elif EXT_TYPE == 1
-"OPENSSL_RAW_DATA", T(Int32),
-"OPENSSL_ZERO_PADDING", T(Int32),
+"OPENSSL_RAW_DATA", T(Int64),
+"OPENSSL_ZERO_PADDING", T(Int64),
 
 #elif EXT_TYPE == 2
 

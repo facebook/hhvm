@@ -2089,7 +2089,7 @@ public:
   hashNodeCon *next;
 };
 static hashNodeCon *conMapTable[8192];
-static hashNodeCon conBuckets[2092];
+static hashNodeCon conBuckets[2094];
 
 void init_builtin_constant_table() {
   const char *conMapData[] = {
@@ -2102,6 +2102,8 @@ void init_builtin_constant_table() {
       (const char *)"FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE", (const char *)-1, (const char *)32, (const char *)&k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE,
       (const char *)"INF", (const char *)-1, (const char *)64, (const char *)&k_INF,
       (const char *)"NAN", (const char *)-1, (const char *)64, (const char *)&k_NAN,
+      (const char *)"OPENSSL_RAW_DATA", (const char *)-1, (const char *)32, (const char *)&k_OPENSSL_RAW_DATA,
+      (const char *)"OPENSSL_ZERO_PADDING", (const char *)-1, (const char *)32, (const char *)&k_OPENSSL_ZERO_PADDING,
       (const char *)"PAGELET_DONE", (const char *)-1, (const char *)32, (const char *)&k_PAGELET_DONE,
       (const char *)"PAGELET_NOT_READY", (const char *)-1, (const char *)32, (const char *)&k_PAGELET_NOT_READY,
       (const char *)"PAGELET_READY", (const char *)-1, (const char *)32, (const char *)&k_PAGELET_READY,

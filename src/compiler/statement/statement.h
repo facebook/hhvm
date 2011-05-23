@@ -113,6 +113,8 @@ public:
   virtual void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
   virtual void outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) = 0;
 
+  virtual void preOutputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {}
+
  /**
    * Called before type inference.
    */

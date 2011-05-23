@@ -124,7 +124,8 @@ public:
     StashVars = 2,
     StashKidVars = 4,
     StashByRef = 8,
-    StashAll = 16
+    StashAll = 16,
+    ForceTemp = 32,
   };
 
   enum Error {
@@ -185,6 +186,10 @@ public:
   virtual bool outputCPPUnneeded(CodeGenerator &cg, AnalysisResultPtr ar);
   bool outputCPPBegin(CodeGenerator &cg, AnalysisResultPtr ar);
   bool outputCPPEnd(CodeGenerator &cg, AnalysisResultPtr ar);
+  void collectCPPTemps(ExpressionPtrVec &collection);
+  void disableCSE();
+  bool hasChainRoots();
+  bool preOutputCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar, bool emitTemps);
   virtual bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                             int state);
   bool preOutputOffsetLHS(CodeGenerator &cg, AnalysisResultPtr ar,
@@ -219,6 +224,12 @@ public:
   }
   ExpressionPtr getCanonLVal() const {
     return m_canonPtr;
+  }
+  ExpressionPtr getNextCanonCsePtr() const;
+  ExpressionPtr getCanonCsePtr() const;
+  bool needsCSE() const { 
+    ExpressionPtr p(getCanonCsePtr());
+    return p && p->hasCPPCseTemp(); 
   }
 
   /**
@@ -346,6 +357,9 @@ public:
   static bool CheckNeededRHS(ExpressionPtr value);
   static bool CheckNeeded(ExpressionPtr variable, ExpressionPtr value);
 
+  static bool GetCseTempInfo(
+      AnalysisResultPtr ar, ExpressionPtr p, TypePtr &t);
+
   void fixExpectedType(AnalysisResultConstPtr ar);
   bool outputCPPArithArg(CodeGenerator &cg, AnalysisResultPtr ar, bool arrayOk);
   bool isUnused() const { return m_unused; }
@@ -367,7 +381,10 @@ protected:
   TypePtr m_expectedType; // null if the same as m_actualType
   TypePtr m_implementedType; // null if the same as m_actualType
   std::string m_cppTemp;
+  std::string m_cppCseTemp;
   int m_argNum;
+
+  bool hasCPPCseTemp() const { return !m_cppCseTemp.empty(); }
 
   TypePtr inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
                                bool coerce, ExpressionPtr variable,
@@ -382,6 +399,11 @@ protected:
  private:
   static ExprClass Classes[];
   void outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar);
+  /**
+   * Returns true if a type cast is needed, and sets src/dst type
+   */
+  bool getTypeCastPtrs(
+      AnalysisResultPtr ar, TypePtr &srcType, TypePtr &dstType); 
 
   BlockScopeRawPtr m_originalScope;
   bool m_originalScopeSet;

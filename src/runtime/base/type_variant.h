@@ -704,6 +704,14 @@ class Variant {
   Variant &lvalAt(CStrRef key, ACCESSPARAMS_DECL);
   Variant &lvalAt(CVarRef key, ACCESSPARAMS_DECL);
 
+  Variant &lvalRef(bool    key, Variant& tmp, ACCESSPARAMS_DECL);
+  Variant &lvalRef(int     key, Variant& tmp, ACCESSPARAMS_DECL);
+  Variant &lvalRef(int64   key, Variant& tmp, ACCESSPARAMS_DECL);
+  Variant &lvalRef(double  key, Variant& tmp, ACCESSPARAMS_DECL);
+  Variant &lvalRef(litstr  key, Variant& tmp, ACCESSPARAMS_DECL);
+  Variant &lvalRef(CStrRef key, Variant& tmp, ACCESSPARAMS_DECL);
+  Variant &lvalRef(CVarRef key, Variant& tmp, ACCESSPARAMS_DECL);
+
   Variant refvalAt(bool    key);
   Variant refvalAt(int     key);
   Variant refvalAt(int64   key);
@@ -1251,7 +1259,11 @@ private:
   void split();  // breaking weak binding by making a real copy
 
   template<typename T>
-  Variant &lvalAtImpl(T key, ACCESSPARAMS_DECL);
+  static inline ALWAYS_INLINE Variant &LvalAtImpl0(
+      Variant *self, T key, Variant *tmp, bool blackHole, ACCESSPARAMS_DECL);
+
+  template<typename T>
+  inline ALWAYS_INLINE Variant &lvalAtImpl(T key, ACCESSPARAMS_DECL);
 
   template<typename T>
   Variant refvalAtImpl(const T &key) {

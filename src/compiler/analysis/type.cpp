@@ -574,7 +574,7 @@ std::string Type::toString() const {
   case KindOfPlusOperand: return "PlusOperand";
   case KindOfSequence:    return "Sequence";
   default:
-    return boost::str(boost::format("[%x]") % m_kindOf);
+    return boost::str(boost::format("[0x%x]") % m_kindOf);
   }
   return "(unknown)";
 }

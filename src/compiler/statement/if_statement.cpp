@@ -31,7 +31,8 @@ using namespace boost;
 
 IfStatement::IfStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, StatementListPtr stmts)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES), m_stmts(stmts) {
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES), 
+  m_stmts(stmts), m_hasCondCSE(false) {
 }
 
 StatementPtr IfStatement::clone() {
@@ -227,12 +228,41 @@ void IfStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
+void IfStatement::preOutputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
+  for (int i = 0; i < m_stmts->getCount(); i++) {
+    IfBranchStatementPtr p(
+        static_pointer_cast<IfBranchStatement>((*m_stmts)[i]));
+    if (p->getCondition() && p->getCondition()->hasChainRoots()) {
+      m_hasCondCSE = true;
+      break;
+    }
+  }
+  if (m_hasCondCSE) {
+    ASSERT(m_stmts->getCount() > 0);
+    IfBranchStatementPtr p(
+        static_pointer_cast<IfBranchStatement>((*m_stmts)[0]));
+    ASSERT(p->getCondition());
+    p->getCondition()->preOutputCPPTemp(cg, ar, true);
+  }
+}
+
 void IfStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   int indent = 0;
   for (int i = 0; i < m_stmts->getCount(); i++) {
-    if (i > 0) cg_printf("else ");
-    indent += dynamic_pointer_cast<IfBranchStatement>((*m_stmts)[i])->
-      outputCPPIfBranch(cg, ar);
+    IfBranchStatementPtr p(
+      static_pointer_cast<IfBranchStatement>((*m_stmts)[i]));
+    if (i > 0) {
+      if (m_hasCondCSE && p->getCondition()) {
+        cg_indentBegin("else {\n");
+        // this is OK since we have ensured you cannot jump
+        // into any child statement, in the alias manager
+        p->getCondition()->preOutputCPPTemp(cg, ar, true);
+        indent++;
+      } else {
+        cg_printf("else ");
+      }
+    }
+    indent += p->outputCPPIfBranch(cg, ar);
   }
   while (indent--) cg_indentEnd("}\n");
 }

@@ -255,6 +255,8 @@ public:
   static const char *ClassConstantPrefix;
   static const char *ExceptionPrefix;
   static const char *TempVariablePrefix;
+  static const char *CseTempVariablePrefix;
+  static const char *CseTempStoragePrefix;
   static const char *EvalOrderTempPrefix;
   static const char *SilencerPrefix;
   static const char *CallInfoPrefix;
@@ -379,6 +381,7 @@ public:
   static bool LocalCopyProp;
   static bool StringLoopOpts;
   static bool AutoInline;
+  static bool ArrayAccessIdempotent;
 
   /**
    * Output options

@@ -140,6 +140,12 @@ void ForStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
+void ForStatement::preOutputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
+  if (m_exp1) m_exp1->preOutputCPPTemp(cg, ar, true);
+  if (m_exp2) m_exp2->preOutputCPPTemp(cg, ar, true);
+  if (m_exp3) m_exp3->preOutputCPPTemp(cg, ar, true);
+}
+
 void ForStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_indentBegin("{\n");
 

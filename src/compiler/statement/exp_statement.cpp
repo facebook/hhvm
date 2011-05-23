@@ -140,14 +140,22 @@ void ExpStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_exp->outputPHP(cg, ar);
   cg_printf(";\n");
 }
+void ExpStatement::preOutputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
+  if (shouldEmitStatement()) m_exp->preOutputCPPTemp(cg, ar, true);
+}
 
 void ExpStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (hasEffect() || Option::KeepStatementsWithNoEffect) {
-    m_exp->outputCPPBegin(cg, ar);
+  if (shouldEmitStatement()) {
+    // use to be m_exp->outputCPPBegin(cg, ar)
+    cg.setInExpression(true);
+    m_exp->preOutputCPP(cg, ar, 0);
+
     m_exp->outputCPPUnneeded(cg, ar);
     cg_printf(";\n");
     m_exp->outputCPPEnd(cg, ar);
-  } else {
-    cg_printf(";\n");
-  }
+  } else cg_printf(";\n");
+}
+
+bool ExpStatement::shouldEmitStatement() const {
+  return hasEffect() || Option::KeepStatementsWithNoEffect;
 }

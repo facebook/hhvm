@@ -161,6 +161,13 @@ void ForEachStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
+void ForEachStatement::preOutputCPPImpl(CodeGenerator &cg, 
+                                        AnalysisResultPtr ar) {
+  m_array->preOutputCPPTemp(cg, ar, true);
+  if (m_name) m_name->preOutputCPPTemp(cg, ar, true);
+  m_value->preOutputCPPTemp(cg, ar, true);
+}
+
 void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_indentBegin("{\n");
   int labelId = cg.createNewLocalId(shared_from_this());

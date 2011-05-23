@@ -196,6 +196,21 @@ void SwitchStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
+  // disable CSE for switch statements, for now.
+  // this is to simplify the implementation (no real reason we
+  // can't do it)
+  // TODO(stephentu): fix this up later
+  m_exp->disableCSE();
+  if (m_cases) {
+    for (int i = 0; i < m_cases->getCount(); i++) {
+      CaseStatementPtr stmt =
+        static_pointer_cast<CaseStatement>((*m_cases)[i]);
+      if (stmt->getCondition()) {
+        stmt->getCondition()->disableCSE();
+      }
+    }
+  }
+
   int labelId = cg.createNewLocalId(shared_from_this());
 
   // if isStaticInt, then we can avoid calling hashForIntSwitch() in static case
@@ -219,7 +234,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
          i < m_cases->getCount() && (staticIntCases || staticStringCases); 
          i++) {
       CaseStatementPtr stmt =
-        dynamic_pointer_cast<CaseStatement>((*m_cases)[i]);
+        static_pointer_cast<CaseStatement>((*m_cases)[i]);
       if (stmt->getCondition()) {
         numNonDefaultLabels++;
         Variant v;

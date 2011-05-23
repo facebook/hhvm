@@ -172,7 +172,7 @@ void ArrayElementExpression::analyzeProgram(AnalysisResultPtr ar) {
       if (!type ||
           (!type->is(Type::KindOfString) && !type->is(Type::KindOfArray))) {
         FunctionScopePtr scope = getFunctionScope();
-        if (scope) scope->setNeedsRefTemp();
+        if (scope && !needsCSE()) scope->setNeedsRefTemp();
       }
     }
     if (m_global) {
@@ -461,26 +461,51 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
       bool byRef = false;
       bool arrRef = false;
       const char *sep = ", AccessFlags::";
+      bool isArrayType = type && type->is(Type::KindOfArray);
+      bool isStringType = type && type->is(Type::KindOfString);
+      bool isRealChainRoot = isChainRoot() && hasCPPCseTemp();
+
+      TypePtr t;
+      bool hasCseStore = isRealChainRoot && GetCseTempInfo(
+          ar,
+          static_pointer_cast<Expression>(shared_from_this()), 
+          t);
+
       if (hasContext(UnsetContext)) {
         // do nothing
       } else if (hasContext(InvokeArgument) && cg.callInfoTop() != -1) {
+        ASSERT(!isRealChainRoot); // TODO: handle this case 
         cg_printf(".argvalAt(cit%d->isRef(%d), ", cg.callInfoTop(), m_argNum);
       } else if (m_context & (LValue|RefValue|DeepReference)) {
-        cg_printf(".lvalAt(");
+        // if we see an array access element in LValue context, the
+        // type inference pass will never infer its type to be a string 
+        ASSERT(!isStringType);
+        if (isRealChainRoot && !isArrayType) {
+          // chain roots for non array types (variants) should call
+          // lvalRef()
+          cg_printf(".lvalRef(");
+        } else {
+          cg_printf(".lvalAt(");
+        }
         lvalAt = true;
       } else {
-        byRef = (m_context & AccessContext) &&
-          (!type || !type->is(Type::KindOfString));
-        arrRef = byRef && type && type->is(Type::KindOfArray);
+        byRef = 
+          ((m_context & AccessContext) || isRealChainRoot) && !isStringType;
+        arrRef = byRef && isArrayType;
         cg_printf(".rval%s%s(",
                   arrRef || !byRef ? "At" : "", byRef ? "Ref" : "");
         rvalAt = true;
       }
       m_offset->outputCPP(cg, ar);
-      if (!type || !type->is(Type::KindOfString)) {
+      if (!isStringType) {
         if (rvalAt) {
           if (byRef && !arrRef) {
-            const string &tmp = cg.getReferenceTemp();
+            string tmp;
+            if (hasCseStore) {
+              tmp = string(Option::CseTempStoragePrefix) + m_cppCseTemp;
+            } else {
+              tmp = cg.getReferenceTemp();
+            }
             cg_printf(", %s", tmp.empty() ? "Variant()" : tmp.c_str());
           }
           if (!hasContext(ExistContext)) {
@@ -488,6 +513,10 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
             sep = "_";
           }
         } else if (lvalAt) {
+          if (hasCseStore && !isArrayType) {
+            cg_printf(", %s%s", 
+                Option::CseTempStoragePrefix, m_cppCseTemp.c_str());
+          }
           if (hasContext(AccessContext)) {
             // Dont copy the array if the element is an object, or
             // is referenced.

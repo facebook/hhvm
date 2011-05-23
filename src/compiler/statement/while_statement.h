@@ -36,6 +36,9 @@ public:
   virtual int getRecursiveCount() const {
     return 1 + (m_stmt ? m_stmt->getRecursiveCount() : 0);
   }
+
+  virtual void preOutputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar); 
+
 private:
   ExpressionPtr m_condition;
   StatementPtr m_stmt;

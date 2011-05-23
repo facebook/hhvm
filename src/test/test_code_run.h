@@ -76,6 +76,7 @@ class TestCodeRun : public TestBase {
   bool TestArrayForEach();
   bool TestArrayAssignment();
   bool TestArrayFunctions();
+  bool TestArrayCSE();
   bool TestScalarArray();
   bool TestRange();
   bool TestVariant();

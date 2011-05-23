@@ -2364,13 +2364,14 @@ public:
   static const bool CheckParams = true;
 };
 
-
 template<typename T>
-Variant& Variant::lvalAtImpl(T key, ACCESSPARAMS_IMPL) {
-  if (m_type == KindOfArray) {
-    Variant *ret = NULL;
-    ArrayData *arr = m_data.parr;
+Variant& Variant::LvalAtImpl0(
+    Variant *self, T key, Variant *tmp, bool blackHole, ACCESSPARAMS_IMPL) {
+head:
+  if (self->m_type == KindOfArray) {
+    ArrayData *arr = self->m_data.parr;
     ArrayData *escalated;
+    Variant *ret = NULL;
     if (LvalHelper<T>::CheckParams && flags & AccessFlags::Key) {
       escalated = arr->lval(key, ret, arr->getCount() > 1,
                             flags & AccessFlags::CheckExist);
@@ -2381,27 +2382,39 @@ Variant& Variant::lvalAtImpl(T key, ACCESSPARAMS_IMPL) {
           arr->lval(k, ret, arr->getCount() > 1,
                     flags & AccessFlags::CheckExist);
       } else {
-        ret = &lvalBlackHole();
+        if (blackHole) ret = &lvalBlackHole();
+        else           ret = tmp;
         escalated = 0;
       }
     }
     if (escalated) {
-      set(escalated);
+      self->set(escalated);
     }
     ASSERT(ret);
     return *ret;
   }
-  if (m_type == KindOfVariant) {
-    return m_data.pvar->lvalAtImpl<T>(key, flags);
+  if (self->m_type == KindOfVariant) {
+    self = self->m_data.pvar;
+    goto head;
   }
-  if (isObjectConvertable()) {
-    set(Array::Create());
-    return lvalAtImpl<T>(key, flags);
+  if (self->isObjectConvertable()) {
+    self->set(Array::Create());
+    goto head;
   }
-  if (m_type == KindOfObject) {
-    return getArrayAccess()->___offsetget_lval(key);
+  if (self->m_type == KindOfObject) {
+    Variant *ret = &(self->getArrayAccess()->___offsetget_lval(key));
+    if (!blackHole) { 
+      *tmp = *ret; 
+      ret = tmp; 
+    }
+    return *ret;
   }
   return lvalInvalid();
+}
+
+template<typename T>
+Variant& Variant::lvalAtImpl(T key, ACCESSPARAMS_IMPL) {
+  return Variant::LvalAtImpl0<T>(this, key, NULL, true, flags);
 }
 
 Variant &Variant::lvalAt(bool    key, ACCESSPARAMS_IMPL) {
@@ -2421,10 +2434,33 @@ Variant &Variant::lvalAt(litstr  ckey, ACCESSPARAMS_IMPL) {
   return lvalAt(key, flags);
 }
 Variant &Variant::lvalAt(CStrRef key, ACCESSPARAMS_IMPL) {
-  return Variant::lvalAtImpl<CStrRef>(key, flags);
+  return lvalAtImpl<CStrRef>(key, flags);
 }
 Variant &Variant::lvalAt(CVarRef k, ACCESSPARAMS_IMPL) {
-  return Variant::lvalAtImpl<CVarRef>(k, flags);
+  return lvalAtImpl<CVarRef>(k, flags);
+}
+
+Variant &Variant::lvalRef(bool    key, Variant& tmp, ACCESSPARAMS_IMPL) {
+  return LvalAtImpl0(this, key, &tmp, false, flags);
+}
+Variant &Variant::lvalRef(int     key, Variant& tmp, ACCESSPARAMS_IMPL) {
+  return lvalRef((int64)key, tmp, flags);
+}
+Variant &Variant::lvalRef(int64   key, Variant& tmp, ACCESSPARAMS_IMPL) {
+  return LvalAtImpl0(this, key, &tmp, false, flags);
+}
+Variant &Variant::lvalRef(double  key, Variant& tmp, ACCESSPARAMS_IMPL) {
+  return LvalAtImpl0(this, key, &tmp, false, flags);
+}
+Variant &Variant::lvalRef(litstr ckey, Variant& tmp, ACCESSPARAMS_IMPL) {
+  String key(ckey);
+  return lvalRef(key, tmp, flags);
+}
+Variant &Variant::lvalRef(CStrRef key, Variant& tmp, ACCESSPARAMS_IMPL) {
+  return Variant::LvalAtImpl0<CStrRef>(this, key, &tmp, false, flags);
+}
+Variant &Variant::lvalRef(CVarRef k, Variant& tmp, ACCESSPARAMS_IMPL) {
+  return Variant::LvalAtImpl0<CVarRef>(this, k, &tmp, false, flags);
 }
 
 Variant *Variant::lvalPtr(CStrRef key, bool forWrite, bool create) {

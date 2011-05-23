@@ -703,27 +703,12 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
 
   bool killCast = false;
 
-  TypePtr srcType = m_actualType;
-  TypePtr dstType = m_expectedType;
-  if (m_implementedType && srcType &&
-      !Type::SameType(m_implementedType, srcType)) {
-    if (dstType) {
-      if (!hasContext(LValue) &&
-          Type::IsCastNeeded(ar, m_implementedType, srcType) &&
-          !Type::IsCastNeeded(ar, m_implementedType, dstType) &&
-          !Type::SameType(m_implementedType, dstType) &&
-          !dstType->is(Type::KindOfAny) && !dstType->is(Type::KindOfSome)) {
-        dstType.reset();
-      }
-    }
-    srcType = m_implementedType;
-    if (!dstType) dstType = m_actualType;
-  }
+  TypePtr srcType, dstType;
+  bool needsCast = getTypeCastPtrs(ar, srcType, dstType);
 
   bool isLvalue = (m_context & LValue);
   bool isTemp = isTemporary();
-  if (dstType && srcType && !isLvalue &&
-      Type::IsCastNeeded(ar, srcType, dstType)) {
+  if (needsCast) {
     isTemp = true;
   } else {
     killCast = true;
@@ -770,7 +755,8 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
       dstType->outputCPPDecl(cg, ar, getScope());
     }
     std::string t = genCPPTemp(cg, ar);
-    const char *ref = (isLvalue || constRef) ? "&" : "";
+    const char *ref = 
+      ((isLvalue || constRef) && !(state & ForceTemp)) ? "&" : "";
     /*
       Note that double parens are necessary:
       type_name1 tmp27(type_name2(foo));
@@ -979,29 +965,56 @@ bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
       }
     }
   }
+  
+  // check to see if this elem has a CSE substitution
+  // or is a chain root. in this case, we need to force a temp
+  // since we will be taking a reference out, if we need to
+  // fix our order
+  bool forceTemp = false;
+  bool hasCse = false;
+  ExpressionPtr p(getCanonCsePtr());
+  if (p && p->hasCPPCseTemp()) {
+    ASSERT(p->isChainRoot() && !isChainRoot());
+    if (!isLocalExprAltered()) return false;
+    hasCse = forceTemp = true;
+  } else if (hasCPPCseTemp() && isChainRoot()) {
+    forceTemp = isLocalExprAltered();
+  }
 
   if (!ret) {
+    if (hasCse) return false;
     if (needRefTemp && cg.inExpression()) {
       cg.wrapExpressionBegin();
     }
     return Expression::preOutputCPP(cg, ar, state) || needRefTemp;
   }
 
+  if (forceTemp) {
+    // if a cast was needed, then no need to force temp
+    TypePtr srcType, dstType;
+    if (getTypeCastPtrs(ar, srcType, dstType)) {
+      forceTemp = false;
+    }
+  }
+
   if (cg.inExpression()) {
     cg.wrapExpressionBegin();
     state |= FixOrder;
 
-    if (ExpressionPtr e0 = getNthExpr(0)) {
-      e0->preOutputCPP(cg, ar, state & ~(StashVars));
-    }
+    if (!hasCse) {
+      if (ExpressionPtr e0 = getNthExpr(0)) {
+        e0->preOutputCPP(cg, ar, state & ~(StashVars));
+      }
 
-    if (ExpressionPtr e1 = getNthExpr(1)) {
-      e1->preOutputCPP(cg, ar, state & ~(StashVars));
+      if (ExpressionPtr e1 = getNthExpr(1)) {
+        e1->preOutputCPP(cg, ar, state & ~(StashVars));
+      }
     }
 
     if (!hasContext(AccessContext)) {
       if (!(m_context & (AssignmentLHS | OprLValue |
                          ExistContext | UnsetContext))) {
+        if (forceTemp) state |= ForceTemp;
         Expression::preOutputStash(cg, ar, state);
       }
     }
@@ -1010,7 +1023,182 @@ bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
   return true;
 }
 
+void Expression::collectCPPTemps(ExpressionPtrVec &collection) { 
+  if (isChainRoot()) {
+    collection.push_back(static_pointer_cast<Expression>(shared_from_this()));
+  } else {
+    for (int i = 0; i < getKidCount(); i++) {
+      ExpressionPtr kid = getNthExpr(i);
+      if (kid) kid->collectCPPTemps(collection);
+    }
+  }
+}
+
+void Expression::disableCSE() {
+  ExpressionPtrVec v;
+  collectCPPTemps(v);
+  ExpressionPtrVec::iterator it(v.begin());
+  for (; it != v.end(); ++it) {
+    ExpressionPtr p(*it);
+    p->clearChainRoot();
+  }
+}
+
+bool Expression::hasChainRoots() {
+  ExpressionPtrVec v;
+  collectCPPTemps(v);
+  return !v.empty();
+}
+
+bool Expression::GetCseTempInfo(
+    AnalysisResultPtr ar,
+    ExpressionPtr p, 
+    TypePtr &t) {
+  ASSERT(p);
+  switch (p->getKindOf()) {
+  case Expression::KindOfArrayElementExpression:
+    {
+      ArrayElementExpressionPtr ap(
+          static_pointer_cast<ArrayElementExpression>(p));
+      ExpressionPtr var(ap->getVariable());
+
+      TypePtr srcType, dstType;
+      bool needsCast =
+        var->getTypeCastPtrs(ar, srcType, dstType);
+
+      TypePtr testType(needsCast ? dstType : srcType);
+      if (testType) {
+        t = testType;
+        return !testType->is(Type::KindOfArray);
+      }
+
+      return true;
+    }
+    break;
+  default:
+    break;
+  }
+  return true;
+}
+
+ExpressionPtr Expression::getNextCanonCsePtr() const {
+
+  bool dAccessCtx = 
+    hasContext(AccessContext);
+  bool dLval =
+    hasContext(LValue);
+  bool dExistCtx =
+    hasContext(ExistContext);
+  bool dUnsetCtx =
+    hasContext(UnsetContext);
+
+  bool dGlobals = false;
+  if (is(KindOfArrayElementExpression)) {
+    ArrayElementExpressionConstPtr a(
+        static_pointer_cast<const ArrayElementExpression>(
+          shared_from_this()));
+    dGlobals = a->isSuperGlobal() || a->isDynamicGlobal();
+  }
+  
+  // see rules below - no hope to find CSE candidate
+  if (dExistCtx || dUnsetCtx || dGlobals || (!dAccessCtx && dLval)) {
+    return ExpressionPtr();
+  }
+
+  KindOf dKindOf = getKindOf();
+
+  ExpressionPtr match;
+  ExpressionPtr p(getCanonLVal());
+  for (; p; p = p->getCanonLVal()) {
+    // check if p is a suitable candidate for CSE of
+    // downstream. the rules are:
+    // A) rvals can always be CSE-ed regardless of access context, 
+    //    except for unset context, which it never can be CSE-ed for
+    // B) lvals can only be CSE-ed if in AccessContext
+    // C) rvals and lvals cannot be CSE-ed for each other
+    // D) for now, ExistContext is not optimized
+    // E) no CSE for $GLOBALS[...]
+    // F) node types need to match
+    
+    bool pLval = p->hasContext(LValue);
+    KindOf pKindOf = p->getKindOf();
+
+    if (dKindOf != pKindOf) continue;
+
+    if (dLval) {
+      ASSERT(dAccessCtx);
+      bool pAccessCtx = p->hasContext(AccessContext);
+      if (pLval && pAccessCtx) {
+        // match found
+        match = p;
+        break;
+      }
+    } else {
+      bool pExistCtx = p->hasContext(ExistContext);
+      bool pUnsetCtx = p->hasContext(UnsetContext);
+      if (!pLval && !pExistCtx && !pUnsetCtx) {
+        // match found
+        match = p;
+        break;
+      }
+    }
+  }
+
+  return match;
+}
+
+ExpressionPtr Expression::getCanonCsePtr() const {
+  ExpressionPtr next(getNextCanonCsePtr());
+  if (next) {
+    if (next->isChainRoot()) return next;
+    return next->getCanonCsePtr();
+  }
+  return ExpressionPtr();
+}
+
+bool Expression::preOutputCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar, 
+    bool emitTemps) {
+  ExpressionPtrVec temps;
+  collectCPPTemps(temps);
+  if (temps.empty()) return false;
+  if (emitTemps) {
+    for (ExpressionPtrVec::iterator it(temps.begin()); 
+        it != temps.end();
+        ++it) {
+      ExpressionPtr p(*it);
+      if (p->hasCPPCseTemp()) continue;
+
+      p->m_cppCseTemp = genCPPTemp(cg, ar);
+      TypePtr t;
+      bool needsStorage = Expression::GetCseTempInfo(ar, p, t);
+      bool useConst = !p->hasContext(Expression::LValue);
+      bool isString = t && t->is(Type::KindOfString);
+      const char *s = isString ? "String" : "Variant";
+      if (!isString) {
+        cg_printf("%s%s *%s%s;\n", 
+                  useConst ? "const " : "",
+                  s,
+                  Option::CseTempVariablePrefix,
+                  p->m_cppCseTemp.c_str());
+        if (needsStorage) {
+          cg_printf("%s %s%s;\n", 
+                    s, 
+                    Option::CseTempStoragePrefix,
+                    p->m_cppCseTemp.c_str());
+        }
+      } else {
+        cg_printf("%s %s%s;\n", 
+                  s, 
+                  Option::CseTempVariablePrefix,
+                  p->m_cppCseTemp.c_str());
+      }
+    }
+  }
+  return true;
+}
+
 bool Expression::outputCPPBegin(CodeGenerator &cg, AnalysisResultPtr ar) {
+  preOutputCPPTemp(cg, ar, !cg.inExpression());
   cg.setInExpression(true);
   return preOutputCPP(cg, ar, 0);
 }
@@ -1021,9 +1209,10 @@ bool Expression::outputCPPEnd(CodeGenerator &cg, AnalysisResultPtr ar) {
   return ret;
 }
 
-void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
-  TypePtr srcType = m_actualType;
-  TypePtr dstType = m_expectedType;
+bool Expression::getTypeCastPtrs(
+    AnalysisResultPtr ar, TypePtr &srcType, TypePtr &dstType) {
+  srcType = m_actualType;
+  dstType = m_expectedType;
   if (m_implementedType && srcType &&
       !Type::SameType(m_implementedType, srcType)) {
     if (dstType) {
@@ -1038,19 +1227,23 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
     srcType = m_implementedType;
     if (!dstType) dstType = m_actualType;
   }
+  return dstType && srcType && ((m_context & LValue) == 0) &&
+      Type::IsCastNeeded(ar, srcType, dstType);
+}
 
+void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (hasError(Expression::BadPassByRef)) {
     cg_printf("throw_fatal(\"bad pass by reference\")");
     return;
   }
-
   int closeParen = 0;
-  if (dstType && srcType && ((m_context & LValue) == 0) &&
-      Type::IsCastNeeded(ar, srcType, dstType)) {
+  TypePtr srcType, dstType;
+  bool needsCast = getTypeCastPtrs(ar, srcType, dstType);
+  if (needsCast) {
+    ASSERT(dstType);
     dstType->outputCPPCast(cg, ar, getScope());
     cg_printf("(");
     closeParen++;
-    outputCPPImpl(cg, ar);
   } else {
     if (hasContext(RefValue) && !hasContext(NoRefWrapper) &&
         isRefable()) {
@@ -1069,8 +1262,38 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
         closeParen++;
       }
     }
+  }
+
+  bool needsDeref = false;
+  if (hasCPPCseTemp()) {
+    TypePtr t;
+    GetCseTempInfo(
+        ar,
+        static_pointer_cast<Expression>(shared_from_this()), 
+        t);
+    if (!t || !t->is(Type::KindOfString)) needsDeref = true;
+    if (isChainRoot()) {
+      if (!needsDeref) {
+        cg_printf("(%s%s = (", 
+            Option::CseTempVariablePrefix, m_cppCseTemp.c_str());
+        closeParen += 2;
+      } else {
+        cg_printf("(*(%s%s = &(", 
+            Option::CseTempVariablePrefix, m_cppCseTemp.c_str());
+        closeParen += 3;
+      }
+    }
+  }
+
+  if (hasCPPCseTemp() && !isChainRoot()) {
+    if (needsDeref) cg_printf("(*");
+    cg_printf("%s%s", 
+        Option::CseTempVariablePrefix, m_cppCseTemp.c_str());
+    if (needsDeref) cg_printf(")");
+  } else {
     outputCPPImpl(cg, ar);
   }
+
   for (int i = 0; i < closeParen; i++) {
     cg_printf(")");
   }
@@ -1121,8 +1344,13 @@ void Expression::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   if (!inExpression) {
-    cg.setInExpression(true);
-    wrapped = preOutputCPP(cg, ar, 0);
+    wrapped = outputCPPBegin(cg, ar);
+  }
+
+  ExpressionPtr p(getCanonCsePtr());
+  if (p && p->hasCPPCseTemp() && !hasCPPCseTemp()) {
+    ASSERT(p->isChainRoot() && !isChainRoot());
+    m_cppCseTemp = p->m_cppCseTemp;
   }
 
   if (!m_cppTemp.empty()) {
@@ -1140,7 +1368,7 @@ void Expression::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
     }
     cg_printf("%s", m_cppTemp.c_str());
-    if (ref) cg_printf(")");
+    if (ref)     cg_printf(")");
   } else {
     bool linemap = outputLineMap(cg, ar);
     if (linemap) cg_printf("(");

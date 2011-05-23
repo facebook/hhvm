@@ -165,6 +165,7 @@ void Construct::dumpNode(int spc, AnalysisResultConstPtr ar) {
   std::string type_info = "";
   unsigned id = 0;
   ExpressionPtr idPtr = ExpressionPtr();
+  ExpressionPtr idCsePtr = ExpressionPtr();
   int ef = 0;
 
   if (Statement *s = dynamic_cast<Statement*>(this)) {
@@ -175,6 +176,8 @@ void Construct::dumpNode(int spc, AnalysisResultConstPtr ar) {
   } else if (Expression *e = dynamic_cast<Expression*>(this)) {
     id = e->getCanonID();
     idPtr = e->getCanonLVal();
+    idCsePtr = e->getCanonCsePtr();
+
     ef = e->getLocalEffects();
 
     Expression::KindOf etype = e->getKindOf();
@@ -286,6 +289,10 @@ void Construct::dumpNode(int spc, AnalysisResultConstPtr ar) {
   if (idPtr) {
     std::cout << "idp=0x" <<
       hex << setfill('0') << setw(10) << (int64)idPtr.get() << " ";
+  }
+  if (idCsePtr) {
+    std::cout << "idcsep=0x" <<
+      hex << setfill('0') << setw(10) << (int64)idCsePtr.get() << " ";
   }
 
   if (value != "") {

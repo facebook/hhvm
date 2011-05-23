@@ -107,6 +107,10 @@ void DoStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf(");\n");
 }
 
+void DoStatement::preOutputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
+  m_condition->preOutputCPPTemp(cg, ar, true);
+}
+
 void DoStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_indentBegin("{\n");
   bool e_order = m_condition->preOutputCPP(cg, ar, 0);

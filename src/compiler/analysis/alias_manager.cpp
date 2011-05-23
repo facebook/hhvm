@@ -18,6 +18,7 @@
 #include <compiler/analysis/function_scope.h>
 #include <compiler/expression/expression.h>
 #include <compiler/expression/assignment_expression.h>
+#include <compiler/expression/array_element_expression.h>
 #include <compiler/expression/list_assignment.h>
 #include <compiler/expression/binary_op_expression.h>
 #include <compiler/expression/unary_op_expression.h>
@@ -39,6 +40,9 @@
 #include <compiler/statement/return_statement.h>
 #include <compiler/statement/loop_statement.h>
 #include <compiler/statement/foreach_statement.h>
+#include <compiler/statement/for_statement.h>
+#include <compiler/statement/while_statement.h>
+#include <compiler/statement/do_statement.h>
 #include <compiler/statement/exp_statement.h>
 #include <compiler/statement/echo_statement.h>
 #include <compiler/analysis/alias_manager.h>
@@ -66,7 +70,8 @@ AliasManager::AliasManager(int opt) :
     m_wildRefs(false), m_nrvoFix(0), m_inlineAsExpr(true),
     m_noAdd(false), m_preOpt(opt<0), m_postOpt(opt>0),
     m_cleared(false), m_inPseudoMain(false), m_genAttrs(false),
-    m_hasDeadStore(false), m_graph(0), m_exprIdx(-1) {
+    m_hasDeadStore(false), m_hasChainRoot(false), 
+    m_graph(0), m_exprIdx(-1) {
 }
 
 AliasManager::~AliasManager() {
@@ -351,7 +356,8 @@ static bool canonCompare(ExpressionPtr e1, ExpressionPtr e2) {
     e1->canonCompare(e2);
 }
 
-int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
+int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2, 
+    bool forLval /* = false */) {
   Expression::KindOf k1 = e1->getKindOf(), k2 = e2->getKindOf();
   while (true) {
     switch (k1) {
@@ -375,8 +381,51 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
         break;
       }
 
-      return canonCompare(e1, e2) ?
-        SameAccess : InterfAccess;
+      if (canonCompare(e1, e2)) return SameAccess;
+      if (!forLval)             return InterfAccess;
+      
+      {
+        // forLval alias checking
+        if (k2 != Expression::KindOfArrayElementExpression) {
+          if (!e1->hasContext(Expression::LValue)) return DisjointAccess;
+          return InterfAccess;
+        }
+
+        // e1 and e2 are both array elements, where e2 is testing
+        // against e1 (e1 is ahead in the chain)
+        ArrayElementExpressionPtr p1(spc(ArrayElementExpression, e1));
+        ArrayElementExpressionPtr p2(spc(ArrayElementExpression, e2));
+
+        if (!p2->getVariable()->is(Expression::KindOfSimpleVariable)) {
+          return InterfAccess;
+        }
+        SimpleVariablePtr sv2(spc(SimpleVariable, p2->getVariable()));
+        if (couldBeAliased(sv2)) return InterfAccess;
+
+        // e2 looks like ($a[...]) now, and $a is not referenced
+        // so the only way e1 would interfere (in an lvalue sense)
+        // is if e1 looked also like ($a[...])
+
+        if (!p1->getVariable()->is(Expression::KindOfSimpleVariable)) {
+          if (p1->getVariable()->is(Expression::KindOfDynamicVariable)) {
+            return InterfAccess;
+          }
+          return DisjointAccess;
+        }
+        SimpleVariablePtr sv1(spc(SimpleVariable, p1->getVariable()));
+
+        // make sure the variables refer to the same thing by chasing
+        // the canon ptr
+        ExpressionPtr p(sv2->getCanonLVal());
+        while (p && p != sv1) p = p->getCanonLVal();
+        if (!p) return DisjointAccess;
+
+        // make sure the offsets refer to the same *value* by comparing
+        // canon ids
+        if (!p1->getOffset() || !p2->getOffset()) return DisjointAccess;
+        return p1->getOffset()->getCanonID() == p2->getOffset()->getCanonID() ?
+          SameAccess : InterfAccess;
+      }
 
     case Expression::KindOfStaticMemberExpression:
       if (k2 == Expression::KindOfSimpleVariable ||
@@ -704,8 +753,9 @@ void AliasManager::killLocals() {
   }
 }
 
-int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
-                              int &depth, int &effects) {
+int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e,
+                              bool &isLoad, int &depth, int &effects,
+                              bool forLval /* = false */) {
   isLoad = true;
   switch (e->getKindOf()) {
     case Expression::KindOfScalarExpression:
@@ -720,7 +770,7 @@ int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
     case Expression::KindOfNewObjectExpression:
     case Expression::KindOfIncludeExpression:
       isLoad = false;
-      return testAccesses(rv, e);
+      return testAccesses(rv, e, forLval);
 
     case Expression::KindOfListAssignment: {
       isLoad = false;
@@ -730,11 +780,11 @@ int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
         ExpressionPtr ep = lhs[i];
         if (ep) {
           if (ep->is(Expression::KindOfListAssignment)) {
-            if (checkInterf(rv, ep, isLoad, depth, effects) !=
+            if (checkInterf(rv, ep, isLoad, depth, effects, forLval) !=
                 DisjointAccess) {
               return InterfAccess;
             }
-          } else if (testAccesses(ep, rv) != DisjointAccess) {
+          } else if (testAccesses(ep, rv, forLval) != DisjointAccess) {
             return InterfAccess;
           }
         }
@@ -753,18 +803,21 @@ int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
                   Expression::Declaration|
                   Expression::UnsetContext);
       isLoad = !(m & Expression::LValue) || m == Expression::LValue;
-      return testAccesses(e, rv);
+      return testAccesses(e, rv, forLval);
     }
 
     case Expression::KindOfUnaryOpExpression:
       isLoad = false;
-      return testAccesses(spc(UnaryOpExpression,e)->getExpression(), rv);
+      return testAccesses(
+          spc(UnaryOpExpression,e)->getExpression(), rv, forLval);
     case Expression::KindOfBinaryOpExpression:
       isLoad = false;
-      return testAccesses(spc(BinaryOpExpression,e)->getExp1(), rv);
+      return testAccesses(
+          spc(BinaryOpExpression,e)->getExp1(), rv, forLval);
     case Expression::KindOfAssignmentExpression:
       isLoad = false;
-      return testAccesses(spc(AssignmentExpression,e)->getVariable(), rv);
+      return testAccesses(
+          spc(AssignmentExpression,e)->getVariable(), rv, forLval);
 
     default:
       assert(false);
@@ -774,14 +827,15 @@ int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
 }
 
 int AliasManager::checkAnyInterf(ExpressionPtr e1, ExpressionPtr e2,
-                                 bool &isLoad, int &depth, int &effects) {
+                                 bool &isLoad, int &depth, int &effects,
+                                 bool forLval /* = false */) {
   switch (e1->getKindOf()) {
     case Expression::KindOfListAssignment: {
       ListAssignmentPtr la = spc(ListAssignment, e1);
       ExpressionList &lhs = *la->getVariables().get();
       for (int i = lhs.getCount(); i--; ) {
         ExpressionPtr ep = lhs[i];
-        if (ep && checkAnyInterf(ep, e2, isLoad, depth, effects) !=
+        if (ep && checkAnyInterf(ep, e2, isLoad, depth, effects, forLval) !=
             DisjointAccess) {
           isLoad = false;
           return InterfAccess;
@@ -801,28 +855,37 @@ int AliasManager::checkAnyInterf(ExpressionPtr e1, ExpressionPtr e2,
       break;
   }
 
-  return checkInterf(e1, e2, isLoad, depth, effects);
+  return checkInterf(e1, e2, isLoad, depth, effects, forLval);
 }
 
-int AliasManager::findInterf(ExpressionPtr rv, bool isLoad,
-                             ExpressionPtr &rep, int *flags /* = 0 */) {
-  BucketMapEntry &lvs = m_accessList;
+int AliasManager::findInterf0(
+  ExpressionPtr rv, bool isLoad, 
+  ExpressionPtr &rep, 
+  ExpressionPtrList::reverse_iterator begin, 
+  ExpressionPtrList::reverse_iterator end, 
+  int *flags /* = 0 */, 
+  bool allowLval /* = false */, bool forLval /* = false */,
+  int depth /* = 0 */, int min_depth /* = 0 */,
+  int max_depth /* = 0 */) {
 
   rep.reset();
-  ExpressionPtrList::reverse_iterator it = lvs.rbegin(), end = lvs.rend();
+  ExpressionPtrList::reverse_iterator it = begin;
 
   bool unset_simple = !isLoad && !m_inPseudoMain &&
     rv->hasContext(Expression::UnsetContext) &&
     rv->hasContext(Expression::LValue) &&
     rv->is(Expression::KindOfSimpleVariable);
 
-  int depth = 0, min_depth = 0, max_depth = 0;
+  bool hasStash = false;
+  ExpressionPtrList::reverse_iterator stash;
+  int stash_depth = 0, stash_min_depth = 0, stash_max_depth = 0;
+
   for (; it != end; ++it) {
     ExpressionPtr e = *it;
     if (e->getContext() & Expression::DeadStore) continue;
     bool eIsLoad = false;
     int effects = 0;
-    int a = checkInterf(rv, e, eIsLoad, depth, effects);
+    int a = checkInterf(rv, e, eIsLoad, depth, effects, forLval);
     if (a != DisjointAccess) {
       if (a == NotAccess) {
         if (effects & Expression::IOEffect) {
@@ -873,15 +936,54 @@ int AliasManager::findInterf(ExpressionPtr rv, bool isLoad,
           }
         }
         if (a != SameAccess && eIsLoad && isLoad && isReadOnlyAccess(e)) {
+          if (!hasStash && !forLval && allowLval) {
+            // stash the state away so we can pick up here if we need to
+            hasStash = true;
+            stash = it;
+            stash_depth = depth;
+            stash_min_depth = min_depth;
+            stash_max_depth = max_depth;
+          }
           continue;
         }
         rep = e;
+        if (!forLval && allowLval && a != SameAccess) {
+          if (hasStash) {
+            return findInterf0(
+                rv, isLoad, rep,
+                stash, end, flags, allowLval, true,
+                stash_depth, stash_min_depth,
+                stash_max_depth);
+          }
+          forLval = true;
+          // try this node again
+          --it;
+          continue;
+        }
+        if (a == SameAccess && forLval) a = SameLValueAccess;
         return a;
       }
     }
   }
 
+  if (hasStash) {
+    ASSERT(allowLval);
+    return findInterf0(
+        rv, isLoad, rep,
+        stash, end, flags, allowLval, true,
+        stash_depth, stash_min_depth,
+        stash_max_depth);
+  }
+
   return DisjointAccess;
+}
+
+int AliasManager::findInterf(ExpressionPtr rv, bool isLoad,
+                             ExpressionPtr &rep, int *flags /* = 0 */,
+                             bool allowLval /* = false */) {
+  BucketMapEntry &lvs = m_accessList;
+  return findInterf0(rv, isLoad, rep, lvs.rbegin(), lvs.rend(), 
+      flags, allowLval);
 }
 
 ExpressionPtr AliasManager::canonicalizeNonNull(ExpressionPtr e) {
@@ -902,6 +1004,48 @@ static bool sameExpr(ExpressionPtr e1, ExpressionPtr e2) {
     if (e2 == e1) return true;
   }
   return false;
+}
+
+void AliasManager::setCanonPtrForArrayCSE(
+    ExpressionPtr e,
+    ExpressionPtr rep) {
+  ASSERT(e);
+  ASSERT(rep);
+  if (e->is(Expression::KindOfArrayElementExpression)) { 
+    // e is an array access in rvalue context, 
+    // need to switch on rep
+    ExpressionPtr rep0;
+    switch (rep->getKindOf()) {
+    case Expression::KindOfUnaryOpExpression:
+      rep0 = spc(UnaryOpExpression, rep)->getExpression();
+      break;
+    case Expression::KindOfBinaryOpExpression:
+      rep0 = spc(BinaryOpExpression, rep)->getExp1();
+      break;
+    case Expression::KindOfAssignmentExpression:
+      rep0 = spc(AssignmentExpression, rep)->getVariable();
+      break;
+    case Expression::KindOfListAssignment:
+      // TODO: IMPLEMENT
+      ASSERT(false);
+      break;
+    default:
+      rep0 = rep;
+      break;
+    }
+    if (rep0 && rep0->is(Expression::KindOfArrayElementExpression)) {
+      e->setCanonPtr(rep0);
+      ExpressionPtr match(e->getNextCanonCsePtr());
+      if (match && !match->isChainRoot()) {
+        ExpressionPtr matchNext(match->getNextCanonCsePtr());
+        if (!matchNext) {
+          // make match a new CSE chain root
+          match->setChainRoot();
+          m_hasChainRoot = true;
+        }
+      }
+    }
+  }
 }
 
 void AliasManager::processAccessChain(ExpressionPtr e) {
@@ -980,6 +1124,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
   e->setVisited();
   e->clearLocalExprAltered();
   e->setCanonPtr(ExpressionPtr());
+  e->clearChainRoot();
   e->setCanonID(0);
 
   switch (e->getKindOf()) {
@@ -1223,6 +1368,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
         In the case of assignment, or binary op assignment, its added
         after the rhs has been fully processed too.
       */
+      bool doArrayCSE = Option::ArrayAccessIdempotent && m_postOpt;
       if (e->hasContext(Expression::AccessContext)) {
         assert(doAccessChains);
         if (e->getContext() & (Expression::LValue|
@@ -1231,7 +1377,8 @@ ExpressionPtr AliasManager::canonicalizeNode(
                                Expression::DeepReference|
                                Expression::UnsetContext)) {
           ExpressionPtr rep;
-          int interf = findInterf(e, true, rep);
+          int interf = 
+            findInterf(e, true, rep, NULL, doArrayCSE);
           add(m_accessList, e);
           if (interf == SameAccess) {
             if (e->getKindOf() == rep->getKindOf()) {
@@ -1247,6 +1394,8 @@ ExpressionPtr AliasManager::canonicalizeNode(
               } while (rep->is(Expression::KindOfAssignmentExpression));
             }
             e->setCanonPtr(rep);
+          } else if (interf == SameLValueAccess) {
+            setCanonPtrForArrayCSE(e, rep);
           }
           break;
         }
@@ -1257,7 +1406,8 @@ ExpressionPtr AliasManager::canonicalizeNode(
                                Expression::DeepReference|
                                Expression::UnsetContext))) {
         ExpressionPtr rep;
-        int interf = findInterf(e, true, rep);
+        int interf = 
+          findInterf(e, true, rep, NULL, doArrayCSE);
         if (!m_inPseudoMain && interf == DisjointAccess && !m_cleared &&
             e->is(Expression::KindOfSimpleVariable) &&
             !e->isThis()) {
@@ -1285,6 +1435,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
             add(m_accessList, e);
             e->setCanonID(rep->getCanonID());
             e->setCanonPtr(rep);
+            if (doArrayCSE) setCanonPtrForArrayCSE(e, rep);
             return ExpressionPtr();
           }
           if (Option::LocalCopyProp &&
@@ -1332,6 +1483,8 @@ ExpressionPtr AliasManager::canonicalizeNode(
             }
             e->setCanonPtr(last);
           }
+        } else if (interf == SameLValueAccess) {
+          setCanonPtrForArrayCSE(e, rep);
         }
       }
       add(m_accessList, e);
@@ -2348,6 +2501,8 @@ int AliasManager::optimize(AnalysisResultConstPtr ar, MethodStatementPtr m) {
     if (copyProp(m)) return 1;
   }
 
+  m_hasChainRoot = false;
+
   if (Option::LocalCopyProp || Option::EliminateDeadCode) {
     for (int i = 0, nkid = m->getKidCount(); i < nkid; i++) {
       if (i) {
@@ -2355,6 +2510,10 @@ int AliasManager::optimize(AnalysisResultConstPtr ar, MethodStatementPtr m) {
         m_cleared = false;
       }
       canonicalizeKid(m, m->getNthKid(i), i);
+      if (m_hasChainRoot && m_postOpt) {
+        // need to do possible invalidation for label statements
+        invalidateChainRoots(m->getStmts());
+      }
     }
 
     killLocals();
@@ -2426,6 +2585,97 @@ void AliasManager::finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m) {
   }
 
   doFinal(m);
+}
+
+void AliasManager::invalidateChainRoots(StatementPtr s) {
+  if (!s) return;
+  switch (s->getKindOf()) {
+  case Statement::KindOfFunctionStatement:
+  case Statement::KindOfMethodStatement:
+  case Statement::KindOfClassStatement:
+  case Statement::KindOfInterfaceStatement:
+    // don't recurse into these definitions
+    return;
+  case Statement::KindOfStatementList:
+    {
+      StatementListPtr slist(spc(StatementList, s));
+      // start from the last statement -
+      // if we find a child stmt with
+      // a reachable label, we must invalidate
+      // all statements before
+      bool disable = false;
+      for (int i = s->getKidCount(); i--; ) {
+        StatementPtr kid((*slist)[i]);
+        invalidateChainRoots(kid);
+        if (!disable && kid->hasReachableLabel()) {
+          disable = true;
+        }
+        if (disable) disableCSE(kid);
+      }
+    }
+    break;
+  case Statement::KindOfDoStatement:
+    {
+      // need to disable CSE in the top level body
+      // otherwise we'd have to declare all CSE temps like:
+      //   declare_temps;
+      //   do { ... } while (cond);
+      disableCSE(s->getNthStmt(DoStatement::BodyStmt));
+    }
+    // fall through
+  default:
+    for (int i = s->getKidCount(); i--; ) {
+      invalidateChainRoots(s->getNthStmt(i));
+    }
+    break;
+  }
+}
+
+void AliasManager::nullSafeDisableCSE(StatementPtr parent, int kid) {
+  ASSERT(parent);
+  ConstructPtr c(parent->getNthKid(kid));
+  if (!c) return;
+  ExpressionPtr e(dpc(Expression, c));
+  ASSERT(e);
+  e->disableCSE();
+}
+
+void AliasManager::disableCSE(StatementPtr s) {
+  if (!s) return;
+  switch (s->getKindOf()) {
+  case Statement::KindOfIfBranchStatement:
+    nullSafeDisableCSE(s, 0);
+    break;
+  case Statement::KindOfSwitchStatement:
+    nullSafeDisableCSE(s, 0);
+    break;
+  case Statement::KindOfForStatement:
+    nullSafeDisableCSE(s, ForStatement::InitExpr);
+    nullSafeDisableCSE(s, ForStatement::CondExpr);
+    nullSafeDisableCSE(s, ForStatement::IncExpr);
+    break;
+  case Statement::KindOfForEachStatement:
+    nullSafeDisableCSE(s, ForEachStatement::ArrayExpr);
+    nullSafeDisableCSE(s, ForEachStatement::NameExpr);
+    nullSafeDisableCSE(s, ForEachStatement::ValueExpr);
+    break;
+  case Statement::KindOfWhileStatement:
+    nullSafeDisableCSE(s, WhileStatement::CondExpr);
+    break;
+  case Statement::KindOfDoStatement:
+    nullSafeDisableCSE(s, DoStatement::CondExpr);
+    break;
+  default:
+    for (int i = s->getKidCount(); i--; ) {
+      ConstructPtr c(s->getNthKid(i));
+      if (StatementPtr skid = dpc(Statement, c)) {
+        disableCSE(skid);
+      } else {
+        nullSafeDisableCSE(s, i);
+      }
+    }
+    break;
+  }
 }
 
 AliasManager::LoopInfo::LoopInfo(StatementPtr s) :

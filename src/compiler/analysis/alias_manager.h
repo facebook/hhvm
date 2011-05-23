@@ -25,6 +25,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(MethodStatement);
 DECLARE_BOOST_TYPES(SimpleVariable);
 DECLARE_BOOST_TYPES(ListAssignment);
+DECLARE_BOOST_TYPES(ArrayElementExpression);
 
 class ControlFlowGraph;
 
@@ -84,7 +85,8 @@ class BucketMapEntry {
 
 class AliasManager {
  public:
-  enum { SameAccess, InterfAccess, DisjointAccess, NotAccess };
+  enum { SameAccess, SameLValueAccess, InterfAccess, 
+    DisjointAccess, NotAccess };
 
   AliasManager(int opt);
   ~AliasManager();
@@ -113,10 +115,25 @@ class AliasManager {
 
   ControlFlowGraph *graph() { return m_graph; }
   int checkAnyInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
-                     int &depth, int &effects);
+                     int &depth, int &effects, bool forLval = false);
   bool hasWildRefs() const { return m_wildRefs; }
   bool couldBeAliased(SimpleVariablePtr sv);
  private:
+
+  int findInterf0(
+    ExpressionPtr rv, bool isLoad, 
+    ExpressionPtr &rep, 
+    ExpressionPtrList::reverse_iterator begin, 
+    ExpressionPtrList::reverse_iterator end, 
+    int *flags = 0, 
+    bool allowLval = false, bool forLval = false,
+    int depth = 0, int min_depth = 0,
+    int max_depth = 0); 
+
+  void setCanonPtrForArrayCSE(
+      ExpressionPtr e,
+      ExpressionPtr rep);
+
   void doFinal(MethodStatementPtr m);
   enum { MaxBuckets = 0x10000 };
   enum { FallThrough, CondBranch, Branch, Converge };
@@ -156,7 +173,7 @@ class AliasManager {
   void add(BucketMapEntry &em, ExpressionPtr e);
 
   void dumpAccessChain();
-  int testAccesses(ExpressionPtr e1, ExpressionPtr e2);
+  int testAccesses(ExpressionPtr e1, ExpressionPtr e2, bool forLval = false);
   void cleanRefs(ExpressionPtr rv,
                  ExpressionPtrList::reverse_iterator it,
                  ExpressionPtrList::reverse_iterator &end,
@@ -167,10 +184,10 @@ class AliasManager {
                    int depth);
   void killLocals();
   bool okToKill(ExpressionPtr ep, bool killRef);
-  int checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
-                  int &depth, int &effects);
+  int checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad, 
+                  int &depth, int &effects, bool forLval = false);
   int findInterf(ExpressionPtr rv, bool isLoad, ExpressionPtr &rep,
-                 int *flags = 0);
+                 int *flags = 0, bool allowLval = false);
   void applyAssign(ExpressionPtr lhs, ExpressionPtr rhs);
   void processAccessChain(ExpressionPtr e);
   void processAccessChainLA(ListAssignmentPtr e);
@@ -182,6 +199,10 @@ class AliasManager {
   ExpressionPtr canonicalizeRecurNonNull(ExpressionPtr e);
   ExpressionPtr canonicalizeRecur(ExpressionPtr e);
   StatementPtr canonicalizeRecur(StatementPtr e, int &ret);
+
+  void invalidateChainRoots(StatementPtr s);
+  void nullSafeDisableCSE(StatementPtr parent, int kid);
+  void disableCSE(StatementPtr s);
 
   int collectAliasInfoRecur(ConstructPtr cs, bool unused);
   void pushStringScope(StatementPtr s);
@@ -232,6 +253,7 @@ class AliasManager {
   bool                      m_inPseudoMain;
   bool                      m_genAttrs;
   bool                      m_hasDeadStore;
+  bool                      m_hasChainRoot;
   BlockScopeRawPtr          m_scope;
 
   ControlFlowGraph          *m_graph;

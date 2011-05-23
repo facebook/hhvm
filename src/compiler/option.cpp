@@ -127,6 +127,8 @@ const char *Option::ConstantPrefix = "k_";
 const char *Option::ClassConstantPrefix = "q_";
 const char *Option::ExceptionPrefix = "e_";
 const char *Option::TempVariablePrefix = "r_";
+const char *Option::CseTempVariablePrefix = "cse_";
+const char *Option::CseTempStoragePrefix = "cses_";
 const char *Option::EvalOrderTempPrefix = "eo_";
 const char *Option::CallInfoPrefix = "ci_";
 const char *Option::CallInfoWrapperPrefix = "ciw_";
@@ -224,6 +226,7 @@ bool Option::StringLoopOpts = true;
 bool Option::AutoInline = false;
 bool Option::ControlFlow = true;
 bool Option::VariableCoalescing = false;
+bool Option::ArrayAccessIdempotent = false;
 bool Option::DumpAst = false;
 
 bool Option::AllDynamic = true;
@@ -424,19 +427,20 @@ void Option::Load(Hdf &config) {
   AllDynamic = config["AllDynamic"].getBool(true);
   AllVolatile = config["AllVolatile"].getBool();
 
-  GenerateCppLibCode = config["GenerateCppLibCode"].getBool(false);
-  GenerateSourceInfo = config["GenerateSourceInfo"].getBool(false);
-  GenerateDocComments = config["GenerateDocComments"].getBool(true);
-  UseVirtualDispatch = config["UseVirtualDispatch"].getBool(false);
-  EliminateDeadCode  = config["EliminateDeadCode"].getBool(true);
-  CopyProp           = config["CopyProp"].getBool(false);
-  LocalCopyProp      = config["LocalCopyProp"].getBool(true);
-  StringLoopOpts     = config["StringLoopOpts"].getBool(true);
-  AutoInline         = config["AutoInline"].getBool(false);
-  ControlFlow        = config["ControlFlow"].getBool(true);
-  VariableCoalescing = config["VariableCoalescing"].getBool(false);
-  DumpAst            = config["DumpAst"].getBool(false);
-  PregenerateCPP     = config["PregenerateCPP"].getBool(false);
+  GenerateCppLibCode       = config["GenerateCppLibCode"].getBool(false);
+  GenerateSourceInfo       = config["GenerateSourceInfo"].getBool(false);
+  GenerateDocComments      = config["GenerateDocComments"].getBool(true);
+  UseVirtualDispatch       = config["UseVirtualDispatch"].getBool(false);
+  EliminateDeadCode        = config["EliminateDeadCode"].getBool(true);
+  CopyProp                 = config["CopyProp"].getBool(false);
+  LocalCopyProp            = config["LocalCopyProp"].getBool(true);
+  StringLoopOpts           = config["StringLoopOpts"].getBool(true);
+  AutoInline               = config["AutoInline"].getBool(false);
+  ControlFlow              = config["ControlFlow"].getBool(true);
+  VariableCoalescing       = config["VariableCoalescing"].getBool(false);
+  ArrayAccessIdempotent    = config["ArrayAccessIdempotent"].getBool(false);
+  DumpAst                  = config["DumpAst"].getBool(false);
+  PregenerateCPP           = config["PregenerateCPP"].getBool(false);
   GenerateFFIStaticBinding = config["GenerateFFIStaticBinding"].getBool(true);
 
   {

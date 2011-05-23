@@ -48,12 +48,12 @@ void Statement::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 void Statement::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
+  preOutputCPPImpl(cg, ar);
   if (m_silencerCountMax > 0) {
     cg_indentBegin("{\n");
     cg_printf("Silencer ");
     for (int i = 0; i < m_silencerCountMax; ++i) {
-      if (i != 0)
-        cg_printf(", ");
+      if (i != 0) cg_printf(", ");
       cg_printf("%s%d", Option::SilencerPrefix, i);
     }
     cg_printf(";\n");
@@ -104,5 +104,3 @@ bool Statement::hasReachableLabel() const {
   }
   return false;
 }
-
-

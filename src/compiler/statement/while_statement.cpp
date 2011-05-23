@@ -104,6 +104,10 @@ void WhileStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
+void WhileStatement::preOutputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
+  m_condition->preOutputCPPTemp(cg, ar, true);
+}
+
 void WhileStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   int labelId = cg.createNewLocalId(shared_from_this());
   cg.pushBreakScope(labelId);

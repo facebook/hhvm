@@ -117,6 +117,9 @@ public:
   void setLocalExprAltered() { m_flags.localExprNotAltered = false; }
   void clearLocalExprAltered() { m_flags.localExprNotAltered = true; }
   bool isLocalExprAltered() const { return !m_flags.localExprNotAltered; }
+  void setChainRoot() { m_flags.chainRoot = true; }
+  void clearChainRoot() { m_flags.chainRoot = false; }
+  bool isChainRoot() const { return m_flags.chainRoot; }
 
   void setReferencedValid() { m_flags.referenced_valid = true; }
   void clearReferencedValid() { m_flags.referenced_valid = false; }
@@ -191,6 +194,15 @@ public:
    */
   virtual int getKidCount() const = 0;
 
+  void dump(int spc, AnalysisResultPtr ar) { 
+    AnalysisResultConstPtr arp(ar);
+    dump(spc, arp);
+  }
+  void dumpNode(int spc, AnalysisResultPtr ar) { 
+    AnalysisResultConstPtr arp(ar);
+    dumpNode(spc, arp);
+  }
+
   void dump(int spc, AnalysisResultConstPtr ar);
   void dumpNode(int spc, AnalysisResultConstPtr ar);
   static void dump(int spc, AnalysisResultConstPtr ar, bool functionOnly,
@@ -242,6 +254,8 @@ private:
       unsigned referenced_valid : 1; // whether or not the above flag is valid
       unsigned needed : 1;
       unsigned needed_valid : 1; // whether or not the above flag is valid
+      unsigned chainRoot : 1; // whether this denotes the begining of a 
+                              // CSE chain
     } m_flags;
   };
 protected:

@@ -37,6 +37,8 @@ public:
     return 1 + (m_stmt ? m_stmt->getRecursiveCount() : 0);
   }
 
+  virtual void preOutputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar);
+
 private:
   StatementPtr m_stmt;
   ExpressionPtr m_condition;

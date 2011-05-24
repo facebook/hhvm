@@ -212,12 +212,14 @@ void CodeGenerator::namespaceEnd() {
 }
 
 std::string CodeGenerator::getFormattedName(const std::string &file) {
-  string formatted = file;
-  Util::replaceAll(formatted, ".", "_");
-  Util::replaceAll(formatted, "/", "_");
-  Util::replaceAll(formatted, "-", "_");
-  Util::replaceAll(formatted, "$", "_");
-
+  char *fn = strdup(file.c_str());
+  int len = strlen(fn);
+  assert(len == (int)file.size());
+  for (int i = 0; i < len; i++) {
+    if (!isalnum(fn[i])) fn[i] = '_';
+  }
+  string formatted = fn;
+  free(fn);
   int hash = hash_string(file.data(), file.size());
   formatted += boost::str(boost::format("%08x") % hash);
   return formatted;

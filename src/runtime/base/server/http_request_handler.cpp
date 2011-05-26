@@ -156,6 +156,15 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     (pos != string::npos) &&
     path.find('/', pos) == string::npos // no extention in ./foo or ../bar
       ? (path.c_str() + pos + 1) : NULL;
+
+  if (ext && !RuntimeOption::ForbiddenFileExtensions.empty()) {
+    if (RuntimeOption::ForbiddenFileExtensions.find(ext) !=
+        RuntimeOption::ForbiddenFileExtensions.end()) {
+      transport->sendString("Forbidden", 403);
+      return;
+    }
+  }
+
   bool cachableDynamicContent =
     (!RuntimeOption::StaticFileGenerators.empty() &&
      RuntimeOption::StaticFileGenerators.find(path) !=

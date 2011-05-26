@@ -150,9 +150,7 @@ HphpArray::~HphpArray() {
         }
       }
       TypedValue* tv = &e->data;
-      if (IS_REFCOUNTED_TYPE(tv->m_type)) {
-        tvDecRef(tv);
-      }
+      tvRefcountedDecRef(tv);
     }
   }
   if (m_data != NULL) {
@@ -1148,9 +1146,7 @@ void HphpArray::compact(bool renumber /* = false */) {
     DataType oldType = to->m_type; \
     uint64_t oldDatum = to->m_data.num; \
     TV_DUP_CELL_NC(fr, to); \
-    if (IS_REFCOUNTED_TYPE(oldType)) { \
-      tvDecRefHelper(oldType, oldDatum); \
-    } \
+    tvRefcountedDecRefHelper(oldType, oldDatum); \
   } else { \
     fr->_count = 0; \
     DataType oldType = to->m_type; \
@@ -1159,9 +1155,7 @@ void HphpArray::compact(bool renumber /* = false */) {
       tvBox(fr); \
     } \
     TV_DUP_VAR_NC(fr, to); \
-    if (IS_REFCOUNTED_TYPE(oldType)) { \
-      tvDecRefHelper(oldType, oldDatum); \
-    } \
+    tvRefcountedDecRefHelper(oldType, oldDatum); \
   } \
 
 #define ELEMENT_CONSTRUCT(fr, to) \
@@ -1693,9 +1687,7 @@ TypedValue* HphpArray::migrateAndSet(StringData* k, TypedValue* tv) {
     TypedValue* slot = (TypedValue*)(&e->data);
     if (slot->m_type != KindOfIndirect) {
       // Destroy the old element
-      if (IS_REFCOUNTED_TYPE(slot->m_type)) {
-        tvDecRef(slot);
-      }
+      tvRefcountedDecRef(slot);
       // Set the element to a KindOfIndirect that points to tv
       slot->m_data.ptv = tv;
       slot->m_type = KindOfIndirect;
@@ -1704,10 +1696,7 @@ TypedValue* HphpArray::migrateAndSet(StringData* k, TypedValue* tv) {
     } else {
       TypedValue* cur = slot->m_data.ptv;
       // Destroy the old element
-      if (IS_REFCOUNTED_TYPE(cur->m_type)) {
-        tvDecRef(cur);
-        TV_WRITE_UNINIT(cur);
-      }
+      tvUnset(cur);
       // Set the element to point to tv
       slot->m_data.ptv = tv;
       return cur;
@@ -2087,9 +2076,7 @@ void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
   if (e->data.m_type != KindOfIndirect) {
     // Free the value if necessary and mark it as a tombstone.
     TypedValue* tv = &e->data;
-    if (IS_REFCOUNTED_TYPE(tv->m_type)) {
-      tvDecRef(tv);
-    }
+    tvRefcountedDecRef(tv);
     tv->m_type = KindOfTombstone;
     // Free the key if necessary, and clear the h and key fields in order to
     // increase the chances that subsequent searches will quickly/safely fail
@@ -2134,9 +2121,7 @@ void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
     // later, we are able to preserve the relationship between the key and
     // the indirect memory location.
     TypedValue* tv = e->data.m_data.ptv;
-    if (IS_REFCOUNTED_TYPE(tv->m_type)) {
-      tvDecRef(tv);
-    }
+    tvRefcountedDecRef(tv);
     tv->m_type = KindOfUninit;
   }
 

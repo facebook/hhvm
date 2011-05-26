@@ -79,6 +79,13 @@ inline void tvDecRefCell(TypedValue* tv) {
 }
 #endif
 
+// Assumes 'tv' is live
+inline void tvRefcountedDecRefCell(TypedValue* tv) {
+  if (IS_REFCOUNTED_TYPE(tv->m_type)) {
+    tvDecRefCell(tv);
+  }
+}
+
 inline void tvDecRefStr(TypedValue* tv) {
   ASSERT(tv->m_type == KindOfString);
   if (tv->m_data.pstr->decRefCount() == 0) {
@@ -100,7 +107,7 @@ inline void tvDecRefObj(TypedValue* tv) {
   }
 }
 
-// Assumes 'tv' is live
+// Assumes 'tv' is live and is an inner cell
 inline void tvDecRefVarInternal(TypedValue* tv) {
   ASSERT(tv->m_type != KindOfVariant);
   ASSERT(tv->_count > 0);
@@ -115,27 +122,32 @@ inline void tvDecRefVar(TypedValue* tv) {
   tvDecRefVarInternal(tv->m_data.ptv);
 }
 
+inline void tvReleaseHelper(DataType type, uint64_t datum) {
+  ASSERT(IS_REFCOUNTED_TYPE(type));
+  if (type == KindOfString) {
+    ((StringData*)datum)->release();
+  } else {
+    if (type < KindOfObject) {
+      ASSERT(type == KindOfArray);
+      ((ArrayData*)datum)->release();
+    } else {
+      if (type == KindOfObject) {
+        ((ObjectData*)datum)->release();
+      } else {
+        ASSERT(type == KindOfVariant);
+        ((Variant*)datum)->release();
+      }
+    }
+  }
+}
+
 // Assumes 'data' is live
 // Assumes 'IS_REFCOUNTED_TYPE(type)'
 #ifdef FAST_REFCOUNT_FOR_VARIANT
 inline void tvDecRefHelper(DataType type, uint64_t datum) {
   ASSERT(IS_REFCOUNTED_TYPE(type));
   if (((Variant*)datum)->decRefCount() == 0) {
-    if (type == KindOfString) {
-      ((StringData*)datum)->release();
-    } else {
-      if (type < KindOfObject) {
-        ASSERT(type == KindOfArray);
-        ((ArrayData*)datum)->release();
-      } else {
-        if (type == KindOfObject) {
-          ((ObjectData*)datum)->release();
-        } else {
-          ASSERT(type == KindOfVariant);
-          ((Variant*)datum)->release();
-        }
-      }
-    }
+    tvReleaseHelper(type, datum);
   }
 }
 #else
@@ -168,11 +180,26 @@ inline void tvDecRefHelper(DataType type, uint64_t datum) {
 #endif
 
 // Assumes 'tv' is live
+inline void tvRefcountedDecRefHelper(DataType type, uint64_t datum) {
+  if (IS_REFCOUNTED_TYPE(type)) {
+    tvDecRefHelper(type, datum);
+  }
+}
+
+// Assumes 'tv' is live
 // Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
 inline void tvDecRef(TypedValue* tv) {
   tvDecRefHelper(tv->m_type, tv->m_data.num);
 }
 
+// Assumes 'tv' is live
+inline void tvRefcountedDecRef(TypedValue* tv) {
+  if (IS_REFCOUNTED_TYPE(tv->m_type)) {
+    tvDecRef(tv);
+  }
+}
+
+// tvBoxHelper sets the refcount of the newly allocated inner cell to 1
 inline TypedValue* tvBoxHelper(DataType type, uint64_t datum) {
   TypedValue* innerCell = (TypedValue*)(NEW(Variant)());
   innerCell->m_data.num = datum;
@@ -248,16 +275,26 @@ inline void tvSet(TypedValue * fr, TypedValue * to) {
   if (to->m_type == KindOfVariant) {
     to = to->m_data.ptv;
   }
-  if (IS_REFCOUNTED_TYPE(to->m_type)) {
-    tvDecRefCell(to);
-  }
-  to->m_data.num = fr->m_data.num;
-  to->m_type = fr->m_type;
-  // If we just copied a complex type, we need to bump
-  // up the refcount
-  if (IS_REFCOUNTED_TYPE(fr->m_type)) {
-    TV_INCREF(fr);
-  }
+  DataType oldType = to->m_type;
+  uint64_t oldDatum = to->m_data.num;
+  TV_DUP_CELL_NC(fr, to);
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+// Assumes 'to' and 'fr' are live
+// Assumes that 'fr->m_type == KindOfVariant'
+inline void tvBind(TypedValue * fr, TypedValue * to) {
+  ASSERT(fr->m_type == KindOfVariant);
+  DataType oldType = to->m_type;
+  uint64_t oldDatum = to->m_data.num;
+  TV_DUP_VAR_NC(fr, to);
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+// Assumes 'to' is live
+inline void tvUnset(TypedValue * to) {
+  tvRefcountedDecRef(to);
+  TV_WRITE_UNINIT(to);
 }
 
 /**

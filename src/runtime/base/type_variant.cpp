@@ -281,7 +281,8 @@ void Variant::setNull() {
   } else if (m_type == KindOfVariant) {
     m_data.pvar->setNull();
   } else {
-    unset();
+    destruct();
+    m_type = KindOfNull;
   }
 }
 

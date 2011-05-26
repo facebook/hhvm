@@ -4400,6 +4400,24 @@ bool TestCodeRun::TestObjectProperty() {
        "foo()->v[0] += 5;"
        "var_dump(shuffle(foo()->v));");
 
+  MVCR("<?php "
+       "class A {}"
+       "class B {"
+       "  public $data;"
+       "  public function setData(A $result = null) {"
+       "    $this->data = $result;"
+       "  }"
+       "}"
+       "function foo($obj) {"
+       "  $obj->data = new A;"
+       "  $a = $obj->data;"
+       "  var_dump($a);"
+       "  $obj->setData(null);"
+       "  $a = $obj->data;"
+       "  var_dump($a);"
+       "}"
+       "foo(new B);");
+
  return true;
 }
 

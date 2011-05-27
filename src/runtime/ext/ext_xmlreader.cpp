@@ -561,7 +561,7 @@ static PropertyAccessor xmlreader_properties[] = {
   { "prefix", NULL, xmlTextReaderConstPrefix, KindOfString },
   { "value", NULL, xmlTextReaderConstValue, KindOfString },
   { "xmlLang", NULL, xmlTextReaderConstXmlLang, KindOfString },
-  { NULL, NULL, NULL, NULL}
+  { NULL, NULL, NULL }
 };
 
 static PropertyAccessorMap xmlreader_properties_map
@@ -580,7 +580,7 @@ Variant c_XMLReader::t___get(Variant name) {
       retint = propertyMap->getter_int(m_ptr);
     }
   }
-  
+
   switch (propertyMap->return_type) {
     case KindOfString:
       if (retchar) {

@@ -547,13 +547,8 @@ extern struct ObjectStaticCallbacks cw_MutableArrayIterator;
 extern struct ObjectStaticCallbacks cw_Directory;
 extern struct ObjectStaticCallbacks cw_FilterIterator;
 extern struct ObjectStaticCallbacks cw_ReflectionParameter;
-Object coo_PDOException() {
+ObjectData *coo_PDOException() {
   return NEWOBJ(c_PDOException)();
-}
-Object co_PDOException(CArrRef params, bool init /* = true */) {
-  Object r(coo_PDOException());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_PDOException
 Variant c_PDOException::os_getInit(CStrRef s) {
@@ -610,7 +605,7 @@ void c_PDOException::destruct() {
   }
 }
 ObjectData *c_PDOException::cloneImpl() {
-  ObjectData *obj = coo_PDOException().detach();
+  ObjectData *obj = coo_PDOException();
   c_PDOException::cloneSet(obj);
   return obj;
 }
@@ -700,13 +695,8 @@ struct ObjectStaticCallbacks cw_PDOException = {
   c_PDOException::os_constant,
   c_PDOException::os_get_call_info
 };
-Object coo_DOMDocumentFragment() {
+ObjectData *coo_DOMDocumentFragment() {
   return NEWOBJ(c_DOMDocumentFragment)();
-}
-Object co_DOMDocumentFragment(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMDocumentFragment());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMDocumentFragment
 Variant c_DOMDocumentFragment::os_getInit(CStrRef s) {
@@ -763,7 +753,7 @@ void c_DOMDocumentFragment::destruct() {
   }
 }
 ObjectData *c_DOMDocumentFragment::cloneImpl() {
-  ObjectData *obj = coo_DOMDocumentFragment().detach();
+  ObjectData *obj = coo_DOMDocumentFragment();
   c_DOMDocumentFragment::cloneSet(obj);
   return obj;
 }
@@ -885,13 +875,8 @@ struct ObjectStaticCallbacks cw_DOMDocumentFragment = {
   c_DOMDocumentFragment::os_constant,
   c_DOMDocumentFragment::os_get_call_info
 };
-Object coo_DOMText() {
+ObjectData *coo_DOMText() {
   return NEWOBJ(c_DOMText)();
-}
-Object co_DOMText(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMText());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMText
 Variant c_DOMText::os_getInit(CStrRef s) {
@@ -948,7 +933,7 @@ void c_DOMText::destruct() {
   }
 }
 ObjectData *c_DOMText::cloneImpl() {
-  ObjectData *obj = coo_DOMText().detach();
+  ObjectData *obj = coo_DOMText();
   c_DOMText::cloneSet(obj);
   return obj;
 }
@@ -1201,13 +1186,8 @@ struct ObjectStaticCallbacks cw_DOMText = {
   c_DOMText::os_constant,
   c_DOMText::os_get_call_info
 };
-Object coo_DebuggerClient() {
+ObjectData *coo_DebuggerClient() {
   return NEWOBJ(c_DebuggerClient)();
-}
-Object co_DebuggerClient(CArrRef params, bool init /* = true */) {
-  Object r(coo_DebuggerClient());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DebuggerClient
 Variant c_DebuggerClient::os_getInit(CStrRef s) {
@@ -1293,7 +1273,7 @@ void c_DebuggerClient::destruct() {
   }
 }
 ObjectData *c_DebuggerClient::cloneImpl() {
-  ObjectData *obj = coo_DebuggerClient().detach();
+  ObjectData *obj = coo_DebuggerClient();
   c_DebuggerClient::cloneSet(obj);
   return obj;
 }
@@ -2225,13 +2205,8 @@ struct ObjectStaticCallbacks cw_DebuggerClient = {
   c_DebuggerClient::os_constant,
   c_DebuggerClient::os_get_call_info
 };
-Object coo_EncodingDetector() {
+ObjectData *coo_EncodingDetector() {
   return NEWOBJ(c_EncodingDetector)();
-}
-Object co_EncodingDetector(CArrRef params, bool init /* = true */) {
-  Object r(coo_EncodingDetector());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_EncodingDetector
 Variant c_EncodingDetector::os_getInit(CStrRef s) {
@@ -2288,7 +2263,7 @@ void c_EncodingDetector::destruct() {
   }
 }
 ObjectData *c_EncodingDetector::cloneImpl() {
-  ObjectData *obj = coo_EncodingDetector().detach();
+  ObjectData *obj = coo_EncodingDetector();
   c_EncodingDetector::cloneSet(obj);
   return obj;
 }
@@ -2484,13 +2459,8 @@ struct ObjectStaticCallbacks cw_EncodingDetector = {
   c_EncodingDetector::os_constant,
   c_EncodingDetector::os_get_call_info
 };
-Object coo_DOMCDATASection() {
+ObjectData *coo_DOMCDATASection() {
   return NEWOBJ(c_DOMCDATASection)();
-}
-Object co_DOMCDATASection(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMCDATASection());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMCDATASection
 Variant c_DOMCDATASection::os_getInit(CStrRef s) {
@@ -2547,7 +2517,7 @@ void c_DOMCDATASection::destruct() {
   }
 }
 ObjectData *c_DOMCDATASection::cloneImpl() {
-  ObjectData *obj = coo_DOMCDATASection().detach();
+  ObjectData *obj = coo_DOMCDATASection();
   c_DOMCDATASection::cloneSet(obj);
   return obj;
 }
@@ -2648,13 +2618,8 @@ struct ObjectStaticCallbacks cw_DOMCDATASection = {
   c_DOMCDATASection::os_constant,
   c_DOMCDATASection::os_get_call_info
 };
-Object coo_Locale() {
+ObjectData *coo_Locale() {
   return NEWOBJ(c_Locale)();
-}
-Object co_Locale(CArrRef params, bool init /* = true */) {
-  Object r(coo_Locale());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Locale
 Variant c_Locale::os_getInit(CStrRef s) {
@@ -2720,7 +2685,7 @@ void c_Locale::destruct() {
   }
 }
 ObjectData *c_Locale::cloneImpl() {
-  ObjectData *obj = coo_Locale().detach();
+  ObjectData *obj = coo_Locale();
   c_Locale::cloneSet(obj);
   return obj;
 }
@@ -2810,13 +2775,8 @@ struct ObjectStaticCallbacks cw_Locale = {
   c_Locale::os_constant,
   c_Locale::os_get_call_info
 };
-Object coo_DOMDocumentType() {
+ObjectData *coo_DOMDocumentType() {
   return NEWOBJ(c_DOMDocumentType)();
-}
-Object co_DOMDocumentType(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMDocumentType());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMDocumentType
 Variant c_DOMDocumentType::os_getInit(CStrRef s) {
@@ -2873,7 +2833,7 @@ void c_DOMDocumentType::destruct() {
   }
 }
 ObjectData *c_DOMDocumentType::cloneImpl() {
-  ObjectData *obj = coo_DOMDocumentType().detach();
+  ObjectData *obj = coo_DOMDocumentType();
   c_DOMDocumentType::cloneSet(obj);
   return obj;
 }
@@ -3055,13 +3015,8 @@ struct ObjectStaticCallbacks cw_DOMDocumentType = {
   c_DOMDocumentType::os_constant,
   c_DOMDocumentType::os_get_call_info
 };
-Object coo_SQLite3Stmt() {
+ObjectData *coo_SQLite3Stmt() {
   return NEWOBJ(c_SQLite3Stmt)();
-}
-Object co_SQLite3Stmt(CArrRef params, bool init /* = true */) {
-  Object r(coo_SQLite3Stmt());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SQLite3Stmt
 Variant c_SQLite3Stmt::os_getInit(CStrRef s) {
@@ -3118,7 +3073,7 @@ void c_SQLite3Stmt::destruct() {
   }
 }
 ObjectData *c_SQLite3Stmt::cloneImpl() {
-  ObjectData *obj = coo_SQLite3Stmt().detach();
+  ObjectData *obj = coo_SQLite3Stmt();
   c_SQLite3Stmt::cloneSet(obj);
   return obj;
 }
@@ -3417,13 +3372,8 @@ struct ObjectStaticCallbacks cw_SQLite3Stmt = {
   c_SQLite3Stmt::os_constant,
   c_SQLite3Stmt::os_get_call_info
 };
-Object coo_DOMNodeList() {
+ObjectData *coo_DOMNodeList() {
   return NEWOBJ(c_DOMNodeList)();
-}
-Object co_DOMNodeList(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMNodeList());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMNodeList
 Variant c_DOMNodeList::os_getInit(CStrRef s) {
@@ -3480,7 +3430,7 @@ void c_DOMNodeList::destruct() {
   }
 }
 ObjectData *c_DOMNodeList::cloneImpl() {
-  ObjectData *obj = coo_DOMNodeList().detach();
+  ObjectData *obj = coo_DOMNodeList();
   c_DOMNodeList::cloneSet(obj);
   return obj;
 }
@@ -3714,13 +3664,8 @@ struct ObjectStaticCallbacks cw_DOMNodeList = {
   c_DOMNodeList::os_constant,
   c_DOMNodeList::os_get_call_info
 };
-Object coo_Normalizer() {
+ObjectData *coo_Normalizer() {
   return NEWOBJ(c_Normalizer)();
-}
-Object co_Normalizer(CArrRef params, bool init /* = true */) {
-  Object r(coo_Normalizer());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Normalizer
 Variant c_Normalizer::os_getInit(CStrRef s) {
@@ -3803,7 +3748,7 @@ void c_Normalizer::destruct() {
   }
 }
 ObjectData *c_Normalizer::cloneImpl() {
-  ObjectData *obj = coo_Normalizer().detach();
+  ObjectData *obj = coo_Normalizer();
   c_Normalizer::cloneSet(obj);
   return obj;
 }
@@ -3947,13 +3892,8 @@ struct ObjectStaticCallbacks cw_Normalizer = {
   c_Normalizer::os_constant,
   c_Normalizer::os_get_call_info
 };
-Object coo_DOMCharacterData() {
+ObjectData *coo_DOMCharacterData() {
   return NEWOBJ(c_DOMCharacterData)();
-}
-Object co_DOMCharacterData(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMCharacterData());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMCharacterData
 Variant c_DOMCharacterData::os_getInit(CStrRef s) {
@@ -4010,7 +3950,7 @@ void c_DOMCharacterData::destruct() {
   }
 }
 ObjectData *c_DOMCharacterData::cloneImpl() {
-  ObjectData *obj = coo_DOMCharacterData().detach();
+  ObjectData *obj = coo_DOMCharacterData();
   c_DOMCharacterData::cloneSet(obj);
   return obj;
 }
@@ -4354,13 +4294,8 @@ struct ObjectStaticCallbacks cw_DOMCharacterData = {
   c_DOMCharacterData::os_constant,
   c_DOMCharacterData::os_get_call_info
 };
-Object coo_DOMEntityReference() {
+ObjectData *coo_DOMEntityReference() {
   return NEWOBJ(c_DOMEntityReference)();
-}
-Object co_DOMEntityReference(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMEntityReference());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMEntityReference
 Variant c_DOMEntityReference::os_getInit(CStrRef s) {
@@ -4417,7 +4352,7 @@ void c_DOMEntityReference::destruct() {
   }
 }
 ObjectData *c_DOMEntityReference::cloneImpl() {
-  ObjectData *obj = coo_DOMEntityReference().detach();
+  ObjectData *obj = coo_DOMEntityReference();
   c_DOMEntityReference::cloneSet(obj);
   return obj;
 }
@@ -4518,13 +4453,8 @@ struct ObjectStaticCallbacks cw_DOMEntityReference = {
   c_DOMEntityReference::os_constant,
   c_DOMEntityReference::os_get_call_info
 };
-Object coo_SimpleXMLElementIterator() {
+ObjectData *coo_SimpleXMLElementIterator() {
   return NEWOBJ(c_SimpleXMLElementIterator)();
-}
-Object co_SimpleXMLElementIterator(CArrRef params, bool init /* = true */) {
-  Object r(coo_SimpleXMLElementIterator());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SimpleXMLElementIterator
 Variant c_SimpleXMLElementIterator::os_getInit(CStrRef s) {
@@ -4581,7 +4511,7 @@ void c_SimpleXMLElementIterator::destruct() {
   }
 }
 ObjectData *c_SimpleXMLElementIterator::cloneImpl() {
-  ObjectData *obj = coo_SimpleXMLElementIterator().detach();
+  ObjectData *obj = coo_SimpleXMLElementIterator();
   c_SimpleXMLElementIterator::cloneSet(obj);
   return obj;
 }
@@ -4793,13 +4723,8 @@ struct ObjectStaticCallbacks cw_SimpleXMLElementIterator = {
   c_SimpleXMLElementIterator::os_constant,
   c_SimpleXMLElementIterator::os_get_call_info
 };
-Object coo_DateTimeZone() {
+ObjectData *coo_DateTimeZone() {
   return NEWOBJ(c_DateTimeZone)();
-}
-Object co_DateTimeZone(CArrRef params, bool init /* = true */) {
-  Object r(coo_DateTimeZone());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DateTimeZone
 Variant c_DateTimeZone::os_getInit(CStrRef s) {
@@ -4899,7 +4824,7 @@ void c_DateTimeZone::destruct() {
   }
 }
 ObjectData *c_DateTimeZone::cloneImpl() {
-  ObjectData *obj = coo_DateTimeZone().detach();
+  ObjectData *obj = coo_DateTimeZone();
   c_DateTimeZone::cloneSet(obj);
   return obj;
 }
@@ -5110,13 +5035,8 @@ struct ObjectStaticCallbacks cw_DateTimeZone = {
   c_DateTimeZone::os_constant,
   c_DateTimeZone::os_get_call_info
 };
-Object coo_DOMNodeIterator() {
+ObjectData *coo_DOMNodeIterator() {
   return NEWOBJ(c_DOMNodeIterator)();
-}
-Object co_DOMNodeIterator(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMNodeIterator());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMNodeIterator
 Variant c_DOMNodeIterator::os_getInit(CStrRef s) {
@@ -5173,7 +5093,7 @@ void c_DOMNodeIterator::destruct() {
   }
 }
 ObjectData *c_DOMNodeIterator::cloneImpl() {
-  ObjectData *obj = coo_DOMNodeIterator().detach();
+  ObjectData *obj = coo_DOMNodeIterator();
   c_DOMNodeIterator::cloneSet(obj);
   return obj;
 }
@@ -5385,13 +5305,8 @@ struct ObjectStaticCallbacks cw_DOMNodeIterator = {
   c_DOMNodeIterator::os_constant,
   c_DOMNodeIterator::os_get_call_info
 };
-Object coo_DOMImplementation() {
+ObjectData *coo_DOMImplementation() {
   return NEWOBJ(c_DOMImplementation)();
-}
-Object co_DOMImplementation(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMImplementation());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMImplementation
 Variant c_DOMImplementation::os_getInit(CStrRef s) {
@@ -5448,7 +5363,7 @@ void c_DOMImplementation::destruct() {
   }
 }
 ObjectData *c_DOMImplementation::cloneImpl() {
-  ObjectData *obj = coo_DOMImplementation().detach();
+  ObjectData *obj = coo_DOMImplementation();
   c_DOMImplementation::cloneSet(obj);
   return obj;
 }
@@ -5648,13 +5563,8 @@ struct ObjectStaticCallbacks cw_DOMImplementation = {
   c_DOMImplementation::os_constant,
   c_DOMImplementation::os_get_call_info
 };
-Object coo_SoapHeader() {
+ObjectData *coo_SoapHeader() {
   return NEWOBJ(c_SoapHeader)();
-}
-Object co_SoapHeader(CArrRef params, bool init /* = true */) {
-  Object r(coo_SoapHeader());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapHeader
 Variant c_SoapHeader::os_getInit(CStrRef s) {
@@ -5711,7 +5621,7 @@ void c_SoapHeader::destruct() {
   }
 }
 ObjectData *c_SoapHeader::cloneImpl() {
-  ObjectData *obj = coo_SoapHeader().detach();
+  ObjectData *obj = coo_SoapHeader();
   c_SoapHeader::cloneSet(obj);
   return obj;
 }
@@ -5842,13 +5752,8 @@ struct ObjectStaticCallbacks cw_SoapHeader = {
   c_SoapHeader::os_constant,
   c_SoapHeader::os_get_call_info
 };
-Object coo_DOMNotation() {
+ObjectData *coo_DOMNotation() {
   return NEWOBJ(c_DOMNotation)();
-}
-Object co_DOMNotation(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMNotation());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMNotation
 Variant c_DOMNotation::os_getInit(CStrRef s) {
@@ -5905,7 +5810,7 @@ void c_DOMNotation::destruct() {
   }
 }
 ObjectData *c_DOMNotation::cloneImpl() {
-  ObjectData *obj = coo_DOMNotation().detach();
+  ObjectData *obj = coo_DOMNotation();
   c_DOMNotation::cloneSet(obj);
   return obj;
 }
@@ -6087,13 +5992,8 @@ struct ObjectStaticCallbacks cw_DOMNotation = {
   c_DOMNotation::os_constant,
   c_DOMNotation::os_get_call_info
 };
-Object coo_DebuggerProxy() {
+ObjectData *coo_DebuggerProxy() {
   return NEWOBJ(c_DebuggerProxy)();
-}
-Object co_DebuggerProxy(CArrRef params, bool init /* = true */) {
-  Object r(coo_DebuggerProxy());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DebuggerProxy
 Variant c_DebuggerProxy::os_getInit(CStrRef s) {
@@ -6150,7 +6050,7 @@ void c_DebuggerProxy::destruct() {
   }
 }
 ObjectData *c_DebuggerProxy::cloneImpl() {
-  ObjectData *obj = coo_DebuggerProxy().detach();
+  ObjectData *obj = coo_DebuggerProxy();
   c_DebuggerProxy::cloneSet(obj);
   return obj;
 }
@@ -6296,13 +6196,8 @@ struct ObjectStaticCallbacks cw_DebuggerProxy = {
   c_DebuggerProxy::os_constant,
   c_DebuggerProxy::os_get_call_info
 };
-Object coo_Memcached() {
+ObjectData *coo_Memcached() {
   return NEWOBJ(c_Memcached)();
-}
-Object co_Memcached(CArrRef params, bool init /* = true */) {
-  Object r(coo_Memcached());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Memcached
 Variant c_Memcached::os_getInit(CStrRef s) {
@@ -6509,7 +6404,7 @@ void c_Memcached::destruct() {
   }
 }
 ObjectData *c_Memcached::cloneImpl() {
-  ObjectData *obj = coo_Memcached().detach();
+  ObjectData *obj = coo_Memcached();
   c_Memcached::cloneSet(obj);
   return obj;
 }
@@ -7846,13 +7741,8 @@ struct ObjectStaticCallbacks cw_Memcached = {
   c_Memcached::os_constant,
   c_Memcached::os_get_call_info
 };
-Object coo_XMLReader() {
+ObjectData *coo_XMLReader() {
   return NEWOBJ(c_XMLReader)();
-}
-Object co_XMLReader(CArrRef params, bool init /* = true */) {
-  Object r(coo_XMLReader());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_XMLReader
 Variant c_XMLReader::os_getInit(CStrRef s) {
@@ -7972,7 +7862,7 @@ void c_XMLReader::destruct() {
   }
 }
 ObjectData *c_XMLReader::cloneImpl() {
-  ObjectData *obj = coo_XMLReader().detach();
+  ObjectData *obj = coo_XMLReader();
   c_XMLReader::cloneSet(obj);
   return obj;
 }
@@ -8798,13 +8688,8 @@ struct ObjectStaticCallbacks cw_XMLReader = {
   c_XMLReader::os_constant,
   c_XMLReader::os_get_call_info
 };
-Object coo_DOMComment() {
+ObjectData *coo_DOMComment() {
   return NEWOBJ(c_DOMComment)();
-}
-Object co_DOMComment(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMComment());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMComment
 Variant c_DOMComment::os_getInit(CStrRef s) {
@@ -8861,7 +8746,7 @@ void c_DOMComment::destruct() {
   }
 }
 ObjectData *c_DOMComment::cloneImpl() {
-  ObjectData *obj = coo_DOMComment().detach();
+  ObjectData *obj = coo_DOMComment();
   c_DOMComment::cloneSet(obj);
   return obj;
 }
@@ -8968,13 +8853,8 @@ struct ObjectStaticCallbacks cw_DOMComment = {
   c_DOMComment::os_constant,
   c_DOMComment::os_get_call_info
 };
-Object coo_SQLite3() {
+ObjectData *coo_SQLite3() {
   return NEWOBJ(c_SQLite3)();
-}
-Object co_SQLite3(CArrRef params, bool init /* = true */) {
-  Object r(coo_SQLite3());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SQLite3
 Variant c_SQLite3::os_getInit(CStrRef s) {
@@ -9031,7 +8911,7 @@ void c_SQLite3::destruct() {
   }
 }
 ObjectData *c_SQLite3::cloneImpl() {
-  ObjectData *obj = coo_SQLite3().detach();
+  ObjectData *obj = coo_SQLite3();
   c_SQLite3::cloneSet(obj);
   return obj;
 }
@@ -9599,13 +9479,8 @@ struct ObjectStaticCallbacks cw_SQLite3 = {
   c_SQLite3::os_constant,
   c_SQLite3::os_get_call_info
 };
-Object coo_DOMAttr() {
+ObjectData *coo_DOMAttr() {
   return NEWOBJ(c_DOMAttr)();
-}
-Object co_DOMAttr(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMAttr());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMAttr
 Variant c_DOMAttr::os_getInit(CStrRef s) {
@@ -9662,7 +9537,7 @@ void c_DOMAttr::destruct() {
   }
 }
 ObjectData *c_DOMAttr::cloneImpl() {
-  ObjectData *obj = coo_DOMAttr().detach();
+  ObjectData *obj = coo_DOMAttr();
   c_DOMAttr::cloneSet(obj);
   return obj;
 }
@@ -9888,13 +9763,8 @@ struct ObjectStaticCallbacks cw_DOMAttr = {
   c_DOMAttr::os_constant,
   c_DOMAttr::os_get_call_info
 };
-Object coo_SoapVar() {
+ObjectData *coo_SoapVar() {
   return NEWOBJ(c_SoapVar)();
-}
-Object co_SoapVar(CArrRef params, bool init /* = true */) {
-  Object r(coo_SoapVar());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapVar
 Variant c_SoapVar::os_getInit(CStrRef s) {
@@ -9951,7 +9821,7 @@ void c_SoapVar::destruct() {
   }
 }
 ObjectData *c_SoapVar::cloneImpl() {
-  ObjectData *obj = coo_SoapVar().detach();
+  ObjectData *obj = coo_SoapVar();
   c_SoapVar::cloneSet(obj);
   return obj;
 }
@@ -10091,13 +9961,8 @@ struct ObjectStaticCallbacks cw_SoapVar = {
   c_SoapVar::os_constant,
   c_SoapVar::os_get_call_info
 };
-Object coo_DOMNamedNodeMap() {
+ObjectData *coo_DOMNamedNodeMap() {
   return NEWOBJ(c_DOMNamedNodeMap)();
-}
-Object co_DOMNamedNodeMap(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMNamedNodeMap());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMNamedNodeMap
 Variant c_DOMNamedNodeMap::os_getInit(CStrRef s) {
@@ -10154,7 +10019,7 @@ void c_DOMNamedNodeMap::destruct() {
   }
 }
 ObjectData *c_DOMNamedNodeMap::cloneImpl() {
-  ObjectData *obj = coo_DOMNamedNodeMap().detach();
+  ObjectData *obj = coo_DOMNamedNodeMap();
   c_DOMNamedNodeMap::cloneSet(obj);
   return obj;
 }
@@ -10454,13 +10319,8 @@ struct ObjectStaticCallbacks cw_DOMNamedNodeMap = {
   c_DOMNamedNodeMap::os_constant,
   c_DOMNamedNodeMap::os_get_call_info
 };
-Object coo_SQLite3Result() {
+ObjectData *coo_SQLite3Result() {
   return NEWOBJ(c_SQLite3Result)();
-}
-Object co_SQLite3Result(CArrRef params, bool init /* = true */) {
-  Object r(coo_SQLite3Result());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SQLite3Result
 Variant c_SQLite3Result::os_getInit(CStrRef s) {
@@ -10517,7 +10377,7 @@ void c_SQLite3Result::destruct() {
   }
 }
 ObjectData *c_SQLite3Result::cloneImpl() {
-  ObjectData *obj = coo_SQLite3Result().detach();
+  ObjectData *obj = coo_SQLite3Result();
   c_SQLite3Result::cloneSet(obj);
   return obj;
 }
@@ -10773,13 +10633,8 @@ struct ObjectStaticCallbacks cw_SQLite3Result = {
   c_SQLite3Result::os_constant,
   c_SQLite3Result::os_get_call_info
 };
-Object coo_SimpleXMLElement() {
+ObjectData *coo_SimpleXMLElement() {
   return NEWOBJ(c_SimpleXMLElement)();
-}
-Object co_SimpleXMLElement(CArrRef params, bool init /* = true */) {
-  Object r(coo_SimpleXMLElement());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SimpleXMLElement
 Variant c_SimpleXMLElement::os_getInit(CStrRef s) {
@@ -10836,7 +10691,7 @@ void c_SimpleXMLElement::destruct() {
   }
 }
 ObjectData *c_SimpleXMLElement::cloneImpl() {
-  ObjectData *obj = coo_SimpleXMLElement().detach();
+  ObjectData *obj = coo_SimpleXMLElement();
   c_SimpleXMLElement::cloneSet(obj);
   return obj;
 }
@@ -11617,13 +11472,8 @@ struct ObjectStaticCallbacks cw_SimpleXMLElement = {
   c_SimpleXMLElement::os_constant,
   c_SimpleXMLElement::os_get_call_info
 };
-Object coo_Memcache() {
+ObjectData *coo_Memcache() {
   return NEWOBJ(c_Memcache)();
-}
-Object co_Memcache(CArrRef params, bool init /* = true */) {
-  Object r(coo_Memcache());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Memcache
 Variant c_Memcache::os_getInit(CStrRef s) {
@@ -11680,7 +11530,7 @@ void c_Memcache::destruct() {
   }
 }
 ObjectData *c_Memcache::cloneImpl() {
-  ObjectData *obj = coo_Memcache().detach();
+  ObjectData *obj = coo_Memcache();
   c_Memcache::cloneSet(obj);
   return obj;
 }
@@ -12475,13 +12325,8 @@ struct ObjectStaticCallbacks cw_Memcache = {
   c_Memcache::os_constant,
   c_Memcache::os_get_call_info
 };
-Object coo_DOMProcessingInstruction() {
+ObjectData *coo_DOMProcessingInstruction() {
   return NEWOBJ(c_DOMProcessingInstruction)();
-}
-Object co_DOMProcessingInstruction(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMProcessingInstruction());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMProcessingInstruction
 Variant c_DOMProcessingInstruction::os_getInit(CStrRef s) {
@@ -12538,7 +12383,7 @@ void c_DOMProcessingInstruction::destruct() {
   }
 }
 ObjectData *c_DOMProcessingInstruction::cloneImpl() {
-  ObjectData *obj = coo_DOMProcessingInstruction().detach();
+  ObjectData *obj = coo_DOMProcessingInstruction();
   c_DOMProcessingInstruction::cloneSet(obj);
   return obj;
 }
@@ -12740,13 +12585,8 @@ struct ObjectStaticCallbacks cw_DOMProcessingInstruction = {
   c_DOMProcessingInstruction::os_constant,
   c_DOMProcessingInstruction::os_get_call_info
 };
-Object coo_EncodingMatch() {
+ObjectData *coo_EncodingMatch() {
   return NEWOBJ(c_EncodingMatch)();
-}
-Object co_EncodingMatch(CArrRef params, bool init /* = true */) {
-  Object r(coo_EncodingMatch());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_EncodingMatch
 Variant c_EncodingMatch::os_getInit(CStrRef s) {
@@ -12803,7 +12643,7 @@ void c_EncodingMatch::destruct() {
   }
 }
 ObjectData *c_EncodingMatch::cloneImpl() {
-  ObjectData *obj = coo_EncodingMatch().detach();
+  ObjectData *obj = coo_EncodingMatch();
   c_EncodingMatch::cloneSet(obj);
   return obj;
 }
@@ -13011,13 +12851,8 @@ struct ObjectStaticCallbacks cw_EncodingMatch = {
   c_EncodingMatch::os_constant,
   c_EncodingMatch::os_get_call_info
 };
-Object coo_PDOStatement() {
+ObjectData *coo_PDOStatement() {
   return NEWOBJ(c_PDOStatement)();
-}
-Object co_PDOStatement(CArrRef params, bool init /* = true */) {
-  Object r(coo_PDOStatement());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_PDOStatement
 Variant c_PDOStatement::os_getInit(CStrRef s) {
@@ -13074,7 +12909,7 @@ void c_PDOStatement::destruct() {
   }
 }
 ObjectData *c_PDOStatement::cloneImpl() {
-  ObjectData *obj = coo_PDOStatement().detach();
+  ObjectData *obj = coo_PDOStatement();
   c_PDOStatement::cloneSet(obj);
   return obj;
 }
@@ -13931,13 +13766,8 @@ struct ObjectStaticCallbacks cw_PDOStatement = {
   c_PDOStatement::os_constant,
   c_PDOStatement::os_get_call_info
 };
-Object coo_SoapClient() {
+ObjectData *coo_SoapClient() {
   return NEWOBJ(c_SoapClient)();
-}
-Object co_SoapClient(CArrRef params, bool init /* = true */) {
-  Object r(coo_SoapClient());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapClient
 Variant c_SoapClient::os_getInit(CStrRef s) {
@@ -13994,7 +13824,7 @@ void c_SoapClient::destruct() {
   }
 }
 ObjectData *c_SoapClient::cloneImpl() {
-  ObjectData *obj = coo_SoapClient().detach();
+  ObjectData *obj = coo_SoapClient();
   c_SoapClient::cloneSet(obj);
   return obj;
 }
@@ -14460,13 +14290,8 @@ struct ObjectStaticCallbacks cw_SoapClient = {
   c_SoapClient::os_constant,
   c_SoapClient::os_get_call_info
 };
-Object coo_SoapParam() {
+ObjectData *coo_SoapParam() {
   return NEWOBJ(c_SoapParam)();
-}
-Object co_SoapParam(CArrRef params, bool init /* = true */) {
-  Object r(coo_SoapParam());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapParam
 Variant c_SoapParam::os_getInit(CStrRef s) {
@@ -14523,7 +14348,7 @@ void c_SoapParam::destruct() {
   }
 }
 ObjectData *c_SoapParam::cloneImpl() {
-  ObjectData *obj = coo_SoapParam().detach();
+  ObjectData *obj = coo_SoapParam();
   c_SoapParam::cloneSet(obj);
   return obj;
 }
@@ -14627,13 +14452,8 @@ struct ObjectStaticCallbacks cw_SoapParam = {
   c_SoapParam::os_constant,
   c_SoapParam::os_get_call_info
 };
-Object coo_DateTime() {
+ObjectData *coo_DateTime() {
   return NEWOBJ(c_DateTime)();
-}
-Object co_DateTime(CArrRef params, bool init /* = true */) {
-  Object r(coo_DateTime());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DateTime
 Variant c_DateTime::os_getInit(CStrRef s) {
@@ -14722,7 +14542,7 @@ void c_DateTime::destruct() {
   }
 }
 ObjectData *c_DateTime::cloneImpl() {
-  ObjectData *obj = coo_DateTime().detach();
+  ObjectData *obj = coo_DateTime();
   c_DateTime::cloneSet(obj);
   return obj;
 }
@@ -15080,13 +14900,8 @@ struct ObjectStaticCallbacks cw_DateTime = {
   c_DateTime::os_constant,
   c_DateTime::os_get_call_info
 };
-Object coo_Collator() {
+ObjectData *coo_Collator() {
   return NEWOBJ(c_Collator)();
-}
-Object co_Collator(CArrRef params, bool init /* = true */) {
-  Object r(coo_Collator());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Collator
 Variant c_Collator::os_getInit(CStrRef s) {
@@ -15208,7 +15023,7 @@ void c_Collator::destruct() {
   }
 }
 ObjectData *c_Collator::cloneImpl() {
-  ObjectData *obj = coo_Collator().detach();
+  ObjectData *obj = coo_Collator();
   c_Collator::cloneSet(obj);
   return obj;
 }
@@ -15660,13 +15475,8 @@ struct ObjectStaticCallbacks cw_Collator = {
   c_Collator::os_constant,
   c_Collator::os_get_call_info
 };
-Object coo_PDO() {
+ObjectData *coo_PDO() {
   return NEWOBJ(c_PDO)();
-}
-Object co_PDO(CArrRef params, bool init /* = true */) {
-  Object r(coo_PDO());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_PDO
 Variant c_PDO::os_getInit(CStrRef s) {
@@ -15955,7 +15765,7 @@ void c_PDO::destruct() {
   }
 }
 ObjectData *c_PDO::cloneImpl() {
-  ObjectData *obj = coo_PDO().detach();
+  ObjectData *obj = coo_PDO();
   c_PDO::cloneSet(obj);
   return obj;
 }
@@ -16491,13 +16301,8 @@ struct ObjectStaticCallbacks cw_PDO = {
   c_PDO::os_constant,
   c_PDO::os_get_call_info
 };
-Object coo_ImageSprite() {
+ObjectData *coo_ImageSprite() {
   return NEWOBJ(c_ImageSprite)();
-}
-Object co_ImageSprite(CArrRef params, bool init /* = true */) {
-  Object r(coo_ImageSprite());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ImageSprite
 Variant c_ImageSprite::os_getInit(CStrRef s) {
@@ -16554,7 +16359,7 @@ void c_ImageSprite::destruct() {
   }
 }
 ObjectData *c_ImageSprite::cloneImpl() {
-  ObjectData *obj = coo_ImageSprite().detach();
+  ObjectData *obj = coo_ImageSprite();
   c_ImageSprite::cloneSet(obj);
   return obj;
 }
@@ -16978,13 +16783,8 @@ struct ObjectStaticCallbacks cw_ImageSprite = {
   c_ImageSprite::os_constant,
   c_ImageSprite::os_get_call_info
 };
-Object coo_DOMEntity() {
+ObjectData *coo_DOMEntity() {
   return NEWOBJ(c_DOMEntity)();
-}
-Object co_DOMEntity(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMEntity());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMEntity
 Variant c_DOMEntity::os_getInit(CStrRef s) {
@@ -17041,7 +16841,7 @@ void c_DOMEntity::destruct() {
   }
 }
 ObjectData *c_DOMEntity::cloneImpl() {
-  ObjectData *obj = coo_DOMEntity().detach();
+  ObjectData *obj = coo_DOMEntity();
   c_DOMEntity::cloneSet(obj);
   return obj;
 }
@@ -17223,13 +17023,8 @@ struct ObjectStaticCallbacks cw_DOMEntity = {
   c_DOMEntity::os_constant,
   c_DOMEntity::os_get_call_info
 };
-Object coo_XMLWriter() {
+ObjectData *coo_XMLWriter() {
   return NEWOBJ(c_XMLWriter)();
-}
-Object co_XMLWriter(CArrRef params, bool init /* = true */) {
-  Object r(coo_XMLWriter());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_XMLWriter
 Variant c_XMLWriter::os_getInit(CStrRef s) {
@@ -17286,7 +17081,7 @@ void c_XMLWriter::destruct() {
   }
 }
 ObjectData *c_XMLWriter::cloneImpl() {
-  ObjectData *obj = coo_XMLWriter().detach();
+  ObjectData *obj = coo_XMLWriter();
   c_XMLWriter::cloneSet(obj);
   return obj;
 }
@@ -18636,13 +18431,8 @@ struct ObjectStaticCallbacks cw_XMLWriter = {
   c_XMLWriter::os_constant,
   c_XMLWriter::os_get_call_info
 };
-Object coo_DOMException() {
+ObjectData *coo_DOMException() {
   return NEWOBJ(c_DOMException)();
-}
-Object co_DOMException(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMException());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMException
 Variant c_DOMException::os_getInit(CStrRef s) {
@@ -18699,7 +18489,7 @@ void c_DOMException::destruct() {
   }
 }
 ObjectData *c_DOMException::cloneImpl() {
-  ObjectData *obj = coo_DOMException().detach();
+  ObjectData *obj = coo_DOMException();
   c_DOMException::cloneSet(obj);
   return obj;
 }
@@ -18815,13 +18605,8 @@ struct ObjectStaticCallbacks cw_DOMException = {
   c_DOMException::os_constant,
   c_DOMException::os_get_call_info
 };
-Object coo_DOMXPath() {
+ObjectData *coo_DOMXPath() {
   return NEWOBJ(c_DOMXPath)();
-}
-Object co_DOMXPath(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMXPath());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMXPath
 Variant c_DOMXPath::os_getInit(CStrRef s) {
@@ -18878,7 +18663,7 @@ void c_DOMXPath::destruct() {
   }
 }
 ObjectData *c_DOMXPath::cloneImpl() {
-  ObjectData *obj = coo_DOMXPath().detach();
+  ObjectData *obj = coo_DOMXPath();
   c_DOMXPath::cloneSet(obj);
   return obj;
 }
@@ -19203,13 +18988,8 @@ struct ObjectStaticCallbacks cw_DOMXPath = {
   c_DOMXPath::os_constant,
   c_DOMXPath::os_get_call_info
 };
-Object coo_SoapServer() {
+ObjectData *coo_SoapServer() {
   return NEWOBJ(c_SoapServer)();
-}
-Object co_SoapServer(CArrRef params, bool init /* = true */) {
-  Object r(coo_SoapServer());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapServer
 Variant c_SoapServer::os_getInit(CStrRef s) {
@@ -19266,7 +19046,7 @@ void c_SoapServer::destruct() {
   }
 }
 ObjectData *c_SoapServer::cloneImpl() {
-  ObjectData *obj = coo_SoapServer().detach();
+  ObjectData *obj = coo_SoapServer();
   c_SoapServer::cloneSet(obj);
   return obj;
 }
@@ -19633,13 +19413,8 @@ struct ObjectStaticCallbacks cw_SoapServer = {
   c_SoapServer::os_constant,
   c_SoapServer::os_get_call_info
 };
-Object coo_DOMNode() {
+ObjectData *coo_DOMNode() {
   return NEWOBJ(c_DOMNode)();
-}
-Object co_DOMNode(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMNode());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMNode
 Variant c_DOMNode::os_getInit(CStrRef s) {
@@ -19696,7 +19471,7 @@ void c_DOMNode::destruct() {
   }
 }
 ObjectData *c_DOMNode::cloneImpl() {
-  ObjectData *obj = coo_DOMNode().detach();
+  ObjectData *obj = coo_DOMNode();
   c_DOMNode::cloneSet(obj);
   return obj;
 }
@@ -20392,13 +20167,8 @@ struct ObjectStaticCallbacks cw_DOMNode = {
   c_DOMNode::os_constant,
   c_DOMNode::os_get_call_info
 };
-Object coo_SpoofChecker() {
+ObjectData *coo_SpoofChecker() {
   return NEWOBJ(c_SpoofChecker)();
-}
-Object co_SpoofChecker(CArrRef params, bool init /* = true */) {
-  Object r(coo_SpoofChecker());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SpoofChecker
 Variant c_SpoofChecker::os_getInit(CStrRef s) {
@@ -20481,7 +20251,7 @@ void c_SpoofChecker::destruct() {
   }
 }
 ObjectData *c_SpoofChecker::cloneImpl() {
-  ObjectData *obj = coo_SpoofChecker().detach();
+  ObjectData *obj = coo_SpoofChecker();
   c_SpoofChecker::cloneSet(obj);
   return obj;
 }
@@ -20703,13 +20473,8 @@ struct ObjectStaticCallbacks cw_SpoofChecker = {
   c_SpoofChecker::os_constant,
   c_SpoofChecker::os_get_call_info
 };
-Object coo_DOMDocument() {
+ObjectData *coo_DOMDocument() {
   return NEWOBJ(c_DOMDocument)();
-}
-Object co_DOMDocument(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMDocument());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMDocument
 Variant c_DOMDocument::os_getInit(CStrRef s) {
@@ -20766,7 +20531,7 @@ void c_DOMDocument::destruct() {
   }
 }
 ObjectData *c_DOMDocument::cloneImpl() {
-  ObjectData *obj = coo_DOMDocument().detach();
+  ObjectData *obj = coo_DOMDocument();
   c_DOMDocument::cloneSet(obj);
   return obj;
 }
@@ -21884,13 +21649,8 @@ struct ObjectStaticCallbacks cw_DOMDocument = {
   c_DOMDocument::os_constant,
   c_DOMDocument::os_get_call_info
 };
-Object coo_LibXMLError() {
+ObjectData *coo_LibXMLError() {
   return NEWOBJ(c_LibXMLError)();
-}
-Object co_LibXMLError(CArrRef params, bool init /* = true */) {
-  Object r(coo_LibXMLError());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LibXMLError
 Variant c_LibXMLError::os_getInit(CStrRef s) {
@@ -21947,7 +21707,7 @@ void c_LibXMLError::destruct() {
   }
 }
 ObjectData *c_LibXMLError::cloneImpl() {
-  ObjectData *obj = coo_LibXMLError().detach();
+  ObjectData *obj = coo_LibXMLError();
   c_LibXMLError::cloneSet(obj);
   return obj;
 }
@@ -22037,13 +21797,8 @@ struct ObjectStaticCallbacks cw_LibXMLError = {
   c_LibXMLError::os_constant,
   c_LibXMLError::os_get_call_info
 };
-Object coo_SoapFault() {
+ObjectData *coo_SoapFault() {
   return NEWOBJ(c_SoapFault)();
-}
-Object co_SoapFault(CArrRef params, bool init /* = true */) {
-  Object r(coo_SoapFault());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapFault
 Variant c_SoapFault::os_getInit(CStrRef s) {
@@ -22100,7 +21855,7 @@ void c_SoapFault::destruct() {
   }
 }
 ObjectData *c_SoapFault::cloneImpl() {
-  ObjectData *obj = coo_SoapFault().detach();
+  ObjectData *obj = coo_SoapFault();
   c_SoapFault::cloneSet(obj);
   return obj;
 }
@@ -22264,13 +22019,8 @@ struct ObjectStaticCallbacks cw_SoapFault = {
   c_SoapFault::os_constant,
   c_SoapFault::os_get_call_info
 };
-Object coo_DOMElement() {
+ObjectData *coo_DOMElement() {
   return NEWOBJ(c_DOMElement)();
-}
-Object co_DOMElement(CArrRef params, bool init /* = true */) {
-  Object r(coo_DOMElement());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMElement
 Variant c_DOMElement::os_getInit(CStrRef s) {
@@ -22327,7 +22077,7 @@ void c_DOMElement::destruct() {
   }
 }
 ObjectData *c_DOMElement::cloneImpl() {
-  ObjectData *obj = coo_DOMElement().detach();
+  ObjectData *obj = coo_DOMElement();
   c_DOMElement::cloneSet(obj);
   return obj;
 }
@@ -23234,12 +22984,13 @@ Variant get_builtin_class_var_init(const char *s, const char *var) {
   }
   return throw_missing_class(s);
 }
-Object create_builtin_object_only_no_init(const char *s, ObjectData* root /* = NULL*/) {
+ObjectData *create_builtin_object_only_no_init(const char *s, ObjectData* root /* = NULL*/) {
   const hashNodeCTD *p = findCTD(s, hash_string(s));
   if (p) {
-    return ((Object(*)())(p->ptr2))();
+    return ((ObjectData*(*)())(p->ptr2))();
   }
-  return throw_missing_class(s);
+  throw_missing_class(s);
+  return 0;
 }
 Object create_builtin_object_only(const char *s, ObjectData* root /* = NULL*/) {
   Object r(create_builtin_object_only_no_init(s, root));

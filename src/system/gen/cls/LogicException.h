@@ -63,8 +63,7 @@ class c_LogicException : public c_Exception {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_LogicException;
-Object co_LogicException(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_LogicException() NEVER_INLINE;
+ObjectData *coo_LogicException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

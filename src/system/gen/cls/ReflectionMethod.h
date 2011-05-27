@@ -101,8 +101,7 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   DECLARE_METHOD_INVOKE_HELPERS(isabstract);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionMethod;
-Object co_ReflectionMethod(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_ReflectionMethod() NEVER_INLINE;
+ObjectData *coo_ReflectionMethod() NEVER_INLINE;
 extern const int64 q_ReflectionMethod_IS_STATIC;
 extern const int64 q_ReflectionMethod_IS_PUBLIC;
 extern const int64 q_ReflectionMethod_IS_PROTECTED;

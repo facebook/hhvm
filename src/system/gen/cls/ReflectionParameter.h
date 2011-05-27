@@ -93,8 +93,7 @@ class c_ReflectionParameter : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(ispassedbyreference);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionParameter;
-Object co_ReflectionParameter(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_ReflectionParameter() NEVER_INLINE;
+ObjectData *coo_ReflectionParameter() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

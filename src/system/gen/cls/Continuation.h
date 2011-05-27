@@ -106,8 +106,7 @@ class c_Continuation : public c_Closure {
   DECLARE_METHOD_INVOKE_HELPERS(update);
 };
 extern struct ObjectStaticCallbacks cw_Continuation;
-Object co_Continuation(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_Continuation() NEVER_INLINE;
+ObjectData *coo_Continuation() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

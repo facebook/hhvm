@@ -63,8 +63,7 @@ class c_ReflectionException : public c_Exception {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_ReflectionException;
-Object co_ReflectionException(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_ReflectionException() NEVER_INLINE;
+ObjectData *coo_ReflectionException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

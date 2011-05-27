@@ -87,8 +87,7 @@ class c_DirectoryIterator : public c_SplFileInfo {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_DirectoryIterator;
-Object co_DirectoryIterator(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_DirectoryIterator() NEVER_INLINE;
+ObjectData *coo_DirectoryIterator() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

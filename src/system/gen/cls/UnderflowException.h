@@ -63,8 +63,7 @@ class c_UnderflowException : public c_RuntimeException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_UnderflowException;
-Object co_UnderflowException(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_UnderflowException() NEVER_INLINE;
+ObjectData *coo_UnderflowException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

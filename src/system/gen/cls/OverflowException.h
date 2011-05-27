@@ -63,8 +63,7 @@ class c_OverflowException : public c_RuntimeException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_OverflowException;
-Object co_OverflowException(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_OverflowException() NEVER_INLINE;
+ObjectData *coo_OverflowException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

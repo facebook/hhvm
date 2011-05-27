@@ -77,8 +77,7 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   DECLARE_METHOD_INVOKE_HELPERS(invoke);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionFunction;
-Object co_ReflectionFunction(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_ReflectionFunction() NEVER_INLINE;
+ObjectData *coo_ReflectionFunction() NEVER_INLINE;
 extern const int64 q_ReflectionFunction_IS_DEPRECATED;
 
 ///////////////////////////////////////////////////////////////////////////////

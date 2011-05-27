@@ -83,8 +83,7 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_RecursiveIteratorIterator;
-Object co_RecursiveIteratorIterator(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_RecursiveIteratorIterator() NEVER_INLINE;
+ObjectData *coo_RecursiveIteratorIterator() NEVER_INLINE;
 extern const int64 q_RecursiveIteratorIterator_LEAVES_ONLY;
 extern const int64 q_RecursiveIteratorIterator_SELF_FIRST;
 extern const int64 q_RecursiveIteratorIterator_CHILD_FIRST;

@@ -50,13 +50,13 @@ Variant Object::toKey() const {
     : String();
 }
 
-Object Object::CreateDummy(Object(*cooFunc)()) {
+Object Object::CreateDummy(ObjectData*(*cooFunc)()) {
   Object r(cooFunc());
   r.get()->setDummy();
   return r;
 }
 
-Object Object::CreateDummy(Object(*cooFunc)(ObjectData *)) {
+Object Object::CreateDummy(ObjectData*(*cooFunc)(ObjectData *)) {
   Object r(cooFunc(NULL));
   r.get()->setDummy();
   return r;

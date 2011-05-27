@@ -63,8 +63,7 @@ class c_RangeException : public c_RuntimeException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_RangeException;
-Object co_RangeException(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_RangeException() NEVER_INLINE;
+ObjectData *coo_RangeException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

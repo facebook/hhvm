@@ -123,8 +123,7 @@ class c_SplFileInfo : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(gettype);
 };
 extern struct ObjectStaticCallbacks cw_SplFileInfo;
-Object co_SplFileInfo(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_SplFileInfo() NEVER_INLINE;
+ObjectData *coo_SplFileInfo() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

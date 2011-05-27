@@ -75,8 +75,7 @@ class c_Directory : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_Directory;
-Object co_Directory(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_Directory() NEVER_INLINE;
+ObjectData *coo_Directory() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

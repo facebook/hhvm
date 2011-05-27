@@ -128,8 +128,7 @@ class c_SplFileObject : public c_SplFileInfo {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_SplFileObject;
-Object co_SplFileObject(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_SplFileObject() NEVER_INLINE;
+ObjectData *coo_SplFileObject() NEVER_INLINE;
 extern const int64 q_SplFileObject_DROP_NEW_LINE;
 extern const int64 q_SplFileObject_READ_AHEAD;
 extern const int64 q_SplFileObject_SKIP_EMPTY;

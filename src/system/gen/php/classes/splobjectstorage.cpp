@@ -135,7 +135,7 @@ bool c_SplObjectStorage::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_SplObjectStorage::cloneImpl() {
-  ObjectData *obj = coo_SplObjectStorage().detach();
+  ObjectData *obj = coo_SplObjectStorage();
   c_SplObjectStorage::cloneSet(obj);
   return obj;
 }
@@ -525,13 +525,8 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
   }
 }
 namespace hphp_impl_splitter {}
-Object coo_SplObjectStorage() {
+ObjectData *coo_SplObjectStorage() {
   return NEWOBJ(c_SplObjectStorage)();
-}
-Object co_SplObjectStorage(CArrRef params, bool init /* = true */) {
-  Object r(coo_SplObjectStorage());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 Variant pm_php$classes$splobjectstorage_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/splobjectstorage.php, pm_php$classes$splobjectstorage_php);

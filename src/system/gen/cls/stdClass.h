@@ -62,8 +62,7 @@ class c_stdClass : public ExtObjectData {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_stdClass;
-Object co_stdClass(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_stdClass() NEVER_INLINE;
+ObjectData *coo_stdClass() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

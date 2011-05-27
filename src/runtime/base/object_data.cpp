@@ -110,7 +110,7 @@ Variant ObjectData::ifa_dummy(MethodCallPackage &mcp, int count,
                               INVOKE_FEW_ARGS_IMPL_ARGS,
                               Variant (*ifa)(MethodCallPackage &mcp, int count,
                                              INVOKE_FEW_ARGS_IMPL_ARGS),
-                              Object (*coo)(ObjectData*)) {
+                              ObjectData *(*coo)(ObjectData*)) {
   Object obj(Object::CreateDummy(coo));
   mcp.obj = obj.get();
   return ifa(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS);
@@ -119,7 +119,7 @@ Variant ObjectData::ifa_dummy(MethodCallPackage &mcp, int count,
 Variant ObjectData::i_dummy(MethodCallPackage &mcp, CArrRef params,
                             Variant (*i)(MethodCallPackage &mcp,
                                          CArrRef params),
-                              Object (*coo)(ObjectData*)) {
+                            ObjectData *(*coo)(ObjectData*)) {
   Object obj(Object::CreateDummy(coo));
   mcp.obj = obj.get();
   return i(mcp, params);
@@ -129,7 +129,7 @@ Variant ObjectData::ifa_dummy(MethodCallPackage &mcp, int count,
                               INVOKE_FEW_ARGS_IMPL_ARGS,
                               Variant (*ifa)(MethodCallPackage &mcp, int count,
                                              INVOKE_FEW_ARGS_IMPL_ARGS),
-                              Object (*coo)()) {
+                              ObjectData *(*coo)()) {
   Object obj(Object::CreateDummy(coo));
   mcp.obj = obj.get();
   return ifa(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS);
@@ -138,7 +138,7 @@ Variant ObjectData::ifa_dummy(MethodCallPackage &mcp, int count,
 Variant ObjectData::i_dummy(MethodCallPackage &mcp, CArrRef params,
                             Variant (*i)(MethodCallPackage &mcp,
                                          CArrRef params),
-                              Object (*coo)()) {
+                            ObjectData *(*coo)()) {
   Object obj(Object::CreateDummy(coo));
   mcp.obj = obj.get();
   return i(mcp, params);

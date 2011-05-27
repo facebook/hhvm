@@ -132,7 +132,7 @@ bool c_SplFileObject::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_SplFileObject::cloneImpl() {
-  ObjectData *obj = coo_SplFileObject().detach();
+  ObjectData *obj = coo_SplFileObject();
   c_SplFileObject::cloneSet(obj);
   return obj;
 }
@@ -1295,7 +1295,7 @@ bool c_SplFileInfo::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_SplFileInfo::cloneImpl() {
-  ObjectData *obj = coo_SplFileInfo().detach();
+  ObjectData *obj = coo_SplFileInfo();
   c_SplFileInfo::cloneSet(obj);
   return obj;
 }
@@ -2252,21 +2252,11 @@ void c_SplFileInfo::t_setinfoclass(CVarRef v_class_name //  = NAMVAR(s_sys_svs91
   x_hphp_splfileinfo_setinfoclass(GET_THIS_TYPED(SplFileInfo), toString(v_class_name));
 }
 namespace hphp_impl_splitter {}
-Object coo_SplFileObject() {
+ObjectData *coo_SplFileObject() {
   return NEWOBJ(c_SplFileObject)();
 }
-Object co_SplFileObject(CArrRef params, bool init /* = true */) {
-  Object r(coo_SplFileObject());
-  r.get()->dynCreate(params, init);
-  return r;
-}
-Object coo_SplFileInfo() {
+ObjectData *coo_SplFileInfo() {
   return NEWOBJ(c_SplFileInfo)();
-}
-Object co_SplFileInfo(CArrRef params, bool init /* = true */) {
-  Object r(coo_SplFileInfo());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 Variant pm_php$classes$splfile_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/splfile.php, pm_php$classes$splfile_php);

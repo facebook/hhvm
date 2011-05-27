@@ -85,8 +85,7 @@ class c_SplObjectStorage : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_SplObjectStorage;
-Object co_SplObjectStorage(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_SplObjectStorage() NEVER_INLINE;
+ObjectData *coo_SplObjectStorage() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

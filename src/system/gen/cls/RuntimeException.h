@@ -63,8 +63,7 @@ class c_RuntimeException : public c_Exception {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_RuntimeException;
-Object co_RuntimeException(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_RuntimeException() NEVER_INLINE;
+ObjectData *coo_RuntimeException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

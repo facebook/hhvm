@@ -143,7 +143,7 @@ bool c_RecursiveDirectoryIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_RecursiveDirectoryIterator::cloneImpl() {
-  ObjectData *obj = coo_RecursiveDirectoryIterator().detach();
+  ObjectData *obj = coo_RecursiveDirectoryIterator();
   c_RecursiveDirectoryIterator::cloneSet(obj);
   return obj;
 }
@@ -519,9 +519,8 @@ void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags
     if (tmp0) {
       {
         {
-          Object obj_tmp0 = coo_UnexpectedValueException();
-          p_UnexpectedValueException &tmp0 ATTRIBUTE_UNUSED = (p_UnexpectedValueException&)obj_tmp0;
-          throw_exception(((c_UnexpectedValueException*)tmp0.get()->create(concat3(NAMSTR(s_sys_ssf0ea8ac1, "RecursiveDirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ssfb6412d4, "): failed to open dir")))));
+          p_UnexpectedValueException tmp0 = coo_UnexpectedValueException();
+          throw_exception(((c_UnexpectedValueException*)tmp0.get()->create(concat3(NAMSTR(s_sys_ssf0ea8ac1, "RecursiveDirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ssfb6412d4, "): failed to open dir"))), tmp0));
         }
       }
     }
@@ -673,7 +672,7 @@ bool c_DirectoryIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_DirectoryIterator::cloneImpl() {
-  ObjectData *obj = coo_DirectoryIterator().detach();
+  ObjectData *obj = coo_DirectoryIterator();
   c_DirectoryIterator::cloneSet(obj);
   return obj;
 }
@@ -966,9 +965,8 @@ void c_DirectoryIterator::t___construct(Variant v_path) {
     if (tmp0) {
       {
         {
-          Object obj_tmp0 = coo_UnexpectedValueException();
-          p_UnexpectedValueException &tmp0 ATTRIBUTE_UNUSED = (p_UnexpectedValueException&)obj_tmp0;
-          throw_exception(((c_UnexpectedValueException*)tmp0.get()->create(concat3(NAMSTR(s_sys_ssdd233bb0, "DirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ssfb6412d4, "): failed to open dir")))));
+          p_UnexpectedValueException tmp0 = coo_UnexpectedValueException();
+          throw_exception(((c_UnexpectedValueException*)tmp0.get()->create(concat3(NAMSTR(s_sys_ssdd233bb0, "DirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ssfb6412d4, "): failed to open dir"))), tmp0));
         }
       }
     }
@@ -1024,21 +1022,11 @@ bool c_DirectoryIterator::t_isdot() {
   return x_hphp_directoryiterator_isdot(GET_THIS_TYPED(DirectoryIterator));
 }
 namespace hphp_impl_splitter {}
-Object coo_RecursiveDirectoryIterator() {
+ObjectData *coo_RecursiveDirectoryIterator() {
   return NEWOBJ(c_RecursiveDirectoryIterator)();
 }
-Object co_RecursiveDirectoryIterator(CArrRef params, bool init /* = true */) {
-  Object r(coo_RecursiveDirectoryIterator());
-  r.get()->dynCreate(params, init);
-  return r;
-}
-Object coo_DirectoryIterator() {
+ObjectData *coo_DirectoryIterator() {
   return NEWOBJ(c_DirectoryIterator)();
-}
-Object co_DirectoryIterator(CArrRef params, bool init /* = true */) {
-  Object r(coo_DirectoryIterator());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 Variant pm_php$classes$directoryiterator_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/directoryiterator.php, pm_php$classes$directoryiterator_php);

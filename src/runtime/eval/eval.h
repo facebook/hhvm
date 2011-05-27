@@ -30,8 +30,7 @@ Variant eval(LVariableTable *vars, CObjRef self, CStrRef code_str,
 bool eval_invoke_hook(Variant &res, const char *s, CArrRef params, int64 hash);
 bool eval_get_class_var_init_hook(Variant &res, const char *s,
                                   const char *var);
-bool eval_create_object_only_hook(Variant &res, const char *s,
-    ObjectData *root);
+ObjectData *eval_create_object_only_hook(const char *s, ObjectData *root);
 bool eval_try_autoload(const char *s);
 bool eval_invoke_static_method_hook(Variant &res, const char *s,
                                     const char* method, CArrRef params,

@@ -63,8 +63,7 @@ class c_InvalidArgumentException : public c_LogicException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_InvalidArgumentException;
-Object co_InvalidArgumentException(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_InvalidArgumentException() NEVER_INLINE;
+ObjectData *coo_InvalidArgumentException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -80,9 +80,9 @@ Object ClassStatics::create(CArrRef params, bool init /* = true */,
   return o;
 }
 
-Object ClassStatics::createOnlyNoInit(ObjectData* root /* = NULL */) {
+ObjectData *ClassStatics::createOnlyNoInit(ObjectData* root /* = NULL */) {
   throwUnknownClass();
-  return null_object;
+  return 0;
 }
 
 Object ClassStatics::createOnly(ObjectData* root /* = NULL */) {

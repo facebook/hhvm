@@ -188,8 +188,8 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
       if (outsideClass) {
         cls->outputVolatileCheckBegin(cg, ar, getScope(), cname);
       }
-      cg_printf("((%s%s*)((%s%s*)(%s%s().get()))->create(",
-                Option::ClassPrefix, cls->getId(cg).c_str(),
+      cg_printf("%s%s(((%s%s*)%s%s())->create(",
+                Option::SmartPtrPrefix, cls->getId(cg).c_str(),
                 Option::ClassPrefix, cls->getId(cg).c_str(),
                 Option::CreateObjectOnlyPrefix, cls->getId(cg).c_str());
     } else {
@@ -201,11 +201,17 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
     FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, m_extraArg,
                                       m_variableArgument, m_argArrayId,
                                       m_argArrayHash, m_argArrayIndex);
-    cg_printf("))");
     if (m_receiverTemp.empty()) {
+    cg_printf("))");
       if (outsideClass) {
         cls->outputVolatileCheckEnd(cg);
       }
+    } else {
+      cg_printf(")");
+      if (!isUnused()) {
+        cg_printf(", %s", m_receiverTemp.c_str());
+      }
+      cg_printf(")");
     }
   } else {
     bool wrap = false;
@@ -302,7 +308,9 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       bool outsideClass = !isPresent();
       cg.wrapExpressionBegin();
       m_receiverTemp = genCPPTemp(cg, ar);
-      cg_printf("Object obj_%s = ", m_receiverTemp.c_str());
+      cg_printf("%s%s %s = ",
+                Option::SmartPtrPrefix, m_classScope->getId(cg).c_str(),
+                m_receiverTemp.c_str());
       if (outsideClass) {
         m_classScope->outputVolatileCheckBegin(cg, ar, getScope(), cname);
       }
@@ -313,11 +321,6 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         m_classScope->outputVolatileCheckEnd(cg);
       }
       cg_printf(";\n");
-      cg_printf("%s%s &%s ATTRIBUTE_UNUSED = (%s%s&)obj_%s;\n",
-                Option::SmartPtrPrefix, m_classScope->getId(cg).c_str(),
-                m_receiverTemp.c_str(),
-                Option::SmartPtrPrefix, m_classScope->getId(cg).c_str(),
-                m_receiverTemp.c_str());
     }
 
     bool tempParams = FunctionCall::preOutputCPP(cg, ar, state);

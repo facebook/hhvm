@@ -63,8 +63,7 @@ class c_BadMethodCallException : public c_BadFunctionCallException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_BadMethodCallException;
-Object co_BadMethodCallException(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_BadMethodCallException() NEVER_INLINE;
+ObjectData *coo_BadMethodCallException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

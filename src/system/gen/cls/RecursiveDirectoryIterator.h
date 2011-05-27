@@ -92,8 +92,7 @@ class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_RecursiveDirectoryIterator;
-Object co_RecursiveDirectoryIterator(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_RecursiveDirectoryIterator() NEVER_INLINE;
+ObjectData *coo_RecursiveDirectoryIterator() NEVER_INLINE;
 extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_SELF;
 extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_FILEINFO;
 extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_PATHNAME;

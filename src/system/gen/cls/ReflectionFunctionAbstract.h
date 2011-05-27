@@ -89,8 +89,7 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(isinternal);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionFunctionAbstract;
-Object co_ReflectionFunctionAbstract(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_ReflectionFunctionAbstract() NEVER_INLINE;
+ObjectData *coo_ReflectionFunctionAbstract() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

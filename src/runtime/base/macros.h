@@ -38,7 +38,7 @@ namespace HPHP {
 
 #define FORWARD_DECLARE_CLASS_BUILTIN(cls)                      \
   FORWARD_DECLARE_CLASS(cls)                       \
-  extern Object coo_##cls();                            \
+  extern ObjectData *coo_##cls();                            \
 
 #define FORWARD_DECLARE_INTERFACE(cls)                  \
   class c_##cls;                                        \
@@ -342,8 +342,6 @@ do { \
 #define HASH_GET_CLASS_VAR_INIT_REDECLARED(code, f)                     \
   if (hash == code && !strcasecmp(s, #f))                               \
     return CLASS_CHECK(g->cso_ ## f->os_getInit(var))
-#define HASH_CREATE_OBJECT(code, f)                                     \
-  if (hash == code && !strcasecmp(s, #f)) return co_ ## f(params, init)
 #define HASH_CREATE_OBJECT_VOLATILE(code, f)                            \
   if (hash == code && !strcasecmp(s, #f))                               \
     return CLASS_CHECK(co_ ## f(params, init))

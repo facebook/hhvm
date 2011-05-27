@@ -88,7 +88,7 @@ bool c_stdClass::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_stdClass::cloneImpl() {
-  ObjectData *obj = coo_stdClass().detach();
+  ObjectData *obj = coo_stdClass();
   c_stdClass::cloneSet(obj);
   return obj;
 }
@@ -173,7 +173,7 @@ bool c___PHP_Incomplete_Class::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c___PHP_Incomplete_Class::cloneImpl() {
-  ObjectData *obj = coo___PHP_Incomplete_Class().detach();
+  ObjectData *obj = coo___PHP_Incomplete_Class();
   c___PHP_Incomplete_Class::cloneSet(obj);
   return obj;
 }
@@ -199,21 +199,11 @@ struct ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
 };
 void c___PHP_Incomplete_Class::init() {
 }
-Object coo_stdClass() {
+ObjectData *coo_stdClass() {
   return NEWOBJ(c_stdClass)();
 }
-Object co_stdClass(CArrRef params, bool init /* = true */) {
-  Object r(coo_stdClass());
-  r.get()->dynCreate(params, init);
-  return r;
-}
-Object coo___PHP_Incomplete_Class() {
+ObjectData *coo___PHP_Incomplete_Class() {
   return NEWOBJ(c___PHP_Incomplete_Class)();
-}
-Object co___PHP_Incomplete_Class(CArrRef params, bool init /* = true */) {
-  Object r(coo___PHP_Incomplete_Class());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 Variant pm_php$classes$stdclass_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/stdclass.php, pm_php$classes$stdclass_php);

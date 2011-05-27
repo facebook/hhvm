@@ -96,7 +96,7 @@ bool c_XhprofFrame::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_XhprofFrame::cloneImpl() {
-  ObjectData *obj = coo_XhprofFrame().detach();
+  ObjectData *obj = coo_XhprofFrame();
   c_XhprofFrame::cloneSet(obj);
   return obj;
 }
@@ -213,13 +213,8 @@ Variant c_XhprofFrame::t___destruct() {
   return null;
 }
 namespace hphp_impl_splitter {}
-Object coo_XhprofFrame() {
+ObjectData *coo_XhprofFrame() {
   return NEWOBJ(c_XhprofFrame)();
-}
-Object co_XhprofFrame(CArrRef params, bool init /* = true */) {
-  Object r(coo_XhprofFrame());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 Variant pm_php$classes$xhprof_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/xhprof.php, pm_php$classes$xhprof_php);

@@ -582,7 +582,8 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf("return %s%s::%slval(s);\n", Option::ClassPrefix,
                   clsName, Option::ObjectStaticPrefix);
         cg_indentEnd("}\n");
-        cg_indentBegin("Object createOnlyNoInit(ObjectData* root = NULL) {\n");
+        cg_indentBegin("ObjectData *createOnlyNoInit"
+                       "(ObjectData* root = NULL) {\n");
         cg_printf("return %s%s(root);\n",
                   Option::CreateObjectOnlyPrefix, clsName);
         cg_indentEnd("}\n");

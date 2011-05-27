@@ -99,8 +99,7 @@ class c_ReflectionProperty : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(getname);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionProperty;
-Object co_ReflectionProperty(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_ReflectionProperty() NEVER_INLINE;
+ObjectData *coo_ReflectionProperty() NEVER_INLINE;
 extern const int64 q_ReflectionProperty_IS_STATIC;
 extern const int64 q_ReflectionProperty_IS_PUBLIC;
 extern const int64 q_ReflectionProperty_IS_PROTECTED;

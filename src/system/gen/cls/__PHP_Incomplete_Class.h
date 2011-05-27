@@ -62,8 +62,7 @@ class c___PHP_Incomplete_Class : public ExtObjectData {
   void init();
 };
 extern struct ObjectStaticCallbacks cw___PHP_Incomplete_Class;
-Object co___PHP_Incomplete_Class(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo___PHP_Incomplete_Class() NEVER_INLINE;
+ObjectData *coo___PHP_Incomplete_Class() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

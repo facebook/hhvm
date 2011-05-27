@@ -109,7 +109,7 @@ bool c_ReflectionFunctionAbstract::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionFunctionAbstract::cloneImpl() {
-  ObjectData *obj = coo_ReflectionFunctionAbstract().detach();
+  ObjectData *obj = coo_ReflectionFunctionAbstract();
   c_ReflectionFunctionAbstract::cloneSet(obj);
   return obj;
 }
@@ -529,7 +529,7 @@ Array c_ReflectionFunctionAbstract::t_getparameters() {
       v_name.assignVal(iter3.first());
       {
         {
-          const p_ReflectionParameter &tmp0((((c_ReflectionParameter*)((c_ReflectionParameter*)(coo_ReflectionParameter().get()))->create(null, null))));
+          const p_ReflectionParameter &tmp0((p_ReflectionParameter(((c_ReflectionParameter*)coo_ReflectionParameter())->create(null, null))));
           v_param = tmp0;
         }
         v_param->m_info.assignVal(v_info);
@@ -663,7 +663,7 @@ bool c_ReflectionObject::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionObject::cloneImpl() {
-  ObjectData *obj = coo_ReflectionObject().detach();
+  ObjectData *obj = coo_ReflectionObject();
   c_ReflectionObject::cloneSet(obj);
   return obj;
 }
@@ -725,8 +725,7 @@ Variant c_ReflectionObject::t_export(Variant v_obj, CVarRef v_ret) {
   String v_str;
 
   {
-    Object obj_tmp0 = coo_ReflectionObject();
-    p_ReflectionObject &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionObject&)obj_tmp0;
+    p_ReflectionObject tmp0 = coo_ReflectionObject();
     ((c_ReflectionObject*)tmp0.get()->create(v_obj));
     v_obj = tmp0;
   }
@@ -800,7 +799,7 @@ bool c_ReflectionException::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionException::cloneImpl() {
-  ObjectData *obj = coo_ReflectionException().detach();
+  ObjectData *obj = coo_ReflectionException();
   c_ReflectionException::cloneSet(obj);
   return obj;
 }
@@ -944,7 +943,7 @@ bool c_ReflectionClass::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionClass::cloneImpl() {
-  ObjectData *obj = coo_ReflectionClass().detach();
+  ObjectData *obj = coo_ReflectionClass();
   c_ReflectionClass::cloneSet(obj);
   return obj;
 }
@@ -2145,9 +2144,8 @@ void c_ReflectionClass::t___construct(Variant v_name) {
         if (tmp0) {
           {
             {
-              Object obj_tmp0 = coo_ReflectionException();
-              p_ReflectionException &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionException&)obj_tmp0;
-              throw_exception(((c_ReflectionException*)tmp0.get()->create(concat3(NAMSTR(s_sys_ssa78ef7eb, "Class "), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))));
+              p_ReflectionException tmp0 = coo_ReflectionException();
+              throw_exception(((c_ReflectionException*)tmp0.get()->create(concat3(NAMSTR(s_sys_ssa78ef7eb, "Class "), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp0));
             }
           }
         }
@@ -2177,9 +2175,8 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
       if (empty(m_info)) {
         {
           {
-            Object obj_tmp0 = coo_ReflectionException();
-            p_ReflectionException &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionException&)obj_tmp0;
-            throw_exception(((c_ReflectionException*)tmp0.get()->create(concat3(NAMSTR(s_sys_ssa78ef7eb, "Class "), toString(m_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))));
+            p_ReflectionException tmp0 = coo_ReflectionException();
+            throw_exception(((c_ReflectionException*)tmp0.get()->create(concat3(NAMSTR(s_sys_ssa78ef7eb, "Class "), toString(m_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp0));
           }
         }
       }
@@ -2192,8 +2189,7 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
           v_interface.assignVal(iter3.first());
           {
             {
-              Object obj_tmp0 = coo_ReflectionClass();
-              p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+              p_ReflectionClass tmp0 = coo_ReflectionClass();
               ((c_ReflectionClass*)tmp0.get()->create(v_interface));
               v_p = tmp0;
             }
@@ -2220,8 +2216,7 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
         if (tmp0) {
           {
             {
-              Object obj_tmp0 = coo_ReflectionClass();
-              p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+              p_ReflectionClass tmp0 = coo_ReflectionClass();
               const Variant &tmp1((m_info.rvalAt(NAMSTR(s_sys_ssfb10fd8c, "parent"), AccessFlags::Error_Key)));
               ((c_ReflectionClass*)tmp0.get()->create(tmp1));
               v_p = tmp0;
@@ -2289,8 +2284,7 @@ Variant c_ReflectionClass::t_export(CVarRef v_name, CVarRef v_ret) {
   String v_str;
 
   {
-    Object obj_tmp0 = coo_ReflectionClass();
-    p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+    p_ReflectionClass tmp0 = coo_ReflectionClass();
     ((c_ReflectionClass*)tmp0.get()->create(v_name));
     v_obj = tmp0;
   }
@@ -2432,15 +2426,14 @@ p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
           v_class.assignVal(tmp0);
         }
         {
-          Object obj_tmp0 = coo_ReflectionException();
-          p_ReflectionException &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionException&)obj_tmp0;
-          throw_exception(((c_ReflectionException*)tmp0.get()->create(concat5(NAMSTR(s_sys_ssdc6e02c2, "Method "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))));
+          p_ReflectionException tmp0 = coo_ReflectionException();
+          throw_exception(((c_ReflectionException*)tmp0.get()->create(concat5(NAMSTR(s_sys_ssdc6e02c2, "Method "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp0));
         }
       }
     }
   }
   {
-    const p_ReflectionMethod &tmp0((((c_ReflectionMethod*)((c_ReflectionMethod*)(coo_ReflectionMethod().get()))->create(null, null))));
+    const p_ReflectionMethod &tmp0((p_ReflectionMethod(((c_ReflectionMethod*)coo_ReflectionMethod())->create(null, null))));
     v_ret = tmp0;
   }
   {
@@ -2536,15 +2529,14 @@ p_ReflectionProperty c_ReflectionClass::t_getproperty(CVarRef v_name) {
           v_class.assignVal(tmp0);
         }
         {
-          Object obj_tmp0 = coo_ReflectionException();
-          p_ReflectionException &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionException&)obj_tmp0;
-          throw_exception(((c_ReflectionException*)tmp0.get()->create(concat5(NAMSTR(s_sys_ss9795dfc8, "Property "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))));
+          p_ReflectionException tmp0 = coo_ReflectionException();
+          throw_exception(((c_ReflectionException*)tmp0.get()->create(concat5(NAMSTR(s_sys_ss9795dfc8, "Property "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp0));
         }
       }
     }
   }
   {
-    const p_ReflectionProperty &tmp0((((c_ReflectionProperty*)((c_ReflectionProperty*)(coo_ReflectionProperty().get()))->create(null, null))));
+    const p_ReflectionProperty &tmp0((p_ReflectionProperty(((c_ReflectionProperty*)coo_ReflectionProperty())->create(null, null))));
     v_ret = tmp0;
   }
   {
@@ -2620,9 +2612,8 @@ Variant c_ReflectionClass::t_getconstant(CVarRef v_name) {
           v_class.assignVal(tmp0);
         }
         {
-          Object obj_tmp0 = coo_ReflectionException();
-          p_ReflectionException &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionException&)obj_tmp0;
-          throw_exception(((c_ReflectionException*)tmp0.get()->create(concat5(NAMSTR(s_sys_ssd816f860, "Class constant "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))));
+          p_ReflectionException tmp0 = coo_ReflectionException();
+          throw_exception(((c_ReflectionException*)tmp0.get()->create(concat5(NAMSTR(s_sys_ssd816f860, "Class constant "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp0));
         }
       }
     }
@@ -2648,8 +2639,7 @@ Array c_ReflectionClass::t_getinterfaces() {
       v_name.assignVal(iter3.first());
       {
         {
-          Object obj_tmp0 = coo_ReflectionClass();
-          p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+          p_ReflectionClass tmp0 = coo_ReflectionClass();
           ((c_ReflectionClass*)tmp0.get()->create(v_name));
           v_cls = tmp0;
         }
@@ -2685,8 +2675,7 @@ Array c_ReflectionClass::t_getinterfacenames() {
       v_name.assignVal(iter3.first());
       {
         {
-          Object obj_tmp0 = coo_ReflectionClass();
-          p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+          p_ReflectionClass tmp0 = coo_ReflectionClass();
           ((c_ReflectionClass*)tmp0.get()->create(v_name));
           v_cls = tmp0;
         }
@@ -2771,9 +2760,8 @@ Variant c_ReflectionClass::t_getparentclass() {
     }
   }
   {
-    Object obj_tmp0 = coo_ReflectionClass();
-    p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
-    return ((c_ReflectionClass*)tmp0.get()->create(v_parent));
+    p_ReflectionClass tmp0 = coo_ReflectionClass();
+    return ((c_ReflectionClass*)tmp0.get()->create(v_parent), tmp0);
   }
 }
 namespace hphp_impl_splitter {}
@@ -2982,8 +2970,7 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
     }
   }
   {
-    Object obj_tmp0 = coo_ReflectionClass();
-    p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+    p_ReflectionClass tmp0 = coo_ReflectionClass();
     ((c_ReflectionClass*)tmp0.get()->create(v_cls));
     v_clsObj = tmp0;
   }
@@ -2996,9 +2983,8 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
     if (tmp0) {
       {
         {
-          Object obj_tmp0 = coo_ReflectionException();
-          p_ReflectionException &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionException&)obj_tmp0;
-          throw_exception(((c_ReflectionException*)tmp0.get()->create(concat3(NAMSTR(s_sys_ss44fe7272, "Interface "), toString(v_cls), NAMSTR(s_sys_ss4c77dad1, " is a Class")))));
+          p_ReflectionException tmp0 = coo_ReflectionException();
+          throw_exception(((c_ReflectionException*)tmp0.get()->create(concat3(NAMSTR(s_sys_ss44fe7272, "Interface "), toString(v_cls), NAMSTR(s_sys_ss4c77dad1, " is a Class"))), tmp0));
         }
       }
     }
@@ -3147,7 +3133,7 @@ bool c_ReflectionExtension::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionExtension::cloneImpl() {
-  ObjectData *obj = coo_ReflectionExtension().detach();
+  ObjectData *obj = coo_ReflectionExtension();
   c_ReflectionExtension::cloneSet(obj);
   return obj;
 }
@@ -3492,8 +3478,7 @@ Variant c_ReflectionExtension::t_export(CVarRef v_name, CVarRef v_ret) {
   String v_str;
 
   {
-    Object obj_tmp0 = coo_ReflectionExtension();
-    p_ReflectionExtension &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionExtension&)obj_tmp0;
+    p_ReflectionExtension tmp0 = coo_ReflectionExtension();
     ((c_ReflectionExtension*)tmp0.get()->create(v_name));
     v_obj = tmp0;
   }
@@ -3696,7 +3681,7 @@ bool c_ReflectionMethod::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionMethod::cloneImpl() {
-  ObjectData *obj = coo_ReflectionMethod().detach();
+  ObjectData *obj = coo_ReflectionMethod();
   c_ReflectionMethod::cloneSet(obj);
   return obj;
 }
@@ -4213,8 +4198,7 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMST
       if (!(x_is_object(v_cls))) {
         {
           {
-            Object obj_tmp0 = coo_ReflectionClass();
-            p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+            p_ReflectionClass tmp0 = coo_ReflectionClass();
             ((c_ReflectionClass*)tmp0.get()->create(v_cls));
             v_cls = tmp0;
           }
@@ -4223,8 +4207,7 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMST
       else {
         {
           {
-            Object obj_tmp0 = coo_ReflectionClass();
-            p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+            p_ReflectionClass tmp0 = coo_ReflectionClass();
             const Variant &tmp1((x_get_class(v_cls)));
             ((c_ReflectionClass*)tmp0.get()->create(tmp1));
             v_cls = tmp0;
@@ -4275,8 +4258,7 @@ Variant c_ReflectionMethod::t_export(Variant v_cls, CVarRef v_name, CVarRef v_re
   if (!(x_is_object(v_cls))) {
     {
       {
-        Object obj_tmp0 = coo_ReflectionClass();
-        p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+        p_ReflectionClass tmp0 = coo_ReflectionClass();
         ((c_ReflectionClass*)tmp0.get()->create(v_cls));
         v_cls = tmp0;
       }
@@ -4285,8 +4267,7 @@ Variant c_ReflectionMethod::t_export(Variant v_cls, CVarRef v_name, CVarRef v_re
   else {
     {
       {
-        Object obj_tmp0 = coo_ReflectionClass();
-        p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+        p_ReflectionClass tmp0 = coo_ReflectionClass();
         const Variant &tmp1((x_get_class(v_cls)));
         ((c_ReflectionClass*)tmp0.get()->create(tmp1));
         v_cls = tmp0;
@@ -4430,10 +4411,9 @@ Variant c_ReflectionMethod::t_getdeclaringclass() {
     }
   }
   {
-    Object obj_tmp0 = coo_ReflectionClass();
-    p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+    p_ReflectionClass tmp0 = coo_ReflectionClass();
     const Variant &tmp1((m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key)));
-    return ((c_ReflectionClass*)tmp0.get()->create(tmp1));
+    return ((c_ReflectionClass*)tmp0.get()->create(tmp1), tmp0);
   }
 }
 namespace hphp_impl_splitter {}
@@ -4555,7 +4535,7 @@ bool c_ReflectionProperty::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionProperty::cloneImpl() {
-  ObjectData *obj = coo_ReflectionProperty().detach();
+  ObjectData *obj = coo_ReflectionProperty();
   c_ReflectionProperty::cloneSet(obj);
   return obj;
 }
@@ -5012,8 +4992,7 @@ void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
       if (!(x_is_object(v_cls))) {
         {
           {
-            Object obj_tmp0 = coo_ReflectionClass();
-            p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+            p_ReflectionClass tmp0 = coo_ReflectionClass();
             ((c_ReflectionClass*)tmp0.get()->create(v_cls));
             v_cls = tmp0;
           }
@@ -5022,8 +5001,7 @@ void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
       else {
         {
           {
-            Object obj_tmp0 = coo_ReflectionClass();
-            p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+            p_ReflectionClass tmp0 = coo_ReflectionClass();
             const Variant &tmp1((x_get_class(v_cls)));
             ((c_ReflectionClass*)tmp0.get()->create(tmp1));
             v_cls = tmp0;
@@ -5074,8 +5052,7 @@ Variant c_ReflectionProperty::t_export(Variant v_cls, CVarRef v_name, CVarRef v_
   if (!(x_is_object(v_cls))) {
     {
       {
-        Object obj_tmp0 = coo_ReflectionClass();
-        p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+        p_ReflectionClass tmp0 = coo_ReflectionClass();
         ((c_ReflectionClass*)tmp0.get()->create(v_cls));
         v_cls = tmp0;
       }
@@ -5084,8 +5061,7 @@ Variant c_ReflectionProperty::t_export(Variant v_cls, CVarRef v_name, CVarRef v_
   else {
     {
       {
-        Object obj_tmp0 = coo_ReflectionClass();
-        p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+        p_ReflectionClass tmp0 = coo_ReflectionClass();
         const Variant &tmp1((x_get_class(v_cls)));
         ((c_ReflectionClass*)tmp0.get()->create(tmp1));
         v_cls = tmp0;
@@ -5158,7 +5134,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1465 */
 void c_ReflectionProperty::t_setaccessible(CVarRef v_accessible) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::setAccessible);
-  throw_exception(((c_ReflectionException*)((c_ReflectionException*)(coo_ReflectionException().get()))->create(NAMSTR(s_sys_ssf82f565f, "ReflectionProperty::setAccessible is not supported"))));
+  throw_exception(p_ReflectionException(((c_ReflectionException*)coo_ReflectionException())->create(NAMSTR(s_sys_ssf82f565f, "ReflectionProperty::setAccessible is not supported"))));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1479 */
@@ -5232,10 +5208,9 @@ Variant c_ReflectionProperty::t_getdeclaringclass() {
     }
   }
   {
-    Object obj_tmp0 = coo_ReflectionClass();
-    p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+    p_ReflectionClass tmp0 = coo_ReflectionClass();
     const Variant &tmp1((m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key)));
-    return ((c_ReflectionClass*)tmp0.get()->create(tmp1));
+    return ((c_ReflectionClass*)tmp0.get()->create(tmp1), tmp0);
   }
 }
 namespace hphp_impl_splitter {}
@@ -5319,7 +5294,7 @@ bool c_ReflectionFunction::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionFunction::cloneImpl() {
-  ObjectData *obj = coo_ReflectionFunction().detach();
+  ObjectData *obj = coo_ReflectionFunction();
   c_ReflectionFunction::cloneSet(obj);
   return obj;
 }
@@ -5520,9 +5495,8 @@ void c_ReflectionFunction::t___construct(Variant v_name) {
   if (empty(m_info)) {
     {
       {
-        Object obj_tmp0 = coo_ReflectionException();
-        p_ReflectionException &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionException&)obj_tmp0;
-        throw_exception(((c_ReflectionException*)tmp0.get()->create(concat3(NAMSTR(s_sys_ss985d885e, "Function "), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))));
+        p_ReflectionException tmp0 = coo_ReflectionException();
+        throw_exception(((c_ReflectionException*)tmp0.get()->create(concat3(NAMSTR(s_sys_ss985d885e, "Function "), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp0));
       }
     }
   }
@@ -5542,8 +5516,7 @@ Variant c_ReflectionFunction::t_export(CVarRef v_name, CVarRef v_ret) {
   String v_str;
 
   {
-    Object obj_tmp0 = coo_ReflectionFunction();
-    p_ReflectionFunction &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionFunction&)obj_tmp0;
+    p_ReflectionFunction tmp0 = coo_ReflectionFunction();
     ((c_ReflectionFunction*)tmp0.get()->create(v_name));
     v_obj = tmp0;
   }
@@ -5663,7 +5636,7 @@ bool c_ReflectionParameter::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionParameter::cloneImpl() {
-  ObjectData *obj = coo_ReflectionParameter().detach();
+  ObjectData *obj = coo_ReflectionParameter();
   c_ReflectionParameter::cloneSet(obj);
   return obj;
 }
@@ -6075,8 +6048,7 @@ Variant c_ReflectionParameter::t_export(CVarRef v_func, CVarRef v_param, CVarRef
   String v_str;
 
   {
-    Object obj_tmp0 = coo_ReflectionParameter();
-    p_ReflectionParameter &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionParameter&)obj_tmp0;
+    p_ReflectionParameter tmp0 = coo_ReflectionParameter();
     ((c_ReflectionParameter*)tmp0.get()->create(v_func, v_param));
     v_obj = tmp0;
   }
@@ -6117,10 +6089,9 @@ Variant c_ReflectionParameter::t_getdeclaringclass() {
     }
   }
   {
-    Object obj_tmp0 = coo_ReflectionClass();
-    p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+    p_ReflectionClass tmp0 = coo_ReflectionClass();
     const Variant &tmp1((m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key)));
-    return ((c_ReflectionClass*)tmp0.get()->create(tmp1));
+    return ((c_ReflectionClass*)tmp0.get()->create(tmp1), tmp0);
   }
 }
 namespace hphp_impl_splitter {}
@@ -6139,10 +6110,9 @@ Variant c_ReflectionParameter::t_getclass() {
     }
   }
   {
-    Object obj_tmp0 = coo_ReflectionClass();
-    p_ReflectionClass &tmp0 ATTRIBUTE_UNUSED = (p_ReflectionClass&)obj_tmp0;
+    p_ReflectionClass tmp0 = coo_ReflectionClass();
     const Variant &tmp1((m_info.rvalAt(NAMSTR(s_sys_ss724a760a, "type"), AccessFlags::Error_Key)));
-    return ((c_ReflectionClass*)tmp0.get()->create(tmp1));
+    return ((c_ReflectionClass*)tmp0.get()->create(tmp1), tmp0);
   }
 }
 namespace hphp_impl_splitter {}
@@ -6186,7 +6156,7 @@ Variant c_ReflectionParameter::t_getdefaultvalue() {
     }
     if (tmp0) {
       {
-        throw_exception(((c_ReflectionException*)((c_ReflectionException*)(coo_ReflectionException().get()))->create(NAMSTR(s_sys_ss4ad0c110, "Parameter is not optional"))));
+        throw_exception(p_ReflectionException(((c_ReflectionException*)coo_ReflectionException())->create(NAMSTR(s_sys_ss4ad0c110, "Parameter is not optional"))));
       }
     }
   }
@@ -6211,77 +6181,32 @@ Variant c_ReflectionParameter::t_getposition() {
   return m_info.rvalAt(NAMSTR(s_sys_ssc0ff3081, "index"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-Object coo_ReflectionFunctionAbstract() {
+ObjectData *coo_ReflectionFunctionAbstract() {
   return NEWOBJ(c_ReflectionFunctionAbstract)();
 }
-Object co_ReflectionFunctionAbstract(CArrRef params, bool init /* = true */) {
-  Object r(coo_ReflectionFunctionAbstract());
-  r.get()->dynCreate(params, init);
-  return r;
-}
-Object coo_ReflectionObject() {
+ObjectData *coo_ReflectionObject() {
   return NEWOBJ(c_ReflectionObject)();
 }
-Object co_ReflectionObject(CArrRef params, bool init /* = true */) {
-  Object r(coo_ReflectionObject());
-  r.get()->dynCreate(params, init);
-  return r;
-}
-Object coo_ReflectionException() {
+ObjectData *coo_ReflectionException() {
   return NEWOBJ(c_ReflectionException)();
 }
-Object co_ReflectionException(CArrRef params, bool init /* = true */) {
-  Object r(coo_ReflectionException());
-  r.get()->dynCreate(params, init);
-  return r;
-}
-Object coo_ReflectionClass() {
+ObjectData *coo_ReflectionClass() {
   return NEWOBJ(c_ReflectionClass)();
 }
-Object co_ReflectionClass(CArrRef params, bool init /* = true */) {
-  Object r(coo_ReflectionClass());
-  r.get()->dynCreate(params, init);
-  return r;
-}
-Object coo_ReflectionExtension() {
+ObjectData *coo_ReflectionExtension() {
   return NEWOBJ(c_ReflectionExtension)();
 }
-Object co_ReflectionExtension(CArrRef params, bool init /* = true */) {
-  Object r(coo_ReflectionExtension());
-  r.get()->dynCreate(params, init);
-  return r;
-}
-Object coo_ReflectionMethod() {
+ObjectData *coo_ReflectionMethod() {
   return NEWOBJ(c_ReflectionMethod)();
 }
-Object co_ReflectionMethod(CArrRef params, bool init /* = true */) {
-  Object r(coo_ReflectionMethod());
-  r.get()->dynCreate(params, init);
-  return r;
-}
-Object coo_ReflectionProperty() {
+ObjectData *coo_ReflectionProperty() {
   return NEWOBJ(c_ReflectionProperty)();
 }
-Object co_ReflectionProperty(CArrRef params, bool init /* = true */) {
-  Object r(coo_ReflectionProperty());
-  r.get()->dynCreate(params, init);
-  return r;
-}
-Object coo_ReflectionFunction() {
+ObjectData *coo_ReflectionFunction() {
   return NEWOBJ(c_ReflectionFunction)();
 }
-Object co_ReflectionFunction(CArrRef params, bool init /* = true */) {
-  Object r(coo_ReflectionFunction());
-  r.get()->dynCreate(params, init);
-  return r;
-}
-Object coo_ReflectionParameter() {
+ObjectData *coo_ReflectionParameter() {
   return NEWOBJ(c_ReflectionParameter)();
-}
-Object co_ReflectionParameter(CArrRef params, bool init /* = true */) {
-  Object r(coo_ReflectionParameter());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 Variant pm_php$classes$reflection_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/reflection.php, pm_php$classes$reflection_php);

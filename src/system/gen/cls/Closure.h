@@ -75,8 +75,7 @@ class c_Closure : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(setvars);
 };
 extern struct ObjectStaticCallbacks cw_Closure;
-Object co_Closure(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_Closure() NEVER_INLINE;
+ObjectData *coo_Closure() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

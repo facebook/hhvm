@@ -128,7 +128,7 @@ bool c_ArrayIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ArrayIterator::cloneImpl() {
-  ObjectData *obj = coo_ArrayIterator().detach();
+  ObjectData *obj = coo_ArrayIterator();
   c_ArrayIterator::cloneSet(obj);
   return obj;
 }
@@ -1047,7 +1047,7 @@ bool c_AppendIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_AppendIterator::cloneImpl() {
-  ObjectData *obj = coo_AppendIterator().detach();
+  ObjectData *obj = coo_AppendIterator();
   c_AppendIterator::cloneSet(obj);
   return obj;
 }
@@ -1333,7 +1333,7 @@ void c_AppendIterator::t___construct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__construct);
   bool oldInCtor = gasInCtor(true);
   {
-    const p_ArrayIterator &tmp0((((c_ArrayIterator*)((c_ArrayIterator*)(coo_ArrayIterator().get()))->create(s_sys_sa00000000))));
+    const p_ArrayIterator &tmp0((p_ArrayIterator(((c_ArrayIterator*)coo_ArrayIterator())->create(s_sys_sa00000000))));
     m_iterators = tmp0;
   }
   gasInCtor(oldInCtor);
@@ -1713,7 +1713,7 @@ bool c_RecursiveIteratorIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_RecursiveIteratorIterator::cloneImpl() {
-  ObjectData *obj = coo_RecursiveIteratorIterator().detach();
+  ObjectData *obj = coo_RecursiveIteratorIterator();
   c_RecursiveIteratorIterator::cloneSet(obj);
   return obj;
 }
@@ -2077,7 +2077,7 @@ bool c_MutableArrayIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_MutableArrayIterator::cloneImpl() {
-  ObjectData *obj = coo_MutableArrayIterator().detach();
+  ObjectData *obj = coo_MutableArrayIterator();
   c_MutableArrayIterator::cloneSet(obj);
   return obj;
 }
@@ -2277,7 +2277,7 @@ bool c_FilterIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_FilterIterator::cloneImpl() {
-  ObjectData *obj = coo_FilterIterator().detach();
+  ObjectData *obj = coo_FilterIterator();
   c_FilterIterator::cloneSet(obj);
   return obj;
 }
@@ -2303,45 +2303,20 @@ struct ObjectStaticCallbacks cw_FilterIterator = {
 };
 void c_FilterIterator::init() {
 }
-Object coo_ArrayIterator() {
+ObjectData *coo_ArrayIterator() {
   return NEWOBJ(c_ArrayIterator)();
 }
-Object co_ArrayIterator(CArrRef params, bool init /* = true */) {
-  Object r(coo_ArrayIterator());
-  r.get()->dynCreate(params, init);
-  return r;
-}
-Object coo_AppendIterator() {
+ObjectData *coo_AppendIterator() {
   return NEWOBJ(c_AppendIterator)();
 }
-Object co_AppendIterator(CArrRef params, bool init /* = true */) {
-  Object r(coo_AppendIterator());
-  r.get()->dynCreate(params, init);
-  return r;
-}
-Object coo_RecursiveIteratorIterator() {
+ObjectData *coo_RecursiveIteratorIterator() {
   return NEWOBJ(c_RecursiveIteratorIterator)();
 }
-Object co_RecursiveIteratorIterator(CArrRef params, bool init /* = true */) {
-  Object r(coo_RecursiveIteratorIterator());
-  r.get()->dynCreate(params, init);
-  return r;
-}
-Object coo_MutableArrayIterator() {
+ObjectData *coo_MutableArrayIterator() {
   return NEWOBJ(c_MutableArrayIterator)();
 }
-Object co_MutableArrayIterator(CArrRef params, bool init /* = true */) {
-  Object r(coo_MutableArrayIterator());
-  r.get()->dynCreate(params, init);
-  return r;
-}
-Object coo_FilterIterator() {
+ObjectData *coo_FilterIterator() {
   return NEWOBJ(c_FilterIterator)();
-}
-Object co_FilterIterator(CArrRef params, bool init /* = true */) {
-  Object r(coo_FilterIterator());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 Variant pm_php$classes$iterator_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/iterator.php, pm_php$classes$iterator_php);

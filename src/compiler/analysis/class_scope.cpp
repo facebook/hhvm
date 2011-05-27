@@ -663,9 +663,7 @@ void ClassScope::serialize(JSON::OutputStream &out) const {
 void ClassScope::outputCPPDynamicClassDecl(CodeGenerator &cg) {
   string clsStr = getId(cg);
   const char *clsName = clsStr.c_str();
-  cg_printf("Object %s%s(CArrRef params, bool init = true) NEVER_INLINE;\n",
-            Option::CreateObjectPrefix, clsName);
-  cg_printf("Object %s%s(%s) NEVER_INLINE;\n",
+  cg_printf("ObjectData *%s%s(%s) NEVER_INLINE;\n",
             Option::CreateObjectOnlyPrefix, clsName,
             isRedeclaring() ? "ObjectData *root = NULL" : "");
 }
@@ -673,7 +671,7 @@ void ClassScope::outputCPPDynamicClassDecl(CodeGenerator &cg) {
 void ClassScope::outputCPPDynamicClassCreateDecl(CodeGenerator &cg) {
   cg_printf("Object create_object_only("
             "const char *s, ObjectData *root);\n");
-  cg_printf("Object create_object_only_no_init("
+  cg_printf("ObjectData *create_object_only_no_init("
             "const char *s, ObjectData *root);\n");
 }
 
@@ -681,19 +679,12 @@ void ClassScope::outputCPPDynamicClassImpl(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
   string clsStr = getId(cg);
   const char *clsName = clsStr.c_str();
-  cg_indentBegin("Object %s%s(%s) {\n",
+  cg_indentBegin("ObjectData *%s%s(%s) {\n",
                  Option::CreateObjectOnlyPrefix, clsName,
                  isRedeclaring() ? "ObjectData *root /* = NULL */" : "");
   cg_printf("return NEWOBJ(%s%s)(%s);\n",
             Option::ClassPrefix, clsName,
             isRedeclaring() ? "root" : "");
-  cg_indentEnd("}\n");
-  cg_indentBegin("Object %s%s(CArrRef params, bool init /* = true */) {\n",
-                 Option::CreateObjectPrefix, clsName);
-  cg_printf("Object r(%s%s());\n", Option::CreateObjectOnlyPrefix, clsName);
-  cg_printf("r.get()->dynCreate(params, init);\n",
-            Option::ClassPrefix, clsName);
-  cg_printf("return r;\n");
   cg_indentEnd("}\n");
 }
 
@@ -943,45 +934,44 @@ void ClassScope::outputCPPDynamicClassCreateImpl
   bool useHashTable = (Option::GenHashTableDynClass && classes.size() > 0);
 
   // output create_object_only_no_init()
-  cg_indentBegin("Object create%s_object_only_no_init(const char *s, "
+  cg_indentBegin("ObjectData *create%s_object_only_no_init(const char *s, "
                  "ObjectData* root /* = NULL*/) {\n",
                  system ?  "_builtin" : "");
   if (withEval) {
     // See if there's an eval'd version
     cg_indentBegin("{\n");
-    cg_printf("Variant r;\n");
-    cg_printf("if (eval_create_object_only_hook(r, s, root)) "
+    cg_printf("if (ObjectData * r = eval_create_object_only_hook(s, root)) "
               "return r;\n");
     cg_indentEnd("}\n");
   }
   if (!useHashTable) {
     outputCPPClassJumpTable(cg, classScopes, classes,
                             "HASH_CREATE_OBJECT_ONLY");
+    if (system) {
+      cg_printf("throw_missing_class(s);\n");
+      cg_printf("return 0;\n");
+    } else {
+      cg_printf("return create_builtin_object_only_no_init(s, root);\n");
+    }
   } else {
     if (system) {
       cg_printf("const hashNodeCTD *p = findCTD(s, hash_string(s));\n"
                 "if (p) {\n"
-                "  return ((Object(*)())(p->ptr2))();\n"
+                "  return ((ObjectData*(*)())(p->ptr2))();\n"
                 "}\n"
-                "return throw_missing_class(s);\n");
+                "throw_missing_class(s);\n"
+                "return 0;\n");
     } else {
       cg.printDeclareGlobals();
       cg_printf("const hashNodeCTD *p = findCTD(s, hash_string(s));\n"
                 "if (!p) return create_builtin_object_only_no_init(s, root);\n"
                 "int64 off = p->off;\n"
-                "if (off == 0) return ((Object(*)())(p->ptr2))();\n"
+                "if (off == 0) return ((ObjectData*(*)())(p->ptr2))();\n"
                 "checkClassExists(s, g);\n"
-                "if (off < 0) return ((Object(*)())(p->ptr2))(); "
+                "if (off < 0) return ((ObjectData*(*)())(p->ptr2))(); "
                 "// volatile class\n"
                 "return g->tgv_ClassStaticsPtr[off-1]->createOnlyNoInit(root); "
                 "// redeclared class\n");
-    }
-  }
-  if (!useHashTable) {
-    if (system) {
-      cg_printf("return throw_missing_class(s);\n");
-    } else {
-      cg_printf("return create_builtin_object_only_no_init(s, root);\n");
     }
   }
   cg_indentEnd("}\n");
@@ -1586,7 +1576,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
   // Cloning
   cg_indentBegin("ObjectData *%s%s::cloneImpl() {\n",
                  Option::ClassPrefix, clsName);
-  cg_printf("ObjectData *obj = %s%s().detach();\n",
+  cg_printf("ObjectData *obj = %s%s();\n",
             Option::CreateObjectOnlyPrefix, clsName);
   cg_printf("%s%s::cloneSet(obj);\n", Option::ClassPrefix, clsName);
   cg_printf("return obj;\n");

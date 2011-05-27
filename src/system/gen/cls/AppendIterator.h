@@ -90,8 +90,7 @@ class c_AppendIterator : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_AppendIterator;
-Object co_AppendIterator(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_AppendIterator() NEVER_INLINE;
+ObjectData *coo_AppendIterator() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

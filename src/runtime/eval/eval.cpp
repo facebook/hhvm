@@ -76,14 +76,13 @@ bool eval_get_class_var_init_hook(Variant &res, const char *s,
   }
   return false;
 }
-bool eval_create_object_only_hook(Variant &res, const char *s,
-                                  ObjectData *root) {
+ObjectData *eval_create_object_only_hook(const char *s, ObjectData *root) {
   Eval::ClassEvalState *ce = Eval::RequestEvalState::findClassState(s, true);
   if (ce) {
-    res = ce->getClass()->create(*ce, root);
-    return true;
+    Object tmp = ce->getClass()->create(*ce, root);
+    return tmp.detach();
   }
-  return false;
+  return 0;
 }
 bool eval_try_autoload(const char *s) {
   return AutoloadHandler::s_instance->invokeHandler(String(s, CopyString),

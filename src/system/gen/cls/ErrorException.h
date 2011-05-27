@@ -71,8 +71,7 @@ class c_ErrorException : public c_Exception {
   DECLARE_METHOD_INVOKE_HELPERS(getseverity);
 };
 extern struct ObjectStaticCallbacks cw_ErrorException;
-Object co_ErrorException(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_ErrorException() NEVER_INLINE;
+ObjectData *coo_ErrorException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

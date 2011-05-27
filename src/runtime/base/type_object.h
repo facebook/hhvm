@@ -81,8 +81,8 @@ class Object : public SmartPtr<ObjectData> {
     return firstHash;
   }
 
-  static Object CreateDummy(Object(*cooFunc)());
-  static Object CreateDummy(Object(*cooFunc)(ObjectData*));
+  static Object CreateDummy(ObjectData*(*cooFunc)());
+  static Object CreateDummy(ObjectData*(*cooFunc)(ObjectData*));
 
   ArrayIter begin(CStrRef context = null_string,
                   bool setIterDirty = false) const;

@@ -95,7 +95,6 @@ const char *Option::BuiltinFunctionPrefix = "x_";
 const char *Option::InvokePrefix = "i_";
 const char *Option::InvokeFewArgsPrefix = "ifa_";
 const char *Option::InvokeSinglePrefix = "is_";
-const char *Option::CreateObjectPrefix = "co_";
 const char *Option::CreateObjectOnlyPrefix = "coo_";
 const char *Option::PseudoMainPrefix = "pm_";
 const char *Option::VariablePrefix = "v_";
@@ -309,7 +308,6 @@ void Option::Load(Hdf &config) {
     READ_CG_OPTION(FunctionPrefix);
     READ_CG_OPTION(BuiltinFunctionPrefix);
     READ_CG_OPTION(InvokePrefix);
-    READ_CG_OPTION(CreateObjectPrefix);
     READ_CG_OPTION(PseudoMainPrefix);
     READ_CG_OPTION(VariablePrefix);
     READ_CG_OPTION(HiddenVariablePrefix);

@@ -115,7 +115,7 @@ bool c_Directory::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_Directory::cloneImpl() {
-  ObjectData *obj = coo_Directory().detach();
+  ObjectData *obj = coo_Directory();
   c_Directory::cloneSet(obj);
   return obj;
 }
@@ -300,13 +300,8 @@ void c_Directory::t_close() {
   x_closedir(toObject(m_handle));
 }
 namespace hphp_impl_splitter {}
-Object coo_Directory() {
+ObjectData *coo_Directory() {
   return NEWOBJ(c_Directory)();
-}
-Object co_Directory(CArrRef params, bool init /* = true */) {
-  Object r(coo_Directory());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 Variant pm_php$classes$directory_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/directory.php, pm_php$classes$directory_php);

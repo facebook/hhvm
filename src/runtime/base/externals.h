@@ -120,8 +120,8 @@ extern Object create_builtin_object(const char *s, const Array &params,
                                     bool init = true, ObjectData *root = NULL);
 extern Object create_builtin_object_only(const char *s,
                                          ObjectData *root = NULL);
-extern Object create_builtin_object_only_no_init(const char *s,
-                                                 ObjectData *root = NULL);
+extern ObjectData *create_builtin_object_only_no_init(const char *s,
+                                                      ObjectData *root = NULL);
 /**
  * Dynamically include a file.
  */

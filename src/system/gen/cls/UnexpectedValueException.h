@@ -63,8 +63,7 @@ class c_UnexpectedValueException : public c_RuntimeException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_UnexpectedValueException;
-Object co_UnexpectedValueException(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_UnexpectedValueException() NEVER_INLINE;
+ObjectData *coo_UnexpectedValueException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

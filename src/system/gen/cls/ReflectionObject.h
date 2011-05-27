@@ -66,8 +66,7 @@ class c_ReflectionObject : public c_ReflectionClass {
   DECLARE_METHOD_INVOKE_HELPERS(export);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionObject;
-Object co_ReflectionObject(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_ReflectionObject() NEVER_INLINE;
+ObjectData *coo_ReflectionObject() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

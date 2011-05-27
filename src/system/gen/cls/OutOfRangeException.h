@@ -63,8 +63,7 @@ class c_OutOfRangeException : public c_LogicException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_OutOfRangeException;
-Object co_OutOfRangeException(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_OutOfRangeException() NEVER_INLINE;
+ObjectData *coo_OutOfRangeException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

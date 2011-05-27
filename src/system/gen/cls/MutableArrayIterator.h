@@ -70,8 +70,7 @@ class c_MutableArrayIterator : public c_ArrayIterator {
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
 };
 extern struct ObjectStaticCallbacks cw_MutableArrayIterator;
-Object co_MutableArrayIterator(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_MutableArrayIterator() NEVER_INLINE;
+ObjectData *coo_MutableArrayIterator() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

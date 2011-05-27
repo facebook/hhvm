@@ -91,8 +91,7 @@ class c_ReflectionExtension : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(getclasses);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionExtension;
-Object co_ReflectionExtension(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_ReflectionExtension() NEVER_INLINE;
+ObjectData *coo_ReflectionExtension() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

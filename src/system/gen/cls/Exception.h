@@ -91,8 +91,7 @@ class c_Exception : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(gettrace);
 };
 extern struct ObjectStaticCallbacks cw_Exception;
-Object co_Exception(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_Exception() NEVER_INLINE;
+ObjectData *coo_Exception() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

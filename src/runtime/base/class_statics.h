@@ -45,7 +45,7 @@ public:
   virtual Variant os_invoke(const char *c, const char *s, CArrRef params,
       int64 hash = -1, bool fatal = true);
   Object create(CArrRef params, bool init = true, ObjectData* root = NULL);
-  virtual Object createOnlyNoInit(ObjectData* root = NULL);
+  virtual ObjectData *createOnlyNoInit(ObjectData* root = NULL);
   virtual Variant os_constant(const char *s);
   virtual bool os_get_call_info(MethodCallPackage &info, int64 hash = -1);
 

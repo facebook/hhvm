@@ -117,7 +117,7 @@ bool c_Closure::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_Closure::cloneImpl() {
-  ObjectData *obj = coo_Closure().detach();
+  ObjectData *obj = coo_Closure();
   c_Closure::cloneSet(obj);
   return obj;
 }
@@ -468,7 +468,7 @@ bool c_Continuation::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_Continuation::cloneImpl() {
-  ObjectData *obj = coo_Continuation().detach();
+  ObjectData *obj = coo_Continuation();
   c_Continuation::cloneSet(obj);
   return obj;
 }
@@ -1012,7 +1012,7 @@ Variant c_Continuation::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::current);
   if (less(m_index, 0LL)) {
     {
-      throw_exception(((c_Exception*)((c_Exception*)(coo_Exception().get()))->create(NAMSTR(s_sys_ss791c5872, "Need to call next() first"))));
+      throw_exception(p_Exception(((c_Exception*)coo_Exception())->create(NAMSTR(s_sys_ss791c5872, "Need to call next() first"))));
     }
   }
   return m_value;
@@ -1023,7 +1023,7 @@ int64 c_Continuation::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::key);
   if (less(m_index, 0LL)) {
     {
-      throw_exception(((c_Exception*)((c_Exception*)(coo_Exception().get()))->create(NAMSTR(s_sys_ss791c5872, "Need to call next() first"))));
+      throw_exception(p_Exception(((c_Exception*)coo_Exception())->create(NAMSTR(s_sys_ss791c5872, "Need to call next() first"))));
     }
   }
   return m_index;
@@ -1045,12 +1045,12 @@ void c_Continuation::t_nextimpl() {
 
   if (m_done) {
     {
-      throw_exception(((c_Exception*)((c_Exception*)(coo_Exception().get()))->create(NAMSTR(s_sys_ssd222d509, "Continuation is already finished"))));
+      throw_exception(p_Exception(((c_Exception*)coo_Exception())->create(NAMSTR(s_sys_ssd222d509, "Continuation is already finished"))));
     }
   }
   if (m_running) {
     {
-      throw_exception(((c_Exception*)((c_Exception*)(coo_Exception().get()))->create(NAMSTR(s_sys_ssee112c62, "Continuation is already running"))));
+      throw_exception(p_Exception(((c_Exception*)coo_Exception())->create(NAMSTR(s_sys_ssee112c62, "Continuation is already running"))));
     }
   }
   m_running = true;
@@ -1097,7 +1097,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/closure.php line 114 */
 void c_Continuation::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::rewind);
-  throw_exception(((c_Exception*)((c_Exception*)(coo_Exception().get()))->create(NAMSTR(s_sys_ssfb726449, "Cannot rewind on a Continuation object"))));
+  throw_exception(p_Exception(((c_Exception*)coo_Exception())->create(NAMSTR(s_sys_ssfb726449, "Cannot rewind on a Continuation object"))));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/closure.php line 117 */
@@ -1111,7 +1111,7 @@ void c_Continuation::t_send(CVarRef v_v) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::send);
   if (less(m_index, 0LL)) {
     {
-      throw_exception(((c_Exception*)((c_Exception*)(coo_Exception().get()))->create(NAMSTR(s_sys_ss791c5872, "Need to call next() first"))));
+      throw_exception(p_Exception(((c_Exception*)coo_Exception())->create(NAMSTR(s_sys_ss791c5872, "Need to call next() first"))));
     }
   }
   m_received.assignVal(v_v);
@@ -1124,21 +1124,11 @@ Variant c_Continuation::t_receive() {
   return m_received;
 }
 namespace hphp_impl_splitter {}
-Object coo_Closure() {
+ObjectData *coo_Closure() {
   return NEWOBJ(c_Closure)();
 }
-Object co_Closure(CArrRef params, bool init /* = true */) {
-  Object r(coo_Closure());
-  r.get()->dynCreate(params, init);
-  return r;
-}
-Object coo_Continuation() {
+ObjectData *coo_Continuation() {
   return NEWOBJ(c_Continuation)();
-}
-Object co_Continuation(CArrRef params, bool init /* = true */) {
-  Object r(coo_Continuation());
-  r.get()->dynCreate(params, init);
-  return r;
 }
 Variant pm_php$classes$closure_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/closure.php, pm_php$classes$closure_php);

@@ -218,7 +218,6 @@ public:
   static const char *InvokePrefix;
   static const char *InvokeFewArgsPrefix;
   static const char *InvokeSinglePrefix;
-  static const char *CreateObjectPrefix;
   static const char *CreateObjectOnlyPrefix;
   static const char *PseudoMainPrefix;
   static const char *VariablePrefix;

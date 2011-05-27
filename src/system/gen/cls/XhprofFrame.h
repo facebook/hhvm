@@ -70,8 +70,7 @@ class c_XhprofFrame : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
 };
 extern struct ObjectStaticCallbacks cw_XhprofFrame;
-Object co_XhprofFrame(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_XhprofFrame() NEVER_INLINE;
+ObjectData *coo_XhprofFrame() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

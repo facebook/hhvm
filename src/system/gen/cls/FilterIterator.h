@@ -63,8 +63,7 @@ class c_FilterIterator : public ExtObjectData {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_FilterIterator;
-Object co_FilterIterator(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_FilterIterator() NEVER_INLINE;
+ObjectData *coo_FilterIterator() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

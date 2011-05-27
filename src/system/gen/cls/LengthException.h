@@ -63,8 +63,7 @@ class c_LengthException : public c_LogicException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_LengthException;
-Object co_LengthException(CArrRef params, bool init = true) NEVER_INLINE;
-Object coo_LengthException() NEVER_INLINE;
+ObjectData *coo_LengthException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

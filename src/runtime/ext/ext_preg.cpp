@@ -103,11 +103,11 @@ Variant f_eregi(CStrRef pattern, CStrRef str, VRefParam regs /* = null */) {
 // regexec
 
 Variant f_split(CStrRef pattern, CStrRef str, int limit /* = -1 */) {
-  return php_split(pattern, str, limit, true);
+  return php_split(pattern, str, limit, false);
 }
 
 Variant f_spliti(CStrRef pattern, CStrRef str, int limit /* = -1 */) {
-  return php_split(pattern, str, limit, false);
+  return php_split(pattern, str, limit, true);
 }
 
 String f_sql_regcase(CStrRef str) {

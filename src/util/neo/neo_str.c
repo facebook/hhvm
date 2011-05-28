@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
-#include <regex.h>
+#include <onigposix.h>
 #include "neo_misc.h"
 #include "neo_err.h"
 #include "neo_str.h"

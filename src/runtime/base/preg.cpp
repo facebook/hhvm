@@ -18,7 +18,7 @@
 #include <util/lock.h>
 #include <util/logger.h>
 #include <pcre.h>
-#include <regex.h>
+#include <onigposix.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/zend/zend_functions.h>

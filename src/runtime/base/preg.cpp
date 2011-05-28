@@ -16,6 +16,7 @@
 #include <runtime/base/string_util.h>
 #include <runtime/base/util/request_local.h>
 #include <util/lock.h>
+#include <util/logger.h>
 #include <pcre.h>
 #include <regex.h>
 #include <runtime/base/runtime_option.h>
@@ -359,6 +360,39 @@ static inline void add_offset_pair(Variant &result, CStrRef str, int offset,
   result.append(match_pair);
 }
 
+static inline bool pcre_need_log_error(int pcre_code) {
+  return RuntimeOption::EnablePregErrorLog &&
+         (pcre_code == PCRE_ERROR_MATCHLIMIT ||
+          pcre_code == PCRE_ERROR_RECURSIONLIMIT);
+}
+
+static void pcre_log_error(const char *func, int line, int pcre_code,
+                           const char *pattern, int pattern_size,
+                           const char *subject, int subject_size,
+                           const char *repl, int repl_size,
+                           int arg1 = 0, int arg2 = 0,
+                           int arg3 = 0, int arg4 = 0) {
+  const char *escapedPattern;
+  const char *escapedSubject;
+  const char *escapedRepl;
+  string p(pattern, pattern_size);
+  string s(subject, subject_size);
+  string r(repl, repl_size);
+  escapedPattern = Logger::EscapeString(p);
+  escapedSubject = Logger::EscapeString(s);
+  escapedRepl = Logger::EscapeString(r);
+  raise_debugging(
+    "REGEXERR: %s/%d: err=%d, pattern='%s', subject='%s', repl='%s', "
+    "limits=(%d, %d), extra=(%d, %d, %d, %d)",
+    func, line, pcre_code,
+    escapedPattern, escapedSubject, escapedRepl,
+    RuntimeOption::PregBacktraceLimit, RuntimeOption::PregRecursionLimit,
+    arg1, arg2, arg3, arg4);
+  free((void *)escapedPattern);
+  free((void *)escapedSubject);
+  free((void *)escapedRepl);
+}
+
 static void pcre_handle_exec_error(int pcre_code) {
   int preg_code = 0;
   switch (pcre_code) {
@@ -416,6 +450,13 @@ Variant preg_grep(CStrRef pattern, CArrRef input, int flags /* = 0 */) {
       raise_warning("Matched, but too many substrings");
       count = size_offsets / 3;
     } else if (count < 0 && count != PCRE_ERROR_NOMATCH) {
+      if (pcre_need_log_error(count)) {
+        pcre_log_error(__FUNCTION__, __LINE__, count,
+                       pattern.data(), pattern.size(),
+                       entry.data(), entry.size(),
+                       "", 0,
+                       flags);
+      }
       pcre_handle_exec_error(count);
       break;
     }
@@ -656,6 +697,13 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
       } else
         break;
     } else {
+      if (pcre_need_log_error(count)) {
+        pcre_log_error(__FUNCTION__, __LINE__, count,
+                       pattern.data(), pattern.size(),
+                       subject.data(), subject.size(),
+                       "", 0,
+                       flags, start_offset, g_notempty, global);
+      }
       pcre_handle_exec_error(count);
       break;
     }
@@ -976,6 +1024,13 @@ static String php_pcre_replace(CStrRef pattern, CStrRef subject,
         break;
       }
     } else {
+      if (pcre_need_log_error(count)) {
+        pcre_log_error(__FUNCTION__, __LINE__, count,
+                       pattern.data(), pattern.size(),
+                       subject.data(), subject.size(),
+                       replace_val.data(), replace_val.size(),
+                       callable, limit, start_offset, g_notempty);
+      }
       pcre_handle_exec_error(count);
       free(result);
       result = NULL;
@@ -1198,6 +1253,14 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
             raise_warning("Unknown error");
             offsets[0] = start_offset;
             offsets[1] = start_offset + 1;
+            if (pcre_need_log_error(count)) {
+              String spattern = pattern.toString();
+              pcre_log_error(__FUNCTION__, __LINE__, count,
+                             spattern.data(), spattern.size(),
+                             ssubject.data(), ssubject.size(),
+                             "", 0,
+                             limit, flags, start_offset);
+            }
           }
         } else {
           offsets[0] = start_offset;
@@ -1206,6 +1269,14 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
       } else
         break;
     } else {
+      if (pcre_need_log_error(count)) {
+        String spattern = pattern.toString();
+        pcre_log_error(__FUNCTION__, __LINE__, count,
+                       spattern.data(), spattern.size(),
+                       ssubject.data(), ssubject.size(),
+                       "", 0,
+                       limit, flags, start_offset, g_notempty);
+      }
       pcre_handle_exec_error(count);
       break;
     }

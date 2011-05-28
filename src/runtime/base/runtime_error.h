@@ -67,6 +67,8 @@ void raise_warning(const std::string &msg);
 void raise_warning(const char *fmt, ...);
 void raise_notice(const std::string &msg);
 void raise_notice(const char *fmt, ...);
+void raise_debugging(const std::string &msg);
+void raise_debugging(const char *fmt, ...);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

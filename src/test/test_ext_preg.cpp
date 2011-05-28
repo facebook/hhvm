@@ -349,8 +349,11 @@ bool TestExtPreg::test_preg_quote() {
 }
 
 bool TestExtPreg::test_preg_last_error() {
+  bool tmp = RuntimeOption::EnablePregErrorLog;
+  RuntimeOption::EnablePregErrorLog = false;
   f_preg_match("/(?:\\D+|<\\d+>)*[!?]/", "foobar foobar foobar");
   VS(f_preg_last_error(), 2);
+  RuntimeOption::EnablePregErrorLog = tmp;
   return Count(true);
 }
 

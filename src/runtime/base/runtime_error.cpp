@@ -120,6 +120,21 @@ void raise_warning(const char *fmt, ...) {
                          "HipHop Warning:  ");
 }
 
+void raise_debugging(const std::string &msg) {
+  g_context->handleError(msg, ErrorConstants::WARNING, true,
+                         ExecutionContext::NeverThrow,
+                         "HipHop Debugging:  ");
+}
+
+void raise_debugging(const char *fmt, ...) {
+  std::string msg;
+  va_list ap;
+  va_start(ap, fmt);
+  Util::string_vsnprintf(msg, fmt, ap);
+  va_end(ap);
+  raise_debugging(msg);
+}
+
 static int64 g_notice_counter = 0;
 
 void raise_notice(const std::string &msg) {

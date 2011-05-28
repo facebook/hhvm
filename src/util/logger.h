@@ -100,6 +100,7 @@ public:
 
   static bool checkDropCache(int &bytesWritten, int &prevBytesWritten,
                              FILE *f);
+  static char *EscapeString(const std::string &msg);
 
   virtual ~Logger() { }
 
@@ -137,8 +138,6 @@ protected:
    * [machine:thread:datetime].
    */
   static std::string GetHeader();
-
-  static char *EscapeString(const std::string &msg);
 private:
   static Logger *s_logger;
 

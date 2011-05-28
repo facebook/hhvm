@@ -225,7 +225,6 @@ Variant f_iterator_to_array(CVarRef obj, bool use_keys /* = true */) {
   return ret;
 }
 
-
 bool f_spl_autoload_register(CVarRef autoload_function /* = null_variant */,
                              bool throws /* = true */,
                              bool prepend /* = false */) {
@@ -256,14 +255,14 @@ bool f_spl_autoload_unregister(CVarRef autoload_function) {
 
 Variant f_spl_autoload_functions() {
   CArrRef handlers = AutoloadHandler::s_instance->getHandlers();
-  if (handlers.empty())
+  if (handlers.isNull())
     return false;
   else
     return handlers.values();
 }
 
 void f_spl_autoload_call(CStrRef class_name) {
-  AutoloadHandler::s_instance->invokeHandler(class_name, true);
+  AutoloadHandler::s_instance->invokeHandler(class_name, NULL, true);
 }
 
 namespace {

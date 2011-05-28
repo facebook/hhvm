@@ -521,8 +521,8 @@ public:
   void removeAllHandlers();
   bool isRunning();
 
-  bool invokeHandler(CStrRef className, bool checkDeclared,
-                     const bool *declared = NULL, bool autoloadExists = false);
+  bool invokeHandler(CStrRef className, const bool *declared = NULL,
+                     bool forceSplStack = false);
 
   DECLARE_STATIC_REQUEST_LOCAL(AutoloadHandler, s_instance);
 
@@ -535,31 +535,35 @@ private:
 
 void checkClassExists(CStrRef name, Globals *g, bool nothrow = false);
 
-bool autoloadClassThrow(CStrRef name, bool *declared);
-bool autoloadClassNoThrow(CStrRef name, bool *declared);
-bool autoloadInterfaceThrow(CStrRef name, bool *declared);
-bool autoloadInterfaceNoThrow(CStrRef name, bool *declared);
+bool autoloadClassThrow(CStrRef name, bool *declared = NULL);
+bool autoloadClassNoThrow(CStrRef name, bool *declared = NULL);
+bool autoloadInterfaceThrow(CStrRef name, bool *declared = NULL);
+bool autoloadInterfaceNoThrow(CStrRef name, bool *declared = NULL);
 
 inline ALWAYS_INLINE bool checkClassExistsThrow(CStrRef name,
                                                 bool *declared) {
+  ASSERT(declared);
   if (LIKELY(*declared)) return true;
   return autoloadClassThrow(name, declared);
 }
 
 inline ALWAYS_INLINE bool checkClassExistsNoThrow(CStrRef name,
                                                   bool *declared) {
+  ASSERT(declared);
   if (LIKELY(*declared)) return true;
   return autoloadClassNoThrow(name, declared);
 }
 
 inline ALWAYS_INLINE bool checkInterfaceExistsThrow(CStrRef name,
                                                     bool *declared) {
+  ASSERT(declared);
   if (LIKELY(*declared)) return true;
   return autoloadInterfaceThrow(name, declared);
 }
 
 inline ALWAYS_INLINE bool checkInterfaceExistsNoThrow(CStrRef name,
                                                       bool *declared) {
+  ASSERT(declared);
   if (LIKELY(*declared)) return true;
   return autoloadInterfaceNoThrow(name, declared);
 }

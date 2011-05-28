@@ -44,6 +44,8 @@ static StaticString s___autoload("__autoload");
 static StaticString s_self("self");
 static StaticString s_parent("parent");
 static StaticString s_static("static");
+static StaticString s_exception("exception");
+static StaticString s_previous("previous");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1176,7 +1178,7 @@ IMPLEMENT_REQUEST_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
 
 void AutoloadHandler::requestInit() {
   m_running = false;
-  m_handlers.clear();
+  m_handlers.reset();
 }
 
 void AutoloadHandler::requestShutdown() {
@@ -1195,39 +1197,64 @@ void AutoloadHandler::fiberExit(AutoloadHandler *handler,
   refMap.unmarshal(m_handlers, handler->m_handlers, default_strategy);
 }
 
-bool AutoloadHandler::invokeHandler(CStrRef className, bool checkDeclared,
-                                    const bool *declared /*= NULL*/,
-                                    bool autoloadExists /*= false*/) {
+bool AutoloadHandler::invokeHandler(CStrRef className,
+                                    const bool *declared /* = NULL */,
+                                    bool forceSplStack /* = false */) {
   Array params(ArrayInit(1, true).set(className).create());
   bool l_running = m_running;
   m_running = true;
-  if (m_handlers.empty()) {
+  if (m_handlers.isNull() && !forceSplStack) {
     if (function_exists(s___autoload)) {
       invoke(s___autoload, params, -1, true, false);
       m_running = l_running;
-      return true;
+      return (declared ? *declared : f_class_exists(className, false));
     }
     m_running = l_running;
     return false;
   } else {
+    Object autoloadException;
     for (ArrayIter iter(m_handlers); iter; ++iter) {
-      f_call_user_func_array(iter.second(), params);
-      if (checkDeclared) {
-        if (f_class_exists(className, false)) {
-          break;
+      try {
+        f_call_user_func_array(iter.second(), params);
+      } catch (Object& ex) {
+        ASSERT(ex.instanceof(s_exception));
+        if (autoloadException.isNull()) {
+          autoloadException = ex;
+        } else {
+          Object cur = ex;
+          Variant next = cur->o_get(s_previous, false, s_exception);
+          while (next.isObject()) {
+            cur = next.toObject();
+            next = cur->o_get(s_previous, false, s_exception);
+          }
+          cur->o_set(s_previous, autoloadException, false, s_exception);
+          autoloadException = ex;
         }
-      } else if (declared && *declared) {
-        break;
+      }
+      if (declared ? *declared : f_class_exists(className, false)) {
+        m_running = l_running;
+        if (!autoloadException.isNull()) {
+          throw autoloadException;
+        }
+        return true;
       }
     }
     m_running = l_running;
-    return true;
+    if (!autoloadException.isNull()) {
+      throw autoloadException;
+    }
+    return false;
   }
 }
 
 bool AutoloadHandler::addHandler(CVarRef handler, bool prepend) {
   String name = getSignature(handler);
   if (name.isNull()) return false;
+
+  if (m_handlers.isNull()) {
+    m_handlers = Array::Create();
+  }
+
   if (!prepend) {
     // The following ensures that the handler is added at the end
     m_handlers.remove(name, true);
@@ -1250,7 +1277,7 @@ void AutoloadHandler::removeHandler(CVarRef handler) {
 }
 
 void AutoloadHandler::removeAllHandlers() {
-  m_handlers.clear();
+  m_handlers.reset();
 }
 
 String AutoloadHandler::getSignature(CVarRef handler) {
@@ -1287,16 +1314,15 @@ bool function_exists(CStrRef function_name) {
 
 void checkClassExists(CStrRef name, Globals *g, bool nothrow /* = false */) {
   if (g->class_exists(name)) return;
-  AutoloadHandler::s_instance->invokeHandler(name, true);
-  if (nothrow) return;
-  if (!g->class_exists(name)) {
+  bool found = AutoloadHandler::s_instance->invokeHandler(name);
+  if (!found && !nothrow) {
     string msg = "unknown class ";
     msg += name.c_str();
     throw_fatal(msg.c_str());
   }
 }
 
-bool autoloadClassThrow(CStrRef name, bool *declared) {
+bool autoloadClassThrow(CStrRef name, bool *declared /* = NULL */) {
   if (autoloadClassNoThrow(name, declared)) return true;
   string msg = "unknown class ";
   msg += name.c_str();
@@ -1304,12 +1330,11 @@ bool autoloadClassThrow(CStrRef name, bool *declared) {
   return false;
 }
 
-bool autoloadClassNoThrow(CStrRef name, bool *declared) {
-  AutoloadHandler::s_instance->invokeHandler(name, false, declared);
-  return declared && *declared;
+bool autoloadClassNoThrow(CStrRef name, bool *declared /* = NULL */) {
+  return AutoloadHandler::s_instance->invokeHandler(name, declared);
 }
 
-bool autoloadInterfaceThrow(CStrRef name, bool *declared) {
+bool autoloadInterfaceThrow(CStrRef name, bool *declared /* = NULL */) {
   if (autoloadInterfaceNoThrow(name, declared)) return true;
   string msg = "unknown interface ";
   msg += name.c_str();
@@ -1317,9 +1342,8 @@ bool autoloadInterfaceThrow(CStrRef name, bool *declared) {
   return false;
 }
 
-bool autoloadInterfaceNoThrow(CStrRef name, bool *declared) {
-  AutoloadHandler::s_instance->invokeHandler(name, false, declared);
-  return declared && *declared;
+bool autoloadInterfaceNoThrow(CStrRef name, bool *declared /* = NULL */) {
+  return AutoloadHandler::s_instance->invokeHandler(name, declared);
 }
 
 Variant &get_static_property_lval(const char *s, const char *prop) {

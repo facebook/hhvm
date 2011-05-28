@@ -44,7 +44,7 @@ bool f_class_exists(CStrRef class_name, bool autoload /* = true */) {
   const ClassInfo *info = ClassInfo::FindClass(class_name);
 
   if (autoload && (!info || (info->getAttribute() & ClassInfo::IsVolatile))) {
-    autoloadClassNoThrow(class_name, (bool*)0);
+    autoloadClassNoThrow(class_name);
     if (!info) {
       // interpreter might have added the class info
       return ClassInfo::FindClass(class_name);
@@ -62,7 +62,7 @@ bool f_interface_exists(CStrRef interface_name, bool autoload /* = true */) {
   const ClassInfo *info = ClassInfo::FindInterface(interface_name);
 
   if (autoload && (!info || (info->getAttribute() & ClassInfo::IsVolatile))) {
-    autoloadInterfaceNoThrow(interface_name, (bool*)0);
+    autoloadInterfaceNoThrow(interface_name);
     if (!info && ClassInfo::FindInterface(interface_name)) {
       // interpreter might have added the interface
       return true;

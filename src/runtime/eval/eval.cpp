@@ -85,8 +85,7 @@ ObjectData *eval_create_object_only_hook(const char *s, ObjectData *root) {
   return 0;
 }
 bool eval_try_autoload(const char *s) {
-  return AutoloadHandler::s_instance->invokeHandler(String(s, CopyString),
-                                                    true);
+  return AutoloadHandler::s_instance->invokeHandler(String(s, CopyString));
 }
 bool eval_invoke_static_method_hook(Variant &res, const char *s,
                                     const char* method, CArrRef params,

@@ -1557,6 +1557,7 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
   }
 
   bool delayVars = true;
+  bool pushStack = false;
 
   switch (e->getKindOf()) {
     case Expression::KindOfQOpExpression:
@@ -1581,14 +1582,27 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
       break;
 
     case Expression::KindOfExpressionList:
+      delayVars = false;
+      break;
+
     case Expression::KindOfObjectMethodExpression:
     case Expression::KindOfDynamicFunctionCall:
     case Expression::KindOfSimpleFunctionCall:
       delayVars = false;
+      // fall through
+      
+    case Expression::KindOfNewObjectExpression:
+      pushStack = m_accessList.size() > 0;
       break;
 
     default:
       break;
+  }
+
+  ExpressionPtr aBack;
+  if (pushStack) {
+    aBack = m_accessList.back();
+    ASSERT(aBack);
   }
 
   int n = e->getKidCount();
@@ -1619,7 +1633,10 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
     }
   }
 
-  return canonicalizeNode(e);
+  if (pushStack) m_exprBeginStack.push_back(aBack);
+  ExpressionPtr ret(canonicalizeNode(e));
+  if (pushStack) m_exprBeginStack.pop_back();
+  return ret;
 }
 
 StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
@@ -2606,13 +2623,19 @@ void AliasManager::markAllLocalExprAltered(ExpressionPtr e) {
   e->setLocalExprAltered();
   ExpressionPtrList::reverse_iterator it(m_accessList.rbegin());
   int curIdx = m_accessList.size() - 1;
+  bool found = m_exprBeginStack.empty();
   for (; curIdx >= m_exprIdx; --curIdx, ++it) {
     ExpressionPtr p(*it);
-    bool isLoad; int depth, effects;
-    int interf = checkAnyInterf(e, p, isLoad, depth, effects);
-    if (interf == InterfAccess ||
-        interf == SameAccess) {
-      p->setLocalExprAltered();
+    if (!found && p == m_exprBeginStack.back()) {
+      found = true;
+    }
+    if (found) {
+      bool isLoad; int depth, effects;
+      int interf = checkAnyInterf(e, p, isLoad, depth, effects);
+      if (interf == InterfAccess ||
+          interf == SameAccess) {
+        p->setLocalExprAltered();
+      }
     }
   }
 }

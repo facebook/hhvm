@@ -301,6 +301,7 @@ private:
 
   // parser output
   StatementPtr m_tree;
+  bool m_errorHandled;
 
   void pushClass(ClassStatementPtr cl);
   void popClass();
@@ -327,13 +328,6 @@ private:
   bool hasType(Token &type);
 
   void throw_invalid_lval();
-  class ParserFrameInjection : public FrameInjection {
-  public:
-    ParserFrameInjection(const char *func, const char *fileName);
-    String getFileName() { return m_file; }
-  private:
-    const char *m_file;
-  };
 };
 
 ///////////////////////////////////////////////////////////////////////////////

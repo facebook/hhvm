@@ -295,6 +295,11 @@ String FrameInjection::getFileName() {
       static_cast<Eval::EvalFrameInjection*>(this);
     return efi->getFileNameEval();
   }
+  if (isParserFrame()) {
+    Eval::ParserFrameInjection *pfi =
+      static_cast<Eval::ParserFrameInjection*>(this);
+    return pfi->getFileName();
+  }
   const char *c = strstr(m_name, "::");
   const char *f = NULL;
   if (c) {

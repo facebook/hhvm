@@ -33,7 +33,8 @@ public:
     EvalFrame       =  1 << 3,
     Function        =  1 << 4,
     StaticMethod    =  1 << 5,
-    ObjectMethod    =  1 << 6
+    ObjectMethod    =  1 << 6,
+    ParserFrame     =  1 << 7
  };
 
   static CStrRef GetClassName(bool skip = false);
@@ -130,6 +131,7 @@ public:
   ThreadInfo* getThreadInfo() const { return m_info;}
 
   bool isEvalFrame() const { return m_flags & EvalFrame; }
+  bool isParserFrame() const { return m_flags & ParserFrame; }
   bool isFunctionFrame() const { return m_flags & Function; }
   bool isStaticMethodFrame() const { return m_flags & StaticMethod; }
   bool isObjectMethodFrame() const { return m_flags & ObjectMethod; }

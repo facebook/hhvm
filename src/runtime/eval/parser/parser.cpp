@@ -183,9 +183,9 @@ void Token::operator=(Token &other) {
   }
 }
 
-Parser::ParserFrameInjection::ParserFrameInjection(
+ParserFrameInjection::ParserFrameInjection(
   const char *func, const char *fileName) :
-    FrameInjection(func, 0),
+    FrameInjection(func, ParserFrame),
     m_file(fileName) {}
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -213,11 +213,16 @@ StatementPtr Parser::ParseFile(const char *fileName,
   try {
     Scanner scanner(fileName, RuntimeOption::ScannerType);
     Parser parser(scanner, fileName, statics);
-    if (parser.parse()) {
-      variableIndices = parser.varIndices();
-      return parser.getTree();
+    try {
+      if (parser.parse()) {
+        variableIndices = parser.varIndices();
+        return parser.getTree();
+      }
+    } catch (FatalErrorException &e) {
+      if (parser.m_errorHandled) throw;
+      parser.error("%s", e.getMessage().c_str());
     }
-    raise_error("Error parsing %s: %s", fileName, parser.getMessage().c_str());
+    parser.error("Parser error: %s", parser.getMessage().c_str());
   } catch (FileOpenException &e) {
     // ignore
   }
@@ -228,7 +233,8 @@ StatementPtr Parser::ParseFile(const char *fileName,
 
 Parser::Parser(Scanner &scanner, const char *fileName,
                vector<StaticStatementPtr> &statics)
-    : ParserBase(scanner, fileName), m_staticStatements(statics) {
+    : ParserBase(scanner, fileName), m_staticStatements(statics),
+      m_errorHandled(false) {
   m_prependingStatements.push_back(vector<StatementPtr>());
 }
 
@@ -238,7 +244,7 @@ void Parser::error(const char* fmt, ...) {
   string msg;
   Util::string_vsnprintf(msg, fmt, ap);
   va_end(ap);
-
+  m_errorHandled = true;
   ParserFrameInjection fi("include", m_fileName);
   fi.setLine(line1());
   raise_error("%s", msg.c_str());

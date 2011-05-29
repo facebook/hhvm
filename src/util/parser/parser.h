@@ -91,21 +91,21 @@ public:
   std::string getMessage(Location *loc, bool filename = false) const;
   LocationPtr getLocation() const;
   void getLocation(Location &loc) const {
-    loc = *m_loc;
+    loc = m_loc;
     loc.file = file();
   }
 
-  int line0() const { return m_loc->line0;}
-  int char0() const { return m_loc->char0;}
-  int line1() const { return m_loc->line1;}
-  int char1() const { return m_loc->char1;}
+  int line0() const { return m_loc.line0;}
+  int char0() const { return m_loc.char0;}
+  int line1() const { return m_loc.line1;}
+  int char1() const { return m_loc.char1;}
 
   // called by generated code
   int scan(ScannerToken *token, Location *loc) {
     return m_scanner.getNextToken(*token, *loc);
   }
   void setRuleLocation(Location *loc) {
-    m_loc = loc;
+    m_loc = *loc;
   }
   void fatal(Location *loc, ParserBase *parser, const char *msg) {}
 
@@ -133,7 +133,7 @@ protected:
   Scanner &m_scanner;
   const char *m_fileName;
 
-  Location *m_loc;
+  Location m_loc;
   LocationPtrVec m_funcLocs;
 
   // for goto syntax checking

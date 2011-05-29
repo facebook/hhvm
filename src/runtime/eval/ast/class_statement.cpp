@@ -154,11 +154,9 @@ void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
       const MethodStatement *mmit = mit->second.first;
       if (mods & Final) {
         throw FatalErrorException(0,
-                                  "Cannot override final method %s::%s() at "
-                                  "%s:%d",
+                                  "Cannot override final method %s::%s()",
                                   mmit->getClass()->name().c_str(),
-                                  (*it)->name().c_str(), (*it)->loc()->file,
-                                  (*it)->loc()->line1);
+                                  (*it)->name().c_str());
       } else if ((mods & (Public|Protected|Private)) <
                  ((*it)->getModifiers() & (Public|Protected|Private))) {
         const char *al = "public";
@@ -169,12 +167,11 @@ void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
         }
         throw FatalErrorException(0,
                                   "Access level to %s must be %s or weaker "
-                                  "(as in class %s) at %s:%d",
+                                  "(as in class %s)",
                                   (*it)->name().c_str(), al,
                                   mmit ?
                                   mmit->getClass()->name().c_str() :
-                                  m_parent.c_str(),(*it)->loc()->file,
-                                  (*it)->loc()->line1);
+                                  m_parent.c_str());
       }
       mit->second.first = it->get();
       mit->second.second = (*it)->getModifiers();
@@ -340,31 +337,26 @@ void ClassStatement::addVariable(ClassVariablePtr v) {
 
 void ClassStatement::addMethod(MethodStatementPtr m) {
   if (m_methods.find(m->name().c_str()) != m_methods.end()) {
-    raise_error("Cannot redeclare %s::%s() in %s on line %d",
-                m_name.c_str(), m->name().c_str(),
-                m->loc()->file, m->loc()->line1);
+    raise_error("Cannot redeclare %s::%s()",
+                m_name.c_str(), m->name().c_str());
   }
   if (m->getModifiers() & Abstract) {
     if (m->getModifiers() & Private) {
-      raise_error("Cannot declare abstract %s::%s() private in %s on line %d",
-                  m_name.c_str(), m->name().c_str(),
-                  m->loc()->file, m->loc()->line1);
+      raise_error("Cannot declare abstract %s::%s() private",
+                  m_name.c_str(), m->name().c_str());
     }
     if (m->getModifiers() & Final) {
-      raise_error("Cannot declare abstract %s::%s() final in %s on line %d",
-                  m_name.c_str(), m->name().c_str(),
-                  m->loc()->file, m->loc()->line1);
+      raise_error("Cannot declare abstract %s::%s() final",
+                  m_name.c_str(), m->name().c_str());
     }
     if (m->hasBody()) {
-      raise_error("Abstract %s::%s() cannot contain body in %s on line %d",
-                  m_name.c_str(), m->name().c_str(),
-                  m->loc()->file, m->loc()->line1);
+      raise_error("Abstract %s::%s() cannot contain body",
+                  m_name.c_str(), m->name().c_str());
     }
   } else if (!m->hasBody()) {
     if (!(m_modifiers & Interface)) {
-      raise_error("Non-abstract %s::%s() must contain body in %s on line %d",
-                  m_name.c_str(), m->name().c_str(),
-                  m->loc()->file, m->loc()->line1);
+      raise_error("Non-abstract %s::%s() must contain body",
+                  m_name.c_str(), m->name().c_str());
     } else if (m->getModifiers() & Protected) {
       raise_error("Access type for interface method %s::%s() must be "
                   "omitted", m_name.c_str(), m->name().c_str());
@@ -377,8 +369,7 @@ void ClassStatement::addMethod(MethodStatementPtr m) {
 void ClassStatement::addConstant(const string &name, ExpressionPtr v) {
   // Array is the only one allowed by the grammer but disallowed semantically
   if (v->is<ArrayExpression>()) {
-    raise_error("Arrays are not allowed in class constants on %s:%d",
-                v->loc()->file, v->loc()->line1);
+    raise_error("Arrays are not allowed in class constants");
   }
   m_constantNames.push_back(AtomicString(name));
   m_constants[m_constantNames.back()] = v;
@@ -857,33 +848,31 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
 
         if ((tmod & Static) && !(pmod & Static)) {
           raise_error("Cannot make non static method %s::%s() static in "
-              "class %s in %s on line %d",
+              "class %s",
               mClass->name().c_str(), m->name().c_str(),
-              m_name.c_str(), (*it)->loc()->file, (*it)->loc()->line1);
+              m_name.c_str());
         }
 
         if (!(tmod & Static) && (pmod & Static)) {
           raise_error("Cannot make static method %s::%s() non static in "
-              "class %s in %s on line %d",
+              "class %s",
               mClass->name().c_str(), m->name().c_str(),
-              m_name.c_str(), (*it)->loc()->file, (*it)->loc()->line1);
+              m_name.c_str());
         }
 
         if (tmod & Abstract || iface) {
           if (!(pmod & Abstract) && (tmod & Abstract)) {
             raise_error("Cannot make non abstract method %s::%s() abstract in "
-                "class %s in %s on line %d",
+                "class %s",
                 mClass->name().c_str(), m->name().c_str(),
-                m_name.c_str(), (*it)->loc()->file,
-                (*it)->loc()->line1);
+                m_name.c_str());
           }
 
           if (pmod & Abstract || ifaceParent) {
             raise_error("Cannot re-declare abstract method %s::%s() abstract "
-                "in class %s in %s on line %d",
+                "in class %s",
                 mClass->name().c_str(), m->name().c_str(),
-                m_name.c_str(), (*it)->loc()->file,
-                (*it)->loc()->line1);
+                m_name.c_str());
           }
         }
         int m1 = (*it)->getModifiers();

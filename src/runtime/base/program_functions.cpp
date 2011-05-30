@@ -974,6 +974,10 @@ public:
 };
 static IMPLEMENT_THREAD_LOCAL(WarmupState, s_warmup_state);
 
+extern "C" void hphp_fatal_error(const char *s) {
+  throw_fatal(s);
+}
+
 void hphp_process_init() {
   Variant::RuntimeCheck();
   init_thread_locals();

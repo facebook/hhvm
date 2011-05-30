@@ -1019,14 +1019,14 @@ public:
       overflowCalls++;
       return false;
     }
+    int new_array_size;
     if (s_n_backing == 0) {
-      s_n_backing = RuntimeOption::ProfilerTraceBuffer;
+      new_array_size = RuntimeOption::ProfilerTraceBuffer;
     } else {
-      int new_array_size = s_n_backing * RuntimeOption::ProfilerTraceExpansion;
-      if (maxTraceBuffer != 0 && new_array_size > maxTraceBuffer)
-      {
-        new_array_size = maxTraceBuffer > s_n_backing
-                                ? maxTraceBuffer : s_n_backing;
+      new_array_size = s_n_backing * RuntimeOption::ProfilerTraceExpansion;
+      if (maxTraceBuffer != 0 && new_array_size > maxTraceBuffer) {
+        new_array_size = maxTraceBuffer > s_n_backing ?
+          maxTraceBuffer : s_n_backing;
       }
       if (new_array_size - nTrace <= 5) {
         // for this operation to succeed, we need room for the entry we're
@@ -1036,17 +1036,26 @@ public:
         collectStats("(trace buffer terminated)", s_trace[nTrace++]);
         return false;
       }
-      collectStats("(trace buffer realloc)", s_trace[nTrace++]);
-      s_n_backing = new_array_size;
       track_realloc = TRUE;
     }
     {
       DECLARE_THREAD_INFO
       MemoryManager::MaskAlloc masker(info->m_mm);
-      s_trace = (TraceEntry*)realloc((void *)s_trace,
-                                    s_n_backing * sizeof(TraceEntry));
+      TraceEntry *r = (TraceEntry*)realloc((void *)s_trace,
+                                           new_array_size * sizeof(TraceEntry));
+
+      if (!r) {
+        full = true;
+        if (s_trace) {
+          collectStats("(trace buffer terminated)", s_trace[nTrace++]);
+        }
+        return false;
+      }
+      s_n_backing = new_array_size;
+      s_trace = r;
     }
     if (track_realloc) {
+      collectStats("(trace buffer realloc)", s_trace[nTrace++]);
       collectStats(NULL, s_trace[nTrace++]);
     }
     return true;

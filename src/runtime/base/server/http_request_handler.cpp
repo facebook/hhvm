@@ -51,20 +51,25 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
                                            const char *data, int len,
                                            time_t mtime,
                                            bool compressed,
-                                           const std::string &cmd) {
-  size_t pos = cmd.rfind('.');
-  ASSERT(pos != string::npos);
-  const char *ext = cmd.c_str() + pos + 1;
+                                           const std::string &cmd,
+                                           const char *ext) {
+  ASSERT(ext);
+  ASSERT(strcmp(ext, cmd.rfind('.') == string::npos ? 
+        NULL : cmd.c_str() + pos + 1) == 0);
   hphp_string_imap<string>::const_iterator iter =
     RuntimeOption::StaticFileExtensions.find(ext);
   if (iter != RuntimeOption::StaticFileExtensions.end()) {
     string val = iter->second;
-    if (val == "text/plain" || val == "text/html") {
+    const char *valp = val.c_str();
+    if (strncmp(valp, "text/", 5)  == 0 &&
+        (strcmp(valp + 5, "plain") == 0 ||
+         strcmp(valp + 5, "html")  == 0)) {
       // Apache adds character set for these two types
       val += "; charset=";
       val += RuntimeOption::DefaultCharsetName;
+      valp = val.c_str();
     }
-    transport->addHeader("Content-Type", val.c_str());
+    transport->addHeader("Content-Type", valp);
   } else {
     transport->addHeader("Content-Type", "application/octet-stream");
   }
@@ -176,8 +181,6 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
       bool original = compressed;
       // check against static content cache
       if (StaticContentCache::TheCache.find(path, data, len, compressed)) {
-        struct stat st;
-        st.st_mtime = 0;
         String str;
         // (qigao) not calling stat at this point because the timestamp of
         // local cache file is not valuable, maybe misleading. This way
@@ -191,7 +194,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
           compressed = false;
           str = NEW(StringData)(data, len, AttachString);
         }
-        sendStaticContent(transport, data, len, st.st_mtime, compressed, path);
+        sendStaticContent(transport, data, len, 0, compressed, path, ext);
         StaticContentCache::TheFileCache->adviseOutMemory();
         ServerStats::LogPage(path, 200);
         return;
@@ -207,7 +210,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
           st.st_mtime = 0;
           stat(translated.data(), &st);
           sendStaticContent(transport, sb.data(), sb.size(), st.st_mtime,
-                            false, path);
+                            false, path, ext);
           ServerStats::LogPage(path, 200);
           return;
         }
@@ -220,7 +223,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
       ASSERT(transport->getUrl());
       string key = path + transport->getUrl();
       if (DynamicContentCache::TheCache.find(key, data, len, compressed)) {
-        sendStaticContent(transport, data, len, 0, compressed, path);
+        sendStaticContent(transport, data, len, 0, compressed, path, ext);
         ServerStats::LogPage(path, 200);
         return;
       }

@@ -47,7 +47,8 @@ private:
   bool handleProxyRequest(Transport *transport, bool force);
   void sendStaticContent(Transport *transport, const char *data, int len,
                          time_t mtime, bool compressed,
-                         const std::string &cmd);
+                         const std::string &cmd,
+                         const char *ext);
   bool executePHPRequest(Transport *transport, RequestURI &reqURI,
                          SourceRootInfo &sourceRootInfo,
                          bool cachableDynamicContent);

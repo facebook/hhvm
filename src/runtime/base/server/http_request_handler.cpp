@@ -54,8 +54,9 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
                                            const std::string &cmd,
                                            const char *ext) {
   ASSERT(ext);
-  ASSERT(strcmp(ext, cmd.rfind('.') == string::npos ? 
-        NULL : cmd.c_str() + pos + 1) == 0);
+  ASSERT(cmd.rfind('.') != string::npos);
+  ASSERT(strcmp(ext, cmd.c_str() + cmd.rfind('.') + 1) == 0);
+
   hphp_string_imap<string>::const_iterator iter =
     RuntimeOption::StaticFileExtensions.find(ext);
   if (iter != RuntimeOption::StaticFileExtensions.end()) {

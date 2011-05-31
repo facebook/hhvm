@@ -23,7 +23,6 @@
 #include "log_aggregator.h"
 #include "text_color.h"
 #include <util/atomic.h>
-#include <runtime/base/runtime_option.h>
 
 using namespace std;
 
@@ -55,6 +54,7 @@ IMPLEMENT_LOGLEVEL(Verbose, false);
 bool Logger::UseLogAggregator = false;
 bool Logger::UseLogFile = true;
 bool Logger::UseCronolog = true;
+bool Logger::IsPipeOutput = false;
 int Logger::DropCacheChunkSize = (1 << 20);
 FILE *Logger::Output = NULL;
 Cronolog Logger::cronOutput;
@@ -189,7 +189,7 @@ void Logger::log(bool err, const std::string &msg,
     }
 
     fflush(f);
-    if (UseCronolog || (Output && RuntimeOption::LogFile[0] != '|')) {
+    if (UseCronolog || (Output && !Logger::IsPipeOutput)) {
       checkDropCache(bytesWritten, prevBytesWritten, f);
     }
   }

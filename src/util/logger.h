@@ -49,6 +49,7 @@ public:
 
   static bool UseLogAggregator;
   static bool UseLogFile;
+  static bool IsPipeOutput;
   static bool UseCronolog;
   static int DropCacheChunkSize;
   static FILE *Output;

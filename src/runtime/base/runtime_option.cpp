@@ -492,6 +492,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     Logger::UseCronolog = logger["UseCronolog"].getBool(false);
     if (Logger::UseLogFile) {
       LogFile = logger["File"].getString();
+      if (LogFile[0] == '|') Logger::IsPipeOutput = true;
       LogFileSymLink = logger["SymLink"].getString();
     }
     Logger::DropCacheChunkSize =

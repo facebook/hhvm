@@ -606,7 +606,7 @@ static int open_server_log_file() {
         if (Logger::Output) return 1;
       }
     } else {
-      if (RuntimeOption::LogFile[0] == '|') {
+      if (Logger::IsPipeOutput) {
         Logger::Output = popen(RuntimeOption::LogFile.substr(1).c_str(), "w");
         if (Logger::Output) return 2;
       } else {

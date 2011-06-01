@@ -1815,20 +1815,17 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
         if (func) {
           bool isGetArgs = m_name == "func_get_args";
           if (func->isGenerator()) {
-            cg_printf("%s%s.%sinvoke(\"%s\", ",
+            cg_printf("%s%s->%s%s(",
                       Option::VariablePrefix, CONTINUATION_OBJECT_NAME,
-                      Option::ObjectPrefix,
+                      Option::MethodPrefix,
                       isGetArgs ? "get_args" : "get_arg");
-            cg_printf("Array(ArrayInit(%d, true)",
-                      m_params ? m_params->getCount() : 0);
             if (m_params) {
               for (int i = 0; i < m_params->getCount(); i++) {
-                cg_printf(".set(");
+                if (i) cg_printf(",");
                 (*m_params)[i]->outputCPP(cg, ar);
-                cg_printf(")");
               }
             }
-            cg_printf(".create()))%s", isGetArgs ? ".toArray()" : "");
+            cg_printf(")");
             return;
           }
           if (isGetArgs &&

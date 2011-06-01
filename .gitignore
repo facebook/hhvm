@@ -45,7 +45,7 @@
 /facebook/extensions/string/test_string
 /facebook/extensions/photodna/test_photodna
 /facebook/extensions/utils/test_utils
-
+/facebook/extensions/fbobj_cache/test_fbobj_cache
 /local/*.mk
 
 CMakeFiles

@@ -44,7 +44,7 @@ class Continuation extends Closure implements Iterator {
     $this->args = $args;
   }
   public function update($label, $value, $vars) {
-    $this->label = $label;
+    $this->label = (int)$label;
     $this->value = $value;
     parent::setVars($vars);
   }
@@ -60,7 +60,7 @@ class Continuation extends Closure implements Iterator {
     return count($this->args);
   }
   public function get_args() {
-    return $this->args;
+    return (array)$this->args;
   }
   public function get_arg($id) {
     if ($id < 0 || $id >= count($this->args)) {

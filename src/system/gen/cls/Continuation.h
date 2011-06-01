@@ -33,7 +33,7 @@ class c_Continuation : public c_Closure {
   // Properties
   Variant m_obj;
   Variant m_args;
-  Variant m_label;
+  int64 m_label;
   bool m_done;
   int64 m_index;
   Variant m_value;
@@ -77,9 +77,9 @@ class c_Continuation : public c_Closure {
   public: void getConstructor(MethodCallPackage &mcp);
   public: void t_update(CVarRef v_label, CVarRef v_value, CVarRef v_vars);
   public: void t_done();
-  public: Variant t_getlabel();
+  public: int64 t_getlabel();
   public: int t_num_args();
-  public: Variant t_get_args();
+  public: Array t_get_args();
   public: Variant t_get_arg(CVarRef v_id);
   public: Variant t_current();
   public: int64 t_key();

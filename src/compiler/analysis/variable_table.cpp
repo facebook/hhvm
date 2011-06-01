@@ -225,7 +225,10 @@ const char *VariableTable::getVariablePrefix(const Symbol *sym) const {
     }
   }
 
-  if (sym->isHidden()) return Option::HiddenVariablePrefix;
+  if (sym->isHidden() && !sym->isParameter()) {
+    return Option::HiddenVariablePrefix;
+  }
+
   return Option::VariablePrefix;
 }
 
@@ -249,7 +252,7 @@ string VariableTable::getVariableName(CodeGenerator &cg,
       return getGlobalVariableName(cg, ar, name);
     }
   }
-  return (sym->isHidden() ?
+  return (sym->isHidden() && !sym->isParameter() ?
           Option::HiddenVariablePrefix : Option::VariablePrefix) +
     cg.formatLabel(name);
 }

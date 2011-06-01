@@ -31,6 +31,7 @@
 #include <compiler/option.h>
 #include <compiler/builtin_symbols.h>
 #include <compiler/analysis/alias_manager.h>
+#include <util/parser/parser.h>
 
 using namespace HPHP;
 using namespace std;
@@ -138,7 +139,6 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
   setBlockScope(funcScope);
 
   funcScope->setParamCounts(ar, -1, -1);
-
   return funcScope;
 }
 
@@ -227,6 +227,11 @@ void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     funcScope->setParamSpecs(ar);
+    if (funcScope->isGenerator()) {
+      VariableTablePtr variables = funcScope->getVariables();
+      Symbol *cont = variables->getSymbol(CONTINUATION_OBJECT_NAME);
+      cont->setHidden();
+    }
     if (funcScope->isSepExtension() ||
         BuiltinSymbols::IsDeclaredDynamic(m_name) ||
         Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {

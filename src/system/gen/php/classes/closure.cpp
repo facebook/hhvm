@@ -369,7 +369,7 @@ Variant &c_Continuation::os_lval(CStrRef s) {
 void c_Continuation::o_getArray(Array &props, bool pubOnly) const {
   if (!pubOnly) if (isInitialized(m_obj)) props.lvalAt(NAMSTR(s_sys_ssc9ae0c06, "\000Continuation\000obj"), AccessFlags::Key).setWithRef(m_obj);
   if (!pubOnly) if (isInitialized(m_args)) props.lvalAt(NAMSTR(s_sys_ss9621feb5, "\000Continuation\000args"), AccessFlags::Key).setWithRef(m_args);
-  if (!pubOnly) if (isInitialized(m_label)) props.lvalAt(NAMSTR(s_sys_ss40877955, "\000Continuation\000label"), AccessFlags::Key).setWithRef(m_label);
+  if (!pubOnly) props.add(NAMSTR(s_sys_ss40877955, "\000Continuation\000label"), m_label, true);
   if (!pubOnly) props.add(NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done"), m_done, true);
   if (!pubOnly) props.add(NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index"), m_index, true);
   if (!pubOnly) if (isInitialized(m_value)) props.lvalAt(NAMSTR(s_sys_ss4e65aff3, "\000Continuation\000value"), AccessFlags::Key).setWithRef(m_value);
@@ -382,7 +382,7 @@ void c_Continuation::o_getArray(Array &props, bool pubOnly) const {
 void c_Continuation::o_setArray(CArrRef props) {
   props->load(NAMSTR(s_sys_ssc9ae0c06, "\000Continuation\000obj"), m_obj);
   props->load(NAMSTR(s_sys_ss9621feb5, "\000Continuation\000args"), m_args);
-  props->load(NAMSTR(s_sys_ss40877955, "\000Continuation\000label"), m_label);
+  if (props->exists(NAMSTR(s_sys_ss40877955, "\000Continuation\000label"))) m_label = props->get(NAMSTR(s_sys_ss40877955, "\000Continuation\000label"));
   if (props->exists(NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done"))) m_done = props->get(NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done"));
   if (props->exists(NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index"))) m_index = props->get(NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index"));
   props->load(NAMSTR(s_sys_ss4e65aff3, "\000Continuation\000value"), m_value);
@@ -416,7 +416,7 @@ Variant * c_Continuation::o_realPropPrivate(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 15) {
     case 0:
-      HASH_REALPROP_STRING(0x3BA4EC7C8E83E5E0LL, "label", 5, label);
+      HASH_REALPROP_TYPED_STRING(0x3BA4EC7C8E83E5E0LL, "label", 5, label);
       HASH_REALPROP_TYPED_STRING(0x3640AC1AE9A5E090LL, "running", 7, running);
       break;
     case 1:
@@ -477,7 +477,7 @@ void c_Continuation::cloneSet(ObjectData *cl) {
   c_Closure::cloneSet(clone);
   clone->m_obj.setWithRef(m_obj);
   clone->m_args.setWithRef(m_args);
-  clone->m_label.setWithRef(m_label);
+  clone->m_label = m_label;
   clone->m_done = m_done;
   clone->m_index = m_index;
   clone->m_value.setWithRef(m_value);
@@ -956,7 +956,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/closure.php line 46 */
 void c_Continuation::t_update(CVarRef v_label, CVarRef v_value, CVarRef v_vars) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::update);
-  m_label.assignVal(v_label);
+  m_label = (toInt64(v_label));
   m_value.assignVal(v_value);
   c_Closure::t_setvars(v_vars);
 }
@@ -968,7 +968,7 @@ void c_Continuation::t_done() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/closure.php line 55 */
-Variant c_Continuation::t_getlabel() {
+int64 c_Continuation::t_getlabel() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::getLabel);
   return m_label;
 }
@@ -980,9 +980,9 @@ int c_Continuation::t_num_args() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/closure.php line 62 */
-Variant c_Continuation::t_get_args() {
+Array c_Continuation::t_get_args() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::get_args);
-  return m_args;
+  return (toArray(m_args));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/closure.php line 65 */

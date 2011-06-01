@@ -104,11 +104,13 @@ Array f_get_class_methods(CVarRef class_or_object) {
 
 Array f_get_class_constants(CStrRef class_name) {
   const ClassInfo *cls = ClassInfo::FindClass(class_name);
-  const ClassInfo::ConstantVec &constants = cls->getConstantsVec();
   Array ret = Array::Create();
-  for (ClassInfo::ConstantVec::const_iterator iter = constants.begin();
-       iter != constants.end(); ++iter) {
-    ret.set((*iter)->name, (*iter)->getValue());
+  if (cls) {
+    const ClassInfo::ConstantVec &constants = cls->getConstantsVec();
+    for (ClassInfo::ConstantVec::const_iterator iter = constants.begin();
+         iter != constants.end(); ++iter) {
+      ret.set((*iter)->name, (*iter)->getValue());
+    }
   }
   return ret;
 }

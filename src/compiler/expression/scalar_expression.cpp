@@ -451,6 +451,14 @@ void ScalarExpression::outputCPPString(CodeGenerator &cg,
   case T_FUNC_C:
     outputCPPString(m_translated, cg, ar, false);
     break;
+  case T_NUM_STRING: {
+    bool constant =
+      (cg.getContext() == CodeGenerator::CppConstantsDecl) ||
+      (cg.getContext() == CodeGenerator::CppClassConstantsImpl);
+    assert(!constant);
+    outputCPPString(m_value, cg, ar, false);
+    break;
+  }
   default:
     ASSERT(false);
   }
@@ -543,9 +551,14 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     break;
   }
   case T_LINE:
-    cg_printf("%s", m_translated.c_str());
+    if (cg.hasScalarVariant() && Option::UseScalarVariant) {
+      outputCPPNamedInteger(cg, ar);
+    } else {
+      cg_printf("%s", m_translated.c_str());
+    }
     break;
   case T_NUM_STRING: {
+    assert(!cg.hasScalarVariant());
     const char *s = m_value.c_str();
 
     if ((*s == '0' && m_value.size() == 1) || ('1' <= *s && *s <= '9')) {
@@ -553,7 +566,7 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("%sLL", m_value.c_str());
     } else {
       // Offset must be treated as a string
-      cg_printf("\"%s\"", m_value.c_str());
+      outputCPPString(cg, ar);
     }
     break;
   }

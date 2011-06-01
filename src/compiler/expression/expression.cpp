@@ -753,7 +753,15 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   if (dstType) {
-    dstType->outputCPPDecl(cg, ar, getScope());
+    bool refParam = hasContext(RefValue) &&
+      !hasAnyContext(InvokeArgument|AssignmentRHS|ReturnContext) &&
+      (is(KindOfObjectPropertyExpression) ||
+       is(KindOfArrayElementExpression));
+    if (refParam) {
+      cg_printf("VRefParamValue");
+    } else {
+      dstType->outputCPPDecl(cg, ar, getScope());
+    }
     std::string t = genCPPTemp(cg, ar);
     const char *ref = (isLvalue || constRef) ? "&" : "";
     /*
@@ -783,7 +791,9 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
       array elements and object properties.
     */
     int save = m_context;
-    if (hasContext(RefValue)) {
+    if (refParam) {
+      m_context &= ~RefParameter;
+    } else if (hasContext(RefValue)) {
       m_context &= ~RefValue;
       if (is(KindOfObjectPropertyExpression) ||
           (is(KindOfArrayElementExpression) &&
@@ -792,6 +802,7 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
         m_context &= ~NoLValueWrapper;
       }
     }
+
     TypePtr et = m_expectedType;
     TypePtr at = m_actualType;
     TypePtr it = m_implementedType;
@@ -809,8 +820,8 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
     m_context = save;
 
     cg_printf("));\n");
-    if ((isLvalue || hasContext(DeepReference) || hasContext(UnsetContext)) &&
-        constRef) {
+    if (!refParam && constRef &&
+        (isLvalue || hasContext(DeepReference) || hasContext(UnsetContext))) {
       dstType->outputCPPDecl(cg, ar, getScope());
       cg_printf(" &%s_lv = const_cast<", t.c_str());
       dstType->outputCPPDecl(cg, ar, getScope());
@@ -1108,8 +1119,11 @@ void Expression::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   if (!m_cppTemp.empty()) {
-    bool ref = (m_context & RefValue) &&
-      !(m_context & NoRefWrapper) &&
+    bool ref = hasContext(RefValue) &&
+      !hasContext(NoRefWrapper) &&
+      (hasAnyContext(ReturnContext|AssignmentRHS|RefParameter) ||
+       !(is(KindOfObjectPropertyExpression) ||
+         is(KindOfArrayElementExpression))) &&
       isRefable();
     if (ref) {
       if (m_context & RefParameter) {

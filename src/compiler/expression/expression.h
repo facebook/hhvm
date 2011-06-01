@@ -116,6 +116,7 @@ public:
     AccessContext = 0x80000,     // ArrayElementExpression::m_variable or
                                  // ObjectPropertyExpression::m_object
     RefAssignmentLHS = 0x100000, // LHS of a reference assignment
+    ReturnContext = 0x200000,    // Return expression
   };
 
   enum Order {
@@ -150,9 +151,9 @@ public:
       // special case Declaration because it is 2 bit fields
       if (hasContext(Declaration)) return true;
       // clear Declaration since we already checked for it
-      context &= ~Declaration;  
+      context &= ~Declaration;
     }
-    return m_context & context; 
+    return m_context & context;
   }
   bool hasAllContext(int context) const { return (m_context & context) == context; }
   bool hasSubExpr(ExpressionPtr sub) const;
@@ -354,7 +355,7 @@ public:
   /**
    * Correctly compute the local expression altered bit
    */
-  void computeLocalExprAltered(); 
+  void computeLocalExprAltered();
 
 protected:
   static bool IsIdentifier(const std::string &value);

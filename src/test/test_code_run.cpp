@@ -6501,6 +6501,24 @@ bool TestCodeRun::TestReference() {
        "test('foo', 1);"
        "test('bar', 1);");
 
+  MVCR("<?php "
+       "class X {"
+       "  public $x = 10;"
+       "  function __destruct() {"
+       "    var_dump('destruct');"
+       "    $this->x = 0;"
+       "  }"
+       "}"
+       "function test(&$a, $b) {"
+       "  var_dump($a, $b);"
+       "}"
+       "function f($x) {"
+       "  unset($GLOBALS['a']);"
+       "  return 1;"
+       "}"
+       "$a = array(new X);"
+       "test($a[0], f(1));");
+
   return true;
 }
 
@@ -7571,7 +7589,7 @@ bool TestCodeRun::TestVolatile() {
         "echo \"**************\\n\";\n"
         "spl_autoload_unregister('spl_autoload_call');\n"
         "class_exists('D');\n"
-        "echo \"**************\\n\";\n" 
+        "echo \"**************\\n\";\n"
         "// hphpc won't call the autoloader unless there exists a \n"
         "// definition for the class somewhere\n"
         "if (true) {\n"

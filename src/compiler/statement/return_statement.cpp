@@ -35,6 +35,7 @@ using namespace boost;
 ReturnStatement::ReturnStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES), m_exp(exp) {
+  if (exp) exp->setContext(Expression::ReturnContext);
 }
 
 StatementPtr ReturnStatement::clone() {

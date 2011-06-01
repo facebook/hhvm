@@ -25081,6 +25081,21 @@ Variant ifa_rename(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg2(a2);
   return (x_rename(arg0, arg1, arg2));
 }
+Variant i_hex2bin(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("hex2bin", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (x_hex2bin(arg0));
+  }
+}
+Variant ifa_hex2bin(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("hex2bin", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (x_hex2bin(arg0));
+}
 Variant i_date_format(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("date_format", count, 2, 2, 1);
@@ -39035,6 +39050,7 @@ CallInfo ci_ctype_cntrl((void*)&i_ctype_cntrl, (void*)&ifa_ctype_cntrl, 1, 0, 0x
 CallInfo ci_hphp_splfileobject_next((void*)&i_hphp_splfileobject_next, (void*)&ifa_hphp_splfileobject_next, 1, 0, 0x0000000000000000LL);
 CallInfo ci_is_array((void*)&i_is_array, (void*)&ifa_is_array, 1, 0, 0x0000000000000000LL);
 CallInfo ci_rename((void*)&i_rename, (void*)&ifa_rename, 3, 0, 0x0000000000000000LL);
+CallInfo ci_hex2bin((void*)&i_hex2bin, (void*)&ifa_hex2bin, 1, 0, 0x0000000000000000LL);
 CallInfo ci_date_format((void*)&i_date_format, (void*)&ifa_date_format, 2, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileobject_fgetc((void*)&i_hphp_splfileobject_fgetc, (void*)&ifa_hphp_splfileobject_fgetc, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imap_timeout((void*)&i_imap_timeout, (void*)&ifa_imap_timeout, 2, 0, 0x0000000000000000LL);
@@ -51633,6 +51649,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x4BD54A631F665F0FLL, drawpathcurvetosmoothabsolute) {
         ci = &ci_drawpathcurvetosmoothabsolute;
+        return true;
+      }
+      break;
+    case 7953:
+      HASH_GUARD(0x3D977DD128A3BF11LL, hex2bin) {
+        ci = &ci_hex2bin;
         return true;
       }
       break;

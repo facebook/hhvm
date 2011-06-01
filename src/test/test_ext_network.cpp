@@ -112,6 +112,7 @@ bool TestExtNetwork::test_inet_pton() {
 
   packed = f_str_repeat(f_chr(0), 15) + f_chr(1);
   VS(f_inet_pton("::1"), packed);
+  VS(f_inet_pton("::1"), f_hex2bin("00000000000000000000000000000001"));
   return Count(true);
 }
 

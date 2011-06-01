@@ -32,6 +32,7 @@ class TestExtString : public TestCppExt {
   bool test_addslashes();
   bool test_stripslashes();
   bool test_bin2hex();
+  bool test_hex2bin();
   bool test_nl2br();
   bool test_quotemeta();
   bool test_str_shuffle();

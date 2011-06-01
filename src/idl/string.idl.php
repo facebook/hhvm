@@ -146,6 +146,24 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "hex2bin",
+    'desc'   => "Returns an ASCII string containing the binary representation of hexidecimal str.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => String,
+      'desc'   => "Returns the binary representation of the given hexidecimal string.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "str",
+        'type'   => String,
+        'desc'   => "A character.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "nl2br",
     'desc'   => "Returns string with '<br />' or '<br>' inserted before all newlines.",
     'flags'  =>  HasDocComment,

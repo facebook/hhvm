@@ -43,6 +43,9 @@ inline String f_stripslashes(CStrRef str) {
 inline String f_bin2hex(CStrRef str) {
   return StringUtil::HexEncode(str);
 }
+inline String f_hex2bin(CStrRef str) {
+  return StringUtil::HexDecode(str);
+}
 inline String f_nl2br(CStrRef str) {
   return str.replace("\n", "<br />\n");
 }

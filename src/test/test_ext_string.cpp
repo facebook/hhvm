@@ -27,6 +27,7 @@ bool TestExtString::RunTests(const std::string &which) {
   RUN_TEST(test_addslashes);
   RUN_TEST(test_stripslashes);
   RUN_TEST(test_bin2hex);
+  RUN_TEST(test_hex2bin);
   RUN_TEST(test_nl2br);
   RUN_TEST(test_quotemeta);
   RUN_TEST(test_str_shuffle);
@@ -141,6 +142,11 @@ bool TestExtString::test_stripslashes() {
 
 bool TestExtString::test_bin2hex() {
   VS(f_bin2hex("ABC\n"), "4142430a");
+  return Count(true);
+}
+
+bool TestExtString::test_hex2bin() {
+  VS(f_hex2bin("4142430a"), "ABC\n");
   return Count(true);
 }
 

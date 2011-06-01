@@ -1795,9 +1795,9 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
     if (m_name == "func_num_args") {
       FunctionScopePtr func = getFunctionScope();
       if (func && func->isGenerator()) {
-        cg_printf("%s%s.%sinvoke(\"num_args\", Array::Create())",
+        cg_printf("%s%s->%snum_args()",
                   Option::VariablePrefix, CONTINUATION_OBJECT_NAME,
-                  Option::ObjectPrefix);
+                  Option::MethodPrefix);
         return;
       }
       if (!func || func->isVariableArgument()) {

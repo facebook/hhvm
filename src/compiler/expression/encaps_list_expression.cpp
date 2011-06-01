@@ -149,9 +149,11 @@ void EncapsListExpression::outputCPPImpl(CodeGenerator &cg,
       ExpressionPtr exp = (*m_exps)[i];
       if (i > 0) cg_printf(" + ");
       if (exp->is(Expression::KindOfScalarExpression)) {
-        cg_printf("toString(");
+        TypePtr actType = exp->getActualType();
+        bool str = actType && actType->is(Type::KindOfString);
+        if (!str) cg_printf("toString(");
         exp->outputCPP(cg, ar);
-        cg_printf(")");
+        if (!str) cg_printf(")");
       } else {
         exp->outputCPP(cg, ar);
       }

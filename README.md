@@ -46,6 +46,8 @@ You may need to point CMake to the location of your custom libcurl and libevent,
 
 To build HipHop, use the following:
 
+Linux:
+
     cd /home/user/dev
     git clone git://github.com/facebook/hiphop-php.git
     cd hiphop-php
@@ -54,6 +56,8 @@ To build HipHop, use the following:
     export HPHP_HOME=`pwd`
     export HPHP_LIB=`pwd`/bin
     cmake .
+
+If you are using FreeBSD instead use export - setenv
 
 Once this is done you can generate the build file. This will return you to the shell. Finally, to build, run `make`. If any errors occur, it may be required to remove the CMakeCache.txt directory in the checkout.
 

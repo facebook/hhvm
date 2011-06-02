@@ -539,7 +539,11 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
     if((s == "func_num_args") ||
        (s == "func_get_args") ||
        (s == "func_get_arg")) {
-      m_hasCallToGetArgs.back() = true;
+      if(m_hasCallToGetArgs.size() == 0) {
+	raise_warning(s + " called from the global scope, no function context");
+      } else {
+        m_hasCallToGetArgs.back() = true;
+      }
     }
   }
   if (className) {

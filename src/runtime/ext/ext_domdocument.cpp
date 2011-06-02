@@ -5622,7 +5622,7 @@ Variant c_DOMNodeIterator::t_valid() {
 ///////////////////////////////////////////////////////////////////////////////
 // function-style wrappers
 
-#define DOM_GET_OBJ(name)                                       \
+#define DOM_GET_OBJ(name)					\
   c_DOM ##name *pobj = NULL;                                    \
   if (obj.isObject()) {                                         \
     pobj = obj.toObject().getTyped<c_DOM ##name>(true, true);   \
@@ -5630,7 +5630,10 @@ Variant c_DOMNodeIterator::t_valid() {
       raise_warning("Expecting dom " #name " object");          \
       return null;                                              \
     }                                                           \
-  }                                                             \
+  } else {                                                      \
+    raise_warning("Expecting dom objects in parameters");       \
+    return null;                                                \
+  }
 
 Variant f_dom_document_create_element(CVarRef obj, CStrRef name,
                                       CStrRef value /* = null_string */) {

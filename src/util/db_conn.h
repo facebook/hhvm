@@ -202,7 +202,7 @@ class DBConn {
   public:
     void onThreadEnter() {}
     void doJob(QueryJobPtr job);
-    void onThreadExit() { my_thread_end();}
+    void onThreadExit() { mysql_thread_end();}
   };
 
   static int parallelExecute(QueryJobPtrVec &jobs, ErrorInfoMap &errors,

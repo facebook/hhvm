@@ -420,12 +420,11 @@ void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
 
   Token init;
   {
-    Token cname;    cname.setText("hphp_get_iterator");
+    Token cname;    cname.setText(byRef ?
+                                  "hphp_get_mutable_iterator" :
+                                  "hphp_get_iterator");
     Token param1;   _p->onCallParam(param1, NULL, arr, 0);
-    Token mutConst; mutConst.setText(byRef ? "true" : "false");
-    Token mut;      _p->onConstantValue(mut, mutConst);
-    Token param2;   _p->onCallParam(param2, &param1, mut, 0);
-    Token call;     _p->onCall(call, 0, cname, param2, NULL);
+    Token call;     _p->onCall(call, 0, cname, param1, NULL);
     Token lname;    lname.setText(loopvar);
     Token var;      _p->onSynthesizedVariable(var, lname);
     Token assign;   _p->onAssign(assign, var, call, false);

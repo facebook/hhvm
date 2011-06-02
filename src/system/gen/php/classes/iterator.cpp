@@ -807,7 +807,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 389 */
 Variant c_ArrayIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::current);
-  return x_current(m_arr);
+  return x_current(ref(m_arr));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 403 */

@@ -166,7 +166,8 @@ inline Variant f_key(VRefParam array) {
   return array.array_iter_key();
 }
 
-Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable);
+Variant f_hphp_get_iterator(CVarRef iterable);
+Variant f_hphp_get_mutable_iterator(VRefParam iterable);
 
 bool f_in_array(CVarRef needle, CVarRef haystack, bool strict = false);
 Variant f_range(CVarRef low, CVarRef high, CVarRef step = 1);

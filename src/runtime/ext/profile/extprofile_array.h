@@ -307,10 +307,16 @@ inline Variant x_key(VRefParam array) {
   return f_key(array);
 }
 
-inline Variant x_hphp_get_iterator(VRefParam iterable, bool isMutable) {
+inline Variant x_hphp_get_iterator(CVarRef iterable) {
   FUNCTION_INJECTION_BUILTIN(hphp_get_iterator);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  return f_hphp_get_iterator(iterable, isMutable);
+  return f_hphp_get_iterator(iterable);
+}
+
+inline Variant x_hphp_get_mutable_iterator(VRefParam iterable) {
+  FUNCTION_INJECTION_BUILTIN(hphp_get_mutable_iterator);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_hphp_get_mutable_iterator(iterable);
 }
 
 inline bool x_in_array(CVarRef needle, CVarRef haystack, bool strict = false) {

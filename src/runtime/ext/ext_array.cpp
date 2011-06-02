@@ -623,7 +623,7 @@ int f_count(CVarRef var, bool recursive /* = false */) {
   return 1;
 }
 
-Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
+static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
   if (iterable.isArray()) {
     if (isMutable) {
       return create_object("MutableArrayIterator",
@@ -668,6 +668,14 @@ Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
   }
   raise_warning("Invalid argument supplied for iteration");
   return null;
+}
+
+Variant f_hphp_get_iterator(CVarRef iterable) {
+  return f_hphp_get_iterator(iterable, false);
+}
+
+Variant f_hphp_get_mutable_iterator(VRefParam iterable) {
+  return f_hphp_get_iterator(iterable, true);
 }
 
 bool f_in_array(CVarRef needle, CVarRef haystack, bool strict /* = false */) {

@@ -426,7 +426,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/splobjectstorage.php line 62 */
 Variant c_SplObjectStorage::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::current);
-  return x_current(m_storage);
+  return x_current(ref(m_storage));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splobjectstorage.php line 74 */

@@ -1214,18 +1214,31 @@ DefineFunction(
     'flags'  => HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The hphp_get_iterator() function returns an iterator object for an array or an object. It could be mutable, but only for arrays and objects that are not instances of Iterator or IteratorAggregate.",
+      'desc'   => "The hphp_get_iterator() function returns a non mutable iterator object for an array or an object.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
+        'type'   => Variant,
+        'desc'   => "The array or object to iterate on.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "hphp_get_mutable_iterator",
+    'desc'   => "hphp_get_mutable_iterator() returns an iterator object for an array or an object.",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "The hphp_get_mutable_iterator() function returns an iterator object for an array or an object. It could be mutable, but only for arrays and objects that are not instances of Iterator or IteratorAggregate.",
     ),
     'args'   => array(
       array(
         'name'   => "iterable",
         'type'   => Variant | Reference,
         'desc'   => "The array or object to iterate on.",
-      ),
-      array(
-        'name'   => "isMutable",
-        'type'   => Boolean,
-        'desc'   => "Whether it is a mutable iterator.",
       ),
     ),
   ));

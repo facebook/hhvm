@@ -25708,21 +25708,18 @@ Variant ifa_date_isodate_set(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) 
 }
 Variant i_hphp_get_iterator(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 2)) return throw_wrong_arguments("hphp_get_iterator", count, 2, 2, 1);
-  const_cast<Array&>(params).escalate(true);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("hphp_get_iterator", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    VRefParam arg0(vref(ad->getValueRef(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (x_hphp_get_iterator(arg0, arg1));
+    CVarRef arg0((ad->getValue(pos)));
+    return (x_hphp_get_iterator(arg0));
   }
 }
 Variant ifa_hphp_get_iterator(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 2)) return throw_wrong_arguments("hphp_get_iterator", count, 2, 2, 1);
-  VRefParam arg0(vref(a0));
-  CVarRef arg1(a1);
-  return (x_hphp_get_iterator(arg0, arg1));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("hphp_get_iterator", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (x_hphp_get_iterator(arg0));
 }
 Variant i_magickpaintopaqueimage(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
@@ -35926,16 +35923,17 @@ Variant ifa_apc_bin_load(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 Variant i_current(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("current", count, 1, 1, 1);
+  const_cast<Array&>(params).escalate(true);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
+    VRefParam arg0(vref(ad->getValueRef(pos)));
     return (x_current(arg0));
   }
 }
 Variant ifa_current(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("current", count, 1, 1, 1);
-  CVarRef arg0(a0);
+  VRefParam arg0(vref(a0));
   return (x_current(arg0));
 }
 Variant i_stream_register_wrapper(void *extra, CArrRef params) {
@@ -37194,6 +37192,22 @@ Variant ifa_lchgrp(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg0(a0);
   CVarRef arg1(a1);
   return (x_lchgrp(arg0, arg1));
+}
+Variant i_hphp_get_mutable_iterator(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("hphp_get_mutable_iterator", count, 1, 1, 1);
+  const_cast<Array&>(params).escalate(true);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    VRefParam arg0(vref(ad->getValueRef(pos)));
+    return (x_hphp_get_mutable_iterator(arg0));
+  }
+}
+Variant ifa_hphp_get_mutable_iterator(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("hphp_get_mutable_iterator", count, 1, 1, 1);
+  VRefParam arg0(vref(a0));
+  return (x_hphp_get_mutable_iterator(arg0));
 }
 Variant i_simplexml_load_file(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
@@ -39086,7 +39100,7 @@ CallInfo ci_sha1((void*)&i_sha1, (void*)&ifa_sha1, 2, 0, 0x0000000000000000LL);
 CallInfo ci_collator_set_strength((void*)&i_collator_set_strength, (void*)&ifa_collator_set_strength, 2, 0, 0x0000000000000000LL);
 CallInfo ci_implode((void*)&i_implode, (void*)&ifa_implode, 2, 0, 0x0000000000000000LL);
 CallInfo ci_date_isodate_set((void*)&i_date_isodate_set, (void*)&ifa_date_isodate_set, 4, 0, 0x0000000000000000LL);
-CallInfo ci_hphp_get_iterator((void*)&i_hphp_get_iterator, (void*)&ifa_hphp_get_iterator, 2, 0, 0x0000000000000001LL);
+CallInfo ci_hphp_get_iterator((void*)&i_hphp_get_iterator, (void*)&ifa_hphp_get_iterator, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickpaintopaqueimage((void*)&i_magickpaintopaqueimage, (void*)&ifa_magickpaintopaqueimage, 4, 0, 0x0000000000000000LL);
 CallInfo ci_mb_strimwidth((void*)&i_mb_strimwidth, (void*)&ifa_mb_strimwidth, 5, 0, 0x0000000000000000LL);
 CallInfo ci_drawsetfont((void*)&i_drawsetfont, (void*)&ifa_drawsetfont, 2, 0, 0x0000000000000000LL);
@@ -39661,7 +39675,7 @@ CallInfo ci_magickdeconstructimages((void*)&i_magickdeconstructimages, (void*)&i
 CallInfo ci_xbox_task_status((void*)&i_xbox_task_status, (void*)&ifa_xbox_task_status, 1, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_open((void*)&i_openssl_open, (void*)&ifa_openssl_open, 4, 0, 0x0000000000000002LL);
 CallInfo ci_apc_bin_load((void*)&i_apc_bin_load, (void*)&ifa_apc_bin_load, 3, 0, 0x0000000000000000LL);
-CallInfo ci_current((void*)&i_current, (void*)&ifa_current, 1, 0, 0x0000000000000000LL);
+CallInfo ci_current((void*)&i_current, (void*)&ifa_current, 1, 0, 0x0000000000000001LL);
 CallInfo ci_stream_register_wrapper((void*)&i_stream_register_wrapper, (void*)&ifa_stream_register_wrapper, 2, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_stats((void*)&i_hphp_stats, (void*)&ifa_hphp_stats, 2, 0, 0x0000000000000000LL);
 CallInfo ci_imap_savebody((void*)&i_imap_savebody, (void*)&ifa_imap_savebody, 5, 0, 0x0000000000000000LL);
@@ -39732,6 +39746,7 @@ CallInfo ci_imageellipse((void*)&i_imageellipse, (void*)&ifa_imageellipse, 6, 0,
 CallInfo ci_getprotobynumber((void*)&i_getprotobynumber, (void*)&ifa_getprotobynumber, 1, 0, 0x0000000000000000LL);
 CallInfo ci_pixelsetopacity((void*)&i_pixelsetopacity, (void*)&ifa_pixelsetopacity, 2, 0, 0x0000000000000000LL);
 CallInfo ci_lchgrp((void*)&i_lchgrp, (void*)&ifa_lchgrp, 2, 0, 0x0000000000000000LL);
+CallInfo ci_hphp_get_mutable_iterator((void*)&i_hphp_get_mutable_iterator, (void*)&ifa_hphp_get_mutable_iterator, 1, 0, 0x0000000000000001LL);
 CallInfo ci_simplexml_load_file((void*)&i_simplexml_load_file, (void*)&ifa_simplexml_load_file, 5, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_pkey_get_details((void*)&i_openssl_pkey_get_details, (void*)&ifa_openssl_pkey_get_details, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imagetypes((void*)&i_imagetypes, (void*)&ifa_imagetypes, 0, 0, 0x0000000000000000LL);
@@ -43659,6 +43674,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 2655:
       HASH_GUARD(0x7CAE3FE798EC0A5FLL, php_logo_guid) {
         ci = &ci_php_logo_guid;
+        return true;
+      }
+      break;
+    case 2660:
+      HASH_GUARD(0x64C3AF1BCF872A64LL, hphp_get_mutable_iterator) {
+        ci = &ci_hphp_get_mutable_iterator;
         return true;
       }
       break;

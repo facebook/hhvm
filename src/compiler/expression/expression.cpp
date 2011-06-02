@@ -497,10 +497,8 @@ void Expression::CheckPassByReference(AnalysisResultPtr ar,
                                       ExpressionPtr param) {
   if (param->hasContext(Expression::RefValue) &&
       !param->isRefable(true)) {
-    if (!param->getFunctionScope()->isGenerator()) {
-      param->setError(Expression::BadPassByRef);
-      Compiler::Error(Compiler::BadPassByReference, param);
-    }
+    param->setError(Expression::BadPassByRef);
+    Compiler::Error(Compiler::BadPassByReference, param);
   }
 }
 

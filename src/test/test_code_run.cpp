@@ -17779,6 +17779,20 @@ bool TestCodeRun::TestYield() {
         "int(4)\n"
         "int(4)\n");
 
+  MVCRO("<?php "
+        "function f($x) { return $x; }"
+        "function foo($a) {"
+        "  yield 1;"
+        "  foreach ((array)f($a) as $x) {"
+        "    var_dump('i:'.$x);"
+        "  }"
+        "}"
+        "foreach (foo(array(1)) as $x) {"
+        "  var_dump('o:'.$x);"
+        "}",
+        "string(3) \"o:1\"\n"
+        "string(3) \"i:1\"\n");
+
   return true;
 }
 

@@ -540,16 +540,17 @@ String File::readRecord(CStrRef delimiter, int64 maxlen /* = 0 */) {
 
   int64 avail = m_writepos - m_readpos;
   if (m_buffer == NULL) {
-    m_buffer = (char *)malloc(CHUNK_SIZE * 2);
+    m_buffer = (char *)malloc(CHUNK_SIZE * 3);
   }
   if (avail < maxlen && !eof()) {
-    m_writepos += readImpl(m_buffer + m_readpos, maxlen - avail);
+    ASSERT(m_writepos + maxlen - avail <= CHUNK_SIZE * 3);
+    m_writepos += readImpl(m_buffer + m_writepos, maxlen - avail);
     maxlen = m_writepos - m_readpos;
   }
   if (m_readpos >= CHUNK_SIZE) {
     memcpy(m_buffer, m_buffer + m_readpos, m_writepos - m_readpos);
-    m_readpos = 0;
     m_writepos -= m_readpos;
+    m_readpos = 0;
   }
 
   int64 toread;

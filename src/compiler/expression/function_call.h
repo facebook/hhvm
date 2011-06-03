@@ -51,7 +51,6 @@ public:
   ExpressionPtr getNameExp() const { return m_nameExp; }
   ExpressionListPtr getParams() const { return m_params; }
   void setNoInline() { m_noInline = true; }
-  void setAllowVoidReturn() { m_allowVoidReturn = true;}
   void setFunctionAndClassScope(FunctionScopePtr fsp, ClassScopePtr csp);
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                     int state);
@@ -82,7 +81,6 @@ protected:
   unsigned m_variableArgument : 1;
   unsigned m_voidReturn : 1;  // no return type
   unsigned m_voidWrapper : 1; // void wrapper is needed
-  unsigned m_allowVoidReturn : 1;
   unsigned m_redeclared : 1;
   unsigned m_noStatic : 1;
   unsigned m_noInline : 1;

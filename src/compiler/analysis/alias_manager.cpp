@@ -1590,7 +1590,7 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
     case Expression::KindOfSimpleFunctionCall:
       delayVars = false;
       // fall through
-      
+
     case Expression::KindOfNewObjectExpression:
       pushStack = m_accessList.size() > 0;
       break;
@@ -2088,9 +2088,18 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
               m_scope->getContainingFunction()->setNextLSB(true);
             }
           }
+        } else if (unused && b->isShortCircuitOperator()) {
+          b->getExp2()->setUnused(true);
         }
         break;
       }
+
+      case Expression::KindOfQOpExpression:
+        if (unused) {
+          if (ExpressionPtr t1 = e->getNthExpr(1)) t1->setUnused(true);
+          e->getNthExpr(2)->setUnused(true);
+        }
+        break;
 
       default:
         break;

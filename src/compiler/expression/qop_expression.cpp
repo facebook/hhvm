@@ -197,50 +197,65 @@ bool QOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
   if (fix_yes || fix_no) {
     cg.wrapExpressionBegin();
-    std::string tmp = genCPPTemp(cg, ar);
-
-    if (m_expYes) {
-      TypePtr typeYes = m_expYes->getActualType();
-      TypePtr typeNo = m_expNo->getActualType();
-      TypePtr type =
-        typeYes && typeNo && Type::SameType(typeYes, typeNo) &&
-        !typeYes->is(Type::KindOfVariant) &&
-        m_expYes->isLiteralString() == m_expNo->isLiteralString() ?
-        typeYes : Type::Variant;
-
-      type->outputCPPDecl(cg, ar, getScope());
-      cg_printf(" %s;\n", tmp.c_str());
+    if (isUnused()) {
       cg_printf("if (");
       m_condition->outputCPP(cg, ar);
       cg_indentBegin(") {\n");
-      m_expYes->preOutputCPP(cg, ar, 0);
-      cg_printf("%s = (", tmp.c_str());
-      m_expYes->outputCPP(cg, ar);
-      cg_indentEnd(");\n");
+      if (m_expYes) {
+        m_expYes->preOutputCPP(cg, ar, 0);
+        if (m_expYes->outputCPPUnneeded(cg, ar)) cg_printf(";\n");
+      }
+      cg_indentEnd("\n");
+      cg_indentBegin("} else {\n");
+      m_expNo->preOutputCPP(cg, ar, 0);
+      if (m_expNo->outputCPPUnneeded(cg, ar)) cg_printf(";\n");
+      cg_indentEnd("}\n");
+      m_cppValue = "null_variant";
     } else {
-      TypePtr typeYes = m_condition->getActualType();
-      TypePtr typeNo = m_expNo->getActualType();
-      TypePtr type =
-        typeYes && typeNo && Type::SameType(typeYes, typeNo) &&
-        !typeYes->is(Type::KindOfVariant) &&
-        m_condition->isLiteralString() == m_expNo->isLiteralString() ?
-        typeYes : Type::Variant;
+      std::string tmp = genCPPTemp(cg, ar);
 
-      type->outputCPPDecl(cg, ar, getScope());
-      cg_printf(" %s = ", tmp.c_str());
-      m_condition->outputCPP(cg, ar);
-      cg_printf(";\n");
-      cg_printf("if (toBoolean(%s)) {\n", tmp.c_str());
+      if (m_expYes) {
+        TypePtr typeYes = m_expYes->getActualType();
+        TypePtr typeNo = m_expNo->getActualType();
+        TypePtr type =
+          typeYes && typeNo && Type::SameType(typeYes, typeNo) &&
+          !typeYes->is(Type::KindOfVariant) &&
+          m_expYes->isLiteralString() == m_expNo->isLiteralString() ?
+          typeYes : Type::Variant;
+
+        type->outputCPPDecl(cg, ar, getScope());
+        cg_printf(" %s;\n", tmp.c_str());
+        cg_printf("if (");
+        m_condition->outputCPP(cg, ar);
+        cg_indentBegin(") {\n");
+        m_expYes->preOutputCPP(cg, ar, 0);
+        cg_printf("%s = (", tmp.c_str());
+        m_expYes->outputCPP(cg, ar);
+        cg_indentEnd(");\n");
+      } else {
+        TypePtr typeYes = m_condition->getActualType();
+        TypePtr typeNo = m_expNo->getActualType();
+        TypePtr type =
+          typeYes && typeNo && Type::SameType(typeYes, typeNo) &&
+          !typeYes->is(Type::KindOfVariant) &&
+          m_condition->isLiteralString() == m_expNo->isLiteralString() ?
+          typeYes : Type::Variant;
+
+        type->outputCPPDecl(cg, ar, getScope());
+        cg_printf(" %s = ", tmp.c_str());
+        m_condition->outputCPP(cg, ar);
+        cg_printf(";\n");
+        cg_printf("if (toBoolean(%s)) {\n", tmp.c_str());
+      }
+
+      cg_indentBegin("} else {\n");
+      m_expNo->preOutputCPP(cg, ar, 0);
+      cg_printf("%s = (", tmp.c_str());
+      m_expNo->outputCPP(cg, ar);
+      cg_printf(");\n");
+      cg_indentEnd("}\n");
+      m_cppValue = tmp;
     }
-
-    cg_indentBegin("} else {\n");
-    m_expNo->preOutputCPP(cg, ar, 0);
-    cg_printf("%s = (", tmp.c_str());
-    m_expNo->outputCPP(cg, ar);
-    cg_printf(");\n");
-    cg_indentEnd("}\n");
-    m_cppValue = tmp;
-
   } else if (state & FixOrder) {
     preOutputStash(cg, ar, state);
     return true;

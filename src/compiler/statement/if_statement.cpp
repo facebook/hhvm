@@ -128,15 +128,17 @@ StatementPtr IfStatement::preOptimize(AnalysisResultConstPtr ar) {
         }
       }
       break;
-    } else if (condition->isScalar() &&
-               condition->getScalarValue(value)) {
+    } else if (condition->getEffectiveScalar(value)) {
       if (value.toBoolean()) {
         hoist = !i &&
           ((getFunctionScope() && !getFunctionScope()->inPseudoMain()) ||
            !branch->hasDecl());
         break;
-      } else {
+      } else if (!condition->hasEffect()) {
         m_stmts->removeElement(i--);
+        changed = true;
+      } else if (branch->getStmt()) {
+        branch->clearStmt();
         changed = true;
       }
     }

@@ -242,9 +242,6 @@ ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
   } catch (Exception &e) {
     // runtime/base threw an exception, perhaps bad operands
   }
-  if (!optExp) {
-    if (isShortCircuitOperator()) optExp = simplifyLogical(ar);
-  }
   if (optExp) optExp = replaceValue(optExp);
   return optExp;
 }
@@ -1021,9 +1018,10 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                    m_op == T_LOGICAL_OR || m_op == T_BOOLEAN_OR ? "!" : "",
                    tmp.c_str());
     m_exp2->preOutputCPP(cg, ar, 0);
-    cg_printf("%s = (", tmp.c_str());
+    if (!isUnused()) cg_printf("%s = (", tmp.c_str());
     m_exp2->outputCPP(cg, ar);
-    cg_printf(");\n");
+    if (!isUnused()) cg_printf(")");
+    cg_printf(";\n");
     cg_indentEnd("}\n");
     m_cppTemp = tmp;
   } else if (state & FixOrder) {

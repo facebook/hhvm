@@ -37,11 +37,6 @@ public:
 
   void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
 
-  /**
-   * Allow 2nd expression to use void returns.
-   */
-  void analyzeShortCircuit(AnalysisResultPtr ar);
-
   virtual bool kidUnused(int i) const { return i == 0; }
 private:
   ExpressionPtr m_exp;

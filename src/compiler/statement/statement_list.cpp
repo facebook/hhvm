@@ -142,10 +142,6 @@ void StatementList::analyzeProgramImpl(AnalysisResultPtr ar) {
           !stmt->is(Statement::KindOfStatementList)) {
         Compiler::Error(Compiler::StatementHasNoEffect, stmt);
       }
-
-      if (stmt->is(Statement::KindOfExpStatement)) {
-        static_pointer_cast<ExpStatement>(stmt)->analyzeShortCircuit(ar);
-      }
     }
 
     bool scopeStmt = stmt->is(Statement::KindOfFunctionStatement) ||

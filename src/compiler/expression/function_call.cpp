@@ -52,7 +52,7 @@ FunctionCall::FunctionCall
     StaticClassName(classExp), m_nameExp(nameExp),
     m_ciTemp(-1), m_params(params), m_valid(false),
     m_extraArg(0), m_variableArgument(false), m_voidReturn(false),
-    m_voidWrapper(false), m_allowVoidReturn(false), m_redeclared(false),
+    m_voidWrapper(false), m_redeclared(false),
     m_noStatic(false), m_noInline(false), m_invokeFewArgsDecision(true),
     m_arrayParams(false),
     m_argArrayId(-1), m_argArrayHash(-1), m_argArrayIndex(-1) {
@@ -540,8 +540,9 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
   if (!frt) {
     m_voidReturn = true;
     setActualType(TypePtr());
-    if (!type->is(Type::KindOfAny)) {
-      if (!m_allowVoidReturn && !func->isFirstPass() && !func->isAbstract()) {
+    if (!isUnused() && !type->is(Type::KindOfAny)) {
+      if (!hasContext(ReturnContext) &&
+          !func->isFirstPass() && !func->isAbstract()) {
         Compiler::Error(Compiler::UseVoidReturn, self);
       }
       m_voidWrapper = true;

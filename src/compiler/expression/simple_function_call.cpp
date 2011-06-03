@@ -425,6 +425,17 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
     if (m_params) {
       markRefParams(m_funcScope, m_name, canInvokeFewArgs());
     }
+  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+    if (!m_class && !m_redeclared && !m_dynamicInvoke && !m_funcScope &&
+        (m_className.empty() ||
+         (m_classScope &&
+          !m_classScope->derivesFromRedeclaring() &&
+          !m_classScope->getAttribute(
+            ClassScope::HasUnknownStaticMethodHandler) &&
+          !m_classScope->getAttribute(
+            ClassScope::InheritsUnknownStaticMethodHandler)))) {
+      Compiler::Error(Compiler::UnknownFunction, shared_from_this());
+    }
   }
 }
 
@@ -1032,15 +1043,6 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       m_redeclared = true;
       getScope()->getVariables()->
         setAttribute(VariableTable::NeedGlobalPointer);
-    } else if (!m_dynamicInvoke &&
-               (!m_classScope ||
-                (!m_classScope->derivesFromRedeclaring() &&
-                 !m_classScope->getAttribute(
-                   ClassScope::HasUnknownStaticMethodHandler) &&
-                 !m_classScope->getAttribute(
-                   ClassScope::InheritsUnknownStaticMethodHandler))) &&
-               getScope()->isFirstPass()) {
-      Compiler::Error(Compiler::UnknownFunction, self);
     }
     if (m_params) {
       if (func) {

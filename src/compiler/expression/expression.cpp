@@ -151,6 +151,15 @@ Expression::ExprClass Expression::getExprClass() const {
   return cls;
 }
 
+bool Expression::getEffectiveScalar(Variant &v) {
+  if (is(KindOfExpressionList)) {
+    ExpressionRawPtr sub = static_cast<ExpressionList*>(this)->listValue();
+    if (!sub) return false;
+    return sub->getEffectiveScalar(v);
+  }
+  return getScalarValue(v);
+}
+
 void Expression::addElement(ExpressionPtr exp) {
   ASSERT(false);
 }

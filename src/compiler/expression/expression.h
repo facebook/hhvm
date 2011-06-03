@@ -230,6 +230,7 @@ public:
   virtual bool isScalar() const { return false; }
   virtual bool isRefable(bool checkError = false) const { return false; }
   virtual bool getScalarValue(Variant &value) { return false; }
+  bool getEffectiveScalar(Variant &value);
   virtual ExpressionPtr clone() {
     ASSERT(false);
     return ExpressionPtr();

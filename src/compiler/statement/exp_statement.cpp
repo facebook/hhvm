@@ -85,18 +85,6 @@ void ExpStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   m_exp = include;
 }
 
-void ExpStatement::analyzeShortCircuit(AnalysisResultPtr ar) {
-  if (!m_exp->is(Expression::KindOfBinaryOpExpression)) return;
-
-  BinaryOpExpressionPtr exp = dynamic_pointer_cast<BinaryOpExpression>(m_exp);
-  if (exp->isShortCircuitOperator()) {
-    FunctionCallPtr call = dynamic_pointer_cast<FunctionCall>(exp->getExp2());
-    if (call) {
-      call->setAllowVoidReturn();
-    }
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 

@@ -1018,10 +1018,13 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                    m_op == T_LOGICAL_OR || m_op == T_BOOLEAN_OR ? "!" : "",
                    tmp.c_str());
     m_exp2->preOutputCPP(cg, ar, 0);
-    if (!isUnused()) cg_printf("%s = (", tmp.c_str());
-    m_exp2->outputCPP(cg, ar);
-    if (!isUnused()) cg_printf(")");
-    cg_printf(";\n");
+    if (isUnused()) {
+      if (m_exp2->outputCPPUnneeded(cg, ar)) cg_printf(";\n");
+    } else {
+      cg_printf("%s = (", tmp.c_str());
+      m_exp2->outputCPP(cg, ar);
+      cg_printf(");\n");
+    }
     cg_indentEnd("}\n");
     m_cppTemp = tmp;
   } else if (state & FixOrder) {

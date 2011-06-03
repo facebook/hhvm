@@ -87,7 +87,7 @@ Variant MethodStatement::
 invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
                      const FunctionCallExpression *caller) const {
   if (getModifiers() & ClassStatement::Static) {
-    return invokeStaticDirect(obj->o_getClassName(), env, caller);
+    return invokeStaticDirect(obj->o_getClassName(), env, caller, false);
   }
   attemptAccess(FrameInjection::GetClassName(false));
   DECLARE_THREAD_INFO_NOINIT
@@ -118,13 +118,14 @@ Variant MethodStatement::invokeStatic(const char* cls, CArrRef params,
 }
 
 Variant MethodStatement::
-invokeStaticDirect(const char* cls, VariableEnvironment &env,
-                   const FunctionCallExpression *caller)
+invokeStaticDirect(CStrRef cls, VariableEnvironment &env,
+                   const FunctionCallExpression *caller, bool sp)
   const {
   attemptAccess(FrameInjection::GetClassName(false));
   MethScopeVariableEnvironment fenv(this);
   directBind(env, caller, fenv);
-  fenv.setCurrentClass(cls);
+  fenv.setCurrentClass(cls.data());
+  EvalFrameInjection::EvalStaticClassNameHelper helper(cls, sp);
   DECLARE_THREAD_INFO_NOINIT
   String clsName(m_class->name());
   EvalFrameInjection fi(clsName, m_fullName.c_str(), fenv,

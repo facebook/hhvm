@@ -42,8 +42,9 @@ public:
     const;
   Variant invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
                                const FunctionCallExpression *caller) const;
-  Variant invokeStaticDirect(const char* cls, VariableEnvironment &env,
-                             const FunctionCallExpression *caller) const;
+  Variant invokeStaticDirect(CStrRef cls, VariableEnvironment &env,
+                             const FunctionCallExpression *caller,
+                             bool sp) const;
   void getInfo(ClassInfo::MethodInfo &info) const;
   virtual LVariableTable *getStaticVars(VariableEnvironment &env) const;
   const ClassStatement *getClass() const { return m_class; }

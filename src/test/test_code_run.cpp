@@ -16823,6 +16823,22 @@ bool TestCodeRun::TestLateStaticBinding() {
         "string(6) \"Y::foo\"\n"
         "string(6) \"Y::bar\"\n");
 
+  MVCRO("<?php "
+        "class S {"
+        "  public static function s() {"
+        "    echo func_get_arg(0);"
+        "  }"
+        "}"
+        "class C {"
+        "  public static function c() {"
+        "    echo get_called_class();"
+        "    S::s(get_called_class());"
+        "    echo get_called_class();"
+        "  }"
+        "}"
+        "C::c();",
+        "CCC");
+
   return true;
 }
 

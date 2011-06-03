@@ -76,8 +76,7 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
     }
   }
   if (ms) {
-    EvalFrameInjection::EvalStaticClassNameHelper helper(cname, sp);
-    return strongBind(ms->invokeStaticDirect(cname.data(), env, this));
+    return strongBind(ms->invokeStaticDirect(cname, env, this, sp));
   }
 
   // Handle builtins

@@ -20,6 +20,7 @@
 #include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/ext/ext_reflection.h>
 #include <runtime/base/preg.h>
+#include <util/logger.h>
 
 using namespace std;
 
@@ -190,7 +191,12 @@ bool CmdInfo::onServer(DebuggerProxy *proxy) {
         &(*m_acLiveLists)[DebuggerClient::AutoCompleteClassMethods],
         &(*m_acLiveLists)[DebuggerClient::AutoCompleteClassProperties],
         &(*m_acLiveLists)[DebuggerClient::AutoCompleteClassConstants]);
-    } catch (...) {}
+    } catch (Exception &e) {
+      Logger::Error("Caught exception %s, auto-complete lists incomplete",
+                    e.getMessage().c_str());
+    } catch(...) {
+      Logger::Error("Caught unknown exception, auto-complete lists incomplete");
+    }
 
     FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
     bool global;

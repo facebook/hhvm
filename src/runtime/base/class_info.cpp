@@ -22,6 +22,7 @@
 #include <runtime/base/variable_unserializer.h>
 #include <util/util.h>
 #include <util/lock.h>
+#include <util/logger.h>
 
 using namespace std;
 
@@ -321,7 +322,15 @@ void ClassInfo::GetClassSymbolNames(CArrRef names, bool interface,
       if (interface) {
         cls = FindInterface(clsname.data());
       } else {
-        cls = FindClass(clsname.data());
+        try {
+          cls = FindClass(clsname.data());
+        } catch (Exception &e) {
+          Logger::Error("Caught exception %s", e.getMessage().c_str());
+          continue;
+        } catch(...) {
+          Logger::Error("Caught unknown exception");
+          continue;
+        }
       }
       ASSERT(cls);
       if (clsMethods) {
@@ -396,7 +405,6 @@ void ClassInfo::GetSymbolNames(std::vector<String> &classes,
   for (ArrayIter iter(funcs2); iter; ++iter) {
     functions.push_back(iter.second().toString());
   }
-
   Array consts = GetConstants();
   constants.reserve(consts.size());
   for (ArrayIter iter(consts); iter; ++iter) {

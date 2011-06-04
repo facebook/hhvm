@@ -1539,6 +1539,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     cg_indentBegin("try {\n");
     cg_printf("%s__destruct();\n", Option::MethodPrefix);
     cg_indentEnd("} catch (...) { handle_destructor_exception();}\n");
+    cg_printf("decRefCount();\n");
     cg_indentEnd("}\n");
     cg_indentEnd("}\n");
   }

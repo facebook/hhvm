@@ -87,9 +87,12 @@ void EvalObjectData::destruct() {
       handle_destructor_exception();
     }
   }
+  decRefCount();
   DynamicObjectData::destruct();
   if (root == this) {
-    RequestEvalState::deregisterObject(this);
+    if (LIKELY(getCount() == 0)) {
+      RequestEvalState::deregisterObject(this);
+    }
   }
 }
 

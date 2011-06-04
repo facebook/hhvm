@@ -3975,6 +3975,25 @@ bool TestCodeRun::TestObject() {
        "}\n"
        "X::f(new X);\n");
 
+  MVCR("<?php\n"
+       "$x = null;\n"
+       "$y = 0;\n"
+       "class C {\n"
+       "  public $p = \"C::\\$p\";\n"
+       "  function __destruct() {\n"
+       "    global $x, $y;\n"
+       "    print \"In C::__destruct(): $y\n\";\n"
+       "    $this->p = \"changed\";\n"
+       "    $x = $this;\n"
+       "  }\n"
+       "}\n"
+       "$c = new C();\n"
+       "var_dump($c);\n"
+       "$c = null;\n"
+       "$y = 140;\n"
+       "var_dump($x);\n"
+       "$x = null;\n");
+
   return true;
 }
 

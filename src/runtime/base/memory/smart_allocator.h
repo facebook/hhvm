@@ -391,8 +391,11 @@ void *SmartAllocatorInitSetup() {
   void *NS::T::ObjAllocatorInitSetup =                                  \
     ObjectAllocatorInitSetup<NS::T>();                                  \
   void NS::T::release() {                                               \
+    ASSERT(getCount() == 0);                                            \
     destruct();                                                         \
-    DELETEOBJ(NS, T, this);                                             \
+    if (LIKELY(getCount() == 0)) {                                      \
+      DELETEOBJ(NS, T, this);                                           \
+    }                                                                   \
   }
 
 #define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(T)                 \

@@ -78,7 +78,8 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     else if (f->getName() == "__callstatic") {
       setAttribute(HasUnknownStaticMethodHandler);
     } else if (f->getName() == "__isset") setAttribute(HasUnknownPropTester);
-    else if (f->getName() == "__unset") setAttribute(HasPropUnsetter);
+    else if (f->getName() == "__unset")   setAttribute(HasPropUnsetter);
+    else if (f->getName() == "__invoke")  setAttribute(HasInvokeMethod);
     addFunction(ar, f);
   }
   setAttribute(Extension);
@@ -131,6 +132,9 @@ void ClassScope::derivedMagicMethods(ClassScopePtr super) {
       (HasUnknownStaticMethodHandler|MayHaveUnknownStaticMethodHandler)) {
     super->setAttribute(MayHaveUnknownStaticMethodHandler);
   }
+  if (m_attribute & (HasInvokeMethod|MayHaveInvokeMethod)) {
+    super->setAttribute(MayHaveInvokeMethod);
+  }
   if (m_attribute & (HasArrayAccess|MayHaveArrayAccess)) {
     super->setAttribute(MayHaveArrayAccess);
   }
@@ -157,6 +161,9 @@ void ClassScope::inheritedMagicMethods(ClassScopePtr super) {
   if (super->m_attribute &
       (HasUnknownStaticMethodHandler|InheritsUnknownStaticMethodHandler)) {
     setAttribute(InheritsUnknownStaticMethodHandler);
+  }
+  if (super->m_attribute & (HasInvokeMethod|InheritsInvokeMethod)) {
+    setAttribute(InheritsInvokeMethod);
   }
   if (super->m_attribute & (HasArrayAccess|InheritsArrayAccess)) {
     setAttribute(InheritsArrayAccess);
@@ -1606,6 +1613,25 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     cg_indentEnd("}\n");
   }
 
+  // __invoke
+  if (getAttribute(ClassScope::HasInvokeMethod)) {
+    // the closure class will generate its own version of
+    // t___invokeCallInfoHelper, which will avoid a level
+    // of indirection
+    if (strcasecmp(clsName, "closure")) {
+      cg_indentBegin("const CallInfo *"
+                     "%s%s::t___invokeCallInfoHelper(void *&extra) {\n",
+                     Option::ClassPrefix, clsName);
+      cg_printf("extra = (void*) this;\n");
+      cg_printf("return &%s%s::%s%s;\n",
+                Option::ClassPrefix,
+                clsName,
+                Option::CallInfoWrapperPrefix,
+                cg.formatLabel("__invoke").c_str());
+      cg_indentEnd("}\n");
+    }
+  }
+
   if (isRedeclaring() && !derivesFromRedeclaring() && derivedByDynamic()) {
     cg_indentBegin("Variant %s%s::doRootCall(Variant v_name, Variant "
                    "v_arguments, bool fatal) {\n",
@@ -1624,6 +1650,17 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     findJumpTableMethods(cg, ar, false, funcs);
     outputCPPMethodInvokeTableSupport(cg, ar, funcs, m_functions, false);
     outputCPPMethodInvokeTableSupport(cg, ar, funcs, m_functions, true);
+    if (getAttribute(ClassScope::HasInvokeMethod)) {
+      // see above - closure does not need the bare object support,
+      // since we already have generated such a function (the
+      // closure function itself)
+      if (strcasecmp(clsName, "closure")) {
+        FunctionScopePtr func(findFunction(ar, "__invoke", false));
+        ASSERT(func);
+        outputCPPMethodInvokeBareObjectSupport(cg, ar, func, false);
+        outputCPPMethodInvokeBareObjectSupport(cg, ar, func, true);
+      }
+    }
     outputCPPJumpTable(cg, ar, true, dynamicObject, CallInfo);
     if (derivesFromRedeclaring()) {
       outputCPPJumpTable(cg, ar, false, dynamicObject, CallInfo);
@@ -1742,6 +1779,54 @@ void ClassScope::findJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar,
       funcs.push_back(name);
     }
   }
+}
+
+void ClassScope::outputCPPMethodInvokeBareObjectSupport(
+    CodeGenerator &cg, AnalysisResultPtr ar, 
+    FunctionScopePtr func, bool fewArgs) {
+
+  string id(getId(cg));
+  string lname(func->getName());
+
+  if (Option::InvokeWithSpecificArgs && !fewArgs &&
+      !ar->isSystem() && !ar->isSepExtension() &&
+      func->getMaxParamCount() == 0 && !func->isVariableArgument()) {
+    return;
+  }
+
+  cg_indentBegin("Variant %s%s::%s%s(void *self, ",
+                  Option::ClassPrefix, id.c_str(),
+                  fewArgs ? Option::InvokeWrapperFewArgsPrefix : 
+                    Option::InvokeWrapperPrefix,
+                  lname.c_str());
+  if (fewArgs) {
+    cg_printf("int count, INVOKE_FEW_ARGS_IMPL_ARGS");
+  } else {
+    cg_printf("CArrRef params");
+  }
+  cg_printf(") {\n");
+  cg_printf("MethodCallPackage mcp;\n");
+  if (func->isStatic() && func->needsClassParam()) {
+    cg_printf("mcp.isObj = true;\n");
+    cg_printf("mcp.rootObj = static_cast<ObjectData*>(self);\n");
+  } else {
+    cg_printf("mcp.obj = static_cast<ObjectData*>(self);\n");
+  }
+  if (fewArgs) {
+    cg_printf("return %s%s::%s%s(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS);\n", 
+              Option::ClassPrefix,
+              id.c_str(),
+              Option::InvokeFewArgsPrefix,
+              lname.c_str());
+  } else {
+    cg_printf("return %s%s::%s%s(mcp, params);\n", 
+              Option::ClassPrefix,
+              id.c_str(),
+              Option::InvokePrefix,
+              lname.c_str());
+  }
+  cg_indentEnd("}\n");
+
 }
 
 void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
@@ -1924,12 +2009,21 @@ void ClassScope::outputCPPJumpTableDecl(CodeGenerator &cg,
          m_functions.begin(); iter != m_functions.end(); ++iter) {
     FunctionScopePtr func = iter->second[0];
     string id = cg.formatLabel(func->getName());
+    bool needsWrapper = func->getName() == "__invoke";
     if (Option::InvokeWithSpecificArgs &&
         !ar->isSystem() && !ar->isSepExtension() &&
         func->getMaxParamCount() == 0 && !func->isVariableArgument()) {
       cg_printf("DECLARE_METHOD_INVOKE_HELPERS_NOPARAM(%s);\n", id.c_str());
+      if (needsWrapper) {
+        cg_printf("DECLARE_METHOD_INVOKE_WRAPPER_HELPERS_NOPARAM(%s);\n",
+                  id.c_str());
+      }
     } else {
       cg_printf("DECLARE_METHOD_INVOKE_HELPERS(%s);\n", id.c_str());
+      if (needsWrapper) {
+        cg_printf("DECLARE_METHOD_INVOKE_WRAPPER_HELPERS(%s);\n", 
+                  id.c_str());
+      }
     }
   }
 }

@@ -1809,6 +1809,41 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
       }
       return;
     }
+    if (m_name == "hphp_get_call_info" &&
+        m_params && m_params->getCount() == 2) {
+      ScalarExpressionPtr clsName(
+          dynamic_pointer_cast<ScalarExpression>((*m_params)[0]));
+      ScalarExpressionPtr funcName(
+          dynamic_pointer_cast<ScalarExpression>((*m_params)[1]));
+      if (clsName && funcName) {
+        string cname = clsName->getLiteralString();
+        string fname = funcName->getLiteralString();
+        if (!fname.empty()) {
+          if (!cname.empty()) {
+            ClassScopePtr cscope(ar->findClass(cname));
+            if (cscope && !cscope->isRedeclaring()) {
+              FunctionScopePtr fscope(cscope->findFunction(ar, fname, true));
+              if (fscope) {
+                cg_printf("(int64)&%s%s::%s%s",
+                          Option::ClassPrefix,
+                          cg.formatLabel(cname).c_str(),
+                          Option::CallInfoPrefix,
+                          fname.c_str());
+                return;
+              }
+            }
+          } else {
+            FunctionScopePtr fscope(ar->findFunction(fname));
+            if (fscope) {
+              cg_printf("(int64)&%s%s",
+                        Option::CallInfoPrefix,
+                        fname.c_str());
+              return;
+            }
+          }
+        }
+      }
+    }
 
     switch (m_type) {
       case VariableArgumentFunction:

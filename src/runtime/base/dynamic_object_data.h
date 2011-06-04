@@ -65,6 +65,7 @@ class DynamicObjectData : public ObjectData {
   virtual String t___tostring();
   virtual Variant t___clone();
   virtual Variant &___offsetget_lval(Variant v_name);
+  virtual const CallInfo *t___invokeCallInfoHelper(void *&extra);
 
   void setParent(Object p) { parent = p; }
   ObjectData *getRedeclaredParent() const { return parent.get(); }

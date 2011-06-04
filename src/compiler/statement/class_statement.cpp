@@ -538,6 +538,10 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                   "bool fatal);\n");
       }
 
+      if (classScope->getAttribute(ClassScope::HasInvokeMethod)) {
+        cg_printf("const CallInfo *t___invokeCallInfoHelper(void *&extra);\n");
+      }
+
       if (classScope->isRedeclaring() &&
           !classScope->derivesFromRedeclaring() &&
           classScope->derivedByDynamic()) {

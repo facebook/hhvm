@@ -22,6 +22,7 @@
 #include <runtime/eval/ast/class_statement.h>
 #include <runtime/eval/runtime/eval_state.h>
 #include <runtime/eval/ast/function_statement.h>
+#include <runtime/eval/ast/method_statement.h>
 #include <runtime/eval/parser/parser.h>
 
 namespace HPHP {
@@ -35,33 +36,24 @@ SimpleFunctionCallExpression::SimpleFunctionCallExpression
 
 Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   SET_LINE;
-  String name(m_name->get(env));
+
+  Variant var(m_name->getAsVariant(env));
+  if (var.is(KindOfObject)) {
+    const CallInfo *cit; 
+    void *extra;
+    get_call_info_or_fail(cit, extra, var);
+    ASSERT(cit);
+    return evalCallInfo(cit, extra, env);
+  }
+
+  String name = var.toString();
   String originalName = name;
   bool renamed = false;
 
-  // handling closure
-  if (name[0] == '0') {
-    const char *id = strchr(name.data(), ':');
-    if (id) {
-      int pos = id - name.data();
-      String sid = name.substr(pos + 1);
-      String function = name.substr(0, pos);
-      const Function *fs = RequestEvalState::findFunction(function.data());
-      if (fs) {
-        const FunctionStatement *fstmt =
-          dynamic_cast<const FunctionStatement *>(fs);
-        if (fstmt) {
-          ObjectData *closure = (ObjectData*)sid.toInt64();
-          return strongBind(fstmt->invokeClosure(Object(closure), env, this));
-        }
-      }
-    }
-  } else {
-    name = get_renamed_function(name, &renamed);
-    if (name[0] == '\\') {
-      name = name.substr(1); // try namespaced function first
-      renamed = true;
-    }
+  name = get_renamed_function(name, &renamed);
+  if (name[0] == '\\') {
+    name = name.substr(1); // try namespaced function first
+    renamed = true;
   }
 
   // fast path for interpreted fn
@@ -87,17 +79,25 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   // If the lookup failed get_call_info_or_fail() must throw an exception,
   // so if we reach here cit1 must not be NULL
   ASSERT(cit1);
+  return evalCallInfo(cit1, vt1, env);
+}
+
+Variant SimpleFunctionCallExpression::evalCallInfo(
+    const CallInfo *cit,
+    void *extra,
+    VariableEnvironment &env) const {
+  ASSERT(cit);
   ArrayInit ai(m_params.size(), true);
   for (unsigned int i = 0; i < m_params.size(); ++i) {
-    if (cit1->mustBeRef(i)) {
+    if (cit->mustBeRef(i)) {
       ai.setRef(m_params[i]->refval(env));
-    } else if (cit1->isRef(i)) {
+    } else if (cit->isRef(i)) {
       ai.setRef(m_params[i]->refval(env, 0));
     } else {
       ai.set(m_params[i]->eval(env));
     }
   }
-  return strongBind((cit1->getFunc())(vt1, Array(ai.create())));
+  return strongBind((cit->getFunc())(extra, Array(ai.create())));
 }
 
 void SimpleFunctionCallExpression::dump(std::ostream &out) const {

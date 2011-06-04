@@ -174,8 +174,9 @@ void ClosureExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void ClosureExpression::outputCPPImpl(CodeGenerator &cg,
                                       AnalysisResultPtr ar) {
-  cg_printf("%sClosure((NEWOBJ(%sClosure)())->create(\"%s\", ",
+  cg_printf("%sClosure((NEWOBJ(%sClosure)())->create((int64)&%s%s, 0LL, ",
             Option::SmartPtrPrefix, Option::ClassPrefix,
+            Option::CallInfoPrefix,
             m_func->getOriginalName().c_str());
 
   if (m_vars && m_vars->getCount()) {

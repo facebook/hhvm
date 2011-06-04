@@ -32,6 +32,9 @@ class Name : public Construct {
 public:
   Name(CONSTRUCT_ARGS);
   virtual String get(VariableEnvironment &env) const = 0;
+	virtual Variant getAsVariant(VariableEnvironment &env) const {
+	 return get(env);
+	}
   virtual int64 hash() const;
   virtual String get() const { return String(); }
   virtual bool isSp() const;
@@ -67,7 +70,10 @@ private:
 class ExprName : public Name {
 public:
   ExprName(CONSTRUCT_ARGS, ExpressionPtr name);
-  virtual String get(VariableEnvironment &env) const;
+  virtual String get(VariableEnvironment &env) const {
+		return getAsVariant(env).toString();
+	}
+  virtual Variant getAsVariant(VariableEnvironment &env) const;
   virtual String get() const { return Name::get(); }
   virtual void dump(std::ostream &out) const;
 

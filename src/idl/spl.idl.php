@@ -111,6 +111,52 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "hphp_get_call_info",
+    'desc'   => "This function returns a pointer to a CallInfo object. Used internally",
+    'flags'  =>  HasDocComment | NoInjection,
+    'return' => array(
+      'type'   => Int64,
+      'desc'   => "CallInfo pointer",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "cls",
+        'type'   => String,
+        'desc'   => "class name",
+      ),
+      array(
+        'name'   => "func",
+        'type'   => String,
+        'desc'   => "function name",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "hphp_get_call_info_extra",
+    'desc'   => "This function returns an opaque pointer, to be used with hphp_get_call_info. Used internally",
+    'flags'  =>  HasDocComment | NoInjection,
+    'return' => array(
+      'type'   => Int64,
+      'desc'   => "extra pointer",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "cls",
+        'type'   => String,
+        'desc'   => "class name",
+      ),
+      array(
+        'name'   => "func",
+        'type'   => String,
+        'desc'   => "function name",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "class_implements",
     'desc'   => "This function returns an array with the names of the interfaces that the given class and its parents implement.",
     'flags'  =>  HasDocComment,

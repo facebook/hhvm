@@ -184,23 +184,25 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
   bool outsideClass = !isPresent();
   if (!m_name.empty() && m_classScope && !m_dynamic) {
     ClassScopePtr cls = m_classScope;
+    const string& lClassName = cls->getId(cg);
     if (m_receiverTemp.empty()) {
       if (outsideClass) {
         cls->outputVolatileCheckBegin(cg, ar, getScope(), cname);
       }
       cg_printf("%s%s(((%s%s*)%s%s())->create(",
-                Option::SmartPtrPrefix, cls->getId(cg).c_str(),
-                Option::ClassPrefix, cls->getId(cg).c_str(),
-                Option::CreateObjectOnlyPrefix, cls->getId(cg).c_str());
+                Option::SmartPtrPrefix, lClassName.c_str(),
+                Option::ClassPrefix, lClassName.c_str(),
+                Option::CreateObjectOnlyPrefix, lClassName.c_str());
     } else {
       cg_printf("((%s%s*)%s.get()->create(",
-                Option::ClassPrefix, cls->getId(cg).c_str(),
+                Option::ClassPrefix, lClassName.c_str(),
                 m_receiverTemp.c_str());
     }
 
     FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, m_extraArg,
                                       m_variableArgument, m_argArrayId,
                                       m_argArrayHash, m_argArrayIndex);
+
     if (m_receiverTemp.empty()) {
     cg_printf("))");
       if (outsideClass) {

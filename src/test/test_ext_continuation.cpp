@@ -14,41 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EVAL_SIMPLE_FUNCTION_CALL_EXPRESSION_H__
-#define __EVAL_SIMPLE_FUNCTION_CALL_EXPRESSION_H__
+#include <test/test_ext_continuation.h>
+#include <runtime/ext/ext_continuation.h>
 
-#include <runtime/eval/ast/function_call_expression.h>
-
-namespace HPHP {
-namespace Eval {
+IMPLEMENT_SEP_EXTENSION_TEST(Continuation);
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_AST_PTR(SimpleFunctionCallExpression);
-DECLARE_AST_PTR(Name);
-class Parser;
+bool TestExtContinuation::RunTests(const std::string &which) {
+  bool ret = true;
 
-class SimpleFunctionCallExpression : public FunctionCallExpression {
-public:
-  SimpleFunctionCallExpression(EXPRESSION_ARGS, NamePtr name,
-                               const std::vector<ExpressionPtr> &params);
-  virtual Variant eval(VariableEnvironment &env) const;
-  virtual void dump(std::ostream &out) const;
-  // Not quite sure if this is the right place
-  static ExpressionPtr make(EXPRESSION_ARGS, NamePtr name,
-                            const std::vector<ExpressionPtr> &params,
-                            const Parser &p);
-protected:
-  NamePtr m_name;
+  RUN_TEST(test_Continuation);
 
-private:
-  Variant evalCallInfo(
-      const CallInfo *cit,
-      void *extra,
-      VariableEnvironment &env) const;
-};
+  return ret;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
-}
-}
 
-#endif /* __EVAL_FUNCTION_CALL_EXPRESSION_H__ */
+bool TestExtContinuation::test_Continuation() {
+  return Count(true);
+}

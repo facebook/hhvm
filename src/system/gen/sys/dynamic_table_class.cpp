@@ -32,377 +32,377 @@ namespace HPHP {
 #define M(x, y) MethodIndex(x, y)
 #define H(x,y,z) MethodIndexHMap(#x,MethodIndex(y,z))
 #define Z MethodIndexHMap(0,MethodIndex(0,0))
-const unsigned g_methodIndexHMapSizeSys = 1010;
+const unsigned g_methodIndexHMapSizeSys = 1008;
 extern const MethodIndexHMap g_methodIndexHMapSys [];
 const MethodIndexHMap g_methodIndexHMapSys [g_methodIndexHMapSizeSys] = {
-H(getOption,263,1), Z, H(isUserDefined,308,1), 
-Z, H(finalize,390,1), Z, 
-Z, H(createfunction,375,1), Z, 
 Z, Z, Z, 
-Z, H(startDTD,493,1), Z, 
-Z, H(ksort,23,1), Z, 
-Z, Z, H(uksort,18,1), 
-H(onClient,180,1), Z, Z, 
-H(__getfunctions,411,1), H(fetchcolumn,288,1), H(fflush,432,1), 
-H(isId,60,1), H(__call,8,1), Z, 
+H(getElementById,110,1), H(writeAttributeNS,483,1), H(detach,440,1), 
+Z, H(getDocComment,328,1), H(setTime,143,1), 
+Z, H(getSize,199,1), Z, 
 Z, Z, Z, 
-H(error,157,1), Z, H(getServerByKey,264,1), 
-Z, H(appendXML,115,1), Z, 
+Z, H(__getfunctions,410,1), H(setIDAttributeNS,115,1), 
+Z, H(fault,419,1), Z, 
+Z, H(addserver,230,1), H(increment,233,1), 
+H(isLink,198,1), H(fseek,422,1), Z, 
 Z, Z, Z, 
-Z, Z, H(getNamespaces,397,1), 
-Z, H(getEndLine,313,1), Z, 
-H(getChildren,304,1), H(lookupPrefix,68,1), H(addAttribute,394,1), 
+Z, H(loadHTMLFile,108,1), Z, 
+H(getCsvControl,426,1), H(getClosure,352,1), H(hasChildren,302,1), 
+H(invokeArgs,349,1), H(hasAttributeNS,118,1), H(seek,21,1), 
+H(validate,86,1), Z, Z, 
+Z, Z, H(getConfidence,217,1), 
+Z, Z, Z, 
+H(getOption,262,1), Z, H(lastinsertid,277,1), 
+H(eof,430,1), H(getStartLine,325,1), Z, 
+Z, H(lasterrorcode,382,1), H(columnname,384,1), 
+H(isInstance,314,1), H(c14n,66,1), H(xpath,394,1), 
+Z, H(removeChild,72,1), Z, 
+Z, Z, Z, 
+H(isDefaultValueAvailable,360,1), Z, Z, 
 Z, Z, Z, 
 Z, Z, Z, 
-Z, Z, H(getFilename,201,1), 
-Z, H(xpath,395,1), Z, 
-H(areConfusable,444,1), H(getParentClass,323,1), H(query,137,1), 
-H(getMethod,321,1), H(getStackTrace,164,1), H(endPI,492,1), 
-H(getCommand,160,1), H(getElementsByTagNameNS,88,1), H(columncount,293,1), 
-Z, H(fscanf,422,1), Z, 
-H(bindcolumn,291,1), H(rollback,280,1), H(getNamedItemNS,136,1), 
-H(setMultiByKey,268,1), H(css,225,1), H(__getlastresponse,413,1), 
-Z, H(getStaticVariables,348,1), Z, 
-Z, H(isValid,220,1), H(getlocale,45,1), 
-H(addUrl,229,1), H(setFlags,17,1), H(seek,21,1), 
-Z, H(text,504,1), H(getElementsByTagName,85,1), 
-Z, H(getProperties,319,1), H(saveXML,94,1), 
-H(isPublic,359,1), H(print,167,1), H(evaluate,138,1), 
-H(getserverstatus,237,1), Z, H(getTransitions,149,1), 
-H(fetchAll,267,1), H(schemaValidateSource,89,1), Z, 
-Z, Z, H(setRelaxNGSchemaSource,452,1), 
+H(setoptimeout,237,1), Z, Z, 
+H(execute,296,1), H(getEndLine,312,1), H(setCsvControl,425,1), 
+H(createEntityReference,91,1), H(registerPHPFunctions,138,1), Z, 
+H(commit,280,1), H(setValue,371,1), H(bindparam,293,1), 
+H(writeRaw,489,1), H(writeDTD,474,1), Z, 
+Z, Z, Z, 
+Z, H(isIterateable,305,1), Z, 
+Z, H(isPassedByReference,367,1), H(getStaticProperties,333,1), 
+Z, Z, Z, 
+Z, H(query,136,1), H(registerNamespace,139,1), 
+Z, Z, Z, 
+Z, Z, Z, 
+H(output,162,1), Z, Z, 
+Z, H(listIdentifiers,149,1), H(flock,435,1), 
+H(__invoke,35,1), H(getVars,49,1), H(getPathInfo,194,1), 
+H(listAbbreviations,150,1), H(getExtensionName,321,1), H(isConstructor,357,1), 
+Z, Z, Z, 
+Z, Z, Z, 
+Z, Z, H(insertData,78,1), 
+H(getFrame,171,1), H(deleteData,81,1), H(setobject,418,1), 
+H(getStaticVariables,347,1), H(fstat,438,1), H(getSubPathname,300,1), 
+H(isExecutable,207,1), H(getPerms,184,1), H(getResultCode,250,1), 
+H(columntype,385,1), H(readInnerXML,463,1), Z, 
+H(startCData,496,1), H(setfetchmode,291,1), H(createElement,98,1), 
+H(startDTD,492,1), Z, Z, 
+Z, H(errorcode,275,1), Z, 
+Z, Z, H(__unset,397,1), 
+H(__wakeup,278,1), H(__sleep,286,1), Z, 
+H(startComment,504,1), H(__init__,30,1), Z, 
+Z, Z, Z, 
+Z, H(setText,211,1), Z, 
+Z, Z, H(createElementNS,99,1), 
+H(__call,8,1), H(css,224,1), H(expand,452,1), 
+Z, Z, Z, 
+H(loadXML,104,1), H(lasterrormsg,376,1), H(startAttribute,486,1), 
+H(arg,153,1), H(isOptional,365,1), Z, 
+Z, H(setSchema,455,1), H(__soapcall,407,1), 
+Z, H(readOuterXML,457,1), Z, 
+H(setAttributeNodeNS,119,1), H(getFunctions,341,1), H(lastinsertrowid,375,1), 
+H(XML,461,1), H(append,5,1), H(loadHTML,90,1), 
+H(writeComment,471,1), H(getPrevious,28,1), H(openFile,208,1), 
+H(item,133,1), Z, Z, 
+Z, H(finalize,389,1), H(tutorial,160,1), 
+H(getDefaultValue,366,1), H(addsoapheader,415,1), H(getstrength,40,1), 
+Z, Z, Z, 
+Z, H(getModifiers,316,1), H(isDefaultNamespace,58,1), 
+H(setOption,254,1), H(moveToFirstAttribute,448,1), H(setMaxLineLen,427,1), 
+H(send,54,1), Z, Z, 
+Z, Z, H(fetchobject,297,1), 
+H(helpBody,170,1), H(hasConstant,319,1), Z, 
+H(lookupPrefix,67,1), H(setParserProperty,456,1), H(getIterator,134,1), 
+Z, Z, H(getNamespaces,396,1), 
+H(isDestructor,359,1), H(ksort,23,1), Z, 
+Z, Z, H(hasAttribute,117,1), 
+H(startDTDEntity,469,1), H(isSubclassOf,330,1), H(__get,73,1), 
+H(fullEndElement,465,1), H(addServers,270,1), H(openblob,381,1), 
+H(replaceByKey,257,1), H(isId,59,1), H(writePI,484,1), 
+H(setMultiByKey,267,1), H(getParserProperty,453,1), H(getAttributeNodeNS,116,1), 
+H(hasChildNodes,76,1), H(createDocument,129,1), H(fetcharray,387,1), 
+H(writeElement,487,1), H(getATime,206,1), H(asort,20,1), 
+H(addFile,229,1), Z, H(getArrayCopy,14,1), 
 Z, Z, H(getInnerIterator,4,1), 
-Z, H(getStaticProperties,334,1), Z, 
-Z, H(helpTitle,159,1), Z, 
-H(ftell,437,1), Z, Z, 
-H(getMaxLineLen,429,1), H(read,184,1), Z, 
-H(lookupNamespaceUri,61,1), Z, Z, 
-H(getFrame,172,1), H(getSeverity,221,1), Z, 
-H(startDTDEntity,470,1), Z, H(isDestructor,360,1), 
-H(getDocComment,329,1), H(setAttributeNodeNS,120,1), H(fgetc,433,1), 
-H(compare,47,1), H(readInnerXML,464,1), H(insertData,79,1), 
-H(setDeclaredEncoding,213,1), H(lookupNamespace,447,1), H(getGroup,189,1), 
-Z, H(setTimezone,147,1), H(loadImages,226,1), 
-H(returnsReference,351,1), H(casByKey,257,1), Z, 
 Z, Z, Z, 
-H(execute,297,1), H(saveHTML,104,1), H(__set,63,1), 
-H(eof,431,1), Z, H(startAttribute,487,1), 
-H(setAttributeNode,129,1), Z, Z, 
-H(__dorequest,404,1), Z, Z, 
-Z, Z, H(next,1,1), 
-Z, Z, H(writeElementNS,465,1), 
-H(setISODate,146,1), Z, Z, 
-Z, Z, H(setfetchmode,292,1), 
-H(getattribute,36,1), Z, Z, 
-H(setStaticPropertyValue,336,1), H(addString,222,1), H(isPassedByReference,368,1), 
-H(writeElement,488,1), Z, Z, 
-H(allowsNull,363,1), H(done,52,1), H(addChild,402,1), 
-H(startDocument,469,1), H(argCount,153,1), Z, 
 Z, Z, Z, 
-Z, Z, H(__getlastrequest,405,1), 
-Z, H(handle,418,1), Z, 
+H(load,96,1), H(getStaticPropertyValue,306,1), H(isWhitespaceInElementContent,82,1), 
+H(removeAttribute,127,1), H(columncount,292,1), H(update,55,1), 
+H(endPI,491,1), H(setAccessible,370,1), Z, 
+H(getTransitions,148,1), H(isDefault,369,1), Z, 
+H(writeDTDAttlist,497,1), H(getElementsByTagNameNS,87,1), H(flush,246,1), 
+H(quit,169,1), H(add,241,1), H(isPublic,358,1), 
+H(isArray,364,1), H(prependByKey,272,1), H(importNode,100,1), 
+Z, Z, H(compare,46,1), 
+Z, Z, H(saveXML,93,1), 
+Z, H(getByKey,260,1), Z, 
+Z, H(rewind,9,1), Z, 
 Z, Z, Z, 
-Z, H(uasort,24,1), H(setpersistence,417,1), 
-H(setcompressthreshold,239,1), Z, H(output,163,1), 
-H(getOffset,143,1), H(get,240,1), H(getCTime,196,1), 
-Z, H(load,97,1), H(getAttributeNodeNS,117,1), 
 Z, Z, Z, 
-Z, Z, H(c14n,67,1), 
-Z, H(quote,283,1), Z, 
-Z, Z, H(setVars,35,1), 
-H(format,141,1), H(moveToFirstAttribute,449,1), Z, 
-H(createElement,99,1), H(isReadable,193,1), H(addsoapheader,416,1), 
-Z, H(asXML,399,1), Z, 
+Z, H(setclass,420,1), H(readString,462,1), 
 Z, Z, Z, 
-Z, Z, H(getStaticPropertyValue,307,1), 
-H(writeRaw,490,1), H(export,318,1), H(setDate,142,1), 
-H(setIndentString,486,1), H(writeDTDElement,483,1), Z, 
+Z, Z, H(isSuspicious,445,1), 
 Z, Z, Z, 
-Z, H(writeDTDEntity,491,1), H(registerXPathNamespace,396,1), 
-H(errorinfo,286,1), H(moveToAttributeNs,460,1), Z, 
-H(isInstance,315,1), H(getTrace,33,1), H(getNumberOfRequiredParameters,346,1), 
-Z, Z, H(removeAttributeNode,127,1), 
-Z, H(getInterfaceNames,325,1), Z, 
-H(version,373,1), H(natcasesort,19,1), H(isFinal,316,1), 
-Z, Z, H(detectAll,215,1), 
-Z, Z, H(hasMethod,314,1), 
-Z, H(c14nfile,71,1), H(getavailabledrivers,282,1), 
-H(getDefaultValue,367,1), Z, Z, 
-Z, H(isInstantiable,337,1), Z, 
-H(isLink,199,1), H(test,333,1), H(registerPHPFunctions,139,1), 
+H(replaceChild,64,1), H(error,156,1), Z, 
+H(set,231,1), Z, H(fgets,434,1), 
 Z, Z, Z, 
 Z, Z, Z, 
 Z, Z, Z, 
-H(getStartLine,326,1), H(prepend,256,1), H(arg,154,1), 
-Z, H(fullEndElement,466,1), Z, 
-Z, Z, H(quit,170,1), 
+Z, H(connect,244,1), H(debugdumpparams,299,1), 
+H(getValue,368,1), H(createaggregate,378,1), H(onClient,179,1), 
+H(getNodePath,69,1), H(uksort,18,1), Z, 
+Z, H(argRest,175,1), H(getattribute,36,1), 
+H(code,167,1), Z, Z, 
+Z, H(ftell,436,1), Z, 
+Z, H(insertBefore,57,1), H(saveHTML,103,1), 
+H(delete,243,1), H(isWritable,185,1), Z, 
+H(createAttributens,97,1), Z, Z, 
+H(fetchcolumn,287,1), H(changes,380,1), Z, 
+Z, H(isInstantiable,336,1), Z, 
+H(getAttributeNode,123,1), Z, H(getNumberOfParameters,346,1), 
+Z, H(getClasses,344,1), H(__toString,26,1), 
+H(setFileClass,189,1), H(__set,62,1), Z, 
+Z, H(normalize,68,1), H(done,51,1), 
+H(setFlags,17,1), Z, Z, 
+H(isnormalized,274,1), H(valid,3,1), H(startElement,477,1), 
+H(endDTDAttlist,466,1), H(helpCmds,154,1), H(ask,155,1), 
+H(replaceData,80,1), H(getMulti,248,1), H(printFrame,165,1), 
+Z, Z, H(schemaValidate,92,1), 
+Z, H(getInterfaceNames,324,1), H(setAttributeNode,128,1), 
+H(attach,439,1), H(querysingle,383,1), H(geterrorcode,39,1), 
+H(setRelaxNGSchemaSource,451,1), H(endCData,470,1), Z, 
 Z, Z, Z, 
-H(getFunctions,342,1), H(getName,152,1), H(loadHTML,91,1), 
-H(startPI,503,1), H(appendChild,62,1), H(getAttributeNo,455,1), 
+Z, Z, H(setByKey,251,1), 
+H(startDocument,468,1), Z, H(getDefaultProperties,334,1), 
+H(getServerByKey,263,1), H(getLanguage,218,1), H(get_arg,50,1), 
+H(getOwner,202,1), H(prepare,284,1), Z, 
+Z, H(deleteByKey,261,1), Z, 
+Z, H(fwrite,437,1), H(rollback,279,1), 
+Z, Z, H(pconnect,240,1), 
+Z, Z, H(unserialize,391,1), 
+H(startAttributens,476,1), Z, Z, 
 Z, Z, Z, 
+H(natsort,16,1), H(save,105,1), Z, 
+Z, H(splitText,83,1), H(offsetSet,13,1), 
+H(isStatic,355,1), H(normalizeDocument,112,1), Z, 
+Z, Z, H(getChildren,303,1), 
+H(info,164,1), Z, Z, 
+H(getMultiByKey,268,1), H(detectAll,214,1), H(endDTD,498,1), 
+Z, H(getRealPath,193,1), H(getProperty,340,1), 
+Z, H(get_args,48,1), Z, 
+H(getcolumnmeta,288,1), Z, Z, 
+H(getSeverity,220,1), H(__setlocation,408,1), H(offsetExists,10,1), 
 Z, Z, Z, 
-H(create,43,1), Z, Z, 
+Z, Z, H(setstrength,41,1), 
+H(clear,226,1), Z, H(fetch,269,1), 
+H(getNamedItemNS,135,1), H(getOffset,142,1), Z, 
 Z, Z, Z, 
-Z, H(getPrevious,28,1), Z, 
-H(get_arg,51,1), Z, Z, 
-H(cas,272,1), H(pconnect,241,1), H(getEncoding,217,1), 
-H(modify,148,1), H(getSize,200,1), H(ftruncate,430,1), 
+Z, Z, H(getlocale,44,1), 
+H(fscanf,421,1), Z, Z, 
+Z, H(paramcount,390,1), Z, 
+Z, Z, H(setDate,141,1), 
+H(relaxNGValidate,89,1), Z, Z, 
 Z, Z, Z, 
-Z, H(openURI,501,1), H(createAttributens,98,1), 
-Z, H(paramcount,391,1), H(current,7,1), 
-H(addFile,230,1), H(numcolumns,387,1), Z, 
-H(ask,156,1), H(getSubPathname,301,1), Z, 
-Z, Z, Z, 
-Z, H(save,106,1), H(setIDAttribute,125,1), 
-H(getMultiByKey,269,1), H(writeDTD,475,1), Z, 
-Z, Z, Z, 
-H(currentRef,274,1), Z, Z, 
-Z, Z, H(fstat,439,1), 
-H(num_args,53,1), H(createEntityReference,92,1), Z, 
-H(isInterface,330,1), Z, H(bindparam,294,1), 
-Z, Z, Z, 
-Z, Z, H(commit,281,1), 
-Z, H(receive,54,1), H(getDefaultProperties,335,1), 
-Z, Z, Z, 
-Z, Z, H(setParserProperty,457,1), 
-Z, Z, Z, 
-Z, Z, Z, 
-Z, H(expand,453,1), Z, 
-Z, Z, H(increment,234,1), 
-Z, H(createCDATASection,86,1), Z, 
-H(getDelayedByKey,259,1), H(isSuspicious,446,1), Z, 
-Z, Z, Z, 
-Z, Z, H(getByKey,261,1), 
-Z, H(closecursor,295,1), Z, 
-H(attributes,403,1), H(sort,39,1), H(rowcount,296,1), 
-H(contains,442,1), H(key,2,1), H(begintransaction,284,1), 
-H(validate,87,1), Z, H(__toString,26,1), 
-Z, H(setValue,372,1), Z, 
-H(code,168,1), Z, Z, 
-Z, H(setattribute,44,1), H(isConstructor,358,1), 
-H(insertBefore,58,1), H(getClassNames,344,1), H(fetch,270,1), 
-H(setAllowedLocales,443,1), H(offsetGet,11,1), H(setIDAttributeNode,126,1), 
-H(getLine,29,1), H(fpassthru,434,1), H(hasAttributes,66,1), 
-H(loadextension,374,1), H(appendData,80,1), H(tutorial,161,1), 
-H(valid,3,1), H(xend,158,1), Z, 
-Z, Z, H(__setsoapheaders,406,1), 
-H(getPathname,188,1), H(isDir,205,1), H(setstrength,42,1), 
-H(serialize,393,1), H(getextendedstats,248,1), H(isStatic,356,1), 
-H(__wakeup,279,1), H(setText,212,1), H(helpSection,169,1), 
-H(getType,211,1), H(startComment,505,1), H(openFile,209,1), 
-H(getNodePath,70,1), H(decrement,235,1), Z, 
-H(offsetUnset,12,1), Z, H(endDTDEntity,476,1), 
-Z, Z, H(setIDAttributeNS,116,1), 
-Z, Z, H(set,232,1), 
-H(getParameters,349,1), Z, H(setMaxLineLen,428,1), 
-H(setSchema,456,1), Z, Z, 
-Z, Z, Z, 
-H(__unset,398,1), H(helpBody,171,1), H(flock,436,1), 
-H(detect,214,1), H(detach,441,1), H(getFileInfo,206,1), 
-H(isDefaultValueAvailable,361,1), H(isIterateable,306,1), H(getConstructor,311,1), 
-Z, H(relaxNGValidateSource,102,1), Z, 
-Z, H(isOptional,366,1), Z, 
-Z, Z, Z, 
-Z, Z, H(isDefault,370,1), 
-H(isWhitespaceInElementContent,83,1), H(getConfidence,218,1), Z, 
-Z, H(helpCmds,155,1), Z, 
-H(setclass,421,1), H(natsort,16,1), H(lastinsertid,278,1), 
-H(replace,246,1), Z, Z, 
-Z, H(isDot,210,1), Z, 
-H(deleteData,82,1), H(columnname,385,1), H(endCData,471,1), 
-H(getPathInfo,195,1), Z, Z, 
-H(listAbbreviations,151,1), H(__construct,6,1), H(loadXML,105,1), 
-H(setChecks,445,1), H(importNode,101,1), H(getLinkTarget,192,1), 
-H(rewind,9,1), H(startAttributens,477,1), H(geterrorcode,40,1), 
-Z, Z, Z, 
-H(isSupported,75,1), Z, Z, 
-Z, Z, Z, 
-H(replaceChild,65,1), Z, Z, 
-Z, Z, Z, 
-Z, H(isInternal,340,1), Z, 
+H(isUserDefined,307,1), H(getLine,29,1), H(setISODate,145,1), 
+Z, H(prepend,255,1), H(addByKey,265,1), 
+Z, H(getNamedItem,132,1), H(fflush,431,1), 
+Z, Z, H(text,503,1), 
+Z, Z, H(newInstance,308,1), 
+Z, H(helpTitle,158,1), H(currentRef,273,1), 
+Z, H(getName,151,1), H(xend,157,1), 
 Z, Z, Z, 
 Z, Z, Z, 
+Z, Z, H(reset,388,1), 
+H(detect,213,1), H(getDocNamespaces,399,1), Z, 
+Z, H(getResultMessage,249,1), Z, 
+H(modify,147,1), H(mapping,223,1), H(export,317,1), 
+H(getAttributeNS,121,1), Z, H(endAttribute,501,1), 
 Z, Z, Z, 
-Z, H(offsetExists,10,1), H(isProtected,355,1), 
-H(get_args,49,1), H(setFileClass,190,1), H(listIdentifiers,150,1), 
+H(startDTDAttlist,495,1), H(count,15,1), H(ftruncate,429,1), 
+H(setcompressthreshold,238,1), H(setChecks,444,1), Z, 
+Z, H(natcasesort,19,1), H(wrap,177,1), 
+H(startDTDElement,479,1), Z, H(decrement,234,1), 
+Z, H(getFilename,200,1), H(createfunction,374,1), 
+Z, Z, H(read,183,1), 
+H(getNumberOfRequiredParameters,345,1), Z, Z, 
+H(getCurrentLocation,176,1), H(__gettypes,413,1), H(getServerList,264,1), 
+H(getCommand,159,1), H(getLineNo,56,1), Z, 
+H(xinclude,107,1), H(bindcolumn,290,1), H(exec,276,1), 
+H(children,400,1), Z, Z, 
+H(appendByKey,252,1), Z, H(cloneNode,63,1), 
+Z, H(getProperties,318,1), H(getINIEntries,342,1), 
+H(setIDAttribute,124,1), Z, Z, 
 Z, Z, Z, 
-H(getIterator,135,1), H(endElement,489,1), H(writeAttributeNS,484,1), 
-H(schemaValidate,93,1), H(replaceData,81,1), H(fgetcsv,425,1), 
-Z, Z, H(startElementNS,479,1), 
-Z, Z, H(isExecutable,208,1), 
-Z, H(createAttribute,107,1), Z, 
-Z, H(createaggregate,379,1), Z, 
-Z, H(__soapcall,408,1), H(loadHTMLFile,109,1), 
+Z, H(lookupNamespaceUri,60,1), Z, 
+H(receive,53,1), H(removeAttributeNS,122,1), H(createDocumentType,130,1), 
+H(invoke,351,1), H(__destruct,34,1), H(isDot,209,1), 
+Z, Z, H(isAbstract,338,1), 
+Z, H(getClass,361,1), H(rowcount,295,1), 
+H(getLinkTarget,191,1), H(current,7,1), H(addUrl,228,1), 
 Z, Z, Z, 
-H(getClass,362,1), Z, Z, 
-H(reset,389,1), Z, Z, 
-Z, Z, H(setInfoClass,191,1), 
-Z, H(send,55,1), H(invoke,352,1), 
-Z, Z, H(createDocumentType,131,1), 
-H(addServers,271,1), H(__gettypes,414,1), H(getModifiers,317,1), 
-H(mapping,224,1), Z, Z, 
-H(debugdumpparams,300,1), H(getSubPath,302,1), Z, 
-H(getExtensionName,322,1), H(newInstanceArgs,312,1), Z, 
-H(addserver,231,1), Z, Z, 
-H(prependByKey,273,1), H(appendByKey,253,1), H(addfunction,415,1), 
-Z, H(implementsInterface,324,1), H(writePI,485,1), 
-H(argRest,176,1), H(getAttributeNode,124,1), H(close,183,1), 
-H(fgetss,424,1), H(setAttributeNS,121,1), Z, 
-Z, Z, H(getcolumnmeta,289,1), 
+H(fetchAll,266,1), H(substringData,77,1), H(c14nfile,70,1), 
+H(endDTDEntity,475,1), H(asXML,398,1), H(newInstanceArgs,311,1), 
 Z, Z, Z, 
-Z, H(exec,277,1), Z, 
-Z, Z, H(append,5,1), 
-H(setRelaxNGSchema,461,1), Z, Z, 
-H(getErrors,228,1), H(onServer,181,1), Z, 
-H(createDocumentFragment,114,1), H(flush,247,1), Z, 
+Z, Z, H(createAttribute,106,1), 
+H(createCDATASection,85,1), Z, Z, 
 Z, Z, Z, 
+Z, H(getConstant,326,1), Z, 
+Z, Z, H(offsetGet,11,1), 
+H(implementsInterface,323,1), H(getTrace,33,1), H(setAllowedLocales,442,1), 
+H(getFile,31,1), H(fgetss,423,1), H(args,173,1), 
 Z, Z, Z, 
-Z, H(createProcessingInstruction,95,1), Z, 
-H(getMethods,305,1), H(getPosition,364,1), H(getversion,243,1), 
-H(addByKey,266,1), H(cloneNode,64,1), H(xinclude,108,1), 
-H(getFlags,22,1), H(asort,20,1), H(getAttributeNS,122,1), 
+H(writeCData,480,1), Z, Z, 
+H(getMethod,320,1), H(numcolumns,386,1), Z, 
 Z, Z, Z, 
+Z, H(relaxNGValidateSource,101,1), Z, 
 Z, Z, Z, 
-Z, H(removeAttribute,128,1), Z, 
-Z, Z, H(errorcode,276,1), 
-Z, Z, H(deleteByKey,262,1), 
-H(__setcookie,407,1), Z, Z, 
-Z, Z, H(help,173,1), 
-Z, H(getPerms,185,1), H(endDTDAttlist,467,1), 
-H(nextrowset,290,1), H(clear,227,1), H(getMTime,204,1), 
-H(getATime,207,1), H(moveToAttributeNo,459,1), H(getConstant,327,1), 
-H(count,15,1), H(getCurrentLocation,177,1), H(lasterrormsg,377,1), 
-H(writeComment,472,1), H(attach,440,1), Z, 
+H(getDeclaringClass,356,1), H(onServer,180,1), H(bindvalue,298,1), 
+Z, Z, H(writeDTDEntity,490,1), 
+H(createComment,111,1), H(getPathname,187,1), H(casByKey,256,1), 
 Z, Z, Z, 
-Z, Z, Z, 
-H(getINIEntries,343,1), H(__get,74,1), H(getVars,34,1), 
-H(XML,462,1), H(setTime,144,1), Z, 
-H(hasFeature,132,1), H(getResultCode,251,1), H(normalizeDocument,113,1), 
-H(isSameNode,72,1), Z, Z, 
-Z, Z, H(startDTDAttlist,496,1), 
-Z, Z, H(nextImpl,50,1), 
-H(createDocument,130,1), H(getArrayCopy,14,1), Z, 
-H(setserverparams,233,1), Z, Z, 
-Z, Z, H(getInode,198,1), 
-Z, H(addCompletion,175,1), Z, 
+H(isFile,201,1), H(evaluate,137,1), H(isInternal,339,1), 
+H(close,182,1), H(hasAttributes,65,1), Z, 
 Z, Z, Z, 
 Z, Z, Z, 
-H(setAccessible,371,1), H(isAbstract,339,1), Z, 
-Z, H(moveToAttribute,450,1), Z, 
+H(getConstructor,310,1), H(setIDAttributeNode,125,1), Z, 
+Z, Z, Z, 
+H(argCount,152,1), Z, Z, 
+Z, Z, H(addChild,401,1), 
+H(getextendedstats,247,1), Z, H(test,332,1), 
+Z, Z, H(getElementsByTagName,84,1), 
+Z, H(getBasename,186,1), H(fgetcsv,424,1), 
+H(isFinal,315,1), Z, Z, 
+Z, Z, H(moveToAttributeNo,458,1), 
+H(__getlastresponse,412,1), H(setTimezone,146,1), H(isProtected,354,1), 
+H(removeAttributeNode,126,1), H(hasMethod,313,1), H(onAutoComplete,178,1), 
+H(__getlastresponseheaders,411,1), H(fpassthru,433,1), Z, 
+Z, H(errorinfo,285,1), Z, 
+Z, H(schemaValidateSource,88,1), Z, 
+Z, Z, H(getversion,242,1), 
+H(create,42,1), Z, Z, 
+Z, Z, Z, 
+Z, Z, Z, 
+H(moveToElement,447,1), H(uasort,24,1), Z, 
 Z, Z, Z, 
 Z, Z, Z, 
 Z, Z, Z, 
+Z, H(attributes,402,1), H(hasProperty,331,1), 
+H(getavailabledrivers,281,1), H(addfunction,414,1), Z, 
 Z, Z, Z, 
-H(getNamedItem,133,1), H(bindvalue,299,1), H(__init__,30,1), 
-H(__setlocation,409,1), Z, Z, 
-H(removeAttributeNS,123,1), Z, Z, 
-Z, Z, Z, 
-Z, Z, Z, 
-H(setobject,419,1), Z, H(update,56,1), 
-H(sortwithsortkeys,37,1), H(registerNamespace,140,1), H(setCsvControl,426,1), 
-H(getLanguage,219,1), H(__getlastresponseheaders,412,1), H(getTimezone,145,1), 
-H(getServerList,265,1), H(changes,381,1), H(getUTF8,216,1), 
-H(getExtension,310,1), H(querysingle,384,1), Z, 
-Z, H(info,165,1), Z, 
-Z, H(replaceByKey,258,1), H(isSubclassOf,331,1), 
-H(getOwner,203,1), Z, Z, 
-Z, Z, Z, 
-Z, Z, Z, 
-Z, Z, H(isFile,202,1), 
-H(getstrength,41,1), H(getMulti,249,1), Z, 
-Z, Z, H(createTextNode,103,1), 
-H(getClasses,345,1), Z, Z, 
-H(getElementById,111,1), H(getResultMessage,250,1), H(getDeclaringClass,357,1), 
-H(add,242,1), H(fetcharray,388,1), H(hasChildren,303,1), 
-H(geterrormessage,46,1), H(printFrame,166,1), H(moveToElement,448,1), 
+Z, Z, H(getType,210,1), 
+H(setpersistence,416,1), H(next,1,1), H(startPI,502,1), 
+Z, H(isValid,219,1), Z, 
+H(setserverparams,232,1), Z, H(__construct,6,1), 
+Z, Z, H(escapestring,377,1), 
+H(__getlastrequest,404,1), H(open,379,1), H(replace,245,1), 
+H(moveToNextAttribute,450,1), H(getStackTrace,163,1), Z, 
+H(getstats,235,1), Z, Z, 
+Z, H(getParameters,348,1), H(endElement,488,1), 
+H(getCTime,195,1), Z, Z, 
 Z, Z, Z, 
 Z, Z, Z, 
-Z, H(delete,244,1), Z, 
-H(endComment,474,1), Z, Z, 
-Z, Z, H(offsetSet,13,1), 
-Z, Z, H(setIndent,494,1), 
-H(hasChildNodes,77,1), H(hasProperty,332,1), H(__getlastrequestheaders,410,1), 
-H(__destruct,38,1), Z, Z, 
-H(getCsvControl,427,1), Z, H(args,174,1), 
-Z, Z, H(lastinsertrowid,376,1), 
-H(isWritable,186,1), H(setOption,255,1), H(writeCData,481,1), 
-H(__sleep,287,1), H(fseek,423,1), H(loadDims,223,1), 
-H(startElement,478,1), Z, Z, 
+H(returnsReference,350,1), H(setMulti,259,1), Z, 
 Z, Z, Z, 
-Z, H(hasAttribute,118,1), H(isDefaultNamespace,59,1), 
-Z, Z, H(createElementNS,100,1), 
-Z, H(endAttribute,502,1), H(connect,245,1), 
-Z, H(lasterrorcode,383,1), H(normalize,69,1), 
-H(openMemory,500,1), H(getParserProperty,454,1), H(open,380,1), 
+Z, H(getserverstatus,236,1), Z, 
+H(geterrormessage,45,1), Z, H(hasFeature,131,1), 
+Z, Z, H(setDeclaredEncoding,212,1), 
 Z, Z, Z, 
-Z, Z, H(getDelayed,254,1), 
-Z, Z, H(moveToNextAttribute,451,1), 
-H(getDocNamespaces,400,1), H(children,401,1), Z, 
-H(fwrite,438,1), Z, H(__isset,76,1), 
-H(getLineNo,57,1), Z, Z, 
-H(prepare,285,1), Z, H(columntype,386,1), 
+H(getGroup,188,1), H(createTextNode,102,1), Z, 
+Z, Z, H(isPrivate,353,1), 
 Z, Z, Z, 
-H(getPath,197,1), H(fgets,435,1), H(isnormalized,275,1), 
-H(escapestring,378,1), H(onAutoComplete,179,1), H(isLocal,182,1), 
-H(setoptimeout,238,1), Z, Z, 
-Z, H(getCode,27,1), Z, 
-H(writeAttribute,473,1), Z, Z, 
-Z, H(hasAttributeNS,119,1), Z, 
-Z, H(readString,463,1), H(endDTDElement,495,1), 
-H(outputMemory,468,1), H(substringData,78,1), H(getLabel,48,1), 
-Z, H(endDTD,499,1), H(isArray,365,1), 
-H(getBasename,187,1), Z, H(getNumberOfParameters,347,1), 
-H(splitText,84,1), Z, H(getInterfaces,338,1), 
-H(newInstance,309,1), Z, Z, 
-Z, H(getClosure,353,1), Z, 
-Z, Z, H(createComment,112,1), 
-H(getstats,236,1), H(openblob,382,1), Z, 
-H(endDocument,482,1), H(isPrivate,354,1), H(startDTDElement,480,1), 
-H(getValue,369,1), H(invokeArgs,350,1), H(writeDTDAttlist,498,1), 
+Z, Z, H(setIndent,493,1), 
+Z, Z, Z, 
+H(areConfusable,443,1), H(version,372,1), Z, 
+H(isLocal,181,1), Z, Z, 
+H(isSameNode,71,1), H(addCompletion,174,1), Z, 
+Z, Z, H(loadextension,373,1), 
+Z, Z, H(setAttributeNS,120,1), 
+H(getPosition,363,1), H(allowsNull,362,1), Z, 
+Z, Z, H(appendData,79,1), 
+H(openMemory,499,1), Z, Z, 
+Z, Z, Z, 
+Z, Z, H(moveToAttribute,449,1), 
+Z, Z, Z, 
+H(addString,221,1), H(setIndentString,485,1), Z, 
+Z, Z, Z, 
+Z, Z, H(loadDims,222,1), 
+Z, H(__setcookie,406,1), H(registerNodeClass,95,1), 
+H(serialize,392,1), H(writeElementNS,464,1), H(argValue,161,1), 
+Z, H(setattribute,43,1), Z, 
+H(getTimezone,144,1), Z, H(appendChild,61,1), 
+H(getFileInfo,205,1), Z, Z, 
+Z, Z, Z, 
+Z, H(addAttribute,393,1), Z, 
+H(getMaxLineLen,428,1), H(outputMemory,467,1), H(getTraceAsString,32,1), 
+Z, H(getDelayedByKey,258,1), H(quote,282,1), 
+H(openURI,500,1), H(getCode,27,1), Z, 
+H(getParentClass,322,1), H(writeDTDElement,482,1), Z, 
+H(getMTime,203,1), Z, H(getDelayed,253,1), 
+H(format,140,1), H(getLabel,47,1), H(offsetUnset,12,1), 
+H(isSupported,74,1), H(endDocument,481,1), H(createProcessingInstruction,94,1), 
+H(saveHTMLFile,109,1), Z, Z, 
+Z, H(cas,271,1), Z, 
+Z, Z, H(__dorequest,403,1), 
+Z, H(endDTDElement,494,1), Z, 
+Z, H(getMethods,304,1), H(writeAttribute,472,1), 
+H(getUTF8,215,1), Z, H(isInterface,329,1), 
+Z, H(getErrors,227,1), H(nextrowset,289,1), 
 H(getMessage,25,1), Z, Z, 
-H(wrap,178,1), H(relaxNGValidate,90,1), H(getConstants,328,1), 
-Z, H(registerNodeClass,96,1), Z, 
-H(saveHTMLFile,110,1), Z, H(removeChild,73,1), 
-H(getProperty,341,1), H(unserialize,392,1), H(startCData,497,1), 
-Z, H(getRealPath,194,1), H(argValue,162,1), 
-H(getTraceAsString,32,1), H(setMulti,260,1), Z, 
-Z, H(fault,420,1), H(hasConstant,320,1), 
-Z, H(readOuterXML,458,1), H(fetchobject,298,1), 
-H(setByKey,252,1), H(getFile,31,1), Z, 
+H(endComment,473,1), Z, Z, 
+H(createDocumentFragment,113,1), H(__setsoapheaders,405,1), H(getInode,197,1), 
+H(setRelaxNGSchema,460,1), Z, H(print,166,1), 
+H(fgetc,432,1), H(getPath,196,1), H(contains,441,1), 
+H(appendXML,114,1), H(handle,417,1), H(getClassNames,343,1), 
+H(setInfoClass,190,1), H(closecursor,294,1), Z, 
 Z, Z, Z, 
+H(sort,38,1), Z, H(__getlastrequestheaders,409,1), 
+Z, H(isReadable,192,1), H(helpSection,168,1), 
+H(key,2,1), H(getFlags,22,1), Z, 
+H(getInterfaces,337,1), H(loadImages,225,1), Z, 
+Z, H(getEncoding,216,1), H(startElementNS,478,1), 
+H(sortwithsortkeys,37,1), H(begintransaction,283,1), H(getExtension,309,1), 
+Z, H(registerXPathNamespace,395,1), H(__isset,75,1), 
 Z, Z, Z, 
-H(item,134,1), Z};
+Z, Z, H(help,172,1), 
+H(getConstants,327,1), Z, Z, 
+Z, Z, Z, 
+H(getSubPath,301,1), Z, H(num_args,52,1), 
+Z, Z, Z, 
+H(setStaticPropertyValue,335,1), Z, Z, 
+Z, Z, Z, 
+H(get,239,1), H(isDir,204,1), H(getAttributeNo,454,1), 
+Z, Z, H(lookupNamespace,446,1), 
+H(moveToAttributeNs,459,1), Z, Z
+};
 #undef M
 #undef H
 #undef Z
 extern const unsigned g_methodIndexReverseCallIndexSys[];
 const unsigned g_methodIndexReverseCallIndexSys[] = {0, 
-1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,
-19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,
-39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,
-59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,
-79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,
-99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,
-119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,
-139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,
-159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,
-179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,
-199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,
-219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,
-239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,
-259,260,261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,278,
-279,280,281,282,283,284,285,286,287,288,289,290,291,292,293,294,295,296,297,298,
-299,300,301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,
-319,320,321,322,323,324,325,326,327,328,329,330,331,332,333,334,335,336,337,338,
-339,340,341,342,343,344,345,346,347,348,349,350,351,352,353,354,355,356,357,358,
-359,360,361,362,363,364,365,366,367,368,369,370,371,372,373,374,375,376,377,378,
-379,380,381,382,383,384,385,386,387,388,389,390,391,392,393,394,395,396,397,398,
-399,400,401,402,403,404,405,406,407,408,409,410,411,412,413,414,415,416,417,418,
-419,420,421,422,423,424,425,426,427,428,429,430,431,432,433,434,435,436,437,438,
-439,440,441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,
-459,460,461,462,463,464,465,466,467,468,469,470,471,472,473,474,475,476,477,478,
-479,480,481,482,483,484,485,486,487,488,489,490,491,492,493,494,495,496,497,498,
-499,500,501,502,503,504};
+1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,
+41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,
+61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,
+81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,
+101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,
+121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,
+141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,
+161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,
+181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,
+201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,
+221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,
+241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,259,260,
+261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,278,279,280,
+281,282,283,284,285,286,287,288,289,290,291,292,293,294,295,296,297,298,299,300,
+301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,319,320,
+321,322,323,324,325,326,327,328,329,330,331,332,333,334,335,336,337,338,339,340,
+341,342,343,344,345,346,347,348,349,350,351,352,353,354,355,356,357,358,359,360,
+361,362,363,364,365,366,367,368,369,370,371,372,373,374,375,376,377,378,379,380,
+381,382,383,384,385,386,387,388,389,390,391,392,393,394,395,396,397,398,399,400,
+401,402,403,404,405,406,407,408,409,410,411,412,413,414,415,416,417,418,419,420,
+421,422,423,424,425,426,427,428,429,430,431,432,433,434,435,436,437,438,439,440,
+441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459,460,
+461,462,463,464,465,466,467,468,469,470,471,472,473,474,475,476,477,478,479,480,
+481,482,483,484,485,486,487,488,489,490,491,492,493,494,495,496,497,498,499,500,
+501,502,503};
 extern const char * g_methodIndexReverseIndexSys[];
 const char * g_methodIndexReverseIndexSys[] = {
 "next", "key", "valid", "getInnerIterator", "append", 
@@ -411,107 +411,105 @@ const char * g_methodIndexReverseIndexSys[] = {
 "natsort", "setFlags", "uksort", "natcasesort", "asort", 
 "seek", "getFlags", "ksort", "uasort", "getMessage", 
 "__toString", "getCode", "getPrevious", "getLine", "__init__", 
-"getFile", "getTraceAsString", "getTrace", "getVars", "setVars", 
-"getattribute", "sortwithsortkeys", "__destruct", "sort", "geterrorcode", 
-"getstrength", "setstrength", "create", "setattribute", "getlocale", 
-"geterrormessage", "compare", "getLabel", "get_args", "nextImpl", 
-"get_arg", "done", "num_args", "receive", "send", 
-"update", "getLineNo", "insertBefore", "isDefaultNamespace", "isId", 
-"lookupNamespaceUri", "appendChild", "__set", "cloneNode", "replaceChild", 
-"hasAttributes", "c14n", "lookupPrefix", "normalize", "getNodePath", 
-"c14nfile", "isSameNode", "removeChild", "__get", "isSupported", 
-"__isset", "hasChildNodes", "substringData", "insertData", "appendData", 
-"replaceData", "deleteData", "isWhitespaceInElementContent", "splitText", "getElementsByTagName", 
-"createCDATASection", "validate", "getElementsByTagNameNS", "schemaValidateSource", "relaxNGValidate", 
-"loadHTML", "createEntityReference", "schemaValidate", "saveXML", "createProcessingInstruction", 
-"registerNodeClass", "load", "createAttributens", "createElement", "createElementNS", 
-"importNode", "relaxNGValidateSource", "createTextNode", "saveHTML", "loadXML", 
-"save", "createAttribute", "xinclude", "loadHTMLFile", "saveHTMLFile", 
-"getElementById", "createComment", "normalizeDocument", "createDocumentFragment", "appendXML", 
-"setIDAttributeNS", "getAttributeNodeNS", "hasAttribute", "hasAttributeNS", "setAttributeNodeNS", 
-"setAttributeNS", "getAttributeNS", "removeAttributeNS", "getAttributeNode", "setIDAttribute", 
-"setIDAttributeNode", "removeAttributeNode", "removeAttribute", "setAttributeNode", "createDocument", 
-"createDocumentType", "hasFeature", "getNamedItem", "item", "getIterator", 
-"getNamedItemNS", "query", "evaluate", "registerPHPFunctions", "registerNamespace", 
-"format", "setDate", "getOffset", "setTime", "getTimezone", 
-"setISODate", "setTimezone", "modify", "getTransitions", "listIdentifiers", 
-"listAbbreviations", "getName", "argCount", "arg", "helpCmds", 
-"ask", "error", "xend", "helpTitle", "getCommand", 
-"tutorial", "argValue", "output", "getStackTrace", "info", 
-"printFrame", "print", "code", "helpSection", "quit", 
-"helpBody", "getFrame", "help", "args", "addCompletion", 
-"argRest", "getCurrentLocation", "wrap", "onAutoComplete", "onClient", 
-"onServer", "isLocal", "close", "read", "getPerms", 
-"isWritable", "getBasename", "getPathname", "getGroup", "setFileClass", 
-"setInfoClass", "getLinkTarget", "isReadable", "getRealPath", "getPathInfo", 
-"getCTime", "getPath", "getInode", "isLink", "getSize", 
-"getFilename", "isFile", "getOwner", "getMTime", "isDir", 
-"getFileInfo", "getATime", "isExecutable", "openFile", "isDot", 
-"getType", "setText", "setDeclaredEncoding", "detect", "detectAll", 
-"getUTF8", "getEncoding", "getConfidence", "getLanguage", "isValid", 
-"getSeverity", "addString", "loadDims", "mapping", "css", 
-"loadImages", "clear", "getErrors", "addUrl", "addFile", 
-"addserver", "set", "setserverparams", "increment", "decrement", 
-"getstats", "getserverstatus", "setoptimeout", "setcompressthreshold", "get", 
-"pconnect", "add", "getversion", "delete", "connect", 
-"replace", "flush", "getextendedstats", "getMulti", "getResultMessage", 
-"getResultCode", "setByKey", "appendByKey", "getDelayed", "setOption", 
-"prepend", "casByKey", "replaceByKey", "getDelayedByKey", "setMulti", 
-"getByKey", "deleteByKey", "getOption", "getServerByKey", "getServerList", 
-"addByKey", "fetchAll", "setMultiByKey", "getMultiByKey", "fetch", 
-"addServers", "cas", "prependByKey", "currentRef", "isnormalized", 
-"errorcode", "exec", "lastinsertid", "__wakeup", "rollback", 
-"commit", "getavailabledrivers", "quote", "begintransaction", "prepare", 
-"errorinfo", "__sleep", "fetchcolumn", "getcolumnmeta", "nextrowset", 
-"bindcolumn", "setfetchmode", "columncount", "bindparam", "closecursor", 
-"rowcount", "execute", "fetchobject", "bindvalue", "debugdumpparams", 
-"getSubPathname", "getSubPath", "hasChildren", "getChildren", "getMethods", 
-"isIterateable", "getStaticPropertyValue", "isUserDefined", "newInstance", "getExtension", 
-"getConstructor", "newInstanceArgs", "getEndLine", "hasMethod", "isInstance", 
-"isFinal", "getModifiers", "export", "getProperties", "hasConstant", 
-"getMethod", "getExtensionName", "getParentClass", "implementsInterface", "getInterfaceNames", 
-"getStartLine", "getConstant", "getConstants", "getDocComment", "isInterface", 
-"isSubclassOf", "hasProperty", "test", "getStaticProperties", "getDefaultProperties", 
-"setStaticPropertyValue", "isInstantiable", "getInterfaces", "isAbstract", "isInternal", 
-"getProperty", "getFunctions", "getINIEntries", "getClassNames", "getClasses", 
-"getNumberOfRequiredParameters", "getNumberOfParameters", "getStaticVariables", "getParameters", "invokeArgs", 
-"returnsReference", "invoke", "getClosure", "isPrivate", "isProtected", 
-"isStatic", "getDeclaringClass", "isConstructor", "isPublic", "isDestructor", 
-"isDefaultValueAvailable", "getClass", "allowsNull", "getPosition", "isArray", 
-"isOptional", "getDefaultValue", "isPassedByReference", "getValue", "isDefault", 
-"setAccessible", "setValue", "version", "loadextension", "createfunction", 
-"lastinsertrowid", "lasterrormsg", "escapestring", "createaggregate", "open", 
-"changes", "openblob", "lasterrorcode", "querysingle", "columnname", 
-"columntype", "numcolumns", "fetcharray", "reset", "finalize", 
-"paramcount", "unserialize", "serialize", "addAttribute", "xpath", 
-"registerXPathNamespace", "getNamespaces", "__unset", "asXML", "getDocNamespaces", 
-"children", "addChild", "attributes", "__dorequest", "__getlastrequest", 
-"__setsoapheaders", "__setcookie", "__soapcall", "__setlocation", "__getlastrequestheaders", 
-"__getfunctions", "__getlastresponseheaders", "__getlastresponse", "__gettypes", "addfunction", 
-"addsoapheader", "setpersistence", "handle", "setobject", "fault", 
-"setclass", "fscanf", "fseek", "fgetss", "fgetcsv", 
-"setCsvControl", "getCsvControl", "setMaxLineLen", "getMaxLineLen", "ftruncate", 
-"eof", "fflush", "fgetc", "fpassthru", "fgets", 
-"flock", "ftell", "fwrite", "fstat", "attach", 
-"detach", "contains", "setAllowedLocales", "areConfusable", "setChecks", 
-"isSuspicious", "lookupNamespace", "moveToElement", "moveToFirstAttribute", "moveToAttribute", 
-"moveToNextAttribute", "setRelaxNGSchemaSource", "expand", "getParserProperty", "getAttributeNo", 
-"setSchema", "setParserProperty", "readOuterXML", "moveToAttributeNo", "moveToAttributeNs", 
-"setRelaxNGSchema", "XML", "readString", "readInnerXML", "writeElementNS", 
-"fullEndElement", "endDTDAttlist", "outputMemory", "startDocument", "startDTDEntity", 
-"endCData", "writeComment", "writeAttribute", "endComment", "writeDTD", 
-"endDTDEntity", "startAttributens", "startElement", "startElementNS", "startDTDElement", 
-"writeCData", "endDocument", "writeDTDElement", "writeAttributeNS", "writePI", 
-"setIndentString", "startAttribute", "writeElement", "endElement", "writeRaw", 
-"writeDTDEntity", "endPI", "startDTD", "setIndent", "endDTDElement", 
-"startDTDAttlist", "startCData", "writeDTDAttlist", "endDTD", "openMemory", 
-"openURI", "endAttribute", "startPI", "text", "startComment"
-};
+"getFile", "getTraceAsString", "getTrace", "__destruct", "__invoke", 
+"getattribute", "sortwithsortkeys", "sort", "geterrorcode", "getstrength", 
+"setstrength", "create", "setattribute", "getlocale", "geterrormessage", 
+"compare", "getLabel", "get_args", "getVars", "get_arg", 
+"done", "num_args", "receive", "send", "update", 
+"getLineNo", "insertBefore", "isDefaultNamespace", "isId", "lookupNamespaceUri", 
+"appendChild", "__set", "cloneNode", "replaceChild", "hasAttributes", 
+"c14n", "lookupPrefix", "normalize", "getNodePath", "c14nfile", 
+"isSameNode", "removeChild", "__get", "isSupported", "__isset", 
+"hasChildNodes", "substringData", "insertData", "appendData", "replaceData", 
+"deleteData", "isWhitespaceInElementContent", "splitText", "getElementsByTagName", "createCDATASection", 
+"validate", "getElementsByTagNameNS", "schemaValidateSource", "relaxNGValidate", "loadHTML", 
+"createEntityReference", "schemaValidate", "saveXML", "createProcessingInstruction", "registerNodeClass", 
+"load", "createAttributens", "createElement", "createElementNS", "importNode", 
+"relaxNGValidateSource", "createTextNode", "saveHTML", "loadXML", "save", 
+"createAttribute", "xinclude", "loadHTMLFile", "saveHTMLFile", "getElementById", 
+"createComment", "normalizeDocument", "createDocumentFragment", "appendXML", "setIDAttributeNS", 
+"getAttributeNodeNS", "hasAttribute", "hasAttributeNS", "setAttributeNodeNS", "setAttributeNS", 
+"getAttributeNS", "removeAttributeNS", "getAttributeNode", "setIDAttribute", "setIDAttributeNode", 
+"removeAttributeNode", "removeAttribute", "setAttributeNode", "createDocument", "createDocumentType", 
+"hasFeature", "getNamedItem", "item", "getIterator", "getNamedItemNS", 
+"query", "evaluate", "registerPHPFunctions", "registerNamespace", "format", 
+"setDate", "getOffset", "setTime", "getTimezone", "setISODate", 
+"setTimezone", "modify", "getTransitions", "listIdentifiers", "listAbbreviations", 
+"getName", "argCount", "arg", "helpCmds", "ask", 
+"error", "xend", "helpTitle", "getCommand", "tutorial", 
+"argValue", "output", "getStackTrace", "info", "printFrame", 
+"print", "code", "helpSection", "quit", "helpBody", 
+"getFrame", "help", "args", "addCompletion", "argRest", 
+"getCurrentLocation", "wrap", "onAutoComplete", "onClient", "onServer", 
+"isLocal", "close", "read", "getPerms", "isWritable", 
+"getBasename", "getPathname", "getGroup", "setFileClass", "setInfoClass", 
+"getLinkTarget", "isReadable", "getRealPath", "getPathInfo", "getCTime", 
+"getPath", "getInode", "isLink", "getSize", "getFilename", 
+"isFile", "getOwner", "getMTime", "isDir", "getFileInfo", 
+"getATime", "isExecutable", "openFile", "isDot", "getType", 
+"setText", "setDeclaredEncoding", "detect", "detectAll", "getUTF8", 
+"getEncoding", "getConfidence", "getLanguage", "isValid", "getSeverity", 
+"addString", "loadDims", "mapping", "css", "loadImages", 
+"clear", "getErrors", "addUrl", "addFile", "addserver", 
+"set", "setserverparams", "increment", "decrement", "getstats", 
+"getserverstatus", "setoptimeout", "setcompressthreshold", "get", "pconnect", 
+"add", "getversion", "delete", "connect", "replace", 
+"flush", "getextendedstats", "getMulti", "getResultMessage", "getResultCode", 
+"setByKey", "appendByKey", "getDelayed", "setOption", "prepend", 
+"casByKey", "replaceByKey", "getDelayedByKey", "setMulti", "getByKey", 
+"deleteByKey", "getOption", "getServerByKey", "getServerList", "addByKey", 
+"fetchAll", "setMultiByKey", "getMultiByKey", "fetch", "addServers", 
+"cas", "prependByKey", "currentRef", "isnormalized", "errorcode", 
+"exec", "lastinsertid", "__wakeup", "rollback", "commit", 
+"getavailabledrivers", "quote", "begintransaction", "prepare", "errorinfo", 
+"__sleep", "fetchcolumn", "getcolumnmeta", "nextrowset", "bindcolumn", 
+"setfetchmode", "columncount", "bindparam", "closecursor", "rowcount", 
+"execute", "fetchobject", "bindvalue", "debugdumpparams", "getSubPathname", 
+"getSubPath", "hasChildren", "getChildren", "getMethods", "isIterateable", 
+"getStaticPropertyValue", "isUserDefined", "newInstance", "getExtension", "getConstructor", 
+"newInstanceArgs", "getEndLine", "hasMethod", "isInstance", "isFinal", 
+"getModifiers", "export", "getProperties", "hasConstant", "getMethod", 
+"getExtensionName", "getParentClass", "implementsInterface", "getInterfaceNames", "getStartLine", 
+"getConstant", "getConstants", "getDocComment", "isInterface", "isSubclassOf", 
+"hasProperty", "test", "getStaticProperties", "getDefaultProperties", "setStaticPropertyValue", 
+"isInstantiable", "getInterfaces", "isAbstract", "isInternal", "getProperty", 
+"getFunctions", "getINIEntries", "getClassNames", "getClasses", "getNumberOfRequiredParameters", 
+"getNumberOfParameters", "getStaticVariables", "getParameters", "invokeArgs", "returnsReference", 
+"invoke", "getClosure", "isPrivate", "isProtected", "isStatic", 
+"getDeclaringClass", "isConstructor", "isPublic", "isDestructor", "isDefaultValueAvailable", 
+"getClass", "allowsNull", "getPosition", "isArray", "isOptional", 
+"getDefaultValue", "isPassedByReference", "getValue", "isDefault", "setAccessible", 
+"setValue", "version", "loadextension", "createfunction", "lastinsertrowid", 
+"lasterrormsg", "escapestring", "createaggregate", "open", "changes", 
+"openblob", "lasterrorcode", "querysingle", "columnname", "columntype", 
+"numcolumns", "fetcharray", "reset", "finalize", "paramcount", 
+"unserialize", "serialize", "addAttribute", "xpath", "registerXPathNamespace", 
+"getNamespaces", "__unset", "asXML", "getDocNamespaces", "children", 
+"addChild", "attributes", "__dorequest", "__getlastrequest", "__setsoapheaders", 
+"__setcookie", "__soapcall", "__setlocation", "__getlastrequestheaders", "__getfunctions", 
+"__getlastresponseheaders", "__getlastresponse", "__gettypes", "addfunction", "addsoapheader", 
+"setpersistence", "handle", "setobject", "fault", "setclass", 
+"fscanf", "fseek", "fgetss", "fgetcsv", "setCsvControl", 
+"getCsvControl", "setMaxLineLen", "getMaxLineLen", "ftruncate", "eof", 
+"fflush", "fgetc", "fpassthru", "fgets", "flock", 
+"ftell", "fwrite", "fstat", "attach", "detach", 
+"contains", "setAllowedLocales", "areConfusable", "setChecks", "isSuspicious", 
+"lookupNamespace", "moveToElement", "moveToFirstAttribute", "moveToAttribute", "moveToNextAttribute", 
+"setRelaxNGSchemaSource", "expand", "getParserProperty", "getAttributeNo", "setSchema", 
+"setParserProperty", "readOuterXML", "moveToAttributeNo", "moveToAttributeNs", "setRelaxNGSchema", 
+"XML", "readString", "readInnerXML", "writeElementNS", "fullEndElement", 
+"endDTDAttlist", "outputMemory", "startDocument", "startDTDEntity", "endCData", 
+"writeComment", "writeAttribute", "endComment", "writeDTD", "endDTDEntity", 
+"startAttributens", "startElement", "startElementNS", "startDTDElement", "writeCData", 
+"endDocument", "writeDTDElement", "writeAttributeNS", "writePI", "setIndentString", 
+"startAttribute", "writeElement", "endElement", "writeRaw", "writeDTDEntity", 
+"endPI", "startDTD", "setIndent", "endDTDElement", "startDTDAttlist", 
+"startCData", "writeDTDAttlist", "endDTD", "openMemory", "openURI", 
+"endAttribute", "startPI", "text", "startComment"};
 extern struct ObjectStaticCallbacks cw_ReflectionFunctionAbstract;
 extern struct ObjectStaticCallbacks cw_ReflectionObject;
 extern struct ObjectStaticCallbacks cw_SplFileObject;
 extern struct ObjectStaticCallbacks cw_UnexpectedValueException;
-extern struct ObjectStaticCallbacks cw_Closure;
 extern struct ObjectStaticCallbacks cw_stdClass;
 extern struct ObjectStaticCallbacks cw_ReflectionException;
 extern struct ObjectStaticCallbacks cw_OverflowException;
@@ -538,7 +536,6 @@ extern struct ObjectStaticCallbacks cw_XhprofFrame;
 extern struct ObjectStaticCallbacks cw_ErrorException;
 extern struct ObjectStaticCallbacks cw_RecursiveDirectoryIterator;
 extern struct ObjectStaticCallbacks cw_DirectoryIterator;
-extern struct ObjectStaticCallbacks cw_Continuation;
 extern struct ObjectStaticCallbacks cw_BadFunctionCallException;
 extern struct ObjectStaticCallbacks cw_LengthException;
 extern struct ObjectStaticCallbacks cw_DomainException;
@@ -602,6 +599,7 @@ void c_PDOException::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_PDOException::cloneImpl() {
@@ -750,6 +748,7 @@ void c_DOMDocumentFragment::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMDocumentFragment::cloneImpl() {
@@ -930,6 +929,7 @@ void c_DOMText::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMText::cloneImpl() {
@@ -1270,6 +1270,7 @@ void c_DebuggerClient::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DebuggerClient::cloneImpl() {
@@ -2260,6 +2261,7 @@ void c_EncodingDetector::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_EncodingDetector::cloneImpl() {
@@ -2514,6 +2516,7 @@ void c_DOMCDATASection::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMCDATASection::cloneImpl() {
@@ -2682,6 +2685,7 @@ void c_Locale::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_Locale::cloneImpl() {
@@ -2775,6 +2779,204 @@ struct ObjectStaticCallbacks cw_Locale = {
   c_Locale::os_constant,
   c_Locale::os_get_call_info
 };
+ObjectData *coo_Closure() {
+  return NEWOBJ(c_Closure)();
+}
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Closure
+Variant c_Closure::os_getInit(CStrRef s) {
+  return c_ObjectData::os_getInit(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Closure
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_Closure
+Variant c_Closure::os_get(CStrRef s) {
+  return c_ObjectData::os_get(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_Closure
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Closure
+Variant &c_Closure::os_lval(CStrRef s) {
+  return c_ObjectData::os_lval(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Closure
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Closure
+void c_Closure::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Closure
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Closure
+void c_Closure::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Closure
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_Closure
+Variant * c_Closure::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_Closure
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Closure
+Variant * c_Closure::o_realPropPublic(CStrRef s, int flags) const {
+  return c_ObjectData::o_realPropPublic(s, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Closure
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Closure
+Variant * c_Closure::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Closure
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Closure
+Variant c_Closure::os_constant(const char *s) {
+  return c_ObjectData::os_constant(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Closure
+IMPLEMENT_CLASS(Closure)
+void c_Closure::destruct() {
+  if (!inCtorDtor()) {
+    incRefCount();
+    try {
+      t___destruct();
+    } catch (...) { handle_destructor_exception();}
+    decRefCount();
+  }
+}
+ObjectData *c_Closure::cloneImpl() {
+  ObjectData *obj = coo_Closure();
+  c_Closure::cloneSet(obj);
+  return obj;
+}
+void c_Closure::cloneSet(ObjectData *cl) {
+  c_Closure *clone = static_cast<c_Closure*>(cl);
+  ObjectData::cloneSet(clone);
+}
+CallInfo c_Closure::ci___destruct((void*)&c_Closure::i___destruct, (void*)&c_Closure::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_Closure::ci___construct((void*)&c_Closure::i___construct, (void*)&c_Closure::ifa___construct, 3, 4, 0x0000000000000000LL);
+CallInfo c_Closure::ci___invoke((void*)&c_Closure::i___invoke, (void*)&c_Closure::ifa___invoke, 0, 5, 0x0000000000000000LL);
+Variant c_Closure::i___destruct(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i___destruct, coo_Closure);
+  }
+  c_Closure *self ATTRIBUTE_UNUSED (static_cast<c_Closure*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
+  return (self->t___destruct());
+}
+Variant c_Closure::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i___construct, coo_Closure);
+  }
+  c_Closure *self ATTRIBUTE_UNUSED (static_cast<c_Closure*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 3)) return throw_wrong_arguments("__construct", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t___construct(arg0, arg1, arg2), null);
+  }
+}
+Variant c_Closure::i___invoke(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i___invoke, coo_Closure);
+  }
+  c_Closure *self ATTRIBUTE_UNUSED (static_cast<c_Closure*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  const Array &p(count > 0 ? ArrayUtil::EnsureIntKeys(params) : Array());
+  return (self->t___invoke(count, p));
+}
+Variant c_Closure::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_Closure);
+  }
+  c_Closure *self ATTRIBUTE_UNUSED (static_cast<c_Closure*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
+  return (self->t___destruct());
+}
+Variant c_Closure::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_Closure);
+  }
+  c_Closure *self ATTRIBUTE_UNUSED (static_cast<c_Closure*>(mcp.obj));
+  if (UNLIKELY(count != 3)) return throw_wrong_arguments("__construct", count, 3, 3, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  CVarRef arg2(a2);
+  return (self->t___construct(arg0, arg1, arg2), null);
+}
+Variant c_Closure::ifa___invoke(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___invoke, coo_Closure);
+  }
+  c_Closure *self ATTRIBUTE_UNUSED (static_cast<c_Closure*>(mcp.obj));
+  Array p;
+  if (count >= 1) p.append(a0);
+  if (count >= 2) p.append(a1);
+  if (count >= 3) p.append(a2);
+  if (count >= 4) p.append(a3);
+  if (count >= 5) p.append(a4);
+  if (count >= 6) p.append(a5);
+  return (self->t___invoke(count, p));
+}
+bool c_Closure::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 7) {
+    case 3:
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
+        mcp.ci = &c_Closure::ci___destruct;
+        return true;
+      }
+      break;
+    case 5:
+      HASH_GUARD_LITSTR(0x795C470F1BD81D65LL, NAMSTR(s_sys_ss54d46cf1, "__invoke")) {
+        mcp.ci = &c_Closure::ci___invoke;
+        return true;
+      }
+      break;
+    case 7:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
+        mcp.ci = &c_Closure::ci___construct;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_get_call_info(mcp, hash);
+}
+bool c_Closure::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
+}
+c_Closure *c_Closure::create(int64 a0, int64 a1, Array a2) {
+  CountableHelper h(this);
+  init();
+  t___construct(a0, a1, a2);
+  return this;
+}
+void c_Closure::dynConstruct(CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 3)) throw_wrong_arguments("__construct", count, 3, 3, 2);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    (t___construct(arg0, arg1, arg2));
+  }
+}
+void c_Closure::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_Closure::ci___construct;
+  mcp.obj = this;
+}
+struct ObjectStaticCallbacks cw_Closure = {
+  c_Closure::os_getInit,
+  c_Closure::os_get,
+  c_Closure::os_lval,
+  c_Closure::os_invoke,
+  c_Closure::os_constant,
+  c_Closure::os_get_call_info
+};
 ObjectData *coo_DOMDocumentType() {
   return NEWOBJ(c_DOMDocumentType)();
 }
@@ -2830,6 +3032,7 @@ void c_DOMDocumentType::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMDocumentType::cloneImpl() {
@@ -3070,6 +3273,7 @@ void c_SQLite3Stmt::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_SQLite3Stmt::cloneImpl() {
@@ -3427,6 +3631,7 @@ void c_DOMNodeList::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMNodeList::cloneImpl() {
@@ -3745,6 +3950,7 @@ void c_Normalizer::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_Normalizer::cloneImpl() {
@@ -3947,6 +4153,7 @@ void c_DOMCharacterData::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMCharacterData::cloneImpl() {
@@ -4349,6 +4556,7 @@ void c_DOMEntityReference::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMEntityReference::cloneImpl() {
@@ -4508,6 +4716,7 @@ void c_SimpleXMLElementIterator::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_SimpleXMLElementIterator::cloneImpl() {
@@ -4821,6 +5030,7 @@ void c_DateTimeZone::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DateTimeZone::cloneImpl() {
@@ -5090,6 +5300,7 @@ void c_DOMNodeIterator::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMNodeIterator::cloneImpl() {
@@ -5360,6 +5571,7 @@ void c_DOMImplementation::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMImplementation::cloneImpl() {
@@ -5618,6 +5830,7 @@ void c_SoapHeader::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_SoapHeader::cloneImpl() {
@@ -5807,6 +6020,7 @@ void c_DOMNotation::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMNotation::cloneImpl() {
@@ -6047,6 +6261,7 @@ void c_DebuggerProxy::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DebuggerProxy::cloneImpl() {
@@ -6401,6 +6616,7 @@ void c_Memcached::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_Memcached::cloneImpl() {
@@ -7859,6 +8075,7 @@ void c_XMLReader::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_XMLReader::cloneImpl() {
@@ -8743,6 +8960,7 @@ void c_DOMComment::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMComment::cloneImpl() {
@@ -8908,6 +9126,7 @@ void c_SQLite3::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_SQLite3::cloneImpl() {
@@ -9534,6 +9753,7 @@ void c_DOMAttr::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMAttr::cloneImpl() {
@@ -9818,6 +10038,7 @@ void c_SoapVar::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_SoapVar::cloneImpl() {
@@ -10016,6 +10237,7 @@ void c_DOMNamedNodeMap::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMNamedNodeMap::cloneImpl() {
@@ -10374,6 +10596,7 @@ void c_SQLite3Result::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_SQLite3Result::cloneImpl() {
@@ -10688,6 +10911,7 @@ void c_SimpleXMLElement::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_SimpleXMLElement::cloneImpl() {
@@ -11527,6 +11751,7 @@ void c_Memcache::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_Memcache::cloneImpl() {
@@ -12380,6 +12605,7 @@ void c_DOMProcessingInstruction::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMProcessingInstruction::cloneImpl() {
@@ -12640,6 +12866,7 @@ void c_EncodingMatch::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_EncodingMatch::cloneImpl() {
@@ -12906,6 +13133,7 @@ void c_PDOStatement::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_PDOStatement::cloneImpl() {
@@ -13821,6 +14049,7 @@ void c_SoapClient::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_SoapClient::cloneImpl() {
@@ -14345,6 +14574,7 @@ void c_SoapParam::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_SoapParam::cloneImpl() {
@@ -14539,6 +14769,7 @@ void c_DateTime::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DateTime::cloneImpl() {
@@ -15020,6 +15251,7 @@ void c_Collator::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_Collator::cloneImpl() {
@@ -15762,6 +15994,7 @@ void c_PDO::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_PDO::cloneImpl() {
@@ -16356,6 +16589,7 @@ void c_ImageSprite::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_ImageSprite::cloneImpl() {
@@ -16783,6 +17017,567 @@ struct ObjectStaticCallbacks cw_ImageSprite = {
   c_ImageSprite::os_constant,
   c_ImageSprite::os_get_call_info
 };
+ObjectData *coo_Continuation() {
+  return NEWOBJ(c_Continuation)();
+}
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Continuation
+Variant c_Continuation::os_getInit(CStrRef s) {
+  return c_ObjectData::os_getInit(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Continuation
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_Continuation
+Variant c_Continuation::os_get(CStrRef s) {
+  return c_ObjectData::os_get(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_Continuation
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Continuation
+Variant &c_Continuation::os_lval(CStrRef s) {
+  return c_ObjectData::os_lval(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Continuation
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Continuation
+void c_Continuation::o_getArray(Array &props, bool pubOnly) const {
+  props.set(NAMSTR(s_sys_ss0f30800a, "vars"), m_vars, true);
+  props.set(NAMSTR(s_sys_ss0f61bd03, "obj"), m_obj, true);
+  props.set(NAMSTR(s_sys_ssf976719e, "args"), m_args, true);
+  props.set(NAMSTR(s_sys_ss1491baad, "label"), m_label, true);
+  props.set(NAMSTR(s_sys_ss74691b30, "done"), m_done, true);
+  props.set(NAMSTR(s_sys_ssc0ff3081, "index"), m_index, true);
+  if (isInitialized(m_value)) props.lvalAt(NAMSTR(s_sys_sse0c88471, "value"), AccessFlags::Key).setWithRef(m_value);
+  props.set(NAMSTR(s_sys_ss14e5c43c, "running"), m_running, true);
+  if (isInitialized(m_received)) props.lvalAt(NAMSTR(s_sys_ss305b0746, "received"), AccessFlags::Key).setWithRef(m_received);
+  c_ObjectData::o_getArray(props, pubOnly);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Continuation
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Continuation
+void c_Continuation::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Continuation
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_Continuation
+Variant * c_Continuation::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_Continuation
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Continuation
+Variant * c_Continuation::o_realPropPublic(CStrRef s, int flags) const {
+  return c_ObjectData::o_realPropPublic(s, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Continuation
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Continuation
+Variant * c_Continuation::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Continuation
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Continuation
+Variant c_Continuation::os_constant(const char *s) {
+  return c_ObjectData::os_constant(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Continuation
+IMPLEMENT_CLASS(Continuation)
+void c_Continuation::destruct() {
+  if (!inCtorDtor()) {
+    incRefCount();
+    try {
+      t___destruct();
+    } catch (...) { handle_destructor_exception();}
+    decRefCount();
+  }
+}
+ObjectData *c_Continuation::cloneImpl() {
+  ObjectData *obj = coo_Continuation();
+  c_Continuation::cloneSet(obj);
+  return obj;
+}
+void c_Continuation::cloneSet(ObjectData *cl) {
+  c_Continuation *clone = static_cast<c_Continuation*>(cl);
+  ObjectData::cloneSet(clone);
+  clone->m_vars = m_vars;
+  clone->m_obj = m_obj;
+  clone->m_args = m_args;
+  clone->m_label = m_label;
+  clone->m_done = m_done;
+  clone->m_index = m_index;
+  clone->m_value.setWithRef(m_value);
+  clone->m_running = m_running;
+  clone->m_received.setWithRef(m_received);
+}
+CallInfo c_Continuation::ci_next((void*)&c_Continuation::i_next, (void*)&c_Continuation::ifa_next, 0, 4, 0x0000000000000000LL);
+CallInfo c_Continuation::ci_key((void*)&c_Continuation::i_key, (void*)&c_Continuation::ifa_key, 0, 4, 0x0000000000000000LL);
+CallInfo c_Continuation::ci_getlabel((void*)&c_Continuation::i_getlabel, (void*)&c_Continuation::ifa_getlabel, 0, 4, 0x0000000000000000LL);
+CallInfo c_Continuation::ci_valid((void*)&c_Continuation::i_valid, (void*)&c_Continuation::ifa_valid, 0, 4, 0x0000000000000000LL);
+CallInfo c_Continuation::ci_get_args((void*)&c_Continuation::i_get_args, (void*)&c_Continuation::ifa_get_args, 0, 4, 0x0000000000000000LL);
+CallInfo c_Continuation::ci___destruct((void*)&c_Continuation::i___destruct, (void*)&c_Continuation::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_Continuation::ci_getvars((void*)&c_Continuation::i_getvars, (void*)&c_Continuation::ifa_getvars, 0, 4, 0x0000000000000000LL);
+CallInfo c_Continuation::ci_get_arg((void*)&c_Continuation::i_get_arg, (void*)&c_Continuation::ifa_get_arg, 1, 4, 0x0000000000000000LL);
+CallInfo c_Continuation::ci___construct((void*)&c_Continuation::i___construct, (void*)&c_Continuation::ifa___construct, 6, 4, 0x0000000000000000LL);
+CallInfo c_Continuation::ci_done((void*)&c_Continuation::i_done, (void*)&c_Continuation::ifa_done, 0, 4, 0x0000000000000000LL);
+CallInfo c_Continuation::ci_num_args((void*)&c_Continuation::i_num_args, (void*)&c_Continuation::ifa_num_args, 0, 4, 0x0000000000000000LL);
+CallInfo c_Continuation::ci_receive((void*)&c_Continuation::i_receive, (void*)&c_Continuation::ifa_receive, 0, 4, 0x0000000000000000LL);
+CallInfo c_Continuation::ci_current((void*)&c_Continuation::i_current, (void*)&c_Continuation::ifa_current, 0, 4, 0x0000000000000000LL);
+CallInfo c_Continuation::ci_send((void*)&c_Continuation::i_send, (void*)&c_Continuation::ifa_send, 1, 4, 0x0000000000000000LL);
+CallInfo c_Continuation::ci_rewind((void*)&c_Continuation::i_rewind, (void*)&c_Continuation::ifa_rewind, 0, 4, 0x0000000000000000LL);
+CallInfo c_Continuation::ci_update((void*)&c_Continuation::i_update, (void*)&c_Continuation::ifa_update, 3, 4, 0x0000000000000000LL);
+Variant c_Continuation::i_next(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_next, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("next", 0, 1);
+  return (self->t_next(), null);
+}
+Variant c_Continuation::i_key(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_key, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("key", 0, 1);
+  return (self->t_key());
+}
+Variant c_Continuation::i_getlabel(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_getlabel, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getlabel", 0, 1);
+  return (self->t_getlabel());
+}
+Variant c_Continuation::i_valid(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_valid, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("valid", 0, 1);
+  return (self->t_valid());
+}
+Variant c_Continuation::i_get_args(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_get_args, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("get_args", 0, 1);
+  return (self->t_get_args());
+}
+Variant c_Continuation::i___destruct(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i___destruct, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
+  return (self->t___destruct());
+}
+Variant c_Continuation::i_getvars(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_getvars, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getvars", 0, 1);
+  return (self->t_getvars());
+}
+Variant c_Continuation::i_get_arg(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_get_arg, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("get_arg", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_get_arg(arg0));
+  }
+}
+Variant c_Continuation::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i___construct, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 4 || count > 6)) return throw_wrong_arguments("__construct", count, 4, 6, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 4) return (self->t___construct(arg0, arg1, arg2, arg3), null);
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 5) return (self->t___construct(arg0, arg1, arg2, arg3, arg4), null);
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
+  }
+}
+Variant c_Continuation::i_done(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_done, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("done", 0, 1);
+  return (self->t_done(), null);
+}
+Variant c_Continuation::i_num_args(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_num_args, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("num_args", 0, 1);
+  return (self->t_num_args());
+}
+Variant c_Continuation::i_receive(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_receive, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("receive", 0, 1);
+  return (self->t_receive());
+}
+Variant c_Continuation::i_current(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_current, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("current", 0, 1);
+  return (self->t_current());
+}
+Variant c_Continuation::i_send(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_send, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("send", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_send(arg0), null);
+  }
+}
+Variant c_Continuation::i_rewind(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_rewind, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("rewind", 0, 1);
+  return (self->t_rewind(), null);
+}
+Variant c_Continuation::i_update(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i_update, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 3)) return throw_wrong_arguments("update", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_update(arg0, arg1, arg2), null);
+  }
+}
+Variant c_Continuation::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_next, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("next", 0, 1);
+  return (self->t_next(), null);
+}
+Variant c_Continuation::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_key, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("key", 0, 1);
+  return (self->t_key());
+}
+Variant c_Continuation::ifa_getlabel(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getlabel, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getlabel", 0, 1);
+  return (self->t_getlabel());
+}
+Variant c_Continuation::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_valid, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("valid", 0, 1);
+  return (self->t_valid());
+}
+Variant c_Continuation::ifa_get_args(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_get_args, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("get_args", 0, 1);
+  return (self->t_get_args());
+}
+Variant c_Continuation::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
+  return (self->t___destruct());
+}
+Variant c_Continuation::ifa_getvars(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getvars, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getvars", 0, 1);
+  return (self->t_getvars());
+}
+Variant c_Continuation::ifa_get_arg(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_get_arg, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("get_arg", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_get_arg(arg0));
+}
+Variant c_Continuation::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  if (UNLIKELY(count < 4)) return throw_wrong_arguments("__construct", count, 4, 6, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  CVarRef arg2(a2);
+  CVarRef arg3(a3);
+  if (count <= 4) return (self->t___construct(arg0, arg1, arg2, arg3), null);
+  CVarRef arg4(a4);
+  if (count <= 5) return (self->t___construct(arg0, arg1, arg2, arg3, arg4), null);
+  CVarRef arg5(a5);
+  return (self->t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
+}
+Variant c_Continuation::ifa_done(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_done, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("done", 0, 1);
+  return (self->t_done(), null);
+}
+Variant c_Continuation::ifa_num_args(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_num_args, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("num_args", 0, 1);
+  return (self->t_num_args());
+}
+Variant c_Continuation::ifa_receive(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_receive, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("receive", 0, 1);
+  return (self->t_receive());
+}
+Variant c_Continuation::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_current, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("current", 0, 1);
+  return (self->t_current());
+}
+Variant c_Continuation::ifa_send(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_send, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("send", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_send(arg0), null);
+}
+Variant c_Continuation::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_rewind, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("rewind", 0, 1);
+  return (self->t_rewind(), null);
+}
+Variant c_Continuation::ifa_update(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_update, coo_Continuation);
+  }
+  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
+  if (UNLIKELY(count != 3)) return throw_wrong_arguments("update", count, 3, 3, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  CVarRef arg2(a2);
+  return (self->t_update(arg0, arg1, arg2), null);
+}
+bool c_Continuation::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD_LITSTR(0x1402C6C4A8D472A0LL, NAMSTR(s_sys_ssf2460018, "update")) {
+        mcp.ci = &c_Continuation::ci_update;
+        return true;
+      }
+      break;
+    case 4:
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss9943cbf4, "valid")) {
+        mcp.ci = &c_Continuation::ci_valid;
+        return true;
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x3E0170A7802E3888LL, NAMSTR(s_sys_ss70eaeb85, "send")) {
+        mcp.ci = &c_Continuation::ci_send;
+        return true;
+      }
+      break;
+    case 9:
+      HASH_GUARD_LITSTR(0x5B300BEBB6379169LL, NAMSTR(s_sys_ss74691b30, "done")) {
+        mcp.ci = &c_Continuation::ci_done;
+        return true;
+      }
+      break;
+    case 10:
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss941ca25f, "rewind")) {
+        mcp.ci = &c_Continuation::ci_rewind;
+        return true;
+      }
+      break;
+    case 16:
+      HASH_GUARD_LITSTR(0x0B7AD2197102D150LL, NAMSTR(s_sys_ssb5d283cb, "receive")) {
+        mcp.ci = &c_Continuation::ci_receive;
+        return true;
+      }
+      break;
+    case 17:
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
+        mcp.ci = &c_Continuation::ci_key;
+        return true;
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
+        mcp.ci = &c_Continuation::ci___destruct;
+        return true;
+      }
+      break;
+    case 22:
+      HASH_GUARD_LITSTR(0x72BA7745837A2236LL, NAMSTR(s_sys_ss63639ccf, "getVars")) {
+        mcp.ci = &c_Continuation::ci_getvars;
+        return true;
+      }
+      break;
+    case 24:
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
+        mcp.ci = &c_Continuation::ci_next;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x05B742E84600B778LL, NAMSTR(s_sys_ss0bbec676, "getLabel")) {
+        mcp.ci = &c_Continuation::ci_getlabel;
+        return true;
+      }
+      break;
+    case 25:
+      HASH_GUARD_LITSTR(0x5A90056E9F9DC839LL, NAMSTR(s_sys_ss26fb679a, "get_args")) {
+        mcp.ci = &c_Continuation::ci_get_args;
+        return true;
+      }
+      break;
+    case 28:
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ssb3a5c1b3, "current")) {
+        mcp.ci = &c_Continuation::ci_current;
+        return true;
+      }
+      break;
+    case 29:
+      HASH_GUARD_LITSTR(0x45F223F256990E3DLL, NAMSTR(s_sys_ss11603299, "get_arg")) {
+        mcp.ci = &c_Continuation::ci_get_arg;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x59E62E16AF84FCFDLL, NAMSTR(s_sys_ss07445cb3, "num_args")) {
+        mcp.ci = &c_Continuation::ci_num_args;
+        return true;
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
+        mcp.ci = &c_Continuation::ci___construct;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_get_call_info(mcp, hash);
+}
+bool c_Continuation::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
+}
+c_Continuation *c_Continuation::create(int64 a0, int64 a1, bool a2, Array a3, Variant a4, Array a5) {
+  CountableHelper h(this);
+  init();
+  t___construct(a0, a1, a2, a3, a4, a5);
+  return this;
+}
+void c_Continuation::dynConstruct(CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 4 || count > 6)) throw_wrong_arguments("__construct", count, 4, 6, 2);
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 4) {
+      (t___construct(arg0, arg1, arg2, arg3));
+      break;
+    }
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 5) {
+      (t___construct(arg0, arg1, arg2, arg3, arg4));
+      break;
+    }
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
+  } while (false);
+}
+void c_Continuation::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_Continuation::ci___construct;
+  mcp.obj = this;
+}
+struct ObjectStaticCallbacks cw_Continuation = {
+  c_Continuation::os_getInit,
+  c_Continuation::os_get,
+  c_Continuation::os_lval,
+  c_Continuation::os_invoke,
+  c_Continuation::os_constant,
+  c_Continuation::os_get_call_info
+};
 ObjectData *coo_DOMEntity() {
   return NEWOBJ(c_DOMEntity)();
 }
@@ -16838,6 +17633,7 @@ void c_DOMEntity::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMEntity::cloneImpl() {
@@ -17078,6 +17874,7 @@ void c_XMLWriter::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_XMLWriter::cloneImpl() {
@@ -18486,6 +19283,7 @@ void c_DOMException::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMException::cloneImpl() {
@@ -18660,6 +19458,7 @@ void c_DOMXPath::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMXPath::cloneImpl() {
@@ -19043,6 +19842,7 @@ void c_SoapServer::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_SoapServer::cloneImpl() {
@@ -19468,6 +20268,7 @@ void c_DOMNode::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMNode::cloneImpl() {
@@ -20248,6 +21049,7 @@ void c_SpoofChecker::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_SpoofChecker::cloneImpl() {
@@ -20528,6 +21330,7 @@ void c_DOMDocument::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMDocument::cloneImpl() {
@@ -21704,6 +22507,7 @@ void c_LibXMLError::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_LibXMLError::cloneImpl() {
@@ -21852,6 +22656,7 @@ void c_SoapFault::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_SoapFault::cloneImpl() {
@@ -22074,6 +22879,7 @@ void c_DOMElement::destruct() {
     try {
       t___destruct();
     } catch (...) { handle_destructor_exception();}
+    decRefCount();
   }
 }
 ObjectData *c_DOMElement::cloneImpl() {
@@ -22870,6 +23676,7 @@ static class SysCTDTableInitializer {
       (const char *)"EncodingDetector", (const char *)&cw_EncodingDetector,(const char *)&coo_EncodingDetector,
       (const char *)"DOMCDATASection", (const char *)&cw_DOMCDATASection,(const char *)&coo_DOMCDATASection,
       (const char *)"Locale", (const char *)&cw_Locale,(const char *)&coo_Locale,
+      (const char *)"Closure", (const char *)&cw_Closure,(const char *)&coo_Closure,
       (const char *)"DOMDocumentType", (const char *)&cw_DOMDocumentType,(const char *)&coo_DOMDocumentType,
       (const char *)"SQLite3Stmt", (const char *)&cw_SQLite3Stmt,(const char *)&coo_SQLite3Stmt,
       (const char *)"DOMNodeList", (const char *)&cw_DOMNodeList,(const char *)&coo_DOMNodeList,
@@ -22902,6 +23709,7 @@ static class SysCTDTableInitializer {
       (const char *)"Collator", (const char *)&cw_Collator,(const char *)&coo_Collator,
       (const char *)"PDO", (const char *)&cw_PDO,(const char *)&coo_PDO,
       (const char *)"ImageSprite", (const char *)&cw_ImageSprite,(const char *)&coo_ImageSprite,
+      (const char *)"Continuation", (const char *)&cw_Continuation,(const char *)&coo_Continuation,
       (const char *)"DOMEntity", (const char *)&cw_DOMEntity,(const char *)&coo_DOMEntity,
       (const char *)"XMLWriter", (const char *)&cw_XMLWriter,(const char *)&coo_XMLWriter,
       (const char *)"DOMException", (const char *)&cw_DOMException,(const char *)&coo_DOMException,
@@ -22917,7 +23725,6 @@ static class SysCTDTableInitializer {
       (const char *)"ReflectionObject", (const char *)&cw_ReflectionObject,(const char *)&coo_ReflectionObject,
       (const char *)"SplFileObject", (const char *)&cw_SplFileObject,(const char *)&coo_SplFileObject,
       (const char *)"UnexpectedValueException", (const char *)&cw_UnexpectedValueException,(const char *)&coo_UnexpectedValueException,
-      (const char *)"Closure", (const char *)&cw_Closure,(const char *)&coo_Closure,
       (const char *)"stdClass", (const char *)&cw_stdClass,(const char *)&coo_stdClass,
       (const char *)"ReflectionException", (const char *)&cw_ReflectionException,(const char *)&coo_ReflectionException,
       (const char *)"OverflowException", (const char *)&cw_OverflowException,(const char *)&coo_OverflowException,
@@ -22944,7 +23751,6 @@ static class SysCTDTableInitializer {
       (const char *)"ErrorException", (const char *)&cw_ErrorException,(const char *)&coo_ErrorException,
       (const char *)"RecursiveDirectoryIterator", (const char *)&cw_RecursiveDirectoryIterator,(const char *)&coo_RecursiveDirectoryIterator,
       (const char *)"DirectoryIterator", (const char *)&cw_DirectoryIterator,(const char *)&coo_DirectoryIterator,
-      (const char *)"Continuation", (const char *)&cw_Continuation,(const char *)&coo_Continuation,
       (const char *)"BadFunctionCallException", (const char *)&cw_BadFunctionCallException,(const char *)&coo_BadFunctionCallException,
       (const char *)"LengthException", (const char *)&cw_LengthException,(const char *)&coo_LengthException,
       (const char *)"DomainException", (const char *)&cw_DomainException,(const char *)&coo_DomainException,

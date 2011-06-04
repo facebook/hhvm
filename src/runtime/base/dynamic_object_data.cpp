@@ -263,5 +263,13 @@ Variant &DynamicObjectData::___offsetget_lval(Variant v_name) {
   }
 }
 
+const CallInfo *DynamicObjectData::t___invokeCallInfoHelper(void *&extra) {
+  if (!parent.isNull()) {
+    return parent->t___invokeCallInfoHelper(extra);
+  } else {
+    return ObjectData::t___invokeCallInfoHelper(extra);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

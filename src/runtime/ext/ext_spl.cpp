@@ -19,6 +19,11 @@
 #include <runtime/ext/ext_math.h>
 #include <runtime/ext/ext_class.h>
 
+#include <runtime/eval/runtime/eval_state.h>
+#include <runtime/eval/ast/class_statement.h>
+#include <runtime/eval/ast/function_statement.h>
+#include <runtime/eval/ast/method_statement.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -121,6 +126,42 @@ String f_spl_object_hash(CObjRef obj) {
 
 Variant f_hphp_get_this() {
   return FrameInjection::GetThis();
+}
+
+static int64 hphp_get_call_info_and_extra(
+    CStrRef cls, CStrRef func, int64 &extra) {
+  if (func.empty()) {
+    throw_spl_exception("Invalid function name given");
+  }
+
+  if (cls.empty()) {
+    const CallInfo *cit;
+    void *extrap;
+    get_call_info_or_fail(cit, extrap, func);
+    extra = (int64) extrap;
+    return (int64) cit;
+  } else {
+    MethodCallPackage mcp;
+    mcp.rootCls = cls.get();
+    mcp.name = &func;
+    if (!get_call_info_static_method(mcp)) {
+      throw_spl_exception("Could not find method %s for class %s",
+                          func.c_str(), cls.c_str());
+    }
+    extra = (int64) mcp.extra;
+    return (int64) mcp.ci;
+  }
+}
+
+int64 f_hphp_get_call_info(CStrRef cls, CStrRef func) {
+  int64 extra;
+  return hphp_get_call_info_and_extra(cls, func, extra);
+}
+
+int64 f_hphp_get_call_info_extra(CStrRef cls, CStrRef func) {
+  int64 extra;
+  hphp_get_call_info_and_extra(cls, func, extra);
+  return extra;
 }
 
 Variant f_class_implements(CVarRef obj, bool autoload /* = true */) {

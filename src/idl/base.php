@@ -530,7 +530,8 @@ function generateFuncArgsCPPHeader($func, $f, $forceRef = false,
   if ($static) {
     fprintf($f, "const char* cls ");
   }
-  if ($var_arg) fprintf($f, 'int _argc, ');
+  if ($var_arg) fprintf($f, 'int _argc');
+  if ($var_arg && count($args) > 0) fprintf($f, ', ');
   for ($i = 0; $i < count($args); $i++) {
     $arg = $args[$i];
     if ($static || $i > 0) fprintf($f, ', ');
@@ -549,9 +550,8 @@ function generateFuncArgsCPPHeader($func, $f, $forceRef = false,
 function generateFuncArgsCall($func, $f, $forceRef = false) {
   $var_arg = ($func['flags'] & VarArgsMask);
   $args = $func['args'];
-  if ($var_arg) {
-    fprintf($f, '_argc, ');
-  }
+  if ($var_arg) fprintf($f, '_argc');
+  if ($var_arg && count($args) > 0) fprintf($f, ', ');
   for ($i = 0; $i < count($args); $i++) {
     $arg = $args[$i];
     fprintf($f, ', ');
@@ -616,7 +616,8 @@ function generateFuncProfileHeader($func, $f) {
   }
   fprintf($f, "f_%s(", $func['name']);
 
-  if ($var_arg) fprintf($f, '_argc, ');
+  if ($var_arg) fprintf($f, '_argc');
+  if ($var_arg && count($args) > 0) fprintf($f, ', ');
   for ($i = 0; $i < count($args); $i++) {
     $arg = $args[$i];
     if ($i > 0) fprintf($f, ', ');
@@ -806,7 +807,8 @@ function generateFuncCPPImplementation($func, $f) {
 
   fprintf($f, '%s f_%s(', typename($func['return']), $func['name']);
   $var_arg = ($func['flags'] & VarArgsMask);
-  if ($var_arg) fprintf($f, 'int _argc, ');
+  if ($var_arg) fprintf($f, 'int _argc');
+  if ($var_arg && count($func['args']) > 0) fprintf($f, ', ');
   $params = "";
   $params_no = 0;
   for ($i = 0; $i < count($func['args']); $i++) {
@@ -857,7 +859,8 @@ function replaceParams($filename, $header) {
     $args = $func['args'];
 
     $search = '(?!return\s)\b\w+\s+f_'.$func['name'].'\s*\(\s*';
-    if ($var_arg) $search .= '\w+\s+\w+,\s*';
+    if ($var_arg) $search .= '\w+\s+\w+';
+    if ($var_arg && count($args) > 0) $search .= ',\s*';
     for ($i = 0; $i < count($args); $i++) {
       $arg = $args[$i];
       $search .= '\w+\s+\w+\s*';

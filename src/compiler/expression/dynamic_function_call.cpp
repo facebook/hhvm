@@ -106,7 +106,12 @@ TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
 
   ar->containsDynamicFunctionCall();
 
-  m_nameExp->inferAndCheck(ar, Type::String, false);
+  if (!m_class && m_className.empty()) {
+    m_nameExp->inferAndCheck(ar, Type::Variant, false);
+  } else {
+    m_nameExp->inferAndCheck(ar, Type::String, false);
+  }
+
   if (m_params) {
     for (int i = 0; i < m_params->getCount(); i++) {
       (*m_params)[i]->inferAndCheck(ar, Type::Variant, true);

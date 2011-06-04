@@ -92,6 +92,7 @@ public:
                         const FunctionCallExpression *caller,
                         int start = 0) const;
   Variant invokeClosure(CArrRef params) const;
+  Variant invokeClosure(ObjectData *closure, CArrRef params) const;
   Variant invokeImpl(FuncScopeVariableEnvironment &fenv, CArrRef params) const;
   virtual LVariableTable *getStaticVars(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
@@ -100,6 +101,7 @@ public:
   const std::vector<ParameterPtr>& getParams() const { return m_params; }
   bool hasBody() const { return m_body;}
   virtual const CallInfo *getCallInfo() const;
+  const CallInfo *getClosureCallInfo() const;
   virtual String fullName() const;
 
   void dumpHeader(std::ostream &out) const;
@@ -137,6 +139,12 @@ private:
   void bindParams(FuncScopeVariableEnvironment &fenv, CArrRef params) const;
   static Variant Invoker(void *ms, CArrRef params);
   static Variant InvokerFewArgs(void *ms, int count, INVOKE_FEW_ARGS_IMPL_ARGS);
+
+  static Variant FSInvoker(void *ms, CArrRef params);
+  static Variant FSInvokerFewArgs(void *ms, int count, 
+                                  INVOKE_FEW_ARGS_IMPL_ARGS);
+
+  CallInfo m_closureCallInfo;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

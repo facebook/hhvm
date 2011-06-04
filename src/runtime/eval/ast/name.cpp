@@ -89,8 +89,8 @@ void StringName::dump(std::ostream &out) const {
 ExprName::ExprName(CONSTRUCT_ARGS, ExpressionPtr name)
   : Name(CONSTRUCT_PASS), m_name(name) {}
 
-String ExprName::get(VariableEnvironment &env) const {
-  return m_name->eval(env).toString();
+Variant ExprName::getAsVariant(VariableEnvironment &env) const {
+  return m_name->eval(env);
 }
 
 void ExprName::dump(std::ostream &out) const {

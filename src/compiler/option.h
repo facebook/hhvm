@@ -217,6 +217,8 @@ public:
   static const char *BuiltinFunctionPrefix;
   static const char *InvokePrefix;
   static const char *InvokeFewArgsPrefix;
+  static const char *InvokeWrapperPrefix;
+  static const char *InvokeWrapperFewArgsPrefix;
   static const char *InvokeSinglePrefix;
   static const char *CreateObjectOnlyPrefix;
   static const char *PseudoMainPrefix;
@@ -251,6 +253,7 @@ public:
   static const char *EvalOrderTempPrefix;
   static const char *SilencerPrefix;
   static const char *CallInfoPrefix;
+  static const char *CallInfoWrapperPrefix;
   static const char *SysPrefix;
   static const char *ScalarPrefix;
   static const char *StaticStringPrefix;

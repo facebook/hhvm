@@ -8,6 +8,8 @@ RUN_TESTSUITE(TestExtArray);
 RUN_TESTSUITE(TestExtBcmath);
 RUN_TESTSUITE(TestExtBzip2);
 RUN_TESTSUITE(TestExtClass);
+RUN_TESTSUITE(TestExtClosure);
+RUN_TESTSUITE(TestExtContinuation);
 RUN_TESTSUITE(TestExtCtype);
 RUN_TESTSUITE(TestExtCurl);
 RUN_TESTSUITE(TestExtDatetime);

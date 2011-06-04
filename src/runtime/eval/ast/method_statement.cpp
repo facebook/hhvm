@@ -85,11 +85,12 @@ Variant MethodStatement::invokeInstance(CObjRef obj, CArrRef params,
 
 Variant MethodStatement::
 invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
-                     const FunctionCallExpression *caller) const {
+                     const FunctionCallExpression *caller,
+                     bool check /* = true */) const {
   if (getModifiers() & ClassStatement::Static) {
     return invokeStaticDirect(obj->o_getClassName(), env, caller, false);
   }
-  attemptAccess(FrameInjection::GetClassName(false));
+  if (check) attemptAccess(FrameInjection::GetClassName(false));
   DECLARE_THREAD_INFO_NOINIT
   MethScopeVariableEnvironment fenv(this);
   directBind(env, caller, fenv);
@@ -121,7 +122,7 @@ Variant MethodStatement::
 invokeStaticDirect(CStrRef cls, VariableEnvironment &env,
                    const FunctionCallExpression *caller, bool sp)
   const {
-  attemptAccess(FrameInjection::GetClassName(false));
+  if (sp) attemptAccess(FrameInjection::GetClassName(false));
   MethScopeVariableEnvironment fenv(this);
   directBind(env, caller, fenv);
   fenv.setCurrentClass(cls.data());
@@ -210,18 +211,27 @@ bool MethodStatement::isAbstract() const {
 
 Variant MethodStatement::MethInvoker(MethodCallPackage &mcp, CArrRef params) {
   const MethodStatement *ms = (const MethodStatement*)mcp.extra;
-  if (ms->getModifiers() & ClassStatement::Static || !mcp.obj) {
-    String cn(mcp.getClassName());
-    if (ms->refReturn()) {
-      return strongBind(ms->invokeStatic(cn.c_str(), params));
+  bool check = strcasecmp(ms->m_name.c_str(), "__invoke") != 0;
+  bool isStatic = ms->getModifiers() & ClassStatement::Static;
+  if (isStatic || !mcp.obj) {
+    String cn;
+    if (UNLIKELY(!isStatic && mcp.isObj && mcp.obj == NULL)) {
+      // this is needed for continuations where
+      // we are passed the dummy object
+      cn = ms->getClass()->name();
     } else {
-      return ms->invokeStatic(cn.c_str(), params);
+      cn = mcp.getClassName();
+    }
+    if (ms->refReturn()) {
+      return strongBind(ms->invokeStatic(cn.c_str(), params, check));
+    } else {
+      return ms->invokeStatic(cn.c_str(), params, check);
     }
   } else {
     if (ms->refReturn()) {
-      return strongBind(ms->invokeInstance(mcp.rootObj, params));
+      return strongBind(ms->invokeInstance(mcp.rootObj, params, check));
     } else {
-      return ms->invokeInstance(mcp.rootObj, params);
+      return ms->invokeInstance(mcp.rootObj, params, check);
     }
   }
 }

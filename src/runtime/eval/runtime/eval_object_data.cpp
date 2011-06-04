@@ -40,6 +40,11 @@ EvalObjectData::EvalObjectData(ClassEvalState &cls, const char* pname,
 
   // an object can never live longer than its class
   m_class_name = m_cls.getClass()->name();
+
+  // seems to require both
+  m_invokeMcp.obj = m_invokeMcp.rootObj = this;
+  // so that getClassName() will work
+  m_invokeMcp.isObj = true;
 }
 
 void EvalObjectData::init() {
@@ -200,6 +205,16 @@ const MethodStatement* EvalObjectData::getConstructorStatement() const {
 bool EvalObjectData::o_instanceof(CStrRef s) const {
   return m_cls.getClass()->subclassOf(s.data()) ||
     (!parent.isNull() && parent->o_instanceof(s));
+}
+
+const CallInfo *EvalObjectData::t___invokeCallInfoHelper(void *&extra) {
+  const MethodStatement *ms = getMethodStatement("__invoke");
+  if (LIKELY(ms != NULL)) {
+    extra = (void*) &m_invokeMcp;
+    m_invokeMcp.extra = (void*) ms;
+    return ms->getCallInfo();
+  }
+  return DynamicObjectData::t___invokeCallInfoHelper(extra);
 }
 
 bool EvalObjectData::o_get_call_info(MethodCallPackage &mcp,

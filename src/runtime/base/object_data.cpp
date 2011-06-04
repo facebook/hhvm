@@ -957,6 +957,11 @@ Variant ObjectData::t___clone() {
   return null;
 }
 
+const CallInfo *ObjectData::t___invokeCallInfoHelper(void *&extra) {
+  extra = NULL;
+  return NULL;
+}
+
 Variant ObjectData::callHandler(MethodCallPackage &info, CArrRef params) {
   if (info.obj && info.obj->o_getId() && info.obj->hasCall()) {
     return info.obj->doRootCall(*info.name, params, true);

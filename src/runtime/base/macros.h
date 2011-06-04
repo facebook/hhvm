@@ -93,9 +93,9 @@ namespace HPHP {
                             INVOKE_FEW_ARGS_IMPL6, CVarRef a6, CVarRef a7, \
                             CVarRef a8, CVarRef a9
 
-#define INVOKE_FEW_ARGS_PASS3 a0, a1, a2
-#define INVOKE_FEW_ARGS_PASS6 INVOKE_FEW_ARGS_PASS3, a3, a4, a5
-#define INVOKE_FEW_ARGS_PASS10 INVOKE_FEW_PARGS_PASS6, a6, a7, a8, a9
+#define INVOKE_FEW_ARGS_PASS3  a0, a1, a2
+#define INVOKE_FEW_ARGS_PASS6  INVOKE_FEW_ARGS_PASS3, a3, a4, a5
+#define INVOKE_FEW_ARGS_PASS10 INVOKE_FEW_ARGS_PASS6, a6, a7, a8, a9
 
 #if INVOKE_FEW_ARGS_COUNT == 3
 #define INVOKE_FEW_ARGS_DECL_ARGS INVOKE_FEW_ARGS_DECL3
@@ -220,12 +220,26 @@ namespace HPHP {
                                 int count, INVOKE_FEW_ARGS_IMPL_ARGS);  \
   static Variant i_##methname(MethodCallPackage &mcp, CArrRef params);  \
 
+#define DECLARE_METHOD_INVOKE_WRAPPER_HELPERS(methname)                 \
+  static CallInfo ciw_##methname;                                       \
+  static Variant iwfa_##methname(void *self,                            \
+                                 int count, INVOKE_FEW_ARGS_IMPL_ARGS); \
+  static Variant iw_##methname(void *self, CArrRef params);             \
+
 #define DECLARE_METHOD_INVOKE_HELPERS_NOPARAM(methname)                 \
   static CallInfo ci_##methname;                                        \
   static Variant ifa_##methname(MethodCallPackage &mcp,                 \
                                 int count, INVOKE_FEW_ARGS_IMPL_ARGS);  \
   static Variant i_##methname(MethodCallPackage &mcp, CArrRef params) { \
     return ((CallInfo::MethInvoker0Args)ifa_##methname)(mcp, 0);        \
+  }                                                                     \
+
+#define DECLARE_METHOD_INVOKE_WRAPPER_HELPERS_NOPARAM(methname)         \
+  static CallInfo ciw_##methname;                                       \
+  static Variant iwfa_##methname(void *self,                            \
+                                 int count, INVOKE_FEW_ARGS_IMPL_ARGS); \
+  static Variant iw_##methname(void *self, CArrRef params) {            \
+    return ((CallInfo::FuncInvoker0Args)iwfa_##methname)(self, 0);      \
   }                                                                     \
 
 //////////////////////////////////////////////////////////////////////////////

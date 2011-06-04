@@ -334,6 +334,9 @@ bool get_user_func_handler(CVarRef function, MethodCallPackage& mcp,
 
 Variant invoke(CStrRef function, CArrRef params, int64 hash = -1,
                bool tryInterp = true, bool fatal = true);
+
+Variant invoke(CVarRef function, CArrRef params,
+               bool tryInterp = true, bool fatal = true);
 /**
  * Invoking an arbitrary static method.
  */
@@ -353,7 +356,9 @@ Variant invoke_static_method_bind(CStrRef s, CStrRef method,
  * matching the name.  If no handlers are able to
  * invoke the function, throw an InvalidFunctionCallException.
  */
-Variant invoke_failed(const char *func, CArrRef params, int64 hash,
+Variant invoke_failed(const char *func, CArrRef params,
+                      bool fatal = true);
+Variant invoke_failed(CVarRef func, CArrRef params,
                       bool fatal = true);
 
 Variant o_invoke_failed(const char *cls, const char *meth,
@@ -362,6 +367,9 @@ Variant o_invoke_failed(const char *cls, const char *meth,
 Array collect_few_args(int count, INVOKE_FEW_ARGS_IMPL_ARGS);
 Array collect_few_args_ref(int count, INVOKE_FEW_ARGS_IMPL_ARGS);
 
+bool get_call_info(const CallInfo *&ci, void *&extra, CVarRef func);
+
+void get_call_info_or_fail(const CallInfo *&ci, void *&extra, CVarRef func);
 void get_call_info_or_fail(const CallInfo *&ci, void *&extra, CStrRef name);
 
 /**
@@ -616,6 +624,7 @@ public:
   void dynamicNamedCallWithIndex(CStrRef self, CStrRef method,
       MethodIndex mi, int64 prehash = -1);
   // function call
+  void functionNamedCall(CVarRef func);
   void functionNamedCall(CStrRef func);
   // Get constructor
   void construct(CObjRef self);

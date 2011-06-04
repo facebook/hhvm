@@ -94,6 +94,8 @@ const char *Option::TypedFunctionPrefix = "ft_";
 const char *Option::BuiltinFunctionPrefix = "x_";
 const char *Option::InvokePrefix = "i_";
 const char *Option::InvokeFewArgsPrefix = "ifa_";
+const char *Option::InvokeWrapperPrefix = "iw_";
+const char *Option::InvokeWrapperFewArgsPrefix = "iwfa_";
 const char *Option::InvokeSinglePrefix = "is_";
 const char *Option::CreateObjectOnlyPrefix = "coo_";
 const char *Option::PseudoMainPrefix = "pm_";
@@ -127,6 +129,7 @@ const char *Option::ExceptionPrefix = "e_";
 const char *Option::TempVariablePrefix = "r_";
 const char *Option::EvalOrderTempPrefix = "eo_";
 const char *Option::CallInfoPrefix = "ci_";
+const char *Option::CallInfoWrapperPrefix = "ciw_";
 const char *Option::SilencerPrefix = "sil_";
 
 const char *Option::ScalarPrefix = "s_";

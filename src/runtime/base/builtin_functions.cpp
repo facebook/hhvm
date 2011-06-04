@@ -79,7 +79,12 @@ String getUndefinedConstant(CStrRef name) {
 
 Variant f_call_user_func_array(CVarRef function, CArrRef params,
                                bool bound /* = false */) {
-  if (function.isString() || function.instanceof("closure")) {
+
+  if (function.isObject()) {
+    return invoke(function, params, true, false);
+  }
+
+  if (function.isString()) {
     String sfunction = function.toString();
     int c = sfunction.find("::");
     if (c != 0 && c != String::npos && c + 2 < sfunction.size()) {
@@ -157,7 +162,15 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
 bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp,
                            String &classname, String &methodname) {
   mcp.noFatal();
-  if (function.isString() || function.instanceof("closure")) {
+
+  if (function.isObject()) {
+    mcp.functionNamedCall(function);
+    if (mcp.ci) return true;
+    raise_warning("call_user_func to non-callback object");
+    return false;
+  }
+
+  if (function.isString()) {
     String sfunction = function.toString();
     int c = sfunction.find("::");
     if (c != 0 && c != String::npos && c + 2 < sfunction.size()) {
@@ -268,19 +281,29 @@ Variant invoke(const char *function, CArrRef params, int64 hash /* = -1*/,
                bool tryInterp /* = true */, bool fatal /* = true */) {
   const CallInfo *ci;
   void *extra;
-  if (get_call_info(ci, extra, function, hash)) {
+  if (LIKELY(get_call_info(ci, extra, function, hash))) {
     return (ci->getFunc())(extra, params);
   }
-  return invoke_failed(function, params, hash, fatal);
+  return invoke_failed(function, params, fatal);
+}
+
+Variant invoke(CVarRef function, CArrRef params,
+               bool tryInterp /* = true */, bool fatal /* = true */) {
+  const CallInfo *ci;
+  void *extra;
+  if (LIKELY(get_call_info(ci, extra, function))) {
+    return (ci->getFunc())(extra, params);
+  }
+  return invoke_failed(function, params, fatal);
 }
 
 Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
   const CallInfo *ci;
   void *extra;
-  if (get_call_info_builtin(ci, extra, s, hash)) {
+  if (LIKELY(get_call_info_builtin(ci, extra, s, hash))) {
     return (ci->getFunc())(extra, params);
   } else {
-    return invoke_failed(s, params, hash, fatal);
+    return invoke_failed(s, params, fatal);
   }
 }
 
@@ -289,7 +312,7 @@ Variant invoke_static_method(CStrRef s, CStrRef method, CArrRef params,
   MethodCallPackage mcp;
   if (!fatal) mcp.noFatal();
   mcp.dynamicNamedCall(s, method, -1);
-  if (mcp.ci) {
+  if (LIKELY(mcp.ci != NULL)) {
     return (mcp.ci->getMeth())(mcp, params);
   } else {
     o_invoke_failed(s.data(), method.data(), fatal);
@@ -297,7 +320,18 @@ Variant invoke_static_method(CStrRef s, CStrRef method, CArrRef params,
   }
 }
 
-Variant invoke_failed(const char *func, CArrRef params, int64 hash,
+Variant invoke_failed(CVarRef func, CArrRef params,
+                      bool fatal /* = true */) {
+  if (func.isObject()) {
+    return o_invoke_failed(
+        func.objectForCall()->o_getClassName().c_str(),
+        "__invoke", fatal);
+  } else {
+    return invoke_failed(func.toString().c_str(), params, fatal);
+  }
+}
+
+Variant invoke_failed(const char *func, CArrRef params,
                       bool fatal /* = true */) {
   INTERCEPT_INJECTION_ALWAYS("?", func, params, strongBind(r));
 
@@ -506,8 +540,32 @@ void throw_pending_exception(ThreadInfo *info) {
   throw e;
 }
 
+bool get_call_info(const CallInfo *&ci, void *&extra, CVarRef func) {
+  if (func.isObject()) {
+    ObjectData *d = func.objectForCall();
+    ci = d->t___invokeCallInfoHelper(extra);
+    return ci != NULL;
+  }
+  CStrRef sref  = func.toString();
+  const char *s = sref.data();
+  int64 hash    = sref->hash();
+  return get_call_info(ci, extra, s, hash);
+}
+
+void get_call_info_or_fail(const CallInfo *&ci, void *&extra, CVarRef func) {
+  if (UNLIKELY(!get_call_info(ci, extra, func))) {
+    if (func.isObject()) {
+      o_invoke_failed(
+        func.objectForCall()->o_getClassName().c_str(),
+        "__invoke", true);
+    } else {
+      throw InvalidFunctionCallException(func.toString().data());
+    }
+  }
+}
+
 void get_call_info_or_fail(const CallInfo *&ci, void *&extra, CStrRef name) {
-  if (!get_call_info(ci, extra, name->data(), name->hash())) {
+  if (UNLIKELY(!get_call_info(ci, extra, name->data(), name->hash()))) {
     throw InvalidFunctionCallException(name->data());
   }
 }
@@ -1478,9 +1536,14 @@ void MethodCallPackage::dynamicNamedCallWithIndex(CStrRef self, CStrRef method,
   }
 }
 
-void MethodCallPackage::functionNamedCall(CStrRef func) {
+void MethodCallPackage::functionNamedCall(CVarRef func) {
   m_isFunc = true;
   get_call_info(ci, extra, func);
+}
+
+void MethodCallPackage::functionNamedCall(CStrRef func) {
+  m_isFunc = true;
+  get_call_info(ci, extra, func.data());
 }
 
 void MethodCallPackage::construct(CObjRef self) {

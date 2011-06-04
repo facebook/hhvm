@@ -105,12 +105,16 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
     }
   }
 
-  if (v.instanceof("closure")) {
+  if (v.isObject()) {
+    ObjectData *d = v.objectForCall();
     if (name.isReferenced()) {
-      name = "Closure::__invoke";
+      name = d->o_getClassName() + "::__invoke";
     }
-    return true;
+    void *extra;
+    const CallInfo *cit = d->t___invokeCallInfoHelper(extra);
+    return cit != NULL;
   }
+
   if (name.isReferenced()) {
     name = v.toString();
   }

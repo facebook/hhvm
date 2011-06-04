@@ -302,6 +302,7 @@ class ObjectData : public CountableNF {
   virtual Variant t___wakeup();
   virtual String t___tostring();
   virtual Variant t___clone();
+  virtual const CallInfo *t___invokeCallInfoHelper(void *&extra);
 
   template<typename T, int op>
   T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);

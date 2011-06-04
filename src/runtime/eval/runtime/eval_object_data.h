@@ -19,6 +19,7 @@
 
 #include <runtime/base/dynamic_object_data.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/builtin_functions.h>
 
 namespace HPHP {
 namespace Eval {
@@ -74,6 +75,7 @@ public:
   virtual String t___tostring();
   virtual Variant t___clone();
   virtual Variant &___offsetget_lval(Variant v_name);
+  virtual const CallInfo *t___invokeCallInfoHelper(void *&extra);
 
   /**
    * Marshaling/Unmarshaling between request thread and fiber thread.
@@ -93,6 +95,7 @@ private:
   ClassEvalState &m_cls;
   Array m_privates;
   String m_class_name;
+  MethodCallPackage m_invokeMcp;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

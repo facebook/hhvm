@@ -8,6 +8,8 @@
 #include "bcmath.inc"
 #include "bzip2.inc"
 #include "class.inc"
+#include "closure.inc"
+#include "continuation.inc"
 #include "ctype.inc"
 #include "curl.inc"
 #include "datetime.inc"

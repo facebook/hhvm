@@ -77,9 +77,9 @@ Array get_global_array_wrapper() {
   return Array();
 }
 
-bool get_call_info(const CallInfo *&ci, void *&extra, const char *s,
-    int64 hash /* = -1 */) {
-  return NULL;
+bool get_call_info(const CallInfo *&ci, void *&extra, 
+    const char *s, int64 hash) {
+  return false;
 }
 bool get_call_info_static_method(MethodCallPackage &info) {
   return false;

@@ -56,7 +56,8 @@ public:
   prefix ## PropUnsetter               = prev << 4, /* __unset */       \
   prefix ## UnknownMethodHandler       = prev << 5, /* __call */        \
   prefix ## UnknownStaticMethodHandler = prev << 6, /* __callStatic */  \
-  prefix ## ArrayAccess                = prev << 7  /* Implements ArrayAccess */
+  prefix ## InvokeMethod               = prev << 7, /* __invoke */      \
+  prefix ## ArrayAccess                = prev << 8  /* Implements ArrayAccess */
 
   enum Attribute {
     System                        = 0x001,
@@ -473,6 +474,10 @@ private:
   std::set<std::string> m_usedClassesFullHeader;
 
   std::string getBaseHeaderFilename(CodeGenerator &cg);
+
+  void outputCPPMethodInvokeBareObjectSupport(
+    CodeGenerator &cg, AnalysisResultPtr ar, 
+    FunctionScopePtr func, bool fewArgs);
 
   static void outputCPPClassJumpTable
   (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,

@@ -57,7 +57,6 @@ private:
   int m_type;
   int m_subtype;
   Kind m_kind;
-  bool m_quoted;
   bool m_binary;
 };
 

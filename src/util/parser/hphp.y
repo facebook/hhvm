@@ -280,7 +280,8 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
 // create a generator function with original name and parameters
 void create_generator(Parser *_p, Token &out, Token &params,
                       Token &name, const std::string &closureName,
-                      const char *clsname, Token *modifiers, bool getArgs) {
+                      const char *clsname, Token *modifiers, bool getArgs,
+                      bool needsExtra) {
   _p->pushFuncLocation();
   if (clsname) {
     _p->onMethodStart(name, *modifiers);
@@ -289,12 +290,44 @@ void create_generator(Parser *_p, Token &out, Token &params,
   }
   Token scont;
   {
-    Token fn;      fn.setText(closureName);
-    if (clsname) {
-      fn.setText(std::string(clsname) + "::" + closureName);
+
+    Token get_call_info;
+    Token get_call_info_extra;
+    {
+      Token cn;      cn.setText(clsname ? clsname : "");
+      Token cname;   _p->onScalar(cname, T_CONSTANT_ENCAPSED_STRING, cn);
+  
+      Token fn;      fn.setText(closureName);
+      Token fname;   _p->onScalar(fname, T_CONSTANT_ENCAPSED_STRING, fn);
+
+      Token get_call_info_params;
+      _p->onCallParam(get_call_info_params, NULL, cname, 0);
+      _p->onCallParam(get_call_info_params, &get_call_info_params, fname, 0);
+
+      Token callname; callname.setText("hphp_get_call_info");
+      _p->onCall(get_call_info, 0, callname, get_call_info_params, NULL); 
+
+      if (needsExtra) {
+        Token get_call_info_extra_params;
+        _p->onCallParam(get_call_info_extra_params, NULL, cname, 0);
+        _p->onCallParam(get_call_info_extra_params, 
+                        &get_call_info_extra_params, fname, 0);
+
+        Token callname; callname.setText("hphp_get_call_info_extra");
+        _p->onCall(get_call_info_extra, 0, callname, 
+                   get_call_info_extra_params, NULL); 
+      } else {
+        Token zero; zero.setText("0");
+                    _p->onScalar(get_call_info_extra, T_LNUMBER, zero);
+      }
     }
-    Token fname;   _p->onScalar(fname, T_CONSTANT_ENCAPSED_STRING, fn);
-    Token param1;  _p->onCallParam(param1, NULL, fname, 0);
+
+    Token fi;      fi.setText(clsname ? "true" : "false");
+    Token fisMeth; _p->onConstantValue(fisMeth, fi);
+
+    Token param1;  _p->onCallParam(param1, NULL, get_call_info, 0);
+                   _p->onCallParam(param1, &param1, get_call_info_extra, 0);
+                   _p->onCallParam(param1, &param1, fisMeth, 0);
 
     Token cname;   cname.setText("get_defined_vars");
     Token empty;

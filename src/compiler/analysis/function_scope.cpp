@@ -841,7 +841,7 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("c_Closure *closure ATTRIBUTE_UNUSED = "
                 "(c_Closure*)extra;\n");
       if (m_closureGenerator) {
-        cg_printf("extract(variables, closure->t_getvars(), 256);\n");
+        cg_printf("extract(variables, closure->m_vars, 256);\n");
       } else {
         VariableTablePtr variables = getVariables();
         for (int i = 0; i < m_closureVars->getCount(); i++) {
@@ -1667,7 +1667,7 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
   if (isAbstract()) return;
   string id;
   if (m_method) {
-    id = cg.formatLabel(m_name).c_str();
+    id = cg.formatLabel(m_name);
   } else {
     id = getId(cg);
   }
@@ -1692,12 +1692,25 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
     }
     ClassScopePtr scope = getContainingClass();
     string clsName = scope->getId(cg);
+
     cg.printf("CallInfo %s%s::%s%s((void*)&%s%s::%s%s, ", Option::ClassPrefix,
               clsName.c_str(), Option::CallInfoPrefix, id.c_str(),
               Option::ClassPrefix, clsName.c_str(), Option::InvokePrefix,
               id.c_str());
     cg.printf("(void*)&%s%s::%s%s", Option::ClassPrefix, clsName.c_str(),
               Option::InvokeFewArgsPrefix, id.c_str());
+    if (m_name == "__invoke" &&
+        strcasecmp(clsName.c_str(), "closure")) {
+      cg.printf(", %d, %d, 0x%.16lXLL);\n", m_maxParam, flags, refflags);
+
+      // need to generate an extra call info for an extra wrapper
+      cg.printf("CallInfo %s%s::%s%s((void*)&%s%s::%s%s, ", Option::ClassPrefix,
+                clsName.c_str(), Option::CallInfoWrapperPrefix, id.c_str(),
+                Option::ClassPrefix, clsName.c_str(), 
+                Option::InvokeWrapperPrefix, id.c_str());
+      cg.printf("(void*)&%s%s::%s%s", Option::ClassPrefix, clsName.c_str(),
+                Option::InvokeWrapperFewArgsPrefix, id.c_str());
+    }
   } else {
     cg.printf("CallInfo %s%s((void*)&%s%s, ", Option::CallInfoPrefix,
               id.c_str(), Option::InvokePrefix, id.c_str());

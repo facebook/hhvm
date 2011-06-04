@@ -33,7 +33,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/intercept.h>
 
-#include <system/gen/php/classes/closure.h>
+#include <runtime/ext/ext_closure.h>
 #include <system/lib/systemlib.h>
 
 namespace HPHP {
@@ -235,7 +235,8 @@ FunctionStatement::FunctionStatement(STATEMENT_ARGS, const string &name,
   : Statement(STATEMENT_PASS), m_name(name),
     m_maybeIntercepted(-1), m_yieldCount(0), m_closure(NULL),
     m_docComment(doc),
-    m_callInfo((void*)Invoker, (void*)InvokerFewArgs, 0, 0, 0) {
+    m_callInfo((void*)Invoker, (void*)InvokerFewArgs, 0, 0, 0), 
+    m_closureCallInfo((void*)FSInvoker, (void*)FSInvokerFewArgs, 0, 0, 0) {
 }
 
 FunctionStatement::~FunctionStatement() {
@@ -253,7 +254,7 @@ void FunctionStatement::init(void *parser, bool ref,
 
   bool seenOptional = false;
   set<string> names;
-  m_callInfo.m_argCount = m_params.size();
+  m_callInfo.m_argCount = m_closureCallInfo.m_argCount = m_params.size();
   for (unsigned int i = 0; i < m_params.size(); i++) {
     ParameterPtr param = m_params[i];
 
@@ -276,7 +277,10 @@ void FunctionStatement::init(void *parser, bool ref,
 */
       param->addNullDefault(parser);
     }
-    if (param->isRef()) m_callInfo.m_refFlags |= 1 << i;
+    if (param->isRef()) {
+      m_callInfo.m_refFlags        |= 1 << i;
+      m_closureCallInfo.m_refFlags |= 1 << i;
+    }
 
     if (param->getIdx() == -1) {
       param->setIdx(declareVariable(name));
@@ -294,6 +298,10 @@ void FunctionStatement::changeName(const std::string &name) {
 
 const CallInfo *FunctionStatement::getCallInfo() const {
   return &m_callInfo;
+}
+
+const CallInfo *FunctionStatement::getClosureCallInfo() const {
+  return &m_closureCallInfo;
 }
 
 void FunctionStatement::eval(VariableEnvironment &env) const {
@@ -486,6 +494,35 @@ Variant FunctionStatement::invokeClosure(CArrRef params) const {
   }
 }
 
+Variant FunctionStatement::invokeClosure(ObjectData *closure,
+                                         CArrRef params) const {
+  ASSERT(closure);
+  ASSERT(m_closure);
+  FuncScopeVariableEnvironment fenv(this);
+  bindParams(fenv, params);
+
+  p_Closure c(closure);
+  const std::vector<ParameterPtr> &vars =
+    ((ClosureExpression *)m_closure)->getVars();
+  for (ArrayIter iter(c->m_vars); iter; ++iter) {
+    int i = iter.first();
+    CVarRef var = iter.secondRef();
+    Parameter *param = vars[i].get();
+    if (param->isRef()) {
+      fenv.get(param->getName()).assignRef(var);
+    } else {
+      fenv.get(param->getName()).assignVal(var);
+    }
+  }
+
+  EvalFrameInjection fi(empty_string, "{closure}", fenv, loc()->file);
+  if (m_ref) {
+    return strongBind(evalBody(fenv));
+  } else {
+    return evalBody(fenv);
+  }
+}
+
 LVariableTable *FunctionStatement::getStaticVars(VariableEnvironment &env)
   const {
   return &RequestEvalState::getFunctionStatics(this);
@@ -595,6 +632,22 @@ void FunctionStatement::getInfo(ClassInfo::MethodInfo &info) const {
     }
     info.staticVariables.push_back(ci);
   }
+}
+
+Variant FunctionStatement::FSInvoker(void *extra, CArrRef params) {
+  ASSERT(extra);
+  c_Closure *c = (c_Closure*) extra;
+  const FunctionStatement *ms = (const FunctionStatement*) c->extraData();
+  if (ms->refReturn()) {
+    return strongBind(ms->invokeClosure(c, params));
+  }
+  return ms->invokeClosure(c, params);
+}
+
+Variant FunctionStatement::FSInvokerFewArgs(void *extra, int count,
+    INVOKE_FEW_ARGS_IMPL_ARGS) {
+  return FSInvoker(extra,
+                   collect_few_args_ref(count, INVOKE_FEW_ARGS_PASS_ARGS));
 }
 
 Variant FunctionStatement::Invoker(void *extra, CArrRef params) {

@@ -26148,6 +26148,23 @@ Variant ifa_drawpolygon(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg1(a1);
   return (x_drawpolygon(arg0, arg1), null);
 }
+Variant i_hphp_get_call_info_extra(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("hphp_get_call_info_extra", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (x_hphp_get_call_info_extra(arg0, arg1));
+  }
+}
+Variant ifa_hphp_get_call_info_extra(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("hphp_get_call_info_extra", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  return (x_hphp_get_call_info_extra(arg0, arg1));
+}
 Variant i_mysql_connect(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 7)) return throw_toomany_arguments("mysql_connect", 7, 1);
@@ -27424,6 +27441,23 @@ Variant ifa_sinh(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg0(a0);
   return (x_sinh(arg0));
 }
+Variant i_hphp_get_call_info(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("hphp_get_call_info", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (x_hphp_get_call_info(arg0, arg1));
+  }
+}
+Variant ifa_hphp_get_call_info(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("hphp_get_call_info", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  return (x_hphp_get_call_info(arg0, arg1));
+}
 Variant i_apc_fetch(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count < 1 || count > 3)) return throw_wrong_arguments("apc_fetch", count, 1, 3, 1);
@@ -27484,6 +27518,15 @@ Variant i_imagecopymerge(void *extra, CArrRef params) {
 Variant ifa_imagecopymerge(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
    return throw_wrong_arguments("imagecopymerge", count, 9, 9, 1);
 }
+Variant i_intl_get_error_code(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("intl_get_error_code", 0, 1);
+  return (x_intl_get_error_code());
+}
+Variant ifa_intl_get_error_code(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("intl_get_error_code", 0, 1);
+  return (x_intl_get_error_code());
+}
 Variant i_magickclipimage(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("magickclipimage", count, 1, 1, 1);
@@ -27498,15 +27541,6 @@ Variant ifa_magickclipimage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("magickclipimage", count, 1, 1, 1);
   CVarRef arg0(a0);
   return (x_magickclipimage(arg0));
-}
-Variant i_intl_get_error_code(void *extra, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("intl_get_error_code", 0, 1);
-  return (x_intl_get_error_code());
-}
-Variant ifa_intl_get_error_code(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("intl_get_error_code", 0, 1);
-  return (x_intl_get_error_code());
 }
 Variant i_shm_has_var(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
@@ -39124,6 +39158,7 @@ CallInfo ci_xml_get_error_code((void*)&i_xml_get_error_code, (void*)&ifa_xml_get
 CallInfo ci_spl_autoload((void*)&i_spl_autoload, (void*)&ifa_spl_autoload, 2, 0, 0x0000000000000000LL);
 CallInfo ci_pcntl_alarm((void*)&i_pcntl_alarm, (void*)&ifa_pcntl_alarm, 1, 0, 0x0000000000000000LL);
 CallInfo ci_drawpolygon((void*)&i_drawpolygon, (void*)&ifa_drawpolygon, 2, 0, 0x0000000000000000LL);
+CallInfo ci_hphp_get_call_info_extra((void*)&i_hphp_get_call_info_extra, (void*)&ifa_hphp_get_call_info_extra, 2, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_connect((void*)&i_mysql_connect, (void*)&ifa_mysql_connect, 7, 0, 0x0000000000000000LL);
 CallInfo ci_xmlwriter_write_raw((void*)&i_xmlwriter_write_raw, (void*)&ifa_xmlwriter_write_raw, 2, 0, 0x0000000000000000LL);
 CallInfo ci_fgetss((void*)&i_fgetss, (void*)&ifa_fgetss, 3, 0, 0x0000000000000000LL);
@@ -39192,11 +39227,12 @@ CallInfo ci_gmmktime((void*)&i_gmmktime, (void*)&ifa_gmmktime, 6, 0, 0x000000000
 CallInfo ci_gmdate((void*)&i_gmdate, (void*)&ifa_gmdate, 2, 0, 0x0000000000000000LL);
 CallInfo ci_posix_getgid((void*)&i_posix_getgid, (void*)&ifa_posix_getgid, 0, 0, 0x0000000000000000LL);
 CallInfo ci_sinh((void*)&i_sinh, (void*)&ifa_sinh, 1, 0, 0x0000000000000000LL);
+CallInfo ci_hphp_get_call_info((void*)&i_hphp_get_call_info, (void*)&ifa_hphp_get_call_info, 2, 0, 0x0000000000000000LL);
 CallInfo ci_apc_fetch((void*)&i_apc_fetch, (void*)&ifa_apc_fetch, 3, 0, 0x0000000000000002LL);
 CallInfo ci_fileowner((void*)&i_fileowner, (void*)&ifa_fileowner, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imagecopymerge((void*)&i_imagecopymerge, (void*)&ifa_imagecopymerge, 9, 0, 0x0000000000000000LL);
-CallInfo ci_magickclipimage((void*)&i_magickclipimage, (void*)&ifa_magickclipimage, 1, 0, 0x0000000000000000LL);
 CallInfo ci_intl_get_error_code((void*)&i_intl_get_error_code, (void*)&ifa_intl_get_error_code, 0, 0, 0x0000000000000000LL);
+CallInfo ci_magickclipimage((void*)&i_magickclipimage, (void*)&ifa_magickclipimage, 1, 0, 0x0000000000000000LL);
 CallInfo ci_shm_has_var((void*)&i_shm_has_var, (void*)&ifa_shm_has_var, 2, 0, 0x0000000000000000LL);
 CallInfo ci_imagestringup((void*)&i_imagestringup, (void*)&ifa_imagestringup, 6, 0, 0x0000000000000000LL);
 CallInfo ci_mt_getrandmax((void*)&i_mt_getrandmax, (void*)&ifa_mt_getrandmax, 0, 0, 0x0000000000000000LL);
@@ -42254,6 +42290,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x3C042C09F662C6C4LL, drawsetstrokepatternurl) {
         ci = &ci_drawsetstrokepatternurl;
+        return true;
+      }
+      break;
+    case 1734:
+      HASH_GUARD(0x36A259FDB3FAA6C6LL, hphp_get_call_info) {
+        ci = &ci_hphp_get_call_info;
         return true;
       }
       break;
@@ -46100,6 +46142,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x07EB5C3A3BEA3053LL, acosh) {
         ci = &ci_acosh;
+        return true;
+      }
+      break;
+    case 4183:
+      HASH_GUARD(0x32637D101E90B057LL, hphp_get_call_info_extra) {
+        ci = &ci_hphp_get_call_info_extra;
         return true;
       }
       break;

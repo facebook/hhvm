@@ -41,7 +41,8 @@ public:
   Variant invokeStatic(const char* cls, CArrRef params, bool check = true)
     const;
   Variant invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
-                               const FunctionCallExpression *caller) const;
+                               const FunctionCallExpression *caller,
+                               bool check = true) const;
   Variant invokeStaticDirect(CStrRef cls, VariableEnvironment &env,
                              const FunctionCallExpression *caller,
                              bool sp) const;

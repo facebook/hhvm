@@ -86,8 +86,8 @@ extern Variant get_builtin_class_constant(const char *s, const char *prop,
 /**
  * Getting function info
  */
-extern bool get_call_info(const CallInfo *&ci, void *&extra, const char *s,
-    int64 hash = -1);
+extern bool get_call_info(const CallInfo *&ci, void *&extra, 
+    const char *s, int64 hash = -1);
 extern bool get_call_info_builtin(const CallInfo *&ci, void *&extra,
     const char *s, int64 hash = -1);
 extern bool get_call_info_static_method(MethodCallPackage &info);

@@ -164,6 +164,8 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
     classScope->setAttribute(ClassScope::HasUnknownMethodHandler);
   } else if (m_name == "__callstatic") {
     classScope->setAttribute(ClassScope::HasUnknownStaticMethodHandler);
+  } else if (m_name == "__invoke") {
+    classScope->setAttribute(ClassScope::HasInvokeMethod);
   }
 
   m_className = classScope->getName();

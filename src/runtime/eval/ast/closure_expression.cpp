@@ -42,7 +42,11 @@ Variant ClosureExpression::eval(VariableEnvironment &env) const {
       vars.append(env.get(name));
     }
   }
-  return create_object("Closure", CREATE_VECTOR2(m_func->name(), vars));
+
+  return create_object("Closure",
+      CREATE_VECTOR3(Variant((int64)m_func->getClosureCallInfo()), 
+                     Variant((int64)m_func.get()), 
+                     vars));
 }
 
 void ClosureExpression::dump(std::ostream &out) const {

@@ -34,7 +34,6 @@ SystemGlobals::SystemGlobals() {
 
 void SystemGlobals::initialize() {
   pm_php$classes$arrayaccess_php(false);
-  pm_php$classes$closure_php(false);
   pm_php$classes$debugger_php(false);
   pm_php$classes$directory_php(false);
   pm_php$classes$directoryiterator_php(false);

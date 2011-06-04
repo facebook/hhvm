@@ -821,23 +821,15 @@ Array f_fb_call_user_func_safe(int _argc, CVarRef function,
 Variant f_fb_call_user_func_safe_return(int _argc, CVarRef function,
                                         CVarRef def,
                                         CArrRef _argv /* = null_array */) {
-  Variant call = function;
-  if (!call.isString() && !call.isArray()) {
-    call = function.toString();
-  }
-  if (f_is_callable(call)) {
-    return f_call_user_func_array(call, _argv);
+  if (f_is_callable(function)) {
+    return f_call_user_func_array(function, _argv);
   }
   return def;
 }
 
 Array f_fb_call_user_func_array_safe(CVarRef function, CArrRef params) {
-  Variant call = function;
-  if (!call.isString() && !call.isArray()) {
-    call = function.toString();
-  }
-  if (f_is_callable(call)) {
-    return CREATE_VECTOR2(true, f_call_user_func_array(call, params));
+  if (f_is_callable(function)) {
+    return CREATE_VECTOR2(true, f_call_user_func_array(function, params));
   }
   return CREATE_VECTOR2(false, null);
 }

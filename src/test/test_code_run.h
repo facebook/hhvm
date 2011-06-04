@@ -84,6 +84,7 @@ class TestCodeRun : public TestBase {
   bool TestObjectMethod();
   bool TestClassMethod();
   bool TestObjectMagicMethod();
+  bool TestObjectInvokeMethod();
   bool TestObjectAssignment();
   bool TestNewObjectExpression();
   bool TestObjectPropertyExpression();

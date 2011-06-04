@@ -817,26 +817,28 @@ static String php_pcre_replace(CStrRef pattern, CStrRef subject,
   const char *replace = NULL;
   const char *replace_end = NULL;
   int replace_len = 0;
-  String replace_val = replace_var.toString();
+  String replace_val;
   String eval_fn;
-  if (eval) {
-    // Extract eval fn
-    int pidx = replace_val.find('(');
-    const char *rd = replace_val.data();
-    int rs = replace_val.size();
 
-    if (!(rs >= 5 && pidx >= 0 && rd[pidx+1] == '"' &&
-          ((rd[rs-2] == '"' && rd[rs-1] == ')') ||
-           (rd[rs-3] == '"' && rd[rs-2] == ')' && rd[rs-1] == ';')))) {
-      throw NotSupportedException("preg_replace",
-                                  "Modifier /e must be used with the form "
-                                  "f(\"<replacement string>\") or "
-                                  "f(\"<replacement string>\");");
-    }
-    eval_fn = replace_val.substr(0, pidx);
-    replace_val = replace_val.substr(pidx+1, rs - (pidx+1) - 1);
-  }
   if (!callable) {
+    replace_val = replace_var.toString();
+    if (eval) {
+      // Extract eval fn
+      int pidx = replace_val.find('(');
+      const char *rd = replace_val.data();
+      int rs = replace_val.size();
+
+      if (!(rs >= 5 && pidx >= 0 && rd[pidx+1] == '"' &&
+            ((rd[rs-2] == '"' && rd[rs-1] == ')') ||
+            (rd[rs-3] == '"' && rd[rs-2] == ')' && rd[rs-1] == ';')))) {
+        throw NotSupportedException("preg_replace",
+                                    "Modifier /e must be used with the form "
+                                    "f(\"<replacement string>\") or "
+                                    "f(\"<replacement string>\");");
+      }
+      eval_fn = replace_val.substr(0, pidx);
+      replace_val = replace_val.substr(pidx+1, rs - (pidx+1) - 1);
+    }
     replace = replace_val.data();
     replace_len = replace_val.size();
     replace_end = replace + replace_len;
@@ -1013,10 +1015,26 @@ static String php_pcre_replace(CStrRef pattern, CStrRef subject,
       }
     } else {
       if (pcre_need_log_error(count)) {
+        const char *s;
+        int size;
+        String stemp;
+        if (callable) {
+          if (replace_var.isObject()) {
+            stemp = 
+              replace_var.objectForCall()->o_getClassName() + "::__invoke";
+          } else {
+            stemp = replace_var.toString();
+          }
+          s = stemp.data();
+          size = stemp.size();
+        } else {
+          s = replace_val.data();
+          size = replace_val.size();
+        }
         pcre_log_error(__FUNCTION__, __LINE__, count,
                        pattern.data(), pattern.size(),
                        subject.data(), subject.size(),
-                       replace_val.data(), replace_val.size(),
+                       s, size,
                        callable, limit, start_offset, g_notempty);
       }
       pcre_handle_exec_error(count);

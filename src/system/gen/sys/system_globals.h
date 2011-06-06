@@ -48,17 +48,17 @@ public:
   ClassStaticsPtr stgv_ClassStaticsPtr[1];
   ObjectStaticCallbacks* stgv_ObjectStaticCallbacksPtr[1];
   Variant stgv_Variant[13];
-  #define gvm_argc stgv_Variant[0]
-  #define gvm_argv stgv_Variant[1]
-  #define gvm__SERVER stgv_Variant[2]
-  #define gvm__GET stgv_Variant[3]
-  #define gvm__POST stgv_Variant[4]
-  #define gvm__COOKIE stgv_Variant[5]
-  #define gvm__FILES stgv_Variant[6]
-  #define gvm__ENV stgv_Variant[7]
-  #define gvm__REQUEST stgv_Variant[8]
-  #define gvm__SESSION stgv_Variant[9]
-  #define gvm_HTTP_RAW_POST_DATA stgv_Variant[10]
+  #define gvm_HTTP_RAW_POST_DATA stgv_Variant[0]
+  #define gvm__COOKIE stgv_Variant[1]
+  #define gvm__ENV stgv_Variant[2]
+  #define gvm__FILES stgv_Variant[3]
+  #define gvm__GET stgv_Variant[4]
+  #define gvm__POST stgv_Variant[5]
+  #define gvm__REQUEST stgv_Variant[6]
+  #define gvm__SERVER stgv_Variant[7]
+  #define gvm__SESSION stgv_Variant[8]
+  #define gvm_argc stgv_Variant[9]
+  #define gvm_argv stgv_Variant[10]
   #define gvm_http_response_header stgv_Variant[11]
   #define k_SID stgv_Variant[12]
   bool stgv_bool[13];

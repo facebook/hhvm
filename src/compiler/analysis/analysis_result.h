@@ -552,6 +552,7 @@ private:
                                   const std::string &target, int offset);
   int getFileSize(FileScopePtr fs);
 
+  void outputCPPHashTableClassDeclaredFlagsLookup(CodeGenerator &cg);
   void outputCPPClassDeclaredFlagsLookup(CodeGenerator &cg);
 
   void repartitionCPP(const std::string &filename, int64 targetSize,

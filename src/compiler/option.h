@@ -166,6 +166,11 @@ public:
    */
   static bool GenHashTableGetConstant;
 
+  /**
+   * Generate hash-table lookup based GlobalVariables::routine
+   */
+  static bool GenHashTableGVRoutine;
+
   static bool UseScalarVariant;
 
   /**

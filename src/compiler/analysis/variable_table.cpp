@@ -761,6 +761,35 @@ void VariableTable::canonicalizeStaticGlobals(CodeGenerator &cg) {
   }
 }
 
+// Make sure GlobalVariables::getRefByIdx has the correct indices
+void VariableTable::checkSystemGVOrder(SymbolList &variants,
+                                       unsigned int max) {
+  static const char *sgvNames[] = {
+    "gvm_HTTP_RAW_POST_DATA",
+    "gvm__COOKIE",
+    "gvm__ENV",
+    "gvm__FILES",
+    "gvm__GET",
+    "gvm__POST",
+    "gvm__REQUEST",
+    "gvm__SERVER",
+    "gvm__SESSION",
+    "gvm_argc",
+    "gvm_argv",
+    "gvm_http_response_header",
+  };
+  if (variants.size() < max ||
+      sizeof(sgvNames)/sizeof(sgvNames[0]) != max) {
+    assert(false);
+  }
+  unsigned int i = 0;
+  for (SymbolList::const_iterator iterName = variants.begin();
+       iterName != variants.end(); ++iterName) {
+    if (strcmp(sgvNames[i], iterName->c_str())) assert(false);
+    i++;
+  }
+}
+
 void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
                                                    AnalysisResultPtr ar) {
   ASSERT(!m_staticGlobals.empty() || m_staticGlobalsVec.empty());
@@ -778,7 +807,8 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     }
   }
 
-  if (cg.getOutput() == CodeGenerator::SystemCPP) {
+  bool system = (cg.getOutput() == CodeGenerator::SystemCPP);
+  if (system) {
     cg_printf("class SystemGlobals : public Globals {\n");
     cg_indentBegin("public:\n");
     cg_printf("SystemGlobals();\n");
@@ -799,21 +829,14 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   SymbolList &bools = type2names["bool"];
 
   // Global Variables
-  if (cg.getOutput() != CodeGenerator::SystemCPP) {
-    for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
-      const Symbol *sym = m_symbolVec[i];
-      if (!sym->isSystem()) {
-        variants.push_back(string("gvm_") + cg.formatLabel(sym->getName()));
-      }
-    }
-  } else {
-    for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
-      const Symbol *sym = m_symbolVec[i];
-      TypePtr type = sym->getFinalType();
-      type2names[type->getCPPDecl(cg, ar, BlockScopeRawPtr())].push_back
-        (string("gvm_") + cg.formatLabel(sym->getName()));
+  for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
+    const Symbol *sym = m_symbolVec[i];
+    if (system || !sym->isSystem()) {
+      variants.push_back(string("gvm_") + cg.formatLabel(sym->getName()));
     }
   }
+
+  if (system) checkSystemGVOrder(variants, m_symbolVec.size());
 
   // Dynamic Constants
   ar->outputCPPDynamicConstantDecl(cg, type2names);
@@ -866,7 +889,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   // PseudoMain Variables
   ar->outputCPPFileRunDecls(cg, type2names);
 
-  if (cg.getOutput() != CodeGenerator::SystemCPP) {
+  if (!system) {
     // Volatile class declared flags
     ar->outputCPPClassDeclaredFlags(cg, type2names);
     cg_printf("virtual bool class_exists(CStrRef name);\n");
@@ -878,13 +901,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   // Redeclared Classes
   ar->outputCPPRedeclaredClassDecl(cg, type2names);
 
-  // generating arr[1] even if it's empty just to make
-  // outputCPPGlobalVariablesImpl()'s memset easier to generate
-  type2names.operator[]("bool");
-  type2names.operator[]("CallInfo*");
-  type2names.operator[]("ObjectStaticCallbacks*");
-
-  const char *prefix = (cg.getOutput() == CodeGenerator::SystemCPP) ?
+  const char *prefix = system ?
     "stgv_" : "tgv_"; // (system) typed global variables
   for (Type2SymbolListMap::const_iterator iter = type2names.begin();
        iter != type2names.end(); ++iter) {
@@ -899,15 +916,22 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
               (names.empty() ? 1 : (int)names.size()));
 
     int i = 0;
+    bool gvmDone = false;
     for (SymbolList::const_iterator iterName = names.begin();
          iterName != names.end(); ++iterName) {
+      bool gvmPrefix = (strncmp(iterName->c_str(), "gvm_", 4) == 0);
+      if (!gvmPrefix) {
+        gvmDone = true;
+      } else if (gvmDone) {
+        assert(false);
+      }
       cg_printf("#define %s %s%s[%d]\n", iterName->c_str(), prefix,
                 typeName.c_str(), i);
       i++;
     }
   }
 
-  if (cg.getOutput() != CodeGenerator::SystemCPP) {
+  if (!system) {
     cg.printSection("Global Array Wrapper Methods");
     cg_indentBegin("virtual ssize_t staticSize() const {\n");
     cg_printf("return %d;\n", m_symbolVec.size());
@@ -925,7 +949,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
 
   // generating scalar arrays
   cg.printSection("Scalar Arrays");
-  if (cg.getOutput() == CodeGenerator::SystemCPP) {
+  if (system) {
     cg_printf("class SystemScalarArrays {\n");
   } else {
     cg_printf("class ScalarArrays : public SystemScalarArrays {\n");
@@ -933,8 +957,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   cg_indentBegin("public:\n");
   cg_printf("static void initialize();\n");
   cg_printf("static void initializeNamed();\n");
-  if (cg.getOutput() != CodeGenerator::SystemCPP &&
-      Option::ScalarArrayFileCount > 1) {
+  if (!system && Option::ScalarArrayFileCount > 1) {
     for (int i = 0; i < Option::ScalarArrayFileCount; i++) {
       cg_printf("static void initialize_%d();\n", i);
     }
@@ -1162,8 +1185,104 @@ void VariableTable::outputCPPGlobalVariablesDtor(CodeGenerator &cg) {
   cg_printf("GlobalVariables::~GlobalVariables() {}\n");
 }
 
+void VariableTable::outputCPPGVHashTableGetImpl(CodeGenerator &cg,
+                                                AnalysisResultPtr ar) {
+  ASSERT(cg.getCurrentIndentation() == 0);
+  const char text1[] =
+    "class hashNodeGV {\n"
+    "public:\n"
+    "  hashNodeGV() {}\n"
+    "  hashNodeGV(int64 h, const char *n, int64 l, int64 o, int64 i) :\n"
+    "    hash(h), name(n), len(l), off(o), index(i), next(NULL) {}\n"
+    "  int64 hash;\n"
+    "  const char *name;\n"
+    "  int64 len;\n"
+    "  int64 off;\n"
+    "  int64 index;\n"
+    "  hashNodeGV *next;\n"
+    "};\n"
+    "static hashNodeGV *gvMapTable[%d];\n"
+    "static hashNodeGV gvBuckets[%d];\n"
+    "\n"
+    "#define GET_GV_OFFSET(n) (offsetof(GlobalVariables, n))\n"
+    "const char *gvMapData[] = {\n";
+
+  const char text2[] =
+    "  NULL, NULL, NULL, NULL,\n"
+    "};\n\n"
+    "static class GVTableInitializer {\n"
+    "  public: GVTableInitializer() {\n"
+    "    hashNodeGV *b = gvBuckets;\n"
+    "    for (const char **s = gvMapData; *s; s++, b++) {\n"
+    "      const char *name = *s++;\n"
+    "      int64 len = (int64)(*s++);\n"
+    "      int64 off = (int64)(*s++);\n"
+    "      int64 index = (int64)(*s);\n"
+    "      int64 hash = hash_string(name, len);\n"
+    "      hashNodeGV *node = new(b) hashNodeGV\n"
+    "        (hash, name, len, off, index);\n"
+    "      int h = hash & %d;\n"
+    "      if (gvMapTable[h]) node->next = gvMapTable[h];\n"
+    "      gvMapTable[h] = node;\n"
+    "    }\n"
+    "  }\n"
+    "} gv_table_initializer;\n"
+    "\n"
+    "static inline const hashNodeGV *\n"
+    "findGV(const char *name, int64 hash) {\n"
+    "  for (const hashNodeGV *p = gvMapTable[hash & %d];\n"
+    "       p; p = p->next) {\n"
+    "    if (p->hash == hash && strcmp(p->name, name) == 0) return p;\n"
+    "  }\n"
+    "  return NULL;\n"
+    "}\n"
+    "static inline const hashNodeGV *\n"
+    "findGV(const char *name, int64 len, int64 hash) {\n"
+    "  for (const hashNodeGV *p = gvMapTable[hash & %d];\n"
+    "       p; p = p->next) {\n"
+    "    if (p->hash == hash && p->len == len &&\n"
+    "        memcmp(p->name, name, len) == 0) {\n"
+    "      return p;\n"
+    "    }\n"
+    "  }\n"
+    "  return NULL;\n"
+    "}\n"
+    "\n";
+
+  const char text3[] =
+    "Variant &GlobalVariables::getImpl(CStrRef s) {\n"
+    "  const hashNodeGV *p = findGV(s.data(), s.size(), s->hash());\n"
+    "  if (p) return *(Variant *)((char *)this + p->off);\n"
+    "  return LVariableTable::getImpl(s);\n"
+    "}\n";
+
+  cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_GETIMPL");
+  int tableSize = Util::roundUpToPowerOfTwo(m_symbolVec.size() * 2);
+  cg_printf(text1, tableSize, m_symbolVec.size());
+  for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
+    const string &name = m_symbolVec[i]->getName();
+    string escaped = cg.escapeLabel(name);
+    string varName = string("gvm_") + cg.formatLabel(name);
+    cg_printf("  (const char *)\"%s\",\n"
+              "  (const char *)%lld,\n"
+              "  (const char *)GET_GV_OFFSET(%s),\n"
+              "  (const char *)%d,\n",
+              escaped.c_str(),
+              name.size(),
+              varName.c_str(),
+              i);
+  }
+  cg_printf(text2, tableSize - 1, tableSize - 1, tableSize - 1);
+  cg_printf(text3);
+  cg.ifdefEnd("OMIT_JUMP_TABLE_GLOBAL_GETIMPL");
+}
+
 void VariableTable::outputCPPGlobalVariablesGetImpl(CodeGenerator &cg,
                                                     AnalysisResultPtr ar) {
+  if (Option::GenHashTableGVRoutine) {
+    outputCPPGVHashTableGetImpl(cg, ar);
+    return;
+  }
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_GETIMPL");
   cg_indentBegin("Variant &GlobalVariables::getImpl(CStrRef s) {\n");
   cg_printf("GlobalVariables *g ATTRIBUTE_UNUSED = this;\n");
@@ -1176,8 +1295,28 @@ void VariableTable::outputCPPGlobalVariablesGetImpl(CodeGenerator &cg,
   cg.ifdefEnd("OMIT_JUMP_TABLE_GLOBAL_GETIMPL");
 }
 
+void VariableTable::outputCPPGVHashTableExists(CodeGenerator &cg,
+                                               AnalysisResultPtr ar) {
+  ASSERT(cg.getCurrentIndentation() == 0);
+  cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_EXISTS");
+  const char text[] =
+    "bool GlobalVariables::exists(CStrRef s) const {\n"
+    "  const hashNodeGV *p = findGV(s.data(), s.size(), s->hash());\n"
+    "  if (p) return isInitialized(*(Variant *)((char *)this + p->off));\n"
+    "  if (!LVariableTable::exists(s)) return false;\n"
+    "  return isInitialized(const_cast<GlobalVariables*>(this)->get(s));\n"
+    "}\n";
+  cg_printf(text);
+  cg.ifdefEnd("OMIT_JUMP_TABLE_GLOBAL_EXISTS");
+}
+
 void VariableTable::outputCPPGlobalVariablesExists(CodeGenerator &cg,
                                                    AnalysisResultPtr ar) {
+  if (Option::GenHashTableGVRoutine) {
+    outputCPPGVHashTableExists(cg, ar);
+    return;
+  }
+
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_EXISTS");
   cg_indentBegin("bool GlobalVariables::exists(CStrRef s) const {\n");
   cg_printf("const GlobalVariables *g ATTRIBUTE_UNUSED = this;\n");
@@ -1192,8 +1331,29 @@ void VariableTable::outputCPPGlobalVariablesExists(CodeGenerator &cg,
   cg.ifdefEnd("OMIT_JUMP_TABLE_GLOBAL_EXISTS");
 }
 
+void VariableTable::outputCPPGVHashTableGetIndex(CodeGenerator &cg,
+                                                 AnalysisResultPtr ar) {
+  ASSERT(cg.getCurrentIndentation() == 0);
+  cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_GETINDEX");
+  const char text[] =
+    "ssize_t GlobalVariables::getIndex(const char* s, int64 hash) const {\n"
+    "  const GlobalVariables *g ATTRIBUTE_UNUSED = this;\n"
+    "  if (hash < 0) hash = hash_string(s);\n"
+    "  const hashNodeGV *p = findGV(s, hash);\n"
+    "  if (p) return p->index;\n"
+    "  return m_px ? (m_px->getIndex(s) + %d) : -1;\n"
+    "}\n";
+  cg_printf(text, m_symbolVec.size());
+  cg.ifdefEnd("OMIT_JUMP_TABLE_GLOBAL_GETINDEX");
+}
+
 void VariableTable::outputCPPGlobalVariablesGetIndex(CodeGenerator &cg,
                                                      AnalysisResultPtr ar) {
+  if (Option::GenHashTableGVRoutine) {
+    outputCPPGVHashTableGetIndex(cg, ar);
+    return;
+  }
+
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_GETINDEX");
   cg_indentBegin("ssize_t GlobalVariables::getIndex(const char* s, "
                  "int64 hash) const {\n");
@@ -1209,8 +1369,42 @@ void VariableTable::outputCPPGlobalVariablesGetIndex(CodeGenerator &cg,
 
 void VariableTable::outputCPPGlobalVariablesMethods(CodeGenerator &cg,
                                                     AnalysisResultPtr ar) {
+  SymbolList variants;
   int maxIdx = m_symbolVec.size();
+  int maxSysIdx = 0;
+  bool sysDone = false;
+  for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
+    const Symbol *sym = m_symbolVec[i];
+    if (sym->isSystem()) {
+      if (sysDone) assert(false);
+      variants.push_back(string("gvm_") + cg.formatLabel(sym->getName()));
+      maxSysIdx++;
+    } else {
+      sysDone = true;
+    }
+  }
 
+  checkSystemGVOrder(variants, maxSysIdx);
+  ASSERT(cg.getCurrentIndentation() == 0);
+  const char text[] =
+    "\n"
+    "CVarRef GlobalVariables::getRefByIdx(ssize_t idx, Variant &k) {\n"
+    "  GlobalVariables *g ATTRIBUTE_UNUSED = this;\n"
+    "  if (idx >= 0 && idx < %d) {\n"
+    "    k = gvMapData[idx << 2]; // idx * 4\n"
+    "    if (idx < %d) {\n"
+    "      return g->stgv_Variant[idx];\n"
+    "    } else {\n"
+    "      return g->tgv_Variant[idx - %d];\n"
+    "    }\n"
+    "  }\n"
+    "  return Globals::getRefByIdx(idx, k);\n"
+    "}\n";
+
+  if (Option::GenHashTableGVRoutine) {
+    cg_printf(text, maxIdx, maxSysIdx, maxSysIdx);
+    return;
+  }
   cg_indentBegin("CVarRef GlobalVariables::getRefByIdx(ssize_t idx, "
                  "Variant &k) {\n");
   cg_printf("GlobalVariables *g ATTRIBUTE_UNUSED = this;\n");

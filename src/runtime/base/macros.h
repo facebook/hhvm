@@ -266,17 +266,6 @@ namespace HPHP {
 #define HASH_INITIALIZED(code, name, str)                               \
   if (hash == code && strcmp(s, str) == 0)                              \
     return isInitialized(name)
-#define HASH_INITIALIZED_STRING(code, name, str, len)                   \
-  if (hash == code && s.length() == len &&                              \
-      memcmp(s.data(), str, len) == 0) return isInitialized(name)
-#define HASH_INITIALIZED_LITSTR(code, index, name, len)                 \
-do { \
-  const char *s1 = s.data();                                            \
-  const char *s2 = literalStrings[index].data();                        \
-  if ((s1 == s2) ||                                                     \
-      (hash == code && s.length() == len &&                             \
-      memcmp(s1, s2, len) == 0)) return isInitialized(name);            \
-} while (0)
 #define HASH_INITIALIZED_NAMSTR(code, str, name, len)                   \
 do { \
   const char *s1 = s.data();                                            \
@@ -287,17 +276,6 @@ do { \
 } while (0)
 #define HASH_RETURN(code, name, str)                                    \
   if (hash == code && strcmp(s, str) == 0) return name
-#define HASH_RETURN_STRING(code, name, str, len)                        \
-  if (hash == code && s.length() == len &&                              \
-      memcmp(s.data(), str, len) == 0) return name
-#define HASH_RETURN_LITSTR(code, index, name, len)                      \
-do { \
-  const char *s1 = s.data();                                            \
-  const char *s2 = literalStrings[index].data();                        \
-  if ((s1 == s2) ||                                                     \
-      (hash == code && s.length() == len &&                             \
-      memcmp(s1, s2, len) == 0)) return name;                           \
-} while (0)
 #define HASH_RETURN_NAMSTR(code, str, name, len)                        \
 do { \
   const char *s1 = s.data();                                            \

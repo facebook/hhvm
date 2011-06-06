@@ -7069,6 +7069,40 @@ bool TestCodeRun::TestDynamicVariables() {
        "$stuff = 1234;"
        "echo \"${$x}\";");
 
+  MVCRO("<?php "
+       "$i = 1;"
+       "$j = 2;"
+       "$k = 3;"
+       "$v = 'i';"
+       "var_dump($$v);"
+       "$v = 'j';"
+       "var_dump($$v);"
+       "$v = 'k';"
+       "var_dump($$v);"
+       "$v = '_FILES';"
+       "var_dump($$v);"
+       "$v = 'l';"
+       "var_dump($$v);"
+       "if (true) {"
+       "  class A{"
+       "    const C = 1;"
+       "  }"
+       "} else {"
+       "  class A{"
+       "    const C = 1;"
+       "  }"
+       "}"
+       "function foo($p) {"
+       "  var_dump($p::C);"
+       "}"
+       "foo('A');",
+       "int(1)\n"
+       "int(2)\n"
+       "int(3)\n"
+       "array(0) {\n"
+       "}\n"
+       "NULL\n"
+       "int(1)\n");
   return true;
 }
 

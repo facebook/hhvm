@@ -184,6 +184,7 @@ bool Option::GenHashTableInvokeFile = true;
 bool Option::GenHashTableInvokeFunc = true;
 bool Option::GenHashTableDynClass= true;
 bool Option::GenHashTableGetConstant = true;
+bool Option::GenHashTableGVRoutine = true;
 bool Option::UseScalarVariant = true;
 bool Option::KeepStatementsWithNoEffect = false;
 

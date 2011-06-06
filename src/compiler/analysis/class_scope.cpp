@@ -764,7 +764,7 @@ void ClassScope::outputCPPHashTableClassVarInit
     "static hashNodeCTD *ctdMapTable[%d];\n"
     "static hashNodeCTD ctdBuckets[%d];\n"
     "\n"
-    "#define GET_OFFSET(n) "
+    "#define GET_CS_OFFSET(n) "
     "((offsetof(GlobalVariables, %s ## n) -"
     "  offsetof(GlobalVariables, tgv_ClassStaticsPtr)) / "
     "sizeof(ClassStaticsPtr) + 1)\n"
@@ -834,7 +834,7 @@ void ClassScope::outputCPPHashTableClassVarInit
     if (iterClasses->second[0]->isRedeclaring()) {
       ASSERT(!system);
       cg_printf("      (const char *)\"%s\", "
-                "(const char *)GET_OFFSET(%s), "
+                "(const char *)GET_CS_OFFSET(%s), "
                 "(const char *)NULL,"
                 "(const char *)NULL,\n",
                 cg.formatLabel(clsName).c_str(),

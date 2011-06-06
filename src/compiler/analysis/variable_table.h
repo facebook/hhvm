@@ -286,10 +286,14 @@ public:
   void outputCPPGlobalVariablesDtorIncludes(CodeGenerator &cg,
                                             AnalysisResultPtr ar);
   void outputCPPGlobalVariablesDtor(CodeGenerator &cg);
+  void outputCPPGVHashTableGetImpl(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPGlobalVariablesGetImpl(CodeGenerator &cg,
                                        AnalysisResultPtr ar);
+  void outputCPPGVHashTableExists(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPGlobalVariablesExists(CodeGenerator &cg,
                                       AnalysisResultPtr ar);
+  void outputCPPGVHashTableGetIndex(CodeGenerator &cg,
+                                    AnalysisResultPtr ar);
   void outputCPPGlobalVariablesGetIndex(CodeGenerator &cg,
                                         AnalysisResultPtr ar);
   void outputCPPGlobalVariablesMethods(CodeGenerator &cg,
@@ -383,6 +387,7 @@ private:
 
   void outputCPPVariableInit(CodeGenerator &cg, AnalysisResultPtr ar,
                              bool inPseudoMain, const std::string &name);
+  void checkSystemGVOrder(SymbolList &variants, unsigned int max);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

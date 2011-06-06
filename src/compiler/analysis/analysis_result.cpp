@@ -772,6 +772,9 @@ void AnalysisResult::analyzeProgramFinal() {
   for (uint i = 0; i < m_fileScopes.size(); i++) {
     m_fileScopes[i]->analyzeProgram(ar);
   }
+
+  // Keep generated code identical without randomness
+  if (m_system) canonicalizeSymbolOrder();
   setPhase(AnalysisResult::CodeGen);
 }
 
@@ -3236,7 +3239,110 @@ void AnalysisResult::outputCPPClassDeclaredFlags
   }
 }
 
+void AnalysisResult::outputCPPHashTableClassDeclaredFlagsLookup(
+  CodeGenerator &cg) {
+  ASSERT(cg.getCurrentIndentation() == 0);
+  AnalysisResultPtr ar = shared_from_this();
+  vector <pair<const char *, const char *> > classes;
+  for (StringToClassScopePtrVecMap::const_iterator it = m_classDecs.begin();
+       it != m_classDecs.end(); ++it) {
+    const char *lowerName = it->first.c_str();
+    if (!it->second.size()) {
+      classes.push_back(pair<const char *, const char *>(lowerName, lowerName));
+    } else if (it->second[0]->isVolatile()) {
+      const char *originalName = it->second[0]->getOriginalName().c_str();
+      classes.push_back(pair<const char *, const char *>
+                        (lowerName, originalName));
+    }
+  }
+  const char text1[] =
+    "class hashNodeClassExists {\n"
+    "public:\n"
+    "  hashNodeClassExists() {}\n"
+    "  hashNodeClassExists(int64 h, const char *n, const void *s, int64 o) :\n"
+    "    hash(h), name(n), str(s), off(o), next(NULL) {}\n"
+    "  int64 hash;\n"
+    "  const char *name;\n"
+    "  const void *str;\n"
+    "  int64 off;\n"
+    "  hashNodeClassExists *next;\n"
+    "};\n"
+    "static hashNodeClassExists *classExistsMapTable[%d];\n"
+    "static hashNodeClassExists classExistsBuckets[%d];\n"
+    "\n"
+    "static class ClassExistsTableInitializer {\n"
+    "  public: ClassExistsTableInitializer() {\n"
+    "    const char *classExistsMapData[] = {\n";
+
+  const char text2[] =
+    "      NULL, NULL, NULL,\n"
+    "    };\n"
+    "    hashNodeClassExists *b = classExistsBuckets;\n"
+    "    for (const char **s = classExistsMapData; *s; s++, b++) {\n"
+    "      const char *name = *s++;\n"
+    "      const void *str = (const void *)(*s++);\n"
+    "      int64 off = (int64)(*s);\n"
+    "      int64 hash = hash_string(name, strlen(name));\n"
+    "      hashNodeClassExists *node = new(b) hashNodeClassExists\n"
+    "        (hash, name, str, off);\n"
+    "      int h = hash & %d;\n"
+    "      if (classExistsMapTable[h]) node->next = classExistsMapTable[h];\n"
+    "      classExistsMapTable[h] = node;\n"
+    "    }\n"
+    "  }\n"
+    "} class_exists_table_initializer;\n"
+    "\n"
+    "static inline const hashNodeClassExists *\n"
+    "findClassExists(const char *name, int64 hash) {\n"
+    "  for (const hashNodeClassExists *p = classExistsMapTable[hash & %d];\n"
+    "       p; p = p->next) {\n"
+    "    if (p->hash == hash) {\n"
+    "       const char *s = ((String*)(p->str))->data();\n"
+    "       if (s == name || strcasecmp(s, name) == 0) return p;\n"
+    "    }\n"
+    "  }\n"
+    "  return NULL;\n"
+    "}\n"
+    "\n";
+
+  const char text3[] =
+    "bool GlobalVariables::class_exists(CStrRef s) {\n"
+    "  const hashNodeClassExists *p = findClassExists(s.data(), s->hash());\n"
+    "  if (p) return *(bool *)((char *)this + p->off);\n"
+    "  return false;\n"
+    "}\n";
+
+  const char text4[] =
+    "bool GlobalVariables::class_exists(CStrRef s) {\n"
+    "  return false;\n"
+    "}\n";
+
+  if (classes.size() == 0) {
+    cg_printf(text4);
+    return;
+  }
+  int tableSize = Util::roundUpToPowerOfTwo(classes.size() * 2);
+  cg_printf(text1, tableSize, classes.size());
+  for (unsigned int i = 0; i < classes.size(); i++) {
+    const char *lowerName = classes[i].first;
+    const char *originalName = classes[i].second;
+    string varName = string("cdec_") + lowerName;
+    cg_printf("      (const char *)\"%s\",\n", originalName);
+    cg_printf("      (const char *)&(");
+    cg_printString(originalName, ar, ar);
+    cg_printf("),\n      (const char *)GET_GV_OFFSET(%s),\n",
+              varName.c_str());
+  }
+  cg_printf(text2, tableSize - 1, tableSize - 1);
+  cg_printf(text3);
+}
+
 void AnalysisResult::outputCPPClassDeclaredFlagsLookup(CodeGenerator &cg) {
+  if (Option::GenHashTableGVRoutine) {
+    outputCPPHashTableClassDeclaredFlagsLookup(cg);
+    return;
+  }
+
   AnalysisResultPtr ar = shared_from_this();
   vector <const char *> classes;
   for (StringToClassScopePtrVecMap::const_iterator it = m_classDecs.begin();
@@ -3744,7 +3850,18 @@ void AnalysisResult::outputCPPScalarArrays(CodeGenerator &cg, int fileCount,
 
 void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
   string filename = m_outputPath + "/" + Option::SystemFilePrefix +
-    "global_variables_" + lexical_cast<string>(part ? part : 1) + ".no.cpp";
+    "global_variables";
+  if (!Option::GenHashTableGVRoutine) {
+    filename += "_";
+    filename += lexical_cast<string>(part ? part : 1);
+  }
+  if ((part == 0 || part == 1) && Option::GenHashTableGVRoutine) {
+    filename += ".cpp";
+  } else if (Option::GenHashTableGVRoutine) {
+    return;
+  } else {
+    filename += ".no.cpp";
+  }
   Util::mkdir(filename);
   ofstream f(filename.c_str());
   CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
@@ -3779,12 +3896,18 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
     cg_printf("bool has_eval_support = %s;\n",
               (Option::EnableEval > Option::NoEval) ? "true" : "false");
     getVariables()->outputCPPGlobalVariablesDtor(cg);
-    getVariables()->outputCPPGlobalVariablesGetImpl (cg, ar);
+    getVariables()->outputCPPGlobalVariablesGetImpl(cg, ar);
     outputCPPClassDeclaredFlagsLookup(cg);
+    if (!Option::GenHashTableGVRoutine) break;
+    // Fall through
+  case 2: getVariables()->outputCPPGlobalVariablesExists  (cg, ar);
+    if (!Option::GenHashTableGVRoutine) break;
+    // Fall through
+  case 3: getVariables()->outputCPPGlobalVariablesGetIndex(cg, ar);
+    if (!Option::GenHashTableGVRoutine) break;
+    // Fall through
+  case 4: getVariables()->outputCPPGlobalVariablesMethods (cg, ar);
     break;
-  case 2: getVariables()->outputCPPGlobalVariablesExists  (cg, ar); break;
-  case 3: getVariables()->outputCPPGlobalVariablesGetIndex(cg, ar); break;
-  case 4: getVariables()->outputCPPGlobalVariablesMethods (cg, ar); break;
   default: ASSERT(false);
   }
   cg.setContext(con);
@@ -4837,7 +4960,7 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
   cg.headerEnd(filename);
   f.close();
 
-  if (genStatic || nstrings == 0) return;
+  if (genStatic || (nstrings == 0 && !Option::UseScalarVariant)) return;
 
   int chunkSize;
   if (ar->isSystem()) {
@@ -4887,6 +5010,11 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
     }
   }
   if (Option::UseScalarVariant) {
+    if (nstrings == 0) {
+      filename = file + ".cpp";
+      f.open(filename.c_str());
+      cg.namespaceBegin();
+    }
     cg_printf("\n");
     for (unsigned int i = 0; i < litVarStrFileIndices.size(); i++) {
       cg_printf("extern void %sinit_literal_varstrings_%d();\n",

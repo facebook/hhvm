@@ -585,7 +585,7 @@ int process(const ProgramOptions &po) {
 
   // saving file cache
   AsyncFileCacheSaver fileCacheThread(&package, po.filecache.c_str());
-  if (!po.filecache.empty()) {
+  if (po.target != "analyze" && !po.filecache.empty()) {
     fileCacheThread.start();
   }
 
@@ -680,10 +680,20 @@ int analyzeTarget(const ProgramOptions &po, AnalysisResultPtr ar) {
   if (!po.noTypeInference) {
     Option::GenerateInferredTypes = true;
   }
+  if (Option::PreOptimization) {
+    Timer timer(Timer::WallTime, "pre-optimizing");
+    ar->preOptimize();
+  }
   if (Option::GenerateInferredTypes) {
     Timer timer(Timer::WallTime, "inferring types");
     ar->inferTypes();
   }
+  if (Option::PostOptimization) {
+    Timer timer(Timer::WallTime, "post-optimizing");
+    ar->postOptimize();
+  }
+  ar->analyzeProgramFinal();
+
   return ret;
 }
 
@@ -777,15 +787,6 @@ int cppTarget(const ProgramOptions &po, AnalysisResultPtr ar,
     return 1;
   }
 
-  if (!po.noTypeInference) {
-    Option::GenerateInferredTypes = true;
-  }
-  if (Option::PreOptimization) {
-    Timer timer(Timer::WallTime, "pre-optimizing");
-    ar->preOptimize();
-  }
-
-
   if (!Option::RTTIOutputFile.empty()) {
     if (!po.rttiDirectory.empty()) {
       Option::UseRTTIProfileData = true;
@@ -795,15 +796,7 @@ int cppTarget(const ProgramOptions &po, AnalysisResultPtr ar,
     }
   }
 
-  if (Option::GenerateInferredTypes) {
-    Timer timer(Timer::WallTime, "inferring types");
-    ar->inferTypes();
-  }
-  if (Option::PostOptimization) {
-    Timer timer(Timer::WallTime, "post-optimizing");
-    ar->postOptimize();
-  }
-  ar->analyzeProgramFinal();
+  ret = analyzeTarget(po, ar);
 
   {
     Timer timer(Timer::WallTime, "creating CPP files");

@@ -39,6 +39,7 @@ public:
 
   virtual bool isRefable(bool checkError = false) const;
   bool isShortCircuitOperator() const;
+  bool isLogicalOrOperator() const;
   ExpressionPtr getExp1() { return m_exp1;}
   ExpressionPtr getExp2() { return m_exp2;}
   int getOp() const { return m_op;}

@@ -128,6 +128,17 @@ bool BinaryOpExpression::isShortCircuitOperator() const {
   return false;
 }
 
+bool BinaryOpExpression::isLogicalOrOperator() const {
+  switch (m_op) {
+  case T_BOOLEAN_OR:
+  case T_LOGICAL_OR:
+    return true;
+  default:
+    break;
+  }
+  return false;
+}
+
 ExpressionPtr BinaryOpExpression::unneededHelper() {
   if (!isShortCircuitOperator() || !m_exp2->getContainedEffects()) {
     return Expression::unneededHelper();

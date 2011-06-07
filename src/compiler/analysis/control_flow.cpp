@@ -19,6 +19,7 @@
 #include "compiler/analysis/data_flow.h"
 #include "compiler/expression/expression.h"
 #include "compiler/expression/binary_op_expression.h"
+#include "compiler/expression/unary_op_expression.h"
 #include "compiler/expression/qop_expression.h"
 #include "compiler/statement/statement.h"
 #include "compiler/statement/method_statement.h"
@@ -140,6 +141,11 @@ private:
 
   void addCFEdge(ControlBlock *b1, ControlBlock *b2);
   void addCFEdge(ControlBlock *b1, ConstructRawPtr c2, ConstructLocation l2);
+
+  void getTrueFalseBranches(
+      int level,
+      ConstructPtr &trueBranch, ConstructLocation &tLoc,
+      ConstructPtr &falseBranch, ConstructLocation &fLoc);
 
   ConstructCFIMap                m_ccfiMap;
   ConstructControlBlockPtrMap    m_ccbpMap[4];
@@ -453,9 +459,21 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
         ExpressionPtr e(dynamic_pointer_cast<Expression>(cp));
         switch (e->getKindOf()) {
           case Expression::KindOfBinaryOpExpression:
-            if (dynamic_pointer_cast<BinaryOpExpression>(e)->
-                isShortCircuitOperator()) {
-              addEdge(e->getNthExpr(0), AfterConstruct, e, AfterConstruct);
+            {
+              BinaryOpExpressionPtr b(
+                  static_pointer_cast<BinaryOpExpression>(e));
+              if (b->isShortCircuitOperator()) {
+                ConstructPtr trueBranch, falseBranch;
+                ConstructLocation tLoc, fLoc;
+                getTrueFalseBranches(0, trueBranch, tLoc, falseBranch, fLoc);
+                ASSERT(trueBranch);
+                ASSERT(falseBranch);
+                if (b->isLogicalOrOperator()) {
+                  addEdge(e->getNthExpr(0), AfterConstruct, trueBranch, tLoc);
+                } else {
+                  addEdge(e->getNthExpr(0), AfterConstruct, falseBranch, fLoc);
+                }
+              }
             }
             break;
           case Expression::KindOfQOpExpression:
@@ -521,6 +539,145 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
     }
   }
   return ret;
+}
+
+void ControlFlowBuilder::getTrueFalseBranches(
+    int level,
+    ConstructPtr &trueBranch, ConstructLocation &tLoc,
+    ConstructPtr &falseBranch, ConstructLocation &fLoc) {
+  if (trueBranch && falseBranch) return;
+
+  ConstructPtr c(top(level));
+  if (StatementPtr s = dynamic_pointer_cast<Statement>(c)) {
+    int kidBodyIdx = -1;
+    switch (s->getKindOf()) {
+    case Statement::KindOfForStatement:
+      // examine which context we're in
+      {
+        ConstructPtr kid(top(level - 1));
+        if (kid == s->getNthKid(ForStatement::InitExpr)) {
+          ; // just do the default case
+        } else if (kid == s->getNthKid(ForStatement::CondExpr)) {
+          kidBodyIdx = ForStatement::BodyStmt;
+          goto loop_stmt;
+        } else if (kid == s->getNthKid(ForStatement::IncExpr)) {
+          ; // just do the default case
+        } else {
+          ASSERT(false);
+        }
+      }
+      break;
+    case Statement::KindOfWhileStatement:
+      kidBodyIdx = WhileStatement::BodyStmt;
+      goto loop_stmt;
+    case Statement::KindOfDoStatement:
+      kidBodyIdx = DoStatement::BodyStmt;
+    loop_stmt:
+      if (!trueBranch) {
+        trueBranch = s->getNthKid(kidBodyIdx);
+        tLoc = BeforeConstruct;
+      }
+      if (!falseBranch) {
+        falseBranch = s;
+        fLoc = AfterConstruct;
+      }
+      break;
+    case Statement::KindOfIfBranchStatement:
+      {
+        IfBranchStatementPtr i(
+            static_pointer_cast<IfBranchStatement>(s));
+        if (!trueBranch) {
+          if (i->getStmt()) {
+            trueBranch = i->getStmt();
+            tLoc = BeforeConstruct;
+          } else {
+            trueBranch = i;
+            tLoc = AfterConstruct;
+          }
+        }
+        if (!falseBranch) {
+          falseBranch = i;
+          fLoc = AfterConstruct;
+        }
+      }
+      break;
+    default:
+      break;
+    }
+  } else if (ExpressionPtr e = dynamic_pointer_cast<Expression>(c)) {
+    switch (e->getKindOf()) {
+    case Expression::KindOfBinaryOpExpression:
+      {
+        BinaryOpExpressionPtr b(
+            static_pointer_cast<BinaryOpExpression>(e));
+        if (b->isShortCircuitOperator()) {
+          if (b->isLogicalOrOperator()) {
+            if (!trueBranch) {
+              getTrueFalseBranches(
+                  level + 1, trueBranch, tLoc,
+                  falseBranch, fLoc);
+            }
+            falseBranch = b->getExp2();
+            fLoc = BeforeConstruct;
+          } else {
+            // logical ANDs
+            if (!falseBranch) {
+              getTrueFalseBranches(
+                  level + 1, trueBranch, tLoc,
+                  falseBranch, fLoc);
+            }
+            trueBranch = b->getExp2();
+            tLoc = BeforeConstruct;
+          }
+          return;
+        }
+      }
+      break;
+    case Expression::KindOfUnaryOpExpression:
+      {
+        UnaryOpExpressionPtr u(
+            static_pointer_cast<UnaryOpExpression>(e));
+        if (u->isLogicalNot()) {
+          getTrueFalseBranches(level + 1,
+              trueBranch, tLoc, falseBranch, fLoc);
+          // swap
+          ConstructPtr tp(trueBranch);
+          ConstructLocation tl(tLoc);
+          trueBranch = falseBranch;
+          tLoc = fLoc;
+          falseBranch = tp;
+          fLoc = tl;
+          return;
+        }
+      }
+      break;
+    case Expression::KindOfQOpExpression:
+      {
+        QOpExpressionPtr qop(
+            static_pointer_cast<QOpExpression>(e));
+        if (!trueBranch) {
+          trueBranch = qop->getYes();
+          tLoc = BeforeConstruct;
+        }
+        if (!falseBranch) {
+          falseBranch = qop->getNo();
+          fLoc = BeforeConstruct;
+        }
+      }
+      return;
+    default:
+      break;
+    }
+  }
+  ASSERT(level > 0);
+  if (!trueBranch) {
+    trueBranch = top(level - 1);
+    tLoc = AfterConstruct;
+  }
+  if (!falseBranch) {
+    falseBranch = top(level - 1);
+    fLoc = AfterConstruct;
+  }
 }
 
 void ControlFlowBuilder::addCFEdge(ControlBlock *b1, ControlBlock *b2) {

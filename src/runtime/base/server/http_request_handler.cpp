@@ -198,6 +198,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
         sendStaticContent(transport, data, len, 0, compressed, path, ext);
         StaticContentCache::TheFileCache->adviseOutMemory();
         ServerStats::LogPage(path, 200);
+        GetAccessLog().log(transport, vhost);
         return;
       }
     }
@@ -213,6 +214,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
           sendStaticContent(transport, sb.data(), sb.size(), st.st_mtime,
                             false, path, ext);
           ServerStats::LogPage(path, 200);
+          GetAccessLog().log(transport, vhost);
           return;
         }
       }
@@ -226,6 +228,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
       if (DynamicContentCache::TheCache.find(key, data, len, compressed)) {
         sendStaticContent(transport, data, len, 0, compressed, path, ext);
         ServerStats::LogPage(path, 200);
+        GetAccessLog().log(transport, vhost);
         return;
       }
     }

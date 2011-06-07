@@ -1538,19 +1538,6 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     }
   }
 
-  // Destruct method
-  if (getAttribute(ClassScope::HasDestructor)) {
-    cg_indentBegin("void %s%s::destruct() {\n", Option::ClassPrefix, clsName);
-    cg_indentBegin("if (!inCtorDtor()) {\n");
-    cg_printf("incRefCount();\n");
-    cg_indentBegin("try {\n");
-    cg_printf("%s__destruct();\n", Option::MethodPrefix);
-    cg_indentEnd("} catch (...) { handle_destructor_exception();}\n");
-    cg_printf("decRefCount();\n");
-    cg_indentEnd("}\n");
-    cg_indentEnd("}\n");
-  }
-
   // instanceof
   if (!isExtensionClass()) { // Extension class uses macros
     cg_indentBegin("bool %s%s::o_instanceof(CStrRef s) const {\n",

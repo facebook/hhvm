@@ -528,9 +528,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           func->outputCPPCreateDecl(cg, ar);
         }
       }
-      if (classScope->getAttribute(ClassScope::HasDestructor)) {
-        cg_printf("public: virtual void destruct();\n");
-      }
 
       // doCall
       if (classScope->getAttribute(ClassScope::HasUnknownMethodHandler)) {

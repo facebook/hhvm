@@ -109,14 +109,18 @@ public:
   void push_back(const T &t) {
     m_size++;
     m_pos++;
-    if (m_pos < CHUNK_ITEM_COUNT) {
+    if (LIKELY(m_pos < CHUNK_ITEM_COUNT)) {
       ((Chunk *)m_tail)->chunk[m_pos] = t;
     } else {
-      if (m_size > m_capacity) allocChunk();
-      m_pos = 0;
-      m_tail = m_tail->next;
-      ((Chunk *)m_tail)->chunk[m_pos] = t;
+      push_back_alloc(t);
     }
+  }
+
+  void NEVER_INLINE push_back_alloc(const T &t) {
+    if (m_size > m_capacity) allocChunk();
+    m_pos = 0;
+    m_tail = m_tail->next;
+    ((Chunk *)m_tail)->chunk[m_pos] = t;
   }
 
   T &back() const {

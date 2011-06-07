@@ -76,14 +76,6 @@ Variant c_XhprofFrame::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_XhprofFrame
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(XhprofFrame)
-void c_XhprofFrame::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-  }
-}
 bool c_XhprofFrame::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 1) {

@@ -170,8 +170,8 @@ class ObjectData : public CountableNF {
   virtual void dynConstruct(CArrRef params);
   virtual void dynConstructUnchecked(CArrRef params);
   virtual void getConstructor(MethodCallPackage &mcp);
-  virtual void release() { destruct(); delete this; } // for SmartPtr<T>
-  virtual void destruct() {}
+  void release(); // for SmartPtr<T>
+  virtual void destruct();
 
   virtual const Eval::MethodStatement* getConstructorStatement() const;
   virtual const Eval::MethodStatement* getMethodStatement(const char* name)

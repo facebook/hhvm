@@ -56,7 +56,7 @@ class c_DebuggerProxy : public ExtObjectData {
   public: c_DebuggerProxy *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
  public:
   Eval::DebuggerProxy *m_proxy;
@@ -150,7 +150,7 @@ class c_DebuggerClient : public ExtObjectData {
   public: c_DebuggerClient *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
  public:
   Eval::DebuggerClient *m_client;

@@ -177,7 +177,7 @@ class c_XMLWriter : public ExtObjectData, public Sweepable {
   public: c_XMLWriter *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
  public:
   SmartObject<File>  m_uri;

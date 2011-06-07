@@ -160,7 +160,7 @@ class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSe
   public: c_DOMNode *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 public:
   virtual ObjectData *clone();
@@ -200,7 +200,7 @@ class c_DOMAttr : public c_DOMNode {
   public: c_DOMAttr *create(String name, String value = null_string);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 
@@ -243,7 +243,7 @@ class c_DOMCharacterData : public c_DOMNode {
   public: c_DOMCharacterData *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 
@@ -270,7 +270,7 @@ class c_DOMComment : public c_DOMCharacterData {
   public: c_DOMComment *create(String value = null_string);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 
@@ -307,7 +307,7 @@ class c_DOMText : public c_DOMCharacterData {
   public: c_DOMText *create(String value = null_string);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 
@@ -334,7 +334,7 @@ class c_DOMCDATASection : public c_DOMText {
   public: c_DOMCDATASection *create(String value);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 
@@ -427,7 +427,7 @@ class c_DOMDocument : public c_DOMNode, public Sweepable {
   public: c_DOMDocument *create(String version = null_string, String encoding = null_string);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 public:
   virtual p_DOMDocument doc() { return this;}
@@ -468,7 +468,7 @@ class c_DOMDocumentFragment : public c_DOMNode {
   public: c_DOMDocumentFragment *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 
@@ -501,7 +501,7 @@ class c_DOMDocumentType : public c_DOMNode {
   public: c_DOMDocumentType *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 
@@ -570,7 +570,7 @@ class c_DOMElement : public c_DOMNode {
   public: c_DOMElement *create(String name, String value = null_string, String namespaceuri = null_string);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 
@@ -603,7 +603,7 @@ class c_DOMEntity : public c_DOMNode {
   public: c_DOMEntity *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 
@@ -630,7 +630,7 @@ class c_DOMEntityReference : public c_DOMNode {
   public: c_DOMEntityReference *create(String name);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 
@@ -663,7 +663,7 @@ class c_DOMNotation : public c_DOMNode {
   public: c_DOMNotation *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 
@@ -696,7 +696,7 @@ class c_DOMProcessingInstruction : public c_DOMNode {
   public: c_DOMProcessingInstruction *create(String name, String value = null_string);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 
@@ -733,7 +733,7 @@ class c_DOMNodeIterator : public ExtObjectData, public Sweepable {
   public: c_DOMNodeIterator *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 public:
   void reset_iterator(dom_iterable *objmap);
@@ -781,7 +781,7 @@ class c_DOMNamedNodeMap : public ExtObjectDataFlags<ObjectData::UseGet|ObjectDat
   public: c_DOMNamedNodeMap *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 
@@ -818,7 +818,7 @@ class c_DOMNodeList : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::U
   public: c_DOMNodeList *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 
@@ -845,7 +845,7 @@ class c_DOMException : public c_Exception {
   public: c_DOMException *create(String message = "", int64 code = 0);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 
@@ -877,7 +877,7 @@ class c_DOMImplementation : public ExtObjectData {
   public: c_DOMImplementation *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 
@@ -917,7 +917,7 @@ class c_DOMXPath : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseS
   public: c_DOMXPath *create(Variant doc);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
  public:
   xmlNodePtr m_node;

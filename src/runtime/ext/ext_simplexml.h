@@ -104,7 +104,7 @@ class c_SimpleXMLElement :
   public: c_SimpleXMLElement *create(String data, int64 options = 0, bool data_is_url = false, String ns = "", bool is_prefix = false);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
  public:
   Object m_doc;
@@ -147,7 +147,7 @@ class c_LibXMLError : public ExtObjectData {
   public: c_LibXMLError *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 
@@ -184,7 +184,7 @@ class c_SimpleXMLElementIterator : public ExtObjectData, public Sweepable {
   public: c_SimpleXMLElementIterator *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 public:
   void reset_iterator(c_SimpleXMLElement *parent);

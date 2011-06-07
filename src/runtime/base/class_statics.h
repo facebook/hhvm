@@ -51,6 +51,9 @@ public:
 
   DECLARE_OBJECT_ALLOCATION(ClassStatics);
   void destruct() {} // artifact when not deriving from ObjectData
+  void release() {
+    DELETEOBJ(HPHP, ClassStatics, this); 
+  } // artifact when not deriving from ObjectData
 
   Object createOnly(ObjectData* root = NULL);
 

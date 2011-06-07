@@ -163,7 +163,7 @@ class c_PDO : public ExtObjectData, public Sweepable {
   public: c_PDO *create(String dsn, String username = null_string, String password = null_string, Array options = null_array);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
   public: sp_PDOConnection m_dbh;
 };
@@ -243,7 +243,7 @@ class c_PDOStatement : public ExtObjectData, public Sweepable {
   public: c_PDOStatement *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
   public: sp_PDOStatement m_stmt;
   public: Variant m_row;
@@ -273,7 +273,7 @@ class c_PDOException : public c_Exception {
   public: c_PDOException *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 

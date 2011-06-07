@@ -178,7 +178,7 @@ class c_Memcached : public ExtObjectData, public Sweepable {
   public: c_Memcached *create(String persistent_id = null_string);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
  private:
   class Impl {

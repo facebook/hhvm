@@ -63,7 +63,7 @@ class c_EncodingDetector : public ExtObjectData {
   public: c_EncodingDetector *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
   private: UCharsetDetector *m_encoding_detector;
 };
@@ -100,7 +100,7 @@ class c_EncodingMatch : public ExtObjectData {
   public: c_EncodingMatch *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
   public: const UCharsetMatch *m_encoding_match;
   private: void validate();

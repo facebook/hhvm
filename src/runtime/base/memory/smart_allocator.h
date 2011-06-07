@@ -48,6 +48,7 @@ namespace HPHP {
 #define NEWOBJ(T) new T
 #define DELETE(T) delete
 #define DELETEOBJ(NS,T,OBJ) delete OBJ
+#define RELEASEOBJ(NS,T,OBJ) ::operator delete(OBJ)
 #define SWEEPOBJ(T) delete this
 #else
 #define NEW(T) new (T::AllocatorType::getNoCheck()) T
@@ -56,7 +57,8 @@ namespace HPHP {
     <ObjectAllocator<ItemSize<sizeof(T)>::value> >     \
     ::getNoCheck()) T
 #define DELETE(T) T::AllocatorType::getNoCheck()->release
-#define DELETEOBJ(NS,T,OBJ) OBJ->~T();                 \
+#define DELETEOBJ(NS,T,OBJ) delete OBJ
+#define RELEASEOBJ(NS,T,OBJ)                           \
   (ThreadLocalSingleton                                \
     <ObjectAllocator<ItemSize<sizeof(T)>::value> >     \
     ::getNoCheck())->release(OBJ)
@@ -381,7 +383,10 @@ void *SmartAllocatorInitSetup() {
 #define DECLARE_OBJECT_ALLOCATION_NO_SWEEP(T)                           \
   public:                                                               \
   static void *ObjAllocatorInitSetup;                                   \
-  virtual void release();                                               \
+  inline ALWAYS_INLINE void operator delete(void *p) {                  \
+    RELEASEOBJ(NS, T, p);                                               \
+  }
+
 
 #define DECLARE_OBJECT_ALLOCATION(T)                                    \
   DECLARE_OBJECT_ALLOCATION_NO_SWEEP(T)                                 \
@@ -389,14 +394,7 @@ void *SmartAllocatorInitSetup() {
 
 #define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T)          \
   void *NS::T::ObjAllocatorInitSetup =                                  \
-    ObjectAllocatorInitSetup<NS::T>();                                  \
-  void NS::T::release() {                                               \
-    ASSERT(getCount() == 0);                                            \
-    destruct();                                                         \
-    if (LIKELY(getCount() == 0)) {                                      \
-      DELETEOBJ(NS, T, this);                                           \
-    }                                                                   \
-  }
+    ObjectAllocatorInitSetup<NS::T>();
 
 #define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(T)                 \
     IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(HPHP,T)

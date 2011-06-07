@@ -593,15 +593,6 @@ Variant c_PDOException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOException
 IMPLEMENT_CLASS(PDOException)
-void c_PDOException::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_PDOException::cloneImpl() {
   ObjectData *obj = coo_PDOException();
   c_PDOException::cloneSet(obj);
@@ -742,15 +733,6 @@ Variant c_DOMDocumentFragment::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocumentFragment
 IMPLEMENT_CLASS(DOMDocumentFragment)
-void c_DOMDocumentFragment::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMDocumentFragment::cloneImpl() {
   ObjectData *obj = coo_DOMDocumentFragment();
   c_DOMDocumentFragment::cloneSet(obj);
@@ -923,15 +905,6 @@ Variant c_DOMText::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMText
 IMPLEMENT_CLASS(DOMText)
-void c_DOMText::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMText::cloneImpl() {
   ObjectData *obj = coo_DOMText();
   c_DOMText::cloneSet(obj);
@@ -1264,15 +1237,6 @@ Variant c_DebuggerClient::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DebuggerClient
 IMPLEMENT_CLASS(DebuggerClient)
-void c_DebuggerClient::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DebuggerClient::cloneImpl() {
   ObjectData *obj = coo_DebuggerClient();
   c_DebuggerClient::cloneSet(obj);
@@ -2255,15 +2219,6 @@ Variant c_EncodingDetector::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_EncodingDetector
 IMPLEMENT_CLASS(EncodingDetector)
-void c_EncodingDetector::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_EncodingDetector::cloneImpl() {
   ObjectData *obj = coo_EncodingDetector();
   c_EncodingDetector::cloneSet(obj);
@@ -2510,15 +2465,6 @@ Variant c_DOMCDATASection::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMCDATASection
 IMPLEMENT_CLASS(DOMCDATASection)
-void c_DOMCDATASection::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMCDATASection::cloneImpl() {
   ObjectData *obj = coo_DOMCDATASection();
   c_DOMCDATASection::cloneSet(obj);
@@ -2679,15 +2625,6 @@ Variant c_Locale::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Locale
 IMPLEMENT_CLASS(Locale)
-void c_Locale::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_Locale::cloneImpl() {
   ObjectData *obj = coo_Locale();
   c_Locale::cloneSet(obj);
@@ -2828,15 +2765,6 @@ Variant c_Closure::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Closure
 IMPLEMENT_CLASS(Closure)
-void c_Closure::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_Closure::cloneImpl() {
   ObjectData *obj = coo_Closure();
   c_Closure::cloneSet(obj);
@@ -3026,15 +2954,6 @@ Variant c_DOMDocumentType::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocumentType
 IMPLEMENT_CLASS(DOMDocumentType)
-void c_DOMDocumentType::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMDocumentType::cloneImpl() {
   ObjectData *obj = coo_DOMDocumentType();
   c_DOMDocumentType::cloneSet(obj);
@@ -3267,15 +3186,6 @@ Variant c_SQLite3Stmt::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3Stmt
 IMPLEMENT_CLASS(SQLite3Stmt)
-void c_SQLite3Stmt::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_SQLite3Stmt::cloneImpl() {
   ObjectData *obj = coo_SQLite3Stmt();
   c_SQLite3Stmt::cloneSet(obj);
@@ -3625,15 +3535,6 @@ Variant c_DOMNodeList::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNodeList
 IMPLEMENT_CLASS(DOMNodeList)
-void c_DOMNodeList::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMNodeList::cloneImpl() {
   ObjectData *obj = coo_DOMNodeList();
   c_DOMNodeList::cloneSet(obj);
@@ -3944,15 +3845,6 @@ Variant c_Normalizer::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Normalizer
 IMPLEMENT_CLASS(Normalizer)
-void c_Normalizer::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_Normalizer::cloneImpl() {
   ObjectData *obj = coo_Normalizer();
   c_Normalizer::cloneSet(obj);
@@ -4147,15 +4039,6 @@ Variant c_DOMCharacterData::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMCharacterData
 IMPLEMENT_CLASS(DOMCharacterData)
-void c_DOMCharacterData::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMCharacterData::cloneImpl() {
   ObjectData *obj = coo_DOMCharacterData();
   c_DOMCharacterData::cloneSet(obj);
@@ -4550,15 +4433,6 @@ Variant c_DOMEntityReference::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMEntityReference
 IMPLEMENT_CLASS(DOMEntityReference)
-void c_DOMEntityReference::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMEntityReference::cloneImpl() {
   ObjectData *obj = coo_DOMEntityReference();
   c_DOMEntityReference::cloneSet(obj);
@@ -4710,15 +4584,6 @@ Variant c_SimpleXMLElementIterator::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SimpleXMLElementIterator
 IMPLEMENT_CLASS(SimpleXMLElementIterator)
-void c_SimpleXMLElementIterator::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_SimpleXMLElementIterator::cloneImpl() {
   ObjectData *obj = coo_SimpleXMLElementIterator();
   c_SimpleXMLElementIterator::cloneSet(obj);
@@ -5024,15 +4889,6 @@ Variant c_DateTimeZone::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DateTimeZone
 IMPLEMENT_CLASS(DateTimeZone)
-void c_DateTimeZone::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DateTimeZone::cloneImpl() {
   ObjectData *obj = coo_DateTimeZone();
   c_DateTimeZone::cloneSet(obj);
@@ -5294,15 +5150,6 @@ Variant c_DOMNodeIterator::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNodeIterator
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMNodeIterator)
-void c_DOMNodeIterator::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMNodeIterator::cloneImpl() {
   ObjectData *obj = coo_DOMNodeIterator();
   c_DOMNodeIterator::cloneSet(obj);
@@ -5565,15 +5412,6 @@ Variant c_DOMImplementation::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMImplementation
 IMPLEMENT_CLASS(DOMImplementation)
-void c_DOMImplementation::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMImplementation::cloneImpl() {
   ObjectData *obj = coo_DOMImplementation();
   c_DOMImplementation::cloneSet(obj);
@@ -5824,15 +5662,6 @@ Variant c_SoapHeader::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapHeader
 IMPLEMENT_CLASS(SoapHeader)
-void c_SoapHeader::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_SoapHeader::cloneImpl() {
   ObjectData *obj = coo_SoapHeader();
   c_SoapHeader::cloneSet(obj);
@@ -6014,15 +5843,6 @@ Variant c_DOMNotation::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNotation
 IMPLEMENT_CLASS(DOMNotation)
-void c_DOMNotation::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMNotation::cloneImpl() {
   ObjectData *obj = coo_DOMNotation();
   c_DOMNotation::cloneSet(obj);
@@ -6255,15 +6075,6 @@ Variant c_DebuggerProxy::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DebuggerProxy
 IMPLEMENT_CLASS(DebuggerProxy)
-void c_DebuggerProxy::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DebuggerProxy::cloneImpl() {
   ObjectData *obj = coo_DebuggerProxy();
   c_DebuggerProxy::cloneSet(obj);
@@ -6610,15 +6421,6 @@ Variant c_Memcached::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Memcached
 IMPLEMENT_CLASS(Memcached)
-void c_Memcached::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_Memcached::cloneImpl() {
   ObjectData *obj = coo_Memcached();
   c_Memcached::cloneSet(obj);
@@ -8069,15 +7871,6 @@ Variant c_XMLReader::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_XMLReader
 IMPLEMENT_CLASS(XMLReader)
-void c_XMLReader::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_XMLReader::cloneImpl() {
   ObjectData *obj = coo_XMLReader();
   c_XMLReader::cloneSet(obj);
@@ -8954,15 +8747,6 @@ Variant c_DOMComment::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMComment
 IMPLEMENT_CLASS(DOMComment)
-void c_DOMComment::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMComment::cloneImpl() {
   ObjectData *obj = coo_DOMComment();
   c_DOMComment::cloneSet(obj);
@@ -9120,15 +8904,6 @@ Variant c_SQLite3::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3
 IMPLEMENT_CLASS(SQLite3)
-void c_SQLite3::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_SQLite3::cloneImpl() {
   ObjectData *obj = coo_SQLite3();
   c_SQLite3::cloneSet(obj);
@@ -9747,15 +9522,6 @@ Variant c_DOMAttr::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMAttr
 IMPLEMENT_CLASS(DOMAttr)
-void c_DOMAttr::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMAttr::cloneImpl() {
   ObjectData *obj = coo_DOMAttr();
   c_DOMAttr::cloneSet(obj);
@@ -10032,15 +9798,6 @@ Variant c_SoapVar::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapVar
 IMPLEMENT_CLASS(SoapVar)
-void c_SoapVar::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_SoapVar::cloneImpl() {
   ObjectData *obj = coo_SoapVar();
   c_SoapVar::cloneSet(obj);
@@ -10231,15 +9988,6 @@ Variant c_DOMNamedNodeMap::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNamedNodeMap
 IMPLEMENT_CLASS(DOMNamedNodeMap)
-void c_DOMNamedNodeMap::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMNamedNodeMap::cloneImpl() {
   ObjectData *obj = coo_DOMNamedNodeMap();
   c_DOMNamedNodeMap::cloneSet(obj);
@@ -10590,15 +10338,6 @@ Variant c_SQLite3Result::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3Result
 IMPLEMENT_CLASS(SQLite3Result)
-void c_SQLite3Result::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_SQLite3Result::cloneImpl() {
   ObjectData *obj = coo_SQLite3Result();
   c_SQLite3Result::cloneSet(obj);
@@ -10905,15 +10644,6 @@ Variant c_SimpleXMLElement::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SimpleXMLElement
 IMPLEMENT_CLASS(SimpleXMLElement)
-void c_SimpleXMLElement::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_SimpleXMLElement::cloneImpl() {
   ObjectData *obj = coo_SimpleXMLElement();
   c_SimpleXMLElement::cloneSet(obj);
@@ -11745,15 +11475,6 @@ Variant c_Memcache::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Memcache
 IMPLEMENT_CLASS(Memcache)
-void c_Memcache::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_Memcache::cloneImpl() {
   ObjectData *obj = coo_Memcache();
   c_Memcache::cloneSet(obj);
@@ -12599,15 +12320,6 @@ Variant c_DOMProcessingInstruction::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMProcessingInstruction
 IMPLEMENT_CLASS(DOMProcessingInstruction)
-void c_DOMProcessingInstruction::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMProcessingInstruction::cloneImpl() {
   ObjectData *obj = coo_DOMProcessingInstruction();
   c_DOMProcessingInstruction::cloneSet(obj);
@@ -12860,15 +12572,6 @@ Variant c_EncodingMatch::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_EncodingMatch
 IMPLEMENT_CLASS(EncodingMatch)
-void c_EncodingMatch::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_EncodingMatch::cloneImpl() {
   ObjectData *obj = coo_EncodingMatch();
   c_EncodingMatch::cloneSet(obj);
@@ -13127,15 +12830,6 @@ Variant c_PDOStatement::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOStatement
 IMPLEMENT_CLASS(PDOStatement)
-void c_PDOStatement::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_PDOStatement::cloneImpl() {
   ObjectData *obj = coo_PDOStatement();
   c_PDOStatement::cloneSet(obj);
@@ -14043,15 +13737,6 @@ Variant c_SoapClient::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapClient
 IMPLEMENT_CLASS(SoapClient)
-void c_SoapClient::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_SoapClient::cloneImpl() {
   ObjectData *obj = coo_SoapClient();
   c_SoapClient::cloneSet(obj);
@@ -14568,15 +14253,6 @@ Variant c_SoapParam::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapParam
 IMPLEMENT_CLASS(SoapParam)
-void c_SoapParam::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_SoapParam::cloneImpl() {
   ObjectData *obj = coo_SoapParam();
   c_SoapParam::cloneSet(obj);
@@ -14763,15 +14439,6 @@ Variant c_DateTime::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DateTime
 IMPLEMENT_CLASS(DateTime)
-void c_DateTime::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DateTime::cloneImpl() {
   ObjectData *obj = coo_DateTime();
   c_DateTime::cloneSet(obj);
@@ -15245,15 +14912,6 @@ Variant c_Collator::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Collator
 IMPLEMENT_CLASS(Collator)
-void c_Collator::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_Collator::cloneImpl() {
   ObjectData *obj = coo_Collator();
   c_Collator::cloneSet(obj);
@@ -15988,15 +15646,6 @@ Variant c_PDO::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_PDO
 IMPLEMENT_CLASS(PDO)
-void c_PDO::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_PDO::cloneImpl() {
   ObjectData *obj = coo_PDO();
   c_PDO::cloneSet(obj);
@@ -16583,15 +16232,6 @@ Variant c_ImageSprite::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ImageSprite
 IMPLEMENT_CLASS(ImageSprite)
-void c_ImageSprite::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_ImageSprite::cloneImpl() {
   ObjectData *obj = coo_ImageSprite();
   c_ImageSprite::cloneSet(obj);
@@ -17075,15 +16715,6 @@ Variant c_Continuation::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Continuation
 IMPLEMENT_CLASS(Continuation)
-void c_Continuation::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_Continuation::cloneImpl() {
   ObjectData *obj = coo_Continuation();
   c_Continuation::cloneSet(obj);
@@ -17627,15 +17258,6 @@ Variant c_DOMEntity::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMEntity
 IMPLEMENT_CLASS(DOMEntity)
-void c_DOMEntity::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMEntity::cloneImpl() {
   ObjectData *obj = coo_DOMEntity();
   c_DOMEntity::cloneSet(obj);
@@ -17868,15 +17490,6 @@ Variant c_XMLWriter::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_XMLWriter
 IMPLEMENT_CLASS(XMLWriter)
-void c_XMLWriter::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_XMLWriter::cloneImpl() {
   ObjectData *obj = coo_XMLWriter();
   c_XMLWriter::cloneSet(obj);
@@ -19277,15 +18890,6 @@ Variant c_DOMException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMException
 IMPLEMENT_CLASS(DOMException)
-void c_DOMException::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMException::cloneImpl() {
   ObjectData *obj = coo_DOMException();
   c_DOMException::cloneSet(obj);
@@ -19452,15 +19056,6 @@ Variant c_DOMXPath::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMXPath
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMXPath)
-void c_DOMXPath::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMXPath::cloneImpl() {
   ObjectData *obj = coo_DOMXPath();
   c_DOMXPath::cloneSet(obj);
@@ -19836,15 +19431,6 @@ Variant c_SoapServer::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapServer
 IMPLEMENT_CLASS(SoapServer)
-void c_SoapServer::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_SoapServer::cloneImpl() {
   ObjectData *obj = coo_SoapServer();
   c_SoapServer::cloneSet(obj);
@@ -20262,15 +19848,6 @@ Variant c_DOMNode::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNode
 IMPLEMENT_CLASS(DOMNode)
-void c_DOMNode::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMNode::cloneImpl() {
   ObjectData *obj = coo_DOMNode();
   c_DOMNode::cloneSet(obj);
@@ -21043,15 +20620,6 @@ Variant c_SpoofChecker::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SpoofChecker
 IMPLEMENT_CLASS(SpoofChecker)
-void c_SpoofChecker::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_SpoofChecker::cloneImpl() {
   ObjectData *obj = coo_SpoofChecker();
   c_SpoofChecker::cloneSet(obj);
@@ -21324,15 +20892,6 @@ Variant c_DOMDocument::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocument
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMDocument)
-void c_DOMDocument::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMDocument::cloneImpl() {
   ObjectData *obj = coo_DOMDocument();
   c_DOMDocument::cloneSet(obj);
@@ -22501,15 +22060,6 @@ Variant c_LibXMLError::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_LibXMLError
 IMPLEMENT_CLASS(LibXMLError)
-void c_LibXMLError::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_LibXMLError::cloneImpl() {
   ObjectData *obj = coo_LibXMLError();
   c_LibXMLError::cloneSet(obj);
@@ -22650,15 +22200,6 @@ Variant c_SoapFault::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapFault
 IMPLEMENT_CLASS(SoapFault)
-void c_SoapFault::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_SoapFault::cloneImpl() {
   ObjectData *obj = coo_SoapFault();
   c_SoapFault::cloneSet(obj);
@@ -22873,15 +22414,6 @@ Variant c_DOMElement::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMElement
 IMPLEMENT_CLASS(DOMElement)
-void c_DOMElement::destruct() {
-  if (!inCtorDtor()) {
-    incRefCount();
-    try {
-      t___destruct();
-    } catch (...) { handle_destructor_exception();}
-    decRefCount();
-  }
-}
 ObjectData *c_DOMElement::cloneImpl() {
   ObjectData *obj = coo_DOMElement();
   c_DOMElement::cloneSet(obj);

@@ -60,7 +60,7 @@ class c_XhprofFrame : public ExtObjectData {
 
   public:
   void init();
-  public: virtual void destruct();
+  
   public: void t___construct(Variant v_name);
   public: c_XhprofFrame *create(CVarRef v_name);
   public: void dynConstruct(CArrRef params);

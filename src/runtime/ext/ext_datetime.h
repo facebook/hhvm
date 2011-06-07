@@ -76,7 +76,7 @@ class c_DateTime : public ExtObjectData {
                              Object timezone = null_object);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
   // Helper for DateTime -> c_DateTime conversion
   public: static Object wrap(SmartObject<DateTime> dt) {
@@ -153,7 +153,7 @@ class c_DateTimeZone : public ExtObjectData {
   public: c_DateTimeZone *create(String timezone);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
   // Helper for TimeZone -> c_DateTimeZone conversion
   public: static Object wrap(SmartObject<TimeZone> tz) {

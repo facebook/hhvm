@@ -34,7 +34,6 @@ ZipFile::ZipFile() : m_gzFile(NULL) {
 
 ZipFile::~ZipFile() {
   closeImpl();
-  m_innerFile->~PlainFile();
   DELETEOBJ(HPHP, PlainFile, m_innerFile);
 }
 

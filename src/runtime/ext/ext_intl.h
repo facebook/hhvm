@@ -122,7 +122,7 @@ class c_Collator : public ExtObjectData, public Sweepable {
   public: c_Collator *create(String locale);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
  private:
   String     m_locale;
@@ -154,7 +154,7 @@ class c_Locale : public ExtObjectData {
   public: c_Locale *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 extern const int64 q_Normalizer_NONE;
@@ -199,7 +199,7 @@ class c_Normalizer : public ExtObjectData, public Sweepable {
   public: c_Normalizer *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
 };
 

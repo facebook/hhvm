@@ -106,7 +106,7 @@ class c_Memcache : public ExtObjectData, public Sweepable {
   public: c_Memcache *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
  private:
   memcached_st m_memcache;

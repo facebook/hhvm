@@ -130,7 +130,7 @@ class c_XMLReader : public ExtObjectDataFlags<ObjectData::UseGet>, public Sweepa
   public: c_XMLReader *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
   private: String read_string_func(xmlreader_read_char_t internal_function);
   private: bool bool_func_no_arg(xmlreader_read_int_t internal_function);

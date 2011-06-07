@@ -91,7 +91,7 @@ class c_SQLite3 : public ExtObjectData {
   public: c_SQLite3 *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
   public: void validate() const;
   public: sqlite3 *m_raw_db;
@@ -141,7 +141,7 @@ class c_SQLite3Stmt : public ExtObjectData {
   public: c_SQLite3Stmt *create(Object dbobject, String statement);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
   public: void validate() const;
   public: p_SQLite3 m_db;
@@ -189,7 +189,7 @@ class c_SQLite3Result : public ExtObjectData {
   public: c_SQLite3Result *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
   public: void validate() const;
   public: p_SQLite3Stmt m_stmt;

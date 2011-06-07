@@ -67,7 +67,7 @@ class c_SoapServer : public ExtObjectData {
   public: c_SoapServer *create(Variant wsdl, Array options = null_array);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
   public: int                        m_type;
   public: soapFunctions              m_soap_functions;
@@ -132,7 +132,7 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
   public: c_SoapClient *create(Variant wsdl, Array options = null_array);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
   public: int                         m_soap_version;
   public: sdl                        *m_sdl;
@@ -191,7 +191,7 @@ class c_SoapVar : public ExtObjectData {
   public: c_SoapVar *create(Variant data, Variant type, String type_name = null_string, String type_namespace = null_string, String node_name = null_string, String node_namespace = null_string);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
   public: Variant m_value;
   public: int64   m_type;
@@ -226,7 +226,7 @@ class c_SoapFault : public c_Exception {
   public: c_SoapFault *create(Variant code, String message, String actor = null_string, Variant detail = null, String name = null_string, Variant header = null);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
   public: String  m_faultstring;
   public: String  m_faultcode;
@@ -259,7 +259,7 @@ class c_SoapParam : public ExtObjectData {
   public: c_SoapParam *create(Variant data, String name);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
   public: String  m_name;
   public: String  m_data;
@@ -287,7 +287,7 @@ class c_SoapHeader : public ExtObjectData {
   public: c_SoapHeader *create(String ns, String name, Variant data = null, bool mustunderstand = false, Variant actor = null);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
   public: String  m_namespace;
   public: String  m_name;

@@ -791,8 +791,6 @@ function generatePreImplemented($method, $class, $f) {
     fprintf($f, ";\n");
     fprintf($f, "  public: void dynConstruct(CArrRef Params);\n");
     fprintf($f, "  public: void getConstructor(MethodCallPackage &mcp);\n");
-  } else if ($method['name'] == '__destruct') {
-    fprintf($f, "  public: virtual void destruct();\n", $class['name']);
   }
 }
 

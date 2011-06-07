@@ -70,7 +70,7 @@ class c_SpoofChecker : public ExtObjectData {
   public: c_SpoofChecker *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
+  
 
   private: USpoofChecker *m_spoof_checker;
 };

@@ -264,12 +264,21 @@ std::string ParserBase::resolve(const std::string &ns, bool cls) {
 
   // unqualified class name always prefixed with NAMESPACE_SEP
   if (cls) {
-    return m_namespace + NAMESPACE_SEP + ns;
+    if (strcasecmp("self", ns.c_str()) && strcasecmp("parent", ns.c_str())) {
+      return m_namespace + NAMESPACE_SEP + ns;
+    }
+    return ns;
+  }
+
+  if (!strcasecmp("true", ns.c_str()) ||
+      !strcasecmp("false", ns.c_str()) ||
+      !strcasecmp("null", ns.c_str())) {
+    return ns;
   }
 
   // unqualified function name needs leading NAMESPACE_SEP to indicate this
   // needs runtime resolution
-  return string("") + NAMESPACE_SEP + m_namespace + NAMESPACE_SEP + ns;
+  return NAMESPACE_SEP + m_namespace + NAMESPACE_SEP + ns;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

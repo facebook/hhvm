@@ -17,6 +17,7 @@
 #include <runtime/eval/ast/constant_expression.h>
 #include <runtime/base/externals.h>
 #include <runtime/ext/ext_misc.h>
+#include <runtime/eval/runtime/eval_state.h>
 
 namespace HPHP {
 namespace Eval {
@@ -28,6 +29,14 @@ ConstantExpression::ConstantExpression(EXPRESSION_ARGS,
   : Expression(EXPRESSION_PASS), m_constant(constant) {}
 
 Variant ConstantExpression::eval(VariableEnvironment &env) const {
+  if (m_constant[0] == '\\') {
+    Variant ret;
+    if (RequestEvalState::findConstant(m_constant.c_str() + 1, ret)) {
+      return ret;
+    }
+    int pos = m_constant.rfind('\\');
+    return get_constant(m_constant.c_str() + pos + 1);
+  }
   return get_constant(m_constant);
 }
 

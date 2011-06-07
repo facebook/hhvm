@@ -397,11 +397,9 @@ bool Util::isPowerOfTwo(int value) {
 }
 
 int Util::roundUpToPowerOfTwo(int value) {
-  ASSERT(value > 0);
-  --value;
-  for (unsigned int i = 1; i < sizeof(int)*8; i <<= 1)
-    value |= value >> i;
-  ++value;
+  while (value & (value - 1)) {
+    value = (value | (value - 1)) + 1;
+  }
   return (value);
 }
 

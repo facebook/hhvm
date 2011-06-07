@@ -5668,7 +5668,7 @@ bool TestCodeRun::TestObjectInvokeMethod() {
         "int(0)\n"
         "int(1)\n"
         "int(1)\n");
-        
+
   MVCRO("<?php\n"
         "// as a private/protected method\n"
         "class C6 {\n"
@@ -5708,7 +5708,7 @@ bool TestCodeRun::TestObjectInvokeMethod() {
         "  int(3)\n"
         "}\n");
   Option::EnableHipHopSyntax = enableHipHopSyntax;
-        
+
   MVCRO("<?php\n"
         "// with var args\n"
         "class C9 {\n"
@@ -18007,6 +18007,47 @@ bool TestCodeRun::TestNamespace() {
         "}\n",
 
         "string(0) \"\"\n");
+
+  MVCRO("<?php "
+        "namespace {"
+        "  function fiz() { var_dump(__METHOD__); }"
+        "  const FIZ = 25;"
+        "  const FUZ = 1;"
+        "}"
+        "namespace foo {"
+        "  class bar {"
+        "    public function test() { echo __CLASS__ . PHP_EOL; }"
+        "  }"
+        "  const FUZ = 2;"
+        "  class baz extends bar {"
+        "    public function fiz() {"
+        "      self::test();"
+        "      parent::test();"
+        "      static::test();"
+        "      bar::test();"
+        "    }"
+        "  }"
+        "  $x = new baz();"
+        "  $x->fiz();"
+        "  var_dump(true);"
+        "  var_dump(false);"
+        "  var_dump(null);"
+        "  var_dump(INF);"
+        "  var_dump(FIZ);"
+        "  var_dump(FUZ);"
+        "  var_dump(\\FUZ);"
+        "}",
+        "foo\\bar\n"
+        "foo\\bar\n"
+        "foo\\bar\n"
+        "foo\\bar\n"
+        "bool(true)\n"
+        "bool(false)\n"
+        "NULL\n"
+        "float(INF)\n"
+        "int(25)\n"
+        "int(2)\n"
+        "int(1)\n");
 
   return true;
 }

@@ -105,43 +105,53 @@ bool ConstantExpression::canonCompare(ExpressionPtr e) const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
+Symbol *ConstantExpression::resolveNS(AnalysisResultConstPtr ar) {
+  bool ns = m_name[0] == '\\';
+  if (ns) m_name = m_name.substr(1);
+  BlockScopeConstPtr block = ar->findConstantDeclarer(m_name);
+  if (!block) {
+    if (ns) {
+      int pos = m_name.rfind('\\');
+      m_name = m_name.substr(pos + 1);
+      block = ar->findConstantDeclarer(m_name);
+    }
+    if (!block) return 0;
+  }
+  Symbol *sym = const_cast<Symbol*>(block->getConstants()->getSymbol(m_name));
+  assert(sym);
+  return sym;
+}
+
 void ConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
-  getFileScope()->addConstantDependency(ar, m_name);
-  if (ar->getPhase() == AnalysisResult::AnalyzeAll &&
-      !(m_context & LValue)) {
-    if (!m_dynamic) {
-      ConstantTablePtr constants = ar->getConstants();
-      if (!constants->getValue(m_name)) {
-        BlockScopePtr block = ar->findConstantDeclarer(m_name);
-        if (block) {
-          Symbol *sym = block->getConstants()->getSymbol(m_name);
-          assert(sym);
-          if (sym->isDynamic()) {
-            m_dynamic = true;
-          } else {
-            ConstructPtr decl = sym->getDeclaration();
-            if (decl) {
-              if (!decl->getScope()) {
-                /*
-                   this only happens if a define is parsed, but a
-                   later syntax error in the same file prevents
-                   completeScope being called on the scope containing
-                   the define.
-                   Might be better to catch this in the parser...
-                */
-                sym->setDeclaration(ExpressionPtr());
-                sym->setValue(ExpressionPtr());
-              } else {
-                decl->getScope()->addUse(
-                  getScope(), BlockScope::UseKindConstRef);
-              }
+  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
+    Symbol *sym = resolveNS(ar);
+    if (!(m_context & LValue) && !m_dynamic) {
+      if (sym && !sym->isSystem()) {
+        if (sym->isDynamic()) {
+          m_dynamic = true;
+        } else {
+          ConstructPtr decl = sym->getDeclaration();
+          if (decl) {
+            if (!decl->getScope()) {
+              /*
+                this only happens if a define is parsed, but a
+                later syntax error in the same file prevents
+                completeScope being called on the scope containing
+                the define.
+                Might be better to catch this in the parser...
+              */
+              sym->setDeclaration(ExpressionPtr());
+              sym->setValue(ExpressionPtr());
+            } else {
+              decl->getScope()->addUse(
+                getScope(), BlockScope::UseKindConstRef);
             }
           }
         }
       }
     }
-  }
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal && m_dynamic) {
+  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal && m_dynamic) {
+    getFileScope()->addConstantDependency(ar, m_name);
     FunctionScopePtr scope = getFunctionScope();
     if (scope) scope->setNeedsCheckMem();
   }
@@ -153,28 +163,20 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
   }
   ConstructPtr decl;
   while (!isScalar() && !m_dynamic && !(m_context & LValue)) {
-    const Symbol *sym = ar->getConstants()->getSymbol(m_name);
-    bool system = true;
-    if (!sym || !sym->getValue()) {
-      system = false;
-      BlockScopeConstPtr block = ar->findConstantDeclarer(m_name);
-      if (block) {
-        sym = block->getConstants()->getSymbol(m_name);
-        if (sym &&
-            (!const_cast<Symbol*>(sym)->checkDefined() || sym->isDynamic())) {
-          sym = 0;
-          m_dynamic = true;
-        }
-      }
+    const Symbol *sym = resolveNS(ar);
+    if (sym &&
+        (!const_cast<Symbol*>(sym)->checkDefined() || sym->isDynamic())) {
+      sym = 0;
+      m_dynamic = true;
     }
     if (!sym) break;
-    if (!system) BlockScope::s_constMutex.lock();
+    if (!sym->isSystem()) BlockScope::s_constMutex.lock();
     ExpressionPtr value = dynamic_pointer_cast<Expression>(sym->getValue());
-    if (!system) BlockScope::s_constMutex.unlock();
+    if (!sym->isSystem()) BlockScope::s_constMutex.unlock();
 
     if (!value || !value->isScalar()) break;
 
-    if (system && !value->is(KindOfScalarExpression)) {
+    if (sym->isSystem() && !value->is(KindOfScalarExpression)) {
       if (ExpressionPtr opt = value->preOptimize(ar)) {
         value = opt;
       }
@@ -185,7 +187,7 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
     rep->setComment(getText());
     Option::FlAnnotate = annotate;
     rep->setLocation(getLocation());
-    if (!system && !value->is(KindOfScalarExpression)) {
+    if (!sym->isSystem() && !value->is(KindOfScalarExpression)) {
       value->getScope()->addUse(getScope(), BlockScope::UseKindConstRef);
     }
     return replaceValue(rep);

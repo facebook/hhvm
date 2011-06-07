@@ -54,6 +54,8 @@ public:
   const std::string getComment() { return m_comment;}
 
 private:
+
+  Symbol *resolveNS(AnalysisResultConstPtr ar);
   std::string m_name;
   bool m_valid;
   bool m_dynamic;

@@ -95,7 +95,7 @@ void LiveDict::updateParams() {
       assert(e->is(Expression::KindOfSimpleVariable));
       Symbol *sym = static_pointer_cast<SimpleVariable>(e)->getSymbol();
       if (sym) {
-        if (sym->isParameter() || e->isThis()) {
+        if (sym->isParameter() || sym->isClosureVar() || e->isThis()) {
           BitOps::set_bit(e->getCanonID(), avlin, true);
         }
         if (sym->isNeeded() || sym->isReferenced()) {
@@ -228,7 +228,7 @@ void LiveDict::updateAccess(ExpressionPtr e) {
     SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(e));
     bool use = false, kill = false, def = false;
     Symbol *sym = sv->getSymbol();
-    bool isReferenced = 
+    bool isReferenced =
       e->isReferencedValid() ?
         e->isReferenced() :
         sym && sym->isReferenced();
@@ -462,6 +462,7 @@ bool LiveDict::color(TypePtr type) {
         if (sym &&
             !sym->isGlobal() &&
             !sym->isParameter() &&
+            !sym->isClosureVar() &&
             !sym->isStatic() &&
             !e->isThis()) {
           col.addNode(i);
@@ -605,7 +606,7 @@ public:
       SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(e));
       Symbol *sym = sv->getSymbol();
       if (!sym || sym->isGlobal() || sym->isStatic() || sym->isParameter() ||
-          sv->isThis()) {
+          sym->isClosureVar() || sv->isThis()) {
         continue;
       }
 

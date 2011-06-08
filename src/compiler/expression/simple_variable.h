@@ -45,7 +45,7 @@ public:
 
   bool couldBeAliased() const;
   bool canKill(bool unset) const;
-
+  bool isHidden() const;
   void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                       int state);
   bool checkUnused() const;

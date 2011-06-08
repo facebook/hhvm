@@ -85,7 +85,7 @@ class BucketMapEntry {
 
 class AliasManager {
  public:
-  enum { SameAccess, SameLValueAccess, InterfAccess, 
+  enum { SameAccess, SameLValueAccess, InterfAccess,
     DisjointAccess, NotAccess };
 
   AliasManager(int opt);
@@ -121,14 +121,14 @@ class AliasManager {
  private:
 
   int findInterf0(
-    ExpressionPtr rv, bool isLoad, 
-    ExpressionPtr &rep, 
-    ExpressionPtrList::reverse_iterator begin, 
-    ExpressionPtrList::reverse_iterator end, 
-    int *flags = 0, 
+    ExpressionPtr rv, bool isLoad,
+    ExpressionPtr &rep,
+    ExpressionPtrList::reverse_iterator begin,
+    ExpressionPtrList::reverse_iterator end,
+    int *flags = 0,
     bool allowLval = false, bool forLval = false,
     int depth = 0, int min_depth = 0,
-    int max_depth = 0); 
+    int max_depth = 0);
 
   void setCanonPtrForArrayCSE(
       ExpressionPtr e,
@@ -184,7 +184,7 @@ class AliasManager {
                    int depth);
   void killLocals();
   bool okToKill(ExpressionPtr ep, bool killRef);
-  int checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad, 
+  int checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
                   int &depth, int &effects, bool forLval = false);
   int findInterf(ExpressionPtr rv, bool isLoad, ExpressionPtr &rep,
                  int *flags = 0, bool allowLval = false);
@@ -210,14 +210,14 @@ class AliasManager {
   void stringOptsRecur(StatementPtr s);
   void stringOptsRecur(ExpressionPtr s, bool ok);
 
-  void beginInExpression(StatementPtr parent);
+  void beginInExpression(StatementPtr parent, ExpressionPtr kid);
   void endInExpression(StatementPtr requestor);
-  bool isInExpression() const { 
+  bool isInExpression() const {
     ASSERT((m_exprIdx >=  0 && m_exprParent) ||
            (m_exprIdx == -1 && !m_exprParent));
-    return m_exprIdx != -1; 
+    return m_exprIdx != -1;
   }
-  
+
   /**
    * Take e and walk down the expression chain, marking all
    * interferences as "altered". It is assumed that e is
@@ -259,6 +259,7 @@ class AliasManager {
   ControlFlowGraph          *m_graph;
   std::map<std::string,int> m_gidMap;
 
+  ExpressionPtr             m_expr;
   int                       m_exprIdx;
   StatementPtr              m_exprParent;
   ExpressionPtrVec          m_exprBeginStack;

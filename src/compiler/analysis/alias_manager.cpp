@@ -587,9 +587,10 @@ void AliasManager::cleanRefs(ExpressionPtr e,
             checkInterf(var, p, pIsLoad, depth, effects);
             if (depth < 0) return;
           } else if (p->is(Expression::KindOfAssignmentExpression) ||
-              (p->is(Expression::KindOfSimpleVariable) &&
-               ((p->getContext() & Expression::Declaration) == Expression::Declaration ||
-                (p->getContext() & (Expression::LValue | Expression::UnsetContext)) == (Expression::LValue | Expression::UnsetContext)))) {
+                     (p->is(Expression::KindOfSimpleVariable) &&
+                      (p->hasAllContext(Expression::Declaration) ||
+                       p->hasAllContext(Expression::LValue |
+                                        Expression::UnsetContext)))) {
             if (checkInterf(var, p, pIsLoad, depth, effects) == SameAccess) {
               m_accessList.erase(it, end);
               continue;
@@ -716,11 +717,8 @@ void AliasManager::killLocals() {
       case Expression::KindOfDynamicVariable:
       case Expression::KindOfArrayElementExpression:
       case Expression::KindOfStaticMemberExpression:
-        if ((e->getContext() &
-             (Expression::LValue | Expression::UnsetContext)) ==
-            (Expression::LValue | Expression::UnsetContext) ||
-            (e->getContext() & Expression::Declaration) ==
-            Expression::Declaration) {
+        if (e->hasAllContext(Expression::LValue | Expression::UnsetContext) ||
+            e->hasAllContext(Expression::Declaration)) {
           if (!(effects & emask) && okToKill(e, true)) {
             bool ok = (m_postOpt || !e->is(Expression::KindOfSimpleVariable));
             if (!ok) {
@@ -871,10 +869,10 @@ int AliasManager::findInterf0(
   rep.reset();
   ExpressionPtrList::reverse_iterator it = begin;
 
-  bool unset_simple = !isLoad && !m_inPseudoMain &&
-    rv->hasContext(Expression::UnsetContext) &&
-    rv->hasContext(Expression::LValue) &&
-    rv->is(Expression::KindOfSimpleVariable);
+  bool unset_simple = !isLoad &&
+    rv->hasAllContext(Expression::UnsetContext | Expression::LValue) &&
+    rv->is(Expression::KindOfSimpleVariable) &&
+    (!m_inPseudoMain || spc(SimpleVariable, rv)->isHidden());
 
   bool hasStash = false;
   ExpressionPtrList::reverse_iterator stash;
@@ -910,8 +908,8 @@ int AliasManager::findInterf0(
             continue;
           } else if (a == SameAccess && rep) {
             if (!e->is(Expression::KindOfSimpleVariable) ||
-                !e->hasContext(Expression::UnsetContext) ||
-                !e->hasContext(Expression::LValue)) {
+                !e->hasAllContext(Expression::UnsetContext |
+                                  Expression::LValue)) {
               return InterfAccess;
             }
           }
@@ -1158,7 +1156,8 @@ ExpressionPtr AliasManager::canonicalizeNode(
                 break;
               }
               if (!Expression::CheckNeeded(a->getVariable(), value) ||
-                  m_accessList.isSubLast(a)) {
+                  m_accessList.isSubLast(a) ||
+                  (value->isTemporary() && m_expr->hasSubExpr(a))) {
                 a->setReplacement(value);
                 m_replaced++;
               }
@@ -1293,7 +1292,8 @@ ExpressionPtr AliasManager::canonicalizeNode(
                     break;
                   }
                   if (!Expression::CheckNeeded(a->getVariable(), value) ||
-                      m_accessList.isSubLast(a)) {
+                      m_accessList.isSubLast(a) ||
+                      (value->isTemporary() && m_expr->hasSubExpr(a))) {
                     rep->setReplacement(value);
                     m_replaced++;
                   } else {
@@ -1665,7 +1665,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
 void AliasManager::canonicalizeKid(ConstructPtr c, ExpressionPtr kid, int i) {
   if (kid) {
     StatementPtr sp(dpc(Statement, c));
-    if (sp) beginInExpression(sp);
+    if (sp) beginInExpression(sp, kid);
     kid = canonicalizeRecur(kid);
     if (kid) {
       c->setNthKid(i, kid);
@@ -1911,8 +1911,8 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
       EchoStatementPtr es(spc(EchoStatement, s));
       ExpressionListPtr exprs = es->getExpressionList();
       for (int i = 0; i < exprs->getCount(); i++) {
-        beginInExpression(es);
         ExpressionPtr kid(exprs->getNthExpr(i));
+        beginInExpression(es, kid);
         canonicalizeKid(exprs, kid, i);
         endInExpression(es);
         kid->computeLocalExprAltered();
@@ -2892,12 +2892,13 @@ void AliasManager::stringOptsRecur(StatementPtr s) {
   }
 }
 
-void AliasManager::beginInExpression(StatementPtr parent) {
+void AliasManager::beginInExpression(StatementPtr parent, ExpressionPtr kid) {
   ASSERT(parent);
   if (m_exprIdx == -1) {
     ASSERT(!m_exprParent);
     m_exprIdx    = m_accessList.size();
     m_exprParent = parent;
+    m_expr       = kid;
   }
 }
 
@@ -2908,6 +2909,7 @@ void AliasManager::endInExpression(StatementPtr requestor) {
     if (requestor == m_exprParent) {
       m_exprIdx = -1;
       m_exprParent.reset();
+      m_expr.reset();
     }
   }
 }

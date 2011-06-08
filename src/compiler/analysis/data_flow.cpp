@@ -258,8 +258,7 @@ int DataFlowWalker::after(ConstructRawPtr cp) {
 int DataFlowWalker::afterEach(ConstructRawPtr cur, int i, ConstructRawPtr kid) {
   if (ExpressionRawPtr k = boost::dynamic_pointer_cast<Expression>(kid)) {
     if (k->is(Expression::KindOfSimpleVariable) &&
-        !boost::static_pointer_cast<SimpleVariable>(
-          k)->getAlwaysStash()) {
+        !boost::static_pointer_cast<SimpleVariable>(k)->getAlwaysStash()) {
       if (ExpressionRawPtr e = boost::dynamic_pointer_cast<Expression>(cur)) {
         switch (e->getKindOf()) {
           case Expression::KindOfBinaryOpExpression:

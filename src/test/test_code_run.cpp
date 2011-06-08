@@ -501,6 +501,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestFiber);
   RUN_TEST(TestAPC);
   RUN_TEST(TestInlining);
+  RUN_TEST(TestCopyProp);
   RUN_TEST(TestParser);
 
   // PHP 5.3 features
@@ -3616,7 +3617,7 @@ bool TestCodeRun::TestArrayCSE() {
        "var_dump(f(array('y' => array()), 'y'));\n"
        "var_dump(f(array(), 'y'));\n"
        "var_dump(f(array(), array()));\n"
-       "h(array(), 0);\n" 
+       "h(array(), 0);\n"
        "h(array(array()), 0);\n");
 
   MVCRO("<?php\n"
@@ -3655,7 +3656,7 @@ bool TestCodeRun::TestArrayCSE() {
         "string(1) \"b\"\n"
         "string(0) \"\"\n"
         "string(1) \"b\"\n");
-  
+
   MVCR("<?php\n"
        "function f($x) {\n"
        "  var_dump($x[0]);\n"
@@ -17288,7 +17289,55 @@ bool TestCodeRun::TestInlining() {
        "  id(new Y)->t();"
        "}");
 
+  MVCR("<?php "
+       "/* Compile only: verify no c++ compilation errors */"
+       "function foo($a) {"
+       "  return $a[1];"
+       "}"
+       "function baz(&$x) { if ($x) $x++; }"
+       "function bar($a) {"
+       "  baz(foo($a)[1]);"
+       "  foo($a)->bar = 1;"
+       "}");
+
   Option::AutoInline = save;
+  return true;
+}
+
+bool TestCodeRun::TestCopyProp() {
+  bool save = Option::CopyProp;
+  Option::CopyProp = true;
+
+  MVCR("<?php "
+       "function test($tr_data) {"
+       "  $temp_tr = null;"
+       "  foreach ($tr_data as $tr_id => $tr_row) {"
+       "    if ($tr_row == 45) $temp_tr = $tr_id;"
+       "    if ($tr_id == 0) {"
+       "      continue;"
+       "    } else {"
+       "      return $tr_row;"
+       "    }"
+       "  }"
+       "  if ($temp_tr) {"
+       "    return $temp_tr;"
+       "  }"
+       "  return null;"
+       "}"
+       "var_dump(test(array('a' => 1, 'b' => 45)));");
+
+  MVCR("<?php "
+       "/* Compile only test. Used to crash hphp */ "
+       "class X {"
+       "  protected $map;"
+       "  protected $parents;"
+       "  public function __construct(array $map, array $parents) {"
+       "    $this->map = $map;"
+       "    $this->parents = $parents;"
+       "  }"
+       "}");
+
+  Option::CopyProp = save;
   return true;
 }
 

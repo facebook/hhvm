@@ -240,6 +240,9 @@ void Construct::dumpNode(int spc, AnalysisResultConstPtr ar) {
     if (c & Expression::DeepAssignmentLHS) {
       scontext += "|DeepAssignmentLHS";
     }
+    if (c & Expression::AssignmentRHS) {
+      scontext += "|AssignmentRHS";
+    }
     if (c & Expression::InvokeArgument) {
       scontext += "|InvokeArgument";
     }
@@ -251,6 +254,9 @@ void Construct::dumpNode(int spc, AnalysisResultConstPtr ar) {
     }
     if (c & Expression::AccessContext) {
       scontext += "|AccessContext";
+    }
+    if (c & Expression::ReturnContext) {
+      scontext += "|ReturnContext";
     }
 
     if (scontext != "") {

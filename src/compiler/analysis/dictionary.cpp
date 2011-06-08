@@ -18,6 +18,8 @@
 #include <compiler/analysis/dictionary.h>
 #include <compiler/expression/expression.h>
 #include <compiler/statement/statement.h>
+#include <compiler/statement/method_statement.h>
+#include <compiler/statement/statement_list.h>
 
 using namespace HPHP;
 using namespace boost;
@@ -27,6 +29,12 @@ using std::vector;
 
 Dictionary::Dictionary(AliasManager &am) : m_am(am) {
   m_idMap.push_back(ExpressionPtr());
+}
+
+void Dictionary::build(MethodStatementPtr m) {
+  if (StatementPtr s = m->getStmts()) {
+    build(s);
+  }
 }
 
 void Dictionary::build(StatementPtr stmt) {

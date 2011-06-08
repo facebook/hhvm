@@ -70,7 +70,7 @@ AliasManager::AliasManager(int opt) :
     m_wildRefs(false), m_nrvoFix(0), m_inlineAsExpr(true),
     m_noAdd(false), m_preOpt(opt<0), m_postOpt(opt>0),
     m_cleared(false), m_inPseudoMain(false), m_genAttrs(false),
-    m_hasDeadStore(false), m_hasChainRoot(false), 
+    m_hasDeadStore(false), m_hasChainRoot(false),
     m_graph(0), m_exprIdx(-1) {
 }
 
@@ -356,7 +356,7 @@ static bool canonCompare(ExpressionPtr e1, ExpressionPtr e2) {
     e1->canonCompare(e2);
 }
 
-int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2, 
+int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2,
     bool forLval /* = false */) {
   Expression::KindOf k1 = e1->getKindOf(), k2 = e2->getKindOf();
   while (true) {
@@ -383,7 +383,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2,
 
       if (canonCompare(e1, e2)) return SameAccess;
       if (!forLval)             return InterfAccess;
-      
+
       {
         // forLval alias checking
         if (k2 != Expression::KindOfArrayElementExpression) {
@@ -859,11 +859,11 @@ int AliasManager::checkAnyInterf(ExpressionPtr e1, ExpressionPtr e2,
 }
 
 int AliasManager::findInterf0(
-  ExpressionPtr rv, bool isLoad, 
-  ExpressionPtr &rep, 
-  ExpressionPtrList::reverse_iterator begin, 
-  ExpressionPtrList::reverse_iterator end, 
-  int *flags /* = 0 */, 
+  ExpressionPtr rv, bool isLoad,
+  ExpressionPtr &rep,
+  ExpressionPtrList::reverse_iterator begin,
+  ExpressionPtrList::reverse_iterator end,
+  int *flags /* = 0 */,
   bool allowLval /* = false */, bool forLval /* = false */,
   int depth /* = 0 */, int min_depth /* = 0 */,
   int max_depth /* = 0 */) {
@@ -982,7 +982,7 @@ int AliasManager::findInterf(ExpressionPtr rv, bool isLoad,
                              ExpressionPtr &rep, int *flags /* = 0 */,
                              bool allowLval /* = false */) {
   BucketMapEntry &lvs = m_accessList;
-  return findInterf0(rv, isLoad, rep, lvs.rbegin(), lvs.rend(), 
+  return findInterf0(rv, isLoad, rep, lvs.rbegin(), lvs.rend(),
       flags, allowLval);
 }
 
@@ -1011,8 +1011,8 @@ void AliasManager::setCanonPtrForArrayCSE(
     ExpressionPtr rep) {
   ASSERT(e);
   ASSERT(rep);
-  if (e->is(Expression::KindOfArrayElementExpression)) { 
-    // e is an array access in rvalue context, 
+  if (e->is(Expression::KindOfArrayElementExpression)) {
+    // e is an array access in rvalue context,
     // need to switch on rep
     ExpressionPtr rep0;
     switch (rep->getKindOf()) {
@@ -1377,7 +1377,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
                                Expression::DeepReference|
                                Expression::UnsetContext)) {
           ExpressionPtr rep;
-          int interf = 
+          int interf =
             findInterf(e, true, rep, NULL, doArrayCSE);
           add(m_accessList, e);
           if (interf == SameAccess) {
@@ -1406,7 +1406,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
                                Expression::DeepReference|
                                Expression::UnsetContext))) {
         ExpressionPtr rep;
-        int interf = 
+        int interf =
           findInterf(e, true, rep, NULL, doArrayCSE);
         if (!m_inPseudoMain && interf == DisjointAccess && !m_cleared &&
             e->is(Expression::KindOfSimpleVariable) &&
@@ -2510,13 +2510,13 @@ int AliasManager::optimize(AnalysisResultConstPtr ar, MethodStatementPtr m) {
         m_cleared = false;
       }
       canonicalizeKid(m, m->getNthKid(i), i);
-      if (m_hasChainRoot && m_postOpt) {
-        // need to do possible invalidation for label statements
-        invalidateChainRoots(m->getStmts());
-      }
+      killLocals();
     }
 
-    killLocals();
+    if (m_hasChainRoot && m_postOpt) {
+      // need to do possible invalidation for label statements
+      invalidateChainRoots(m->getStmts());
+    }
   }
 
   if (!m_replaced && !m_changes && m_postOpt && !Option::ControlFlow) {

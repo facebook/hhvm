@@ -173,6 +173,7 @@ class TestCodeRun : public TestBase {
   bool TestFiber();
   bool TestAPC();
   bool TestInlining();
+  bool TestCopyProp();
   bool TestRenameFunction();
   bool TestIntercept();
   bool TestMaxInt();

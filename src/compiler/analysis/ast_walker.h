@@ -94,13 +94,13 @@ class AstWalker {
             }
           } else {
             flag = functor.afterEach(cur, ii, kid);
-            if (flag == WalkStop) break;
+            if (flag == WalkStop || kid == endAfter) break;
           }
         }
         cfs->index++;
         continue;
       }
-      if (functor.after(cur) == WalkStop || cur == endAfter) break;
+      if (functor.after(cur) == WalkStop) break;
       state.pop_back();
       if (!--size) break;
       cfs = &state.back();

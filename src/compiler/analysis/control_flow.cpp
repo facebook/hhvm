@@ -347,7 +347,7 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
             ConstructRawPtr begin = name ? name : value;
             ConstructRawPtr end = body ? body : value;
             addEdge(end, AfterConstruct, begin, BeforeConstruct);
-            addEdge(begin, BeforeConstruct, s, AfterConstruct);
+            addEdge(value, AfterConstruct, s, AfterConstruct);
             break;
           }
 

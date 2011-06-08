@@ -504,6 +504,14 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         break;
       }
     }
+    if (!ret) {
+      ExpressionPtr e = m_exps[n - 1];
+      if (hasContext(LValue) && !hasAnyContext(RefValue|InvokeArgument) &&
+          !(e->hasContext(LValue) &&
+            !e->hasAnyContext(RefValue|InvokeArgument))) {
+        ret = true;
+      }
+    }
   }
 
   if (!inExpression) return ret;
@@ -531,14 +539,30 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
           cg_printf(";\n");
         }
         e->setCPPTemp("/**/");
-      } else if (e->hasCPPTemp() && Type::SameType(e->getType(), getType())) {
-        setCPPTemp(e->cppTemp());
-      } else if (!i && n > 1) {
+        continue;
+      }
+      bool lvSwitch =
+        hasContext(LValue) && !hasAnyContext(RefValue|InvokeArgument) &&
+        !(e->hasContext(LValue) &&
+          !e->hasAnyContext(RefValue|InvokeArgument));
+
+      if (lvSwitch || (!i && n > 1)) {
         e->Expression::preOutputStash(cg, ar, state | FixOrder);
         if (!(state & FixOrder)) {
           cg_printf("id(%s);\n", e->cppTemp().c_str());
         }
-        setCPPTemp(e->cppTemp());
+      }
+      if (e->hasCPPTemp() &&
+          Type::SameType(e->getType(), getType())) {
+        const string &t = e->cppTemp();
+
+        if (lvSwitch) {
+          cg_printf("Variant &%s_lv = const_cast<Variant&>(%s);\n",
+                    t.c_str(), t.c_str());
+          setCPPTemp(t + "_lv");
+        } else {
+          setCPPTemp(t);
+        }
       }
     }
   }
@@ -720,7 +744,14 @@ bool ExpressionList::outputCPPInternal(CodeGenerator &cg,
       } else if (m_kind != ListKindParam && (i != ix || !needed)) {
         needsComma = exp->outputCPPUnneeded(cg, ar);
       } else {
+        bool wrap =
+          exp->hasCPPTemp() &&
+          hasContext(LValue) && !hasAnyContext(RefValue|InvokeArgument) &&
+            !(exp->hasContext(LValue) &&
+              !exp->hasAnyContext(RefValue|InvokeArgument));
+        if (wrap) cg_printf("const_cast<Variant&>(");
         exp->outputCPP(cg, ar);
+        if (wrap) cg_printf(")");
         needsComma = true;
       }
       if (needsComma) {

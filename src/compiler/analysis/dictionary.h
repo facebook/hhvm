@@ -33,6 +33,7 @@ public:
   typedef std::vector<ExpressionPtr> IdMap;
 
   Dictionary(AliasManager &am);
+  void build(MethodStatementPtr s);
   void build(StatementPtr s);
   void build(ExpressionPtr s);
   virtual void visit(ExpressionPtr e) = 0;

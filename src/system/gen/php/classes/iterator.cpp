@@ -20,7 +20,6 @@
 
 // Dependencies
 #include <php/classes/arrayaccess.h>
-#include <php/globals/constants.h>
 #include <runtime/ext/ext.h>
 #include <runtime/eval/eval.h>
 namespace hphp_impl_starter {}

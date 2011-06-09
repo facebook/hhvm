@@ -50,7 +50,6 @@ class c_Closure : public ExtObjectData {
   public: c_Closure *create(int64 func, int64 extra, Array vars);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  public: virtual void destruct();
 public:
   virtual const CallInfo *t___invokeCallInfoHelper(void *&extra);
   void *extraData() const { return m_extraData; }

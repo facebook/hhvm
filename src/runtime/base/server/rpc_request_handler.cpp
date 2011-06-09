@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/base/server/http_request_handler.h>
 #include <runtime/base/server/rpc_request_handler.h>
 #include <runtime/base/program_functions.h>
 #include <runtime/base/runtime_option.h>
@@ -53,6 +54,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   ExecutionProfiler ep(ThreadInfo::RuntimeFunctions);
 
   Logger::OnNewRequest();
+  HttpRequestHandler::GetAccessLog().onNewRequest();
   m_context->setTransport(transport);
   transport->enableCompression();
 
@@ -71,6 +73,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
     if (iter == passwords.end()) {
       transport->sendString("Unauthorized", 401);
       transport->onSendEnd();
+      HttpRequestHandler::GetAccessLog().log(transport, NULL);
       return;
     }
   } else {
@@ -78,6 +81,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
     if (!password.empty() && password != transport->getParam("auth")) {
       transport->sendString("Unauthorized", 401);
       transport->onSendEnd();
+      HttpRequestHandler::GetAccessLog().log(transport, NULL);
       return;
     }
   }
@@ -88,6 +92,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   if (vhost->disabled()) {
     transport->sendString("Virtual host disabled.", 404);
     transport->onSendEnd();
+    HttpRequestHandler::GetAccessLog().log(transport, vhost);
     return;
   }
   vhost->setRequestTimeoutSeconds();
@@ -111,6 +116,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   // record request for debugging purpose
   std::string tmpfile = HttpProtocol::RecordRequest(transport);
   bool ret = executePHPFunction(transport, sourceRootInfo);
+  HttpRequestHandler::GetAccessLog().log(transport, vhost);
   HttpProtocol::ClearRecord(ret, tmpfile);
 }
 

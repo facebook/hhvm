@@ -185,7 +185,8 @@ bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
 // main functions
 
 bool DebuggerProxy::needInterrupt() {
-  return m_hasBreakPoints || m_signum != CmdSignal::SignalNone;
+  return m_hasBreakPoints || m_flow ||
+         m_signum != CmdSignal::SignalNone;
 }
 
 void DebuggerProxy::interrupt(CmdInterrupt &cmd) {

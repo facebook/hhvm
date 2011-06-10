@@ -277,6 +277,16 @@ public:
     return ret;
   }
   operator ArrayData *() { return create(); }
+  static ArrayData *CreateParams(CVarRef a0);
+  static ArrayData *CreateParams(CVarRef a0, CVarRef a1);
+  static ArrayData *CreateParams(CVarRef a0, CVarRef a1, CVarRef a2);
+  static ArrayData *CreateParams(CVarRef a0, CVarRef a1, CVarRef a2,
+                                 CVarRef a3);
+  static ArrayData *CreateParams(CVarRef a0, CVarRef a1, CVarRef a2,
+                                 CVarRef a3, CVarRef a4);
+  static ArrayData *CreateParams(CVarRef a0, CVarRef a1, CVarRef a2,
+                                 CVarRef a3, CVarRef a4, CVarRef a5);
+  static ArrayData *CreateParams(int count, ...);
   // this consructor should never be called directly, it is only called from
   // generated code.
   ArrayInit (ArrayData *data) {  m_data = data;}

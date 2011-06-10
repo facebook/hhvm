@@ -188,6 +188,7 @@ bool Option::GenHashTableDynClass= true;
 bool Option::GenHashTableGetConstant = true;
 bool Option::GenHashTableGVRoutine = true;
 bool Option::UseScalarVariant = true;
+bool Option::UseCallUserFuncFewArgs = true;
 bool Option::KeepStatementsWithNoEffect = false;
 
 int Option::ConditionalIncludeExpandLevel = 1;

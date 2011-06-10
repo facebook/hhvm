@@ -51,5 +51,17 @@ ArrayInit::ArrayInit(ssize_t n, bool keepRef /* = false */) {
   }
 }
 
+ArrayData *ArrayInit::CreateParams(int count, ...) {
+  va_list ap;
+  va_start(ap, count);
+  ArrayInit ai(count);
+  for (int i = 0; i < count; i++) {
+    ai.setRef(*va_arg(ap, const Variant *));
+  }
+  va_end(ap);
+  return ai.create();
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 }

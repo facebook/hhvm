@@ -832,6 +832,92 @@ public:
   }
 };
 
+enum CallUserFuncKind {
+  CallUserFuncError = -1,
+  CallUserFuncCommon = 0,
+  CallUserFuncObjStatic,
+  CallUserFuncObj,
+  CallUserFuncWithinCls,
+  CallUserFuncUnbound,
+};
+
+Variant call_user_func_array_helper(int kind,
+                                    CVarRef classname,
+                                    CVarRef methodname,
+                                    CStrRef cls,
+                                    CStrRef method,
+                                    CStrRef sclass,
+                                    ObjectData *obj,
+                                    CArrRef params);
+
+int getClassMethodInfo(CVarRef function,
+                       Variant &classname,
+                       Variant &methodname,
+                       String &cls,
+                       String &method,
+                       String &sclass,
+                       ObjectData *&obj,
+                       bool bound = false);
+
+#define CALL_USER_FUNC_FEW_ARGS_COUNT 6
+#if CALL_USER_FUNC_FEW_ARGS_COUNT == 6
+
+Variant call_user_func_few_args(CVarRef function, int count, ...);
+
+inline Variant call_user_func0(CVarRef function) {
+  return call_user_func_few_args(function, 0);
+}
+
+inline Variant call_user_func1(CVarRef function,
+                               CVarRef a0) {
+  return call_user_func_few_args(function, 1, &a0);
+}
+
+inline Variant call_user_func2(CVarRef function,
+                               CVarRef a0,
+                               CVarRef a1) {
+  return call_user_func_few_args(function, 2, &a0, &a1);
+}
+
+inline Variant call_user_func3(CVarRef function,
+                               CVarRef a0,
+                               CVarRef a1,
+                               CVarRef a2) {
+  return call_user_func_few_args(function, 3, &a0, &a1, &a2);
+}
+
+inline Variant call_user_func4(CVarRef function,
+                               CVarRef a0,
+                               CVarRef a1,
+                               CVarRef a2,
+                               CVarRef a3) {
+  return call_user_func_few_args(function, 4, &a0, &a1, &a2, &a3);
+}
+
+inline Variant call_user_func5(CVarRef function,
+                               CVarRef a0,
+                               CVarRef a1,
+                               CVarRef a2,
+                               CVarRef a3,
+                               CVarRef a4) {
+  return call_user_func_few_args(function, 5, &a0, &a1, &a2, &a3, &a4);
+}
+
+
+inline Variant call_user_func6(CVarRef function,
+                               CVarRef a0,
+                               CVarRef a1,
+                               CVarRef a2,
+                               CVarRef a3,
+                               CVarRef a4,
+                               CVarRef a5) {
+  return call_user_func_few_args(function, 6, &a0, &a1, &a2, &a3, &a4, &a5);
+}
+
+#else
+#error Bad CALL_USER_FUNC_FEW_ARGS_COUNT
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

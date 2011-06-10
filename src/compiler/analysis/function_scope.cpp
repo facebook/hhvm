@@ -1059,17 +1059,26 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
   ASSERT(extraArg <= paramCount);
   int iMax = paramCount - extraArg;
   bool extra = false;
+  bool callUserFuncFewArgs = false;
 
   if (variableArgument) {
-    if (paramCount == 0) {
-      cg_printf("0");
-    } else {
-      cg_printf("%d, ", paramCount);
+    callUserFuncFewArgs = 
+      Option::UseCallUserFuncFewArgs &&
+      func->getName() == "call_user_func" &&
+      (paramCount <= CALL_USER_FUNC_FEW_ARGS_COUNT + 1) &&
+      extraArgArrayId == -1;
+
+    if (!callUserFuncFewArgs) {
+      if (paramCount == 0) {
+        cg_printf("0");
+      } else {
+        cg_printf("%d, ", paramCount);
+      }
     }
   }
   for (int i = 0; i < paramCount; i++) {
     ExpressionPtr param = (*params)[i];
-    if (i > 0) cg_printf(extra ? "." : ", ");
+    if (i > 0) cg_printf(extra && !callUserFuncFewArgs ? "." : ", ");
     if (!extra && (i == iMax || extraArg < 0)) {
       if (extraArgArrayId != -1) {
         assert(extraArgArrayHash != -1 && extraArgArrayIndex != -1);
@@ -1082,6 +1091,7 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
       if (Option::GenArrayCreate &&
           cg.getOutput() != CodeGenerator::SystemCPP) {
         if (!params->hasNonArrayCreateValue(false, i)) {
+          assert(!callUserFuncFewArgs);
           if (ar->m_arrayIntegerKeyMaxSize < paramCount - i) {
             ar->m_arrayIntegerKeyMaxSize  = paramCount - i;
           }
@@ -1092,19 +1102,23 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
           return;
         }
       }
-      cg_printf("Array(ArrayInit(%d).", paramCount - i);
+      if (!callUserFuncFewArgs) {
+        cg_printf("Array(ArrayInit(%d).", paramCount - i);
+      }
     }
     if (extra) {
       bool needRef = param->hasContext(Expression::RefValue) &&
         !param->hasContext(Expression::NoRefWrapper) &&
         param->isRefable();
-      cg_printf("set%s(", needRef ? "Ref" : "");
+      if (!callUserFuncFewArgs) {
+        cg_printf("set%s(", needRef ? "Ref" : "");
+      }
       if (needRef) {
         // The parameter itself shouldn't be wrapped with ref() any more.
         param->setContext(Expression::NoRefWrapper);
       }
       param->outputCPP(cg, ar);
-      cg_printf(")");
+      if (!callUserFuncFewArgs) cg_printf(")");
     } else {
       // If the implemented type is ref-counted and expected type is variant,
       // use VarNR to avoid unnecessary ref-counting because we know
@@ -1139,7 +1153,7 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
     }
   }
   if (extra) {
-    cg_printf(".create())");
+    if (!callUserFuncFewArgs) cg_printf(".create())");
   }
 }
 

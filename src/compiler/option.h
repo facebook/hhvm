@@ -173,6 +173,8 @@ public:
 
   static bool UseScalarVariant;
 
+  static bool UseCallUserFuncFewArgs;
+
   /**
    * Separate compilation
    */

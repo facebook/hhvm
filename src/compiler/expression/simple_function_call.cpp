@@ -1607,10 +1607,19 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         if (m_noPrefix) {
           cg_printf("%s(", cg.formatLabel(m_name).c_str());
         } else {
-          cg_printf("%s%s(",
-                    m_builtinFunction ? Option::BuiltinFunctionPrefix :
-                    m_funcScope->getPrefix(m_params),
-                    m_funcScope->getId(cg).c_str());
+          bool callUserFuncFewArgs = 
+            Option::UseCallUserFuncFewArgs &&
+            m_name == "call_user_func" &&
+            (m_params->getCount() <= CALL_USER_FUNC_FEW_ARGS_COUNT + 1) &&
+            m_argArrayId == -1;
+          if (callUserFuncFewArgs) {
+            cg_printf("%s%d(", m_name.c_str(), m_params->getCount() - 1);
+          } else {
+            cg_printf("%s%s(",
+                      m_builtinFunction ? Option::BuiltinFunctionPrefix :
+                      m_funcScope->getPrefix(m_params),
+                      m_funcScope->getId(cg).c_str());
+          }
         }
       }
     }

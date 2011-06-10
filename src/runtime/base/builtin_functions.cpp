@@ -77,14 +77,119 @@ String getUndefinedConstant(CStrRef name) {
   return name;
 }
 
-Variant f_call_user_func_array(CVarRef function, CArrRef params,
-                               bool bound /* = false */) {
-
-  if (function.isObject()) {
-    return invoke(function, params, true, false);
+int getClassMethodInfo(CVarRef function,
+                       Variant &classname,
+                       Variant &methodname,
+                       String &cls,
+                       String &method,
+                       String &sclass,
+                       ObjectData *&obj,
+                       bool bound /* = false */) {
+  Array arr = function.toArray();
+  if (!(arr.size() == 2 && arr.exists(0LL) && arr.exists(1LL))) {
+    throw_invalid_argument("function: not a valid callback array");
+    return CallUserFuncError;
+  }
+  classname = arr.rvalAt(0LL);
+  methodname = arr.rvalAt(1LL);
+  if (!methodname.isString()) {
+    throw_invalid_argument("function: methodname not string");
+    return CallUserFuncError;
   }
 
-  if (function.isString()) {
+  method = methodname.toString();
+  if (classname.is(KindOfObject)) {
+    int c = method.find("::");
+    if (c != 0 && c != String::npos && c + 2 < method.size()) {
+      cls = method.substr(0, c);
+      if (cls->same(s_self.get())) {
+        cls = FrameInjection::GetClassName(true);
+      } else if (cls->same(s_parent.get())) {
+        cls = FrameInjection::GetParentClassName(true);
+      }
+      method = method.substr(c + 2);
+      return CallUserFuncObjStatic;
+    }
+    obj = classname.getObjectData();
+#ifdef ENABLE_LATE_STATIC_BINDING
+    sclass = bound ? FrameInjection::GetClassName(true) : obj->o_getClassName();
+#endif
+    return CallUserFuncObj;
+  }
+  if (!classname.isString()) {
+    throw_invalid_argument("function: classname not string");
+    return CallUserFuncError;
+  }
+  sclass = classname.toString();
+  if (sclass->same(s_self.get())) {
+    sclass = FrameInjection::GetClassName(true);
+  } else if (sclass->same(s_parent.get())) {
+    sclass = FrameInjection::GetParentClassName(true);
+  }
+  obj = FrameInjection::GetThis(true);
+  if (obj && obj->o_instanceof(sclass)) {
+    return CallUserFuncWithinCls;
+  }
+#ifdef ENABLE_LATE_STATIC_BINDING
+  if (!bound) {
+    return CallUserFuncUnbound;
+  }
+#endif /* ENABLE_LATE_STATIC_BINDING */
+  return CallUserFuncCommon;
+}
+
+Variant call_user_func_array_helper(int kind,
+                                    CVarRef classname,
+                                    CVarRef methodname,
+                                    CStrRef cls,
+                                    CStrRef method,
+                                    CStrRef sclass,
+                                    ObjectData *obj,
+                                    CArrRef params) {
+  switch (kind) {
+  case CallUserFuncCommon:
+    return invoke_static_method(sclass, method, params, false);
+  case CallUserFuncObjStatic:
+    return classname.getObjectData()->o_invoke_ex(cls, method, params, false);
+  case CallUserFuncObj: {
+#ifdef ENABLE_LATE_STATIC_BINDING
+    FrameInjection::StaticClassNameHelper scn(
+      ThreadInfo::s_threadInfo.getNoCheck(), sclass);
+#endif
+    return obj->o_invoke(method, params, -1, false);
+  }
+  case CallUserFuncWithinCls:
+    return obj->o_invoke_ex(sclass, method, params, false);
+  case CallUserFuncUnbound:
+    return invoke_static_method_bind(sclass, method, params, false);
+  case CallUserFuncError:
+    return null;
+  default:
+    ASSERT(false);
+    return null;
+  }
+}
+
+Variant f_call_user_func_array(CVarRef function, CArrRef params,
+                               bool bound /* = false */) {
+  if (function.is(KindOfArray)) {
+    Variant classname;
+    Variant methodname;
+    String cls;
+    String method;
+    String sclass;
+    ObjectData *obj;
+    int kind = getClassMethodInfo(function, classname, methodname,
+                                  cls, method, sclass, obj, bound);
+    return call_user_func_array_helper(kind,
+                                       classname,
+                                       methodname,
+                                       cls,
+                                       method,
+                                       sclass,
+                                       obj,
+                                       params);
+  } else if (function.isString()) {
     String sfunction = function.toString();
     int c = sfunction.find("::");
     if (c != 0 && c != String::npos && c + 2 < sfunction.size()) {
@@ -100,61 +205,10 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
                                   false);
     }
     return invoke(sfunction, params, -1, true, false);
-  } else if (function.is(KindOfArray)) {
-    Array arr = function.toArray();
-    if (!(arr.size() == 2 && arr.exists(0LL) && arr.exists(1LL))) {
-      throw_invalid_argument("function: not a valid callback array");
-      return null;
-    }
-    Variant classname = arr.rvalAt(0LL);
-    Variant methodname = arr.rvalAt(1LL);
-    if (!methodname.isString()) {
-      throw_invalid_argument("function: methodname not string");
-      return null;
-    }
-    String method = methodname.toString();
-    if (classname.is(KindOfObject)) {
-      int c = method.find("::");
-      if (c != 0 && c != String::npos && c + 2 < method.size()) {
-        String cls = method.substr(0, c);
-        if (cls->same(s_self.get())) {
-          cls = FrameInjection::GetClassName(true);
-        } else if (cls->same(s_parent.get())) {
-          cls = FrameInjection::GetParentClassName(true);
-        }
-        return classname.getObjectData()->o_invoke_ex
-          (cls, method.substr(c + 2), params, false);
-      }
-      ObjectData *obj = classname.getObjectData();
-#ifdef ENABLE_LATE_STATIC_BINDING
-      FrameInjection::StaticClassNameHelper scn(
-        ThreadInfo::s_threadInfo.getNoCheck(),
-        bound ? FrameInjection::GetClassName(true) : obj->o_getClassName());
-#endif
-      return obj->o_invoke(method, params, -1, false);
-    } else {
-      if (!classname.isString()) {
-        throw_invalid_argument("function: classname not string");
-        return null;
-      }
-      String sclass = classname.toString();
-      if (sclass->same(s_self.get())) {
-        sclass = FrameInjection::GetClassName(true);
-      } else if (sclass->same(s_parent.get())) {
-        sclass = FrameInjection::GetParentClassName(true);
-      }
-      ObjectData *obj = FrameInjection::GetThis(true);
-      if (obj && obj->o_instanceof(sclass)) {
-        return obj->o_invoke_ex(sclass, method, params, false);
-      }
-#ifdef ENABLE_LATE_STATIC_BINDING
-      if (!bound) {
-        return invoke_static_method_bind(sclass, method, params, false);
-      }
-#endif /* ENABLE_LATE_STATIC_BINDING */
-      return invoke_static_method(sclass, method, params, false);
-    }
+  } else if (function.isObject()) {
+    return invoke(function, params, true, false);
   }
+
   throw_invalid_argument("function: not string or array");
   return null;
 }
@@ -1586,6 +1640,86 @@ const CallInfo *MethodCallPackage::bindClass(FrameInjection &fi) {
   }
 #endif
   return ci;
+}
+
+Variant call_user_func_few_args(CVarRef function, int count, ...) {
+  ASSERT(count <= CALL_USER_FUNC_FEW_ARGS_COUNT);
+  va_list ap;
+  va_start(ap, count);
+  const Variant *a0 = (count > 0) ? va_arg(ap, const Variant *) : NULL;
+  const Variant *a1 = (count > 1) ? va_arg(ap, const Variant *) : NULL;
+  const Variant *a2 = (count > 2) ? va_arg(ap, const Variant *) : NULL;
+  const Variant *a3 = (count > 3) ? va_arg(ap, const Variant *) : NULL;
+  const Variant *a4 = (count > 4) ? va_arg(ap, const Variant *) : NULL;
+  const Variant *a5 = (count > 5) ? va_arg(ap, const Variant *) : NULL;
+  va_end(ap);
+  if (function.is(KindOfArray)) {
+    Variant classname;
+    Variant methodname;
+    String cls;
+    String method;
+    String sclass;
+    ObjectData *obj;
+    int kind = getClassMethodInfo(function, classname, methodname,
+                                  cls, method, sclass, obj);
+    if (kind == 0) {
+      MethodCallPackage mcp;
+      mcp.noFatal();
+      mcp.dynamicNamedCall(sclass, method, -1);
+      if (LIKELY(mcp.ci != NULL)) {
+        switch (count) {
+        case 0:
+          return (mcp.ci->getMeth0Args())(mcp, 0);
+        case 1:
+          return (mcp.ci->getMeth1Args())(mcp, 1, *a0);
+        case 2:
+          return (mcp.ci->getMeth2Args())(mcp, 2, *a0, *a1);
+        case 3:
+          return (mcp.ci->getMeth3Args())(mcp, 3, *a0, *a1, *a2);
+        case 4:
+          return (mcp.ci->getMeth4Args())(mcp, 4, *a0, *a1, *a2, *a3);
+        case 5:
+          return (mcp.ci->getMeth5Args())(mcp, 5, *a0, *a1, *a2, *a3, *a4);
+        case 6:
+          return (mcp.ci->getMeth6Args())(mcp, 6, *a0, *a1, *a2, *a3, *a4, *a5);
+        default:
+          ASSERT(false);
+          return null;
+        }
+      } else {
+        o_invoke_failed(sclass.data(), method.data(), false);
+        return null;
+      }
+    }
+    return call_user_func_array_helper(
+      kind, classname, methodname, cls, method, sclass, obj,
+      Array(ArrayInit::CreateParams(count, a0, a1, a2, a3, a4, a5)));
+  }
+  const CallInfo *ci;
+  void *extra;
+  if (!has_eval_support && get_call_info(ci, extra, function)) {
+    switch (count) {
+    case 0:
+      return (ci->getFunc0Args())(extra, 0);
+    case 1:
+      return (ci->getFunc1Args())(extra, 1, *a0);
+    case 2:
+      return (ci->getFunc2Args())(extra, 2, *a0, *a1);
+    case 3:
+      return (ci->getFunc3Args())(extra, 3, *a0, *a1, *a2);
+    case 4:
+      return (ci->getFunc4Args())(extra, 4, *a0, *a1, *a2, *a3);
+    case 5:
+      return (ci->getFunc5Args())(extra, 5, *a0, *a1, *a2, *a3, *a4);
+    case 6:
+      return (ci->getFunc6Args())(extra, 6, *a0, *a1, *a2, *a3, *a4, *a5);
+    default:
+      ASSERT(false);
+      return null;
+    }
+  }
+  return f_call_user_func(count, function,
+    Array(ArrayInit::CreateParams(count, a0, a1, a2, a3, a4, a5)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

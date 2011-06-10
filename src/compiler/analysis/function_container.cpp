@@ -371,6 +371,9 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
         functions->find(name);iterFuncs =
       functions->find(name);
       ASSERT(iterFuncs != functions->end());
+      // We have assumptions that function names do not contain ".."
+      // (e.g., call_user_func0 ~ call_user_func6)
+      if (strstr(name, "..")) assert(false);
       cg_printf("      (const char *)\"%s\", ", cg.escapeLabel(name).c_str());
       if (!system) {
         cg_printf("(const char *)%d, ",

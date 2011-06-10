@@ -545,6 +545,11 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
     String code(php.c_str(), php.size(), AttachLiteral);
     ret = eval(vars, Object(), code, false);
 
+  } catch (InvalidFunctionCallException &e) {
+    sb.append(Debugger::ColorStderr(String(e.what())));
+    sb.append(Debugger::ColorStderr(
+              "You may also need to connect to a host "
+              "(e.g., machine connect localhost)."));
   } catch (Exception &e) {
     sb.append(Debugger::ColorStderr(String(e.what())));
   } catch (Object &e) {

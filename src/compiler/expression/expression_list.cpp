@@ -612,38 +612,43 @@ void ExpressionList::outputCPPUniqLitKeyArrayInit(
   if (arrayElements) ASSERT(m_arrayElements);
   unsigned int n =  m_exps.size();
   cg_printf("array_createv%c(%lu, ", litstrKeys ? 's' : 'i', num);
+  assert(n - start == num);
   for (unsigned int i = start; i < n; i++) {
-    if (ExpressionPtr exp = m_exps[i]) {
-      ExpressionPtr name;
-      ExpressionPtr value = exp;
-      if (arrayElements) {
-        ArrayPairExpressionPtr ap =
-          dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
-        name = ap->getName();
-        value = ap->getValue();
-      }
-      cg_printf("toVPOD(");
-      if (value->isScalar()) {
-        ASSERT(!cg.hasScalarVariant());
-        cg.setScalarVariant();
-        value->outputCPP(cg, ar);
-        cg.clearScalarVariant();
-      } else {
-        value->outputCPP(cg, ar);
-      }
+    ExpressionPtr exp = m_exps[i];
+    assert(exp);
+    ExpressionPtr name;
+    ExpressionPtr value = exp;
+    if (arrayElements) {
+      ArrayPairExpressionPtr ap =
+        dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
+      name = ap->getName();
+      value = ap->getValue();
+    }
+    if (name) {
+      assert(litstrKeys);
+      cg_printf("toSPOD(");
+      name->outputCPP(cg, ar);
+      cg_printf("), ");
+    }
+    cg_printf("toVPOD(");
+    if (value->isScalar()) {
+      assert(!cg.hasScalarVariant());
+      cg.setScalarVariant();
+      if (!Option::UseScalarVariant) cg_printf("VarNR(");
+      value->outputCPP(cg, ar);
+      if (!Option::UseScalarVariant) cg_printf(")");
+      cg.clearScalarVariant();
+    } else {
+      bool wrap = Expression::CheckVarNR(value, Type::Variant);
+      if (wrap) cg_printf("VarNR(");
+      value->outputCPP(cg, ar);
+      if (wrap) cg_printf(")");
+    }
+    cg_printf(")");
+    if (i < n-1) {
+      cg_printf(", ");
+    } else {
       cg_printf(")");
-      if (name) {
-        ASSERT(litstrKeys);
-        cg_printf(", ");
-        cg_printf("toSPOD(");
-        name->outputCPP(cg, ar);
-        cg_printf(")");
-      }
-      if (i < n-1) {
-        cg_printf(", ");
-      } else {
-        cg_printf(")");
-      }
     }
   }
 }

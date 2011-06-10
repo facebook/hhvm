@@ -1111,14 +1111,7 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
       // the actual argument will always has a ref in the callee.
       bool wrap = false;
       bool scalar = param->isScalar();
-      if (!param->hasContext(Expression::RefValue) &&
-          param->getExpectedType() &&
-          param->getExpectedType()->is(Type::KindOfVariant) &&
-          (param->getCPPType()->is(Type::KindOfArray) ||
-           param->getCPPType()->is(Type::KindOfString) ||
-           param->getCPPType()->is(Type::KindOfObject) ||
-           param->getCPPType()->isPrimitive() ||
-           scalar)) {
+      if (Expression::CheckVarNR(param)) {
         if (scalar) {
           ASSERT(!cg.hasScalarVariant());
           cg.setScalarVariant();
@@ -1136,9 +1129,7 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
           }
         }
       }
-      if (wrap) {
-        cg_printf("VarNR(");
-      }
+      if (wrap) cg_printf("VarNR(");
       param->outputCPP(cg, ar);
       if (scalar) cg.clearScalarVariant();
       ASSERT(!cg.hasScalarVariant());

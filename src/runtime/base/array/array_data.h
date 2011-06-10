@@ -45,9 +45,7 @@ class ArrayData : public Countable {
   virtual ~ArrayData();
 
   /**
-   * Create a new ArrayData with specified array element(s). If "replace" is
-   * true, only unique elements will be inserted (with the last one replacing
-   * previous ones with the same name).
+   * Create a new ArrayData with specified array element(s).
    */
   static ArrayData *Create();
   static ArrayData *Create(CVarRef value);

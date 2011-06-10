@@ -207,7 +207,6 @@ void ReturnStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   cg_printf("return");
-
   if (m_exp) {
     bool close = false;
     cg_printf(" ");

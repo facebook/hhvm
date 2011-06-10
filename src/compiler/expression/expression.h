@@ -356,6 +356,7 @@ public:
 
   static bool CheckNeededRHS(ExpressionPtr value);
   static bool CheckNeeded(ExpressionPtr variable, ExpressionPtr value);
+  static bool CheckVarNR(ExpressionPtr value, TypePtr expectedType = TypePtr());
 
   static bool GetCseTempInfo(
       AnalysisResultPtr ar, ExpressionPtr p, TypePtr &t);

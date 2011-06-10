@@ -433,6 +433,20 @@ bool Expression::CheckNeeded(ExpressionPtr variable, ExpressionPtr value) {
   return needed;
 }
 
+bool Expression::CheckVarNR(ExpressionPtr value,
+                            TypePtr expectedType /* = TypePtr */) {
+  if (!expectedType) expectedType = value->getExpectedType();
+  ASSERT(!value->getExpectedType() ||
+         Type::SameType(expectedType, value->getExpectedType()));
+  return (!value->hasContext(Expression::RefValue) &&
+          expectedType && expectedType->is(Type::KindOfVariant) &&
+          (value->getCPPType()->is(Type::KindOfArray) ||
+           value->getCPPType()->is(Type::KindOfString) ||
+           value->getCPPType()->is(Type::KindOfObject) ||
+           value->getCPPType()->isPrimitive() ||
+           value->isScalar()));
+}
+
 TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
                                          bool coerce, ExpressionPtr variable,
                                          ExpressionPtr

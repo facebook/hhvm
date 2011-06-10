@@ -255,6 +255,7 @@ public:
   void setScalarVariant() { m_scalarVariant = true; }
   bool hasScalarVariant() { return m_scalarVariant; }
   void clearScalarVariant() { m_scalarVariant = false; }
+
 private:
   std::string m_filename;
   Stream m_curStream;

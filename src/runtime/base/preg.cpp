@@ -369,10 +369,14 @@ static void pcre_log_error(const char *func, int line, int pcre_code,
   escapedPattern = Logger::EscapeString(p);
   escapedSubject = Logger::EscapeString(s);
   escapedRepl = Logger::EscapeString(r);
+  const char *errString =
+    (pcre_code == PCRE_ERROR_MATCHLIMIT) ? "PCRE_ERROR_MATCHLIMIT" :
+    (pcre_code == PCRE_ERROR_RECURSIONLIMIT) ? "PCRE_ERROR_RECURSIONLIMIT" :
+    "UNKNOWN";
   raise_debugging(
-    "REGEXERR: %s/%d: err=%d, pattern='%s', subject='%s', repl='%s', "
+    "REGEXERR: %s/%d: err=%d(%s), pattern='%s', subject='%s', repl='%s', "
     "limits=(%d, %d), extra=(%d, %d, %d, %d)",
-    func, line, pcre_code,
+    func, line, pcre_code, errString,
     escapedPattern, escapedSubject, escapedRepl,
     RuntimeOption::PregBacktraceLimit, RuntimeOption::PregRecursionLimit,
     arg1, arg2, arg3, arg4);

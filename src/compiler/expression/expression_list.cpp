@@ -704,7 +704,7 @@ bool ExpressionList::outputCPPInternal(CodeGenerator &cg,
     if (pre) {
       cg_printf(" %s", m_cppTemp.c_str());
     }
-    cg_printf("(%d, %s)", m_exps.size(), isVector ? "true" : "false");
+    cg_printf("(%d)", m_exps.size());
     if (pre) cg_printf(";\n");
     needsComma = true;
     anyOutput = true;

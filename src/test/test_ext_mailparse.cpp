@@ -252,7 +252,7 @@ bool TestExtMailparse::test_mailparse_msg_get_part() {
       CREATE_VECTOR2("from mail pickup service by hotmail.com with Microsoft",
                      "from 66.178.40.49 by BAY116-DAV8.phx.gbl with DAV;");
     VS(info,
-       Array(ArrayInit(11, false).
+       Array(ArrayInit(11).
              set("headers", CREATE_MAP1("received", received)).
              set("starting-pos", 0).
              set("starting-pos-body", 200).

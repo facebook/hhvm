@@ -1090,7 +1090,7 @@ Variant c_SplFileObject::t_fscanf(int num_args, CVarRef v_format, Array args /* 
     v_argc = tmp0;
   }
   {
-    const Array &tmp0((func_get_args(num_args, Array(ArrayInit(1, true).set(v_format).create()),args)));
+    const Array &tmp0((func_get_args(num_args, Array(ArrayInit(1).set(v_format).create()),args)));
     v_argv = tmp0;
   }
   return x_hphp_splfileobject_fscanf(toInt64(v_argc), GET_THIS_TYPED(SplFileObject), toString(v_format), VarNR(v_argv));

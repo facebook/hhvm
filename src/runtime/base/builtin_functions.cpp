@@ -363,49 +363,49 @@ Array collect_few_args(int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
     return Array();
   }
   case 1: {
-    return Array(ArrayInit(1, true).set(a0).create());
+    return Array(ArrayInit(1).set(a0).create());
   }
   case 2: {
-    return Array(ArrayInit(2, true).set(a0).set(a1).create());
+    return Array(ArrayInit(2).set(a0).set(a1).create());
   }
   case 3: {
-    return Array(ArrayInit(3, true).set(a0).set(a1).set(a2).create());
+    return Array(ArrayInit(3).set(a0).set(a1).set(a2).create());
   }
 #if INVOKE_FEW_ARGS_COUNT > 3
   case 4: {
-    return Array(ArrayInit(4, true).set(a0).set(a1).set(a2).
-                                    set(a3).create());
+    return Array(ArrayInit(4).set(a0).set(a1).set(a2).
+                              set(a3).create());
   }
   case 5: {
-    return Array(ArrayInit(5, true).set(a0).set(a1).set(a2).
-                                    set(a3).set(a4).create());
+    return Array(ArrayInit(5).set(a0).set(a1).set(a2).
+                              set(a3).set(a4).create());
   }
   case 6: {
-    return Array(ArrayInit(6, true).set(a0).set(a1).set(a2).
-                                    set(a3).set(a4).set(a5).create());
+    return Array(ArrayInit(6).set(a0).set(a1).set(a2).
+                              set(a3).set(a4).set(a5).create());
   }
 #endif
 #if INVOKE_FEW_ARGS_COUNT > 6
   case 7: {
-    return Array(ArrayInit(7, true).set(a0).set(a1).set(a2).
-                                    set(a3).set(a4).set(a5).
+    return Array(ArrayInit(7).set(a0).set(a1).set(a2).
+                              set(a3).set(a4).set(a5).
                                     set(a6).create());
   }
   case 8: {
-    return Array(ArrayInit(8, true).set(a0).set(a1).set(a2).
-                                    set(a3).set(a4).set(a5).
-                                    set(a6).set(a7).create());
+    return Array(ArrayInit(8).set(a0).set(a1).set(a2).
+                              set(a3).set(a4).set(a5).
+                              set(a6).set(a7).create());
   }
   case 9: {
-    return Array(ArrayInit(9, true).set(a0).set(a1).set(a2).
-                                    set(a3).set(a4).set(a5).
-                                    set(a6).set(a7).set(a8).create());
+    return Array(ArrayInit(9).set(a0).set(a1).set(a2).
+                              set(a3).set(a4).set(a5).
+                              set(a6).set(a7).set(a8).create());
   }
   case 10: {
-    return Array(ArrayInit(10, true).set(a0).set(a1).set(a2).
-                                     set(a3).set(a4).set(a5).
-                                     set(a6).set(a7).set(a8).
-                                     set(a9).create());
+    return Array(ArrayInit(10).set(a0).set(a1).set(a2).
+                               set(a3).set(a4).set(a5).
+                               set(a6).set(a7).set(a8).
+                               set(a9).create());
   }
 #endif
   default:
@@ -420,49 +420,49 @@ Array collect_few_args_ref(int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
     return Array();
   }
   case 1: {
-    return Array(ArrayInit(1, true).setRef(a0).create());
+    return Array(ArrayInit(1).setRef(a0).create());
   }
   case 2: {
-    return Array(ArrayInit(2, true).setRef(a0).setRef(a1).create());
+    return Array(ArrayInit(2).setRef(a0).setRef(a1).create());
   }
   case 3: {
-    return Array(ArrayInit(3, true).setRef(a0).setRef(a1).setRef(a2).create());
+    return Array(ArrayInit(3).setRef(a0).setRef(a1).setRef(a2).create());
   }
 #if INVOKE_FEW_ARGS_COUNT > 3
   case 4: {
-    return Array(ArrayInit(4, true).setRef(a0).setRef(a1).setRef(a2).
-                                    setRef(a3).create());
+    return Array(ArrayInit(4).setRef(a0).setRef(a1).setRef(a2).
+                              setRef(a3).create());
   }
   case 5: {
-    return Array(ArrayInit(5, true).setRef(a0).setRef(a1).setRef(a2).
-                                    setRef(a3).setRef(a4).create());
+    return Array(ArrayInit(5).setRef(a0).setRef(a1).setRef(a2).
+                              setRef(a3).setRef(a4).create());
   }
   case 6: {
-    return Array(ArrayInit(6, true).setRef(a0).setRef(a1).setRef(a2).
-                                    setRef(a3).setRef(a4).setRef(a5).create());
+    return Array(ArrayInit(6).setRef(a0).setRef(a1).setRef(a2).
+                              setRef(a3).setRef(a4).setRef(a5).create());
   }
 #endif
 #if INVOKE_FEW_ARGS_COUNT > 6
   case 7: {
-    return Array(ArrayInit(7, true).setRef(a0).setRef(a1).setRef(a2).
-                                    setRef(a3).setRef(a4).setRef(a5).
-                                    setRef(a6).create());
+    return Array(ArrayInit(7).setRef(a0).setRef(a1).setRef(a2).
+                              setRef(a3).setRef(a4).setRef(a5).
+                              setRef(a6).create());
   }
   case 8: {
-    return Array(ArrayInit(8, true).setRef(a0).setRef(a1).setRef(a2).
-                                    setRef(a3).setRef(a4).setRef(a5).
-                                    setRef(a6).setRef(a7).create());
+    return Array(ArrayInit(8).setRef(a0).setRef(a1).setRef(a2).
+                              setRef(a3).setRef(a4).setRef(a5).
+                              setRef(a6).setRef(a7).create());
   }
   case 9: {
-    return Array(ArrayInit(9, true).setRef(a0).setRef(a1).setRef(a2).
-                                    setRef(a3).setRef(a4).setRef(a5).
-                                    setRef(a6).setRef(a7).setRef(a8).create());
+    return Array(ArrayInit(9).setRef(a0).setRef(a1).setRef(a2).
+                              setRef(a3).setRef(a4).setRef(a5).
+                              setRef(a6).setRef(a7).setRef(a8).create());
   }
   case 10: {
-    return Array(ArrayInit(10, true).setRef(a0).setRef(a1).setRef(a2).
-                                     setRef(a3).setRef(a4).setRef(a5).
-                                     setRef(a6).setRef(a7).setRef(a8).
-                                     setRef(a9).create());
+    return Array(ArrayInit(10).setRef(a0).setRef(a1).setRef(a2).
+                               setRef(a3).setRef(a4).setRef(a5).
+                               setRef(a6).setRef(a7).setRef(a8).
+                               setRef(a9).create());
   }
 #endif
   default:
@@ -1258,7 +1258,7 @@ void AutoloadHandler::fiberExit(AutoloadHandler *handler,
 bool AutoloadHandler::invokeHandler(CStrRef className,
                                     const bool *declared /* = NULL */,
                                     bool forceSplStack /* = false */) {
-  Array params(ArrayInit(1, true).set(className).create());
+  Array params(ArrayInit(1).set(className).create());
   bool l_running = m_running;
   m_running = true;
   if (m_handlers.isNull() && !forceSplStack) {

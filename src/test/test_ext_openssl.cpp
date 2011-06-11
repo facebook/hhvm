@@ -111,7 +111,7 @@ bool TestExtOpenssl::test_openssl_csr_new() {
 }
 
 bool TestExtOpenssl::test_openssl_csr_sign() {
-  Array dn(ArrayInit(7, false).
+  Array dn(ArrayInit(7).
            set(0, "countryName", "XX").
            set(1, "stateOrProvinceName", "State").
            set(2, "localityName", "SomewhereCity").

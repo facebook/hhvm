@@ -32,30 +32,30 @@ namespace HPHP {
 // constructors/destructors
 
 ArrayData *ArrayData::Create() {
-  return ArrayInit(0, false).create();
+  return ArrayInit((ssize_t)0).create();
 }
 
 ArrayData *ArrayData::Create(CVarRef value) {
-  ArrayInit init(1, true);
+  ArrayInit init(1);
   init.set(value);
   return init.create();
 }
 
 ArrayData *ArrayData::Create(CVarRef name, CVarRef value) {
-  ArrayInit init(1, false);
+  ArrayInit init(1);
   // There is no toKey() call on name.
   init.set(name, value, true);
   return init.create();
 }
 
 ArrayData *ArrayData::CreateRef(CVarRef value) {
-  ArrayInit init(1, true);
+  ArrayInit init(1);
   init.setRef(value);
   return init.create();
 }
 
 ArrayData *ArrayData::CreateRef(CVarRef name, CVarRef value) {
-  ArrayInit init(1, false);
+  ArrayInit init(1);
   // There is no toKey() call on name.
   init.setRef(name, value, true);
   return init.create();

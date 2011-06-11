@@ -680,7 +680,7 @@ memcached_return_t doStatsCallback(const memcached_st *ptr,
   memcached_stat_st *stats = context->stats;
   ssize_t i = context->returnValue.size();
 
-  context->returnValue.set(String(key, CopyString), Array(ArrayInit(24, false)
+  context->returnValue.set(String(key, CopyString), Array(ArrayInit(24)
       .set("pid",                        (int64)stats[i].pid)
       .set("uptime",                     (int64)stats[i].uptime)
       .set("threads",                    (int64)stats[i].threads)
@@ -994,9 +994,9 @@ bool c_Memcached::toObject(Variant& value, const memcached_result_st &result) {
 
 memcached_return c_Memcached::doCacheCallback(CVarRef callback, CStrRef key,
                                               Variant& value) {
-  Array params(ArrayInit(3, true).set(Variant(this))
-                                 .set(key)
-                                 .setRef(value).create());
+  Array params(ArrayInit(3).set(Variant(this))
+                           .set(key)
+                           .setRef(value).create());
   if (!f_call_user_func_array(callback, params)) {
     return MEMCACHED_NOTFOUND;
   }

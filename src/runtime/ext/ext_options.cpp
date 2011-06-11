@@ -576,7 +576,7 @@ Array f_getrusage(int who /* = 0 */) {
     throw SystemCallFailure("getrusage");
   }
 
-  return Array(ArrayInit(17, true).
+  return Array(ArrayInit(17).
                set(PHP_RUSAGE_PARA(ru_oublock)).
                set(PHP_RUSAGE_PARA(ru_inblock)).
                set(PHP_RUSAGE_PARA(ru_msgsnd)).

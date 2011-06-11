@@ -87,7 +87,7 @@ Variant SimpleFunctionCallExpression::evalCallInfo(
     void *extra,
     VariableEnvironment &env) const {
   ASSERT(cit);
-  ArrayInit ai(m_params.size(), true);
+  ArrayInit ai(m_params.size());
   for (unsigned int i = 0; i < m_params.size(); ++i) {
     if (cit->mustBeRef(i)) {
       ai.setRef(m_params[i]->refval(env));

@@ -1194,7 +1194,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     if (!cg.inExpression()) return true;
     cg.wrapExpressionBegin();
     m_ciTemp = cg.createNewLocalId(shared_from_this());
-    cg_printf("ArrayInit compact%d(%d, false);\n",
+    cg_printf("ArrayInit compact%d(%d);\n",
               m_ciTemp, m_params->getCount() / 2);
     for (int i = 0; i < m_params->getCount(); i += 2) {
       assert((*m_params)[i]->isLiteralString());
@@ -1545,7 +1545,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
     }
     if (!isUnused()) {
       if (m_safe > 0 && !m_safeDef) {
-        cg_printf("Array(ArrayInit(2, true).set(0, true).set(1, ");
+        cg_printf("Array(ArrayInit(2).set(0, true).set(1, ");
 
         Array ret(Array::Create(0, false));
         ret.set(1, Variant());

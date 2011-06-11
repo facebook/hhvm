@@ -667,7 +667,7 @@ void MethodStatement::outputCPPArgInjections(CodeGenerator &cg,
         outputParamArrayCreate(cg, true);
         cg_printf(", %s);\n", funcScope->isRefReturn() ? "ref(r)" : "r");
       } else {
-        cg_printf("(Array(ArrayInit(%d, true)", n);
+        cg_printf("(Array(ArrayInit(%d)", n);
         for (int i = 0; i < n; i++) {
           ParameterExpressionPtr param =
             dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);

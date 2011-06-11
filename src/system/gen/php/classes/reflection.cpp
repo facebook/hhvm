@@ -2133,10 +2133,10 @@ void c_ReflectionClass::t___construct(Variant v_name) {
       {
         bool tmp0;
         {
-          bool tmp1((toBoolean(x_call_user_func(2, NAMVAR(s_sys_svsb7ae555d, "class_exists"), Array(ArrayInit(1, true).setRef(v_name).create())))));
+          bool tmp1((toBoolean(x_call_user_func(2, NAMVAR(s_sys_svsb7ae555d, "class_exists"), Array(ArrayInit(1).setRef(v_name).create())))));
           bool tmp2 = (!(tmp1));
           if (tmp2) {
-            bool tmp3((toBoolean(x_call_user_func(2, NAMVAR(s_sys_svs5f48f4d6, "interface_exists"), Array(ArrayInit(1, true).setRef(v_name).create())))));
+            bool tmp3((toBoolean(x_call_user_func(2, NAMVAR(s_sys_svs5f48f4d6, "interface_exists"), Array(ArrayInit(1).setRef(v_name).create())))));
             tmp2 = (!(tmp3));
           }
           tmp0 = (tmp2);
@@ -2169,7 +2169,7 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
   if (!(toBoolean(m_info))) {
     {
       {
-        const Variant &tmp0((x_call_user_func(2, NAMVAR(s_sys_svs7732a9a6, "hphp_get_class_info"), Array(ArrayInit(1, true).setRef(m_name).create()))));
+        const Variant &tmp0((x_call_user_func(2, NAMVAR(s_sys_svs7732a9a6, "hphp_get_class_info"), Array(ArrayInit(1).setRef(m_name).create()))));
         m_info.assignVal(tmp0);
       }
       if (empty(m_info)) {
@@ -4298,7 +4298,7 @@ Variant c_ReflectionMethod::t_invoke(int num_args, CVarRef v_obj, Array args /* 
   Variant v_args;
 
   {
-    const Array &tmp0((func_get_args(num_args, Array(ArrayInit(1, true).set(v_obj).create()),args)));
+    const Array &tmp0((func_get_args(num_args, Array(ArrayInit(1).set(v_obj).create()),args)));
     v_args = tmp0;
   }
   x_array_shift(ref(v_args));

@@ -501,7 +501,7 @@ static StaticString s_key("key");
 
 Variant HphpArray::each() {
   if (m_pos != ArrayData::invalid_index) {
-    ArrayInit init(4, false);
+    ArrayInit init(4);
     Variant key = getKey(m_pos);
     Variant value = getValue(m_pos);
     init.set(int64(1), value);

@@ -87,7 +87,7 @@ bool TestExtUrl::test_http_build_query() {
        "foo=bar&amp;baz=boom&amp;cow=milk&amp;php=hypertext+processor");
   }
   {
-    Array data = Array(ArrayInit(6, false).
+    Array data = Array(ArrayInit(6).
                        set("foo").
                        set("bar").
                        set("baz").
@@ -102,7 +102,7 @@ bool TestExtUrl::test_http_build_query() {
        "php=hypertext+processor");
   }
   {
-    Array data = Array(ArrayInit(4, false).
+    Array data = Array(ArrayInit(4).
       set("user",
           CREATE_MAP4("name", "Bob Smith",
                       "age", 47,

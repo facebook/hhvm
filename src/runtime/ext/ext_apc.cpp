@@ -70,7 +70,7 @@ Variant f_apc_fetch(CVarRef key, VRefParam success /* = null */,
   if (key.is(KindOfArray)) {
     bool tmp = false;
     Array keys = key.toArray();
-    ArrayInit init(keys.size(), false);
+    ArrayInit init(keys.size());
     for (ArrayIter iter(keys); iter; ++iter) {
       Variant k = iter.second();
       if (!k.isString()) {
@@ -106,7 +106,7 @@ Variant f_apc_delete(CVarRef key, int64 cache_id /* = 0 */) {
 
   if (key.is(KindOfArray)) {
     Array keys = key.toArray();
-    ArrayInit init(keys.size(), true);
+    ArrayInit init(keys.size());
     for (ArrayIter iter(keys); iter; ++iter) {
       Variant k = iter.second();
       if (!k.isString()) {
@@ -182,7 +182,7 @@ Variant f_apc_exists(CVarRef key, int64 cache_id /* = 0 */) {
 
   if (key.is(KindOfArray)) {
     Array keys = key.toArray();
-    ArrayInit init(keys.size(), false);
+    ArrayInit init(keys.size());
     for (ArrayIter iter(keys); iter; ++iter) {
       Variant k = iter.second();
       if (!k.isString()) {

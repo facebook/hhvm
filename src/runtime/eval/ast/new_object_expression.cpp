@@ -45,7 +45,7 @@ Variant NewObjectExpression::eval(VariableEnvironment &env) const {
   mcp1.construct(o);
   const CallInfo* cit1 = mcp1.ci;
   ASSERT(cit1);
-  ArrayInit ai(m_params.size(), true);
+  ArrayInit ai(m_params.size());
   for (unsigned int i = 0; i < m_params.size(); ++i) {
     if (cit1->mustBeRef(i)) {
       ai.setRef(m_params[i]->refval(env));

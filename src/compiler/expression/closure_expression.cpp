@@ -180,7 +180,7 @@ void ClosureExpression::outputCPPImpl(CodeGenerator &cg,
             m_func->getOriginalName().c_str());
 
   if (m_vars && m_vars->getCount()) {
-    cg_printf("Array(ArrayInit(%d, false, true)", m_vars->getCount());
+    cg_printf("Array(ArrayInit(%d, true)", m_vars->getCount());
     for (int i = 0; i < m_vars->getCount(); i++) {
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);

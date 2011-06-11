@@ -310,7 +310,7 @@ static StaticString s_key("key");
 
 Variant ZendArray::each() {
   if (m_pos) {
-    ArrayInit init(4, false);
+    ArrayInit init(4);
     Bucket *p = reinterpret_cast<Bucket *>(m_pos);
     Variant key = getKey(m_pos);
     Variant value = getValue(m_pos);

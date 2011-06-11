@@ -234,13 +234,13 @@ bool TestCppBase::TestArray() {
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
     VERIFY((int)arr[0] == 0);
-    VS(arr, Array(ArrayInit(1, true).set(0).create()));
+    VS(arr, Array(ArrayInit(1).set(0).create()));
 
     arr = Array::Create("test");
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
     VERIFY(arr[0] == "test");
-    VS(arr, Array(ArrayInit(1, true).set("test").create()));
+    VS(arr, Array(ArrayInit(1).set("test").create()));
 
     Array arrCopy = arr;
     arr = Array::Create(arr);
@@ -248,19 +248,19 @@ bool TestCppBase::TestArray() {
     VERIFY(!arr.isNull());
     VERIFY(arr[0].toArray().size() == 1);
     VS(arr[0], arrCopy);
-    VS(arr, Array(ArrayInit(1, true).set(arrCopy).create()));
+    VS(arr, Array(ArrayInit(1).set(arrCopy).create()));
 
     arr = Array::Create("name", 1);
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
     VERIFY((int)arr["name"] == 1);
-    VS(arr, Array(ArrayInit(1, false).set("name", 1).create()));
+    VS(arr, Array(ArrayInit(1).set("name", 1).create()));
 
     arr = Array::Create("name", "test");
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
     VERIFY(arr["name"] == "test");
-    VS(arr, Array(ArrayInit(1, false).set("name", "test").create()));
+    VS(arr, Array(ArrayInit(1).set("name", "test").create()));
 
     arrCopy = arr;
     arr = Array::Create("name", arr);
@@ -268,7 +268,7 @@ bool TestCppBase::TestArray() {
     VERIFY(!arr.isNull());
     VS(arr["name"], arrCopy);
     VERIFY(arr["name"].toArray().size() == 1);
-    VS(arr, Array(ArrayInit(1, false).set("name", arrCopy).create()));
+    VS(arr, Array(ArrayInit(1).set("name", arrCopy).create()));
   }
 
   // iteration
@@ -761,7 +761,7 @@ bool TestCppBase::TestVariant() {
   }
   {
     Variant v1 = 10;
-    Variant v2 = Array(ArrayInit(1, true).setRef(v1).create());
+    Variant v2 = Array(ArrayInit(1).setRef(v1).create());
     v1 = 20;
     VS(v2[0], 20);
   }

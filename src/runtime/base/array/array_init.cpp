@@ -23,8 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayInit
 
-ArrayInit::ArrayInit(ssize_t n, bool isVector /* = false */,
-                     bool keepRef /* = false */) : m_data(NULL) {
+ArrayInit::ArrayInit(ssize_t n, bool keepRef /* = false */) {
   if (n == 0) {
     if (keepRef) {
       m_data = StaticEmptyZendArray::Get();

@@ -24,7 +24,7 @@ Variant &LVariableTable::getImpl(CStrRef s) {
   // LVariableTable may have references to its values leaked, and therefore
   // cannot support escalation from SmallArray.
   if (!m_px) {
-    m_px = ArrayInit(0, false, true).create();
+    m_px = ArrayInit((ssize_t)0, true).create();
     m_px->incRefCount();
   }
   return lvalAt(s, AccessFlags::Key);

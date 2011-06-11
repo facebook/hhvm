@@ -1584,7 +1584,7 @@ namespace hphp_impl_splitter {}
 Variant c_AppendIterator::t___call(Variant v_func, Variant v_params) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__call);
   {
-    ArrayInit tmp0(2, true);
+    ArrayInit tmp0(2);
     MethodCallPackage mcp1;
     mcp1.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
     const CallInfo *cit1 ATTRIBUTE_UNUSED = mcp1.ci;

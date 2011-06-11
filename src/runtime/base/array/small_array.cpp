@@ -204,7 +204,7 @@ StaticString s_key("key");
 
 Variant SmallArray::each() {
   if (m_pos >= 0) {
-    ArrayInit init(4, false);
+    ArrayInit init(4);
     Variant key(getKey(m_pos));
     Variant value(getValue(m_pos));
     init.set(1LL, value);

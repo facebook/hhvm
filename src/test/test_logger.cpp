@@ -37,7 +37,7 @@ bool TestLogger::initializeRun() {
   gethostname(buf, sizeof(buf));
   hostname = buf;
 
-  ArrayInit data(8, false);
+  ArrayInit data(8);
   data.set("startedTime",  time(NULL));
   data.set("stillRunning", true);
   data.set("hostname",     hostname);

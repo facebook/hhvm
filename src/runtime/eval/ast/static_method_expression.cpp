@@ -86,7 +86,7 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
   // If the lookup failed dynamicNamedCall() must throw an exception,
   // so if we reach here cit1 must not be NULL
   ASSERT(cit1);
-  ArrayInit ai(m_params.size(), true);
+  ArrayInit ai(m_params.size());
   for (unsigned int i = 0; i < m_params.size(); ++i) {
     if (cit1->mustBeRef(i)) {
       ai.setRef(m_params[i]->refval(env));

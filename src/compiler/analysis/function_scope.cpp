@@ -1002,7 +1002,7 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
     cg_printf("Array(");
     if (m_maxParam) {
       // param arrays are always vectors
-      cg_printf("ArrayInit(%d, true).", m_maxParam);
+      cg_printf("ArrayInit(%d).", m_maxParam);
     }
   }
   for (int i = 0; i < m_maxParam; i++) {
@@ -1092,7 +1092,7 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
           return;
         }
       }
-      cg_printf("Array(ArrayInit(%d, true).", paramCount - i);
+      cg_printf("Array(ArrayInit(%d).", paramCount - i);
     }
     if (extra) {
       bool needRef = param->hasContext(Expression::RefValue) &&

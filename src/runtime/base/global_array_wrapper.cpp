@@ -261,7 +261,7 @@ static StaticString s_key("key");
 
 Variant GlobalArrayWrapper::each() {
   if (!isInvalid()) {
-    ArrayInit init(4, false);
+    ArrayInit init(4);
     Variant key = getKey(m_pos);
     Variant value = getValue(m_pos);
     init.set(1, value);

@@ -33,6 +33,7 @@ Variant f_curl_copy_handle(CObjRef ch);
 Variant f_curl_version(int uversion = k_CURLVERSION_NOW);
 bool f_curl_setopt(CObjRef ch, int option, CVarRef value);
 bool f_curl_setopt_array(CObjRef ch, CArrRef options);
+Variant f_fb_curl_getopt(CObjRef ch, int opt = 0);
 Variant f_curl_exec(CObjRef ch);
 Variant f_curl_getinfo(CObjRef ch, int opt = 0);
 Variant f_curl_errno(CObjRef ch);

@@ -55,6 +55,12 @@ inline bool x_curl_setopt_array(CObjRef ch, CArrRef options) {
   return f_curl_setopt_array(ch, options);
 }
 
+inline Variant x_fb_curl_getopt(CObjRef ch, int opt = 0) {
+  FUNCTION_INJECTION_BUILTIN(fb_curl_getopt);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_fb_curl_getopt(ch, opt);
+}
+
 inline Variant x_curl_exec(CObjRef ch) {
   FUNCTION_INJECTION_BUILTIN(curl_exec);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);

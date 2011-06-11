@@ -154,6 +154,31 @@ DefineFunction(
     ),
   ));
 
+// FB-specific extension
+DefineFunction(
+  array(
+    'name'   => "fb_curl_getopt",
+    'desc'   => "Gets options on the given cURL session handle.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "If opt is given, returns its value. Otherwise, returns an associative array.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "ch",
+        'type'   => Resource,
+        'desc'   => "A cURL handle returned by curl_init().",
+      ),
+      array(
+        'name'   => "opt",
+        'type'   => Int32,
+        'value'  => "0",
+        'desc'   => "This should be one of the CURLOPT_* values.",
+      ),
+    ),
+  ));
+
 DefineFunction(
   array(
     'name'   => "curl_exec",

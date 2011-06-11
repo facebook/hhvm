@@ -72,6 +72,7 @@ private:
     vector<char*>          str;
     vector<curl_httppost*> post;
     vector<curl_slist*>    slist;
+    map<long, Variant>     opts;
 
     ~ToFree() {
       for (unsigned int i = 0; i < str.size(); i++) {
@@ -512,7 +513,30 @@ public:
       break;
     }
 
+    m_to_free->opts[option] = value;
+
     return m_error_no == CURLE_OK;
+  }
+
+  Variant getOption(long option) {
+
+    if (option != 0) {
+      std::map<long, Variant>::iterator it = m_to_free->opts.find(option);
+      if (it == m_to_free->opts.end()) {
+        return false;
+      }
+
+      return it->second;
+    }
+
+    Array ret;
+    for (std::map<long, Variant>::iterator it = m_to_free->opts.begin();
+         it != m_to_free->opts.end();
+         it++) {
+      ret.set(Variant(it->first), it->second);
+    }
+
+    return ret;
   }
 
   static int curl_debug(CURL *cp, curl_infotype type, char *buf,
@@ -718,6 +742,11 @@ bool f_curl_setopt_array(CObjRef ch, CArrRef options) {
     }
   }
   return true;
+}
+
+Variant f_fb_curl_getopt(CObjRef ch, int opt /* = 0 */) {
+  CHECK_RESOURCE(curl);
+  return curl->getOption(opt);
 }
 
 Variant f_curl_exec(CObjRef ch) {

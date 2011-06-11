@@ -5905,6 +5905,25 @@ Variant ifa_imagechar(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg5(a5);
   return (x_imagechar(arg0, arg1, arg2, arg3, arg4, arg5));
 }
+Variant i_fb_curl_getopt(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("fb_curl_getopt", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (x_fb_curl_getopt(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (x_fb_curl_getopt(arg0, arg1));
+  }
+}
+Variant ifa_fb_curl_getopt(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("fb_curl_getopt", count, 1, 2, 1);
+  CVarRef arg0(a0);
+  if (count <= 1) return (x_fb_curl_getopt(arg0));
+  CVarRef arg1(a1);
+  return (x_fb_curl_getopt(arg0, arg1));
+}
 Variant i_magicksetimagebackgroundcolor(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("magicksetimagebackgroundcolor", count, 2, 2, 1);
@@ -38022,6 +38041,7 @@ CallInfo ci_dom_node_append_child((void*)&i_dom_node_append_child, (void*)&ifa_d
 CallInfo ci_cosh((void*)&i_cosh, (void*)&ifa_cosh, 1, 0, 0x0000000000000000LL);
 CallInfo ci_copy((void*)&i_copy, (void*)&ifa_copy, 3, 0, 0x0000000000000000LL);
 CallInfo ci_imagechar((void*)&i_imagechar, (void*)&ifa_imagechar, 6, 0, 0x0000000000000000LL);
+CallInfo ci_fb_curl_getopt((void*)&i_fb_curl_getopt, (void*)&ifa_fb_curl_getopt, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magicksetimagebackgroundcolor((void*)&i_magicksetimagebackgroundcolor, (void*)&ifa_magicksetimagebackgroundcolor, 2, 0, 0x0000000000000000LL);
 CallInfo ci_ldap_mod_add((void*)&i_ldap_mod_add, (void*)&ifa_ldap_mod_add, 3, 0, 0x0000000000000000LL);
 CallInfo ci_fb_thrift_serialize((void*)&i_fb_thrift_serialize, (void*)&ifa_fb_thrift_serialize, 1, 0, 0x0000000000000000LL);
@@ -43632,6 +43652,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 2604:
       HASH_GUARD(0x073ACDF9B3F06A2CLL, memcache_setoptimeout) {
         ci = &ci_memcache_setoptimeout;
+        return true;
+      }
+      HASH_GUARD(0x3DA70155FBE16A2CLL, fb_curl_getopt) {
+        ci = &ci_fb_curl_getopt;
         return true;
       }
       break;

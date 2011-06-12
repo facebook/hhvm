@@ -356,6 +356,25 @@ static bool canonCompare(ExpressionPtr e1, ExpressionPtr e2) {
     e1->canonCompare(e2);
 }
 
+static bool compareArrays(ArrayElementExpressionPtr e1,
+                          ArrayElementExpressionPtr e2) {
+  if (!e1->getOffset() || !e2->getOffset() ||
+      e1->getOffset()->getCanonID() != e2->getOffset()->getCanonID()) {
+    return false;
+  }
+
+  if (e1->getVariable()->getCanonID() == e2->getVariable()->getCanonID()) {
+    return true;
+  }
+
+  if (e1->getVariable()->getCanonLVal() == e2->getVariable() ||
+      e2->getVariable()->getCanonLVal() == e1->getVariable()) {
+    return true;
+  }
+
+  return false;
+}
+
 int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2,
     bool forLval /* = false */) {
   Expression::KindOf k1 = e1->getKindOf(), k2 = e2->getKindOf();
@@ -382,19 +401,25 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2,
       }
 
       if (canonCompare(e1, e2)) return SameAccess;
-      if (!forLval)             return InterfAccess;
+
+      if (k2 != Expression::KindOfArrayElementExpression) {
+        if (forLval && !e1->hasContext(Expression::LValue)) {
+          return DisjointAccess;
+        }
+        return InterfAccess;
+      }
 
       {
+        ArrayElementExpressionPtr p1(spc(ArrayElementExpression, e1));
+        ArrayElementExpressionPtr p2(spc(ArrayElementExpression, e2));
+        if (compareArrays(p1, p2)) return SameAccess;
+
+        if (!forLval)             return InterfAccess;
+
         // forLval alias checking
-        if (k2 != Expression::KindOfArrayElementExpression) {
-          if (!e1->hasContext(Expression::LValue)) return DisjointAccess;
-          return InterfAccess;
-        }
 
         // e1 and e2 are both array elements, where e2 is testing
         // against e1 (e1 is ahead in the chain)
-        ArrayElementExpressionPtr p1(spc(ArrayElementExpression, e1));
-        ArrayElementExpressionPtr p2(spc(ArrayElementExpression, e2));
 
         if (!p2->getVariable()->is(Expression::KindOfSimpleVariable)) {
           return InterfAccess;
@@ -422,7 +447,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2,
 
         // make sure the offsets refer to the same *value* by comparing
         // canon ids
-        if (!p1->getOffset() || !p2->getOffset()) return DisjointAccess;
+        if (!p1->getOffset() || !p2->getOffset()) return InterfAccess;
         return p1->getOffset()->getCanonID() == p2->getOffset()->getCanonID() ?
           SameAccess : InterfAccess;
       }
@@ -900,6 +925,16 @@ int AliasManager::findInterf0(
           max_depth = depth;
         }
       } else {
+        if (a == InterfAccess &&
+            rv->is(Expression::KindOfArrayElementExpression) &&
+            e->hasContext(Expression::AccessContext)) {
+          ExpressionPtr t = rv;
+          do {
+            t = spc(ArrayElementExpression, t)->getVariable();
+            if (t == e) break;
+          } while (t->is(Expression::KindOfArrayElementExpression));
+          if (t == e) continue;
+        }
         if (unset_simple) {
           if (a == InterfAccess) {
             if (!rep) {
@@ -1396,6 +1431,37 @@ ExpressionPtr AliasManager::canonicalizeNode(
             e->setCanonPtr(rep);
           } else if (interf == SameLValueAccess) {
             setCanonPtrForArrayCSE(e, rep);
+          } else if (interf == InterfAccess && rep &&
+                     rep->is(Expression::KindOfAssignmentExpression) &&
+                     (e->is(Expression::KindOfSimpleVariable) ||
+                      e->is(Expression::KindOfArrayElementExpression))) {
+            ExpressionPtr val = rep;
+            do {
+              val = spc(AssignmentExpression, val)->getValue();
+            } while (val->is(Expression::KindOfAssignmentExpression));
+            if (!val->isScalar()) break;
+            ExpressionPtr var = spc(AssignmentExpression, rep)->getVariable();
+            while (var->is(Expression::KindOfArrayElementExpression)) {
+              var = spc(ArrayElementExpression, var)->getVariable();
+              if (var->getKindOf() == e->getKindOf()) {
+                if (var->is(Expression::KindOfSimpleVariable)) {
+                  if (canonCompare(var, e)) {
+                    e->setCanonPtr(var);
+                    break;
+                  }
+                } else {
+                  ArrayElementExpressionPtr a1(
+                    spc(ArrayElementExpression, e));
+                  ArrayElementExpressionPtr a2(
+                    spc(ArrayElementExpression, var));
+                  if (compareArrays(a1, a2)) {
+                    e->setCanonPtr(var);
+                    break;
+                  }
+                }
+
+              }
+            }
           }
           break;
         }

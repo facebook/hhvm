@@ -29,6 +29,8 @@
 #include <runtime/ext/ext_class.h>
 #include <runtime/ext/ext_output.h>
 
+#include <system/lib/systemlib.h>
+
 using namespace std;
 
 namespace HPHP {
@@ -145,7 +147,7 @@ static void model_to_string(sdlContentModelPtr model, StringBuffer &buf,
 // client helpers
 
 static Object create_soap_fault(CStrRef code, CStrRef fault) {
-  return Object((NEWOBJ(c_SoapFault)())->create(code, fault));
+  return Object(SystemLib::AllocSoapFaultObject(code, fault));
 }
 
 static Object create_soap_fault(Exception &e) {
@@ -1183,8 +1185,8 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
   }
   xmlDocSetRootElement(doc, envelope);
 
-  if (ret.isObject() && ret.toObject().is<c_SoapFault>()) {
-    c_SoapFault *obj = ret.toObject().getTyped<c_SoapFault>();
+  if (ret.isObject() && ret.toObject()->o_instanceof("SoapFault")) {
+    ObjectData* obj = ret.getObjectData();
 
     char *detail_name;
     sdlFaultPtr fault;
@@ -1194,7 +1196,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
       xmlNodePtr head;
       encodePtr hdr_enc;
       int hdr_use = SOAP_LITERAL;
-      Variant &hdr_ret = obj->m_headerfault;
+      Variant hdr_ret = obj->o_get("headerfault");
       soapHeader *h = headers[0].toObject().getTyped<soapHeader>();
       const char *hdr_ns   = h->hdr ? h->hdr->ns.c_str() : NULL;
       const char *hdr_name = h->function_name.data();
@@ -1223,12 +1225,14 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
           }
         }
         hdr_ret = ht->m_data;
+        obj->o_set("headerfault", hdr_ret);
       }
 
       if (h->function) {
         if (serialize_response_call2(head, h->function,
                                      h->function_name.data(), uri,
                                      hdr_ret, version, 0) == SOAP_ENCODED) {
+          obj->o_set("headerfault", hdr_ret);
           use = SOAP_ENCODED;
         }
       } else {
@@ -1246,11 +1250,12 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
     body = xmlNewChild(envelope, ns, BAD_CAST("Body"), NULL);
     param = xmlNewChild(body, ns, BAD_CAST("Fault"), NULL);
 
-    fault_ns = obj->m_faultcodens.data();
+    fault_ns = obj->o_get("faultcodens").toString().data();
     use = SOAP_LITERAL;
-    if (!obj->m_name.empty()) {
+    if (!obj->o_get("_name").toString().empty()) {
       if (function) {
-        sdlFaultMap::iterator iter = function->faults.find(obj->m_name.data());
+        sdlFaultMap::iterator iter =
+          function->faults.find(obj->o_get("_name").toString().data());
         if (iter != function->faults.end()) {
           fault = iter->second;
           if (function->binding &&
@@ -1285,9 +1290,9 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
     }
 
     if (version == SOAP_1_1) {
-      if (!obj->m_faultcode.empty()) {
+      if (!obj->o_get("faultcode").toString().empty()) {
         xmlNodePtr node = xmlNewNode(NULL, BAD_CAST("faultcode"));
-        String str = StringUtil::HtmlEncode(obj->m_faultcode,
+        String str = StringUtil::HtmlEncode(obj->o_get("faultcode"),
                                             StringUtil::DoubleQuotes,
                                             "UTF-8", true);
         xmlAddChild(param, node);
@@ -1301,23 +1306,23 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
           xmlNodeSetContentLen(node, BAD_CAST(str.data()), str.size());
         }
       }
-      if (!obj->m_faultstring.empty()) {
+      if (!obj->o_get("faultstring").toString().empty()) {
         xmlNodePtr node = master_to_xml(get_conversion(KindOfString),
-                                        obj->m_faultstring, SOAP_LITERAL,
+                                        obj->o_get("faultstring"), SOAP_LITERAL,
                                         param);
         xmlNodeSetName(node, BAD_CAST("faultstring"));
       }
-      if (!obj->m_faultactor.empty()) {
+      if (!obj->o_get("faultactor").toString().empty()) {
         xmlNodePtr node = master_to_xml(get_conversion(KindOfString),
-                                        obj->m_faultactor, SOAP_LITERAL,
+                                        obj->o_get("faultactor"), SOAP_LITERAL,
                                         param);
         xmlNodeSetName(node, BAD_CAST("faultactor"));
       }
       detail_name = "detail";
     } else {
-      if (!obj->m_faultcode.empty()) {
+      if (!obj->o_get("faultcode").toString().empty()) {
         xmlNodePtr node = xmlNewChild(param, ns, BAD_CAST("Code"), NULL);
-        String str = StringUtil::HtmlEncode(obj->m_faultcode,
+        String str = StringUtil::HtmlEncode(obj->o_get("faultcode"),
                                             StringUtil::DoubleQuotes,
                                             "UTF-8", true);
         node = xmlNewChild(node, ns, BAD_CAST("Value"), NULL);
@@ -1331,9 +1336,9 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
           xmlNodeSetContentLen(node, BAD_CAST(str.data()), str.size());
         }
       }
-      if (!obj->m_faultstring.empty()) {
+      if (!obj->o_get("faultstring").toString().empty()) {
         xmlNodePtr node = xmlNewChild(param, ns, BAD_CAST("Reason"), NULL);
-        node = master_to_xml(get_conversion(KindOfString), obj->m_faultstring,
+        node = master_to_xml(get_conversion(KindOfString), obj->o_get("faultstring"),
                              SOAP_LITERAL, node);
         xmlNodeSetName(node, BAD_CAST("Text"));
         xmlSetNs(node, ns);
@@ -1346,8 +1351,8 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
       sdlParamPtr sparam;
       xmlNodePtr x;
 
-      if (!obj->m_detail.isNull()) {
-        detail = obj->m_detail;
+      if (!obj->o_get("detail").isNull()) {
+        detail = obj->o_get("detail");
       }
       node = xmlNewNode(NULL, BAD_CAST(detail_name));
       xmlAddChild(param, node);
@@ -1388,8 +1393,8 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
         xmlSetNsProp(x, envelope->ns, BAD_CAST("encodingStyle"),
                      BAD_CAST(SOAP_1_2_ENC_NAMESPACE));
       }
-    } else if (!obj->m_detail.isNull()) {
-      serialize_zval(obj->m_detail, sdlParamPtr(), detail_name, use, param);
+    } else if (!obj->o_get("detail").isNull()) {
+      serialize_zval(obj->o_get("detail"), sdlParamPtr(), detail_name, use, param);
     }
   } else {
 
@@ -1797,7 +1802,12 @@ bool f_use_soap_error_handler(bool handler /* = true */) {
 }
 
 bool f_is_soap_fault(CVarRef fault) {
-  return fault.isObject() && fault.toObject().is<c_SoapFault>();
+  return fault.isObject() && fault.toObject()->o_instanceof("SoapFault");
+}
+
+int64 f__soap_active_version() {
+  USE_SOAP_GLOBAL;
+  return SOAP_GLOBAL(soap_version);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2151,7 +2161,8 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
         send_soap_server_fault(function, e, h);
         return;
       }
-      if (h->retval.isObject() && h->retval.toObject().is<c_SoapFault>()) {
+      if (h->retval.isObject() &&
+          h->retval.toObject()->o_instanceof("SoapFault")) {
         send_soap_server_fault(function, h->retval, h);
         return;
       }
@@ -2175,7 +2186,7 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
       send_soap_server_fault(function, e, NULL);
       return;
     }
-    if (retval.isObject() && retval.toObject().is<c_SoapFault>()) {
+    if (retval.isObject() && retval.toObject()->o_instanceof("SoapFault")) {
       send_soap_server_fault(function, retval, NULL);
       return;
     }
@@ -2247,7 +2258,7 @@ void c_SoapServer::t_fault(CVarRef code, CStrRef fault,
                            CStrRef name /* = null_string */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SoapServer, SoapServer::fault);
   SoapServerScope ss(this);
-  Object obj((NEWOBJ(c_SoapFault)())->create(code, fault, actor, detail, name));
+  Object obj(SystemLib::AllocSoapFaultObject(code, fault, actor, detail, name));
   send_soap_server_fault(sdlFunctionPtr(), obj, NULL);
 }
 
@@ -2616,7 +2627,7 @@ Variant c_SoapClient::t___dorequest(CStrRef buf, CStrRef location, CStrRef actio
   INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__dorequest);
   if (location.empty()) {
     m_soap_fault =
-      Object((NEWOBJ(c_SoapFault)())->create("HTTP", "Unable to parse URL"));
+      Object(SystemLib::AllocSoapFaultObject("HTTP", "Unable to parse URL"));
     return null;
   }
 
@@ -2678,9 +2689,8 @@ Variant c_SoapClient::t___dorequest(CStrRef buf, CStrRef location, CStrRef actio
   int code = http.post(location.data(), buffer.data(), buffer.size(), response,
                        &headers);
   if (code == 0) {
-    m_soap_fault =
-      Object((NEWOBJ(c_SoapFault)())->create
-             ("HTTP", "Failed Sending HTTP SOAP request"));
+    m_soap_fault = Object(SystemLib::AllocSoapFaultObject(
+      "HTTP", "Failed Sending HTTP SOAP request"));
     return null;
   }
   if (code != 200) {
@@ -2688,7 +2698,7 @@ Variant c_SoapClient::t___dorequest(CStrRef buf, CStrRef location, CStrRef actio
     if (msg.empty()) {
       msg = HttpProtocol::GetReasonString(code);
     }
-    m_soap_fault = Object((NEWOBJ(c_SoapFault)())->create("HTTP", msg));
+    m_soap_fault = Object(SystemLib::AllocSoapFaultObject("HTTP", msg));
     return null;
   }
 
@@ -2779,89 +2789,6 @@ void c_SoapVar::t___construct(CVarRef data, CVarRef type,
 
 Variant c_SoapVar::t___destruct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SoapVar, SoapVar::__destruct);
-  return null;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// class SoapFault
-
-c_SoapFault::c_SoapFault() {
-}
-
-c_SoapFault::~c_SoapFault() {
-}
-
-void c_SoapFault::t___construct(CVarRef code, CStrRef message,
-                                CStrRef actor /* = null_string */,
-                                CVarRef detail /* = null */,
-                                CStrRef name /* = null_string */,
-                                CVarRef header /* = null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapFault, SoapFault::__construct);
-  USE_SOAP_GLOBAL;
-  Variant fault_ns, fault_code;
-  if (code.isString()) {
-    fault_code = code;
-  } else if (code.isArray() && code.toArray().size() == 2) {
-    ArrayIter iter(code.toArray());
-    fault_ns = iter.second();
-    ++iter;
-    fault_code = iter.second();
-    if (!fault_ns.isString() || !fault_code.isString()) {
-      raise_warning("Invalid fault code");
-      return;
-    }
-  } else  {
-    raise_warning("Invalid fault code");
-    return;
-  }
-  m_faultcodens = fault_ns.toString();
-  m_faultcode = fault_code.toString();
-  if (m_faultcode.empty()) {
-    raise_warning("Invalid fault code");
-    return;
-  }
-
-  m_faultstring = c_Exception::m_message = message;
-  m_faultactor = actor;
-  m_detail = detail;
-  m_name = name;
-  m_headerfault = header;
-
-  int soap_version = SOAP_GLOBAL(soap_version);
-  if (m_faultcodens.empty()) {
-    if (soap_version == SOAP_1_1) {
-      if (m_faultcode == "Client" ||
-          m_faultcode == "Server" ||
-          m_faultcode == "VersionMismatch" ||
-          m_faultcode == "MustUnderstand") {
-        m_faultcodens = SOAP_1_1_ENV_NAMESPACE;
-      }
-    } else if (soap_version == SOAP_1_2) {
-      if (m_faultcode == "Client") {
-        m_faultcode = "Sender";
-        m_faultcodens = SOAP_1_2_ENV_NAMESPACE;
-      } else if (m_faultcode == "Server") {
-        m_faultcode = "Receiver";
-        m_faultcodens = SOAP_1_2_ENV_NAMESPACE;
-      } else if (m_faultcode == "VersionMismatch" ||
-                 m_faultcode == "MustUnderstand" ||
-                 m_faultcode == "DataEncodingUnknown") {
-        m_faultcodens = SOAP_1_2_ENV_NAMESPACE;
-      }
-    }
-  }
-}
-
-String c_SoapFault::t___tostring() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapFault, SoapFault::__tostring);
-  StringBuffer sb;
-  sb.printf("SoapFault exception: [%s] %s", m_faultcode.data(),
-            m_faultstring.data());
-  return sb.detach();
-}
-
-Variant c_SoapFault::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapFault, SoapFault::__destruct);
   return null;
 }
 

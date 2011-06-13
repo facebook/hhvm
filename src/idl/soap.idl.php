@@ -87,6 +87,18 @@ DefineFunction(
     ),
   ));
 
+DefineFunction(
+  array(
+    'name'   => "_soap_active_version",
+    'desc'   => "This function returns the soap version that is currently active.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Int64,
+      'desc'   => "This will return the active soap version.",
+    ),
+    'args'   => array(),
+  ));
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
@@ -666,87 +678,6 @@ DefineFunction(
         'type'   => String,
         'value'  => "null_string",
       ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
-EndClass(
-);
-
-///////////////////////////////////////////////////////////////////////////////
-
-BeginClass(
-  array(
-    'name'   => "SoapFault",
-    'parent' => "Exception",
-    'desc'   => "Represents a SOAP fault.",
-    'flags'  =>  HasDocComment,
-    'footer' => <<<EOT
-
-  public: String  m_faultstring;
-  public: String  m_faultcode;
-  public: String  m_faultcodens;
-  public: String  m_faultactor;
-  public: Variant m_detail;
-  public: String  m_name;
-  public: Variant m_headerfault;
-EOT
-,
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__construct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => null,
-    ),
-    'args'   => array(
-      array(
-        'name'   => "code",
-        'type'   => Variant,
-      ),
-      array(
-        'name'   => "message",
-        'type'   => String,
-      ),
-      array(
-        'name'   => "actor",
-        'type'   => String,
-        'value'  => "null_string",
-      ),
-      array(
-        'name'   => "detail",
-        'type'   => Variant,
-        'value'  => "null",
-      ),
-      array(
-        'name'   => "name",
-        'type'   => String,
-        'value'  => "null_string",
-      ),
-      array(
-        'name'   => "header",
-        'type'   => Variant,
-        'value'  => "null",
-      ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__tostring",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => String,
     ),
   ));
 

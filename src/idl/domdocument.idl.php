@@ -4419,49 +4419,6 @@ EndClass(
 
 BeginClass(
   array(
-    'name'   => "DOMException",
-    'parent' => "Exception",
-    'desc'   => "DOM operations raise exceptions under particular circumstances, i.e., when an operation is impossible to perform for logical reasons.\n\nSee also Exceptions.",
-    'flags'  =>  HasDocComment,
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__construct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => null,
-    ),
-    'args'   => array(
-      array(
-        'name'   => "message",
-        'type'   => String,
-        'value'  => "\"\"",
-      ),
-      array(
-        'name'   => "code",
-        'type'   => Int64,
-        'value'  => "0",
-      ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
-EndClass(
-);
-
-///////////////////////////////////////////////////////////////////////////////
-
-BeginClass(
-  array(
     'name'   => "DOMImplementation",
     'desc'   => "The DOMImplementation interface provides a number of methods for performing operations that are independent of any particular instance of the document object model.",
     'flags'  =>  HasDocComment,

@@ -823,33 +823,6 @@ class c_DOMNodeList : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::U
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class DOMException
-
-FORWARD_DECLARE_CLASS_BUILTIN(DOMException);
-class c_DOMException : public c_Exception {
- public:
-  BEGIN_CLASS_MAP(DOMException)
-  RECURSIVE_PARENT_CLASS(Exception)
-  END_CLASS_MAP(DOMException)
-  DECLARE_CLASS(DOMException, DOMException, Exception)
-
-  // need to implement
-  public: c_DOMException();
-  public: ~c_DOMException();
-  public: void t___construct(CStrRef message = "", int64 code = 0);
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
-
-  // implemented by HPHP
-  public: c_DOMException *create(String message = "", int64 code = 0);
-  public: void dynConstruct(CArrRef Params);
-  public: void getConstructor(MethodCallPackage &mcp);
-  
-
-};
-
-///////////////////////////////////////////////////////////////////////////////
 // class DOMImplementation
 
 FORWARD_DECLARE_CLASS_BUILTIN(DOMImplementation);

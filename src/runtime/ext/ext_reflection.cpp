@@ -20,7 +20,6 @@
 #include <runtime/base/class_info.h>
 #include <runtime/base/source_info.h>
 #include <runtime/base/runtime_option.h>
-#include <system/gen/php/classes/reflection.h>
 #include <runtime/base/string_util.h>
 
 #include <system/lib/systemlib.h>

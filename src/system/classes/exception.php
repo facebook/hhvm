@@ -308,4 +308,14 @@ class ErrorException extends Exception {
   final public function getSeverity() { return $this->severity; }
 }
 
+class DOMException extends Exception {
+  public function __construct($message, $code) {
+    parent::__construct($message, $code);
+  }
+}
+
+class PDOException extends Exception {
+  public function __construct() {
+  }
+}
 

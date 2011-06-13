@@ -1346,34 +1346,3 @@ DefineFunction(
 EndClass(
 );
 
-///////////////////////////////////////////////////////////////////////////////
-
-BeginClass(
-  array(
-    'name'   => "PDOException",
-    'parent' => "Exception",
-    'desc'   => "Represents an error raised by PDO. You should not throw a PDOException from your own code. See Exceptions for more information about Exceptions in PHP.",
-    'flags'  =>  HasDocComment,
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__construct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => null,
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
-EndClass(
-);
-

@@ -105,6 +105,7 @@ const char *BuiltinSymbols::SystemClasses[] = {
   "debugger",
   "xhprof",
   "directoryiterator",
+  "soapfault",
   NULL
 };
 

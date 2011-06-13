@@ -113,7 +113,7 @@ void f_var_dump(CVarRef v) {
   vs.serialize(v, false);
 }
 
-void f_var_dump(int _argc, Variant expression,
+void f_var_dump(int _argc, CVarRef expression,
                 CArrRef _argv /* = null_array */) {
   f_var_dump(expression);
   for (int i = 0; i < _argv.size(); i++) {

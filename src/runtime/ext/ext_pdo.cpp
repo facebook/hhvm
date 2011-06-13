@@ -457,20 +457,20 @@ public:
 static PDOErrorHash s_err_hash;
 
 void throw_pdo_exception(CVarRef code, CVarRef info, const char *fmt, ...) {
-  c_PDOException *e = NEWOBJ(c_PDOException)();
-  e->m_code = code;
+  ObjectData *obj = SystemLib::AllocPDOExceptionObject();
+  obj->o_set("code", code, "PDOException");
 
   va_list ap;
   va_start(ap, fmt);
   string msg;
   Util::string_vsnprintf(msg, fmt, ap);
-  e->m_message = String(msg);
+  obj->o_set("message", String(msg), "PDOException");
   va_end(ap);
 
   if (!info.isNull()) {
-    e->set("errorInfo", info);
+    obj->o_set("errorInfo", info, "PDOException");
   }
-  throw Object(e);
+  throw Object(obj);
 }
 
 void pdo_raise_impl_error(sp_PDOConnection dbh, sp_PDOStatement stmt,
@@ -3166,23 +3166,6 @@ Variant c_PDOStatement::t___sleep() {
 
 Variant c_PDOStatement::t___destruct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::__destruct);
-  return null;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// PDOException
-
-c_PDOException::c_PDOException() {
-}
-
-c_PDOException::~c_PDOException() {
-}
-
-void c_PDOException::t___construct() {
-}
-
-Variant c_PDOException::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(PDOException, PDOException::__destruct);
   return null;
 }
 

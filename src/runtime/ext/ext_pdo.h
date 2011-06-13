@@ -251,33 +251,6 @@ class c_PDOStatement : public ExtObjectData, public Sweepable {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class PDOException
-
-FORWARD_DECLARE_CLASS_BUILTIN(PDOException);
-class c_PDOException : public c_Exception {
- public:
-  BEGIN_CLASS_MAP(PDOException)
-  RECURSIVE_PARENT_CLASS(Exception)
-  END_CLASS_MAP(PDOException)
-  DECLARE_CLASS(PDOException, PDOException, Exception)
-
-  // need to implement
-  public: c_PDOException();
-  public: ~c_PDOException();
-  public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
-
-  // implemented by HPHP
-  public: c_PDOException *create();
-  public: void dynConstruct(CArrRef Params);
-  public: void getConstructor(MethodCallPackage &mcp);
-  
-
-};
-
-///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // __EXT_PDO_H__

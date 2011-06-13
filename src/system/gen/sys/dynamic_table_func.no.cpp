@@ -10017,6 +10017,15 @@ Variant ifa_session_set_cookie_params(void *extra, int count, INVOKE_FEW_ARGS_IM
   CVarRef arg4(a4);
   return (x_session_set_cookie_params(arg0, arg1, arg2, arg3, arg4), null);
 }
+Variant i__soap_active_version(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("_soap_active_version", 0, 1);
+  return (x__soap_active_version());
+}
+Variant ifa__soap_active_version(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("_soap_active_version", 0, 1);
+  return (x__soap_active_version());
+}
 Variant i_drawellipse(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 7)) return throw_wrong_arguments("drawellipse", count, 7, 7, 1);
@@ -30589,21 +30598,6 @@ Variant ifa_hphp_splfileinfo_getfileinfo(void *extra, int count, INVOKE_FEW_ARGS
   CVarRef arg1(a1);
   return (x_hphp_splfileinfo_getfileinfo(arg0, arg1));
 }
-Variant i_get_cfg_var(void *extra, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("get_cfg_var", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (x_get_cfg_var(arg0));
-  }
-}
-Variant ifa_get_cfg_var(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("get_cfg_var", count, 1, 1, 1);
-  CVarRef arg0(a0);
-  return (x_get_cfg_var(arg0));
-}
 Variant i_imagerectangle(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 6)) return throw_wrong_arguments("imagerectangle", count, 6, 6, 1);
@@ -30628,6 +30622,21 @@ Variant ifa_imagerectangle(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg4(a4);
   CVarRef arg5(a5);
   return (x_imagerectangle(arg0, arg1, arg2, arg3, arg4, arg5));
+}
+Variant i_get_cfg_var(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("get_cfg_var", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (x_get_cfg_var(arg0));
+  }
+}
+Variant ifa_get_cfg_var(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("get_cfg_var", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (x_get_cfg_var(arg0));
 }
 Variant i_call_user_func_rpc(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
@@ -38272,6 +38281,7 @@ CallInfo ci_urldecode((void*)&i_urldecode, (void*)&ifa_urldecode, 1, 0, 0x000000
 CallInfo ci_magickannotateimage((void*)&i_magickannotateimage, (void*)&ifa_magickannotateimage, 6, 0, 0x0000000000000000LL);
 CallInfo ci_mailparse_msg_create((void*)&i_mailparse_msg_create, (void*)&ifa_mailparse_msg_create, 0, 0, 0x0000000000000000LL);
 CallInfo ci_session_set_cookie_params((void*)&i_session_set_cookie_params, (void*)&ifa_session_set_cookie_params, 5, 0, 0x0000000000000000LL);
+CallInfo ci__soap_active_version((void*)&i__soap_active_version, (void*)&ifa__soap_active_version, 0, 0, 0x0000000000000000LL);
 CallInfo ci_drawellipse((void*)&i_drawellipse, (void*)&ifa_drawellipse, 7, 0, 0x0000000000000000LL);
 CallInfo ci_xmlwriter_write_element_ns((void*)&i_xmlwriter_write_element_ns, (void*)&ifa_xmlwriter_write_element_ns, 5, 0, 0x0000000000000000LL);
 CallInfo ci_magicksetcompressionquality((void*)&i_magicksetcompressionquality, (void*)&ifa_magicksetcompressionquality, 2, 0, 0x0000000000000000LL);
@@ -39426,8 +39436,8 @@ CallInfo ci_destroymagickwand((void*)&i_destroymagickwand, (void*)&ifa_destroyma
 CallInfo ci_mcrypt_generic_init((void*)&i_mcrypt_generic_init, (void*)&ifa_mcrypt_generic_init, 3, 0, 0x0000000000000000LL);
 CallInfo ci_quoted_printable_decode((void*)&i_quoted_printable_decode, (void*)&ifa_quoted_printable_decode, 1, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileinfo_getfileinfo((void*)&i_hphp_splfileinfo_getfileinfo, (void*)&ifa_hphp_splfileinfo_getfileinfo, 2, 0, 0x0000000000000000LL);
-CallInfo ci_get_cfg_var((void*)&i_get_cfg_var, (void*)&ifa_get_cfg_var, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imagerectangle((void*)&i_imagerectangle, (void*)&ifa_imagerectangle, 6, 0, 0x0000000000000000LL);
+CallInfo ci_get_cfg_var((void*)&i_get_cfg_var, (void*)&ifa_get_cfg_var, 1, 0, 0x0000000000000000LL);
 CallInfo ci_call_user_func_rpc((void*)&i_call_user_func_rpc, (void*)&ifa_call_user_func_rpc, 5, 32, 0x0000000000000000LL);
 CallInfo ci_pixelgetalphaquantum((void*)&i_pixelgetalphaquantum, (void*)&ifa_pixelgetalphaquantum, 1, 0, 0x0000000000000000LL);
 CallInfo ci_fb_renamed_functions((void*)&i_fb_renamed_functions, (void*)&ifa_fb_renamed_functions, 1, 0, 0x0000000000000000LL);
@@ -41834,6 +41844,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1419:
       HASH_GUARD(0x1EF2C1426AB0A58BLL, dom_node_replace_child) {
         ci = &ci_dom_node_replace_child;
+        return true;
+      }
+      HASH_GUARD(0x135C66BF0425458BLL, _soap_active_version) {
+        ci = &ci__soap_active_version;
         return true;
       }
       HASH_GUARD(0x3A34B44E4C51C58BLL, xml_set_element_handler) {

@@ -40,6 +40,7 @@ void SystemGlobals::initialize() {
   pm_php$classes$exception_php(false);
   pm_php$classes$iterator_php(false);
   pm_php$classes$reflection_php(false);
+  pm_php$classes$soapfault_php(false);
   pm_php$classes$splfile_php(false);
   pm_php$classes$splobjectstorage_php(false);
   pm_php$classes$stdclass_php(false);

@@ -16,13 +16,38 @@
 
 #include <system/lib/systemlib.h>
 #include <runtime/base/complex_types.h>
+#include <system/gen/php/classes/exception.h>
 #include <system/gen/php/classes/stdclass.h>
+#include <system/gen/php/classes/soapfault.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 ObjectData* SystemLib::AllocStdClassObject() {
   return NEWOBJ(c_stdClass)();
+}
+
+ObjectData* SystemLib::AllocExceptionObject(CVarRef message) {
+  return (NEWOBJ(c_Exception)())->create(message);
+}
+
+ObjectData* SystemLib::AllocDOMExceptionObject(CVarRef message, CVarRef code) {
+  return (NEWOBJ(c_DOMException)())->create(message, code);
+}
+
+ObjectData* SystemLib::AllocPDOExceptionObject() {
+  return (NEWOBJ(c_PDOException)())->create();
+}
+
+ObjectData*
+SystemLib::AllocSoapFaultObject(CVarRef code,
+                                CVarRef message,
+                                CVarRef actor /* = null_variant */,
+                                CVarRef detail /* = null_variant */,
+                                CVarRef name /* = null_variant */,
+                                CVarRef header /* = null_variant */) {
+  return (NEWOBJ(c_SoapFault)())->create(code, message, actor, detail, name,
+                                         header);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -18,6 +18,8 @@
 #include <runtime/ext/ext_splfile.h>
 #include <runtime/ext/ext_file.h>
 
+#include <system/lib/systemlib.h>
+
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(SPL);
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,9 +86,9 @@ String f_hphp_splfileinfo_getlinktarget(CObjRef obj) {
   SplFileInfo *fileInfo = get_splfileinfo(obj);
   String ret = f_readlink_internal(fileInfo->getFileName(), false);
   if (!ret.size())  {
-    throw (Object)p_Exception(NEWOBJ(c_Exception)())->create(Variant(
-      "Unable to read link "+fileInfo->getFileName()
-      +", error: no such file or directory"));
+    throw Object(SystemLib::AllocExceptionObject(Variant(
+      "Unable to read link "+fileInfo->getFileName() +
+      ", error: no such file or directory")));
   }
   return ret;
 }

@@ -507,6 +507,7 @@ const char * g_methodIndexReverseIndexSys[] = {
 "startCData", "writeDTDAttlist", "endDTD", "openMemory", "openURI", 
 "endAttribute", "startPI", "text", "startComment"};
 extern struct ObjectStaticCallbacks cw_ReflectionFunctionAbstract;
+extern struct ObjectStaticCallbacks cw_PDOException;
 extern struct ObjectStaticCallbacks cw_ReflectionObject;
 extern struct ObjectStaticCallbacks cw_SplFileObject;
 extern struct ObjectStaticCallbacks cw_UnexpectedValueException;
@@ -536,6 +537,7 @@ extern struct ObjectStaticCallbacks cw_XhprofFrame;
 extern struct ObjectStaticCallbacks cw_ErrorException;
 extern struct ObjectStaticCallbacks cw_RecursiveDirectoryIterator;
 extern struct ObjectStaticCallbacks cw_DirectoryIterator;
+extern struct ObjectStaticCallbacks cw_DOMException;
 extern struct ObjectStaticCallbacks cw_BadFunctionCallException;
 extern struct ObjectStaticCallbacks cw_LengthException;
 extern struct ObjectStaticCallbacks cw_DomainException;
@@ -543,147 +545,8 @@ extern struct ObjectStaticCallbacks cw_RecursiveIteratorIterator;
 extern struct ObjectStaticCallbacks cw_MutableArrayIterator;
 extern struct ObjectStaticCallbacks cw_Directory;
 extern struct ObjectStaticCallbacks cw_FilterIterator;
+extern struct ObjectStaticCallbacks cw_SoapFault;
 extern struct ObjectStaticCallbacks cw_ReflectionParameter;
-ObjectData *coo_PDOException() {
-  return NEWOBJ(c_PDOException)();
-}
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_PDOException
-Variant c_PDOException::os_getInit(CStrRef s) {
-  return c_Exception::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_PDOException
-Variant c_PDOException::os_get(CStrRef s) {
-  return c_Exception::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDOException
-Variant &c_PDOException::os_lval(CStrRef s) {
-  return c_Exception::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_PDOException
-void c_PDOException::o_getArray(Array &props, bool pubOnly) const {
-  c_Exception::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_PDOException
-void c_PDOException::o_setArray(CArrRef props) {
-  c_Exception::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PDOException
-Variant * c_PDOException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_PDOException
-Variant * c_PDOException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_Exception::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDOException
-Variant * c_PDOException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOException
-Variant c_PDOException::os_constant(const char *s) {
-  return c_Exception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOException
-IMPLEMENT_CLASS(PDOException)
-ObjectData *c_PDOException::cloneImpl() {
-  ObjectData *obj = coo_PDOException();
-  c_PDOException::cloneSet(obj);
-  return obj;
-}
-void c_PDOException::cloneSet(ObjectData *cl) {
-  c_PDOException *clone = static_cast<c_PDOException*>(cl);
-  c_Exception::cloneSet(clone);
-}
-CallInfo c_PDOException::ci___destruct((void*)&c_PDOException::i___destruct, (void*)&c_PDOException::ifa___destruct, 0, 4, 0x0000000000000000LL);
-CallInfo c_PDOException::ci___construct((void*)&c_PDOException::i___construct, (void*)&c_PDOException::ifa___construct, 0, 4, 0x0000000000000000LL);
-Variant c_PDOException::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___destruct, coo_PDOException);
-  }
-  c_PDOException *self ATTRIBUTE_UNUSED (static_cast<c_PDOException*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
-Variant c_PDOException::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___construct, coo_PDOException);
-  }
-  c_PDOException *self ATTRIBUTE_UNUSED (static_cast<c_PDOException*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__construct", 0, 1);
-  return (self->t___construct(), null);
-}
-Variant c_PDOException::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_PDOException);
-  }
-  c_PDOException *self ATTRIBUTE_UNUSED (static_cast<c_PDOException*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
-Variant c_PDOException::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_PDOException);
-  }
-  c_PDOException *self ATTRIBUTE_UNUSED (static_cast<c_PDOException*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__construct", 0, 1);
-  return (self->t___construct(), null);
-}
-bool c_PDOException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 3) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
-        mcp.ci = &c_PDOException::ci___destruct;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
-        mcp.ci = &c_PDOException::ci___construct;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_Exception::os_get_call_info(mcp, hash);
-}
-bool c_PDOException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  mcp.obj = this;
-  return os_get_call_info(mcp, hash);
-}
-c_PDOException *c_PDOException::create() {
-  CountableHelper h(this);
-  init();
-  t___construct();
-  return this;
-}
-void c_PDOException::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
-void c_PDOException::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_PDOException::ci___construct;
-  mcp.obj = this;
-}
-struct ObjectStaticCallbacks cw_PDOException = {
-  c_PDOException::os_getInit,
-  c_PDOException::os_get,
-  c_PDOException::os_lval,
-  c_PDOException::os_invoke,
-  c_PDOException::os_constant,
-  c_PDOException::os_get_call_info
-};
 ObjectData *coo_DOMDocumentFragment() {
   return NEWOBJ(c_DOMDocumentFragment)();
 }
@@ -18841,172 +18704,6 @@ struct ObjectStaticCallbacks cw_XMLWriter = {
   c_XMLWriter::os_constant,
   c_XMLWriter::os_get_call_info
 };
-ObjectData *coo_DOMException() {
-  return NEWOBJ(c_DOMException)();
-}
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMException
-Variant c_DOMException::os_getInit(CStrRef s) {
-  return c_Exception::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMException
-Variant c_DOMException::os_get(CStrRef s) {
-  return c_Exception::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMException
-Variant &c_DOMException::os_lval(CStrRef s) {
-  return c_Exception::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMException
-void c_DOMException::o_getArray(Array &props, bool pubOnly) const {
-  c_Exception::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMException
-void c_DOMException::o_setArray(CArrRef props) {
-  c_Exception::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMException
-Variant * c_DOMException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMException
-Variant * c_DOMException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_Exception::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMException
-Variant * c_DOMException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMException
-Variant c_DOMException::os_constant(const char *s) {
-  return c_Exception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMException
-IMPLEMENT_CLASS(DOMException)
-ObjectData *c_DOMException::cloneImpl() {
-  ObjectData *obj = coo_DOMException();
-  c_DOMException::cloneSet(obj);
-  return obj;
-}
-void c_DOMException::cloneSet(ObjectData *cl) {
-  c_DOMException *clone = static_cast<c_DOMException*>(cl);
-  c_Exception::cloneSet(clone);
-}
-CallInfo c_DOMException::ci___destruct((void*)&c_DOMException::i___destruct, (void*)&c_DOMException::ifa___destruct, 0, 4, 0x0000000000000000LL);
-CallInfo c_DOMException::ci___construct((void*)&c_DOMException::i___construct, (void*)&c_DOMException::ifa___construct, 2, 4, 0x0000000000000000LL);
-Variant c_DOMException::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___destruct, coo_DOMException);
-  }
-  c_DOMException *self ATTRIBUTE_UNUSED (static_cast<c_DOMException*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
-Variant c_DOMException::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___construct, coo_DOMException);
-  }
-  c_DOMException *self ATTRIBUTE_UNUSED (static_cast<c_DOMException*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 2)) return throw_toomany_arguments("__construct", 2, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    if (count <= 0) return (self->t___construct(), null);
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) return (self->t___construct(arg0), null);
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (self->t___construct(arg0, arg1), null);
-  }
-}
-Variant c_DOMException::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMException);
-  }
-  c_DOMException *self ATTRIBUTE_UNUSED (static_cast<c_DOMException*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
-Variant c_DOMException::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_DOMException);
-  }
-  c_DOMException *self ATTRIBUTE_UNUSED (static_cast<c_DOMException*>(mcp.obj));
-  if (UNLIKELY(count > 2)) return throw_toomany_arguments("__construct", 2, 1);
-  if (count <= 0) return (self->t___construct(), null);
-  CVarRef arg0(a0);
-  if (count <= 1) return (self->t___construct(arg0), null);
-  CVarRef arg1(a1);
-  return (self->t___construct(arg0, arg1), null);
-}
-bool c_DOMException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 3) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
-        mcp.ci = &c_DOMException::ci___destruct;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
-        mcp.ci = &c_DOMException::ci___construct;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_Exception::os_get_call_info(mcp, hash);
-}
-bool c_DOMException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  mcp.obj = this;
-  return os_get_call_info(mcp, hash);
-}
-c_DOMException *c_DOMException::create(String a0, int64 a1) {
-  CountableHelper h(this);
-  init();
-  t___construct(a0, a1);
-  return this;
-}
-void c_DOMException::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 2)) throw_toomany_arguments("__construct", 2, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    if (count <= 0) {
-      (t___construct());
-      break;
-    }
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
-  } while (false);
-}
-void c_DOMException::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_DOMException::ci___construct;
-  mcp.obj = this;
-}
-struct ObjectStaticCallbacks cw_DOMException = {
-  c_DOMException::os_getInit,
-  c_DOMException::os_get,
-  c_DOMException::os_lval,
-  c_DOMException::os_invoke,
-  c_DOMException::os_constant,
-  c_DOMException::os_get_call_info
-};
 ObjectData *coo_DOMXPath() {
   return NEWOBJ(c_DOMXPath)();
 }
@@ -22151,220 +21848,6 @@ struct ObjectStaticCallbacks cw_LibXMLError = {
   c_LibXMLError::os_constant,
   c_LibXMLError::os_get_call_info
 };
-ObjectData *coo_SoapFault() {
-  return NEWOBJ(c_SoapFault)();
-}
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapFault
-Variant c_SoapFault::os_getInit(CStrRef s) {
-  return c_Exception::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_SoapFault
-Variant c_SoapFault::os_get(CStrRef s) {
-  return c_Exception::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapFault
-Variant &c_SoapFault::os_lval(CStrRef s) {
-  return c_Exception::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapFault
-void c_SoapFault::o_getArray(Array &props, bool pubOnly) const {
-  c_Exception::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapFault
-void c_SoapFault::o_setArray(CArrRef props) {
-  c_Exception::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapFault
-Variant * c_SoapFault::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SoapFault
-Variant * c_SoapFault::o_realPropPublic(CStrRef s, int flags) const {
-  return c_Exception::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapFault
-Variant * c_SoapFault::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapFault
-Variant c_SoapFault::os_constant(const char *s) {
-  return c_Exception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapFault
-IMPLEMENT_CLASS(SoapFault)
-ObjectData *c_SoapFault::cloneImpl() {
-  ObjectData *obj = coo_SoapFault();
-  c_SoapFault::cloneSet(obj);
-  return obj;
-}
-void c_SoapFault::cloneSet(ObjectData *cl) {
-  c_SoapFault *clone = static_cast<c_SoapFault*>(cl);
-  c_Exception::cloneSet(clone);
-}
-CallInfo c_SoapFault::ci___tostring((void*)&c_SoapFault::i___tostring, (void*)&c_SoapFault::ifa___tostring, 0, 4, 0x0000000000000000LL);
-CallInfo c_SoapFault::ci___destruct((void*)&c_SoapFault::i___destruct, (void*)&c_SoapFault::ifa___destruct, 0, 4, 0x0000000000000000LL);
-CallInfo c_SoapFault::ci___construct((void*)&c_SoapFault::i___construct, (void*)&c_SoapFault::ifa___construct, 6, 4, 0x0000000000000000LL);
-Variant c_SoapFault::i___tostring(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___tostring, coo_SoapFault);
-  }
-  c_SoapFault *self ATTRIBUTE_UNUSED (static_cast<c_SoapFault*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__tostring", 0, 1);
-  return (self->t___tostring());
-}
-Variant c_SoapFault::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___destruct, coo_SoapFault);
-  }
-  c_SoapFault *self ATTRIBUTE_UNUSED (static_cast<c_SoapFault*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
-Variant c_SoapFault::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___construct, coo_SoapFault);
-  }
-  c_SoapFault *self ATTRIBUTE_UNUSED (static_cast<c_SoapFault*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 2 || count > 6)) return throw_wrong_arguments("__construct", count, 2, 6, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 2) return (self->t___construct(arg0, arg1), null);
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 3) return (self->t___construct(arg0, arg1, arg2), null);
-    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 4) return (self->t___construct(arg0, arg1, arg2, arg3), null);
-    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 5) return (self->t___construct(arg0, arg1, arg2, arg3, arg4), null);
-    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
-    return (self->t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
-  }
-}
-Variant c_SoapFault::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_SoapFault);
-  }
-  c_SoapFault *self ATTRIBUTE_UNUSED (static_cast<c_SoapFault*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__tostring", 0, 1);
-  return (self->t___tostring());
-}
-Variant c_SoapFault::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_SoapFault);
-  }
-  c_SoapFault *self ATTRIBUTE_UNUSED (static_cast<c_SoapFault*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
-Variant c_SoapFault::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_SoapFault);
-  }
-  c_SoapFault *self ATTRIBUTE_UNUSED (static_cast<c_SoapFault*>(mcp.obj));
-  if (UNLIKELY(count < 2)) return throw_wrong_arguments("__construct", count, 2, 6, 1);
-  CVarRef arg0(a0);
-  CVarRef arg1(a1);
-  if (count <= 2) return (self->t___construct(arg0, arg1), null);
-  CVarRef arg2(a2);
-  if (count <= 3) return (self->t___construct(arg0, arg1, arg2), null);
-  CVarRef arg3(a3);
-  if (count <= 4) return (self->t___construct(arg0, arg1, arg2, arg3), null);
-  CVarRef arg4(a4);
-  if (count <= 5) return (self->t___construct(arg0, arg1, arg2, arg3, arg4), null);
-  CVarRef arg5(a5);
-  return (self->t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
-}
-bool c_SoapFault::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 7) {
-    case 3:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ssa23e236b, "__tostring")) {
-        mcp.ci = &c_SoapFault::ci___tostring;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
-        mcp.ci = &c_SoapFault::ci___destruct;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
-        mcp.ci = &c_SoapFault::ci___construct;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_Exception::os_get_call_info(mcp, hash);
-}
-bool c_SoapFault::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  mcp.obj = this;
-  return os_get_call_info(mcp, hash);
-}
-c_SoapFault *c_SoapFault::create(Variant a0, String a1, String a2, Variant a3, String a4, Variant a5) {
-  CountableHelper h(this);
-  init();
-  t___construct(a0, a1, a2, a3, a4, a5);
-  return this;
-}
-void c_SoapFault::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 2 || count > 6)) throw_wrong_arguments("__construct", count, 2, 6, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 2) {
-      (t___construct(arg0, arg1));
-      break;
-    }
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 3) {
-      (t___construct(arg0, arg1, arg2));
-      break;
-    }
-    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 4) {
-      (t___construct(arg0, arg1, arg2, arg3));
-      break;
-    }
-    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 5) {
-      (t___construct(arg0, arg1, arg2, arg3, arg4));
-      break;
-    }
-    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
-  } while (false);
-}
-void c_SoapFault::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_SoapFault::ci___construct;
-  mcp.obj = this;
-}
-struct ObjectStaticCallbacks cw_SoapFault = {
-  c_SoapFault::os_getInit,
-  c_SoapFault::os_get,
-  c_SoapFault::os_lval,
-  c_SoapFault::os_invoke,
-  c_SoapFault::os_constant,
-  c_SoapFault::os_get_call_info
-};
 ObjectData *coo_DOMElement() {
   return NEWOBJ(c_DOMElement)();
 }
@@ -23201,7 +22684,6 @@ static hashNodeCTD ctdBuckets[90];
 static class SysCTDTableInitializer {
   public: SysCTDTableInitializer() {
     const char *ctdMapData[] = {
-      (const char *)"PDOException", (const char *)&cw_PDOException,(const char *)&coo_PDOException,
       (const char *)"DOMDocumentFragment", (const char *)&cw_DOMDocumentFragment,(const char *)&coo_DOMDocumentFragment,
       (const char *)"DOMText", (const char *)&cw_DOMText,(const char *)&coo_DOMText,
       (const char *)"DebuggerClient", (const char *)&cw_DebuggerClient,(const char *)&coo_DebuggerClient,
@@ -23244,16 +22726,15 @@ static class SysCTDTableInitializer {
       (const char *)"Continuation", (const char *)&cw_Continuation,(const char *)&coo_Continuation,
       (const char *)"DOMEntity", (const char *)&cw_DOMEntity,(const char *)&coo_DOMEntity,
       (const char *)"XMLWriter", (const char *)&cw_XMLWriter,(const char *)&coo_XMLWriter,
-      (const char *)"DOMException", (const char *)&cw_DOMException,(const char *)&coo_DOMException,
       (const char *)"DOMXPath", (const char *)&cw_DOMXPath,(const char *)&coo_DOMXPath,
       (const char *)"SoapServer", (const char *)&cw_SoapServer,(const char *)&coo_SoapServer,
       (const char *)"DOMNode", (const char *)&cw_DOMNode,(const char *)&coo_DOMNode,
       (const char *)"SpoofChecker", (const char *)&cw_SpoofChecker,(const char *)&coo_SpoofChecker,
       (const char *)"DOMDocument", (const char *)&cw_DOMDocument,(const char *)&coo_DOMDocument,
       (const char *)"LibXMLError", (const char *)&cw_LibXMLError,(const char *)&coo_LibXMLError,
-      (const char *)"SoapFault", (const char *)&cw_SoapFault,(const char *)&coo_SoapFault,
       (const char *)"DOMElement", (const char *)&cw_DOMElement,(const char *)&coo_DOMElement,
       (const char *)"ReflectionFunctionAbstract", (const char *)&cw_ReflectionFunctionAbstract,(const char *)&coo_ReflectionFunctionAbstract,
+      (const char *)"PDOException", (const char *)&cw_PDOException,(const char *)&coo_PDOException,
       (const char *)"ReflectionObject", (const char *)&cw_ReflectionObject,(const char *)&coo_ReflectionObject,
       (const char *)"SplFileObject", (const char *)&cw_SplFileObject,(const char *)&coo_SplFileObject,
       (const char *)"UnexpectedValueException", (const char *)&cw_UnexpectedValueException,(const char *)&coo_UnexpectedValueException,
@@ -23283,6 +22764,7 @@ static class SysCTDTableInitializer {
       (const char *)"ErrorException", (const char *)&cw_ErrorException,(const char *)&coo_ErrorException,
       (const char *)"RecursiveDirectoryIterator", (const char *)&cw_RecursiveDirectoryIterator,(const char *)&coo_RecursiveDirectoryIterator,
       (const char *)"DirectoryIterator", (const char *)&cw_DirectoryIterator,(const char *)&coo_DirectoryIterator,
+      (const char *)"DOMException", (const char *)&cw_DOMException,(const char *)&coo_DOMException,
       (const char *)"BadFunctionCallException", (const char *)&cw_BadFunctionCallException,(const char *)&coo_BadFunctionCallException,
       (const char *)"LengthException", (const char *)&cw_LengthException,(const char *)&coo_LengthException,
       (const char *)"DomainException", (const char *)&cw_DomainException,(const char *)&coo_DomainException,
@@ -23290,6 +22772,7 @@ static class SysCTDTableInitializer {
       (const char *)"MutableArrayIterator", (const char *)&cw_MutableArrayIterator,(const char *)&coo_MutableArrayIterator,
       (const char *)"Directory", (const char *)&cw_Directory,(const char *)&coo_Directory,
       (const char *)"FilterIterator", (const char *)&cw_FilterIterator,(const char *)&coo_FilterIterator,
+      (const char *)"SoapFault", (const char *)&cw_SoapFault,(const char *)&coo_SoapFault,
       (const char *)"ReflectionParameter", (const char *)&cw_ReflectionParameter,(const char *)&coo_ReflectionParameter,
       NULL, NULL, NULL
     };

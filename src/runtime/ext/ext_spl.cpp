@@ -24,6 +24,8 @@
 #include <runtime/eval/ast/function_statement.h>
 #include <runtime/eval/ast/method_statement.h>
 
+#include <system/lib/systemlib.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -99,7 +101,7 @@ void throw_spl_exception(const char *fmt, ...) {
   Util::string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
-  throw (Object)p_Exception(NEWOBJ(c_Exception)())->create(Variant(msg));
+  throw Object(SystemLib::AllocExceptionObject(Variant(msg)));
 }
 
 static bool s_inited = false;

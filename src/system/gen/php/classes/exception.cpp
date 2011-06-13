@@ -29,6 +29,142 @@ namespace HPHP {
 /* preface starts */
 extern CallInfo ci_;
 /* preface finishes */
+/* SRC: classes/exception.php line 317 */
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_PDOException
+Variant c_PDOException::os_getInit(CStrRef s) {
+  return c_Exception::os_getInit(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_PDOException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_PDOException
+Variant c_PDOException::os_get(CStrRef s) {
+  return c_Exception::os_get(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_PDOException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDOException
+Variant &c_PDOException::os_lval(CStrRef s) {
+  return c_Exception::os_lval(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDOException
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_PDOException
+void c_PDOException::o_getArray(Array &props, bool pubOnly) const {
+  c_Exception::o_getArray(props, pubOnly);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_PDOException
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_PDOException
+void c_PDOException::o_setArray(CArrRef props) {
+  c_Exception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_PDOException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PDOException
+Variant * c_PDOException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PDOException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_PDOException
+Variant * c_PDOException::o_realPropPublic(CStrRef s, int flags) const {
+  return c_Exception::o_realPropPublic(s, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_PDOException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDOException
+Variant * c_PDOException::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDOException
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOException
+Variant c_PDOException::os_constant(const char *s) {
+  return c_Exception::os_constant(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOException
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(PDOException)
+bool c_PDOException::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 3) {
+    case 0:
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
+      break;
+    case 1:
+      HASH_INSTANCEOF(0x5D8785ACD19F77BDLL, NAMSTR(s_sys_ss8e0a632f, "PDOException"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
+ObjectData *c_PDOException::cloneImpl() {
+  ObjectData *obj = coo_PDOException();
+  c_PDOException::cloneSet(obj);
+  return obj;
+}
+void c_PDOException::cloneSet(ObjectData *cl) {
+  c_PDOException *clone = static_cast<c_PDOException*>(cl);
+  c_Exception::cloneSet(clone);
+}
+CallInfo c_PDOException::ci___construct((void*)&c_PDOException::i___construct, (void*)&c_PDOException::ifa___construct, 0, 4, 0x0000000000000000LL);
+Variant c_PDOException::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i___construct, coo_PDOException);
+  }
+  c_PDOException *self ATTRIBUTE_UNUSED (static_cast<c_PDOException*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("PDOException::__construct", 0, 2);
+  return (self->t___construct(), null);
+}
+Variant c_PDOException::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_PDOException);
+  }
+  c_PDOException *self ATTRIBUTE_UNUSED (static_cast<c_PDOException*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("PDOException::__construct", 0, 2);
+  return (self->t___construct(), null);
+}
+bool c_PDOException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 1) {
+    case 1:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
+        mcp.ci = &c_PDOException::ci___construct;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_Exception::os_get_call_info(mcp, hash);
+}
+bool c_PDOException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
+}
+c_PDOException *c_PDOException::create() {
+  CountableHelper h(this);
+  init();
+  t___construct();
+  return this;
+}
+void c_PDOException::dynConstruct(CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) throw_toomany_arguments("PDOException::__construct", 0, 2);
+  (t___construct());
+}
+void c_PDOException::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_PDOException::ci___construct;
+  mcp.obj = this;
+}
+struct ObjectStaticCallbacks cw_PDOException = {
+  c_PDOException::os_getInit,
+  c_PDOException::os_get,
+  c_PDOException::os_lval,
+  c_PDOException::os_invoke,
+  c_PDOException::os_constant,
+  c_PDOException::os_get_call_info
+};
+/* SRC: classes/exception.php line 318 */
+void c_PDOException::t___construct() {
+  bool oldInCtor = gasInCtor(true);
+  gasInCtor(oldInCtor);
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 277 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_UnexpectedValueException
 Variant c_UnexpectedValueException::os_getInit(CStrRef s) {
@@ -1828,6 +1964,158 @@ Variant c_ErrorException::t_getseverity() {
   return m_severity;
 }
 namespace hphp_impl_splitter {}
+/* SRC: classes/exception.php line 311 */
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMException
+Variant c_DOMException::os_getInit(CStrRef s) {
+  return c_Exception::os_getInit(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMException
+Variant c_DOMException::os_get(CStrRef s) {
+  return c_Exception::os_get(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMException
+Variant &c_DOMException::os_lval(CStrRef s) {
+  return c_Exception::os_lval(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMException
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMException
+void c_DOMException::o_getArray(Array &props, bool pubOnly) const {
+  c_Exception::o_getArray(props, pubOnly);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMException
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMException
+void c_DOMException::o_setArray(CArrRef props) {
+  c_Exception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMException
+Variant * c_DOMException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMException
+Variant * c_DOMException::o_realPropPublic(CStrRef s, int flags) const {
+  return c_Exception::o_realPropPublic(s, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMException
+Variant * c_DOMException::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMException
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMException
+Variant c_DOMException::os_constant(const char *s) {
+  return c_Exception::os_constant(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMException
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMException)
+bool c_DOMException::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 3) {
+    case 0:
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
+      break;
+    case 2:
+      HASH_INSTANCEOF(0x6A5B99D5B1A4566ALL, NAMSTR(s_sys_ss4b58691e, "DOMException"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
+ObjectData *c_DOMException::cloneImpl() {
+  ObjectData *obj = coo_DOMException();
+  c_DOMException::cloneSet(obj);
+  return obj;
+}
+void c_DOMException::cloneSet(ObjectData *cl) {
+  c_DOMException *clone = static_cast<c_DOMException*>(cl);
+  c_Exception::cloneSet(clone);
+}
+CallInfo c_DOMException::ci___construct((void*)&c_DOMException::i___construct, (void*)&c_DOMException::ifa___construct, 2, 4, 0x0000000000000000LL);
+Variant c_DOMException::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return i_dummy(mcp, params, i___construct, coo_DOMException);
+  }
+  c_DOMException *self ATTRIBUTE_UNUSED (static_cast<c_DOMException*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("DOMException::__construct", count, 2, 2, 2);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t___construct(arg0, arg1), null);
+  }
+}
+Variant c_DOMException::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_DOMException);
+  }
+  c_DOMException *self ATTRIBUTE_UNUSED (static_cast<c_DOMException*>(mcp.obj));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("DOMException::__construct", count, 2, 2, 2);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  return (self->t___construct(arg0, arg1), null);
+}
+bool c_DOMException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 1) {
+    case 1:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
+        mcp.ci = &c_DOMException::ci___construct;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_Exception::os_get_call_info(mcp, hash);
+}
+bool c_DOMException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
+}
+c_DOMException *c_DOMException::create(CVarRef v_message, CVarRef v_code) {
+  CountableHelper h(this);
+  init();
+  t___construct(v_message, v_code);
+  return this;
+}
+void c_DOMException::dynConstruct(CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 2)) throw_wrong_arguments("DOMException::__construct", count, 2, 2, 2);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    (t___construct(arg0, arg1));
+  }
+}
+void c_DOMException::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_DOMException::ci___construct;
+  mcp.obj = this;
+}
+struct ObjectStaticCallbacks cw_DOMException = {
+  c_DOMException::os_getInit,
+  c_DOMException::os_get,
+  c_DOMException::os_lval,
+  c_DOMException::os_invoke,
+  c_DOMException::os_constant,
+  c_DOMException::os_get_call_info
+};
+/* SRC: classes/exception.php line 312 */
+void c_DOMException::t___construct(Variant v_message, Variant v_code) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMException, DOMException::__construct);
+  bool oldInCtor = gasInCtor(true);
+  c_Exception::t___construct(v_message, v_code);
+  gasInCtor(oldInCtor);
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 183 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_BadFunctionCallException
 Variant c_BadFunctionCallException::os_getInit(CStrRef s) {
@@ -2091,6 +2379,9 @@ struct ObjectStaticCallbacks cw_DomainException = {
   c_DomainException::os_constant,
   c_DomainException::os_get_call_info
 };
+ObjectData *coo_PDOException() {
+  return NEWOBJ(c_PDOException)();
+}
 ObjectData *coo_UnexpectedValueException() {
   return NEWOBJ(c_UnexpectedValueException)();
 }
@@ -2126,6 +2417,9 @@ ObjectData *coo_Exception() {
 }
 ObjectData *coo_ErrorException() {
   return NEWOBJ(c_ErrorException)();
+}
+ObjectData *coo_DOMException() {
+  return NEWOBJ(c_DOMException)();
 }
 ObjectData *coo_BadFunctionCallException() {
   return NEWOBJ(c_BadFunctionCallException)();

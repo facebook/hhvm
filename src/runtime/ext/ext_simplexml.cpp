@@ -20,6 +20,8 @@
 #include <runtime/base/class_info.h>
 #include <runtime/base/util/request_local.h>
 
+#include <system/lib/systemlib.h>
+
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(SimpleXML);
 ///////////////////////////////////////////////////////////////////////////////
@@ -298,8 +300,8 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64 options /* = 0 */,
       m_attributes = collect_attributes(m_node, ns, is_prefix);
     }
   } else {
-    throw (Object)p_Exception(NEWOBJ(c_Exception)())->create(
-        "String could not be parsed as XML");
+    throw Object(SystemLib::AllocExceptionObject(
+        "String could not be parsed as XML"));
   }
 }
 

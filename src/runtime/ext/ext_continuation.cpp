@@ -17,6 +17,8 @@
 
 #include <runtime/ext/ext_continuation.h>
 
+#include <system/lib/systemlib.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -91,8 +93,7 @@ Variant c_Continuation::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::current);
   if (m_index < 0LL) {
     throw_exception(
-      p_Exception(
-        ((c_Exception*)coo_Exception())->create("Need to call next() first")));
+      Object(SystemLib::AllocExceptionObject("Need to call next() first")));
   }
   return m_value;
 }
@@ -101,24 +102,19 @@ int64 c_Continuation::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::key);
   if (m_index < 0LL) {
     throw_exception(
-      p_Exception(
-        ((c_Exception*)coo_Exception())->create("Need to call next() first")));
+      Object(SystemLib::AllocExceptionObject("Need to call next() first")));
   }
   return m_index;
 }
 
 #define NEXT_IMPL \
   if (m_done) { \
-    throw_exception( \
-      p_Exception( \
-        ((c_Exception*)coo_Exception())->create( \
-          "Continuation is already finished"))); \
+    throw_exception(Object(SystemLib::AllocExceptionObject( \
+      "Continuation is already finished"))); \
   } \
   if (m_running) { \
-    throw_exception( \
-      p_Exception( \
-        ((c_Exception*)coo_Exception())->create( \
-          "Continuation is already running"))); \
+    throw_exception(Object(SystemLib::AllocExceptionObject( \
+      "Continuation is already running"))); \
   } \
   m_running = true; \
   ++m_index; \
@@ -151,10 +147,8 @@ void c_Continuation::t_next() {
 
 void c_Continuation::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::rewind);
-  throw_exception(
-    p_Exception(
-      ((c_Exception*)coo_Exception())->create(
-        "Cannot rewind on a Continuation object")));
+  throw_exception(Object(SystemLib::AllocExceptionObject(
+    "Cannot rewind on a Continuation object")));
 }
 
 bool c_Continuation::t_valid() {
@@ -166,8 +160,7 @@ void c_Continuation::t_send(CVarRef v) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::send);
   if (m_index < 0LL) {
     throw_exception(
-      p_Exception(
-        ((c_Exception*)coo_Exception())->create("Need to call next() first")));
+      Object(SystemLib::AllocExceptionObject("Need to call next() first")));
   }
   m_received.assignVal(v);
   NEXT_IMPL;

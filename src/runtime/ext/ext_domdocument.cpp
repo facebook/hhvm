@@ -21,6 +21,8 @@
 #include <runtime/base/runtime_error.h>
 #include <runtime/ext/ext_function.h>
 
+#include <system/lib/systemlib.h>
+
 #define DOM_XMLNS_NAMESPACE                             \
   (const xmlChar *) "http://www.w3.org/2000/xmlns/"
 
@@ -206,8 +208,7 @@ static void php_dom_throw_error(dom_exception_code error_code,
   }
 
   if (strict_error) {
-    p_DOMException e(NEWOBJ(c_DOMException)());
-    e->t___construct(error_message);
+    Object e(SystemLib::AllocDOMExceptionObject(error_message, 0));
     throw e;
   }
   raise_warning(error_message);
@@ -5049,25 +5050,6 @@ Variant c_DOMNodeList::t_getiterator() {
   c_DOMNodeIterator *iter = NEWOBJ(c_DOMNodeIterator)();
   iter->reset_iterator(this);
   return Object(iter);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-c_DOMException::c_DOMException() {
-}
-
-c_DOMException::~c_DOMException() {
-}
-
-void c_DOMException::t___construct(CStrRef message /* = "" */,
-                                   int64 code /* = 0 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DOMException, DOMException::__construct);
-  c_Exception::t___construct(message, code);
-}
-
-Variant c_DOMException::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DOMException, DOMException::__destruct);
-  return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

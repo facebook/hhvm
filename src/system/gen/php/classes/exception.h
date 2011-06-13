@@ -21,6 +21,7 @@
 #include <php/classes/exception.fw.h>
 
 // Declarations
+#include <cls/PDOException.h>
 #include <cls/UnexpectedValueException.h>
 #include <cls/OverflowException.h>
 #include <cls/OutOfBoundsException.h>
@@ -33,6 +34,7 @@
 #include <cls/RuntimeException.h>
 #include <cls/Exception.h>
 #include <cls/ErrorException.h>
+#include <cls/DOMException.h>
 #include <cls/BadFunctionCallException.h>
 #include <cls/LengthException.h>
 #include <cls/DomainException.h>

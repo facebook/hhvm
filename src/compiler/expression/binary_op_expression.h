@@ -62,6 +62,7 @@ public:
   bool isAssignmentOp() const { return m_assign; }
 
 private:
+  void optimizeTypes(AnalysisResultConstPtr ar);
   ExpressionPtr simplifyLogical(AnalysisResultConstPtr ar);
   ExpressionPtr simplifyArithmetic(AnalysisResultConstPtr ar);
   bool isOpEqual();

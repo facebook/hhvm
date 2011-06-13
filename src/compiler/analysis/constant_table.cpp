@@ -339,7 +339,6 @@ bool ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_printf(isString ? "(" : " = ");
     if (value) {
       ExpressionPtr exp = dynamic_pointer_cast<Expression>(value);
-      ASSERT(!exp->getExpectedType());
       if (isString && exp->isScalar()) {
         ScalarExpressionPtr scalarExp =
           dynamic_pointer_cast<ScalarExpression>(exp);

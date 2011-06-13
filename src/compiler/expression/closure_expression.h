@@ -37,6 +37,8 @@ public:
   virtual void setNthKid(int n, ConstructPtr cp);
   virtual int getKidCount() const;
 
+  FunctionStatementPtr getClosureFunction() { return m_func; }
+
 private:
   FunctionStatementPtr m_func;
   ExpressionListPtr m_vars;

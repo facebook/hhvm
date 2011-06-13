@@ -121,6 +121,12 @@ public:
                               TypePtr from, TypePtr to);
 
   /**
+   * Whether or not this type is mapped to type Variant
+   * in the runtime
+   */
+  static bool IsMappedToVariant(TypePtr t);
+
+  /**
    * Whether or not a cast is needed during code generation.
    */
   static bool IsCastNeeded(AnalysisResultConstPtr ar, TypePtr from, TypePtr to);
@@ -157,6 +163,15 @@ public:
    * Testing type conversion for constants.
    */
   static bool IsExactType(KindOf kindOf);
+
+  static bool HasFastCastMethod(TypePtr t);
+
+  /**
+   *  Returns the name of the method used to fast cast from
+   *  variant to dst
+   */
+  static std::string GetFastCastMethod(
+      TypePtr dst, bool allowRef, bool forConst);
 
 private:
   Type(KindOf kindOf, const std::string &name);
@@ -198,6 +213,12 @@ public:
   /**
    * Generate type conversion in C++.
    */
+
+  void outputCPPFastObjectCast(CodeGenerator &cg,
+      AnalysisResultConstPtr ar,
+      BlockScopeRawPtr scope,
+      bool isConst);
+
   void outputCPPCast(CodeGenerator &cg, AnalysisResultConstPtr ar,
                      BlockScopeRawPtr scope);
 

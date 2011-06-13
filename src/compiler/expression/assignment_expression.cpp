@@ -314,11 +314,42 @@ static void wrapValue(CodeGenerator &cg, AnalysisResultPtr ar,
 void AssignmentExpression::preOutputStash(CodeGenerator &cg,
                                           AnalysisResultPtr ar, int state) {
   if (hasCPPTemp()) return;
-  if (m_value->hasCPPTemp() && Type::SameType(getType(), m_value->getType())) {
+  if (m_value->hasCPPTemp() &&
+      (Type::SameType(getType(), m_value->getType()) ||
+       (Type::IsMappedToVariant(getType()) &&
+        Type::IsMappedToVariant(m_value->getType())))) {
     setUnused(true);
     outputCPP(cg, ar);
     cg_printf(";\n");
-    m_cppTemp = m_value->cppTemp();
+    setCPPTemp(m_value->cppTemp());
+    return;
+  }
+  TypePtr at(getActualType());
+  TypePtr et(getExpectedType());
+  TypePtr it(getImplementedType());
+  if (at && !Type::IsMappedToVariant(at) &&
+      !et && it && Type::IsMappedToVariant(it)) {
+    m_value->preOutputStash(cg, ar, state);
+    if (!m_value->hasCPPTemp()) {
+      // preOutputStash did no work, so we need to
+      // explicitly do a stash
+      TypePtr t(m_value->getType());
+      bool constRef = !t->isPrimitive() &&
+        (m_value->isTemporary() || !m_value->isLocalExprAltered());
+      const string &tmp = m_value->genCPPTemp(cg, ar);
+      if (constRef) cg_printf("const ");
+      t->outputCPPDecl(cg, ar, getScope());
+      const char *ref = constRef ? "&" : "";
+      cg_printf(" %s%s((", ref, tmp.c_str());
+      m_value->outputCPP(cg, ar);
+      cg_printf("));\n");
+      m_value->setCPPTemp(tmp);
+    }
+    ASSERT(m_value->hasCPPTemp());
+    setUnused(true);
+    outputCPP(cg, ar);
+    cg_printf(";\n");
+    setCPPTemp(m_value->cppTemp());
     return;
   }
   return Expression::preOutputStash(cg, ar, state);

@@ -197,39 +197,131 @@ class Variant {
    * Fast accessors that can be used by generated code when type inference can
    * prove that m_type will have a certain value at a given point in time
    */
-  const String & asCStrRef() const {
+
+///////////////////////////////////////////////////////////////////////////////
+// int64
+
+  inline ALWAYS_INLINE int64 asInt64Val() const {
+    ASSERT(m_type == KindOfInt32 || m_type == KindOfInt64);
+    return m_data.num;
+  }
+
+  inline ALWAYS_INLINE int64 toInt64Val() const {
+    ASSERT(is(KindOfInt32) || is(KindOfInt64));
+    return
+        LIKELY(m_type == KindOfInt32 || m_type == KindOfInt64) ?
+        m_data.num : m_data.pvar->m_data.num;
+  }
+
+///////////////////////////////////////////////////////////////////////////////
+// double
+
+  inline ALWAYS_INLINE double asDoubleVal() const {
+    ASSERT(m_type == KindOfDouble);
+    return m_data.dbl;
+  }
+
+  inline ALWAYS_INLINE double toDoubleVal() const {
+    ASSERT(is(KindOfDouble));
+    return
+        LIKELY(m_type == KindOfDouble) ?
+        m_data.dbl : m_data.pvar->m_data.dbl;
+  }
+
+///////////////////////////////////////////////////////////////////////////////
+// boolean
+
+  inline ALWAYS_INLINE bool asBooleanVal() const {
+    ASSERT(m_type == KindOfBoolean);
+    return m_data.num;
+  }
+
+  inline ALWAYS_INLINE bool toBooleanVal() const {
+    ASSERT(is(KindOfBoolean));
+    return
+        LIKELY(m_type == KindOfBoolean) ?
+        m_data.num : m_data.pvar->m_data.num;
+  }
+
+///////////////////////////////////////////////////////////////////////////////
+// string
+
+  inline ALWAYS_INLINE const String & asCStrRef() const {
     ASSERT(m_type == KindOfString || m_type == KindOfStaticString);
     return *(const String*)(this);
   }
 
-  String & asStrRef() {
+  inline ALWAYS_INLINE const String & toCStrRef() const {
+    ASSERT(is(KindOfString) || is(KindOfStaticString));
+    return *(const String*)(
+        LIKELY(m_type == KindOfString || m_type == KindOfStaticString) ?
+        this : this->m_data.pvar);
+  }
+
+  inline ALWAYS_INLINE String & asStrRef() {
     ASSERT(m_type == KindOfString || m_type == KindOfStaticString);
     return *(String*)(this);
   }
 
-  const Array & asCArrRef() const {
+  inline ALWAYS_INLINE String & toStrRef() {
+    ASSERT(is(KindOfString) || is(KindOfStaticString));
+    return *(String*)(
+        LIKELY(m_type == KindOfString || m_type == KindOfStaticString) ?
+        this : this->m_data.pvar);
+  }
+
+///////////////////////////////////////////////////////////////////////////////
+// array
+
+  inline ALWAYS_INLINE const Array & asCArrRef() const {
     ASSERT(m_type == KindOfArray);
     return *(const Array*)(this);
   }
 
-  const Array & toCArrRef() const {
+  inline ALWAYS_INLINE const Array & toCArrRef() const {
     ASSERT(is(KindOfArray));
-    return *(Array*)(LIKELY(m_type == KindOfArray) ? this : this->m_data.pvar);
+    return *(const Array*)(
+        LIKELY(m_type == KindOfArray) ?
+        this : this->m_data.pvar);
   }
 
-  Array & asArrRef() {
+  inline ALWAYS_INLINE Array & asArrRef() {
     ASSERT(m_type == KindOfArray);
     return *(Array*)(this);
   }
 
-  const Object & asCObjRef() const {
+  inline ALWAYS_INLINE Array & toArrRef() {
+    ASSERT(is(KindOfArray));
+    return *(Array*)(
+        LIKELY(m_type == KindOfArray) ?
+        this : this->m_data.pvar);
+  }
+
+///////////////////////////////////////////////////////////////////////////////
+// object
+
+  inline ALWAYS_INLINE const Object & asCObjRef() const {
     ASSERT(m_type == KindOfObject);
     return *(const Object*)(this);
   }
 
-  Object & asObjRef() {
+  inline ALWAYS_INLINE const Object & toCObjRef() const {
+    ASSERT(is(KindOfObject));
+    return *(const Object*)(
+        LIKELY(m_type == KindOfObject) ?
+        this : this->m_data.pvar);
+  }
+
+  inline ALWAYS_INLINE Object & asObjRef() {
     ASSERT(m_type == KindOfObject);
     return *(Object*)(this);
+  }
+
+  inline ALWAYS_INLINE Object & toObjRef() {
+    ASSERT(is(KindOfObject));
+    return *(Object*)(
+        LIKELY(m_type == KindOfObject) ?
+        this : this->m_data.pvar);
   }
 
   ObjectData *objectForCall() const {

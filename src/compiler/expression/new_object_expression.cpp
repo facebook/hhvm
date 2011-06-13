@@ -78,6 +78,11 @@ void NewObjectExpression::analyzeProgram(AnalysisResultPtr ar) {
     if (m_params) {
       markRefParams(func, "", canInvokeFewArgs());
     }
+
+    TypePtr at(getActualType());
+    if (at && at->isSpecificObject() && !getExpectedType()) {
+      setExpectedType(at);
+    }
   }
 }
 

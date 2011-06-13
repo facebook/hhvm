@@ -17136,6 +17136,20 @@ bool TestCodeRun::TestFiber() {
         "int(0)\n"
         "int(1)\n");
 
+  MVCRO("<?php\n"
+        "function id($x) { return $x; }\n"
+        "function f($x) {\n"
+        "  $local = array(0, 1);\n"
+        "  $local[] = $x;\n"
+        "  $c = id(function () use ($local) {\n"
+        "    var_dump($local[2][0]);\n"
+        "  });\n"
+        "  return $c;\n"
+        "}\n"
+        "$c = f(array(32));\n"
+        "$c();\n",
+        "int(32)\n");
+
   return true;
 }
 

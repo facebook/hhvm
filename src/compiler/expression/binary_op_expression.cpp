@@ -320,7 +320,40 @@ ExpressionPtr BinaryOpExpression::simplifyArithmetic(
   return ExpressionPtr();
 }
 
+void BinaryOpExpression::optimizeTypes(AnalysisResultConstPtr ar) {
+  switch (m_op) {
+  case '<':
+  case T_IS_SMALLER_OR_EQUAL:
+  case '>':
+  case T_IS_GREATER_OR_EQUAL:
+  case T_IS_IDENTICAL:
+  case T_IS_NOT_IDENTICAL:
+  case T_IS_EQUAL:
+  case T_IS_NOT_EQUAL:
+    {
+      // not needed for correctness, but will allow us to
+      // generate better code, since we can use the more
+      // specific runtime function
+
+      TypePtr a1(m_exp1->getActualType());
+      TypePtr i1(m_exp1->getImplementedType());
+      if (a1 && i1 &&
+          Type::IsMappedToVariant(i1) && Type::HasFastCastMethod(a1)) {
+        m_exp1->setExpectedType(a1);
+      }
+      TypePtr a2(m_exp2->getActualType());
+      TypePtr i2(m_exp2->getImplementedType());
+      if (a2 && i2 &&
+          Type::IsMappedToVariant(i2) && Type::HasFastCastMethod(a2)) {
+        m_exp2->setExpectedType(a2);
+      }
+    }
+  default: break;
+  }
+}
+
 ExpressionPtr BinaryOpExpression::postOptimize(AnalysisResultConstPtr ar) {
+  optimizeTypes(ar);
   ExpressionPtr optExp = simplifyArithmetic(ar);
   if (!optExp) {
     if (isShortCircuitOperator()) optExp = simplifyLogical(ar);
@@ -669,6 +702,10 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       TypePtr lhs = m_exp1->inferAndCheck(ar, Type::Any, true);
       if (lhs) {
         if (lhs->mustBe(Type::KindOfArray)) {
+          TypePtr a2(m_exp2->getActualType());
+          if (a2 && a2->is(Type::KindOfArray)) {
+            m_exp2->setExpectedType(a2);
+          }
           rt = Type::Array;
           break;
         }
@@ -676,7 +713,17 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
           if (!rhs->mustBe(lhs->getKindOf())) {
             rhs = Type::combinedArithmeticType(lhs, rhs);
             if (!rhs) rhs = Type::Numeric;
-            lhs = m_exp1->inferAndCheck(ar, rhs, true);
+            m_exp1->inferAndCheck(ar, rhs, true);
+          }
+          TypePtr a1(m_exp1->getCPPType());
+          TypePtr a2(m_exp2->getActualType());
+          if (a1 && a1->mustBe(Type::KindOfNumeric) &&
+              a2 && a2->mustBe(Type::KindOfNumeric)) {
+            // both LHS and RHS are numeric.
+            // Set the expected type of RHS to be
+            // the stronger type
+            TypePtr t = a1->getKindOf() > a2->getKindOf() ? a1 : a2;
+            m_exp2->setExpectedType(t);
           }
           rt = Type::Numeric;
           break;
@@ -718,16 +765,24 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 
       TypePtr combined = Type::combinedArithmeticType(act1, act2);
       if (combined && combined->isSubsetOf(rt)) {
+        if (act1) m_exp1->setExpectedType(act1);
+        if (act2) m_exp2->setExpectedType(act2);
         rt = combined;
       } else if (m_op == '+') {
         bool a1 = act1 && act1->is(Type::KindOfArray);
         bool a2 = act2 && act2->is(Type::KindOfArray);
         if (a1 || a2) {
-          if (!a1 || !a2) {
+          m_implementedType.reset();
+          if (!a1) {
             m_implementedType = Type::Variant;
+          } else if (!a2) {
+            m_exp1->setExpectedType(Type::Array);
+            // in this case, the implemented type will
+            // actually be Type::Array (since Array::operator+
+            // returns an Array)
           } else {
-            m_exp1->setExpectedType(TypePtr());
-            m_exp2->setExpectedType(TypePtr());
+            m_exp1->setExpectedType(Type::Array);
+            m_exp2->setExpectedType(Type::Array);
           }
           rt = Type::Array;
         }
@@ -739,9 +794,6 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     m_exp2->inferAndCheck(ar, et2, coerce2);
     break;
   }
-
-  m_exp1->fixExpectedType(ar);
-  m_exp2->fixExpectedType(ar);
 
   return rt;
 }
@@ -898,18 +950,10 @@ static void outputStringExpr(CodeGenerator &cg, AnalysisResultPtr ar,
     return;
   }
 
-  bool close = false;
-  if ((exp->hasContext(Expression::LValue) &&
-       (!exp->getActualType()->is(Type::KindOfString) ||
-        (exp->getImplementedType() &&
-         !exp->getImplementedType()->is(Type::KindOfString))))
-      ||
-      !exp->getType()->is(Type::KindOfString)) {
-    cg_printf("toString(");
-    close = true;
-  }
+  TypePtr et(exp->getExpectedType());
+  exp->setExpectedType(Type::String);
   exp->outputCPP(cg, ar);
-  if (close) cg_printf(")");
+  exp->setExpectedType(et);
 }
 
 static void outputStringBufExprs(ExpressionPtrVec &ev,

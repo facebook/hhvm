@@ -169,6 +169,21 @@ TypePtr Type::Intersection(AnalysisResultConstPtr ar,
   return res;
 }
 
+bool Type::IsMappedToVariant(TypePtr t) {
+  switch (t->m_kindOf) {
+  case KindOfBoolean:
+  case KindOfInt32  :
+  case KindOfInt64  :
+  case KindOfDouble :
+  case KindOfString :
+  case KindOfArray  :
+  case KindOfObject :
+    return false;
+  default: break;
+  }
+  return true;
+}
+
 bool Type::IsCastNeeded(AnalysisResultConstPtr ar, TypePtr from, TypePtr to) {
   if (SameType(from, to)) return false;
   if (!from->m_kindOf) return true;
@@ -318,6 +333,68 @@ bool Type::IsExactType(KindOf kindOf) {
   // clever trick thanks to mwilliams - this will evaluate
   // to true iff exactly one bit is set in kindOf
   return kindOf && !(kindOf & (kindOf-1));
+}
+
+bool Type::HasFastCastMethod(TypePtr t) {
+  switch (t->getKindOf()) {
+  case Type::KindOfBoolean:
+  case Type::KindOfInt32:
+  case Type::KindOfInt64:
+  case Type::KindOfDouble:
+  case Type::KindOfString:
+  case Type::KindOfArray:
+  case Type::KindOfObject:
+    return true;
+  default: break;
+  }
+  return false;
+}
+
+string Type::GetFastCastMethod(
+    TypePtr dst, bool allowRef, bool forConst, bool forVal) {
+  const char *prefix0 = allowRef ?            "to"  : "as";
+  const char *prefix1 = forConst && !forVal ? "C"   : "";
+  const char *prefix2 = forVal   ?            "Val" : "Ref";
+  const char *type;
+
+  switch (dst->getKindOf()) {
+  case Type::KindOfBoolean:
+  case Type::KindOfInt32:
+  case Type::KindOfInt64:
+  case Type::KindOfDouble:
+    prefix0 = "to";
+    prefix1 = "";
+    prefix2 = "Val";
+    break;
+  default: break;
+  }
+
+  switch (dst->getKindOf()) {
+  case Type::KindOfBoolean:
+    type = "Boolean";
+    break;
+  case Type::KindOfInt32:
+  case Type::KindOfInt64:
+    type = "Int64";
+    break;
+  case Type::KindOfDouble:
+    type = "Double";
+    break;
+  case Type::KindOfString:
+    type = "Str";
+    break;
+  case Type::KindOfArray:
+    type = "Arr";
+    break;
+  case Type::KindOfObject:
+    type = "Obj";
+    break;
+  default:
+    ASSERT(false);
+    break;
+  }
+
+  return string(prefix0) + string(prefix1) + string(type) + string(prefix2);
 }
 
 /* This new IsLegalCast returns true in a few cases where the old version
@@ -505,6 +582,22 @@ void Type::outputCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
       scope->getContainingFile()->addUsedClassHeader(m_name);
     }
   }
+}
+
+void Type::outputCPPFastObjectCast(CodeGenerator &cg,
+    AnalysisResultConstPtr ar,
+    BlockScopeRawPtr scope,
+    bool isConst,
+    bool isVal) {
+  ASSERT(isSpecificObject());
+  ClassScopePtr cls(getClass(ar, scope));
+  ASSERT(cls);
+  const string &cppClsName = cls->getId(cg);
+  cg_printf("(%s%s%s%s)",
+            isConst ? "const " : "",
+            Option::SmartPtrPrefix,
+            cppClsName.c_str(),
+            isVal ? "" : "&");
 }
 
 void Type::outputCPPCast(CodeGenerator &cg, AnalysisResultConstPtr ar,

@@ -227,9 +227,9 @@ public:
   }
   ExpressionPtr getNextCanonCsePtr() const;
   ExpressionPtr getCanonCsePtr() const;
-  bool needsCSE() const { 
+  bool needsCSE() const {
     ExpressionPtr p(getCanonCsePtr());
-    return p && p->hasCPPCseTemp(); 
+    return p && p->hasCPPCseTemp();
   }
 
   /**
@@ -361,7 +361,6 @@ public:
   static bool GetCseTempInfo(
       AnalysisResultPtr ar, ExpressionPtr p, TypePtr &t);
 
-  void fixExpectedType(AnalysisResultConstPtr ar);
   bool outputCPPArithArg(CodeGenerator &cg, AnalysisResultPtr ar, bool arrayOk);
   bool isUnused() const { return m_unused; }
   void setUnused(bool u) { m_unused = u; }
@@ -400,11 +399,15 @@ protected:
  private:
   static ExprClass Classes[];
   void outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar);
+
   /**
    * Returns true if a type cast is needed, and sets src/dst type
    */
   bool getTypeCastPtrs(
-      AnalysisResultPtr ar, TypePtr &srcType, TypePtr &dstType); 
+      AnalysisResultPtr ar, TypePtr &srcType, TypePtr &dstType);
+
+  bool needsFastCastTemp(AnalysisResultPtr ar);
+  bool canUseFastCast(AnalysisResultPtr ar);
 
   BlockScopeRawPtr m_originalScope;
   bool m_originalScopeSet;

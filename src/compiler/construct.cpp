@@ -157,6 +157,15 @@ void Construct::printSource(CodeGenerator &cg) {
 }
 
 void Construct::dumpNode(int spc, AnalysisResultConstPtr ar) {
+  dumpNode(spc);
+}
+
+void Construct::dumpNode(int spc) const {
+  // evil, but helpful!
+  const_cast<Construct*>(this)->dumpNode(spc);
+}
+
+void Construct::dumpNode(int spc) {
   int nkid = getKidCount();
   const char *name = 0;
   int type = 0;
@@ -269,9 +278,13 @@ void Construct::dumpNode(int spc, AnalysisResultConstPtr ar) {
       type_info = e->getActualType()->toString();
       if (e->getExpectedType()) {
         type_info += ":" + e->getExpectedType()->toString();
+      } else {
+        type_info += ":";
       }
       if (e->getImplementedType()) {
         type_info += ";" + e->getImplementedType()->toString();
+      } else {
+        type_info += ";";
       }
       type_info = "{" + type_info + "} ";
     }
@@ -362,7 +375,8 @@ void Construct::dumpNode(int spc, AnalysisResultConstPtr ar) {
   }
   if (objstr != "") objstr = " (" + objstr + ")";
 
-  std::cout << type_info << nkid << scontext << sef << localtered << refstr << objstr;
+  std::cout << type_info << nkid << scontext << sef
+    << localtered << refstr << objstr;
   if (m_loc) {
     std::cout << " " << m_loc->file << ":" <<
       m_loc->line1 << "@" << m_loc->char1;

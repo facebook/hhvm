@@ -31,7 +31,8 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-RPCRequestHandler::RPCRequestHandler() : m_count(0), m_reset(false) {
+RPCRequestHandler::RPCRequestHandler() : m_count(0), m_reset(false),
+  m_returnEncodeType(Json) {
   hphp_session_init();
   m_context = hphp_context_init();
   m_created = time(0);
@@ -234,7 +235,13 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     if (ret) {
       String response;
       switch (output) {
-        case 0: response = f_json_encode(funcRet); break;
+        case 0: {
+          ASSERT(m_returnEncodeType == Json ||
+                 m_returnEncodeType == Serialize);
+          response = (m_returnEncodeType == Json) ? f_json_encode(funcRet)
+                                                  : f_serialize(funcRet);
+          break;
+        }
         case 1: response = m_context->obDetachContents(); break;
         case 2:
           response =

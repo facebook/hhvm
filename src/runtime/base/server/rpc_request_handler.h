@@ -30,6 +30,11 @@ DECLARE_BOOST_TYPES(SatelliteServerInfo);
 
 class RPCRequestHandler : public RequestHandler {
 public:
+  enum ReturnEncodeType {
+    Json      = 1,
+    Serialize = 2,
+  };
+
   RPCRequestHandler();
   virtual ~RPCRequestHandler();
 
@@ -51,11 +56,14 @@ public:
 
   time_t getCreationTime() const { return m_created; }
 
+  void setReturnEncodeType(ReturnEncodeType et) { m_returnEncodeType = et; }
+  ReturnEncodeType getReturnEncodeType() { return m_returnEncodeType; }
 private:
   ExecutionContext *m_context;
   SatelliteServerInfoPtr m_serverInfo;
   int m_count;
   bool m_reset;
+  ReturnEncodeType m_returnEncodeType;
   time_t m_created;
 
   bool executePHPFunction(Transport *transport,

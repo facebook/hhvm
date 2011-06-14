@@ -156,11 +156,13 @@ private:
       *s_xbox_server_info = XboxServerInfoPtr(new XboxServerInfo());
     }
     s_xbox_request_handler->setServerInfo(*s_xbox_server_info);
+    s_xbox_request_handler->setReturnEncodeType(RPCRequestHandler::Serialize);
     if (s_xbox_request_handler->needReset() ||
         s_xbox_request_handler->incRequest() >
         (*s_xbox_server_info)->getMaxRequest()) {
       s_xbox_request_handler.destroy();
       s_xbox_request_handler->setServerInfo(*s_xbox_server_info);
+      s_xbox_request_handler->setReturnEncodeType(RPCRequestHandler::Serialize);
       s_xbox_request_handler->incRequest();
     }
     return s_xbox_request_handler.get();
@@ -220,7 +222,7 @@ bool XboxServer::SendMessage(CStrRef message, Variant &ret, int timeout_ms,
     if (code > 0) {
       ret.set("code", code);
       if (code == 200) {
-        ret.set("response", f_json_decode(response));
+        ret.set("response", f_unserialize(response));
       } else {
         ret.set("error", response);
       }
@@ -252,7 +254,7 @@ bool XboxServer::SendMessage(CStrRef message, Variant &ret, int timeout_ms,
         String sresponse(response, len, AttachString);
         ret.set("code", code);
         if (code == 200) {
-          ret.set("response", f_json_decode(sresponse));
+          ret.set("response", f_unserialize(sresponse));
         } else {
           ret.set("error", sresponse);
         }
@@ -297,7 +299,7 @@ bool XboxServer::PostMessage(CStrRef message,
         int len = 0;
         char *response = http->recv(len);
         String sresponse(response, len, AttachString);
-        if (code == 200 && same(f_json_decode(sresponse), true)) {
+        if (code == 200 && same(f_unserialize(sresponse), true)) {
           return true;
         }
       }
@@ -374,7 +376,7 @@ int XboxServer::TaskResult(CObjRef task, int timeout_ms, Variant &ret) {
   int code = 0;
   String response = ptask->getJob()->getResults(code, timeout_ms);
   if (code == 200) {
-    ret = f_json_decode(response);
+    ret = f_unserialize(response);
   } else {
     ret = response;
   }

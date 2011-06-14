@@ -2234,6 +2234,15 @@ HphpArray* HphpArray::copyImpl() const {
             if (fr->m_type == KindOfUninit) {
               // If the indirect memory location is set to uninit
               // null, we treat it as a tombstone.
+              // Before setting the entry as Tombstone, invalidate its
+              // hash index.
+              ElmInd* ei = findForInsert(e->key->data(),
+                                            e->key->size(), e->h);
+              ASSERT(*ei == pos);
+              ElmInd* tei = (ElmInd*) ((uintptr_t)target->m_hash
+                                       + (uintptr_t)ei - (uintptr_t)m_hash);
+              ASSERT(*tei == pos);
+              *tei = ElmIndOfTombstone;
               te->h = 0;
               te->key = NULL;
               te->data.m_type = KindOfTombstone;

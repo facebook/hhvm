@@ -60,7 +60,6 @@ class c_InvalidArgumentException : public c_LogicException {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  void init();
 };
 extern struct ObjectStaticCallbacks cw_InvalidArgumentException;
 ObjectData *coo_InvalidArgumentException() NEVER_INLINE;

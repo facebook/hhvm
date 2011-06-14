@@ -60,7 +60,7 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  void init();
+  c_ReflectionFunctionAbstract() : m_info(Variant::nullInit) {}
   public: Variant t_getname();
   public: Variant t_isinternal();
   public: Variant t_getclosure();

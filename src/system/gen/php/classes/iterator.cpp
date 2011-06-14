@@ -770,10 +770,6 @@ struct ObjectStaticCallbacks cw_ArrayIterator = {
   c_ArrayIterator::os_constant,
   c_ArrayIterator::os_get_call_info
 };
-void c_ArrayIterator::init() {
-  setNull(m_arr);
-  setNull(m_flags);
-}
 /* SRC: classes/iterator.php line 333 */
 void c_ArrayIterator::t___construct(Variant v_array, Variant v_flags //  = 0LL
 ) {
@@ -1324,9 +1320,6 @@ struct ObjectStaticCallbacks cw_AppendIterator = {
   c_AppendIterator::os_constant,
   c_AppendIterator::os_get_call_info
 };
-void c_AppendIterator::init() {
-  setNull(m_iterators);
-}
 /* SRC: classes/iterator.php line 700 */
 void c_AppendIterator::t___construct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__construct);
@@ -1954,9 +1947,6 @@ struct ObjectStaticCallbacks cw_RecursiveIteratorIterator = {
   c_RecursiveIteratorIterator::os_constant,
   c_RecursiveIteratorIterator::os_get_call_info
 };
-void c_RecursiveIteratorIterator::init() {
-  setNull(m_rsrc);
-}
 /* SRC: classes/iterator.php line 237 */
 void c_RecursiveIteratorIterator::t___construct(Variant v_iterator, Variant v_mode //  = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */
 , Variant v_flags //  = 0LL
@@ -2189,9 +2179,6 @@ struct ObjectStaticCallbacks cw_MutableArrayIterator = {
   c_MutableArrayIterator::os_constant,
   c_MutableArrayIterator::os_get_call_info
 };
-void c_MutableArrayIterator::init() {
-  c_ArrayIterator::init();
-}
 /* SRC: classes/iterator.php line 642 */
 void c_MutableArrayIterator::t___construct(VRefParam rv_array, Variant v_flags //  = 0LL
 ) {
@@ -2300,8 +2287,6 @@ struct ObjectStaticCallbacks cw_FilterIterator = {
   c_FilterIterator::os_constant,
   c_FilterIterator::os_get_call_info
 };
-void c_FilterIterator::init() {
-}
 ObjectData *coo_ArrayIterator() {
   return NEWOBJ(c_ArrayIterator)();
 }

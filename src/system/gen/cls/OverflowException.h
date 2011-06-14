@@ -60,7 +60,6 @@ class c_OverflowException : public c_RuntimeException {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  void init();
 };
 extern struct ObjectStaticCallbacks cw_OverflowException;
 ObjectData *coo_OverflowException() NEVER_INLINE;

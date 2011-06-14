@@ -438,6 +438,24 @@ public:
     return m_emptyJumpTables.find(name) == m_emptyJumpTables.end();
   }
 
+  void setNeedsCppCtor(bool needsCppCtor) {
+    m_needsCppCtor = needsCppCtor;
+  }
+
+  bool needsCppCtor() const {
+    return m_needsCppCtor;
+  }
+
+  void setNeedsInitMethod(bool needsInit) {
+    m_needsInit = needsInit;
+  }
+
+  bool needsInitMethod() const {
+    return m_needsInit;
+  }
+
+  bool canSkipCreateMethod() const;
+
 protected:
   void findJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar,
                             bool staticOnly, std::vector<const char *> &funcs);
@@ -457,6 +475,8 @@ private:
   bool m_derivedByDynamic;
   std::set<std::string> m_missingMethods;
   bool m_sep;
+  bool m_needsCppCtor;
+  bool m_needsInit;
 
   std::set<JumpTableName> m_emptyJumpTables;
   std::set<std::string> m_usedLiteralStringsHeader;
@@ -476,7 +496,7 @@ private:
   std::string getBaseHeaderFilename(CodeGenerator &cg);
 
   void outputCPPMethodInvokeBareObjectSupport(
-    CodeGenerator &cg, AnalysisResultPtr ar, 
+    CodeGenerator &cg, AnalysisResultPtr ar,
     FunctionScopePtr func, bool fewArgs);
 
   static void outputCPPClassJumpTable

@@ -64,7 +64,7 @@ class c_ArrayIterator : public ExtObjectData {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  void init();
+  c_ArrayIterator() : m_arr(Variant::nullInit), m_flags(Variant::nullInit) {}
   public: void t___construct(Variant v_array, Variant v_flags = 0LL);
   public: c_ArrayIterator *create(CVarRef v_array, CVarRef v_flags = NAMVAR(s_sys_svif01bca90, 0LL));
   public: void dynConstruct(CArrRef params);

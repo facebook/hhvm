@@ -445,9 +445,6 @@ struct ObjectStaticCallbacks cw_ReflectionFunctionAbstract = {
   c_ReflectionFunctionAbstract::os_constant,
   c_ReflectionFunctionAbstract::os_get_call_info
 };
-void c_ReflectionFunctionAbstract::init() {
-  setNull(m_info);
-}
 /* SRC: classes/reflection.php line 261 */
 Variant c_ReflectionFunctionAbstract::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getName);
@@ -716,9 +713,6 @@ struct ObjectStaticCallbacks cw_ReflectionObject = {
   c_ReflectionObject::os_constant,
   c_ReflectionObject::os_get_call_info
 };
-void c_ReflectionObject::init() {
-  c_ReflectionClass::init();
-}
 /* SRC: classes/reflection.php line 1299 */
 Variant c_ReflectionObject::t_export(Variant v_obj, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionObject, ReflectionObject::export);
@@ -823,9 +817,6 @@ struct ObjectStaticCallbacks cw_ReflectionException = {
   c_ReflectionException::os_constant,
   c_ReflectionException::os_get_call_info
 };
-void c_ReflectionException::init() {
-  c_Exception::init();
-}
 /* SRC: classes/reflection.php line 538 */
 const int64 q_ReflectionClass_IS_IMPLICIT_ABSTRACT = 16LL;
 const int64 q_ReflectionClass_IS_EXPLICIT_ABSTRACT = 32LL;
@@ -2112,10 +2103,6 @@ struct ObjectStaticCallbacks cw_ReflectionClass = {
   c_ReflectionClass::os_constant,
   c_ReflectionClass::os_get_call_info
 };
-void c_ReflectionClass::init() {
-  setNull(m_name);
-  setNull(m_info);
-}
 /* SRC: classes/reflection.php line 546 */
 void c_ReflectionClass::t___construct(Variant v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::__construct);
@@ -3450,10 +3437,6 @@ struct ObjectStaticCallbacks cw_ReflectionExtension = {
   c_ReflectionExtension::os_constant,
   c_ReflectionExtension::os_get_call_info
 };
-void c_ReflectionExtension::init() {
-  setNull(m_name);
-  setNull(m_info);
-}
 /* SRC: classes/reflection.php line 1838 */
 void c_ReflectionExtension::t___construct(Variant v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::__construct);
@@ -4153,11 +4136,6 @@ struct ObjectStaticCallbacks cw_ReflectionMethod = {
   c_ReflectionMethod::os_constant,
   c_ReflectionMethod::os_get_call_info
 };
-void c_ReflectionMethod::init() {
-  c_ReflectionFunctionAbstract::init();
-  setNull(m_name);
-  setNull(m_class);
-}
 /* SRC: classes/reflection.php line 1584 */
 void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMSTR(s_sys_ss00000000, "")
 ) {
@@ -4976,11 +4954,6 @@ struct ObjectStaticCallbacks cw_ReflectionProperty = {
   c_ReflectionProperty::os_constant,
   c_ReflectionProperty::os_get_call_info
 };
-void c_ReflectionProperty::init() {
-  setNull(m_info);
-  setNull(m_name);
-  setNull(m_class);
-}
 /* SRC: classes/reflection.php line 1330 */
 void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::__construct);
@@ -5481,9 +5454,6 @@ struct ObjectStaticCallbacks cw_ReflectionFunction = {
   c_ReflectionFunction::os_constant,
   c_ReflectionFunction::os_get_call_info
 };
-void c_ReflectionFunction::init() {
-  c_ReflectionFunctionAbstract::init();
-}
 /* SRC: classes/reflection.php line 465 */
 void c_ReflectionFunction::t___construct(Variant v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::__construct);
@@ -6005,9 +5975,6 @@ struct ObjectStaticCallbacks cw_ReflectionParameter = {
   c_ReflectionParameter::os_constant,
   c_ReflectionParameter::os_get_call_info
 };
-void c_ReflectionParameter::init() {
-  setNull(m_info);
-}
 /* SRC: classes/reflection.php line 49 */
 void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::__construct);

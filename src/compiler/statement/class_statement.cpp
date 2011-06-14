@@ -24,6 +24,7 @@
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/statement/method_statement.h>
+#include <compiler/statement/class_variable.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/analysis/constant_table.h>
 #include <util/util.h>
@@ -144,6 +145,13 @@ void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
 
   if (m_stmt) {
     m_stmt->analyzeProgram(ar);
+  }
+  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+    ClassScopePtr cls = getClassScope();
+    bool needsCppCtor, needsInit;
+    getCtorAndInitInfo(needsCppCtor, needsInit);
+    cls->setNeedsCppCtor(needsCppCtor);
+    cls->setNeedsInitMethod(needsInit);
   }
   if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
   ar->recordClassSource(m_name, m_loc, getFileScope()->getName());
@@ -338,6 +346,42 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   cg_printf("public:\n");
 }
 
+void ClassStatement::GetCtorAndInitInfo(
+    StatementPtr s, bool &needsCppCtor, bool &needsInit) {
+  if (!s) return;
+  switch (s->getKindOf()) {
+  case Statement::KindOfStatementList:
+    {
+      StatementListPtr stmts = static_pointer_cast<StatementList>(s);
+      for (int i = 0; i < stmts->getCount(); i++) {
+        GetCtorAndInitInfo((*stmts)[i], needsCppCtor, needsInit);
+      }
+    }
+    break;
+  case Statement::KindOfClassVariable:
+    {
+      ClassVariablePtr cv = static_pointer_cast<ClassVariable>(s);
+      cv->getCtorAndInitInfo(needsCppCtor, needsInit);
+    }
+    break;
+  default: break;
+  }
+}
+
+void ClassStatement::getCtorAndInitInfo(bool &needsCppCtor, bool &needsInit) {
+  needsCppCtor = needsInit = false;
+  ClassScopeRawPtr classScope = getClassScope();
+  if (!m_parent.empty()) {
+    if (classScope->derivesFromRedeclaring() ==
+        ClassScope::DirectFromRedeclared) {
+      needsInit = true;
+    }
+  }
+  GetCtorAndInitInfo(m_stmt, needsCppCtor, needsInit);
+  // exception is special
+  if (!needsInit && m_name == "exception") needsInit = true;
+}
+
 void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();
   if (cg.getContext() == CodeGenerator::NoContext) {
@@ -380,6 +424,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   string clsNameStr = classScope->getId(cg);
   const char *clsName = clsNameStr.c_str();
   bool redeclared = classScope->isRedeclaring();
+
   switch (cg.getContext()) {
   case CodeGenerator::CppDeclaration:
     {
@@ -447,6 +492,10 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf("virtual bool o_instanceof(CStrRef s) const;\n");
       }
 
+      bool hasEmitCppCtor = false;
+      bool needsCppCtor = classScope->needsCppCtor();
+      bool needsInit    = classScope->needsInitMethod();
+
       if (Option::GenerateCPPMacros) {
         bool dyn = (!parCls && !m_parent.empty()) ||
           classScope->derivesFromRedeclaring() ==
@@ -486,6 +535,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
           string conInit = "";
           bool hasParam = false;
+          bool needsLateInit = false;
           if (dyn) {
             conInit = " : DynamicObjectData(\"" + m_parent + "\", r)";
             hasParam = true;
@@ -495,15 +545,47 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
             hasParam = true;
           } else {
             if (redec && classScope->derivedByDynamic()) {
-              conInit = " : root(r ? r : this)";
+              conInit = "root(r ? r : this)";
+              needsLateInit = true;
             }
             hasParam = true;
           }
 
-          cg_indentBegin("%s%s(%s)%s {%s",
-                         Option::ClassPrefix, clsName,
-                         hasParam ? "ObjectData* r = NULL" : "",
-                         conInit.c_str(),
+          // this dance around the initialization list is to make
+          // sure members get set in the right order - since properties
+          // come first, and root comes later, we need to init the
+          // properties first, and then root.
+          if (needsLateInit) {
+            cg_printf("%s%s(%s) : ",
+                      Option::ClassPrefix,
+                      clsName,
+                      hasParam ? "ObjectData* r = NULL" : "");
+            if (needsCppCtor) {
+              cg.setContext(CodeGenerator::CppConstructor);
+              ASSERT(!cg.hasInitListFirstElem());
+              m_stmt->outputCPP(cg, ar);
+              cg.clearInitListFirstElem();
+              cg.setContext(CodeGenerator::CppDeclaration);
+              cg_printf(", ");
+            }
+            cg_printf("%s", conInit.c_str());
+          } else {
+            cg_printf("%s%s(%s)%s%s",
+                      Option::ClassPrefix,
+                      clsName,
+                      hasParam ? "ObjectData* r = NULL" : "",
+                      conInit.c_str(),
+                      needsCppCtor ? conInit.empty() ? " : " : ", " : "");
+            if (needsCppCtor) {
+              cg.setContext(CodeGenerator::CppConstructor);
+              ASSERT(!cg.hasInitListFirstElem());
+              m_stmt->outputCPP(cg, ar);
+              cg.clearInitListFirstElem();
+              cg.setContext(CodeGenerator::CppDeclaration);
+            }
+          }
+
+          cg_indentBegin(" {%s",
                          hasGet || hasSet || hasCall || hasCallStatic ?
                          "\n" : "");
           if (hasGet) cg_printf("setAttribute(UseGet);\n");
@@ -511,10 +593,23 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           if (hasCall) cg_printf("setAttribute(HasCall);\n");
           if (hasCallStatic) cg_printf("setAttribute(HasCallStatic);\n");
           cg_indentEnd("}\n");
+          hasEmitCppCtor = true;
         }
       }
 
-      cg_printf("void init();\n");
+      if (needsCppCtor && !hasEmitCppCtor) {
+        cg_printf("%s%s() : ", Option::ClassPrefix, clsName);
+        cg.setContext(CodeGenerator::CppConstructor);
+        ASSERT(!cg.hasInitListFirstElem());
+        m_stmt->outputCPP(cg, ar);
+        cg.clearInitListFirstElem();
+        cg.setContext(CodeGenerator::CppDeclaration);
+        cg_printf(" {}\n");
+      }
+
+      if (needsInit) {
+        cg_printf("void init();\n");
+      }
 
       if (classScope->needLazyStaticInitializer()) {
         cg_printf("static GlobalVariables *lazy_initializer"
@@ -610,78 +705,81 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
     break;
   case CodeGenerator::CppImplementation:
-    if (m_stmt) {
-      cg.setContext(CodeGenerator::CppClassConstantsImpl);
-      m_stmt->outputCPP(cg, ar);
-      cg.setContext(CodeGenerator::CppImplementation);
-    }
-
-    classScope->outputCPPSupportMethodsImpl(cg, ar);
-
-    if (redeclared) {
-      cg_printf("IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(%s%s);\n",
-                Option::ClassStaticsPrefix, clsName);
-    }
-
-    cg_indentBegin("void %s%s::init() {\n",
-                   Option::ClassPrefix, clsName);
-    if (!m_parent.empty()) {
-      if (classScope->derivesFromRedeclaring() ==
-          ClassScope::DirectFromRedeclared) {
-        cg_printf("parent->init();\n");
-      } else {
-
-        ClassScopePtr parCls = ar->findClass(m_parent);
-        cg_printf("%s%s::init();\n", Option::ClassPrefix,
-                  parCls->getId(cg).c_str());
+    {
+      if (m_stmt) {
+        cg.setContext(CodeGenerator::CppClassConstantsImpl);
+        m_stmt->outputCPP(cg, ar);
+        cg.setContext(CodeGenerator::CppImplementation);
       }
-    }
-    if (classScope->getVariables()->
-        getAttribute(VariableTable::NeedGlobalPointer)) {
-      cg.printDeclareGlobals();
-    }
-    cg.setContext(CodeGenerator::CppConstructor);
-    if (m_stmt) m_stmt->outputCPP(cg, ar);
 
-    // This is lame. Exception base class needs to prepare stacktrace outside
-    // of its PHP constructor. Every subclass of exception also needs this
-    // stacktrace, so we're adding an artificial __init__ in exception.php
-    // and calling it here.
-    if (m_name == "exception") {
-      cg_printf("{CountableHelper h(this); t___init__();}\n");
-    }
+      classScope->outputCPPSupportMethodsImpl(cg, ar);
 
-    cg_indentEnd("}\n");
+      if (redeclared) {
+        cg_printf("IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(%s%s);\n",
+                  Option::ClassStaticsPrefix, clsName);
+      }
 
-    if (classScope->needStaticInitializer()) {
-      cg_indentBegin("void %s%s::os_static_initializer() {\n",
-                     Option::ClassPrefix, clsName);
-      cg.printDeclareGlobals();
-      cg.setContext(CodeGenerator::CppStaticInitializer);
+      bool needsInit = classScope->needsInitMethod();
+      if (needsInit) {
+        cg_indentBegin("void %s%s::init() {\n",
+                       Option::ClassPrefix, clsName);
+        if (!m_parent.empty()) {
+          if (classScope->derivesFromRedeclaring() ==
+              ClassScope::DirectFromRedeclared) {
+            cg_printf("parent->init();\n");
+          } else {
+            ClassScopePtr parCls = ar->findClass(m_parent);
+            cg_printf("%s%s::init();\n", Option::ClassPrefix,
+                      parCls->getId(cg).c_str());
+          }
+        }
+        if (classScope->getVariables()->
+            getAttribute(VariableTable::NeedGlobalPointer)) {
+          cg.printDeclareGlobals();
+        }
+        cg.setContext(CodeGenerator::CppInitializer);
+        if (m_stmt) m_stmt->outputCPP(cg, ar);
+
+        // This is lame. Exception base class needs to prepare stacktrace
+        // outside of its PHP constructor. Every subclass of exception also
+        // needs this stacktrace, so we're adding an artificial __init__ in
+        // exception.php and calling it here.
+        if (m_name == "exception") {
+          cg_printf("{CountableHelper h(this); t___init__();}\n");
+        }
+
+        cg_indentEnd("}\n");
+      }
+
+      if (classScope->needStaticInitializer()) {
+        cg_indentBegin("void %s%s::os_static_initializer() {\n",
+                       Option::ClassPrefix, clsName);
+        cg.printDeclareGlobals();
+        cg.setContext(CodeGenerator::CppStaticInitializer);
+        if (m_stmt) m_stmt->outputCPP(cg, ar);
+        cg_indentEnd("}\n");
+        cg_indentBegin("void %s%s() {\n",
+                       Option::ClassStaticInitializerPrefix, clsName);
+        cg_printf("%s%s::os_static_initializer();\n",  Option::ClassPrefix,
+                  clsName);
+        cg_indentEnd("}\n");
+      }
+      if (classScope->needLazyStaticInitializer()) {
+        cg_indentBegin("GlobalVariables *%s%s::lazy_initializer("
+                       "GlobalVariables *g) {\n", Option::ClassPrefix, clsName);
+        cg_indentBegin("if (!g->%s%s) {\n",
+                       Option::ClassStaticInitializerFlagPrefix, clsName);
+        cg_printf("g->%s%s = true;\n", Option::ClassStaticInitializerFlagPrefix,
+                  clsName);
+        cg.setContext(CodeGenerator::CppLazyStaticInitializer);
+        if (m_stmt) m_stmt->outputCPP(cg, ar);
+        cg_indentEnd("}\n");
+        cg_printf("return g;\n");
+        cg_indentEnd("}\n");
+      }
+      cg.setContext(CodeGenerator::CppImplementation);
       if (m_stmt) m_stmt->outputCPP(cg, ar);
-      cg_indentEnd("}\n");
-      cg_indentBegin("void %s%s() {\n",
-                     Option::ClassStaticInitializerPrefix, clsName);
-      cg_printf("%s%s::os_static_initializer();\n",  Option::ClassPrefix,
-                clsName);
-      cg_indentEnd("}\n");
     }
-    if (classScope->needLazyStaticInitializer()) {
-      cg_indentBegin("GlobalVariables *%s%s::lazy_initializer("
-                     "GlobalVariables *g) {\n", Option::ClassPrefix, clsName);
-      cg_indentBegin("if (!g->%s%s) {\n",
-                     Option::ClassStaticInitializerFlagPrefix, clsName);
-      cg_printf("g->%s%s = true;\n", Option::ClassStaticInitializerFlagPrefix,
-                clsName);
-      cg.setContext(CodeGenerator::CppLazyStaticInitializer);
-      if (m_stmt) m_stmt->outputCPP(cg, ar);
-      cg_indentEnd("}\n");
-      cg_printf("return g;\n");
-      cg_indentEnd("}\n");
-    }
-    cg.setContext(CodeGenerator::CppImplementation);
-    if (m_stmt) m_stmt->outputCPP(cg, ar);
-
     break;
   case CodeGenerator::CppFFIDecl:
   case CodeGenerator::CppFFIImpl:

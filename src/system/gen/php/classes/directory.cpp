@@ -266,10 +266,6 @@ struct ObjectStaticCallbacks cw_Directory = {
   c_Directory::os_constant,
   c_Directory::os_get_call_info
 };
-void c_Directory::init() {
-  setNull(m_path);
-  setNull(m_handle);
-}
 /* SRC: classes/directory.php line 7 */
 void c_Directory::t___construct(Variant v_path) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::__construct);

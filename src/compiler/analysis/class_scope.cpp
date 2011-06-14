@@ -47,7 +47,7 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
     m_kindOf(kindOf), m_parent(parent), m_bases(bases), m_attribute(0),
     m_redeclaring(-1), m_volatile(false), m_needStaticInitializer(false),
     m_derivesFromRedeclaring(FromNormal), m_derivedByDynamic(false),
-    m_sep(false) {
+    m_sep(false), m_needsCppCtor(false), m_needsInit(true) {
 
   m_dynamic = Option::IsDynamicClass(m_name);
 
@@ -68,7 +68,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     m_attribute(0), m_dynamic(false), m_redeclaring(-1), m_volatile(false),
     m_needStaticInitializer(false),
     m_derivesFromRedeclaring(FromNormal), m_derivedByDynamic(false),
-    m_sep(false) {
+    m_sep(false), m_needsCppCtor(false), m_needsInit(true) {
   BOOST_FOREACH(FunctionScopePtr f, methods) {
     if (f->getName() == "__construct") setAttribute(HasConstructor);
     else if (f->getName() == "__destruct") setAttribute(HasDestructor);
@@ -1769,7 +1769,7 @@ void ClassScope::findJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar,
 }
 
 void ClassScope::outputCPPMethodInvokeBareObjectSupport(
-    CodeGenerator &cg, AnalysisResultPtr ar, 
+    CodeGenerator &cg, AnalysisResultPtr ar,
     FunctionScopePtr func, bool fewArgs) {
 
   string id(getId(cg));
@@ -1783,7 +1783,7 @@ void ClassScope::outputCPPMethodInvokeBareObjectSupport(
 
   cg_indentBegin("Variant %s%s::%s%s(void *self, ",
                   Option::ClassPrefix, id.c_str(),
-                  fewArgs ? Option::InvokeWrapperFewArgsPrefix : 
+                  fewArgs ? Option::InvokeWrapperFewArgsPrefix :
                     Option::InvokeWrapperPrefix,
                   lname.c_str());
   if (fewArgs) {
@@ -1800,13 +1800,13 @@ void ClassScope::outputCPPMethodInvokeBareObjectSupport(
     cg_printf("mcp.obj = static_cast<ObjectData*>(self);\n");
   }
   if (fewArgs) {
-    cg_printf("return %s%s::%s%s(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS);\n", 
+    cg_printf("return %s%s::%s%s(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS);\n",
               Option::ClassPrefix,
               id.c_str(),
               Option::InvokeFewArgsPrefix,
               lname.c_str());
   } else {
-    cg_printf("return %s%s::%s%s(mcp, params);\n", 
+    cg_printf("return %s%s::%s%s(mcp, params);\n",
               Option::ClassPrefix,
               id.c_str(),
               Option::InvokePrefix,
@@ -2008,7 +2008,7 @@ void ClassScope::outputCPPJumpTableDecl(CodeGenerator &cg,
     } else {
       cg_printf("DECLARE_METHOD_INVOKE_HELPERS(%s);\n", id.c_str());
       if (needsWrapper) {
-        cg_printf("DECLARE_METHOD_INVOKE_WRAPPER_HELPERS(%s);\n", 
+        cg_printf("DECLARE_METHOD_INVOKE_WRAPPER_HELPERS(%s);\n",
                   id.c_str());
       }
     }
@@ -2250,4 +2250,16 @@ void ClassScope::outputMethodWrappers(CodeGenerator &cg,
       }
     }
   }
+}
+
+bool ClassScope::canSkipCreateMethod() const {
+  // create() is not necessary if
+  // 1) not inheriting from any class
+  // 2) no constructor defined (__construct or class name)
+  // 3) no init() defined
+  if (!m_parent.empty())                  return false;
+  if (getAttribute(HasConstructor) ||
+      getAttribute(ClassNameConstructor)) return false;
+  if (needsInitMethod())                  return false;
+  return true;
 }

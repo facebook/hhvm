@@ -400,7 +400,6 @@ struct ObjectStaticCallbacks cw_SplObjectStorage = {
 };
 void c_SplObjectStorage::init() {
   m_storage = s_sys_sa00000000;
-  m_index = 0LL;
 }
 /* SRC: classes/splobjectstorage.php line 24 */
 void c_SplObjectStorage::t_rewind() {

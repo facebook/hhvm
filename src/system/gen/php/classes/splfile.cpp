@@ -1007,9 +1007,6 @@ struct ObjectStaticCallbacks cw_SplFileObject = {
   c_SplFileObject::os_constant,
   c_SplFileObject::os_get_call_info
 };
-void c_SplFileObject::init() {
-  c_SplFileInfo::init();
-}
 /* SRC: classes/splfile.php line 392 */
 void c_SplFileObject::t___construct(Variant v_filename, Variant v_open_mode //  = NAMSTR(s_sys_ss0d42ecf6, "r")
 , Variant v_use_include_path //  = false
@@ -2071,9 +2068,6 @@ struct ObjectStaticCallbacks cw_SplFileInfo = {
   c_SplFileInfo::os_constant,
   c_SplFileInfo::os_get_call_info
 };
-void c_SplFileInfo::init() {
-  setNull(m_rsrc);
-}
 /* SRC: classes/splfile.php line 14 */
 void c_SplFileInfo::t___construct(Variant v_file_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::__construct);

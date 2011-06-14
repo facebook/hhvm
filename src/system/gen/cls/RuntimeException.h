@@ -60,7 +60,6 @@ class c_RuntimeException : public c_Exception {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  void init();
 };
 extern struct ObjectStaticCallbacks cw_RuntimeException;
 ObjectData *coo_RuntimeException() NEVER_INLINE;

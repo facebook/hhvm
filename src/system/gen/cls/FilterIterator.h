@@ -60,7 +60,6 @@ class c_FilterIterator : public ExtObjectData {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  void init();
 };
 extern struct ObjectStaticCallbacks cw_FilterIterator;
 ObjectData *coo_FilterIterator() NEVER_INLINE;

@@ -189,8 +189,6 @@ struct ObjectStaticCallbacks cw_XhprofFrame = {
   c_XhprofFrame::os_constant,
   c_XhprofFrame::os_get_call_info
 };
-void c_XhprofFrame::init() {
-}
 /* SRC: classes/xhprof.php line 7 */
 void c_XhprofFrame::t___construct(Variant v_name) {
   bool oldInCtor = gasInCtor(true);

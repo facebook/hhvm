@@ -61,7 +61,6 @@ class c_ReflectionObject : public c_ReflectionClass {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  void init();
   public: static Variant t_export(Variant v_obj, CVarRef v_ret);
   DECLARE_METHOD_INVOKE_HELPERS(export);
 };

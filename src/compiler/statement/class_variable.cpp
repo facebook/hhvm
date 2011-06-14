@@ -199,6 +199,66 @@ void ClassVariable::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
+void ClassVariable::getCtorAndInitInfo(
+    ExpressionPtr exp,
+    bool &needsCppCtor,
+    bool &needsInit,
+    SimpleVariablePtr &var,
+    TypePtr &type,
+    Symbol *&sym,
+    ExpressionPtr &value) {
+
+  ClassScopePtr scope = getClassScope();
+  bool derivFromRedec = scope->derivesFromRedeclaring() &&
+    !m_modifiers->isPrivate();
+  AssignmentExpressionPtr assignment;
+  bool isAssign = exp->is(Expression::KindOfAssignmentExpression);
+  if (isAssign) {
+    assignment = static_pointer_cast<AssignmentExpression>(exp);
+    var = dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
+    ASSERT(var);
+    value = assignment->getValue();
+    ASSERT(value);
+  } else {
+    var = dynamic_pointer_cast<SimpleVariable>(exp);
+    ASSERT(var);
+  }
+  sym = scope->getVariables()->getSymbol(var->getName());
+  ASSERT(sym);
+  type = scope->getVariables()->getFinalType(var->getName());
+  ASSERT(type);
+
+  bool isValueNull = isAssign ? value->isLiteralNull() : false;
+  bool typeIsInitable = type->is(Type::KindOfVariant) ||
+                        type->getCPPInitializer();
+  if (!derivFromRedec &&
+      !sym->isOverride() &&
+      (isAssign ?
+        (isValueNull ||
+         (value->is(Expression::KindOfScalarExpression) &&
+          type->isPrimitive())) :
+        typeIsInitable)) {
+    needsCppCtor = true;
+  } else if (isAssign || typeIsInitable) {
+    // if we aren't an assignment and the type is not a variant
+    // w/ no CPP initializer, then we currently don't bother
+    // to initialize it in init().
+    needsInit = true;
+  }
+}
+
+void ClassVariable::getCtorAndInitInfo(bool &needsCppCtor, bool &needsInit) {
+  if (m_modifiers->isStatic()) return;
+  for (int i = 0; i < m_declaration->getCount(); i++) {
+    ExpressionPtr exp = (*m_declaration)[i];
+    SimpleVariablePtr var;
+    TypePtr type;
+    Symbol *sym;
+    ExpressionPtr value;
+    getCtorAndInitInfo(exp, needsCppCtor, needsInit, var, type, sym, value);
+  }
+}
+
 void ClassVariable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_modifiers->outputPHP(cg, ar);
   cg_printf(" ");
@@ -207,56 +267,108 @@ void ClassVariable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
+
+  // bail out early if possible
+  switch (cg.getContext()) {
+  case CodeGenerator::CppConstructor:
+  case CodeGenerator::CppInitializer:
+    if (m_modifiers->isStatic()) return;
+    break;
+  case CodeGenerator::CppStaticInitializer:
+  case CodeGenerator::CppLazyStaticInitializer:
+    if (!m_modifiers->isStatic()) return;
+    break;
+  default:
+    return;
+  }
+
   ClassScopePtr scope = getClassScope();
   bool derivFromRedec = scope->derivesFromRedeclaring() &&
     !m_modifiers->isPrivate();
+
   for (int i = 0; i < m_declaration->getCount(); i++) {
     ExpressionPtr exp = (*m_declaration)[i];
-
     SimpleVariablePtr var;
     TypePtr type;
+    Symbol *sym;
+    ExpressionPtr value;
+
+    bool initInCtor = false;
+    bool initInInit = false;
+    getCtorAndInitInfo(exp, initInCtor, initInInit, var, type, sym, value);
+
+    bool isAssign = exp->is(Expression::KindOfAssignmentExpression);
+    bool isValueNull = isAssign ? value->isLiteralNull() : false;
 
     switch (cg.getContext()) {
     case CodeGenerator::CppConstructor:
-      if (m_modifiers->isStatic()) continue;
-
-      if (exp->is(Expression::KindOfAssignmentExpression)) {
-        AssignmentExpressionPtr assignment =
-          dynamic_pointer_cast<AssignmentExpression>(exp);
-
-        var = dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
-        ExpressionPtr value = assignment->getValue();
-        value->outputCPPBegin(cg, ar);
-        if (derivFromRedec) {
-          cg_printf("%sset(", Option::ObjectPrefix);
-          cg_printString(var->getName(), ar, shared_from_this());
+      if (initInCtor) {
+        if (!cg.hasInitListFirstElem()) {
+          cg.setInitListFirstElem();
+        } else {
           cg_printf(", ");
-          value->outputCPP(cg, ar);
-          cg_printf(")");
-        } else if (value->isLiteralNull()) {
-          cg_printf("setNull(%s%s)", Option::PropertyPrefix,
-                    var->getName().c_str());
-        } else {
-          cg_printf("%s%s = ", Option::PropertyPrefix, var->getName().c_str());
-          value->outputCPP(cg, ar);
         }
-        cg_printf(";\n");
-        value->outputCPPEnd(cg, ar);
-      } else {
-        var = dynamic_pointer_cast<SimpleVariable>(exp);
-        if (derivFromRedec) {
-          cg_printf("%sset(", Option::ObjectPrefix);
-          cg_printString(var->getName(), ar, shared_from_this());
-          cg_printf(", null_variant);\n");
-        } else {
-          type = scope->getVariables()->getFinalType(var->getName());
-          if (type->is(Type::KindOfVariant)) {
-            cg_printf("setNull(%s%s);\n", Option::PropertyPrefix,
+        if (isAssign) {
+          if (isValueNull) {
+            cg_printf("%s%s(Variant::nullInit)",
+                      Option::PropertyPrefix,
                       var->getName().c_str());
           } else {
-            const char *initializer = type->is(Type::KindOfVariant) ? "null" :
-              type->getCPPInitializer();
-            if (initializer) {
+            ASSERT(value);
+            ASSERT(value->is(Expression::KindOfScalarExpression));
+            cg_printf("%s%s(",
+                      Option::PropertyPrefix,
+                      var->getName().c_str());
+            value->outputCPP(cg, ar);
+            cg_printf(")");
+          }
+        } else {
+          if (type->is(Type::KindOfVariant)) {
+            cg_printf("%s%s(Variant::nullInit)",
+                      Option::PropertyPrefix,
+                      var->getName().c_str());
+          } else {
+            const char *initializer = type->getCPPInitializer();
+            ASSERT(initializer);
+            cg_printf("%s%s(%s)",
+                      Option::PropertyPrefix,
+                      var->getName().c_str(),
+                      initializer);
+          }
+        }
+      }
+      break;
+    case CodeGenerator::CppInitializer:
+      if (initInInit) {
+        if (isAssign) {
+          value->outputCPPBegin(cg, ar);
+          if (derivFromRedec) {
+            cg_printf("%sset(", Option::ObjectPrefix);
+            cg_printString(var->getName(), ar, shared_from_this());
+            cg_printf(", ");
+            value->outputCPP(cg, ar);
+            cg_printf(")");
+          } else if (isValueNull) {
+            cg_printf("setNull(%s%s)", Option::PropertyPrefix,
+                      var->getName().c_str());
+          } else {
+            cg_printf("%s%s = ", Option::PropertyPrefix, var->getName().c_str());
+            value->outputCPP(cg, ar);
+          }
+          cg_printf(";\n");
+          value->outputCPPEnd(cg, ar);
+        } else {
+          if (derivFromRedec) {
+            cg_printf("%sset(", Option::ObjectPrefix);
+            cg_printString(var->getName(), ar, shared_from_this());
+            cg_printf(", null_variant);\n");
+          } else {
+            if (type->is(Type::KindOfVariant)) {
+              cg_printf("setNull(%s%s);\n", Option::PropertyPrefix,
+                        var->getName().c_str());
+            } else {
+              const char *initializer = type->getCPPInitializer();
+              ASSERT(initializer);
               cg_printf("%s%s = %s;\n", Option::PropertyPrefix,
                         var->getName().c_str(), initializer);
             }
@@ -264,66 +376,42 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         }
       }
       break;
-
     case CodeGenerator::CppStaticInitializer:
-      {
-        if (!m_modifiers->isStatic()) continue;
-
-        VariableTablePtr variables = scope->getVariables();
-        if (exp->is(Expression::KindOfAssignmentExpression)) {
-          AssignmentExpressionPtr assignment =
-            dynamic_pointer_cast<AssignmentExpression>(exp);
-
-          var = dynamic_pointer_cast<SimpleVariable>
-            (assignment->getVariable());
-          ExpressionPtr value = assignment->getValue();
-          if (value->containsDynamicConstant(ar)) continue;
-          Symbol *sym = scope->getVariables()->getSymbol(var->getName());
-          if (sym->isOverride()) continue;
-          if (value->isLiteralNull()) {
-            cg_printf("setNull(g->%s%s%s%s)",
-                      Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
-                      Option::IdPrefix.c_str(), var->getName().c_str());
-          } else {
-            cg_printf("g->%s%s%s%s = ",
-                      Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
-                      Option::IdPrefix.c_str(), var->getName().c_str());
-            value->outputCPP(cg, ar);
-          }
+      if (isAssign) {
+        if (value->containsDynamicConstant(ar)) continue;
+        if (sym->isOverride()) continue;
+        if (isValueNull) {
+          cg_printf("setNull(g->%s%s%s%s)",
+                    Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
+                    Option::IdPrefix.c_str(), var->getName().c_str());
         } else {
-          var = dynamic_pointer_cast<SimpleVariable>(exp);
-          type = scope->getVariables()->getFinalType(var->getName());
-          const char *initializer = type->getCPPInitializer();
-          if (initializer) {
-            cg_printf("g->%s%s%s%s = %s",
-                      Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
-                      Option::IdPrefix.c_str(), var->getName().c_str(),
-                      initializer);
-          }
+          cg_printf("g->%s%s%s%s = ",
+                    Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
+                    Option::IdPrefix.c_str(), var->getName().c_str());
+          value->outputCPP(cg, ar);
         }
-        cg_printf(";\n");
+      } else {
+        const char *initializer = type->getCPPInitializer();
+        if (initializer) {
+          cg_printf("g->%s%s%s%s = %s",
+                    Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
+                    Option::IdPrefix.c_str(), var->getName().c_str(),
+                    initializer);
+        }
       }
+      cg_printf(";\n");
       break;
     case CodeGenerator::CppLazyStaticInitializer:
-      {
-        if (!m_modifiers->isStatic()) continue;
-        if (!exp->is(Expression::KindOfAssignmentExpression)) continue;
-        VariableTablePtr variables = scope->getVariables();
-        AssignmentExpressionPtr assignment =
-          dynamic_pointer_cast<AssignmentExpression>(exp);
-        var = dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
-        ExpressionPtr value = assignment->getValue();
-        if (!value->containsDynamicConstant(ar)) continue;
-        Symbol *sym = scope->getVariables()->getSymbol(var->getName());
-        if (sym->isOverride()) continue;
-        value->outputCPPBegin(cg, ar);
-        cg_printf("g->%s%s%s%s = ",
-                  Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
-                  Option::IdPrefix.c_str(), var->getName().c_str());
-        value->outputCPP(cg, ar);
-        cg_printf(";\n");
-        value->outputCPPEnd(cg, ar);
-      }
+      if (!isAssign) continue;
+      if (!value->containsDynamicConstant(ar)) continue;
+      if (sym->isOverride()) continue;
+      value->outputCPPBegin(cg, ar);
+      cg_printf("g->%s%s%s%s = ",
+                Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
+                Option::IdPrefix.c_str(), var->getName().c_str());
+      value->outputCPP(cg, ar);
+      cg_printf(";\n");
+      value->outputCPPEnd(cg, ar);
       break;
     default:
       break;

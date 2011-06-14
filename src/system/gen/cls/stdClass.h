@@ -59,7 +59,6 @@ class c_stdClass : public ExtObjectData {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  void init();
 };
 extern struct ObjectStaticCallbacks cw_stdClass;
 ObjectData *coo_stdClass() NEVER_INLINE;

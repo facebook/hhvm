@@ -116,9 +116,6 @@ struct ObjectStaticCallbacks cw_UnexpectedValueException = {
   c_UnexpectedValueException::os_constant,
   c_UnexpectedValueException::os_get_call_info
 };
-void c_UnexpectedValueException::init() {
-  c_RuntimeException::init();
-}
 /* SRC: classes/exception.php line 251 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OverflowException
 Variant c_OverflowException::os_getInit(CStrRef s) {
@@ -206,9 +203,6 @@ struct ObjectStaticCallbacks cw_OverflowException = {
   c_OverflowException::os_constant,
   c_OverflowException::os_get_call_info
 };
-void c_OverflowException::init() {
-  c_RuntimeException::init();
-}
 /* SRC: classes/exception.php line 243 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfBoundsException
 Variant c_OutOfBoundsException::os_getInit(CStrRef s) {
@@ -296,9 +290,6 @@ struct ObjectStaticCallbacks cw_OutOfBoundsException = {
   c_OutOfBoundsException::os_constant,
   c_OutOfBoundsException::os_get_call_info
 };
-void c_OutOfBoundsException::init() {
-  c_RuntimeException::init();
-}
 /* SRC: classes/exception.php line 173 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LogicException
 Variant c_LogicException::os_getInit(CStrRef s) {
@@ -385,9 +376,6 @@ struct ObjectStaticCallbacks cw_LogicException = {
   c_LogicException::os_constant,
   c_LogicException::os_get_call_info
 };
-void c_LogicException::init() {
-  c_Exception::init();
-}
 /* SRC: classes/exception.php line 259 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RangeException
 Variant c_RangeException::os_getInit(CStrRef s) {
@@ -475,9 +463,6 @@ struct ObjectStaticCallbacks cw_RangeException = {
   c_RangeException::os_constant,
   c_RangeException::os_get_call_info
 };
-void c_RangeException::init() {
-  c_RuntimeException::init();
-}
 /* SRC: classes/exception.php line 211 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_InvalidArgumentException
 Variant c_InvalidArgumentException::os_getInit(CStrRef s) {
@@ -567,9 +552,6 @@ struct ObjectStaticCallbacks cw_InvalidArgumentException = {
   c_InvalidArgumentException::os_constant,
   c_InvalidArgumentException::os_get_call_info
 };
-void c_InvalidArgumentException::init() {
-  c_LogicException::init();
-}
 /* SRC: classes/exception.php line 268 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_UnderflowException
 Variant c_UnderflowException::os_getInit(CStrRef s) {
@@ -655,9 +637,6 @@ struct ObjectStaticCallbacks cw_UnderflowException = {
   c_UnderflowException::os_constant,
   c_UnderflowException::os_get_call_info
 };
-void c_UnderflowException::init() {
-  c_RuntimeException::init();
-}
 /* SRC: classes/exception.php line 227 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfRangeException
 Variant c_OutOfRangeException::os_getInit(CStrRef s) {
@@ -745,9 +724,6 @@ struct ObjectStaticCallbacks cw_OutOfRangeException = {
   c_OutOfRangeException::os_constant,
   c_OutOfRangeException::os_get_call_info
 };
-void c_OutOfRangeException::init() {
-  c_LogicException::init();
-}
 /* SRC: classes/exception.php line 193 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_BadMethodCallException
 Variant c_BadMethodCallException::os_getInit(CStrRef s) {
@@ -840,9 +816,6 @@ struct ObjectStaticCallbacks cw_BadMethodCallException = {
   c_BadMethodCallException::os_constant,
   c_BadMethodCallException::os_get_call_info
 };
-void c_BadMethodCallException::init() {
-  c_BadFunctionCallException::init();
-}
 /* SRC: classes/exception.php line 235 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RuntimeException
 Variant c_RuntimeException::os_getInit(CStrRef s) {
@@ -927,9 +900,6 @@ struct ObjectStaticCallbacks cw_RuntimeException = {
   c_RuntimeException::os_constant,
   c_RuntimeException::os_get_call_info
 };
-void c_RuntimeException::init() {
-  c_Exception::init();
-}
 /* SRC: classes/exception.php line 10 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Exception
 Variant c_Exception::os_getInit(CStrRef s) {
@@ -1379,10 +1349,6 @@ struct ObjectStaticCallbacks cw_Exception = {
 void c_Exception::init() {
   m_message = NAMSTR(s_sys_ss00000000, "");
   m_code = 0LL;
-  setNull(m_previous);
-  setNull(m_file);
-  setNull(m_line);
-  setNull(m_trace);
   {CountableHelper h(this); t___init__();}
 }
 /* SRC: classes/exception.php line 24 */
@@ -1832,10 +1798,6 @@ struct ObjectStaticCallbacks cw_ErrorException = {
   c_ErrorException::os_constant,
   c_ErrorException::os_get_call_info
 };
-void c_ErrorException::init() {
-  c_Exception::init();
-  setNull(m_severity);
-}
 /* SRC: classes/exception.php line 288 */
 void c_ErrorException::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
 , Variant v_code //  = 0LL
@@ -1955,9 +1917,6 @@ struct ObjectStaticCallbacks cw_BadFunctionCallException = {
   c_BadFunctionCallException::os_constant,
   c_BadFunctionCallException::os_get_call_info
 };
-void c_BadFunctionCallException::init() {
-  c_LogicException::init();
-}
 /* SRC: classes/exception.php line 219 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LengthException
 Variant c_LengthException::os_getInit(CStrRef s) {
@@ -2045,9 +2004,6 @@ struct ObjectStaticCallbacks cw_LengthException = {
   c_LengthException::os_constant,
   c_LengthException::os_get_call_info
 };
-void c_LengthException::init() {
-  c_LogicException::init();
-}
 /* SRC: classes/exception.php line 202 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DomainException
 Variant c_DomainException::os_getInit(CStrRef s) {
@@ -2135,9 +2091,6 @@ struct ObjectStaticCallbacks cw_DomainException = {
   c_DomainException::os_constant,
   c_DomainException::os_get_call_info
 };
-void c_DomainException::init() {
-  c_LogicException::init();
-}
 ObjectData *coo_UnexpectedValueException() {
   return NEWOBJ(c_UnexpectedValueException)();
 }

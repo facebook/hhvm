@@ -50,6 +50,9 @@ private:
   std::string m_originalParent;
   bool m_ignored;
 
+  static void GetCtorAndInitInfo(
+      StatementPtr s, bool &needsCppCtor, bool &needsInit);
+  void getCtorAndInitInfo(bool &needsCppCtor, bool &needsInit);
   void outputCPPClassDecl(CodeGenerator &cg, AnalysisResultPtr ar,
                           const char *clsName, const char *originalName,
                           const char *parent);

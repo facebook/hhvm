@@ -25,6 +25,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(ModifierExpression);
 DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(ClassVariable);
+DECLARE_BOOST_TYPES(SimpleVariable);
 
 class ClassVariable : public Statement, public IParseHandler {
 public:
@@ -40,7 +41,19 @@ public:
 
   ExpressionListPtr getVarList() const { return m_declaration; }
   ModifierExpressionPtr getModifiers() const { return m_modifiers; }
+
+  void getCtorAndInitInfo(bool &needsCppCtor, bool &needsInit);
 private:
+
+  void getCtorAndInitInfo(
+      ExpressionPtr exp,
+      bool &needsCppCtor,
+      bool &needsInit,
+      SimpleVariablePtr &var,
+      TypePtr &type,
+      Symbol *&sym,
+      ExpressionPtr &value);
+
   ModifierExpressionPtr m_modifiers;
   ExpressionListPtr m_declaration;
 };

@@ -60,6 +60,7 @@ public:
     CppImplementation,          // other statements than declarations
     CppPseudoMain,              // pseudo mains
     CppConstructor,             // we are generating class constructor
+    CppInitializer,             // we are generating class initializer
     CppStaticInitializer,       // we are genearting static initializer
     CppLazyStaticInitializer,   // lazy initializer for dynamic statics
     CppClassConstantsDecl,
@@ -256,6 +257,9 @@ public:
   bool hasScalarVariant() { return m_scalarVariant; }
   void clearScalarVariant() { m_scalarVariant = false; }
 
+  void setInitListFirstElem() { m_initListFirstElem = true; }
+  bool hasInitListFirstElem() { return m_initListFirstElem; }
+  void clearInitListFirstElem() { m_initListFirstElem = false; }
 private:
   std::string m_filename;
   Stream m_curStream;
@@ -294,6 +298,7 @@ private:
 
   bool m_translatePredefined; // translate predefined constants in PHP output
   bool m_scalarVariant;
+  bool m_initListFirstElem;
 
   void print(const char *fmt, va_list ap);
   void print(const char *msg, bool indent = true);

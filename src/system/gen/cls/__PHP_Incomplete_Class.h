@@ -59,7 +59,6 @@ class c___PHP_Incomplete_Class : public ExtObjectData {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  void init();
 };
 extern struct ObjectStaticCallbacks cw___PHP_Incomplete_Class;
 ObjectData *coo___PHP_Incomplete_Class() NEVER_INLINE;

@@ -60,7 +60,6 @@ class c_MutableArrayIterator : public c_ArrayIterator {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  void init();
   public: void t___construct(VRefParam rv_array, Variant v_flags = 0LL);
   public: c_MutableArrayIterator *create(VRefParam v_array, CVarRef v_flags = NAMVAR(s_sys_svif01bca90, 0LL));
   public: void dynConstruct(CArrRef params);

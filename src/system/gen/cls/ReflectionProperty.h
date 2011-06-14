@@ -63,7 +63,7 @@ class c_ReflectionProperty : public ExtObjectData {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  void init();
+  c_ReflectionProperty() : m_info(Variant::nullInit), m_name(Variant::nullInit), m_class(Variant::nullInit) {}
   public: void t___construct(Variant v_cls, Variant v_name);
   public: c_ReflectionProperty *create(CVarRef v_cls, CVarRef v_name);
   public: void dynConstruct(CArrRef params);

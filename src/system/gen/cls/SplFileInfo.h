@@ -61,7 +61,7 @@ class c_SplFileInfo : public ExtObjectData {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  void init();
+  c_SplFileInfo() : m_rsrc(Variant::nullInit) {}
   public: void t___construct(Variant v_file_name);
   public: c_SplFileInfo *create(CVarRef v_file_name);
   public: void dynConstruct(CArrRef params);

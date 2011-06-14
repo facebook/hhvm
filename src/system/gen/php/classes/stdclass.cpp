@@ -112,8 +112,6 @@ struct ObjectStaticCallbacks cw_stdClass = {
   c_stdClass::os_constant,
   c_stdClass::os_get_call_info
 };
-void c_stdClass::init() {
-}
 /* SRC: classes/stdclass.php line 8 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT___PHP_Incomplete_Class
 Variant c___PHP_Incomplete_Class::os_getInit(CStrRef s) {
@@ -197,8 +195,6 @@ struct ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
   c___PHP_Incomplete_Class::os_constant,
   c___PHP_Incomplete_Class::os_get_call_info
 };
-void c___PHP_Incomplete_Class::init() {
-}
 ObjectData *coo_stdClass() {
   return NEWOBJ(c_stdClass)();
 }

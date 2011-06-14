@@ -62,10 +62,9 @@ class c_AppendIterator : public ExtObjectData {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  c_AppendIterator(ObjectData* r = NULL) {
+  c_AppendIterator(ObjectData* r = NULL) : m_iterators(Variant::nullInit) {
     setAttribute(HasCall);
   }
-  void init();
   Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   public: void t___construct();
   public: c_AppendIterator *create();

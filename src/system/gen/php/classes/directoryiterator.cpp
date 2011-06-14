@@ -502,9 +502,6 @@ struct ObjectStaticCallbacks cw_RecursiveDirectoryIterator = {
   c_RecursiveDirectoryIterator::os_constant,
   c_RecursiveDirectoryIterator::os_get_call_info
 };
-void c_RecursiveDirectoryIterator::init() {
-  c_DirectoryIterator::init();
-}
 /* SRC: classes/directoryiterator.php line 132 */
 void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags //  = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */
 ) {
@@ -949,9 +946,6 @@ struct ObjectStaticCallbacks cw_DirectoryIterator = {
   c_DirectoryIterator::os_constant,
   c_DirectoryIterator::os_get_call_info
 };
-void c_DirectoryIterator::init() {
-  c_SplFileInfo::init();
-}
 /* SRC: classes/directoryiterator.php line 14 */
 void c_DirectoryIterator::t___construct(Variant v_path) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::__construct);

@@ -185,31 +185,39 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
   if (!m_name.empty() && m_classScope && !m_dynamic) {
     ClassScopePtr cls = m_classScope;
     const string& lClassName = cls->getId(cg);
+    bool skipCreate = cls->canSkipCreateMethod();
     if (m_receiverTemp.empty()) {
       if (outsideClass) {
         cls->outputVolatileCheckBegin(cg, ar, getScope(), cname);
       }
-      cg_printf("%s%s(((%s%s*)%s%s())->create(",
+      cg_printf("%s%s(((%s%s*)%s%s())%s",
                 Option::SmartPtrPrefix, lClassName.c_str(),
                 Option::ClassPrefix, lClassName.c_str(),
-                Option::CreateObjectOnlyPrefix, lClassName.c_str());
+                Option::CreateObjectOnlyPrefix, lClassName.c_str(),
+                skipCreate ? "" : "->create(");
     } else {
-      cg_printf("((%s%s*)%s.get()->create(",
+      cg_printf("((%s%s*)%s.get()%s",
                 Option::ClassPrefix, lClassName.c_str(),
-                m_receiverTemp.c_str());
+                m_receiverTemp.c_str(),
+                skipCreate ? "" : "->create(");
     }
 
-    FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, m_extraArg,
-                                      m_variableArgument, m_argArrayId,
-                                      m_argArrayHash, m_argArrayIndex);
+    if (skipCreate) {
+      ASSERT(!m_params || m_params->getOutputCount() == 0);
+    } else {
+      FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar,
+                                        m_extraArg, m_variableArgument,
+                                        m_argArrayId, m_argArrayHash,
+                                        m_argArrayIndex);
+    }
 
     if (m_receiverTemp.empty()) {
-    cg_printf("))");
+      cg_printf(skipCreate ? ")" : "))");
       if (outsideClass) {
         cls->outputVolatileCheckEnd(cg);
       }
     } else {
-      cg_printf(")");
+      if (!skipCreate) cg_printf(")");
       if (!isUnused()) {
         cg_printf(", %s", m_receiverTemp.c_str());
       }

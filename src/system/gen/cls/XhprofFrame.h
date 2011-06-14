@@ -59,7 +59,6 @@ class c_XhprofFrame : public ExtObjectData {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  void init();
   public: void t___construct(Variant v_name);
   public: c_XhprofFrame *create(CVarRef v_name);
   public: void dynConstruct(CArrRef params);

@@ -60,7 +60,6 @@ class c_BadMethodCallException : public c_BadFunctionCallException {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  void init();
 };
 extern struct ObjectStaticCallbacks cw_BadMethodCallException;
 ObjectData *coo_BadMethodCallException() NEVER_INLINE;

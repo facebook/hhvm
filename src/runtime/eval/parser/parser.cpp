@@ -250,6 +250,22 @@ void Parser::error(const char* fmt, ...) {
   raise_error("%s", msg.c_str());
 }
 
+void Parser::warning(const char* fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  string msg;
+  Util::string_vsnprintf(msg, fmt, ap);
+  va_end(ap);
+  m_errorHandled = true;
+  ParserFrameInjection fi("include", m_fileName);
+  fi.setLine(line1());
+  raise_warning("%s", msg.c_str());
+}
+
+void Parser::warning(const string &msg) {
+  warning(msg.c_str());
+}
+
 bool Parser::enableXHP() {
   return RuntimeOption::EnableXHP;
 }
@@ -540,7 +556,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
        (s == "func_get_args") ||
        (s == "func_get_arg")) {
       if(m_hasCallToGetArgs.size() == 0) {
-	raise_warning(s + " called from the global scope, no function context");
+	warning(s + " called from the global scope, no function context");
       } else {
         m_hasCallToGetArgs.back() = true;
       }

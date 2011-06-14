@@ -228,9 +228,17 @@ Variant EvalFuncGetArgs::InvokeImpl(VariableEnvironment &env,
     if (ObjectData *cont = env.getContinuation()) {
       return cont->o_invoke("get_args", Array::Create());
     }
+    ThreadInfo *info = ThreadInfo::s_threadInfo.getCheck();
     Array res = Array::Create();
     for (ArrayIter iter(env.getParams()); !iter.end(); iter.next()) {
       res.append(iter.second());
+    }
+    if (res.size() == 0) {
+      FrameInjection *top;
+      for (top = info->m_top; top; top = top->getPrev()) {
+        if (!top->isPseudoMainFrame()) break;
+      }
+      if (!top) return false;
     }
     return res;
   }
@@ -243,7 +251,16 @@ Variant EvalFuncNumArgs::InvokeImpl(VariableEnvironment &env,
   if (ObjectData *cont = env.getContinuation()) {
     return cont->o_invoke("num_args", Array::Create());
   }
-  return env.getParams().size();
+  ThreadInfo *info = ThreadInfo::s_threadInfo.getCheck();
+  int n = env.getParams().size();
+  if (n == 0) {
+    FrameInjection *top;
+    for (top = info->m_top; top; top = top->getPrev()) {
+      if (!top->isPseudoMainFrame()) break;
+    }
+    if (!top) return -1;
+  }
+  return n;
 }
 
 Variant EvalCompact::InvokeImpl(VariableEnvironment &env,

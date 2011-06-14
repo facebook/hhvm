@@ -171,6 +171,8 @@ public:
   // implementing ParserBase
   virtual bool parse();
   virtual void error(const char* fmt, ...);
+  virtual void warning(const char* fmt, ...);
+  virtual void warning(const std::string &msg);
   virtual bool enableXHP();
   IMPLEMENT_XHP_ATTRIBUTES;
 

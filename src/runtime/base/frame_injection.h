@@ -135,6 +135,7 @@ public:
   bool isFunctionFrame() const { return m_flags & Function; }
   bool isStaticMethodFrame() const { return m_flags & StaticMethod; }
   bool isObjectMethodFrame() const { return m_flags & ObjectMethod; }
+  bool isPseudoMainFrame() const { return m_flags & PseudoMain; }
 
 #ifdef ENABLE_LATE_STATIC_BINDING
   void setStaticClassName(CStrRef cls) { m_staticClass = &cls; }

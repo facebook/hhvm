@@ -107,7 +107,7 @@ char *StringBuffer::detach(int &size) {
 String StringBuffer::detach() {
   TAINT_OBSERVER_REGISTER_ACCESSED(this);
 #ifdef TAINTED
-    getTaintData()->unsetTaint(TAINT_BIT_ALL);
+  getTaintData()->unsetTaint(TAINT_BIT_ALL);
 #endif
 
   if (m_buffer && m_pos) {

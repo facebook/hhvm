@@ -19,10 +19,14 @@
 
 #ifdef TAINTED
 
-#define TAINT_BIT_HTML (0x01)
-#define TAINT_BIT_SQL  (0x02)
-#define TAINT_BIT_ALL  (0x03)
-#define TAINT_BIT_NONE (0x00)
+// Taint bits have the semantic of being propagated by OR; untainted then
+// implies a semantic of propagation by AND.
+#define TAINT_BIT_HTML     (0x01)
+#define TAINT_BIT_SQL      (0x02)
+#define TAINT_BIT_MUTATED  (0x04)
+#define TAINT_BIT_ALL      (0x07) // Does not include TRACED bit
+#define TAINT_BIT_TRACED   (0x08)
+#define TAINT_BIT_NONE     (0x00)
 
 #include <runtime/base/taint/taint_metadata.h>
 
@@ -37,9 +41,7 @@ public:
   void setTaint(bitstring bits, const char* original_str);
   void unsetTaint(bitstring bits);
   const char* getOriginalStr() const;
-
   void clearMetadata();
-
   void dump() const;
 private:
   bitstring m_taint_bits;

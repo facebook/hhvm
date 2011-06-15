@@ -195,7 +195,6 @@ void ExecutionContext::write(CStrRef s) {
     taint_warn_if_tainted(s, TAINT_BIT_HTML);
   }
 #endif
-
   write(s.data(), s.size());
 }
 

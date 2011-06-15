@@ -876,13 +876,13 @@ void f_fb_unset_taint(VRefParam str, int taint) {
 #endif
 }
 
-int f_fb_get_taint(CStrRef str) {
+bool f_fb_get_taint(CStrRef str, int taint) {
 #ifdef TAINTED
   StringData *string_data = str.get();
   ASSERT(string_data);
-  return string_data->getTaintData()->getTaint();
+  return string_data->getTaintData()->getTaint() & taint;
 #else
-  return 0;
+  return false;
 #endif
 }
 

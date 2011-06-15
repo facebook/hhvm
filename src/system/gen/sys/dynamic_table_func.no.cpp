@@ -23233,18 +23233,20 @@ Variant ifa_mysql_select_db(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 }
 Variant i_fb_get_taint(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("fb_get_taint", count, 1, 1, 1);
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("fb_get_taint", count, 2, 2, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    return (x_fb_get_taint(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (x_fb_get_taint(arg0, arg1));
   }
 }
 Variant ifa_fb_get_taint(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("fb_get_taint", count, 1, 1, 1);
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("fb_get_taint", count, 2, 2, 1);
   CVarRef arg0(a0);
-  return (x_fb_get_taint(arg0));
+  CVarRef arg1(a1);
+  return (x_fb_get_taint(arg0, arg1));
 }
 Variant i_use_soap_error_handler(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
@@ -39035,7 +39037,7 @@ CallInfo ci_substr_replace((void*)&i_substr_replace, (void*)&ifa_substr_replace,
 CallInfo ci_xbox_get_thread_time((void*)&i_xbox_get_thread_time, (void*)&ifa_xbox_get_thread_time, 0, 0, 0x0000000000000000LL);
 CallInfo ci_xmlwriter_write_dtd((void*)&i_xmlwriter_write_dtd, (void*)&ifa_xmlwriter_write_dtd, 5, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_select_db((void*)&i_mysql_select_db, (void*)&ifa_mysql_select_db, 2, 0, 0x0000000000000000LL);
-CallInfo ci_fb_get_taint((void*)&i_fb_get_taint, (void*)&ifa_fb_get_taint, 1, 0, 0x0000000000000000LL);
+CallInfo ci_fb_get_taint((void*)&i_fb_get_taint, (void*)&ifa_fb_get_taint, 2, 0, 0x0000000000000000LL);
 CallInfo ci_use_soap_error_handler((void*)&i_use_soap_error_handler, (void*)&ifa_use_soap_error_handler, 1, 0, 0x0000000000000000LL);
 CallInfo ci_debug_backtrace((void*)&i_debug_backtrace, (void*)&ifa_debug_backtrace, 1, 0, 0x0000000000000000LL);
 CallInfo ci_drawpathcurvetosmoothrelative((void*)&i_drawpathcurvetosmoothrelative, (void*)&ifa_drawpathcurvetosmoothrelative, 5, 0, 0x0000000000000000LL);

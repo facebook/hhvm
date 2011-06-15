@@ -721,6 +721,10 @@ DefineFunction(
         'desc'   => "The bit to flag.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -743,6 +747,10 @@ DefineFunction(
         'desc'   => "The bit to clear.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -751,8 +759,8 @@ DefineFunction(
     'desc'   => "Checks to see if a bit is set.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
-      'type'   => Int32,
-      'desc'   => "All bits that were tainted.",
+      'type'   => Boolean,
+      'desc'   => "Whether the taint was set.",
     ),
     'args'   => array(
       array(
@@ -760,6 +768,15 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The string to check.",
       ),
+      array(
+        'name'   => "taint",
+        'type'   => Int32,
+        'desc'   => "The bit to check against.",
+      ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 

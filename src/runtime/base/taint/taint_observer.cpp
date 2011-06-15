@@ -98,7 +98,7 @@ void TaintObserver::RegisterMutated(StringBuffer* string_buffer) {
     return;
   }
 
-  // Prevent recursive calls into the TaintObserver
+  // Prevent recursive calls into the TaintObserver.
   TaintObserver *tc = *instance;
   *instance = NULL;
 

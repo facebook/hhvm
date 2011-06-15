@@ -16,6 +16,9 @@
 
 #ifdef TAINTED
 
+#include <map>
+#include <boost/assign.hpp>
+
 #include <runtime/base/types.h>
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/complex_types.h>
@@ -24,9 +27,14 @@
 
 namespace HPHP {
 
+std::map<int, std::string> taint_names = boost::assign::map_list_of
+  (TAINT_BIT_HTML,    "HTML-unsafe")
+  (TAINT_BIT_SQL,     "SQL-unsafe")
+  (TAINT_BIT_MUTATED, "non-static");
+
 void taint_warn_if_tainted(CStrRef s, const bitstring bit) {
   if (s.get()->getTaintDataRef().getTaint() & bit) {
-    std::string buf = "using a tainted string !!!\n";
+    std::string buf = "Using a " + taint_names[bit] + " (tainted) string!\n";
     if (s.get()->getTaintDataRef().getOriginalStr()) {
       buf += "original string: ";
       buf += s.get()->getTaintDataRef().getOriginalStr();

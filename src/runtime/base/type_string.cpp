@@ -23,6 +23,7 @@
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/zend/zend_printf.h>
+#include <runtime/base/taint/taint_observer.h>
 
 namespace HPHP {
 
@@ -49,6 +50,8 @@ String::String(int n) {
   int len;
   char *buf;
 
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+
   tmpbuf[11] = '\0';
   p = conv_10(n, &is_negative, &tmpbuf[11], &len);
 
@@ -65,6 +68,8 @@ String::String(int64 n) {
   int len;
   char *buf;
 
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+
   tmpbuf[20] = '\0';
   p = conv_10(n, &is_negative, &tmpbuf[20], &len);
 
@@ -76,6 +81,9 @@ String::String(int64 n) {
 
 String::String(double n) {
   char *buf;
+
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+
   if (n == 0.0) n = 0.0; // so to avoid "-0" output
   vspprintf(&buf, 0, "%.*G", 14, n);
   m_px = NEW(StringData)(buf, AttachString);

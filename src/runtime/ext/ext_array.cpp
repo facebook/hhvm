@@ -667,7 +667,11 @@ static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
                          CREATE_VECTOR1(obj->o_toIterArray(context)));
   }
   raise_warning("Invalid argument supplied for iteration");
-  return null;
+  if (isMutable) {
+    return create_object("MutableArrayIterator",
+                         CREATE_VECTOR1(Array::Create()));
+  }
+  return create_object("ArrayIterator", CREATE_VECTOR1(Array::Create()));
 }
 
 Variant f_hphp_get_iterator(CVarRef iterable) {

@@ -18691,6 +18691,21 @@ bool TestCodeRun::TestYield() {
         "string(3) \"o:1\"\n"
         "string(3) \"i:1\"\n");
 
+  // Test passing null to hphp_get_iterator()
+  MVCRO("<?php \n"
+        "function f() {\n"
+        "  $var = hphp_get_iterator(null);\n"
+        "  var_dump(is_null($var));\n"
+        "  var_dump(is_object($var));\n"
+        "  var_dump(get_class($var));\n"
+        "}\n"
+        "f();\n",
+
+        "bool(false)\n"
+        "bool(true)\n"
+        "string(13) \"ArrayIterator\"\n"
+        );
+
   return true;
 }
 

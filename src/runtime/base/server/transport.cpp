@@ -90,10 +90,12 @@ const char *Transport::getServerObject() {
   } else if (strncmp(url, "https://", 8) == 0) {
     strip = 8;
   }
-  if (strip == 0) return url;
   const char *p = strchr(url + strip, '/');
-  if (p) return p;
-
+  if (p) {
+    while (*(p + 1) == '/') p++;
+    return p;
+  }
+  if (strip == 0) return url;
   return "";
 }
 
@@ -104,7 +106,7 @@ string Transport::getCommand() {
     return "";
   }
 
-  if (*url == '/') {
+  while (*url == '/') {
     ++url;
   }
   const char *v = strchr(url, '?');

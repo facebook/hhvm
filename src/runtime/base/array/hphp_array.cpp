@@ -2242,7 +2242,7 @@ HphpArray* HphpArray::copyImpl() const {
               ElmInd* tei = (ElmInd*) ((uintptr_t)target->m_hash
                                        + (uintptr_t)ei - (uintptr_t)m_hash);
               ASSERT(*tei == pos);
-              *tei = ElmIndOfTombstone;
+              *tei = ElmIndTombstone;
               te->h = 0;
               te->key = NULL;
               te->data.m_type = KindOfTombstone;

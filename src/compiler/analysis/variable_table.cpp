@@ -2059,11 +2059,14 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
     }
     switch (type) {
     case VariableTable::JumpRealProp:
-      cg_printf("HASH_REALPROP_%sSTRING(0x%016llXLL, \"%s\", %d, %s);\n",
+      cg_printf("HASH_REALPROP_%sNAMSTR(0x%016llXLL, ",
                 Type::SameType(getFinalType(name), Type::Variant) ?
-                "" : "TYPED_",
-                hash_string(name), cg.escapeLabel(name).c_str(),
-                strlen(name), cg.formatLabel(name).c_str());
+                  "" : "TYPED_",
+                hash_string(name));
+      cg_printString(name, ar, getBlockScope());
+      cg_printf(", %d, %s);\n",
+                strlen(name),
+                cg.formatLabel(name).c_str());
       break;
     case VariableTable::JumpReturn:
       cg_printf("HASH_RETURN(0x%016llXLL, %s,\n",

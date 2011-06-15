@@ -1108,22 +1108,22 @@ Variant * c_Exception::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 15) {
     case 1:
-      HASH_REALPROP_STRING(0x0B197E8F85F4DA21LL, "previous", 8, previous);
+      HASH_REALPROP_NAMSTR(0x0B197E8F85F4DA21LL, NAMSTR(s_sys_ss90291821, "previous"), 8, previous);
       break;
     case 7:
-      HASH_REALPROP_STRING(0x3CCB986B2CF0A747LL, "trace", 5, trace);
+      HASH_REALPROP_NAMSTR(0x3CCB986B2CF0A747LL, NAMSTR(s_sys_ss94c9ce77, "trace"), 5, trace);
       break;
     case 9:
-      HASH_REALPROP_STRING(0x58C72230857ACDB9LL, "code", 4, code);
+      HASH_REALPROP_NAMSTR(0x58C72230857ACDB9LL, NAMSTR(s_sys_ssab7a1dec, "code"), 4, code);
       break;
     case 10:
-      HASH_REALPROP_STRING(0x04AB35CACF8C8C9ALL, "line", 4, line);
+      HASH_REALPROP_NAMSTR(0x04AB35CACF8C8C9ALL, NAMSTR(s_sys_ssddf8728c, "line"), 4, line);
       break;
     case 11:
-      HASH_REALPROP_STRING(0x0247CDBB94C9D47BLL, "message", 7, message);
+      HASH_REALPROP_NAMSTR(0x0247CDBB94C9D47BLL, NAMSTR(s_sys_ss155366df, "message"), 7, message);
       break;
     case 15:
-      HASH_REALPROP_STRING(0x7863294A8F33D14FLL, "file", 4, file);
+      HASH_REALPROP_NAMSTR(0x7863294A8F33D14FLL, NAMSTR(s_sys_ss8ce7db5b, "file"), 4, file);
       break;
     default:
       break;
@@ -1751,7 +1751,7 @@ Variant * c_ErrorException::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_REALPROP_STRING(0x4FDAA620FA5F15F9LL, "severity", 8, severity);
+      HASH_REALPROP_NAMSTR(0x4FDAA620FA5F15F9LL, NAMSTR(s_sys_ssb84c8cfa, "severity"), 8, severity);
       break;
     default:
       break;

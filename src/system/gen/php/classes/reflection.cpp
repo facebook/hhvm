@@ -78,7 +78,7 @@ Variant * c_ReflectionFunctionAbstract::o_realPropPublic(CStrRef s, int flags) c
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_REALPROP_STRING(0x0F2EF58F157D479FLL, "info", 4, info);
+      HASH_REALPROP_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"), 4, info);
       break;
     default:
       break;
@@ -882,7 +882,7 @@ Variant * c_ReflectionClass::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 0:
-      HASH_REALPROP_STRING(0x5655B4FF77E35232LL, "name", 4, name);
+      HASH_REALPROP_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ssdc3cbddc, "name"), 4, name);
       break;
     default:
       break;
@@ -895,7 +895,7 @@ Variant * c_ReflectionClass::o_realPropPrivate(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_REALPROP_STRING(0x0F2EF58F157D479FLL, "info", 4, info);
+      HASH_REALPROP_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"), 4, info);
       break;
     default:
       break;
@@ -3088,10 +3088,10 @@ Variant * c_ReflectionExtension::o_realPropPrivate(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 2:
-      HASH_REALPROP_STRING(0x5655B4FF77E35232LL, "name", 4, name);
+      HASH_REALPROP_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ssdc3cbddc, "name"), 4, name);
       break;
     case 3:
-      HASH_REALPROP_STRING(0x0F2EF58F157D479FLL, "info", 4, info);
+      HASH_REALPROP_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"), 4, info);
       break;
     default:
       break;
@@ -3603,10 +3603,10 @@ Variant * c_ReflectionMethod::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_REALPROP_STRING(0x2E3A246D1F74C210LL, "class", 5, class);
+      HASH_REALPROP_NAMSTR(0x2E3A246D1F74C210LL, NAMSTR(s_sys_ssc82dbd12, "class"), 5, class);
       break;
     case 2:
-      HASH_REALPROP_STRING(0x5655B4FF77E35232LL, "name", 4, name);
+      HASH_REALPROP_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ssdc3cbddc, "name"), 4, name);
       break;
     default:
       break;
@@ -4456,13 +4456,13 @@ Variant * c_ReflectionProperty::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 0:
-      HASH_REALPROP_STRING(0x2E3A246D1F74C210LL, "class", 5, class);
+      HASH_REALPROP_NAMSTR(0x2E3A246D1F74C210LL, NAMSTR(s_sys_ssc82dbd12, "class"), 5, class);
       break;
     case 2:
-      HASH_REALPROP_STRING(0x5655B4FF77E35232LL, "name", 4, name);
+      HASH_REALPROP_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ssdc3cbddc, "name"), 4, name);
       break;
     case 7:
-      HASH_REALPROP_STRING(0x0F2EF58F157D479FLL, "info", 4, info);
+      HASH_REALPROP_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"), 4, info);
       break;
     default:
       break;
@@ -5572,7 +5572,7 @@ Variant * c_ReflectionParameter::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_REALPROP_STRING(0x0F2EF58F157D479FLL, "info", 4, info);
+      HASH_REALPROP_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"), 4, info);
       break;
     default:
       break;

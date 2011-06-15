@@ -103,21 +103,21 @@ Variant * c_SoapFault::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 15) {
     case 1:
-      HASH_REALPROP_STRING(0x223FBAE23D3926D1LL, "faultcodens", 11, faultcodens);
+      HASH_REALPROP_NAMSTR(0x223FBAE23D3926D1LL, NAMSTR(s_sys_ssb9540e00, "faultcodens"), 11, faultcodens);
       break;
     case 2:
-      HASH_REALPROP_STRING(0x6AB66433A5A06842LL, "faultactor", 10, faultactor);
-      HASH_REALPROP_STRING(0x3B9257D5A7BFC952LL, "detail", 6, detail);
+      HASH_REALPROP_NAMSTR(0x6AB66433A5A06842LL, NAMSTR(s_sys_ss5b7cf41f, "faultactor"), 10, faultactor);
+      HASH_REALPROP_NAMSTR(0x3B9257D5A7BFC952LL, NAMSTR(s_sys_ss2235bf3d, "detail"), 6, detail);
       break;
     case 7:
-      HASH_REALPROP_STRING(0x7F0FEC816F538D87LL, "headerfault", 11, headerfault);
+      HASH_REALPROP_NAMSTR(0x7F0FEC816F538D87LL, NAMSTR(s_sys_ss40793385, "headerfault"), 11, headerfault);
       break;
     case 9:
-      HASH_REALPROP_STRING(0x6C2E2F7FE9DC8A09LL, "_name", 5, _name);
+      HASH_REALPROP_NAMSTR(0x6C2E2F7FE9DC8A09LL, NAMSTR(s_sys_ssee3a4fdd, "_name"), 5, _name);
       break;
     case 13:
-      HASH_REALPROP_STRING(0x58CB312B3F4C8D8DLL, "faultcode", 9, faultcode);
-      HASH_REALPROP_STRING(0x6CDD9F7B80D687ADLL, "faultstring", 11, faultstring);
+      HASH_REALPROP_NAMSTR(0x58CB312B3F4C8D8DLL, NAMSTR(s_sys_ssff0553c0, "faultcode"), 9, faultcode);
+      HASH_REALPROP_NAMSTR(0x6CDD9F7B80D687ADLL, NAMSTR(s_sys_ssff4490ec, "faultstring"), 11, faultstring);
       break;
     default:
       break;

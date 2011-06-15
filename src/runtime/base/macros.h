@@ -254,15 +254,25 @@ namespace HPHP {
 #define HASH_EXISTS_STRING(code, str, len)                              \
   if (hash == code && s.length() == len &&                              \
       memcmp(s.data(), str, len) == 0) return true
-#define HASH_REALPROP_STRING(code, str, len, prop)                      \
-  if (hash == code && s.length() == len &&                              \
-      memcmp(s.data(), str, len) == 0)                                  \
-    return const_cast<Variant*>(&m_##prop)
-#define HASH_REALPROP_TYPED_STRING(code, str, len, prop)                \
+#define HASH_REALPROP_NAMSTR(code, str, len, prop)                      \
+do {                                                                    \
+  const char *s1 = s.data();                                            \
+  const char *s2 = str.data();                                          \
+  if ((s1 == s2) ||                                                     \
+      (hash == code && s.length() == len &&                             \
+      memcmp(s1, s2, len) == 0))                                        \
+    return const_cast<Variant*>(&m_##prop);                             \
+} while (0)
+#define HASH_REALPROP_TYPED_NAMSTR(code, str, len, prop)                \
+do {                                                                    \
+  const char *s1 = s.data();                                            \
+  const char *s2 = str.data();                                          \
   if (!(flags&(RealPropCreate|RealPropWrite)) &&                        \
-      hash == code && s.length() == len &&                              \
-      memcmp(s.data(), str, len) == 0)                                  \
-    return g->__realPropProxy = m_##prop,&g->__realPropProxy
+      ((s1 == s2) ||                                                    \
+      (hash == code && s.length() == len &&                             \
+      memcmp(s1, s2, len) == 0)))                                       \
+    return g->__realPropProxy = m_##prop,&g->__realPropProxy;           \
+} while (0)
 #define HASH_INITIALIZED(code, name, str)                               \
   if (hash == code && strcmp(s, str) == 0)                              \
     return isInitialized(name)

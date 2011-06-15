@@ -99,10 +99,10 @@ Variant * c_SplObjectStorage::o_realPropPrivate(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 2:
-      HASH_REALPROP_TYPED_STRING(0x4B27521443880CAELL, "index", 5, index);
+      HASH_REALPROP_TYPED_NAMSTR(0x4B27521443880CAELL, NAMSTR(s_sys_ssc0ff3081, "index"), 5, index);
       break;
     case 3:
-      HASH_REALPROP_STRING(0x17AC96477E2B6DC3LL, "storage", 7, storage);
+      HASH_REALPROP_NAMSTR(0x17AC96477E2B6DC3LL, NAMSTR(s_sys_ss64fc2cb1, "storage"), 7, storage);
       break;
     default:
       break;

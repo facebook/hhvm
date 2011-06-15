@@ -82,10 +82,10 @@ Variant * c_ArrayIterator::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
-      HASH_REALPROP_STRING(0x7D2126D089B92EA5LL, "arr", 3, arr);
+      HASH_REALPROP_NAMSTR(0x7D2126D089B92EA5LL, NAMSTR(s_sys_ss7cb08d68, "arr"), 3, arr);
       break;
     case 3:
-      HASH_REALPROP_STRING(0x7401482B86AFCBFBLL, "flags", 5, flags);
+      HASH_REALPROP_NAMSTR(0x7401482B86AFCBFBLL, NAMSTR(s_sys_ss28fae70d, "flags"), 5, flags);
       break;
     default:
       break;
@@ -1007,7 +1007,7 @@ Variant * c_AppendIterator::o_realPropPrivate(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_REALPROP_STRING(0x60EA38C41F14FF71LL, "iterators", 9, iterators);
+      HASH_REALPROP_NAMSTR(0x60EA38C41F14FF71LL, NAMSTR(s_sys_ssd4af8244, "iterators"), 9, iterators);
       break;
     default:
       break;
@@ -1655,7 +1655,7 @@ Variant * c_RecursiveIteratorIterator::o_realPropPrivate(CStrRef s, int flags) c
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_REALPROP_STRING(0x26C16E62FD792BB7LL, "rsrc", 4, rsrc);
+      HASH_REALPROP_NAMSTR(0x26C16E62FD792BB7LL, NAMSTR(s_sys_ss7f14ba70, "rsrc"), 4, rsrc);
       break;
     default:
       break;

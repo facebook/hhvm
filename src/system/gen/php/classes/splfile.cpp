@@ -1266,7 +1266,7 @@ Variant * c_SplFileInfo::o_realPropPrivate(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_REALPROP_STRING(0x26C16E62FD792BB7LL, "rsrc", 4, rsrc);
+      HASH_REALPROP_NAMSTR(0x26C16E62FD792BB7LL, NAMSTR(s_sys_ss7f14ba70, "rsrc"), 4, rsrc);
       break;
     default:
       break;

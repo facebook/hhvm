@@ -81,10 +81,10 @@ Variant * c_Directory::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_REALPROP_STRING(0x1429F792A6880074LL, "path", 4, path);
+      HASH_REALPROP_NAMSTR(0x1429F792A6880074LL, NAMSTR(s_sys_ssf362b3c4, "path"), 4, path);
       break;
     case 2:
-      HASH_REALPROP_STRING(0x5C4CA333F4541532LL, "handle", 6, handle);
+      HASH_REALPROP_NAMSTR(0x5C4CA333F4541532LL, NAMSTR(s_sys_ss46eeef5c, "handle"), 6, handle);
       break;
     default:
       break;

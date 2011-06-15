@@ -842,7 +842,7 @@ Variant Variant::operator+(CVarRef var) const {
   }
   int na = is(KindOfArray) + var.is(KindOfArray);
   if (na == 2) {
-    return toCArrRef() + var.toCArrRef();
+    return toArray() + var.toArray();
   } else if (na) {
     throw BadArrayMergeException();
   }
@@ -2403,9 +2403,9 @@ head:
   }
   if (self->m_type == KindOfObject) {
     Variant *ret = &(self->getArrayAccess()->___offsetget_lval(key));
-    if (!blackHole) {
-      *tmp = *ret;
-      ret = tmp;
+    if (!blackHole) { 
+      *tmp = *ret; 
+      ret = tmp; 
     }
     return *ret;
   }

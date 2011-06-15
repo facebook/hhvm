@@ -307,6 +307,13 @@ string Expression::originalClassName(CodeGenerator &cg, bool withComma) {
   return withComma ? "" : "null_string";
 }
 
+void Expression::fixExpectedType(AnalysisResultConstPtr ar) {
+  if (m_expectedType && m_actualType &&
+      !Type::IsCastNeeded(ar, m_actualType, m_expectedType)) {
+    m_expectedType.reset();
+  }
+}
+
 TypePtr Expression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                   bool coerce) {
   TypePtr actualType = inferTypes(ar, type, coerce);
@@ -336,12 +343,12 @@ TypePtr Expression::checkTypesImpl(AnalysisResultConstPtr ar,
 void Expression::setTypes(AnalysisResultConstPtr ar, TypePtr actualType,
                           TypePtr expectedType) {
   m_actualType = actualType;
-  if (!expectedType->is(Type::KindOfAny) &&
+  if (!Type::SameType(expectedType, actualType) &&
+      !expectedType->is(Type::KindOfAny) &&
       !expectedType->is(Type::KindOfSome)) {
-    // store the expected type if it is not Any nor Some,
-    // regardless of the actual type
     m_expectedType = expectedType;
   } else {
+    // Clear expected type since expectedType == actualType
     m_expectedType.reset();
   }
 
@@ -429,6 +436,8 @@ bool Expression::CheckNeeded(ExpressionPtr variable, ExpressionPtr value) {
 bool Expression::CheckVarNR(ExpressionPtr value,
                             TypePtr expectedType /* = TypePtr */) {
   if (!expectedType) expectedType = value->getExpectedType();
+  ASSERT(!value->getExpectedType() ||
+         Type::SameType(expectedType, value->getExpectedType()));
   return (!value->hasContext(Expression::RefValue) &&
           expectedType && expectedType->is(Type::KindOfVariant) &&
           (value->getCPPType()->is(Type::KindOfArray) ||
@@ -473,20 +482,12 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
   if (!coerce && type->is(Type::KindOfAny)) {
     ret = vt;
   } else {
-    TypePtr it = variable->getCPPType();
+    TypePtr it = variable->is(KindOfObjectPropertyExpression) ?
+      Type::Variant :
+      variable->getImplementedType();
+    if (!it) it = vt;
     if (!Type::SameType(it, ret)) {
       m_implementedType = it;
-    }
-  }
-
-  if (value) {
-    TypePtr vat(value->getActualType());
-    TypePtr vet(value->getExpectedType());
-    TypePtr vit(value->getImplementedType());
-    if (vat && !vet && vit &&
-        Type::IsMappedToVariant(vit) &&
-        Type::HasFastCastMethod(vat)) {
-      value->setExpectedType(vat);
     }
   }
 
@@ -672,7 +673,7 @@ bool Expression::outputCPPArithArg(CodeGenerator &cg, AnalysisResultPtr ar,
       (at->is(Type::KindOfString) ||
        at->is(Type::KindOfObject) ||
        (at->is(Type::KindOfArray) && !arrayOk)) &&
-      (!hasCPPTemp() || getCPPType()->isExactType())) {
+      (!hasCPPTemp() || getType()->isExactType())) {
     if (!hasCPPTemp() && !getCPPType()->isExactType()) {
       TypePtr et = getExpectedType();
       setExpectedType(TypePtr());
@@ -712,29 +713,16 @@ std::string Expression::genCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar) {
 void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                                 int state) {
   if (hasCPPTemp() || isScalar()) return;
-  bool fastCast = needsFastCastTemp(ar);
-  if (!isLocalExprAltered() && !hasEffect() && !fastCast) return;
+  if (!isLocalExprAltered() && !hasEffect()) return;
 
   bool killCast = false;
 
-  TypePtr srcType, dstType, dstType0;
+  TypePtr srcType, dstType;
   bool needsCast = getTypeCastPtrs(ar, srcType, dstType);
 
   bool isLvalue = (m_context & LValue);
   bool isTemp = isTemporary();
-
-  bool isReferenced = false;
-
-  if (fastCast) {
-    isTemp = true;
-    killCast = true;
-    dstType0 = dstType;
-    dstType = Type::Variant;
-    SimpleVariablePtr p(
-      dynamic_pointer_cast<SimpleVariable>(
-        shared_from_this()));
-    isReferenced = p ? p->couldBeAliased() : !isTemporary();
-  } else if (needsCast) {
+  if (needsCast) {
     isTemp = true;
   } else {
     killCast = true;
@@ -781,7 +769,7 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
       dstType->outputCPPDecl(cg, ar, getScope());
     }
     std::string t = genCPPTemp(cg, ar);
-    const char *ref =
+    const char *ref = 
       ((isLvalue || constRef) && !(state & ForceTemp)) ? "&" : "";
     /*
       Note that double parens are necessary:
@@ -847,42 +835,7 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
       cg_printf("&>(%s);\n", t.c_str());
       t += "_lv";
     }
-    if (fastCast) {
-      ASSERT(dstType0);
-      ASSERT(srcType == m_implementedType);
-      dstType = dstType0;
 
-      if (constRef) cg_printf("const ");
-      dstType->outputCPPDecl(cg, ar, getScope());
-      cg_printf(" %s%s_vv = ",
-                dstType->isPrimitive() ? "" : "&",
-                t.c_str());
-
-      int closeParen = 0;
-      if (!Type::SameType(m_actualType, dstType)) {
-        dstType->outputCPPCast(cg, ar, getScope());
-        cg_printf("(");
-        closeParen++;
-      }
-
-      if (m_actualType->isSpecificObject()) {
-        cg_printf("(");
-        closeParen++;
-        m_actualType->outputCPPFastObjectCast(
-            cg, ar, getScope(), constRef, false);
-        cg_printf("(");
-        closeParen++;
-      }
-
-      const string& method = Type::GetFastCastMethod(
-          m_actualType, isReferenced, constRef, false);
-      cg_printf("%s.%s()", t.c_str(), method.c_str());
-
-      for (int i = 0; i < closeParen; i++) cg_printf(")");
-      cg_printf(";\n");
-
-      t += "_vv";
-    }
     m_cppTemp = t;
   } else {
     if (outputCPPUnneeded(cg, ar)) {
@@ -900,19 +853,20 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
   bool stashAll = state & StashAll;
   state &= ~StashAll;
-  bool doStash = (state & FixOrder) != 0 || needsFastCastTemp(ar);
-  bool ret = doStash;
+  bool ret = (state & FixOrder) != 0;
   int kidState = (state & ~(StashKidVars|StashVars|FixOrder));
   if (state & StashKidVars) kidState |= StashVars;
   int lastEffect = -1, i;
   int n = getKidCount();
   if (hasEffect()) {
     int j;
+    ExpressionPtr lastExpr;
     for (i = j = 0; i < n; i++) {
       ExpressionPtr k = getNthExpr(i);
       if (k && !k->isScalar()) {
         if (k->hasEffect()) {
           lastEffect = i;
+          lastExpr = k;
           if (!j && k->isTemporary()) {
             j++;
           }
@@ -962,7 +916,7 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     }
   }
 
-  if (doStash) {
+  if (state & FixOrder) {
     if (cg.inExpression()) {
       preOutputStash(cg, ar, state);
     }
@@ -1025,7 +979,7 @@ bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
       }
     }
   }
-
+  
   // check to see if this elem has a CSE substitution
   // or is a chain root. in this case, we need to force a temp
   // since we will be taking a reference out, if we need to
@@ -1083,7 +1037,7 @@ bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
   return true;
 }
 
-void Expression::collectCPPTemps(ExpressionPtrVec &collection) {
+void Expression::collectCPPTemps(ExpressionPtrVec &collection) { 
   if (isChainRoot()) {
     collection.push_back(static_pointer_cast<Expression>(shared_from_this()));
   } else {
@@ -1112,7 +1066,7 @@ bool Expression::hasChainRoots() {
 
 bool Expression::GetCseTempInfo(
     AnalysisResultPtr ar,
-    ExpressionPtr p,
+    ExpressionPtr p, 
     TypePtr &t) {
   ASSERT(p);
   switch (p->getKindOf()) {
@@ -1143,7 +1097,7 @@ bool Expression::GetCseTempInfo(
 
 ExpressionPtr Expression::getNextCanonCsePtr() const {
 
-  bool dAccessCtx =
+  bool dAccessCtx = 
     hasContext(AccessContext);
   bool dLval =
     hasContext(LValue);
@@ -1159,7 +1113,7 @@ ExpressionPtr Expression::getNextCanonCsePtr() const {
           shared_from_this()));
     dGlobals = a->isSuperGlobal() || a->isDynamicGlobal();
   }
-
+  
   // see rules below - no hope to find CSE candidate
   if (dExistCtx || dUnsetCtx || dGlobals || (!dAccessCtx && dLval)) {
     return ExpressionPtr();
@@ -1172,14 +1126,14 @@ ExpressionPtr Expression::getNextCanonCsePtr() const {
   for (; p; p = p->getCanonLVal()) {
     // check if p is a suitable candidate for CSE of
     // downstream. the rules are:
-    // A) rvals can always be CSE-ed regardless of access context,
+    // A) rvals can always be CSE-ed regardless of access context, 
     //    except for unset context, which it never can be CSE-ed for
     // B) lvals can only be CSE-ed if in AccessContext
     // C) rvals and lvals cannot be CSE-ed for each other
     // D) for now, ExistContext is not optimized
     // E) no CSE for $GLOBALS[...]
     // F) node types need to match
-
+    
     bool pLval = p->hasContext(LValue);
     KindOf pKindOf = p->getKindOf();
 
@@ -1216,13 +1170,13 @@ ExpressionPtr Expression::getCanonCsePtr() const {
   return ExpressionPtr();
 }
 
-bool Expression::preOutputCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar,
+bool Expression::preOutputCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar, 
     bool emitTemps) {
   ExpressionPtrVec temps;
   collectCPPTemps(temps);
   if (temps.empty()) return false;
   if (emitTemps) {
-    for (ExpressionPtrVec::iterator it(temps.begin());
+    for (ExpressionPtrVec::iterator it(temps.begin()); 
         it != temps.end();
         ++it) {
       ExpressionPtr p(*it);
@@ -1235,20 +1189,20 @@ bool Expression::preOutputCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar,
       bool isString = t && t->is(Type::KindOfString);
       const char *s = isString ? "String" : "Variant";
       if (!isString) {
-        cg_printf("%s%s *%s%s;\n",
+        cg_printf("%s%s *%s%s;\n", 
                   useConst ? "const " : "",
                   s,
                   Option::CseTempVariablePrefix,
                   p->m_cppCseTemp.c_str());
         if (needsStorage) {
-          cg_printf("%s %s%s;\n",
-                    s,
+          cg_printf("%s %s%s;\n", 
+                    s, 
                     Option::CseTempStoragePrefix,
                     p->m_cppCseTemp.c_str());
         }
       } else {
-        cg_printf("%s %s%s;\n",
-                  s,
+        cg_printf("%s %s%s;\n", 
+                  s, 
                   Option::CseTempVariablePrefix,
                   p->m_cppCseTemp.c_str());
       }
@@ -1275,32 +1229,20 @@ bool Expression::getTypeCastPtrs(
   dstType = m_expectedType;
   if (m_implementedType && srcType &&
       !Type::SameType(m_implementedType, srcType)) {
+    if (dstType) {
+      if (!hasContext(LValue) &&
+          Type::IsCastNeeded(ar, m_implementedType, srcType) &&
+          !Type::IsCastNeeded(ar, m_implementedType, dstType) &&
+          !Type::SameType(m_implementedType, dstType) &&
+          !dstType->is(Type::KindOfAny) && !dstType->is(Type::KindOfSome)) {
+        dstType.reset();
+      }
+    }
     srcType = m_implementedType;
+    if (!dstType) dstType = m_actualType;
   }
   return dstType && srcType && ((m_context & LValue) == 0) &&
       Type::IsCastNeeded(ar, srcType, dstType);
-}
-
-bool Expression::needsFastCastTemp(AnalysisResultPtr ar) {
-  if (is(KindOfSimpleVariable)) return false;
-  if (!canUseFastCast(ar))      return false;
-  ASSERT(m_actualType);
-  return !m_actualType->isPrimitive();
-}
-
-bool Expression::canUseFastCast(AnalysisResultPtr ar) {
-  TypePtr srcType, dstType;
-  getTypeCastPtrs(ar, srcType, dstType);
-  // if the impl type is Variant and the actual type is known
-  // with a fast cast method, and we have a dst type that
-  // is not Variant (in CPP), then we have something to benefit
-  // from doing a fast cast and should emit one.
-  return m_implementedType &&
-         Type::IsMappedToVariant(m_implementedType) &&
-         m_actualType &&
-         Type::HasFastCastMethod(m_actualType) &&
-         dstType &&
-         !Type::IsMappedToVariant(dstType);
 }
 
 void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
@@ -1311,51 +1253,11 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
   int closeParen = 0;
   TypePtr srcType, dstType;
   bool needsCast = getTypeCastPtrs(ar, srcType, dstType);
-
-  bool useFastCast = false;
-  bool isReferenced = true;
-  bool isLval = (m_context & LValue);
-  bool useVal = false;
-
-  if (canUseFastCast(ar)) {
-    useFastCast = true;
-    SimpleVariablePtr p(
-      dynamic_pointer_cast<SimpleVariable>(
-        shared_from_this()));
-    isReferenced = p ? p->couldBeAliased() : !isTemporary();
-    useVal = !p;
-  }
-
   if (needsCast) {
     ASSERT(dstType);
-    if (!useFastCast ||
-        !Type::SameType(m_actualType, dstType) ||
-        m_actualType->isSpecificObject()) {
-      if (useFastCast && m_actualType->isSpecificObject()) {
-        if (!Type::SameType(m_actualType, dstType)) {
-          dstType->outputCPPCast(cg, ar, getScope());
-          cg_printf("(");
-          closeParen++;
-        }
-
-        // specific object is special, since we do not have
-        // a fast cast method into a specific object on Variant,
-        // we must emit an additional (but also fast) cast.
-        // In the end, the cast will look like (for example):
-        //
-        //    (const X&)(v_var.asCObjRef())
-
-        cg_printf("(");
-        closeParen++;
-        m_actualType->outputCPPFastObjectCast(cg, ar, getScope(), !isLval, useVal);
-        cg_printf("(");
-        closeParen++;
-      } else {
-        dstType->outputCPPCast(cg, ar, getScope());
-        cg_printf("(");
-        closeParen++;
-      }
-    }
+    dstType->outputCPPCast(cg, ar, getScope());
+    cg_printf("(");
+    closeParen++;
   } else {
     if (hasContext(RefValue) && !hasContext(NoRefWrapper) &&
         isRefable()) {
@@ -1364,14 +1266,12 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
       } else {
         cg_printf("ref(");
       }
-      useFastCast = false; // cannot ref() or strongBind() a non-variant
       closeParen++;
     }
     if (is(Expression::KindOfArrayElementExpression)) {
       if (((m_context & LValue) || ((m_context & RefValue) &&
                                     !(m_context & InvokeArgument))) &&
           !(m_context & NoLValueWrapper)) {
-        isLval = true;
         cg_printf("lval(");
         closeParen++;
       }
@@ -1383,16 +1283,16 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
     TypePtr t;
     GetCseTempInfo(
         ar,
-        static_pointer_cast<Expression>(shared_from_this()),
+        static_pointer_cast<Expression>(shared_from_this()), 
         t);
     if (!t || !t->is(Type::KindOfString)) needsDeref = true;
     if (isChainRoot()) {
       if (!needsDeref) {
-        cg_printf("(%s%s = (",
+        cg_printf("(%s%s = (", 
             Option::CseTempVariablePrefix, m_cppCseTemp.c_str());
         closeParen += 2;
       } else {
-        cg_printf("(*(%s%s = &(",
+        cg_printf("(*(%s%s = &(", 
             Option::CseTempVariablePrefix, m_cppCseTemp.c_str());
         closeParen += 3;
       }
@@ -1401,18 +1301,11 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (hasCPPCseTemp() && !isChainRoot()) {
     if (needsDeref) cg_printf("(*");
-    cg_printf("%s%s",
+    cg_printf("%s%s", 
         Option::CseTempVariablePrefix, m_cppCseTemp.c_str());
     if (needsDeref) cg_printf(")");
   } else {
     outputCPPImpl(cg, ar);
-  }
-
-  if (useFastCast) {
-    ASSERT(srcType == m_implementedType);
-    const string& method = Type::GetFastCastMethod(
-        m_actualType, isReferenced, !isLval, useVal);
-    cg_printf(".%s()", method.c_str());
   }
 
   for (int i = 0; i < closeParen; i++) {

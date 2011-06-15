@@ -171,9 +171,8 @@ bool ScalarExpression::canonCompare(ExpressionPtr e) const {
 }
 
 ExpressionPtr ScalarExpression::postOptimize(AnalysisResultConstPtr ar) {
-  if (!m_expectedType || Type::SameType(m_actualType, m_expectedType)) {
+  if (!m_expectedType)
     return ExpressionPtr();
-  }
 
   Variant orig = getVariant();
   Variant cast;
@@ -186,11 +185,10 @@ ExpressionPtr ScalarExpression::postOptimize(AnalysisResultConstPtr ar) {
   case Type::KindOfString:  match = true; cast = orig.toString();  break;
   }
 
-  if (!match || same(orig, cast)) {
+  if (!match || same(orig, cast))
     // no changes need to be made
     return ExpressionPtr();
-  }
-
+  
   ExpressionPtr p = makeScalarExpression(ar, cast);
   p->setActualType(m_expectedType);
   return p;

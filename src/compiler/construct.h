@@ -194,21 +194,17 @@ public:
    */
   virtual int getKidCount() const = 0;
 
-  // helpers for GDB
-  void dump(int spc, AnalysisResultPtr ar) {
+  void dump(int spc, AnalysisResultPtr ar) { 
     AnalysisResultConstPtr arp(ar);
     dump(spc, arp);
   }
-  void dumpNode(int spc, AnalysisResultPtr ar) {
+  void dumpNode(int spc, AnalysisResultPtr ar) { 
     AnalysisResultConstPtr arp(ar);
     dumpNode(spc, arp);
   }
-  void dumpNode(int spc);
-  void dumpNode(int spc) const;
 
   void dump(int spc, AnalysisResultConstPtr ar);
   void dumpNode(int spc, AnalysisResultConstPtr ar);
-
   static void dump(int spc, AnalysisResultConstPtr ar, bool functionOnly,
                    const AstWalkerStateVec &start,
                    ConstructPtr endBefore, ConstructPtr endAfter);
@@ -258,7 +254,7 @@ private:
       unsigned referenced_valid : 1; // whether or not the above flag is valid
       unsigned needed : 1;
       unsigned needed_valid : 1; // whether or not the above flag is valid
-      unsigned chainRoot : 1; // whether this denotes the begining of a
+      unsigned chainRoot : 1; // whether this denotes the begining of a 
                               // CSE chain
     } m_flags;
   };

@@ -191,18 +191,6 @@ void ArrayElementExpression::analyzeProgram(AnalysisResultPtr ar) {
       }
       FunctionScopePtr scope = getFunctionScope();
       if (scope) scope->setNeedsCheckMem();
-    } else {
-      TypePtr at(m_variable->getActualType());
-      TypePtr et(m_variable->getExpectedType());
-      if (et &&
-          (et->is(Type::KindOfSequence) ||
-           et->is(Type::KindOfAutoSequence)) &&
-          at && at->isExactType()) {
-        // since Sequence maps to Variant in the runtime,
-        // using Sequence for the expected type will
-        // never allow the necessary casts to be generated.
-        m_variable->setExpectedType(at);
-      }
     }
   }
 }
@@ -437,7 +425,7 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
       cg_printf(")");
     }
   } else {
-    TypePtr type = m_variable->getType();
+    TypePtr type = m_variable->getActualType();
     if (hasContext(UnsetContext)) {
       cg_printf("unsetLval(");
       m_variable->outputCPP(cg, ar);
@@ -453,7 +441,18 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
         m_variable->outputCPP(cg, ar);
         cg_printf(")");
       } else {
+        TypePtr act;
+        if (!m_variable->hasCPPTemp() && m_variable->getImplementedType() &&
+            type->is(Type::KindOfArray) &&
+            !Type::SameType(m_variable->getImplementedType(), type)) {
+          act = type;
+          type = m_variable->getImplementedType();
+          m_variable->setActualType(m_variable->getImplementedType());
+        }
         m_variable->outputCPP(cg, ar);
+        if (act) {
+          m_variable->setActualType(act);
+        }
       }
     }
     if (m_offset) {
@@ -469,17 +468,17 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
       TypePtr t;
       bool hasCseStore = isRealChainRoot && GetCseTempInfo(
           ar,
-          static_pointer_cast<Expression>(shared_from_this()),
+          static_pointer_cast<Expression>(shared_from_this()), 
           t);
 
       if (hasContext(UnsetContext)) {
         // do nothing
       } else if (hasContext(InvokeArgument) && cg.callInfoTop() != -1) {
-        ASSERT(!isRealChainRoot); // TODO: handle this case
+        ASSERT(!isRealChainRoot); // TODO: handle this case 
         cg_printf(".argvalAt(cit%d->isRef(%d), ", cg.callInfoTop(), m_argNum);
       } else if (m_context & (LValue|RefValue|DeepReference)) {
         // if we see an array access element in LValue context, the
-        // type inference pass will never infer its type to be a string
+        // type inference pass will never infer its type to be a string 
         ASSERT(!isStringType);
         if (isRealChainRoot && !isArrayType) {
           // chain roots for non array types (variants) should call
@@ -490,7 +489,7 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
         }
         lvalAt = true;
       } else {
-        byRef =
+        byRef = 
           ((m_context & AccessContext) || isRealChainRoot) && !isStringType;
         arrRef = byRef && isArrayType;
         cg_printf(".rval%s%s(",
@@ -515,7 +514,7 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
           }
         } else if (lvalAt) {
           if (hasCseStore && !isArrayType) {
-            cg_printf(", %s%s",
+            cg_printf(", %s%s", 
                 Option::CseTempStoragePrefix, m_cppCseTemp.c_str());
           }
           if (hasContext(AccessContext)) {

@@ -471,42 +471,14 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
         rt = expType;
       }
       break;
-    case T_ISSET:
-    case T_EMPTY:
-      if (m_exp->is(Expression::KindOfExpressionList)) {
-        ExpressionListPtr exps =
-          dynamic_pointer_cast<ExpressionList>(m_exp);
-        if (exps->getListKind() == ExpressionList::ListKindParam) {
-          for (int i = 0; i < exps->getCount(); i++) {
-            SetExpTypeForExistsContext((*exps)[i], m_op == T_EMPTY);
-          }
-        }
-      } else {
-        SetExpTypeForExistsContext(m_exp, m_op == T_EMPTY);
-      }
-      break;
     default:
       break;
     }
   }
 
-  return rt;
-}
+  if (m_exp) m_exp->fixExpectedType(ar);
 
-void UnaryOpExpression::SetExpTypeForExistsContext(ExpressionPtr e,
-    bool allowPrimitives) {
-  if (!e) return;
-  TypePtr at(e->getActualType());
-  TypePtr it(e->getImplementedType());
-  if (at && it &&
-      Type::IsMappedToVariant(it) &&
-      ((allowPrimitives && Type::HasFastCastMethod(at)) ||
-       (!allowPrimitives &&
-        (at->is(Type::KindOfObject) ||
-         at->is(Type::KindOfArray) ||
-         at->is(Type::KindOfString))))) {
-    e->setExpectedType(at);
-  }
+  return rt;
 }
 
 ExpressionPtr UnaryOpExpression::unneededHelper() {

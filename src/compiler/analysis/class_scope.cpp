@@ -1879,7 +1879,7 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
     if (!func->isStatic()) {
       // Instance method called as such
       cg_indentBegin("if (UNLIKELY(mcp.obj == 0)) {\n");
-      cg_printf("return %sdummy(mcp, ",
+      cg_printf("return ObjectData::%sdummy(mcp, ",
                 fewArgs ? Option::InvokeFewArgsPrefix : Option::InvokePrefix);
       if (fewArgs) {
         cg_printf("count, INVOKE_FEW_ARGS_PASS_ARGS");

@@ -1375,6 +1375,7 @@ public:
   operator Object () const { return m_var.toObject();}
 
   bool is(DataType type) const { return m_var.is(type); }
+  bool isString() const { return m_var.isString(); }
   bool isObject() const { return m_var.isObject(); }
   bool isReferenced() const { return m_var.isReferenced(); }
   bool isNull() const { return m_var.isNull(); }
@@ -1383,6 +1384,7 @@ public:
   int64 toInt64() const { return m_var.toInt64(); }
   double toDouble() const { return m_var.toDouble(); }
   String toString() const { return m_var.toString(); }
+  StringData *getStringData() const { return m_var.getStringData(); }
   Array toArray() const { return m_var.toArray(); }
   Object toObject() const { return m_var.toObject(); }
   ObjectData *getObjectData() const { return m_var.getObjectData(); }

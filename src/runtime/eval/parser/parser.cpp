@@ -250,6 +250,10 @@ void Parser::error(const char* fmt, ...) {
   raise_error("%s", msg.c_str());
 }
 
+void Parser::error(const string &msg) {
+  error(msg.c_str());
+}
+
 void Parser::warning(const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);

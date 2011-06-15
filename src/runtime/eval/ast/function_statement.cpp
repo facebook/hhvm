@@ -98,17 +98,7 @@ Parameter::Parameter(CONSTRUCT_ARGS, const string &type,
         m_nullDefault = (dtype == KindOfNull &&
                          m_defVal->unsafe_cast<ScalarExpression>());
         if (!checkTypeHint(m_kind, dtype)) {
-          if (m_kind == KindOfArray) {
-            parser->error("Default value with array type hint can only be "
-                          "an array or NULL");
-          } else if (m_kind == KindOfObject) {
-            parser->error("Default value with a class type hint can only be "
-                          "NULL");
-          } else {
-            ASSERT(RuntimeOption::EnableHipHopSyntax);
-            parser->error("Default value need to have the same type as "
-                          "the type hint");
-          }
+          reportTypeHintError(NULL, type);
         } else if (m_defVal->unsafe_cast<ScalarExpression>() ||
                    m_defVal->unsafe_cast<ArrayExpression>()) {
           m_correct = true;
@@ -149,17 +139,7 @@ void Parameter::bindDefault(VariableEnvironment &env) const {
       DataType dtype = v.getType();
       ASSERT(dtype != KindOfUninit);
       if (!checkTypeHint(m_kind, dtype)) {
-        if (m_kind == KindOfArray) {
-          raise_error("Default value with array type hint can only be "
-                      "an array or NULL");
-        } else if (m_kind == KindOfObject) {
-          raise_error("Default value with a class type hint can only be "
-                      "NULL");
-        } else {
-          ASSERT(RuntimeOption::EnableHipHopSyntax);
-          raise_error("Default value need to have the same type as "
-                      "the type hint");
-        }
+        reportTypeHintError(NULL, m_type);
       }
     }
     env.getIdx(m_idx)->assignVal(v);
@@ -663,6 +643,51 @@ Variant FunctionStatement::InvokerFewArgs(void *extra, int count,
     INVOKE_FEW_ARGS_IMPL_ARGS) {
   return Invoker(extra,
                  collect_few_args_ref(count, INVOKE_FEW_ARGS_PASS_ARGS));
+}
+
+void Parameter::error(Parser *parser, const char *fmt, ...) const {
+  std::string msg;
+  va_list ap;
+  va_start(ap, fmt);
+  Util::string_vsnprintf(msg, fmt, ap);
+  va_end(ap);
+  if (parser) {
+    parser->error(msg);
+  } else {
+    raise_error(msg);
+  }
+}
+
+void Parameter::reportTypeHintError(Parser *parser, const string &hintType)
+  const {
+  if (m_kind == KindOfArray) {
+    error(parser,
+          "Default value with array type hint can only be an array or NULL");
+  } else if (m_kind == KindOfObject) {
+    bool isHipHopTypeHint = false;
+    bool isHipHopExperimentalTypeHint = false;
+    if (GetHipHopTypeHintTypes().find(hintType) !=
+        GetHipHopTypeHintTypes().end()) {
+      isHipHopTypeHint = true;
+    } else if (GetHipHopExperimentalTypeHintTypes().find(hintType) !=
+               GetHipHopExperimentalTypeHintTypes().end()) {
+      isHipHopExperimentalTypeHint = true;
+    }
+    if (!RuntimeOption::EnableHipHopSyntax && isHipHopTypeHint) {
+      error(parser,
+            "HipHop type hint %s is not enabled", hintType.c_str());
+    } else if (!RuntimeOption::EnableHipHopExperimentalSyntax &&
+               isHipHopExperimentalTypeHint) {
+      error(parser, "HipHop experimental type hint %s is not enabled",
+            hintType.c_str());
+    } else {
+      error(parser, "Default value with a class type hint can only be NULL");
+    }
+  } else {
+    ASSERT(RuntimeOption::EnableHipHopSyntax ||
+           RuntimeOption::EnableHipHopExperimentalSyntax);
+    error(parser, "Default value need to have the same type as the type hint");
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

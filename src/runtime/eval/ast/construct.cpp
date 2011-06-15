@@ -23,24 +23,50 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 Construct::TypePtrMap Construct::TypeHintTypes;
+Construct::TypePtrMap Construct::HipHopTypeHintTypes;
+Construct::TypePtrMap Construct::HipHopExperimentalTypeHintTypes;
+
+const Construct::TypePtrMap &Construct::GetHipHopTypeHintTypes() {
+  if (HipHopTypeHintTypes.empty()) {
+    HipHopTypeHintTypes["bool"]    = KindOfBoolean;
+    HipHopTypeHintTypes["boolean"] = KindOfBoolean;
+    HipHopTypeHintTypes["int"]     = KindOfInt64;
+    HipHopTypeHintTypes["integer"] = KindOfInt64;
+    HipHopTypeHintTypes["real"]    = KindOfDouble;
+    HipHopTypeHintTypes["double"]  = KindOfDouble;
+    HipHopTypeHintTypes["float"]   = KindOfDouble;
+    HipHopTypeHintTypes["string"]  = KindOfString;
+  }
+  return HipHopTypeHintTypes;
+}
+
+const Construct::TypePtrMap &Construct::GetHipHopExperimentalTypeHintTypes() {
+  if (HipHopExperimentalTypeHintTypes.empty()) {
+    HipHopExperimentalTypeHintTypes["vector"]  = KindOfArray;
+    HipHopExperimentalTypeHintTypes["map"]     = KindOfArray;
+    HipHopExperimentalTypeHintTypes["set"]     = KindOfArray;
+  }
+  return HipHopExperimentalTypeHintTypes;
+}
 
 const Construct::TypePtrMap &Construct::GetTypeHintTypes() {
   if (TypeHintTypes.empty()) {
     TypeHintTypes["array"] = KindOfArray;
     if (RuntimeOption::EnableHipHopExperimentalSyntax) {
-      TypeHintTypes["vector"]  = KindOfArray;
-      TypeHintTypes["map"]     = KindOfArray;
-      TypeHintTypes["set"]     = KindOfArray;
+      GetHipHopExperimentalTypeHintTypes();
+      for (Construct::TypePtrMap::const_iterator iter =
+           HipHopExperimentalTypeHintTypes.begin();
+           iter != HipHopExperimentalTypeHintTypes.end(); ++iter) {
+        TypeHintTypes[iter->first]  = iter->second;
+      }
     }
     if (RuntimeOption::EnableHipHopSyntax) {
-      TypeHintTypes["bool"]    = KindOfBoolean;
-      TypeHintTypes["boolean"] = KindOfBoolean;
-      TypeHintTypes["int"]     = KindOfInt64;
-      TypeHintTypes["integer"] = KindOfInt64;
-      TypeHintTypes["real"]    = KindOfDouble;
-      TypeHintTypes["double"]  = KindOfDouble;
-      TypeHintTypes["float"]   = KindOfDouble;
-      TypeHintTypes["string"]  = KindOfString;
+      GetHipHopTypeHintTypes();
+      for (Construct::TypePtrMap::const_iterator iter =
+           HipHopTypeHintTypes.begin();
+           iter != HipHopTypeHintTypes.end(); ++iter) {
+        TypeHintTypes[iter->first]  = iter->second;
+      }
     }
   }
   return TypeHintTypes;

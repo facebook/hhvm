@@ -71,6 +71,8 @@ private:
   bool m_correct;
 private:
   bool checkTypeHint(DataType hint, DataType type) const;
+  void error(Parser *parser, const char *fmt, ...) const;
+  void reportTypeHintError(Parser *parser, const std::string &hintType) const;
 };
 
 class FunctionStatement : public Statement, public Block, public Function {

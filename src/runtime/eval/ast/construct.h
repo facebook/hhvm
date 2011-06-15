@@ -37,6 +37,8 @@ class Construct {
 public:
   typedef hphp_string_imap<DataType> TypePtrMap;
   static const TypePtrMap &GetTypeHintTypes();
+  static const TypePtrMap &GetHipHopTypeHintTypes();
+  static const TypePtrMap &GetHipHopExperimentalTypeHintTypes();
 
 public:
   Construct(CONSTRUCT_ARGS);
@@ -98,6 +100,8 @@ private:
   int _count;
 
   static TypePtrMap TypeHintTypes;
+  static TypePtrMap HipHopTypeHintTypes;
+  static TypePtrMap HipHopExperimentalTypeHintTypes;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

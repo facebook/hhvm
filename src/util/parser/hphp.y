@@ -1914,7 +1914,8 @@ static_scalar:
   | static_class_constant              { $$ = $1;}
 ;
 static_class_constant:
-    T_STRING T_PAAMAYIM_NEKUDOTAYIM
+    class_namespace_string
+    T_PAAMAYIM_NEKUDOTAYIM
     T_STRING                           { _p->onClassConst($$, $1, $3, 1);}
   | T_XHP_LABEL T_PAAMAYIM_NEKUDOTAYIM
     T_STRING                           { $1.xhpLabel();

@@ -5029,7 +5029,7 @@ yyreduce:
 
 /* Line 1464 of yacc.c  */
 #line 1026 "../../../src/util/parser/hphp.y"
-    { _p->onUse((yyvsp[(1) - (2)]).text(),"");;}
+    { _p->onUse((yyvsp[(2) - (2)]).text(),"");;}
     break;
 
   case 20:
@@ -5043,7 +5043,7 @@ yyreduce:
 
 /* Line 1464 of yacc.c  */
 #line 1029 "../../../src/util/parser/hphp.y"
-    { _p->onUse((yyvsp[(1) - (4)]).text(),(yyvsp[(3) - (4)]).text());;}
+    { _p->onUse((yyvsp[(2) - (4)]).text(),(yyvsp[(4) - (4)]).text());;}
     break;
 
   case 22:

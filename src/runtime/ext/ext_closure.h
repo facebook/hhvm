@@ -43,6 +43,8 @@ class c_Closure : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t___invoke(int _argc, CArrRef _argv = null_array);
   DECLARE_METHOD_INVOKE_HELPERS(__invoke);
+  public: Variant t___clone();
+  DECLARE_METHOD_INVOKE_HELPERS(__clone);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 

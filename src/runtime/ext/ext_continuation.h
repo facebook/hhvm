@@ -81,6 +81,8 @@ class c_Continuation : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(receive);
   public: Array t_getvars();
   DECLARE_METHOD_INVOKE_HELPERS(getvars);
+  public: Variant t___clone();
+  DECLARE_METHOD_INVOKE_HELPERS(__clone);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 

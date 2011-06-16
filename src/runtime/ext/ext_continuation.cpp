@@ -16,6 +16,7 @@
 */
 
 #include <runtime/ext/ext_continuation.h>
+#include <runtime/base/builtin_functions.h>
 
 #include <system/lib/systemlib.h>
 
@@ -24,12 +25,12 @@ namespace HPHP {
 
 static StaticString s___cont__("__cont__");
 
-c_Continuation::c_Continuation() : 
+c_Continuation::c_Continuation() :
   m_callInfo(NULL), m_extra(NULL), m_isMethod(false) {}
 c_Continuation::~c_Continuation() {}
 
 void c_Continuation::t___construct(
-    int64 func, int64 extra, bool isMethod, 
+    int64 func, int64 extra, bool isMethod,
     CArrRef vars, CVarRef obj, CArrRef args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::__construct);
   // initialize the member variables
@@ -137,7 +138,7 @@ int64 c_Continuation::t_key() {
       throw; \
     } \
   } \
-  m_running = false; 
+  m_running = false;
 
 void c_Continuation::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::next);
@@ -174,6 +175,12 @@ Variant c_Continuation::t_receive() {
 Array c_Continuation::t_getvars() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::getvars);
   return m_vars;
+}
+
+Variant c_Continuation::t___clone() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::__clone);
+  throw_fatal("Trying to clone an uncloneable object of class Continuation");
+  return null;
 }
 
 Variant c_Continuation::t___destruct() {

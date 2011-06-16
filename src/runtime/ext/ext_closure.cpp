@@ -16,11 +16,12 @@
 */
 
 #include <runtime/ext/ext_closure.h>
+#include <runtime/base/builtin_functions.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Closure::c_Closure() : m_vars(Array::Create()), 
+c_Closure::c_Closure() : m_vars(Array::Create()),
   m_callInfo(NULL), m_extraData(NULL) {}
 c_Closure::~c_Closure() {}
 
@@ -35,6 +36,12 @@ void c_Closure::t___construct(int64 func, int64 extra, CArrRef vars) {
 Variant c_Closure::t___invoke(int _argc, CArrRef _argv) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Closure, Closure::__invoke);
   return (m_callInfo->getFunc())((void*)this, _argv);
+}
+
+Variant c_Closure::t___clone() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Closure, Closure::__clone);
+  throw_fatal("Trying to clone an uncloneable object of class Closure");
+  return null;
 }
 
 Variant c_Closure::t___destruct() {

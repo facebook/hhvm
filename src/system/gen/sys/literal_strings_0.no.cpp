@@ -91,6 +91,7 @@ StaticString s_sys_ss94ec964c("getDeclaringClass");
 StaticString s_sys_ss95821704("isDir");
 StaticString s_sys_ss95d17b71("loadXML");
 StaticString s_sys_ss95d41015("Server");
+StaticString s_sys_ss960d7a27("__clone");
 StaticString s_sys_ss961c2365("getDelayedByKey");
 StaticString s_sys_ss9631f2ea("isDestructor");
 StaticString s_sys_ss963681e7("__setsoapheaders");

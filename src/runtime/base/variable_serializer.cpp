@@ -415,7 +415,11 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
 
   switch (m_type) {
   case PrintR:
-    if (!m_objClass.empty()) {
+    if (!m_rsrcName.empty()) {
+      m_buf->append("Resource id #");
+      m_buf->append(m_rsrcId);
+      break;
+    } else if (!m_objClass.empty()) {
       m_buf->append(m_objClass);
       m_buf->append(" Object\n");
     } else {
@@ -699,10 +703,12 @@ void VariableSerializer::writeArrayFooter(const ArrayData *arr) {
   m_indent -= info.indent_delta;
   switch (m_type) {
   case PrintR:
-    indent();
-    m_buf->append(")\n");
-    if (m_indent > 0) {
-      m_indent -= 4;
+    if (m_rsrcName.empty()) {
+      indent();
+      m_buf->append(")\n");
+      if (m_indent > 0) {
+        m_indent -= 4;
+      }
     }
     break;
   case VarExport:

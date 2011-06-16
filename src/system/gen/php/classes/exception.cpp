@@ -102,7 +102,7 @@ void c_PDOException::cloneSet(ObjectData *cl) {
 CallInfo c_PDOException::ci___construct((void*)&c_PDOException::i___construct, (void*)&c_PDOException::ifa___construct, 0, 4, 0x0000000000000000LL);
 Variant c_PDOException::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___construct, coo_PDOException);
+    return ObjectData::i_dummy(mcp, params, i___construct, coo_PDOException);
   }
   c_PDOException *self ATTRIBUTE_UNUSED (static_cast<c_PDOException*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -111,7 +111,7 @@ Variant c_PDOException::i___construct(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_PDOException::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_PDOException);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_PDOException);
   }
   c_PDOException *self ATTRIBUTE_UNUSED (static_cast<c_PDOException*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("PDOException::__construct", 0, 2);
@@ -1180,7 +1180,7 @@ CallInfo c_Exception::ci_gettraceasstring((void*)&c_Exception::i_gettraceasstrin
 CallInfo c_Exception::ci_gettrace((void*)&c_Exception::i_gettrace, (void*)&c_Exception::ifa_gettrace, 0, 4, 0x0000000000000000LL);
 Variant c_Exception::i_getmessage(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getmessage, coo_Exception);
+    return ObjectData::i_dummy(mcp, params, i_getmessage, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1189,7 +1189,7 @@ Variant c_Exception::i_getmessage(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Exception::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___tostring, coo_Exception);
+    return ObjectData::i_dummy(mcp, params, i___tostring, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1198,7 +1198,7 @@ Variant c_Exception::i___tostring(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Exception::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___construct, coo_Exception);
+    return ObjectData::i_dummy(mcp, params, i___construct, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1217,7 +1217,7 @@ Variant c_Exception::i___construct(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Exception::i_getcode(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getcode, coo_Exception);
+    return ObjectData::i_dummy(mcp, params, i_getcode, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1226,7 +1226,7 @@ Variant c_Exception::i_getcode(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Exception::i_getprevious(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getprevious, coo_Exception);
+    return ObjectData::i_dummy(mcp, params, i_getprevious, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1235,7 +1235,7 @@ Variant c_Exception::i_getprevious(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Exception::i_getline(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getline, coo_Exception);
+    return ObjectData::i_dummy(mcp, params, i_getline, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1244,7 +1244,7 @@ Variant c_Exception::i_getline(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Exception::i___init__(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___init__, coo_Exception);
+    return ObjectData::i_dummy(mcp, params, i___init__, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1253,7 +1253,7 @@ Variant c_Exception::i___init__(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Exception::i_getfile(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getfile, coo_Exception);
+    return ObjectData::i_dummy(mcp, params, i_getfile, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1262,7 +1262,7 @@ Variant c_Exception::i_getfile(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Exception::i_gettraceasstring(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_gettraceasstring, coo_Exception);
+    return ObjectData::i_dummy(mcp, params, i_gettraceasstring, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1271,7 +1271,7 @@ Variant c_Exception::i_gettraceasstring(MethodCallPackage &mcp, CArrRef params) 
 }
 Variant c_Exception::i_gettrace(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_gettrace, coo_Exception);
+    return ObjectData::i_dummy(mcp, params, i_gettrace, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1280,7 +1280,7 @@ Variant c_Exception::i_gettrace(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Exception::ifa_getmessage(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getmessage, coo_Exception);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getmessage, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -1288,7 +1288,7 @@ Variant c_Exception::ifa_getmessage(MethodCallPackage &mcp, int count, INVOKE_FE
 }
 Variant c_Exception::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_Exception);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -1296,7 +1296,7 @@ Variant c_Exception::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FE
 }
 Variant c_Exception::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_Exception);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   if (UNLIKELY(count > 3)) return throw_toomany_arguments("Exception::__construct", 3, 2);
@@ -1310,7 +1310,7 @@ Variant c_Exception::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
 }
 Variant c_Exception::ifa_getcode(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getcode, coo_Exception);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getcode, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -1318,7 +1318,7 @@ Variant c_Exception::ifa_getcode(MethodCallPackage &mcp, int count, INVOKE_FEW_A
 }
 Variant c_Exception::ifa_getprevious(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getprevious, coo_Exception);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getprevious, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getPrevious", 0, 1);
@@ -1326,7 +1326,7 @@ Variant c_Exception::ifa_getprevious(MethodCallPackage &mcp, int count, INVOKE_F
 }
 Variant c_Exception::ifa_getline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getline, coo_Exception);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getline, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -1334,7 +1334,7 @@ Variant c_Exception::ifa_getline(MethodCallPackage &mcp, int count, INVOKE_FEW_A
 }
 Variant c_Exception::ifa___init__(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___init__, coo_Exception);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___init__, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -1342,7 +1342,7 @@ Variant c_Exception::ifa___init__(MethodCallPackage &mcp, int count, INVOKE_FEW_
 }
 Variant c_Exception::ifa_getfile(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getfile, coo_Exception);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getfile, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -1350,7 +1350,7 @@ Variant c_Exception::ifa_getfile(MethodCallPackage &mcp, int count, INVOKE_FEW_A
 }
 Variant c_Exception::ifa_gettraceasstring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_gettraceasstring, coo_Exception);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_gettraceasstring, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -1358,7 +1358,7 @@ Variant c_Exception::ifa_gettraceasstring(MethodCallPackage &mcp, int count, INV
 }
 Variant c_Exception::ifa_gettrace(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_gettrace, coo_Exception);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_gettrace, coo_Exception);
   }
   c_Exception *self ATTRIBUTE_UNUSED (static_cast<c_Exception*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -1798,7 +1798,7 @@ CallInfo c_ErrorException::ci___construct((void*)&c_ErrorException::i___construc
 CallInfo c_ErrorException::ci_getseverity((void*)&c_ErrorException::i_getseverity, (void*)&c_ErrorException::ifa_getseverity, 0, 4, 0x0000000000000000LL);
 Variant c_ErrorException::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___construct, coo_ErrorException);
+    return ObjectData::i_dummy(mcp, params, i___construct, coo_ErrorException);
   }
   c_ErrorException *self ATTRIBUTE_UNUSED (static_cast<c_ErrorException*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1821,7 +1821,7 @@ Variant c_ErrorException::i___construct(MethodCallPackage &mcp, CArrRef params) 
 }
 Variant c_ErrorException::i_getseverity(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getseverity, coo_ErrorException);
+    return ObjectData::i_dummy(mcp, params, i_getseverity, coo_ErrorException);
   }
   c_ErrorException *self ATTRIBUTE_UNUSED (static_cast<c_ErrorException*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1830,7 +1830,7 @@ Variant c_ErrorException::i_getseverity(MethodCallPackage &mcp, CArrRef params) 
 }
 Variant c_ErrorException::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_ErrorException);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_ErrorException);
   }
   c_ErrorException *self ATTRIBUTE_UNUSED (static_cast<c_ErrorException*>(mcp.obj));
   if (UNLIKELY(count > 5)) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
@@ -1848,7 +1848,7 @@ Variant c_ErrorException::ifa___construct(MethodCallPackage &mcp, int count, INV
 }
 Variant c_ErrorException::ifa_getseverity(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getseverity, coo_ErrorException);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getseverity, coo_ErrorException);
   }
   c_ErrorException *self ATTRIBUTE_UNUSED (static_cast<c_ErrorException*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
@@ -2037,7 +2037,7 @@ void c_DOMException::cloneSet(ObjectData *cl) {
 CallInfo c_DOMException::ci___construct((void*)&c_DOMException::i___construct, (void*)&c_DOMException::ifa___construct, 2, 4, 0x0000000000000000LL);
 Variant c_DOMException::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___construct, coo_DOMException);
+    return ObjectData::i_dummy(mcp, params, i___construct, coo_DOMException);
   }
   c_DOMException *self ATTRIBUTE_UNUSED (static_cast<c_DOMException*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -2052,7 +2052,7 @@ Variant c_DOMException::i___construct(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DOMException::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_DOMException);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_DOMException);
   }
   c_DOMException *self ATTRIBUTE_UNUSED (static_cast<c_DOMException*>(mcp.obj));
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("DOMException::__construct", count, 2, 2, 2);

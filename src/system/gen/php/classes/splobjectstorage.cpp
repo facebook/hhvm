@@ -156,7 +156,7 @@ CallInfo c_SplObjectStorage::ci_current((void*)&c_SplObjectStorage::i_current, (
 CallInfo c_SplObjectStorage::ci_rewind((void*)&c_SplObjectStorage::i_rewind, (void*)&c_SplObjectStorage::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_SplObjectStorage::i_next(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_next, coo_SplObjectStorage);
+    return ObjectData::i_dummy(mcp, params, i_next, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -165,7 +165,7 @@ Variant c_SplObjectStorage::i_next(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_SplObjectStorage::i_detach(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_detach, coo_SplObjectStorage);
+    return ObjectData::i_dummy(mcp, params, i_detach, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -179,7 +179,7 @@ Variant c_SplObjectStorage::i_detach(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_SplObjectStorage::i_attach(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_attach, coo_SplObjectStorage);
+    return ObjectData::i_dummy(mcp, params, i_attach, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -193,7 +193,7 @@ Variant c_SplObjectStorage::i_attach(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_SplObjectStorage::i_count(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_count, coo_SplObjectStorage);
+    return ObjectData::i_dummy(mcp, params, i_count, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -202,7 +202,7 @@ Variant c_SplObjectStorage::i_count(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_SplObjectStorage::i_key(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_key, coo_SplObjectStorage);
+    return ObjectData::i_dummy(mcp, params, i_key, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -211,7 +211,7 @@ Variant c_SplObjectStorage::i_key(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_SplObjectStorage::i_valid(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_valid, coo_SplObjectStorage);
+    return ObjectData::i_dummy(mcp, params, i_valid, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -220,7 +220,7 @@ Variant c_SplObjectStorage::i_valid(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_SplObjectStorage::i_contains(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_contains, coo_SplObjectStorage);
+    return ObjectData::i_dummy(mcp, params, i_contains, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -234,7 +234,7 @@ Variant c_SplObjectStorage::i_contains(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_SplObjectStorage::i_current(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_current, coo_SplObjectStorage);
+    return ObjectData::i_dummy(mcp, params, i_current, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -243,7 +243,7 @@ Variant c_SplObjectStorage::i_current(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_SplObjectStorage::i_rewind(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_rewind, coo_SplObjectStorage);
+    return ObjectData::i_dummy(mcp, params, i_rewind, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -252,7 +252,7 @@ Variant c_SplObjectStorage::i_rewind(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_SplObjectStorage::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_next, coo_SplObjectStorage);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_next, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplObjectStorage::next", 0, 1);
@@ -260,7 +260,7 @@ Variant c_SplObjectStorage::ifa_next(MethodCallPackage &mcp, int count, INVOKE_F
 }
 Variant c_SplObjectStorage::ifa_detach(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_detach, coo_SplObjectStorage);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_detach, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplObjectStorage::detach", count, 1, 1, 1);
@@ -269,7 +269,7 @@ Variant c_SplObjectStorage::ifa_detach(MethodCallPackage &mcp, int count, INVOKE
 }
 Variant c_SplObjectStorage::ifa_attach(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_attach, coo_SplObjectStorage);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_attach, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 1, 1);
@@ -278,7 +278,7 @@ Variant c_SplObjectStorage::ifa_attach(MethodCallPackage &mcp, int count, INVOKE
 }
 Variant c_SplObjectStorage::ifa_count(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_count, coo_SplObjectStorage);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_count, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplObjectStorage::count", 0, 1);
@@ -286,7 +286,7 @@ Variant c_SplObjectStorage::ifa_count(MethodCallPackage &mcp, int count, INVOKE_
 }
 Variant c_SplObjectStorage::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_key, coo_SplObjectStorage);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_key, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplObjectStorage::key", 0, 1);
@@ -294,7 +294,7 @@ Variant c_SplObjectStorage::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FE
 }
 Variant c_SplObjectStorage::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_valid, coo_SplObjectStorage);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_valid, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplObjectStorage::valid", 0, 1);
@@ -302,7 +302,7 @@ Variant c_SplObjectStorage::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_
 }
 Variant c_SplObjectStorage::ifa_contains(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_contains, coo_SplObjectStorage);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_contains, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplObjectStorage::contains", count, 1, 1, 1);
@@ -311,7 +311,7 @@ Variant c_SplObjectStorage::ifa_contains(MethodCallPackage &mcp, int count, INVO
 }
 Variant c_SplObjectStorage::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_current, coo_SplObjectStorage);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_current, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplObjectStorage::current", 0, 1);
@@ -319,7 +319,7 @@ Variant c_SplObjectStorage::ifa_current(MethodCallPackage &mcp, int count, INVOK
 }
 Variant c_SplObjectStorage::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_rewind, coo_SplObjectStorage);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_rewind, coo_SplObjectStorage);
   }
   c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplObjectStorage::rewind", 0, 1);

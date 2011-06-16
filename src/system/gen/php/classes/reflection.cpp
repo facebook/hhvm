@@ -133,7 +133,7 @@ CallInfo c_ReflectionFunctionAbstract::ci_getname((void*)&c_ReflectionFunctionAb
 CallInfo c_ReflectionFunctionAbstract::ci_isinternal((void*)&c_ReflectionFunctionAbstract::i_isinternal, (void*)&c_ReflectionFunctionAbstract::ifa_isinternal, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionFunctionAbstract::i_getnumberofrequiredparameters(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getnumberofrequiredparameters, coo_ReflectionFunctionAbstract);
+    return ObjectData::i_dummy(mcp, params, i_getnumberofrequiredparameters, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -142,7 +142,7 @@ Variant c_ReflectionFunctionAbstract::i_getnumberofrequiredparameters(MethodCall
 }
 Variant c_ReflectionFunctionAbstract::i_isuserdefined(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isuserdefined, coo_ReflectionFunctionAbstract);
+    return ObjectData::i_dummy(mcp, params, i_isuserdefined, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -151,7 +151,7 @@ Variant c_ReflectionFunctionAbstract::i_isuserdefined(MethodCallPackage &mcp, CA
 }
 Variant c_ReflectionFunctionAbstract::i_getnumberofparameters(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getnumberofparameters, coo_ReflectionFunctionAbstract);
+    return ObjectData::i_dummy(mcp, params, i_getnumberofparameters, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -160,7 +160,7 @@ Variant c_ReflectionFunctionAbstract::i_getnumberofparameters(MethodCallPackage 
 }
 Variant c_ReflectionFunctionAbstract::i_getendline(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getendline, coo_ReflectionFunctionAbstract);
+    return ObjectData::i_dummy(mcp, params, i_getendline, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -169,7 +169,7 @@ Variant c_ReflectionFunctionAbstract::i_getendline(MethodCallPackage &mcp, CArrR
 }
 Variant c_ReflectionFunctionAbstract::i_getstaticvariables(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getstaticvariables, coo_ReflectionFunctionAbstract);
+    return ObjectData::i_dummy(mcp, params, i_getstaticvariables, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -178,7 +178,7 @@ Variant c_ReflectionFunctionAbstract::i_getstaticvariables(MethodCallPackage &mc
 }
 Variant c_ReflectionFunctionAbstract::i_getparameters(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getparameters, coo_ReflectionFunctionAbstract);
+    return ObjectData::i_dummy(mcp, params, i_getparameters, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -187,7 +187,7 @@ Variant c_ReflectionFunctionAbstract::i_getparameters(MethodCallPackage &mcp, CA
 }
 Variant c_ReflectionFunctionAbstract::i_returnsreference(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_returnsreference, coo_ReflectionFunctionAbstract);
+    return ObjectData::i_dummy(mcp, params, i_returnsreference, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -196,7 +196,7 @@ Variant c_ReflectionFunctionAbstract::i_returnsreference(MethodCallPackage &mcp,
 }
 Variant c_ReflectionFunctionAbstract::i_getfilename(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getfilename, coo_ReflectionFunctionAbstract);
+    return ObjectData::i_dummy(mcp, params, i_getfilename, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -205,7 +205,7 @@ Variant c_ReflectionFunctionAbstract::i_getfilename(MethodCallPackage &mcp, CArr
 }
 Variant c_ReflectionFunctionAbstract::i_getstartline(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getstartline, coo_ReflectionFunctionAbstract);
+    return ObjectData::i_dummy(mcp, params, i_getstartline, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -214,7 +214,7 @@ Variant c_ReflectionFunctionAbstract::i_getstartline(MethodCallPackage &mcp, CAr
 }
 Variant c_ReflectionFunctionAbstract::i_getdoccomment(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getdoccomment, coo_ReflectionFunctionAbstract);
+    return ObjectData::i_dummy(mcp, params, i_getdoccomment, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -223,7 +223,7 @@ Variant c_ReflectionFunctionAbstract::i_getdoccomment(MethodCallPackage &mcp, CA
 }
 Variant c_ReflectionFunctionAbstract::i_getclosure(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getclosure, coo_ReflectionFunctionAbstract);
+    return ObjectData::i_dummy(mcp, params, i_getclosure, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -232,7 +232,7 @@ Variant c_ReflectionFunctionAbstract::i_getclosure(MethodCallPackage &mcp, CArrR
 }
 Variant c_ReflectionFunctionAbstract::i_getname(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getname, coo_ReflectionFunctionAbstract);
+    return ObjectData::i_dummy(mcp, params, i_getname, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -241,7 +241,7 @@ Variant c_ReflectionFunctionAbstract::i_getname(MethodCallPackage &mcp, CArrRef 
 }
 Variant c_ReflectionFunctionAbstract::i_isinternal(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isinternal, coo_ReflectionFunctionAbstract);
+    return ObjectData::i_dummy(mcp, params, i_isinternal, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -250,7 +250,7 @@ Variant c_ReflectionFunctionAbstract::i_isinternal(MethodCallPackage &mcp, CArrR
 }
 Variant c_ReflectionFunctionAbstract::ifa_getnumberofrequiredparameters(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getnumberofrequiredparameters, coo_ReflectionFunctionAbstract);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getnumberofrequiredparameters, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
@@ -258,7 +258,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getnumberofrequiredparameters(MethodCa
 }
 Variant c_ReflectionFunctionAbstract::ifa_isuserdefined(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isuserdefined, coo_ReflectionFunctionAbstract);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isuserdefined, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
@@ -266,7 +266,7 @@ Variant c_ReflectionFunctionAbstract::ifa_isuserdefined(MethodCallPackage &mcp, 
 }
 Variant c_ReflectionFunctionAbstract::ifa_getnumberofparameters(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getnumberofparameters, coo_ReflectionFunctionAbstract);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getnumberofparameters, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
@@ -274,7 +274,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getnumberofparameters(MethodCallPackag
 }
 Variant c_ReflectionFunctionAbstract::ifa_getendline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getendline, coo_ReflectionFunctionAbstract);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getendline, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
@@ -282,7 +282,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getendline(MethodCallPackage &mcp, int
 }
 Variant c_ReflectionFunctionAbstract::ifa_getstaticvariables(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getstaticvariables, coo_ReflectionFunctionAbstract);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getstaticvariables, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
@@ -290,7 +290,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getstaticvariables(MethodCallPackage &
 }
 Variant c_ReflectionFunctionAbstract::ifa_getparameters(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getparameters, coo_ReflectionFunctionAbstract);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getparameters, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
@@ -298,7 +298,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getparameters(MethodCallPackage &mcp, 
 }
 Variant c_ReflectionFunctionAbstract::ifa_returnsreference(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_returnsreference, coo_ReflectionFunctionAbstract);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_returnsreference, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
@@ -306,7 +306,7 @@ Variant c_ReflectionFunctionAbstract::ifa_returnsreference(MethodCallPackage &mc
 }
 Variant c_ReflectionFunctionAbstract::ifa_getfilename(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getfilename, coo_ReflectionFunctionAbstract);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getfilename, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
@@ -314,7 +314,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getfilename(MethodCallPackage &mcp, in
 }
 Variant c_ReflectionFunctionAbstract::ifa_getstartline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getstartline, coo_ReflectionFunctionAbstract);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getstartline, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
@@ -322,7 +322,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getstartline(MethodCallPackage &mcp, i
 }
 Variant c_ReflectionFunctionAbstract::ifa_getdoccomment(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdoccomment, coo_ReflectionFunctionAbstract);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdoccomment, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
@@ -330,7 +330,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getdoccomment(MethodCallPackage &mcp, 
 }
 Variant c_ReflectionFunctionAbstract::ifa_getclosure(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getclosure, coo_ReflectionFunctionAbstract);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getclosure, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
@@ -338,7 +338,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getclosure(MethodCallPackage &mcp, int
 }
 Variant c_ReflectionFunctionAbstract::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getname, coo_ReflectionFunctionAbstract);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getname, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
@@ -346,7 +346,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getname(MethodCallPackage &mcp, int co
 }
 Variant c_ReflectionFunctionAbstract::ifa_isinternal(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isinternal, coo_ReflectionFunctionAbstract);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isinternal, coo_ReflectionFunctionAbstract);
   }
   c_ReflectionFunctionAbstract *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunctionAbstract*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
@@ -988,7 +988,7 @@ CallInfo c_ReflectionClass::ci_getproperty((void*)&c_ReflectionClass::i_getprope
 CallInfo c_ReflectionClass::ci_isinternal((void*)&c_ReflectionClass::i_isinternal, (void*)&c_ReflectionClass::ifa_isinternal, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionClass::i_getmethods(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getmethods, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getmethods, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1003,7 +1003,7 @@ Variant c_ReflectionClass::i_getmethods(MethodCallPackage &mcp, CArrRef params) 
 }
 Variant c_ReflectionClass::i_isiterateable(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isiterateable, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_isiterateable, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1012,7 +1012,7 @@ Variant c_ReflectionClass::i_isiterateable(MethodCallPackage &mcp, CArrRef param
 }
 Variant c_ReflectionClass::i_getstaticpropertyvalue(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getstaticpropertyvalue, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getstaticpropertyvalue, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1028,7 +1028,7 @@ Variant c_ReflectionClass::i_getstaticpropertyvalue(MethodCallPackage &mcp, CArr
 }
 Variant c_ReflectionClass::i_isuserdefined(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isuserdefined, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_isuserdefined, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1037,7 +1037,7 @@ Variant c_ReflectionClass::i_isuserdefined(MethodCallPackage &mcp, CArrRef param
 }
 Variant c_ReflectionClass::i_newinstance(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_newinstance, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_newinstance, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1046,7 +1046,7 @@ Variant c_ReflectionClass::i_newinstance(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionClass::i_getextension(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getextension, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getextension, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1055,7 +1055,7 @@ Variant c_ReflectionClass::i_getextension(MethodCallPackage &mcp, CArrRef params
 }
 Variant c_ReflectionClass::i_getconstructor(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getconstructor, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getconstructor, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1064,7 +1064,7 @@ Variant c_ReflectionClass::i_getconstructor(MethodCallPackage &mcp, CArrRef para
 }
 Variant c_ReflectionClass::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___tostring, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i___tostring, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1073,7 +1073,7 @@ Variant c_ReflectionClass::i___tostring(MethodCallPackage &mcp, CArrRef params) 
 }
 Variant c_ReflectionClass::i_newinstanceargs(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_newinstanceargs, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_newinstanceargs, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1087,7 +1087,7 @@ Variant c_ReflectionClass::i_newinstanceargs(MethodCallPackage &mcp, CArrRef par
 }
 Variant c_ReflectionClass::i_getendline(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getendline, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getendline, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1096,7 +1096,7 @@ Variant c_ReflectionClass::i_getendline(MethodCallPackage &mcp, CArrRef params) 
 }
 Variant c_ReflectionClass::i_isinstance(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isinstance, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_isinstance, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1110,7 +1110,7 @@ Variant c_ReflectionClass::i_isinstance(MethodCallPackage &mcp, CArrRef params) 
 }
 Variant c_ReflectionClass::i_hasmethod(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_hasmethod, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_hasmethod, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1124,7 +1124,7 @@ Variant c_ReflectionClass::i_hasmethod(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_ReflectionClass::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___construct, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i___construct, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1138,7 +1138,7 @@ Variant c_ReflectionClass::i___construct(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionClass::i_isfinal(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isfinal, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_isfinal, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1147,7 +1147,7 @@ Variant c_ReflectionClass::i_isfinal(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_ReflectionClass::i_getmodifiers(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getmodifiers, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getmodifiers, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1167,7 +1167,7 @@ Variant c_ReflectionClass::i_export(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_ReflectionClass::i_getproperties(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getproperties, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getproperties, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1182,7 +1182,7 @@ Variant c_ReflectionClass::i_getproperties(MethodCallPackage &mcp, CArrRef param
 }
 Variant c_ReflectionClass::i_hasconstant(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_hasconstant, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_hasconstant, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1196,7 +1196,7 @@ Variant c_ReflectionClass::i_hasconstant(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionClass::i_getmethod(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getmethod, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getmethod, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1210,7 +1210,7 @@ Variant c_ReflectionClass::i_getmethod(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_ReflectionClass::i_getextensionname(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getextensionname, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getextensionname, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1219,7 +1219,7 @@ Variant c_ReflectionClass::i_getextensionname(MethodCallPackage &mcp, CArrRef pa
 }
 Variant c_ReflectionClass::i_getparentclass(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getparentclass, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getparentclass, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1228,7 +1228,7 @@ Variant c_ReflectionClass::i_getparentclass(MethodCallPackage &mcp, CArrRef para
 }
 Variant c_ReflectionClass::i_getfilename(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getfilename, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getfilename, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1237,7 +1237,7 @@ Variant c_ReflectionClass::i_getfilename(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionClass::i_implementsinterface(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_implementsinterface, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_implementsinterface, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1251,7 +1251,7 @@ Variant c_ReflectionClass::i_implementsinterface(MethodCallPackage &mcp, CArrRef
 }
 Variant c_ReflectionClass::i_getinterfacenames(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getinterfacenames, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getinterfacenames, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1260,7 +1260,7 @@ Variant c_ReflectionClass::i_getinterfacenames(MethodCallPackage &mcp, CArrRef p
 }
 Variant c_ReflectionClass::i_getconstant(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getconstant, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getconstant, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1274,7 +1274,7 @@ Variant c_ReflectionClass::i_getconstant(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionClass::i_getstartline(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getstartline, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getstartline, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1283,7 +1283,7 @@ Variant c_ReflectionClass::i_getstartline(MethodCallPackage &mcp, CArrRef params
 }
 Variant c_ReflectionClass::i_getconstants(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getconstants, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getconstants, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1292,7 +1292,7 @@ Variant c_ReflectionClass::i_getconstants(MethodCallPackage &mcp, CArrRef params
 }
 Variant c_ReflectionClass::i_getdoccomment(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getdoccomment, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getdoccomment, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1301,7 +1301,7 @@ Variant c_ReflectionClass::i_getdoccomment(MethodCallPackage &mcp, CArrRef param
 }
 Variant c_ReflectionClass::i_isinterface(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isinterface, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_isinterface, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1310,7 +1310,7 @@ Variant c_ReflectionClass::i_isinterface(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionClass::i_issubclassof(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_issubclassof, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_issubclassof, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1324,7 +1324,7 @@ Variant c_ReflectionClass::i_issubclassof(MethodCallPackage &mcp, CArrRef params
 }
 Variant c_ReflectionClass::i_hasproperty(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_hasproperty, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_hasproperty, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1338,7 +1338,7 @@ Variant c_ReflectionClass::i_hasproperty(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionClass::i_getstaticproperties(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getstaticproperties, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getstaticproperties, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1347,7 +1347,7 @@ Variant c_ReflectionClass::i_getstaticproperties(MethodCallPackage &mcp, CArrRef
 }
 Variant c_ReflectionClass::i_test(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_test, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_test, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1362,7 +1362,7 @@ Variant c_ReflectionClass::i_test(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_ReflectionClass::i_getdefaultproperties(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getdefaultproperties, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getdefaultproperties, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1371,7 +1371,7 @@ Variant c_ReflectionClass::i_getdefaultproperties(MethodCallPackage &mcp, CArrRe
 }
 Variant c_ReflectionClass::i_setstaticpropertyvalue(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_setstaticpropertyvalue, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_setstaticpropertyvalue, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1386,7 +1386,7 @@ Variant c_ReflectionClass::i_setstaticpropertyvalue(MethodCallPackage &mcp, CArr
 }
 Variant c_ReflectionClass::i_isinstantiable(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isinstantiable, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_isinstantiable, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1395,7 +1395,7 @@ Variant c_ReflectionClass::i_isinstantiable(MethodCallPackage &mcp, CArrRef para
 }
 Variant c_ReflectionClass::i_getinterfaces(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getinterfaces, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getinterfaces, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1404,7 +1404,7 @@ Variant c_ReflectionClass::i_getinterfaces(MethodCallPackage &mcp, CArrRef param
 }
 Variant c_ReflectionClass::i_fetch(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_fetch, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_fetch, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1418,7 +1418,7 @@ Variant c_ReflectionClass::i_fetch(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_ReflectionClass::i_isabstract(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isabstract, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_isabstract, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1427,7 +1427,7 @@ Variant c_ReflectionClass::i_isabstract(MethodCallPackage &mcp, CArrRef params) 
 }
 Variant c_ReflectionClass::i_getname(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getname, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getname, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1436,7 +1436,7 @@ Variant c_ReflectionClass::i_getname(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_ReflectionClass::i_getproperty(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getproperty, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_getproperty, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1450,7 +1450,7 @@ Variant c_ReflectionClass::i_getproperty(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionClass::i_isinternal(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isinternal, coo_ReflectionClass);
+    return ObjectData::i_dummy(mcp, params, i_isinternal, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -1459,7 +1459,7 @@ Variant c_ReflectionClass::i_isinternal(MethodCallPackage &mcp, CArrRef params) 
 }
 Variant c_ReflectionClass::ifa_getmethods(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getmethods, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getmethods, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 1)) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
@@ -1469,7 +1469,7 @@ Variant c_ReflectionClass::ifa_getmethods(MethodCallPackage &mcp, int count, INV
 }
 Variant c_ReflectionClass::ifa_isiterateable(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isiterateable, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isiterateable, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
@@ -1477,7 +1477,7 @@ Variant c_ReflectionClass::ifa_isiterateable(MethodCallPackage &mcp, int count, 
 }
 Variant c_ReflectionClass::ifa_getstaticpropertyvalue(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getstaticpropertyvalue, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getstaticpropertyvalue, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
@@ -1488,7 +1488,7 @@ Variant c_ReflectionClass::ifa_getstaticpropertyvalue(MethodCallPackage &mcp, in
 }
 Variant c_ReflectionClass::ifa_isuserdefined(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isuserdefined, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isuserdefined, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
@@ -1496,7 +1496,7 @@ Variant c_ReflectionClass::ifa_isuserdefined(MethodCallPackage &mcp, int count, 
 }
 Variant c_ReflectionClass::ifa_newinstance(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_newinstance, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_newinstance, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   Array p;
@@ -1510,7 +1510,7 @@ Variant c_ReflectionClass::ifa_newinstance(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionClass::ifa_getextension(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getextension, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getextension, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
@@ -1518,7 +1518,7 @@ Variant c_ReflectionClass::ifa_getextension(MethodCallPackage &mcp, int count, I
 }
 Variant c_ReflectionClass::ifa_getconstructor(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getconstructor, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getconstructor, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
@@ -1526,7 +1526,7 @@ Variant c_ReflectionClass::ifa_getconstructor(MethodCallPackage &mcp, int count,
 }
 Variant c_ReflectionClass::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
@@ -1534,7 +1534,7 @@ Variant c_ReflectionClass::ifa___tostring(MethodCallPackage &mcp, int count, INV
 }
 Variant c_ReflectionClass::ifa_newinstanceargs(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_newinstanceargs, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_newinstanceargs, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
@@ -1543,7 +1543,7 @@ Variant c_ReflectionClass::ifa_newinstanceargs(MethodCallPackage &mcp, int count
 }
 Variant c_ReflectionClass::ifa_getendline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getendline, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getendline, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
@@ -1551,7 +1551,7 @@ Variant c_ReflectionClass::ifa_getendline(MethodCallPackage &mcp, int count, INV
 }
 Variant c_ReflectionClass::ifa_isinstance(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isinstance, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isinstance, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
@@ -1560,7 +1560,7 @@ Variant c_ReflectionClass::ifa_isinstance(MethodCallPackage &mcp, int count, INV
 }
 Variant c_ReflectionClass::ifa_hasmethod(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_hasmethod, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_hasmethod, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
@@ -1569,7 +1569,7 @@ Variant c_ReflectionClass::ifa_hasmethod(MethodCallPackage &mcp, int count, INVO
 }
 Variant c_ReflectionClass::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
@@ -1578,7 +1578,7 @@ Variant c_ReflectionClass::ifa___construct(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionClass::ifa_isfinal(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isfinal, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isfinal, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
@@ -1586,7 +1586,7 @@ Variant c_ReflectionClass::ifa_isfinal(MethodCallPackage &mcp, int count, INVOKE
 }
 Variant c_ReflectionClass::ifa_getmodifiers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getmodifiers, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getmodifiers, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
@@ -1600,7 +1600,7 @@ Variant c_ReflectionClass::ifa_export(MethodCallPackage &mcp, int count, INVOKE_
 }
 Variant c_ReflectionClass::ifa_getproperties(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getproperties, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getproperties, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 1)) return throw_toomany_arguments("ReflectionClass::getProperties", 1, 1);
@@ -1610,7 +1610,7 @@ Variant c_ReflectionClass::ifa_getproperties(MethodCallPackage &mcp, int count, 
 }
 Variant c_ReflectionClass::ifa_hasconstant(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_hasconstant, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_hasconstant, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
@@ -1619,7 +1619,7 @@ Variant c_ReflectionClass::ifa_hasconstant(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionClass::ifa_getmethod(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getmethod, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getmethod, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
@@ -1628,7 +1628,7 @@ Variant c_ReflectionClass::ifa_getmethod(MethodCallPackage &mcp, int count, INVO
 }
 Variant c_ReflectionClass::ifa_getextensionname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getextensionname, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getextensionname, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
@@ -1636,7 +1636,7 @@ Variant c_ReflectionClass::ifa_getextensionname(MethodCallPackage &mcp, int coun
 }
 Variant c_ReflectionClass::ifa_getparentclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getparentclass, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getparentclass, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
@@ -1644,7 +1644,7 @@ Variant c_ReflectionClass::ifa_getparentclass(MethodCallPackage &mcp, int count,
 }
 Variant c_ReflectionClass::ifa_getfilename(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getfilename, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getfilename, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
@@ -1652,7 +1652,7 @@ Variant c_ReflectionClass::ifa_getfilename(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionClass::ifa_implementsinterface(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_implementsinterface, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_implementsinterface, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
@@ -1661,7 +1661,7 @@ Variant c_ReflectionClass::ifa_implementsinterface(MethodCallPackage &mcp, int c
 }
 Variant c_ReflectionClass::ifa_getinterfacenames(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getinterfacenames, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getinterfacenames, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
@@ -1669,7 +1669,7 @@ Variant c_ReflectionClass::ifa_getinterfacenames(MethodCallPackage &mcp, int cou
 }
 Variant c_ReflectionClass::ifa_getconstant(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getconstant, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getconstant, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
@@ -1678,7 +1678,7 @@ Variant c_ReflectionClass::ifa_getconstant(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionClass::ifa_getstartline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getstartline, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getstartline, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
@@ -1686,7 +1686,7 @@ Variant c_ReflectionClass::ifa_getstartline(MethodCallPackage &mcp, int count, I
 }
 Variant c_ReflectionClass::ifa_getconstants(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getconstants, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getconstants, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
@@ -1694,7 +1694,7 @@ Variant c_ReflectionClass::ifa_getconstants(MethodCallPackage &mcp, int count, I
 }
 Variant c_ReflectionClass::ifa_getdoccomment(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdoccomment, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdoccomment, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
@@ -1702,7 +1702,7 @@ Variant c_ReflectionClass::ifa_getdoccomment(MethodCallPackage &mcp, int count, 
 }
 Variant c_ReflectionClass::ifa_isinterface(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isinterface, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isinterface, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
@@ -1710,7 +1710,7 @@ Variant c_ReflectionClass::ifa_isinterface(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionClass::ifa_issubclassof(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_issubclassof, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_issubclassof, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
@@ -1719,7 +1719,7 @@ Variant c_ReflectionClass::ifa_issubclassof(MethodCallPackage &mcp, int count, I
 }
 Variant c_ReflectionClass::ifa_hasproperty(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_hasproperty, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_hasproperty, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
@@ -1728,7 +1728,7 @@ Variant c_ReflectionClass::ifa_hasproperty(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionClass::ifa_getstaticproperties(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getstaticproperties, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getstaticproperties, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
@@ -1736,7 +1736,7 @@ Variant c_ReflectionClass::ifa_getstaticproperties(MethodCallPackage &mcp, int c
 }
 Variant c_ReflectionClass::ifa_test(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_test, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_test, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
@@ -1746,7 +1746,7 @@ Variant c_ReflectionClass::ifa_test(MethodCallPackage &mcp, int count, INVOKE_FE
 }
 Variant c_ReflectionClass::ifa_getdefaultproperties(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdefaultproperties, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdefaultproperties, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
@@ -1754,7 +1754,7 @@ Variant c_ReflectionClass::ifa_getdefaultproperties(MethodCallPackage &mcp, int 
 }
 Variant c_ReflectionClass::ifa_setstaticpropertyvalue(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_setstaticpropertyvalue, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_setstaticpropertyvalue, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
@@ -1764,7 +1764,7 @@ Variant c_ReflectionClass::ifa_setstaticpropertyvalue(MethodCallPackage &mcp, in
 }
 Variant c_ReflectionClass::ifa_isinstantiable(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isinstantiable, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isinstantiable, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
@@ -1772,7 +1772,7 @@ Variant c_ReflectionClass::ifa_isinstantiable(MethodCallPackage &mcp, int count,
 }
 Variant c_ReflectionClass::ifa_getinterfaces(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getinterfaces, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getinterfaces, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
@@ -1780,7 +1780,7 @@ Variant c_ReflectionClass::ifa_getinterfaces(MethodCallPackage &mcp, int count, 
 }
 Variant c_ReflectionClass::ifa_fetch(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_fetch, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_fetch, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
@@ -1789,7 +1789,7 @@ Variant c_ReflectionClass::ifa_fetch(MethodCallPackage &mcp, int count, INVOKE_F
 }
 Variant c_ReflectionClass::ifa_isabstract(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isabstract, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isabstract, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
@@ -1797,7 +1797,7 @@ Variant c_ReflectionClass::ifa_isabstract(MethodCallPackage &mcp, int count, INV
 }
 Variant c_ReflectionClass::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getname, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getname, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
@@ -1805,7 +1805,7 @@ Variant c_ReflectionClass::ifa_getname(MethodCallPackage &mcp, int count, INVOKE
 }
 Variant c_ReflectionClass::ifa_getproperty(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getproperty, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getproperty, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
@@ -1814,7 +1814,7 @@ Variant c_ReflectionClass::ifa_getproperty(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionClass::ifa_isinternal(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isinternal, coo_ReflectionClass);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isinternal, coo_ReflectionClass);
   }
   c_ReflectionClass *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionClass*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
@@ -3143,7 +3143,7 @@ CallInfo c_ReflectionExtension::ci_getname((void*)&c_ReflectionExtension::i_getn
 CallInfo c_ReflectionExtension::ci_getclasses((void*)&c_ReflectionExtension::i_getclasses, (void*)&c_ReflectionExtension::ifa_getclasses, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionExtension::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___tostring, coo_ReflectionExtension);
+    return ObjectData::i_dummy(mcp, params, i___tostring, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3152,7 +3152,7 @@ Variant c_ReflectionExtension::i___tostring(MethodCallPackage &mcp, CArrRef para
 }
 Variant c_ReflectionExtension::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___construct, coo_ReflectionExtension);
+    return ObjectData::i_dummy(mcp, params, i___construct, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3166,7 +3166,7 @@ Variant c_ReflectionExtension::i___construct(MethodCallPackage &mcp, CArrRef par
 }
 Variant c_ReflectionExtension::i_getfunctions(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getfunctions, coo_ReflectionExtension);
+    return ObjectData::i_dummy(mcp, params, i_getfunctions, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3186,7 +3186,7 @@ Variant c_ReflectionExtension::i_export(MethodCallPackage &mcp, CArrRef params) 
 }
 Variant c_ReflectionExtension::i_info(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_info, coo_ReflectionExtension);
+    return ObjectData::i_dummy(mcp, params, i_info, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3195,7 +3195,7 @@ Variant c_ReflectionExtension::i_info(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_ReflectionExtension::i_getinientries(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getinientries, coo_ReflectionExtension);
+    return ObjectData::i_dummy(mcp, params, i_getinientries, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3204,7 +3204,7 @@ Variant c_ReflectionExtension::i_getinientries(MethodCallPackage &mcp, CArrRef p
 }
 Variant c_ReflectionExtension::i_getconstants(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getconstants, coo_ReflectionExtension);
+    return ObjectData::i_dummy(mcp, params, i_getconstants, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3213,7 +3213,7 @@ Variant c_ReflectionExtension::i_getconstants(MethodCallPackage &mcp, CArrRef pa
 }
 Variant c_ReflectionExtension::i_getclassnames(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getclassnames, coo_ReflectionExtension);
+    return ObjectData::i_dummy(mcp, params, i_getclassnames, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3222,7 +3222,7 @@ Variant c_ReflectionExtension::i_getclassnames(MethodCallPackage &mcp, CArrRef p
 }
 Variant c_ReflectionExtension::i_getversion(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getversion, coo_ReflectionExtension);
+    return ObjectData::i_dummy(mcp, params, i_getversion, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3231,7 +3231,7 @@ Variant c_ReflectionExtension::i_getversion(MethodCallPackage &mcp, CArrRef para
 }
 Variant c_ReflectionExtension::i_getname(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getname, coo_ReflectionExtension);
+    return ObjectData::i_dummy(mcp, params, i_getname, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3240,7 +3240,7 @@ Variant c_ReflectionExtension::i_getname(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionExtension::i_getclasses(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getclasses, coo_ReflectionExtension);
+    return ObjectData::i_dummy(mcp, params, i_getclasses, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3249,7 +3249,7 @@ Variant c_ReflectionExtension::i_getclasses(MethodCallPackage &mcp, CArrRef para
 }
 Variant c_ReflectionExtension::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_ReflectionExtension);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
@@ -3257,7 +3257,7 @@ Variant c_ReflectionExtension::ifa___tostring(MethodCallPackage &mcp, int count,
 }
 Variant c_ReflectionExtension::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_ReflectionExtension);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
@@ -3266,7 +3266,7 @@ Variant c_ReflectionExtension::ifa___construct(MethodCallPackage &mcp, int count
 }
 Variant c_ReflectionExtension::ifa_getfunctions(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getfunctions, coo_ReflectionExtension);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getfunctions, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
@@ -3280,7 +3280,7 @@ Variant c_ReflectionExtension::ifa_export(MethodCallPackage &mcp, int count, INV
 }
 Variant c_ReflectionExtension::ifa_info(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_info, coo_ReflectionExtension);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_info, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
@@ -3288,7 +3288,7 @@ Variant c_ReflectionExtension::ifa_info(MethodCallPackage &mcp, int count, INVOK
 }
 Variant c_ReflectionExtension::ifa_getinientries(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getinientries, coo_ReflectionExtension);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getinientries, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
@@ -3296,7 +3296,7 @@ Variant c_ReflectionExtension::ifa_getinientries(MethodCallPackage &mcp, int cou
 }
 Variant c_ReflectionExtension::ifa_getconstants(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getconstants, coo_ReflectionExtension);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getconstants, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
@@ -3304,7 +3304,7 @@ Variant c_ReflectionExtension::ifa_getconstants(MethodCallPackage &mcp, int coun
 }
 Variant c_ReflectionExtension::ifa_getclassnames(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getclassnames, coo_ReflectionExtension);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getclassnames, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
@@ -3312,7 +3312,7 @@ Variant c_ReflectionExtension::ifa_getclassnames(MethodCallPackage &mcp, int cou
 }
 Variant c_ReflectionExtension::ifa_getversion(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getversion, coo_ReflectionExtension);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getversion, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
@@ -3320,7 +3320,7 @@ Variant c_ReflectionExtension::ifa_getversion(MethodCallPackage &mcp, int count,
 }
 Variant c_ReflectionExtension::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getname, coo_ReflectionExtension);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getname, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
@@ -3328,7 +3328,7 @@ Variant c_ReflectionExtension::ifa_getname(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionExtension::ifa_getclasses(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getclasses, coo_ReflectionExtension);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getclasses, coo_ReflectionExtension);
   }
   c_ReflectionExtension *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionExtension*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
@@ -3692,7 +3692,7 @@ CallInfo c_ReflectionMethod::ci_getclosure((void*)&c_ReflectionMethod::i_getclos
 CallInfo c_ReflectionMethod::ci_isabstract((void*)&c_ReflectionMethod::i_isabstract, (void*)&c_ReflectionMethod::ifa_isabstract, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionMethod::i_isprivate(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isprivate, coo_ReflectionMethod);
+    return ObjectData::i_dummy(mcp, params, i_isprivate, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3701,7 +3701,7 @@ Variant c_ReflectionMethod::i_isprivate(MethodCallPackage &mcp, CArrRef params) 
 }
 Variant c_ReflectionMethod::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___tostring, coo_ReflectionMethod);
+    return ObjectData::i_dummy(mcp, params, i___tostring, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3710,7 +3710,7 @@ Variant c_ReflectionMethod::i___tostring(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionMethod::i_isprotected(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isprotected, coo_ReflectionMethod);
+    return ObjectData::i_dummy(mcp, params, i_isprotected, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3719,7 +3719,7 @@ Variant c_ReflectionMethod::i_isprotected(MethodCallPackage &mcp, CArrRef params
 }
 Variant c_ReflectionMethod::i_isstatic(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isstatic, coo_ReflectionMethod);
+    return ObjectData::i_dummy(mcp, params, i_isstatic, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3728,7 +3728,7 @@ Variant c_ReflectionMethod::i_isstatic(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_ReflectionMethod::i_getdeclaringclass(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getdeclaringclass, coo_ReflectionMethod);
+    return ObjectData::i_dummy(mcp, params, i_getdeclaringclass, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3737,7 +3737,7 @@ Variant c_ReflectionMethod::i_getdeclaringclass(MethodCallPackage &mcp, CArrRef 
 }
 Variant c_ReflectionMethod::i_isconstructor(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isconstructor, coo_ReflectionMethod);
+    return ObjectData::i_dummy(mcp, params, i_isconstructor, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3746,7 +3746,7 @@ Variant c_ReflectionMethod::i_isconstructor(MethodCallPackage &mcp, CArrRef para
 }
 Variant c_ReflectionMethod::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___construct, coo_ReflectionMethod);
+    return ObjectData::i_dummy(mcp, params, i___construct, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3762,7 +3762,7 @@ Variant c_ReflectionMethod::i___construct(MethodCallPackage &mcp, CArrRef params
 }
 Variant c_ReflectionMethod::i_isfinal(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isfinal, coo_ReflectionMethod);
+    return ObjectData::i_dummy(mcp, params, i_isfinal, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3771,7 +3771,7 @@ Variant c_ReflectionMethod::i_isfinal(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_ReflectionMethod::i_invokeargs(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_invokeargs, coo_ReflectionMethod);
+    return ObjectData::i_dummy(mcp, params, i_invokeargs, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3786,7 +3786,7 @@ Variant c_ReflectionMethod::i_invokeargs(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionMethod::i_getmodifiers(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getmodifiers, coo_ReflectionMethod);
+    return ObjectData::i_dummy(mcp, params, i_getmodifiers, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3807,7 +3807,7 @@ Variant c_ReflectionMethod::i_export(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_ReflectionMethod::i_invoke(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_invoke, coo_ReflectionMethod);
+    return ObjectData::i_dummy(mcp, params, i_invoke, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3822,7 +3822,7 @@ Variant c_ReflectionMethod::i_invoke(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_ReflectionMethod::i_ispublic(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_ispublic, coo_ReflectionMethod);
+    return ObjectData::i_dummy(mcp, params, i_ispublic, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3831,7 +3831,7 @@ Variant c_ReflectionMethod::i_ispublic(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_ReflectionMethod::i_isdestructor(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isdestructor, coo_ReflectionMethod);
+    return ObjectData::i_dummy(mcp, params, i_isdestructor, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3840,7 +3840,7 @@ Variant c_ReflectionMethod::i_isdestructor(MethodCallPackage &mcp, CArrRef param
 }
 Variant c_ReflectionMethod::i_getclosure(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getclosure, coo_ReflectionMethod);
+    return ObjectData::i_dummy(mcp, params, i_getclosure, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3849,7 +3849,7 @@ Variant c_ReflectionMethod::i_getclosure(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionMethod::i_isabstract(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isabstract, coo_ReflectionMethod);
+    return ObjectData::i_dummy(mcp, params, i_isabstract, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -3858,7 +3858,7 @@ Variant c_ReflectionMethod::i_isabstract(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionMethod::ifa_isprivate(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isprivate, coo_ReflectionMethod);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isprivate, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
@@ -3866,7 +3866,7 @@ Variant c_ReflectionMethod::ifa_isprivate(MethodCallPackage &mcp, int count, INV
 }
 Variant c_ReflectionMethod::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_ReflectionMethod);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
@@ -3874,7 +3874,7 @@ Variant c_ReflectionMethod::ifa___tostring(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionMethod::ifa_isprotected(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isprotected, coo_ReflectionMethod);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isprotected, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
@@ -3882,7 +3882,7 @@ Variant c_ReflectionMethod::ifa_isprotected(MethodCallPackage &mcp, int count, I
 }
 Variant c_ReflectionMethod::ifa_isstatic(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isstatic, coo_ReflectionMethod);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isstatic, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
@@ -3890,7 +3890,7 @@ Variant c_ReflectionMethod::ifa_isstatic(MethodCallPackage &mcp, int count, INVO
 }
 Variant c_ReflectionMethod::ifa_getdeclaringclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdeclaringclass, coo_ReflectionMethod);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdeclaringclass, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
@@ -3898,7 +3898,7 @@ Variant c_ReflectionMethod::ifa_getdeclaringclass(MethodCallPackage &mcp, int co
 }
 Variant c_ReflectionMethod::ifa_isconstructor(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isconstructor, coo_ReflectionMethod);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isconstructor, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
@@ -3906,7 +3906,7 @@ Variant c_ReflectionMethod::ifa_isconstructor(MethodCallPackage &mcp, int count,
 }
 Variant c_ReflectionMethod::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_ReflectionMethod);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("ReflectionMethod::__construct", count, 1, 2, 2);
@@ -3917,7 +3917,7 @@ Variant c_ReflectionMethod::ifa___construct(MethodCallPackage &mcp, int count, I
 }
 Variant c_ReflectionMethod::ifa_isfinal(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isfinal, coo_ReflectionMethod);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isfinal, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
@@ -3925,7 +3925,7 @@ Variant c_ReflectionMethod::ifa_isfinal(MethodCallPackage &mcp, int count, INVOK
 }
 Variant c_ReflectionMethod::ifa_invokeargs(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_invokeargs, coo_ReflectionMethod);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_invokeargs, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
@@ -3935,7 +3935,7 @@ Variant c_ReflectionMethod::ifa_invokeargs(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionMethod::ifa_getmodifiers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getmodifiers, coo_ReflectionMethod);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getmodifiers, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
@@ -3950,7 +3950,7 @@ Variant c_ReflectionMethod::ifa_export(MethodCallPackage &mcp, int count, INVOKE
 }
 Variant c_ReflectionMethod::ifa_invoke(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_invoke, coo_ReflectionMethod);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_invoke, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   if (UNLIKELY(count < 1)) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
@@ -3965,7 +3965,7 @@ Variant c_ReflectionMethod::ifa_invoke(MethodCallPackage &mcp, int count, INVOKE
 }
 Variant c_ReflectionMethod::ifa_ispublic(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_ispublic, coo_ReflectionMethod);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_ispublic, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
@@ -3973,7 +3973,7 @@ Variant c_ReflectionMethod::ifa_ispublic(MethodCallPackage &mcp, int count, INVO
 }
 Variant c_ReflectionMethod::ifa_isdestructor(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isdestructor, coo_ReflectionMethod);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isdestructor, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
@@ -3981,7 +3981,7 @@ Variant c_ReflectionMethod::ifa_isdestructor(MethodCallPackage &mcp, int count, 
 }
 Variant c_ReflectionMethod::ifa_getclosure(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getclosure, coo_ReflectionMethod);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getclosure, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
@@ -3989,7 +3989,7 @@ Variant c_ReflectionMethod::ifa_getclosure(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionMethod::ifa_isabstract(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isabstract, coo_ReflectionMethod);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isabstract, coo_ReflectionMethod);
   }
   c_ReflectionMethod *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionMethod*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
@@ -4541,7 +4541,7 @@ CallInfo c_ReflectionProperty::ci_setvalue((void*)&c_ReflectionProperty::i_setva
 CallInfo c_ReflectionProperty::ci_getname((void*)&c_ReflectionProperty::i_getname, (void*)&c_ReflectionProperty::ifa_getname, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionProperty::i_isprivate(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isprivate, coo_ReflectionProperty);
+    return ObjectData::i_dummy(mcp, params, i_isprivate, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -4550,7 +4550,7 @@ Variant c_ReflectionProperty::i_isprivate(MethodCallPackage &mcp, CArrRef params
 }
 Variant c_ReflectionProperty::i_getvalue(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getvalue, coo_ReflectionProperty);
+    return ObjectData::i_dummy(mcp, params, i_getvalue, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -4565,7 +4565,7 @@ Variant c_ReflectionProperty::i_getvalue(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionProperty::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___tostring, coo_ReflectionProperty);
+    return ObjectData::i_dummy(mcp, params, i___tostring, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -4574,7 +4574,7 @@ Variant c_ReflectionProperty::i___tostring(MethodCallPackage &mcp, CArrRef param
 }
 Variant c_ReflectionProperty::i_isprotected(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isprotected, coo_ReflectionProperty);
+    return ObjectData::i_dummy(mcp, params, i_isprotected, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -4583,7 +4583,7 @@ Variant c_ReflectionProperty::i_isprotected(MethodCallPackage &mcp, CArrRef para
 }
 Variant c_ReflectionProperty::i_isstatic(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isstatic, coo_ReflectionProperty);
+    return ObjectData::i_dummy(mcp, params, i_isstatic, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -4592,7 +4592,7 @@ Variant c_ReflectionProperty::i_isstatic(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionProperty::i_getdeclaringclass(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getdeclaringclass, coo_ReflectionProperty);
+    return ObjectData::i_dummy(mcp, params, i_getdeclaringclass, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -4601,7 +4601,7 @@ Variant c_ReflectionProperty::i_getdeclaringclass(MethodCallPackage &mcp, CArrRe
 }
 Variant c_ReflectionProperty::i_isdefault(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isdefault, coo_ReflectionProperty);
+    return ObjectData::i_dummy(mcp, params, i_isdefault, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -4610,7 +4610,7 @@ Variant c_ReflectionProperty::i_isdefault(MethodCallPackage &mcp, CArrRef params
 }
 Variant c_ReflectionProperty::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___construct, coo_ReflectionProperty);
+    return ObjectData::i_dummy(mcp, params, i___construct, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -4625,7 +4625,7 @@ Variant c_ReflectionProperty::i___construct(MethodCallPackage &mcp, CArrRef para
 }
 Variant c_ReflectionProperty::i_getmodifiers(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getmodifiers, coo_ReflectionProperty);
+    return ObjectData::i_dummy(mcp, params, i_getmodifiers, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -4646,7 +4646,7 @@ Variant c_ReflectionProperty::i_export(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_ReflectionProperty::i_ispublic(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_ispublic, coo_ReflectionProperty);
+    return ObjectData::i_dummy(mcp, params, i_ispublic, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -4655,7 +4655,7 @@ Variant c_ReflectionProperty::i_ispublic(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionProperty::i_setaccessible(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_setaccessible, coo_ReflectionProperty);
+    return ObjectData::i_dummy(mcp, params, i_setaccessible, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -4669,7 +4669,7 @@ Variant c_ReflectionProperty::i_setaccessible(MethodCallPackage &mcp, CArrRef pa
 }
 Variant c_ReflectionProperty::i_getdoccomment(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getdoccomment, coo_ReflectionProperty);
+    return ObjectData::i_dummy(mcp, params, i_getdoccomment, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -4678,7 +4678,7 @@ Variant c_ReflectionProperty::i_getdoccomment(MethodCallPackage &mcp, CArrRef pa
 }
 Variant c_ReflectionProperty::i_setvalue(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_setvalue, coo_ReflectionProperty);
+    return ObjectData::i_dummy(mcp, params, i_setvalue, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -4693,7 +4693,7 @@ Variant c_ReflectionProperty::i_setvalue(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionProperty::i_getname(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getname, coo_ReflectionProperty);
+    return ObjectData::i_dummy(mcp, params, i_getname, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -4702,7 +4702,7 @@ Variant c_ReflectionProperty::i_getname(MethodCallPackage &mcp, CArrRef params) 
 }
 Variant c_ReflectionProperty::ifa_isprivate(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isprivate, coo_ReflectionProperty);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isprivate, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
@@ -4710,7 +4710,7 @@ Variant c_ReflectionProperty::ifa_isprivate(MethodCallPackage &mcp, int count, I
 }
 Variant c_ReflectionProperty::ifa_getvalue(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getvalue, coo_ReflectionProperty);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getvalue, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   if (UNLIKELY(count > 1)) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
@@ -4720,7 +4720,7 @@ Variant c_ReflectionProperty::ifa_getvalue(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionProperty::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_ReflectionProperty);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
@@ -4728,7 +4728,7 @@ Variant c_ReflectionProperty::ifa___tostring(MethodCallPackage &mcp, int count, 
 }
 Variant c_ReflectionProperty::ifa_isprotected(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isprotected, coo_ReflectionProperty);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isprotected, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
@@ -4736,7 +4736,7 @@ Variant c_ReflectionProperty::ifa_isprotected(MethodCallPackage &mcp, int count,
 }
 Variant c_ReflectionProperty::ifa_isstatic(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isstatic, coo_ReflectionProperty);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isstatic, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
@@ -4744,7 +4744,7 @@ Variant c_ReflectionProperty::ifa_isstatic(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionProperty::ifa_getdeclaringclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdeclaringclass, coo_ReflectionProperty);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdeclaringclass, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
@@ -4752,7 +4752,7 @@ Variant c_ReflectionProperty::ifa_getdeclaringclass(MethodCallPackage &mcp, int 
 }
 Variant c_ReflectionProperty::ifa_isdefault(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isdefault, coo_ReflectionProperty);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isdefault, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
@@ -4760,7 +4760,7 @@ Variant c_ReflectionProperty::ifa_isdefault(MethodCallPackage &mcp, int count, I
 }
 Variant c_ReflectionProperty::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_ReflectionProperty);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
@@ -4770,7 +4770,7 @@ Variant c_ReflectionProperty::ifa___construct(MethodCallPackage &mcp, int count,
 }
 Variant c_ReflectionProperty::ifa_getmodifiers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getmodifiers, coo_ReflectionProperty);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getmodifiers, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
@@ -4785,7 +4785,7 @@ Variant c_ReflectionProperty::ifa_export(MethodCallPackage &mcp, int count, INVO
 }
 Variant c_ReflectionProperty::ifa_ispublic(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_ispublic, coo_ReflectionProperty);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_ispublic, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
@@ -4793,7 +4793,7 @@ Variant c_ReflectionProperty::ifa_ispublic(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionProperty::ifa_setaccessible(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_setaccessible, coo_ReflectionProperty);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_setaccessible, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionProperty::setAccessible", count, 1, 1, 1);
@@ -4802,7 +4802,7 @@ Variant c_ReflectionProperty::ifa_setaccessible(MethodCallPackage &mcp, int coun
 }
 Variant c_ReflectionProperty::ifa_getdoccomment(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdoccomment, coo_ReflectionProperty);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdoccomment, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
@@ -4810,7 +4810,7 @@ Variant c_ReflectionProperty::ifa_getdoccomment(MethodCallPackage &mcp, int coun
 }
 Variant c_ReflectionProperty::ifa_setvalue(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_setvalue, coo_ReflectionProperty);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_setvalue, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
@@ -4820,7 +4820,7 @@ Variant c_ReflectionProperty::ifa_setvalue(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionProperty::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getname, coo_ReflectionProperty);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getname, coo_ReflectionProperty);
   }
   c_ReflectionProperty *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionProperty*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
@@ -5282,7 +5282,7 @@ CallInfo c_ReflectionFunction::ci_export((void*)&c_ReflectionFunction::i_export,
 CallInfo c_ReflectionFunction::ci_invoke((void*)&c_ReflectionFunction::i_invoke, (void*)&c_ReflectionFunction::ifa_invoke, 0, 5, 0x0000000000000000LL);
 Variant c_ReflectionFunction::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___tostring, coo_ReflectionFunction);
+    return ObjectData::i_dummy(mcp, params, i___tostring, coo_ReflectionFunction);
   }
   c_ReflectionFunction *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunction*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5291,7 +5291,7 @@ Variant c_ReflectionFunction::i___tostring(MethodCallPackage &mcp, CArrRef param
 }
 Variant c_ReflectionFunction::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___construct, coo_ReflectionFunction);
+    return ObjectData::i_dummy(mcp, params, i___construct, coo_ReflectionFunction);
   }
   c_ReflectionFunction *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunction*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5305,7 +5305,7 @@ Variant c_ReflectionFunction::i___construct(MethodCallPackage &mcp, CArrRef para
 }
 Variant c_ReflectionFunction::i_invokeargs(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_invokeargs, coo_ReflectionFunction);
+    return ObjectData::i_dummy(mcp, params, i_invokeargs, coo_ReflectionFunction);
   }
   c_ReflectionFunction *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunction*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5330,7 +5330,7 @@ Variant c_ReflectionFunction::i_export(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_ReflectionFunction::i_invoke(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_invoke, coo_ReflectionFunction);
+    return ObjectData::i_dummy(mcp, params, i_invoke, coo_ReflectionFunction);
   }
   c_ReflectionFunction *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunction*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5339,7 +5339,7 @@ Variant c_ReflectionFunction::i_invoke(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_ReflectionFunction::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_ReflectionFunction);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_ReflectionFunction);
   }
   c_ReflectionFunction *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunction*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
@@ -5347,7 +5347,7 @@ Variant c_ReflectionFunction::ifa___tostring(MethodCallPackage &mcp, int count, 
 }
 Variant c_ReflectionFunction::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_ReflectionFunction);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_ReflectionFunction);
   }
   c_ReflectionFunction *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunction*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
@@ -5356,7 +5356,7 @@ Variant c_ReflectionFunction::ifa___construct(MethodCallPackage &mcp, int count,
 }
 Variant c_ReflectionFunction::ifa_invokeargs(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_invokeargs, coo_ReflectionFunction);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_invokeargs, coo_ReflectionFunction);
   }
   c_ReflectionFunction *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunction*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
@@ -5371,7 +5371,7 @@ Variant c_ReflectionFunction::ifa_export(MethodCallPackage &mcp, int count, INVO
 }
 Variant c_ReflectionFunction::ifa_invoke(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_invoke, coo_ReflectionFunction);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_invoke, coo_ReflectionFunction);
   }
   c_ReflectionFunction *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionFunction*>(mcp.obj));
   Array p;
@@ -5630,7 +5630,7 @@ CallInfo c_ReflectionParameter::ci_getname((void*)&c_ReflectionParameter::i_getn
 CallInfo c_ReflectionParameter::ci_ispassedbyreference((void*)&c_ReflectionParameter::i_ispassedbyreference, (void*)&c_ReflectionParameter::ifa_ispassedbyreference, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionParameter::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___tostring, coo_ReflectionParameter);
+    return ObjectData::i_dummy(mcp, params, i___tostring, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5639,7 +5639,7 @@ Variant c_ReflectionParameter::i___tostring(MethodCallPackage &mcp, CArrRef para
 }
 Variant c_ReflectionParameter::i_getdeclaringclass(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getdeclaringclass, coo_ReflectionParameter);
+    return ObjectData::i_dummy(mcp, params, i_getdeclaringclass, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5648,7 +5648,7 @@ Variant c_ReflectionParameter::i_getdeclaringclass(MethodCallPackage &mcp, CArrR
 }
 Variant c_ReflectionParameter::i_isdefaultvalueavailable(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isdefaultvalueavailable, coo_ReflectionParameter);
+    return ObjectData::i_dummy(mcp, params, i_isdefaultvalueavailable, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5657,7 +5657,7 @@ Variant c_ReflectionParameter::i_isdefaultvalueavailable(MethodCallPackage &mcp,
 }
 Variant c_ReflectionParameter::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___construct, coo_ReflectionParameter);
+    return ObjectData::i_dummy(mcp, params, i___construct, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5672,7 +5672,7 @@ Variant c_ReflectionParameter::i___construct(MethodCallPackage &mcp, CArrRef par
 }
 Variant c_ReflectionParameter::i_getclass(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getclass, coo_ReflectionParameter);
+    return ObjectData::i_dummy(mcp, params, i_getclass, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5693,7 +5693,7 @@ Variant c_ReflectionParameter::i_export(MethodCallPackage &mcp, CArrRef params) 
 }
 Variant c_ReflectionParameter::i_allowsnull(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_allowsnull, coo_ReflectionParameter);
+    return ObjectData::i_dummy(mcp, params, i_allowsnull, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5702,7 +5702,7 @@ Variant c_ReflectionParameter::i_allowsnull(MethodCallPackage &mcp, CArrRef para
 }
 Variant c_ReflectionParameter::i_getposition(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getposition, coo_ReflectionParameter);
+    return ObjectData::i_dummy(mcp, params, i_getposition, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5711,7 +5711,7 @@ Variant c_ReflectionParameter::i_getposition(MethodCallPackage &mcp, CArrRef par
 }
 Variant c_ReflectionParameter::i_isarray(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isarray, coo_ReflectionParameter);
+    return ObjectData::i_dummy(mcp, params, i_isarray, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5720,7 +5720,7 @@ Variant c_ReflectionParameter::i_isarray(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionParameter::i_isoptional(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_isoptional, coo_ReflectionParameter);
+    return ObjectData::i_dummy(mcp, params, i_isoptional, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5729,7 +5729,7 @@ Variant c_ReflectionParameter::i_isoptional(MethodCallPackage &mcp, CArrRef para
 }
 Variant c_ReflectionParameter::i_getdefaultvalue(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getdefaultvalue, coo_ReflectionParameter);
+    return ObjectData::i_dummy(mcp, params, i_getdefaultvalue, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5738,7 +5738,7 @@ Variant c_ReflectionParameter::i_getdefaultvalue(MethodCallPackage &mcp, CArrRef
 }
 Variant c_ReflectionParameter::i_getname(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_getname, coo_ReflectionParameter);
+    return ObjectData::i_dummy(mcp, params, i_getname, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5747,7 +5747,7 @@ Variant c_ReflectionParameter::i_getname(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_ReflectionParameter::i_ispassedbyreference(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i_ispassedbyreference, coo_ReflectionParameter);
+    return ObjectData::i_dummy(mcp, params, i_ispassedbyreference, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -5756,7 +5756,7 @@ Variant c_ReflectionParameter::i_ispassedbyreference(MethodCallPackage &mcp, CAr
 }
 Variant c_ReflectionParameter::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_ReflectionParameter);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
@@ -5764,7 +5764,7 @@ Variant c_ReflectionParameter::ifa___tostring(MethodCallPackage &mcp, int count,
 }
 Variant c_ReflectionParameter::ifa_getdeclaringclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdeclaringclass, coo_ReflectionParameter);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdeclaringclass, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
@@ -5772,7 +5772,7 @@ Variant c_ReflectionParameter::ifa_getdeclaringclass(MethodCallPackage &mcp, int
 }
 Variant c_ReflectionParameter::ifa_isdefaultvalueavailable(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isdefaultvalueavailable, coo_ReflectionParameter);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isdefaultvalueavailable, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
@@ -5780,7 +5780,7 @@ Variant c_ReflectionParameter::ifa_isdefaultvalueavailable(MethodCallPackage &mc
 }
 Variant c_ReflectionParameter::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_ReflectionParameter);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
@@ -5790,7 +5790,7 @@ Variant c_ReflectionParameter::ifa___construct(MethodCallPackage &mcp, int count
 }
 Variant c_ReflectionParameter::ifa_getclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getclass, coo_ReflectionParameter);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getclass, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
@@ -5805,7 +5805,7 @@ Variant c_ReflectionParameter::ifa_export(MethodCallPackage &mcp, int count, INV
 }
 Variant c_ReflectionParameter::ifa_allowsnull(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_allowsnull, coo_ReflectionParameter);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_allowsnull, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
@@ -5813,7 +5813,7 @@ Variant c_ReflectionParameter::ifa_allowsnull(MethodCallPackage &mcp, int count,
 }
 Variant c_ReflectionParameter::ifa_getposition(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getposition, coo_ReflectionParameter);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getposition, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
@@ -5821,7 +5821,7 @@ Variant c_ReflectionParameter::ifa_getposition(MethodCallPackage &mcp, int count
 }
 Variant c_ReflectionParameter::ifa_isarray(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isarray, coo_ReflectionParameter);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isarray, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
@@ -5829,7 +5829,7 @@ Variant c_ReflectionParameter::ifa_isarray(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionParameter::ifa_isoptional(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isoptional, coo_ReflectionParameter);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isoptional, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
@@ -5837,7 +5837,7 @@ Variant c_ReflectionParameter::ifa_isoptional(MethodCallPackage &mcp, int count,
 }
 Variant c_ReflectionParameter::ifa_getdefaultvalue(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdefaultvalue, coo_ReflectionParameter);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdefaultvalue, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
@@ -5845,7 +5845,7 @@ Variant c_ReflectionParameter::ifa_getdefaultvalue(MethodCallPackage &mcp, int c
 }
 Variant c_ReflectionParameter::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getname, coo_ReflectionParameter);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getname, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
@@ -5853,7 +5853,7 @@ Variant c_ReflectionParameter::ifa_getname(MethodCallPackage &mcp, int count, IN
 }
 Variant c_ReflectionParameter::ifa_ispassedbyreference(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_ispassedbyreference, coo_ReflectionParameter);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_ispassedbyreference, coo_ReflectionParameter);
   }
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);

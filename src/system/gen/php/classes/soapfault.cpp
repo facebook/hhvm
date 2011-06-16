@@ -170,7 +170,7 @@ CallInfo c_SoapFault::ci___tostring((void*)&c_SoapFault::i___tostring, (void*)&c
 CallInfo c_SoapFault::ci___construct((void*)&c_SoapFault::i___construct, (void*)&c_SoapFault::ifa___construct, 6, 4, 0x0000000000000000LL);
 Variant c_SoapFault::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___tostring, coo_SoapFault);
+    return ObjectData::i_dummy(mcp, params, i___tostring, coo_SoapFault);
   }
   c_SoapFault *self ATTRIBUTE_UNUSED (static_cast<c_SoapFault*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -179,7 +179,7 @@ Variant c_SoapFault::i___tostring(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_SoapFault::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___construct, coo_SoapFault);
+    return ObjectData::i_dummy(mcp, params, i___construct, coo_SoapFault);
   }
   c_SoapFault *self ATTRIBUTE_UNUSED (static_cast<c_SoapFault*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -202,7 +202,7 @@ Variant c_SoapFault::i___construct(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_SoapFault::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_SoapFault);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_SoapFault);
   }
   c_SoapFault *self ATTRIBUTE_UNUSED (static_cast<c_SoapFault*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("SoapFault::__toString", 0, 1);
@@ -210,7 +210,7 @@ Variant c_SoapFault::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FE
 }
 Variant c_SoapFault::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_SoapFault);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_SoapFault);
   }
   c_SoapFault *self ATTRIBUTE_UNUSED (static_cast<c_SoapFault*>(mcp.obj));
   if (UNLIKELY(count < 2)) return throw_wrong_arguments("SoapFault::__construct", count, 2, 6, 2);

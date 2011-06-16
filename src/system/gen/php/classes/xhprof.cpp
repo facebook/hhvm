@@ -100,7 +100,7 @@ CallInfo c_XhprofFrame::ci___destruct((void*)&c_XhprofFrame::i___destruct, (void
 CallInfo c_XhprofFrame::ci___construct((void*)&c_XhprofFrame::i___construct, (void*)&c_XhprofFrame::ifa___construct, 1, 4, 0x0000000000000000LL);
 Variant c_XhprofFrame::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___destruct, coo_XhprofFrame);
+    return ObjectData::i_dummy(mcp, params, i___destruct, coo_XhprofFrame);
   }
   c_XhprofFrame *self ATTRIBUTE_UNUSED (static_cast<c_XhprofFrame*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -109,7 +109,7 @@ Variant c_XhprofFrame::i___destruct(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_XhprofFrame::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return i_dummy(mcp, params, i___construct, coo_XhprofFrame);
+    return ObjectData::i_dummy(mcp, params, i___construct, coo_XhprofFrame);
   }
   c_XhprofFrame *self ATTRIBUTE_UNUSED (static_cast<c_XhprofFrame*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
@@ -123,7 +123,7 @@ Variant c_XhprofFrame::i___construct(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_XhprofFrame::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_XhprofFrame);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_XhprofFrame);
   }
   c_XhprofFrame *self ATTRIBUTE_UNUSED (static_cast<c_XhprofFrame*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("XhprofFrame::__destruct", 0, 1);
@@ -131,7 +131,7 @@ Variant c_XhprofFrame::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_
 }
 Variant c_XhprofFrame::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_XhprofFrame);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_XhprofFrame);
   }
   c_XhprofFrame *self ATTRIBUTE_UNUSED (static_cast<c_XhprofFrame*>(mcp.obj));
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("XhprofFrame::__construct", count, 1, 1, 2);

@@ -89,9 +89,25 @@ BeginClass(
     'name' => 'Closure',
     'footer' => <<<EOT
 public:
+  /**
+   * Explicitly provide a t___invokeCallInfoHelper to
+   * allow __invoke() to sidestep an extra level of indirection
+   */
   virtual const CallInfo *t___invokeCallInfoHelper(void *&extra);
+
+  /**
+   * Used by HPHPI to make closures work
+   */
   void *extraData() const { return m_extraData; }
-  Array m_vars;
+
+  /**
+   * This is the constructor which is called internally-
+   * PHP code will never be able to call this constructor
+   */
+  c_Closure(const CallInfo *callInfo, void *extraData) :
+    m_callInfo(callInfo), m_extraData(extraData) {
+    ASSERT(callInfo);
+  }
 private:
   const CallInfo *m_callInfo;
   void *m_extraData;
@@ -103,22 +119,9 @@ EOT
 DefineFunction(
   array(
     'name'   => '__construct',
+    'args'   => array(),
     'return' => array(
       'type'   => null,
-    ),
-    'args'   => array(
-      array(
-        'name'   => 'func',
-        'type'   => Int64,
-      ),
-      array(
-        'name'   => 'extra',
-        'type'   => Int64,
-      ),
-      array(
-        'name'   => 'vars',
-        'type'   => VariantMap,
-      ),
     ),
   ));
 
@@ -136,6 +139,39 @@ DefineFunction(
     'name'   => '__clone',
     'return' => array(
       'type'   => Variant,
+    ),
+  ));
+
+EndClass();
+
+BeginClass(
+  array(
+    'name' => 'GeneratorClosure',
+    'parent' => 'Closure',
+    'footer' => <<<EOT
+public:
+  /**
+   * This is the constructor which is called internally-
+   * PHP code will never be able to call this constructor
+   */
+  c_GeneratorClosure(
+    const CallInfo *callInfo,
+    void *extraData,
+    CArrRef vars) :
+    c_Closure(callInfo, extraData), m_vars(vars) {}
+public:
+  Array m_vars;
+EOT
+,
+  )
+);
+
+DefineFunction(
+  array(
+    'name'   => '__construct',
+    'args'   => array(),
+    'return' => array(
+      'type'   => null,
     ),
   ));
 

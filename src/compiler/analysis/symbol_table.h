@@ -141,6 +141,7 @@ public:
   void clearNeeded() { m_flags.m_needed = false; }
   void clearReferenced() { m_flags.m_referenced = false; }
   void clearReseated() { m_flags.m_reseated = false; }
+  void clearRefClosureVar() { m_flags.m_refClosureVar = false; }
 
   void update(Symbol *src) {
     m_flags_val = src->m_flags_val;

@@ -838,25 +838,26 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
     if (m_closureVars) {
       VariableTablePtr variables = getVariables();
-      cg_printf("c_Closure *closure ATTRIBUTE_UNUSED = "
-                "(c_Closure*)extra;\n");
+      ParameterExpressionPtrVec useVars;
       if (m_closureGenerator) {
+        cg_printf("c_GeneratorClosure *closure ATTRIBUTE_UNUSED = "
+                  "(c_GeneratorClosure*)extra;\n");
         cg_printf("extract(variables, closure->m_vars, 256);\n");
-      } else {
-        VariableTablePtr variables = getVariables();
-        for (int i = 0; i < m_closureVars->getCount(); i++) {
-          ParameterExpressionPtr param =
-            dynamic_pointer_cast<ParameterExpression>((*m_closureVars)[i]);
+      } else if (needsAnonClosureClass(useVars)) {
+        cg_printf("%sClosure$%s *closure ATTRIBUTE_UNUSED = "
+                  "(%sClosure$%s*)extra;\n",
+                  Option::ClassPrefix,
+                  cg.formatLabel(m_name).c_str(),
+                  Option::ClassPrefix,
+                  cg.formatLabel(m_name).c_str());
+        BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
           string name = param->getName();
-          if (variables->isPresent(name)) {
-            if (param->isRef()) {
-              cg_printf("%s%s.assignRef(closure->m_vars.lvalAt(\"%s\"));\n",
-                        Option::VariablePrefix, name.c_str(), name.c_str());
-            } else {
-              cg_printf("%s%s.assignVal(closure->m_vars[\"%s\"]);\n",
-                        Option::VariablePrefix, name.c_str(), name.c_str());
-            }
-          }
+          ASSERT(variables->isPresent(name));
+          // TODO: handle if the closure variable isn't a Variant
+          const char *s = param->isRef() ? "Ref" : "Val";
+          cg_printf("%s%s.assign%s(closure->%s%s);\n",
+                    Option::VariablePrefix, name.c_str(), s,
+                    Option::VariablePrefix, name.c_str());
         }
       }
     }
@@ -1711,7 +1712,7 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
       // need to generate an extra call info for an extra wrapper
       cg.printf("CallInfo %s%s::%s%s((void*)&%s%s::%s%s, ", Option::ClassPrefix,
                 clsName.c_str(), Option::CallInfoWrapperPrefix, id.c_str(),
-                Option::ClassPrefix, clsName.c_str(), 
+                Option::ClassPrefix, clsName.c_str(),
                 Option::InvokeWrapperPrefix, id.c_str());
       cg.printf("(void*)&%s%s::%s%s", Option::ClassPrefix, clsName.c_str(),
                 Option::InvokeWrapperFewArgsPrefix, id.c_str());
@@ -1722,6 +1723,132 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
     cg.printf("(void*)&%s%s", Option::InvokeFewArgsPrefix, id.c_str());
   }
   cg.printf(", %d, %d, 0x%.16lXLL);\n", m_maxParam, flags, refflags);
+}
+
+void FunctionScope::getClosureUseVars(
+    ParameterExpressionPtrIdxPairVec &useVars,
+    bool filterPresent /* = true */) {
+  useVars.clear();
+  if (!m_closureVars) return;
+  VariableTablePtr variables = getVariables();
+  for (int i = 0; i < m_closureVars->getCount(); i++) {
+    ParameterExpressionPtr param =
+      dynamic_pointer_cast<ParameterExpression>((*m_closureVars)[i]);
+    string name = param->getName();
+    if (!filterPresent || variables->isPresent(name)) {
+      useVars.push_back(ParameterExpressionPtrIdxPair(param, i));
+    }
+  }
+}
+
+template <class U, class V>
+static U pair_first_elem(pair<U, V> p) { return p.first; }
+
+bool FunctionScope::needsAnonClosureClass(ParameterExpressionPtrVec &useVars) {
+  useVars.clear();
+  ParameterExpressionPtrIdxPairVec useVars0;
+  getClosureUseVars(useVars0);
+  useVars.resize(useVars0.size());
+  // C++ seems to be unable to infer the type here on pair_first_elem
+  transform(useVars0.begin(),
+            useVars0.end(),
+            useVars.begin(),
+            pair_first_elem<ParameterExpressionPtr, int>);
+  if (!m_closureVars || m_closureGenerator) return false;
+  return useVars.size() > 0;
+}
+
+bool FunctionScope::needsAnonClosureClass(
+    ParameterExpressionPtrIdxPairVec &useVars) {
+  getClosureUseVars(useVars);
+  if (!m_closureVars || m_closureGenerator) return false;
+  return useVars.size() > 0;
+}
+
+void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
+  // spit out extern CallInfo decl
+  cg_printf("extern CallInfo %s%s;\n", Option::CallInfoPrefix,
+            getId(cg).c_str());
+
+  ParameterExpressionPtrVec useVars;
+  if (needsAnonClosureClass(useVars)) {
+    cg_printf("FORWARD_DECLARE_CLASS(Closure$%s);\n",
+              cg.formatLabel(m_name).c_str());
+    cg_indentBegin("class %sClosure$%s : public %sClosure {\n",
+                   Option::ClassPrefix,
+                   cg.formatLabel(m_name).c_str(),
+                   Option::ClassPrefix);
+
+    cg_printf("public:\n");
+
+    cg_printf("DECLARE_OBJECT_ALLOCATION_NO_SWEEP(%sClosure$%s)\n",
+              Option::ClassPrefix,
+              cg.formatLabel(m_name).c_str());
+
+    VariableTablePtr variables = getVariables();
+    BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
+      string name = param->getName();
+      Symbol *sym = variables->getSymbol(name);
+      ASSERT(sym->isPresent());
+      TypePtr t(sym->getFinalType());
+      t->outputCPPDecl(cg, ar, shared_from_this());
+      cg_printf(" %s%s;\n",
+                Option::VariablePrefix,
+                cg.formatLabel(name).c_str());
+    }
+
+    cg_printf("%sClosure$%s(const CallInfo *func, void *extra, ",
+              Option::ClassPrefix,
+              cg.formatLabel(m_name).c_str());
+
+    bool hasEmit = false;
+    BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
+      if (!hasEmit) hasEmit = true;
+      else          cg_printf(", ");
+
+      string name = param->getName();
+      Symbol *sym = variables->getSymbol(name);
+      ASSERT(sym->isPresent());
+      TypePtr t(sym->getFinalType());
+      t->outputCPPDecl(cg, ar, shared_from_this());
+      cg_printf(" %s%s_",
+                Option::VariablePrefix,
+                cg.formatLabel(name).c_str());
+    }
+
+    // TODO: non ref variants can be directly assigned to the member
+    // variable in the initialization list, giving an ever-so-slight
+    // gain in performance
+    cg_indentBegin(") : %sClosure(func, extra) {\n", Option::ClassPrefix);
+    BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
+      string name = param->getName();
+      Symbol *sym = variables->getSymbol(name);
+      ASSERT(sym->isPresent());
+      TypePtr t(sym->getFinalType());
+      ASSERT(!param->isRef() || t->is(Type::KindOfVariant));
+      if (t->is(Type::KindOfVariant)) {
+        const char *s = param->isRef() ? "Ref" : "Val";
+        cg_printf("%s%s.assign%s(%s%s_);\n",
+                  Option::VariablePrefix,
+                  name.c_str(),
+                  s,
+                  Option::VariablePrefix,
+                  name.c_str());
+      } else {
+        cg_printf("%s%s = %s%s_;\n",
+                  Option::VariablePrefix,
+                  name.c_str(),
+                  Option::VariablePrefix,
+                  name.c_str());
+      }
+    }
+    cg_indentEnd("}\n");
+
+    cg_indentEnd("};\n");
+    cg_printf("IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(%sClosure$%s)\n",
+              Option::ClassPrefix,
+              cg.formatLabel(m_name).c_str());
+  }
 }
 
 FunctionScope::StringToFunctionInfoPtrMap FunctionScope::s_refParamInfo;

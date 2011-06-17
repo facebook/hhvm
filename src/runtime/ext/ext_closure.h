@@ -39,7 +39,7 @@ class c_Closure : public ExtObjectData {
   // need to implement
   public: c_Closure();
   public: ~c_Closure();
-  public: void t___construct(int64 func, int64 extra, CArrRef vars);
+  public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t___invoke(int _argc, CArrRef _argv = null_array);
   DECLARE_METHOD_INVOKE_HELPERS(__invoke);
@@ -49,16 +49,73 @@ class c_Closure : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
-  public: c_Closure *create(int64 func, int64 extra, Array vars);
+  public: c_Closure *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
 public:
+  /**
+   * Explicitly provide a t___invokeCallInfoHelper to
+   * allow __invoke() to sidestep an extra level of indirection
+   */
   virtual const CallInfo *t___invokeCallInfoHelper(void *&extra);
+
+  /**
+   * Used by HPHPI to make closures work
+   */
   void *extraData() const { return m_extraData; }
-  Array m_vars;
+
+  /**
+   * This is the constructor which is called internally-
+   * PHP code will never be able to call this constructor
+   */
+  c_Closure(const CallInfo *callInfo, void *extraData) :
+    m_callInfo(callInfo), m_extraData(extraData) {
+    ASSERT(callInfo);
+  }
 private:
   const CallInfo *m_callInfo;
   void *m_extraData;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class GeneratorClosure
+
+FORWARD_DECLARE_CLASS_BUILTIN(GeneratorClosure);
+class c_GeneratorClosure : public c_Closure {
+ public:
+  BEGIN_CLASS_MAP(GeneratorClosure)
+  RECURSIVE_PARENT_CLASS(Closure)
+  END_CLASS_MAP(GeneratorClosure)
+
+  // Closure is deliberately passed in as the original name,
+  // so that get_class() on a GeneratorClosure returns
+  // the string "Closure"
+  DECLARE_CLASS(GeneratorClosure, Closure, Closure)
+
+  // need to implement
+  public: c_GeneratorClosure();
+  public: ~c_GeneratorClosure();
+  public: void t___construct();
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
+
+  // implemented by HPHP
+  public: c_GeneratorClosure *create();
+  public: void dynConstruct(CArrRef Params);
+  public: void getConstructor(MethodCallPackage &mcp);
+public:
+  /**
+   * This is the constructor which is called internally-
+   * PHP code will never be able to call this constructor
+   */
+  c_GeneratorClosure(
+    const CallInfo *callInfo,
+    void *extraData,
+    CArrRef vars) :
+    c_Closure(callInfo, extraData), m_vars(vars) {}
+public:
+  Array m_vars;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

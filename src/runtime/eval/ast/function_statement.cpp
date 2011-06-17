@@ -215,7 +215,7 @@ FunctionStatement::FunctionStatement(STATEMENT_ARGS, const string &name,
   : Statement(STATEMENT_PASS), m_name(name),
     m_maybeIntercepted(-1), m_yieldCount(0), m_closure(NULL),
     m_docComment(doc),
-    m_callInfo((void*)Invoker, (void*)InvokerFewArgs, 0, 0, 0), 
+    m_callInfo((void*)Invoker, (void*)InvokerFewArgs, 0, 0, 0),
     m_closureCallInfo((void*)FSInvoker, (void*)FSInvokerFewArgs, 0, 0, 0) {
 }
 
@@ -418,7 +418,7 @@ Variant FunctionStatement::invokeClosure(CObjRef closure,
   FuncScopeVariableEnvironment fenv(this);
   directBind(env, caller, fenv, start);
 
-  p_Closure c = closure.getTyped<c_Closure>();
+  p_GeneratorClosure c = closure.getTyped<c_GeneratorClosure>();
   const std::vector<ParameterPtr> &vars =
     ((ClosureExpression *)m_closure)->getVars();
   for (ArrayIter iter(c->m_vars); iter; ++iter) {
@@ -452,7 +452,7 @@ Variant FunctionStatement::invokeClosure(CArrRef params) const {
     }
   }
   EvalFrameInjection *efi = static_cast<EvalFrameInjection*>(fi);
-  c_Closure *closure = (c_Closure *) efi->getEnv().getClosure();
+  c_GeneratorClosure *closure = (c_GeneratorClosure *) efi->getEnv().getClosure();
   const std::vector<ParameterPtr> &vars =
     ((ClosureExpression *)m_closure)->getVars();
   for (ArrayIter iter(closure->m_vars); iter; ++iter) {
@@ -481,7 +481,7 @@ Variant FunctionStatement::invokeClosure(ObjectData *closure,
   FuncScopeVariableEnvironment fenv(this);
   bindParams(fenv, params);
 
-  p_Closure c(closure);
+  p_GeneratorClosure c(closure);
   const std::vector<ParameterPtr> &vars =
     ((ClosureExpression *)m_closure)->getVars();
   for (ArrayIter iter(c->m_vars); iter; ++iter) {

@@ -33,25 +33,42 @@ ClosureExpression::ClosureExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS, FunctionStatementPtr func,
  ExpressionListPtr vars)
     : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-      m_func(func), m_vars(vars) {
+      m_func(func) {
 
-  if (m_vars) {
-    m_values = ExpressionListPtr
-      (new ExpressionList(m_vars->getScope(), m_vars->getLocation(),
+  if (vars) {
+    m_vars = ExpressionListPtr
+      (new ExpressionList(vars->getScope(), vars->getLocation(),
                           KindOfExpressionList));
-    for (int i = 0; i < m_vars->getCount(); i++) {
-      ParameterExpressionPtr param =
-        dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
-      string name = param->getName();
-
-      SimpleVariablePtr var(new SimpleVariable(param->getScope(),
-                                               param->getLocation(),
-                                               KindOfSimpleVariable,
-                                               name));
-      if (param->isRef()) {
-        var->setContext(RefValue);
+    // push the vars in reverse order, not retaining duplicates
+    set<string> seenBefore;
+    for (int i = vars->getCount() - 1; i >= 0; i--) {
+      ParameterExpressionPtr param(
+        dynamic_pointer_cast<ParameterExpression>((*vars)[i]));
+      ASSERT(param);
+      if (seenBefore.find(param->getName().c_str()) == seenBefore.end()) {
+        seenBefore.insert(param->getName().c_str());
+        m_vars->insertElement(param);
       }
-      m_values->addElement(var);
+    }
+
+    if (m_vars) {
+      m_values = ExpressionListPtr
+        (new ExpressionList(m_vars->getScope(), m_vars->getLocation(),
+                            KindOfExpressionList));
+      for (int i = 0; i < m_vars->getCount(); i++) {
+        ParameterExpressionPtr param =
+          dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
+        string name = param->getName();
+
+        SimpleVariablePtr var(new SimpleVariable(param->getScope(),
+                                                 param->getLocation(),
+                                                 KindOfSimpleVariable,
+                                                 name));
+        if (param->isRef()) {
+          var->setContext(RefValue);
+        }
+        m_values->addElement(var);
+      }
     }
   }
 }
@@ -117,6 +134,8 @@ void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
           sym->setClosureVar();
           if (param->isRef()) {
             sym->setRefClosureVar();
+          } else {
+            sym->clearRefClosureVar();
           }
         }
       }
@@ -156,7 +175,7 @@ TypePtr ClosureExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       }
     }
   }
-  return Type::CreateObjectType("Closure");
+  return Type::CreateObjectType("closure"); // needs lower case
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -174,27 +193,71 @@ void ClosureExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void ClosureExpression::outputCPPImpl(CodeGenerator &cg,
                                       AnalysisResultPtr ar) {
-  cg_printf("%sClosure((NEWOBJ(%sClosure)())->create((int64)&%s%s, 0LL, ",
-            Option::SmartPtrPrefix, Option::ClassPrefix,
-            Option::CallInfoPrefix,
-            m_func->getOriginalName().c_str());
 
-  if (m_vars && m_vars->getCount()) {
-    cg_printf("Array(ArrayInit(%d, true)", m_vars->getCount());
-    for (int i = 0; i < m_vars->getCount(); i++) {
-      ParameterExpressionPtr param =
-        dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
-      ExpressionPtr value = (*m_values)[i];
-      bool ref = param->isRef() && value->isRefable();
-      if (ref) value->setContext(NoRefWrapper);
 
-      cg_printf(".set%s(\"%s\", ", ref ? "Ref" : "", param->getName().c_str());
-      value->outputCPP(cg, ar);
-      cg_printf(")");
-    }
-    cg_printf(".create())");
+  FunctionScopeRawPtr cfunc(m_func->getFunctionScope());
+  VariableTablePtr vt(cfunc->getVariables());
+  ParameterExpressionPtrIdxPairVec useVars;
+  bool needsAnonCls = cfunc->needsAnonClosureClass(useVars);
+
+  const string &origName = m_func->getOriginalName();
+
+  if (needsAnonCls) {
+    cg_printf("%sClosure$%s(NEWOBJ(%sClosure$%s)(&%s%s, NULL, ",
+              Option::SmartPtrPrefix, origName.c_str(),
+              Option::ClassPrefix, origName.c_str(),
+              Option::CallInfoPrefix, origName.c_str());
+  } else if (cfunc->isClosureGenerator()) {
+    cg_printf("%sGeneratorClosure(NEWOBJ(%sGeneratorClosure)(&%s%s, NULL, ",
+              Option::SmartPtrPrefix, Option::ClassPrefix,
+              Option::CallInfoPrefix, origName.c_str());
   } else {
-    cg_printf("Array()");
+    // no use vars, so can use the generic closure
+    cg_printf("%sClosure(NEWOBJ(%sClosure)(&%s%s, NULL",
+              Option::SmartPtrPrefix, Option::ClassPrefix,
+              Option::CallInfoPrefix, origName.c_str());
+  }
+
+  bool hasEmit = false;
+  if (needsAnonCls) {
+    ASSERT(m_vars && m_vars->getCount());
+    BOOST_FOREACH(ParameterExpressionPtrIdxPair paramPair, useVars) {
+      ParameterExpressionPtr param(paramPair.first);
+      string name = param->getName();
+      ExpressionPtr value((*m_values)[paramPair.second]);
+      if (!hasEmit) hasEmit = true;
+      else          cg_printf(", ");
+      bool ref = param->isRef() && value->isRefable();
+      if (ref) {
+        value->setContext(NoRefWrapper);
+        cg_printf("strongBind(");
+      }
+      value->outputCPP(cg, ar);
+      if (ref) cg_printf(")");
+    }
+  } else if (cfunc->isClosureGenerator()) {
+    // TODO: for some reason, use vars which are also params in
+    // closure generators do not get the "present" bit set,
+    // so we cannot filter present symbols. That is why
+    // we fetch the closure use vars again (w/o the filter)
+    useVars.clear();
+    cfunc->getClosureUseVars(useVars, false);
+    if (useVars.size()) {
+      ASSERT(m_vars && m_vars->getCount());
+      cg_printf("Array(ArrayInit(%d, true)", useVars.size());
+      BOOST_FOREACH(ParameterExpressionPtrIdxPair paramPair, useVars) {
+        ParameterExpressionPtr param(paramPair.first);
+        ExpressionPtr value((*m_values)[paramPair.second]);
+        bool ref = param->isRef() && value->isRefable();
+        if (ref) value->setContext(NoRefWrapper);
+        cg_printf(".set%s(\"%s\", ", ref ? "Ref" : "", param->getName().c_str());
+        value->outputCPP(cg, ar);
+        cg_printf(")");
+      }
+      cg_printf(".create())");
+    } else {
+      cg_printf("Array()");
+    }
   }
 
   cg_printf("))");

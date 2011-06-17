@@ -387,7 +387,6 @@ void *SmartAllocatorInitSetup() {
     RELEASEOBJ(NS, T, p);                                               \
   }
 
-
 #define DECLARE_OBJECT_ALLOCATION(T)                                    \
   DECLARE_OBJECT_ALLOCATION_NO_SWEEP(T)                                 \
   virtual void sweep();                                                 \

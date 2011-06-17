@@ -18163,7 +18163,6 @@ bool TestCodeRun::TestClosure() {
         "  }\n"
         "}\n"
         "Foo::bar();\n",
-
         "string(3) \"Foo\"\n"
         "string(9) \"{closure}\"\n");
 
@@ -18179,6 +18178,7 @@ bool TestCodeRun::TestClosure() {
         "  [1]=>\n"
         "  int(2)\n"
         "}\n");
+
   MVCRO("<?php\n"
         "$v=5;"
         "call_user_func("
@@ -18192,6 +18192,7 @@ bool TestCodeRun::TestClosure() {
         "  { echo $v; }, array()"
         ");"
         "call_user_func($f, array());", "5555");
+
   MVCRO("<?php\n"
         "$myfunc = function() {"
         "  echo \"hello, world!\\n\";"
@@ -18261,6 +18262,7 @@ bool TestCodeRun::TestClosure() {
         "$x(2);",
         "2 456\n"
         "2 456\n");
+
   MVCRO("<?php "
         "function test($x) {"
         "  $s_path = serialize($x);"
@@ -18273,6 +18275,7 @@ bool TestCodeRun::TestClosure() {
         "test(array(1,2,'foo'=>'bar'));",
         "string(12) \"s:5:\"hello\";\"\n"
         "string(42) \"a:3:{i:0;i:1;i:1;i:2;s:3:\"foo\";s:3:\"bar\";}\"\n");
+
   MVCRO("<?php "
         "function test($a, $b) {"
         "  return array_map(function (array $x) use ($b) {"
@@ -18290,6 +18293,29 @@ bool TestCodeRun::TestClosure() {
         "  int(2)\n"
         "}\n"
         "int(5)\n");
+
+  MVCRO("<?php\n"
+        "function f(&$u0) {\n"
+        "  return function () use (&$u0, $u0) { $u0++; };\n"
+        "}\n"
+        "function g(&$u0) {\n"
+        "  return function () use ($u0, &$u0) { $u0++; };\n"
+        "}\n"
+        "$x1 = 0;\n"
+        "$f = f($x1);\n"
+        "var_dump($x1);\n"
+        "$f();\n"
+        "var_dump($x1);\n"
+        "\n"
+        "$x2 = 0;\n"
+        "$g = g($x2);\n"
+        "var_dump($x2);\n"
+        "$g();\n"
+        "var_dump($x2);\n",
+        "int(0)\n"
+        "int(0)\n"
+        "int(0)\n"
+        "int(1)\n");
 
   return true;
 }

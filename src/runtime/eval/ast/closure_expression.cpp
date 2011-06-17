@@ -18,6 +18,8 @@
 #include <runtime/eval/ast/function_statement.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
+#include <runtime/ext/ext_closure.h>
+
 namespace HPHP {
 namespace Eval {
 using namespace std;
@@ -26,8 +28,21 @@ using namespace std;
 ClosureExpression::ClosureExpression(EXPRESSION_ARGS,
                                      FunctionStatementPtr func,
                                      const vector<ParameterPtr> &vars)
-    : Expression(EXPRESSION_PASS), m_func(func), m_vars(vars) {
+    : Expression(EXPRESSION_PASS), m_func(func) {
   func->setClosure(this);
+
+  // push the vars in reverse order, not retaining duplicates
+  set<string> seenBefore;
+  for (vector<ParameterPtr>::const_reverse_iterator it(vars.rbegin());
+       it != vars.rend();
+       it++) {
+    ParameterPtr param(*it);
+    if (seenBefore.find(param->getName().c_str()) == seenBefore.end()) {
+      seenBefore.insert(param->getName().c_str());
+      m_vars.push_back(param);
+    }
+  }
+  reverse(m_vars.begin(), m_vars.end());
 }
 
 Variant ClosureExpression::eval(VariableEnvironment &env) const {
@@ -43,10 +58,9 @@ Variant ClosureExpression::eval(VariableEnvironment &env) const {
     }
   }
 
-  return create_object("Closure",
-      CREATE_VECTOR3(Variant((int64)m_func->getClosureCallInfo()), 
-                     Variant((int64)m_func.get()), 
-                     vars));
+  // need to get at low level constructor
+  return Object(NEWOBJ(c_GeneratorClosure)(
+                m_func->getClosureCallInfo(), m_func.get(), vars));
 }
 
 void ClosureExpression::dump(std::ostream &out) const {

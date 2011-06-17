@@ -21,16 +21,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Closure::c_Closure() : m_vars(Array::Create()),
-  m_callInfo(NULL), m_extraData(NULL) {}
+c_Closure::c_Closure() {
+  throw_fatal("Cannot explicitly instantiate and/or subclass Closure");
+}
 c_Closure::~c_Closure() {}
 
-void c_Closure::t___construct(int64 func, int64 extra, CArrRef vars) {
+void c_Closure::t___construct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Closure, Closure::__construct);
-  m_callInfo = (const CallInfo*) func;
-  ASSERT(m_callInfo);
-  m_extraData = (void*) extra;
-  m_vars = vars;
+  throw_fatal("Cannot explicitly instantiate and/or subclass Closure");
 }
 
 Variant c_Closure::t___invoke(int _argc, CArrRef _argv) {
@@ -53,6 +51,23 @@ const CallInfo *c_Closure::t___invokeCallInfoHelper(void *&extra) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Closure, Closure::__invokeCallInfoHelper);
   extra = (void*) this;
   return m_callInfo;
+}
+
+c_GeneratorClosure::c_GeneratorClosure() {
+  throw_fatal(
+      "Cannot explicitly instantiate and/or subclass GeneratorClosure");
+}
+c_GeneratorClosure::~c_GeneratorClosure() {}
+
+void c_GeneratorClosure::t___construct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(GeneratorClosure, GeneratorClosure::__construct);
+  throw_fatal(
+      "Cannot explicitly instantiate and/or subclass GeneratorClosure");
+}
+
+Variant c_GeneratorClosure::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(GeneratorClosure, GeneratorClosure::__destruct);
+  return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2639,7 +2639,7 @@ void c_Closure::cloneSet(ObjectData *cl) {
   ObjectData::cloneSet(clone);
 }
 CallInfo c_Closure::ci___destruct((void*)&c_Closure::i___destruct, (void*)&c_Closure::ifa___destruct, 0, 4, 0x0000000000000000LL);
-CallInfo c_Closure::ci___construct((void*)&c_Closure::i___construct, (void*)&c_Closure::ifa___construct, 3, 4, 0x0000000000000000LL);
+CallInfo c_Closure::ci___construct((void*)&c_Closure::i___construct, (void*)&c_Closure::ifa___construct, 0, 4, 0x0000000000000000LL);
 CallInfo c_Closure::ci___clone((void*)&c_Closure::i___clone, (void*)&c_Closure::ifa___clone, 0, 4, 0x0000000000000000LL);
 CallInfo c_Closure::ci___invoke((void*)&c_Closure::i___invoke, (void*)&c_Closure::ifa___invoke, 0, 5, 0x0000000000000000LL);
 Variant c_Closure::i___destruct(MethodCallPackage &mcp, CArrRef params) {
@@ -2657,15 +2657,8 @@ Variant c_Closure::i___construct(MethodCallPackage &mcp, CArrRef params) {
   }
   c_Closure *self ATTRIBUTE_UNUSED (static_cast<c_Closure*>(mcp.obj));
   int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 3)) return throw_wrong_arguments("__construct", count, 3, 3, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    return (self->t___construct(arg0, arg1, arg2), null);
-  }
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__construct", 0, 1);
+  return (self->t___construct(), null);
 }
 Variant c_Closure::i___clone(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -2698,11 +2691,8 @@ Variant c_Closure::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_Closure);
   }
   c_Closure *self ATTRIBUTE_UNUSED (static_cast<c_Closure*>(mcp.obj));
-  if (UNLIKELY(count != 3)) return throw_wrong_arguments("__construct", count, 3, 3, 1);
-  CVarRef arg0(a0);
-  CVarRef arg1(a1);
-  CVarRef arg2(a2);
-  return (self->t___construct(arg0, arg1, arg2), null);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__construct", 0, 1);
+  return (self->t___construct(), null);
 }
 Variant c_Closure::ifa___clone(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -2761,23 +2751,16 @@ bool c_Closure::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-c_Closure *c_Closure::create(int64 a0, int64 a1, Array a2) {
+c_Closure *c_Closure::create() {
   CountableHelper h(this);
   init();
-  t___construct(a0, a1, a2);
+  t___construct();
   return this;
 }
 void c_Closure::dynConstruct(CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 3)) throw_wrong_arguments("__construct", count, 3, 3, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1, arg2));
-  }
+  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
+  (t___construct());
 }
 void c_Closure::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Closure::ci___construct;
@@ -4682,6 +4665,146 @@ struct ObjectStaticCallbacks cw_SimpleXMLElementIterator = {
   c_SimpleXMLElementIterator::os_invoke,
   c_SimpleXMLElementIterator::os_constant,
   c_SimpleXMLElementIterator::os_get_call_info
+};
+ObjectData *coo_GeneratorClosure() {
+  return NEWOBJ(c_GeneratorClosure)();
+}
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_GeneratorClosure
+Variant c_GeneratorClosure::os_getInit(CStrRef s) {
+  return c_Closure::os_getInit(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_GeneratorClosure
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_GeneratorClosure
+Variant c_GeneratorClosure::os_get(CStrRef s) {
+  return c_Closure::os_get(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_GeneratorClosure
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_GeneratorClosure
+Variant &c_GeneratorClosure::os_lval(CStrRef s) {
+  return c_Closure::os_lval(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_GeneratorClosure
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_GeneratorClosure
+void c_GeneratorClosure::o_getArray(Array &props, bool pubOnly) const {
+  c_Closure::o_getArray(props, pubOnly);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_GeneratorClosure
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_GeneratorClosure
+void c_GeneratorClosure::o_setArray(CArrRef props) {
+  c_Closure::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_GeneratorClosure
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_GeneratorClosure
+Variant * c_GeneratorClosure::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_GeneratorClosure
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_GeneratorClosure
+Variant * c_GeneratorClosure::o_realPropPublic(CStrRef s, int flags) const {
+  return c_Closure::o_realPropPublic(s, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_GeneratorClosure
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_GeneratorClosure
+Variant * c_GeneratorClosure::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_GeneratorClosure
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_GeneratorClosure
+Variant c_GeneratorClosure::os_constant(const char *s) {
+  return c_Closure::os_constant(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_GeneratorClosure
+IMPLEMENT_CLASS(GeneratorClosure)
+ObjectData *c_GeneratorClosure::cloneImpl() {
+  ObjectData *obj = coo_GeneratorClosure();
+  c_GeneratorClosure::cloneSet(obj);
+  return obj;
+}
+void c_GeneratorClosure::cloneSet(ObjectData *cl) {
+  c_GeneratorClosure *clone = static_cast<c_GeneratorClosure*>(cl);
+  c_Closure::cloneSet(clone);
+}
+CallInfo c_GeneratorClosure::ci___destruct((void*)&c_GeneratorClosure::i___destruct, (void*)&c_GeneratorClosure::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_GeneratorClosure::ci___construct((void*)&c_GeneratorClosure::i___construct, (void*)&c_GeneratorClosure::ifa___construct, 0, 4, 0x0000000000000000LL);
+Variant c_GeneratorClosure::i___destruct(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i___destruct, coo_GeneratorClosure);
+  }
+  c_GeneratorClosure *self ATTRIBUTE_UNUSED (static_cast<c_GeneratorClosure*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
+  return (self->t___destruct());
+}
+Variant c_GeneratorClosure::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i___construct, coo_GeneratorClosure);
+  }
+  c_GeneratorClosure *self ATTRIBUTE_UNUSED (static_cast<c_GeneratorClosure*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__construct", 0, 1);
+  return (self->t___construct(), null);
+}
+Variant c_GeneratorClosure::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_GeneratorClosure);
+  }
+  c_GeneratorClosure *self ATTRIBUTE_UNUSED (static_cast<c_GeneratorClosure*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
+  return (self->t___destruct());
+}
+Variant c_GeneratorClosure::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_GeneratorClosure);
+  }
+  c_GeneratorClosure *self ATTRIBUTE_UNUSED (static_cast<c_GeneratorClosure*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__construct", 0, 1);
+  return (self->t___construct(), null);
+}
+bool c_GeneratorClosure::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 3) {
+    case 3:
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
+        mcp.ci = &c_GeneratorClosure::ci___destruct;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
+        mcp.ci = &c_GeneratorClosure::ci___construct;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_Closure::os_get_call_info(mcp, hash);
+}
+bool c_GeneratorClosure::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
+}
+c_GeneratorClosure *c_GeneratorClosure::create() {
+  CountableHelper h(this);
+  init();
+  t___construct();
+  return this;
+}
+void c_GeneratorClosure::dynConstruct(CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
+  (t___construct());
+}
+void c_GeneratorClosure::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_GeneratorClosure::ci___construct;
+  mcp.obj = this;
+}
+struct ObjectStaticCallbacks cw_GeneratorClosure = {
+  c_GeneratorClosure::os_getInit,
+  c_GeneratorClosure::os_get,
+  c_GeneratorClosure::os_lval,
+  c_GeneratorClosure::os_invoke,
+  c_GeneratorClosure::os_constant,
+  c_GeneratorClosure::os_get_call_info
 };
 ObjectData *coo_DateTimeZone() {
   return NEWOBJ(c_DateTimeZone)();
@@ -22726,7 +22849,7 @@ public:
   hashNodeCTD *next;
 };
 static hashNodeCTD *ctdMapTable[256];
-static hashNodeCTD ctdBuckets[90];
+static hashNodeCTD ctdBuckets[91];
 
 static class SysCTDTableInitializer {
   public: SysCTDTableInitializer() {
@@ -22745,6 +22868,7 @@ static class SysCTDTableInitializer {
       (const char *)"DOMCharacterData", (const char *)&cw_DOMCharacterData,(const char *)&coo_DOMCharacterData,
       (const char *)"DOMEntityReference", (const char *)&cw_DOMEntityReference,(const char *)&coo_DOMEntityReference,
       (const char *)"SimpleXMLElementIterator", (const char *)&cw_SimpleXMLElementIterator,(const char *)&coo_SimpleXMLElementIterator,
+      (const char *)"GeneratorClosure", (const char *)&cw_GeneratorClosure,(const char *)&coo_GeneratorClosure,
       (const char *)"DateTimeZone", (const char *)&cw_DateTimeZone,(const char *)&coo_DateTimeZone,
       (const char *)"DOMNodeIterator", (const char *)&cw_DOMNodeIterator,(const char *)&coo_DOMNodeIterator,
       (const char *)"DOMImplementation", (const char *)&cw_DOMImplementation,(const char *)&coo_DOMImplementation,

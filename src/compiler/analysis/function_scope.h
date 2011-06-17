@@ -33,12 +33,19 @@ DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(Expression);
 DECLARE_BOOST_TYPES(SimpleFunctionCall);
 DECLARE_BOOST_TYPES(ClassScope);
+DECLARE_BOOST_TYPES(ParameterExpression);
 
 class CodeGenerator;
 
 typedef ExpressionPtr (*FunctionOptPtr)(CodeGenerator *cg,
                                         AnalysisResultConstPtr ar,
                                         SimpleFunctionCallPtr, int);
+
+typedef std::pair< ParameterExpressionPtr, int >
+        ParameterExpressionPtrIdxPair;
+
+typedef std::vector< ParameterExpressionPtrIdxPair >
+        ParameterExpressionPtrIdxPairVec;
 
 /**
  * A FunctionScope corresponds to a function declaration. We store all
@@ -96,6 +103,7 @@ public:
   void setNeedsCheckMem() { m_needsCheckMem = true; }
   bool needsCheckMem() const { return m_needsCheckMem; }
   void setClosureGenerator() { m_closureGenerator = true; }
+  bool isClosureGenerator() const { return m_closureGenerator; }
   bool needsClassParam();
 
   void setInlineSameContext(bool f) { m_inlineSameContext = f; }
@@ -351,6 +359,8 @@ public:
    */
   void outputCPPCallInfo(CodeGenerator &cg, AnalysisResultPtr ar);
 
+  void outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar);
+
   /**
    * Serialize the iface, not everything.
    */
@@ -377,6 +387,13 @@ public:
   ExpressionListPtr getClosureVars() const {
     return m_closureVars;
   }
+
+  void getClosureUseVars(ParameterExpressionPtrIdxPairVec &useVars,
+                         bool filterPresent = true);
+
+  bool needsAnonClosureClass(ParameterExpressionPtrVec &useVars);
+
+  bool needsAnonClosureClass(ParameterExpressionPtrIdxPairVec &useVars);
 
   void addCaller(BlockScopePtr caller);
   ReadWriteMutex &getInlineMutex() { return m_inlineMutex; }
@@ -469,6 +486,7 @@ private:
                                     bool ret, bool constructor, int maxCount);
   ExpressionPtrVec m_retExprsToFix;
   ExpressionListPtr m_closureVars;
+  ExpressionListPtr m_closureValues;
   ReadWriteMutex m_inlineMutex;
 };
 

@@ -24,6 +24,7 @@ bool TestExtClosure::RunTests(const std::string &which) {
   bool ret = true;
 
   RUN_TEST(test_Closure);
+  RUN_TEST(test_GeneratorClosure);
 
   return ret;
 }
@@ -31,5 +32,9 @@ bool TestExtClosure::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtClosure::test_Closure() {
+  return Count(true);
+}
+
+bool TestExtClosure::test_GeneratorClosure() {
   return Count(true);
 }

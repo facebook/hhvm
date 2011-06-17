@@ -627,7 +627,10 @@ Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
   }
 
   IOStatusHelper io("socket_select");
-  int timeout_ms = vtv_sec.toInt32() * 1000 + tv_usec / 1000;
+  int timeout_ms = -1;
+  if (!vtv_sec.isNull()) {
+    timeout_ms = vtv_sec.toInt32() * 1000 + tv_usec / 1000;
+  }
   int retval = poll(fds, count, timeout_ms);
   if (retval == -1) {
     raise_warning("unable to select [%d]: %s", errno,

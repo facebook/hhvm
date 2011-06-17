@@ -77,8 +77,8 @@ static String _xmlreader_get_valid_file_path(const char *source) {
   return file_dest;
 }
 
-static xmlRelaxNGPtr _xmlreader_get_relaxNG(String source, int type, 
-                                            xmlRelaxNGValidityErrorFunc error_func, 
+static xmlRelaxNGPtr _xmlreader_get_relaxNG(String source, int type,
+                                            xmlRelaxNGValidityErrorFunc error_func,
                                             xmlRelaxNGValidityWarningFunc warn_func )
 {
   xmlRelaxNGParserCtxtPtr parser = NULL;
@@ -95,7 +95,7 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(String source, int type,
       break;
     case XMLREADER_LOAD_STRING:
       parser = xmlRelaxNGNewMemParserCtxt(source.data(), source.size());
-      /* If loading from memory, we need to set the base directory for the document 
+      /* If loading from memory, we need to set the base directory for the document
         but it is not apparent how to do that for schema's */
       break;
     default:
@@ -123,7 +123,7 @@ c_XMLReader::c_XMLReader() : m_ptr(NULL), m_input(NULL), m_schema(NULL) {
 }
 
 c_XMLReader::~c_XMLReader() {
-  t_close();
+  close_impl();
 }
 
 void c_XMLReader::t___construct() {
@@ -134,7 +134,7 @@ bool c_XMLReader::t_open(CStrRef uri, CStrRef encoding /*= null_string*/, int64 
   if (m_ptr) {
     t_close();
   }
-  
+
   if (uri.empty()) {
     raise_warning("Empty string supplied as input");
     return false;
@@ -160,7 +160,7 @@ bool c_XMLReader::t_open(CStrRef uri, CStrRef encoding /*= null_string*/, int64 
 bool c_XMLReader::t_xml(CStrRef source, CStrRef encoding /*= null_string*/, int64 options /*= 0*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::xml);
   xmlParserInputBufferPtr inputbfr = xmlParserInputBufferCreateMem(source.c_str(), source.size(), XML_CHAR_ENCODING_NONE);
-  
+
   if (inputbfr != NULL) {
     char *uri = NULL;
     String directory = g_context->getCwd();
@@ -200,8 +200,7 @@ bool c_XMLReader::t_xml(CStrRef source, CStrRef encoding /*= null_string*/, int6
   return false;
 }
 
-bool c_XMLReader::t_close() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::close);
+void c_XMLReader::close_impl() {
   if (m_ptr) {
     xmlFreeTextReader(m_ptr);
     m_ptr = NULL;
@@ -214,6 +213,11 @@ bool c_XMLReader::t_close() {
     xmlRelaxNGFree((xmlRelaxNGPtr) m_schema);
     m_schema = NULL;
   }
+}
+
+bool c_XMLReader::t_close() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::close);
+  close_impl();
   return true;
 }
 
@@ -286,7 +290,7 @@ bool c_XMLReader::bool_func_no_arg(xmlreader_read_int_t internal_function) {
   if (m_ptr) {
     int ret = internal_function(m_ptr);
     if (ret == 1) {
-      return true; 
+      return true;
     }
   }
   return false;
@@ -339,14 +343,14 @@ String c_XMLReader::t_getattributens(CStrRef name, CStrRef namespaceURI) {
     raise_warning("Attribute Name and Namespace URI cannot be empty");
     return false;
   }
-  
+
   char *retchar = NULL;
   if (m_ptr) {
     retchar = (char *)xmlTextReaderGetAttributeNs(m_ptr,
                                                   (xmlChar *)name.data(),
                                                   (xmlChar *)namespaceURI.data());
   }
-  
+
   if (retchar) {
     String ret((const char*)retchar, CopyString);
     xmlFree(retchar);
@@ -362,11 +366,11 @@ bool c_XMLReader::t_movetoattribute(CStrRef name) {
     raise_warning("Attribute Name is required");
     return false;
   }
-  
+
   if (m_ptr) {
     int ret = xmlTextReaderMoveToAttribute(m_ptr, (xmlChar *)name.data());
     if (ret == 1) {
-      return true; 
+      return true;
     }
   }
   return false;
@@ -377,7 +381,7 @@ bool c_XMLReader::t_movetoattributeno(int64 index) {
   if (m_ptr) {
     int ret = xmlTextReaderMoveToAttributeNo(m_ptr, index);
     if (ret == 1) {
-      return true; 
+      return true;
     }
   }
   return false;
@@ -390,11 +394,11 @@ bool c_XMLReader::t_movetoattributens(CStrRef name, CStrRef namespaceURI) {
     return false;
   }
   if (m_ptr) {
-    int ret = xmlTextReaderMoveToAttributeNs(m_ptr, 
+    int ret = xmlTextReaderMoveToAttributeNs(m_ptr,
                                              (xmlChar *)name.data(),
                                              (xmlChar *)namespaceURI.data());
     if (ret == 1) {
-      return true; 
+      return true;
     }
   }
   return false;
@@ -449,7 +453,7 @@ bool c_XMLReader::t_setschema(CStrRef source) {
     raise_warning("Schema data source is required");
     return false;
   }
-  
+
   if (m_ptr) {
     int ret = xmlTextReaderSchemaValidate(m_ptr, source);
     if (ret == 0) {
@@ -478,7 +482,7 @@ bool c_XMLReader::set_relaxng_schema(String source, int type) {
     raise_warning("Schema data source is required");
     return false;
   }
-  
+
   if (m_ptr) {
     int ret = -1;
     xmlRelaxNGPtr schema = NULL;
@@ -499,7 +503,7 @@ bool c_XMLReader::set_relaxng_schema(String source, int type) {
       return true;
     }
   }
-  
+
   raise_warning("Unable to set schema. This must be set prior to reading or schema contains errors.");
   return false;
 }

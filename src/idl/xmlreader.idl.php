@@ -113,6 +113,7 @@ BeginClass(
   xmlTextReaderPtr        m_ptr;
   xmlParserInputBufferPtr m_input;
   void*                   m_schema;
+  void close_impl();
 EOT
 ,
   ));
@@ -361,7 +362,7 @@ DefineFunction(
       'type'   => String,
     ),
   ));
-  
+
 DefineFunction(
   array(
     'name'   => "readOuterXML",
@@ -379,7 +380,7 @@ DefineFunction(
       'type'   => Boolean,
     ),
   ));
-  
+
 DefineFunction(
   array(
     'name'   => "getAttribute",
@@ -486,7 +487,7 @@ DefineFunction(
       'type'   => Boolean,
     ),
   ));
-  
+
 DefineFunction(
   array(
     'name'   => "moveToFirstAttribute",

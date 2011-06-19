@@ -1253,6 +1253,8 @@ bool DebuggerClient::process() {
       if (cmd) {
         DebuggerCommandPtr deleter(cmd);
         return cmd->onClient(this);
+      } else {
+        return processTakeCode();
       }
       break;
     }
@@ -1459,17 +1461,16 @@ bool DebuggerClient::processTakeCode() {
   if (first == '@') {
     m_code = string("<?php ") + (m_line.c_str() + 1) + ";";
     return processEval();
-  }
-  if (first == '=') {
+  } else if (first == '=') {
     m_code = string("<?php $_") + m_line + "; " + m_printFunction;
     return processEval();
-  }
-  if (first == '$') {
+  } else if (first != '<') {
+    // User entered something that did not start with @, =, or <
+    // and also was not a debugger command. Interpret it as PHP.
     m_code = "<?php ";
     m_code += m_line + ";";
     return processEval();
   }
-  ASSERT(first == '<');
   m_code = "<?php ";
   m_code += m_line.substr(m_command.length()) + "\n";
   m_inputState = TakingCode;

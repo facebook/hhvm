@@ -791,6 +791,9 @@ String ExecutionContext::getenv(CStrRef name) const {
   if (value) {
     return String(value, CopyString);
   }
+  if (RuntimeOption::EnvVariables.find(name.c_str()) != RuntimeOption::EnvVariables.end()) {
+    return String(RuntimeOption::EnvVariables[name.c_str()].data(), CopyString);
+  }
   return String();
 }
 

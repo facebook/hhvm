@@ -880,7 +880,7 @@ void ClassScope::outputCPPClassVarInitImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  bool useHashTable = (Option::GenHashTableDynClass && classes.size() > 0);
+  bool useHashTable = (classes.size() > 0);
   if (useHashTable) {
     outputCPPHashTableClassVarInit(cg, classScopes, classes);
   }
@@ -938,7 +938,7 @@ void ClassScope::outputCPPDynamicClassCreateImpl
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
   bool withEval = !system && Option::EnableEval == Option::FullEval;
-  bool useHashTable = (Option::GenHashTableDynClass && classes.size() > 0);
+  bool useHashTable = (classes.size() > 0);
 
   // output create_object_only_no_init()
   cg_indentBegin("ObjectData *create%s_object_only_no_init(const char *s, "
@@ -997,7 +997,7 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  bool useHashTable = (Option::GenHashTableDynClass && classes.size() > 0);
+  bool useHashTable = (classes.size() > 0);
   cg_indentBegin("bool get_call_info_static_method%s(MethodCallPackage &mcp)"
       " {\n", system ? "_builtin" : "");
   if (Option::UseMethodIndex) {
@@ -1126,7 +1126,7 @@ void ClassScope::outputCPPGetStaticPropertyImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  bool useHashTable = (Option::GenHashTableDynClass && classes.size() > 0);
+  bool useHashTable = (classes.size() > 0);
 
   cg_indentBegin("const ObjectStaticCallbacks * "
                  "get%s_object_static_callbacks(const char *s) {\n",

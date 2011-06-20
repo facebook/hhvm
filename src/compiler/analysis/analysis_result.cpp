@@ -2768,29 +2768,11 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
 
 void AnalysisResult::outputCPPDynamicClassTables(
   CodeGenerator::Output output) {
-  outputCPPDynamicClassTables(output, 1);
-  if (output != CodeGenerator::SystemCPP && Option::SplitDynamicClassTable) {
-    if (!Option::GenHashTableDynClass) {
-      outputCPPDynamicClassTables(output, 2);
-      outputCPPDynamicClassTables(output, 3);
-      outputCPPDynamicClassTables(output, 4);
-    }
-  }
-}
-
-void AnalysisResult::outputCPPDynamicClassTables(
-  CodeGenerator::Output output, int part) {
   AnalysisResultPtr ar = shared_from_this();
   bool system = output == CodeGenerator::SystemCPP;
   string n;
-  string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
-    ((system || !Option::SplitDynamicClassTable) ? "dynamic_table_class"
-      : "dynamic_table_class_" + lexical_cast<string>(part)) + ".no.cpp";
-
-  if (part == 1 && Option::GenHashTableDynClass) {
-    tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
-                "dynamic_table_class.cpp";
-  }
+  string tablePath =
+    m_outputPath + "/" + Option::SystemFilePrefix + "dynamic_table_class.cpp";
 
   Util::mkdir(tablePath);
   ofstream fTable(tablePath.c_str());
@@ -2798,9 +2780,7 @@ void AnalysisResult::outputCPPDynamicClassTables(
 
   outputCPPDynamicTablesHeader(cg, true, false);
   cg.printSection("Class Invoke Tables");
-  if (part == 1) {
-    MethodSlot::emitMethodSlot(cg, ar, system); // FMC broken for IDL tests(?)
-  }
+  MethodSlot::emitMethodSlot(cg, ar, system); // FMC broken for IDL tests(?)
   vector<const char*> classes;
   ClassScopePtr cls;
   StringToClassScopePtrVecMap classScopes;
@@ -2838,26 +2818,11 @@ void AnalysisResult::outputCPPDynamicClassTables(
         classScopes[cls->getName()].push_back(cls);
       }
     }
-    bool fallThrough =
-      (!Option::SplitDynamicClassTable || Option::GenHashTableDynClass);
-    switch (part) {
-    case 1:
-      ClassScope::outputCPPClassVarInitImpl(cg, classScopes, classes);
-      if (!fallThrough) break;
-    case 2:
-      ClassScope::outputCPPDynamicClassCreateImpl(cg, classScopes, classes);
-      if (!fallThrough) break;
-    case 3:
-      ClassScope::outputCPPGetCallInfoStaticMethodImpl(cg, classScopes,
-          classes);
-      if (!fallThrough) break;
-    case 4:
-      ClassScope::outputCPPGetStaticPropertyImpl(cg, classScopes, classes);
-      ClassScope::outputCPPGetClassConstantImpl(cg, classScopes, classes);
-      break;
-    default:
-      assert(false);
-    }
+    ClassScope::outputCPPClassVarInitImpl(cg, classScopes, classes);
+    ClassScope::outputCPPDynamicClassCreateImpl(cg, classScopes, classes);
+    ClassScope::outputCPPGetCallInfoStaticMethodImpl(cg, classScopes, classes);
+    ClassScope::outputCPPGetStaticPropertyImpl(cg, classScopes, classes);
+    ClassScope::outputCPPGetClassConstantImpl(cg, classScopes, classes);
   }
   cg.namespaceEnd();
   fTable.close();

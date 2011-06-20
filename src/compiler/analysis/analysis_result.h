@@ -600,7 +600,6 @@ private:
   void outputCPPHashTableInvokeFile(CodeGenerator &cg,
                                     const std::vector<const char*> &entries,
                                     bool needEvalHook);
-  void outputCPPDynamicClassTables(CodeGenerator::Output output, int part);
   void outputCPPDynamicClassTables(CodeGenerator::Output output);
   void outputCPPDynamicConstantTable(CodeGenerator::Output output);
   void outputCPPHashTableGetConstant(CodeGenerator &cg, bool system,

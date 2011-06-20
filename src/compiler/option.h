@@ -156,12 +156,6 @@ public:
   static bool GenHashTableInvokeFunc;
 
   /**
-   * Generate hash-table lookup based dynamic class functions
-   * get_class_var_init, create_object_only, etc.
-   */
-  static bool GenHashTableDynClass;
-
-  /**
    * Generate hash-table lookup based get_constant
    */
   static bool GenHashTableGetConstant;
@@ -393,7 +387,6 @@ public:
   static bool GenerateDocComments;
   static bool FlAnnotate; // annotate emitted code with compiler file-line info
   static bool SystemGen; // -t cpp -f sys
-  static bool SplitDynamicClassTable;
   static bool ControlFlow;
   static bool VariableCoalescing;
   static bool DumpAst;

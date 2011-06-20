@@ -297,6 +297,10 @@ class Variant {
   bool isArray() const {
     return getType() == KindOfArray;
   }
+  // Is "define('CONSTANT', <this value>)" legal?
+  bool isAllowedAsConstantValue() const {
+    return isNull() || isScalar();
+  }
   bool isResource() const;
   bool instanceof(CStrRef s) const;
 

@@ -504,7 +504,13 @@ bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstPtr ar) {
       return true;
     }
     ExpressionPtr value = (*m_params)[1];
-    return (!ar->isConstantRedeclared(varName)) && value->isScalar();
+    if (ar->isConstantRedeclared(varName)) {
+      return false;
+    }
+    Variant scalarValue;
+    return (value->isScalar() &&
+            value->getScalarValue(scalarValue) &&
+            scalarValue.isAllowedAsConstantValue());
   } else {
     return false;
   }
@@ -1607,7 +1613,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         if (m_noPrefix) {
           cg_printf("%s(", cg.formatLabel(m_name).c_str());
         } else {
-          bool callUserFuncFewArgs = 
+          bool callUserFuncFewArgs =
             Option::UseCallUserFuncFewArgs &&
             m_name == "call_user_func" &&
             (m_params->getCount() <= CALL_USER_FUNC_FEW_ARGS_COUNT + 1) &&
@@ -1784,6 +1790,17 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
           if (isSystem ||
               ((!ar->isConstantRedeclared(varName)) && value->isScalar())) {
             needAssignment = false;
+          }
+          Variant scalarValue;
+          if (value->isScalar() &&
+              value->getScalarValue(scalarValue) &&
+              !scalarValue.isAllowedAsConstantValue()) {
+            cg_printf("raise_warning(\"Constants may only evaluate to scalar "
+                      "values\"),");
+            // TODO don't actually define, and return false
+            if (!needAssignment) {
+              cg_printf("true");
+            }
           }
           if (needAssignment) {
             cg_printf("%s%s = ", Option::ConstantPrefix, varName.c_str());

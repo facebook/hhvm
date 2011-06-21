@@ -91,6 +91,50 @@ String FrameInjection::GetContainingFileName(bool skip /* = false */) {
   return "";
 }
 
+Array FrameInjection::getStackFrame(bool withSelf, bool withThis) {
+  Array frame = Array::Create();
+
+  if (m_prev) {
+    String file = m_prev->getFileName();
+    if (!file.empty() && m_prev->m_line) {
+      frame.set(s_file, file, true);
+      frame.set(s_line, m_prev->m_line, true);
+    }
+  } else if (m_flags & PseudoMain) {
+    // Stop at top, don't include top file
+    return Array();
+  }
+
+  if (m_flags & PseudoMain) {
+    frame.set(s_function, "include", true);
+    frame.set(s_args, Array::Create(getFileName()), true);
+  } else {
+    const char *c = strstr(m_name, "::");
+    if (c) {
+      frame.set(s_function, String(c + 2), true);
+      frame.set(s_class, getClassName()->copy(), true);
+      if (ObjectData *obj = getObjectV()) {
+        if (withThis) {
+          frame.set(s_object, Object(obj), true);
+        }
+        frame.set(s_type, "->", true);
+      } else {
+        frame.set(s_type, "::", true);
+      }
+    } else {
+      frame.set(s_function, m_name, true);
+    }
+
+    Array args = getArgs();
+    if (!args.isNull()) {
+      frame.set(s_args, args, true);
+    } else {
+      frame.set(s_args, Array::Create(), true);
+    }
+  }
+  return frame;
+}
+
 Array FrameInjection::GetBacktrace(bool skip /* = false */,
                                    bool withSelf /* = false */,
                                    bool withThis /* = true */) {
@@ -111,51 +155,53 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
       bt.append(frame);
     }
   }
-  while (t && (RuntimeOption::InjectedStackTraceLimit < 0
-            || bt.size() < RuntimeOption::InjectedStackTraceLimit)) {
-    Array frame = Array::Create();
-
-    if (t->m_prev) {
-      String file = t->m_prev->getFileName();
-      if (!file.empty() && t->m_prev->m_line) {
-        frame.set(s_file, file, true);
-        frame.set(s_line, t->m_prev->m_line, true);
-      }
-    } else if (t->m_flags & PseudoMain) {
-      // Stop at top, don't include top file
-      break;
-    }
-
-    if (t->m_flags & PseudoMain) {
-      frame.set(s_function, "include", true);
-      frame.set(s_args, Array::Create(t->getFileName()), true);
-    } else {
-      const char *c = strstr(t->m_name, "::");
-      if (c) {
-        frame.set(s_function, String(c + 2), true);
-        frame.set(s_class, t->getClassName()->copy(), true);
-        if (ObjectData *obj = t->getObjectV()) {
-          if (withThis) {
-            frame.set(s_object, Object(obj), true);
-          }
-          frame.set(s_type, "->", true);
-        } else {
-          frame.set(s_type, "::", true);
-        }
-      } else {
-        frame.set(s_function, t->m_name, true);
-      }
-
-      Array args = t->getArgs();
-      if (!args.isNull()) {
-        frame.set(s_args, args, true);
-      } else {
-        frame.set(s_args, Array::Create(), true);
-      }
-    }
-
+  Array sbt = bt;
+  FrameInjection *st = t;
+  while (t && (RuntimeOption::InjectedStackTraceLimit < 0 ||
+               bt.size() < RuntimeOption::InjectedStackTraceLimit)) {
+    Array frame = t->getStackFrame(withSelf, withThis);
+    if (frame.isNull()) return bt;
     bt.append(frame);
     t = t->m_prev;
+  }
+  if (!t) return bt;
+  // The stack depth has exceeded the limit. Re-construct bt to include the
+  // top and bottom frames. This is considered more useful in cases such as
+  // infinite recursion.
+  ASSERT(bt.size() == RuntimeOption::InjectedStackTraceLimit);
+  int half = RuntimeOption::InjectedStackTraceLimit / 2;
+
+  // start over, get the top half
+  bt = sbt;
+  t = st;
+  while (t && bt.size() < half) {
+    Array frame = t->getStackFrame(withSelf, withThis);
+    if (frame.isNull()) assert(false);
+    bt.append(frame);
+    t = t->m_prev;
+  }
+  // then the bottom half
+  std::vector<FrameInjection *> remainingFrames;
+  while (t) {
+    if (!t->m_prev && (t->m_flags & PseudoMain)) break;
+    remainingFrames.push_back(t);
+    t = t->m_prev;
+  }
+  int remaining = remainingFrames.size();
+  int omitted = remaining - half;
+  assert(omitted >= 0);
+  if (omitted > 0) {
+    std::string tmp("(...) ");
+    tmp += boost::lexical_cast<std::string>(omitted) +
+           " omitted frame" + ((omitted > 1) ? "s" : "");
+    Array frame;
+    frame.set(s_function, tmp); 
+    bt.append(frame);
+  }
+  for (int i = omitted; i < remaining; i++) {
+    Array frame = remainingFrames[i]->getStackFrame(withSelf, withThis);
+    if (frame.isNull()) assert(false);
+    bt.append(frame);
   }
   return bt;
 }

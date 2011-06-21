@@ -181,6 +181,7 @@ protected:
     if (m_name[len] != ':' || m_name[len+1] != ':') return false;
     return true;
   }
+  Array getStackFrame(bool withSelf, bool withThis);
 };
 
 class FrameInjectionFunction : public FrameInjection {

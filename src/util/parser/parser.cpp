@@ -117,56 +117,82 @@ void ParserBase::pushLabelInfo() {
   pushLabelScope();
 }
 
-void ParserBase::pushLabelScope() {
+void ParserBase::pushLabelScope(bool forTryCatch /* = false */) {
   ASSERT(!m_labelInfos.empty());
   LabelInfo &info = m_labelInfos.back();
   info.scopes.push_back(++info.scopeId);
+  if (forTryCatch) info.tryCatchBlockDepth++;
 }
 
-void ParserBase::popLabelScope() {
+void ParserBase::popLabelScope(bool forTryCatch /* = false */) {
   ASSERT(!m_labelInfos.empty());
   LabelInfo &info = m_labelInfos.back();
   info.scopes.pop_back();
+  if (forTryCatch) info.tryCatchBlockDepth--;
 }
 
-void ParserBase::addLabel(const std::string &label) {
+void ParserBase::addLabel(const std::string &label,
+                          LocationPtr loc,
+                          ScannerToken *stmt) {
   ASSERT(!m_labelInfos.empty());
   LabelInfo &info = m_labelInfos.back();
   if (info.labels.find(label) != info.labels.end()) {
     error("Label '%s' already defined: %s", label.c_str(),
           getMessage().c_str());
+    invalidateLabel(extractStatement(stmt));
     return;
   }
   ASSERT(!info.scopes.empty());
-  info.labels[label] = info.scopes.back();
+  LabelStmtInfo labelInfo;
+  labelInfo.scopeId         = info.scopes.back();
+  labelInfo.stmt            = extractStatement(stmt);
+  labelInfo.inTryCatchBlock = info.inTryCatchBlock();
+  labelInfo.loc             = loc;
+  info.labels[label]        = labelInfo;
 }
 
-void ParserBase::addGoto(const std::string &label, LocationPtr loc) {
+void ParserBase::addGoto(const std::string &label,
+                         LocationPtr loc,
+                         ScannerToken *stmt) {
   ASSERT(!m_labelInfos.empty());
   LabelInfo &info = m_labelInfos.back();
   GotoInfo gotoInfo;
-  gotoInfo.label = label;
+  gotoInfo.label  = label;
   gotoInfo.scopes = info.scopes;
-  gotoInfo.loc = loc;
+  gotoInfo.loc    = loc;
+  gotoInfo.stmt   = extractStatement(stmt);
   info.gotos.push_back(gotoInfo);
 }
 
 void ParserBase::popLabelInfo() {
   ASSERT(!m_labelInfos.empty());
   LabelInfo &info = m_labelInfos.back();
+  LabelMap labels = info.labels; // shallow copy
+
   for (unsigned int i = 0; i < info.gotos.size(); i++) {
     const GotoInfo &gotoInfo = info.gotos[i];
     LabelMap::const_iterator iter = info.labels.find(gotoInfo.label);
     if (iter == info.labels.end()) {
       error("'goto' to undefined label '%s': %s",
             gotoInfo.label.c_str(), getMessage(gotoInfo.loc.get()).c_str());
-      return;
-    }
-    // "yield" generates unlimited goto, so no need to check scoping
-    if (gotoInfo.label.find(YIELD_LABEL_PREFIX) == 0) {
+      invalidateGoto(gotoInfo.stmt, UndefLabel);
       continue;
     }
-    int labelScopeId = iter->second;
+    const LabelStmtInfo &labelInfo = iter->second;
+    if (gotoInfo.label.find(YIELD_LABEL_PREFIX) == 0) {
+      // we must disallow yield jumps into try/catch blocks, but
+      // we can allow switch/loops...
+      if (labelInfo.inTryCatchBlock) {
+        // would jump into try/catch block
+        error("yield is not allowed from within a try/catch block: %s",
+              getMessage(labelInfo.loc.get()).c_str());
+        invalidateGoto(gotoInfo.stmt, InvalidBlock);
+      } else {
+        labels.erase(gotoInfo.label);
+      }
+      continue;
+    }
+    int labelScopeId = labelInfo.scopeId;
     bool found = false;
     for (int j = gotoInfo.scopes.size() - 1; j >= 0; j--) {
       if (labelScopeId == gotoInfo.scopes[j]) {
@@ -177,9 +203,20 @@ void ParserBase::popLabelInfo() {
     if (!found) {
       error("'goto' into loop or switch statement or try/catch block "
             "is disallowed: %s", getMessage(gotoInfo.loc.get()).c_str());
-      return;
+      invalidateGoto(gotoInfo.stmt, InvalidBlock);
+      continue;
+    } else {
+      labels.erase(gotoInfo.label);
     }
   }
+
+  // now invalidate all un-used labels
+  for (LabelMap::const_iterator it(labels.begin());
+       it != labels.end();
+       ++it) {
+    invalidateLabel(it->second.stmt);
+  }
+
   m_labelInfos.pop_back();
 }
 

@@ -225,24 +225,27 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
       Token empty;   empty = 1; _p->appendMethodParams(empty);
                      _p->popObject(mcall);
 
-      Token cases;
-      for (int i = count; i > 0; i--) {
-        std::string si = boost::lexical_cast<std::string>(i);
-
-        Token label;   label.setText(YIELD_LABEL_PREFIX + si);
-        Token sgoto;   _p->addGoto(label.text(), _p->getLocation());
-                       _p->onGoto(sgoto, label, false);
-        Token stmts0;  _p->onStatementListStart(stmts0);
-        Token stmts1;  _p->addStatement(stmts1, stmts0, sgoto);
-        Token stmts;   _p->finishStatement(stmts, stmts1); stmts = 1;
-
-        Token snum;    snum.setText(si);
-        Token num;     _p->onScalar(num, T_LNUMBER, snum);
-        Token scase;   _p->onCase(scase, cases, &num, stmts);
-        cases = scase;
-      }
       _p->pushLabelScope();
-      _p->onSwitch(sswitch, mcall, cases);
+      {
+        Token cases;
+        for (int i = count; i > 0; i--) {
+          std::string si = boost::lexical_cast<std::string>(i);
+
+          Token label;   label.setText(YIELD_LABEL_PREFIX + si);
+          Token sgoto;   _p->onGoto(sgoto, label, false);
+                         _p->addGoto(label.text(), _p->getLocation(), &sgoto);
+
+          Token stmts0;  _p->onStatementListStart(stmts0);
+          Token stmts1;  _p->addStatement(stmts1, stmts0, sgoto);
+          Token stmts;   _p->finishStatement(stmts, stmts1); stmts = 1;
+
+          Token snum;    snum.setText(si);
+          Token num;     _p->onScalar(num, T_LNUMBER, snum);
+          Token scase;   _p->onCase(scase, cases, &num, stmts);
+          cases = scase;
+        }
+        _p->onSwitch(sswitch, mcall, cases);
+      }
       _p->popLabelScope();
     }
     Token sdone;
@@ -415,7 +418,8 @@ void transform_yield(Parser *_p, Token &stmts, int index, Token *expr) {
 
   Token lname;   lname.setText(YIELD_LABEL_PREFIX +
                                boost::lexical_cast<std::string>(index));
-  Token label;   _p->addLabel(lname.text()); _p->onLabel(label, lname);
+  Token label;   _p->onLabel(label, lname);
+                 _p->addLabel(lname.text(), _p->getLocation(), &label);
 
   Token stmts0;  _p->onStatementListStart(stmts0);
 
@@ -1068,8 +1072,10 @@ inner_statement:
 statement:
    expr ';'                            { _p->onExpStatement($$, $1);}
  | statement_without_expr              { $$ = $1;}
- | T_STRING ':'                        { _p->addLabel($1.text());
-                                         _p->onLabel($$, $1);}
+ | T_STRING ':'                        { _p->onLabel($$, $1);
+                                         _p->addLabel($1.text(),
+                                                      _p->getLocation(),
+                                                      &$$); }
 ;
 statement_without_expr:
     '{' inner_statement_list '}'       { _p->onBlock($$, $2);}
@@ -1148,26 +1154,28 @@ statement_without_expr:
   | T_DECLARE '(' declare_list ')'
     declare_statement                  { _p->onBlock($$, $5); $$ = T_DECLARE;}
 
-  | T_TRY '{'                          { _p->pushLabelScope();}
-    inner_statement_list '}'           { _p->popLabelScope();}
+  | T_TRY '{'                          { _p->pushLabelScope(true);}
+    inner_statement_list '}'           { _p->popLabelScope(true);}
     T_CATCH '('
     fully_qualified_class_name
-    T_VARIABLE ')' '{'                 { _p->pushLabelScope();}
-    inner_statement_list '}'           { _p->popLabelScope();}
+    T_VARIABLE ')' '{'                 { _p->pushLabelScope(true);}
+    inner_statement_list '}'           { _p->popLabelScope(true);}
     additional_catches                 { _p->onTry($$,$4,$9,$10,$14,$17);}
 
   | T_THROW expr ';'                   { _p->onThrow($$, $2);}
-  | T_GOTO T_STRING ';'                { _p->addGoto($2.text(),
-                                                     _p->getLocation());
-                                         _p->onGoto($$, $2, true);}
-;
+  | T_GOTO T_STRING ';'                { _p->onGoto($$, $2, true);
+                                         _p->addGoto($2.text(),
+                                                     _p->getLocation(),
+                                                     &$$); }
 
 additional_catches:
     additional_catches
     T_CATCH '('
     fully_qualified_class_name
     T_VARIABLE ')'
-    '{' inner_statement_list '}'       { _p->onCatch($$, $1, $4, $5, $8);}
+    '{'                                { _p->pushLabelScope(true);}
+    inner_statement_list '}'           { _p->popLabelScope(true);
+                                         _p->onCatch($$, $1, $4, $5, $9);}
   |                                    { $$.reset();}
 ;
 

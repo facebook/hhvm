@@ -17,6 +17,7 @@
 #ifndef __GOTO_STATEMENT_H__
 #define __GOTO_STATEMENT_H__
 
+#include <util/parser/parser.h>
 #include <compiler/statement/statement.h>
 
 namespace HPHP {
@@ -31,8 +32,11 @@ public:
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
   const std::string &label() { return m_label; }
+
+	void invalidate(ParserBase::GotoError error);
 private:
   std::string m_label;
+  ParserBase::GotoError m_error;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

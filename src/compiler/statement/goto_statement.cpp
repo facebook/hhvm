@@ -25,17 +25,33 @@ using namespace boost;
 
 GotoStatement::GotoStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, const std::string &label)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES), m_label(label) {
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+    m_label(label), m_error((ParserBase::GotoError)0) {
 }
 
 StatementPtr GotoStatement::clone() {
   GotoStatementPtr stmt(new GotoStatement(*this));
   stmt->m_label = m_label;
+  stmt->m_error = m_error;
   return stmt;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
+void GotoStatement::invalidate(ParserBase::GotoError error) {
+  m_error = error;
+  switch (m_error) {
+  case ParserBase::UndefLabel:
+    Compiler::Error(Compiler::GotoUndefLabel, shared_from_this());
+    break;
+  case ParserBase::InvalidBlock:
+    Compiler::Error(Compiler::GotoInvalidBlock, shared_from_this());
+    break;
+  default:
+    ASSERT(false);
+    break;
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
@@ -75,5 +91,21 @@ void GotoStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void GotoStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  cg_printf("goto %s;\n", m_label.c_str());
+  if (!m_error) {
+    cg_printf("goto %s;\n", m_label.c_str());
+  } else {
+    switch (m_error) {
+    case ParserBase::UndefLabel:
+      cg_printf("throw_fatal(\"'goto' to undefined label '%s'\");\n",
+                m_label.c_str());
+      break;
+    case ParserBase::InvalidBlock:
+      cg_printf("throw_fatal(\"'goto' into loop or switch statement "
+                "or try/catch block is disallowed\");\n");
+      break;
+    default:
+      ASSERT(false);
+      break;
+    }
+  }
 }

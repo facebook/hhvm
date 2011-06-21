@@ -206,6 +206,11 @@ public:
   void onTypeDecl(Token &out, Token &type, Token &decl);
   void onTypedVariable(Token &out, Token *exprs, Token &var, Token *value);
 
+  virtual void invalidateGoto(TStatementPtr stmt, GotoError error);
+  virtual void invalidateLabel(TStatementPtr stmt);
+
+  virtual TStatementPtr extractStatement(ScannerToken *stmt);
+
   FileScopePtr getFileScope() { return m_file; }
 private:
   AnalysisResultPtr m_ar;

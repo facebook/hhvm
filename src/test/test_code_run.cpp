@@ -18045,6 +18045,9 @@ bool TestCodeRun::TestGoto() {
   MVCRO("<?php goto a; if (false) { a: print 'here';} ",
         "here");
 
+  MVCRO("<?php my_lbl: print 'here';",
+        "here");
+
   return true;
 }
 

@@ -125,6 +125,7 @@ public:
   std::vector<StaticVariablePtr > &staticVars ();
   std::vector<String            > &strings    ();
 
+
 private:
   ExpressionPtr m_exp;
   StatementPtr m_stmt;
@@ -176,6 +177,14 @@ public:
   virtual void warning(const std::string &msg);
   virtual bool enableXHP();
   IMPLEMENT_XHP_ATTRIBUTES;
+
+  // no-ops, since the hphpi runtime takes care of this
+  virtual void invalidateGoto(TStatementPtr stmt,
+                              ParserBase::GotoError error) {}
+  virtual void invalidateLabel(TStatementPtr stmt) {}
+  virtual TStatementPtr extractStatement(ScannerToken *stmt) {
+    return NULL;
+  }
 
   // result
   StatementPtr getTree() const;

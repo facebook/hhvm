@@ -25,12 +25,14 @@ using namespace boost;
 
 LabelStatement::LabelStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, const std::string &label)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES), m_label(label) {
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+    m_label(label), m_isValid(true) {
 }
 
 StatementPtr LabelStatement::clone() {
   LabelStatementPtr stmt(new LabelStatement(*this));
-  stmt->m_label = m_label;
+  stmt->m_label   = m_label;
+  stmt->m_isValid = m_isValid;
   return stmt;
 }
 
@@ -75,5 +77,5 @@ void LabelStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void LabelStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  cg_printf("%s:;\n", m_label.c_str());
+  if (m_isValid) cg_printf("%s:;\n", m_label.c_str());
 }

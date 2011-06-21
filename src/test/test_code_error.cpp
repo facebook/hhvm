@@ -479,3 +479,33 @@ bool TestCodeError::TestBadArgumentType() {
 
   return true;
 }
+
+bool TestCodeError::TestGotoUndefLabel() {
+  VE(GotoUndefLabel,
+     "<?php goto foo_bar;");
+
+  VE(GotoUndefLabel,
+     "<?php function f() { goto baz; } baz:");
+
+  return true;
+}
+
+bool TestCodeError::TestGotoInvalidBlock() {
+  VE(GotoInvalidBlock,
+     "<?php goto my_block; try { my_block: } catch (Exception $e) {}");
+
+  VE(GotoInvalidBlock,
+     "<?php "
+     "function f($x) {"
+     "  goto foo;"
+     "  for ($i = 0; $i < $x; $i++) {"
+     "    foo: var_dump($i);"
+     "  }"
+     "}");
+
+  VE(GotoInvalidBlock,
+     "<?php goto my_block; try { var_dump(0); } catch (Exception $e) {} "
+		 "catch (Exception $b) { my_block: var_dump($b); }");
+
+  return true;
+}

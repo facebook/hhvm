@@ -46,6 +46,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+typedef void * TStatementPtr;
 class ParserBase {
 public:
   enum NameKind {
@@ -115,10 +116,12 @@ public:
 
   // for goto syntax checking
   void pushLabelInfo();
-  void pushLabelScope();
-  void popLabelScope();
-  void addLabel(const std::string &label);
-  void addGoto(const std::string &label, LocationPtr loc);
+  void pushLabelScope(bool forTryCatch = false);
+  void popLabelScope(bool forTryCatch = false);
+  void addLabel(const std::string &label, LocationPtr loc,
+                ScannerToken *stmt);
+  void addGoto(const std::string &label, LocationPtr loc,
+               ScannerToken *stmt);
   void popLabelInfo();
 
   // for namespace support
@@ -129,6 +132,16 @@ public:
   std::string nsDecl(const std::string &name);
   std::string resolve(const std::string &ns, bool cls);
 
+  enum GotoError {
+    UndefLabel = 1,
+    InvalidBlock,
+  };
+
+  virtual void invalidateGoto(TStatementPtr expr, GotoError error) = 0;
+  virtual void invalidateLabel(TStatementPtr expr) = 0;
+
+  virtual TStatementPtr extractStatement(ScannerToken *stmt) = 0;
+
 protected:
   Scanner &m_scanner;
   const char *m_fileName;
@@ -136,18 +149,30 @@ protected:
   Location m_loc;
   LocationPtrVec m_funcLocs;
 
+  struct LabelStmtInfo {
+    int scopeId;
+    TStatementPtr stmt;
+    bool inTryCatchBlock;
+    LocationPtr loc;
+  };
+  typedef std::map<std::string, LabelStmtInfo> LabelMap;
+    // name => LabelStmtInfo
+
   // for goto syntax checking
   typedef std::vector<int> LabelScopes;
-  typedef std::map<std::string, int> LabelMap; // name => scopeId
   struct GotoInfo {
     std::string label;
     LabelScopes scopes;
     LocationPtr loc;
+    TStatementPtr stmt;
   };
+
   class LabelInfo {
   public:
-    LabelInfo() : scopeId(0) {}
+    LabelInfo() : scopeId(0), tryCatchBlockDepth(0) {}
+    bool inTryCatchBlock() { return tryCatchBlockDepth > 0; }
     int scopeId;
+    int tryCatchBlockDepth;
     LabelScopes scopes;
     LabelMap labels;
     std::vector<GotoInfo> gotos;

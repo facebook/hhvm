@@ -31,8 +31,11 @@ public:
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
   const std::string &label() { return m_label; }
+
+	void invalidate() { m_isValid = false; }
 private:
   std::string m_label;
+	bool m_isValid;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

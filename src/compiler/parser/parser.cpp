@@ -1266,6 +1266,23 @@ void Parser::onTypedVariable(Token &out, Token *exprs, Token &var,
                              Token *value) {
 }
 
+void Parser::invalidateGoto(TStatementPtr stmt, GotoError error) {
+  GotoStatement *gs = (GotoStatement*) stmt;
+  ASSERT(gs);
+  gs->invalidate(error);
+}
+
+void Parser::invalidateLabel(TStatementPtr stmt) {
+  LabelStatement *ls = (LabelStatement*) stmt;
+  ASSERT(ls);
+  ls->invalidate();
+}
+
+TStatementPtr Parser::extractStatement(ScannerToken *stmt) {
+  Token *t = (Token*) stmt;
+  return t->stmt.get();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool Parser::hasType(Token &type) {

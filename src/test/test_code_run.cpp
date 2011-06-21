@@ -483,6 +483,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestAssignment);
   RUN_TEST(TestBadFunctionCalls);
   RUN_TEST(TestConstructor);
+  RUN_TEST(TestIntIsset);
   RUN_TEST(TestTernary);
   RUN_TEST(TestUselessAssignment);
   RUN_TEST(TestTypes);
@@ -15187,6 +15188,12 @@ bool TestCodeRun::TestConstructor() {
        "}"
        "$y = new Y(1,2);");
 
+  return true;
+}
+
+bool TestCodeRun::TestIntIsset() {
+  MVCR("<? "
+       "function f($p) { $i = strlen($p); if (isset($i)) {} }");
   return true;
 }
 

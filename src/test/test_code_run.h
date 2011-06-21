@@ -141,6 +141,7 @@ class TestCodeRun : public TestBase {
   bool TestLocale();
   bool TestBadFunctionCalls();
   bool TestConstructor();
+  bool TestIntIsset();
 
   // misc
   bool TestHereDoc();

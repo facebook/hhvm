@@ -238,6 +238,12 @@ inline bool isInitialized(CVarRef v) { return v.isInitialized();}
 Variant getDynamicConstant(CVarRef v, CStrRef name);
 String getUndefinedConstant(CStrRef name);
 
+inline bool isset(bool v)    { return true; }
+inline bool isset(char v)    { return true; }
+inline bool isset(short v)   { return true; }
+inline bool isset(int v)     { return true; }
+inline bool isset(int64 v)   { return true; }
+inline bool isset(double v)  { return true; }
 inline bool isset(CVarRef v) { return !v.isNull();}
 inline bool isset(CObjRef v) { return !v.isNull();}
 inline bool isset(CStrRef v) { return !v.isNull();}

@@ -67,7 +67,7 @@ LVariableTable *MethodStatement::getStaticVars(VariableEnvironment &env)
 Variant MethodStatement::invokeInstance(CObjRef obj, CArrRef params,
     bool check /* = true */) const {
   if (getModifiers() & ClassStatement::Static) {
-    return invokeStatic(obj->o_getClassName(), params);
+    return invokeStatic(obj->o_getClassName(), params, check);
   }
   if (check) attemptAccess(FrameInjection::GetClassName(false));
   // The debug frame should have been pushed at ObjectMethodExpression
@@ -88,7 +88,8 @@ invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
                      const FunctionCallExpression *caller,
                      bool check /* = true */) const {
   if (getModifiers() & ClassStatement::Static) {
-    return invokeStaticDirect(obj->o_getClassName(), env, caller, false);
+    return invokeStaticDirect(obj->o_getClassName(), env,
+                              caller, false, check);
   }
   if (check) attemptAccess(FrameInjection::GetClassName(false));
   DECLARE_THREAD_INFO_NOINIT
@@ -120,9 +121,10 @@ Variant MethodStatement::invokeStatic(const char* cls, CArrRef params,
 
 Variant MethodStatement::
 invokeStaticDirect(CStrRef cls, VariableEnvironment &env,
-                   const FunctionCallExpression *caller, bool sp)
+                   const FunctionCallExpression *caller, bool sp,
+                   bool check /* = true */)
   const {
-  if (sp) attemptAccess(FrameInjection::GetClassName(false));
+  if (check) attemptAccess(FrameInjection::GetClassName(false));
   MethScopeVariableEnvironment fenv(this);
   directBind(env, caller, fenv);
   fenv.setCurrentClass(cls.data());

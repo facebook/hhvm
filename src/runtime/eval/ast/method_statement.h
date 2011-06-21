@@ -45,7 +45,7 @@ public:
                                bool check = true) const;
   Variant invokeStaticDirect(CStrRef cls, VariableEnvironment &env,
                              const FunctionCallExpression *caller,
-                             bool sp) const;
+                             bool sp, bool check = true) const;
   void getInfo(ClassInfo::MethodInfo &info) const;
   virtual LVariableTable *getStaticVars(VariableEnvironment &env) const;
   const ClassStatement *getClass() const { return m_class; }

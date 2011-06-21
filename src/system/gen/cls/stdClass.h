@@ -44,8 +44,6 @@ class c_stdClass : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_stdClass 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_stdClass 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_stdClass 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_stdClass 1
 

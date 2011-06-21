@@ -45,16 +45,6 @@ Variant &c_XhprofFrame::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_XhprofFrame
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_XhprofFrame
-void c_XhprofFrame::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_XhprofFrame
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_XhprofFrame
-void c_XhprofFrame::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_XhprofFrame
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_XhprofFrame
 Variant * c_XhprofFrame::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -212,6 +202,10 @@ Variant pm_php$classes$xhprof_php(bool incOnce /* = false */, LVariableTable* va
   return true;
 }
 namespace hphp_impl_splitter {}
+
+// Class tables
+
+// o_getClassPropTable
 
 ///////////////////////////////////////////////////////////////////////////////
 }

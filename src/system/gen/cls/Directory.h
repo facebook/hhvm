@@ -46,8 +46,7 @@ class c_Directory : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual void o_getArray(Array &props, bool pubOnly = false) const;
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_Directory 1
+  virtual const ClassPropTable *o_getClassPropTable() const;
   #define OMIT_JUMP_TABLE_CLASS_realProp_Directory 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Directory 1
 

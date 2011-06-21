@@ -45,8 +45,6 @@ class c_ReflectionObject : public c_ReflectionClass {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionObject 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionObject 1
   virtual Variant *o_realProp(CStrRef s, int flags,
                               CStrRef context = null_string) const;
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionObject 1

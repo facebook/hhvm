@@ -529,7 +529,8 @@ Variant *ObjectData::o_weakLval(CStrRef propName,
 
 Array ObjectData::o_toArray() const {
   Array ret(ArrayData::Create());
-  const_cast<ObjectData*>(this)->getRoot()->o_getArray(ret);
+  ObjectData *root = const_cast<ObjectData*>(this)->getRoot();
+  ClassInfo::GetArray(root, root->o_getClassPropTable(), ret, false);
   return ret;
 }
 
@@ -1026,9 +1027,10 @@ Object ObjectData::fiberMarshal(FiberReferenceMap &refMap) const {
     // ahead of deep copy
     refMap.insert(const_cast<ObjectData*>(this), copy.get());
     Array props;
-    o_getArray(props);
+    ClassInfo::GetArray(this, this->o_getClassPropTable(), props, false);
     if (!props.empty()) {
-      copy->o_setArray(props.fiberMarshal(refMap));
+      ClassInfo::SetArray(copy.get(), copy->o_getClassPropTable(),
+                          props.fiberMarshal(refMap));
     }
     FiberLocal *src = dynamic_cast<FiberLocal*>(const_cast<ObjectData*>(this));
     if (src) {
@@ -1057,9 +1059,10 @@ Object ObjectData::fiberUnmarshal(FiberReferenceMap &refMap) const {
     // ahead of deep copy
     refMap.insert(const_cast<ObjectData*>(this), px);
     Array props;
-    o_getArray(props);
+    ClassInfo::GetArray(this, this->o_getClassPropTable(), props, false);
     if (!props.empty()) {
-      px->o_setArray(props.fiberUnmarshal(refMap));
+      ClassInfo::SetArray(px, px->o_getClassPropTable(),
+                          props.fiberMarshal(refMap));
     }
     FiberLocal *src = dynamic_cast<FiberLocal*>(const_cast<ObjectData*>(this));
     if (src) {

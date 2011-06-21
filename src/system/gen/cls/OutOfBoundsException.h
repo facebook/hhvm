@@ -45,8 +45,6 @@ class c_OutOfBoundsException : public c_RuntimeException {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_OutOfBoundsException 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_OutOfBoundsException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_OutOfBoundsException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OutOfBoundsException 1
 

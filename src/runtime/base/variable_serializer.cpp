@@ -298,7 +298,7 @@ void VariableSerializer::write(CObjRef v) {
       writeOverflow(v.get(), true);
     } else {
       Array props(ArrayData::Create());
-      v->o_getArray(props, true);
+      ClassInfo::GetArray(v.get(), v->o_getClassPropTable(), props, true);
       setObjectInfo(v->o_getClassName(), v->o_getId());
       props.serialize(this);
     }

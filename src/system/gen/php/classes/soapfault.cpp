@@ -76,23 +76,6 @@ Variant &c_SoapFault::os_lval(CStrRef s) {
   return c_Exception::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapFault
-void c_SoapFault::o_getArray(Array &props, bool pubOnly) const {
-  if (isInitialized(m_faultcode)) props.lvalAt(NAMSTR(s_sys_ssff0553c0, "faultcode"), AccessFlags::Key).setWithRef(m_faultcode);
-  if (isInitialized(m_faultcodens)) props.lvalAt(NAMSTR(s_sys_ssb9540e00, "faultcodens"), AccessFlags::Key).setWithRef(m_faultcodens);
-  if (isInitialized(m_faultstring)) props.lvalAt(NAMSTR(s_sys_ssff4490ec, "faultstring"), AccessFlags::Key).setWithRef(m_faultstring);
-  if (isInitialized(m_faultactor)) props.lvalAt(NAMSTR(s_sys_ss5b7cf41f, "faultactor"), AccessFlags::Key).setWithRef(m_faultactor);
-  if (isInitialized(m_detail)) props.lvalAt(NAMSTR(s_sys_ss2235bf3d, "detail"), AccessFlags::Key).setWithRef(m_detail);
-  if (isInitialized(m__name)) props.lvalAt(NAMSTR(s_sys_ssee3a4fdd, "_name"), AccessFlags::Key).setWithRef(m__name);
-  if (isInitialized(m_headerfault)) props.lvalAt(NAMSTR(s_sys_ss40793385, "headerfault"), AccessFlags::Key).setWithRef(m_headerfault);
-  c_Exception::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapFault
-void c_SoapFault::o_setArray(CArrRef props) {
-  c_Exception::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapFault
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapFault
 Variant * c_SoapFault::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -449,6 +432,45 @@ Variant pm_php$classes$soapfault_php(bool incOnce /* = false */, LVariableTable*
   return true;
 }
 namespace hphp_impl_splitter {}
+
+// Class tables
+ClassPropTable cpt_SoapFault;
+extern ClassPropTable cpt_Exception;
+static int ctInitializer() {
+  const char *ctMapData[] = {
+    (const char *)7, (const char *)0, (const char *)&cpt_SoapFault, (const char *)&cpt_Exception,
+    (const char *)64, (const char *)&NAMSTR(s_sys_ssff0553c0, "faultcode"),
+    (const char *)GET_PROPERTY_OFFSET(c_SoapFault, m_faultcode),
+    (const char *)10,
+    (const char *)64, (const char *)&NAMSTR(s_sys_ssb9540e00, "faultcodens"),
+    (const char *)GET_PROPERTY_OFFSET(c_SoapFault, m_faultcodens),
+    (const char *)10,
+    (const char *)64, (const char *)&NAMSTR(s_sys_ssff4490ec, "faultstring"),
+    (const char *)GET_PROPERTY_OFFSET(c_SoapFault, m_faultstring),
+    (const char *)10,
+    (const char *)64, (const char *)&NAMSTR(s_sys_ss5b7cf41f, "faultactor"),
+    (const char *)GET_PROPERTY_OFFSET(c_SoapFault, m_faultactor),
+    (const char *)10,
+    (const char *)64, (const char *)&NAMSTR(s_sys_ss2235bf3d, "detail"),
+    (const char *)GET_PROPERTY_OFFSET(c_SoapFault, m_detail),
+    (const char *)10,
+    (const char *)64, (const char *)&NAMSTR(s_sys_ssee3a4fdd, "_name"),
+    (const char *)GET_PROPERTY_OFFSET(c_SoapFault, m__name),
+    (const char *)10,
+    (const char *)64, (const char *)&NAMSTR(s_sys_ss40793385, "headerfault"),
+    (const char *)GET_PROPERTY_OFFSET(c_SoapFault, m_headerfault),
+    (const char *)10,
+
+    NULL, NULL, NULL,
+  };
+  static ClassPropTableEntry entries[7];
+  static ClassPropTableEntry *pentries[1];
+  return ClassInfo::InitClassPropTable(ctMapData, entries, pentries);
+}
+static int ct_initializer = ctInitializer();
+
+// o_getClassPropTable
+const ClassPropTable *c_SoapFault::o_getClassPropTable() const { return &cpt_SoapFault; }
 
 ///////////////////////////////////////////////////////////////////////////////
 }

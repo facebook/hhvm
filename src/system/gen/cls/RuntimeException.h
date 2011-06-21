@@ -45,8 +45,6 @@ class c_RuntimeException : public c_Exception {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_RuntimeException 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_RuntimeException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_RuntimeException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RuntimeException 1
 

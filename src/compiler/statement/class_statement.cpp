@@ -285,18 +285,9 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   cg.printSection("DECLARE_INSTANCE_PROP_OPS");
   cg_printf("public:\n");
 
-  if (variables->hasJumpTable(VariableTable::JumpTableClassGetArray)) {
-    cg_printf("virtual void o_getArray(Array &props, bool pubOnly = false) "
-              "const;\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_GETARRAY_%s 1\n", clsName);
+  if (classScope->hasGetClassPropTable()) {
+    cg_printf("virtual const ClassPropTable *o_getClassPropTable() const;\n");
   }
-  if (variables->hasJumpTable(VariableTable::JumpTableClassSetArray)) {
-    cg_printf("virtual void o_setArray(CArrRef props);\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_SETARRAY_%s 1\n", clsName);
-  }
-
   if (variables->hasJumpTable(VariableTable::JumpTableClassRealProp)) {
     cg_printf("virtual Variant *o_realProp(CStrRef s, int flags,\n");
     cg_printf("                            CStrRef context = null_string) "

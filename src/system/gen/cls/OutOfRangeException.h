@@ -45,8 +45,6 @@ class c_OutOfRangeException : public c_LogicException {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_OutOfRangeException 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_OutOfRangeException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_OutOfRangeException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OutOfRangeException 1
 

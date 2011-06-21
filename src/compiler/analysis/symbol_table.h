@@ -304,6 +304,7 @@ public:
   void canonicalizeSymbolOrder();
   void getSymbols(std::vector<Symbol*> &syms, bool filterHidden = false) const;
   void getSymbols(std::vector<std::string> &syms) const;
+  const std::vector<Symbol*> &getSymbols() const { return m_symbolVec; }
   void getCoerced(StringToTypePtrMap &coerced) const;
 
   virtual TypePtr setType(AnalysisResultConstPtr ar, const std::string &name,

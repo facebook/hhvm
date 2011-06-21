@@ -2266,7 +2266,9 @@ void AnalysisResult::outputCPPExtClassImpl(CodeGenerator &cg) {
   ClassScope::outputCPPDynamicClassCreateImpl(cg, merged, classes);
   ClassScope::outputCPPGetCallInfoStaticMethodImpl(cg, merged, classes);
   ClassScope::outputCPPGetStaticPropertyImpl(cg, merged, classes);
-  ClassScope::outputCPPGetClassConstantImpl(cg, merged, classes);
+  ClassScope::outputCPPGetClassConstantImpl(cg, merged);
+  ClassScope::outputCPPGetClassPropTableImpl(cg, ar,
+    ar->getExtensionClasses(), true);
 }
 
 void AnalysisResult::outputCPPClassMapFile() {
@@ -2837,7 +2839,7 @@ void AnalysisResult::outputCPPDynamicClassTables(
     ClassScope::outputCPPDynamicClassCreateImpl(cg, classScopes, classes);
     ClassScope::outputCPPGetCallInfoStaticMethodImpl(cg, classScopes, classes);
     ClassScope::outputCPPGetStaticPropertyImpl(cg, classScopes, classes);
-    ClassScope::outputCPPGetClassConstantImpl(cg, classScopes, classes);
+    ClassScope::outputCPPGetClassConstantImpl(cg, classScopes);
   }
   cg.namespaceEnd();
   fTable.close();
@@ -4448,6 +4450,8 @@ void AnalysisResult::outputCPPClusterImpl(CodeGenerator &cg,
       outputCPPFileImpl(cg, fs);
     }
   }
+  ClassScope::outputCPPGetClassPropTableImpl(cg, shared_from_this(),
+                                             cg.getClasses());
   cg.namespaceEnd();
 }
 
@@ -4878,6 +4882,26 @@ void AnalysisResult::cloneRTTIFuncs(const char *RTTIDirectory) {
   }
 }
 
+StringToClassScopePtrVecMap AnalysisResult::getMergedClasses() {
+  StringToClassScopePtrVecMap merged(m_classDecs);
+  for (StringToClassScopePtrMap::const_iterator iter = m_systemClasses.begin();
+       iter != m_systemClasses.end(); ++iter) {
+    ClassScopePtr cls = iter->second;
+    merged[cls->getName()].push_back(cls);
+  }
+  return merged;
+}
+
+StringToClassScopePtrVecMap AnalysisResult::getExtensionClasses() {
+  StringToClassScopePtrVecMap exts;
+  for (StringToClassScopePtrMap::const_iterator iter = m_systemClasses.begin();
+       iter != m_systemClasses.end(); ++iter) {
+    ClassScopePtr cls = iter->second;
+    if (cls->isExtensionClass()) exts[cls->getName()].push_back(cls);
+  }
+  return exts;
+}
+
 void AnalysisResult::outputInitLiteralVarStrings(CodeGenerator &cg,
   int fileIndex, vector<int> &litVarStrFileIndices,
   vector<pair<int, int> > &litVarStrs) {
@@ -5107,7 +5131,8 @@ void AnalysisResult::outputCPPSepExtensionImpl(const std::string &filename) {
       cls->outputCPPSupportMethodsImpl(cg, ar);
     }
   }
-
+  ClassScope::outputCPPGetClassPropTableImpl(cg, shared_from_this(),
+                                             cg.getClasses());
   cg.namespaceEnd();
   fTable.close();
   outputCPPNamedLiteralStrings(true, litstrFile);

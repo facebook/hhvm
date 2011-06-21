@@ -44,8 +44,6 @@ class c_XhprofFrame : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_XhprofFrame 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_XhprofFrame 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_XhprofFrame 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_XhprofFrame 1
 

@@ -36,6 +36,7 @@ class VariableEnvironment;
 
 class ArrayIter;
 class MutableArrayIter;
+class ClassPropTable;
 
 /**
  * Base class of all user-defined classes. All data members and methods in
@@ -220,7 +221,9 @@ class ObjectData : public CountableNF {
   Variant *o_weakLval(CStrRef s, CStrRef context = null_string);
 
   virtual void o_setArray(CArrRef properties);
+
   virtual void o_getArray(Array &props, bool pubOnly = false) const;
+  virtual const ClassPropTable *o_getClassPropTable() const { return NULL; }
   void o_set(const Array properties);
   Variant o_argval(bool byRef, CStrRef s, bool error = true,
       CStrRef context = null_string);

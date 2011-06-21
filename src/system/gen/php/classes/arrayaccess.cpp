@@ -36,5 +36,9 @@ Variant pm_php$classes$arrayaccess_php(bool incOnce /* = false */, LVariableTabl
 }
 namespace hphp_impl_splitter {}
 
+// Class tables
+
+// o_getClassPropTable
+
 ///////////////////////////////////////////////////////////////////////////////
 }

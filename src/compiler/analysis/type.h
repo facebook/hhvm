@@ -20,6 +20,7 @@
 #include <compiler/hphp.h>
 #include <util/json.h>
 #include <util/case_insensitive.h>
+#include <runtime/base/types.h>
 
 #define NEW_TYPE(s) TypePtr(new Type(Type::KindOf ## s))
 
@@ -207,6 +208,8 @@ public:
    */
   std::string getCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
                          BlockScopeRawPtr scope);
+  DataType getDataType() const;
+
   void outputCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
                      BlockScopeRawPtr scope);
 

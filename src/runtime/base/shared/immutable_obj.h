@@ -35,11 +35,11 @@ public:
   void getSizeStats(SharedVariantStats *stats);
   int32 getSpaceUsage();
 
-private:
   struct Prop {
     StringData *name;
     SharedVariant *val;
   };
+private:
   Prop* m_props;
   int m_propCount;
   StringData *m_cls;

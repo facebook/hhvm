@@ -44,8 +44,6 @@ class c___PHP_Incomplete_Class : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY___PHP_Incomplete_Class 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY___PHP_Incomplete_Class 1
   #define OMIT_JUMP_TABLE_CLASS_realProp___PHP_Incomplete_Class 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE___PHP_Incomplete_Class 1
 

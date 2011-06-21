@@ -566,16 +566,6 @@ Variant &c_DOMDocumentFragment::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMDocumentFragment
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMDocumentFragment
-void c_DOMDocumentFragment::o_getArray(Array &props, bool pubOnly) const {
-  c_DOMNode::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMDocumentFragment
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMDocumentFragment
-void c_DOMDocumentFragment::o_setArray(CArrRef props) {
-  c_DOMNode::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMDocumentFragment
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMDocumentFragment
 Variant * c_DOMDocumentFragment::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -738,16 +728,6 @@ Variant &c_DOMText::os_lval(CStrRef s) {
   return c_DOMCharacterData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMText
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMText
-void c_DOMText::o_getArray(Array &props, bool pubOnly) const {
-  c_DOMCharacterData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMText
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMText
-void c_DOMText::o_setArray(CArrRef props) {
-  c_DOMCharacterData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMText
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMText
 Variant * c_DOMText::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -1041,16 +1021,6 @@ Variant &c_DebuggerClient::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DebuggerClient
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DebuggerClient
-void c_DebuggerClient::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DebuggerClient
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DebuggerClient
-void c_DebuggerClient::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DebuggerClient
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DebuggerClient
 Variant * c_DebuggerClient::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -2052,16 +2022,6 @@ Variant &c_EncodingDetector::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_EncodingDetector
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_EncodingDetector
-void c_EncodingDetector::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_EncodingDetector
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_EncodingDetector
-void c_EncodingDetector::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_EncodingDetector
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_EncodingDetector
 Variant * c_EncodingDetector::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -2298,16 +2258,6 @@ Variant &c_DOMCDATASection::os_lval(CStrRef s) {
   return c_DOMText::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMCDATASection
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMCDATASection
-void c_DOMCDATASection::o_getArray(Array &props, bool pubOnly) const {
-  c_DOMText::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMCDATASection
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMCDATASection
-void c_DOMCDATASection::o_setArray(CArrRef props) {
-  c_DOMText::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMCDATASection
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMCDATASection
 Variant * c_DOMCDATASection::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -2449,16 +2399,6 @@ Variant &c_Locale::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Locale
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Locale
-void c_Locale::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Locale
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Locale
-void c_Locale::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Locale
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_Locale
 Variant * c_Locale::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -2598,16 +2538,6 @@ Variant &c_Closure::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Closure
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Closure
-void c_Closure::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Closure
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Closure
-void c_Closure::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Closure
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_Closure
 Variant * c_Closure::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -2792,16 +2722,6 @@ Variant &c_DOMDocumentType::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMDocumentType
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMDocumentType
-void c_DOMDocumentType::o_getArray(Array &props, bool pubOnly) const {
-  c_DOMNode::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMDocumentType
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMDocumentType
-void c_DOMDocumentType::o_setArray(CArrRef props) {
-  c_DOMNode::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMDocumentType
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMDocumentType
 Variant * c_DOMDocumentType::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -3024,18 +2944,6 @@ Variant &c_GenericContinuation::os_lval(CStrRef s) {
   return c_Continuation::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_GenericContinuation
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_GenericContinuation
-void c_GenericContinuation::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) props.add(NAMSTR(s_sys_ss020cf65e, "\000GenericContinuation\000vars"), m_vars, true);
-  c_Continuation::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_GenericContinuation
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_GenericContinuation
-void c_GenericContinuation::o_setArray(CArrRef props) {
-  if (props->exists(NAMSTR(s_sys_ss020cf65e, "\000GenericContinuation\000vars"))) m_vars = props->get(NAMSTR(s_sys_ss020cf65e, "\000GenericContinuation\000vars"));
-  c_Continuation::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_GenericContinuation
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_GenericContinuation
 Variant * c_GenericContinuation::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -3277,16 +3185,6 @@ Variant &c_SQLite3Stmt::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SQLite3Stmt
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SQLite3Stmt
-void c_SQLite3Stmt::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SQLite3Stmt
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SQLite3Stmt
-void c_SQLite3Stmt::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SQLite3Stmt
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SQLite3Stmt
 Variant * c_SQLite3Stmt::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -3626,16 +3524,6 @@ Variant &c_DOMNodeList::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNodeList
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNodeList
-void c_DOMNodeList::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNodeList
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNodeList
-void c_DOMNodeList::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNodeList
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMNodeList
 Variant * c_DOMNodeList::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -3910,16 +3798,6 @@ Variant &c_Normalizer::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Normalizer
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Normalizer
-void c_Normalizer::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Normalizer
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Normalizer
-void c_Normalizer::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Normalizer
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_Normalizer
 Variant * c_Normalizer::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -4130,16 +4008,6 @@ Variant &c_DOMCharacterData::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMCharacterData
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMCharacterData
-void c_DOMCharacterData::o_getArray(Array &props, bool pubOnly) const {
-  c_DOMNode::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMCharacterData
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMCharacterData
-void c_DOMCharacterData::o_setArray(CArrRef props) {
-  c_DOMNode::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMCharacterData
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMCharacterData
 Variant * c_DOMCharacterData::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -4524,16 +4392,6 @@ Variant &c_DOMEntityReference::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMEntityReference
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMEntityReference
-void c_DOMEntityReference::o_getArray(Array &props, bool pubOnly) const {
-  c_DOMNode::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMEntityReference
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMEntityReference
-void c_DOMEntityReference::o_setArray(CArrRef props) {
-  c_DOMNode::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMEntityReference
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMEntityReference
 Variant * c_DOMEntityReference::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -4675,16 +4533,6 @@ Variant &c_SimpleXMLElementIterator::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SimpleXMLElementIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SimpleXMLElementIterator
-void c_SimpleXMLElementIterator::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SimpleXMLElementIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SimpleXMLElementIterator
-void c_SimpleXMLElementIterator::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SimpleXMLElementIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SimpleXMLElementIterator
 Variant * c_SimpleXMLElementIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -4937,16 +4785,6 @@ Variant &c_GeneratorClosure::os_lval(CStrRef s) {
   return c_Closure::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_GeneratorClosure
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_GeneratorClosure
-void c_GeneratorClosure::o_getArray(Array &props, bool pubOnly) const {
-  c_Closure::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_GeneratorClosure
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_GeneratorClosure
-void c_GeneratorClosure::o_setArray(CArrRef props) {
-  c_Closure::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_GeneratorClosure
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_GeneratorClosure
 Variant * c_GeneratorClosure::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -5077,16 +4915,6 @@ Variant &c_DateTimeZone::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DateTimeZone
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DateTimeZone
-void c_DateTimeZone::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DateTimeZone
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DateTimeZone
-void c_DateTimeZone::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DateTimeZone
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DateTimeZone
 Variant * c_DateTimeZone::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -5381,16 +5209,6 @@ Variant &c_DOMNodeIterator::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNodeIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNodeIterator
-void c_DOMNodeIterator::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNodeIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNodeIterator
-void c_DOMNodeIterator::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNodeIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMNodeIterator
 Variant * c_DOMNodeIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -5643,16 +5461,6 @@ Variant &c_DOMImplementation::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMImplementation
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMImplementation
-void c_DOMImplementation::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMImplementation
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMImplementation
-void c_DOMImplementation::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMImplementation
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMImplementation
 Variant * c_DOMImplementation::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -5893,16 +5701,6 @@ Variant &c_SoapHeader::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapHeader
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapHeader
-void c_SoapHeader::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapHeader
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapHeader
-void c_SoapHeader::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapHeader
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapHeader
 Variant * c_SoapHeader::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -6074,16 +5872,6 @@ Variant &c_DOMNotation::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNotation
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNotation
-void c_DOMNotation::o_getArray(Array &props, bool pubOnly) const {
-  c_DOMNode::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNotation
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNotation
-void c_DOMNotation::o_setArray(CArrRef props) {
-  c_DOMNode::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNotation
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMNotation
 Variant * c_DOMNotation::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -6306,16 +6094,6 @@ Variant &c_DebuggerProxy::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DebuggerProxy
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DebuggerProxy
-void c_DebuggerProxy::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DebuggerProxy
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DebuggerProxy
-void c_DebuggerProxy::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DebuggerProxy
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DebuggerProxy
 Variant * c_DebuggerProxy::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -6502,16 +6280,6 @@ Variant &c_Memcached::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Memcached
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Memcached
-void c_Memcached::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Memcached
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Memcached
-void c_Memcached::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Memcached
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_Memcached
 Variant * c_Memcached::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -8039,16 +7807,6 @@ Variant &c_XMLReader::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_XMLReader
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_XMLReader
-void c_XMLReader::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_XMLReader
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_XMLReader
-void c_XMLReader::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_XMLReader
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_XMLReader
 Variant * c_XMLReader::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -8978,16 +8736,6 @@ Variant &c_DOMComment::os_lval(CStrRef s) {
   return c_DOMCharacterData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMComment
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMComment
-void c_DOMComment::o_getArray(Array &props, bool pubOnly) const {
-  c_DOMCharacterData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMComment
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMComment
-void c_DOMComment::o_setArray(CArrRef props) {
-  c_DOMCharacterData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMComment
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMComment
 Variant * c_DOMComment::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -9135,16 +8883,6 @@ Variant &c_SQLite3::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SQLite3
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SQLite3
-void c_SQLite3::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SQLite3
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SQLite3
-void c_SQLite3::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SQLite3
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SQLite3
 Variant * c_SQLite3::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -9753,16 +9491,6 @@ Variant &c_DOMAttr::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMAttr
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMAttr
-void c_DOMAttr::o_getArray(Array &props, bool pubOnly) const {
-  c_DOMNode::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMAttr
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMAttr
-void c_DOMAttr::o_setArray(CArrRef props) {
-  c_DOMNode::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMAttr
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMAttr
 Variant * c_DOMAttr::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -10029,16 +9757,6 @@ Variant &c_SoapVar::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapVar
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapVar
-void c_SoapVar::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapVar
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapVar
-void c_SoapVar::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapVar
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapVar
 Variant * c_SoapVar::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -10219,16 +9937,6 @@ Variant &c_DOMNamedNodeMap::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNamedNodeMap
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNamedNodeMap
-void c_DOMNamedNodeMap::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNamedNodeMap
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNamedNodeMap
-void c_DOMNamedNodeMap::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNamedNodeMap
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMNamedNodeMap
 Variant * c_DOMNamedNodeMap::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -10569,16 +10277,6 @@ Variant &c_SQLite3Result::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SQLite3Result
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SQLite3Result
-void c_SQLite3Result::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SQLite3Result
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SQLite3Result
-void c_SQLite3Result::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SQLite3Result
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SQLite3Result
 Variant * c_SQLite3Result::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -10875,16 +10573,6 @@ Variant &c_SimpleXMLElement::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SimpleXMLElement
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SimpleXMLElement
-void c_SimpleXMLElement::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SimpleXMLElement
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SimpleXMLElement
-void c_SimpleXMLElement::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SimpleXMLElement
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SimpleXMLElement
 Variant * c_SimpleXMLElement::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -11706,16 +11394,6 @@ Variant &c_Memcache::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Memcache
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Memcache
-void c_Memcache::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Memcache
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Memcache
-void c_Memcache::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Memcache
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_Memcache
 Variant * c_Memcache::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -12551,16 +12229,6 @@ Variant &c_DOMProcessingInstruction::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMProcessingInstruction
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMProcessingInstruction
-void c_DOMProcessingInstruction::o_getArray(Array &props, bool pubOnly) const {
-  c_DOMNode::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMProcessingInstruction
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMProcessingInstruction
-void c_DOMProcessingInstruction::o_setArray(CArrRef props) {
-  c_DOMNode::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMProcessingInstruction
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMProcessingInstruction
 Variant * c_DOMProcessingInstruction::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -12803,16 +12471,6 @@ Variant &c_EncodingMatch::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_EncodingMatch
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_EncodingMatch
-void c_EncodingMatch::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_EncodingMatch
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_EncodingMatch
-void c_EncodingMatch::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_EncodingMatch
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_EncodingMatch
 Variant * c_EncodingMatch::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -13061,16 +12719,6 @@ Variant &c_PDOStatement::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDOStatement
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_PDOStatement
-void c_PDOStatement::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_PDOStatement
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_PDOStatement
-void c_PDOStatement::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_PDOStatement
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_PDOStatement
 Variant * c_PDOStatement::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -13968,16 +13616,6 @@ Variant &c_SoapClient::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapClient
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapClient
-void c_SoapClient::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapClient
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapClient
-void c_SoapClient::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapClient
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapClient
 Variant * c_SoapClient::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -14484,16 +14122,6 @@ Variant &c_SoapParam::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapParam
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapParam
-void c_SoapParam::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapParam
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapParam
-void c_SoapParam::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapParam
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapParam
 Variant * c_SoapParam::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -14638,16 +14266,6 @@ Variant &c_DateTime::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DateTime
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DateTime
-void c_DateTime::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DateTime
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DateTime
-void c_DateTime::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DateTime
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DateTime
 Variant * c_DateTime::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -15078,16 +14696,6 @@ Variant &c_Collator::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Collator
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Collator
-void c_Collator::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Collator
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Collator
-void c_Collator::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Collator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_Collator
 Variant * c_Collator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -15645,16 +15253,6 @@ Variant &c_PDO::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDO
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_PDO
-void c_PDO::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_PDO
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_PDO
-void c_PDO::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_PDO
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_PDO
 Variant * c_PDO::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -16463,16 +16061,6 @@ Variant &c_ImageSprite::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ImageSprite
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ImageSprite
-void c_ImageSprite::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ImageSprite
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ImageSprite
-void c_ImageSprite::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ImageSprite
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ImageSprite
 Variant * c_ImageSprite::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -16937,32 +16525,6 @@ Variant &c_Continuation::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Continuation
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Continuation
-void c_Continuation::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) props.add(NAMSTR(s_sys_ssc9ae0c06, "\000Continuation\000obj"), m_obj, true);
-  if (!pubOnly) props.add(NAMSTR(s_sys_ss9621feb5, "\000Continuation\000args"), m_args, true);
-  if (!pubOnly) props.add(NAMSTR(s_sys_ss40877955, "\000Continuation\000label"), m_label, true);
-  if (!pubOnly) props.add(NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done"), m_done, true);
-  if (!pubOnly) props.add(NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index"), m_index, true);
-  if (!pubOnly) if (isInitialized(m_value)) props.lvalAt(NAMSTR(s_sys_ss4e65aff3, "\000Continuation\000value"), AccessFlags::Key).setWithRef(m_value);
-  if (!pubOnly) props.add(NAMSTR(s_sys_ssde0dbfb2, "\000Continuation\000running"), m_running, true);
-  if (!pubOnly) if (isInitialized(m_received)) props.lvalAt(NAMSTR(s_sys_ss19136311, "\000Continuation\000received"), AccessFlags::Key).setWithRef(m_received);
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Continuation
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Continuation
-void c_Continuation::o_setArray(CArrRef props) {
-  if (props->exists(NAMSTR(s_sys_ssc9ae0c06, "\000Continuation\000obj"))) m_obj = props->get(NAMSTR(s_sys_ssc9ae0c06, "\000Continuation\000obj"));
-  if (props->exists(NAMSTR(s_sys_ss9621feb5, "\000Continuation\000args"))) m_args = props->get(NAMSTR(s_sys_ss9621feb5, "\000Continuation\000args"));
-  if (props->exists(NAMSTR(s_sys_ss40877955, "\000Continuation\000label"))) m_label = props->get(NAMSTR(s_sys_ss40877955, "\000Continuation\000label"));
-  if (props->exists(NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done"))) m_done = props->get(NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done"));
-  if (props->exists(NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index"))) m_index = props->get(NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index"));
-  props->load(NAMSTR(s_sys_ss4e65aff3, "\000Continuation\000value"), m_value);
-  if (props->exists(NAMSTR(s_sys_ssde0dbfb2, "\000Continuation\000running"))) m_running = props->get(NAMSTR(s_sys_ssde0dbfb2, "\000Continuation\000running"));
-  props->load(NAMSTR(s_sys_ss19136311, "\000Continuation\000received"), m_received);
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Continuation
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_Continuation
 Variant * c_Continuation::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -17499,16 +17061,6 @@ Variant &c_DOMEntity::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMEntity
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMEntity
-void c_DOMEntity::o_getArray(Array &props, bool pubOnly) const {
-  c_DOMNode::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMEntity
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMEntity
-void c_DOMEntity::o_setArray(CArrRef props) {
-  c_DOMNode::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMEntity
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMEntity
 Variant * c_DOMEntity::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -17731,16 +17283,6 @@ Variant &c_XMLWriter::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_XMLWriter
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_XMLWriter
-void c_XMLWriter::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_XMLWriter
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_XMLWriter
-void c_XMLWriter::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_XMLWriter
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_XMLWriter
 Variant * c_XMLWriter::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -19131,16 +18673,6 @@ Variant &c_DOMXPath::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMXPath
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMXPath
-void c_DOMXPath::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMXPath
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMXPath
-void c_DOMXPath::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMXPath
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMXPath
 Variant * c_DOMXPath::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -19506,16 +19038,6 @@ Variant &c_SoapServer::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapServer
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapServer
-void c_SoapServer::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapServer
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapServer
-void c_SoapServer::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapServer
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapServer
 Variant * c_SoapServer::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -19923,16 +19445,6 @@ Variant &c_DOMNode::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNode
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNode
-void c_DOMNode::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNode
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNode
-void c_DOMNode::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNode
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMNode
 Variant * c_DOMNode::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -20669,16 +20181,6 @@ Variant &c_SpoofChecker::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SpoofChecker
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SpoofChecker
-void c_SpoofChecker::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SpoofChecker
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SpoofChecker
-void c_SpoofChecker::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SpoofChecker
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SpoofChecker
 Variant * c_SpoofChecker::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -20967,16 +20469,6 @@ Variant &c_DOMDocument::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMDocument
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMDocument
-void c_DOMDocument::o_getArray(Array &props, bool pubOnly) const {
-  c_DOMNode::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMDocument
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMDocument
-void c_DOMDocument::o_setArray(CArrRef props) {
-  c_DOMNode::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMDocument
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMDocument
 Variant * c_DOMDocument::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -22135,16 +21627,6 @@ Variant &c_LibXMLError::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_LibXMLError
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_LibXMLError
-void c_LibXMLError::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_LibXMLError
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_LibXMLError
-void c_LibXMLError::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_LibXMLError
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_LibXMLError
 Variant * c_LibXMLError::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -22275,16 +21757,6 @@ Variant &c_DOMElement::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMElement
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMElement
-void c_DOMElement::o_getArray(Array &props, bool pubOnly) const {
-  c_DOMNode::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMElement
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMElement
-void c_DOMElement::o_setArray(CArrRef props) {
-  c_DOMNode::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMElement
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMElement
 Variant * c_DOMElement::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -23273,6 +22745,103 @@ Variant get_builtin_class_constant(const char *s, const char *constant, bool fat
   }
   return null;
 }
+
+// Class tables
+ClassPropTable cpt_Continuation;
+ClassPropTable cpt_GenericContinuation;
+static int ctInitializer() {
+  const char *ctMapData[] = {
+    (const char *)8, (const char *)8, (const char *)&cpt_Continuation, (const char *)NULL,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ssc9ae0c06, "\000Continuation\000obj"),
+    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_obj),
+    (const char *)9,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ss9621feb5, "\000Continuation\000args"),
+    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_args),
+    (const char *)8,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ss40877955, "\000Continuation\000label"),
+    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_label),
+    (const char *)4,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done"),
+    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_done),
+    (const char *)2,
+    (const char *)256, (const char *)&NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index"),
+    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_index),
+    (const char *)4,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ss4e65aff3, "\000Continuation\000value"),
+    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_value),
+    (const char *)10,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ssde0dbfb2, "\000Continuation\000running"),
+    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_running),
+    (const char *)2,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ss19136311, "\000Continuation\000received"),
+    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_received),
+    (const char *)10,
+
+    (const char *)1, (const char *)1, (const char *)&cpt_GenericContinuation, (const char *)&cpt_Continuation,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ss020cf65e, "\000GenericContinuation\000vars"),
+    (const char *)GET_PROPERTY_OFFSET(c_GenericContinuation, m_vars),
+    (const char *)8,
+
+    NULL, NULL, NULL,
+  };
+  static ClassPropTableEntry entries[9];
+  static ClassPropTableEntry *pentries[11];
+  return ClassInfo::InitClassPropTable(ctMapData, entries, pentries);
+}
+static int ct_initializer = ctInitializer();
+
+// o_getClassPropTable
+const ClassPropTable *c_Closure::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_Collator::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_Continuation::o_getClassPropTable() const { return &cpt_Continuation; }
+const ClassPropTable *c_DOMAttr::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMCDATASection::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMCharacterData::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMComment::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMDocument::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMDocumentFragment::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMDocumentType::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMElement::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMEntity::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMEntityReference::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMImplementation::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMNamedNodeMap::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMNode::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMNodeIterator::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMNodeList::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMNotation::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMProcessingInstruction::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMText::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DOMXPath::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DateTime::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DateTimeZone::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DebuggerClient::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_DebuggerProxy::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_EncodingDetector::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_EncodingMatch::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_GeneratorClosure::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_GenericContinuation::o_getClassPropTable() const { return &cpt_GenericContinuation; }
+const ClassPropTable *c_ImageSprite::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_LibXMLError::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_Locale::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_Memcache::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_Memcached::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_Normalizer::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_PDO::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_PDOStatement::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_SQLite3::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_SQLite3Result::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_SQLite3Stmt::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_SimpleXMLElement::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_SimpleXMLElementIterator::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_SoapClient::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_SoapHeader::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_SoapParam::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_SoapServer::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_SoapVar::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_SpoofChecker::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_XMLReader::o_getClassPropTable() const { return NULL; }
+const ClassPropTable *c_XMLWriter::o_getClassPropTable() const { return NULL; }
 
 ///////////////////////////////////////////////////////////////////////////////
 }

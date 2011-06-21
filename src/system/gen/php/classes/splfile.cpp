@@ -50,16 +50,6 @@ Variant &c_SplFileObject::os_lval(CStrRef s) {
   return c_SplFileInfo::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplFileObject
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SplFileObject
-void c_SplFileObject::o_getArray(Array &props, bool pubOnly) const {
-  c_SplFileInfo::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SplFileObject
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SplFileObject
-void c_SplFileObject::o_setArray(CArrRef props) {
-  c_SplFileInfo::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SplFileObject
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SplFileObject
 Variant * c_SplFileObject::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -1230,18 +1220,6 @@ Variant &c_SplFileInfo::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplFileInfo
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SplFileInfo
-void c_SplFileInfo::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_rsrc)) props.lvalAt(NAMSTR(s_sys_ss25b53cd5, "\000SplFileInfo\000rsrc"), AccessFlags::Key).setWithRef(m_rsrc);
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SplFileInfo
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SplFileInfo
-void c_SplFileInfo::o_setArray(CArrRef props) {
-  props->load(NAMSTR(s_sys_ss25b53cd5, "\000SplFileInfo\000rsrc"), m_rsrc);
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SplFileInfo
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SplFileInfo
 Variant * c_SplFileInfo::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -2258,6 +2236,26 @@ Variant pm_php$classes$splfile_php(bool incOnce /* = false */, LVariableTable* v
   return true;
 }
 namespace hphp_impl_splitter {}
+
+// Class tables
+ClassPropTable cpt_SplFileInfo;
+static int ctInitializer() {
+  const char *ctMapData[] = {
+    (const char *)1, (const char *)1, (const char *)&cpt_SplFileInfo, (const char *)NULL,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ss25b53cd5, "\000SplFileInfo\000rsrc"),
+    (const char *)GET_PROPERTY_OFFSET(c_SplFileInfo, m_rsrc),
+    (const char *)10,
+
+    NULL, NULL, NULL,
+  };
+  static ClassPropTableEntry entries[1];
+  static ClassPropTableEntry *pentries[2];
+  return ClassInfo::InitClassPropTable(ctMapData, entries, pentries);
+}
+static int ct_initializer = ctInitializer();
+
+// o_getClassPropTable
+const ClassPropTable *c_SplFileInfo::o_getClassPropTable() const { return &cpt_SplFileInfo; }
 
 ///////////////////////////////////////////////////////////////////////////////
 }

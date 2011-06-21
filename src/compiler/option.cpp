@@ -103,6 +103,7 @@ const char *Option::VariablePrefix = "v_";
 const char *Option::HiddenVariablePrefix = "h_";
 const char *Option::GlobalVariablePrefix = "gv_";
 const char *Option::StaticVariablePrefix = "sv_";
+const char *Option::ClassPropTablePrefix = "cpt_";
 const char *Option::ScalarArrayName = "sa_";
 const char *Option::SystemScalarArrayName = "ssa_";
 const char *Option::ClassPrefix = "c_";

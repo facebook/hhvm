@@ -3790,7 +3790,7 @@ void Variant::unserialize(VariableUnserializer *uns) {
 
       Array v = Array::Create();
       v.unserialize(uns);
-      obj->o_setArray(v);
+      ClassInfo::SetArray(obj.get(), obj->o_getClassPropTable(), v);
 
       obj->t___wakeup();
       return; // array has '}' terminating

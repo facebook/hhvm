@@ -45,8 +45,6 @@ class c_MutableArrayIterator : public c_ArrayIterator {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_MutableArrayIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_MutableArrayIterator 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_MutableArrayIterator 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_MutableArrayIterator 1
 

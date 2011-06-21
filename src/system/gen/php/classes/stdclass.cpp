@@ -45,16 +45,6 @@ Variant &c_stdClass::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_stdClass
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_stdClass
-void c_stdClass::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_stdClass
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_stdClass
-void c_stdClass::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_stdClass
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_stdClass
 Variant * c_stdClass::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -128,16 +118,6 @@ Variant &c___PHP_Incomplete_Class::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL___PHP_Incomplete_Class
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY___PHP_Incomplete_Class
-void c___PHP_Incomplete_Class::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY___PHP_Incomplete_Class
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY___PHP_Incomplete_Class
-void c___PHP_Incomplete_Class::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY___PHP_Incomplete_Class
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp___PHP_Incomplete_Class
 Variant * c___PHP_Incomplete_Class::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -207,6 +187,10 @@ Variant pm_php$classes$stdclass_php(bool incOnce /* = false */, LVariableTable* 
   return true;
 }
 namespace hphp_impl_splitter {}
+
+// Class tables
+
+// o_getClassPropTable
 
 ///////////////////////////////////////////////////////////////////////////////
 }

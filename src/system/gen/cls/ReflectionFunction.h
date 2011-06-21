@@ -46,8 +46,6 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionFunction 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionFunction 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_ReflectionFunction 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionFunction 1
 

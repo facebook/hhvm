@@ -45,8 +45,6 @@ class c_FilterIterator : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_FilterIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_FilterIterator 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_FilterIterator 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_FilterIterator 1
 

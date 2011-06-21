@@ -832,5 +832,162 @@ ClassInfo::MethodInfo::~MethodInfo() {
   }
 }
 
+void ClassInfo::GetArray(const ObjectData *obj, const ClassPropTable *ct,
+                         Array &props, bool pubOnly) {
+  while (ct) {
+    ClassPropTableEntry *p = ct->m_entries;
+    for (int64 i = 0; i < ct->m_count; i++, p++) {
+      if (!pubOnly || p->isPublic()) {
+        if (p->isOverride()) {
+          /* The actual property is stored in a base class,
+             but we need to set the entry here, to get the
+             iteration order right */
+          props.set(*p->keyName, null_variant, true);
+          continue;
+        }
+        const char *addr = ((const char *)obj) + p->offset;
+        if (LIKELY(p->type == KindOfVariant)) {
+          if (isInitialized(*(Variant*)addr)) {
+            props.lvalAt(*p->keyName, AccessFlags::Key)
+                 .setWithRef(*(Variant*)addr);
+          }
+          continue;
+        }
+        if (p->isPrivate()) {
+          switch (p->type) {
+          case KindOfBoolean:
+            props.add(*p->keyName, *(bool*)addr, true);
+            break;
+          case KindOfInt32:
+            props.add(*p->keyName, *(int*)addr, true);
+            break;
+          case KindOfInt64:
+            props.add(*p->keyName, *(int64*)addr, true);
+            break;
+          case KindOfDouble:
+            props.add(*p->keyName, *(double*)addr, true);
+            break;
+          case KindOfString:
+            props.add(*p->keyName, *(String*)addr, true);
+            break;
+          case KindOfArray:
+            props.add(*p->keyName, *(Array*)addr, true);
+            break;
+          case KindOfObject:
+            props.add(*p->keyName, *(Object*)addr, true);
+            break;
+          default:
+            ASSERT(false);
+            break; 
+          }
+        } else {
+          switch (p->type) {
+          case KindOfBoolean:
+            props.set(*p->keyName, *(bool*)addr, true);
+            break;
+          case KindOfInt32:
+            props.set(*p->keyName, *(int*)addr, true);
+            break;
+          case KindOfInt64:
+            props.set(*p->keyName, *(int64*)addr, true);
+            break;
+          case KindOfDouble:
+            props.set(*p->keyName, *(double*)addr, true);
+            break;
+          case KindOfString:
+            props.set(*p->keyName, *(String*)addr, true);
+            break;
+          case KindOfArray:
+            props.set(*p->keyName, *(Array*)addr, true);
+            break;
+          case KindOfObject:
+            props.set(*p->keyName, *(Object*)addr, true);
+            break;
+          default:
+            ASSERT(false);
+            break; 
+          }
+        }
+      }
+    }
+    ct = ct->m_parent;
+    if (!ct) {
+      ObjectData *parent =
+        (const_cast<ObjectData *>(obj))->getRedeclaredParent();
+      if (parent) {
+        ASSERT(parent != obj);
+        obj = parent;
+        ct = obj->o_getClassPropTable();
+      }
+    }
+  }
+  obj->o_getArray(props, pubOnly);
+}
+
+void ClassInfo::SetArray(ObjectData *obj, const ClassPropTable *ct,
+                         CArrRef props) {
+  while (ct) {
+    for (ClassPropTableEntry **pp = ct->m_pentries; *pp; pp++) {
+      ClassPropTableEntry *p = *pp;
+      ASSERT(p->isPrivate());
+      const char *addr = ((const char *)obj) + p->offset;
+      if (LIKELY(p->type == KindOfVariant)) {
+        props->load(*p->keyName, *(Variant*)addr);
+        continue;
+      }
+      if (!props->exists(*p->keyName)) continue;
+
+      CVarRef value = props->get(*p->keyName);
+      switch (p->type) {
+      case KindOfBoolean: *(bool*)addr = value;   break;
+      case KindOfInt32:   *(int*)addr = value;    break;
+      case KindOfInt64:   *(int64*)addr = value;  break;
+      case KindOfDouble:  *(double*)addr = value; break;
+      case KindOfString:  *(String*)addr = value; break;
+      case KindOfArray:   *(Array*)addr = value;  break;
+      case KindOfObject:  *(Object*)addr = value; break;
+      default:            ASSERT(false);          break; 
+      }
+    }
+    ct = ct->m_parent;
+    if (!ct) {
+      ObjectData *parent =
+        (const_cast<ObjectData *>(obj))->getRedeclaredParent();
+      if (parent) {
+        ASSERT(parent != obj);
+        obj = parent;
+        ct = obj->o_getClassPropTable();
+      }
+    }
+  }
+  obj->o_setArray(props);
+}
+
+int ClassInfo::InitClassPropTable(const char *ctMapData[],
+                                  ClassPropTableEntry entries[],
+                                  ClassPropTableEntry *pentries[]) {
+  ClassPropTableEntry *ce = entries;
+  ClassPropTableEntry **cpe = pentries;
+  for (const char **s = ctMapData; *s;) {
+    int64 count = (int64)(*s++);
+    int64 pcount = (int64)(*s++);
+    ClassPropTable *ct = (ClassPropTable *)(*s++);
+    ClassPropTable *pt = (ClassPropTable *)(*s++);
+    new (ct) ClassPropTable(count, pcount, pt, ce, cpe);
+    ClassPropTableEntry *t = ce;
+    for (int64 i = 0; i < count; i++, ce++) {
+      ce->flags = (int64)(*s++);
+      ce->keyName = (StaticString *)(*s++);
+      ce->offset = (int64)(*s++);
+      ce->type = (int64)(*s++);
+    }
+    for (int64 i = 0; i < count; i++, t++) {
+      if (t->isPrivate()) *cpe++ = t;
+    }
+    *cpe++ = NULL;
+  }
+  return 0;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

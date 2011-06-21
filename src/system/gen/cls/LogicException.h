@@ -45,8 +45,6 @@ class c_LogicException : public c_Exception {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_LogicException 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_LogicException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_LogicException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LogicException 1
 

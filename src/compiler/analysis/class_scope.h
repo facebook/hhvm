@@ -348,8 +348,11 @@ public:
   (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
    const std::vector<const char*> &classes);
   static void outputCPPGetClassConstantImpl
-  (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
-   const std::vector<const char*> &classes);
+  (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes);
+  static void outputCPPGetClassPropTableImpl
+  (CodeGenerator &cg, AnalysisResultPtr ar,
+   const StringToClassScopePtrVecMap &classScopes,
+   bool extension = false);
   void outputCPPStaticInitializerDecl(CodeGenerator &cg);
   bool isInterface() { return m_kindOf == KindOfInterface; }
   bool isFinal() { return m_kindOf == KindOfFinalClass; }
@@ -456,6 +459,10 @@ public:
 
   bool canSkipCreateMethod() const;
 
+  bool hasGetClassPropTable() const { return m_getClassPropTable; }
+  typedef std::map<std::string,
+                   std::pair<ClassScopePtr, std::vector<const Symbol *> > >
+    ClassPropTableMap;
 protected:
   void findJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar,
                             bool staticOnly, std::vector<const char *> &funcs);
@@ -477,6 +484,7 @@ private:
   bool m_sep;
   bool m_needsCppCtor;
   bool m_needsInit;
+  bool m_getClassPropTable;
 
   std::set<JumpTableName> m_emptyJumpTables;
   std::set<std::string> m_usedLiteralStringsHeader;
@@ -517,6 +525,9 @@ private:
       AnalysisResultPtr ar, const std::vector<const char*> &keys,
       const StringToFunctionScopePtrVecMap &funcScopes, bool fewArgs);
   hphp_const_char_imap<int> m_implemented;
+
+  ClassScopePtr getNextParentWithProp(CodeGenerator &cg, AnalysisResultPtr ar,
+                                      ClassPropTableMap tables);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

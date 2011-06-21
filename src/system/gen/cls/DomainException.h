@@ -45,8 +45,6 @@ class c_DomainException : public c_LogicException {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_DomainException 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_DomainException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_DomainException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DomainException 1
 

@@ -45,8 +45,6 @@ class c_RangeException : public c_RuntimeException {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_RangeException 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_RangeException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_RangeException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RangeException 1
 

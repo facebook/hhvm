@@ -19,6 +19,7 @@
 #include <runtime/base/externals.h>
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/array/array_iterator.h>
+#include <runtime/base/class_info.h>
 
 namespace HPHP {
 
@@ -30,7 +31,7 @@ ImmutableObj::ImmutableObj(ObjectData *obj) {
   ASSERT(!obj->o_instanceof("Serializable"));
   m_cls = obj->o_getClassName()->copy(true);
   Array props;
-  obj->o_getArray(props);
+  ClassInfo::GetArray(obj, obj->o_getClassPropTable(), props, false);
   if (props.empty()) {
     m_props = NULL;
     m_propCount = 0;
@@ -66,7 +67,7 @@ Object ImmutableObj::getObject() {
            true);
   }
   Array v = ai.create();
-  obj->o_setArray(v);
+  ClassInfo::SetArray(obj.get(), obj->o_getClassPropTable(), v);
   obj->t___wakeup();
   return obj;
 }

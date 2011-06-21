@@ -60,20 +60,6 @@ Variant &c_SplObjectStorage::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplObjectStorage
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SplObjectStorage
-void c_SplObjectStorage::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_storage)) props.lvalAt(NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage"), AccessFlags::Key).setWithRef(m_storage);
-  if (!pubOnly) props.add(NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index"), m_index, true);
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SplObjectStorage
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SplObjectStorage
-void c_SplObjectStorage::o_setArray(CArrRef props) {
-  props->load(NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage"), m_storage);
-  if (props->exists(NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index"))) m_index = props->get(NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index"));
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SplObjectStorage
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SplObjectStorage
 Variant * c_SplObjectStorage::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -533,6 +519,29 @@ Variant pm_php$classes$splobjectstorage_php(bool incOnce /* = false */, LVariabl
   return true;
 }
 namespace hphp_impl_splitter {}
+
+// Class tables
+ClassPropTable cpt_SplObjectStorage;
+static int ctInitializer() {
+  const char *ctMapData[] = {
+    (const char *)2, (const char *)2, (const char *)&cpt_SplObjectStorage, (const char *)NULL,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage"),
+    (const char *)GET_PROPERTY_OFFSET(c_SplObjectStorage, m_storage),
+    (const char *)10,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index"),
+    (const char *)GET_PROPERTY_OFFSET(c_SplObjectStorage, m_index),
+    (const char *)4,
+
+    NULL, NULL, NULL,
+  };
+  static ClassPropTableEntry entries[2];
+  static ClassPropTableEntry *pentries[3];
+  return ClassInfo::InitClassPropTable(ctMapData, entries, pentries);
+}
+static int ct_initializer = ctInitializer();
+
+// o_getClassPropTable
+const ClassPropTable *c_SplObjectStorage::o_getClassPropTable() const { return &cpt_SplObjectStorage; }
 
 ///////////////////////////////////////////////////////////////////////////////
 }

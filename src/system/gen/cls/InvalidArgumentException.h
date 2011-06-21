@@ -45,8 +45,6 @@ class c_InvalidArgumentException : public c_LogicException {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_InvalidArgumentException 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_InvalidArgumentException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_InvalidArgumentException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_InvalidArgumentException 1
 

@@ -48,8 +48,7 @@ class c_SplObjectStorage : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual void o_getArray(Array &props, bool pubOnly = false) const;
-  virtual void o_setArray(CArrRef props);
+  virtual const ClassPropTable *o_getClassPropTable() const;
   virtual Variant *o_realProp(CStrRef s, int flags,
                               CStrRef context = null_string) const;
   Variant *o_realPropPrivate(CStrRef s, int flags) const;

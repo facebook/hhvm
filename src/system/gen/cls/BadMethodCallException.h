@@ -45,8 +45,6 @@ class c_BadMethodCallException : public c_BadFunctionCallException {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_BadMethodCallException 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_BadMethodCallException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_BadMethodCallException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_BadMethodCallException 1
 

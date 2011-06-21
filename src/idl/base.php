@@ -765,14 +765,7 @@ function generateMethodCPPHeader($method, $class, $f) {
 }
 
 function generatePropertyCPPHeader($property, $f) {
-  if ($property['flags'] & IsPrivate) {
-    $vis = "private";
-  } else if ($property['flags'] & IsProtected) {
-    $vis = "protected";
-  } else {
-    $vis = "public";
-  }
-  fprintf($f, "  %s: ", $vis);
+  fprintf($f, "  public: ");
   fprintf($f, "%s m_%s;\n", typename($property['type']),
           $property['name']);
 }

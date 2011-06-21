@@ -45,8 +45,6 @@ class c_OverflowException : public c_RuntimeException {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_OverflowException 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_OverflowException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_OverflowException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OverflowException 1
 

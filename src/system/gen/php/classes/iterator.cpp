@@ -60,18 +60,6 @@ Variant &c_ArrayIterator::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ArrayIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ArrayIterator
-void c_ArrayIterator::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_arr)) props.lvalAt(NAMSTR(s_sys_ss7cb08d68, "arr"), AccessFlags::Key).setWithRef(m_arr);
-  if (!pubOnly) if (isInitialized(m_flags)) props.lvalAt(NAMSTR(s_sys_ss28fae70d, "flags"), AccessFlags::Key).setWithRef(m_flags);
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ArrayIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ArrayIterator
-void c_ArrayIterator::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ArrayIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ArrayIterator
 Variant * c_ArrayIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -971,18 +959,6 @@ Variant &c_AppendIterator::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_AppendIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_AppendIterator
-void c_AppendIterator::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_iterators)) props.lvalAt(NAMSTR(s_sys_ssb3fce46e, "\000AppendIterator\000iterators"), AccessFlags::Key).setWithRef(m_iterators);
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_AppendIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_AppendIterator
-void c_AppendIterator::o_setArray(CArrRef props) {
-  props->load(NAMSTR(s_sys_ssb3fce46e, "\000AppendIterator\000iterators"), m_iterators);
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_AppendIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_AppendIterator
 Variant * c_AppendIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -1619,18 +1595,6 @@ Variant &c_RecursiveIteratorIterator::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RecursiveIteratorIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_RecursiveIteratorIterator
-void c_RecursiveIteratorIterator::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_rsrc)) props.lvalAt(NAMSTR(s_sys_ss246080da, "\000RecursiveIteratorIterator\000rsrc"), AccessFlags::Key).setWithRef(m_rsrc);
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_RecursiveIteratorIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_RecursiveIteratorIterator
-void c_RecursiveIteratorIterator::o_setArray(CArrRef props) {
-  props->load(NAMSTR(s_sys_ss246080da, "\000RecursiveIteratorIterator\000rsrc"), m_rsrc);
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_RecursiveIteratorIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_RecursiveIteratorIterator
 Variant * c_RecursiveIteratorIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -2009,16 +1973,6 @@ Variant &c_MutableArrayIterator::os_lval(CStrRef s) {
   return c_ArrayIterator::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_MutableArrayIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_MutableArrayIterator
-void c_MutableArrayIterator::o_getArray(Array &props, bool pubOnly) const {
-  c_ArrayIterator::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_MutableArrayIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_MutableArrayIterator
-void c_MutableArrayIterator::o_setArray(CArrRef props) {
-  c_ArrayIterator::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_MutableArrayIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_MutableArrayIterator
 Variant * c_MutableArrayIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -2213,16 +2167,6 @@ Variant &c_FilterIterator::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_FilterIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_FilterIterator
-void c_FilterIterator::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_FilterIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_FilterIterator
-void c_FilterIterator::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_FilterIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_FilterIterator
 Variant * c_FilterIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -2308,6 +2252,43 @@ Variant pm_php$classes$iterator_php(bool incOnce /* = false */, LVariableTable* 
   return true;
 }
 namespace hphp_impl_splitter {}
+
+// Class tables
+ClassPropTable cpt_AppendIterator;
+ClassPropTable cpt_ArrayIterator;
+ClassPropTable cpt_RecursiveIteratorIterator;
+static int ctInitializer() {
+  const char *ctMapData[] = {
+    (const char *)1, (const char *)1, (const char *)&cpt_AppendIterator, (const char *)NULL,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ssb3fce46e, "\000AppendIterator\000iterators"),
+    (const char *)GET_PROPERTY_OFFSET(c_AppendIterator, m_iterators),
+    (const char *)10,
+
+    (const char *)2, (const char *)0, (const char *)&cpt_ArrayIterator, (const char *)NULL,
+    (const char *)128, (const char *)&NAMSTR(s_sys_ss7cb08d68, "arr"),
+    (const char *)GET_PROPERTY_OFFSET(c_ArrayIterator, m_arr),
+    (const char *)10,
+    (const char *)128, (const char *)&NAMSTR(s_sys_ss28fae70d, "flags"),
+    (const char *)GET_PROPERTY_OFFSET(c_ArrayIterator, m_flags),
+    (const char *)10,
+
+    (const char *)1, (const char *)1, (const char *)&cpt_RecursiveIteratorIterator, (const char *)NULL,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ss246080da, "\000RecursiveIteratorIterator\000rsrc"),
+    (const char *)GET_PROPERTY_OFFSET(c_RecursiveIteratorIterator, m_rsrc),
+    (const char *)10,
+
+    NULL, NULL, NULL,
+  };
+  static ClassPropTableEntry entries[4];
+  static ClassPropTableEntry *pentries[5];
+  return ClassInfo::InitClassPropTable(ctMapData, entries, pentries);
+}
+static int ct_initializer = ctInitializer();
+
+// o_getClassPropTable
+const ClassPropTable *c_AppendIterator::o_getClassPropTable() const { return &cpt_AppendIterator; }
+const ClassPropTable *c_ArrayIterator::o_getClassPropTable() const { return &cpt_ArrayIterator; }
+const ClassPropTable *c_RecursiveIteratorIterator::o_getClassPropTable() const { return &cpt_RecursiveIteratorIterator; }
 
 ///////////////////////////////////////////////////////////////////////////////
 }

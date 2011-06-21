@@ -45,8 +45,6 @@ class c_UnderflowException : public c_RuntimeException {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_UnderflowException 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_UnderflowException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_UnderflowException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_UnderflowException 1
 

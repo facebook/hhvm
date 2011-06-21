@@ -36,5 +36,9 @@ Variant pm_php$classes$debugger_php(bool incOnce /* = false */, LVariableTable* 
 }
 namespace hphp_impl_splitter {}
 
+// Class tables
+
+// o_getClassPropTable
+
 ///////////////////////////////////////////////////////////////////////////////
 }

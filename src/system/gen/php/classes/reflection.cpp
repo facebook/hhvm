@@ -57,17 +57,6 @@ Variant &c_ReflectionFunctionAbstract::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionFunctionAbstract
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionFunctionAbstract
-void c_ReflectionFunctionAbstract::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_info)) props.lvalAt(NAMSTR(s_sys_ss33988b3e, "info"), AccessFlags::Key).setWithRef(m_info);
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionFunctionAbstract
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionFunctionAbstract
-void c_ReflectionFunctionAbstract::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionFunctionAbstract
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionFunctionAbstract
 Variant * c_ReflectionFunctionAbstract::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -604,16 +593,6 @@ Variant &c_ReflectionObject::os_lval(CStrRef s) {
   return c_ReflectionClass::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionObject
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionObject
-void c_ReflectionObject::o_getArray(Array &props, bool pubOnly) const {
-  c_ReflectionClass::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionObject
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionObject
-void c_ReflectionObject::o_setArray(CArrRef props) {
-  c_ReflectionClass::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionObject
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionObject
 Variant * c_ReflectionObject::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -749,16 +728,6 @@ Variant &c_ReflectionException::os_lval(CStrRef s) {
   return c_Exception::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionException
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionException
-void c_ReflectionException::o_getArray(Array &props, bool pubOnly) const {
-  c_Exception::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionException
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionException
-void c_ReflectionException::o_setArray(CArrRef props) {
-  c_Exception::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionException
 Variant * c_ReflectionException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -850,19 +819,6 @@ Variant &c_ReflectionClass::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionClass
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionClass
-void c_ReflectionClass::o_getArray(Array &props, bool pubOnly) const {
-  if (isInitialized(m_name)) props.lvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Key).setWithRef(m_name);
-  if (!pubOnly) if (isInitialized(m_info)) props.lvalAt(NAMSTR(s_sys_ss84e1d89d, "\000ReflectionClass\000info"), AccessFlags::Key).setWithRef(m_info);
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionClass
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionClass
-void c_ReflectionClass::o_setArray(CArrRef props) {
-  props->load(NAMSTR(s_sys_ss84e1d89d, "\000ReflectionClass\000info"), m_info);
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionClass
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionClass
 Variant * c_ReflectionClass::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -3050,20 +3006,6 @@ Variant &c_ReflectionExtension::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionExtension
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionExtension
-void c_ReflectionExtension::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_name)) props.lvalAt(NAMSTR(s_sys_ss8bbc8ede, "\000ReflectionExtension\000name"), AccessFlags::Key).setWithRef(m_name);
-  if (!pubOnly) if (isInitialized(m_info)) props.lvalAt(NAMSTR(s_sys_ss5596f6c8, "\000ReflectionExtension\000info"), AccessFlags::Key).setWithRef(m_info);
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionExtension
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionExtension
-void c_ReflectionExtension::o_setArray(CArrRef props) {
-  props->load(NAMSTR(s_sys_ss8bbc8ede, "\000ReflectionExtension\000name"), m_name);
-  props->load(NAMSTR(s_sys_ss5596f6c8, "\000ReflectionExtension\000info"), m_info);
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionExtension
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionExtension
 Variant * c_ReflectionExtension::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -3581,18 +3523,6 @@ Variant &c_ReflectionMethod::os_lval(CStrRef s) {
   return c_ReflectionFunctionAbstract::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionMethod
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionMethod
-void c_ReflectionMethod::o_getArray(Array &props, bool pubOnly) const {
-  if (isInitialized(m_name)) props.lvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Key).setWithRef(m_name);
-  if (isInitialized(m_class)) props.lvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Key).setWithRef(m_class);
-  c_ReflectionFunctionAbstract::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionMethod
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionMethod
-void c_ReflectionMethod::o_setArray(CArrRef props) {
-  c_ReflectionFunctionAbstract::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionMethod
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionMethod
 Variant * c_ReflectionMethod::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -4433,19 +4363,6 @@ Variant &c_ReflectionProperty::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionProperty
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionProperty
-void c_ReflectionProperty::o_getArray(Array &props, bool pubOnly) const {
-  if (isInitialized(m_info)) props.lvalAt(NAMSTR(s_sys_ss33988b3e, "info"), AccessFlags::Key).setWithRef(m_info);
-  if (isInitialized(m_name)) props.lvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Key).setWithRef(m_name);
-  if (isInitialized(m_class)) props.lvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Key).setWithRef(m_class);
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionProperty
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionProperty
-void c_ReflectionProperty::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionProperty
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionProperty
 Variant * c_ReflectionProperty::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -5210,16 +5127,6 @@ Variant &c_ReflectionFunction::os_lval(CStrRef s) {
   return c_ReflectionFunctionAbstract::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionFunction
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionFunction
-void c_ReflectionFunction::o_getArray(Array &props, bool pubOnly) const {
-  c_ReflectionFunctionAbstract::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionFunction
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionFunction
-void c_ReflectionFunction::o_setArray(CArrRef props) {
-  c_ReflectionFunctionAbstract::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionFunction
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionFunction
 Variant * c_ReflectionFunction::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -5551,17 +5458,6 @@ Variant &c_ReflectionParameter::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionParameter
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionParameter
-void c_ReflectionParameter::o_getArray(Array &props, bool pubOnly) const {
-  if (isInitialized(m_info)) props.lvalAt(NAMSTR(s_sys_ss33988b3e, "info"), AccessFlags::Key).setWithRef(m_info);
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionParameter
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionParameter
-void c_ReflectionParameter::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionParameter
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionParameter
 Variant * c_ReflectionParameter::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -6181,6 +6077,77 @@ Variant pm_php$classes$reflection_php(bool incOnce /* = false */, LVariableTable
   return true;
 }
 namespace hphp_impl_splitter {}
+
+// Class tables
+ClassPropTable cpt_ReflectionClass;
+ClassPropTable cpt_ReflectionExtension;
+ClassPropTable cpt_ReflectionFunctionAbstract;
+ClassPropTable cpt_ReflectionMethod;
+ClassPropTable cpt_ReflectionParameter;
+ClassPropTable cpt_ReflectionProperty;
+extern ClassPropTable cpt_Exception;
+static int ctInitializer() {
+  const char *ctMapData[] = {
+    (const char *)2, (const char *)1, (const char *)&cpt_ReflectionClass, (const char *)NULL,
+    (const char *)64, (const char *)&NAMSTR(s_sys_ssdc3cbddc, "name"),
+    (const char *)GET_PROPERTY_OFFSET(c_ReflectionClass, m_name),
+    (const char *)10,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ss84e1d89d, "\000ReflectionClass\000info"),
+    (const char *)GET_PROPERTY_OFFSET(c_ReflectionClass, m_info),
+    (const char *)10,
+
+    (const char *)2, (const char *)2, (const char *)&cpt_ReflectionExtension, (const char *)NULL,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ss8bbc8ede, "\000ReflectionExtension\000name"),
+    (const char *)GET_PROPERTY_OFFSET(c_ReflectionExtension, m_name),
+    (const char *)10,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ss5596f6c8, "\000ReflectionExtension\000info"),
+    (const char *)GET_PROPERTY_OFFSET(c_ReflectionExtension, m_info),
+    (const char *)10,
+
+    (const char *)1, (const char *)0, (const char *)&cpt_ReflectionFunctionAbstract, (const char *)NULL,
+    (const char *)128, (const char *)&NAMSTR(s_sys_ss33988b3e, "info"),
+    (const char *)GET_PROPERTY_OFFSET(c_ReflectionFunctionAbstract, m_info),
+    (const char *)10,
+
+    (const char *)2, (const char *)0, (const char *)&cpt_ReflectionMethod, (const char *)&cpt_ReflectionFunctionAbstract,
+    (const char *)64, (const char *)&NAMSTR(s_sys_ssdc3cbddc, "name"),
+    (const char *)GET_PROPERTY_OFFSET(c_ReflectionMethod, m_name),
+    (const char *)10,
+    (const char *)64, (const char *)&NAMSTR(s_sys_ssc82dbd12, "class"),
+    (const char *)GET_PROPERTY_OFFSET(c_ReflectionMethod, m_class),
+    (const char *)10,
+
+    (const char *)1, (const char *)0, (const char *)&cpt_ReflectionParameter, (const char *)NULL,
+    (const char *)64, (const char *)&NAMSTR(s_sys_ss33988b3e, "info"),
+    (const char *)GET_PROPERTY_OFFSET(c_ReflectionParameter, m_info),
+    (const char *)10,
+
+    (const char *)3, (const char *)0, (const char *)&cpt_ReflectionProperty, (const char *)NULL,
+    (const char *)64, (const char *)&NAMSTR(s_sys_ss33988b3e, "info"),
+    (const char *)GET_PROPERTY_OFFSET(c_ReflectionProperty, m_info),
+    (const char *)10,
+    (const char *)64, (const char *)&NAMSTR(s_sys_ssdc3cbddc, "name"),
+    (const char *)GET_PROPERTY_OFFSET(c_ReflectionProperty, m_name),
+    (const char *)10,
+    (const char *)64, (const char *)&NAMSTR(s_sys_ssc82dbd12, "class"),
+    (const char *)GET_PROPERTY_OFFSET(c_ReflectionProperty, m_class),
+    (const char *)10,
+
+    NULL, NULL, NULL,
+  };
+  static ClassPropTableEntry entries[11];
+  static ClassPropTableEntry *pentries[9];
+  return ClassInfo::InitClassPropTable(ctMapData, entries, pentries);
+}
+static int ct_initializer = ctInitializer();
+
+// o_getClassPropTable
+const ClassPropTable *c_ReflectionClass::o_getClassPropTable() const { return &cpt_ReflectionClass; }
+const ClassPropTable *c_ReflectionExtension::o_getClassPropTable() const { return &cpt_ReflectionExtension; }
+const ClassPropTable *c_ReflectionFunctionAbstract::o_getClassPropTable() const { return &cpt_ReflectionFunctionAbstract; }
+const ClassPropTable *c_ReflectionMethod::o_getClassPropTable() const { return &cpt_ReflectionMethod; }
+const ClassPropTable *c_ReflectionParameter::o_getClassPropTable() const { return &cpt_ReflectionParameter; }
+const ClassPropTable *c_ReflectionProperty::o_getClassPropTable() const { return &cpt_ReflectionProperty; }
 
 ///////////////////////////////////////////////////////////////////////////////
 }

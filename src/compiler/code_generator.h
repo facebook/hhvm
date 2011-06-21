@@ -26,6 +26,7 @@ DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(Statement);
 DECLARE_BOOST_TYPES(Construct);
 DECLARE_BOOST_TYPES(BlockScope);
+DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(LoopStatement);
 
 class CodeGenerator {
@@ -260,6 +261,12 @@ public:
   void setInitListFirstElem() { m_initListFirstElem = true; }
   bool hasInitListFirstElem() { return m_initListFirstElem; }
   void clearInitListFirstElem() { m_initListFirstElem = false; }
+
+  const StringToClassScopePtrVecMap &getClasses() const { return m_classes; }
+  void addClass(const std::string &name, ClassScopePtr cls) {
+    m_classes[name].push_back(cls);
+  }
+  void clearClasses() { m_classes.clear(); }
 private:
   std::string m_filename;
   Stream m_curStream;
@@ -291,6 +298,7 @@ private:
   std::deque<int> m_callInfos;
   LoopStatementPtr m_loopStatement;
   bool m_insideScalarArray;
+  StringToClassScopePtrVecMap m_classes;
 
   int m_itemIndex;
 

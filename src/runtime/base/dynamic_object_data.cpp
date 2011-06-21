@@ -19,6 +19,7 @@
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/externals.h>
 #include <runtime/base/builtin_functions.h>
+#include <runtime/base/class_info.h>
 #include <util/util.h>
 
 namespace HPHP {
@@ -108,17 +109,18 @@ Variant *DynamicObjectData::o_realPropPublic(CStrRef propName,
 void DynamicObjectData::o_getArray(Array &props, bool pubOnly /* = false */)
 const {
   if (!parent.isNull()) {
-    return parent->o_getArray(props, pubOnly);
+    ClassInfo::GetArray(parent.get(), parent->o_getClassPropTable(),
+                        props, pubOnly);
   } else {
-    return ObjectData::o_getArray(props, pubOnly);
+    ObjectData::o_getArray(props, pubOnly);
   }
 }
 
 void DynamicObjectData::o_setArray(CArrRef props) {
   if (!parent.isNull()) {
-    return parent->o_setArray(props);
+    ClassInfo::SetArray(parent.get(), parent->o_getClassPropTable(), props);
   } else {
-    return ObjectData::o_setArray(props);
+    ObjectData::o_setArray(props);
   }
 }
 

@@ -557,17 +557,34 @@ string Type::getCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
   case KindOfDouble:      return "double";
   case KindOfString:      return "String";
   case KindOfArray:       return "Array";
-  case KindOfNumeric:     return "Numeric";
-  case KindOfPrimitive:   return "Primitive";
-  case KindOfPlusOperand: return "PlusOperand";
-  case KindOfSequence:    return "Sequence";
   case KindOfObject:{
     ClassScopePtr cls(getClass(ar, scope));
     if (!cls) return "Object";
     return Option::SmartPtrPrefix + cls->getId(cg);
   }
+  case KindOfNumeric:     return "Numeric";
+  case KindOfPrimitive:   return "Primitive";
+  case KindOfPlusOperand: return "PlusOperand";
+  case KindOfSequence:    return "Sequence";
   default:
     return "Variant";
+  }
+}
+
+DataType Type::getDataType() const {
+  switch (m_kindOf) {
+  case KindOfBoolean:     return HPHP::KindOfBoolean;
+  case KindOfInt32:       return HPHP::KindOfInt32;
+  case KindOfInt64:       return HPHP::KindOfInt64;
+  case KindOfDouble:      return HPHP::KindOfDouble;
+  case KindOfString:      return HPHP::KindOfString;
+  case KindOfArray:       return HPHP::KindOfArray;
+  case KindOfObject:      return HPHP::KindOfObject;
+  case KindOfNumeric:
+  case KindOfPrimitive:
+  case KindOfPlusOperand:
+  case KindOfSequence:
+  default:                return HPHP::KindOfVariant;
   }
 }
 

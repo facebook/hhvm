@@ -45,8 +45,6 @@ class c_PDOException : public c_Exception {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_PDOException 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_PDOException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PDOException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDOException 1
 

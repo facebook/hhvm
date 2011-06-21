@@ -59,18 +59,6 @@ Variant &c_Directory::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Directory
-void c_Directory::o_getArray(Array &props, bool pubOnly) const {
-  if (isInitialized(m_path)) props.lvalAt(NAMSTR(s_sys_ssf362b3c4, "path"), AccessFlags::Key).setWithRef(m_path);
-  if (isInitialized(m_handle)) props.lvalAt(NAMSTR(s_sys_ss46eeef5c, "handle"), AccessFlags::Key).setWithRef(m_handle);
-  c_ObjectData::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Directory
-void c_Directory::o_setArray(CArrRef props) {
-  c_ObjectData::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Directory
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_Directory
 Variant * c_Directory::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -305,6 +293,29 @@ Variant pm_php$classes$directory_php(bool incOnce /* = false */, LVariableTable*
   return true;
 }
 namespace hphp_impl_splitter {}
+
+// Class tables
+ClassPropTable cpt_Directory;
+static int ctInitializer() {
+  const char *ctMapData[] = {
+    (const char *)2, (const char *)0, (const char *)&cpt_Directory, (const char *)NULL,
+    (const char *)64, (const char *)&NAMSTR(s_sys_ssf362b3c4, "path"),
+    (const char *)GET_PROPERTY_OFFSET(c_Directory, m_path),
+    (const char *)10,
+    (const char *)64, (const char *)&NAMSTR(s_sys_ss46eeef5c, "handle"),
+    (const char *)GET_PROPERTY_OFFSET(c_Directory, m_handle),
+    (const char *)10,
+
+    NULL, NULL, NULL,
+  };
+  static ClassPropTableEntry entries[2];
+  static ClassPropTableEntry *pentries[1];
+  return ClassInfo::InitClassPropTable(ctMapData, entries, pentries);
+}
+static int ct_initializer = ctInitializer();
+
+// o_getClassPropTable
+const ClassPropTable *c_Directory::o_getClassPropTable() const { return &cpt_Directory; }
 
 ///////////////////////////////////////////////////////////////////////////////
 }

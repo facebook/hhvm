@@ -48,8 +48,6 @@ class c_SplFileObject : public c_SplFileInfo {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_SplFileObject 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_SplFileObject 1
   virtual Variant *o_realProp(CStrRef s, int flags,
                               CStrRef context = null_string) const;
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplFileObject 1

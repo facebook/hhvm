@@ -54,16 +54,6 @@ Variant &c_RecursiveDirectoryIterator::os_lval(CStrRef s) {
   return c_DirectoryIterator::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RecursiveDirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_RecursiveDirectoryIterator
-void c_RecursiveDirectoryIterator::o_getArray(Array &props, bool pubOnly) const {
-  c_DirectoryIterator::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_RecursiveDirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_RecursiveDirectoryIterator
-void c_RecursiveDirectoryIterator::o_setArray(CArrRef props) {
-  c_DirectoryIterator::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_RecursiveDirectoryIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_RecursiveDirectoryIterator
 Variant * c_RecursiveDirectoryIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -607,16 +597,6 @@ Variant &c_DirectoryIterator::os_lval(CStrRef s) {
   return c_SplFileInfo::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DirectoryIterator
-void c_DirectoryIterator::o_getArray(Array &props, bool pubOnly) const {
-  c_SplFileInfo::o_getArray(props, pubOnly);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DirectoryIterator
-void c_DirectoryIterator::o_setArray(CArrRef props) {
-  c_SplFileInfo::o_setArray(props);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DirectoryIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DirectoryIterator
 Variant * c_DirectoryIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -1028,6 +1008,12 @@ Variant pm_php$classes$directoryiterator_php(bool incOnce /* = false */, LVariab
   return true;
 }
 namespace hphp_impl_splitter {}
+
+// Class tables
+extern ClassPropTable cpt_SplFileInfo;
+extern ClassPropTable cpt_SplFileInfo;
+
+// o_getClassPropTable
 
 ///////////////////////////////////////////////////////////////////////////////
 }

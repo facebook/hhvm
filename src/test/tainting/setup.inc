@@ -15,11 +15,6 @@
    +----------------------------------------------------------------------+
 */
 
-define('TAINT_HTML',    0x1);
-define('TAINT_SQL',     0x2);
-define('TAINT_MUTATED', 0x4);
-define('TAINT_ALL',     0x7);
-
 $good1 = "heLlO\nwoRld\ntoto\ntiti\ntata";
 $good2 = "world";
 $good3 = "toto";

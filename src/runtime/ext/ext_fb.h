@@ -45,9 +45,9 @@ void f_xhprof_network_enable();
 Variant f_xhprof_network_disable();
 void f_xhprof_frame_begin(CStrRef name);
 void f_xhprof_frame_end();
+Variant f_xhprof_run_trace(CStrRef packedTrace, int flags);
 void f_xhprof_sample_enable();
 Variant f_xhprof_sample_disable();
-Variant f_xhprof_run_trace(CStrRef, int flags = 0);
 void f_fb_load_local_databases(CArrRef servers);
 Array f_fb_parallel_query(CArrRef sql_map, int max_thread = 50, bool combine_result = true, bool retry_query_on_fail = true, int connect_timeout = -1, int read_timeout = -1, bool timeout_in_ms = false);
 Array f_fb_crossall_query(CStrRef sql, int max_thread = 50, bool retry_query_on_fail = true, int connect_timeout = -1, int read_timeout = -1, bool timeout_in_ms = false);
@@ -69,6 +69,12 @@ extern const int64 k_XHPROF_FLAGS_VTSC;
 extern const int64 k_XHPROF_FLAGS_TRACE;
 extern const int64 k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE;
 extern const int64 k_XHPROF_FLAGS_MALLOC;
+extern const int64 k_TAINT_NONE;
+extern const int64 k_TAINT_HTML;
+extern const int64 k_TAINT_SQL;
+extern const int64 k_TAINT_MUTATED;
+extern const int64 k_TAINT_ALL;
+extern const int64 k_TAINT_TRACE;
 
 ///////////////////////////////////////////////////////////////////////////////
 

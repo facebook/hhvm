@@ -45,6 +45,14 @@ const int64 k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE =
 const int64 k_FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE =
   FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;
 
+// TODO: Get rid of magic numbers when tainting is shipped.
+const int64 k_TAINT_NONE = 0x0;
+const int64 k_TAINT_HTML = 0x1;
+const int64 k_TAINT_SQL = 0x2;
+const int64 k_TAINT_MUTATED = 0x4;
+const int64 k_TAINT_ALL = 0x7;
+const int64 k_TAINT_TRACE = 0x8;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /* Linux and other systems don't currently support a ntohx or htonx

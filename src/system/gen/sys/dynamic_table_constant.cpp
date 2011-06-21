@@ -2089,7 +2089,7 @@ public:
   hashNodeCon *next;
 };
 static hashNodeCon *conMapTable[8192];
-static hashNodeCon conBuckets[2094];
+static hashNodeCon conBuckets[2100];
 
 void init_builtin_constant_table() {
   const char *conMapData[] = {
@@ -2122,6 +2122,12 @@ void init_builtin_constant_table() {
       (const char *)"STDERR", (const char *)-1, (const char *)512, (const char *)&BuiltinFiles::GetSTDERR,
       (const char *)"STDIN", (const char *)-1, (const char *)512, (const char *)&BuiltinFiles::GetSTDIN,
       (const char *)"STDOUT", (const char *)-1, (const char *)512, (const char *)&BuiltinFiles::GetSTDOUT,
+      (const char *)"TAINT_ALL", (const char *)-1, (const char *)32, (const char *)&k_TAINT_ALL,
+      (const char *)"TAINT_HTML", (const char *)-1, (const char *)32, (const char *)&k_TAINT_HTML,
+      (const char *)"TAINT_MUTATED", (const char *)-1, (const char *)32, (const char *)&k_TAINT_MUTATED,
+      (const char *)"TAINT_NONE", (const char *)-1, (const char *)32, (const char *)&k_TAINT_NONE,
+      (const char *)"TAINT_SQL", (const char *)-1, (const char *)32, (const char *)&k_TAINT_SQL,
+      (const char *)"TAINT_TRACE", (const char *)-1, (const char *)32, (const char *)&k_TAINT_TRACE,
       (const char *)"UCOL_ALTERNATE_HANDLING", (const char *)-1, (const char *)32, (const char *)&k_UCOL_ALTERNATE_HANDLING,
       (const char *)"UCOL_CASE_FIRST", (const char *)-1, (const char *)32, (const char *)&k_UCOL_CASE_FIRST,
       (const char *)"UCOL_CASE_LEVEL", (const char *)-1, (const char *)32, (const char *)&k_UCOL_CASE_LEVEL,

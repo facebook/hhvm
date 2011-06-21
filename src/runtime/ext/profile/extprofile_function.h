@@ -81,7 +81,7 @@ inline Variant x_end_user_func_async(CObjRef handle, int default_strategy = k_GL
 
 inline String x_call_user_func_serialized(CStrRef input) {
   FUNCTION_INJECTION_BUILTIN(call_user_func_serialized);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_call_user_func_serialized(input);
 }
 
@@ -117,7 +117,7 @@ inline String x_get_called_class() {
 
 inline String x_create_function(CStrRef args, CStrRef code) {
   FUNCTION_INJECTION_BUILTIN(create_function);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_create_function(args, code);
 }
 

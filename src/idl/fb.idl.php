@@ -91,6 +91,42 @@ DefineConstant(
     'type'   => Int64,
   ));
 
+DefineConstant(
+  array(
+    'name'   => "TAINT_NONE",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "TAINT_HTML",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "TAINT_SQL",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "TAINT_MUTATED",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "TAINT_ALL",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "TAINT_TRACE",
+    'type'   => Int64,
+  ));
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Functions

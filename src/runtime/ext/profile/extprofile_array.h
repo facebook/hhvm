@@ -27,7 +27,7 @@ namespace HPHP {
 
 inline Variant x_array_change_key_case(CVarRef input, bool upper = false) {
   FUNCTION_INJECTION_BUILTIN(array_change_key_case);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_array_change_key_case(input, upper);
 }
 
@@ -495,31 +495,31 @@ inline Variant x_natcasesort(VRefParam array) {
 
 inline String x_i18n_loc_get_default() {
   FUNCTION_INJECTION_BUILTIN(i18n_loc_get_default);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_i18n_loc_get_default();
 }
 
 inline bool x_i18n_loc_set_default(CStrRef locale) {
   FUNCTION_INJECTION_BUILTIN(i18n_loc_set_default);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_i18n_loc_set_default(locale);
 }
 
 inline bool x_i18n_loc_set_attribute(int64 attr, int64 val) {
   FUNCTION_INJECTION_BUILTIN(i18n_loc_set_attribute);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_i18n_loc_set_attribute(attr, val);
 }
 
 inline bool x_i18n_loc_set_strength(int64 strength) {
   FUNCTION_INJECTION_BUILTIN(i18n_loc_set_strength);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_i18n_loc_set_strength(strength);
 }
 
 inline Variant x_i18n_loc_get_error_code() {
   FUNCTION_INJECTION_BUILTIN(i18n_loc_get_error_code);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_i18n_loc_get_error_code();
 }
 

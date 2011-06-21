@@ -605,9 +605,13 @@ void String::serialize(VariableSerializer *serializer) const {
 void String::unserialize(VariableUnserializer *uns,
                          char delimiter0 /* = '"' */,
                          char delimiter1 /* = '"' */) {
-  int size = uns->readInt();
+  int64 size = uns->readInt();
   if (size >= RuntimeOption::MaxSerializedStringSize) {
-    throw Exception("Size of serialized string (%d) exceeds max", size);
+    throw Exception("Size of serialized string (%d) exceeds max", int(size));
+  }
+  if (size < 0) {
+    throw Exception("Size of serialized string (%d) must not be negative",
+                    int(size));
   }
 
   char ch = uns->readChar();

@@ -14,18 +14,36 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-require_once('setup.inc');
+require_once('../setup.inc');
 
 /**
- * Check that the reference operator doesn't cause us to loose any taint
- * information
+ * Sanity checks for tainting array entries.
  */
 
-$a = $good1;
-$b = &$a;
+$arrg1 = array($good1);
+$arrb1 = array($bad1);
+echo "Testing array() on strings:\n";
+assert_not_tainted($arrg1[0]);
+assert_tainted($arrb1[0]);
 
-$a .= $good2;
-not_tainted($b);
+$arr = array(
+  'good1' => $good1,
+  'bad1'  => $bad1,
+  42      => array(
+    'good2' => $good2,
+    'bad2'  => $bad2,
+  ),
+);
+echo "\n";
+echo "Testing array containing mixed taints:\n";
+assert_not_tainted($arr);
+assert_tainted(print_r($arr, true));
 
-$a .= $bad1;
-tainted($b);
+echo "\n";
+echo "Testing taint independence among array entries:\n";
+assert_not_tainted($arr['good1']);
+assert_tainted($arr['bad1']);
+assert_not_tainted($arr[42]);
+assert_tainted(print_r($arr[42], true));
+assert_not_tainted($arr[42]['good2']);
+assert_tainted($arr[42]['bad2']);

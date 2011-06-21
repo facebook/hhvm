@@ -14,22 +14,29 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-require_once('setup.inc');
+require_once('../setup.inc');
 
-$a = "good\n";
-$b = print_r($a, true);
+/**
+ * Check that various forms of concatenations output the right general taint
+ * information.  Concatenation tests for staticity can be found in ./static/
+ */
 
-if(fb_get_taint($b) & TAINT_HTML_MASK){
-  echo "b is tainted\n";
-} else {
-  echo "b is not tainted\n";
-}
+$a = $good1 . $good2;
+assert_not_tainted($a);
 
-$b = array($a);
-$c = print_r($b, true);
+$a = $good1 . $bad1;
+assert_tainted($a);
 
-if(fb_get_taint($c) & TAINT_HTML_MASK){
-  echo "c is tainted\n";
-} else {
-  echo "c is not tainted\n";
-}
+$a = $good1;
+$a .= $good2;
+assert_not_tainted($a);
+
+$a = $good1;
+$a .= $bad1;
+assert_tainted($a);
+
+$a = "$good1 $good2";
+assert_not_tainted($a);
+
+$a = "$good1 $bad1";
+assert_tainted($a);

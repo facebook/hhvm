@@ -15,52 +15,78 @@
    +----------------------------------------------------------------------+
 */
 
-define('TAINT_HTML_MASK', 0x1);
+define('TAINT_HTML',    0x1);
+define('TAINT_SQL',     0x2);
+define('TAINT_MUTATED', 0x4);
+define('TAINT_ALL',     0x7);
 
 $good1 = "heLlO\nwoRld\ntoto\ntiti\ntata";
 $good2 = "world";
 $good3 = "toto";
-
 $serialized_good = 's:5:"hello";';
 
 $bad1 = "eViL\nsTring\nare\tfun\narent\tthey?";
 $bad2 = "some\nthing\ntoto\nbad!";
-
 $serialized_bad = 's:11:"evil string";';
-fb_set_taint($bad1, TAINT_HTML_MASK);
-fb_set_taint($bad2, TAINT_HTML_MASK);
-fb_set_taint($serialized_bad, TAINT_HTML_MASK);
 
-function not_tainted($v) {
+fb_set_taint($bad1, TAINT_ALL);
+fb_set_taint($bad2, TAINT_ALL);
+fb_set_taint($serialized_bad, TAINT_ALL);
+
+function assert_positive($v, $taint) {
   if (ob_get_level()) {
-    die("HEY YOU CAN'T CALL not_tainted INSIDE ob_start()");
+    die("Error: may not call assert_negative() inside ob_start()\n");
   }
 
-  $r = fb_get_taint($v);
-  if ($r) {
-    echo chr(27)."[0;31m";
-    echo "FAIL (tainted something which shouldn't be tainted)\n";
+  if (!fb_get_taint($v, $taint)) {
+    echo chr(27)."[0;32m";
+    echo "OK\n";
     echo chr(27)."[0m";
   } else {
-    echo chr(27)."[0;32m";
-    echo "Ok\n";
+    echo chr(27)."[0;31m";
+    echo "FAIL\n";
     echo chr(27)."[0m";
   }
 }
 
-function tainted($v) {
+function assert_negative($v, $taint) {
   if (ob_get_level()) {
-    die("HEY YOU CAN'T CALL tainted INSIDE ob_start()");
+    die("Error: may not call assert_positive() inside ob_start()\n");
   }
 
-  $r = fb_get_taint($v);
-  if (!$r) {
-    echo chr(27)."[0;31m";
-    echo "FAIL (did not taint something which should have been)\n";
+  if (fb_get_taint($v, $taint)) {
+    echo chr(27)."[0;32m";
+    echo "OK\n";
     echo chr(27)."[0m";
   } else {
-    echo chr(27)."[0;32m";
-    echo "Ok\n";
+    echo chr(27)."[0;31m";
+    echo "FAIL\n";
     echo chr(27)."[0m";
   }
+}
+
+function assert_not_tainted($v) {
+  return assert_positive($v, TAINT_ALL);
+}
+function assert_html_safe($v) {
+  return assert_positive($v, TAINT_HTML);
+}
+function assert_sql_safe($v) {
+  return assert_positive($v, TAINT_SQL);
+}
+function assert_static($v) {
+  return assert_positive($v, TAINT_MUTATED);
+}
+
+function assert_tainted($v) {
+  return assert_negative($v, TAINT_ALL);
+}
+function assert_html_unsafe($v) {
+  return assert_negative($v, TAINT_HTML);
+}
+function assert_sql_unsafe($v) {
+  return assert_negative($v, TAINT_SQL);
+}
+function assert_not_static($v) {
+  return assert_negative($v, TAINT_MUTATED);
 }

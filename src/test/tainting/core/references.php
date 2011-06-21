@@ -14,24 +14,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-require_once('setup.inc');
+require_once('../setup.inc');
 
-$a = "bad\n";
-fb_set_taint($a, 1);
+/**
+ * Check that the reference operator doesn't cause us to lose any taint
+ * information.
+ */
 
-$b = print_r($a, true);
+$a = $good1;
+$b = &$a;
 
-if(fb_get_taint($b) & TAINT_HTML_MASK){
-  echo "b is tainted\n";
-} else {
-  echo "b is not tainted\n";
-}
+$a .= $good2;
+assert_not_tainted($b);
 
-$b = array($a);
-$c = print_r($b, true);
-
-if(fb_get_taint($c) & TAINT_HTML_MASK){
-  echo "c is tainted\n";
-} else {
-  echo "c is not tainted\n";
-}
+$a .= $bad1;
+assert_tainted($b);

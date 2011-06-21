@@ -17,7 +17,7 @@
 require_once('setup.inc');
 
 $a = "bad\n";
-fb_set_taint($a, TAINT_HTML_MASK);
+fb_set_taint($a, TAINT_ALL_MASK);
 
 print_r($a);
 

@@ -871,7 +871,10 @@ bool DebuggerClient::console() {
     if (line == NULL) {
       line = readline(getPrompt().c_str());
       if (line == NULL) {
-        return false;
+        // treat ^D as quit
+        char *quit_cmd = (char *)malloc(sizeof(char) * 2);
+        strcpy(quit_cmd, "q");
+        line = (const char *)quit_cmd;
       }
     } else if (!NoPrompt) {
       print("%s%s", getPrompt().c_str(), line);

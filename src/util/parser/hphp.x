@@ -261,6 +261,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
     case T_EXTENDS:      case T_INSTANCEOF:       case T_DOUBLE_ARROW:
     case T_CLASS:
     case T_XHP_ATTRIBUTE:
+    case -1:
       yytext++; yyleng--; // skipping the first colon
       SETTOKEN;
       return T_XHP_LABEL;

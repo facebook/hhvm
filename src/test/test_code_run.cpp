@@ -18965,7 +18965,13 @@ bool TestCodeRun::TestHint() {
 bool TestCodeRun::TestParser() {
   MVCRO("<?php function foo() { return array(1, 2, 3);} var_dump(foo()[2]);",
         "int(3)\n");
-
+  MVCRO("<?php "
+        ":test::go();"
+        "class :test {"
+        "  static function go() {"
+        "    echo \"Everything's cool\\n\";"
+        "  }"
+        "}", "Everything's cool\n");
   return true;
 }
 

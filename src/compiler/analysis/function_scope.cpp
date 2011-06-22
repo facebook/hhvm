@@ -851,13 +851,21 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
                   Option::ClassPrefix,
                   cg.formatLabel(m_name).c_str());
         BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
-          string name = param->getName();
-          ASSERT(variables->isPresent(name));
-          // TODO: handle if the closure variable isn't a Variant
-          const char *s = param->isRef() ? "Ref" : "Val";
-          cg_printf("%s%s.assign%s(closure->%s%s);\n",
-                    Option::VariablePrefix, name.c_str(), s,
-                    Option::VariablePrefix, name.c_str());
+          const string &name = param->getName();
+          Symbol *sym = variables->getSymbol(name);
+          ASSERT(sym->isUsed());
+          TypePtr t(sym->getFinalType());
+          ASSERT(!param->isRef() || t->is(Type::KindOfVariant));
+          if (t->is(Type::KindOfVariant)) {
+            const char *s = param->isRef() ? "Ref" : "Val";
+            cg_printf("%s%s.assign%s(closure->%s%s);\n",
+                      Option::VariablePrefix, name.c_str(), s,
+                      Option::VariablePrefix, name.c_str());
+          } else {
+            cg_printf("%s%s = closure->%s%s;\n",
+                      Option::VariablePrefix, name.c_str(),
+                      Option::VariablePrefix, name.c_str());
+          }
         }
       }
     }
@@ -1063,7 +1071,7 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
   bool callUserFuncFewArgs = false;
 
   if (variableArgument) {
-    callUserFuncFewArgs = 
+    callUserFuncFewArgs =
       Option::UseCallUserFuncFewArgs &&
       func->getName() == "call_user_func" &&
       (paramCount <= CALL_USER_FUNC_FEW_ARGS_COUNT + 1) &&
@@ -1727,15 +1735,15 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
 
 void FunctionScope::getClosureUseVars(
     ParameterExpressionPtrIdxPairVec &useVars,
-    bool filterPresent /* = true */) {
+    bool filterUsed /* = true */) {
   useVars.clear();
   if (!m_closureVars) return;
   VariableTablePtr variables = getVariables();
   for (int i = 0; i < m_closureVars->getCount(); i++) {
     ParameterExpressionPtr param =
       dynamic_pointer_cast<ParameterExpression>((*m_closureVars)[i]);
-    string name = param->getName();
-    if (!filterPresent || variables->isPresent(name)) {
+    const string &name = param->getName();
+    if (!filterUsed || variables->isUsed(name)) {
       useVars.push_back(ParameterExpressionPtrIdxPair(param, i));
     }
   }
@@ -1787,9 +1795,9 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
 
     VariableTablePtr variables = getVariables();
     BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
-      string name = param->getName();
+      const string &name = param->getName();
       Symbol *sym = variables->getSymbol(name);
-      ASSERT(sym->isPresent());
+      ASSERT(sym->isUsed());
       TypePtr t(sym->getFinalType());
       t->outputCPPDecl(cg, ar, shared_from_this());
       cg_printf(" %s%s;\n",
@@ -1806,9 +1814,9 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (!hasEmit) hasEmit = true;
       else          cg_printf(", ");
 
-      string name = param->getName();
+      const string &name = param->getName();
       Symbol *sym = variables->getSymbol(name);
-      ASSERT(sym->isPresent());
+      ASSERT(sym->isUsed());
       TypePtr t(sym->getFinalType());
       t->outputCPPDecl(cg, ar, shared_from_this());
       cg_printf(" %s%s_",
@@ -1821,9 +1829,9 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
     // gain in performance
     cg_indentBegin(") : %sClosure(func, extra) {\n", Option::ClassPrefix);
     BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
-      string name = param->getName();
+      const string &name = param->getName();
       Symbol *sym = variables->getSymbol(name);
-      ASSERT(sym->isPresent());
+      ASSERT(sym->isUsed());
       TypePtr t(sym->getFinalType());
       ASSERT(!param->isRef() || t->is(Type::KindOfVariant));
       if (t->is(Type::KindOfVariant)) {

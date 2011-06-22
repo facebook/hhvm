@@ -61,13 +61,14 @@ public:
   };
 
   enum UseKinds {
-    UseKindCaller = 1,
-    UseKindStaticRef = 2,
+    UseKindCaller       = 1,
+    UseKindStaticRef    = 2,
     UseKindNonStaticRef = 4,
-    UseKindConstRef = 8,
-    UseKindParentRef = 16,
-    UseKindInclude = 32,
-    UseKindAny = (unsigned)-1
+    UseKindConstRef     = 8,
+    UseKindParentRef    = 16,
+    UseKindInclude      = 32,
+    UseKindClosure      = 64,
+    UseKindAny          = (unsigned)-1
   };
 
   enum Marks {

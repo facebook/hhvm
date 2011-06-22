@@ -389,7 +389,7 @@ public:
   }
 
   void getClosureUseVars(ParameterExpressionPtrIdxPairVec &useVars,
-                         bool filterPresent = true);
+                         bool filterUsed = true);
 
   bool needsAnonClosureClass(ParameterExpressionPtrVec &useVars);
 

@@ -2280,6 +2280,18 @@ void AliasManager::gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m) {
       }
     }
   }
+  if (ExpressionListPtr useVars = func->getClosureVars()) {
+    for (int i = 0; i < useVars->getCount(); i++) {
+      ParameterExpressionPtr p = dpc(ParameterExpression, (*useVars)[i]);
+      ASSERT(p);
+      if (Symbol *sym = m_variables->getSymbol(p->getName())) {
+        if (p->isRef()) {
+          sym->setReferenced();
+          sym->setUsed();
+        }
+      }
+    }
+  }
 
   if (!m_inPseudoMain) {
     m_variables->clearAttribute(VariableTable::ContainsLDynamicVariable);

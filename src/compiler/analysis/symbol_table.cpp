@@ -69,6 +69,9 @@ TypePtr Symbol::setType(AnalysisResultConstPtr ar, BlockScopeRawPtr scope,
     } else if (isParameter()) {
       useKind = BlockScope::UseKindCaller;
     }
+    if (isPassClosureVar()) {
+      useKind |= BlockScope::UseKindClosure;
+    }
     scope->addUpdates(useKind);
   }
 

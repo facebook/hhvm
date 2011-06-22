@@ -58,7 +58,7 @@ ClosureExpression::ClosureExpression
       for (int i = 0; i < m_vars->getCount(); i++) {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
-        string name = param->getName();
+        const string &name = param->getName();
 
         SimpleVariablePtr var(new SimpleVariable(param->getScope(),
                                                  param->getLocation(),
@@ -69,6 +69,7 @@ ClosureExpression::ClosureExpression
         }
         m_values->addElement(var);
       }
+      ASSERT(m_vars->getCount() == m_values->getCount());
     }
   }
 }
@@ -121,21 +122,29 @@ void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
     m_values->analyzeProgram(ar);
 
     if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
+      getFunctionScope()->addUse(m_func->getFunctionScope(),
+                                 BlockScope::UseKindClosure);
       m_func->getFunctionScope()->setClosureVars(m_vars);
 
       // closure function's variable table (not containing function's)
       VariableTablePtr variables = m_func->getFunctionScope()->getVariables();
+      VariableTablePtr containing = getFunctionScope()->getVariables();
       for (int i = 0; i < m_vars->getCount(); i++) {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
-        string name = param->getName();
+        const string &name = param->getName();
         {
+          Symbol *containingSym = containing->addSymbol(name);
+          containingSym->setPassClosureVar();
+
           Symbol *sym = variables->addSymbol(name);
           sym->setClosureVar();
           if (param->isRef()) {
             sym->setRefClosureVar();
+            sym->setUsed();
           } else {
             sym->clearRefClosureVar();
+            sym->clearUsed();
           }
         }
       }
@@ -147,7 +156,7 @@ void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
       for (int i = 0; i < m_vars->getCount(); i++) {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
-        string name = param->getName();
+        const string &name = param->getName();
 
         // so we can assign values to them, instead of seeing CVarRef
         Symbol *sym = variables->getSymbol(name);
@@ -161,17 +170,32 @@ void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
 
 TypePtr ClosureExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                       bool coerce) {
-  m_func->inferTypes(ar);
   if (m_values) m_values->inferAndCheck(ar, Type::Some, false);
   if (m_vars) {
+    ASSERT(m_values && m_values->getCount() == m_vars->getCount());
     // containing function's variable table (not closure function's)
     VariableTablePtr variables = getScope()->getVariables();
+    // closure function's variable table
+    VariableTablePtr cvariables = m_func->getFunctionScope()->getVariables();
     for (int i = 0; i < m_vars->getCount(); i++) {
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
-      string name = param->getName();
+      const string &name = param->getName();
       if (param->isRef()) {
         variables->forceVariant(ar, name, VariableTable::AnyVars);
+      }
+      ExpressionPtr e = ((*m_values)[i]);
+      TypePtr t = param->isRef() ? Type::Variant : e->getType();
+      if (getScope()->isFirstPass()) {
+        cvariables->add(name, t, false, ar,
+                        shared_from_this(), ModifierExpressionPtr());
+      } else {
+        int p;
+        TypePtr ret = cvariables->checkVariable(name, t, true, ar,
+                                                shared_from_this(), p);
+        if (ret->is(Type::KindOfSome)) {
+          cvariables->forceVariant(ar, name, VariableTable::AnyVars);
+        }
       }
     }
   }
@@ -223,7 +247,6 @@ void ClosureExpression::outputCPPImpl(CodeGenerator &cg,
     ASSERT(m_vars && m_vars->getCount());
     BOOST_FOREACH(ParameterExpressionPtrIdxPair paramPair, useVars) {
       ParameterExpressionPtr param(paramPair.first);
-      string name = param->getName();
       ExpressionPtr value((*m_values)[paramPair.second]);
       if (!hasEmit) hasEmit = true;
       else          cg_printf(", ");
@@ -236,10 +259,7 @@ void ClosureExpression::outputCPPImpl(CodeGenerator &cg,
       if (ref) cg_printf(")");
     }
   } else if (cfunc->isClosureGenerator()) {
-    // TODO: for some reason, use vars which are also params in
-    // closure generators do not get the "present" bit set,
-    // so we cannot filter present symbols. That is why
-    // we fetch the closure use vars again (w/o the filter)
+    // closure generators are special
     useVars.clear();
     cfunc->getClosureUseVars(useVars, false);
     if (useVars.size()) {

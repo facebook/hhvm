@@ -18092,6 +18092,25 @@ bool TestCodeRun::TestClosure() {
         "int(333)\n");
 
   MVCRO("<?php\n"
+        "$x = false;\n"
+        "$f = function ($arg0) use (&$x) { $x = $arg0; };\n"
+        "$f(32);\n"
+        "var_dump($x);\n",
+        "int(32)\n");
+
+  MVCRO("<?php\n"
+        "function f() {\n"
+        "  $test = false;\n"
+        "  $f = function ($p) use (&$test) {\n"
+        "    if ($p) $test = true;\n"
+        "  };\n"
+        "  $f(true);\n"
+        "  var_dump($test);\n"
+        "}\n"
+        "f();\n",
+        "bool(true)\n");
+
+  MVCRO("<?php\n"
         "class Foo {\n"
         "  function bar() {\n"
         "    $abc = 123;\n"

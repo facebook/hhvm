@@ -337,6 +337,13 @@ int64 SSLSocket::readImpl(char *buffer, int64 length) {
   if (m_ssl_active) {
     bool retry = true;
     do {
+      if (m_is_blocked) {
+        Socket::waitForData();
+        if (m_timedOut) {
+          break;
+        }
+        // could get here and we only have parts of an SSL packet
+      }
       nr_bytes = SSL_read(m_handle, buffer, length);
       if (nr_bytes > 0) break; /* we got the data */
       retry = handleError(nr_bytes, false);

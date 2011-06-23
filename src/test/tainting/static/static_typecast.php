@@ -24,8 +24,7 @@ require_once('../setup.inc');
  *   - bools and NULL are static (N.B.: this is done because when implicitly
  *     typecast in HPHP, bools and NULL are converted to global string
  *     constants, and tainting these constants could have undesired side-
- *     effects; we would like it if they could be marked non-static, hence
- *     the test failure)
+ *     effects)
  *   - HPHP casts all arrays to the string "Array"; this is considered
  *     static
  *   - values in an array are static or non-static (or, in general, tainted
@@ -50,12 +49,12 @@ echo "Testing static string variable: ";
 assert_static($str);
 
 echo "Testing NULL: ";
-assert_not_static(NULL);
+assert_static(NULL);
 
 echo "Testing true: ";
-assert_not_static(true);
+assert_static(true);
 echo "Testing false: ";
-assert_not_static(false);
+assert_static(false);
 
 echo "Testing int: ";
 assert_not_static(42);
@@ -74,7 +73,7 @@ assert_not_static($array['str']);
 echo "  string value: ";
 assert_static($array[42]);
 echo "  bool value: ";
-assert_not_static($array[1]);
+assert_static($array[1]);
 echo "  typecast as string: ";
 assert_static($array);
 

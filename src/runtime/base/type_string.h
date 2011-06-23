@@ -484,11 +484,8 @@ public:
 class AtomicString : public AtomicSmartPtr<StringData> {
 public:
   AtomicString() { }
-  AtomicString(const char *s, StringDataMode mode = AttachLiteral)
-    : AtomicSmartPtr<StringData>(s ? new StringData(s, mode) : NULL) { }
-  AtomicString(const std::string &s)
-    : AtomicSmartPtr<StringData>(new StringData(s.data(), s.size(),
-                                                CopyString)) { }
+  AtomicString(const char *s, StringDataMode mode = AttachLiteral);
+  AtomicString(const std::string &s);
   AtomicString(StringData *str);
   AtomicString(const AtomicString &s) : AtomicSmartPtr<StringData>(s.m_px) { }
 

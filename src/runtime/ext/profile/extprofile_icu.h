@@ -31,6 +31,12 @@ inline String x_icu_transliterate(CStrRef str, bool remove_accents) {
   return f_icu_transliterate(str, remove_accents);
 }
 
+inline Array x_icu_tokenize(CStrRef text) {
+  FUNCTION_INJECTION_BUILTIN(icu_tokenize);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_icu_tokenize(text);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

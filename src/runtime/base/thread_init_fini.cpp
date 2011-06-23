@@ -23,6 +23,7 @@
 #include <runtime/base/zend/zend_strtod.h>
 #include <runtime/base/zend/zend_math.h>
 #include <util/async_func.h>
+#include <runtime/ext/ext_icu.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,6 +43,7 @@ void init_thread_locals(void *arg /* = NULL */) {
   get_global_variables_check();
   ThreadInfo::s_threadInfo.getCheck();
   g_context.getCheck();
+  icu_get_checks();
 }
 
 void finish_thread_locals(void *arg /* = NULL */) {

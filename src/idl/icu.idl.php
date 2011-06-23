@@ -74,6 +74,20 @@ DefineFunction(
   ));
 
 
+DefineFunction(
+  array(
+    'name' => "icu_tokenize",
+    'return' => array(
+      'type' => StringVec,
+    ),
+    'args' => array(
+      array(
+        'name' => "text",
+        'type' => String,
+      ),
+    ),
+  ));
+
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
 //

@@ -37486,6 +37486,21 @@ Variant ifa_is_numeric(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg0(a0);
   return (x_is_numeric(arg0));
 }
+Variant i_icu_tokenize(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("icu_tokenize", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (x_icu_tokenize(arg0));
+  }
+}
+Variant ifa_icu_tokenize(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("icu_tokenize", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (x_icu_tokenize(arg0));
+}
 Variant i_gzdeflate(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("gzdeflate", count, 1, 2, 1);
@@ -39824,6 +39839,7 @@ CallInfo ci_drawpushpattern((void*)&i_drawpushpattern, (void*)&ifa_drawpushpatte
 CallInfo ci_xmlwriter_set_indent((void*)&i_xmlwriter_set_indent, (void*)&ifa_xmlwriter_set_indent, 2, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_csr_get_subject((void*)&i_openssl_csr_get_subject, (void*)&ifa_openssl_csr_get_subject, 2, 0, 0x0000000000000000LL);
 CallInfo ci_is_numeric((void*)&i_is_numeric, (void*)&ifa_is_numeric, 1, 0, 0x0000000000000000LL);
+CallInfo ci_icu_tokenize((void*)&i_icu_tokenize, (void*)&ifa_icu_tokenize, 1, 0, 0x0000000000000000LL);
 CallInfo ci_gzdeflate((void*)&i_gzdeflate, (void*)&ifa_gzdeflate, 2, 0, 0x0000000000000000LL);
 CallInfo ci_dns_check_record((void*)&i_dns_check_record, (void*)&ifa_dns_check_record, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magicknegateimage((void*)&i_magicknegateimage, (void*)&ifa_magicknegateimage, 3, 0, 0x0000000000000000LL);
@@ -40680,6 +40696,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 626:
       HASH_GUARD(0x1C65F32FF28BC272LL, pathinfo) {
         ci = &ci_pathinfo;
+        return true;
+      }
+      break;
+    case 635:
+      HASH_GUARD(0x57B85F644523027BLL, icu_tokenize) {
+        ci = &ci_icu_tokenize;
         return true;
       }
       break;

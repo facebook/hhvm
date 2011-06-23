@@ -16,6 +16,7 @@
 
 #include <test/test_ext_icu.h>
 #include <runtime/ext/ext_icu.h>
+#include <iostream>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -23,6 +24,7 @@ bool TestExtIcu::RunTests(const std::string &which) {
   bool ret = true;
 
   RUN_TEST(test_icu_transliterate);
+  RUN_TEST(test_icu_tokenize);
 
   return ret;
 }
@@ -58,6 +60,84 @@ bool TestExtIcu::test_icu_transliterate() {
                            CopyString);
   String output_zh = f_icu_transliterate(input_zh, true);
   VERIFY(output_zh == "si shi si shi shi zi");
+
+  return Count(true);
+}
+
+
+bool TestExtIcu::test_icu_tokenize() {
+
+
+  String input_eng = String("Hello World");
+  Array output_eng = f_icu_tokenize(input_eng);
+
+  VS(f_print_r(output_eng, true),
+     "Array\n"
+     "(\n"
+     "    [0] => _B_\n"
+     "    [1] => hello\n"
+     "    [2] => world\n"
+     "    [3] => _E_\n"
+     ")\n"
+    );
+  String input_long = String("Hello! You are visitor #1234 to "
+                            "http://www.facebook.com! "
+                            "<3 How are you today (6/14/2011),"
+                            " hello@world.com?");
+
+  Array output_long = f_icu_tokenize(input_long);
+
+  VS(f_print_r(output_long, true),
+     "Array\n"
+     "(\n"
+     "    [0] => _B_\n"
+     "    [1] => hello\n"
+     "    [2] => !\n"
+     "    [3] => you\n"
+     "    [4] => are\n"
+     "    [5] => visitor\n"
+     "    [6] => #\n"
+     "    [7] => XXXX\n"
+     "    [8] => to\n"
+     "    [9] => TOKEN_URL\n"
+     "    [10] => !\n"
+     "    [11] => TOKEN_HEART\n"
+     "    [12] => how\n"
+     "    [13] => are\n"
+     "    [14] => you\n"
+     "    [15] => today\n"
+     "    [16] => (\n"
+     "    [17] => TOKEN_DATE\n"
+     "    [18] => )\n"
+     "    [19] => ,\n"
+     "    [20] => TOKEN_EMAIL\n"
+     "    [21] => ?\n"
+     "    [22] => _E_\n"
+     ")\n"
+    );
+
+  String input_de = String("Ich mÃ¶chte Ã¼berzeugend oder Ã¤hnliche sein");
+  Array output_de = f_icu_tokenize(input_de);
+
+  VS(f_print_r(output_de, true),
+     "Array\n"
+     "(\n"
+     "    [0] => _B_\n"
+     "    [1] => ich\n"
+     "    [2] => mã\n"
+     "    [3] => ¶\n"
+     "    [4] => chte\n"
+     "    [5] => ã\n"
+     "    [6] => ¼\n"
+     "    [7] => berzeugend\n"
+     "    [8] => oder\n"
+     "    [9] => ã\n"
+     "    [10] => ¤\n"
+     "    [11] => hnliche\n"
+     "    [12] => sein\n"
+     "    [13] => _E_\n"
+     ")\n");
+
 
   return Count(true);
 }

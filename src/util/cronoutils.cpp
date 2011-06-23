@@ -209,7 +209,7 @@ create_subdirs(char *filename)
  * This function could do with more error checking!
  */
 void
-create_link(char *pfilename,
+create_link(const char *pfilename,
 	    const char *linkname, mode_t linktype,
 	    const char *prevlinkname)
 {

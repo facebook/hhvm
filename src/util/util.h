@@ -127,6 +127,11 @@ std::string normalizeDir(const std::string &dirname);
 std::string safe_strerror(int errnum);
 
 /**
+ * Thread-safe dirname().
+ */
+std::string safe_dirname(const char *path);
+
+/**
  * Check if value is a power of two.
  */
 bool isPowerOfTwo(int value);

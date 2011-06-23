@@ -16,6 +16,7 @@
 
 #include "util.h"
 #include "base.h"
+#include "lock.h"
 #include "logger.h"
 #include "exception.h"
 #include "network.h"
@@ -24,11 +25,14 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <libgen.h>
 
 using namespace std;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+static Mutex s_file_mutex;
 
 void Util::split(char delimiter, const char *s, vector<string> &out,
                  bool ignoreEmpty /* = false */) {
@@ -390,6 +394,21 @@ std::string Util::safe_strerror(int errnum) {
   strerror_r(errnum, buf, sizeof(buf));
   return buf;
 #endif
+}
+
+std::string Util::safe_dirname(const char *path) {
+  char* tmp_path = strdup(path);
+  std::string ret;
+
+  {
+    Lock lock(s_file_mutex);
+    char* dir = dirname(tmp_path);
+    ASSERT(dir);
+    ret.assign(dir);
+  }
+
+  free((void *) tmp_path);
+  return ret;
 }
 
 bool Util::isPowerOfTwo(int value) {

@@ -156,7 +156,7 @@ PERIODICITY;
 /* Function prototypes */
 
 void    create_subdirs(char *);
-void    create_link(char *, const char *, mode_t, const char *);
+void    create_link(const char *, const char *, mode_t, const char *);
 PERIODICITY  determine_periodicity(char *);
 PERIODICITY   parse_timespec(char *optarg, int *p_period_multiple);
 time_t    start_of_next_period(time_t, PERIODICITY, int);

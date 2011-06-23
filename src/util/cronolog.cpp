@@ -16,6 +16,7 @@
 
 #include <pwd.h>
 #include <util/cronolog.h>
+#include <util/util.h>
 
 using namespace std;
 
@@ -76,7 +77,19 @@ static FILE *new_log_file(const char *fileTemplate, const char *linkname,
   }
 
   if (linkname) {
-    create_link(pfilename, linkname, linktype, prevlinkname);
+    /* Create a relative symlink to logs under linkname's directory */
+    std::string dir = Util::safe_dirname(linkname);
+    if (dir != "/") {
+      dir.append("/");
+    }
+    std::string filename;
+    if (!strncmp(pfilename, dir.c_str(), dir.length())) {
+      filename = pfilename + dir.length();
+    } else {
+      filename = pfilename;
+    }
+
+    create_link(filename.c_str(), linkname, linktype, prevlinkname);
   }
   return fdopen(log_fd, "a");
 }

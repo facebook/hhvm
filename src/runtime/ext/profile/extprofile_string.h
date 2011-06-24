@@ -129,7 +129,7 @@ inline String x_ltrim(CStrRef str, CStrRef charlist = k_HPHP_TRIM_CHARLIST) {
 
 inline String x_rtrim(CStrRef str, CStrRef charlist = k_HPHP_TRIM_CHARLIST) {
   FUNCTION_INJECTION_BUILTIN(rtrim);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_rtrim(str, charlist);
 }
 
@@ -147,7 +147,7 @@ inline Variant x_explode(CStrRef delimiter, CStrRef str, int limit = 0x7FFFFFFF)
 
 inline String x_implode(CVarRef arg1, CVarRef arg2 = null_variant) {
   FUNCTION_INJECTION_BUILTIN(implode);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_implode(arg1, arg2);
 }
 
@@ -207,7 +207,7 @@ inline String x_str_pad(CStrRef input, int pad_length, CStrRef pad_string = " ",
 
 inline String x_str_repeat(CStrRef input, int multiplier) {
   FUNCTION_INJECTION_BUILTIN(str_repeat);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_str_repeat(input, multiplier);
 }
 

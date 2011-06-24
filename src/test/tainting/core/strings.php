@@ -40,7 +40,6 @@ $common_suite_funcs = array(
   "strip_tags",
   "trim",
   "ltrim",
-  "rtrim",
   "chop",
   "html_entity_decode",
   "htmlentities",
@@ -66,12 +65,22 @@ function test_common_suite($func) {
   assert_not_static($func($bad1));
 }
 
+
+
 echo "Testing addcslashes:\n";
 assert_html_safe(addcslashes($good1, $good2));
 assert_html_unsafe(addcslashes($bad1, $bad1));
 assert_html_unsafe(addcslashes($good1, $bad1));
 assert_not_static(addcslashes($good1, $good2));
 assert_not_static(addcslashes($bad1, $bad2));
+
+echo "\n";
+echo "Testing rtrim:\n";
+assert_html_safe(rtrim($good1));
+assert_html_unsafe(rtrim($bad1));
+assert_static(rtrim($good1));
+assert_not_static(rtrim($good1, 5));
+assert_not_static(rtrim($bad1));
 
 foreach ($common_suite_funcs as $func) {
   test_common_suite($func);
@@ -96,7 +105,8 @@ $arr = array();
 $arr[] = $good1;
 $arr[] = $good2;
 assert_html_safe(implode("\t", $arr));
-assert_not_static(implode("\t", $arr));
+assert_static(implode("\t", $arr));
+assert_not_static(implode($bad2, $arr));
 $arr[] = $bad1;
 assert_html_unsafe(implode("\t", $arr));
 assert_not_static(implode("\t", $arr));
@@ -223,7 +233,7 @@ echo "\n";
 echo "Testing str_repeat:\n";
 assert_html_safe(str_repeat($good1, 5));
 assert_html_unsafe(str_repeat($bad1, 13));
-assert_not_static(str_repeat($good1, 5));
+assert_static(str_repeat($good1, 5));
 assert_not_static(str_repeat($bad1, 13));
 
 echo "\n";

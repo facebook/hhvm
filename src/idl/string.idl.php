@@ -399,6 +399,10 @@ DefineFunction(
         'desc'   => "You can also specify the characters you want to strip, by means of the charlist parameter. Simply list all characters that you want to be stripped. With .. you can specify a range of characters.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => 'TAINT_BIT_NONE',
+      'clear_mask' => 'TAINT_BIT_NONE',
+    ),
   ));
 
 DefineFunction(
@@ -471,6 +475,10 @@ DefineFunction(
         'value'  => "null_variant",
         'desc'   => "The array of strings to implode.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -757,6 +765,10 @@ DefineFunction(
         'type'   => Int32,
         'desc'   => "Number of time the input string should be repeated.\n\nmultiplier has to be greater than or equal to 0. If the multiplier is set to 0, the function will return an empty string.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 

@@ -1319,9 +1319,7 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
     if (function_exists(s___autoload)) {
       invoke(s___autoload, params, -1, true, false);
       m_running = l_running;
-      return (declared && *declared) ||
-             (!declared && (ClassInfo::FindClass(className) ||
-                            ClassInfo::FindInterface(className)));
+      return (declared ? *declared : f_class_exists(className, false));
     }
     m_running = l_running;
     return false;
@@ -1345,9 +1343,7 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
           autoloadException = ex;
         }
       }
-      if ((declared && *declared) ||
-          (!declared && (ClassInfo::FindClass(className) ||
-                         ClassInfo::FindInterface(className)))) {
+      if (declared ? *declared : f_class_exists(className, false)) {
         m_running = l_running;
         if (!autoloadException.isNull()) {
           throw autoloadException;

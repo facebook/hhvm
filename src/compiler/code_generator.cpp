@@ -77,6 +77,7 @@ CodeGenerator::CodeGenerator(std::ostream *primary,
   if (filename) m_filename = *filename;
   m_translatePredefined = false;
   m_scalarVariant = false;
+  m_initListFirstElem = false;
   m_inFileOrClassHeader = false;
   m_inNamespace = false;
 }

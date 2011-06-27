@@ -328,7 +328,7 @@ public:
 
   FILE *exec(const char *cmd) {
     ASSERT(m_proc == NULL);
-    if (RuntimeOption::WritelistExec && !checkCmd(cmd)) {
+    if (RuntimeOption::WhitelistExec && !checkCmd(cmd)) {
       return NULL;
     }
     m_proc = LightProcess::popen(cmd, "r", g_context->getCwd().data());
@@ -371,8 +371,13 @@ bool ShellExecContext::checkCmd(const char *cmd) {
       }
     }
     if (!allow) {
-      Logger::Warning("Command %s not in the whitelist", cmd_tmp);
-      return false;
+      String file = FrameInjection::GetContainingFileName(true);
+      int line = FrameInjection::GetLine(true);
+      Logger::Warning("Command %s is not in the whitelist, called at %s:%d",
+                      cmd_tmp, file.data(), line);
+      if (!RuntimeOption::WhitelistExecWarningOnly) {
+        return false;
+      }
     }
     const char *bar = strchr(cmd_tmp, '|');
     if (!bar) { // no pipe, we are done

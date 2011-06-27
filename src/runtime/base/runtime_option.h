@@ -192,7 +192,8 @@ public:
   static std::set<std::string> StaticFileGenerators;
   static FilesMatchPtrVec FilesMatches;
 
-  static bool WritelistExec;
+  static bool WhitelistExec;
+  static bool WhitelistExecWarningOnly;
   static std::vector<std::string> AllowedExecCmds;
 
   static std::string TakeoverFilename;

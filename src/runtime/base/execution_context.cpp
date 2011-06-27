@@ -186,15 +186,6 @@ void ExecutionContext::setRequestMemoryMaxBytes(int64 max) {
 // write()
 
 void ExecutionContext::write(CStrRef s) {
-#ifdef TAINTED
-  if (!getTransport() && !m_out) {
-    // We are running a PHP script and we are about to echo to stdout
-    taint_warn_if_tainted(s, TAINT_BIT_HTML);
-  } else if (getTransport() && m_buffers.size() == 2) {
-    // We are responding to a request and we are about to echo to stdout
-    taint_warn_if_tainted(s, TAINT_BIT_HTML);
-  }
-#endif
   write(s.data(), s.size());
 }
 

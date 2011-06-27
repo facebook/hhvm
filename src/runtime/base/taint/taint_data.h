@@ -38,10 +38,8 @@ class TaintData {
 public:
   TaintData();
   bitstring getTaint() const;
-  void setTaint(bitstring bits, const char* original_str);
+  void setTaint(bitstring bits);
   void unsetTaint(bitstring bits);
-  const char* getOriginalStr() const;
-  void clearMetadata();
   void dump() const;
 private:
   bitstring m_taint_bits;

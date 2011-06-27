@@ -35,13 +35,6 @@ std::map<int, std::string> taint_names = boost::assign::map_list_of
 void taint_warn_if_tainted(CStrRef s, const bitstring bit) {
   if (s.get()->getTaintDataRef().getTaint() & bit) {
     std::string buf = "Using a " + taint_names[bit] + " (tainted) string!\n";
-    if (s.get()->getTaintDataRef().getOriginalStr()) {
-      buf += "original string: ";
-      buf += s.get()->getTaintDataRef().getOriginalStr();
-    } else {
-      buf += "first 100 bytes: ";
-      buf += s.substr(0, 100).data();
-    }
     buf += "\n\n";
     raise_warning(buf);
   }
@@ -54,7 +47,7 @@ void taint_array_variant(Variant &v, const std::string original_str) {
     s += " from ";
     s += original_str;
 
-    v.asStrRef().get()->getTaintData()->setTaint(TAINT_BIT_ALL, s.c_str());
+    v.asStrRef().get()->getTaintData()->setTaint(TAINT_BIT_ALL);
   }
 
   if (v.isArray()) {

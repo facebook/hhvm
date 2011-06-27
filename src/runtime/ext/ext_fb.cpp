@@ -866,9 +866,7 @@ void f_fb_set_taint(VRefParam str, int taint) {
 
   StringData *string_data = str.getStringData();
   ASSERT(string_data);
-  string_data->getTaintData()->setTaint(
-    taint,
-    string_data->data());
+  string_data->getTaintData()->setTaint(taint);
 #endif
 }
 

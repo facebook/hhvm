@@ -416,12 +416,12 @@ int64 StringData::hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
   int64 lval; double dval;
   DataType ret = isNumericWithVal(lval, dval, 1);
   switch (ret) {
-  case KindOfNull:   
+  case KindOfNull:
     // if the string is not a number, it matches 0
     return 0;
   case KindOfInt64:
     return lval;
-  case KindOfDouble: 
+  case KindOfDouble:
     return Variant::DoubleHashForIntSwitch(dval, noMatch);
   default:
     break;
@@ -442,11 +442,11 @@ int64 StringData::hashForStringSwitch(
   DataType ret = isNumericWithVal(lval, dval, 1);
   needsOrder = false;
   switch (ret) {
-  case KindOfNull:   
+  case KindOfNull:
     return empty() ? firstNullCaseHash : hash();
   case KindOfInt64:
     return lval;
-  case KindOfDouble: 
+  case KindOfDouble:
     return (int64) dval;
   default:
     break;
@@ -547,10 +547,6 @@ int64 StringData::hashHelper() const {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool StringData::calculate(int &totalSize) {
-#ifdef TAINTED
-  m_taint_data.clearMetadata();
-#endif
-
   if (m_data && !isLiteral()) {
     totalSize += (size() + 1); // ending NULL
     return true;
@@ -568,9 +564,6 @@ void StringData::restore(const char *&data) {
   m_len &= LenMask;
   m_len |= IsLinear;
   m_hash = hash_string(m_data, size());
-#ifdef TAINTED
-  ASSERT(m_taint_data.getOriginalStr() == NULL);
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

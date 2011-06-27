@@ -154,11 +154,11 @@ TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar,
   }
 
   ConstantExpressionPtr p;
-  if (ret->isPrimitive() && 
+  if (ret->isPrimitive() &&
       m_defaultValue &&
       (p = dynamic_pointer_cast<ConstantExpression>(m_defaultValue)) &&
       p->isNull())
-    // if we have a primitive type on the LHS w/ a default 
+    // if we have a primitive type on the LHS w/ a default
     // of null, then don't bother to infer it's type, since we will
     // not specialize for this case
     ret = Type::Some;
@@ -195,23 +195,8 @@ TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   // parameters are like variables, but we need to remember these are
   // parameters so when variable table is generated, they are not generated
   // as declared variables.
-  if (getScope()->isFirstPass()) {
-    ret = variables->add(m_name, ret, false, ar,
-                         shared_from_this(), ModifierExpressionPtr());
-  } else {
-    int p;
-    ret = variables->checkVariable(m_name, ret, true, ar,
-                                   shared_from_this(), p);
-    if (ret->is(Type::KindOfSome)) {
-      // This is probably too conservative. The problem is that
-      // a function never called will have parameter types of Any.
-      // Functions that it calls won't be able to accept variant unless
-      // it is forced here.
-      variables->forceVariant(ar, m_name, VariableTable::AnyVars);
-      ret = Type::Variant;
-    }
-  }
-  return ret;
+  return variables->addParamLike(m_name, ret, ar, shared_from_this(),
+                                 getScope()->isFirstPass());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -285,19 +270,20 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
     bool done = false;
     if (con && con->isNull()) {
       done = true;
-      if (isCVarRef)
+      if (isCVarRef) {
         cg_printf("null_variant");
-      else if (paramType->is(Type::KindOfVariant) ||
-               paramType->is(Type::KindOfSome))
+      } else if (paramType->is(Type::KindOfVariant) ||
+               paramType->is(Type::KindOfSome)) {
         cg_printf("null");
-      else if (paramType->is(Type::KindOfObject))
+      } else if (paramType->is(Type::KindOfObject)) {
         cg_printf("Object()");
-      else if (paramType->is(Type::KindOfArray))
+      } else if (paramType->is(Type::KindOfArray)) {
         cg_printf("Array()");
-      else if (paramType->is(Type::KindOfString))
+      } else if (paramType->is(Type::KindOfString)) {
         cg_printf("String()");
-      else 
+      } else {
         done = false;
+      }
     }
     if (!done) {
       if (comment) {

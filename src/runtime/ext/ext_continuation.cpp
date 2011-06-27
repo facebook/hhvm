@@ -18,34 +18,85 @@
 #include <runtime/ext/ext_continuation.h>
 #include <runtime/base/builtin_functions.h>
 
+#include <runtime/ext/ext_spl.h>
+#include <runtime/ext/ext_variable.h>
+
+#include <runtime/eval/runtime/variable_environment.h>
 #include <system/lib/systemlib.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+p_Continuation f_hphp_create_continuation(CStrRef clsname,
+                                          CStrRef funcname,
+                                          CArrRef args /* = null_array */) {
+  Eval::VariableEnvironment *env =
+    FrameInjection::GetVariableEnvironment(true);
+  if (UNLIKELY(!env)) {
+    throw_fatal("Cannot call hphp_create_continuation in non-eval context");
+  }
+  bool isMethod = !clsname.isNull() && !clsname.empty();
+  int64 callInfo = f_hphp_get_call_info(clsname, funcname);
+  int64 extra = f_hphp_get_call_info_extra(clsname, funcname);
+  CObjRef obj = FrameInjection::GetThis(true);
+  return p_GenericContinuation(
+      ((c_GenericContinuation*)coo_GenericContinuation())->
+        create(callInfo, extra, isMethod,
+               env->getDefinedVariables(), obj, args));
+}
+
+void f_hphp_pack_continuation(CObjRef continuation,
+                              int64 label, CVarRef value) {
+  Eval::VariableEnvironment *env =
+    FrameInjection::GetVariableEnvironment(true);
+  if (UNLIKELY(!env)) {
+    throw_fatal("Cannot call hphp_pack_continuation in non-eval context");
+  }
+  if (UNLIKELY(!continuation->o_instanceof("GenericContinuation"))) {
+    throw_fatal(
+        "Cannot call hphp_pack_continuation with a "
+        "non-GenericContinuation object");
+  }
+  p_GenericContinuation c(
+      static_cast<c_GenericContinuation*>(continuation.get()));
+  c->t_update(label, value, env->getDefinedVariables());
+}
+
+void f_hphp_unpack_continuation(CObjRef continuation) {
+  Eval::VariableEnvironment *env =
+    FrameInjection::GetVariableEnvironment(true);
+  if (UNLIKELY(!env)) {
+    throw_fatal("Cannot call hphp_unpack_continuation in non-eval context");
+  }
+  if (UNLIKELY(!continuation->o_instanceof("GenericContinuation"))) {
+    throw_fatal(
+        "Cannot call hphp_pack_continuation with a "
+        "non-GenericContinuation object");
+  }
+  p_GenericContinuation c(
+      static_cast<c_GenericContinuation*>(continuation.get()));
+  extract(env, c->t_getvars(), 256 /* EXTR_REFS */);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 static StaticString s___cont__("__cont__");
 
 c_Continuation::c_Continuation() :
+  m_label(0LL), m_done(false), m_index(-1LL),
+  m_value(Variant::nullInit), m_running(false), m_received(Variant::nullInit),
   m_callInfo(NULL), m_extra(NULL), m_isMethod(false) {}
 c_Continuation::~c_Continuation() {}
 
 void c_Continuation::t___construct(
     int64 func, int64 extra, bool isMethod,
-    CArrRef vars, CVarRef obj, CArrRef args) {
+    CVarRef obj, CArrRef args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::__construct);
-  // initialize the member variables
-  m_label   = 0LL;
-  m_done    = false;
-  m_index   = -1LL;
-  m_running = false;
-  m_received.assignVal(null);
-
   m_callInfo = (const CallInfo*) func;
   m_extra    = (void*) extra;
   m_isMethod = isMethod;
-  m_vars     = vars;
+
   if (!obj.isNull()) {
-    ASSERT(obj.isObject());
     m_obj = obj.toObject();
     ASSERT(!m_obj.isNull());
   } else {
@@ -56,12 +107,10 @@ void c_Continuation::t___construct(
   ASSERT(m_callInfo);
 }
 
-void c_Continuation::t_update(int64 label, CVarRef value, CArrRef vars) {
+void c_Continuation::t_update(int64 label, CVarRef value) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::update);
   m_label = label;
   m_value.assignVal(value);
-  m_vars = vars;
-  m_vars.weakRemove(s___cont__, true);
 }
 
 void c_Continuation::t_done() {
@@ -142,7 +191,7 @@ int64 c_Continuation::t_key() {
 
 void c_Continuation::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::next);
-  m_received.assignVal(null);
+  m_received.setNull();
   NEXT_IMPL;
 }
 
@@ -172,14 +221,10 @@ Variant c_Continuation::t_receive() {
   return m_received;
 }
 
-Array c_Continuation::t_getvars() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::getvars);
-  return m_vars;
-}
-
 Variant c_Continuation::t___clone() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::__clone);
-  throw_fatal("Trying to clone an uncloneable object of class Continuation");
+  throw_fatal(
+      "Trying to clone an uncloneable object of class Continuation");
   return null;
 }
 
@@ -189,6 +234,33 @@ Variant c_Continuation::t___destruct() {
 }
 
 #undef NEXT_IMPL
+
+c_GenericContinuation::c_GenericContinuation()  {}
+c_GenericContinuation::~c_GenericContinuation() {}
+
+void c_GenericContinuation::t___construct(int64 func, int64 extra, bool isMethod,
+                                   CArrRef vars, CVarRef obj, CArrRef args) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(GenericContinuation, GenericContinuation::__construct);
+  c_Continuation::t___construct(func, extra, isMethod, obj, args);
+  m_vars = vars;
+}
+
+void c_GenericContinuation::t_update(int64 label, CVarRef value, CArrRef vars) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(GenericContinuation, GenericContinuation::update);
+  c_Continuation::t_update(label, value);
+  m_vars = vars;
+  m_vars.weakRemove(s___cont__, true);
+}
+
+Array c_GenericContinuation::t_getvars() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(GenericContinuation, GenericContinuation::getvars);
+  return m_vars;
+}
+
+Variant c_GenericContinuation::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(GenericContinuation, GenericContinuation::__destruct);
+  return null;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

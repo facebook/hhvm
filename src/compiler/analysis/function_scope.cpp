@@ -836,20 +836,16 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
     }
 
-    if (m_closureVars) {
+    ParameterExpressionPtrVec useVars;
+    if (needsAnonClosureClass(useVars)) {
       VariableTablePtr variables = getVariables();
-      ParameterExpressionPtrVec useVars;
-      if (m_closureGenerator) {
-        cg_printf("c_GeneratorClosure *closure ATTRIBUTE_UNUSED = "
-                  "(c_GeneratorClosure*)extra;\n");
-        cg_printf("extract(variables, closure->m_vars, 256);\n");
-      } else if (needsAnonClosureClass(useVars)) {
-        cg_printf("%sClosure$%s *closure ATTRIBUTE_UNUSED = "
-                  "(%sClosure$%s*)extra;\n",
-                  Option::ClassPrefix,
-                  cg.formatLabel(m_name).c_str(),
-                  Option::ClassPrefix,
-                  cg.formatLabel(m_name).c_str());
+      cg_printf("%sClosure$%s *closure ATTRIBUTE_UNUSED = "
+                "(%sClosure$%s*)extra;\n",
+                Option::ClassPrefix,
+                cg.formatLabel(m_name).c_str(),
+                Option::ClassPrefix,
+                cg.formatLabel(m_name).c_str());
+      if (!m_closureGenerator) {
         BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
           const string &name = param->getName();
           Symbol *sym = variables->getSymbol(name);
@@ -1755,59 +1751,56 @@ static U pair_first_elem(pair<U, V> p) { return p.first; }
 bool FunctionScope::needsAnonClosureClass(ParameterExpressionPtrVec &useVars) {
   useVars.clear();
   ParameterExpressionPtrIdxPairVec useVars0;
-  getClosureUseVars(useVars0);
+  getClosureUseVars(useVars0, !m_closureGenerator);
   useVars.resize(useVars0.size());
   // C++ seems to be unable to infer the type here on pair_first_elem
   transform(useVars0.begin(),
             useVars0.end(),
             useVars.begin(),
             pair_first_elem<ParameterExpressionPtr, int>);
-  if (!m_closureVars || m_closureGenerator) return false;
+  if (!m_closureVars) return false;
   return useVars.size() > 0;
 }
 
 bool FunctionScope::needsAnonClosureClass(
     ParameterExpressionPtrIdxPairVec &useVars) {
-  getClosureUseVars(useVars);
-  if (!m_closureVars || m_closureGenerator) return false;
+  getClosureUseVars(useVars, !m_closureGenerator);
+  if (!m_closureVars) return false;
   return useVars.size() > 0;
 }
 
 void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
-  // spit out extern CallInfo decl
-  cg_printf("extern CallInfo %s%s;\n", Option::CallInfoPrefix,
-            getId(cg).c_str());
+  if (!getContainingClass()) {
+    // spit out extern CallInfo decl
+    cg_printf("extern CallInfo %s%s;\n", Option::CallInfoPrefix,
+              getId(cg).c_str());
+  }
 
+  const string &funcName = cg.formatLabel(m_name);
   ParameterExpressionPtrVec useVars;
   if (needsAnonClosureClass(useVars)) {
-    cg_printf("FORWARD_DECLARE_CLASS(Closure$%s);\n",
-              cg.formatLabel(m_name).c_str());
+    cg_printf("FORWARD_DECLARE_CLASS(Closure$%s);\n", funcName.c_str());
     cg_indentBegin("class %sClosure$%s : public %sClosure {\n",
-                   Option::ClassPrefix,
-                   cg.formatLabel(m_name).c_str(),
+                   Option::ClassPrefix, funcName.c_str(),
                    Option::ClassPrefix);
 
     cg_printf("public:\n");
 
     cg_printf("DECLARE_OBJECT_ALLOCATION_NO_SWEEP(%sClosure$%s)\n",
-              Option::ClassPrefix,
-              cg.formatLabel(m_name).c_str());
+              Option::ClassPrefix, funcName.c_str());
 
     VariableTablePtr variables = getVariables();
     BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
       const string &name = param->getName();
       Symbol *sym = variables->getSymbol(name);
-      ASSERT(sym->isUsed());
       TypePtr t(sym->getFinalType());
       t->outputCPPDecl(cg, ar, shared_from_this());
-      cg_printf(" %s%s;\n",
-                Option::VariablePrefix,
-                cg.formatLabel(name).c_str());
+      const string &varName = variables->getVariableName(cg, ar, sym);
+      cg_printf(" %s;\n", varName.c_str());
     }
 
     cg_printf("%sClosure$%s(const CallInfo *func, void *extra, ",
-              Option::ClassPrefix,
-              cg.formatLabel(m_name).c_str());
+              Option::ClassPrefix, funcName.c_str());
 
     bool hasEmit = false;
     BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
@@ -1816,7 +1809,6 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
 
       const string &name = param->getName();
       Symbol *sym = variables->getSymbol(name);
-      ASSERT(sym->isUsed());
       TypePtr t(sym->getFinalType());
       t->outputCPPDecl(cg, ar, shared_from_this());
       cg_printf(" %s%s",
@@ -1831,31 +1823,130 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
     BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
       const string &name = param->getName();
       Symbol *sym = variables->getSymbol(name);
-      ASSERT(sym->isUsed());
+      ASSERT(sym);
       TypePtr t(sym->getFinalType());
       ASSERT(!param->isRef() || t->is(Type::KindOfVariant));
+      const string &varName = variables->getVariableName(cg, ar, sym);
+      const string &tmpName =
+        string(Option::TempVariablePrefix) + cg.formatLabel(name);
       if (t->is(Type::KindOfVariant)) {
         const char *s = param->isRef() ? "Ref" : "Val";
-        cg_printf("%s%s.assign%s(%s%s);\n",
-                  Option::VariablePrefix,
-                  name.c_str(),
-                  s,
-                  Option::TempVariablePrefix,
-                  name.c_str());
+        cg_printf("%s.assign%s(%s);\n", varName.c_str(), s, tmpName.c_str());
       } else {
-        cg_printf("%s%s = %s%s;\n",
-                  Option::VariablePrefix,
-                  name.c_str(),
-                  Option::TempVariablePrefix,
-                  name.c_str());
+        ASSERT(!param->isRef());
+        cg_printf("%s = %s;\n", varName.c_str(), tmpName.c_str());
       }
     }
     cg_indentEnd("}\n");
 
     cg_indentEnd("};\n");
     cg_printf("IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(%sClosure$%s)\n",
-              Option::ClassPrefix,
-              cg.formatLabel(m_name).c_str());
+              Option::ClassPrefix, funcName.c_str());
+  }
+
+  if (isGenerator()) {
+    cg_printf("FORWARD_DECLARE_CLASS(Continuation$%s);\n", funcName.c_str());
+    cg_indentBegin("class %sContinuation$%s : public %sContinuation {\n",
+                   Option::ClassPrefix, funcName.c_str(), Option::ClassPrefix);
+
+    cg_printf("public:\n");
+
+    cg_printf("DECLARE_OBJECT_ALLOCATION_NO_SWEEP(%sContinuation$%s)\n",
+              Option::ClassPrefix, funcName.c_str());
+
+    VariableTablePtr variables = getVariables();
+    vector<Symbol*> symbols;
+    variables->getSymbols(symbols, true);
+
+    BOOST_FOREACH(Symbol *sym, symbols) {
+      const string &varName = variables->getVariableName(cg, ar, sym);
+      TypePtr type = sym->getFinalType();
+      type->outputCPPDecl(cg, ar, shared_from_this());
+      cg_printf(" %s;\n", varName.c_str());
+    }
+
+    // constructor is bootstrapped with all the parameters
+    // of the original generator function + use vars for any
+    // surrounding closure generator
+    cg_printf("static %sContinuation$%s Build("
+              "int64 func, int64 extra, bool isMethod, ",
+              Option::SmartPtrPrefix, funcName.c_str());
+
+    ASSERT(getStmt());
+    MethodStatementPtr m = dynamic_pointer_cast<MethodStatement>(getStmt());
+    ASSERT(m);
+    ASSERT(m->getOrigGeneratorFunc());
+    MethodStatementPtr orig =
+      dynamic_pointer_cast<MethodStatement>(m->getOrigGeneratorFunc());
+    ASSERT(orig);
+    ExpressionListPtr params = orig->getParams();
+
+    vector<ParameterExpressionPtr> ctorParams;
+    if (params) {
+      for (int i = 0; i < params->getCount(); i++) {
+        ParameterExpressionPtr param =
+          dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+        ctorParams.push_back(param);
+      }
+    }
+    useVars.clear();
+    bool needsClosureCls =
+      orig->getFunctionScope()->needsAnonClosureClass(useVars);
+    if (needsClosureCls) {
+      ASSERT(useVars.size() > 0);
+      ctorParams.insert(ctorParams.end(), useVars.begin(), useVars.end());
+    }
+
+    bool hasEmit = false;
+    BOOST_FOREACH(ParameterExpressionPtr param, ctorParams) {
+      const string& name = param->getName();
+      Symbol *sym = variables->getSymbol(name);
+      if (sym) {
+        if (!hasEmit) hasEmit = true;
+        else          cg_printf(", ");
+        TypePtr t(sym->getFinalType());
+        t->outputCPPDecl(cg, ar, shared_from_this());
+        const string &tmpName =
+          string(Option::TempVariablePrefix) + cg.formatLabel(name);
+        cg_printf(" %s", tmpName.c_str());
+      }
+    }
+
+    if (hasEmit) cg_printf(", ");
+    cg_indentBegin("CVarRef obj, CArrRef args) {\n");
+    cg_printf("%sContinuation$%s cont = "
+              "%sContinuation$%s(NEWOBJ(%sContinuation$%s)());\n",
+              Option::SmartPtrPrefix, funcName.c_str(),
+              Option::SmartPtrPrefix, funcName.c_str(),
+              Option::ClassPrefix,    funcName.c_str());
+    cg_printf("cont->%s__construct(func, extra, isMethod, obj, args);\n",
+              Option::MethodPrefix);
+
+    BOOST_FOREACH(ParameterExpressionPtr param, ctorParams) {
+      const string& name = param->getName();
+      Symbol *sym = variables->getSymbol(name);
+      if (sym) {
+        const string &varName = variables->getVariableName(cg, ar, sym);
+        const string &tmpName =
+          string(Option::TempVariablePrefix) + cg.formatLabel(name);
+        TypePtr t(sym->getFinalType());
+        if (t->is(Type::KindOfVariant)) {
+          const char *s = param->isRef() ? "Ref" : "Val";
+          cg_printf("cont->%s.assign%s(%s);\n",
+                    varName.c_str(), s, tmpName.c_str());
+        } else {
+          ASSERT(!param->isRef());
+          cg_printf("cont->%s = %s;\n", varName.c_str(), tmpName.c_str());
+        }
+      }
+    }
+
+    cg_printf("return cont;\n");
+    cg_indentEnd("}\n");
+
+    cg_indentEnd("};\n");
+    cg_printf("IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(%sContinuation$%s)\n",
+              Option::ClassPrefix, funcName.c_str());
   }
 }
 

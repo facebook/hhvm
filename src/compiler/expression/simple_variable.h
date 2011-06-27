@@ -55,6 +55,7 @@ public:
   void setGuardedThis() { m_guardedThis = true; }
   bool isGuardedThis() const { return m_guardedThis; }
   void coalesce(SimpleVariablePtr other);
+  std::string getNamePrefix() const;
 private:
   std::string m_name;
 

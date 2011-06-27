@@ -76,6 +76,13 @@ public:
   }
 
   const std::string &getDocComment() const { return m_docComment; }
+
+  void setOrigGeneratorFunc(StatementPtr stmt) {
+    m_origGeneratorFunc = stmt;
+  }
+  StatementPtr getOrigGeneratorFunc() const {
+    return m_origGeneratorFunc;
+  }
 protected:
   bool m_method;
   ModifierExpressionPtr m_modifiers;
@@ -89,6 +96,7 @@ protected:
   int m_attribute;
   std::string m_docComment;
   int m_cppLength;
+  StatementPtr m_origGeneratorFunc;
 
   void outputCPPArgInjections(CodeGenerator &cg, AnalysisResultPtr ar,
                               const char *name, ClassScopePtr cls,

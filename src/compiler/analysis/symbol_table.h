@@ -302,6 +302,7 @@ public:
   }
 
   void canonicalizeSymbolOrder();
+  void getSymbols(std::vector<Symbol*> &syms, bool filterHidden = false) const;
   void getSymbols(std::vector<std::string> &syms) const;
   void getCoerced(StringToTypePtrMap &coerced) const;
 

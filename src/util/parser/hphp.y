@@ -199,20 +199,13 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
   {
     Token scall;
     {
+      // hphp_unpack_continuation(v___cont__)
       Token name;    name.setText(CONTINUATION_OBJECT_NAME);
       Token var;     _p->onSynthesizedVariable(var, name);
-      Token pn;      pn.setText("getVars");
-      Token pname;   _p->onName(pname, pn, Parser::VarName);
-      Token mcall;   _p->pushObject(var); _p->appendProperty(pname);
-      Token empty;   empty = 1; _p->appendMethodParams(empty);
-                     _p->popObject(mcall);
+      Token param1;  _p->onCallParam(param1, NULL, var, false);
 
-      Token cname;   cname.setText("extract");
-      Token param1;  _p->onCallParam(param1, NULL, mcall, 0);
-      Token refs;    refs.setText("EXTR_REFS");
-      Token crefs;   _p->onConstantValue(crefs, refs);
-      Token param2;  _p->onCallParam(param2, &param1, crefs, 0);
-      Token call;    _p->onCall(call, 0, cname, param2, NULL);
+      Token cname;   cname.setText("hphp_unpack_continuation");
+      Token call;    _p->onCall(call, false, cname, param1, NULL);
       _p->onExpStatement(scall, call);
     }
     Token sswitch;
@@ -284,83 +277,34 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
 void create_generator(Parser *_p, Token &out, Token &params,
                       Token &name, const std::string &closureName,
                       const char *clsname, Token *modifiers, bool getArgs,
-                      bool needsExtra) {
+                      Token &origGenFunc) {
   _p->pushFuncLocation();
   if (clsname) {
     _p->onMethodStart(name, *modifiers);
   } else {
     _p->onFunctionStart(name);
   }
+
   Token scont;
   {
+    Token cn;      cn.setText(clsname ? clsname : "");
+    Token cname;   _p->onScalar(cname, T_CONSTANT_ENCAPSED_STRING, cn);
 
-    Token get_call_info;
-    Token get_call_info_extra;
-    {
-      Token cn;      cn.setText(clsname ? clsname : "");
-      Token cname;   _p->onScalar(cname, T_CONSTANT_ENCAPSED_STRING, cn);
+    Token fn;      fn.setText(closureName);
+    Token fname;   _p->onScalar(fname, T_CONSTANT_ENCAPSED_STRING, fn);
 
-      Token fn;      fn.setText(closureName);
-      Token fname;   _p->onScalar(fname, T_CONSTANT_ENCAPSED_STRING, fn);
-
-      Token get_call_info_params;
-      _p->onCallParam(get_call_info_params, NULL, cname, 0);
-      _p->onCallParam(get_call_info_params, &get_call_info_params, fname, 0);
-
-      Token callname; callname.setText("hphp_get_call_info");
-      _p->onCall(get_call_info, 0, callname, get_call_info_params, NULL);
-
-      if (needsExtra) {
-        Token get_call_info_extra_params;
-        _p->onCallParam(get_call_info_extra_params, NULL, cname, 0);
-        _p->onCallParam(get_call_info_extra_params,
-                        &get_call_info_extra_params, fname, 0);
-
-        Token callname; callname.setText("hphp_get_call_info_extra");
-        _p->onCall(get_call_info_extra, 0, callname,
-                   get_call_info_extra_params, NULL);
-      } else {
-        Token zero; zero.setText("0");
-                    _p->onScalar(get_call_info_extra, T_LNUMBER, zero);
-      }
-    }
-
-    Token fi;      fi.setText(clsname ? "true" : "false");
-    Token fisMeth; _p->onConstantValue(fisMeth, fi);
-
-    Token param1;  _p->onCallParam(param1, NULL, get_call_info, 0);
-                   _p->onCallParam(param1, &param1, get_call_info_extra, 0);
-                   _p->onCallParam(param1, &param1, fisMeth, 0);
-
-    Token cname;   cname.setText("get_defined_vars");
-    Token empty;
-    Token call;    _p->onCall(call, 0, cname, empty, NULL);
-    Token param2;  _p->onCallParam(param2, &param1, call, 0);
-
-    Token params;
-    if (clsname || getArgs) {
-      Token cname;   cname.setText("hphp_get_this");
+    Token param1;  _p->onCallParam(param1, NULL, cname, false);
+                   _p->onCallParam(param1, &param1, fname, false);
+    if (getArgs) {
+      Token cname;   cname.setText("func_get_args");
       Token empty;
-      Token call;    _p->onCall(call, 0, cname, empty, NULL);
-      Token param3;  _p->onCallParam(param3, &param2, call, 0);
-
-      if (getArgs) {
-        Token cname;   cname.setText("func_get_args");
-        Token empty;
-        Token call;    _p->onCall(call, 0, cname, empty, NULL);
-        Token param4;  _p->onCallParam(param4, &param3, call, 0);
-        params = param4;
-      } else {
-        params = param3;
-      }
-    } else {
-      params = param2;
+      Token call;    _p->onCall(call, false, cname, empty, NULL);
+                     _p->onCallParam(param1, &param1, call, false);
     }
 
-    Token clsname; clsname.setText("Continuation");
-    Token cls;     _p->onName(cls, clsname, Parser::StringName);
-    Token newobj;  _p->onNewObject(newobj, cls, params);
-    Token ret;     _p->onReturn(ret, &newobj);
+    Token cname0;  cname0.setText("hphp_create_continuation");
+    Token call;    _p->onCall(call, false, cname0, param1, NULL);
+    Token ret;     _p->onReturn(ret, &call);
 
     Token stmts0;  _p->onStatementListStart(stmts0);
     Token stmts1;  _p->addStatement(stmts1, stmts0, ret);
@@ -373,6 +317,7 @@ void create_generator(Parser *_p, Token &out, Token &params,
   if (clsname) {
     Token closure;
     _p->onMethod(closure, *modifiers, ret, ref, name, params, scont);
+    origGenFunc = closure;
 
     Token stmts0;  _p->onStatementListStart(stmts0);
     Token stmts1;  _p->addStatement(stmts1, stmts0, closure);
@@ -381,39 +326,33 @@ void create_generator(Parser *_p, Token &out, Token &params,
   } else {
     out.reset();
     _p->onFunction(out, ret, ref, name, params, scont);
+    origGenFunc = out;
   }
 }
 
 void transform_yield(Parser *_p, Token &stmts, int index, Token *expr) {
   Token update;
   {
+    // hphp_pack_contination(v___cont__, label, value)
+
     Token name;    name.setText(CONTINUATION_OBJECT_NAME);
     Token var;     _p->onSynthesizedVariable(var, name);
-    Token pn;      pn.setText("update");
-    Token pname;   _p->onName(pname, pn, Parser::VarName);
-    Token mcall;   _p->pushObject(var); _p->appendProperty(pname);
+    Token param1;  _p->onCallParam(param1, NULL, var, false);
 
     Token snum;    snum.setText(boost::lexical_cast<std::string>(index));
     Token num;     _p->onScalar(num, T_LNUMBER, snum);
-    Token param1;  _p->onCallParam(param1, NULL, num, 0);
+                   _p->onCallParam(param1, &param1, num, false);
 
-    Token param2;
     if (expr) {
-      _p->onCallParam(param2, &param1, *expr, 0);
+      _p->onCallParam(param1, &param1, *expr, false);
     } else {
       Token tnull; scalar_null(_p, tnull);
-      _p->onCallParam(param2, &param1, tnull, 0);
+      _p->onCallParam(param1, &param1, tnull, false);
     }
 
-    Token cname;   cname.setText("get_defined_vars");
-    Token empty;
-    Token call;    _p->onCall(call, 0, cname, empty, NULL);
-
-    Token param;   _p->onCallParam(param, &param2, call, 0);
-                   param = 1; _p->appendMethodParams(param);
-
-    _p->popObject(mcall);
-    _p->onExpStatement(update, mcall);
+    Token cname;   cname.setText("hphp_pack_continuation");
+    Token call;    _p->onCall(call, false, cname, param1, NULL);
+    _p->onExpStatement(update, call);
   }
 
   Token lname;   lname.setText(YIELD_LABEL_PREFIX +

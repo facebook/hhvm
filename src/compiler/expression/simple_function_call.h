@@ -109,6 +109,12 @@ protected:
   ExpressionPtr optimize(AnalysisResultConstPtr ar);
 private:
   int checkObjCall(AnalysisResultPtr ar);
+  FunctionScopePtr
+  getFuncScopeFromParams(AnalysisResultPtr ar,
+                         ExpressionPtr clsName,
+                         ExpressionPtr funcName,
+                         std::string &clsstr,
+                         std::string &funcstr);
   std::string getThisString(bool withArrow);
   std::string m_localThis;
   void *m_extra; // e.g., raw pointer to the symbol defined

@@ -23,12 +23,17 @@ IMPLEMENT_SEP_EXTENSION_TEST(Continuation);
 bool TestExtContinuation::RunTests(const std::string &which) {
   bool ret = true;
 
+  RUN_TEST(test_BaseContinuation);
   RUN_TEST(test_Continuation);
 
   return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+bool TestExtContinuation::test_BaseContinuation() {
+  return Count(true);
+}
 
 bool TestExtContinuation::test_Continuation() {
   return Count(true);

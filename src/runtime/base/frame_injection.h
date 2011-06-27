@@ -24,6 +24,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class VariableEnvironment;
+
 class FrameInjection {
 public:
   enum Flag {
@@ -44,6 +46,7 @@ public:
   static Array GetBacktrace(bool skip = false, bool withSelf = false,
                             bool withThis = true);
   static Array GetCallerInfo(bool skip = false);
+  static Eval::VariableEnvironment *GetVariableEnvironment(bool skip = false);
   static int GetLine(bool skip = false);
 
 #ifdef ENABLE_LATE_STATIC_BINDING

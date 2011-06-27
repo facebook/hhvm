@@ -22,6 +22,7 @@
 #include <compiler/builtin_symbols.h>
 #include <compiler/expression/scalar_expression.h>
 #include <util/parser/hphp.tab.hpp>
+#include <util/parser/parser.h>
 
 using namespace HPHP;
 using namespace std;
@@ -88,6 +89,12 @@ void SimpleVariable::coalesce(SimpleVariablePtr other) {
   m_sym->clearNeeded();
   m_sym = other->m_sym;
   m_name = m_sym->getName();
+}
+
+string SimpleVariable::getNamePrefix() const {
+  bool needsCont = getFunctionScope()->isGenerator();
+  return needsCont && m_name != CONTINUATION_OBJECT_NAME ?
+      string(TYPED_CONTINUATION_OBJECT_NAME) + "->" : string("");
 }
 
 /*
@@ -280,11 +287,13 @@ void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
     ASSERT(!ref_temp.empty());
     string copy_temp = genCPPTemp(cg, ar);
     string arg_temp = genCPPTemp(cg, ar);
-    const char *prefix =
+    const string &prefix0 = getNamePrefix();
+    const char *prefix1 =
       getScope()->getVariables()->getVariablePrefix(m_sym);
-    cg_printf("const Variant %s = %s%s;\n",
+    cg_printf("const Variant %s = %s%s%s;\n",
               copy_temp.c_str(),
-              prefix,
+              prefix0.c_str(),
+              prefix1,
               cg.formatLabel(m_name).c_str());
     cg_printf("const Variant &%s = cit%d->isRef(%d) ? %s : %s;\n",
               arg_temp.c_str(),
@@ -338,9 +347,13 @@ void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       sw = true;
       cg_printf(" ");
     }
-    const char *prefix =
+    const string &prefix0 = getNamePrefix();
+    const char *prefix1 =
       getScope()->getVariables()->getVariablePrefix(m_sym);
-    cg_printf("%s%s", prefix, cg.formatLabel(m_name).c_str());
+    cg_printf("%s%s%s",
+              prefix0.c_str(),
+              prefix1,
+              cg.formatLabel(m_name).c_str());
     if (m_originalSym) {
       cg.printf(" /* %s */", m_originalSym->getName().c_str());
     }

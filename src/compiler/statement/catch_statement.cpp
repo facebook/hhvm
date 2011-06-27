@@ -129,8 +129,10 @@ void CatchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printString(m_className, ar, shared_from_this());
     cg_indentBegin(")) {\n");
     VariableTablePtr variables = getScope()->getVariables();
-    string name = variables->getVariableName(cg, ar, m_variable->getName());
-    cg_printf("%s = e;\n", name.c_str());
+    const string &prefix = m_variable->getNamePrefix();
+    const string &name =
+      variables->getVariableName(cg, ar, m_variable->getName());
+    cg_printf("%s%s = e;\n", prefix.c_str(), name.c_str());
   } else {
     cg_indentBegin("if (false) {\n");
   }

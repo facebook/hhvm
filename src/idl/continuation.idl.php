@@ -49,6 +49,64 @@ CPP
 //      )
 // )
 
+DefineFunction(
+  array(
+    'name'   => 'hphp_create_continuation',
+    'return' => array(
+      'type'   => 'Continuation',
+    ),
+    'args'   => array(
+      array(
+        'name'   => 'clsname',
+        'type'   => String,
+      ),
+      array(
+        'name'   => 'funcname',
+        'type'   => String,
+      ),
+      array(
+        'name'   => 'args',
+        'type'   => VariantMap,
+        'value'  => 'null_array',
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => 'hphp_pack_continuation',
+    'return' => array(
+      'type'   => null,
+    ),
+    'args'   => array(
+      array(
+        'name'   => 'continuation',
+        'type'   => Object,
+      ),
+      array(
+        'name'   => 'label',
+        'type'   => Int64,
+      ),
+      array(
+        'name'   => 'value',
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => 'hphp_unpack_continuation',
+    'return' => array(
+      'type'   => null,
+    ),
+    'args'   => array(
+      array(
+        'name'   => 'continuation',
+        'type'   => Object,
+      ),
+    ),
+  ));
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
@@ -118,10 +176,6 @@ DefineFunction(
         'type'   => Boolean,
       ),
       array(
-        'name'   => 'vars',
-        'type'   => VariantMap,
-      ),
-      array(
         'name'   => 'obj',
         'type'   => Variant,
         'value'  => 'null',
@@ -148,10 +202,6 @@ DefineFunction(
       array(
         'name'   => 'value',
         'type'   => Variant,
-      ),
-      array(
-        'name'   => 'vars',
-        'type'   => VariantMap,
       ),
     ),
   ));
@@ -264,21 +314,6 @@ DefineFunction(
     ),
   ));
 
-DefineFunction(
-  array(
-    'name'   => 'getVars',
-    'return' => array(
-      'type'   => VariantMap,
-    ),
-  ));
-
-DefineProperty(
-  array(
-    'name'  => 'vars',
-    'type'  => VariantMap,
-    'flags' => IsPrivate,
-  ));
-
 DefineProperty(
   array(
     'name'  => 'obj',
@@ -341,6 +376,88 @@ DefineFunction(
     'return' => array(
       'type'   => Variant,
     ),
+  ));
+
+EndClass();
+
+BeginClass(
+  array(
+    'name'   => 'GenericContinuation',
+    'parent' => 'Continuation',
+  )
+);
+
+DefineFunction(
+  array(
+    'name'   => '__construct',
+    'return' => array(
+      'type'   => null,
+    ),
+    'args'   => array(
+      array(
+        'name'   => 'func',
+        'type'   => Int64,
+      ),
+      array(
+        'name'   => 'extra',
+        'type'   => Int64,
+      ),
+      array(
+        'name'   => 'isMethod',
+        'type'   => Boolean,
+      ),
+      array(
+        'name'   => 'vars',
+        'type'   => VariantMap,
+      ),
+      array(
+        'name'   => 'obj',
+        'type'   => Variant,
+        'value'  => 'null',
+      ),
+      array(
+        'name'   => 'args',
+        'type'   => VariantMap,
+        'value'  => 'null_array',
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => 'update',
+    'return' => array(
+      'type'   => null,
+    ),
+    'args'   => array(
+      array(
+        'name'   => 'label',
+        'type'   => Int64,
+      ),
+      array(
+        'name'   => 'value',
+        'type'   => Variant,
+      ),
+      array(
+        'name'   => 'vars',
+        'type'   => VariantMap,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => 'getVars',
+    'return' => array(
+      'type'   => VariantMap,
+    ),
+  ));
+
+DefineProperty(
+  array(
+    'name'  => 'vars',
+    'type'  => VariantMap,
+    'flags' => IsPrivate,
   ));
 
 EndClass();

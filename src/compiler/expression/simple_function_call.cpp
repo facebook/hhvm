@@ -26,6 +26,8 @@
 #include <compiler/expression/array_pair_expression.h>
 #include <compiler/expression/array_element_expression.h>
 #include <compiler/expression/unary_op_expression.h>
+#include <compiler/expression/parameter_expression.h>
+#include <compiler/statement/method_statement.h>
 #include <compiler/analysis/constant_table.h>
 #include <compiler/analysis/variable_table.h>
 #include <util/util.h>
@@ -1181,6 +1183,43 @@ static int isObjCall(AnalysisResultPtr ar,
   return 0;
 }
 
+FunctionScopePtr
+SimpleFunctionCall::getFuncScopeFromParams(AnalysisResultPtr ar,
+                                           ExpressionPtr clsName,
+                                           ExpressionPtr funcName,
+                                           string &clsstr,
+                                           string &funcstr) {
+  ScalarExpressionPtr clsName0(
+      dynamic_pointer_cast<ScalarExpression>(clsName));
+  ScalarExpressionPtr funcName0(
+      dynamic_pointer_cast<ScalarExpression>(funcName));
+  if (clsName0 && funcName0) {
+    string cname = clsName0->getLiteralString();
+    string fname = funcName0->getLiteralString();
+    if (!fname.empty()) {
+      if (!cname.empty()) {
+        ClassScopePtr cscope(ar->findClass(cname));
+        if (cscope && !cscope->isRedeclaring()) {
+          FunctionScopePtr fscope(cscope->findFunction(ar, fname, true));
+          if (fscope) {
+            clsstr = cname;
+            funcstr = fname;
+          }
+          return fscope;
+        }
+      } else {
+        FunctionScopePtr fscope(ar->findFunction(fname));
+        if (fscope) {
+          clsstr = "";
+          funcstr = fname;
+        }
+        return fscope;
+      }
+    }
+  }
+  return FunctionScopePtr();
+}
+
 int SimpleFunctionCall::checkObjCall(AnalysisResultPtr ar) {
   ClassScopeRawPtr orig = getOriginalClass();
   int objCall = isObjCall(ar, orig, getOriginalFunction(),
@@ -1837,38 +1876,155 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
     }
     if (m_name == "hphp_get_call_info" &&
         m_params && m_params->getCount() == 2) {
-      ScalarExpressionPtr clsName(
-          dynamic_pointer_cast<ScalarExpression>((*m_params)[0]));
-      ScalarExpressionPtr funcName(
-          dynamic_pointer_cast<ScalarExpression>((*m_params)[1]));
-      if (clsName && funcName) {
-        string cname = clsName->getLiteralString();
-        string fname = funcName->getLiteralString();
-        if (!fname.empty()) {
-          if (!cname.empty()) {
-            ClassScopePtr cscope(ar->findClass(cname));
-            if (cscope && !cscope->isRedeclaring()) {
-              FunctionScopePtr fscope(cscope->findFunction(ar, fname, true));
-              if (fscope) {
-                cg_printf("(int64)&%s%s::%s%s",
-                          Option::ClassPrefix,
-                          cg.formatLabel(cname).c_str(),
-                          Option::CallInfoPrefix,
-                          fname.c_str());
-                return;
+      string cname, fname;
+      FunctionScopePtr fscope(
+          getFuncScopeFromParams(
+              ar, (*m_params)[0], (*m_params)[1], cname, fname));
+      if (fscope) {
+        ASSERT(!fname.empty());
+        if (!cname.empty()) {
+          cg_printf("(int64)&%s%s::%s%s",
+                    Option::ClassPrefix,
+                    cg.formatLabel(cname).c_str(),
+                    Option::CallInfoPrefix,
+                    fname.c_str());
+        } else {
+          cg_printf("(int64)&%s%s",
+                    Option::CallInfoPrefix,
+                    fname.c_str());
+        }
+        return;
+      }
+    }
+
+    if (m_name == "hphp_create_continuation" &&
+        m_params &&
+        (m_params->getCount() == 2 || m_params->getCount() == 3)) {
+      string cname, fname;
+      FunctionScopePtr fscope(
+          getFuncScopeFromParams(
+              ar, (*m_params)[0], (*m_params)[1], cname, fname));
+      if (fscope) {
+        ASSERT(!fname.empty());
+        cg_printf("%sContinuation$%s::Build(",
+                  Option::ClassPrefix,
+                  cg.formatLabel(fname).c_str());
+
+        // func
+        if (!cname.empty()) {
+          cg_printf("(int64)&%s%s::%s%s, ",
+                    Option::ClassPrefix,
+                    cg.formatLabel(cname).c_str(),
+                    Option::CallInfoPrefix,
+                    fname.c_str());
+        } else {
+          cg_printf("(int64)&%s%s, ",
+                    Option::CallInfoPrefix,
+                    fname.c_str());
+        }
+
+        // extra
+        cg_printf("0LL, ");
+
+        // isMethod
+        cg_printf("%s, ", cname.empty() ? "false" : "true");
+
+        // function params
+
+        // vtable for the transformed *generator* function
+        VariableTablePtr variables = fscope->getVariables();
+
+        // method statement for the *original* function
+        MethodStatementPtr m =
+          dynamic_pointer_cast<MethodStatement>(getFunctionScope()->getStmt());
+        ASSERT(m);
+
+        ExpressionListPtr params = m->getParams();
+        if (params) {
+          for (int i = 0; i < params->getCount(); i++) {
+            ParameterExpressionPtr param =
+              dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+            const string& name = param->getName();
+            Symbol *sym = variables->getSymbol(name);
+            if (sym) {
+              if (param->isRef()) {
+                ASSERT(sym->getFinalType()->is(Type::KindOfVariant));
+                cg_printf("strongBind(%s%s), ",
+                          variables->getVariablePrefix(sym),
+                          cg.formatLabel(name).c_str());
+              } else {
+                cg_printf("%s%s, ",
+                          variables->getVariablePrefix(sym),
+                          cg.formatLabel(name).c_str());
               }
-            }
-          } else {
-            FunctionScopePtr fscope(ar->findFunction(fname));
-            if (fscope) {
-              cg_printf("(int64)&%s%s",
-                        Option::CallInfoPrefix,
-                        fname.c_str());
-              return;
             }
           }
         }
+
+        // closure use vars
+        if (getFunctionScope()->isClosureGenerator()) {
+          ParameterExpressionPtrVec useVars;
+          if (getFunctionScope()->needsAnonClosureClass(useVars)) {
+            BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
+              const string &name = param->getName();
+              Symbol *sym = variables->getSymbol(name);
+              if (sym) {
+                TypePtr t(sym->getFinalType());
+                // read the variables off the closure
+                if (param->isRef()) {
+                  ASSERT(sym->getFinalType()->is(Type::KindOfVariant));
+                  cg_printf("strongBind(closure->%s%s), ",
+                            variables->getVariablePrefix(sym),
+                            cg.formatLabel(name).c_str());
+                } else {
+                  cg_printf("closure->%s%s, ",
+                            variables->getVariablePrefix(sym),
+                            cg.formatLabel(name).c_str());
+                }
+              }
+            }
+          }
+        }
+
+        // TODO: avoid generating obj/args for specialized continuations
+        // if possible
+
+        // obj
+        if (cname.empty()) {
+          cg_printf("null_object, ");
+        } else {
+          cg_printf("GET_THIS_TYPED(%s), ", cname.c_str());
+        }
+
+        // args
+        if (m_params->getCount() == 3) {
+          ((*m_params)[2])->outputCPP(cg, ar);
+        } else {
+          cg_printf("null_array");
+        }
+
+        cg_printf(")");
+        return;
       }
+    }
+
+    if (m_name == "hphp_pack_continuation" &&
+        m_params && m_params->getCount() == 3) {
+      cg_printf("%s%s->%supdate(",
+                Option::VariablePrefix,
+                CONTINUATION_OBJECT_NAME,
+                Option::MethodPrefix);
+      m_params->removeElement(0); // remove cont obj
+      FunctionScope::OutputCPPArguments(m_params, m_funcScope,
+                                        cg, ar, 0, false);
+      cg_printf(")");
+      return;
+    }
+
+    if (m_name == "hphp_unpack_continuation" &&
+        m_params && m_params->getCount() == 1) {
+      cg_printf("0");
+      return;
     }
 
     switch (m_type) {

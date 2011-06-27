@@ -38,10 +38,11 @@
   }                                             \
 
 // NOTE: system/classes/closure.php may have reference to these strings:
-#define CONTINUATION_OBJECT_NAME "__cont__"
-#define YIELD_LABEL_PREFIX "__yield__"
-#define FOREACH_VAR_PREFIX "__foreach__"
-#define NAMESPACE_SEP '\\'
+#define CONTINUATION_OBJECT_NAME       "__cont__"
+#define TYPED_CONTINUATION_OBJECT_NAME "__typedCont__"
+#define YIELD_LABEL_PREFIX             "__yield__"
+#define FOREACH_VAR_PREFIX             "__foreach__"
+#define NAMESPACE_SEP                  '\\'
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

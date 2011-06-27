@@ -155,6 +155,8 @@ public:
   const char *getVariablePrefix(const Symbol *sym) const;
   std::string getVariableName(CodeGenerator &cg, AnalysisResultConstPtr ar,
                               const std::string &name) const;
+  std::string getVariableName(CodeGenerator &cg, AnalysisResultConstPtr ar,
+                              const Symbol *sym) const;
   std::string getGlobalVariableName(CodeGenerator &cg,
                                     AnalysisResultConstPtr ar,
                                     const std::string &name) const;
@@ -174,6 +176,10 @@ public:
    */
   TypePtr addParam(const std::string &name, TypePtr type,
                    AnalysisResultConstPtr ar, ConstructPtr construct);
+
+  TypePtr addParamLike(const std::string &name, TypePtr type,
+                       AnalysisResultPtr ar, ConstructPtr construct,
+                       bool firstPass);
 
   /**
    * Called when a variable is declared or being assigned (l-value).
@@ -370,7 +376,8 @@ private:
                                       AnalysisResultPtr ar);
   void outputCPPGlobalVariablesImpl(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPVariableTable(CodeGenerator &cg, AnalysisResultPtr ar);
+  void outputCPPVariableTable(CodeGenerator &cg, AnalysisResultPtr ar,
+                              const char *paramPrefix);
   bool outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
                           const char *prefix, bool defineHash,
                           bool variantOnly, StaticSelection staticVar,

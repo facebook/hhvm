@@ -239,6 +239,20 @@ Array FrameInjection::GetCallerInfo(bool skip /* = false */) {
   return Array::Create();
 }
 
+Eval::VariableEnvironment *
+FrameInjection::GetVariableEnvironment(bool skip /* = false */) {
+  FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
+  if (skip && t) {
+    t = t->m_prev;
+  }
+  if (t && t->isEvalFrame()) {
+    Eval::EvalFrameInjection* efi =
+      static_cast<Eval::EvalFrameInjection*>(t);
+    return &(efi->getEnv());
+  }
+  return NULL;
+}
+
 int FrameInjection::GetLine(bool skip /* = false */) {
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (t && skip) {

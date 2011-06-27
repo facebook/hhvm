@@ -109,7 +109,7 @@ extern void prepare_generator(Parser *_p, Token &stmt, Token &params,
 extern void create_generator(Parser *_p, Token &out, Token &params,
                              Token &name, const std::string &closureName,
                              const char *clsname, Token *modifiers,
-                             bool getArgs, bool needsExtra);
+                             bool getArgs, Token &origGenFunc);
 extern void transform_yield(Parser *_p, Token &stmts, int index, Token *expr);
 extern void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
                               Token &value, Token &stmt, int count,
@@ -709,9 +709,11 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
       prepending.push_back(func);
 
       if (name->text().empty()) m_closureGenerator = true;
+      Token origGenFunc;
       create_generator(this, out, params, name, closureName, NULL, NULL,
-                       hasCallToGetArgs, false);
+                       hasCallToGetArgs, origGenFunc);
       m_closureGenerator = false;
+      func->setOrigGeneratorFunc(origGenFunc->stmt);
     }
 
   } else {
@@ -886,8 +888,10 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     {
       completeScope(mth->onInitialParse(m_ar, m_file));
     }
+    Token origGenFunc;
     create_generator(this, out, params, name, closureName, m_clsName.c_str(),
-                     &modifiers, hasCallToGetArgs, false);
+                     &modifiers, hasCallToGetArgs, origGenFunc);
+    mth->setOrigGeneratorFunc(origGenFunc->stmt);
 
   } else {
     mth = NEW_STMT(MethodStatement, exp, ref->num(), name->text(),

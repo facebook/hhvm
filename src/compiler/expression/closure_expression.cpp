@@ -186,17 +186,8 @@ TypePtr ClosureExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       }
       ExpressionPtr e = ((*m_values)[i]);
       TypePtr t = param->isRef() ? Type::Variant : e->getType();
-      if (getScope()->isFirstPass()) {
-        cvariables->add(name, t, false, ar,
-                        shared_from_this(), ModifierExpressionPtr());
-      } else {
-        int p;
-        TypePtr ret = cvariables->checkVariable(name, t, true, ar,
-                                                shared_from_this(), p);
-        if (ret->is(Type::KindOfSome)) {
-          cvariables->forceVariant(ar, name, VariableTable::AnyVars);
-        }
-      }
+      cvariables->addParamLike(name, t, ar, shared_from_this(),
+                               getScope()->isFirstPass());
     }
   }
   return Type::CreateObjectType("closure"); // needs lower case
@@ -231,10 +222,6 @@ void ClosureExpression::outputCPPImpl(CodeGenerator &cg,
               Option::SmartPtrPrefix, origName.c_str(),
               Option::ClassPrefix, origName.c_str(),
               Option::CallInfoPrefix, origName.c_str());
-  } else if (cfunc->isClosureGenerator()) {
-    cg_printf("%sGeneratorClosure(NEWOBJ(%sGeneratorClosure)(&%s%s, NULL, ",
-              Option::SmartPtrPrefix, Option::ClassPrefix,
-              Option::CallInfoPrefix, origName.c_str());
   } else {
     // no use vars, so can use the generic closure
     cg_printf("%sClosure(NEWOBJ(%sClosure)(&%s%s, NULL",
@@ -257,26 +244,6 @@ void ClosureExpression::outputCPPImpl(CodeGenerator &cg,
       }
       value->outputCPP(cg, ar);
       if (ref) cg_printf(")");
-    }
-  } else if (cfunc->isClosureGenerator()) {
-    // closure generators are special
-    useVars.clear();
-    cfunc->getClosureUseVars(useVars, false);
-    if (useVars.size()) {
-      ASSERT(m_vars && m_vars->getCount());
-      cg_printf("Array(ArrayInit(%d, true)", useVars.size());
-      BOOST_FOREACH(ParameterExpressionPtrIdxPair paramPair, useVars) {
-        ParameterExpressionPtr param(paramPair.first);
-        ExpressionPtr value((*m_values)[paramPair.second]);
-        bool ref = param->isRef() && value->isRefable();
-        if (ref) value->setContext(NoRefWrapper);
-        cg_printf(".set%s(\"%s\", ", ref ? "Ref" : "", param->getName().c_str());
-        value->outputCPP(cg, ar);
-        cg_printf(")");
-      }
-      cg_printf(".create())");
-    } else {
-      cg_printf("Array()");
     }
   }
 

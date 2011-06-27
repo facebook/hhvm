@@ -27,6 +27,7 @@ class TestExtContinuation : public TestCppExt {
  public:
   virtual bool RunTests(const std::string &which);
 
+  bool test_BaseContinuation();
   bool test_Continuation();
 };
 

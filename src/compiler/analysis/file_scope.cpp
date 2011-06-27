@@ -267,6 +267,19 @@ void FileScope::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
   }
 
+  for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
+       it != m_classes.end(); ++it) {
+    BOOST_FOREACH(ClassScopePtr cls, it->second) {
+      for (StringToFunctionScopePtrVecMap::const_iterator fit =
+             cls->getFunctions().begin();
+           fit != cls->getFunctions().end(); ++fit) {
+        BOOST_FOREACH(FunctionScopePtr func, fit->second) {
+          func->outputCPPPreface(cg, ar);
+        }
+      }
+    }
+  }
+
   cg_printf("/* preface finishes */\n");
 
   outputCPPHelper(cg, ar);

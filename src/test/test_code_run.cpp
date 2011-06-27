@@ -18578,6 +18578,7 @@ bool TestCodeRun::TestNamespace() {
 }
 
 bool TestCodeRun::TestYield() {
+  bool enableSyntax = Option::EnableHipHopSyntax;
   Option::EnableHipHopSyntax = true;
 
   MVCRO("<?php function fruit() { yield 'apple'; yield 'banana';} "
@@ -18792,6 +18793,55 @@ bool TestCodeRun::TestYield() {
         "string(3) \"o:1\"\n"
         "string(3) \"i:1\"\n");
 
+  // closure generator w/ use var by ref
+  MVCRO("<?php\n"
+        "$env = 3;\n"
+        "$f = function ($arg0) use (&$env) {\n"
+        "  yield $arg0;\n"
+        "  yield $arg0 + ($env++);\n"
+        "  yield $arg0 + ($env++) + 1;\n"
+        "};\n"
+        "foreach ($f(32) as $x) { var_dump($x); }\n"
+        "var_dump($env);\n",
+        "int(32)\n"
+        "int(35)\n"
+        "int(37)\n"
+        "int(5)\n");
+
+  // closure generator w/ arg by ref
+  MVCRO("<?php\n"
+        "$env = 3;\n"
+        "$f = function (&$arg0) use ($env) {\n"
+        "  yield $arg0++ + $env;\n"
+        "  yield $arg0++ + $env;\n"
+        "};\n"
+        "foreach ($f($env) as $x) {\n"
+        "  var_dump($x);\n"
+        "}\n"
+        "var_dump($env);\n",
+        "int(6)\n"
+        "int(7)\n"
+        "int(5)\n");
+
+  MVCRO("<?php\n"
+        "class X {\n"
+        "  public function doIt() {\n"
+        "    throw new Exception('foobar');\n"
+        "  }\n"
+        "}\n"
+        "function f($obj) {\n"
+        "  $res = null;\n"
+        "  try {\n"
+        "    $res = $obj->doIt();\n"
+        "  } catch (Exception $e) {\n"
+        "    $res = $e->message;\n"
+        "  }\n"
+        "  yield $res;\n"
+        "}\n"
+        "$x = new X;\n"
+        "foreach (f($x) as $i) { var_dump($i); }\n",
+        "string(6) \"foobar\"\n");
+
   // Test passing null to hphp_get_iterator()
   MVCRO("<?php \n"
         "function f() {\n"
@@ -18807,6 +18857,7 @@ bool TestCodeRun::TestYield() {
         "string(13) \"ArrayIterator\"\n"
         );
 
+  Option::EnableHipHopSyntax = enableSyntax;
   return true;
 }
 

@@ -30,6 +30,7 @@
 #include <runtime/base/class_info.h>
 #include <util/util.h>
 #include <util/parser/location.h>
+#include <util/parser/parser.h>
 
 using namespace std;
 using namespace boost;
@@ -235,7 +236,13 @@ const char *VariableTable::getVariablePrefix(const Symbol *sym) const {
 string VariableTable::getVariableName(CodeGenerator &cg,
                                       AnalysisResultConstPtr ar,
                                       const string &name) const {
-  const Symbol *sym = getSymbol(name);
+  return getVariableName(cg, ar, getSymbol(name));
+}
+
+string VariableTable::getVariableName(CodeGenerator &cg,
+                                      AnalysisResultConstPtr ar,
+                                      const Symbol *sym) const {
+  const string &name = sym->getName();
   if (sym && sym->isStatic()) {
     if (!needLocalCopy(sym)) {
       return string(Option::StaticVariablePrefix) + cg.formatLabel(name);
@@ -304,6 +311,29 @@ TypePtr VariableTable::addParam(const string &name, TypePtr type,
   }
   return type ?
     add(sym, type, false, ar, construct, ModifierExpressionPtr()) : type;
+}
+
+TypePtr VariableTable::addParamLike(const string &name, TypePtr type,
+                                    AnalysisResultPtr ar,
+                                    ConstructPtr construct, bool firstPass) {
+  TypePtr ret = type;
+  if (firstPass) {
+    ret = add(name, ret, false, ar,
+              construct, ModifierExpressionPtr());
+  } else {
+    int p;
+    ret = checkVariable(name, ret, true, ar,
+                        construct, p);
+    if (ret->is(Type::KindOfSome)) {
+      // This is probably too conservative. The problem is that
+      // a function never called will have parameter types of Any.
+      // Functions that it calls won't be able to accept variant unless
+      // it is forced here.
+      forceVariant(ar, name, VariableTable::AnyVars);
+      ret = Type::Variant;
+    }
+  }
+  return ret;
 }
 
 void VariableTable::addStaticVariable(Symbol *sym,
@@ -1461,6 +1491,14 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
   }
 
+  bool isGenScope = false;
+  if (m_blockScope.is(BlockScope::FunctionScope)) {
+    FunctionScope &fscope = static_cast<FunctionScope&>(m_blockScope);
+    if (fscope.isGenerator()) {
+      isGenScope = true;
+    }
+  }
+
   bool declared = false;
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     const Symbol *sym = m_symbolVec[i];
@@ -1534,6 +1572,12 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       continue;
     }
 
+    // omit local variables in continuations (since they will
+    // be part of the continuation object)
+    if (isGenScope) {
+      continue;
+    }
+
     // local variables
     if (((getAttribute(ContainsDynamicVariable) || inPseudoMain) &&
          !sym->isHidden()) ||
@@ -1559,15 +1603,28 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf("\n");
   }
 
+  if (isGenScope) {
+    const string &name = cg.formatLabel(m_blockScope.getName());
+    cg_printf("%sContinuation$%s *%s ATTRIBUTE_UNUSED = "
+              "(%sContinuation$%s*) %s%s.get();\n",
+              Option::ClassPrefix,    name.c_str(),
+              TYPED_CONTINUATION_OBJECT_NAME,
+              Option::ClassPrefix,    name.c_str(),
+              Option::VariablePrefix, CONTINUATION_OBJECT_NAME);
+  }
+
   if (Option::GenerateCPPMacros && getAttribute(ContainsDynamicVariable) &&
       cg.getOutput() != CodeGenerator::SystemCPP && !inPseudoMain) {
-    outputCPPVariableTable(cg, ar);
+    string paramPrefix = isGenScope ?
+      string(TYPED_CONTINUATION_OBJECT_NAME) + "->" : string("");
+    outputCPPVariableTable(cg, ar, paramPrefix.c_str());
     ar->m_variableTableFunctions.insert(getScopePtr()->getName());
   }
 }
 
 void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
-                                           AnalysisResultPtr ar) {
+                                           AnalysisResultPtr ar,
+                                           const char *paramPrefix) {
   bool inGlobalScope = isGlobalTable(ar);
 
   string varDecl, initializer, memDecl, params;
@@ -1590,7 +1647,7 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
       initializer += varName + "(" + Option::TempVariablePrefix +
         cg.formatLabel(name) + ")";
       memDecl += type->getCPPDecl(cg, ar, getBlockScope()) + " &" + varName;
-      params += varName;
+      params += string(paramPrefix) + varName;
     }
   }
 

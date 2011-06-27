@@ -375,6 +375,45 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
   if (m_params) {
     m_params->inferAndCheck(ar, Type::Any, false);
   }
+
+  // must also include params and use vars if this is a
+  // generator
+  if (funcScope->isGenerator()) {
+    // orig function params
+    ASSERT(getOrigGeneratorFunc());
+    MethodStatementPtr m =
+      dynamic_pointer_cast<MethodStatement>(getOrigGeneratorFunc());
+    ASSERT(m);
+
+    VariableTablePtr variables = funcScope->getVariables();
+
+    ExpressionListPtr params = m->getParams();
+    if (params) {
+      for (int i = 0; i < params->getCount(); i++) {
+        ParameterExpressionPtr param =
+          dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+        const string &name = param->getName();
+        TypePtr ret = param->isRef() ? Type::Variant : Type::Some;
+        variables->addParamLike(name, ret, ar, param,
+                                funcScope->isFirstPass());
+      }
+    }
+
+    // use vars
+    ExpressionListPtr useVars = m->getFunctionScope()->getClosureVars();
+    if (useVars) {
+      for (int i = 0; i < useVars->getCount(); i++) {
+        ParameterExpressionPtr param =
+          dynamic_pointer_cast<ParameterExpression>((*useVars)[i]);
+        const string &name = param->getName();
+        TypePtr ret = param->isRef() ? Type::Variant : Type::Some;
+        variables->addParamLike(name, ret, ar, param,
+                                funcScope->isFirstPass());
+      }
+    }
+
+  }
+
   if (m_stmt) {
     m_stmt->inferTypes(ar);
   }

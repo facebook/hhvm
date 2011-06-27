@@ -95,7 +95,7 @@ extern void prepare_generator(Parser *_p, Token &stmt, Token &params,
 extern void create_generator(Parser *_p, Token &out, Token &params,
                              Token &name, const std::string &closureName,
                              const char *clsname, Token *modifiers,
-                             bool getArgs, bool needsExtra);
+                             bool getArgs, Token &origGenFunc);
 extern void transform_yield(Parser *_p, Token &stmts, int index, Token *expr);
 extern void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
                               Token &value, Token &stmt, int count,
@@ -1058,8 +1058,9 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
     vector<StatementPtr> &prepending = m_prependingStatements.back();
     prepending.push_back(func);
 
+    Token origGenFunc;
     create_generator(this, out, params, name, closureName, NULL, NULL,
-                     hasCallToGetArgs, true);
+                     hasCallToGetArgs, origGenFunc);
 
   } else {
     StatementListStatementPtr body = stmt->getStmtList();
@@ -1197,8 +1198,9 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     ms->init(this, ref.num(), new_params->params(), stmts, hasCallToGetArgs);
 
     String clsname = cs->name();
+    Token origGenFunc;
     create_generator(this, out, params, name, closureName, clsname.data(),
-                     &modifiers, hasCallToGetArgs, true);
+                     &modifiers, hasCallToGetArgs, origGenFunc);
   } else {
     StatementListStatementPtr stmts = stmt->getStmtList();
     if (stmts) stmts->resetLoc(this);

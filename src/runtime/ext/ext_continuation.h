@@ -23,13 +23,16 @@
 #include <runtime/base/base_includes.h>
 
 namespace HPHP {
+FORWARD_DECLARE_CLASS_BUILTIN(Continuation);
 ///////////////////////////////////////////////////////////////////////////////
 
+p_Continuation f_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CArrRef args = null_array);
+void f_hphp_pack_continuation(CObjRef continuation, int64 label, CVarRef value);
+void f_hphp_unpack_continuation(CObjRef continuation);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Continuation
 
-FORWARD_DECLARE_CLASS_BUILTIN(Continuation);
 class c_Continuation : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(Continuation)
@@ -38,7 +41,6 @@ class c_Continuation : public ExtObjectData {
   DECLARE_CLASS(Continuation, Continuation, ObjectData)
 
   // properties
-  private: Array m_vars;
   private: Object m_obj;
   private: Array m_args;
   private: int64 m_label;
@@ -51,9 +53,9 @@ class c_Continuation : public ExtObjectData {
   // need to implement
   public: c_Continuation();
   public: ~c_Continuation();
-  public: void t___construct(int64 func, int64 extra, bool isMethod, CArrRef vars, CVarRef obj = null, CArrRef args = null_array);
+  public: void t___construct(int64 func, int64 extra, bool isMethod, CVarRef obj = null, CArrRef args = null_array);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  public: void t_update(int64 label, CVarRef value, CArrRef vars);
+  public: void t_update(int64 label, CVarRef value);
   DECLARE_METHOD_INVOKE_HELPERS(update);
   public: void t_done();
   DECLARE_METHOD_INVOKE_HELPERS(done);
@@ -79,21 +81,52 @@ class c_Continuation : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(send);
   public: Variant t_receive();
   DECLARE_METHOD_INVOKE_HELPERS(receive);
-  public: Array t_getvars();
-  DECLARE_METHOD_INVOKE_HELPERS(getvars);
   public: Variant t___clone();
   DECLARE_METHOD_INVOKE_HELPERS(__clone);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
-  public: c_Continuation *create(int64 func, int64 extra, bool isMethod, Array vars, Variant obj = null, Array args = null_array);
+  public: c_Continuation *create(int64 func, int64 extra, bool isMethod, Variant obj = null, Array args = null_array);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
 private:
   const CallInfo *m_callInfo;
   void *m_extra;
   bool m_isMethod;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class GenericContinuation
+
+FORWARD_DECLARE_CLASS_BUILTIN(GenericContinuation);
+class c_GenericContinuation : public c_Continuation {
+ public:
+  BEGIN_CLASS_MAP(GenericContinuation)
+  RECURSIVE_PARENT_CLASS(Continuation)
+  END_CLASS_MAP(GenericContinuation)
+  DECLARE_CLASS(GenericContinuation, GenericContinuation, Continuation)
+
+  // properties
+  private: Array m_vars;
+
+  // need to implement
+  public: c_GenericContinuation();
+  public: ~c_GenericContinuation();
+  public: void t___construct(int64 func, int64 extra, bool isMethod, CArrRef vars, CVarRef obj = null, CArrRef args = null_array);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  public: void t_update(int64 label, CVarRef value, CArrRef vars);
+  DECLARE_METHOD_INVOKE_HELPERS(update);
+  public: Array t_getvars();
+  DECLARE_METHOD_INVOKE_HELPERS(getvars);
+  public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
+
+  // implemented by HPHP
+  public: c_GenericContinuation *create(int64 func, int64 extra, bool isMethod, Array vars, Variant obj = null, Array args = null_array);
+  public: void dynConstruct(CArrRef Params);
+  public: void getConstructor(MethodCallPackage &mcp);
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -39,11 +39,11 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
 
   Variant var(m_name->getAsVariant(env));
   if (var.is(KindOfObject)) {
-    const CallInfo *cit; 
+    const CallInfo *cit;
     void *extra;
     get_call_info_or_fail(cit, extra, var);
     ASSERT(cit);
-    return evalCallInfo(cit, extra, env);
+    return strongBind(evalCallInfo(cit, extra, env));
   }
 
   String name = var.toString();
@@ -79,7 +79,7 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   // If the lookup failed get_call_info_or_fail() must throw an exception,
   // so if we reach here cit1 must not be NULL
   ASSERT(cit1);
-  return evalCallInfo(cit1, vt1, env);
+  return strongBind(evalCallInfo(cit1, vt1, env));
 }
 
 Variant SimpleFunctionCallExpression::evalCallInfo(

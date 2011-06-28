@@ -1819,8 +1819,8 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
       ASSERT(sym->isUsed());
       TypePtr t(sym->getFinalType());
       t->outputCPPDecl(cg, ar, shared_from_this());
-      cg_printf(" %s%s_",
-                Option::VariablePrefix,
+      cg_printf(" %s%s",
+                Option::TempVariablePrefix,
                 cg.formatLabel(name).c_str());
     }
 
@@ -1836,17 +1836,17 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
       ASSERT(!param->isRef() || t->is(Type::KindOfVariant));
       if (t->is(Type::KindOfVariant)) {
         const char *s = param->isRef() ? "Ref" : "Val";
-        cg_printf("%s%s.assign%s(%s%s_);\n",
+        cg_printf("%s%s.assign%s(%s%s);\n",
                   Option::VariablePrefix,
                   name.c_str(),
                   s,
-                  Option::VariablePrefix,
+                  Option::TempVariablePrefix,
                   name.c_str());
       } else {
-        cg_printf("%s%s = %s%s_;\n",
+        cg_printf("%s%s = %s%s;\n",
                   Option::VariablePrefix,
                   name.c_str(),
-                  Option::VariablePrefix,
+                  Option::TempVariablePrefix,
                   name.c_str());
       }
     }

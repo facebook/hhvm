@@ -222,7 +222,7 @@ StatementPtr Parser::ParseFile(const char *fileName,
       if (parser.m_errorHandled) throw;
       parser.error("%s", e.getMessage().c_str());
     }
-    parser.error("Parser error: %s", parser.getMessage().c_str());
+    parser.error("Parse error: %s", parser.errString().c_str());
   } catch (FileOpenException &e) {
     // ignore
   }
@@ -236,6 +236,14 @@ Parser::Parser(Scanner &scanner, const char *fileName,
     : ParserBase(scanner, fileName), m_staticStatements(statics),
       m_errorHandled(false) {
   m_prependingStatements.push_back(vector<StatementPtr>());
+}
+
+string Parser::errString() {
+  return m_error.empty() ? getMessage() : m_error;
+}
+
+void Parser::fatal(Location *loc, const char *msg) {
+  m_error = msg;
 }
 
 void Parser::error(const char* fmt, ...) {

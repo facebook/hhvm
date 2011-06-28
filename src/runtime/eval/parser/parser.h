@@ -175,6 +175,9 @@ public:
   virtual void error(const std::string &msg);
   virtual void warning(const char* fmt, ...);
   virtual void warning(const std::string &msg);
+  virtual void fatal(Location *loc, const char *msg);
+  std::string errString();
+
   virtual bool enableXHP();
   IMPLEMENT_XHP_ATTRIBUTES;
 
@@ -314,6 +317,7 @@ private:
   // parser output
   StatementPtr m_tree;
   bool m_errorHandled;
+  std::string m_error;
 
   void pushClass(ClassStatementPtr cl);
   void popClass();

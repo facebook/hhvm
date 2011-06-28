@@ -90,7 +90,7 @@
 #ifdef yyerror
 #undef yyerror
 #endif
-#define yyerror _p->fatal
+#define yyerror(loc,p,msg) p->fatal(loc,msg)
 
 #ifdef YYLLOC_DEFAULT
 # undef YYLLOC_DEFAULT
@@ -374,7 +374,7 @@ void create_generator(Parser *_p, Token &out, Token &params,
     {
       Token cn;      cn.setText(clsname ? clsname : "");
       Token cname;   _p->onScalar(cname, T_CONSTANT_ENCAPSED_STRING, cn);
-  
+
       Token fn;      fn.setText(closureName);
       Token fname;   _p->onScalar(fname, T_CONSTANT_ENCAPSED_STRING, fn);
 
@@ -383,17 +383,17 @@ void create_generator(Parser *_p, Token &out, Token &params,
       _p->onCallParam(get_call_info_params, &get_call_info_params, fname, 0);
 
       Token callname; callname.setText("hphp_get_call_info");
-      _p->onCall(get_call_info, 0, callname, get_call_info_params, NULL); 
+      _p->onCall(get_call_info, 0, callname, get_call_info_params, NULL);
 
       if (needsExtra) {
         Token get_call_info_extra_params;
         _p->onCallParam(get_call_info_extra_params, NULL, cname, 0);
-        _p->onCallParam(get_call_info_extra_params, 
+        _p->onCallParam(get_call_info_extra_params,
                         &get_call_info_extra_params, fname, 0);
 
         Token callname; callname.setText("hphp_get_call_info_extra");
-        _p->onCall(get_call_info_extra, 0, callname, 
-                   get_call_info_extra_params, NULL); 
+        _p->onCall(get_call_info_extra, 0, callname,
+                   get_call_info_extra_params, NULL);
       } else {
         Token zero; zero.setText("0");
                     _p->onScalar(get_call_info_extra, T_LNUMBER, zero);

@@ -212,12 +212,13 @@ ClassEvalState &RequestEvalState::declareClass(const ClassStatement *cls) {
 void RequestEvalState::declareFunction(const FunctionStatement *fn) {
   RequestEvalState *self = s_res.get();
   String name = fn->name();
-  if (self->m_functions.find(name) != self->m_functions.end() &&
-      (self->m_functions[name] != fn || name[0] != '0') || // anonymous funcs
-      get_renamed_function(name) != name) {
-    raise_error("Cannot redeclare %s()", name.c_str());
+  if (!fn->invalidOverride() && get_renamed_function(name) == name) {
+    std::pair<hphp_const_char_imap<const FunctionStatement*>::iterator,
+      bool> p = self->m_functions.insert(make_pair(name, fn));
+    if (p.second || (p.first->second == fn && name[0] == '0')) return;
   }
-  self->m_functions[name] = fn;
+
+  raise_error("Cannot redeclare %s()", name.c_str());
 }
 
 bool RequestEvalState::declareConstant(CStrRef name, CVarRef val) {
@@ -237,7 +238,8 @@ ClassInfoEvaled::~ClassInfoEvaled() {
   for (MethodVec::iterator it = m_methodsVec.begin(); it != m_methodsVec.end();
        ++it) {
     MethodInfo *mi = *it;
-    for (std::vector<const ParameterInfo*>::iterator mit = mi->parameters.begin();
+    for (std::vector<const ParameterInfo*>::iterator mit =
+           mi->parameters.begin();
          mit != mi->parameters.end(); ++mit) {
       free((void*)(*mit)->value);
     }

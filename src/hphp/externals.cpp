@@ -77,7 +77,11 @@ Array get_global_array_wrapper() {
   return Array();
 }
 
-bool get_call_info(const CallInfo *&ci, void *&extra, 
+bool get_call_info(const CallInfo *&ci, void *&extra,
+    const char *s, int64 hash) {
+  return false;
+}
+bool get_call_info_no_eval(const CallInfo *&ci, void *&extra,
     const char *s, int64 hash) {
   return false;
 }

@@ -606,6 +606,10 @@ bool get_call_info(const CallInfo *&ci, void *&extra, CVarRef func) {
   return get_call_info(ci, extra, s, hash);
 }
 
+bool get_call_info_no_eval(const CallInfo *&ci, void *&extra, CStrRef name) {
+  return get_call_info_no_eval(ci, extra, name->data(), name->hash());
+}
+
 void get_call_info_or_fail(const CallInfo *&ci, void *&extra, CVarRef func) {
   if (UNLIKELY(!get_call_info(ci, extra, func))) {
     if (func.isObject()) {

@@ -32,6 +32,7 @@
 /facebook/push/install
 /facebook/stub_funcs.hdf
 /facebook/volatile.hdf
+/facebook/www.pid
 
 /facebook/push/apc
 /facebook/push/apclog
@@ -41,6 +42,8 @@
 /facebook/push/system.tgz
 /facebook/push/volatile.hdf
 
+/facebook/extensions/gen
+/facebook/extensions/hphpi
 /facebook/extensions/*/*.so
 /facebook/extensions/string/test_string
 /facebook/extensions/photodna/test_photodna

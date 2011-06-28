@@ -57,8 +57,9 @@ public:
   const StringToFunctionScopePtrVecMap &getFunctions() const {
     return m_functions;
   }
-  void outputCPPCodeInfoTable(CodeGenerator &cg, AnalysisResultPtr ar,
-      bool support, const StringToFunctionScopePtrVecMap *functions = NULL);
+  void outputCPPCodeInfoTable(
+    CodeGenerator &cg, AnalysisResultPtr ar, bool support,
+    const StringToFunctionScopePtrVecMap *functions = NULL);
 
 protected:
   // name => functions. Order of declaration
@@ -78,12 +79,13 @@ protected:
                                        FunctionScopePtr func,
                                        const char *funcPrefix);
 private:
-  void outputGetCallInfoHeader(CodeGenerator &cg, bool system,
+  void outputGetCallInfoHeader(CodeGenerator &cg, const char *suffix,
                                bool needGlobals);
   void outputGetCallInfoTail(CodeGenerator &cg, bool system);
-  void outputCPPHashTableGetCallInfo(CodeGenerator &cg, bool system,
-       const StringToFunctionScopePtrVecMap *functions,
-       const std::vector<const char *> &funcs);
+  void outputCPPHashTableGetCallInfo(
+    CodeGenerator &cg, bool system, bool noEval,
+    const StringToFunctionScopePtrVecMap *functions,
+    const std::vector<const char *> &funcs);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

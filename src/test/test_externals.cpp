@@ -294,10 +294,15 @@ Variant invokeImpl(void *extra, CArrRef params) {
 }
 CallInfo invokeImplCallInfo((void*)invokeImpl, NULL, 0, CallInfo::VarArgs, 0);
 bool get_call_info(const CallInfo *&ci, void *&extra, const char *s,
-    int64 hash /* = -1 */) {
+                   int64 hash /* = -1 */) {
   extra = (void*)s;
   ci = &invokeImplCallInfo;
   return true;
+}
+
+bool get_call_info_no_eval(const CallInfo *&ci, void *&extra, const char *s,
+                           int64 hash /* = -1 */) {
+  return get_call_info(ci, extra, s, hash);
 }
 
 void init_static_variables() { SystemScalarArrays::initialize();}

@@ -214,7 +214,7 @@ FunctionStatement::FunctionStatement(STATEMENT_ARGS, const string &name,
                                      const string &doc)
   : Statement(STATEMENT_PASS), m_name(name),
     m_maybeIntercepted(-1), m_yieldCount(0), m_closure(NULL),
-    m_docComment(doc),
+    m_invalid(false), m_docComment(doc),
     m_callInfo((void*)Invoker, (void*)InvokerFewArgs, 0, 0, 0),
     m_closureCallInfo((void*)FSInvoker, (void*)FSInvokerFewArgs, 0, 0, 0) {
 }
@@ -231,6 +231,9 @@ void FunctionStatement::init(void *parser, bool ref,
   m_params = params;
   m_body = body;
   m_hasCallToGetArgs = has_call_to_get_args;
+  const CallInfo* cit1;
+  void* vt1;
+  m_invalid = get_call_info_no_eval(cit1, vt1, Variant(m_name));
 
   bool seenOptional = false;
   set<string> names;

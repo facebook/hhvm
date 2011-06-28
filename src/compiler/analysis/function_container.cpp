@@ -244,20 +244,20 @@ void FunctionContainer::outputCPPJumpTable(CodeGenerator &cg,
 }
 
 void FunctionContainer::outputGetCallInfoHeader(CodeGenerator &cg,
-                                                bool system,
+                                                const char *suffix,
                                                 bool needGlobals) {
   cg_indentBegin("bool get_call_info%s(const CallInfo *&ci, void *&extra, "
-      "const char *s, int64 hash) {\n", system ? "_builtin" : "");
+      "const char *s, int64 hash) {\n", suffix ? suffix : "");
 
   if (needGlobals) cg.printDeclareGlobals();
   cg_printf("extra = NULL;\n");
 
-  if (!system && (!Option::DynamicInvokeFunctions.empty() ||
-        Option::EnableEval == Option::FullEval)) {
+  if (!suffix && (!Option::DynamicInvokeFunctions.empty() ||
+                  Option::EnableEval == Option::FullEval)) {
     cg_printf("const char *ss = get_renamed_function(s);\n");
     cg_printf("if (ss != s) { s = ss; hash = -1;};\n");
   }
-  if (!system && Option::EnableEval == Option::FullEval) {
+  if (!suffix && Option::EnableEval == Option::FullEval) {
     cg_printf("if (eval_get_call_info_hook(ci, extra, s, hash)) "
               "return true;\n");
   }
@@ -274,7 +274,7 @@ void FunctionContainer::outputGetCallInfoTail(CodeGenerator &cg,
 }
 
 void FunctionContainer::outputCPPHashTableGetCallInfo(
-  CodeGenerator &cg, bool system,
+  CodeGenerator &cg, bool system, bool noEval,
   const StringToFunctionScopePtrVecMap *functions,
   const vector<const char *> &funcs) {
   ASSERT(cg.getCurrentIndentation() == 0);
@@ -359,7 +359,7 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
     "  }\n";
 
   int numEntries = funcs.size();
-  if (numEntries > 0) {
+  if (!noEval && numEntries > 0) {
     int tableSize = Util::roundUpToPowerOfTwo(numEntries * 2);
     cg_printf(system ? text1s : text1);
     cg_printf(text2, tableSize, numEntries,
@@ -395,7 +395,8 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
               (system ? "" : ", offset"),
               tableSize - 1, tableSize - 1);
   }
-  outputGetCallInfoHeader(cg, system, !system);
+  outputGetCallInfoHeader(cg, system ? "_builtin" : noEval ? "_no_eval" : 0,
+                          !system);
   cg_indentEnd("");
   if (numEntries > 0) {
     cg_printf(system ? text4s : text4);
@@ -404,9 +405,9 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
   outputGetCallInfoTail(cg, system);
 }
 
-void FunctionContainer::outputCPPCodeInfoTable(CodeGenerator &cg,
-    AnalysisResultPtr ar, bool support,
-    const StringToFunctionScopePtrVecMap *functions /* = NULL */) {
+void FunctionContainer::outputCPPCodeInfoTable(
+  CodeGenerator &cg, AnalysisResultPtr ar, bool support,
+  const StringToFunctionScopePtrVecMap *functions /* = NULL */) {
   if (!functions) functions = &m_functions;
   bool needGlobals = false;
   vector<const char *> funcs;
@@ -428,10 +429,12 @@ void FunctionContainer::outputCPPCodeInfoTable(CodeGenerator &cg,
     }
   }
   if (Option::GenHashTableInvokeFunc && !system) {
-    outputCPPHashTableGetCallInfo(cg, system, functions, funcs);
+    outputCPPHashTableGetCallInfo(cg, system, false, functions, funcs);
+    outputCPPHashTableGetCallInfo(cg, system, true, functions, funcs);
     return;
   }
-  outputGetCallInfoHeader(cg, system, needGlobals);
+  if (!system) cg_printf("static ");
+  outputGetCallInfoHeader(cg, system ? "_builtin" : "_impl", needGlobals);
 
   for (JumpTable fit(cg, funcs, true, true, false); fit.ready(); fit.next()) {
     const char *name = fit.key();
@@ -451,5 +454,15 @@ void FunctionContainer::outputCPPCodeInfoTable(CodeGenerator &cg,
     cg_indentEnd("}\n");
   }
   outputGetCallInfoTail(cg, system);
+
+  if (system) return;
+
+  outputGetCallInfoHeader(cg, 0, false);
+  cg_printf("return get_call_info_impl(ci, extra, s, hash);\n");
+  cg_indentEnd("}\n");
+
+  outputGetCallInfoHeader(cg, "_no_eval", false);
+  cg_printf("return get_call_info_impl(ci, extra, s, hash);\n");
+  cg_indentEnd("}\n");
 }
 

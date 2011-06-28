@@ -14,7 +14,7 @@ TEST_SOURCES = \
 	$(PROJECT_ROOT)/src/test/test_cpp_ext.cpp \
 	$(PROJECT_ROOT)/src/test/test_externals.cpp \
 	$(PROJECT_ROOT)/src/test/test_logger.cpp \
-	test_ext_$(EXT).cpp
+	$(if $(EXT),test_ext_$(EXT).cpp)
 
 TEST_OBJECTS = $(patsubst %.cpp, %.o, $(TEST_SOURCES))
 TEST_PIC_OBJECTS = $(call pic_objects, $(TEST_OBJECTS))

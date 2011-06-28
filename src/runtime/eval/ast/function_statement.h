@@ -115,6 +115,7 @@ public:
   int addYield() { ASSERT(m_yieldCount >= 0); return ++m_yieldCount;}
   int getYieldCount() const { return m_yieldCount;}
   void setClosure(void *closure) { m_closure = closure;}
+  bool invalidOverride() const { return m_invalid; }
 
   void setName(const std::string &name) { m_name = AtomicString(name);}
 
@@ -128,6 +129,7 @@ protected:
   mutable char m_maybeIntercepted;
   int m_yieldCount;
   void *m_closure;
+  bool m_invalid;
 
   std::string m_docComment;
 
@@ -143,7 +145,7 @@ private:
   static Variant InvokerFewArgs(void *ms, int count, INVOKE_FEW_ARGS_IMPL_ARGS);
 
   static Variant FSInvoker(void *ms, CArrRef params);
-  static Variant FSInvokerFewArgs(void *ms, int count, 
+  static Variant FSInvokerFewArgs(void *ms, int count,
                                   INVOKE_FEW_ARGS_IMPL_ARGS);
 
   CallInfo m_closureCallInfo;

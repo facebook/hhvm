@@ -333,8 +333,8 @@ void ClassStatement::addVariable(ClassVariablePtr v) {
 
   ClassVariablePtr &cv = m_variables[v->name()];
   if (cv) {
-    raise_debugging("Cannot redeclare %s::$%s",
-                    name().c_str(), v->name().c_str());
+    throw FatalErrorException(0, "Cannot redeclare %s::$%s",
+                              name().c_str(), v->name().c_str());
   }
   cv = v;
   m_variablesVec.push_back(v);

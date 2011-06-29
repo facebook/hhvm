@@ -305,6 +305,11 @@ void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     ASSERT((getContext() & ObjectContext) == 0);
     if (hasContext(OprLValue) || hasContext(AssignmentLHS)) {
       cg_printf("throw_assign_this()");
+      return;
+    }
+    VariableTablePtr variables = getScope()->getVariables();
+    if (variables->getAttribute(VariableTable::ContainsLDynamicVariable)) {
+      cg_printf("%sthis", variables->getVariablePrefix(m_sym));
     } else if (hasContext(DeepOprLValue) ||
                hasContext(DeepAssignmentLHS) ||
                hasContext(LValue)) {

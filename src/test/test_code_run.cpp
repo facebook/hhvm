@@ -7479,6 +7479,19 @@ bool TestCodeRun::TestDynamicVariables() {
        "}\n"
        "NULL\n"
        "int(1)\n");
+
+  if (Option::EnableEval < Option::FullEval) {
+    MVCR("<?php "
+         "class X {"
+         "  function foo($t) {"
+         "    $$t = 5;"
+         "    var_dump($this);"
+         "  }"
+         "}"
+         "$x = new X;"
+         "$x->foo('this');");
+  }
+
   return true;
 }
 

@@ -367,7 +367,18 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
 #ifdef HPHP_VERSION
 #undef HPHP_VERSION
 #endif
-#define HPHP_VERSION(v) cout << "HipHop Compiler v" #v << "\n";
+
+#ifdef HPHP_COMPILER_STR
+#undef HPHP_COMPILER_STR
+#endif
+
+#ifdef DEBUG
+#define HPHP_COMPILER_STR "HipHop Compiler (Debug Build) v"
+#else
+#define HPHP_COMPILER_STR "HipHop Compiler v"
+#endif
+
+#define HPHP_VERSION(v) cout << HPHP_COMPILER_STR #v << "\n";
 #include "../version"
 
 #ifdef COMPILER_ID

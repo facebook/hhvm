@@ -20,23 +20,6 @@
 
 namespace HPHP {
 
-TaintData::TaintData() {
-  m_taint_bits = TAINT_BIT_NONE;
-  m_metadata = NULL;
-}
-
-bitstring TaintData::getTaint() const {
-  return m_taint_bits;
-}
-
-void TaintData::setTaint(bitstring bits) {
-  m_taint_bits = m_taint_bits | bits;
-}
-
-void TaintData::unsetTaint(bitstring bits) {
-  m_taint_bits = m_taint_bits & (~bits);
-}
-
 void TaintData::dump() const {
   printf("Taint: %x\n", m_taint_bits);
 }

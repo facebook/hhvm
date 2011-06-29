@@ -36,10 +36,10 @@ typedef int bitstring;
 
 class TaintData {
 public:
-  TaintData();
-  bitstring getTaint() const;
-  void setTaint(bitstring bits);
-  void unsetTaint(bitstring bits);
+  TaintData() : m_taint_bits(TAINT_BIT_NONE), m_metadata(NULL) { }
+  bitstring getTaint() const { return m_taint_bits; }
+  void setTaint(bitstring bits) { m_taint_bits |= bits; }
+  void unsetTaint(bitstring bits) { m_taint_bits &= (~bits); }
   void dump() const;
 private:
   bitstring m_taint_bits;

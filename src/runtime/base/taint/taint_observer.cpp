@@ -22,18 +22,6 @@ namespace HPHP {
 
 IMPLEMENT_THREAD_LOCAL(TaintObserver*, TaintObserver::instance);
 
-TaintObserver::TaintObserver(bitstring set_mask, bitstring clear_mask) {
-  m_set_mask = set_mask;
-  m_clear_mask = clear_mask;
-
-  m_previous = *instance;
-  *instance = this;
-}
-
-TaintObserver::~TaintObserver() {
-  *instance = m_previous;
-}
-
 void TaintObserver::RegisterAccessed(TaintData const& td) {
   if (!*instance) {
     return;

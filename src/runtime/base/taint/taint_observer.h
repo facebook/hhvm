@@ -42,8 +42,11 @@ public:
    * if set_mask and clear_mask are both set to 0, then we propagate
    * using the input strings.
    */
-  TaintObserver(bitstring set_mask = 0, bitstring clear_mask = 0);
-  ~TaintObserver();
+  TaintObserver(bitstring set_mask = 0, bitstring clear_mask = 0) :
+      m_set_mask(set_mask), m_clear_mask(clear_mask), m_previous(*instance) {
+    *instance = this;
+  }
+  ~TaintObserver() { *instance = m_previous; }
 
   /**
    * This functions needs to be called whenever data inside strings is accessed.

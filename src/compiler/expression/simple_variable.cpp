@@ -209,20 +209,15 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     m_sym->setLvalParam();
   }
   if (m_this) {
+    ret = Type::Object;
     ClassScopePtr cls = getOriginalClass();
-    if (cls) {
-      if (!hasContext(ObjectContext) && cls->derivedByDynamic()) {
-        ret = Type::Object;
-      } else {
-        ret = Type::CreateObjectType(cls->getName());
-      }
-      if (!hasContext(ObjectContext) &&
-          variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
-        ret = variables->add(m_sym, ret, true, ar,
-                             construct, scope->getModifiers());
-      }
-    } else {
-      ret = Type::Object;
+    if (cls && (hasContext(ObjectContext) || !cls->derivedByDynamic())) {
+      ret = Type::CreateObjectType(cls->getName());
+    }
+    if (!hasContext(ObjectContext) &&
+        variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
+      ret = variables->add(m_sym, ret, true, ar,
+                           construct, scope->getModifiers());
     }
   } else if ((m_context & (LValue|Declaration)) &&
              !(m_context & (ObjectContext|RefValue))) {

@@ -228,7 +228,7 @@ void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
   }
-  if (!getScope()->inPseudoMain() && !m_privateScope) {
+  if (!m_privateScope) {
     VariableTablePtr var = getScope()->getVariables();
     var->setAttribute(VariableTable::ContainsLDynamicVariable);
     var->forceVariants(ar, VariableTable::AnyVars);

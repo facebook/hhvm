@@ -1481,14 +1481,9 @@ void VariableTable::outputCPPVariableInit(CodeGenerator &cg,
 void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool inPseudoMain = isPseudoMainTable();
   if (inPseudoMain) {
-    if (m_forcedVariants) {
-      cg_printf("LVariableTable *gVariables ATTRIBUTE_UNUSED = "
-                "(LVariableTable *)g;\n");
-    } else {
-      ASSERT(false);
-      cg_printf("RVariableTable *gVariables ATTRIBUTE_UNUSED = "
-                "(RVariableTable *)g;\n");
-    }
+    ASSERT(m_forcedVariants);
+    cg_printf("LVariableTable *gVariables ATTRIBUTE_UNUSED = "
+              "(LVariableTable *)g;\n");
   }
 
   bool isGenScope = false;

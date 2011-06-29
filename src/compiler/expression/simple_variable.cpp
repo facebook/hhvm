@@ -137,7 +137,7 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
           func->setContainsBareThis();
           if (variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
             ClassScopePtr cls = getClassScope();
-            TypePtr t = cls->isRedeclaring() ?
+            TypePtr t = !cls || cls->isRedeclaring() ?
               Type::Variant : Type::CreateObjectType(cls->getName());
             variables->add(m_sym, t, true, ar, shared_from_this(),
                            getScope()->getModifiers());

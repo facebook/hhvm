@@ -84,7 +84,7 @@ class StringData {
 
   StringData() : m_data(NULL), _count(0), m_len(0) {
     m_hash = 0;
-    TAINT_OBSERVER_REGISTER_MUTATED(this);
+    TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
   }
 
   /**
@@ -105,7 +105,7 @@ class StringData {
    * Informational.
    */
   const char *data() const {
-    TAINT_OBSERVER_REGISTER_ACCESSED(this);
+    TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
     return m_data;
   }
   int size() const { return m_len & LenMask;}
@@ -138,8 +138,8 @@ class StringData {
       bool &needsOrder) const;
 
 #ifdef TAINTED
-  TaintData* getTaintData() { return &m_taint_data; }
-  const TaintData& getTaintDataRef() const { return m_taint_data; }
+  TaintData& getTaintDataRef() { return m_taint_data; }
+  const TaintData& getTaintDataRefConst() const { return m_taint_data; }
 #endif
 
   /**

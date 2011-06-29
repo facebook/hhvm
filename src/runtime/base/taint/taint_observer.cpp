@@ -17,8 +17,6 @@
 #ifdef TAINTED
 
 #include <runtime/base/taint/taint_observer.h>
-#include <runtime/base/string_data.h>
-#include <runtime/base/util/string_buffer.h>
 
 namespace HPHP {
 
@@ -36,7 +34,7 @@ TaintObserver::~TaintObserver() {
   *instance = m_previous;
 }
 
-void TaintObserver::RegisterAccessed(const StringData* string_data) {
+void TaintObserver::RegisterAccessed(TaintData const& td) {
   if (!*instance) {
     return;
   }
@@ -47,51 +45,12 @@ void TaintObserver::RegisterAccessed(const StringData* string_data) {
   TaintObserver *tc = *instance;
   *instance = NULL;
 
-  tc->m_current_taint.setTaint(
-    string_data->getTaintDataRef().getTaint()
-  );
+  tc->m_current_taint.setTaint(td.getTaint());
 
   *instance = tc;
 }
 
-void TaintObserver::RegisterAccessed(const StringBuffer *string_buffer) {
-  if (!*instance) {
-    return;
-  }
-
-  // Prevent recursive calls into the TaintObserver. This should never
-  // actually happen, except when adding debugging code.
-
-  TaintObserver *tc = *instance;
-  *instance = NULL;
-
-  tc->m_current_taint.setTaint(
-    string_buffer->getTaintDataRef().getTaint()
-  );
-
-  *instance = tc;
-}
-
-void TaintObserver::RegisterMutated(StringData* string_data) {
-  if (!*instance) {
-    return;
-  }
-
-  // Prevent recursive calls into the TaintObserver. This should never
-  // actually happen, except when adding debugging code.
-
-  TaintObserver *tc = *instance;
-  *instance = NULL;
-
-  bitstring t = tc->m_current_taint.getTaint();
-  bitstring result_mask = tc->m_set_mask | (~tc->m_clear_mask & t);
-
-  string_data->getTaintData()->setTaint(result_mask);
-
-  *instance = tc;
-}
-
-void TaintObserver::RegisterMutated(StringBuffer* string_buffer) {
+void TaintObserver::RegisterMutated(TaintData& td) {
   if (!*instance) {
     return;
   }
@@ -101,9 +60,7 @@ void TaintObserver::RegisterMutated(StringBuffer* string_buffer) {
   *instance = NULL;
 
   bitstring t = tc->m_current_taint.getTaint();
-  bitstring result_mask = tc->m_set_mask | (~tc->m_clear_mask & t);
-
-  string_buffer->getTaintData()->setTaint(result_mask);
+  td.setTaint(tc->m_set_mask | (~tc->m_clear_mask & t));
 
   *instance = tc;
 }

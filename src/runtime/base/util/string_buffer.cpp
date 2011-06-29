@@ -32,7 +32,7 @@ StringBuffer::StringBuffer(int initialSize /* = 1024 */)
   : m_initialSize(initialSize), m_maxBytes(0), m_size(initialSize), m_pos(0) {
   ASSERT(initialSize > 0);
   m_buffer = (char *)Util::safe_malloc(initialSize + 1);
-  TAINT_OBSERVER_REGISTER_MUTATED(this);
+  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
 }
 
 StringBuffer::StringBuffer(const char *filename)
@@ -54,13 +54,13 @@ StringBuffer::StringBuffer(const char *filename)
       ::close(fd);
     }
   }
-  TAINT_OBSERVER_REGISTER_MUTATED(this);
+  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
 }
 
 StringBuffer::StringBuffer(char *data, int len)
   : m_buffer(data), m_initialSize(1024), m_maxBytes(0), m_size(len),
     m_pos(len) {
-  TAINT_OBSERVER_REGISTER_MUTATED(this);
+  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
 }
 
 StringBuffer::~StringBuffer() {
@@ -86,9 +86,9 @@ char StringBuffer::charAt(int pos) const {
 }
 
 char *StringBuffer::detach(int &size) {
-  TAINT_OBSERVER_REGISTER_ACCESSED(this);
+  TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
 #ifdef TAINTED
-  getTaintData()->unsetTaint(TAINT_BIT_ALL);
+  m_taint_data.unsetTaint(TAINT_BIT_ALL);
 #endif
   if (m_buffer) {
     if (m_pos) {
@@ -105,9 +105,9 @@ char *StringBuffer::detach(int &size) {
 }
 
 String StringBuffer::detach() {
-  TAINT_OBSERVER_REGISTER_ACCESSED(this);
+  TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
 #ifdef TAINTED
-  getTaintData()->unsetTaint(TAINT_BIT_ALL);
+  m_taint_data.unsetTaint(TAINT_BIT_ALL);
 #endif
 
   if (m_buffer && m_pos) {
@@ -121,7 +121,7 @@ String StringBuffer::detach() {
 }
 
 String StringBuffer::copy() {
-  TAINT_OBSERVER_REGISTER_ACCESSED(this);
+  TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
 
   String r = String(data(), size(), CopyString);
   return r;
@@ -129,8 +129,8 @@ String StringBuffer::copy() {
 
 void StringBuffer::absorb(StringBuffer &buf) {
   if (empty()) {
-    TAINT_OBSERVER_REGISTER_ACCESSED(&buf);
-    TAINT_OBSERVER_REGISTER_MUTATED(this);
+    TAINT_OBSERVER_REGISTER_ACCESSED(buf.getTaintDataRefConst());
+    TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
 
     char *buffer = m_buffer;
     int size = m_size;
@@ -150,7 +150,7 @@ void StringBuffer::absorb(StringBuffer &buf) {
 void StringBuffer::reset() {
   m_pos = 0;
 #ifdef TAINTED
-  getTaintData()->unsetTaint(TAINT_BIT_ALL);
+  m_taint_data.unsetTaint(TAINT_BIT_ALL);
 #endif
 }
 
@@ -210,7 +210,7 @@ void StringBuffer::appendHelper(char ch) {
 
 void StringBuffer::append(CStrRef s) {
   append(s.data(), s.size());
-  TAINT_OBSERVER_REGISTER_MUTATED(this);
+  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
 }
 
 void StringBuffer::appendHelper(const char *s, int len) {

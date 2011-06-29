@@ -95,7 +95,7 @@ public:
   void append(litstr  s) { ASSERT(s); append(s, strlen(s));}
   void append(CStrRef s);
   void append(const char *s, int len) {
-    TAINT_OBSERVER_REGISTER_MUTATED(this);
+    TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
     ASSERT(len >= 0);
     if (m_buffer && m_pos + len <= m_size) {
       memcpy(m_buffer + m_pos, s, len);
@@ -138,8 +138,8 @@ public:
   void read(File *in, int page_size = 1024);
 
 #ifdef TAINTED
-  TaintData* getTaintData() { return &m_taint_data; }
-  const TaintData& getTaintDataRef() const { return m_taint_data; }
+  TaintData& getTaintDataRef() { return m_taint_data; }
+  const TaintData& getTaintDataRefConst() const { return m_taint_data; }
 #endif
 
 private:

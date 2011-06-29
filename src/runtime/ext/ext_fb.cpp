@@ -869,7 +869,7 @@ void f_fb_set_taint(VRefParam str, int taint) {
 
   StringData *string_data = str.getStringData();
   ASSERT(string_data);
-  string_data->getTaintData()->setTaint(taint);
+  string_data->getTaintDataRef().setTaint(taint);
 #endif
 }
 
@@ -881,7 +881,7 @@ void f_fb_unset_taint(VRefParam str, int taint) {
   }
   StringData *string_data = str.getStringData();
   ASSERT(string_data);
-  string_data->getTaintData()->unsetTaint(taint);
+  string_data->getTaintDataRef().unsetTaint(taint);
 #endif
 }
 
@@ -889,7 +889,7 @@ bool f_fb_get_taint(CStrRef str, int taint) {
 #ifdef TAINTED
   StringData *string_data = str.get();
   ASSERT(string_data);
-  return string_data->getTaintData()->getTaint() & taint;
+  return string_data->getTaintDataRefConst().getTaint() & taint;
 #else
   return false;
 #endif

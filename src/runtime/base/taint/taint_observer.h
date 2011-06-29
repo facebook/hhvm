@@ -34,9 +34,6 @@
 
 namespace HPHP {
 
-class StringData;
-class StringBuffer;
-
 class TaintObserver {
 public:
   /**
@@ -51,14 +48,12 @@ public:
   /**
    * This functions needs to be called whenever data inside strings is accessed.
    */
-  static void RegisterAccessed(const StringData *string_data);
-  static void RegisterAccessed(const StringBuffer *string_buffer);
+  static void RegisterAccessed(TaintData const& td);
 
   /**
    * This function needs to be called whenever a string is created or mutated.
    */
-  static void RegisterMutated(StringData *string_data);
-  static void RegisterMutated(StringBuffer *string_buffer);
+  static void RegisterMutated(TaintData& td);
 
 private:
   bitstring m_set_mask;
@@ -82,17 +77,17 @@ private:
 #define TAINT_OBSERVER(set, clear) \
   TaintObserver taint_observer((set), (clear))
 
-#define TAINT_OBSERVER_REGISTER_ACCESSED(obj) \
-  TaintObserver::RegisterAccessed((obj))
+#define TAINT_OBSERVER_REGISTER_ACCESSED(td) \
+  TaintObserver::RegisterAccessed((td))
 
-#define TAINT_OBSERVER_REGISTER_MUTATED(obj) \
-  TaintObserver::RegisterMutated((obj))
+#define TAINT_OBSERVER_REGISTER_MUTATED(td) \
+  TaintObserver::RegisterMutated((td))
 
 #else
 
 #define TAINT_OBSERVER(set, clear) /* do nothing (note: not ; friendly) */
-#define TAINT_OBSERVER_REGISTER_ACCESSED(obj) /* do nothing */
-#define TAINT_OBSERVER_REGISTER_MUTATED(obj) /* do nothing */
+#define TAINT_OBSERVER_REGISTER_ACCESSED(td) /* do nothing */
+#define TAINT_OBSERVER_REGISTER_MUTATED(td) /* do nothing */
 
 #endif // TAINTED
 

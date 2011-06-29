@@ -146,13 +146,6 @@ void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   if (m_stmt) {
     m_stmt->analyzeProgram(ar);
   }
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    ClassScopePtr cls = getClassScope();
-    bool needsCppCtor, needsInit;
-    getCtorAndInitInfo(needsCppCtor, needsInit);
-    cls->setNeedsCppCtor(needsCppCtor);
-    cls->setNeedsInitMethod(needsInit);
-  }
   if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
   ar->recordClassSource(m_name, m_loc, getFileScope()->getName());
   for (unsigned int i = 0; i < bases.size(); i++) {

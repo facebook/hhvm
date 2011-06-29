@@ -7244,7 +7244,7 @@ bool TestCodeRun::TestReference() {
        "$foo0($x, $x = 5);\n"
        "$foo1($x, $x = 5);\n");
 
-  MVCR("<?php ;"
+  MVCR("<?php "
        "function foo($a, &$b, $c) {"
        "  $a+=1;"
        "  $b+=2;"
@@ -11055,7 +11055,7 @@ bool TestCodeRun::TestLogicalOperators() {
 
   MVCR("<?php var_dump($a || null);");
 
-  MVCR("<?php ;"
+  MVCR("<?php "
        "function f($a) { var_dump('f:'.$a); return $a; }"
        "function foo($a) {"
        "  var_dump($a && true);"
@@ -15174,7 +15174,7 @@ bool TestCodeRun::TestConstructor() {
       "$obj = new E;"
       "$obj->foo();");
 
-  MVCR("<?php ;"
+  MVCR("<?php "
        "if (isset($g)) {"
        "  class X {}"
        "} else {"
@@ -15188,6 +15188,40 @@ bool TestCodeRun::TestConstructor() {
        "}"
        "$y = new Y(1,2);");
 
+  MVCR("<?php "
+       "if (true) {"
+       "  class A {"
+       "    public function __construct($i, $j, $k) {"
+       "      $this->a = $i * $i;"
+       "      $this->b = $j * $j;"
+       "      $this->c = $k * $k;"
+       "    }"
+       "    public $a;"
+       "    protected $b;"
+       "    private $c;"
+       "    public $aa = 'aa';"
+       "    protected $bb = false;"
+       "    private $cc = 1.22;"
+       "  }"
+       "}"
+       "class B extends A {"
+       "  public function __construct($i, $j, $k) {"
+       "    $this->a = $i + $i;"
+       "    $this->b = $j + $j;"
+       "    $this->c = $k + $k;"
+       "  }"
+       "  public $a;"
+       "  protected $b;"
+       "  private $c;"
+       "  public $aa = 'aaa';"
+       "  protected $bb = 4;"
+       "  private $cc = 1.222;"
+       "}"
+       "function foo() {"
+       "  $obj = new B(1, 2, 3);"
+       "  var_dump($obj);"
+       "}"
+       "foo();");
   return true;
 }
 

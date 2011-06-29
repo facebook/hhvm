@@ -44,6 +44,7 @@ public:
   virtual std::string getName() const;
   virtual void getAllParents(AnalysisResultConstPtr ar,
                              std::vector<std::string> &names);
+  void getCtorAndInitInfo(bool &needsCppCtor, bool &needsInit);
 private:
   int m_type;
   std::string m_parent;
@@ -52,7 +53,6 @@ private:
 
   static void GetCtorAndInitInfo(
       StatementPtr s, bool &needsCppCtor, bool &needsInit);
-  void getCtorAndInitInfo(bool &needsCppCtor, bool &needsInit);
   void outputCPPClassDecl(CodeGenerator &cg, AnalysisResultPtr ar,
                           const char *clsName, const char *originalName,
                           const char *parent);

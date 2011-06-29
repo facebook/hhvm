@@ -772,7 +772,22 @@ void AnalysisResult::analyzeProgramFinal() {
   for (uint i = 0; i < m_fileScopes.size(); i++) {
     m_fileScopes[i]->analyzeProgram(ar);
   }
-
+  for (StringToClassScopePtrVecMap::iterator iter = m_classDecs.begin(),
+       end = m_classDecs.end(); iter != end; ++iter) {
+    for (ClassScopePtrVec::iterator it = iter->second.begin(),
+         e = iter->second.end(); it != e; ++it) {
+      ClassScopePtr cls = *it;
+      if (cls->isUserClass()) {
+        ClassStatementPtr clsStmt =
+          dynamic_pointer_cast<ClassStatement>(cls->getStmt());
+        bool needsCppCtor = false;
+        bool needsInit = false;
+        if (clsStmt) clsStmt->getCtorAndInitInfo(needsCppCtor, needsInit);
+        cls->setNeedsCppCtor(needsCppCtor);
+        cls->setNeedsInitMethod(needsInit);
+      }
+    }
+  }
   // Keep generated code identical without randomness
   if (m_system) canonicalizeSymbolOrder();
   setPhase(AnalysisResult::CodeGen);

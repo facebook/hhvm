@@ -499,15 +499,15 @@ class Array : public SmartPtr<ArrayData> {
   void remove(CVarRef key);
 
   void weakRemove(litstr  key, bool isString = false) {
-    if (m_px) remove(key, isString);
+    remove(key, isString);
   }
   void weakRemove(CStrRef key, bool isString = false) {
-    if (m_px) remove(key, isString);
+    remove(key, isString);
   }
 
   template<typename T>
   void weakRemove(const T &key) {
-    if (m_px) remove(key);
+    remove(key);
   }
 
   void removeAll();

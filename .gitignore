@@ -41,6 +41,9 @@
 /facebook/push/output_www
 /facebook/push/system.tgz
 /facebook/push/volatile.hdf
+/facebook/push/stub_funcs.hdf
+/facebook/push/output
+/facebook/push/shared
 
 /facebook/extensions/gen
 /facebook/extensions/hphpi

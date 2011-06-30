@@ -140,7 +140,8 @@ OUTPUT_REL := $(patsubst /%,,$(patsubst ~%,,$(OUTPUT_ROOT)))
 OUT_TOP_BASE := $(if $(OUTPUT_REL),$(ABS_PROJECT_ROOT)/)$(OUTPUT_ROOT)
 
 OUT_TOP := $(OUT_TOP_BASE)$(OUT_EXT)
-OUT_DIR := $(OUT_TOP)$(REL)/
+OUT_ABS := $(OUT_TOP)$(REL)
+OUT_DIR := $(OUT_ABS)/
 LIB_DIR := $(OUT_TOP)
 OUT_TOP := $(OUT_TOP)/
 HPHP := $(OUT_TOP)hphp
@@ -150,6 +151,7 @@ else
 
 OUT_TOP :=
 OUT_DIR :=
+OUT_ABS := $(shell pwd)
 LIB_DIR := $(PROJECT_ROOT)/bin
 ifdef HPHP_LIB
 ifneq ($(HPHP_LIB),$(HPHP_ROOT)/bin)

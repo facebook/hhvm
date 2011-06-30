@@ -137,7 +137,7 @@ SOURCES += $(filter-out $(EXCLUDES), $(ALL_SOURCES))
 OBJECTS += $(addprefix $(OUT_DIR),$(patsubst %.S, %.o, $(patsubst %.cpp, %.o, $(SOURCES:.c=.o))))
 PIC_OBJECTS = $(call pic_objects, $(OBJECTS))
 OBJECT_DIR_DEPS := $(if $(OUT_DIR),$(addsuffix .mkdir, \
-	$(sort $(dir $(OBJECTS)))))
+	$(sort $(dir $(OBJECTS) $(TEST_OBJECTS)))))
 OBJECT_DIRS_REQUIRED := $(filter-out $(wildcard $(OBJECT_DIR_DEPS)), \
 	$(OBJECT_DIR_DEPS))
 ifneq ($(OBJECT_DIRS_REQUIRED),)

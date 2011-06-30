@@ -1,7 +1,4 @@
 
-override OUTPUT_ROOT :=
-override OUTDIR_BY_TYPE :=
-
 EXT = $(patsubst %.idl.php,%, $(wildcard *.idl.php))
 IDL_TOOL = $(PROJECT_ROOT)/src/idl/idl.php
 IDL_BASE = $(PROJECT_ROOT)/src/idl/base.php
@@ -14,54 +11,53 @@ TEST_SOURCES = \
 	$(PROJECT_ROOT)/src/test/test_cpp_ext.cpp \
 	$(PROJECT_ROOT)/src/test/test_externals.cpp \
 	$(PROJECT_ROOT)/src/test/test_logger.cpp \
-	$(if $(EXT),test_ext_$(EXT).cpp)
 
-TEST_OBJECTS = $(patsubst %.cpp, %.o, $(TEST_SOURCES))
+TEST_OBJECTS = $(addprefix $(OUT_DIR),$(patsubst %.cpp, %.o, $(TEST_SOURCES)))
 TEST_PIC_OBJECTS = $(call pic_objects, $(TEST_OBJECTS))
 
 SCHEMA_SOURCES = extmap_$(EXT).cpp
-SCHEMA_OBJECTS = $(patsubst %.cpp, %.o, $(SCHEMA_SOURCES:.c=.o))
+SCHEMA_OBJECTS = $(addprefix $(OUT_DIR),$(patsubst %.cpp, %.o, $(SCHEMA_SOURCES:.c=.o)))
 SCHEMA_PIC_OBJECTS = $(call pic_objects, $(SCHEMA_OBJECTS))
 
 CXX_SOURCES += $(filter-out $(TEST_SOURCES), $(wildcard *.cpp))
 CXXFLAGS += -DSEP_EXTENSION
-INTERMEDIATE_FILES += schema.so
+INTERMEDIATE_FILES += $(OUT_DIR)schema.so
 
 HPHP = $(PROJECT_ROOT)/src/hphp/hphp
 
 include $(PROJECT_ROOT)/src/rules.mk
-TARGETS = lib$(EXT).so lib$(EXT).a test_$(EXT)
+TARGETS = $(OUT_DIR)lib$(EXT).so $(OUT_DIR)lib$(EXT).a $(OUT_TOP)test_$(EXT)
 
 all: $(TARGETS)
 
 ifndef SHOW_LINK
-schema.so: $(SCHEMA_PIC_OBJECTS)
+$(OUT_DIR)schema.so: $(SCHEMA_PIC_OBJECTS)
 	@echo 'Linking $@ ...'
 	$(V)$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror \
 		-Wl,-soname,schema.so $(SO_LDFLAGS) -o $@ $(SCHEMA_PIC_OBJECTS)
 else
-schema.so: $(SCHEMA_PIC_OBJECTS)
+$(OUT_DIR)schema.so: $(SCHEMA_PIC_OBJECTS)
 	$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror \
 		-Wl,-soname,schema.so $(SO_LDFLAGS) -o $@ $(SCHEMA_PIC_OBJECTS)
 endif
 
-extimpl_$(EXT).cpp: schema.so
+extimpl_$(EXT).cpp: $(OUT_DIR)schema.so
 	$(HPHP) -t sep-ext-cpp --output-file $@ \
 	-v "SepExtensions.$(EXT).soname=schema.so" \
 	-v "SepExtensions.$(EXT).shared=true" \
-	-v "SepExtensions.$(EXT).libpath=`pwd`" \
+	-v "SepExtensions.$(EXT).libpath=$(OUT_ABS)" \
 
-lib$(EXT).so: $(PIC_OBJECTS) extimpl_$(EXT).pic.o
+$(OUT_DIR)lib$(EXT).so: $(filter-out $(if $(EXT),%test_ext_$(EXT).pic.o),$(PIC_OBJECTS)) $(OUT_DIR)extimpl_$(EXT).pic.o
 	@echo 'Linking $@ ...'
 	$(V)$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror \
 		-Wl,-soname,lib$(EXT).so $(SO_LDFLAGS) -o $@ $^
 
-lib$(EXT).a: $(OBJECTS) extimpl_$(EXT).o
+$(OUT_DIR)lib$(EXT).a: $(OBJECTS) $(OUT_DIR)extimpl_$(EXT).o
 	@echo 'Linking $@ ...'
 	$(V)$(AR_CMD) $@ $(OBJECTS) $^
 
-test_$(EXT): $(TEST_OBJECTS) lib$(EXT).a
-	$(LINK_OBJECTS) lib$(EXT).a \
+$(OUT_TOP)test_$(EXT): $(TEST_OBJECTS) $(OUT_DIR)lib$(EXT).a
+	$(LINK_OBJECTS) $(OUT_DIR)lib$(EXT).a \
 	$(LIB_DIR)/libhphp_analysis.a $(LIB_DIR)/libhphp_runtime.a \
 	$(ALL_LIBS) $(LINK_LIBS)
 

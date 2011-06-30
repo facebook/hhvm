@@ -62,6 +62,45 @@ static char **build_envp(CArrRef envs, std::vector<String> &senvs) {
   return envp;
 }
 
+// check whitelist
+static bool check_cmd(const char *cmd) {
+  const char *cmd_tmp = cmd;
+  while (true) {
+    bool allow = false;
+    while (isblank(*cmd_tmp)) cmd_tmp++;
+    const char *space = strchr(cmd_tmp, ' ');
+    unsigned int cmd_len = strlen(cmd_tmp);
+    if (space) {
+      cmd_len = space - cmd_tmp;
+    }
+    for (unsigned int i = 0; i < RuntimeOption::AllowedExecCmds.size(); i++) {
+      std::string &allowedCmd = RuntimeOption::AllowedExecCmds[i];
+      if (allowedCmd.size() != cmd_len) {
+        continue;
+      }
+      if (strncmp(allowedCmd.c_str(), cmd_tmp, allowedCmd.size()) == 0) {
+        allow = true;
+        break;
+      }
+    }
+    if (!allow) {
+      String file = FrameInjection::GetContainingFileName(true);
+      int line = FrameInjection::GetLine(true);
+      Logger::Warning("Command %s is not in the whitelist, called at %s:%d",
+                      cmd_tmp, file.data(), line);
+      if (!RuntimeOption::WhitelistExecWarningOnly) {
+        return false;
+      }
+    }
+    const char *bar = strchr(cmd_tmp, '|');
+    if (!bar) { // no pipe, we are done
+      return true;
+    }
+    cmd_tmp = bar + 1;
+  }
+  return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // pcntl
 
@@ -69,6 +108,10 @@ IMPLEMENT_DEFAULT_EXTENSION(pcntl);
 
 void f_pcntl_exec(CStrRef path, CArrRef args /* = null_array */,
                   CArrRef envs /* = null_array */) {
+  if (RuntimeOption::WhitelistExec && !check_cmd(path.data())) {
+    return;
+  }
+
   // build argumnent list
   std::vector<String> sargs; // holding those char *
   int size = args.size();
@@ -328,7 +371,7 @@ public:
 
   FILE *exec(const char *cmd) {
     ASSERT(m_proc == NULL);
-    if (RuntimeOption::WhitelistExec && !checkCmd(cmd)) {
+    if (RuntimeOption::WhitelistExec && !check_cmd(cmd)) {
       return NULL;
     }
     m_proc = LightProcess::popen(cmd, "r", g_context->getCwd().data());
@@ -347,46 +390,7 @@ public:
 private:
   void (*m_sig_handler)(int);
   FILE *m_proc;
-  bool checkCmd(const char *cmd);
 };
-
-bool ShellExecContext::checkCmd(const char *cmd) {
-  const char *cmd_tmp = cmd;
-  while (true) {
-    bool allow = false;
-    while (isblank(*cmd_tmp)) cmd_tmp++;
-    const char *space = strchr(cmd_tmp, ' ');
-    unsigned int cmd_len = strlen(cmd_tmp);
-    if (space) {
-      cmd_len = space - cmd_tmp;
-    }
-    for (unsigned int i = 0; i < RuntimeOption::AllowedExecCmds.size(); i++) {
-      std::string &allowedCmd = RuntimeOption::AllowedExecCmds[i];
-      if (allowedCmd.size() != cmd_len) {
-        continue;
-      }
-      if (strncmp(allowedCmd.c_str(), cmd_tmp, allowedCmd.size()) == 0) {
-        allow = true;
-        break;
-      }
-    }
-    if (!allow) {
-      String file = FrameInjection::GetContainingFileName(true);
-      int line = FrameInjection::GetLine(true);
-      Logger::Warning("Command %s is not in the whitelist, called at %s:%d",
-                      cmd_tmp, file.data(), line);
-      if (!RuntimeOption::WhitelistExecWarningOnly) {
-        return false;
-      }
-    }
-    const char *bar = strchr(cmd_tmp, '|');
-    if (!bar) { // no pipe, we are done
-      return true;
-    }
-    cmd_tmp = bar + 1;
-  }
-  return false;
-}
 
 String f_shell_exec(CStrRef cmd) {
   ShellExecContext ctx;
@@ -716,6 +720,10 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
                     CStrRef cwd /* = null_string */,
                     CVarRef env /* = null_variant */,
                     CVarRef other_options /* = null_variant */) {
+  if (RuntimeOption::WhitelistExec && !check_cmd(cmd.data())) {
+    return false;
+  }
+
   std::vector<DescriptorItem> items;
 
   string scwd = "";

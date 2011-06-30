@@ -104,6 +104,7 @@ public:
 
   static const char *STARTER_MARKER;
   static const char *SPLITTER_MARKER;
+  static const char *HASH_INCLUDE;
 
 public:
   CodeGenerator() {} // only for creating a dummy code generator

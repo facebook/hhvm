@@ -53,6 +53,8 @@ const char *CodeGenerator::STARTER_MARKER =
   "namespace hphp_impl_starter {}";
 const char *CodeGenerator::SPLITTER_MARKER =
   "namespace hphp_impl_splitter {}";
+const char *CodeGenerator::HASH_INCLUDE =
+  "#include";
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -274,7 +276,7 @@ void CodeGenerator::printInclude(const std::string &file) {
     }
     formatted = string("<") + formatted + '>';
   }
-  printf("#include %s\n", formatted.c_str());
+  printf("%s %s\n", HASH_INCLUDE, formatted.c_str());
 }
 
 void CodeGenerator::printBasicIncludes() {

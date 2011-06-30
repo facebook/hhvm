@@ -1764,7 +1764,7 @@ void AnalysisResult::repartitionCPP(const string &filename, int64 targetSize,
     current += line.length() + 1;
     if (inPreface) preface.push_back(line);
 
-    if (line[0] == '#') {
+    if (line.find(CodeGenerator::HASH_INCLUDE) == 0) {
       includes.push_back(line);
     } else if (line == "/* preface starts */") {
       inPreface = true;

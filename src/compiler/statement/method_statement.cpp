@@ -625,7 +625,12 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                 getAttribute(VariableTable::ContainsDynamicVariable)) {
               Symbol *sym = funcScope->getVariables()->getSymbol("this");
               if (sym && sym->declarationSet()) {
-                cg_printf("%sthis = this;\n", Option::VariablePrefix);
+                string namePrefix;
+                if (funcScope->isGenerator()) {
+                  namePrefix = string(TYPED_CONTINUATION_OBJECT_NAME) + "->";
+                }
+                cg_printf("%s%sthis = this;\n", namePrefix.c_str(),
+                          Option::VariablePrefix);
               }
             }
             outputCPPStmt(cg, ar);

@@ -78,6 +78,8 @@ protected:
   void outputCPPJumpTableSupportMethod(CodeGenerator &cg, AnalysisResultPtr ar,
                                        FunctionScopePtr func,
                                        const char *funcPrefix);
+  void outputCPPHelperClassAllocSupport(CodeGenerator &cg,
+                                        AnalysisResultPtr ar);
 private:
   void outputGetCallInfoHeader(CodeGenerator &cg, const char *suffix,
                                bool needGlobals);

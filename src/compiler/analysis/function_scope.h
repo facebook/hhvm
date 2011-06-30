@@ -98,6 +98,8 @@ public:
   void setDirectInvoke() { m_directInvoke = true; }
   bool hasDirectInvoke() const { return m_directInvoke; }
   bool isGenerator() const;
+  StatementPtr getOrigGenStmt() const;
+  FunctionScopePtr getOrigGenFS() const;
   void setNeedsRefTemp() { m_needsRefTemp = true; }
   bool needsRefTemp() const { return m_needsRefTemp; }
   void setNeedsCheckMem() { m_needsCheckMem = true; }
@@ -360,6 +362,9 @@ public:
   void outputCPPCallInfo(CodeGenerator &cg, AnalysisResultPtr ar);
 
   void outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar);
+
+  void outputCPPHelperClassAlloc(CodeGenerator &cg,
+                                 AnalysisResultPtr ar);
 
   /**
    * Serialize the iface, not everything.

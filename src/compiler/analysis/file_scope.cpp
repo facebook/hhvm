@@ -291,6 +291,7 @@ void FileScope::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       outputCPPJumpTableEvalSupport(cg, ar, hasRedec);
     }
     outputCPPCallInfoTableSupport(cg, ar, hasRedec);
+    outputCPPHelperClassAllocSupport(cg, ar);
     for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
          it != m_classes.end(); ++it) {
       BOOST_FOREACH(ClassScopePtr cls, it->second) {

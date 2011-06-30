@@ -147,6 +147,17 @@ void FunctionContainer::outputCPPJumpTableSupportMethod
   cg_indentEnd("}\n");
 }
 
+void
+FunctionContainer::outputCPPHelperClassAllocSupport(CodeGenerator &cg,
+                                                    AnalysisResultPtr ar) {
+  bool hasRedeclared;
+  for (FunctionIterator fit(m_functions, hasRedeclared); fit.ready();
+      fit.next()) {
+    FunctionScopePtr func = fit.get();
+    func->outputCPPHelperClassAlloc(cg, ar);
+  }
+}
+
 void FunctionContainer::outputCPPJumpTableSupport
 (CodeGenerator &cg, AnalysisResultPtr ar, bool &hasRedeclared,
  vector<const char *> *funcs /* = NULL */) {

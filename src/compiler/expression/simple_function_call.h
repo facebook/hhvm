@@ -111,10 +111,10 @@ private:
   int checkObjCall(AnalysisResultPtr ar);
   FunctionScopePtr
   getFuncScopeFromParams(AnalysisResultPtr ar,
+                         BlockScopeRawPtr scope,
                          ExpressionPtr clsName,
                          ExpressionPtr funcName,
-                         std::string &clsstr,
-                         std::string &funcstr);
+                         ClassScopePtr &clsScope);
   std::string getThisString(bool withArrow);
   std::string m_localThis;
   void *m_extra; // e.g., raw pointer to the symbol defined

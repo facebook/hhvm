@@ -1633,6 +1633,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     outputCPPJumpTable(cg, ar, true, dynamicObject);
     bool hasRedec;
     outputCPPCallInfoTableSupport(cg, ar, hasRedec);
+    outputCPPHelperClassAllocSupport(cg, ar);
     vector<const char *> funcs;
     findJumpTableMethods(cg, ar, false, funcs);
     outputCPPMethodInvokeTableSupport(cg, ar, funcs, m_functions, false);

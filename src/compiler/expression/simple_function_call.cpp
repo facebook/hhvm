@@ -384,8 +384,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         // compact() call.
         m_type = CompactFunction;
       } else {
-        // compact('a', 'b', 'c') becomes compact('a', $a, 'b', $b, 'c', $c),
-        // but only for variables that exist in the variable table.
+        // compact('a', 'b', 'c') becomes compact('a', $a, 'b', $b, 'c', $c)
         vector<ExpressionPtr> new_params;
         vector<string> strs;
         for (int i = 0; i < m_params->getCount(); i++) {
@@ -404,15 +403,13 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
           if (found) continue;
           strs.push_back(name);
 
-          if (vt->getSymbol(name)) {
-            SimpleVariablePtr var(new SimpleVariable(
-                                    e->getScope(), e->getLocation(),
-                                    KindOfSimpleVariable, name));
-            var->copyContext(e);
-            var->updateSymbol(SimpleVariablePtr());
-            new_params.push_back(e);
-            new_params.push_back(var);
-          }
+          SimpleVariablePtr var(new SimpleVariable(
+                                  e->getScope(), e->getLocation(),
+                                  KindOfSimpleVariable, name));
+          var->copyContext(e);
+          var->updateSymbol(SimpleVariablePtr());
+          new_params.push_back(e);
+          new_params.push_back(var);
         }
         m_params->clearElements();
         for (unsigned i = 0; i < new_params.size(); i++) {
@@ -1185,10 +1182,11 @@ static int isObjCall(AnalysisResultPtr ar,
 
 FunctionScopePtr
 SimpleFunctionCall::getFuncScopeFromParams(AnalysisResultPtr ar,
+                                           BlockScopeRawPtr scope,
                                            ExpressionPtr clsName,
                                            ExpressionPtr funcName,
-                                           string &clsstr,
-                                           string &funcstr) {
+                                           ClassScopePtr &clsScope) {
+  clsScope.reset();
   ScalarExpressionPtr clsName0(
       dynamic_pointer_cast<ScalarExpression>(clsName));
   ScalarExpressionPtr funcName0(
@@ -1199,20 +1197,18 @@ SimpleFunctionCall::getFuncScopeFromParams(AnalysisResultPtr ar,
     if (!fname.empty()) {
       if (!cname.empty()) {
         ClassScopePtr cscope(ar->findClass(cname));
-        if (cscope && !cscope->isRedeclaring()) {
+        if (cscope && cscope->isRedeclaring()) {
+          cscope = scope->findExactClass(Util::toLower(cname));
+        }
+        if (cscope) {
           FunctionScopePtr fscope(cscope->findFunction(ar, fname, true));
           if (fscope) {
-            clsstr = cname;
-            funcstr = fname;
+            clsScope = cscope;
           }
           return fscope;
         }
       } else {
         FunctionScopePtr fscope(ar->findFunction(fname));
-        if (fscope) {
-          clsstr = "";
-          funcstr = fname;
-        }
         return fscope;
       }
     }
@@ -1248,8 +1244,11 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       if (e->is(KindOfSimpleVariable)
        && Type::SameType(e->getCPPType(), Type::Variant)) {
         SimpleVariablePtr sv = dynamic_pointer_cast<SimpleVariable>(e);
-        cg_printf("if (%s%s.isInitialized()) ",
-                  Option::VariablePrefix, sv->getName().c_str());
+        const string &namePrefix = sv->getNamePrefix();
+        cg_printf("if (%s%s%s.isInitialized()) ",
+                  namePrefix.c_str(),
+                  Option::VariablePrefix,
+                  cg.formatLabel(sv->getName()).c_str());
       }
       e->preOutputCPP(cg, ar, 0);
       cg_printf("compact%d.add(", m_ciTemp);
@@ -1876,22 +1875,21 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
     }
     if (m_name == "hphp_get_call_info" &&
         m_params && m_params->getCount() == 2) {
-      string cname, fname;
+      ClassScopePtr cscope;
       FunctionScopePtr fscope(
           getFuncScopeFromParams(
-              ar, (*m_params)[0], (*m_params)[1], cname, fname));
+              ar, getScope(), (*m_params)[0], (*m_params)[1], cscope));
       if (fscope) {
-        ASSERT(!fname.empty());
-        if (!cname.empty()) {
+        if (cscope) {
           cg_printf("(int64)&%s%s::%s%s",
                     Option::ClassPrefix,
-                    cg.formatLabel(cname).c_str(),
+                    cscope->getId(cg).c_str(),
                     Option::CallInfoPrefix,
-                    fname.c_str());
+                    fscope->getId(cg).c_str());
         } else {
           cg_printf("(int64)&%s%s",
                     Option::CallInfoPrefix,
-                    fname.c_str());
+                    fscope->getId(cg).c_str());
         }
         return;
       }
@@ -1900,34 +1898,33 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
     if (m_name == "hphp_create_continuation" &&
         m_params &&
         (m_params->getCount() == 2 || m_params->getCount() == 3)) {
-      string cname, fname;
+      ClassScopePtr cscope;
       FunctionScopePtr fscope(
           getFuncScopeFromParams(
-              ar, (*m_params)[0], (*m_params)[1], cname, fname));
+              ar, getScope(), (*m_params)[0], (*m_params)[1], cscope));
       if (fscope) {
-        ASSERT(!fname.empty());
         cg_printf("%sContinuation$%s::Build(",
                   Option::ClassPrefix,
-                  cg.formatLabel(fname).c_str());
+                  fscope->getId(cg).c_str());
 
         // func
-        if (!cname.empty()) {
+        if (cscope) {
           cg_printf("(int64)&%s%s::%s%s, ",
                     Option::ClassPrefix,
-                    cg.formatLabel(cname).c_str(),
+                    cscope->getId(cg).c_str(),
                     Option::CallInfoPrefix,
-                    fname.c_str());
+                    fscope->getId(cg).c_str());
         } else {
           cg_printf("(int64)&%s%s, ",
                     Option::CallInfoPrefix,
-                    fname.c_str());
+                    fscope->getId(cg).c_str());
         }
 
         // extra
         cg_printf("0LL, ");
 
         // isMethod
-        cg_printf("%s, ", cname.empty() ? "false" : "true");
+        cg_printf("%s, ", cscope ? "true" : "false");
 
         // function params
 
@@ -1990,10 +1987,14 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
         // if possible
 
         // obj
-        if (cname.empty()) {
+        if (!cscope) {
           cg_printf("null_object, ");
         } else {
-          cg_printf("GET_THIS_TYPED(%s), ", cname.c_str());
+          if (cscope->derivedByDynamic()) {
+            cg_printf("Object(GET_THIS()), ");
+          } else {
+            cg_printf("GET_THIS_TYPED(%s), ", cscope->getId(cg).c_str());
+          }
         }
 
         // args

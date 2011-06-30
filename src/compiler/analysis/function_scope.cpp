@@ -255,8 +255,22 @@ bool FunctionScope::isMixedVariableArgument() const {
 }
 
 bool FunctionScope::isGenerator() const {
-  return name()[0] == '0' && m_paramNames.size() == 1
-      && m_paramNames[0] == CONTINUATION_OBJECT_NAME;
+  ASSERT(!getOrigGenStmt() ||
+         (name()[0] == '0' && m_paramNames.size() == 1
+         && m_paramNames[0] == CONTINUATION_OBJECT_NAME));
+  return getOrigGenStmt();
+}
+
+StatementPtr FunctionScope::getOrigGenStmt() const {
+  if (!getStmt()) return StatementPtr();
+  MethodStatementPtr m =
+    dynamic_pointer_cast<MethodStatement>(getStmt());
+  return m ? m->getOrigGeneratorFunc() : StatementPtr();
+}
+
+FunctionScopePtr FunctionScope::getOrigGenFS() const {
+  StatementPtr origStmt = getOrigGenStmt();
+  return origStmt ? origStmt->getFunctionScope() : FunctionScopeRawPtr();
 }
 
 void FunctionScope::setVariableArgument(int reference) {
@@ -1672,6 +1686,21 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_variables->outputCPPStaticVariables(cg, ar);
 }
 
+void FunctionScope::outputCPPHelperClassAlloc(CodeGenerator &cg,
+                                              AnalysisResultPtr ar) {
+
+  const string &funcName = cg.formatLabel(m_name);
+  ParameterExpressionPtrVec useVars;
+  if (needsAnonClosureClass(useVars)) {
+    cg_printf("IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(%sClosure$%s)\n",
+              Option::ClassPrefix, funcName.c_str());
+  }
+  if (isGenerator()) {
+    cg_printf("IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(%sContinuation$%s)\n",
+              Option::ClassPrefix, funcName.c_str());
+  }
+}
+
 void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
     AnalysisResultPtr ar) {
   if (isAbstract()) return;
@@ -1838,10 +1867,7 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
     }
     cg_indentEnd("}\n");
-
     cg_indentEnd("};\n");
-    cg_printf("IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(%sClosure$%s)\n",
-              Option::ClassPrefix, funcName.c_str());
   }
 
   if (isGenerator()) {
@@ -1872,12 +1898,8 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
               "int64 func, int64 extra, bool isMethod, ",
               Option::SmartPtrPrefix, funcName.c_str());
 
-    ASSERT(getStmt());
-    MethodStatementPtr m = dynamic_pointer_cast<MethodStatement>(getStmt());
-    ASSERT(m);
-    ASSERT(m->getOrigGeneratorFunc());
     MethodStatementPtr orig =
-      dynamic_pointer_cast<MethodStatement>(m->getOrigGeneratorFunc());
+      dynamic_pointer_cast<MethodStatement>(getOrigGenStmt());
     ASSERT(orig);
     ExpressionListPtr params = orig->getParams();
 
@@ -1943,10 +1965,7 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
 
     cg_printf("return cont;\n");
     cg_indentEnd("}\n");
-
     cg_indentEnd("};\n");
-    cg_printf("IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(%sContinuation$%s)\n",
-              Option::ClassPrefix, funcName.c_str());
   }
 }
 

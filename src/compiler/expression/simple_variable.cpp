@@ -313,7 +313,10 @@ void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
     VariableTablePtr variables = getScope()->getVariables();
     if (variables->getAttribute(VariableTable::ContainsLDynamicVariable)) {
-      cg_printf("%sthis", variables->getVariablePrefix(m_sym));
+      const string &namePrefix = getNamePrefix();
+      cg_printf("%s%sthis",
+                namePrefix.c_str(),
+                variables->getVariablePrefix(m_sym));
     } else if (hasContext(DeepOprLValue) ||
                hasContext(DeepAssignmentLHS) ||
                hasContext(LValue)) {

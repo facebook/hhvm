@@ -1799,6 +1799,29 @@ bool FunctionScope::needsAnonClosureClass(
   return useVars.size() > 0;
 }
 
+void FunctionScope::outputCPPSubClassParam(CodeGenerator &cg,
+                                           AnalysisResultPtr ar,
+                                           ParameterExpressionPtr param) {
+  VariableTablePtr variables = getVariables();
+  const string &name = param->getName();
+  Symbol *sym = variables->getSymbol(name);
+  ASSERT(sym);
+  TypePtr t(sym->getFinalType());
+  if (!param->isRef()) {
+    if (t->is(Type::KindOfVariant) || t->is(Type::KindOfSome)) {
+      cg_printf("CVarRef");
+    } else if (t->is(Type::KindOfArray)) cg_printf("CArrRef");
+    else if (t->is(Type::KindOfString))  cg_printf("CStrRef");
+    else if (t->isStandardObject())      cg_printf("CObjRef");
+    else t->outputCPPDecl(cg, ar, shared_from_this());
+  } else {
+    t->outputCPPDecl(cg, ar, shared_from_this());
+  }
+  cg_printf(" %s%s",
+            Option::TempVariablePrefix,
+            cg.formatLabel(name).c_str());
+}
+
 void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (!getContainingClass()) {
     // spit out extern CallInfo decl
@@ -1836,14 +1859,7 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
     BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
       if (!hasEmit) hasEmit = true;
       else          cg_printf(", ");
-
-      const string &name = param->getName();
-      Symbol *sym = variables->getSymbol(name);
-      TypePtr t(sym->getFinalType());
-      t->outputCPPDecl(cg, ar, shared_from_this());
-      cg_printf(" %s%s",
-                Option::TempVariablePrefix,
-                cg.formatLabel(name).c_str());
+      outputCPPSubClassParam(cg, ar, param);
     }
 
     // TODO: non ref variants can be directly assigned to the member
@@ -1927,11 +1943,7 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (sym) {
         if (!hasEmit) hasEmit = true;
         else          cg_printf(", ");
-        TypePtr t(sym->getFinalType());
-        t->outputCPPDecl(cg, ar, shared_from_this());
-        const string &tmpName =
-          string(Option::TempVariablePrefix) + cg.formatLabel(name);
-        cg_printf(" %s", tmpName.c_str());
+        outputCPPSubClassParam(cg, ar, param);
       }
     }
 

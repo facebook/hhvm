@@ -441,6 +441,10 @@ private:
                             AnalysisResultPtr ar,
                             int m_maxParam);
 
+  void outputCPPSubClassParam(CodeGenerator &cg,
+                              AnalysisResultPtr ar,
+                              ParameterExpressionPtr param);
+
   static StringToFunctionInfoPtrMap s_refParamInfo;
 
   int m_minParam;

@@ -84,7 +84,7 @@ Scanner::Scanner(const char *filename, int type)
     : m_filename(filename), m_source(NULL), m_len(0), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(NULL), m_token(NULL),
       m_loc(NULL), m_lastToken(-1), m_gap(false), m_inScript(false),
-      m_xhpState(0) {
+      m_xhpState(0), m_lookahead(false), m_lookaheadTokid(-1) {
   m_stream = new ifstream(filename);
   m_streamOwner = true;
   if (m_stream->bad()) {
@@ -106,7 +106,7 @@ Scanner::Scanner(istream &stream, int type, const char *fileName /* = "" */)
     : m_filename(fileName), m_source(NULL), m_len(0), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(NULL), m_token(NULL),
       m_loc(NULL), m_lastToken(-1), m_gap(false), m_inScript(false),
-      m_xhpState(0) {
+      m_xhpState(0), m_lookahead(false), m_lookaheadTokid(-1) {
   m_stream = &stream;
   m_streamOwner = false;
   if (type & PreprocessXHP) {
@@ -123,7 +123,7 @@ Scanner::Scanner(const char *source, int len, int type,
     : m_filename(fileName), m_source(source), m_len(len), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(NULL), m_token(NULL),
       m_loc(NULL), m_lastToken(-1), m_gap(false), m_inScript(false),
-      m_xhpState(0) {
+      m_xhpState(0), m_lookahead(false), m_lookaheadTokid(-1) {
   ASSERT(m_source);
   m_stream = NULL;
   m_streamOwner = false;
@@ -156,10 +156,23 @@ void Scanner::setHashBang(const char *rawText, int rawLeng) {
   }
 }
 
+int Scanner::peekNextToken() {
+  assert(!m_lookahead);
+  m_lookaheadTokid = getNextToken(m_lookaheadToken, m_lookaheadTokenLoc);
+  m_lookahead = true;
+  return m_lookaheadTokid;
+}
+
 int Scanner::getNextToken(ScannerToken &t, Location &l) {
+  if (m_lookahead) {
+    *m_token = m_lookaheadToken;
+    *m_loc = m_lookaheadTokenLoc;
+    m_lastToken = m_lookaheadTokid;
+    m_lookahead = false;
+    return m_lookaheadTokid;
+  }
   m_token = &t;
   m_loc = &l;
-
   int tokid;
   bool done = false;
   m_gap = false;

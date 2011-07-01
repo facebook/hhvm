@@ -106,6 +106,7 @@ public:
    * Called by parser or tokenizer.
    */
   int getNextToken(ScannerToken &t, Location &l);
+  int peekNextToken();
   const std::string &getError() const { return m_error;}
   Location *getLocation() const { return m_loc;}
 
@@ -228,7 +229,10 @@ private:
   bool m_gap;      // was whitespace token
   bool m_inScript; // inside <script language="php"> </script>
   int m_xhpState;
-
+  bool m_lookahead;
+  ScannerToken m_lookaheadToken;
+  Location m_lookaheadTokenLoc;
+  int m_lookaheadTokid;
   void incLoc(const char *rawText, int rawLeng);
 };
 

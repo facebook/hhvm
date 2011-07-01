@@ -445,16 +445,19 @@ void Parser::onStaticVariable(Token &out, Token *exprs, Token &var,
 void Parser::onSimpleVariable(Token &out, Token &var) {
   out.reset();
   if (var.text() == "this" && haveClass()) {
-    out->exp() = NEW_EXP0(This);
-  } else {
-    int idx = -1;
-    if (haveFunc()) {
-      idx = peekFunc()->declareVariable(var.text());
-    } else {
-      idx = m_fileBlock.declareVariable(var.text());
+    int tokid = m_scanner.peekNextToken();
+    if (tokid == T_OBJECT_OPERATOR) {
+      out->exp() = NEW_EXP0(This);
+      return;
     }
-    out->exp() = NEW_EXP(Variable, Name::fromString(this, var.text()), idx);
   }
+  int idx = -1;
+  if (haveFunc()) {
+    idx = peekFunc()->declareVariable(var.text());
+  } else {
+    idx = m_fileBlock.declareVariable(var.text());
+  }
+  out->exp() = NEW_EXP(Variable, Name::fromString(this, var.text()), idx);
 }
 
 void Parser::onSynthesizedVariable(Token &out, Token &var) {

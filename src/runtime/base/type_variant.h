@@ -112,7 +112,7 @@ class Variant {
 
   void destruct();
 
-  ~Variant() { if (IS_REFCOUNTED_TYPE(m_type)) destruct(); }
+  ~Variant();
 
   void reset(); // only for special memory sweeping!
 
@@ -164,6 +164,7 @@ class Variant {
 #endif
 
  private:
+  inline ALWAYS_INLINE void destructImpl();
   friend class VarNR;
   // This helper is only used to construct VarNR
   static const int NR_FLAG = 1 << 29;

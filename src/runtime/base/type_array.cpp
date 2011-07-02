@@ -46,6 +46,8 @@ Array Array::Create(CVarRef name, CVarRef var) {
   return ArrayData::Create(name.isString() ? name.toKey() : name, var);
 }
 
+Array::~Array() {}
+
 ///////////////////////////////////////////////////////////////////////////////
 // operators
 

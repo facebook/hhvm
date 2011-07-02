@@ -61,6 +61,7 @@ class Array : public SmartPtr<ArrayData> {
 
  public:
   Array() {}
+  ~Array();
 
   /**
    * Constructors. Those that take "arr" or "var" are copy constructors, taking

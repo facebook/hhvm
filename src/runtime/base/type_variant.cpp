@@ -213,8 +213,7 @@ static void (*destructors[4])(void *) =
   {destructString, destructArray, destructObject, destructVariant};
 #endif
 
-__attribute__ ((section (".text.hot")))
-void Variant::destruct() {
+inline ALWAYS_INLINE void Variant::destructImpl() {
   ASSERT(!isPrimitive());
 #ifdef FAST_REFCOUNT_FOR_VARIANT
   /**
@@ -257,6 +256,16 @@ void Variant::destruct() {
     break;
   }
 #endif
+}
+
+__attribute__ ((section (".text.hot")))
+void Variant::destruct() {
+  destructImpl();
+}
+
+__attribute__ ((section (".text.hot")))
+Variant::~Variant() {
+  if (IS_REFCOUNTED_TYPE(m_type)) destructImpl();
 }
 
 __attribute__ ((section (".text.hot")))

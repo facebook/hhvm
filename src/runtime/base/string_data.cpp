@@ -539,7 +539,7 @@ int64 StringData::getSharedStringHash() const {
 }
 
 int64 StringData::hashHelper() const {
-  int64 h = hash_string(data(), size());
+  int64 h = hash_string_inline(data(), size());
   m_hash |= h;
   return h;
 }

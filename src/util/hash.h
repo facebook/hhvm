@@ -87,7 +87,11 @@ inline long long hash_string_cs(const char *arKey, int nKeyLength) {
   return h & 0x7fffffffffffffffLL;
 }
 
-inline long long hash_string_i(const char *arKey, int nKeyLength) {
+long long hash_string_i(const char *arKey, int nKeyLength);
+long long hash_string(const char *arKey, int nKeyLength);
+
+inline long long hash_string_i_inline(
+  const char *arKey, int nKeyLength) {
   const unsigned long long m = 0xc6a4a7935bd1e995ULL;
   const int r = 47;
 
@@ -128,7 +132,7 @@ inline long long hash_string_i(const char *arKey, int nKeyLength) {
   return h & 0x7fffffffffffffffULL;
 }
 
-inline long long hash_string(const char *arKey, int nKeyLength) {
+inline long long hash_string_inline(const char *arKey, int nKeyLength) {
   return hash_string_i(arKey, nKeyLength);
 }
 

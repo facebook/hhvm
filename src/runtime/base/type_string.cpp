@@ -43,6 +43,8 @@ String String::FromChar(char ch) {
 ///////////////////////////////////////////////////////////////////////////////
 // constructors
 
+String::~String() {}
+
 String::String(int n) {
   char tmpbuf[12];
   char *p;

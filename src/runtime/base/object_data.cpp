@@ -74,7 +74,7 @@ void ObjectData:: dynConstructUnchecked(CArrRef params) {
 }
 
 void ObjectData::release() {
-  ASSERT(getCount() == 0);  
+  ASSERT(getCount() == 0);
   destruct();
   if (LIKELY(getCount() == 0)) {
     delete this;
@@ -87,7 +87,7 @@ void ObjectData::destruct() {
     try {
       t___destruct();
     } catch (...) {
-      handle_destructor_exception(); 
+      handle_destructor_exception();
     }
   }
 }

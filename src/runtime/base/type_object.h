@@ -50,6 +50,8 @@ class Object : public SmartPtr<ObjectData> {
   Object(ObjectData *data) : SmartPtr<ObjectData>(data) { }
   Object(CObjRef src) : SmartPtr<ObjectData>(src.m_px) { }
 
+  ~Object();
+
   /**
    * Informational
    */

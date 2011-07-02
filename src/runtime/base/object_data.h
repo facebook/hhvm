@@ -354,6 +354,8 @@ class ObjectData : public CountableNF {
 #endif
 };
 
+template<> inline SmartPtr<ObjectData>::~SmartPtr() {}
+
 typedef ObjectData c_ObjectData; // purely for easier code generation
 
 class ExtObjectData : public ObjectData {

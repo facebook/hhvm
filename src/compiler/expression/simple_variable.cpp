@@ -258,7 +258,8 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
   }
 
-  TypePtr actual = propagateTypes(ar, ret);
+	// if m_assertedType is set, then this is a type assertion node
+  TypePtr actual = propagateTypes(ar, m_assertedType ? m_assertedType : ret);
   setTypes(ar, actual, type);
   if (Type::SameType(actual, ret)) {
     m_implementedType.reset();

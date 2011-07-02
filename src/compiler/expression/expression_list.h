@@ -58,6 +58,8 @@ public:
   virtual bool isRefable(bool checkError = false) const;
   virtual bool kidUnused(int i) const;
   ExpressionPtr listValue() const;
+  virtual bool isLiteralString() const;
+  virtual std::string getLiteralString() const;
 
   bool isScalarArrayPairs() const;
 

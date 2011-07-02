@@ -52,6 +52,8 @@ public:
   ExpressionPtr getExpression() { return m_exp;}
   int getOp() const { return m_op;}
   bool isLogicalNot() const { return m_op == '!'; }
+  bool isCast() const;
+  TypePtr getCastType() const;
   bool getFront() const { return m_front; }
 
   virtual bool canonCompare(ExpressionPtr e) const;

@@ -138,6 +138,10 @@ public:
   void clearNeeded() { m_flags.needed = false; }
   bool isNeeded() const { return m_flags.needed; }
 
+  void setNoRemove() { m_flags.noRemove = true; }
+  void clearNoRemove() { m_flags.noRemove = false; }
+  bool isNoRemove() const { return m_flags.noRemove; }
+
   BlockScopeRawPtr getScope() const { return m_blockScope; }
   void setBlockScope(BlockScopeRawPtr scope) { m_blockScope = scope; }
   FileScopeRawPtr getFileScope() const {
@@ -261,6 +265,7 @@ private:
       unsigned needed_valid : 1; // whether or not the above flag is valid
       unsigned chainRoot : 1; // whether this denotes the begining of a
                               // CSE chain
+      unsigned noRemove : 1; // DCE should NOT remove this node
     } m_flags;
   };
 protected:

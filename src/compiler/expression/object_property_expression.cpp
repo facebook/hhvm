@@ -410,6 +410,23 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
                                                AnalysisResultPtr ar,
                                                bool noEvalOnError) {
   if (m_object->isThis()) {
+    TypePtr thisImplType(m_object->getImplementedType());
+    TypePtr thisActType (m_object->getActualType());
+    bool close = false;
+    if (m_valid && thisImplType) {
+      ASSERT(!Type::SameType(thisActType, thisImplType));
+      // This happens in this case:
+      // if ($this instanceof Y) {
+      //   ... $this->prop ...
+      // }
+      ClassScopePtr cls(thisActType->getClass(ar, getScope()));
+      ASSERT(cls && !cls->derivedByDynamic()); // since we don't do type
+                                               // assertions for these
+      cg_printf("static_cast<%s%s*>(",
+                Option::ClassPrefix,
+                cls->getId().c_str());
+      close = true;
+    }
     if (m_valid) {
       if (!m_object->getOriginalClass()) {
         m_valid = false;
@@ -426,11 +443,20 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
         }
       }
     }
-    if (!m_valid) {
+    if (m_valid) {
+      if (close) cg_printf("this");
+    } else {
       if (!getClassScope() || getClassScope()->derivedByDynamic() ||
           !static_pointer_cast<SimpleVariable>(m_object)->isGuardedThis()) {
-        cg_printf("GET_THIS_ARROW()");
+        if (close) {
+          cg_printf("GET_THIS_VALID()");
+        } else {
+          cg_printf("GET_THIS_ARROW()");
+        }
       }
+    }
+    if (close) {
+      cg_printf(")->");
     }
   } else if (m_valid) {
     TypePtr act;

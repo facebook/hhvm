@@ -22,6 +22,7 @@
 #include <compiler/expression/list_assignment.h>
 #include <compiler/expression/binary_op_expression.h>
 #include <compiler/expression/unary_op_expression.h>
+#include <compiler/expression/qop_expression.h>
 #include <compiler/expression/simple_variable.h>
 #include <compiler/expression/scalar_expression.h>
 #include <compiler/expression/simple_function_call.h>
@@ -36,6 +37,9 @@
 #include <compiler/statement/statement_list.h>
 #include <compiler/statement/catch_statement.h>
 #include <compiler/statement/method_statement.h>
+#include <compiler/statement/block_statement.h>
+#include <compiler/statement/if_statement.h>
+#include <compiler/statement/if_branch_statement.h>
 #include <compiler/statement/break_statement.h>
 #include <compiler/statement/return_statement.h>
 #include <compiler/statement/loop_statement.h>
@@ -55,6 +59,7 @@
 #include <compiler/analysis/ref_dict.h>
 
 #include <util/parser/hphp.tab.hpp>
+#include <util/parser/location.h>
 #include <util/util.h>
 
 #define spc(T,p) boost::static_pointer_cast<T>(p)
@@ -71,7 +76,7 @@ AliasManager::AliasManager(int opt) :
     m_noAdd(false), m_preOpt(opt<0), m_postOpt(opt>0),
     m_cleared(false), m_inPseudoMain(false), m_genAttrs(false),
     m_hasDeadStore(false), m_hasChainRoot(false),
-    m_graph(0), m_exprIdx(-1) {
+    m_hasTypeAssertions(false), m_graph(0), m_exprIdx(-1) {
 }
 
 AliasManager::~AliasManager() {
@@ -651,6 +656,7 @@ void AliasManager::cleanInterf(ExpressionPtr load,
 }
 
 bool AliasManager::okToKill(ExpressionPtr ep, bool killRef) {
+  if (ep && ep->isNoRemove()) return false;
   if (ep && ep->is(Expression::KindOfSimpleVariable)) {
     return spc(SimpleVariable, ep)->canKill(killRef);
   }
@@ -1789,12 +1795,15 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
       return canonicalizeNode(e);
 
     case Expression::KindOfBinaryOpExpression:
-      if (spc(BinaryOpExpression,e)->isShortCircuitOperator()) {
-        canonicalizeKid(e, e->getNthExpr(0), 0);
-        beginScope();
-        canonicalizeKid(e, e->getNthExpr(1), 1);
-        endScope();
-        return canonicalizeNode(e);
+      {
+        BinaryOpExpressionPtr binop(spc(BinaryOpExpression, e));
+        if (binop->isShortCircuitOperator()) {
+          canonicalizeKid(e, e->getNthExpr(0), 0);
+          beginScope();
+          canonicalizeKid(e, e->getNthExpr(1), 1);
+          endScope();
+          return canonicalizeNode(e);
+        }
       }
       break;
 
@@ -2135,6 +2144,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
     }
   } else {
     ExpressionPtr e = spc(Expression, cs);
+    if (e->isNoRemove()) m_hasTypeAssertions = true;
     if (e->getContext() & Expression::DeadStore) m_hasDeadStore = true;
     e->setCanonID(0);
     if (!kidCost) {
@@ -2432,6 +2442,786 @@ static void markAvailable(ExpressionRawPtr e) {
   }
 }
 
+class TypeAssertionInserter {
+public:
+  TypeAssertionInserter(AnalysisResultConstPtr ar) :
+    m_ar(ar), m_changed(false) {
+    BuildAssertionMap();
+  }
+  bool walk(StatementPtr stmt) {
+    m_changed = false;
+    createTypeAssertions(stmt);
+    return m_changed;
+  }
+private:
+
+  #define CONSTRUCT_PARAMS(from) \
+      (from)->getScope(), (from)->getLocation()
+
+  AnalysisResultConstPtr m_ar;
+  bool m_changed;
+
+  typedef std::pair<int, TypePtr> PosType;
+  typedef hphp_hash_map<string, PosType, string_hash>
+    StringPosTypeMap;
+  typedef hphp_hash_map<string, SimpleVariablePtr, string_hash>
+    StringVarMap;
+
+  static StringPosTypeMap s_type_assertion_map;
+  static Mutex s_type_assertion_map_mutex;
+
+  static void BuildAssertionMap();
+
+  ExpressionPtr createTypeAssertionsForKids(ExpressionPtr parent,
+                                            int startIdx,
+                                            bool &passStmt,
+                                            bool &negate) {
+    ExpressionPtr rep;
+    for (int i = startIdx; i < parent->getKidCount(); i++) {
+      rep = createTypeAssertions(parent->getNthExpr(i), passStmt, negate);
+    }
+    return rep;
+  }
+
+  void replaceExpression(
+      ConstructPtr parent, ExpressionPtr rep, ExpressionPtr old, int kid) {
+    ASSERT(parent);
+    ASSERT(parent->getKidCount() > kid);
+    ASSERT(parent->getNthKid(kid) == old);
+
+    if (!rep) return;
+
+    rep->setActualType(old->getActualType());
+    rep->setExpectedType(old->getExpectedType());
+    rep->setImplementedType(old->getImplementedType());
+    old->replaceValue(rep);
+
+    parent->setNthKid(kid, rep);
+    m_changed = true;
+  }
+
+  void replaceExpression(ExpressionPtr parent, ExpressionPtr rep, int kid) {
+    replaceExpression(parent, rep, parent->getNthExpr(kid), kid);
+  }
+
+  // returns the rep node for target, after the insertion
+  ExpressionPtr insertTypeAssertion(ExpressionPtr assertion,
+                                    ExpressionPtr target) {
+    ASSERT(assertion);
+    ASSERT(target);
+    ASSERT(assertion->is(Expression::KindOfSimpleVariable) ||
+           assertion->is(Expression::KindOfExpressionList));
+    ASSERT(assertion->isNoRemove());
+
+    if (ExpressionListPtr el = dpc(ExpressionList, target)) {
+      if (el->getListKind() == ExpressionList::ListKindComma) {
+        ASSERT(assertion->is(Expression::KindOfSimpleVariable));
+        el->insertElement(assertion, el->getCount() - 1);
+        return ExpressionPtr();
+      }
+    }
+
+    if (ExpressionListPtr el = dpc(ExpressionList, assertion)) {
+      ExpressionListPtr el0 = spc(ExpressionList, el->clone());
+      el0->insertElement(target, el0->getCount());
+      return el0;
+    }
+
+    ExpressionListPtr el(
+        new ExpressionList(
+          CONSTRUCT_PARAMS(target),
+          ExpressionList::ListKindComma));
+    el->addElement(assertion);
+    el->addElement(target);
+    el->setNoRemove(); // since it contains an assertion
+    return el;
+  }
+
+  ExpressionPtr newTypeAssertion(ExpressionPtr base, TypePtr t) {
+    ASSERT(base->is(Expression::KindOfSimpleVariable));
+    ExpressionPtr assertion(base->clone());
+    assertion->setAssertedType(t);
+    assertion->setNoRemove();
+    return assertion;
+  }
+
+  ExpressionPtr newInstanceOfAssertion(
+      ExpressionPtr obj, ExpressionPtr clsName) {
+    SimpleVariablePtr sv(extractAssertableVariable(obj));
+    ScalarExpressionPtr se(dpc(ScalarExpression, clsName));
+    if (sv && se) {
+      const string &s = se->getLiteralString();
+      if (s.empty()) return ExpressionPtr();
+      TypePtr o(Type::CreateObjectType(Util::toLower(s)));
+
+      // don't do specific type assertions for unknown classes
+      ClassScopePtr cscope(o->getClass(m_ar, sv->getScope()));
+      if (!cscope) return newTypeAssertion(sv, Type::Object);
+
+      // don't do type assertions for interfaces, since
+      // user classes don't necessarily extend the interface class
+      // in C++
+      if (cscope->isInterface()) {
+        return newTypeAssertion(sv, Type::Object);
+      }
+
+      // also don't do type assertions for derived by dynamic
+      // classes, since these classes will be DynamicObjectData
+      // instances at runtime (so we cannot emit a fast pointer cast
+      // safely)
+      if (cscope->derivedByDynamic()) {
+        return newTypeAssertion(sv, Type::Object);
+      }
+
+      return newTypeAssertion(sv, o);
+    }
+    return ExpressionPtr();
+  }
+
+  SimpleVariablePtr extractAssertableVariable(ExpressionPtr e) {
+    ASSERT(e);
+    switch (e->getKindOf()) {
+    case Expression::KindOfSimpleVariable:
+      return spc(SimpleVariable, e);
+    case Expression::KindOfAssignmentExpression:
+      {
+        AssignmentExpressionPtr ae(spc(AssignmentExpression, e));
+        return extractAssertableVariable(ae->getVariable());
+      }
+    default:
+      break;
+    }
+    return SimpleVariablePtr();
+  }
+
+  ExpressionPtr orAssertions(
+      SimpleVariablePtr lhs,
+      SimpleVariablePtr rhs) {
+    ASSERT(lhs && lhs->isNoRemove() && lhs->getAssertedType());
+    ASSERT(rhs && rhs->isNoRemove() && rhs->getAssertedType());
+    ASSERT(lhs->getName() == rhs->getName());
+    TypePtr u(
+        Type::Union(m_ar, lhs->getAssertedType(), rhs->getAssertedType()));
+    ExpressionPtr lhs0(lhs->clone());
+    lhs0->setAssertedType(u);
+    return lhs0;
+  }
+
+  ExpressionPtr andAssertions(
+      SimpleVariablePtr lhs,
+      SimpleVariablePtr rhs) {
+    ASSERT(lhs && lhs->isNoRemove() && lhs->getAssertedType());
+    ASSERT(rhs && rhs->isNoRemove() && rhs->getAssertedType());
+    ASSERT(lhs->getName() == rhs->getName());
+    TypePtr i(
+        Type::Intersection(
+          m_ar, lhs->getAssertedType(), rhs->getAssertedType()));
+    ExpressionPtr lhs0(lhs->clone());
+    lhs0->setAssertedType(i);
+    return lhs0;
+  }
+
+  ExpressionPtr orAssertions(ExpressionPtr lhs, ExpressionPtr rhs) {
+    if (!lhs || !rhs) return ExpressionPtr();
+
+    ASSERT(lhs->is(Expression::KindOfSimpleVariable) ||
+           lhs->is(Expression::KindOfExpressionList));
+    ASSERT(rhs->is(Expression::KindOfSimpleVariable) ||
+           rhs->is(Expression::KindOfExpressionList));
+
+    if (lhs->is(Expression::KindOfSimpleVariable) &&
+        rhs->is(Expression::KindOfSimpleVariable) &&
+        spc(SimpleVariable, lhs)->getName() ==
+        spc(SimpleVariable, rhs)->getName()) {
+      return orAssertions(
+          spc(SimpleVariable, lhs),
+          spc(SimpleVariable, rhs));
+    }
+
+    return ExpressionPtr();
+  }
+
+  bool isAllScalar(ExpressionListPtr ep, int startIdx) {
+    ASSERT(ep && ep->getListKind() == ExpressionList::ListKindParam);
+    for (int i = startIdx; i < ep->getCount(); i++) {
+      ExpressionPtr c((*ep)[i]);
+      if (c && !c->isScalar()) return false;
+    }
+    return true;
+  }
+
+  ExpressionPtr createTypeAssertions(ExpressionPtr from,
+                                     bool &passStmt,
+                                     bool &negate) {
+    passStmt = false;
+    negate   = false;
+    if (!from) return ExpressionPtr();
+    int startIdx     = 0;
+    bool useKidValue = true;
+    switch (from->getKindOf()) {
+      case Expression::KindOfExpressionList:
+        {
+          ExpressionListPtr p(spc(ExpressionList, from));
+          switch (p->getListKind()) {
+            case ExpressionList::ListKindComma:
+              return createTypeAssertions(p->listValue(), passStmt, negate);
+            default:
+              break;
+          }
+        }
+        break;
+      case Expression::KindOfSimpleFunctionCall:
+        {
+          SimpleFunctionCallPtr p(spc(SimpleFunctionCall, from));
+          ExpressionListPtr ep(p->getParams());
+          StringPosTypeMap::const_iterator it(
+             s_type_assertion_map.find(p->getName()));
+          if (it != s_type_assertion_map.end()) {
+            int pos = it->second.first;
+            TypePtr t(it->second.second);
+            if (ep->getCount() - 1 >= pos && isAllScalar(ep, pos + 1)) {
+              ExpressionPtr a0((*ep)[pos]);
+              if (a0) {
+                SimpleVariablePtr sv(extractAssertableVariable(a0));
+                if (sv) {
+                  bool passStmt;
+                  bool negate;
+                  createTypeAssertionsForKids(from, 2, passStmt, negate);
+                  return newTypeAssertion(sv, t);
+                }
+              }
+            }
+          } else if (p->getName() == "is_a" &&
+                     (ep->getCount() >= 2 && isAllScalar(ep, 1))) {
+            // special case is_a
+            bool passStmt;
+            bool negate;
+            createTypeAssertionsForKids(from, 2, passStmt, negate);
+            return newInstanceOfAssertion((*ep)[0], (*ep)[1]);
+          }
+          startIdx = 2; // params
+        }
+        break;
+      case Expression::KindOfQOpExpression:
+        {
+          QOpExpressionPtr qop(spc(QOpExpression, from));
+          bool passStmt;
+          bool negateChild;
+          ExpressionPtr lAfter(
+            createTypeAssertions(
+              qop->getCondition(),
+              passStmt,
+              negateChild));
+          if (lAfter) {
+            if (negateChild || qop->getYes()) {
+              replaceExpression(
+                  qop,
+                  insertTypeAssertion(
+                    lAfter,
+                    !negateChild ? qop->getYes() : qop->getNo()),
+                  !negateChild ? 1 : 2);
+            }
+          }
+          startIdx = 1; // yes expr
+          useKidValue = false;
+        }
+        break;
+      case Expression::KindOfBinaryOpExpression:
+        {
+          BinaryOpExpressionPtr binop(spc(BinaryOpExpression, from));
+          switch (binop->getOp()) {
+            case T_LOGICAL_AND:
+            case T_BOOLEAN_AND:
+              {
+                // we cannot push the LHS assertion into the expr
+                // past the RHS assertion, since the RHS assertion could
+                // have changed the LHS assertion. for example:
+                //
+                // if (is_array($x) && ($x = 5)) { stmt1; }
+                //
+                // All we can do is to push the LHS assertion into the beginning
+                // of the RHS assertion, and then return the RHS assertion. We
+                // would need more analysis to do more (eg copy prop of
+                // assertions)
+                bool passStmt;
+                bool negateChild;
+                ExpressionPtr lhsAfter(
+                  createTypeAssertions(
+                    binop->getExp1(),
+                    passStmt,
+                    negateChild));
+                if (lhsAfter && !negateChild) {
+                  replaceExpression(
+                    binop,
+                    insertTypeAssertion(lhsAfter, binop->getExp2()),
+                    1);
+                }
+                ExpressionPtr rhsAfter(
+                  createTypeAssertions(
+                    binop->getExp2(),
+                    passStmt,
+                    negateChild));
+                return negateChild ? ExpressionPtr() : rhsAfter;
+              }
+            case T_LOGICAL_OR:
+            case T_BOOLEAN_OR:
+              {
+                bool passStmt;
+                bool negateChild1;
+                bool negateChild2;
+                ExpressionPtr lhsAfter(
+                  createTypeAssertions(
+                    binop->getExp1(),
+                    passStmt,
+                    negateChild1));
+                ExpressionPtr rhsAfter(
+                  createTypeAssertions(
+                    binop->getExp2(),
+                    passStmt,
+                    negateChild2));
+                if (lhsAfter && rhsAfter && !negateChild1 && !negateChild2) {
+                  return orAssertions(lhsAfter, rhsAfter);
+                }
+                return ExpressionPtr();
+              }
+            case T_INSTANCEOF:
+              {
+                ExpressionPtr r(newInstanceOfAssertion(
+                    binop->getExp1(), binop->getExp2()));
+                if (r) return r;
+              }
+          }
+        }
+        break;
+      case Expression::KindOfUnaryOpExpression:
+        {
+          UnaryOpExpressionPtr unop(spc(UnaryOpExpression, from));
+          switch (unop->getOp()) {
+            case '!':
+              {
+                bool passStmt;
+                ExpressionPtr after(
+                  createTypeAssertions(
+                    unop->getExpression(), passStmt, negate));
+                negate = !negate;
+                return after;
+              }
+            default:
+              // do the default behavior
+              break;
+          }
+        }
+        break;
+      case Expression::KindOfAssignmentExpression:
+        {
+          // handle $x = (type) $x explicitly,
+          // since our current type inference will not be
+          // able to deal with it optimally
+          AssignmentExpressionPtr ap(spc(AssignmentExpression, from));
+          SimpleVariablePtr sv(dpc(SimpleVariable, ap->getVariable()));
+          UnaryOpExpressionPtr uop(dpc(UnaryOpExpression, ap->getValue()));
+          if (sv && uop) {
+            TypePtr castType(uop->getCastType());
+            if (castType) {
+              if (SimpleVariablePtr sv0 =
+                  dpc(SimpleVariable, uop->getExpression())) {
+                if (sv->getName() == sv0->getName()) {
+                  passStmt = true;
+                  return newTypeAssertion(sv, castType);
+                }
+              }
+            }
+          }
+          useKidValue = false;
+        }
+        break;
+      default:
+        break;
+    }
+    ExpressionPtr result(
+        createTypeAssertionsForKids(from, startIdx, passStmt, negate));
+    return useKidValue ? result : ExpressionPtr();
+  }
+
+  void insertTypeAssertion(
+      ExpressionPtr assertion,
+      StatementPtr stmt,
+      int idx = 0) {
+    if (!stmt) return;
+
+    m_changed = true;
+    switch (stmt->getKindOf()) {
+    case Statement::KindOfBlockStatement:
+      {
+        BlockStatementPtr blockPtr(spc(BlockStatement, stmt));
+        insertTypeAssertion(assertion, blockPtr->getStmts());
+      }
+      break;
+    case Statement::KindOfStatementList:
+      {
+        StatementListPtr slistPtr(spc(StatementList, stmt));
+        slistPtr->insertElement(
+          ExpStatementPtr(
+            new ExpStatement(
+              CONSTRUCT_PARAMS(slistPtr), assertion)),
+          idx);
+      }
+      break;
+    case Statement::KindOfExpStatement:
+      {
+        ExpStatementPtr es(spc(ExpStatement, stmt));
+        ExpressionPtr rep(
+            insertTypeAssertion(assertion, es->getExpression()));
+        replaceExpression(es, rep, es->getExpression(), 0);
+      }
+      break;
+    case Statement::KindOfReturnStatement:
+      {
+        ReturnStatementPtr rs(spc(ReturnStatement, stmt));
+        if (rs->hasRetExp()) {
+          ExpressionPtr rep(
+              insertTypeAssertion(assertion, rs->getRetExp()));
+          replaceExpression(rs, rep, rs->getRetExp(), 0);
+        }
+      }
+      break;
+    case Statement::KindOfBreakStatement:
+      {
+        BreakStatementPtr bs(spc(BreakStatement, stmt));
+        if (bs->getExp()) {
+          ExpressionPtr rep(
+              insertTypeAssertion(assertion, bs->getExp()));
+          replaceExpression(bs, rep, bs->getExp(), 0);
+        }
+      }
+    default:
+      // this is something like a continue statement,
+      // in which case we don't do anything
+      break;
+    }
+  }
+
+  ExpressionPtr createTypeAssertions(StatementPtr e) {
+    if (!e) return ExpressionPtr();
+    if (FunctionWalker::SkipRecurse(e)) return ExpressionPtr();
+
+    int loopCondIdx = -1, loopBodyIdx = -1;
+    std::vector<int> needed;
+    switch (e->getKindOf()) {
+    case Statement::KindOfIfStatement:
+      {
+        IfStatementPtr ifStmt(spc(IfStatement, e));
+        StatementListPtr branches(ifStmt->getIfBranches());
+        if (branches) {
+          for (int i = 0; i < branches->getCount(); i++) {
+            IfBranchStatementPtr branch(
+                dpc(IfBranchStatement, (*branches)[i]));
+            ASSERT(branch);
+            if (branch->getCondition()) {
+              bool passStmt;
+              bool negate;
+              ExpressionPtr after(
+                createTypeAssertions(
+                  branch->getCondition(), passStmt, negate));
+              if (after) {
+                if (!negate) {
+                  insertTypeAssertion(after, branch->getStmt());
+                } else {
+                  // insert into the next branch:
+                  //   * if a condition exists, put it in the condition.
+                  //   * if there is no condition, put it in the body.
+                  //   * if this is the last branch, create a branch after
+                  //     with no condition, and put it in the body.
+
+                  if (i < branches->getCount() - 1) {
+                    IfBranchStatementPtr nextBranch(
+                        dpc(IfBranchStatement, (*branches)[i + 1]));
+                    ASSERT(nextBranch);
+                    if (nextBranch->getCondition()) {
+                      ExpressionPtr old(nextBranch->getCondition());
+                      replaceExpression(
+                          nextBranch,
+                          insertTypeAssertion(after, old),
+                          old,
+                          0);
+                    } else {
+                      // next branch must be the last branch
+                      ASSERT(i + 1 == branches->getCount() - 1);
+                      insertTypeAssertion(after, nextBranch->getStmt());
+                    }
+                  } else {
+                    ExpStatementPtr newExpStmt(
+                      new ExpStatement(
+                        CONSTRUCT_PARAMS(branch),
+                        after));
+
+                    IfBranchStatementPtr newBranch(
+                      new IfBranchStatement(
+                        CONSTRUCT_PARAMS(branch),
+                        ExpressionPtr(), newExpStmt));
+
+                    branches->addElement(newBranch);
+                    break;
+                  }
+                }
+              }
+            }
+          }
+          for (int i = 0; i < branches->getCount(); i++) {
+            IfBranchStatementPtr branch(
+                dpc(IfBranchStatement, (*branches)[i]));
+            ASSERT(branch);
+            if (branch->getStmt()) {
+              createTypeAssertions(branch->getStmt());
+            }
+          }
+        }
+      }
+      return ExpressionPtr();
+    case Statement::KindOfForStatement:
+      loopCondIdx = ForStatement::CondExpr;
+      loopBodyIdx = ForStatement::BodyStmt;
+      needed.push_back(ForStatement::InitExpr);
+      needed.push_back(ForStatement::IncExpr);
+      goto loop_stmt;
+    case Statement::KindOfWhileStatement:
+      loopCondIdx = WhileStatement::CondExpr;
+      loopBodyIdx = WhileStatement::BodyStmt;
+      goto loop_stmt;
+    case Statement::KindOfDoStatement:
+      loopCondIdx = DoStatement::CondExpr;
+      loopBodyIdx = DoStatement::BodyStmt;
+
+loop_stmt:
+      {
+        ASSERT(loopCondIdx >= 0);
+        ASSERT(loopBodyIdx >= 0);
+        if (e->getNthKid(loopCondIdx)) {
+          bool passStmt;
+          bool negate;
+          ExpressionPtr after(createTypeAssertions(
+              spc(Expression, e->getNthKid(loopCondIdx)), passStmt, negate));
+          if (after && !negate) {
+            insertTypeAssertion(
+                after, dpc(Statement, e->getNthKid(loopBodyIdx)));
+          }
+        }
+        for (std::vector<int>::const_iterator it = needed.begin();
+             it != needed.end();
+             ++it) {
+          ExpressionPtr k(dpc(Expression, e->getNthKid(*it)));
+          if (k) {
+            bool passStmt;
+            bool negate;
+            createTypeAssertions(k, passStmt, negate);
+          }
+        }
+        ConstructPtr body(e->getNthKid(loopBodyIdx));
+        createTypeAssertions(dpc(Statement, body));
+      }
+      return ExpressionPtr();
+    case Statement::KindOfStatementList:
+      {
+        StatementListPtr slist(spc(StatementList, e));
+        int i = 0;
+        while (i < slist->getCount()) {
+          ExpressionPtr next(createTypeAssertions((*slist)[i]));
+          if (next) {
+            insertTypeAssertion(next, slist, i + 1);
+            i += 2; // skip over the inserted node
+          } else {
+            i++;
+          }
+        }
+      }
+      return ExpressionPtr();
+    case Statement::KindOfExpStatement:
+      {
+        ExpStatementPtr es(dpc(ExpStatement, e));
+        bool passStmt;
+        bool negate;
+        ExpressionPtr after(
+            createTypeAssertions(es->getExpression(), passStmt, negate));
+        return passStmt && !negate ? after : ExpressionPtr();
+      }
+    default:
+      break;
+    }
+    for (int i = 0; i < e->getKidCount(); i++) {
+      ConstructPtr kid(e->getNthKid(i));
+      if (!kid) continue;
+      if (StatementPtr s = dpc(Statement, kid)) {
+        createTypeAssertions(s);
+      } else if (ExpressionPtr e = dpc(Expression, kid)) {
+        bool passStmt;
+        bool negate;
+        createTypeAssertions(e, passStmt, negate);
+      } else {
+        ASSERT(false);
+      }
+    }
+    return ExpressionPtr();
+  }
+
+};
+
+TypeAssertionInserter::StringPosTypeMap
+  TypeAssertionInserter::s_type_assertion_map;
+Mutex
+  TypeAssertionInserter::s_type_assertion_map_mutex;
+
+void TypeAssertionInserter::BuildAssertionMap() {
+  Lock lock(s_type_assertion_map_mutex);
+  if (s_type_assertion_map.empty()) {
+    s_type_assertion_map["is_array"]   = PosType(0, Type::Array);
+    s_type_assertion_map["is_string"]  = PosType(0, Type::String);
+    s_type_assertion_map["is_object"]  = PosType(0, Type::Object);
+
+    s_type_assertion_map["is_int"]     = PosType(0, Type::Int64);
+    s_type_assertion_map["is_integer"] = PosType(0, Type::Int64);
+    s_type_assertion_map["is_long"]    = PosType(0, Type::Int64);
+
+    s_type_assertion_map["is_double"]  = PosType(0, Type::Double);
+    s_type_assertion_map["is_float"]   = PosType(0, Type::Double);
+    s_type_assertion_map["is_real"]    = PosType(0, Type::Double);
+
+    s_type_assertion_map["is_bool"]    = PosType(0, Type::Boolean);
+
+    s_type_assertion_map["is_numeric"] = PosType(0, Type::Numeric);
+
+    s_type_assertion_map["in_array"]   = PosType(1, Type::Array);
+
+    // even though the PHP docs say that in PHP 5.3, this function
+    // only accepts an array for the search, Zend PHP 5.3 still
+    // accepts objects. Quite a bummer.
+    s_type_assertion_map["array_key_exists"] =
+      PosType(1,
+          TypePtr(
+            new Type(
+              (Type::KindOf)(Type::KindOfArray|Type::KindOfObject))));
+  }
+}
+
+class TypeAssertionRemover {
+public:
+  TypeAssertionRemover() : m_changed(false) {}
+  bool walk(StatementPtr stmt) {
+    m_changed = false;
+    removeTypeAssertions(stmt);
+    return m_changed;
+  }
+private:
+
+  bool m_changed;
+
+  void safeRepValue(ConstructPtr parent, int i,
+      ExpressionPtr orig, ExpressionPtr rep) {
+    if (orig == rep) return;
+    m_changed = true;
+    return parent->setNthKid(i, orig->replaceValue(rep));
+  }
+
+  void safeRepValue(ConstructPtr parent, int i,
+      ConstructPtr orig, ConstructPtr rep) {
+    if (orig == rep) return;
+    m_changed = true;
+    return parent->setNthKid(i, rep);
+  }
+
+  /**
+   * Returns the replacement node for from
+   */
+  ConstructPtr removeTypeAssertions(ConstructPtr from) {
+    if (!from) return ConstructPtr();
+    if (StatementPtr s = dpc(Statement, from)) {
+      return removeTypeAssertions(s);
+    } else if (ExpressionPtr e = dpc(Expression, from)) {
+      return removeTypeAssertions(e);
+    } else {
+      ASSERT(false);
+      return ConstructPtr();
+    }
+  }
+
+  ExpressionPtr restoreExpType(ExpressionPtr orig, ExpressionPtr rep) {
+    rep->setExpectedType(orig->getExpectedType());
+    return rep;
+  }
+
+  ExpressionPtr removeTypeAssertions(ExpressionPtr from) {
+    if (!from) return ExpressionPtr();
+    switch (from->getKindOf()) {
+    case Expression::KindOfExpressionList:
+      {
+        ExpressionListPtr p(spc(ExpressionList, from));
+        if (p->getListKind() ==
+            ExpressionList::ListKindComma) {
+          for (int i = 0; i < p->getCount(); i++) {
+            ExpressionPtr c((*p)[i]);
+            ExpressionPtr rep(removeTypeAssertions(c));
+            if (!rep) p->removeElement(i--);
+            else      safeRepValue(p, i, c, rep);
+          }
+          if (p->isNoRemove()) {
+            if (p->getCount() == 0) return ExpressionPtr();
+            if (p->getCount() == 1) return restoreExpType(p, (*p)[0]);
+          }
+        }
+      }
+      break;
+    case Expression::KindOfSimpleVariable:
+      if (from->isNoRemove()) return ExpressionPtr();
+      break;
+    default:
+      break;
+    }
+    for (int i = 0; i < from->getKidCount(); i++) {
+      ExpressionPtr c(from->getNthExpr(i));
+      ExpressionPtr rep(removeTypeAssertions(c));
+      safeRepValue(from, i, c, rep);
+    }
+    return from;
+  }
+
+  StatementPtr removeTypeAssertions(StatementPtr from) {
+    if (!from) return from;
+    if (FunctionWalker::SkipRecurse(from)) return from;
+
+    switch (from->getKindOf()) {
+    case Statement::KindOfExpStatement:
+      {
+        ExpStatementPtr p(spc(ExpStatement, from));
+        ExpressionPtr rep(removeTypeAssertions(p->getExpression()));
+        if (!rep) return StatementPtr();
+        else      safeRepValue(p, 0, p->getExpression(), rep);
+      }
+      break;
+    case Statement::KindOfStatementList:
+      {
+        StatementListPtr p(spc(StatementList, from));
+        for (int i = 0; i < p->getKidCount(); i++) {
+          StatementPtr s((*p)[i]);
+          StatementPtr rep(removeTypeAssertions(s));
+          if (!rep) p->removeElement(i--);
+          else      safeRepValue(from, i, s, rep);
+        }
+      }
+      break;
+    default:
+      {
+        for (int i = 0; i < from->getKidCount(); i++) {
+          ConstructPtr c(from->getNthKid(i));
+          ConstructPtr rep(removeTypeAssertions(c));
+          safeRepValue(from, i, c, rep);
+        }
+      }
+      break;
+    }
+    return from;
+  }
+
+};
+
 class ConstructTagger : public ControlFlowGraphWalker {
 public:
   ConstructTagger(ControlFlowGraph *g) : ControlFlowGraphWalker(g) {}
@@ -2470,23 +3260,44 @@ public:
 
 class Propagater : public ControlFlowGraphWalker {
 public:
-  Propagater(ControlFlowGraph *g, ExprDict &d) :
-      ControlFlowGraphWalker(g), m_dict(d), m_changed(false) {}
+  Propagater(ControlFlowGraph *g, ExprDict &d, bool doTypeProp) :
+      ControlFlowGraphWalker(g), m_dict(d),
+      m_changed(false), m_doTypeProp(doTypeProp) {}
 
   bool walk() { ControlFlowGraphWalker::walk(*this); return m_changed; }
   int afterEach(ConstructRawPtr p, int i, ConstructPtr kid) {
     if (ExpressionRawPtr e = boost::dynamic_pointer_cast<Expression>(kid)) {
-      if (e->isAnticipated() &&
+      if (e->isTypeAssertion()) return WalkContinue; // nothing to do
+
+      bool safeForProp =
+          e->isAnticipated() &&
           !(e->getContext() & (Expression::LValue|
                                Expression::OprLValue|
                                Expression::AssignmentLHS|
                                Expression::RefValue|
                                Expression::UnsetContext|
-                               Expression::DeepReference))) {
+                               Expression::DeepReference));
+      if (safeForProp) {
         if (ExpressionPtr rep = m_dict.propagate(e)) {
           m_changed = true;
           rep = e->replaceValue(rep->clone());
           p->setNthKid(i, rep);
+          return WalkContinue;
+        }
+      }
+
+      if (m_doTypeProp && e->isAnticipated()) {
+        TypePtr t = m_dict.propagateType(e);
+        if (!t) return WalkContinue;
+        if (safeForProp ||
+            // $x[0] = ... where $x is not referenced
+            // should be allowed to grab the type assertion
+            // if it is an array assertion
+            (t->is(Type::KindOfArray) &&
+              e->is(Expression::KindOfSimpleVariable) &&
+              e->hasContext(Expression::AccessContext) &&
+              !spc(SimpleVariable, e)->couldBeAliased())) {
+          e->setAssertedType(t);
         }
       }
     }
@@ -2500,6 +3311,7 @@ public:
 private:
   ExprDict &m_dict;
   bool m_changed;
+  bool m_doTypeProp;
 };
 
 void AliasManager::doFinal(MethodStatementPtr m) {
@@ -2531,11 +3343,6 @@ void AliasManager::performReferencedAndNeededAnalysis(MethodStatementPtr m) {
   // bail out for pseudomain context
   if (m->getScope()->inPseudoMain()) return;
 
-  if (Option::DumpAst) {
-    printf("----- Before reference + needed analysis -----\n");
-    m_graph->dump(m_arp);
-  }
-
   RefDict rd(*this);
   rd.build(m);
   AttributeTagger<RefDict> rt(m_graph, rd);
@@ -2555,15 +3362,10 @@ void AliasManager::performReferencedAndNeededAnalysis(MethodStatementPtr m) {
   rt.walk();
   DataFlow::ComputePartialNeeded(*m_graph);
   rdw.walk();
-
-  if (Option::DumpAst) {
-    printf("----- After reference + needed analysis -----\n");
-    m_graph->dump(m_arp);
-  }
 }
 
 int AliasManager::copyProp(MethodStatementPtr m) {
-  m_graph = ControlFlowGraph::buildControlFlow(m);
+  if (m_graph == NULL) createCFG(m);
 
   performReferencedAndNeededAnalysis(m);
 
@@ -2579,25 +3381,77 @@ int AliasManager::copyProp(MethodStatementPtr m) {
 
   if (Option::DumpAst) m_graph->dump(m_arp);
 
-  Propagater prop(m_graph, ed);
+  Propagater prop(m_graph, ed, m_preOpt);
   bool ret = prop.walk();
-
-  delete m_graph;
-  m_graph = 0;
-
+  deleteCFG();
   return ret;
 }
 
+void AliasManager::deleteCFG() {
+  ASSERT(m_graph != NULL);
+  delete m_graph;
+  m_graph = NULL;
+}
+
+void AliasManager::createCFG(MethodStatementPtr m) {
+  ASSERT(m_graph == NULL);
+  m_graph = ControlFlowGraph::buildControlFlow(m);
+}
+
+void AliasManager::insertTypeAssertions(AnalysisResultConstPtr ar,
+                                        MethodStatementPtr m) {
+  TypeAssertionInserter i(ar);
+  i.walk(m->getStmts());
+
+  if (Option::ControlFlow && Option::DumpAst) {
+    if (m_graph != NULL) deleteCFG();
+    createCFG(m);
+    printf("-------- BEGIN INSERTED -----------\n");
+    m_graph->dump(m_arp);
+    printf("-------- END   INSERTED -----------\n");
+    deleteCFG();
+  }
+}
+
+void AliasManager::removeTypeAssertions(AnalysisResultConstPtr ar,
+                                        MethodStatementPtr m) {
+  TypeAssertionRemover r;
+  r.walk(m->getStmts());
+
+  if (Option::ControlFlow && Option::DumpAst) {
+    if (m_graph != NULL) deleteCFG();
+    createCFG(m);
+    printf("-------- BEGIN REMOVED -----------\n");
+    m_graph->dump(m_arp);
+    printf("-------- END   REMOVED -----------\n");
+    deleteCFG();
+  }
+}
+
 int AliasManager::optimize(AnalysisResultConstPtr ar, MethodStatementPtr m) {
+  m_hasTypeAssertions = false;
   gatherInfo(ar, m);
+
+  bool runCanon = Option::LocalCopyProp || Option::EliminateDeadCode;
+
+  if (runCanon && m_preOpt) {
+    if (m_hasTypeAssertions) removeTypeAssertions(ar, m);
+    insertTypeAssertions(ar, m);
+  }
+
+  if (runCanon && m_postOpt && m_hasTypeAssertions) {
+    removeTypeAssertions(ar, m);
+  }
 
   if (!m_hasDeadStore && Option::CopyProp) {
     if (copyProp(m)) return 1;
   }
 
+  if (m_graph != NULL) deleteCFG();
+
   m_hasChainRoot = false;
 
-  if (Option::LocalCopyProp || Option::EliminateDeadCode) {
+  if (runCanon) {
     for (int i = 0, nkid = m->getKidCount(); i < nkid; i++) {
       if (i) {
         clear();
@@ -2677,7 +3531,6 @@ void AliasManager::finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m) {
     delete m_graph;
     m_graph = 0;
   }
-
   doFinal(m);
 }
 

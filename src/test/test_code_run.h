@@ -179,6 +179,7 @@ class TestCodeRun : public TestBase {
   bool TestIntercept();
   bool TestMaxInt();
   bool TestParser();
+  bool TestTypeAssertions();
 
   // PHP 5.3
   bool TestVariableClassName();

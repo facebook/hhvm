@@ -111,11 +111,16 @@ bool ExpressionList::isScalar() const {
     return isScalarArrayPairs();
   }
 
-  for (unsigned int i = m_exps.size(); i--; ) {
-    if (m_exps[i] && !m_exps[i]->isScalar()) return false;
+  if (m_kind == ListKindParam) {
+    for (unsigned int i = m_exps.size(); i--; ) {
+      if (m_exps[i] && !m_exps[i]->isScalar()) return false;
+    }
+    return true;
+  } else if (!hasEffect()) {
+    ExpressionPtr v(listValue());
+    return v ? v->isScalar() : false;
   }
-
-  return true;
+  return false;
 }
 
 bool ExpressionList::isNoObjectInvolved() const {
@@ -182,35 +187,36 @@ ExpressionList::flattenLiteralStrings(vector<ExpressionPtr> &literals) const {
 }
 
 bool ExpressionList::getScalarValue(Variant &value) {
-  if (m_arrayElements && isScalarArrayPairs()) {
-    ArrayInit init(m_exps.size());
-    for (unsigned int i = 0; i < m_exps.size(); i++) {
-      ArrayPairExpressionPtr exp =
-        dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
-      ExpressionPtr name = exp->getName();
-      ExpressionPtr val = exp->getValue();
-      if (!name) {
-        Variant v;
-        bool ret = val->getScalarValue(v);
-        if (!ret) ASSERT(false);
-        init.set(v);
-      } else {
-        Variant n;
-        Variant v;
-        bool ret1 = name->getScalarValue(n);
-        bool ret2 = val->getScalarValue(v);
-        if (!(ret1 && ret2)) return ExpressionPtr();
-        init.set(n, v);
+  if (m_arrayElements) {
+    if (isScalarArrayPairs()) {
+      ArrayInit init(m_exps.size());
+      for (unsigned int i = 0; i < m_exps.size(); i++) {
+        ArrayPairExpressionPtr exp =
+          dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
+        ExpressionPtr name = exp->getName();
+        ExpressionPtr val = exp->getValue();
+        if (!name) {
+          Variant v;
+          bool ret = val->getScalarValue(v);
+          if (!ret) ASSERT(false);
+          init.set(v);
+        } else {
+          Variant n;
+          Variant v;
+          bool ret1 = name->getScalarValue(n);
+          bool ret2 = val->getScalarValue(v);
+          if (!(ret1 && ret2)) return ExpressionPtr();
+          init.set(n, v);
+        }
       }
+      value = Array(init.create());
+      return true;
     }
-    value = Array(init.create());
-    return true;
+    return false;
   }
   if (m_kind != ListKindParam && !hasEffect()) {
-    int i = m_exps.size();
-    if (i) {
-      return m_exps[m_kind == ListKindLeft ? 0 : i-1]->getScalarValue(value);
-    }
+    ExpressionPtr v(listValue());
+    return v ? v->getScalarValue(value) : false;
   }
   return false;
 }
@@ -332,6 +338,16 @@ ExpressionPtr ExpressionList::listValue() const {
   return ExpressionPtr();
 }
 
+bool ExpressionList::isLiteralString() const {
+  ExpressionPtr v(listValue());
+  return v ? v->isLiteralString() : false;
+}
+
+string ExpressionList::getLiteralString() const {
+  ExpressionPtr v(listValue());
+  return v ? v->getLiteralString() : string("");
+}
+
 void ExpressionList::optimize(AnalysisResultConstPtr ar) {
   bool changed = false;
   size_t i = m_exps.size();
@@ -340,7 +356,7 @@ void ExpressionList::optimize(AnalysisResultConstPtr ar) {
     while (i--) {
       if (i != skip) {
         ExpressionPtr &e = m_exps[i];
-        if (!e || e->getContainedEffects() == NoEffect) {
+        if (!e || (e->getContainedEffects() == NoEffect && !e->isNoRemove())) {
           removeElement(i);
           changed = true;
         } else if (e->is(KindOfExpressionList)) {
@@ -357,7 +373,11 @@ void ExpressionList::optimize(AnalysisResultConstPtr ar) {
       }
     }
     if (m_exps.size() == 1) {
-      m_kind = ListKindWrapped;
+      // don't convert an exp-list with type assertions to
+      // a ListKindWrapped
+      if (!isNoRemove()) {
+        m_kind = ListKindWrapped;
+      }
     } else if (m_kind == ListKindLeft && m_exps[0]->isScalar()) {
       ExpressionPtr e = m_exps[0];
       removeElement(0);

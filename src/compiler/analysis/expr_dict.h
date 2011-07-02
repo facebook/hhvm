@@ -22,9 +22,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+typedef std::pair<TypePtr, int>     TypePtrIdxPair;
+typedef std::vector<TypePtrIdxPair> TypePtrIdxPairVec;
+
 class ExprDict : public Dictionary {
 public:
-  ExprDict(AliasManager &am) : Dictionary(am) {}
+  ExprDict(AliasManager &am);
   /* Building the dictionary */
   void build(MethodStatementPtr m);
   void visit(ExpressionPtr e);
@@ -37,9 +40,55 @@ public:
   /* Copy propagation */
   void beforePropagate(ControlBlock *b);
   ExpressionPtr propagate(ExpressionPtr e);
+  TypePtr propagateType(ExpressionPtr e);
+
+  void getTypes(ExpressionPtr e, TypePtrIdxPairVec &types);
 private:
+
+  /**
+   * types is filled with (type assertion, canon id for that type assertion)
+   * tuples
+   */
+  void getTypes(int id, TypePtrIdxPairVec &types);
+
+  /**
+   * entries is filled with (type assertion, canon id for that type assertion)
+   * tuples or (TypePtr(), canon id) tuples
+   */
+  void getAllEntries(int id, TypePtrIdxPairVec &types);
+
+  template <class T>
+  void getEntries(int id, TypePtrIdxPairVec &entries, T func);
+
+  bool containsAssertion(TypePtr assertion,
+                         const TypePtrIdxPairVec &types,
+                         TypePtrIdxPair &entry) const;
+
+  inline bool isCanonicalStructure(int i) const { return id(i) == i; }
+
+  int id(int i) const {
+    ASSERT(i >= 0 && i < (int) m_canonIdMap.size());
+    int ret = m_canonIdMap[i];
+    ASSERT(ret != -1);
+    return ret;
+  }
+
+  void setStructureOps(int idx, BitOps::Bits *bits, bool flag);
+
   std::vector<ExpressionRawPtr> m_avlExpr;
   std::vector<ExpressionRawPtr> m_avlAccess;
+  std::vector<TypePtr>          m_avlTypes;
+  std::vector<int>              m_avlTypeAsserts;
+
+  TypePtr extractTypeAssertion(ExpressionPtr e) const;
+  TypePtr reduceToSingleAssertion(const TypePtrIdxPairVec &types) const;
+
+  TypePtrIdxPairVec m_canonTypeMap;
+    // ids to (assertion type, prev id)
+
+  std::vector<int> m_canonIdMap;
+    // ids -> canon structure id
+
   ExpressionPtr m_active;
 };
 

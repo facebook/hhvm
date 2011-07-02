@@ -88,9 +88,19 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
     // necessary because we set the expected type of m_object to
     // Type::Some during type inference.
-    TypePtr act(m_object->getActualType());
-    if (!m_object->isThis() && act && act->is(Type::KindOfObject)) {
-      m_object->setExpectedType(act);
+    TypePtr at(m_object->getActualType());
+    TypePtr it(m_object->getImplementedType());
+    if (!m_object->isThis() && at && at->is(Type::KindOfObject)) {
+      if (at->isSpecificObject() && it && Type::IsMappedToVariant(it)) {
+        // fast-cast inference
+        ClassScopePtr scope(ar->findClass(at->getName()));
+        if (scope) {
+          // add a dependency to m_object's class type
+          // to allow the fast cast to succeed
+          addUserClass(ar, at->getName());
+        }
+      }
+      m_object->setExpectedType(at);
     }
   }
 }
@@ -265,11 +275,37 @@ void ObjectMethodExpression::outputPHP(CodeGenerator &cg,
 void ObjectMethodExpression::outputCPPObject(CodeGenerator &cg,
                                              AnalysisResultPtr ar) {
   bool isThis = m_object->isThis();
-  if (isThis && getFunctionScope()->isStatic()) {
-    cg_printf("GET_THIS_ARROW()");
-  }
-
-  if (!isThis) {
+  if (isThis) {
+    TypePtr thisImplType(m_object->getImplementedType());
+    TypePtr thisActType (m_object->getActualType());
+    bool close = false;
+    if (thisImplType) {
+      ASSERT(!Type::SameType(thisActType, thisImplType));
+      // This happens in this case:
+      // if ($this instanceof Y) {
+      //   ... $this->meth() ...
+      // }
+      ClassScopePtr cls(thisActType->getClass(ar, getScope()));
+      ASSERT(cls && !cls->derivedByDynamic()); // since we don't do type
+                                               // assertions for these
+      cg_printf("static_cast<%s%s*>(",
+                Option::ClassPrefix,
+                cls->getId().c_str());
+      close = true;
+    }
+    if (getFunctionScope()->isStatic()) {
+      if (close) {
+        cg_printf("GET_THIS_VALID()");
+      } else {
+        cg_printf("GET_THIS_ARROW()");
+      }
+    } else {
+      if (close) cg_printf("this");
+    }
+    if (close) {
+      cg_printf(")->");
+    }
+  } else {
     TypePtr t = m_object->getType();
     bool ok = !t || t->is(Type::KindOfObject) || t->is(Type::KindOfVariant);
     if (!ok) cg_printf("Variant(");

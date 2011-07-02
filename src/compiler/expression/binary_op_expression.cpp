@@ -1110,9 +1110,11 @@ bool BinaryOpExpression::outputCPPImplOpEqual(CodeGenerator &cg,
       dynamic_pointer_cast<ArrayElementExpression>(m_exp1);
     if (exp->isSuperGlobal() || exp->isDynamicGlobal()) return false;
     if (TypePtr t = exp->getVariable()->getActualType()) {
+      TypePtr it(exp->getVariable()->getImplementedType());
       if (t->is(Type::KindOfArray) &&
-          (!exp->getVariable()->getImplementedType() ||
-           exp->getVariable()->getImplementedType()->is(Type::KindOfArray))) {
+          (!it ||
+           it->is(Type::KindOfArray) ||
+           Type::IsMappedToVariant(it) /* fast cast will kick in */)) {
         return false;
       }
     }

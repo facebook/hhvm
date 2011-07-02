@@ -80,6 +80,10 @@ void BreakStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
+ExpressionPtr BreakStatement::getExp() {
+  return m_exp;
+}
+
 StatementPtr BreakStatement::preOptimize(AnalysisResultConstPtr ar) {
   Variant v;
   // break/continue 1 => break/continue;

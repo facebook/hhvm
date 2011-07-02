@@ -107,7 +107,7 @@ public:
   bool isSuperGlobal() const { return m_flags.m_superGlobal; }
   bool isOverride() const { return m_flags.m_override; }
   bool isIndirectAltered() const { return m_flags.m_indirectAltered; }
-  bool isReferenced() const { return m_flags.m_referenced; }
+  bool isReferenced() const { return !m_flags.m_notReferenced; }
   bool isHidden() const { return m_flags.m_hidden; }
   bool isClosureVar() const { return m_flags.m_closureVar; }
   bool isRefClosureVar() const { return m_flags.m_refClosureVar; }
@@ -132,7 +132,7 @@ public:
   void setSuperGlobal() { m_flags.m_superGlobal = true; }
   void setOverride() { m_flags.m_override = true; }
   void setIndirectAltered() { m_flags.m_indirectAltered = true; }
-  void setReferenced() { m_flags.m_referenced = true; }
+  void setReferenced() { m_flags.m_notReferenced = false; }
   void setHidden() { m_flags.m_hidden = true; }
   void setClosureVar() { m_flags.m_closureVar = true; }
   void setRefClosureVar() { m_flags.m_refClosureVar = true; }
@@ -145,7 +145,7 @@ public:
   void clearGlobal() { m_flags.m_global = false; }
   void clearUsed() { m_flags.m_used = false; }
   void clearNeeded() { m_flags.m_needed = false; }
-  void clearReferenced() { m_flags.m_referenced = false; }
+  void clearReferenced() { m_flags.m_notReferenced = true; }
   void clearReseated() { m_flags.m_reseated = false; }
   void clearRefClosureVar() { m_flags.m_refClosureVar = false; }
 
@@ -204,7 +204,7 @@ private:
       unsigned m_superGlobal : 1;
       unsigned m_override : 1;
       unsigned m_indirectAltered : 1;
-      unsigned m_referenced : 1;
+      unsigned m_notReferenced : 1;
       unsigned m_hidden : 1;
       unsigned m_closureVar : 1;
       unsigned m_refClosureVar : 1;

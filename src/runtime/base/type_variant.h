@@ -249,11 +249,13 @@ class Variant {
 
   inline ALWAYS_INLINE const String & asCStrRef() const {
     ASSERT(m_type == KindOfString || m_type == KindOfStaticString);
+    ASSERT(m_data.pstr);
     return *(const String*)(this);
   }
 
   inline ALWAYS_INLINE const String & toCStrRef() const {
     ASSERT(is(KindOfString) || is(KindOfStaticString));
+    ASSERT(m_type == KindOfVariant ? m_data.pvar->m_data.pstr : m_data.pstr);
     return *(const String*)(
         LIKELY(m_type == KindOfString || m_type == KindOfStaticString) ?
         this : this->m_data.pvar);
@@ -261,11 +263,13 @@ class Variant {
 
   inline ALWAYS_INLINE String & asStrRef() {
     ASSERT(m_type == KindOfString || m_type == KindOfStaticString);
+    ASSERT(m_data.pstr);
     return *(String*)(this);
   }
 
   inline ALWAYS_INLINE String & toStrRef() {
     ASSERT(is(KindOfString) || is(KindOfStaticString));
+    ASSERT(m_type == KindOfVariant ? m_data.pvar->m_data.pstr : m_data.pstr);
     return *(String*)(
         LIKELY(m_type == KindOfString || m_type == KindOfStaticString) ?
         this : this->m_data.pvar);
@@ -276,11 +280,13 @@ class Variant {
 
   inline ALWAYS_INLINE const Array & asCArrRef() const {
     ASSERT(m_type == KindOfArray);
+    ASSERT(m_data.parr);
     return *(const Array*)(this);
   }
 
   inline ALWAYS_INLINE const Array & toCArrRef() const {
     ASSERT(is(KindOfArray));
+    ASSERT(m_type == KindOfVariant ? m_data.pvar->m_data.parr : m_data.parr);
     return *(const Array*)(
         LIKELY(m_type == KindOfArray) ?
         this : this->m_data.pvar);
@@ -288,11 +294,13 @@ class Variant {
 
   inline ALWAYS_INLINE Array & asArrRef() {
     ASSERT(m_type == KindOfArray);
+    ASSERT(m_data.parr);
     return *(Array*)(this);
   }
 
   inline ALWAYS_INLINE Array & toArrRef() {
     ASSERT(is(KindOfArray));
+    ASSERT(m_type == KindOfVariant ? m_data.pvar->m_data.parr : m_data.parr);
     return *(Array*)(
         LIKELY(m_type == KindOfArray) ?
         this : this->m_data.pvar);
@@ -303,11 +311,13 @@ class Variant {
 
   inline ALWAYS_INLINE const Object & asCObjRef() const {
     ASSERT(m_type == KindOfObject);
+    ASSERT(m_data.pobj);
     return *(const Object*)(this);
   }
 
   inline ALWAYS_INLINE const Object & toCObjRef() const {
     ASSERT(is(KindOfObject));
+    ASSERT(m_type == KindOfVariant ? m_data.pvar->m_data.pobj : m_data.pobj);
     return *(const Object*)(
         LIKELY(m_type == KindOfObject) ?
         this : this->m_data.pvar);
@@ -315,11 +325,13 @@ class Variant {
 
   inline ALWAYS_INLINE Object & asObjRef() {
     ASSERT(m_type == KindOfObject);
+    ASSERT(m_data.pobj);
     return *(Object*)(this);
   }
 
   inline ALWAYS_INLINE Object & toObjRef() {
     ASSERT(is(KindOfObject));
+    ASSERT(m_type == KindOfVariant ? m_data.pvar->m_data.pobj : m_data.pobj);
     return *(Object*)(
         LIKELY(m_type == KindOfObject) ?
         this : this->m_data.pvar);

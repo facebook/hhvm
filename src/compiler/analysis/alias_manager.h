@@ -118,6 +118,8 @@ class AliasManager {
                      int &depth, int &effects, bool forLval = false);
   bool hasWildRefs() const { return m_wildRefs; }
   bool couldBeAliased(SimpleVariablePtr sv);
+
+  AnalysisResultConstPtr getAnalysisResult() { return m_arp; }
  private:
 
   int findInterf0(
@@ -145,6 +147,8 @@ class AliasManager {
   };
 
   void performReferencedAndNeededAnalysis(MethodStatementPtr m);
+  void insertTypeAssertions(AnalysisResultConstPtr ar, MethodStatementPtr m);
+  void removeTypeAssertions(AnalysisResultConstPtr ar, MethodStatementPtr m);
 
   typedef std::set<std::string> StringSet;
 
@@ -203,6 +207,8 @@ class AliasManager {
   void invalidateChainRoots(StatementPtr s);
   void nullSafeDisableCSE(StatementPtr parent, int kid);
   void disableCSE(StatementPtr s);
+  void createCFG(MethodStatementPtr m);
+  void deleteCFG();
 
   int collectAliasInfoRecur(ConstructPtr cs, bool unused);
   void pushStringScope(StatementPtr s);
@@ -254,6 +260,7 @@ class AliasManager {
   bool                      m_genAttrs;
   bool                      m_hasDeadStore;
   bool                      m_hasChainRoot;
+  bool                      m_hasTypeAssertions;
   BlockScopeRawPtr          m_scope;
 
   ControlFlowGraph          *m_graph;

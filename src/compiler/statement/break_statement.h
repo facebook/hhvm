@@ -33,6 +33,7 @@ public:
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   StatementPtr preOptimize(AnalysisResultConstPtr ar);
   int64 getDepth();
+  ExpressionPtr getExp();
 protected:
   const char *m_name;
   ExpressionPtr m_exp;

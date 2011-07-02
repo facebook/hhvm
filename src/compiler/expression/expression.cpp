@@ -125,6 +125,7 @@ void Expression::deepCopy(ExpressionPtr exp) {
   exp->m_actualType = m_actualType;
   exp->m_expectedType = m_expectedType;
   exp->m_implementedType = m_implementedType;
+  exp->m_assertedType = m_assertedType;
   exp->m_canon_id = 0;
   exp->m_unused = false;
   exp->m_canonPtr.reset();
@@ -202,7 +203,7 @@ ExpressionPtr Expression::unneededHelper() {
 }
 
 ExpressionPtr Expression::unneeded() {
-  if (getLocalEffects() || is(KindOfScalarExpression)) {
+  if (getLocalEffects() || is(KindOfScalarExpression) || isNoRemove()) {
     return static_pointer_cast<Expression>(shared_from_this());
   }
   if (!getContainedEffects()) {
@@ -252,7 +253,7 @@ TypePtr Expression::getCPPType() {
 }
 
 TypePtr Expression::propagateTypes(AnalysisResultConstPtr ar, TypePtr inType) {
-  ExpressionPtr e = this->getCanonPtr();
+  ExpressionPtr e = getCanonTypeInfPtr();
   TypePtr ret = inType;
 
   while (e) {
@@ -261,7 +262,7 @@ TypePtr Expression::propagateTypes(AnalysisResultConstPtr ar, TypePtr inType) {
       break;
     }
     ret = inferred;
-    e = e->getCanonPtr();
+    e = e->getCanonTypeInfPtr();
   }
 
   return ret;
@@ -557,6 +558,32 @@ bool Expression::canonCompare(ExpressionPtr e) const {
   }
 
   return true;
+}
+
+ExpressionPtr Expression::getCanonTypeInfPtr() const {
+  if (!m_canonPtr) return ExpressionPtr();
+  if (!(m_context & (LValue|RefValue|UnsetContext|DeepReference))) {
+    return m_canonPtr;
+  }
+  if (!m_canonPtr->getActualType()) return ExpressionPtr();
+  switch (m_canonPtr->getActualType()->getKindOf()) {
+  case Type::KindOfArray:
+    {
+      if (!is(Expression::KindOfSimpleVariable)) return ExpressionPtr();
+      SimpleVariableConstPtr sv(
+        static_pointer_cast<const SimpleVariable>(shared_from_this()));
+      if (sv->couldBeAliased()) return ExpressionPtr();
+      if ((hasContext(LValue) && hasContext(AccessContext)) &&
+          !(m_context & (RefValue | UnsetContext | DeepReference))) {
+        return m_canonPtr;
+      }
+    }
+    break;
+  // TODO(stephentu): more cases for strings + objects
+  default:
+    break;
+  }
+  return ExpressionPtr();
 }
 
 ExpressionPtr Expression::fetchReplacement() {
@@ -1290,13 +1317,14 @@ bool Expression::couldCppTypeBeReferenced() {
   VariableTablePtr vt(scope ? scope->getVariables() : VariableTablePtr());
   // a simple variable could have its CPP type referenced if:
   //   it could be aliased or,
-  //   it is a parameter or,
+  //   it is a non-lval parameter or,
   //   the scope it lives in has a dynamic variable or contains extract()
   // note that we default to true (the conservative case) if no symbol
   // or variable table is found
   return p ?
     (p->couldBeAliased() ||
-     (!p->getSymbol() || p->getSymbol()->isParameter()) ||
+     (!p->getSymbol() ||
+      (p->getSymbol()->isParameter() && !p->getSymbol()->isLvalParam())) ||
      (!vt || (vt->getAttribute(VariableTable::ContainsDynamicVariable) ||
               vt->getAttribute(VariableTable::ContainsExtract)))) :
     !isTemporary();
@@ -1337,10 +1365,11 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (needsCast) {
     ASSERT(dstType);
+    bool isSpecObj = m_actualType->isSpecificObject();
     if (!useFastCast ||
         !Type::SameType(m_actualType, dstType) ||
-        m_actualType->isSpecificObject()) {
-      if (useFastCast && m_actualType->isSpecificObject()) {
+        isSpecObj) {
+      if (useFastCast && isSpecObj) {
         if (!Type::SameType(m_actualType, dstType)) {
           dstType->outputCPPCast(cg, ar, getScope());
           cg_printf("(");
@@ -1420,7 +1449,8 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (useFastCast) {
     ASSERT(srcType == m_implementedType);
     const string& method = Type::GetFastCastMethod(
-        m_actualType, isReferenced, !isLval);
+        m_actualType, isReferenced,
+        !isLval && !(m_context & UnsetContext));
     cg_printf(".%s()", method.c_str());
   }
 

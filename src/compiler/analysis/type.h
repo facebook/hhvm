@@ -180,6 +180,9 @@ public:
   static std::string GetFastCastMethod(
       TypePtr dst, bool allowRef, bool forConst);
 
+  static TypePtr GetStrongerObjectType(AnalysisResultConstPtr ar,
+                                       TypePtr type1, TypePtr type2);
+
 private:
   Type(KindOf kindOf, const std::string &name);
 
@@ -207,7 +210,8 @@ public:
   const std::string &getName() const { return m_name;}
   static TypePtr combinedArithmeticType(TypePtr t1, TypePtr t2);
 
-  ClassScopePtr getClass(AnalysisResultConstPtr ar, BlockScopeRawPtr scope);
+  ClassScopePtr getClass(AnalysisResultConstPtr ar,
+                         BlockScopeRawPtr scope) const;
 
   /**
    * Generate type specifier in C++.

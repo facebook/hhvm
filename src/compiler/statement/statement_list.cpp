@@ -360,7 +360,7 @@ StatementPtr StatementList::preOptimize(AnalysisResultConstPtr ar) {
         } else if (s->is(KindOfExpStatement)) {
           ExpressionPtr e =
             dynamic_pointer_cast<ExpStatement>(s)->getExpression();
-          if (!e->hasEffect()) {
+          if (!e->hasEffect() && !e->isNoRemove()) {
             removeElement(i--);
             changed = true;
           }
@@ -378,6 +378,9 @@ StatementPtr StatementList::postOptimize(AnalysisResultConstPtr ar) {
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
     StatementPtr &s = m_stmts[i];
     if (s->is(KindOfExpStatement) && !s->hasEffect()) {
+      ExpressionPtr e =
+        dynamic_pointer_cast<ExpStatement>(s)->getExpression();
+      if (e->isNoRemove()) continue;
       if (Option::EliminateDeadCode ||
           static_pointer_cast<ExpStatement>(s)->getExpression()->isScalar()) {
         removeElement(i--);

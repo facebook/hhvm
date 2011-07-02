@@ -239,6 +239,7 @@ public:
     ExpressionPtr p(getCanonCsePtr());
     return p && p->hasCPPCseTemp();
   }
+  ExpressionPtr getCanonTypeInfPtr() const;
 
   /**
    * Type checking without RTTI.
@@ -272,7 +273,7 @@ public:
   virtual void addElement(ExpressionPtr exp);
   virtual void insertElement(ExpressionPtr exp, int index = 0);
 
-  virtual void analyzeProgram(AnalysisResultPtr ar);                    \
+  virtual void analyzeProgram(AnalysisResultPtr ar);
 
   /**
    * Called before type inference.
@@ -336,9 +337,11 @@ public:
   TypePtr checkTypesImpl(AnalysisResultConstPtr ar, TypePtr expectedType,
                          TypePtr actualType, bool coerce);
 
-  TypePtr getActualType() { return m_actualType;}
-  TypePtr getExpectedType() { return m_expectedType;}
-  TypePtr getImplementedType() { return m_implementedType;}
+  TypePtr getActualType()      { return m_actualType;      }
+  TypePtr getExpectedType()    { return m_expectedType;    }
+  TypePtr getImplementedType() { return m_implementedType; }
+  TypePtr getAssertedType()    { return m_assertedType;    }
+
   void setActualType(TypePtr actualType) {
     m_actualType = actualType;
   }
@@ -348,8 +351,15 @@ public:
   void setImplementedType(TypePtr implementedType) {
     m_implementedType = implementedType;
   }
+  void setAssertedType(TypePtr assertedType) {
+    m_assertedType = assertedType;
+  }
   TypePtr getType();
   TypePtr getCPPType();
+
+  bool isTypeAssertion() const {
+    return isNoRemove() && m_assertedType;
+  }
 
   static ExpressionPtr MakeConstant(AnalysisResultConstPtr ar,
                                     BlockScopePtr scope,
@@ -388,6 +398,7 @@ protected:
   TypePtr m_actualType;
   TypePtr m_expectedType; // null if the same as m_actualType
   TypePtr m_implementedType; // null if the same as m_actualType
+  TypePtr m_assertedType;
   std::string m_cppTemp;
   std::string m_cppCseTemp;
   int m_argNum;

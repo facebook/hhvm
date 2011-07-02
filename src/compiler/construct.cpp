@@ -397,8 +397,13 @@ void Construct::dumpNode(int spc) {
   }
   if (objstr != "") objstr = " (" + objstr + ")";
 
+  string noremoved;
+  if (isNoRemove()) {
+    noremoved = " (NoRemove)";
+  }
+
   std::cout << type_info << nkid << scontext << sef
-    << localtered << refstr << objstr;
+    << localtered << refstr << objstr << noremoved;
   if (m_loc) {
     std::cout << " " << m_loc->file << ":" <<
       m_loc->line1 << "@" << m_loc->char1;

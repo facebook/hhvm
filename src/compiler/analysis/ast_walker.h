@@ -111,6 +111,7 @@ class AstWalker {
 
 class FunctionWalker : public AstWalker {
   public:
+  static bool SkipRecurse(ConstructRawPtr cp);
   int before(ConstructRawPtr cp);
 };
 

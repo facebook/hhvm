@@ -22,7 +22,7 @@ using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int FunctionWalker::before(ConstructRawPtr cp) {
+bool FunctionWalker::SkipRecurse(ConstructRawPtr cp) {
   if (StatementRawPtr s = dynamic_pointer_cast<Statement>(cp)) {
     Statement::KindOf stype = s->getKindOf();
     switch (stype) {
@@ -30,10 +30,14 @@ int FunctionWalker::before(ConstructRawPtr cp) {
       case Statement::KindOfMethodStatement:
       case Statement::KindOfClassStatement:
       case Statement::KindOfInterfaceStatement:
-        return WalkSkip;
+        return true;
       default:
         break;
     }
   }
-  return WalkContinue;
+  return false;
+}
+
+int FunctionWalker::before(ConstructRawPtr cp) {
+  return SkipRecurse(cp) ? WalkSkip : WalkContinue;
 }

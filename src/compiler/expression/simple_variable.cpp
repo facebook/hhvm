@@ -275,16 +275,18 @@ void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                                     int state)
 {
   if (hasCPPTemp()) return;
+  VariableTablePtr vt(getScope()->getVariables());
   if (hasContext(InvokeArgument) && !hasContext(AccessContext) &&
+      (!isThis() ||
+       vt->getAttribute(VariableTable::ContainsLDynamicVariable)) &&
       (isLocalExprAltered() || hasEffect())) {
     Expression::preOutputStash(cg, ar, state);
-    const string& ref_temp = cppTemp();
+    const string &ref_temp  = cppTemp();
     ASSERT(!ref_temp.empty());
-    string copy_temp = genCPPTemp(cg, ar);
-    string arg_temp = genCPPTemp(cg, ar);
-    const string &prefix0 = getNamePrefix();
-    const char *prefix1 =
-      getScope()->getVariables()->getVariablePrefix(m_sym);
+    const string &copy_temp = genCPPTemp(cg, ar);
+    const string &arg_temp  = genCPPTemp(cg, ar);
+    const string &prefix0   = getNamePrefix();
+    const char *prefix1     = vt->getVariablePrefix(m_sym);
     cg_printf("const Variant %s = %s%s%s;\n",
               copy_temp.c_str(),
               prefix0.c_str(),

@@ -7304,6 +7304,23 @@ bool TestCodeRun::TestReference() {
        "$foo0($x, $x = 5);\n"
        "$foo1($x, $x = 5);\n");
 
+  MVCR("<?php\n"
+       "function f($arg0, $arg1) { var_dump($arg0, $arg1); }\n"
+       "function g(&$arg0, $arg1) { var_dump($arg0, $arg1); }\n"
+       "class A {\n"
+       "  function f($f, $var) {\n"
+       "    $f($this, $$var = 5);\n"
+       "  }\n"
+       "  function g($f, $var) {\n"
+       "    $f($this, $var++);\n"
+       "  }\n"
+       "}\n"
+       "$a = new A;\n"
+       "$a->f('f', 'this');\n"
+       "$a->f('g', 'this');\n"
+       "$a->g('f', 30);\n"
+       "$a->g('g', 30);\n");
+
   MVCR("<?php "
        "function foo($a, &$b, $c) {"
        "  $a+=1;"

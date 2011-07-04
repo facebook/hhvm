@@ -1602,20 +1602,24 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
 
   // __invoke
   if (getAttribute(ClassScope::HasInvokeMethod)) {
-    // the closure class will generate its own version of
-    // t___invokeCallInfoHelper, which will avoid a level
-    // of indirection
-    if (strcasecmp(clsName, "closure")) {
-      cg_indentBegin("const CallInfo *"
-                     "%s%s::t___invokeCallInfoHelper(void *&extra) {\n",
-                     Option::ClassPrefix, clsName);
-      cg_printf("extra = (void*) this;\n");
-      cg_printf("return &%s%s::%s%s;\n",
-                Option::ClassPrefix,
-                clsName,
-                Option::CallInfoWrapperPrefix,
-                cg.formatLabel("__invoke").c_str());
-      cg_indentEnd("}\n");
+    FunctionScopePtr func = findFunction(ar, "__invoke", false);
+    ASSERT(func);
+    if (!func->isAbstract()) {
+      // the closure class will generate its own version of
+      // t___invokeCallInfoHelper, which will avoid a level
+      // of indirection
+      if (strcasecmp(clsName, "closure")) {
+        cg_indentBegin("const CallInfo *"
+                       "%s%s::t___invokeCallInfoHelper(void *&extra) {\n",
+                       Option::ClassPrefix, clsName);
+        cg_printf("extra = (void*) this;\n");
+        cg_printf("return &%s%s::%s%s;\n",
+                  Option::ClassPrefix,
+                  clsName,
+                  Option::CallInfoWrapperPrefix,
+                  cg.formatLabel("__invoke").c_str());
+        cg_indentEnd("}\n");
+      }
     }
   }
 
@@ -1645,8 +1649,10 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
       if (strcasecmp(clsName, "closure")) {
         FunctionScopePtr func(findFunction(ar, "__invoke", false));
         ASSERT(func);
-        outputCPPMethodInvokeBareObjectSupport(cg, ar, func, false);
-        outputCPPMethodInvokeBareObjectSupport(cg, ar, func, true);
+        if (!func->isAbstract()) {
+          outputCPPMethodInvokeBareObjectSupport(cg, ar, func, false);
+          outputCPPMethodInvokeBareObjectSupport(cg, ar, func, true);
+        }
       }
     }
     outputCPPJumpTable(cg, ar, true, dynamicObject, CallInfo);
@@ -1773,14 +1779,14 @@ void ClassScope::outputCPPMethodInvokeBareObjectSupport(
     CodeGenerator &cg, AnalysisResultPtr ar,
     FunctionScopePtr func, bool fewArgs) {
 
-  string id(getId(cg));
-  string lname(func->getName());
-
   if (Option::InvokeWithSpecificArgs && !fewArgs &&
       !ar->isSystem() && !ar->isSepExtension() &&
       func->getMaxParamCount() == 0 && !func->isVariableArgument()) {
     return;
   }
+
+  const string &id(getId(cg));
+  const string &lname(func->getName());
 
   cg_indentBegin("Variant %s%s::%s%s(void *self, ",
                   Option::ClassPrefix, id.c_str(),

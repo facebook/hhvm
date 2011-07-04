@@ -624,7 +624,13 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
 
       if (classScope->getAttribute(ClassScope::HasInvokeMethod)) {
-        cg_printf("const CallInfo *t___invokeCallInfoHelper(void *&extra);\n");
+        FunctionScopePtr func =
+          classScope->findFunction(ar, "__invoke", false);
+        ASSERT(func);
+        if (!func->isAbstract()) {
+          cg_printf("const CallInfo *"
+                    "t___invokeCallInfoHelper(void *&extra);\n");
+        }
       }
 
       if (classScope->isRedeclaring() &&

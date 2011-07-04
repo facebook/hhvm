@@ -6153,6 +6153,56 @@ bool TestCodeRun::TestObjectInvokeMethod() {
         "bool(false)\n"
         "bool(true)\n");
 
+  bool enableSyntax = Option::EnableHipHopSyntax;
+  Option::EnableHipHopSyntax = true;
+
+  MVCRO("<?php\n"
+        "abstract class A {\n"
+        "  abstract public function __invoke($x);\n"
+        "}\n"
+        "interface IfaceInvoke {\n"
+        "  public function __invoke($x);\n"
+        "}\n"
+        "class Test1 extends A {\n"
+        "  public function __invoke($x) {\n"
+        "    var_dump(__CLASS__);\n"
+        "    var_dump($x);\n"
+        "  }\n"
+        "}\n"
+        "class Test2 implements IfaceInvoke {\n"
+        "  public function __invoke($x) {\n"
+        "    var_dump(__CLASS__);\n"
+        "    var_dump($x);\n"
+        "  }\n"
+        "}\n"
+        "function f1($x, $y)             { $x($y); $x->__invoke($y); }\n"
+        "function f2(A $x, $y)           { $x($y); $x->__invoke($y); }\n"
+        "function f3(IfaceInvoke $x, $y) { $x($y); $x->__invoke($y); }\n"
+        "$t1 = new Test1;\n"
+        "$t2 = new Test2;\n"
+        "f1($t1, 1);\n"
+        "f1($t2, 2);\n"
+        "f2($t1, 1);\n"
+        "f3($t2, 2);\n",
+        "string(5) \"Test1\"\n"
+        "int(1)\n"
+        "string(5) \"Test1\"\n"
+        "int(1)\n"
+        "string(5) \"Test2\"\n"
+        "int(2)\n"
+        "string(5) \"Test2\"\n"
+        "int(2)\n"
+        "string(5) \"Test1\"\n"
+        "int(1)\n"
+        "string(5) \"Test1\"\n"
+        "int(1)\n"
+        "string(5) \"Test2\"\n"
+        "int(2)\n"
+        "string(5) \"Test2\"\n"
+        "int(2)\n");
+
+  Option::EnableHipHopSyntax = enableSyntax;
+
 	return true;
 }
 

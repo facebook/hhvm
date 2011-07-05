@@ -772,7 +772,7 @@ static StaticStringUninitializer s_static_string_uninitializer;
 AtomicString::AtomicString(const char *s,
                            StringDataMode mode /* = AttachLiteral */) {
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  m_px = s ? NEW(StringData)(s, mode) : NULL;
+  m_px = s ? (new StringData(s, mode)) : NULL;
   if (m_px) {
     m_px->setAtomic();
     m_px->incAtomicCount();
@@ -781,8 +781,11 @@ AtomicString::AtomicString(const char *s,
 
 AtomicString::AtomicString(const std::string &s) {
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  AtomicSmartPtr<StringData>::operator=(new StringData(s.c_str(), s.size(),
-                                                       CopyString));
+  m_px = new StringData(s.c_str(), s.size(), CopyString);
+  if (m_px) {
+    m_px->setAtomic();
+    m_px->incAtomicCount();
+  }
 }
 
 AtomicString::AtomicString(StringData *str) {

@@ -58,7 +58,7 @@ all: $(TARGETS)
 $(PROGRAMS) : $(STATIC_LIB)
 hphp-setup: compiler-setup
 hphp: compiler
-hphpi: hphp
+hphpi: hphp | test-obj
 test-setup: compiler-setup
 test: compiler shared-lib-target
 

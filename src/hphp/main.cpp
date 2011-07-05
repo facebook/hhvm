@@ -479,9 +479,12 @@ cout << "Compiler: " << COMPILER_ID << "\n";
     if (po.format.empty()) po.format = "cluster";
   }
 
-  if (po.optimizeLevel > 0) {
-    Option::PreOptimization = true;
-    Option::PostOptimization = true;
+  // we always do pre/post opt no matter the opt level
+  Option::PreOptimization = true;
+  Option::PostOptimization = true;
+  if (po.optimizeLevel == 0) {
+    // --optimize-level=0 is equivalent to --opts=none
+    po.optimizations = "none";
   }
 
   if (po.generateFFI) {

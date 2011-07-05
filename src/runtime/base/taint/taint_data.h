@@ -28,22 +28,19 @@
 #define TAINT_BIT_TRACED   (0x08)
 #define TAINT_BIT_NONE     (0x00)
 
-#include <runtime/base/taint/taint_metadata.h>
-
 namespace HPHP {
 
 typedef int bitstring;
 
 class TaintData {
 public:
-  TaintData() : m_taint_bits(TAINT_BIT_NONE), m_metadata(NULL) { }
+  TaintData() : m_taint_bits(TAINT_BIT_NONE) { }
   bitstring getTaint() const { return m_taint_bits; }
   void setTaint(bitstring bits) { m_taint_bits |= bits; }
   void unsetTaint(bitstring bits) { m_taint_bits &= (~bits); }
   void dump() const;
 private:
   bitstring m_taint_bits;
-  TaintMetadataPtr m_metadata;
 };
 
 }

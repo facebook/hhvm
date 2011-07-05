@@ -1,5 +1,5 @@
 
-$(HPHPI) : facebook-extensions
+$(HPHPI) : | facebook-extensions
 
 $(HPHPI) : export FACEBOOK_EXTENSIONS_PATH := \
 	$(ABS_PROJECT_ROOT)/facebook/extensions

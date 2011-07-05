@@ -3026,17 +3026,30 @@ Variant &c_GenericContinuation::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_GenericContinuation
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_GenericContinuation
 void c_GenericContinuation::o_getArray(Array &props, bool pubOnly) const {
-  props.set(NAMSTR(s_sys_ss0f30800a, "vars"), m_vars, true);
+  if (!pubOnly) props.add(NAMSTR(s_sys_ss020cf65e, "\000GenericContinuation\000vars"), m_vars, true);
   c_Continuation::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_GenericContinuation
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_GenericContinuation
 void c_GenericContinuation::o_setArray(CArrRef props) {
+  if (props->exists(NAMSTR(s_sys_ss020cf65e, "\000GenericContinuation\000vars"))) m_vars = props->get(NAMSTR(s_sys_ss020cf65e, "\000GenericContinuation\000vars"));
   c_Continuation::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_GenericContinuation
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_GenericContinuation
 Variant * c_GenericContinuation::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  int64 hash = s->hash();
+  switch (hash & 3) {
+    case 1:
+      HASH_GUARD_STRING(0x05DE30099B58533DLL, GenericContinuation) { return o_realPropPrivate(prop, flags); }
+      break;
+    case 2:
+      HASH_GUARD_STRING(0x61DD21ABF790E9E2LL, Continuation) { return c_Continuation::o_realPropPrivate(prop, flags); }
+      break;
+    default:
+      break;
+  }
   return o_realPropPublic(prop, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_GenericContinuation
@@ -16926,24 +16939,41 @@ Variant &c_Continuation::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Continuation
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Continuation
 void c_Continuation::o_getArray(Array &props, bool pubOnly) const {
-  props.set(NAMSTR(s_sys_ss0f61bd03, "obj"), m_obj, true);
-  props.set(NAMSTR(s_sys_ssf976719e, "args"), m_args, true);
-  props.set(NAMSTR(s_sys_ss1491baad, "label"), m_label, true);
-  props.set(NAMSTR(s_sys_ss74691b30, "done"), m_done, true);
-  props.set(NAMSTR(s_sys_ssc0ff3081, "index"), m_index, true);
-  if (isInitialized(m_value)) props.lvalAt(NAMSTR(s_sys_sse0c88471, "value"), AccessFlags::Key).setWithRef(m_value);
-  props.set(NAMSTR(s_sys_ss14e5c43c, "running"), m_running, true);
-  if (isInitialized(m_received)) props.lvalAt(NAMSTR(s_sys_ss305b0746, "received"), AccessFlags::Key).setWithRef(m_received);
+  if (!pubOnly) props.add(NAMSTR(s_sys_ssc9ae0c06, "\000Continuation\000obj"), m_obj, true);
+  if (!pubOnly) props.add(NAMSTR(s_sys_ss9621feb5, "\000Continuation\000args"), m_args, true);
+  if (!pubOnly) props.add(NAMSTR(s_sys_ss40877955, "\000Continuation\000label"), m_label, true);
+  if (!pubOnly) props.add(NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done"), m_done, true);
+  if (!pubOnly) props.add(NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index"), m_index, true);
+  if (!pubOnly) if (isInitialized(m_value)) props.lvalAt(NAMSTR(s_sys_ss4e65aff3, "\000Continuation\000value"), AccessFlags::Key).setWithRef(m_value);
+  if (!pubOnly) props.add(NAMSTR(s_sys_ssde0dbfb2, "\000Continuation\000running"), m_running, true);
+  if (!pubOnly) if (isInitialized(m_received)) props.lvalAt(NAMSTR(s_sys_ss19136311, "\000Continuation\000received"), AccessFlags::Key).setWithRef(m_received);
   c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Continuation
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Continuation
 void c_Continuation::o_setArray(CArrRef props) {
+  if (props->exists(NAMSTR(s_sys_ssc9ae0c06, "\000Continuation\000obj"))) m_obj = props->get(NAMSTR(s_sys_ssc9ae0c06, "\000Continuation\000obj"));
+  if (props->exists(NAMSTR(s_sys_ss9621feb5, "\000Continuation\000args"))) m_args = props->get(NAMSTR(s_sys_ss9621feb5, "\000Continuation\000args"));
+  if (props->exists(NAMSTR(s_sys_ss40877955, "\000Continuation\000label"))) m_label = props->get(NAMSTR(s_sys_ss40877955, "\000Continuation\000label"));
+  if (props->exists(NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done"))) m_done = props->get(NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done"));
+  if (props->exists(NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index"))) m_index = props->get(NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index"));
+  props->load(NAMSTR(s_sys_ss4e65aff3, "\000Continuation\000value"), m_value);
+  if (props->exists(NAMSTR(s_sys_ssde0dbfb2, "\000Continuation\000running"))) m_running = props->get(NAMSTR(s_sys_ssde0dbfb2, "\000Continuation\000running"));
+  props->load(NAMSTR(s_sys_ss19136311, "\000Continuation\000received"), m_received);
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Continuation
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_Continuation
 Variant * c_Continuation::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  int64 hash = s->hash();
+  switch (hash & 1) {
+    case 0:
+      HASH_GUARD_STRING(0x61DD21ABF790E9E2LL, Continuation) { return o_realPropPrivate(prop, flags); }
+      break;
+    default:
+      break;
+  }
   return o_realPropPublic(prop, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_Continuation

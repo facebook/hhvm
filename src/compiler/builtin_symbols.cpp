@@ -202,11 +202,21 @@ void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
     p++;
     // Parse properties
     while (*p) {
-      p++; // TODO, support visibility
+      int flags = (int)(int64)(*p++);
+      ModifierExpressionPtr modifiers(
+        new ModifierExpression(BlockScopePtr(), LocationPtr(),
+                               Expression::KindOfModifierExpression));
+      if (flags & ClassInfo::IsProtected) {
+        modifiers->add(T_PROTECTED);
+      } else if (flags & ClassInfo::IsPrivate) {
+        modifiers->add(T_PRIVATE);
+      }
+      if (flags & ClassInfo::IsStatic) {
+        modifiers->add(T_STATIC);
+      }
       const char *name = *p++;
       TypePtr type = ParseType(p);
-      cl->getVariables()->add(name, type, false, ar, ExpressionPtr(),
-                              ModifierExpressionPtr());
+      cl->getVariables()->add(name, type, false, ar, ExpressionPtr(), modifiers);
     }
     p++;
     // Parse consts

@@ -246,7 +246,7 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
       cg_printf("CVarRef");
       isCVarRef = true;
     }
-    else if (paramType->is(Type::KindOfArray)) cg_printf("CArrRef");
+    else if (paramType->is(Type::KindOfArray))  cg_printf("CArrRef");
     else if (paramType->is(Type::KindOfString)) cg_printf("CStrRef");
     else paramType->outputCPPDecl(cg, ar, getScope());
   } else {
@@ -273,7 +273,7 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
       if (isCVarRef) {
         cg_printf("null_variant");
       } else if (paramType->is(Type::KindOfVariant) ||
-               paramType->is(Type::KindOfSome)) {
+                 paramType->is(Type::KindOfSome)) {
         cg_printf("null");
       } else if (paramType->is(Type::KindOfObject)) {
         cg_printf("Object()");

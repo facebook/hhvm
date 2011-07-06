@@ -886,31 +886,44 @@ void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
       dynamic_pointer_cast<ConstantExpression>(param->defaultValue());
     bool needsNullGet = con && con->isNull();
     if (i) cg_printf(", ");
-    cg_printf("%s%s", Option::VariablePrefix,
-              param->getName().c_str());
+
+    const string &paramName =
+      string(Option::VariablePrefix) + param->getName();
     if (TypePtr spec = funcScope->getParamTypeSpec(i)) {
       if (Type::SameType(spec, funcScope->getParamType(i))) {
-        if (spec->is(Type::KindOfArray)) {
-          if (needsNullGet)
-            cg_printf(".getArrayDataOrNull()");
-          else
-            cg_printf(".getArrayData()");
-        } else if (spec->is(Type::KindOfString)) {
-          if (needsNullGet)
-            cg_printf(".getStringDataOrNull()");
-          else
-            cg_printf(".getStringData()");
-        } else if (spec->isSpecificObject()) {
+        if (spec->isSpecificObject() && !needsNullGet) {
           ClassScopePtr cls = ar->findClass(spec->getName());
-          assert(cls && !cls->isRedeclaring());
-          if (needsNullGet)
-            cg_printf(".getObjectDataOrNull()");
-          else
-            cg_printf(".getObjectData()");
-        } else if (spec->isExactType()) {
-          cg_printf(".");
-          spec->outputCPPCast(cg, ar, funcScope);
-          cg_printf("()");
+          ASSERT(cls && !cls->isRedeclaring());
+          spec->outputCPPFastObjectCast(cg, ar, getScope(), true);
+        }
+
+        ASSERT(Type::HasFastCastMethod(spec));
+
+        const char *nullGetMethod = NULL;
+        switch (spec->getKindOf()) {
+        case Type::KindOfArray:
+          nullGetMethod = "getArrayDataOrNull";
+          break;
+        case Type::KindOfString:
+          nullGetMethod = "getStringDataOrNull";
+          break;
+        case Type::KindOfObject:
+          ASSERT(spec->isSpecificObject());
+          nullGetMethod = "getObjectDataOrNull";
+          break;
+        default:
+          break;
+        }
+
+        ASSERT(!needsNullGet || nullGetMethod != NULL);
+
+        cg_printf("%s", paramName.c_str());
+        if (needsNullGet) {
+          cg_printf(".%s()", nullGetMethod);
+        } else {
+          const string &fastCast = Type::GetFastCastMethod(spec, true, true);
+          ASSERT(!fastCast.empty());
+          cg_printf(".%s()", fastCast.c_str());
         }
       } else if (needsNullGet &&
                  funcScope->getParamType(i)->isStandardObject()) {
@@ -921,8 +934,12 @@ void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
         // and we do not have to generate a special type
         // check in the wrapper
         ASSERT(spec->isSpecificObject());
-        cg_printf(".getObjectDataOrNull()");
+        cg_printf("%s.getObjectDataOrNull()", paramName.c_str());
+      } else {
+        cg_printf("%s", paramName.c_str());
       }
+    } else {
+      cg_printf("%s", paramName.c_str());
     }
   }
 

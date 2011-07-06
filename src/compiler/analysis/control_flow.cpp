@@ -612,22 +612,30 @@ void ControlFlowBuilder::getTrueFalseBranches(
             static_pointer_cast<BinaryOpExpression>(e));
         if (b->isShortCircuitOperator()) {
           if (b->isLogicalOrOperator()) {
-            if (!trueBranch) {
+            if (!trueBranch || !falseBranch) {
               getTrueFalseBranches(
                   level + 1, trueBranch, tLoc,
                   falseBranch, fLoc);
             }
-            falseBranch = b->getExp2();
-            fLoc = BeforeConstruct;
+            ASSERT(trueBranch && falseBranch);
+            if (level == 0 ||
+                b->getExp1() == top(level - 1)) {
+              falseBranch = b->getExp2();
+              fLoc = BeforeConstruct;
+            }
           } else {
             // logical ANDs
-            if (!falseBranch) {
+            if (!trueBranch || !falseBranch) {
               getTrueFalseBranches(
                   level + 1, trueBranch, tLoc,
                   falseBranch, fLoc);
             }
-            trueBranch = b->getExp2();
-            tLoc = BeforeConstruct;
+            ASSERT(trueBranch && falseBranch);
+            if (level == 0 ||
+                b->getExp1() == top(level - 1)) {
+              trueBranch = b->getExp2();
+              tLoc = BeforeConstruct;
+            }
           }
           return;
         }
@@ -653,18 +661,22 @@ void ControlFlowBuilder::getTrueFalseBranches(
       break;
     case Expression::KindOfQOpExpression:
       {
+        ASSERT(level > 0);
         QOpExpressionPtr qop(
             static_pointer_cast<QOpExpression>(e));
-        if (!trueBranch) {
-          trueBranch = qop->getYes();
-          tLoc = BeforeConstruct;
-        }
-        if (!falseBranch) {
-          falseBranch = qop->getNo();
-          fLoc = BeforeConstruct;
+        if (qop->getCondition() == top(level - 1)) {
+          if (!trueBranch) {
+            trueBranch = qop->getYes();
+            tLoc = BeforeConstruct;
+          }
+          if (!falseBranch) {
+            falseBranch = qop->getNo();
+            fLoc = BeforeConstruct;
+          }
+          return;
         }
       }
-      return;
+      break;
     default:
       break;
     }

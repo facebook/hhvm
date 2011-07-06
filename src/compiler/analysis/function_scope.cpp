@@ -1696,8 +1696,9 @@ void FunctionScope::outputCPPHelperClassAlloc(CodeGenerator &cg,
               Option::ClassPrefix, funcName.c_str());
   }
   if (isGenerator()) {
-    cg_printf("IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(%sContinuation$%s)\n",
-              Option::ClassPrefix, funcName.c_str());
+    cg_printf(
+        "IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(%sContinuation$%s)\n",
+        Option::ClassPrefix, funcName.c_str());
   }
 }
 

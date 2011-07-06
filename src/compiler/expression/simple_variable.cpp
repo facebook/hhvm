@@ -342,6 +342,7 @@ void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     bool sw = false;
     if (m_sym->isShrinkWrapped() &&
         m_context == Declaration) {
+      ASSERT(!getFunctionScope()->isGenerator());
       TypePtr type = m_sym->getFinalType();
       type->outputCPPDecl(cg, ar, getScope());
       sw = true;

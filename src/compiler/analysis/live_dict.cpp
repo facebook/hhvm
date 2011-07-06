@@ -15,7 +15,9 @@
 */
 
 #include <compiler/analysis/alias_manager.h>
+#include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/live_dict.h>
+#include <compiler/analysis/variable_table.h>
 
 #include <compiler/expression/expression.h>
 #include <compiler/expression/assignment_expression.h>
@@ -458,10 +460,27 @@ bool LiveDict::color(TypePtr type) {
   for (int i = size(); i--; ) {
     if (ExpressionPtr e = get(i)) {
       if (Type::SameType(type, e->getCPPType())) {
-        Symbol *sym = static_pointer_cast<SimpleVariable>(e)->getSymbol();
+        SimpleVariablePtr sv(
+            static_pointer_cast<SimpleVariable>(e));
+        bool isGenParam = false;
+        if (sv->getFunctionScope()->isGenerator()) {
+          // do not allow coalescing of symbols which are parameters/use vars
+          // in the generator (sym->isParameter() will be false b/c we are in
+          // the scope of the generator function)
+          FunctionScopePtr origScope(sv->getFunctionScope()->getOrigGenFS());
+          ASSERT(origScope);
+          Symbol *origSym =
+            origScope->getVariables()->getSymbol(sv->getName());
+          if (origSym &&
+              (origSym->isParameter() || origSym->isClosureVar())) {
+            isGenParam = true;
+          }
+        }
+        Symbol *sym = sv->getSymbol();
         if (sym &&
             !sym->isGlobal() &&
             !sym->isParameter() &&
+            !isGenParam &&
             !sym->isClosureVar() &&
             !sym->isStatic() &&
             !e->isThis()) {
@@ -605,8 +624,9 @@ public:
       assert(e && e->is(Expression::KindOfSimpleVariable));
       SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(e));
       Symbol *sym = sv->getSymbol();
+      bool inGen = sv->getFunctionScope()->isGenerator();
       if (!sym || sym->isGlobal() || sym->isStatic() || sym->isParameter() ||
-          sym->isClosureVar() || sv->isThis()) {
+          sym->isClosureVar() || sv->isThis() || inGen) {
         continue;
       }
 

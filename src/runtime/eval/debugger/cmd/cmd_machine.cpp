@@ -153,6 +153,7 @@ bool CmdMachine::AttachSandbox(DebuggerClient *client,
 
   client->send(&cmd);
   client->info("Pre-loading %s, please wait...", sandbox->desc().c_str());
+  client->playMacro("startup");
   throw DebuggerConsoleExitException();
 }
 

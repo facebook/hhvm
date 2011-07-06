@@ -724,6 +724,7 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
           } else {
             DebuggerCommand *cmd = createCommand();
             if (cmd) {
+              if (cmd->is(DebuggerCommand::KindOfRun)) playMacro("startup");
               DebuggerCommandPtr deleter(cmd);
               cmd->list(this);
             }
@@ -1254,6 +1255,7 @@ bool DebuggerClient::process() {
     default: {
       DebuggerCommand *cmd = createCommand();
       if (cmd) {
+        if (cmd->is(DebuggerCommand::KindOfRun)) playMacro("startup");
         DebuggerCommandPtr deleter(cmd);
         return cmd->onClient(this);
       } else {

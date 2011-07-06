@@ -31,6 +31,12 @@ bool eval_invoke_hook(Variant &res, const char *s, CArrRef params, int64 hash);
 bool eval_get_class_var_init_hook(Variant &res, const char *s,
                                   const char *var);
 ObjectData *eval_create_object_only_hook(const char *s, ObjectData *root);
+/**
+ * eval_try_autoload is hphpi's mechanism for invoking the autoload facility.
+ * It returns true if any autoload handlers are executed, false otherwise.
+ * When this function returns true, it is the caller's responsibility to check
+ * if the given class or interface exists.
+ */
 bool eval_try_autoload(const char *s);
 bool eval_invoke_static_method_hook(Variant &res, const char *s,
                                     const char* method, CArrRef params,

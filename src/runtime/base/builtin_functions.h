@@ -548,12 +548,26 @@ private:
   bool m_running;
 };
 
+/**
+ * The check/autoload helpers below are used by generated code to invoke
+ * the autoload facility. These helpers should only be used by generated
+ * code produced by hphpc.
+ *
+ * All of the helpers (exception checkClassExists) take a 'declared' pointer
+ * which points to the flag corresponding to the given class or interface.
+ * When the autoload handlers execute they will set the flag to true if the
+ * given class or interface is found. If 'declared' is non-NULL, these helpers
+ * will execute the autoload handlers and then return the value of the flag.
+ * If 'declared' is NULL, these helpers will execute the autoload hanlders
+ * and then return false.
+ */
+
 void checkClassExists(CStrRef name, Globals *g, bool nothrow = false);
 
-bool autoloadClassThrow(CStrRef name, bool *declared = NULL);
-bool autoloadClassNoThrow(CStrRef name, bool *declared = NULL);
-bool autoloadInterfaceThrow(CStrRef name, bool *declared = NULL);
-bool autoloadInterfaceNoThrow(CStrRef name, bool *declared = NULL);
+bool autoloadClassThrow(CStrRef name, bool *declared);
+bool autoloadClassNoThrow(CStrRef name, bool *declared);
+bool autoloadInterfaceThrow(CStrRef name, bool *declared);
+bool autoloadInterfaceNoThrow(CStrRef name, bool *declared);
 
 inline ALWAYS_INLINE bool checkClassExistsThrow(CStrRef name,
                                                 bool *declared) {

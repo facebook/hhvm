@@ -1347,19 +1347,18 @@ void ClassScope::outputCPPGetClassPropTableImpl(
     ClassScopePtr cls = iter->second.first;
     childParentMap[cls] = cls->getNextParentWithProp(cg, ar, globalTables);
   }
-  vector<ClassScopePtr> externals;
+  set<string> externals;
   for (map<ClassScopePtr, ClassScopePtr>::const_iterator iter =
        childParentMap.begin(); iter != childParentMap.end(); iter++) {
     ClassScopePtr parentCls = iter->second;
     if (parentCls && tables.find(parentCls->getId(cg)) == tables.end()) {
-      externals.push_back(parentCls);
+      externals.insert(parentCls->getId(cg));
     }
   }
-  for (unsigned int i = 0; i < externals.size(); i++) {
-    ClassScopePtr cls = externals[i];
-    const string &clsId = cls->getId(cg);
+  for (set<string>::const_iterator iter = externals.begin();
+       iter != externals.end(); iter++) {
     cg_printf("extern ClassPropTable %s%s;\n",
-              Option::ClassPropTablePrefix, clsId.c_str());
+              Option::ClassPropTablePrefix, iter->c_str());
   }
   if (totalEntries > 0) {
     cg_printf(text1);

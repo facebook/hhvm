@@ -96,6 +96,7 @@ void ClassVariable::analyzeProgramImpl(AnalysisResultPtr ar) {
   ClassScopePtr scope = getClassScope();
   for (int i = 0; i < m_declaration->getCount(); i++) {
     ExpressionPtr exp = (*m_declaration)[i];
+    bool error;
     if (exp->is(Expression::KindOfAssignmentExpression)) {
       AssignmentExpressionPtr assignment =
         dynamic_pointer_cast<AssignmentExpression>(exp);
@@ -103,13 +104,16 @@ void ClassVariable::analyzeProgramImpl(AnalysisResultPtr ar) {
         dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
       ExpressionPtr value = assignment->getValue();
       scope->getVariables()->setClassInitVal(var->getName(), value);
-      scope->getVariables()->markOverride(ar, var->getName());
+      error = scope->getVariables()->markOverride(ar, var->getName());
     } else {
       SimpleVariablePtr var =
         dynamic_pointer_cast<SimpleVariable>(exp);
-      scope->getVariables()->markOverride(ar, var->getName());
+      error = scope->getVariables()->markOverride(ar, var->getName());
       scope->getVariables()->setClassInitVal(var->getName(),
                                              makeConstant(ar, "null"));
+    }
+    if (error) {
+      Compiler::Error(Compiler::InvalidOverride, exp);
     }
   }
 }

@@ -1287,7 +1287,7 @@ static int buildClassPropTableMap(
       tables[cls->getId(cg)] =
         pair<ClassScopePtr, vector<const Symbol *> >(cls, entries);
       if (entries.size() > 0) {
-        totalEntries += entries.size(); 
+        totalEntries += entries.size();
         totalPrivateEntries++; // for the ending NULL
       }
     }
@@ -1383,7 +1383,7 @@ void ClassScope::outputCPPGetClassPropTableImpl(
       } else {
         cg_printf("(const char *)NULL,\n");
       }
-  
+
       for (unsigned int i = 0; i < entries.size(); i++) {
         const Symbol *sym = entries[i];
         string prop(sym->getName());

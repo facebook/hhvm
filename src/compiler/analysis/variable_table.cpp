@@ -368,22 +368,32 @@ void VariableTable::addStaticVariable(Symbol *sym,
   addStaticVariable(sym, ar->lock().get(), member);
 }
 
-void VariableTable::markOverride(AnalysisResultPtr ar, const string &name) {
+bool VariableTable::markOverride(AnalysisResultPtr ar, const string &name) {
   Symbol *sym = getSymbol(name);
-  assert(sym && sym->isPresent());
+  ASSERT(sym && sym->isPresent());
+  bool ret = false;
   if (!sym->isStatic() ||
       (sym->isPublic() && !sym->getClassInitVal())) {
     ClassScopePtr parent = findParent(ar, name);
     if (parent) {
       Symbol *s2 = parent->getVariables()->getSymbol(name);
-      assert(s2);
+      ASSERT(s2);
       if (!s2->isPrivate()) {
         if (!sym->isStatic() || s2->isProtected()) {
+          if (sym->isPrivate()) {
+            // don't mark the symbol as overridden
+            return true;
+          }
+          if (sym->isProtected() && s2->isPublic()) {
+            // still mark the symbol as overridden
+            ret = true;
+          }
           sym->setOverride();
         }
       }
     }
   }
+  return ret;
 }
 
 TypePtr VariableTable::add(const string &name, TypePtr type,

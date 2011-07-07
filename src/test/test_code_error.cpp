@@ -331,6 +331,19 @@ bool TestCodeError::TestInvalidDerivation() {
   return true;
 }
 
+bool TestCodeError::TestInvalidOverride() {
+  VE(InvalidOverride,
+     "<?php class A { protected $x; } class B extends A { private $x; }");
+
+  VE(InvalidOverride,
+     "<?php class A { public $x; } class B extends A { private $x; }");
+
+  VE(InvalidOverride,
+     "<?php class A { public $x; } class B extends A { protected $x; }");
+
+  return true;
+}
+
 bool TestCodeError::TestReassignThis() {
   VE(ReassignThis,
      "<?php "

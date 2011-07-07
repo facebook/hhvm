@@ -193,9 +193,10 @@ public:
 
   /**
    * Called to note whether a class variable overrides
-   * a definition in a base class.
+   * a definition in a base class. Returns whether or not there
+   * was an error in marking as override.
    */
-  void markOverride(AnalysisResultPtr ar, const std::string &name);
+  bool markOverride(AnalysisResultPtr ar, const std::string &name);
 
   /**
    * Called when a variable is used or being evaluated (r-value).

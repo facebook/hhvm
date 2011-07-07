@@ -2200,8 +2200,11 @@ static Variant php_mb_substr(CStrRef str, int from, int len,
     }
   }
 
-  if (from >= size) {
-    return false;
+  if (from > size) {
+    if (!substr) {
+      return false;
+    }
+    from = size;
   }
   if ((int)((unsigned)from + (unsigned)len) > size) {
     len = size - from;

@@ -666,8 +666,13 @@ void ControlFlowBuilder::getTrueFalseBranches(
             static_pointer_cast<QOpExpression>(e));
         if (qop->getCondition() == top(level - 1)) {
           if (!trueBranch) {
-            trueBranch = qop->getYes();
-            tLoc = BeforeConstruct;
+            if (qop->getYes()) {
+              trueBranch = qop->getYes();
+              tLoc = BeforeConstruct;
+            } else {
+              trueBranch = qop;
+              tLoc = AfterConstruct;
+            }
           }
           if (!falseBranch) {
             falseBranch = qop->getNo();

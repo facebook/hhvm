@@ -17763,6 +17763,16 @@ bool TestCodeRun::TestCopyProp() {
        "  }"
        "}");
 
+  MVCRO("<?php\n"
+        "function f($x, $y) {\n"
+        "  $z = 32;\n"
+        "  return $x && $y ?: $z;\n"
+        "}\n"
+        "var_dump(f(false, false));\n"
+        "var_dump(f(true, true));\n",
+        "int(32)\n"
+        "bool(true)\n");
+
   Option::CopyProp = save;
   return true;
 }

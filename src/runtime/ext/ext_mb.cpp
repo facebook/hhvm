@@ -983,9 +983,18 @@ static int php_mb_stripos(int mode,
       break;
     }
 
-    if (offset < 0 || (unsigned long)offset > haystack.len) {
-      raise_warning("Offset not contained in string.");
-      break;
+    int haystack_char_len = mbfl_strlen(&haystack);
+    if (mode) {
+      if ((offset > 0 && offset > haystack_char_len) ||
+          (offset < 0 && -offset > haystack_char_len)) {
+        raise_warning("Offset is greater than the length of haystack string");
+        break;
+      }
+    } else {
+      if (offset < 0 || offset > haystack_char_len) {
+        raise_warning("Offset not contained in string.");
+        break;
+      }
     }
 
     n = mbfl_strpos(&haystack, &needle, offset, mode);
@@ -1135,15 +1144,13 @@ bool f_mb_check_encoding(CStrRef var /* = null_string */,
     return false;
   }
   mbfl_buffer_converter_illegal_mode
-    (convd, MBSTRG(current_filter_illegal_mode));
+    (convd, MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE);
   mbfl_buffer_converter_illegal_substchar
-    (convd, MBSTRG(current_filter_illegal_substchar));
+    (convd, 0);
 
   /* initialize string */
-  mbfl_string_init(&string);
+  mbfl_string_init_set(&string, mbfl_no_language_neutral, no_encoding);
   mbfl_string_init(&result);
-  string.no_encoding = no_encoding;
-  string.no_language = MBSTRG(current_language);
 
   string.val = (unsigned char *)var.data();
   string.len = var.size();
@@ -1153,13 +1160,13 @@ bool f_mb_check_encoding(CStrRef var /* = null_string */,
 
   if (ret != NULL) {
     MBSTRG(illegalchars) += illegalchars;
-    if (illegalchars == 0 &&
-        strncmp((const char *)string.val, (const char *)ret->val,
+    if (illegalchars == 0 && string.len == ret->len &&
+        memcmp((const char *)string.val, (const char *)ret->val,
                 string.len) == 0) {
-      free(ret->val);
+      mbfl_string_clear(&result);
       return true;
     } else {
-      free(ret->val);
+      mbfl_string_clear(&result);
       return false;
     }
   } else {
@@ -1200,7 +1207,9 @@ Variant f_mb_convert_encoding(CStrRef str, CStrRef to_encoding,
 
   unsigned int size;
   char *ret = php_mb_convert_encoding(str.data(), str.size(),
-                                      to_encoding.data(), encoding.data(),
+                                      to_encoding.data(),
+                                      (!encoding.empty() ?
+                                       encoding.data() : NULL),
                                       &size);
   if (ret != NULL) {
     return String(ret, size, AttachString);
@@ -2206,9 +2215,6 @@ static Variant php_mb_substr(CStrRef str, int from, int len,
     }
     from = size;
   }
-  if ((int)((unsigned)from + (unsigned)len) > size) {
-    len = size - from;
-  }
 
   mbfl_string result;
   mbfl_string *ret;
@@ -2289,6 +2295,11 @@ Variant f_mb_stripos(CStrRef haystack, CStrRef needle, int offset /* = 0 */,
     from_encoding = encoding.data();
   }
 
+  if (needle.empty()) {
+    raise_warning("Empty delimiter");
+    return false;
+  }
+
   int n = php_mb_stripos(0, haystack.data(), haystack.size(),
                          needle.data(), needle.size(), offset, from_encoding);
   if (n >= 0) {
@@ -2305,10 +2316,6 @@ Variant f_mb_strripos(CStrRef haystack, CStrRef needle, int offset /* = 0 */,
       mbfl_no2preferred_mime_name(MBSTRG(current_internal_encoding));
   } else {
     from_encoding = encoding.data();
-  }
-
-  if (offset > haystack.size()) {
-    return false;
   }
 
   int n = php_mb_stripos(1, haystack.data(), haystack.size(),
@@ -2424,7 +2431,7 @@ Variant f_mb_strpos(CStrRef haystack, CStrRef needle, int offset /* = 0 */,
     }
   }
 
-  if (offset < 0 || (unsigned long)offset > mbs_haystack.len) {
+  if (offset < 0 || offset > mbfl_strlen(&mbs_haystack)) {
     raise_warning("Offset not contained in string.");
     return false;
   }
@@ -2516,6 +2523,13 @@ Variant f_mb_strrpos(CStrRef haystack, CStrRef needle,
   if (mbs_needle.len <= 0) {
     return false;
   }
+
+  if ((noffset > 0 && noffset > mbfl_strlen(&mbs_haystack)) ||
+      (noffset < 0 && -noffset > mbfl_strlen(&mbs_haystack))) {
+    raise_notice("Offset is greater than the length of haystack string");
+    return false;
+  }
+
   int n = mbfl_strpos(&mbs_haystack, &mbs_needle, noffset, 1);
   if (n >= 0) {
     return n;

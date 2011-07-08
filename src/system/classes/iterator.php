@@ -330,6 +330,9 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   protected $arr;
   protected $flags;
 
+  const STD_PROP_LIST = 1;
+  const ARRAY_AS_PROPS = 2;
+
   public function __construct($array, $flags = 0) {
     $this->arr = $array;
     $this->flags = $flags;

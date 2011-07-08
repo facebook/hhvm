@@ -1011,7 +1011,6 @@ namespace hphp_impl_splitter {}
 
 // Class tables
 extern ClassPropTable cpt_SplFileInfo;
-extern ClassPropTable cpt_SplFileInfo;
 
 // o_getClassPropTable
 

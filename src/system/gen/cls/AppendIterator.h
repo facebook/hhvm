@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 697 */
+/* SRC: classes/iterator.php line 700 */
 FORWARD_DECLARE_CLASS(AppendIterator);
 class c_AppendIterator : public ExtObjectData {
   public:

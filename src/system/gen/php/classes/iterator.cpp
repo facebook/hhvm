@@ -31,6 +31,8 @@ namespace HPHP {
 extern CallInfo ci_;
 /* preface finishes */
 /* SRC: classes/iterator.php line 329 */
+const int64 q_ArrayIterator_STD_PROP_LIST = 1LL;
+const int64 q_ArrayIterator_ARRAY_AS_PROPS = 2LL;
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ArrayIterator
 Variant c_ArrayIterator::os_getInit(CStrRef s) {
   DECLARE_SYSTEM_GLOBALS(g);
@@ -88,6 +90,17 @@ Variant * c_ArrayIterator::o_realPropPrivate(CStrRef s, int flags) const {
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ArrayIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ArrayIterator
 Variant c_ArrayIterator::os_constant(const char *s) {
+  int64 hash = hash_string(s);
+  switch (hash & 3) {
+    case 0:
+      HASH_RETURN(0x7DE206EA225FC80CLL, q_ArrayIterator_STD_PROP_LIST, "STD_PROP_LIST");
+      break;
+    case 3:
+      HASH_RETURN(0x3C29F8CAC8DB5B17LL, q_ArrayIterator_ARRAY_AS_PROPS, "ARRAY_AS_PROPS");
+      break;
+    default:
+      break;
+  }
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ArrayIterator
@@ -758,7 +771,7 @@ struct ObjectStaticCallbacks cw_ArrayIterator = {
   c_ArrayIterator::os_constant,
   c_ArrayIterator::os_get_call_info
 };
-/* SRC: classes/iterator.php line 333 */
+/* SRC: classes/iterator.php line 336 */
 void c_ArrayIterator::t___construct(Variant v_array, Variant v_flags //  = 0LL
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::__construct);
@@ -769,73 +782,73 @@ void c_ArrayIterator::t___construct(Variant v_array, Variant v_flags //  = 0LL
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 350 */
+/* SRC: classes/iterator.php line 353 */
 void c_ArrayIterator::t_append(CVarRef v_value) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::append);
   m_arr.append((v_value));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 363 */
+/* SRC: classes/iterator.php line 366 */
 void c_ArrayIterator::t_asort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::asort);
   x_asort(ref(m_arr), toInt32(m_flags));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 377 */
+/* SRC: classes/iterator.php line 380 */
 int c_ArrayIterator::t_count() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::count);
   return x_count(m_arr);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 389 */
+/* SRC: classes/iterator.php line 392 */
 Variant c_ArrayIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::current);
   return x_current(ref(m_arr));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 403 */
+/* SRC: classes/iterator.php line 406 */
 Variant c_ArrayIterator::t_getarraycopy() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::getArrayCopy);
   return m_arr;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 416 */
+/* SRC: classes/iterator.php line 419 */
 Variant c_ArrayIterator::t_getflags() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::getFlags);
   return m_flags;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 428 */
+/* SRC: classes/iterator.php line 431 */
 Variant c_ArrayIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::key);
   return x_key(ref(m_arr));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 441 */
+/* SRC: classes/iterator.php line 444 */
 void c_ArrayIterator::t_ksort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::ksort);
   x_ksort(ref(m_arr), toInt32(m_flags));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 455 */
+/* SRC: classes/iterator.php line 458 */
 void c_ArrayIterator::t_natcasesort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::natcasesort);
   x_natcasesort(ref(m_arr));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 469 */
+/* SRC: classes/iterator.php line 472 */
 void c_ArrayIterator::t_natsort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::natsort);
   x_natsort(ref(m_arr));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 481 */
+/* SRC: classes/iterator.php line 484 */
 void c_ArrayIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::next);
   x_next(ref(m_arr));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 496 */
+/* SRC: classes/iterator.php line 499 */
 bool c_ArrayIterator::t_offsetexists(CVarRef v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetExists);
   {
@@ -843,13 +856,13 @@ bool c_ArrayIterator::t_offsetexists(CVarRef v_index) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 511 */
+/* SRC: classes/iterator.php line 514 */
 Variant c_ArrayIterator::t_offsetget(Variant v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetGet);
   return m_arr.rvalAt(v_index, AccessFlags::Error);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 511 */
+/* SRC: classes/iterator.php line 514 */
 Variant &c_ArrayIterator::___offsetget_lval(Variant v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetGet);
   Variant &v = get_system_globals()->__lvalProxy;
@@ -857,27 +870,27 @@ Variant &c_ArrayIterator::___offsetget_lval(Variant v_index) {
   return v;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 527 */
+/* SRC: classes/iterator.php line 530 */
 Variant c_ArrayIterator::t_offsetset(CVarRef v_index, CVarRef v_newval) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetSet);
   m_arr.set(v_index, (v_newval));
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 542 */
+/* SRC: classes/iterator.php line 545 */
 Variant c_ArrayIterator::t_offsetunset(CVarRef v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetUnset);
   m_arr.weakRemove(v_index);
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 554 */
+/* SRC: classes/iterator.php line 557 */
 void c_ArrayIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::rewind);
   x_reset(ref(m_arr));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 567 */
+/* SRC: classes/iterator.php line 570 */
 void c_ArrayIterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::seek);
   int64 v_i = 0;
@@ -905,25 +918,25 @@ void c_ArrayIterator::t_seek(CVarRef v_position) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 590 */
+/* SRC: classes/iterator.php line 593 */
 void c_ArrayIterator::t_setflags(CVarRef v_flags) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::setFlags);
   m_flags.assignVal(v_flags);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 607 */
+/* SRC: classes/iterator.php line 610 */
 void c_ArrayIterator::t_uasort(CVarRef v_cmp_function) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::uasort);
   x_uasort(ref(m_arr), v_cmp_function);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 624 */
+/* SRC: classes/iterator.php line 627 */
 void c_ArrayIterator::t_uksort(CVarRef v_cmp_function) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::uksort);
   x_uksort(ref(m_arr), v_cmp_function);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 636 */
+/* SRC: classes/iterator.php line 639 */
 bool c_ArrayIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::valid);
   {
@@ -933,7 +946,7 @@ bool c_ArrayIterator::t_valid() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 697 */
+/* SRC: classes/iterator.php line 700 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_AppendIterator
 Variant c_AppendIterator::os_getInit(CStrRef s) {
   DECLARE_SYSTEM_GLOBALS(g);
@@ -1296,7 +1309,7 @@ struct ObjectStaticCallbacks cw_AppendIterator = {
   c_AppendIterator::os_constant,
   c_AppendIterator::os_get_call_info
 };
-/* SRC: classes/iterator.php line 700 */
+/* SRC: classes/iterator.php line 703 */
 void c_AppendIterator::t___construct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__construct);
   bool oldInCtor = gasInCtor(true);
@@ -1307,7 +1320,7 @@ void c_AppendIterator::t___construct() {
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 715 */
+/* SRC: classes/iterator.php line 718 */
 void c_AppendIterator::t_append(CVarRef v_it) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::append);
   if(!v_it.instanceof(NAMSTR(s_sys_ss2fd353cc, "iterator"))) {
@@ -1323,7 +1336,7 @@ void c_AppendIterator::t_append(CVarRef v_it) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 729 */
+/* SRC: classes/iterator.php line 732 */
 Variant c_AppendIterator::t_getinneriterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::getInnerIterator);
   {
@@ -1335,7 +1348,7 @@ Variant c_AppendIterator::t_getinneriterator() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 743 */
+/* SRC: classes/iterator.php line 746 */
 void c_AppendIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::rewind);
   {
@@ -1371,7 +1384,7 @@ void c_AppendIterator::t_rewind() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 759 */
+/* SRC: classes/iterator.php line 762 */
 bool c_AppendIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::valid);
   {
@@ -1394,7 +1407,7 @@ bool c_AppendIterator::t_valid() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 772 */
+/* SRC: classes/iterator.php line 775 */
 Variant c_AppendIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::current);
   {
@@ -1419,7 +1432,7 @@ Variant c_AppendIterator::t_current() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 790 */
+/* SRC: classes/iterator.php line 793 */
 Variant c_AppendIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::key);
   {
@@ -1444,7 +1457,7 @@ Variant c_AppendIterator::t_key() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 804 */
+/* SRC: classes/iterator.php line 807 */
 void c_AppendIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::next);
   {
@@ -1549,7 +1562,7 @@ void c_AppendIterator::t_next() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 822 */
+/* SRC: classes/iterator.php line 825 */
 Variant c_AppendIterator::t___call(Variant v_func, Variant v_params) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__call);
   {
@@ -1957,7 +1970,7 @@ bool c_RecursiveIteratorIterator::t_valid() {
   return x_hphp_recursiveiteratoriterator_valid(GET_THIS_TYPED(RecursiveIteratorIterator));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 641 */
+/* SRC: classes/iterator.php line 644 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_MutableArrayIterator
 Variant c_MutableArrayIterator::os_getInit(CStrRef s) {
   return c_ArrayIterator::os_getInit(s);
@@ -2133,7 +2146,7 @@ struct ObjectStaticCallbacks cw_MutableArrayIterator = {
   c_MutableArrayIterator::os_constant,
   c_MutableArrayIterator::os_get_call_info
 };
-/* SRC: classes/iterator.php line 642 */
+/* SRC: classes/iterator.php line 645 */
 void c_MutableArrayIterator::t___construct(VRefParam rv_array, Variant v_flags //  = 0LL
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::__construct);
@@ -2145,13 +2158,13 @@ void c_MutableArrayIterator::t___construct(VRefParam rv_array, Variant v_flags /
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 648 */
+/* SRC: classes/iterator.php line 651 */
 Variant c_MutableArrayIterator::t_currentref() {
   INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::currentRef);
   return strongBind(x_hphp_current_ref(ref(m_arr)));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 662 */
+/* SRC: classes/iterator.php line 665 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_FilterIterator
 Variant c_FilterIterator::os_getInit(CStrRef s) {
   return c_ObjectData::os_getInit(s);

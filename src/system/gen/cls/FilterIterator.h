@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 662 */
+/* SRC: classes/iterator.php line 665 */
 FORWARD_DECLARE_CLASS(FilterIterator);
 class c_FilterIterator : public ExtObjectData {
   public:

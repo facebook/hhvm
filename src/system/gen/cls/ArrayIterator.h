@@ -45,7 +45,7 @@ class c_ArrayIterator : public ExtObjectData {
   static Variant os_getInit(CStrRef s);
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_ArrayIterator 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ArrayIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_ArrayIterator 1
+  static Variant os_constant(const char *s);
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
@@ -115,6 +115,8 @@ class c_ArrayIterator : public ExtObjectData {
 };
 extern struct ObjectStaticCallbacks cw_ArrayIterator;
 ObjectData *coo_ArrayIterator() NEVER_INLINE;
+extern const int64 q_ArrayIterator_STD_PROP_LIST;
+extern const int64 q_ArrayIterator_ARRAY_AS_PROPS;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 641 */
+/* SRC: classes/iterator.php line 644 */
 FORWARD_DECLARE_CLASS(MutableArrayIterator);
 class c_MutableArrayIterator : public c_ArrayIterator {
   public:

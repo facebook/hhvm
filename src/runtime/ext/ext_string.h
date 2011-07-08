@@ -136,10 +136,10 @@ inline Variant f_wordwrap(CStrRef str, int width = 75, CStrRef wordbreak = "\n",
 
 inline String f_html_entity_decode(CStrRef str, int quote_style = k_ENT_COMPAT,
                                    CStrRef charset = "ISO-8859-1") {
-  // dropping quote_style parameter, as I don't see why decoding needs to check
   const char *scharset = charset.data();
   if (!*scharset) scharset = "UTF-8";
-  return StringUtil::HtmlDecode(str, scharset, true);
+  return StringUtil::HtmlDecode(str, (StringUtil::QuoteStyle)quote_style,
+                                scharset, true);
 }
 inline String f_htmlentities(CStrRef str, int quote_style = k_ENT_COMPAT,
                              CStrRef charset = "ISO-8859-1",
@@ -152,8 +152,8 @@ inline String f_htmlentities(CStrRef str, int quote_style = k_ENT_COMPAT,
 }
 inline String f_htmlspecialchars_decode(CStrRef str,
                                         int quote_style = k_ENT_COMPAT) {
-  // dropping quote_style parameter, as I don't see why decoding needs to check
-  return StringUtil::HtmlDecode(str, "UTF-8", false);
+  return StringUtil::HtmlDecode(str, (StringUtil::QuoteStyle)quote_style,
+                                "UTF-8", false);
 }
 inline String f_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT,
                                  CStrRef charset = "ISO-8859-1",

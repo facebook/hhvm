@@ -341,7 +341,8 @@ String StringUtil::HtmlEncode(CStrRef input, QuoteStyle quoteStyle,
   return String(ret, len, AttachString);
 }
 
-String StringUtil::HtmlDecode(CStrRef input, const char *charset, bool all) {
+String StringUtil::HtmlDecode(CStrRef input, QuoteStyle quoteStyle,
+                              const char *charset, bool all) {
   if (input.empty()) return input;
 
   ASSERT(charset);
@@ -351,7 +352,8 @@ String StringUtil::HtmlDecode(CStrRef input, const char *charset, bool all) {
   }
 
   int len = input.size();
-  char *ret = string_html_decode(input, len, charset, all);
+  char *ret = string_html_decode(input, len, quoteStyle != NoQuotes,
+                                 quoteStyle == BothQuotes, charset, all);
   return String(ret, len, AttachString);
 }
 

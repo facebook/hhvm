@@ -574,11 +574,12 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
 }
 
 inline static bool decode_entity(char *entity, int *len,
+                                 bool decode_double_quote,
+                                 bool decode_single_quote,
                                  enum entity_charset charset, bool all,
                                  bool xhp = false) {
   // entity is 16 bytes, allocated statically below
   // default in PHP
-  int quote_style = ENT_COMPAT;
   ASSERT(entity && *entity);
   if (entity[0] == '#') {
     int code;
@@ -590,6 +591,13 @@ inline static bool decode_entity(char *entity, int *len,
 
     // since we don't support multibyte chars other than utf-8
     int l = 1;
+
+    if (code == 39 && decode_single_quote) {
+      entity[0] = code;
+      entity[1] = '\0';
+      *len = l;
+      return true;
+    }
 
     switch (charset) {
       case cs_utf_8:
@@ -607,7 +615,7 @@ inline static bool decode_entity(char *entity, int *len,
         if ((code >= 0x80 && code < 0xa0) || code > 0xff) {
           return false;
         } else {
-          if (code == 39 || !quote_style) {
+          if (code == 39) {
             return false;
           }
           entity[0] = code;
@@ -652,6 +660,11 @@ inline static bool decode_entity(char *entity, int *len,
     return true;
   } else {
     HtmlEntityMap *entityMap;
+
+    if (strncasecmp(entity, "quot", 4) == 0 && !decode_double_quote) {
+      return false;
+    }
+
     if (all) {
       entityMap = xhp ? &XHPEntityMap[charset] : &EntityMap[charset];
     } else {
@@ -670,6 +683,7 @@ inline static bool decode_entity(char *entity, int *len,
 }
 
 char *string_html_decode(const char *input, int &len,
+                         bool decode_double_quote, bool decode_single_quote,
                          const char *charset_hint, bool all,
                          bool xhp /* = false */) {
   ASSERT(input);
@@ -711,7 +725,8 @@ char *string_html_decode(const char *input, int &len,
           }
           memcpy(buf, p, l);
           buf[l] = '\0';
-          if (decode_entity(buf, &l, charset, all, xhp)) {
+          if (decode_entity(buf, &l, decode_double_quote, decode_single_quote,
+                            charset, all, xhp)) {
             memcpy(q, buf, l);
             found = true;
             p = t;

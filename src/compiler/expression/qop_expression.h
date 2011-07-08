@@ -43,6 +43,10 @@ public:
   ExpressionPtr getYes() const { return m_expYes; }
   ExpressionPtr getNo() const { return m_expNo; }
 private:
+  void wrapBoolean(CodeGenerator &cg,
+                   AnalysisResultPtr ar,
+                   ExpressionPtr exp);
+
   ExpressionPtr m_condition;
   ExpressionPtr m_expYes;
   ExpressionPtr m_expNo;

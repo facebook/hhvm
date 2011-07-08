@@ -15335,8 +15335,11 @@ bool TestCodeRun::TestIntIsset() {
 
 bool TestCodeRun::TestTernary() {
   MVCR("<?php $t = true; $a = $t ? \"hello\" : \"world\"; var_dump($a);");
+
   MVCR("<?php $f = false; $a = $f ? 5 : \"hello\"; var_dump($a);");
+
   MVCR("<?php $t = true; $a = $t ? \"hello\" : null; var_dump($a);");
+
   MVCR("<?php "
       "function memcache_init_split_vars() {"
       "  global $_SERVER;"
@@ -15345,21 +15348,27 @@ bool TestCodeRun::TestTernary() {
       "    crc32(empty($_SERVER['SERVER_ADDR']) ? php_uname('n')"
       "                                         : $_SERVER['SERVER_ADDR']);"
       "}");
+
   MVCR("<?php "
       "function f() {} function g() {} "
       "$t = true;"
       "$a = $t ? f() : g();"
       "var_dump($a);");
+
   MVCR("<?php function test($a) { $b = $a + 1 == 5 ? 5 : 7; } test(4);");
+
   MVCR("<?php $t = true; $f = false;"
       "$a = $t ? null : ($f ? \"hello\" : \"world\");");
+
   MVCR("<?php $t = true; $a = $t ? \"\" : \"a\" . $t . \"b\";");
+
   MVCR("<?php "
       "function add_cssclass($add, $class) {"
       "  $class = empty($class) ? $add : $class .= ' ' . $add;"
       "  return $class;"
       "}"
       "add_cssclass('test', $a);");
+
   MVCR("<?php "
       "$a = 123;"
       "echo $a ? @mysql_data_seek(null, null) : false;");
@@ -15371,6 +15380,105 @@ bool TestCodeRun::TestTernary() {
        "}"
        "var_dump(foo(1, 2, 3));"
        "var_dump(foo(0, 2, 3));");
+
+  bool enableSyntax = Option::EnableHipHopSyntax;
+  Option::EnableHipHopSyntax = true;
+
+  MVCRO("<?php\n"
+        "class X {\n"
+        "  public $exp_info;\n"
+        "  public function __construct(array $exp_info = null) {\n"
+        "    $this->exp_info = $exp_info ?: array();\n"
+        "  }\n"
+        "}\n"
+        "$x = new X(array(0, 1, 2));\n"
+        "var_dump($x->exp_info);\n"
+        "$x1 = new X(null);\n"
+        "var_dump($x->exp_info);\n",
+        "array(3) {\n"
+        "  [0]=>\n"
+        "  int(0)\n"
+        "  [1]=>\n"
+        "  int(1)\n"
+        "  [2]=>\n"
+        "  int(2)\n"
+        "}\n"
+        "array(3) {\n"
+        "  [0]=>\n"
+        "  int(0)\n"
+        "  [1]=>\n"
+        "  int(1)\n"
+        "  [2]=>\n"
+        "  int(2)\n"
+        "}\n");
+
+  Option::EnableHipHopSyntax = enableSyntax;
+
+  MVCRO("<?php\n"
+        "class X {}\n"
+        "function f($a0,\n"
+        "           $a1,\n"
+        "           $a2,\n"
+        "           $a3 = null,\n"
+        "           $a4 = null,\n"
+        "           $a5 = null) {\n"
+        "  $r0 = $a0 ?: 0;\n"
+        "  $r1 = $a1 ?: 0.0;\n"
+        "  $r2 = $a2 ?: false;\n"
+        "  $r3 = $a3 ?: ''; \n"
+        "  $r4 = $a4 ?: array();\n"
+        "  $r5 = $a5 ?: new X;\n"
+        "  return array(\n"
+        "    $r0, $r1, $r2,\n"
+        "    $r3, $r4, $r5);\n"
+        "}\n"
+        "var_dump(f(0, 0.0, false, null, null, null));\n"
+        "var_dump(f(1, 1.0, true, 'hello', array(0, 1), new X));\n",
+        "array(6) {\n"
+        "  [0]=>\n"
+        "  int(0)\n"
+        "  [1]=>\n"
+        "  float(0)\n"
+        "  [2]=>\n"
+        "  bool(false)\n"
+        "  [3]=>\n"
+        "  string(0) \"\"\n"
+        "  [4]=>\n"
+        "  array(0) {\n"
+        "  }\n"
+        "  [5]=>\n"
+        "  object(X)#1 (0) {\n"
+        "  }\n"
+        "}\n"
+        "array(6) {\n"
+        "  [0]=>\n"
+        "  int(1)\n"
+        "  [1]=>\n"
+        "  float(1)\n"
+        "  [2]=>\n"
+        "  bool(true)\n"
+        "  [3]=>\n"
+        "  string(5) \"hello\"\n"
+        "  [4]=>\n"
+        "  array(2) {\n"
+        "    [0]=>\n"
+        "    int(0)\n"
+        "    [1]=>\n"
+        "    int(1)\n"
+        "  }\n"
+        "  [5]=>\n"
+        "  object(X)#1 (0) {\n"
+        "  }\n"
+        "}\n");
+
+  MVCRO("<?php\n"
+        "function f($x, $y) {\n"
+        "  return $x[0][$y++] ?: false;\n"
+        "}\n"
+        "var_dump(f(array(array(0, 1, 2)), 0));\n"
+        "var_dump(f(array(array(0, 1, 2)), 1));\n",
+        "bool(false)\n"
+        "int(1)\n");
 
   return true;
 }
@@ -17340,7 +17448,7 @@ bool TestCodeRun::TestAPC() {
         "  int(123)\n"
         "}\n");
   int savedApcAllowObj = RuntimeOption::ApcAllowObj;
-  RuntimeOption::ApcAllowObj = false; 
+  RuntimeOption::ApcAllowObj = false;
   for (int i = 0; i < 2; i++) {
     RuntimeOption::ApcAllowObj = !RuntimeOption::ApcAllowObj;
     // apc_fetch twice to trigger immutable object

@@ -177,6 +177,20 @@ void QOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_expNo->outputPHP(cg, ar);
 }
 
+void QOpExpression::wrapBoolean(CodeGenerator &cg,
+                                AnalysisResultPtr ar,
+                                ExpressionPtr exp) {
+  TypePtr t(exp->getType());
+  ASSERT(t);
+  bool wrap = false;
+  if (!t->is(Type::KindOfBoolean)) {
+    wrap = true;
+    cg_printf("toBoolean(");
+  }
+  exp->outputCPP(cg, ar);
+  if (wrap) cg_printf(")");
+}
+
 bool QOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                  int state) {
   if (!hasEffect()) {
@@ -199,7 +213,7 @@ bool QOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg.wrapExpressionBegin();
     if (isUnused()) {
       cg_printf("if (");
-      m_condition->outputCPP(cg, ar);
+      wrapBoolean(cg, ar, m_condition);
       cg_indentBegin(") {\n");
       if (m_expYes) {
         m_expYes->preOutputCPP(cg, ar, 0);
@@ -226,7 +240,7 @@ bool QOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         type->outputCPPDecl(cg, ar, getScope());
         cg_printf(" %s;\n", tmp.c_str());
         cg_printf("if (");
-        m_condition->outputCPP(cg, ar);
+        wrapBoolean(cg, ar, m_condition);
         cg_indentBegin(") {\n");
         m_expYes->preOutputCPP(cg, ar, 0);
         cg_printf("%s = (", tmp.c_str());
@@ -285,7 +299,7 @@ void QOpExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (wrapped) {
       cg_printf("(");
     }
-    m_condition->outputCPP(cg, ar);
+    wrapBoolean(cg, ar, m_condition);
     if (isUnused()) {
       cg_printf(" ? ");
       outputUnneededExpr(cg, ar, expYes);

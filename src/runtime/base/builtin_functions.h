@@ -853,15 +853,6 @@ public:
   }
 };
 
-enum CallUserFuncKind {
-  CallUserFuncError = -1,
-  CallUserFuncCommon = 0,
-  CallUserFuncObjStatic,
-  CallUserFuncObj,
-  CallUserFuncWithinCls,
-  CallUserFuncUnbound,
-};
-
 Variant call_user_func_array_helper(int kind,
                                     CVarRef classname,
                                     CVarRef methodname,
@@ -870,15 +861,6 @@ Variant call_user_func_array_helper(int kind,
                                     CStrRef sclass,
                                     ObjectData *obj,
                                     CArrRef params);
-
-int getClassMethodInfo(CVarRef function,
-                       Variant &classname,
-                       Variant &methodname,
-                       String &cls,
-                       String &method,
-                       String &sclass,
-                       ObjectData *&obj,
-                       bool bound = false);
 
 #define CALL_USER_FUNC_FEW_ARGS_COUNT 6
 #if CALL_USER_FUNC_FEW_ARGS_COUNT == 6

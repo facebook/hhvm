@@ -77,14 +77,25 @@ String getUndefinedConstant(CStrRef name) {
   return name;
 }
 
-int getClassMethodInfo(CVarRef function,
-                       Variant &classname,
-                       Variant &methodname,
-                       String &cls,
-                       String &method,
-                       String &sclass,
-                       ObjectData *&obj,
-                       bool bound /* = false */) {
+enum CallUserFuncKind {
+  CallUserFuncError = -1,
+  CallUserFuncCommon = 0, // don't change these two values
+  CallUserFuncObjStatic,
+  CallUserFuncObj,
+  CallUserFuncWithinCls,
+  CallUserFuncUnbound,
+};
+
+static CallUserFuncKind getClassMethodInfo(
+  CVarRef function,
+  Variant &classname,
+  Variant &methodname,
+  String &cls,
+  String &method,
+  String &sclass,
+  ObjectData *&obj,
+  bool skip,
+  bool bound = false) {
   Array arr = function.toArray();
   if (!(arr.size() == 2 && arr.exists(0LL) && arr.exists(1LL))) {
     throw_invalid_argument("function: not a valid callback array");
@@ -103,16 +114,16 @@ int getClassMethodInfo(CVarRef function,
     if (c != 0 && c != String::npos && c + 2 < method.size()) {
       cls = method.substr(0, c);
       if (cls->same(s_self.get())) {
-        cls = FrameInjection::GetClassName(true);
+        cls = FrameInjection::GetClassName(skip);
       } else if (cls->same(s_parent.get())) {
-        cls = FrameInjection::GetParentClassName(true);
+        cls = FrameInjection::GetParentClassName(skip);
       }
       method = method.substr(c + 2);
       return CallUserFuncObjStatic;
     }
     obj = classname.getObjectData();
 #ifdef ENABLE_LATE_STATIC_BINDING
-    sclass = bound ? FrameInjection::GetClassName(true) : obj->o_getClassName();
+    sclass = bound ? FrameInjection::GetClassName(skip) : obj->o_getClassName();
 #endif
     return CallUserFuncObj;
   }
@@ -122,11 +133,11 @@ int getClassMethodInfo(CVarRef function,
   }
   sclass = classname.toString();
   if (sclass->same(s_self.get())) {
-    sclass = FrameInjection::GetClassName(true);
+    sclass = FrameInjection::GetClassName(skip);
   } else if (sclass->same(s_parent.get())) {
-    sclass = FrameInjection::GetParentClassName(true);
+    sclass = FrameInjection::GetParentClassName(skip);
   }
-  obj = FrameInjection::GetThis(true);
+  obj = FrameInjection::GetThis(skip);
   if (obj && obj->o_instanceof(sclass)) {
     return CallUserFuncWithinCls;
   }
@@ -180,7 +191,7 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
     String sclass;
     ObjectData *obj;
     int kind = getClassMethodInfo(function, classname, methodname,
-                                  cls, method, sclass, obj, bound);
+                                  cls, method, sclass, obj, true, bound);
     return call_user_func_array_helper(kind,
                                        classname,
                                        methodname,
@@ -1670,7 +1681,7 @@ Variant call_user_func_few_args(CVarRef function, int count, ...) {
     String sclass;
     ObjectData *obj;
     int kind = getClassMethodInfo(function, classname, methodname,
-                                  cls, method, sclass, obj);
+                                  cls, method, sclass, obj, false);
     if (kind == 0) {
       MethodCallPackage mcp;
       mcp.noFatal();

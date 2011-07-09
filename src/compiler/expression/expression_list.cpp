@@ -215,7 +215,7 @@ bool ExpressionList::getScalarValue(Variant &value) {
 
 void ExpressionList::stripConcat() {
   ExpressionList &el = *this;
-  for (int i = 0, s = el.getCount(); i < s; ) {
+  for (int i = 0; i < el.getCount(); ) {
     ExpressionPtr &e = el[i];
     if (e->is(Expression::KindOfUnaryOpExpression)) {
       UnaryOpExpressionPtr u(boost::static_pointer_cast<UnaryOpExpression>(e));

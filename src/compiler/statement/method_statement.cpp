@@ -233,6 +233,8 @@ void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
       VariableTablePtr variables = funcScope->getVariables();
       Symbol *cont = variables->getSymbol(CONTINUATION_OBJECT_NAME);
       cont->setHidden();
+      getOrigGeneratorFunc()->getFunctionScope()->addUse(
+        funcScope, BlockScope::UseKindClosure);
     }
     if (funcScope->isSepExtension() ||
         BuiltinSymbols::IsDeclaredDynamic(m_name) ||
@@ -393,7 +395,7 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*params)[i]);
         const string &name = param->getName();
-        TypePtr ret = param->isRef() ? Type::Variant : Type::Some;
+        TypePtr ret = param->isRef() ? Type::Variant : param->getType();
         variables->addParamLike(name, ret, ar, param,
                                 funcScope->isFirstPass());
       }

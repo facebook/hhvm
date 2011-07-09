@@ -19405,6 +19405,15 @@ bool TestCodeRun::TestYield() {
         "string(13) \"ArrayIterator\"\n"
         );
 
+  MVCRO("<?php "
+        "function foo($x = null) {"
+        "  if ($x) $x = 'foo';"
+        "  var_dump($x);"
+        "  yield 1;"
+        "  }"
+        "foreach(foo() as $x) {}",
+        "NULL\n" );
+
   Option::EnableHipHopSyntax = enableSyntax;
   return true;
 }

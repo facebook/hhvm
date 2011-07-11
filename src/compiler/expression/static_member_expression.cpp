@@ -175,7 +175,11 @@ ExpressionPtr StaticMemberExpression::postOptimize(AnalysisResultConstPtr ar) {
         if (init) {
           ExpressionPtr rep = dynamic_pointer_cast<Expression>(init);
           if (rep->isScalar()) {
-            return replaceValue(Clone(rep, getScope()));
+            ExpressionPtr repClone = Clone(rep, getScope());
+            if (!repClone->getActualType()) {
+              repClone->setActualType(getActualType());
+            }
+            return replaceValue(repClone);
           }
         }
       }

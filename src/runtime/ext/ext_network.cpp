@@ -249,6 +249,24 @@ String f_long2ip(int proper_address) {
   return Util::safe_inet_ntoa(myaddr);
 }
 
+/* just a hack to free resources allocated by glibc in __res_nsend()
+ * See also:
+ *   res_thread_freeres() in glibc/resolv/res_init.c
+ *   __libc_res_nsend()   in resolv/res_send.c
+ * */
+
+static void php_dns_free_res(struct __res_state res) {
+#if defined(__GLIBC__)
+  int ns;
+  for (ns = 0; ns < MAXNS; ns++) {
+    if (res._u._ext.nsaddrs[ns] != NULL) {
+      free(res._u._ext.nsaddrs[ns]);
+      res._u._ext.nsaddrs[ns] = NULL;
+    }
+  }
+#endif
+}
+
 bool f_dns_check_record(CStrRef host, CStrRef type /* = null_string */) {
   IOStatusHelper io("dns_check_record", host.data());
   const char *stype;
@@ -280,7 +298,15 @@ bool f_dns_check_record(CStrRef host, CStrRef type /* = null_string */) {
   }
 
   unsigned char ans[MAXPACKET];
-  return res_search(host.data(), C_IN, ntype, ans, sizeof(ans)) >= 0;
+  struct __res_state res;
+  memset(&res, 0, sizeof(res));
+  if (res_ninit(&res)) {
+    return false;
+  }
+  int i = res_nsearch(&res, host.data(), C_IN, ntype, ans, sizeof(ans));
+  res_nclose(&res);
+  php_dns_free_res(res);
+  return (i >= 0);
 }
 
 typedef union {
@@ -288,23 +314,6 @@ typedef union {
   u_char qb2[65536];
 } querybuf;
 
-/* just a hack to free resources allocated by glibc in __res_nsend()
- * See also:
- *   res_thread_freeres() in glibc/resolv/res_init.c
- *   __libc_res_nsend()   in resolv/res_send.c
- * */
-
-static void php_dns_free_res(struct __res_state res) {
-#if defined(__GLIBC__)
-  int ns;
-  for (ns = 0; ns < MAXNS; ns++) {
-    if (res._u._ext.nsaddrs[ns] != NULL) {
-      free(res._u._ext.nsaddrs[ns]);
-      res._u._ext.nsaddrs[ns] = NULL;
-    }
-  }
-#endif
-}
 
 static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
                                   int type_to_fetch, bool store,
@@ -597,7 +606,7 @@ Variant f_dns_get_record(CStrRef hostname, int type /* = -1 */,
 
   unsigned char *cp = NULL, *end = NULL;
   int qd, an, ns = 0, ar = 0;
-  querybuf buf, answer;
+  querybuf answer;
 
   /* - We emulate an or'ed type mask by querying type by type.
    *   (Steps 0 - NUMTYPES-1 )
@@ -639,25 +648,16 @@ Variant f_dns_get_record(CStrRef hostname, int type /* = -1 */,
 
     struct __res_state res;
     memset(&res, 0, sizeof(res));
-    res_ninit(&res);
-    res.retrans = 5;
-    res.options &= ~RES_DEFNAMES;
-
-    int n = res_nmkquery(&res, QUERY, hostname.data(), C_IN, type_to_fetch,
-                         NULL, 0, NULL, buf.qb2, sizeof buf);
-    if (n < 0) {
-      raise_warning("res_nmkquery() failed");
-      res_nclose(&res);
-      php_dns_free_res(res);
+    if (res_ninit(&res)) {
       return false;
     }
 
-    n = res_nsend(&res, buf.qb2, n, answer.qb2, sizeof answer);
+    int n = res_nsearch(&res, hostname.data(), C_IN, type_to_fetch,
+                        answer.qb2, sizeof answer);
     if (n < 0) {
-      raise_warning("res_nsend() failed");
       res_nclose(&res);
       php_dns_free_res(res);
-      return false;
+      continue;
     }
 
     HEADER *hp;
@@ -727,9 +727,17 @@ bool f_dns_get_mx(CStrRef hostname, VRefParam mxhosts,
   weights = Array::Create();
 
   /* Go! */
-  int i = res_search(hostname.data(), C_IN, DNS_T_MX, (unsigned char *)&ans,
-                     sizeof(ans));
+  struct __res_state res;
+  memset(&res, 0, sizeof(res));
+  if (res_ninit(&res)) {
+    return false;
+  }
+
+  int i = res_nsearch(&res, hostname.data(), C_IN, DNS_T_MX,
+                      (unsigned char*)&ans, sizeof(ans));
   if (i < 0) {
+    res_nclose(&res);
+    php_dns_free_res(res);
     return false;
   }
   if (i > (int)sizeof(ans)) {
@@ -740,12 +748,16 @@ bool f_dns_get_mx(CStrRef hostname, VRefParam mxhosts,
   end = (unsigned char *)&ans +i;
   for (qdc = ntohs((unsigned short)hp->qdcount); qdc--; cp += i + QFIXEDSZ) {
     if ((i = dn_skipname(cp, end)) < 0 ) {
+      res_nclose(&res);
+      php_dns_free_res(res);
       return false;
     }
   }
   count = ntohs((unsigned short)hp->ancount);
   while (--count >= 0 && cp < end) {
     if ((i = dn_skipname(cp, end)) < 0 ) {
+      res_nclose(&res);
+      php_dns_free_res(res);
       return false;
     }
     cp += i;
@@ -758,12 +770,16 @@ bool f_dns_get_mx(CStrRef hostname, VRefParam mxhosts,
     }
     GETSHORT(weight, cp);
     if ((i = dn_expand(ans, end, cp, buf, sizeof(buf)-1)) < 0) {
+      res_nclose(&res);
+      php_dns_free_res(res);
       return false;
     }
     cp += i;
     mxhosts.append(String(buf, CopyString));
     weights.append(weight);
   }
+  res_nclose(&res);
+  php_dns_free_res(res);
   return true;
 }
 

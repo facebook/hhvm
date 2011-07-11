@@ -2260,7 +2260,13 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       }
       break;
       case Expression::KindOfSimpleFunctionCall:
-        spc(SimpleFunctionCall, e)->updateVtFlags();
+      {
+        SimpleFunctionCallPtr sfc(spc(SimpleFunctionCall, e));
+        if (sfc->getName() == "hphp_create_continuation") {
+          m_inlineAsExpr = false;
+        }
+        sfc->updateVtFlags();
+      }
       case Expression::KindOfDynamicFunctionCall:
       case Expression::KindOfClassConstantExpression:
       case Expression::KindOfStaticMemberExpression:

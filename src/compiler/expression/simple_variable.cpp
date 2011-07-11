@@ -93,7 +93,10 @@ void SimpleVariable::coalesce(SimpleVariablePtr other) {
 
 string SimpleVariable::getNamePrefix() const {
   bool needsCont = getFunctionScope()->isGenerator();
-  return needsCont && m_name != CONTINUATION_OBJECT_NAME ?
+  bool isHidden = m_sym && m_sym->isHidden();
+  return (needsCont &&
+          m_name != CONTINUATION_OBJECT_NAME &&
+          !isHidden) ?
       string(TYPED_CONTINUATION_OBJECT_NAME) + "->" : string("");
 }
 

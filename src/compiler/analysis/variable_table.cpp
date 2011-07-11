@@ -1577,16 +1577,18 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       continue;
     }
 
-    // omit local variables in continuations (since they will
-    // be part of the continuation object)
-    if (isGenScope) {
-      continue;
-    }
+    bool condition = isGenScope ?
+      // omit local variables in continuations (since they will
+      // be part of the continuation object). we however need
+      // the hidden variables which are used and/or needed
+      (sym->isHidden() && (sym->isUsed() || sym->isNeeded())) :
 
-    // local variables
-    if (((getAttribute(ContainsDynamicVariable) || inPseudoMain) &&
+      // local variables
+      (((getAttribute(ContainsDynamicVariable) || inPseudoMain) &&
          !sym->isHidden()) ||
-        sym->isUsed() || sym->isNeeded()) {
+        sym->isUsed() || sym->isNeeded());
+
+    if (condition) {
       TypePtr type = sym->getFinalType();
       type->outputCPPDecl(cg, ar, getBlockScope());
       cg_printf(" %s%s%s", prefix, getVariablePrefix(sym),

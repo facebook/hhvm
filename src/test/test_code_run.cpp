@@ -17737,6 +17737,21 @@ bool TestCodeRun::TestInlining() {
        "  foo($a)->bar = 1;"
        "}");
 
+  bool enableSyntax = Option::EnableHipHopSyntax;
+  Option::EnableHipHopSyntax = true;
+
+  MVCRO("<?php\n"
+        "function inline_me($x, $y, &$z) { return ($z = ($x + $y)); }\n"
+        "function gen($x, $y) {\n"
+        "  yield inline_me($x, $y, $arg);\n"
+        "  yield $arg;\n"
+        "}\n"
+        "foreach (gen(10, 20) as $x) { var_dump($x); }\n",
+        "int(30)\n"
+        "int(30)\n");
+
+  Option::EnableHipHopSyntax = enableSyntax;
+
   Option::AutoInline = save;
   return true;
 }

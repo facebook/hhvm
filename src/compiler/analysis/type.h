@@ -253,6 +253,10 @@ public:
   void count(std::map<std::string, int> &counts);
 
 private:
+  static TypePtr InferredObject(AnalysisResultConstPtr ar,
+                                TypePtr type1,
+                                TypePtr type2);
+
   static TypePtrMap TypeHintTypes;
 
   KindOf m_kindOf;

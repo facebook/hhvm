@@ -720,6 +720,36 @@ void Type::count(std::map<std::string, int> &counts) {
   counts["_all"]++;
 }
 
+TypePtr Type::InferredObject(AnalysisResultConstPtr ar,
+                             TypePtr type1,
+                             TypePtr type2) {
+  ASSERT(type1->m_kindOf == KindOfObject);
+  ASSERT(type2->m_kindOf == KindOfObject);
+
+  std::string resultName = "";
+  // if they're the same, or we don't know one's name, then use
+  // the other
+  if (type1->m_name == type2->m_name || type1->m_name.empty()) {
+    resultName = type2->m_name;
+  } else if (type2->m_name.empty()) {
+    resultName = type1->m_name;
+  } else {
+    // take the subclass
+    ClassScopePtr cls1 = ar->findClass(type1->m_name);
+    ClassScopePtr cls2 = ar->findClass(type2->m_name);
+    if (cls1 && !cls1->isRedeclaring()
+        && cls1->derivesFrom(ar, type2->m_name, true, false)) {
+      resultName = type1->m_name;
+    } else if (cls2 && !cls2->isRedeclaring()
+               && cls2->derivesFrom(ar, type1->m_name, true, false)) {
+      resultName = type2->m_name;
+    }
+  }
+  return resultName.empty() ?
+    Type::Object :
+    Type::CreateObjectType(resultName);
+}
+
 /* We have inferred type1 and type2 as the actual types for the same
    expression.
    Check that the types are compatible (it cant be both a string and
@@ -733,47 +763,27 @@ TypePtr Type::Inferred(AnalysisResultConstPtr ar,
   KindOf k1 = type1->m_kindOf;
   KindOf k2 = type2->m_kindOf;
 
-  if (k1 == k2) return type1;
+  if (k1 == k2) {
+    return k1 == KindOfObject ?
+      Type::InferredObject(ar, type1, type2) : type1;
+  }
 
   // If one set is a subset of the other, return the subset.
   if ((k1 & k2) == k1) return type1;
   if ((k1 & k2) == k2) return type2;
 
   // If one type must be numeric and the other might be, then assume numeric
-  if (type1->mustBe(KindOfNumeric) && type2->couldBe(KindOfNumeric))
+  if (type1->mustBe(KindOfNumeric) && type2->couldBe(KindOfNumeric)) {
     return type1;
-  if (type2->mustBe(KindOfNumeric) && type1->couldBe(KindOfNumeric))
+  }
+  if (type2->mustBe(KindOfNumeric) && type1->couldBe(KindOfNumeric)) {
     return type2;
+  }
 
   // Otherwise, take the intersection
   int resultKind = type1->m_kindOf & type2->m_kindOf;
-  std::string resultName = "";
-
-  if (resultKind & KindOfObject) {
-    // if they're the same, or we don't know one's name, then use
-    // the other
-    if (type1->m_name == type2->m_name || type1->m_name.empty()) {
-      resultName = type2->m_name;
-    } else if (type2->m_name.empty()) {
-      resultName = type1->m_name;
-    } else {
-      // take the subclass
-      ClassScopePtr cls1 = ar->findClass(type1->m_name);
-        ClassScopePtr cls2 = ar->findClass(type2->m_name);
-      if (cls1 && !cls1->isRedeclaring()
-          && cls1->derivesFrom(ar, type2->m_name, true, false)) {
-        resultName = type1->m_name;
-      } else if (cls2 && !cls2->isRedeclaring()
-                 && cls2->derivesFrom(ar, type1->m_name, true, false)) {
-        resultName = type2->m_name;
-      } else {
-        resultKind &= ~KindOfObject;
-      }
-    }
+  if (resultKind == KindOfObject) {
+    return Type::InferredObject(ar, type1, type2);
   }
-
-  if (resultKind)
-    return TypePtr(new Type((KindOf)resultKind, resultName));
-  else
-    return TypePtr();
+  return resultKind ? GetType(resultKind) : TypePtr();
 }

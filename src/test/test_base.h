@@ -53,6 +53,22 @@ class TestBase {
   static char error_buffer[];
 };
 
+template <bool value>
+class WithOption {
+public:
+  WithOption(bool &option) :
+    m_option(&option), m_save(option) {
+    option = value;
+  }
+  ~WithOption() { *m_option = m_save; }
+private:
+  bool *m_option;
+  const bool m_save;
+};
+
+typedef WithOption<true>  WithOpt;
+typedef WithOption<false> WithNoOpt;
+
 ///////////////////////////////////////////////////////////////////////////////
 // macros
 

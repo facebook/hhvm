@@ -3561,11 +3561,9 @@ bool TestCodeRun::TestArrayFunctions() {
 }
 
 bool TestCodeRun::TestArrayCSE() {
-  bool enableSyntax          = Option::EnableHipHopSyntax;
-  bool arrayAccessIdempotent = Option::ArrayAccessIdempotent;
 
-  Option::EnableHipHopSyntax    = true;
-  Option::ArrayAccessIdempotent = true;
+  WithOpt w0(Option::EnableHipHopSyntax);
+  WithOpt w1(Option::ArrayAccessIdempotent);
 
   MVCR("<?php\n"
        "function f($x, $y) {\n"
@@ -3927,9 +3925,6 @@ bool TestCodeRun::TestArrayCSE() {
        "  blocker();\n"
        "  var_dump($y);\n"
        "}\n");
-
-  Option::EnableHipHopSyntax    = enableSyntax;
-  Option::ArrayAccessIdempotent = arrayAccessIdempotent;
 
   return true;
 }
@@ -6075,9 +6070,9 @@ bool TestCodeRun::TestObjectInvokeMethod() {
         "int(10)\n"
         "int(20)\n");
 
-  bool enableHipHopSyntax = Option::EnableHipHopSyntax;
-  Option::EnableHipHopSyntax = true;
-  MVCRO("<?php\n"
+  {
+    WithOpt w(Option::EnableHipHopSyntax);
+    MVCRO("<?php\n"
         "// with type hints\n"
         "class C8 {\n"
         "  public function __invoke(array $a0) {\n"
@@ -6094,7 +6089,7 @@ bool TestCodeRun::TestObjectInvokeMethod() {
         "  [2]=>\n"
         "  int(3)\n"
         "}\n");
-  Option::EnableHipHopSyntax = enableHipHopSyntax;
+  }
 
   MVCRO("<?php\n"
         "// with var args\n"
@@ -6164,57 +6159,55 @@ bool TestCodeRun::TestObjectInvokeMethod() {
         "bool(false)\n"
         "bool(true)\n");
 
-  bool enableSyntax = Option::EnableHipHopSyntax;
-  Option::EnableHipHopSyntax = true;
+  {
+    WithOpt w(Option::EnableHipHopSyntax);
+    MVCRO("<?php\n"
+          "abstract class A {\n"
+          "  abstract public function __invoke($x);\n"
+          "}\n"
+          "interface IfaceInvoke {\n"
+          "  public function __invoke($x);\n"
+          "}\n"
+          "class Test1 extends A {\n"
+          "  public function __invoke($x) {\n"
+          "    var_dump(__CLASS__);\n"
+          "    var_dump($x);\n"
+          "  }\n"
+          "}\n"
+          "class Test2 implements IfaceInvoke {\n"
+          "  public function __invoke($x) {\n"
+          "    var_dump(__CLASS__);\n"
+          "    var_dump($x);\n"
+          "  }\n"
+          "}\n"
+          "function f1($x, $y)             { $x($y); $x->__invoke($y); }\n"
+          "function f2(A $x, $y)           { $x($y); $x->__invoke($y); }\n"
+          "function f3(IfaceInvoke $x, $y) { $x($y); $x->__invoke($y); }\n"
+          "$t1 = new Test1;\n"
+          "$t2 = new Test2;\n"
+          "f1($t1, 1);\n"
+          "f1($t2, 2);\n"
+          "f2($t1, 1);\n"
+          "f3($t2, 2);\n",
+          "string(5) \"Test1\"\n"
+          "int(1)\n"
+          "string(5) \"Test1\"\n"
+          "int(1)\n"
+          "string(5) \"Test2\"\n"
+          "int(2)\n"
+          "string(5) \"Test2\"\n"
+          "int(2)\n"
+          "string(5) \"Test1\"\n"
+          "int(1)\n"
+          "string(5) \"Test1\"\n"
+          "int(1)\n"
+          "string(5) \"Test2\"\n"
+          "int(2)\n"
+          "string(5) \"Test2\"\n"
+          "int(2)\n");
+  }
 
-  MVCRO("<?php\n"
-        "abstract class A {\n"
-        "  abstract public function __invoke($x);\n"
-        "}\n"
-        "interface IfaceInvoke {\n"
-        "  public function __invoke($x);\n"
-        "}\n"
-        "class Test1 extends A {\n"
-        "  public function __invoke($x) {\n"
-        "    var_dump(__CLASS__);\n"
-        "    var_dump($x);\n"
-        "  }\n"
-        "}\n"
-        "class Test2 implements IfaceInvoke {\n"
-        "  public function __invoke($x) {\n"
-        "    var_dump(__CLASS__);\n"
-        "    var_dump($x);\n"
-        "  }\n"
-        "}\n"
-        "function f1($x, $y)             { $x($y); $x->__invoke($y); }\n"
-        "function f2(A $x, $y)           { $x($y); $x->__invoke($y); }\n"
-        "function f3(IfaceInvoke $x, $y) { $x($y); $x->__invoke($y); }\n"
-        "$t1 = new Test1;\n"
-        "$t2 = new Test2;\n"
-        "f1($t1, 1);\n"
-        "f1($t2, 2);\n"
-        "f2($t1, 1);\n"
-        "f3($t2, 2);\n",
-        "string(5) \"Test1\"\n"
-        "int(1)\n"
-        "string(5) \"Test1\"\n"
-        "int(1)\n"
-        "string(5) \"Test2\"\n"
-        "int(2)\n"
-        "string(5) \"Test2\"\n"
-        "int(2)\n"
-        "string(5) \"Test1\"\n"
-        "int(1)\n"
-        "string(5) \"Test1\"\n"
-        "int(1)\n"
-        "string(5) \"Test2\"\n"
-        "int(2)\n"
-        "string(5) \"Test2\"\n"
-        "int(2)\n");
-
-  Option::EnableHipHopSyntax = enableSyntax;
-
-	return true;
+  return true;
 }
 
 bool TestCodeRun::TestObjectAssignment() {
@@ -7799,8 +7792,8 @@ bool TestCodeRun::TestMaxInt() {
 }
 
 bool TestCodeRun::TestDynamicMethods() {
-  bool saveDynamic = Option::AllDynamic;
-  Option::AllDynamic = true;
+  WithOpt w(Option::AllDynamic);
+
   MVCR("<?php "
       "class A { public function test() { print 'in A';} } "
       "class B extends A { public function test() { print 'in B';} } "
@@ -7811,10 +7804,12 @@ bool TestCodeRun::TestDynamicMethods() {
       "public function &dyn_test(&$a) { global $i; $a = $i; return $i;}} "
       "$obj = new A(); $f = 'dyn_test'; "
       "$c = &$obj->$f($b); var_dump($b); var_dump($c);");
+
   MVCR("<?php $i = 'gi'; $s = 'gs'; class A { "
       "public static function &dyn_test(&$a) "
       "{ global $s; $a = $s; return $s;}} "
       "$f = 'dyn_test'; $e = A::$f($d); var_dump($d); var_dump($e);");
+
   MVCR("<?php class dyn_A{} class B{} $cls = 'dyn_a'; $a = new $cls();");
 
   MVCR("<?php class A { function _test() { print 'ok';} "
@@ -7893,6 +7888,7 @@ bool TestCodeRun::TestDynamicMethods() {
       "}"
       "$z = new z;"
       "$z->z();");
+
   MVCR("<?php "
       "function bar() {"
       "  echo 'bar called';"
@@ -7908,6 +7904,7 @@ bool TestCodeRun::TestDynamicMethods() {
       "  }"
       "}"
       "$a = new foo ();");
+
   MVCR("<?php "
       "function t($x) {"
       "  var_dump($x);"
@@ -7937,7 +7934,6 @@ bool TestCodeRun::TestDynamicMethods() {
        "$obj->$method($aa[3]);"
        "var_dump($aa);");
 
-  Option::AllDynamic = saveDynamic;
   return true;
 }
 
@@ -15392,38 +15388,36 @@ bool TestCodeRun::TestTernary() {
        "var_dump(foo(1, 2, 3));"
        "var_dump(foo(0, 2, 3));");
 
-  bool enableSyntax = Option::EnableHipHopSyntax;
-  Option::EnableHipHopSyntax = true;
-
-  MVCRO("<?php\n"
-        "class X {\n"
-        "  public $exp_info;\n"
-        "  public function __construct(array $exp_info = null) {\n"
-        "    $this->exp_info = $exp_info ?: array();\n"
-        "  }\n"
-        "}\n"
-        "$x = new X(array(0, 1, 2));\n"
-        "var_dump($x->exp_info);\n"
-        "$x1 = new X(null);\n"
-        "var_dump($x->exp_info);\n",
-        "array(3) {\n"
-        "  [0]=>\n"
-        "  int(0)\n"
-        "  [1]=>\n"
-        "  int(1)\n"
-        "  [2]=>\n"
-        "  int(2)\n"
-        "}\n"
-        "array(3) {\n"
-        "  [0]=>\n"
-        "  int(0)\n"
-        "  [1]=>\n"
-        "  int(1)\n"
-        "  [2]=>\n"
-        "  int(2)\n"
-        "}\n");
-
-  Option::EnableHipHopSyntax = enableSyntax;
+  {
+    WithOpt w(Option::EnableHipHopSyntax);
+    MVCRO("<?php\n"
+          "class X {\n"
+          "  public $exp_info;\n"
+          "  public function __construct(array $exp_info = null) {\n"
+          "    $this->exp_info = $exp_info ?: array();\n"
+          "  }\n"
+          "}\n"
+          "$x = new X(array(0, 1, 2));\n"
+          "var_dump($x->exp_info);\n"
+          "$x1 = new X(null);\n"
+          "var_dump($x->exp_info);\n",
+          "array(3) {\n"
+          "  [0]=>\n"
+          "  int(0)\n"
+          "  [1]=>\n"
+          "  int(1)\n"
+          "  [2]=>\n"
+          "  int(2)\n"
+          "}\n"
+          "array(3) {\n"
+          "  [0]=>\n"
+          "  int(0)\n"
+          "  [1]=>\n"
+          "  int(1)\n"
+          "  [2]=>\n"
+          "  int(2)\n"
+          "}\n");
+  }
 
   MVCRO("<?php\n"
         "class X {}\n"
@@ -17625,8 +17619,7 @@ bool TestCodeRun::TestAPC() {
 }
 
 bool TestCodeRun::TestInlining() {
-  bool save = Option::AutoInline;
-  Option::AutoInline = true;
+  WithOpt w(Option::AutoInline);
 
   MVCR("<?php "
        "function id($x) {"
@@ -17737,28 +17730,24 @@ bool TestCodeRun::TestInlining() {
        "  foo($a)->bar = 1;"
        "}");
 
-  bool enableSyntax = Option::EnableHipHopSyntax;
-  Option::EnableHipHopSyntax = true;
+  {
+    WithOpt w(Option::EnableHipHopSyntax);
+    MVCRO("<?php\n"
+          "function inline_me($x, $y, &$z) { return ($z = ($x + $y)); }\n"
+          "function gen($x, $y) {\n"
+          "  yield inline_me($x, $y, $arg);\n"
+          "  yield $arg;\n"
+          "}\n"
+          "foreach (gen(10, 20) as $x) { var_dump($x); }\n",
+          "int(30)\n"
+          "int(30)\n");
+  }
 
-  MVCRO("<?php\n"
-        "function inline_me($x, $y, &$z) { return ($z = ($x + $y)); }\n"
-        "function gen($x, $y) {\n"
-        "  yield inline_me($x, $y, $arg);\n"
-        "  yield $arg;\n"
-        "}\n"
-        "foreach (gen(10, 20) as $x) { var_dump($x); }\n",
-        "int(30)\n"
-        "int(30)\n");
-
-  Option::EnableHipHopSyntax = enableSyntax;
-
-  Option::AutoInline = save;
   return true;
 }
 
 bool TestCodeRun::TestCopyProp() {
-  bool save = Option::CopyProp;
-  Option::CopyProp = true;
+  WithOpt w(Option::CopyProp);
 
   MVCR("<?php "
        "function test($tr_data) {"
@@ -17799,7 +17788,6 @@ bool TestCodeRun::TestCopyProp() {
         "int(32)\n"
         "bool(true)\n");
 
-  Option::CopyProp = save;
   return true;
 }
 
@@ -19002,8 +18990,7 @@ bool TestCodeRun::TestNamespace() {
 }
 
 bool TestCodeRun::TestYield() {
-  bool enableSyntax = Option::EnableHipHopSyntax;
-  Option::EnableHipHopSyntax = true;
+  WithOpt w(Option::EnableHipHopSyntax);
 
   MVCRO("<?php function fruit() { yield 'apple'; yield 'banana';} "
         "foreach (fruit() as $fruit) { var_dump($fruit);} ",
@@ -19429,13 +19416,11 @@ bool TestCodeRun::TestYield() {
         "foreach(foo() as $x) {}",
         "NULL\n" );
 
-  Option::EnableHipHopSyntax = enableSyntax;
   return true;
 }
 
 bool TestCodeRun::TestHint() {
-  bool enableSyntax = Option::EnableHipHopSyntax;
-  Option::EnableHipHopSyntax = true;
+  WithOpt w(Option::EnableHipHopSyntax);
 
   MVCRO("<?php\n"
         "function f1(int $i = 1) { var_dump($i); }\n"
@@ -19647,7 +19632,6 @@ bool TestCodeRun::TestHint() {
         "int(1)\n"
         "int(2)\n");
 
-  Option::EnableHipHopSyntax = enableSyntax;
   return true;
 }
 

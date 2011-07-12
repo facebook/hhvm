@@ -660,11 +660,8 @@ bool TestParserStmt::TestGotoStatement() {
 
 bool TestParserStmt::TestYieldStatement() {
 
-  bool save0 = RuntimeOption::EnableHipHopSyntax;
-  bool save1 = Option::EnableHipHopSyntax;
-
-  RuntimeOption::EnableHipHopSyntax = true;
-  Option::EnableHipHopSyntax = true;
+  WithOpt w0(RuntimeOption::EnableHipHopSyntax);
+  WithOpt w1(Option::EnableHipHopSyntax);
 
   V("<?php function foo() { yield break;}",
     "function (Continuation $" CONTINUATION_OBJECT_NAME ") {\n"
@@ -722,9 +719,6 @@ bool TestParserStmt::TestYieldStatement() {
     "$" CONTINUATION_OBJECT_NAME "->done();\n"
     "}\n"
     "}\n");
-
-  RuntimeOption::EnableHipHopSyntax = save0;
-  Option::EnableHipHopSyntax = save1;
 
   return true;
 }

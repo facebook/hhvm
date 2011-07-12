@@ -2407,6 +2407,8 @@ void AliasManager::gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m) {
       func->clearUsesLSB();
       m_changes = true;
     }
+  } else {
+    func->setInlineSameContext(true);
   }
 }
 

@@ -26,6 +26,8 @@ using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static const char *php_path = "/usr/local/php/bin/php";
+
 bool TestExtProcess::RunTests(const std::string &which) {
   bool ret = true;
 
@@ -294,7 +296,7 @@ bool TestExtProcess::test_proc_open() {
   Array env = CREATE_MAP1("some_option", "aeiou");
 
   Variant pipes;
-  Variant process = f_proc_open("php", descriptorspec, ref(pipes), cwd, env);
+  Variant process = f_proc_open(php_path, descriptorspec, ref(pipes), cwd, env);
   VERIFY(!same(process, false));
 
   {
@@ -323,7 +325,7 @@ bool TestExtProcess::test_proc_terminate() {
                 1, CREATE_VECTOR2("pipe", "w"),
                 2, CREATE_VECTOR3("file", "/tmp/error-output.txt", "a"));
   Variant pipes;
-  Variant process = f_proc_open("php", descriptorspec, ref(pipes));
+  Variant process = f_proc_open(php_path, descriptorspec, ref(pipes));
   VERIFY(!same(process, false));
   VERIFY(f_proc_terminate(process.toObject()));
   // still need to close it, not to leave a zombie behind
@@ -341,10 +343,10 @@ bool TestExtProcess::test_proc_get_status() {
                 1, CREATE_VECTOR2("pipe", "w"),
                 2, CREATE_VECTOR3("file", "/tmp/error-output.txt", "a"));
   Variant pipes;
-  Variant process = f_proc_open("php", descriptorspec, ref(pipes));
+  Variant process = f_proc_open(php_path, descriptorspec, ref(pipes));
   VERIFY(!same(process, false));
   Array ret = f_proc_get_status(process.toObject());
-  VS(ret["command"], "php");
+  VS(ret["command"], php_path);
   VERIFY(ret["pid"].toInt32() > 0);
   VERIFY(ret["running"]);
   VERIFY(!ret["signaled"]);

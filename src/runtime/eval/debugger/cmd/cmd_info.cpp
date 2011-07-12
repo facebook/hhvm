@@ -90,22 +90,44 @@ bool CmdInfo::help(DebuggerClient *client) {
   return true;
 }
 
+bool CmdInfo::parseZeroArg(DebuggerClient *client) {
+  ASSERT(client->argCount() == 0);
+  BreakPointInfoPtr bpi = client->getCurrentLocation();
+  if (bpi) {
+    m_symbol = bpi->getClass();
+    m_type = KindOfClass;
+    if (m_symbol.empty()) {
+      m_symbol = bpi->getFunction();
+      m_type = KindOfFunction;
+    }
+  }
+  return !m_symbol.empty();
+}
+
+void CmdInfo::parseOneArg(DebuggerClient *client, string &subsymbol) {
+  ASSERT(client->argCount() == 1);
+  string symbol = client->argValue(1);
+  size_t pos = symbol.find("::");
+  if (pos != string::npos) {
+    m_symbol = String(symbol.substr(0, pos));
+    m_type = KindOfClass;
+    subsymbol = symbol.substr(pos + 2);
+  } else if (symbol.size() > 2 && symbol.substr(symbol.size() - 2) == "()") {
+    m_symbol = symbol.substr(0, symbol.size() - 2);
+    m_type = KindOfFunction;
+  } else {
+    m_symbol = String(symbol);
+    m_type = KindOfUnknown;
+  }
+}
+
 bool CmdInfo::onClient(DebuggerClient *client) {
   if (DebuggerCommand::onClient(client)) return true;
 
   string subsymbol;
 
   if (client->argCount() == 0) {
-    BreakPointInfoPtr bpi = client->getCurrentLocation();
-    if (bpi) {
-      m_symbol = bpi->getClass();
-      m_type = KindOfClass;
-      if (m_symbol.empty()) {
-        m_symbol = bpi->getFunction();
-        m_type = KindOfFunction;
-      }
-    }
-    if (m_symbol.empty()) {
+    if (!parseZeroArg(client)) {
       client->error("There is no current function or method to look up.");
       client->tutorial(
         "You can only use '[i]nfo' without a symbol name when you are running "
@@ -115,19 +137,7 @@ bool CmdInfo::onClient(DebuggerClient *client) {
       return true;
     }
   } else if (client->argCount() == 1) {
-    string symbol = client->argValue(1);
-    size_t pos = symbol.find("::");
-    if (pos != string::npos) {
-      m_symbol = String(symbol.substr(0, pos));
-      m_type = KindOfClass;
-      subsymbol = symbol.substr(pos + 2);
-    } else if (symbol.size() > 2 && symbol.substr(symbol.size() - 2) == "()") {
-      m_symbol = symbol.substr(0, symbol.size() - 2);
-      m_type = KindOfFunction;
-    } else {
-      m_symbol = String(symbol);
-      m_type = KindOfUnknown;
-    }
+    parseOneArg(client, subsymbol);
   } else {
     return help(client);
   }
@@ -143,7 +153,6 @@ bool CmdInfo::onClient(DebuggerClient *client) {
       client->code(sb.detach());
     }
   }
-
   return true;
 }
 

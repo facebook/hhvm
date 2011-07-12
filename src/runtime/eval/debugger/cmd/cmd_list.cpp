@@ -15,6 +15,7 @@
 */
 
 #include <runtime/eval/debugger/cmd/cmd_list.h>
+#include <runtime/eval/debugger/cmd/cmd_info.h>
 #include <runtime/base/file/file.h>
 #include <runtime/ext/ext_file.h>
 
@@ -52,6 +53,9 @@ bool CmdList::help(DebuggerClient *client) {
     "list {line1}-",          "displays code starting with the line",
     "list -{line2}",          "displays code ending with the line",
     "list {file}",            "displays beginning lines of the file",
+    "list {cls}",             "displays beginning lines of the class",
+    "list {function}",        "displays beginning lines of the function",
+    "list {cls::method}",     "displays beginning lines of the method",
     "list {file}:{line}",     "displays code around specified file:line",
     "list {file}:{l1}-{l2}",  "displays specified block in the file",
     "list {file}:{l1}-",      "displays specified block in the file",
@@ -74,6 +78,89 @@ bool CmdList::help(DebuggerClient *client) {
   return true;
 }
 
+bool CmdList::listCurrent(DebuggerClient *client, int &line,
+                          int &charFocus0, int &lineFocus1,
+                          int &charFocus1) {
+  int linePrev = 0;
+  client->getListLocation(m_file, linePrev, line, charFocus0, lineFocus1,
+                          charFocus1);
+  if (m_line1 == 0 && m_line2 == 0) {
+    m_line1 = linePrev + 1;
+    m_line2 = m_line1 + DebuggerClient::CodeBlockSize;
+  }
+  if (m_file.empty()) {
+    string code = client->getCode();
+    if (code.empty()) {
+      client->error("There is no current source file.");
+      return true;
+    }
+    client->print(highlight_php(code));
+    return true;
+  }
+  return false;
+}
+
+bool CmdList::listFileRange(DebuggerClient *client, int line,
+                            int charFocus0, int lineFocus1,
+                            int charFocus1) {
+  if (m_line1 <= 0) m_line1 = 1;
+  if (m_line2 <= 0) m_line2 = 1;
+  if (m_line1 > m_line2) {
+    int32 tmp = m_line1;
+    m_line1 = m_line2;
+    m_line2 = tmp;
+  }
+
+  CmdListPtr res = client->xend<CmdList>(this);
+  if (res->m_code.isString()) {
+    if (!client->code(res->m_code, line, m_line1, m_line2, charFocus0,
+                      lineFocus1, charFocus1)) {
+      client->info("No more lines in %s to display.", m_file.c_str());
+    }
+    client->setListLocation(m_file, m_line2, false);
+    return true;
+  }
+  return false;
+}
+
+bool CmdList::listFunctionOrClass(DebuggerClient *client) {
+  ASSERT(client->argCount() == 1);
+  CmdInfoPtr cmdInfo(new CmdInfo());
+  DebuggerCommandPtr deleter(cmdInfo);
+  string subsymbol;
+  cmdInfo->parseOneArg(client, subsymbol);
+  CmdInfoPtr cmd = client->xend<CmdInfo>(cmdInfo.get());
+  Array info = cmd->getInfo();
+  if (info.empty()) return false;
+  assert(info.size() == 1);
+  ArrayIter iter(info);
+  Array funcInfo = iter.second();
+  if (!subsymbol.empty()) {
+    String key = CmdInfo::FindSubSymbol(funcInfo["methods"], subsymbol);
+    if (key.isNull()) return false;
+    funcInfo = funcInfo["methods"][key].toArray(); 
+  }
+  String file = funcInfo["file"].toString();
+  int line1 = funcInfo["line1"].toInt32();
+  int line2 = funcInfo["line2"].toInt32();
+  int line = line1 ? line1 : line2;
+  if (file.empty() || !line) return false;
+  client->setListLocation(file.data(), line - 1, false);
+  line = 0;
+  int charFocus0 = 0;
+  int lineFocus1 = 0;
+  int charFocus1 = 0;
+  m_file.clear();
+  m_line1 = m_line2 = 0;
+  if (listCurrent(client, line, charFocus0, lineFocus1, charFocus1)) {
+    return true;
+  }
+  if (listFileRange(client, line, charFocus0, lineFocus1, charFocus1)) {
+    return true;
+  }
+  return false;
+}
+
 bool CmdList::onClient(DebuggerClient *client) {
   if (DebuggerCommand::onClient(client)) return true;
   if (client->argCount() > 1) {
@@ -92,7 +179,13 @@ bool CmdList::onClient(DebuggerClient *client) {
       }
       m_line1 = line - DebuggerClient::CodeBlockSize/2;
       m_line2 = m_line1 + DebuggerClient::CodeBlockSize;
+    } else if (arg.find("::") != string::npos) {
+      if (!listFunctionOrClass(client)) {
+        client->error("Unable to read specified method.");
+      }
+      return true;
     } else {
+
       size_t pos = arg.find(':');
       if (pos != string::npos) {
         m_file = arg.substr(0, pos);
@@ -158,23 +251,10 @@ bool CmdList::onClient(DebuggerClient *client) {
   int charFocus1 = 0;
 
   if (m_file.empty()) {
-    int linePrev = 0;
-    client->getListLocation(m_file, linePrev, line, charFocus0, lineFocus1,
-                            charFocus1);
-    if (m_line1 == 0 && m_line2 == 0) {
-      m_line1 = linePrev + 1;
-      m_line2 = m_line1 + DebuggerClient::CodeBlockSize;
-    }
-    if (m_file.empty()) {
-      string code = client->getCode();
-      if (code.empty()) {
-        client->error("There is no current source file.");
-        return true;
-      }
-      client->print(highlight_php(code));
+    if (listCurrent(client, line, charFocus0, lineFocus1, charFocus1)) {
       return true;
     }
-  } else {
+  } else if (m_file[0] == '/') {
     struct stat sb;
     stat(m_file.c_str(), &sb);
     if ((sb.st_mode & S_IFMT) == S_IFDIR) {
@@ -184,25 +264,13 @@ bool CmdList::onClient(DebuggerClient *client) {
     }
   }
 
-  if (m_line1 <= 0) m_line1 = 1;
-  if (m_line2 <= 0) m_line2 = 1;
-  if (m_line1 > m_line2) {
-    int32 tmp = m_line1;
-    m_line1 = m_line2;
-    m_line2 = tmp;
+  if (listFileRange(client, line, charFocus0, lineFocus1, charFocus1)) {
+    return true;
+  } else if (client->argCount() != 1 || !listFunctionOrClass(client)) {
+    client->error(
+      "Unable to read specified function, class or source file location.");
+    return true;
   }
-
-  CmdListPtr res = client->xend<CmdList>(this);
-  if (res->m_code.isString()) {
-    if (!client->code(res->m_code, line, m_line1, m_line2, charFocus0,
-                      lineFocus1, charFocus1)) {
-      client->info("No more lines in %s to display.", m_file.c_str());
-    }
-    client->setListLocation(m_file, m_line2, false);
-  } else {
-    client->error("Unable to read specified source file location.");
-  }
-
   return true;
 }
 

@@ -44,6 +44,15 @@ private:
   int32 m_line1;
   int32 m_line2;
   Variant m_code;
+
+  bool listCurrent(DebuggerClient *client, int &line,
+                   int &charFocus0, int &lineFocus1,
+                   int &charFocus1);
+  bool listFileRange(DebuggerClient *client, int line,
+                     int charFocus0, int lineFocus1,
+                     int charFocus1);
+  bool listFunctionOrClass(DebuggerClient *client);
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////

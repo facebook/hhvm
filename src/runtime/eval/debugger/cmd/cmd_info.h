@@ -41,6 +41,11 @@ public:
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
+  bool parseZeroArg(DebuggerClient *client);
+  void parseOneArg(DebuggerClient *client, std::string &subsymbol);
+  Array getInfo() { return m_info; }
+  static String FindSubSymbol(CArrRef symbols, const std::string &symbol);
+
 private:
   enum SymbolType {
     KindOfUnknown,
@@ -58,8 +63,6 @@ private:
   static String GetParams(CArrRef params, bool varg, bool detailed = false);
   static String GetModifier(CArrRef info, const char *name);
 
-  static String FindSubSymbol(CArrRef symbols, const std::string &symbol);
-
   static bool TryConstant(StringBuffer &sb, CArrRef info,
                           const std::string &subsymbol);
   static bool TryProperty(StringBuffer &sb, CArrRef info,
@@ -68,10 +71,10 @@ private:
                         CArrRef info, std::string subsymbol);
 
   static void PrintDocComments(StringBuffer &sb, CArrRef info);
-  static void PrintHeader(DebuggerClient *client, StringBuffer &sb,
-                          CArrRef info);
   static void PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
                         const std::string &subsymbol);
+  static void PrintHeader(DebuggerClient *client, StringBuffer &sb,
+                          CArrRef info);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

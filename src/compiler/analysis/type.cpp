@@ -281,6 +281,15 @@ TypePtr Type::Coerce(AnalysisResultConstPtr ar, TypePtr type1, TypePtr type2) {
         cls2->derivesFrom(ar, type1->m_name, true, false)) {
       return type1;
     }
+    if (cls1 && cls2 &&
+        !cls1->isRedeclaring() && !cls2->isRedeclaring()) {
+      ClassScopePtr parent =
+        ClassScope::FindCommonParent(ar, type1->m_name,
+                                         type2->m_name);
+      if (parent) {
+        return Type::CreateObjectType(parent->getName());
+      }
+    }
     return Type::Object;
   }
 
@@ -297,9 +306,9 @@ TypePtr Type::Union(AnalysisResultConstPtr ar, TypePtr type1, TypePtr type2) {
   }
 
   int resultKind = type1->m_kindOf | type2->m_kindOf;
-  std::string resultName("");
+  if (resultKind == KindOfObject) {
+    std::string resultName("");
 
-  if (resultKind & KindOfObject) {
     // if they're the same, or we don't know one's name, then use
     // the other
     if (type1->m_name == type2->m_name) {
@@ -309,10 +318,12 @@ TypePtr Type::Union(AnalysisResultConstPtr ar, TypePtr type1, TypePtr type2) {
       // we know it's an object but not what kind.
     } else {
       // take the superclass
-      resultName = ClassScope::findCommonParent(ar, type1->m_name,
-                                                    type2->m_name);
-
+      ClassScopePtr res =
+        ClassScope::FindCommonParent(ar, type1->m_name,
+                                         type2->m_name);
+      if (res) resultName = res->getName();
     }
+    return TypePtr(Type::CreateObjectType(resultName));
   }
 
   return TypePtr(new Type((KindOf)resultKind));

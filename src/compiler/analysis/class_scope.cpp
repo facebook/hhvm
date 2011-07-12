@@ -360,25 +360,27 @@ bool ClassScope::derivesFrom(AnalysisResultConstPtr ar,
   return false;
 }
 
-std::string ClassScope::findCommonParent(AnalysisResultConstPtr ar,
-                                         const std::string cn1,
-                                         const std::string cn2) {
+ClassScopePtr ClassScope::FindCommonParent(AnalysisResultConstPtr ar,
+                                           const std::string &cn1,
+                                           const std::string &cn2) {
 
   ClassScopePtr cls1 = ar->findClass(cn1);
   ClassScopePtr cls2 = ar->findClass(cn2);
 
-  if (!cls1 || cls1->derivesFrom(ar, cn2, true, false)) return cn2;
-  if (!cls2 || cls2->derivesFrom(ar, cn1, true, false)) return cn1;
+  if (!cls1 || !cls2) return ClassScopePtr();
+  if (cls1->getName() == cls2->getName())      return cls1;
+  if (cls1->derivesFrom(ar, cn2, true, false)) return cls2;
+  if (cls2->derivesFrom(ar, cn1, true, false)) return cls1;
 
   // walk up the class hierarchy.
-  BOOST_FOREACH(std::string base1, cls1->m_bases) {
-    BOOST_FOREACH(std::string base2, cls2->m_bases) {
-      std::string parent = findCommonParent(ar, base1, base2);
-      if (!parent.empty()) return parent;
+  BOOST_FOREACH(const std::string &base1, cls1->m_bases) {
+    BOOST_FOREACH(const std::string &base2, cls2->m_bases) {
+      ClassScopePtr parent = FindCommonParent(ar, base1, base2);
+      if (parent) return parent;
     }
   }
 
-  return "";
+  return ClassScopePtr();
 }
 
 void ClassScope::setVolatile() {

@@ -93,7 +93,7 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
   minParam = maxParam = 0;
   bool hasRef = false;
   if (m_params) {
-    set<string> names;
+    set<string> names, allDeclNames;
     int i = 0;
     maxParam = m_params->getCount();
     for (i = maxParam; i--; ) {
@@ -105,23 +105,24 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
       } else if (minParam && !param->hasTypeHint()) {
         Compiler::Error(Compiler::RequiredAfterOptionalParam, param);
       }
+      allDeclNames.insert(param->getName());
     }
 
-    for (i = 0; i < maxParam; i++) {
+    for (i = maxParam-1; i >= 0; i--) {
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
-      if (names.find(param->getName()) == names.end()) {
-        names.insert(param->getName());
-      } else {
+      if (names.find(param->getName()) != names.end()) {
         Compiler::Error(Compiler::RedundantParameter, param);
         for (int j = 0; j < 1000; j++) {
           string name = param->getName() + lexical_cast<string>(j);
-          if (names.find(name) == names.end()) {
+          if (names.find(name) == names.end() &&
+              allDeclNames.find(name) == allDeclNames.end()) {
             param->rename(name);
             break;
           }
         }
       }
+      names.insert(param->getName());
     }
   }
 

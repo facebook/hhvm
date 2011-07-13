@@ -352,7 +352,7 @@ const char *CodeGenerator::getGlobals(AnalysisResultPtr ar) {
   return "g";
 }
 
-std::string CodeGenerator::formatLabel(const std::string &name) {
+std::string CodeGenerator::FormatLabel(const std::string &name) {
   string ret;
   ret.reserve(name.size());
   for (size_t i = 0; i < name.size(); i++) {
@@ -371,7 +371,7 @@ std::string CodeGenerator::formatLabel(const std::string &name) {
   return ret;
 }
 
-std::string CodeGenerator::escapeLabel(const std::string &name,
+std::string CodeGenerator::EscapeLabel(const std::string &name,
                                        bool *binary /* = NULL */) {
   return Util::escapeStringForCPP(name, binary);
 }
@@ -590,7 +590,7 @@ string CodeGenerator::printString(const string &str, AnalysisResultPtr ar,
                                   BlockScopeRawPtr bs,
                                   bool stringWrapper /* = true */) {
   bool isBinary = false;
-  string escaped = escapeLabel(str, &isBinary);
+  string escaped = EscapeLabel(str, &isBinary);
   if (bs) {
     return printNamedString(str, escaped, ar, bs, true);
   }

@@ -251,10 +251,10 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   // be generated differently...
 
   cg_printf("DECLARE_CLASS_COMMON%s(%s, %s)\n", sweep,
-            clsName, cg.escapeLabel(originalName).c_str());
+            clsName, CodeGenerator::EscapeLabel(originalName).c_str());
   cg_printf("DECLARE_INVOKE_EX%s(%s, %s, %s)\n",
       Option::UseMethodIndex ? "WITH_INDEX" : "", clsName,
-            cg.escapeLabel(originalName).c_str(), parent);
+            CodeGenerator::EscapeLabel(originalName).c_str(), parent);
 
   cg.printSection("DECLARE_STATIC_PROP_OPS");
   cg_printf("public:\n");
@@ -370,17 +370,17 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();
   if (cg.getContext() == CodeGenerator::NoContext) {
     if (classScope->isVolatile()) {
-      string name = cg.formatLabel(m_name);
+      string name = CodeGenerator::FormatLabel(m_name);
       if (classScope->isRedeclaring()) {
         cg_printf("g->%s%s = ClassStaticsPtr(NEWOBJ(%s%s)());\n",
                   Option::ClassStaticsObjectPrefix,
                   name.c_str(),
-                  Option::ClassStaticsPrefix, classScope->getId(cg).c_str());
+                  Option::ClassStaticsPrefix, classScope->getId().c_str());
         cg_printf("g->%s%s = &%s%s;\n",
                   Option::ClassStaticsCallbackPrefix,
                   name.c_str(),
                   Option::ClassWrapperFunctionPrefix,
-                  classScope->getId(cg).c_str());
+                  classScope->getId().c_str());
       }
       cg_printf("g->CDEC(%s) = true;\n", name.c_str());
 
@@ -394,7 +394,8 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           cg_printString(base->getOriginalName(), ar, shared_from_this());
           string lname = Util::toLower(base->getOriginalName());
           cg_printf(", &%s->CDEC(%s));\n",
-                    cg.getGlobals(ar), cg.formatLabel(lname).c_str());
+                    cg.getGlobals(ar),
+                    CodeGenerator::FormatLabel(lname).c_str());
         }
       }
     }
@@ -405,7 +406,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     printSource(cg);
   }
 
-  string clsNameStr = classScope->getId(cg);
+  string clsNameStr = classScope->getId();
   const char *clsName = clsNameStr.c_str();
   bool redeclared = classScope->isRedeclaring();
 
@@ -431,7 +432,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           cg_printf(" : public DynamicObjectData");
         } else {
           cg_printf(" : public %s%s", Option::ClassPrefix,
-                    parCls->getId(cg).c_str());
+                    parCls->getId().c_str());
         }
       } else {
         if (classScope->derivesFromRedeclaring()) {
@@ -451,7 +452,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           if (intfClassScope && !intfClassScope->isRedeclaring() &&
               classScope->derivesDirectlyFrom(intf) &&
               (!parCls || !parCls->derivesFrom(ar, intf, true, false))) {
-            string id = intfClassScope->getId(cg);
+            string id = intfClassScope->getId();
             cg_printf(", public %s%s", Option::ClassPrefix, id.c_str());
           }
         }
@@ -489,13 +490,13 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         bool redec = classScope->isRedeclaring();
         if (!classScope->derivesFromRedeclaring()) {
           outputCPPClassDecl(cg, ar, clsName, m_originalName.c_str(),
-                             parCls ? parCls->getId(cg).c_str()
+                             parCls ? parCls->getId().c_str()
                                     : "ObjectData");
         } else {
           cg_printf("DECLARE_DYNAMIC_CLASS(%s, %s, %s)\n", clsName,
                     m_originalName.c_str(),
                     dyn || !parCls ? "DynamicObjectData" :
-                    parCls->getId(cg).c_str());
+                    parCls->getId().c_str());
         }
 
         bool hasGet = classScope->getAttribute(
@@ -524,7 +525,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
             conInit = " : DynamicObjectData(\"" + m_parent + "\", r)";
             hasParam = true;
           } else if (idyn) {
-            conInit = " : " + string(Option::ClassPrefix) + parCls->getId(cg) +
+            conInit = " : " + string(Option::ClassPrefix) + parCls->getId() +
               "(r ? r : this)";
             hasParam = true;
           } else {
@@ -720,7 +721,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           } else {
             ClassScopePtr parCls = ar->findClass(m_parent);
             cg_printf("%s%s::init();\n", Option::ClassPrefix,
-                      parCls->getId(cg).c_str());
+                      parCls->getId().c_str());
           }
         }
         if (classScope->getVariables()->
@@ -972,7 +973,7 @@ void ClassStatement::outputJavaFFICPPCreator(CodeGenerator &cg,
 
   cg_indentBegin(") {\n");
   cg_printf("ObjectData *obj = (NEWOBJ(%s%s)())->create(%s);\n",
-            Option::ClassPrefix, cls->getId(cg).c_str(), args.str().c_str());
+            Option::ClassPrefix, cls->getId().c_str(), args.str().c_str());
   cg_printf("return (jlong)(NEW(Variant)(obj));\n");
   cg_indentEnd("}\n\n");
 }

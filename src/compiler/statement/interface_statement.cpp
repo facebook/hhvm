@@ -235,12 +235,13 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg,
   ClassScopeRawPtr classScope = getClassScope();
   if (cg.getContext() == CodeGenerator::NoContext) {
     if (classScope->isVolatile()) {
-      cg_printf("g->CDEC(%s) = true;\n", cg.formatLabel(m_name).c_str());
+      cg_printf("g->CDEC(%s) = true;\n",
+                CodeGenerator::FormatLabel(m_name).c_str());
     }
     return;
   }
 
-  string clsNameStr = classScope->getId(cg);
+  string clsNameStr = classScope->getId();
   const char *clsName = clsNameStr.c_str();
 
   switch (cg.getContext()) {
@@ -261,7 +262,7 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg,
           ClassScopePtr intfClassScope = ar->findClass(intf);
           if (intfClassScope && !intfClassScope->isRedeclaring() &&
               classScope->derivesDirectlyFrom(intf)) {
-            string id = intfClassScope->getId(cg);
+            string id = intfClassScope->getId();
             cg_printf("%s public %s%s", sep, Option::ClassPrefix, id.c_str());
             sep = ",";
           }

@@ -164,7 +164,7 @@ void GlobalStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (variables->needLocalCopy(name)) {
         cg_printf("%s%s.assignRef(g->%s);\n",
                   Option::VariablePrefix, name.c_str(),
-                  variables->getGlobalVariableName(cg, ar, name).c_str());
+                  variables->getGlobalVariableName(ar, name).c_str());
       }
     } else if (exp->is(Expression::KindOfDynamicVariable)) {
       DynamicVariablePtr var = dynamic_pointer_cast<DynamicVariable>(exp);

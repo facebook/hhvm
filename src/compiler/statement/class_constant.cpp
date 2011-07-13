@@ -160,7 +160,7 @@ void ClassConstant::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         type->outputCPPDecl(cg, ar, getScope());
       }
       cg_printf(" %s%s_%s;\n", Option::ClassConstantPrefix,
-                scope->getId(cg).c_str(),
+                scope->getId().c_str(),
                 var->getName().c_str());
       break;
     case CodeGenerator::CppClassConstantsImpl: {
@@ -173,14 +173,14 @@ void ClassConstant::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
       value->outputCPPBegin(cg, ar);
       cg_printf(" %s%s_%s", Option::ClassConstantPrefix,
-                scope->getId(cg).c_str(),
+                scope->getId().c_str(),
                 var->getName().c_str());
       cg_printf(isString ? "(" : " = ");
       ScalarExpressionPtr scalarExp =
         dynamic_pointer_cast<ScalarExpression>(value);
       if (isString && scalarExp) {
         cg_printf("LITSTR_INIT(%s)",
-                  scalarExp->getCPPLiteralString(cg).c_str());
+                  scalarExp->getCPPLiteralString().c_str());
       } else {
         value->outputCPP(cg, ar);
       }
@@ -191,7 +191,7 @@ void ClassConstant::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     case CodeGenerator::CppLazyStaticInitializer:
       value->outputCPPBegin(cg, ar);
       cg_printf("g->%s%s_%s = ", Option::ClassConstantPrefix,
-                scope->getId(cg).c_str(),
+                scope->getId().c_str(),
                 var->getName().c_str());
       value->outputCPP(cg, ar);
       cg_printf(";\n");

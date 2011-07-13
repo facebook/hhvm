@@ -153,12 +153,11 @@ public:
 
   const char *getVariablePrefix(const std::string &name) const;
   const char *getVariablePrefix(const Symbol *sym) const;
-  std::string getVariableName(CodeGenerator &cg, AnalysisResultConstPtr ar,
+  std::string getVariableName(AnalysisResultConstPtr ar,
                               const std::string &name) const;
-  std::string getVariableName(CodeGenerator &cg, AnalysisResultConstPtr ar,
+  std::string getVariableName(AnalysisResultConstPtr ar,
                               const Symbol *sym) const;
-  std::string getGlobalVariableName(CodeGenerator &cg,
-                                    AnalysisResultConstPtr ar,
+  std::string getGlobalVariableName(AnalysisResultConstPtr ar,
                                     const std::string &name) const;
 
   /**
@@ -273,7 +272,7 @@ public:
   /**
    * Canonicalize symbol order of static globals.
    */
-  void canonicalizeStaticGlobals(CodeGenerator &cg);
+  void canonicalizeStaticGlobals();
 
   /**
    * Generate all variable declarations for this symbol table.
@@ -333,7 +332,7 @@ public:
     FunctionScopePtr func;
 
     // get unique identifier for this variable
-    static std::string getId(CodeGenerator &cg, ClassScopePtr cls,
+    static std::string getId(ClassScopePtr cls,
                              FunctionScopePtr func, const std::string &name);
   };
 

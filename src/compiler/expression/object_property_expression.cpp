@@ -443,7 +443,7 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
       m_object->setActualType(m_object->getImplementedType());
       ClassScopePtr cls = ar->findExactClass(shared_from_this(),
                                              act->getName());
-      cg_printf("((%s%s*)", Option::ClassPrefix, cls->getId(cg).c_str());
+      cg_printf("((%s%s*)", Option::ClassPrefix, cls->getId().c_str());
     }
     m_object->outputCPP(cg, ar);
     if (act) {
@@ -475,7 +475,7 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
   if (m_valid && m_propSym->isPrivate() &&
       m_objectClass != getOriginalClass()) {
     cg_printf("%s%s::",
-              Option::ClassPrefix, getOriginalClass()->getId(cg).c_str());
+              Option::ClassPrefix, getOriginalClass()->getId().c_str());
   }
   return false;
 }

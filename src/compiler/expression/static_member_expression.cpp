@@ -411,37 +411,37 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
 
     ASSERT(m_resolvedClass);
     ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
-    string clsId = m_resolvedClass->getId(cg);
+    string clsId = m_resolvedClass->getId();
     if (m_resolvedClass->needLazyStaticInitializer()) {
       cg_printf("%s%s::lazy_initializer(g)->%s%s%s%s",
                 Option::ClassPrefix, clsId.c_str(),
                 Option::StaticPropertyPrefix, clsId.c_str(),
                 Option::IdPrefix.c_str(),
-                cg.formatLabel(var->getString()).c_str());
+                CodeGenerator::FormatLabel(var->getString()).c_str());
     } else {
       cg_printf("g->%s%s%s%s", Option::StaticPropertyPrefix, clsId.c_str(),
                 Option::IdPrefix.c_str(),
-                cg.formatLabel(var->getString()).c_str());
+                CodeGenerator::FormatLabel(var->getString()).c_str());
     }
   } else {
     if (m_context & (LValue | RefValue | UnsetContext)) {
       if (isRedeclared()) {
         cg_printf("g->%s%s->%slval(", Option::ClassStaticsObjectPrefix,
-                  cg.formatLabel(m_className).c_str(),
+                  CodeGenerator::FormatLabel(m_className).c_str(),
                   Option::ObjectStaticPrefix);
       } else {
         cg_printf("%s%s::%slval(", Option::ClassPrefix,
-                  m_resolvedClass->getId(cg).c_str(),
+                  m_resolvedClass->getId().c_str(),
                   Option::ObjectStaticPrefix);
       }
     } else {
       if (isRedeclared()) {
         cg_printf("g->%s%s->%sget(", Option::ClassStaticsObjectPrefix,
-                  cg.formatLabel(m_className).c_str(),
+                  CodeGenerator::FormatLabel(m_className).c_str(),
                   Option::ObjectStaticPrefix);
       } else {
         cg_printf("%s%s::%sget(", Option::ClassPrefix,
-                  m_resolvedClass->getId(cg).c_str(),
+                  m_resolvedClass->getId().c_str(),
                   Option::ObjectStaticPrefix);
       }
     }

@@ -206,7 +206,7 @@ public:
   /**
    * Generate type specifier in C++.
    */
-  std::string getCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
+  std::string getCPPDecl(AnalysisResultConstPtr ar,
                          BlockScopeRawPtr scope);
   DataType getDataType() const;
 

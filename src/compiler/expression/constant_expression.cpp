@@ -285,17 +285,18 @@ void ConstantExpression::outputCPPImpl(CodeGenerator &cg,
     if (m_dynamic) {
       cg_printf("getDynamicConstant(%s->%s%s, ",
                 cg.getGlobals(ar), Option::ConstantPrefix,
-                cg.formatLabel(m_name).c_str());
+                CodeGenerator::FormatLabel(m_name).c_str());
       cg_printString(m_name, ar, shared_from_this());
       cg_printf(")");
     } else {
       cg_printf("%s%s", Option::ConstantPrefix,
-                cg.formatLabel(m_name).c_str());
+                CodeGenerator::FormatLabel(m_name).c_str());
       requireFwDeclaration = true;
     }
   } else {
     cg_printf("getUndefinedConstant(");
-    cg_printString(cg.formatLabel(m_name).c_str(), ar, shared_from_this());
+    cg_printString(CodeGenerator::FormatLabel(m_name).c_str(), ar,
+                   shared_from_this());
     cg_printf(")");
     requireFwDeclaration = true;
   }

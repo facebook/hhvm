@@ -287,7 +287,7 @@ void ObjectMethodExpression::outputCPPObjectCall(CodeGenerator &cg,
     if (type->isSpecificObject() && !m_name.empty() && m_valid) {
       objType = type->getName();
       ClassScopePtr cls = ar->findClass(objType);
-      objType = cls->getId(cg);
+      objType = cls->getId();
     } else {
       objType = "ObjectData";
     }
@@ -297,7 +297,7 @@ void ObjectMethodExpression::outputCPPObjectCall(CodeGenerator &cg,
       cg_printf("->");
     }
   } else if (m_bindClass && m_classScope) {
-    cg_printf(" BIND_CLASS_ARROW(%s) ", m_classScope->getId(cg).c_str());
+    cg_printf(" BIND_CLASS_ARROW(%s) ", m_classScope->getId().c_str());
   }
 }
 

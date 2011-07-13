@@ -588,7 +588,7 @@ bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   Expression::preOutputCPP(cg, ar, state & ~FixOrder);
   cg.wrapExpressionBegin();
   if (m_classScope) {
-    string className = m_classScope->getId(cg);
+    string className = m_classScope->getId();
 #ifdef ENABLE_LATE_STATIC_BINDING
     cg_printf("fi.setStaticClassName(%s%s::s_class_name);\n",
               Option::ClassPrefix, className.c_str());
@@ -676,7 +676,7 @@ void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (!m_className.empty()) {
       cg_printf("STATIC_CLASS_NAME_CALL(");
       if (m_classScope) {
-        string className = m_classScope->getId(cg);
+        string className = m_classScope->getId();
         cg_printf("%s%s::s_class_name, ",
                   Option::ClassPrefix, className.c_str());
       } else {

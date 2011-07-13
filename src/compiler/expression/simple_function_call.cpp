@@ -1248,7 +1248,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         cg_printf("if (%s%s%s.isInitialized()) ",
                   namePrefix.c_str(),
                   Option::VariablePrefix,
-                  cg.formatLabel(sv->getName()).c_str());
+                  CodeGenerator::FormatLabel(sv->getName()).c_str());
       }
       e->preOutputCPP(cg, ar, 0);
       cg_printf("compact%d.add(", m_ciTemp);
@@ -1290,7 +1290,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
           // mcp.isObj is by default false
           cg_printf("mcp%d.rootCls = %s%s::s_class_name.get();\n",
                     m_ciTemp,
-                    Option::ClassPrefix, m_classScope->getId(cg).c_str());
+                    Option::ClassPrefix, m_classScope->getId().c_str());
         } else {
           if (!objCall || m_arrayParams) {
             cg.wrapExpressionBegin();
@@ -1308,7 +1308,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       if (cg.inExpression()) {
         cg.wrapExpressionBegin();
         cg_printf("extern Variant %s%s(void*,CArrRef);\n",
-                  Option::InvokePrefix, m_funcScope->getId(cg).c_str());
+                  Option::InvokePrefix, m_funcScope->getId().c_str());
       }
     }
 
@@ -1320,7 +1320,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   cg.wrapExpressionBegin();
   m_ciTemp = cg.createNewLocalId(shared_from_this());
   bool needHash = true;
-  string escapedName(cg.escapeLabel(m_origName));
+  string escapedName(CodeGenerator::EscapeLabel(m_origName));
   string escapedClass;
   ClassScopePtr cls = m_classScope;
   if (!m_className.empty()) {
@@ -1329,7 +1329,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         cg, ar, getScope(), m_origClassName, false);
       cg_printf(";\n");
     }
-    escapedClass = cg.escapeLabel(m_className);
+    escapedClass = CodeGenerator::EscapeLabel(m_className);
   }
   cg_printf("const CallInfo *cit%d = NULL;\n", m_ciTemp);
   if (!m_class && m_className.empty()) {
@@ -1350,7 +1350,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       cg_indentBegin("if (");
       cg_printf("%s->FVF(%s)",
           cg.getGlobals(ar),
-          cg.formatLabel(m_name).c_str());
+          CodeGenerator::FormatLabel(m_name).c_str());
       safeCheck = true;
     }
   }
@@ -1361,7 +1361,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     if (m_redeclared && !m_dynamicInvoke) {
       needHash = false;
       cg_printf("cit%d = %s->GCI(%s);\n", m_ciTemp, cg.getGlobals(ar),
-                cg.formatLabel(m_name).c_str());
+                CodeGenerator::FormatLabel(m_name).c_str());
       if (!safeCheck) {
         // If m_safe, check cit later, if null then yield null or safeDef
         cg_printf("if (!cit%d) invoke_failed(\"%s\", null_array, -1);\n",
@@ -1388,12 +1388,12 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     string className;
     if (m_classScope) {
       if (isRedeclared()) {
-        className = cg.formatLabel(m_className);
+        className = CodeGenerator::FormatLabel(m_className);
       } else {
-        className = m_classScope->getId(cg);
+        className = m_classScope->getId();
       }
     } else {
-      className = cg.formatLabel(m_className);
+      className = CodeGenerator::FormatLabel(m_className);
       if (!m_className.empty() && m_cppTemp.empty() &&
           !isSelf() && !isParent() && !isStatic()) {
         // Create a temporary to hold the class name, in case it is not a
@@ -1571,7 +1571,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       if (m_valid) {
         cg_printf("(%s->FVF(%s)",
                   cg.getGlobals(ar),
-                  cg.formatLabel(m_name).c_str());
+                  CodeGenerator::FormatLabel(m_name).c_str());
       }
       volatileCheck = true;
     }
@@ -1618,20 +1618,20 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         if (m_localThis.empty() && getOriginalClass()->isRedeclaring() &&
             getOriginalClass() != getClassScope()) {
           cg_printf("((%s%s*)parent.get())->",
-                    Option::ClassPrefix, getOriginalClass()->getId(cg).c_str());
+                    Option::ClassPrefix, getOriginalClass()->getId().c_str());
         }
         if (m_classScope->isRedeclaring() &&
             m_classScope != getOriginalClass()) {
           cg_printf("((%s%s*)%sparent.get())->",
-                    Option::ClassPrefix, cls->getId(cg).c_str(),
+                    Option::ClassPrefix, cls->getId().c_str(),
                     getThisString(true).c_str());
         } else if (getOriginalClass() != getClassScope()) {
           cg_printf("%s", getThisString(true).c_str());
         }
       }
-      cg_printf("%s%s::%s%s(", Option::ClassPrefix, cls->getId(cg).c_str(),
+      cg_printf("%s%s::%s%s(", Option::ClassPrefix, cls->getId().c_str(),
                 m_funcScope->getPrefix(m_params),
-                cg.formatLabel(m_funcScope->getName()).c_str());
+                CodeGenerator::FormatLabel(m_funcScope->getName()).c_str());
     } else {
       int paramCount = m_params ? m_params->getCount() : 0;
       if (m_name == "get_class" && getOriginalClass() && paramCount == 0) {
@@ -1649,7 +1649,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         }
       } else {
         if (m_noPrefix) {
-          cg_printf("%s(", cg.formatLabel(m_name).c_str());
+          cg_printf("%s(", CodeGenerator::FormatLabel(m_name).c_str());
         } else {
           bool callUserFuncFewArgs =
             Option::UseCallUserFuncFewArgs &&
@@ -1662,7 +1662,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
             cg_printf("%s%s(",
                       m_builtinFunction ? Option::BuiltinFunctionPrefix :
                       m_funcScope->getPrefix(m_params),
-                      m_funcScope->getId(cg).c_str());
+                      m_funcScope->getId().c_str());
           }
         }
       }
@@ -1678,7 +1678,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       if (m_valid) {
         assert(m_arrayParams && m_ciTemp < 0);
         cg_printf("%s%s(NULL, ", Option::InvokePrefix,
-                  m_funcScope->getId(cg).c_str());
+                  m_funcScope->getId().c_str());
       } else if (canInvokeFewArgs() && !m_arrayParams) {
         if (Option::InvokeWithSpecificArgs) {
           cg_printf("(cit%d->getFunc%dArgs())(vt%d, ",
@@ -1697,9 +1697,9 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
 
         cg_printf("%s%s%s::%s%s(mcp%d, ",
                   getThisString(true).c_str(),
-                  Option::ClassPrefix, cls->getId(cg).c_str(),
+                  Option::ClassPrefix, cls->getId().c_str(),
                   prefix,
-                  cg.formatLabel(m_funcScope->getName()).c_str(),
+                  CodeGenerator::FormatLabel(m_funcScope->getName()).c_str(),
                   m_ciTemp);
       } else if (canInvokeFewArgs() && !m_arrayParams) {
         if (Option::InvokeWithSpecificArgs) {
@@ -1819,7 +1819,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
           cg_printf("g->declareConstant(");
           cg_printString(varName, ar, shared_from_this());
           cg_printf(", g->%s%s, ", Option::ConstantPrefix,
-                    cg.formatLabel(varName).c_str());
+                    CodeGenerator::FormatLabel(varName).c_str());
           value->outputCPP(cg, ar);
           cg_printf(")");
         } else {
@@ -1883,13 +1883,13 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
         if (cscope) {
           cg_printf("(int64)&%s%s::%s%s",
                     Option::ClassPrefix,
-                    cscope->getId(cg).c_str(),
+                    cscope->getId().c_str(),
                     Option::CallInfoPrefix,
-                    fscope->getId(cg).c_str());
+                    fscope->getId().c_str());
         } else {
           cg_printf("(int64)&%s%s",
                     Option::CallInfoPrefix,
-                    fscope->getId(cg).c_str());
+                    fscope->getId().c_str());
         }
         return;
       }
@@ -1905,19 +1905,19 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
       if (fscope) {
         cg_printf("%sContinuation$%s::Build(",
                   Option::ClassPrefix,
-                  fscope->getId(cg).c_str());
+                  fscope->getId().c_str());
 
         // func
         if (cscope) {
           cg_printf("(int64)&%s%s::%s%s, ",
                     Option::ClassPrefix,
-                    cscope->getId(cg).c_str(),
+                    cscope->getId().c_str(),
                     Option::CallInfoPrefix,
-                    fscope->getId(cg).c_str());
+                    fscope->getId().c_str());
         } else {
           cg_printf("(int64)&%s%s, ",
                     Option::CallInfoPrefix,
-                    fscope->getId(cg).c_str());
+                    fscope->getId().c_str());
         }
 
         // extra
@@ -1948,11 +1948,11 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                 ASSERT(sym->getFinalType()->is(Type::KindOfVariant));
                 cg_printf("strongBind(%s%s), ",
                           variables->getVariablePrefix(sym),
-                          cg.formatLabel(name).c_str());
+                          CodeGenerator::FormatLabel(name).c_str());
               } else {
                 cg_printf("%s%s, ",
                           variables->getVariablePrefix(sym),
-                          cg.formatLabel(name).c_str());
+                          CodeGenerator::FormatLabel(name).c_str());
               }
             }
           }
@@ -1972,11 +1972,11 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                   ASSERT(sym->getFinalType()->is(Type::KindOfVariant));
                   cg_printf("strongBind(closure->%s%s), ",
                             variables->getVariablePrefix(sym),
-                            cg.formatLabel(name).c_str());
+                            CodeGenerator::FormatLabel(name).c_str());
                 } else {
                   cg_printf("closure->%s%s, ",
                             variables->getVariablePrefix(sym),
-                            cg.formatLabel(name).c_str());
+                            CodeGenerator::FormatLabel(name).c_str());
                 }
               }
             }
@@ -1993,7 +1993,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
           if (cscope->derivedByDynamic()) {
             cg_printf("Object(GET_THIS()), ");
           } else {
-            cg_printf("GET_THIS_TYPED(%s), ", cscope->getId(cg).c_str());
+            cg_printf("GET_THIS_TYPED(%s), ", cscope->getId().c_str());
           }
         }
 
@@ -2147,7 +2147,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                   if (func->isVolatile()) {
                     cg_printf("%s->FVF(%s)",
                               cg.getGlobals(ar),
-                              cg.formatLabel(lname).c_str());
+                              CodeGenerator::FormatLabel(lname).c_str());
                     break;
                   }
                   cg_printf("true");
@@ -2192,7 +2192,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                   cg_printString(symbol, ar, shared_from_this());
                   cg_printf(", &%s->CDEC(%s))",
                             cg.getGlobals(ar),
-                            cg.formatLabel(lname).c_str());
+                            CodeGenerator::FormatLabel(lname).c_str());
                 }
               } else {
                 if (m_type == ClassExistsFunction) {

@@ -1966,7 +1966,7 @@ public:
         fs->outputCPPDeclHeader(cg, m_ar);
         f.close();
       }
-      fs->outputCPPClassHeaders(cg, m_ar, m_output);
+      fs->outputCPPClassHeaders(m_ar, m_output);
       fs->outputCPPForwardClassHeaders(cg, m_ar, m_output);
       {
         ofstream f(fwFileHeader.c_str());
@@ -2177,8 +2177,7 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
       SCHEDULE_JOB(UtilImpl);
     }
     if (output != CodeGenerator::SystemCPP && Option::GenerateCPPMain) {
-      outputCPPGlobalVariablesMethods(0); // canonicalizing static globals
-
+      getVariables()->canonicalizeStaticGlobals();
       SCHEDULE_JOB(GlobalDecl);
       SCHEDULE_JOB(Main);
       SCHEDULE_JOB(ScalarArrays);
@@ -2386,7 +2385,7 @@ void AnalysisResult::outputCPPNameMaps() {
            iter->second.begin();
          iterInner != iter->second.end(); ++iterInner) {
       cg_printf("\"%s\", \"%s\", (const char *)%d,\n",
-                cg.escapeLabel(iter->first).c_str(),
+                CodeGenerator::EscapeLabel(iter->first).c_str(),
                 iterInner->first.c_str(), iterInner->second);
     }
   }
@@ -2402,7 +2401,7 @@ void AnalysisResult::outputCPPNameMaps() {
            iter->second.begin();
          iterInner != iter->second.end(); ++iterInner) {
       cg_printf("\"%s\", \"%s\", (const char *)%d,\n",
-                cg.escapeLabel(iter->first).c_str(),
+                CodeGenerator::EscapeLabel(iter->first).c_str(),
                 iterInner->first.c_str(), iterInner->second);
     }
   }
@@ -2921,8 +2920,9 @@ void AnalysisResult::outputCPPHashTableGetConstant(
             system ? "" : "  init_builtin_constant_table();\n");
   for (uint i = 0; i < strings.size(); i++) {
     const char *name = strings[i];
-    string escaped = cg.escapeLabel(name);
-    string varName = string(Option::ConstantPrefix) + cg.formatLabel(name);
+    string escaped = CodeGenerator::EscapeLabel(name);
+    string varName = string(Option::ConstantPrefix) +
+                     CodeGenerator::FormatLabel(name);
     hphp_const_char_map<bool>::const_iterator it = dyns.find(name);
     bool dyn = it != dyns.end() && it->second;
     if (dyn) {
@@ -3084,11 +3084,12 @@ void AnalysisResult::outputCPPDynamicConstantTable(
     for (JumpTable jt(cg, strings, false, false, false); jt.ready();
          jt.next()) {
       const char *name = jt.key();
-      string varName = string(Option::ConstantPrefix) + cg.formatLabel(name);
+      string varName = string(Option::ConstantPrefix) +
+                       CodeGenerator::FormatLabel(name);
       hphp_const_char_map<bool>::const_iterator it = dyns.find(name);
       bool dyn = it != dyns.end() && it->second;
       if (dyn) {
-        string escaped = cg.escapeLabel(name);
+        string escaped = CodeGenerator::EscapeLabel(name);
         cg_printf("HASH_RETURN(0x%016llXLL, "
                   "getDynamicConstant(g->%s, \"%s\"), \"%s\");\n",
                   hash_string(name), varName.c_str(),
@@ -3096,7 +3097,7 @@ void AnalysisResult::outputCPPDynamicConstantTable(
       } else {
         cg_printf("HASH_RETURN(0x%016llXLL, %s, \"%s\");\n",
                   hash_string(name), varName.c_str(),
-                  cg.escapeLabel(name).c_str());
+                  CodeGenerator::EscapeLabel(name).c_str());
       }
     }
   }
@@ -3392,7 +3393,7 @@ void AnalysisResult::outputCPPRedeclaredFunctionDecl
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
       m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
     if (iter->second[0]->isVolatile()) {
-      std::string fname = cg.formatLabel(iter->first);
+      std::string fname = CodeGenerator::FormatLabel(iter->first);
       const char *name = fname.c_str();
       if (iter->second[0]->isRedeclaring()) {
         symbols.push_back(string("cim_") + name);
@@ -3735,7 +3736,7 @@ void AnalysisResult::outputCPPClassStaticInitializerFlags
     BOOST_FOREACH(ClassScopePtr cls, iter->second) {
       if (cls->needLazyStaticInitializer()) {
         symbols.push_back(string(Option::ClassStaticInitializerFlagPrefix) +
-                          cls->getId(cg));
+                          cls->getId());
       }
     }
   }
@@ -3837,7 +3838,7 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
     filename += "_";
     filename += lexical_cast<string>(part ? part : 1);
   }
-  if ((part == 0 || part == 1) && Option::GenHashTableGVRoutine) {
+  if (part == 1 && Option::GenHashTableGVRoutine) {
     filename += ".cpp";
   } else if (Option::GenHashTableGVRoutine) {
     return;
@@ -3848,11 +3849,6 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
   ofstream f(filename.c_str());
   CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
   AnalysisResultPtr ar = shared_from_this();
-
-  if (part == 0) {
-    getVariables()->canonicalizeStaticGlobals(cg);
-    return;
-  }
 
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
@@ -4073,7 +4069,7 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairVecVec &symbols,
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
          m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
     if (iter->second[0]->isVolatile()) {
-      std::string fname = cg.formatLabel(iter->first);
+      std::string fname = CodeGenerator::FormatLabel(iter->first);
       const char *name = fname.c_str();
       if (iter->second[0]->isRedeclaring()) {
         string varname = string("cim_") + name;
@@ -4130,7 +4126,7 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairVecVec &symbols,
         string varname = string(Option::ClassStaticInitializerFlagPrefix) +
           name;
         string memname = string(Option::ClassStaticInitializerFlagPrefix) +
-          iter->second[i]->getId(cg);
+          iter->second[i]->getId();
         names->push_back(pair<string, string>(varname, memname));
       }
     }
@@ -4171,7 +4167,8 @@ void AnalysisResult::outputCPPFiberGlobalState() {
   for (int i = 0; i < GlobalSymbolTypeCount; i++) {
     StringPairVec &names = symbols[i];
     for (unsigned int j = 0; j < names.size(); j++) {
-      cg_printf("\"%s\",\n", cg.escapeLabel(names[j].first).c_str());
+      cg_printf("\"%s\",\n",
+                CodeGenerator::EscapeLabel(names[j].first).c_str());
       index++;
     }
   }
@@ -4637,7 +4634,7 @@ void AnalysisResult::outputHSFFIStubs() {
         } else {
           cg_printf(", ");
         }
-        cg_printf("f_%s", func->getId(cg).c_str());
+        cg_printf("f_%s", func->getId().c_str());
       }
     }
   }
@@ -4862,9 +4859,9 @@ void AnalysisResult::addNamedScalarVarArray(const std::string &s) {
 string AnalysisResult::getFuncId(ClassScopePtr cls, FunctionScopePtr func) {
   CodeGenerator cg;
   if (cls) {
-    return cls->getId(cg) + "::" + func->getId(cg);
+    return cls->getId() + "::" + func->getId();
   }
-  return func->getId(cg);
+  return func->getId();
 }
 
 string AnalysisResult::getParamRTTIEntryKey(ClassScopePtr cls,

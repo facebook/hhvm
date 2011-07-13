@@ -189,7 +189,7 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
   bool outsideClass = !isPresent();
   if (!m_name.empty() && m_classScope && !m_dynamic) {
     ClassScopePtr cls = m_classScope;
-    const string& lClassName = cls->getId(cg);
+    const string& lClassName = cls->getId();
     bool skipCreate = cls->canSkipCreateMethod();
     if (m_receiverTemp.empty()) {
       if (outsideClass) {
@@ -324,14 +324,14 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       cg.wrapExpressionBegin();
       m_receiverTemp = genCPPTemp(cg, ar);
       cg_printf("%s%s %s = ",
-                Option::SmartPtrPrefix, m_classScope->getId(cg).c_str(),
+                Option::SmartPtrPrefix, m_classScope->getId().c_str(),
                 m_receiverTemp.c_str());
       if (outsideClass) {
         m_classScope->outputVolatileCheckBegin(cg, ar, getScope(), cname);
       }
       cg_printf("%s%s()",
                 Option::CreateObjectOnlyPrefix,
-                m_classScope->getId(cg).c_str());
+                m_classScope->getId().c_str());
       if (outsideClass) {
         m_classScope->outputVolatileCheckEnd(cg);
       }

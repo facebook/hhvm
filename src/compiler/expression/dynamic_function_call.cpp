@@ -210,7 +210,7 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       }
     } else if (m_classScope) {
       cg_printf("CStrRef cls%d = ", m_ciTemp);
-      cg_printString(m_classScope->getId(cg), ar, shared_from_this());
+      cg_printString(m_classScope->getId(), ar, shared_from_this());
     } else {
       cg_printf("CStrRef cls%d = ", m_ciTemp);
       cg_printString(m_className, ar, shared_from_this());
@@ -247,7 +247,7 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_printf("const CallInfo *&cit%d = mcp%d.ci;\n", m_ciTemp, m_ciTemp);
     if (m_classScope) {
       cg_printf("%s%s::%sget_call_info(mcp%d",
-                Option::ClassPrefix, m_classScope->getId(cg).c_str(),
+                Option::ClassPrefix, m_classScope->getId().c_str(),
                 Option::ObjectStaticPrefix, m_ciTemp, m_className.c_str());
     } else if (isRedeclared()) {
       cg_printf("g->%s%s->%sget_call_info(mcp%d",

@@ -298,7 +298,7 @@ string Expression::originalClassName(CodeGenerator &cg, bool withComma) {
     if (cls == getClassScope()) {
       return ret + "s_class_name";
     }
-    return ret + Option::ClassPrefix + cls->getId(cg) + "::s_class_name";
+    return ret + Option::ClassPrefix + cls->getId() + "::s_class_name";
   } else if (FunctionScopePtr funcScope = getOriginalFunction()) {
     if (!funcScope->inPseudoMain()) {
       return ret + "empty_string";

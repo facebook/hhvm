@@ -138,7 +138,7 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
   CodeGenerator::Context context = cg.getContext();
 
   FunctionScopeRawPtr funcScope = getFunctionScope();
-  string fname = funcScope->getId(cg);
+  string fname = funcScope->getId();
   bool pseudoMain = funcScope->inPseudoMain();
   string origFuncName = !pseudoMain ? funcScope->getOriginalName() :
           ("run_init::" + funcScope->getContainingFile()->getName());
@@ -147,7 +147,7 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
 
   if (context == CodeGenerator::NoContext) {
     if (funcScope->isVolatile()) {
-      string rname = cg.formatLabel(m_name);
+      string rname = CodeGenerator::FormatLabel(m_name);
       if (funcScope->isRedeclaring()) {
         cg.printf("g->GCI(%s) = &%s%s;\n", rname.c_str(),
                   Option::CallInfoPrefix, fname.c_str());

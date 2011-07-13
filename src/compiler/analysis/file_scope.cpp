@@ -315,7 +315,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   BOOST_FOREACH(const string &dep, m_usedClassesFullHeader) {
     ClassScopePtr cls = ar->findClass(dep);
     if (cls && cls->isUserClass()) {
-      cg_printInclude(cls->getHeaderFilename(cg));
+      cg_printInclude(cls->getHeaderFilename());
     }
   }
 
@@ -434,7 +434,7 @@ void FileScope::outputCPPDeclarations(CodeGenerator &cg,
     for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
          it != m_classes.end(); ++it) {
       BOOST_FOREACH(ClassScopePtr cls, it->second) {
-        cg_printInclude(cls->getHeaderFilename(cg));
+        cg_printInclude(cls->getHeaderFilename());
       }
     }
 
@@ -588,13 +588,13 @@ void FileScope::outputCPPDeclHeader(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg.headerEnd(header);
 }
 
-void FileScope::outputCPPClassHeaders(CodeGenerator &cg, AnalysisResultPtr ar,
+void FileScope::outputCPPClassHeaders(AnalysisResultPtr ar,
                                       CodeGenerator::Output output) {
   ClassScopePtr cls;
   for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
        it != m_classes.end(); ++it) {
     BOOST_FOREACH(ClassScopePtr cls, it->second) {
-      cls->outputCPPHeader(cg, ar, output);
+      cls->outputCPPHeader(ar, output);
     }
   }
 }
@@ -606,7 +606,7 @@ void FileScope::outputCPPForwardClassHeaders(CodeGenerator &cg,
   for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
        it != m_classes.end(); ++it) {
     BOOST_FOREACH(ClassScopePtr cls, it->second) {
-      cls->outputCPPForwardHeader(cg, ar, output);
+      cls->outputCPPForwardHeader(ar, output);
     }
   }
 }

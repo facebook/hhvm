@@ -704,8 +704,8 @@ void FunctionScope::setOverriding(TypePtr returnType,
   }
 }
 
-std::string FunctionScope::getId(CodeGenerator &cg) const {
-  string name = cg.formatLabel(getOriginalName());
+std::string FunctionScope::getId() const {
+  string name = CodeGenerator::FormatLabel(getOriginalName());
   if (m_redeclaring < 0) {
     return name;
   }
@@ -730,9 +730,10 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   int inTypedWrapper = Option::HardTypeHints ?
     cg.getContext() == CodeGenerator::CppTypedParamsWrapperImpl : -1;
 
-  string funcName = cg.escapeLabel(getOriginalName());
+  string funcName = CodeGenerator::EscapeLabel(getOriginalName());
   if (ClassScopePtr cls = getContainingClass()) {
-    funcName = cg.escapeLabel(cls->getOriginalName()) + "::" + funcName;
+    funcName = CodeGenerator::EscapeLabel(cls->getOriginalName()) + "::" +
+               funcName;
   }
   funcName += "()";
 
@@ -740,7 +741,7 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   for (int i = 0; i < m_maxParam; i++) {
     if (inTypedWrapper <= 0 && isRefParam(i)) {
       const string &name = getParamName(i);
-      string vname = Option::VariablePrefix + cg.formatLabel(name);
+      string vname = Option::VariablePrefix + CodeGenerator::FormatLabel(name);
       cg_printf("Variant &%s ATTRIBUTE_UNUSED = r%s;\n",
                 vname.c_str(), vname.c_str());
     }
@@ -839,7 +840,8 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
           sym->setStashedVal();
           TypePtr paramType = getParamType(i);
           paramType->outputCPPDecl(cg, ar, shared_from_this());
-          string vname = Option::VariablePrefix + cg.formatLabel(name);
+          string vname = Option::VariablePrefix +
+                         CodeGenerator::FormatLabel(name);
           if (!ref || paramType->isExactType()) {
             cg_printf(" v%s = %s;\n", vname.c_str(), vname.c_str());
           } else {
@@ -856,9 +858,9 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("%sClosure$%s *closure ATTRIBUTE_UNUSED = "
                 "(%sClosure$%s*)extra;\n",
                 Option::ClassPrefix,
-                cg.formatLabel(m_name).c_str(),
+                CodeGenerator::FormatLabel(m_name).c_str(),
                 Option::ClassPrefix,
-                cg.formatLabel(m_name).c_str());
+                CodeGenerator::FormatLabel(m_name).c_str());
       if (!m_closureGenerator) {
         BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
           const string &name = param->getName();
@@ -1222,7 +1224,8 @@ int FunctionScope::outputCPPInvokeArgCountCheck(
           cg_printf("%sthrow_missing_typed_argument(\"%s\", ",
                     fullGuard ? "return " : "", fullname.c_str());
           cg_printf(t->is(Type::KindOfArray) ?
-                    "0" : "\"%s\"", cg.escapeLabel(t->getName()).c_str());
+                    "0" : "\"%s\"",
+                    CodeGenerator::EscapeLabel(t->getName()).c_str());
           cg_printf(", %d);\n", i + 1);
           if (fullGuard) {
             if (i >= maxCount) return m_minParam;
@@ -1444,7 +1447,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
               instance ? instance : "");
     if (m_perfectVirtual) {
       ClassScopePtr cls = getContainingClass();
-      cg_printf("%s%s::", Option::ClassPrefix, cls->getId(cg).c_str());
+      cg_printf("%s%s::", Option::ClassPrefix, cls->getId().c_str());
     }
     cg_printf("%s%s(", funcPrefix, name);
 
@@ -1520,7 +1523,7 @@ void FunctionScope::outputCPPCreateDecl(CodeGenerator &cg,
   bool setWrapper = Option::HardTypeHints && needsTypeCheckWrapper();
 
   cg_printf("public: %s%s *create(",
-            Option::ClassPrefix, scope->getId(cg).c_str());
+            Option::ClassPrefix, scope->getId().c_str());
   cg.setContext(setWrapper ?
                 CodeGenerator::CppTypedParamsWrapperDecl :
                 CodeGenerator::CppFunctionWrapperDecl);
@@ -1538,7 +1541,7 @@ void FunctionScope::outputCPPCreateDecl(CodeGenerator &cg,
 void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   ClassScopePtr scope = getContainingClass();
-  string clsNameStr = scope->getId(cg);
+  string clsNameStr = scope->getId();
   const char *clsName = clsNameStr.c_str();
   const string &funcNameStr = this->getName();
   const char *consName = funcNameStr.c_str();
@@ -1565,14 +1568,15 @@ void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
                  Option::ClassPrefix, clsName);
   OutputCPPDynamicInvokeCount(cg);
   outputCPPDynamicInvoke(cg, ar, Option::MethodPrefix,
-                         cg.formatLabel(consName).c_str(),
+                         CodeGenerator::FormatLabel(consName).c_str(),
                          true, false, false, NULL, true);
   cg_indentEnd("}\n");
   if (isDynamic() || isSepExtension()) {
     cg_indentBegin("void %s%s::getConstructor(MethodCallPackage &mcp) {\n",
                    Option::ClassPrefix, clsName);
     cg_printf("mcp.ci = &%s%s::%s%s;\n", Option::ClassPrefix, clsName,
-              Option::CallInfoPrefix, cg.formatLabel(consName).c_str());
+              Option::CallInfoPrefix,
+              CodeGenerator::FormatLabel(consName).c_str());
     cg_printf("mcp.obj = this;\n");
     cg_indentEnd("}\n");
   }
@@ -1618,7 +1622,7 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   // Use the original cased name, for reflection to work correctly.
   cg_printf("(const char *)0x%04X, \"%s\", \"%s\", (const char *)%d, "
             "(const char *)%d, NULL, NULL,\n", attribute,
-            cg.escapeLabel(getOriginalName()).c_str(),
+            CodeGenerator::EscapeLabel(getOriginalName()).c_str(),
             m_stmt ? m_stmt->getLocation()->file : "",
             m_stmt ? m_stmt->getLocation()->line0 : 0,
             m_stmt ? m_stmt->getLocation()->line1 : 0);
@@ -1689,7 +1693,7 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
 void FunctionScope::outputCPPHelperClassAlloc(CodeGenerator &cg,
                                               AnalysisResultPtr ar) {
 
-  const string &funcName = cg.formatLabel(m_name);
+  const string &funcName = CodeGenerator::FormatLabel(m_name);
   ParameterExpressionPtrVec useVars;
   if (needsAnonClosureClass(useVars)) {
     cg_printf("IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(%sClosure$%s)\n",
@@ -1707,9 +1711,9 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
   if (isAbstract()) return;
   string id;
   if (m_method) {
-    id = cg.formatLabel(m_name);
+    id = CodeGenerator::FormatLabel(m_name);
   } else {
-    id = getId(cg);
+    id = getId();
   }
   int64 refflags = 0;
   for (int i = 0; i < m_maxParam; ++i) {
@@ -1731,7 +1735,7 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
       flags |= CallInfo::StaticMethod;
     }
     ClassScopePtr scope = getContainingClass();
-    string clsName = scope->getId(cg);
+    string clsName = scope->getId();
 
     cg.printf("CallInfo %s%s::%s%s((void*)&%s%s::%s%s, ", Option::ClassPrefix,
               clsName.c_str(), Option::CallInfoPrefix, id.c_str(),
@@ -1819,17 +1823,17 @@ void FunctionScope::outputCPPSubClassParam(CodeGenerator &cg,
   }
   cg_printf(" %s%s",
             Option::TempVariablePrefix,
-            cg.formatLabel(name).c_str());
+            CodeGenerator::FormatLabel(name).c_str());
 }
 
 void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (!getContainingClass()) {
     // spit out extern CallInfo decl
     cg_printf("extern CallInfo %s%s;\n", Option::CallInfoPrefix,
-              getId(cg).c_str());
+              getId().c_str());
   }
 
-  const string &funcName = cg.formatLabel(m_name);
+  const string &funcName = CodeGenerator::FormatLabel(m_name);
   ParameterExpressionPtrVec useVars;
   if (needsAnonClosureClass(useVars)) {
     cg_printf("FORWARD_DECLARE_CLASS(Closure$%s);\n", funcName.c_str());
@@ -1848,7 +1852,7 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
       Symbol *sym = variables->getSymbol(name);
       TypePtr t(sym->getFinalType());
       t->outputCPPDecl(cg, ar, shared_from_this());
-      const string &varName = variables->getVariableName(cg, ar, sym);
+      const string &varName = variables->getVariableName(ar, sym);
       cg_printf(" %s;\n", varName.c_str());
     }
 
@@ -1872,9 +1876,9 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
       ASSERT(sym);
       TypePtr t(sym->getFinalType());
       ASSERT(!param->isRef() || t->is(Type::KindOfVariant));
-      const string &varName = variables->getVariableName(cg, ar, sym);
+      const string &varName = variables->getVariableName(ar, sym);
       const string &tmpName =
-        string(Option::TempVariablePrefix) + cg.formatLabel(name);
+        string(Option::TempVariablePrefix) + CodeGenerator::FormatLabel(name);
       if (t->is(Type::KindOfVariant)) {
         const char *s = param->isRef() ? "Ref" : "Val";
         cg_printf("%s.assign%s(%s);\n", varName.c_str(), s, tmpName.c_str());
@@ -1902,7 +1906,7 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
     variables->getSymbols(symbols, true);
 
     BOOST_FOREACH(Symbol *sym, symbols) {
-      const string &varName = variables->getVariableName(cg, ar, sym);
+      const string &varName = variables->getVariableName(ar, sym);
       TypePtr type = sym->getFinalType();
       type->outputCPPDecl(cg, ar, shared_from_this());
       cg_printf(" %s;\n", varName.c_str());
@@ -1961,9 +1965,10 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
       const string& name = param->getName();
       Symbol *sym = variables->getSymbol(name);
       if (sym) {
-        const string &varName = variables->getVariableName(cg, ar, sym);
+        const string &varName = variables->getVariableName(ar, sym);
         const string &tmpName =
-          string(Option::TempVariablePrefix) + cg.formatLabel(name);
+          string(Option::TempVariablePrefix) +
+          CodeGenerator::FormatLabel(name);
         TypePtr t(sym->getFinalType());
         if (t->is(Type::KindOfVariant)) {
           const char *s = param->isRef() ? "Ref" : "Val";
@@ -2038,7 +2043,7 @@ void FunctionScope::outputMethodWrapper(CodeGenerator &cg,
       } else {
         cg_printf("void");
       }
-      cg_printf(" %s%s(", Option::MethodWrapperPrefix, getId(cg).c_str());
+      cg_printf(" %s%s(", Option::MethodWrapperPrefix, getId().c_str());
     }
 
     for (int i = 0; i < count; i++) {
@@ -2067,7 +2072,8 @@ void FunctionScope::outputMethodWrapper(CodeGenerator &cg,
         cg_printf("return ");
       }
 
-      cg_printf("%s%s(", Option::MethodPrefix, cg.formatLabel(m_name).c_str());
+      cg_printf("%s%s(", Option::MethodPrefix,
+                         CodeGenerator::FormatLabel(m_name).c_str());
       if (isVariableArgument()) {
         cg_printf("args.size() + %d, ", count);
       }

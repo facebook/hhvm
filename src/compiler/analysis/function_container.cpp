@@ -69,10 +69,10 @@ void FunctionContainer::outputCPPJumpTableDecl(CodeGenerator &cg,
     if (iter->second[0]->isRedeclaring()) {
       BOOST_FOREACH(FunctionScopePtr func, iter->second) {
         cg_printf("Variant %s%s(void *extra, CArrRef params);\n",
-                  Option::InvokePrefix, func->getId(cg).c_str());
+                  Option::InvokePrefix, func->getId().c_str());
         cg_printf("Variant %s%s(void *extra, int count, "
                   "INVOKE_FEW_ARGS_IMPL_ARGS);\n",
-                  Option::InvokeFewArgsPrefix, func->getId(cg).c_str());
+                  Option::InvokeFewArgsPrefix, func->getId().c_str());
       }
     }
   }
@@ -120,7 +120,7 @@ private:
 void FunctionContainer::outputCPPJumpTableSupportMethod
 (CodeGenerator &cg, AnalysisResultPtr ar, FunctionScopePtr func,
  const char *funcPrefix) {
-  string name = func->getId(cg);
+  string name = func->getId();
   const char *cname = name.c_str();
   cg_indentBegin("Variant %s%s(void *extra, CArrRef params) {\n",
       Option::InvokePrefix, cname);
@@ -213,7 +213,7 @@ void FunctionContainer::outputCPPJumpTableEvalSupport
       funcs->push_back(fit.name().c_str());
     }
     if (!implementation && func->isRedeclaring()) continue;
-    string sname = func->getId(cg);
+    string sname = func->getId();
 
     if (func->isRedeclaring()) {
       hasRedeclared = true;
@@ -243,10 +243,10 @@ void FunctionContainer::outputCPPJumpTable(CodeGenerator &cg,
     FunctionScopePtr func = iterFuncs->second[0];
     if (func->isRedeclaring()) {
       cg_printf("HASH_INVOKE_REDECLARED(0x%016llXLL, %s);\n",
-                hash_string_i(name), cg.formatLabel(name).c_str());
+                hash_string_i(name), CodeGenerator::FormatLabel(name).c_str());
     } else {
       cg_printf("HASH_INVOKE(0x%016llXLL, %s);\n",
-                hash_string_i(name), func->getId(cg).c_str());
+                hash_string_i(name), func->getId().c_str());
     }
   }
 
@@ -385,7 +385,8 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
       // We have assumptions that function names do not contain ".."
       // (e.g., call_user_func0 ~ call_user_func6)
       if (strstr(name, "..")) assert(false);
-      cg_printf("      (const char *)\"%s\", ", cg.escapeLabel(name).c_str());
+      cg_printf("      (const char *)\"%s\", ",
+                CodeGenerator::EscapeLabel(name).c_str());
       if (!system) {
         cg_printf("(const char *)%d, ",
                   iterFuncs->second[0]->isRedeclaring() ? 1 : 0);
@@ -393,12 +394,12 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
       FunctionScopePtr func = iterFuncs->second[0];
       if (func->isRedeclaring()) {
         assert(!system);
-        string lname(cg.formatLabel(name));
+        string lname(CodeGenerator::FormatLabel(name));
         cg_printf("(const char *)(offsetof(GlobalVariables, GCI(%s))),\n",
                   lname.c_str());
       } else {
         cg_printf("(const char *)&%s%s,\n",
-                  Option::CallInfoPrefix, func->getId(cg).c_str());
+                  Option::CallInfoPrefix, func->getId().c_str());
       }
     }
     cg_printf("      NULL, NULL, %s\n    };\n", system ? "" : "NULL, ");
@@ -435,7 +436,7 @@ void FunctionContainer::outputCPPCodeInfoTable(
       funcs.push_back(fit.name().c_str());
       if (!support && !func->isRedeclaring() && !func->isSepExtension()) {
         cg_printf("extern CallInfo %s%s;\n", Option::CallInfoPrefix,
-                  func->getId(cg).c_str());
+                  func->getId().c_str());
       }
     }
   }
@@ -453,13 +454,14 @@ void FunctionContainer::outputCPPCodeInfoTable(
       functions->find(name);
     ASSERT(iterFuncs != functions->end());
     cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
-                   hash_string_i(name), cg.escapeLabel(name).c_str());
+                   hash_string_i(name),
+                   CodeGenerator::EscapeLabel(name).c_str());
     if (iterFuncs->second[0]->isRedeclaring()) {
-      string lname(cg.formatLabel(name));
+      string lname(CodeGenerator::FormatLabel(name));
       cg_printf("ci = g->GCI(%s);\n", lname.c_str());
     } else {
       cg_printf("ci = &%s%s;\n", Option::CallInfoPrefix,
-                iterFuncs->second[0]->getId(cg).c_str());
+                iterFuncs->second[0]->getId().c_str());
     }
     cg_printf("return true;\n");
     cg_indentEnd("}\n");

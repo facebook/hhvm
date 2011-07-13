@@ -131,7 +131,7 @@ void CatchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     VariableTablePtr variables = getScope()->getVariables();
     const string &prefix = m_variable->getNamePrefix();
     const string &name =
-      variables->getVariableName(cg, ar, m_variable->getName());
+      variables->getVariableName(ar, m_variable->getName());
     cg_printf("%s%s = e;\n", prefix.c_str(), name.c_str());
   } else {
     cg_indentBegin("if (false) {\n");

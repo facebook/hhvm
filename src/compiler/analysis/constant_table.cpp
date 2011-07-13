@@ -243,7 +243,7 @@ void ConstantTable::outputCPPDynamicDecl(CodeGenerator &cg,
   ClassScopePtr scope = getClassScope();
   if (scope) {
     prefix = Option::ClassConstantPrefix;
-    classId = scope->getId(cg);
+    classId = scope->getId();
     fmt = "_";
   }
 
@@ -254,7 +254,7 @@ void ConstantTable::outputCPPDynamicDecl(CodeGenerator &cg,
     if (sym->declarationSet() && sym->isDynamic() &&
         system == sym->isSystem()) {
       symbols.push_back(string(prefix) + classId + fmt +
-                        cg.formatLabel(sym->getName()));
+                        CodeGenerator::FormatLabel(sym->getName()));
     }
   }
 }
@@ -264,8 +264,8 @@ void ConstantTable::outputCPPDynamicImpl(CodeGenerator &cg,
   BOOST_FOREACH(Symbol *sym, m_symbolVec) {
     if (sym->declarationSet() && sym->isDynamic()) {
       cg_printf("%s%s = \"%s\";\n", Option::ConstantPrefix,
-                cg.formatLabel(sym->getName()).c_str(),
-                cg.escapeLabel(sym->getName()).c_str());
+                CodeGenerator::FormatLabel(sym->getName()).c_str(),
+                CodeGenerator::EscapeLabel(sym->getName()).c_str());
     }
   }
 }
@@ -275,7 +275,8 @@ void ConstantTable::collectCPPGlobalSymbols(StringPairVec &symbols,
                                             AnalysisResultPtr ar) {
   BOOST_FOREACH(Symbol *sym, m_symbolVec) {
     if (sym->declarationSet() && sym->isDynamic()) {
-      string varname = Option::ConstantPrefix + cg.formatLabel(sym->getName());
+      string varname = Option::ConstantPrefix +
+                       CodeGenerator::FormatLabel(sym->getName());
       symbols.push_back(pair<string, string>(varname, varname));
     }
   }
@@ -321,20 +322,20 @@ bool ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   if (decl) {
     if (!cls) {
       cg_printf(" %s%s", Option::ConstantPrefix,
-                cg.formatLabel(name).c_str());
+                CodeGenerator::FormatLabel(name).c_str());
     } else {
       cg_printf(" %s%s_%s", Option::ClassConstantPrefix,
-                cls->getId(cg).c_str(),
-                cg.formatLabel(name).c_str());
+                cls->getId().c_str(),
+                CodeGenerator::FormatLabel(name).c_str());
     }
   } else {
     if (!cls) {
       cg_printf(" %s%s", Option::ConstantPrefix,
-                cg.formatLabel(name).c_str());
+                CodeGenerator::FormatLabel(name).c_str());
     } else {
       cg_printf(" %s%s_%s", Option::ClassConstantPrefix,
-                cls->getId(cg).c_str(),
-                cg.formatLabel(name).c_str());
+                cls->getId().c_str(),
+                CodeGenerator::FormatLabel(name).c_str());
     }
     cg_printf(isString ? "(" : " = ");
     if (value) {
@@ -344,18 +345,18 @@ bool ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
           dynamic_pointer_cast<ScalarExpression>(exp);
         if (scalarExp) {
           cg_printf("LITSTR_INIT(%s)",
-                    scalarExp->getCPPLiteralString(cg).c_str());
+                    scalarExp->getCPPLiteralString().c_str());
         } else {
           Variant v;
           exp->getScalarValue(v);
           cg_printf("LITSTR_INIT(\"%s\")",
-                    cg.escapeLabel(v.toString().data()).c_str());
+                    CodeGenerator::EscapeLabel(v.toString().data()).c_str());
         }
       } else {
         exp->outputCPP(cg, ar);
       }
     } else {
-      cg_printf("\"%s\"", cg.escapeLabel(name).c_str());
+      cg_printf("\"%s\"", CodeGenerator::EscapeLabel(name).c_str());
     }
     if (isString) {
       cg_printf(")");
@@ -402,13 +403,13 @@ void ConstantTable::outputCPPJumpTable(CodeGenerator &cg,
          jt.next()) {
       const char *name = jt.key();
       string varName = string(Option::ClassConstantPrefix) +
-        getScopePtr()->getId(cg) + "_" + cg.formatLabel(name);
+        getScopePtr()->getId() + "_" + CodeGenerator::FormatLabel(name);
       if (isDynamic(name)) {
         varName = string("g->") + varName;
       }
       cg_printf("HASH_RETURN(0x%016llXLL, %s, \"%s\");\n",
                 hash_string(name), varName.c_str(),
-                cg.escapeLabel(name).c_str());
+                CodeGenerator::EscapeLabel(name).c_str());
     }
   }
   if (ret) {
@@ -430,10 +431,11 @@ void ConstantTable::outputCPPConstantSymbol(CodeGenerator &cg,
       int len;
       string output = getEscapedText(v, len);
       cg_printf("\"%s\", (const char *)%d, \"%s\",\n",
-                cg.escapeLabel(sym->getName()).c_str(), len, output.c_str());
+                CodeGenerator::EscapeLabel(sym->getName()).c_str(),
+                len, output.c_str());
     } else {
       cg_printf("\"%s\", (const char *)0, NULL,\n",
-                cg.escapeLabel(sym->getName()).c_str());
+                CodeGenerator::EscapeLabel(sym->getName()).c_str());
     }
   }
 }

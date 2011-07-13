@@ -386,11 +386,11 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         if (sym->isOverride()) continue;
         if (isValueNull) {
           cg_printf("setNull(g->%s%s%s%s)",
-                    Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
+                    Option::StaticPropertyPrefix, scope->getId().c_str(),
                     Option::IdPrefix.c_str(), var->getName().c_str());
         } else {
           cg_printf("g->%s%s%s%s = ",
-                    Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
+                    Option::StaticPropertyPrefix, scope->getId().c_str(),
                     Option::IdPrefix.c_str(), var->getName().c_str());
           value->outputCPP(cg, ar);
         }
@@ -398,7 +398,7 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         const char *initializer = type->getCPPInitializer();
         if (initializer) {
           cg_printf("g->%s%s%s%s = %s",
-                    Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
+                    Option::StaticPropertyPrefix, scope->getId().c_str(),
                     Option::IdPrefix.c_str(), var->getName().c_str(),
                     initializer);
         }
@@ -411,7 +411,7 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (sym->isOverride()) continue;
       value->outputCPPBegin(cg, ar);
       cg_printf("g->%s%s%s%s = ",
-                Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
+                Option::StaticPropertyPrefix, scope->getId().c_str(),
                 Option::IdPrefix.c_str(), var->getName().c_str());
       value->outputCPP(cg, ar);
       cg_printf(";\n");

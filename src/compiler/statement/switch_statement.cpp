@@ -341,7 +341,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         m_exp->is(Expression::KindOfSimpleVariable)) {
       // use existing variable
       var = getScope()->getVariables()->getVariableName(
-        cg, ar, static_pointer_cast<SimpleVariable>(m_exp)->getName());
+        ar, static_pointer_cast<SimpleVariable>(m_exp)->getName());
     } else {
       var = string(Option::SwitchPrefix) + lexical_cast<string>(varId);
       string var0; // holds the variable name to call outputCPP on
@@ -678,7 +678,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (m_exp->hasContext(Expression::LValue) &&
           m_exp->is(Expression::KindOfSimpleVariable)) {
         var = getScope()->getVariables()->getVariableName(
-          cg, ar, static_pointer_cast<SimpleVariable>(m_exp)->getName());
+          ar, static_pointer_cast<SimpleVariable>(m_exp)->getName());
       } else {
         var = string(Option::SwitchPrefix) + lexical_cast<string>(varId);
         m_exp->getType()->outputCPPDecl(cg, ar, getScope());

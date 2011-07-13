@@ -170,8 +170,8 @@ public:
   void printImplStarter(); // end of includes
   void printImplSplitter(); // marker to split .cpp into smaller files
   const char *getGlobals(AnalysisResultPtr ar);
-  std::string formatLabel(const std::string &name);
-  std::string escapeLabel(const std::string &name, bool *binary = NULL);
+  static std::string FormatLabel(const std::string &name);
+  static std::string EscapeLabel(const std::string &name, bool *binary = NULL);
 
   /**
    * Make sure PHP variables, functions and typenames are unique and

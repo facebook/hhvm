@@ -559,7 +559,7 @@ ClassScopePtr Type::getClass(AnalysisResultConstPtr ar,
   return cls;
 }
 
-string Type::getCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
+string Type::getCPPDecl(AnalysisResultConstPtr ar,
                         BlockScopeRawPtr scope) {
   switch (m_kindOf) {
   case KindOfBoolean:     return "bool";
@@ -571,7 +571,7 @@ string Type::getCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
   case KindOfObject:{
     ClassScopePtr cls(getClass(ar, scope));
     if (!cls) return "Object";
-    return Option::SmartPtrPrefix + cls->getId(cg);
+    return Option::SmartPtrPrefix + cls->getId();
   }
   case KindOfNumeric:     return "Numeric";
   case KindOfPrimitive:   return "Primitive";
@@ -601,7 +601,7 @@ DataType Type::getDataType() const {
 
 void Type::outputCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
                          BlockScopeRawPtr scope) {
-  cg_printf(getCPPDecl(cg, ar, scope).c_str());
+  cg_printf(getCPPDecl(ar, scope).c_str());
 
   if (isSpecificObject() && cg.isFileOrClassHeader() && scope) {
     if (scope->getContainingClass()) {
@@ -619,7 +619,7 @@ void Type::outputCPPFastObjectCast(CodeGenerator &cg,
   ASSERT(isSpecificObject());
   ClassScopePtr cls(getClass(ar, scope));
   ASSERT(cls);
-  const string &cppClsName = cls->getId(cg);
+  const string &cppClsName = cls->getId();
   cg_printf("(%s%s%s&)",
             isConst ? "const " : "",
             Option::SmartPtrPrefix,
@@ -644,7 +644,7 @@ void Type::outputCPPCast(CodeGenerator &cg, AnalysisResultConstPtr ar,
       if (!cls) {
         cg_printf("toObject");
       } else {
-        cg_printf("%s%s", Option::SmartPtrPrefix, cls->getId(cg).c_str());
+        cg_printf("%s%s", Option::SmartPtrPrefix, cls->getId().c_str());
       }
       break;
     }

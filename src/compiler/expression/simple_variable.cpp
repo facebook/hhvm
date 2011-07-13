@@ -294,7 +294,7 @@ void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
               copy_temp.c_str(),
               prefix0.c_str(),
               prefix1,
-              cg.formatLabel(m_name).c_str());
+              CodeGenerator::FormatLabel(m_name).c_str());
     cg_printf("const Variant &%s = cit%d->isRef(%d) ? %s : %s;\n",
               arg_temp.c_str(),
               cg.callInfoTop(),
@@ -332,12 +332,12 @@ void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (!cls || cls->derivedByDynamic()) {
         cg_printf("Object(GET_THIS())");
       } else {
-        cg_printf("GET_THIS_TYPED(%s)", cls->getId(cg).c_str());
+        cg_printf("GET_THIS_TYPED(%s)", cls->getId().c_str());
       }
     }
   } else if (m_superGlobal) {
     VariableTablePtr variables = getScope()->getVariables();
-    string name = variables->getGlobalVariableName(cg, ar, m_name);
+    string name = variables->getGlobalVariableName(ar, m_name);
     cg_printf("g->%s", name.c_str());
   } else if (m_globals) {
     cg_printf("get_global_array_wrapper()");
@@ -357,7 +357,7 @@ void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf("%s%s%s",
               prefix0.c_str(),
               prefix1,
-              cg.formatLabel(m_name).c_str());
+              CodeGenerator::FormatLabel(m_name).c_str());
     if (m_originalSym) {
       cg.printf(" /* %s */", m_originalSym->getName().c_str());
     }

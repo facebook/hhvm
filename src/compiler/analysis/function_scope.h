@@ -132,7 +132,7 @@ public:
     return getName();
   }
 
-  virtual std::string getId(CodeGenerator &cg) const;
+  virtual std::string getId() const;
 
   int getRedeclaringId() const {
     return m_redeclaring;

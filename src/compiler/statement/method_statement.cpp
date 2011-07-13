@@ -498,14 +498,15 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
            Option::TypedMethodImplPrefix : Option::TypedMethodPrefix) :
           (needsClassParam ? Option::MethodImplPrefix : Option::MethodPrefix);
         cg_printf(" %s%s(", prefix,
-                  cg.formatLabel(m_name).c_str());
+                  CodeGenerator::FormatLabel(m_name).c_str());
         if (needsClassParam) {
           cg_printf("CStrRef cls%s",
                     funcScope->isVariableArgument() ||
                     (m_params && m_params->getCount()) ? ", " : "");
         }
       } else {
-        cg_printf(" %s%s(", prefix, cg.formatLabel(m_name).c_str());
+        cg_printf(" %s%s(", prefix,
+                  CodeGenerator::FormatLabel(m_name).c_str());
       }
       funcScope->outputCPPParamsDecl(cg, ar, m_params, true);
       if (m_stmt) {
@@ -556,7 +557,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
         if (m_name == "__offsetget_lval") {
           cg_printf(" &%s%s::___offsetget_lval(",
-                    Option::ClassPrefix, scope->getId(cg).c_str());
+                    Option::ClassPrefix, scope->getId().c_str());
         } else if (m_modifiers->isStatic()) {
           bool needsClassParam = funcScope->needsClassParam();
           const char *prefix = needsWrapper && !isWrapper ?
@@ -564,8 +565,8 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
              Option::TypedMethodImplPrefix : Option::TypedMethodPrefix) :
             (needsClassParam ? Option::MethodImplPrefix : Option::MethodPrefix);
           cg_printf(" %s%s::%s%s(", Option::ClassPrefix,
-                    scope->getId(cg).c_str(), prefix,
-                    cg.formatLabel(m_name).c_str());
+                    scope->getId().c_str(), prefix,
+                    CodeGenerator::FormatLabel(m_name).c_str());
           if (needsClassParam) {
             cg_printf("CStrRef cls%s",
                       funcScope->isVariableArgument() ||
@@ -573,8 +574,8 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           }
         } else {
           cg_printf(" %s%s::%s%s(", Option::ClassPrefix,
-                    scope->getId(cg).c_str(),
-                    prefix, cg.formatLabel(m_name).c_str());
+                    scope->getId().c_str(),
+                    prefix, CodeGenerator::FormatLabel(m_name).c_str());
         }
         funcScope->outputCPPParamsDecl(cg, ar, m_params, false);
         cg_indentBegin(") {\n");
@@ -682,7 +683,8 @@ void MethodStatement::outputParamArrayCreate(CodeGenerator &cg, bool checkRef) {
     if (!checkRef && variables->getSymbol(paramName)->isStashedVal()) {
       pre = "v";
     }
-    string name = pre + (Option::VariablePrefix + cg.formatLabel(paramName));
+    string name = pre + (Option::VariablePrefix +
+                         CodeGenerator::FormatLabel(paramName));
     if (checkRef && param->isRef()) {
       assert(false);
       cg_printf("ref(%s)", name.c_str());
@@ -821,13 +823,13 @@ void MethodStatement::outputCPPStaticMethodWrapper(CodeGenerator &cg,
   }
   cg_printf(" %s%s(", needsWrapper && !isWrapper ?
             Option::TypedMethodPrefix : Option::MethodPrefix,
-            cg.formatLabel(m_name).c_str());
+            CodeGenerator::FormatLabel(m_name).c_str());
   if (!isWrapper) cg.setContext(CodeGenerator::CppFunctionWrapperDecl);
   funcScope->outputCPPParamsDecl(cg, ar, m_params, true);
   cg_printf(") { %s%s%s(", type ? "return " : "",
             needsWrapper && !isWrapper ?
             Option::TypedMethodImplPrefix : Option::MethodImplPrefix,
-            cg.formatLabel(m_name).c_str());
+            CodeGenerator::FormatLabel(m_name).c_str());
   cg_printf("%s%s::s_class_name", Option::ClassPrefix, cls);
   cg.setContext(context);
   if (funcScope->isVariableArgument()) {
@@ -857,7 +859,7 @@ void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
   FunctionScopeRawPtr funcScope = getFunctionScope();
   TypePtr type = funcScope->getReturnType();
   bool isMethod = getClassScope();
-  string fname = isMethod ? funcScope->getName() : funcScope->getId(cg);
+  string fname = isMethod ? funcScope->getName() : funcScope->getId();
 
   funcScope->outputCPP(cg, ar);
   cg_printf("%s%s%s(", type ? "return " : "",
@@ -1002,7 +1004,7 @@ void MethodStatement::outputCPPFFIStub(CodeGenerator &cg,
   ClassScopePtr clsScope = getClassScope();
   bool varArgs = funcScope->isVariableArgument();
   bool ret = funcScope->getReturnType();
-  string fname = funcScope->getId(cg);
+  string fname = funcScope->getId();
   bool inClass = !m_className.empty();
   bool isStatic = !inClass || m_modifiers->isStatic();
 
@@ -1068,12 +1070,12 @@ void MethodStatement::outputCPPFFIStub(CodeGenerator &cg,
     } else if (isStatic) {
       // static method call
       cg_printf("%s%s::%s%s(", Option::ClassPrefix,
-                clsScope->getId(cg).c_str(),
+                clsScope->getId().c_str(),
                 Option::MethodPrefix, funcScope->getName().c_str());
     } else {
       // instance method call
       cg_printf("dynamic_cast<%s%s *>(target->getObjectData())->",
-                Option::ClassPrefix, clsScope->getId(cg).c_str());
+                Option::ClassPrefix, clsScope->getId().c_str());
       cg_printf("%s%s(", Option::MethodPrefix, funcScope->getName().c_str());
     }
 
@@ -1113,7 +1115,7 @@ void MethodStatement::outputHSFFIStub(CodeGenerator &cg, AnalysisResultPtr ar) {
   FunctionScopeRawPtr funcScope = getFunctionScope();
   bool varArgs = funcScope->isVariableArgument();
   bool ret = funcScope->getReturnType();
-  string fname = funcScope->getId(cg).c_str();
+  string fname = funcScope->getId().c_str();
   cg_indentBegin("foreign import ccall \"stubs.h %s%s\" %s%s\n",
                  Option::FFIFnPrefix, fname.c_str(),
                  Option::FFIFnPrefix, fname.c_str());
@@ -1221,7 +1223,7 @@ void MethodStatement::outputJavaFFIStub(CodeGenerator &cg,
   bool ret = funcScope->getReturnType();
   bool inClass = !m_className.empty();
   bool isStatic = !inClass || m_modifiers->isStatic();
-  string fname = funcScope->getId(cg);
+  string fname = funcScope->getId();
   string originalName = funcScope->getOriginalName();
   if (originalName.length() < fname.length()) {
     // if there are functions of the same name, fname may contain "$$..."
@@ -1341,7 +1343,7 @@ void MethodStatement::outputJavaFFICPPStub(CodeGenerator &cg,
   bool ret = funcScope->getReturnType();
   bool inClass = !m_className.empty();
   bool isStatic = !inClass || m_modifiers->isStatic();
-  string fname = funcScope->getId(cg);
+  string fname = funcScope->getId();
   int ac = funcScope->getMaxParamCount();
   bool exposeNative = !(ac > 0 || varArgs || !isStatic || !ret && inClass);
 
@@ -1434,7 +1436,7 @@ void MethodStatement::outputSwigFFIStub(CodeGenerator &cg,
   FunctionScopeRawPtr funcScope = getFunctionScope();
   bool varArgs = funcScope->isVariableArgument();
   bool ret = funcScope->getReturnType();
-  string fname = funcScope->getId(cg);
+  string fname = funcScope->getId();
   string originalName = funcScope->getOriginalName();
   int ac = funcScope->getMaxParamCount();
 

@@ -379,15 +379,14 @@ void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
-std::string ScalarExpression::getCPPLiteralString(CodeGenerator &cg,
-                                                  bool *binary /* = NULL */) {
+std::string ScalarExpression::getCPPLiteralString(bool *binary /* = NULL */) {
   string output;
   switch (m_type) {
   case T_CONSTANT_ENCAPSED_STRING:
   case T_ENCAPSED_AND_WHITESPACE:
   case T_STRING: {
     output = "\"";
-    output += cg.escapeLabel(m_value, binary);
+    output += CodeGenerator::EscapeLabel(m_value, binary);
     output += "\"";
     break;
   }
@@ -413,7 +412,7 @@ void ScalarExpression::outputCPPString(const string &str,
   }
 
   bool isBinary = false;
-  string escaped = cg.escapeLabel(str, &isBinary);
+  string escaped = CodeGenerator::EscapeLabel(str, &isBinary);
   string fullName = cg.printNamedString(str, escaped, ar, getScope(), false);
   ASSERT(!fullName.empty());
   string prefix(Option::ScalarPrefix);

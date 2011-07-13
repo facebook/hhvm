@@ -87,7 +87,7 @@ public:
   bool is(KindOf kind) const { return kind == m_kind;}
   const std::string &getName() const { return m_name;}
   void setName(const std::string name) { m_name = name;}
-  virtual std::string getId(CodeGenerator &cg) const;
+  virtual std::string getId() const;
   StatementPtr getStmt() const { return m_stmt;}
   VariableTableConstPtr getVariables() const { return m_variables;}
   ConstantTableConstPtr getConstants() const { return m_constants;}

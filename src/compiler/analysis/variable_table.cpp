@@ -40,18 +40,18 @@ namespace HPHP {
 // StaticGlobalInfo
 
 string VariableTable::StaticGlobalInfo::getId
-(CodeGenerator &cg, ClassScopePtr cls, FunctionScopePtr func,
+(ClassScopePtr cls, FunctionScopePtr func,
  const string &name) {
   ASSERT(cls || func);
 
   // format: <class>$$<func>$$name
   string id;
   if (cls) {
-    id += cls->getId(cg);
+    id += cls->getId();
     id += Option::IdPrefix;
   }
   if (func) {
-    id += func->getId(cg);
+    id += func->getId();
     id += Option::IdPrefix;
   }
   id += name;
@@ -233,42 +233,40 @@ const char *VariableTable::getVariablePrefix(const Symbol *sym) const {
   return Option::VariablePrefix;
 }
 
-string VariableTable::getVariableName(CodeGenerator &cg,
-                                      AnalysisResultConstPtr ar,
+string VariableTable::getVariableName(AnalysisResultConstPtr ar,
                                       const string &name) const {
-  return getVariableName(cg, ar, getSymbol(name));
+  return getVariableName(ar, getSymbol(name));
 }
 
-string VariableTable::getVariableName(CodeGenerator &cg,
-                                      AnalysisResultConstPtr ar,
+string VariableTable::getVariableName(AnalysisResultConstPtr ar,
                                       const Symbol *sym) const {
   const string &name = sym->getName();
   if (sym && sym->isStatic()) {
     if (!needLocalCopy(sym)) {
-      return string(Option::StaticVariablePrefix) + cg.formatLabel(name);
+      return string(Option::StaticVariablePrefix) +
+             CodeGenerator::FormatLabel(name);
     }
-    return string(Option::VariablePrefix) + cg.formatLabel(name);
+    return string(Option::VariablePrefix) + CodeGenerator::FormatLabel(name);
   }
 
   if (getAttribute(ForceGlobal)) {
-    return getGlobalVariableName(cg, ar, name);
+    return getGlobalVariableName(ar, name);
   }
 
   if (sym->isGlobal()) {
     if (!needLocalCopy(sym)) {
-      return getGlobalVariableName(cg, ar, name);
+      return getGlobalVariableName(ar, name);
     }
   }
   return (sym->isHidden() && !sym->isParameter() ?
           Option::HiddenVariablePrefix : Option::VariablePrefix) +
-    cg.formatLabel(name);
+    CodeGenerator::FormatLabel(name);
 }
 
 string
-VariableTable::getGlobalVariableName(CodeGenerator &cg,
-                                     AnalysisResultConstPtr ar,
+VariableTable::getGlobalVariableName(AnalysisResultConstPtr ar,
                                      const string &name) const {
-  return string("GV(") + cg.formatLabel(name) + ")";
+  return string("GV(") + CodeGenerator::FormatLabel(name) + ")";
 }
 
 ConstructPtr VariableTable::getStaticInitVal(string varName) {
@@ -786,7 +784,7 @@ static bool by_location(const VariableTable::StaticGlobalInfoPtr &p1,
   return d1->getLocation()->compare(d2->getLocation().get()) < 0;
 }
 
-void VariableTable::canonicalizeStaticGlobals(CodeGenerator &cg) {
+void VariableTable::canonicalizeStaticGlobals() {
   ASSERT(m_staticGlobals.empty());
 
   sort(m_staticGlobalsVec.begin(), m_staticGlobalsVec.end(), by_location);
@@ -794,7 +792,7 @@ void VariableTable::canonicalizeStaticGlobals(CodeGenerator &cg) {
   for (unsigned int i = 0; i < m_staticGlobalsVec.size(); i++) {
     StaticGlobalInfoPtr &sgi = m_staticGlobalsVec[i];
     if (!sgi->sym->getDeclaration()) continue;
-    string id = StaticGlobalInfo::getId(cg, sgi->cls, sgi->func,
+    string id = StaticGlobalInfo::getId(sgi->cls, sgi->func,
                                         sgi->sym->getName());
     ASSERT(m_staticGlobals.find(id) == m_staticGlobals.end());
     m_staticGlobals[id] = sgi;
@@ -872,7 +870,8 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     const Symbol *sym = m_symbolVec[i];
     if (system || !sym->isSystem()) {
-      variants.push_back(string("gvm_") + cg.formatLabel(sym->getName()));
+      variants.push_back(string("gvm_") +
+                         CodeGenerator::FormatLabel(sym->getName()));
     }
   }
 
@@ -888,7 +887,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     StaticGlobalInfoPtr sgi = iter->second;
     if (sgi->func) {
       TypePtr varType = sgi->sym->getFinalType();
-      type2names[varType->getCPPDecl(cg, ar, BlockScopeRawPtr())].push_back
+      type2names[varType->getCPPDecl(ar, BlockScopeRawPtr())].push_back
         (string(Option::StaticVariablePrefix) + id);
     }
   }
@@ -914,11 +913,11 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
          m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     StaticGlobalInfoPtr sgi = iter->second;
     // id can change if we discover it is redeclared
-    const string &id = StaticGlobalInfo::getId(cg, sgi->cls, sgi->func,
+    const string &id = StaticGlobalInfo::getId(sgi->cls, sgi->func,
                                                sgi->sym->getName());
     if (!sgi->func && !sgi->sym->isOverride()) {
       TypePtr varType = sgi->sym->getFinalType();
-      type2names[varType->getCPPDecl(cg, ar, BlockScopeRawPtr())].push_back
+      type2names[varType->getCPPDecl(ar, BlockScopeRawPtr())].push_back
         (string(Option::StaticPropertyPrefix) + id);
     }
   }
@@ -1022,8 +1021,9 @@ void VariableTable::collectCPPGlobalSymbols(StringPairVecVec &symbols,
   names->resize(m_symbolVec.size());
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     const string &name = m_symbolVec[i]->getName();
-    (*names)[i].first = Option::GlobalVariablePrefix + cg.escapeLabel(name);
-    (*names)[i].second = getGlobalVariableName(cg, ar, name);
+    (*names)[i].first = Option::GlobalVariablePrefix +
+                        CodeGenerator::EscapeLabel(name);
+    (*names)[i].second = getGlobalVariableName(ar, name);
   }
 
   // method static variables
@@ -1044,7 +1044,7 @@ void VariableTable::collectCPPGlobalSymbols(StringPairVecVec &symbols,
        m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     StaticGlobalInfoPtr sgi = iter->second;
     // id can change if we discover it is redeclared
-    const string &id = StaticGlobalInfo::getId(cg, sgi->cls, sgi->func,
+    const string &id = StaticGlobalInfo::getId(sgi->cls, sgi->func,
                                                sgi->sym->getName());
     if (!sgi->func && !sgi->sym->isOverride()) {
       string name = Option::StaticPropertyPrefix + id;
@@ -1098,7 +1098,7 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
     if (!sgi->func && !sgi->sym->isOverride()) {
       TypePtr varType = sgi->sym->getFinalType();
       if (varType->isPrimitive()) {
-        const string &id = StaticGlobalInfo::getId(cg, sgi->cls, sgi->func,
+        const string &id = StaticGlobalInfo::getId(sgi->cls, sgi->func,
                                                    sgi->sym->getName());
         const char *initializer = varType->getCPPInitializer();
         ASSERT(initializer);
@@ -1129,7 +1129,7 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
     if (!sgi->func && !sgi->sym->isOverride() &&
         sgi->cls->needStaticInitializer()) {
       cg_printf("%s%s();\n", Option::ClassStaticInitializerPrefix,
-                sgi->cls->getId(cg).c_str());
+                sgi->cls->getId().c_str());
     }
   }
   cg_indentEnd("}\n");
@@ -1301,8 +1301,8 @@ void VariableTable::outputCPPGVHashTableGetImpl(CodeGenerator &cg,
   cg_printf(text1, tableSize, m_symbolVec.size());
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     const string &name = m_symbolVec[i]->getName();
-    string escaped = cg.escapeLabel(name);
-    string varName = string("gvm_") + cg.formatLabel(name);
+    string escaped = CodeGenerator::EscapeLabel(name);
+    string varName = string("gvm_") + CodeGenerator::FormatLabel(name);
     cg_printf("  (const char *)\"%s\",\n"
               "  (const char *)%lld,\n"
               "  (const char *)GET_GV_OFFSET(%s),\n"
@@ -1417,7 +1417,8 @@ void VariableTable::outputCPPGlobalVariablesMethods(CodeGenerator &cg,
     const Symbol *sym = m_symbolVec[i];
     if (sym->isSystem()) {
       if (sysDone) assert(false);
-      variants.push_back(string("gvm_") + cg.formatLabel(sym->getName()));
+      variants.push_back(string("gvm_") +
+                         CodeGenerator::FormatLabel(sym->getName()));
       maxSysIdx++;
     } else {
       sysDone = true;
@@ -1451,7 +1452,7 @@ void VariableTable::outputCPPGlobalVariablesMethods(CodeGenerator &cg,
   cg_indentBegin("static const char *names[] = {\n");
   for (int i = 0; i < maxIdx; i++) {
     const string &name = m_symbolVec[i]->getName();
-    cg_printf("\"%s\",\n", cg.escapeLabel(name).c_str());
+    cg_printf("\"%s\",\n", CodeGenerator::EscapeLabel(name).c_str());
   }
   cg_indentEnd("};\n");
   cg_indentBegin("if (idx >= 0 && idx < %d) {\n", maxIdx);
@@ -1460,7 +1461,7 @@ void VariableTable::outputCPPGlobalVariablesMethods(CodeGenerator &cg,
   for (int i = 0; i < maxIdx; i++) {
     const string &name = m_symbolVec[i]->getName();
     cg_printf("case %d: return %s;\n", i,
-              getGlobalVariableName(cg, ar, name).c_str());
+              getGlobalVariableName(ar, name).c_str());
   }
   cg_printf("}\n");
   cg_indentEnd("}\n");
@@ -1481,7 +1482,7 @@ void VariableTable::outputCPPVariableInit(CodeGenerator &cg,
     }
     cg_printf("g->");
     if (cg.getOutput() != CodeGenerator::SystemCPP) {
-      cg_printf(getGlobalVariableName(cg, ar, name).c_str());
+      cg_printf(getGlobalVariableName(ar, name).c_str());
     } else {
       cg_printf("GV(%s)", name.c_str());
     }
@@ -1508,7 +1509,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     const Symbol *sym = m_symbolVec[i];
     const string &name = sym->getName();
-    string fname = cg.formatLabel(name);
+    string fname = CodeGenerator::FormatLabel(name);
     if (sym->isShrinkWrapped()) continue;
     if (sym->isSystem() && cg.getOutput() != CodeGenerator::SystemCPP) {
       continue;
@@ -1516,7 +1517,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
     if (sym->isStatic()) {
       string id = StaticGlobalInfo::getId
-        (cg, getClassScope(), getFunctionScope(), name);
+        (getClassScope(), getFunctionScope(), name);
 
       TypePtr type = sym->getFinalType();
       type->outputCPPDecl(cg, ar, getBlockScope());
@@ -1564,7 +1565,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       type->outputCPPDecl(cg, ar, getBlockScope());
       cg_printf(" &%s%s ATTRIBUTE_UNUSED = g->%s;\n",
                 Option::GlobalVariablePrefix, fname.c_str(),
-                getGlobalVariableName(cg, ar, name).c_str());
+                getGlobalVariableName(ar, name).c_str());
 
       if (needLocalCopy(name)) {
         type->outputCPPDecl(cg, ar, getBlockScope());
@@ -1611,7 +1612,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   if (isGenScope) {
-    const string &name = cg.formatLabel(m_blockScope.getName());
+    const string &name = CodeGenerator::FormatLabel(m_blockScope.getName());
     cg_printf("%sContinuation$%s *%s ATTRIBUTE_UNUSED = "
               "(%sContinuation$%s*) %s%s.get();\n",
               Option::ClassPrefix,    name.c_str(),
@@ -1640,7 +1641,7 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
     if (sym->isHidden()) continue;
     const string &name = sym->getName();
     string varName = string(getVariablePrefix(sym)) +
-      cg.formatLabel(name);
+      CodeGenerator::FormatLabel(name);
     TypePtr type = sym->getFinalType();
     if (!inGlobalScope) {
       if (!varDecl.empty()) {
@@ -1649,11 +1650,11 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
         memDecl += "; ";
         params += ", ";
       }
-      varDecl += type->getCPPDecl(cg, ar, getBlockScope()) + " &" +
-        Option::TempVariablePrefix + cg.formatLabel(name);
+      varDecl += type->getCPPDecl(ar, getBlockScope()) + " &" +
+        Option::TempVariablePrefix + CodeGenerator::FormatLabel(name);
       initializer += varName + "(" + Option::TempVariablePrefix +
-        cg.formatLabel(name) + ")";
-      memDecl += type->getCPPDecl(cg, ar, getBlockScope()) + " &" + varName;
+        CodeGenerator::FormatLabel(name) + ")";
+      memDecl += type->getCPPDecl(ar, getBlockScope()) + " &" + varName;
       params += string(paramPrefix) + varName;
     }
   }
@@ -1729,12 +1730,12 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
       const char *prefix = getVariablePrefix(sym);
       string varName;
       if (prefix == Option::GlobalVariablePrefix) {
-        varName = string("g->") + getGlobalVariableName(cg, ar, name);
+        varName = string("g->") + getGlobalVariableName(ar, name);
       } else {
-        varName = string(prefix) + cg.formatLabel(name);
+        varName = string(prefix) + CodeGenerator::FormatLabel(name);
       }
       cg_printf("if (%s.isInitialized()) ret.lval(\"%s\").setWithRef(%s);\n",
-                varName.c_str(), cg.escapeLabel(name).c_str(),
+                varName.c_str(), CodeGenerator::EscapeLabel(name).c_str(),
                 varName.c_str());
     }
     cg_printf("return ret;\n");
@@ -1790,7 +1791,7 @@ void VariableTable::outputCPPPropertyDecl(CodeGenerator &cg,
     const string &name = sym->getName();
     sym->getFinalType()->outputCPPDecl(cg, ar, getBlockScope());
     cg_printf(" %s%s;\n", Option::PropertyPrefix,
-              cg.formatLabel(name).c_str());
+              CodeGenerator::FormatLabel(name).c_str());
   }
 }
 
@@ -1801,7 +1802,7 @@ void VariableTable::outputCPPPropertyClone(CodeGenerator &cg,
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     const Symbol *sym = m_symbolVec[i];
     const string &name = sym->getName();
-    string formatted = cg.formatLabel(name);
+    string formatted = CodeGenerator::FormatLabel(name);
     if (sym->isStatic() || sym->isOverride()) continue;
     if (sym->getFinalType()->is(Type::KindOfVariant)) {
       if (!dynamicObject || isPrivate(name)) {
@@ -1820,7 +1821,7 @@ void VariableTable::outputCPPPropertyClone(CodeGenerator &cg,
 void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
     AnalysisResultPtr ar, const char *parent, const char *parentName,
     ClassScope::Derivation dynamicObject) {
-  string clsStr = m_blockScope.getId(cg);
+  string clsStr = m_blockScope.getId();
   const char *cls = clsStr.c_str();
 
   const char *cprefix = Option::ClassPrefix;
@@ -2042,13 +2043,13 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       prefix ? prefix : getVariablePrefix(name);
     string varName;
     if (prefix == Option::StaticPropertyPrefix) {
-      varName = string(prefix) + getClassScope()->getId(cg) +
-        Option::IdPrefix + cg.formatLabel(name);
+      varName = string(prefix) + getClassScope()->getId() +
+        Option::IdPrefix + CodeGenerator::FormatLabel(name);
     } else {
-      varName = string(symbol_prefix) + cg.formatLabel(name);
+      varName = string(symbol_prefix) + CodeGenerator::FormatLabel(name);
     }
     if (symbol_prefix == Option::GlobalVariablePrefix) {
-      varName = string("g->") + getGlobalVariableName(cg, ar, name);
+      varName = string("g->") + getGlobalVariableName(ar, name);
     } else if (symbol_prefix != Option::VariablePrefix &&
                symbol_prefix != Option::PropertyPrefix) {
       varName = string("g->") + varName;
@@ -2062,23 +2063,25 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       cg_printString(name, ar, getBlockScope());
       cg_printf(", %d, %s);\n",
                 strlen(name),
-                cg.formatLabel(name).c_str());
+                CodeGenerator::FormatLabel(name).c_str());
       break;
     case VariableTable::JumpReturn:
       cg_printf("HASH_RETURN(0x%016llXLL, %s,\n",
                 hash_string(name), varName.c_str());
-      cg_printf("            \"%s\");\n", cg.escapeLabel(name).c_str());
+      cg_printf("            \"%s\");\n",
+                CodeGenerator::EscapeLabel(name).c_str());
       break;
     case VariableTable::JumpSet:
       cg_printf("HASH_SET_STRING(0x%016llXLL, %s,\n",
                 hash_string(name), varName.c_str());
       cg_printf("                \"%s\", %d);\n",
-                cg.escapeLabel(name).c_str(), strlen(name));
+                CodeGenerator::EscapeLabel(name).c_str(), strlen(name));
       break;
     case VariableTable::JumpInitialized:
       cg_printf("HASH_INITIALIZED(0x%016llXLL, %s,\n",
                 hash_string(name), varName.c_str());
-      cg_printf("                 \"%s\");\n", cg.escapeLabel(name).c_str());
+      cg_printf("                 \"%s\");\n",
+                CodeGenerator::EscapeLabel(name).c_str());
       break;
     case VariableTable::JumpInitializedString: {
       int index = -1;
@@ -2096,7 +2099,8 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
         ASSERT(it != varIdx.end());
         ssize_t idx = it->second;
         cg_printf("HASH_INDEX(0x%016llXLL, \"%s\", %d);\n",
-                  hash_string(name), cg.escapeLabel(name).c_str(), idx);
+                  hash_string(name),
+                  CodeGenerator::EscapeLabel(name).c_str(), idx);
       }
       break;
     case VariableTable::JumpReturnString: {
@@ -2149,7 +2153,7 @@ void VariableTable::outputCPPClassMap(CodeGenerator &cg,
     }
 
     cg_printf("(const char *)0x%04X, \"%s\",\n", attribute,
-              cg.escapeLabel(name).c_str());
+              CodeGenerator::EscapeLabel(name).c_str());
   }
   cg_printf("NULL,\n");
 }
@@ -2170,7 +2174,8 @@ void VariableTable::outputCPPStaticVariables(CodeGenerator &cg,
         // static variable in order to get the current value (as opposed to
         // the initial value) at runtime
         cg_printf("\"%s\", (const char *)%d, \"%s\",\n",
-                  cg.escapeLabel(name).c_str(), len, output.c_str());
+                  CodeGenerator::EscapeLabel(name).c_str(),
+                  len, output.c_str());
       }
     }
   }

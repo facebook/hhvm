@@ -114,12 +114,12 @@ public:
   const std::string &getOriginalName() const;
 
 
-  virtual std::string getId(CodeGenerator &cg) const;
+  virtual std::string getId() const;
 
   void checkDerivation(AnalysisResultPtr ar, hphp_string_set &seen);
   const std::string &getParent() const { return m_parent;}
-  std::string getHeaderFilename(CodeGenerator &old_cg);
-  std::string getForwardHeaderFilename(CodeGenerator &old_cg);
+  std::string getHeaderFilename();
+  std::string getForwardHeaderFilename();
 
   /**
    * Returns topmost parent class that has the method.
@@ -359,9 +359,9 @@ public:
   bool isAbstract() { return m_kindOf == KindOfAbstractClass; }
   bool hasProperty(const std::string &name);
   bool hasConst(const std::string &name);
-  void outputCPPHeader(CodeGenerator &cg, AnalysisResultPtr ar,
+  void outputCPPHeader(AnalysisResultPtr ar,
                        CodeGenerator::Output output);
-  void outputCPPForwardHeader(CodeGenerator &old_cg, AnalysisResultPtr ar,
+  void outputCPPForwardHeader(AnalysisResultPtr ar,
                               CodeGenerator::Output output);
   void outputCPPJumpTableDecl(CodeGenerator &cg, AnalysisResultPtr ar);
 
@@ -501,7 +501,7 @@ private:
   std::set<std::string> m_usedClassesHeader;
   std::set<std::string> m_usedClassesFullHeader;
 
-  std::string getBaseHeaderFilename(CodeGenerator &cg);
+  std::string getBaseHeaderFilename();
 
   void outputCPPMethodInvokeBareObjectSupport(
     CodeGenerator &cg, AnalysisResultPtr ar,
@@ -526,7 +526,7 @@ private:
       const StringToFunctionScopePtrVecMap &funcScopes, bool fewArgs);
   hphp_const_char_imap<int> m_implemented;
 
-  ClassScopePtr getNextParentWithProp(CodeGenerator &cg, AnalysisResultPtr ar,
+  ClassScopePtr getNextParentWithProp(AnalysisResultPtr ar,
                                       ClassPropTableMap tables);
 };
 

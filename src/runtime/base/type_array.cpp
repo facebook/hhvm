@@ -961,9 +961,10 @@ void Array::prepend(CVarRef v) {
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
 
-void Array::serialize(VariableSerializer *serializer) const {
+void Array::serialize(VariableSerializer *serializer,
+                      bool isObject /* = false */) const {
   if (m_px) {
-    m_px->serialize(serializer);
+    m_px->serialize(serializer, isObject);
   } else {
     serializer->writeNull();
   }

@@ -824,7 +824,7 @@ void ObjectData::serialize(VariableSerializer *serializer) const {
           }
         }
         serializer->setObjectInfo(o_getClassName(), o_getId());
-        wanted.serialize(serializer);
+        wanted.serialize(serializer, true);
       } else {
         if (o_instanceof("Closure")) {
           if (serializer->getType() == VariableSerializer::DebuggerSerialize) {
@@ -847,7 +847,7 @@ void ObjectData::serialize(VariableSerializer *serializer) const {
       }
     } else {
       serializer->setObjectInfo(o_getClassName(), o_getId());
-      o_toArray().serialize(serializer);
+      o_toArray().serialize(serializer, true);
     }
   }
   serializer->decNestedLevel((void*)this);

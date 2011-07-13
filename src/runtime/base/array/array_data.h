@@ -308,7 +308,8 @@ class ArrayData : public Countable {
    * to implementing array functions in this base class than utilizing a type
    * specialized implementation, which is normally more optimized.
    */
-  void serialize(VariableSerializer *serializer) const;
+  void serialize(VariableSerializer *serializer,
+                 bool isObject = false) const;
 
   virtual void dump();
   virtual void dump(std::string &out);
@@ -331,6 +332,9 @@ class ArrayData : public Countable {
   PointerList<FullPos> m_strongIterators;
 
   void freeStrongIterators();
+
+ private:
+  void serializeImpl(VariableSerializer *serializer) const;
 
 #ifdef FAST_REFCOUNT_FOR_VARIANT
  private:

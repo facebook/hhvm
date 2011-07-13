@@ -378,28 +378,39 @@ ssize_t ArrayData::iter_rewind(ssize_t prev) const {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-void ArrayData::serialize(VariableSerializer *serializer) const {
+void ArrayData::serializeImpl(VariableSerializer *serializer) const {
+  serializer->writeArrayHeader(this, size());
+  for (ArrayIter iter(this); iter; ++iter) {
+    Variant key(iter.first());
+    if (key.isInteger()) {
+      serializer->writeArrayKey(this, key.toInt64());
+    } else {
+      serializer->writeArrayKey(this, key.toString());
+    }
+    serializer->writeArrayValue(this, iter.secondRef());
+  }
+  serializer->writeArrayFooter(this);
+}
+
+void ArrayData::serialize(VariableSerializer *serializer,
+                          bool isObject /* = false */) const {
   if (size() == 0) {
     serializer->writeArrayHeader(this, 0);
     serializer->writeArrayFooter(this);
     return;
   }
-  if (serializer->incNestedLevel((void*)this)) {
-    serializer->writeOverflow((void*)this);
-  } else {
-    serializer->writeArrayHeader(this, size());
-    for (ArrayIter iter(this); iter; ++iter) {
-      Variant key(iter.first());
-      if (key.isInteger()) {
-        serializer->writeArrayKey(this, key.toInt64());
-      } else {
-        serializer->writeArrayKey(this, key.toString());
-      }
-      serializer->writeArrayValue(this, iter.secondRef());
+  if (!isObject) {
+    if (serializer->incNestedLevel((void*)this)) {
+      serializer->writeOverflow((void*)this);
+    } else {
+      serializeImpl(serializer);
     }
-    serializer->writeArrayFooter(this);
+    serializer->decNestedLevel((void*)this);
+  } else {
+    // If isObject, the array is temporary and we should not check or save
+    // its pointer.
+    serializeImpl(serializer);
   }
-  serializer->decNestedLevel((void*)this);
 }
 
 bool ArrayData::hasInternalReference(PointerSet &vars,

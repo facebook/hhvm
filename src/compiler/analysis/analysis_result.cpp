@@ -3902,9 +3902,26 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
 ///////////////////////////////////////////////////////////////////////////////
 // output_global_state()
 
+void AnalysisResult::outputCPPGlobalStateFileHeader(CodeGenerator &cg) {
+  cg_printf("\n");
+  cg_printInclude("<runtime/base/hphp.h>");
+  cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
+  if (Option::GenConcat || Option::GenArrayCreate) {
+    cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
+  }
+  if (Option::EnableEval >= Option::LimitedEval) {
+    cg_printInclude("<runtime/eval/eval.h>");
+  }
+  cg_printf("\n");
+  cg.printImplStarter();
+  cg_printf("using namespace std;\n");
+  cg.namespaceBegin();
+  cg_printf("namespace global_state {\n");
+}
+
 void AnalysisResult::outputCPPGlobalStateBegin(CodeGenerator &cg,
                                                const char *section) {
-  cg_indentBegin("static void get_%s(Array &res) {\n", section);
+  cg_indentBegin("void get_%s(Array &res) {\n", section);
   cg_printf("DECLARE_GLOBAL_VARIABLES(g);\n");
   cg_printf("Array %s;\n", section);
 }
@@ -3921,36 +3938,63 @@ void AnalysisResult::outputCPPGlobalStateEnd(CodeGenerator &cg,
 void AnalysisResult::outputCPPGlobalStateSection
 (CodeGenerator &cg, const StringPairVec &names, const char *section,
  const char *prefix /* = "g->" */, const char *name_prefix /* = "" */) {
-  outputCPPGlobalStateBegin(cg, section);
-  for (unsigned int i = 0; i < names.size(); i++) {
-    cg_printf("%s.set(\"%s%s\", %s%s%s);\n", section,
-              name_prefix, names[i].first.c_str(),
-              prefix, name_prefix, names[i].second.c_str());
+  cg_printf("void get_%s(Array &res);\n", section);
+
+  {
+    string filename = m_outputPath + "/" + Option::SystemFilePrefix +
+      "global_state_" + section + ".no.cpp";
+    Util::mkdir(filename);
+    ofstream f(filename.c_str());
+    CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
+    outputCPPGlobalStateFileHeader(cg);
+
+    unsigned size = names.size();
+    const unsigned MAXSIZE = 30000;
+    if (size > MAXSIZE) {
+      unsigned num = (size + MAXSIZE - 1) / MAXSIZE;
+      unsigned elems = (size + num - 1) / num;
+      for (unsigned i = 0, j = 0, end = elems; j < num; j++) {
+        cg_indentBegin("static void get_%s_%u(Array &%s) {\n",
+                       section, j, section);
+        cg_printf("DECLARE_GLOBAL_VARIABLES(g);\n");
+        while (i < end) {
+          cg_printf("%s.set(\"%s%s\", %s%s%s);\n", section,
+                    name_prefix, names[i].first.c_str(),
+                    prefix, name_prefix, names[i].second.c_str());
+          i++;
+        }
+        end += elems;
+        if (end > size) end = size;
+        cg_indentEnd("}\n");
+      }
+      outputCPPGlobalStateBegin(cg, section);
+      for (unsigned j = 0; j < num; j++) {
+        cg_printf("get_%s_%u(%s);\n", section, j, section);
+      }
+      outputCPPGlobalStateEnd(cg, section);
+    } else {
+      outputCPPGlobalStateBegin(cg, section);
+      for (unsigned i = 0; i < names.size(); i++) {
+        cg_printf("%s.set(\"%s%s\", %s%s%s);\n", section,
+                  name_prefix, names[i].first.c_str(),
+                  prefix, name_prefix, names[i].second.c_str());
+      }
+      outputCPPGlobalStateEnd(cg, section);
+    }
+    cg_printf("}\n");
+    cg.namespaceEnd();
+    f.close();
   }
-  outputCPPGlobalStateEnd(cg, section);
 }
 
 void AnalysisResult::outputCPPGlobalState() {
   string filename = m_outputPath + "/" + Option::SystemFilePrefix +
-    "global_state.no.cpp";
+    "global_state.cpp";
   Util::mkdir(filename);
   ofstream f(filename.c_str());
   CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
   AnalysisResultPtr ar = shared_from_this();
-
-  cg_printf("\n");
-  cg_printInclude("<runtime/base/hphp.h>");
-  cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-  if (Option::GenConcat || Option::GenArrayCreate) {
-    cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
-  }
-  if (Option::EnableEval >= Option::LimitedEval) {
-    cg_printInclude("<runtime/eval/eval.h>");
-  }
-  cg_printf("\n");
-  cg.printImplStarter();
-  cg_printf("using namespace std;\n");
-  cg.namespaceBegin();
+  outputCPPGlobalStateFileHeader(cg);
 
   StringPairVecVec symbols(GlobalSymbolTypeCount);
   getVariables()->collectCPPGlobalSymbols(symbols, cg, ar);
@@ -3979,6 +4023,8 @@ void AnalysisResult::outputCPPGlobalState() {
                               "redeclared_functions", "(int64)g->");
   outputCPPGlobalStateSection(cg, symbols[KindOfRedeclaredClassId],
                               "redeclared_classes");
+
+  cg_printf("}\n\nusing namespace global_state;\n\n");
 
   cg_indentBegin("Array get_global_state() {\n");
   cg_printf("Array res(Array::Create());\n");

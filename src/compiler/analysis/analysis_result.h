@@ -531,6 +531,7 @@ private:
 
   void collectCPPGlobalSymbols(StringPairVecVec &symbols,
                                CodeGenerator &cg);
+  void outputCPPGlobalStateFileHeader(CodeGenerator &cg);
   void outputCPPGlobalStateBegin(CodeGenerator &cg, const char *section);
   void outputCPPGlobalStateEnd(CodeGenerator &cg, const char *section);
   void outputCPPGlobalStateSection(CodeGenerator &cg,

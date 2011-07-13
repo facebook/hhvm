@@ -138,7 +138,7 @@ bool CmdList::listFunctionOrClass(DebuggerClient *client) {
   if (!subsymbol.empty()) {
     String key = CmdInfo::FindSubSymbol(funcInfo["methods"], subsymbol);
     if (key.isNull()) return false;
-    funcInfo = funcInfo["methods"][key].toArray(); 
+    funcInfo = funcInfo["methods"][key].toArray();
   }
   String file = funcInfo["file"].toString();
   int line1 = funcInfo["line1"].toInt32();
@@ -276,6 +276,11 @@ bool CmdList::onClient(DebuggerClient *client) {
 
 bool CmdList::onServer(DebuggerProxy *proxy) {
   m_code = f_file_get_contents(m_file.c_str());
+  if (!m_code && m_file[0] != '/') {
+    DSandboxInfo info = proxy->getSandbox();
+    std::string full_path = info.m_path + m_file;
+    m_code = f_file_get_contents(full_path.c_str());
+  }
   return proxy->send(this);
 }
 

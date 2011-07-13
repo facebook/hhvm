@@ -43,6 +43,8 @@ private:
   FunctionStatementPtr m_func;
   ExpressionListPtr m_vars;
   ExpressionListPtr m_values;
+
+  static TypePtr s_ClosureType;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

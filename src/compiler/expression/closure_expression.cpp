@@ -26,6 +26,9 @@ using namespace HPHP;
 using namespace std;
 using namespace boost;
 
+TypePtr ClosureExpression::s_ClosureType =
+  Type::CreateObjectType("closure"); // needs lower case
+
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
 
@@ -190,7 +193,7 @@ TypePtr ClosureExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                getScope()->isFirstPass());
     }
   }
-  return Type::CreateObjectType("closure"); // needs lower case
+  return s_ClosureType;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -108,7 +108,8 @@ public:
    * For inferred, return static type objects; for uncertain, create new
    * ones.
    */
-  static TypePtr GetType(KindOf kindOf);
+  static TypePtr GetType(KindOf kindOf,
+                         const std::string &clsname = "");
 
   /**
    * Whether a type can be used as another type.
@@ -259,8 +260,8 @@ private:
 
   static TypePtrMap TypeHintTypes;
 
-  KindOf m_kindOf;
-  std::string m_name;
+  const KindOf m_kindOf;
+  const std::string m_name;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

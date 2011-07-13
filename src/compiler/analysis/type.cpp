@@ -80,7 +80,11 @@ TypePtr Type::CreateObjectType(const std::string &classname) {
   return TypePtr(new Type(KindOfObject, classname));
 }
 
-TypePtr Type::GetType(KindOf kindOf) {
+TypePtr Type::GetType(KindOf kindOf,
+                      const std::string &clsname /* = "" */) {
+  ASSERT(kindOf);
+  if (!clsname.empty()) return TypePtr(new Type(kindOf, clsname));
+
   switch (kindOf) {
   case KindOfBoolean:     return Type::Boolean;
   case KindOfInt32:       return Type::Int32;
@@ -89,18 +93,15 @@ TypePtr Type::GetType(KindOf kindOf) {
   case KindOfString:      return Type::String;
   case KindOfArray:       return Type::Array;
   case KindOfVariant:     return Type::Variant;
-  case KindOfObject:
-  case KindOfNumeric:
-  case KindOfPrimitive:
-  case KindOfPlusOperand:
-  case KindOfSequence:
-  case KindOfSome:
-  case KindOfAny:         return TypePtr(new Type(kindOf));
-  default:
-    ASSERT(false);
-    break;
+  case KindOfObject:      return Type::Object;
+  case KindOfNumeric:     return Type::Numeric;
+  case KindOfPrimitive:   return Type::Primitive;
+  case KindOfPlusOperand: return Type::PlusOperand;
+  case KindOfSequence:    return Type::Sequence;
+  case KindOfSome:        return Type::Some;
+  case KindOfAny:         return Type::Any;
+  default:                return TypePtr(new Type(kindOf));
   }
-  return TypePtr();
 }
 
 TypePtr Type::Intersection(AnalysisResultConstPtr ar,
@@ -142,7 +143,7 @@ TypePtr Type::Intersection(AnalysisResultConstPtr ar,
   // down something like Sequenece to be more specific), then return the
   // intersection of the types.
   if (resultKind) {
-    res = TypePtr(new Type((KindOf)resultKind, resultName));
+    res = GetType(resultKind, resultName);
   } else if (from->mustBe(KindOfObject) && to->m_kindOf == KindOfPrimitive) {
     // Special case Object -> Primitive: can we tostring it?
     if (!from->m_name.empty()) {
@@ -254,7 +255,7 @@ TypePtr Type::Coerce(AnalysisResultConstPtr ar, TypePtr type1, TypePtr type2) {
       if (type2->m_kindOf == KindOfAutoSequence) {
         return Type::Sequence;
       }
-      return TypePtr(new Type((KindOf)(type2->m_kindOf & ~KindOfAuto)));
+      return GetType((KindOf)(type2->m_kindOf & ~KindOfAuto));
     }
     return Type::Variant;
   }
@@ -326,7 +327,7 @@ TypePtr Type::Union(AnalysisResultConstPtr ar, TypePtr type1, TypePtr type2) {
     return TypePtr(Type::CreateObjectType(resultName));
   }
 
-  return TypePtr(new Type((KindOf)resultKind));
+  return GetType((KindOf)resultKind);
 }
 
 bool Type::SameType(TypePtr type1, TypePtr type2) {
@@ -468,6 +469,10 @@ Type::Type(KindOf kindOf) : m_kindOf(kindOf) {
 
 Type::Type(KindOf kindOf, const std::string &name)
   : m_kindOf(kindOf), m_name(name) {
+
+  // m_name must not be empty only when this type could
+  // be an object
+  ASSERT(m_name.empty() || (m_kindOf & KindOfObject));
 }
 
 bool Type::isInteger() const {

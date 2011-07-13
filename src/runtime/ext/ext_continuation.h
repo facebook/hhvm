@@ -88,6 +88,8 @@ class c_Continuation : public ExtObjectData {
   public: c_Continuation *create(int64 func, int64 extra, bool isMethod, Variant obj = null, Array args = null_array);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
+protected:
+  virtual bool php_sleep(Variant &ret);
 private:
   const CallInfo *m_callInfo;
   void *m_extra;

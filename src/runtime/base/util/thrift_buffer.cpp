@@ -27,7 +27,9 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-ThriftBuffer::ThriftBuffer(int size) : m_size(size), m_safe(false) {
+ThriftBuffer::ThriftBuffer(int size,
+                           int sType /* = VariableSerializer::Serialize*/)
+  : m_size(size), m_safe(false), m_serializerType(sType) {
   m_buf = (char *)malloc(m_size + 1);
   if (!m_buf) throwOutOfMemory();
   m_pEnd = m_buf + m_size;
@@ -237,7 +239,8 @@ void ThriftBuffer::read(Array &data) {
 }
 
 void ThriftBuffer::write(CArrRef data) {
-  String sdata = f_serialize(data);
+  VariableSerializer vs((VariableSerializer::Type)m_serializerType);
+  String sdata = vs.serialize(VarNR(data), true);
   write(sdata);
 }
 
@@ -248,7 +251,8 @@ void ThriftBuffer::read(Object &data) {
 }
 
 void ThriftBuffer::write(CObjRef data) {
-  String sdata = f_serialize(data);
+  VariableSerializer vs((VariableSerializer::Type)m_serializerType);
+  String sdata = vs.serialize(VarNR(data), true);
   write(sdata);
 }
 
@@ -259,7 +263,8 @@ void ThriftBuffer::read(Variant &data) {
 }
 
 void ThriftBuffer::write(CVarRef data) {
-  String sdata = f_serialize(data);
+  VariableSerializer vs((VariableSerializer::Type)m_serializerType);
+  String sdata = vs.serialize(data, true);
   write(sdata);
 }
 

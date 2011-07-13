@@ -72,6 +72,8 @@ public:
     m_callInfo(callInfo), m_extraData(extraData) {
     ASSERT(callInfo);
   }
+protected:
+  virtual bool php_sleep(Variant &ret);
 private:
   const CallInfo *m_callInfo;
   void *m_extraData;

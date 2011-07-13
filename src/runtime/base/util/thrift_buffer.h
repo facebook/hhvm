@@ -19,6 +19,7 @@
 
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/variable_serializer.h>
 
 #include <arpa/inet.h>
 #if defined(__FREEBSD__)
@@ -93,7 +94,7 @@ public:
    * Constructing with some initial size, subsequent allocation will double
    * existing size every round.
    */
-  ThriftBuffer(int size);
+  ThriftBuffer(int size, int sType = VariableSerializer::Serialize);
   ~ThriftBuffer();
 
   void flush(); // write bytes to transport
@@ -267,6 +268,8 @@ private:
   bool  m_safe;
 
   char *m_buf;
+
+  int m_serializerType;
 
   void flush(CStrRef data);
   void read(char *data, int len);

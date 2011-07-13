@@ -3618,7 +3618,8 @@ void Variant::serialize(VariableSerializer *serializer,
   if (m_type == KindOfVariant) {
     // Ugly, but behavior is different for serialize
     if (serializer->getType() == VariableSerializer::Serialize ||
-        serializer->getType() == VariableSerializer::APCSerialize) {
+        serializer->getType() == VariableSerializer::APCSerialize ||
+        serializer->getType() == VariableSerializer::DebuggerSerialize) {
       if (serializer->incNestedLevel(m_data.pvar)) {
         serializer->writeOverflow(m_data.pvar);
       } else {

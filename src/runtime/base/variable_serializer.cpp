@@ -36,7 +36,7 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
                                        int maxRecur /* = 3 */)
   : m_type(type), m_option(option), m_buf(NULL), m_indent(0),
     m_valueCount(0), m_referenced(false), m_refCount(1), m_maxCount(maxRecur) {
-  if (type == Serialize || type == APCSerialize) {
+  if (type == Serialize || type == APCSerialize || type == DebuggerSerialize) {
     m_arrayIds = new PointerCounterMap();
   } else {
     m_arrayIds = NULL;
@@ -96,6 +96,7 @@ void VariableSerializer::write(bool v) {
     break;
   case Serialize:
   case APCSerialize:
+  case DebuggerSerialize:
     m_buf->append(v ? "b:1;" : "b:0;");
     break;
   default:
@@ -128,6 +129,7 @@ void VariableSerializer::write(int64 v) {
     break;
   case Serialize:
   case APCSerialize:
+  case DebuggerSerialize:
     m_buf->append("i:");
     m_buf->append(v);
     m_buf->append(';');
@@ -179,6 +181,7 @@ void VariableSerializer::write(double v) {
     break;
   case Serialize:
   case APCSerialize:
+  case DebuggerSerialize:
     m_buf->append("d:");
     if (isnan(v)) {
       m_buf->append("NAN");
@@ -243,6 +246,7 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
   }
   case Serialize:
   case APCSerialize:
+  case DebuggerSerialize:
     if (len < 0) len = strlen(v);
     m_buf->append("s:");
     m_buf->append(len);
@@ -335,6 +339,7 @@ void VariableSerializer::writeNull() {
     break;
   case Serialize:
   case APCSerialize:
+  case DebuggerSerialize:
     m_buf->append("N;");
     break;
   case JSON:
@@ -370,6 +375,7 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
     break;
   case Serialize:
   case APCSerialize:
+  case DebuggerSerialize:
     {
       ASSERT(m_arrayIds);
       PointerCounterMap::const_iterator iter = m_arrayIds->find(ptr);
@@ -479,6 +485,7 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
     m_indent += (info.indent_delta = 2);
     break;
   case Serialize:
+  case DebuggerSerialize:
     if (!m_objClass.empty()) {
       m_buf->append("O:");
       m_buf->append((int)m_objClass.size());
@@ -554,7 +561,7 @@ void VariableSerializer::writePropertyPrivacy(CStrRef prop,
 
 void VariableSerializer::writeSerializedProperty(CStrRef prop,
                                                  const ClassInfo *cls) {
-  ASSERT(m_type == Serialize);
+  ASSERT(m_type == Serialize || m_type == DebuggerSerialize);
   const ClassInfo *origCls = cls;
   if (cls) {
     ClassInfo::PropertyInfo *p = cls->getPropertyInfo(prop);
@@ -651,6 +658,7 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
     break;
   case Serialize:
   case APCSerialize:
+  case DebuggerSerialize:
     if (info.is_object) {
       writeSerializedProperty(key.toString(), cls);
     } else {
@@ -675,7 +683,8 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
 
 void VariableSerializer::writeArrayValue(const ArrayData *arr, CVarRef value) {
   // Do not count referenced values after the first
-  if ((m_type == Serialize || m_type == APCSerialize) &&
+  if ((m_type == Serialize || m_type == APCSerialize ||
+       m_type == DebuggerSerialize) &&
       !(value.isReferenced() &&
         m_arrayIds->find(value.getVariantData()) != m_arrayIds->end())) {
     m_valueCount++;
@@ -728,6 +737,7 @@ void VariableSerializer::writeArrayFooter(const ArrayData *arr) {
     break;
   case Serialize:
   case APCSerialize:
+  case DebuggerSerialize:
     m_buf->append('}');
     break;
   case JSON:
@@ -783,6 +793,7 @@ bool VariableSerializer::incNestedLevel(void *ptr,
     return ++m_counts[ptr] >= m_maxCount;
   case Serialize:
   case APCSerialize:
+  case DebuggerSerialize:
     {
       ASSERT(m_arrayIds);
       int ct = ++m_counts[ptr];

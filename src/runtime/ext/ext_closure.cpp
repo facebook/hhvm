@@ -53,6 +53,11 @@ const CallInfo *c_Closure::t___invokeCallInfoHelper(void *&extra) {
   return m_callInfo;
 }
 
+bool c_Closure::php_sleep(Variant &ret) {
+  ret = false;
+  return true;
+}
+
 c_GeneratorClosure::c_GeneratorClosure() {
   throw_fatal(
       "Cannot explicitly instantiate and/or subclass GeneratorClosure");

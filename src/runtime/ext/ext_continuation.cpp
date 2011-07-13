@@ -157,6 +157,11 @@ int64 c_Continuation::t_key() {
   return m_index;
 }
 
+bool c_Continuation::php_sleep(Variant &ret) {
+  ret = false;
+  return true;
+}
+
 #define NEXT_IMPL \
   if (m_done) { \
     throw_exception(Object(SystemLib::AllocExceptionObject( \

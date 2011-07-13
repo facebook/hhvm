@@ -784,7 +784,8 @@ void ObjectData::serialize(VariableSerializer *serializer) const {
   if (serializer->incNestedLevel((void*)this, true)) {
     serializer->writeOverflow((void*)this, true);
   } else if ((serializer->getType() == VariableSerializer::Serialize ||
-              serializer->getType() == VariableSerializer::APCSerialize) &&
+              serializer->getType() == VariableSerializer::APCSerialize ||
+              serializer->getType() == VariableSerializer::DebuggerSerialize) &&
              o_instanceof("Serializable")) {
     Variant ret =
       const_cast<ObjectData*>(this)->o_invoke("serialize", Array(), -1);
@@ -799,7 +800,8 @@ void ObjectData::serialize(VariableSerializer *serializer) const {
   } else {
     Variant ret;
     if ((serializer->getType() == VariableSerializer::Serialize ||
-         serializer->getType() == VariableSerializer::APCSerialize) &&
+         serializer->getType() == VariableSerializer::APCSerialize ||
+         serializer->getType() == VariableSerializer::DebuggerSerialize) &&
         const_cast<ObjectData*>(this)->php_sleep(ret)) {
       if (ret.isArray()) {
         const ClassInfo *cls = ClassInfo::FindClass(o_getClassName());
@@ -824,10 +826,24 @@ void ObjectData::serialize(VariableSerializer *serializer) const {
         serializer->setObjectInfo(o_getClassName(), o_getId());
         wanted.serialize(serializer);
       } else {
-        raise_warning("serialize(): __sleep should return an array only "
-                      "containing the names of instance-variables to "
+        if (o_instanceof("Closure")) {
+          if (serializer->getType() == VariableSerializer::DebuggerSerialize) {
+            serializer->write("Closure");
+          } else {
+            throw_fatal("Serialization of Closure is not allowed");
+          }
+        } else if (o_instanceof("Continuation")) {
+          if (serializer->getType() == VariableSerializer::DebuggerSerialize) {
+            serializer->write("Continuation");
+          } else {
+            throw_fatal("Serialization of Continuation is not allowed");
+          }
+        } else {
+          raise_warning("serialize(): __sleep should return an array only "
+              "containing the names of instance-variables to "
                       "serialize");
-        null.serialize(serializer);
+          null.serialize(serializer);
+        }
       }
     } else {
       serializer->setObjectInfo(o_getClassName(), o_getId());

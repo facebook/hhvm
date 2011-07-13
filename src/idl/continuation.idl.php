@@ -147,6 +147,8 @@ BeginClass(
     'name' => 'Continuation',
     'ifaces' => array('Iterator'),
     'footer' => <<<EOT
+protected:
+  virtual bool php_sleep(Variant &ret);
 private:
   const CallInfo *m_callInfo;
   void *m_extra;

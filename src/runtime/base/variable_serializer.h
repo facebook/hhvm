@@ -44,6 +44,7 @@ public:
     Serialize,
     JSON,
     APCSerialize,
+    DebuggerSerialize,
   };
 
   /**

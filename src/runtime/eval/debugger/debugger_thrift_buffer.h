@@ -19,6 +19,7 @@
 
 #include <runtime/base/util/thrift_buffer.h>
 #include <runtime/base/file/socket.h>
+#include <runtime/base/variable_serializer.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,7 +33,8 @@ public:
   static const int BUFFER_SIZE = 1024;
 
 public:
-  DebuggerThriftBuffer() : ThriftBuffer(BUFFER_SIZE) {}
+  DebuggerThriftBuffer()
+    : ThriftBuffer(BUFFER_SIZE, VariableSerializer::DebuggerSerialize) {}
 
   SmartPtr<Socket> getSocket() { return m_socket;}
 

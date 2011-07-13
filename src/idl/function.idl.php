@@ -145,10 +145,7 @@ DefineFunction(
         'desc'   => "The parameters to be passed to the function, as an indexed array.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -168,10 +165,7 @@ DefineFunction(
         'desc'   => "The function to be called. Class methods may also be invoked statically using this function by passing array(\$classname, \$methodname) to this parameter. Additionally class methods of an object instance may be called by passing array(\$objectinstance, \$methodname) to this parameter.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -195,10 +189,7 @@ DefineFunction(
         'desc'   => "Parameters, same as in call_user_func_array().",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -217,10 +208,7 @@ DefineFunction(
         'desc'   => "The function to be called, same as in call_user_func_array().",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -245,10 +233,7 @@ DefineFunction(
         'desc'   => "In milli-seconds. -1 to return job status immediately without blocking; positive numbers for blocking until some of the specified jobs are done; 0 for infinite waiting until some of the specified jobs are done.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -279,10 +264,7 @@ DefineFunction(
         'desc'   => "Extra strategy for individual variables. Please read documentation for more details.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -301,6 +283,7 @@ DefineFunction(
         'desc'   => "Serialized callback and parameters.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -344,10 +327,7 @@ DefineFunction(
         'desc'   => "Parameters, same as in call_user_func_array().",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -386,10 +366,7 @@ DefineFunction(
         'desc'   => "The function to be called, same as in call_user_func_array().",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -413,10 +390,7 @@ DefineFunction(
         'desc'   => "One parameter, gathering all the method parameter in one array.\n\nNote that the parameters for forward_static_call_array() are not passed by reference.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -435,10 +409,7 @@ DefineFunction(
         'desc'   => "The function or method to be called. This parameter may be an array, with the name of the class, and the method, or a string, with a function name.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(

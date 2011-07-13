@@ -87,19 +87,16 @@ inline bool x_fb_utf8ize(VRefParam input) {
 
 inline Array x_fb_call_user_func_safe(int _argc, CVarRef function, CArrRef _argv = null_array) {
   FUNCTION_NOPROFILE_BUILTIN(fb_call_user_func_safe);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_fb_call_user_func_safe(_argc, function, _argv);
 }
 
 inline Variant x_fb_call_user_func_safe_return(int _argc, CVarRef function, CVarRef def, CArrRef _argv = null_array) {
   FUNCTION_NOPROFILE_BUILTIN(fb_call_user_func_safe_return);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_fb_call_user_func_safe_return(_argc, function, def, _argv);
 }
 
 inline Array x_fb_call_user_func_array_safe(CVarRef function, CArrRef params) {
   FUNCTION_NOPROFILE_BUILTIN(fb_call_user_func_array_safe);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_fb_call_user_func_array_safe(function, params);
 }
 

@@ -600,11 +600,13 @@ function generateFuncProfileHeader($func, $f) {
     fprintf($f, "  FUNCTION_INJECTION_BUILTIN(%s);\n", $func['name']);
   }
   if (isset($func['taint_observer'])) {
-    fprintf(
-      $f,
-      "  TAINT_OBSERVER(%s, %s);\n",
-      $func['taint_observer']['set_mask'],
-      $func['taint_observer']['clear_mask']);
+    if ($func['taint_observer'] !== false) {
+      fprintf(
+        $f,
+        "  TAINT_OBSERVER(%s, %s);\n",
+        $func['taint_observer']['set_mask'],
+        $func['taint_observer']['clear_mask']);
+    }
   } else {
     fprintf($f, "  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);\n");
   }

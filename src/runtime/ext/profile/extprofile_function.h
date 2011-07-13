@@ -45,67 +45,56 @@ inline bool x_is_callable(CVarRef v, bool syntax = false, VRefParam name = null)
 
 inline Variant x_call_user_func_array(CVarRef function, CArrRef params) {
   FUNCTION_NOPROFILE_BUILTIN(call_user_func_array);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_call_user_func_array(function, params);
 }
 
 inline Variant x_call_user_func(int _argc, CVarRef function, CArrRef _argv = null_array) {
   FUNCTION_NOPROFILE_BUILTIN(call_user_func);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_call_user_func(_argc, function, _argv);
 }
 
 inline Object x_call_user_func_array_async(CVarRef function, CArrRef params) {
   FUNCTION_INJECTION_BUILTIN(call_user_func_array_async);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_call_user_func_array_async(function, params);
 }
 
 inline Object x_call_user_func_async(int _argc, CVarRef function, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(call_user_func_async);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_call_user_func_async(_argc, function, _argv);
 }
 
 inline Variant x_check_user_func_async(CVarRef handles, int timeout = -1) {
   FUNCTION_INJECTION_BUILTIN(check_user_func_async);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_check_user_func_async(handles, timeout);
 }
 
 inline Variant x_end_user_func_async(CObjRef handle, int default_strategy = k_GLOBAL_STATE_IGNORE, CVarRef additional_strategies = null) {
   FUNCTION_INJECTION_BUILTIN(end_user_func_async);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_end_user_func_async(handle, default_strategy, additional_strategies);
 }
 
 inline String x_call_user_func_serialized(CStrRef input) {
   FUNCTION_INJECTION_BUILTIN(call_user_func_serialized);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_call_user_func_serialized(input);
 }
 
 inline Variant x_call_user_func_array_rpc(CStrRef host, int port, CStrRef auth, int timeout, CVarRef function, CArrRef params) {
   FUNCTION_INJECTION_BUILTIN(call_user_func_array_rpc);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_call_user_func_array_rpc(host, port, auth, timeout, function, params);
 }
 
 inline Variant x_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth, int timeout, CVarRef function, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(call_user_func_rpc);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_call_user_func_rpc(_argc, host, port, auth, timeout, function, _argv);
 }
 
 inline Variant x_forward_static_call_array(CVarRef function, CArrRef params) {
   FUNCTION_INJECTION_BUILTIN(forward_static_call_array);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_forward_static_call_array(function, params);
 }
 
 inline Variant x_forward_static_call(int _argc, CVarRef function, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(forward_static_call);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_forward_static_call(_argc, function, _argv);
 }
 

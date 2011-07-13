@@ -425,6 +425,7 @@ DefineFunction(
         'desc'   => "The callback to invoke.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -449,6 +450,7 @@ DefineFunction(
         'desc'   => "Value returned when function does not exist.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -473,6 +475,7 @@ DefineFunction(
         'desc'   => "The function parameters to invoke with.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(

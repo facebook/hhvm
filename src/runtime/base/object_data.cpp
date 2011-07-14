@@ -504,15 +504,18 @@ Variant &ObjectData::o_lval(CStrRef propName, CVarRef tmpForGet,
     }
   }
 
-  ASSERT(useGet);
+  Variant &ret = const_cast<Variant&>(tmpForGet);
+  if (LIKELY(useGet)) {
+    AttributeClearer a(UseGet, this);
+    if (getAttribute(HasLval)) {
+      return *___lval(propName);
+    }
 
-  AttributeClearer a(UseGet, this);
-  if (getAttribute(HasLval)) {
-    return *___lval(propName);
+    ret = t___get(propName);
+    return ret;
   }
 
-  Variant &ret = const_cast<Variant&>(tmpForGet);
-  ret = t___get(propName);
+  ret.unset();
   return ret;
 }
 

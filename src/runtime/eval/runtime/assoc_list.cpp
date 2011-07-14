@@ -34,10 +34,13 @@ AssocList::~AssocList() {
   for (vp = m_list; vp && i < start; vp = vp->m_next) i++;
   VarAssocPair *startvp = vp;
   assert(startvp);
-  for (; vp; vp = vp->m_next) {
+  VarAssocPair *next;
+  for (; vp; vp = next) {
+    next = vp->m_next;
     DELETE(VarAssocPair)(vp);
   }
-  for (vp = m_list; vp != startvp; vp = vp->m_next) {
+  for (vp = m_list; vp != startvp; vp = next) {
+    next = vp->m_next;
     DELETE(VarAssocPair)(vp);
   }
 }

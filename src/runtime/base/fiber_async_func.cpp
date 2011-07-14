@@ -40,16 +40,33 @@ namespace HPHP {
  */
 class FiberAsyncFuncData : public Synchronizable {
 public:
-  FiberAsyncFuncData() : m_reqId(0), m_fiberThread(false) {}
-  Mutex m_mutexReqId;
-  int64 m_reqId;
-  bool  m_fiberThread;
+  FiberAsyncFuncData() : m_reqId(0), m_fiberCount(0), m_fiberThread(false) {}
+  Mutex    m_mutexReqId;
+  unsigned m_reqId;
+  int      m_fiberCount;
+  bool     m_fiberThread;
+
+  void incRefCount() {
+    atomic_inc(m_fiberCount);
+  }
+  int decRefCount() {
+    ASSERT(m_fiberCount);
+    return atomic_dec(m_fiberCount);
+  }
 };
 static IMPLEMENT_THREAD_LOCAL(FiberAsyncFuncData, s_fiber_data);
 
 void FiberAsyncFunc::OnRequestExit() {
-  Lock lock(s_fiber_data->m_mutexReqId);
-  ++s_fiber_data->m_reqId;
+  {
+    Lock lock(s_fiber_data->m_mutexReqId);
+    ++s_fiber_data->m_reqId;
+  }
+  {
+    Lock lock(s_fiber_data.get());
+    while (s_fiber_data->m_fiberCount) {
+      s_fiber_data->wait();
+    }
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -162,6 +179,7 @@ public:
       }
 
       Lock lock(this);
+      m_thread->incRefCount();
       m_ready = true;
       notify();
     }
@@ -287,6 +305,8 @@ public:
     }
   }
 
+  FiberAsyncFuncData *getOwnerThread() { return m_thread; }
+
 private:
   FiberAsyncFuncData *m_thread;
 
@@ -297,12 +317,12 @@ private:
   GlobalVariables *m_unmarshaled_global_variables;
 
   FiberReferenceMap m_refMap;
-  int64 m_reqId;
 
   Variant m_function;
   Array m_params;
   GlobalVariables *m_global_variables;
 
+  unsigned m_reqId;
   int m_refCount;
 
   bool m_async;
@@ -325,11 +345,15 @@ private:
 
 class FiberWorker : public JobQueueWorker<FiberJob*> {
 public:
+  FiberWorker() : m_owner(0) {}
+
   // FIBER THREAD
   virtual void doJob(FiberJob *job);
 
   virtual void onThreadEnter();
   virtual void onThreadExit();
+private:
+  FiberAsyncFuncData *m_owner;
 };
 
 static JobQueueDispatcher<FiberJob*, FiberWorker> *s_dispatcher;
@@ -351,7 +375,8 @@ void FiberWorker::doJob(FiberJob *job) {
       job->wait(1);
     }
   }
-  delete job;
+  m_owner = job->getOwnerThread();
+  job->decRefCount();
   m_stopped = true; // one-time job
 }
 
@@ -363,6 +388,10 @@ void FiberWorker::onThreadExit() {
   hphp_context_exit(g_context.getNoCheck(), false, true);
   hphp_session_exit();
 
+  if (m_owner && !m_owner->decRefCount()) {
+    m_owner->notify();
+  }
+
   if (s_dispatcher) {
     s_dispatcher->removeWorker(this, (AsyncFunc<FiberWorker>*)m_func, true);
   }
@@ -372,7 +401,7 @@ void FiberWorker::onThreadExit() {
 
 class FiberAsyncFuncHandle : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(FiberAsyncFuncHandle)
+  DECLARE_OBJECT_ALLOCATION_NO_SWEEP(FiberAsyncFuncHandle)
 
   FiberAsyncFuncHandle(CVarRef function, CArrRef params, bool async) {
     m_job = new FiberJob(s_fiber_data.get(), function, params, async);
@@ -382,6 +411,8 @@ public:
   ~FiberAsyncFuncHandle() {
     m_job->decRefCount();
   }
+
+  void sweep() {}
 
   FiberJob *getJob() { return m_job;}
 
@@ -393,7 +424,7 @@ private:
   FiberJob *m_job;
 };
 
-IMPLEMENT_OBJECT_ALLOCATION(FiberAsyncFuncHandle)
+IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(FiberAsyncFuncHandle)
 
 StaticString FiberAsyncFuncHandle::s_class_name("FiberAsyncFuncHandle");
 

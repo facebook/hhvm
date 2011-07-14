@@ -394,7 +394,7 @@ private:
 
   void outputCPPVariableInit(CodeGenerator &cg, AnalysisResultPtr ar,
                              bool inPseudoMain, const std::string &name);
-  void checkSystemGVOrder(SymbolList &variants, unsigned int max);
+  void checkSystemGVOrder(SymbolSet &variants, unsigned int max);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -38,8 +38,8 @@ DECLARE_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(BlockScope);
 
 // used by global_variables.h generation in variable_table.cpp
-typedef std::list<std::string> SymbolList;
-typedef std::map<std::string, std::list<std::string> > Type2SymbolListMap;
+typedef std::set<std::string> SymbolSet;
+typedef std::map<std::string, std::set<std::string> > Type2SymbolSetMap;
 
 class Symbol {
 public:

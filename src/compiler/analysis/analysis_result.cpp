@@ -3211,13 +3211,13 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
   }
 }
 
-void AnalysisResult::outputCPPClassDeclaredFlags
-(CodeGenerator &cg, Type2SymbolListMap &type2names) {
-  SymbolList &symbols = type2names["bool"];
+void AnalysisResult::getCPPClassDeclaredFlags
+(CodeGenerator &cg, Type2SymbolSetMap &type2names) {
+  SymbolSet &symbols = type2names["bool"];
   for (StringToClassScopePtrVecMap::const_iterator it = m_classDecs.begin();
        it != m_classDecs.end(); ++it) {
     if (!it->second.size() || it->second[0]->isVolatile()) {
-      symbols.push_back(string("cdec_") + Util::toLower(it->first));
+      symbols.insert(string("cdec_") + Util::toLower(it->first));
     }
   }
 }
@@ -3386,35 +3386,35 @@ void AnalysisResult::outputCPPSystem() {
   outputCPPScalarArrays(true);
 }
 
-void AnalysisResult::outputCPPRedeclaredFunctionDecl
-(CodeGenerator &cg, Type2SymbolListMap &type2names) {
-  SymbolList &symbols = type2names["CallInfo*"];
-  SymbolList &bools = type2names["bool"];
+void AnalysisResult::getCPPRedeclaredFunctionDecl
+(CodeGenerator &cg, Type2SymbolSetMap &type2names) {
+  SymbolSet &symbols = type2names["CallInfo*"];
+  SymbolSet &bools = type2names["bool"];
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
       m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
     if (iter->second[0]->isVolatile()) {
       std::string fname = CodeGenerator::FormatLabel(iter->first);
       const char *name = fname.c_str();
       if (iter->second[0]->isRedeclaring()) {
-        symbols.push_back(string("cim_") + name);
+        symbols.insert(string("cim_") + name);
       }
       if (strcmp(name, "__autoload")) {
-        bools.push_back(string(FVF_PREFIX) + name);
+        bools.insert(string(FVF_PREFIX) + name);
       }
     }
   }
 }
 
-void AnalysisResult::outputCPPRedeclaredClassDecl
-(CodeGenerator &cg, Type2SymbolListMap &type2names) {
-  SymbolList &statics = type2names["ClassStaticsPtr"];
-  SymbolList &callbacks = type2names["ObjectStaticCallbacks*"];
+void AnalysisResult::getCPPRedeclaredClassDecl
+(CodeGenerator &cg, Type2SymbolSetMap &type2names) {
+  SymbolSet &statics = type2names["ClassStaticsPtr"];
+  SymbolSet &callbacks = type2names["ObjectStaticCallbacks*"];
   for (StringToClassScopePtrVecMap::const_iterator iter =
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
     const char *name = iter->first.c_str();
     if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
-      statics.push_back(string(Option::ClassStaticsObjectPrefix) + name);
-      callbacks.push_back(string(Option::ClassStaticsCallbackPrefix) + name);
+      statics.insert(string(Option::ClassStaticsObjectPrefix) + name);
+      callbacks.insert(string(Option::ClassStaticsCallbackPrefix) + name);
     }
   }
 }
@@ -3430,20 +3430,20 @@ void AnalysisResult::outputCPPRedeclaredClassImpl(CodeGenerator &cg) {
   }
 }
 
-void AnalysisResult::outputCPPDynamicConstantDecl
-(CodeGenerator &cg, Type2SymbolListMap &type2names) {
+void AnalysisResult::getCPPDynamicConstantDecl
+(CodeGenerator &cg, Type2SymbolSetMap &type2names) {
   AnalysisResultPtr ar = shared_from_this();
-  getConstants()->outputCPPDynamicDecl(cg, ar, type2names);
+  getConstants()->getCPPDynamicDecl(cg, ar, type2names);
   for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
        iter != m_files.end(); ++iter) {
-    iter->second->getConstants()->outputCPPDynamicDecl(cg, ar, type2names);
+    iter->second->getConstants()->getCPPDynamicDecl(cg, ar, type2names);
   }
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
     for (vector<ClassScopePtr>::const_iterator viter = iter->second.begin();
          viter != iter->second.end(); ++viter) {
       const ClassScopePtr &cls = *viter;
-      cls->getConstants()->outputCPPDynamicDecl(cg, ar, type2names);
+      cls->getConstants()->getCPPDynamicDecl(cg, ar, type2names);
     }
   }
 }
@@ -3710,12 +3710,12 @@ void AnalysisResult::outputCPPSystemImplementations(CodeGenerator &cg) {
   }
 }
 
-void AnalysisResult::outputCPPFileRunDecls(CodeGenerator &cg,
-                                           Type2SymbolListMap &type2names) {
-  SymbolList &symbols = type2names["bool"];
+void AnalysisResult::getCPPFileRunDecls(CodeGenerator &cg,
+                                        Type2SymbolSetMap &type2names) {
+  SymbolSet &symbols = type2names["bool"];
   BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
-    symbols.push_back(string("run_") + Option::PseudoMainPrefix +
-                      f->pseudoMainName());
+    symbols.insert(string("run_") + Option::PseudoMainPrefix +
+                   f->pseudoMainName());
   }
 }
 
@@ -3728,15 +3728,15 @@ void AnalysisResult::outputCPPClassStaticInitializerDecls(CodeGenerator &cg) {
   }
 }
 
-void AnalysisResult::outputCPPClassStaticInitializerFlags
-(CodeGenerator &cg, Type2SymbolListMap &type2names) {
-  SymbolList &symbols = type2names["bool"];
+void AnalysisResult::getCPPClassStaticInitializerFlags
+(CodeGenerator &cg, Type2SymbolSetMap &type2names) {
+  SymbolSet &symbols = type2names["bool"];
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
     BOOST_FOREACH(ClassScopePtr cls, iter->second) {
       if (cls->needLazyStaticInitializer()) {
-        symbols.push_back(string(Option::ClassStaticInitializerFlagPrefix) +
-                          cls->getId());
+        symbols.insert(string(Option::ClassStaticInitializerFlagPrefix) +
+                       cls->getId());
       }
     }
   }

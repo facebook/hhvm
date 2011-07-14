@@ -80,8 +80,8 @@ public:
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                  bool newline = true) const;
-  void outputCPPDynamicDecl(CodeGenerator &cg, AnalysisResultPtr ar,
-                            Type2SymbolListMap &type2names);
+  void getCPPDynamicDecl(CodeGenerator &cg, AnalysisResultPtr ar,
+                         Type2SymbolSetMap &type2names);
   void outputCPPDynamicImpl(CodeGenerator &cg, AnalysisResultPtr ar);
   bool outputSingleConstant(CodeGenerator &cg, AnalysisResultPtr ar,
                             const std::string &name) const;

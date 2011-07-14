@@ -800,7 +800,7 @@ void VariableTable::canonicalizeStaticGlobals() {
 }
 
 // Make sure GlobalVariables::getRefByIdx has the correct indices
-void VariableTable::checkSystemGVOrder(SymbolList &variants,
+void VariableTable::checkSystemGVOrder(SymbolSet &variants,
                                        unsigned int max) {
   static const char *sgvNames[] = {
     "gvm_HTTP_RAW_POST_DATA",
@@ -821,7 +821,7 @@ void VariableTable::checkSystemGVOrder(SymbolList &variants,
     assert(false);
   }
   unsigned int i = 0;
-  for (SymbolList::const_iterator iterName = variants.begin();
+  for (SymbolSet::const_iterator iterName = variants.begin();
        iterName != variants.end(); ++iterName) {
     if (strcmp(sgvNames[i], iterName->c_str())) assert(false);
     i++;
@@ -862,23 +862,23 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   cg_printf("\n");
 
   // We will create one variable[] per type.
-  Type2SymbolListMap type2names;
-  SymbolList &variants = type2names["Variant"];
-  SymbolList &bools = type2names["bool"];
+  Type2SymbolSetMap type2names;
+  SymbolSet &variants = type2names["Variant"];
+  SymbolSet &bools = type2names["bool"];
 
   // Global Variables
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     const Symbol *sym = m_symbolVec[i];
     if (system || !sym->isSystem()) {
-      variants.push_back(string("gvm_") +
-                         CodeGenerator::FormatLabel(sym->getName()));
+      variants.insert(string("gvm_") +
+                      CodeGenerator::FormatLabel(sym->getName()));
     }
   }
 
   if (system) checkSystemGVOrder(variants, m_symbolVec.size());
 
   // Dynamic Constants
-  ar->outputCPPDynamicConstantDecl(cg, type2names);
+  ar->getCPPDynamicConstantDecl(cg, type2names);
 
   // Function/Method Static Variables
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
@@ -887,7 +887,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     StaticGlobalInfoPtr sgi = iter->second;
     if (sgi->func) {
       TypePtr varType = sgi->sym->getFinalType();
-      type2names[varType->getCPPDecl(ar, BlockScopeRawPtr())].push_back
+      type2names[varType->getCPPDecl(ar, BlockScopeRawPtr())].insert
         (string(Option::StaticVariablePrefix) + id);
     }
   }
@@ -901,9 +901,9 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
       string name = string(Option::InitPrefix) +
         Option::StaticVariablePrefix + id;
       if (ClassScope::NeedStaticArray(sgi->cls, sgi->func)) {
-        variants.push_back(name);
+        variants.insert(name);
       } else {
-        bools.push_back(name);
+        bools.insert(name);
       }
     }
   }
@@ -917,37 +917,37 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
                                                sgi->sym->getName());
     if (!sgi->func && !sgi->sym->isOverride()) {
       TypePtr varType = sgi->sym->getFinalType();
-      type2names[varType->getCPPDecl(ar, BlockScopeRawPtr())].push_back
+      type2names[varType->getCPPDecl(ar, BlockScopeRawPtr())].insert
         (string(Option::StaticPropertyPrefix) + id);
     }
   }
 
   // Class Static Initializer Flags
-  ar->outputCPPClassStaticInitializerFlags(cg, type2names);
+  ar->getCPPClassStaticInitializerFlags(cg, type2names);
 
   // PseudoMain Variables
-  ar->outputCPPFileRunDecls(cg, type2names);
+  ar->getCPPFileRunDecls(cg, type2names);
 
   if (!system) {
     // Volatile class declared flags
-    ar->outputCPPClassDeclaredFlags(cg, type2names);
+    ar->getCPPClassDeclaredFlags(cg, type2names);
     cg_printf("virtual bool class_exists(CStrRef name);\n");
   }
 
   // Redeclared Functions
-  ar->outputCPPRedeclaredFunctionDecl(cg, type2names);
+  ar->getCPPRedeclaredFunctionDecl(cg, type2names);
 
   // Redeclared Classes
-  ar->outputCPPRedeclaredClassDecl(cg, type2names);
+  ar->getCPPRedeclaredClassDecl(cg, type2names);
 
   const char *prefix = system ?
     "stgv_" : "tgv_"; // (system) typed global variables
-  for (Type2SymbolListMap::const_iterator iter = type2names.begin();
+  for (Type2SymbolSetMap::const_iterator iter = type2names.begin();
        iter != type2names.end(); ++iter) {
     const string &type = iter->first;
     string typeName = type;
     Util::replaceAll(typeName, "*", "Ptr");
-    const SymbolList &names = iter->second;
+    const SymbolSet &names = iter->second;
 
     // generating arr[1] even if it's empty just to make
     // outputCPPGlobalVariablesImpl()'s memset easier to generate
@@ -956,7 +956,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
 
     int i = 0;
     bool gvmDone = false;
-    for (SymbolList::const_iterator iterName = names.begin();
+    for (SymbolSet::const_iterator iterName = names.begin();
          iterName != names.end(); ++iterName) {
       bool gvmPrefix = (strncmp(iterName->c_str(), "gvm_", 4) == 0);
       if (!gvmPrefix) {
@@ -1409,7 +1409,7 @@ void VariableTable::outputCPPGlobalVariablesGetIndex(CodeGenerator &cg,
 
 void VariableTable::outputCPPGlobalVariablesMethods(CodeGenerator &cg,
                                                     AnalysisResultPtr ar) {
-  SymbolList variants;
+  SymbolSet variants;
   int maxIdx = m_symbolVec.size();
   int maxSysIdx = 0;
   bool sysDone = false;
@@ -1417,8 +1417,8 @@ void VariableTable::outputCPPGlobalVariablesMethods(CodeGenerator &cg,
     const Symbol *sym = m_symbolVec[i];
     if (sym->isSystem()) {
       if (sysDone) assert(false);
-      variants.push_back(string("gvm_") +
-                         CodeGenerator::FormatLabel(sym->getName()));
+      variants.insert(string("gvm_") +
+                             CodeGenerator::FormatLabel(sym->getName()));
       maxSysIdx++;
     } else {
       sysDone = true;

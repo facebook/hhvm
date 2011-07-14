@@ -234,9 +234,9 @@ void ConstantTable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
-void ConstantTable::outputCPPDynamicDecl(CodeGenerator &cg,
-                                         AnalysisResultPtr ar,
-                                         Type2SymbolListMap &type2names) {
+void ConstantTable::getCPPDynamicDecl(CodeGenerator &cg,
+                                      AnalysisResultPtr ar,
+                                      Type2SymbolSetMap &type2names) {
   const char *prefix = Option::ConstantPrefix;
   string classId;
   const char *fmt = "";
@@ -249,12 +249,12 @@ void ConstantTable::outputCPPDynamicDecl(CodeGenerator &cg,
 
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
 
-  SymbolList &symbols = type2names["Variant"];
+  SymbolSet &symbols = type2names["Variant"];
   BOOST_FOREACH(Symbol *sym, m_symbolVec) {
     if (sym->declarationSet() && sym->isDynamic() &&
         system == sym->isSystem()) {
-      symbols.push_back(string(prefix) + classId + fmt +
-                        CodeGenerator::FormatLabel(sym->getName()));
+      symbols.insert(string(prefix) + classId + fmt +
+                     CodeGenerator::FormatLabel(sym->getName()));
     }
   }
 }

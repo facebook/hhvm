@@ -210,25 +210,24 @@ public:
                     const std::string *compileDir);
 
   void outputCPPSystemImplementations(CodeGenerator &cg);
-  void outputCPPFileRunDecls(CodeGenerator &cg,
-                             Type2SymbolListMap &type2names);
-  void outputCPPRedeclaredFunctionDecl(CodeGenerator &cg,
-                                       Type2SymbolListMap &type2names);
-  void outputCPPRedeclaredClassDecl(CodeGenerator &cg,
-                                    Type2SymbolListMap &type2names);
+  void getCPPFileRunDecls(CodeGenerator &cg, Type2SymbolSetMap &type2names);
+  void getCPPRedeclaredFunctionDecl(CodeGenerator &cg,
+                                    Type2SymbolSetMap &type2names);
+  void getCPPRedeclaredClassDecl(CodeGenerator &cg,
+                                 Type2SymbolSetMap &type2names);
   void outputCPPRedeclaredClassImpl(CodeGenerator &cg);
-  void outputCPPDynamicConstantDecl(CodeGenerator &cg,
-                                    Type2SymbolListMap &type2names);
+  void getCPPDynamicConstantDecl(CodeGenerator &cg,
+                                 Type2SymbolSetMap &type2names);
   void outputCPPDynamicConstantImpl(CodeGenerator &cg);
   void outputCPPScalarArrayDecl(CodeGenerator &cg);
   void outputCPPScalarArrayImpl(CodeGenerator &cg);
   void outputCPPScalarArrayInit(CodeGenerator &cg, int fileCount, int part);
   void outputCPPScalarArrayId(CodeGenerator &cg, int id, int hash, int index,
                               bool scalarVariant = false);
-  void outputCPPClassStaticInitializerFlags(CodeGenerator &cg,
-                                            Type2SymbolListMap &type2names);
-  void outputCPPClassDeclaredFlags(CodeGenerator &cg,
-                                   Type2SymbolListMap &type2names);
+  void getCPPClassStaticInitializerFlags(CodeGenerator &cg,
+                                         Type2SymbolSetMap &type2names);
+  void getCPPClassDeclaredFlags(CodeGenerator &cg,
+                                Type2SymbolSetMap &type2names);
 
   void outputCPPFiniteDouble(CodeGenerator &cg, double dval);
 

@@ -25,6 +25,47 @@ CPP
 //   'note' => additional note about this constant's schema
 // )
 
+DefineConstant(
+  array(
+    'name'   => "JSON_HEX_TAG",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "JSON_HEX_AMP",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "JSON_HEX_APOS",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "JSON_HEX_QUOT",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "JSON_FORCE_OBJECT",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "JSON_NUMERIC_CHECK",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "JSON_FB_LOOSE",
+    'type'   => Int64,
+  ));
 
 ///////////////////////////////////////////////////////////////////////////////
 // Functions
@@ -65,9 +106,9 @@ DefineFunction(
         'desc'   => "The value being encoded. Can be any type except a resource.\n\nThis function only works with UTF-8 encoded data.",
       ),
       array(
-        'name'   => "loose",
-        'type'   => Boolean,
-        'value'  => "false",
+        'name'   => "options",
+        'type'   => Variant,
+        'value'  => "0",
         'desc'   => "Bitmask consisting of JSON_HEX_QUOT, JSON_HEX_TAG, JSON_HEX_AMP, JSON_HEX_APOS, JSON_FORCE_OBJECT.",
       ),
     ),
@@ -95,9 +136,9 @@ DefineFunction(
         'desc'   => "When TRUE, returned objects will be converted into associative arrays.",
       ),
       array(
-        'name'   => "loose",
-        'type'   => Boolean,
-        'value'  => "false",
+        'name'   => "options",
+        'type'   => Variant,
+        'value'  => "0",
         'desc'   => "User specified recursion depth.",
       ),
     ),

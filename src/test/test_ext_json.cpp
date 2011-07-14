@@ -38,7 +38,7 @@ bool TestExtJson::test_json_encode() {
      "[\"a\",1,true,false,null]");
 
   VS(f_json_encode("a\xE0"), "null");
-  VS(f_json_encode("a\xE0", true), "\"a?\"");
+  VS(f_json_encode("a\xE0", k_JSON_FB_LOOSE), "\"a?\"");
 
   VS(f_json_encode(CREATE_MAP2("0", "apple", "1", "banana")),
      "[\"apple\",\"banana\"]");
@@ -72,23 +72,23 @@ bool TestExtJson::test_json_decode() {
   VS(obj.toArray(), CREATE_VECTOR5("a", 1, true, false, null));
 
   VS(f_json_decode("{z:1}",     true),       null);
-  VS(f_json_decode("{z:1}",     true, true), CREATE_MAP1("z", 1));
+  VS(f_json_decode("{z:1}",     true, k_JSON_FB_LOOSE), CREATE_MAP1("z", 1));
   VS(f_json_decode("{z:\"z\"}", true),       null);
-  VS(f_json_decode("{z:\"z\"}", true, true), CREATE_MAP1("z", "z"));
+  VS(f_json_decode("{z:\"z\"}", true, k_JSON_FB_LOOSE), CREATE_MAP1("z", "z"));
   VS(f_json_decode("{'x':1}",   true),       null);
-  VS(f_json_decode("{'x':1}",   true, true), CREATE_MAP1("x", 1));
+  VS(f_json_decode("{'x':1}",   true, k_JSON_FB_LOOSE), CREATE_MAP1("x", 1));
   VS(f_json_decode("{y:1,}",    true),       null);
-  VS(f_json_decode("{y:1,}",    true, true), CREATE_MAP1("y", 1));
+  VS(f_json_decode("{y:1,}",    true, k_JSON_FB_LOOSE), CREATE_MAP1("y", 1));
   VS(f_json_decode("{,}",       true),       null);
-  VS(f_json_decode("{,}",       true, true), null);
+  VS(f_json_decode("{,}",       true, k_JSON_FB_LOOSE), null);
   VS(f_json_decode("[1,2,3,]",  true),       null);
-  VS(f_json_decode("[1,2,3,]",  true, true), CREATE_VECTOR3(1,2,3));
+  VS(f_json_decode("[1,2,3,]",  true, k_JSON_FB_LOOSE), CREATE_VECTOR3(1,2,3));
   VS(f_json_decode("[,]",       true),       null);
-  VS(f_json_decode("[,]",       true, true), null);
+  VS(f_json_decode("[,]",       true, k_JSON_FB_LOOSE), null);
   VS(f_json_decode("[]",        true),       Array::Create());
-  VS(f_json_decode("[]",        true, true), Array::Create());
+  VS(f_json_decode("[]",        true, k_JSON_FB_LOOSE), Array::Create());
   VS(f_json_decode("{}",        true),       Array::Create());
-  VS(f_json_decode("{}",        true, true), Array::Create());
+  VS(f_json_decode("{}",        true, k_JSON_FB_LOOSE), Array::Create());
 
   VS(f_json_decode("[{\"a\":\"apple\"},{\"b\":\"banana\"}]", true),
      CREATE_VECTOR2(CREATE_MAP1("a", "apple"), CREATE_MAP1("b", "banana")));

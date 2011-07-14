@@ -25,16 +25,16 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline String x_json_encode(CVarRef value, bool loose = false) {
+inline String x_json_encode(CVarRef value, CVarRef options = 0) {
   FUNCTION_INJECTION_BUILTIN(json_encode);
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
-  return f_json_encode(value, loose);
+  return f_json_encode(value, options);
 }
 
-inline Variant x_json_decode(CStrRef json, bool assoc = false, bool loose = false) {
+inline Variant x_json_decode(CStrRef json, bool assoc = false, CVarRef options = 0) {
   FUNCTION_INJECTION_BUILTIN(json_decode);
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
-  return f_json_decode(json, assoc, loose);
+  return f_json_decode(json, assoc, options);
 }
 
 

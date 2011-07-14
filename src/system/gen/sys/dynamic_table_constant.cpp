@@ -2089,7 +2089,7 @@ public:
   hashNodeCon *next;
 };
 static hashNodeCon *conMapTable[8192];
-static hashNodeCon conBuckets[2100];
+static hashNodeCon conBuckets[2107];
 
 void init_builtin_constant_table() {
   const char *conMapData[] = {
@@ -2101,6 +2101,13 @@ void init_builtin_constant_table() {
       (const char *)"FB_UNSERIALIZE_UNEXPECTED_END", (const char *)-1, (const char *)32, (const char *)&k_FB_UNSERIALIZE_UNEXPECTED_END,
       (const char *)"FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE", (const char *)-1, (const char *)32, (const char *)&k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE,
       (const char *)"INF", (const char *)-1, (const char *)64, (const char *)&k_INF,
+      (const char *)"JSON_FB_LOOSE", (const char *)-1, (const char *)32, (const char *)&k_JSON_FB_LOOSE,
+      (const char *)"JSON_FORCE_OBJECT", (const char *)-1, (const char *)32, (const char *)&k_JSON_FORCE_OBJECT,
+      (const char *)"JSON_HEX_AMP", (const char *)-1, (const char *)32, (const char *)&k_JSON_HEX_AMP,
+      (const char *)"JSON_HEX_APOS", (const char *)-1, (const char *)32, (const char *)&k_JSON_HEX_APOS,
+      (const char *)"JSON_HEX_QUOT", (const char *)-1, (const char *)32, (const char *)&k_JSON_HEX_QUOT,
+      (const char *)"JSON_HEX_TAG", (const char *)-1, (const char *)32, (const char *)&k_JSON_HEX_TAG,
+      (const char *)"JSON_NUMERIC_CHECK", (const char *)-1, (const char *)32, (const char *)&k_JSON_NUMERIC_CHECK,
       (const char *)"NAN", (const char *)-1, (const char *)64, (const char *)&k_NAN,
       (const char *)"OPENSSL_RAW_DATA", (const char *)-1, (const char *)32, (const char *)&k_OPENSSL_RAW_DATA,
       (const char *)"OPENSSL_ZERO_PADDING", (const char *)-1, (const char *)32, (const char *)&k_OPENSSL_ZERO_PADDING,

@@ -23,20 +23,40 @@
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(json);
 ///////////////////////////////////////////////////////////////////////////////
+const int64 k_JSON_HEX_TAG       = 1<<0;
+const int64 k_JSON_HEX_AMP       = 1<<1;
+const int64 k_JSON_HEX_APOS      = 1<<2;
+const int64 k_JSON_HEX_QUOT      = 1<<3;
+const int64 k_JSON_FORCE_OBJECT  = 1<<4;
+const int64 k_JSON_NUMERIC_CHECK = 1<<5;
+// intentionally higher so when PHP adds more options we're fine
+const int64 k_JSON_FB_LOOSE      = 1<<20;
 
-String f_json_encode(CVarRef value, bool loose /* = false */) {
-  VariableSerializer vs(VariableSerializer::JSON, loose ? 1 : 0);
+///////////////////////////////////////////////////////////////////////////////
+
+String f_json_encode(CVarRef value, CVarRef options /* = 0 */) {
+  int64 json_options = options.toInt64();
+  if (options.isBoolean() && options.toBooleanVal()) {
+    json_options = k_JSON_FB_LOOSE;
+  }
+
+  VariableSerializer vs(VariableSerializer::JSON, (json_options & k_JSON_FB_LOOSE) ? 1 : 0);
   return vs.serialize(value, true);
 }
 
 Variant f_json_decode(CStrRef json, bool assoc /* = false */,
-                      bool loose /* = false */) {
+                      CVarRef options /* = 0 */) {
   if (json.empty()) {
     return null;
   }
 
+  int64 json_options = options.toInt64();;
+  if (options.isBoolean() && options.toBooleanVal()) {
+    json_options = k_JSON_FB_LOOSE;
+  }
+
   Variant z;
-  if (JSON_parser(z, json.data(), json.size(), assoc, loose)) {
+  if (JSON_parser(z, json.data(), json.size(), assoc, (json_options & k_JSON_FB_LOOSE))) {
     return z;
   }
 
@@ -61,7 +81,7 @@ Variant f_json_decode(CStrRef json, bool assoc /* = false */,
     return json.substr(1, json.size() - 2);
   }
 
-  if (loose && json.size() > 1 &&
+  if ((json_options & k_JSON_FB_LOOSE) && json.size() > 1 &&
       ch0 == '\'' && json.charAt(json.size() - 1) == '\'') {
     return json.substr(1, json.size() - 2);
   }

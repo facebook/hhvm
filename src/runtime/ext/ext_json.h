@@ -25,9 +25,15 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-String f_json_encode(CVarRef value, bool loose = false);
-Variant f_json_decode(CStrRef json, bool assoc = false, bool loose = false);
-
+String f_json_encode(CVarRef value, CVarRef options = 0);
+Variant f_json_decode(CStrRef json, bool assoc = false, CVarRef options = 0);
+extern const int64 k_JSON_HEX_TAG;
+extern const int64 k_JSON_HEX_AMP;
+extern const int64 k_JSON_HEX_APOS;
+extern const int64 k_JSON_HEX_QUOT;
+extern const int64 k_JSON_FORCE_OBJECT;
+extern const int64 k_JSON_NUMERIC_CHECK;
+extern const int64 k_JSON_FB_LOOSE;
 ///////////////////////////////////////////////////////////////////////////////
 }
 

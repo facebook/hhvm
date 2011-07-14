@@ -55,8 +55,13 @@ public:
   void setGuardedThis() { m_guardedThis = true; }
   bool isGuardedThis() const { return m_guardedThis; }
   void coalesce(SimpleVariablePtr other);
-  std::string getNamePrefix() const;
+
+  bool hasAssignableCPPVariable() const;
+  std::string getAssignableCPPVariable(AnalysisResultPtr ar) const;
+
 private:
+  std::string getNamePrefix() const;
+
   std::string m_name;
 
   TypePtr m_superGlobalType;

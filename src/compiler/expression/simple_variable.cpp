@@ -280,21 +280,19 @@ void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
   if (hasCPPTemp()) return;
   VariableTablePtr vt(getScope()->getVariables());
   if (hasContext(InvokeArgument) && !hasContext(AccessContext) &&
-      (!isThis() ||
-       vt->getAttribute(VariableTable::ContainsLDynamicVariable)) &&
-      (isLocalExprAltered() || hasEffect())) {
+      (isLocalExprAltered() || hasEffect()) &&
+      !m_globals /* $GLOBALS always has reference semantics */ &&
+      hasAssignableCPPVariable()) {
     Expression::preOutputStash(cg, ar, state);
     const string &ref_temp  = cppTemp();
     ASSERT(!ref_temp.empty());
     const string &copy_temp = genCPPTemp(cg, ar);
     const string &arg_temp  = genCPPTemp(cg, ar);
-    const string &prefix0   = getNamePrefix();
-    const char *prefix1     = vt->getVariablePrefix(m_sym);
-    cg_printf("const Variant %s = %s%s%s;\n",
+    const string &cppName   = getAssignableCPPVariable(ar);
+    ASSERT(!cppName.empty());
+    cg_printf("const Variant %s = %s;\n",
               copy_temp.c_str(),
-              prefix0.c_str(),
-              prefix1,
-              CodeGenerator::FormatLabel(m_name).c_str());
+              cppName.c_str());
     cg_printf("const Variant &%s = cit%d->isRef(%d) ? %s : %s;\n",
               arg_temp.c_str(),
               cg.callInfoTop(),
@@ -309,15 +307,51 @@ void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
   Expression::preOutputStash(cg, ar, state);
 }
 
+bool SimpleVariable::hasAssignableCPPVariable() const {
+  VariableTablePtr variables = getScope()->getVariables();
+  if (m_this) {
+    return !hasAnyContext(OprLValue | AssignmentLHS) &&
+       variables->getAttribute(VariableTable::ContainsLDynamicVariable);
+  }
+  return true;
+}
+
+std::string SimpleVariable::getAssignableCPPVariable(AnalysisResultPtr ar)
+  const {
+  VariableTablePtr variables = getScope()->getVariables();
+  if (m_this) {
+    if (!hasAnyContext(OprLValue | AssignmentLHS) &&
+        variables->getAttribute(VariableTable::ContainsLDynamicVariable)) {
+      ASSERT(m_sym);
+      const string &namePrefix = getNamePrefix();
+      return namePrefix + variables->getVariablePrefix(m_sym) + "this";
+    }
+    return "";
+  } else if (m_superGlobal) {
+    const string &name = variables->getGlobalVariableName(ar, m_name);
+    return string("g->") + name.c_str();
+  } else if (m_globals) {
+    return "get_global_array_wrapper()";
+  } else {
+    ASSERT(m_sym);
+    const string &prefix0 = getNamePrefix();
+    const char *prefix1 =
+      getScope()->getVariables()->getVariablePrefix(m_sym);
+    return prefix0 + prefix1 +
+           CodeGenerator::FormatLabel(m_name);
+  }
+}
+
 void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
+  VariableTablePtr variables = getScope()->getVariables();
   if (m_this) {
     ASSERT((getContext() & ObjectContext) == 0);
     if (hasContext(OprLValue) || hasContext(AssignmentLHS)) {
       cg_printf("throw_assign_this()");
       return;
     }
-    VariableTablePtr variables = getScope()->getVariables();
     if (variables->getAttribute(VariableTable::ContainsLDynamicVariable)) {
+      ASSERT(m_sym);
       const string &namePrefix = getNamePrefix();
       cg_printf("%s%sthis",
                 namePrefix.c_str(),
@@ -336,12 +370,12 @@ void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
     }
   } else if (m_superGlobal) {
-    VariableTablePtr variables = getScope()->getVariables();
-    string name = variables->getGlobalVariableName(ar, m_name);
+    const string &name = variables->getGlobalVariableName(ar, m_name);
     cg_printf("g->%s", name.c_str());
   } else if (m_globals) {
     cg_printf("get_global_array_wrapper()");
   } else {
+    ASSERT(m_sym);
     bool sw = false;
     if (m_sym->isShrinkWrapped() &&
         m_context == Declaration) {
@@ -352,8 +386,7 @@ void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf(" ");
     }
     const string &prefix0 = getNamePrefix();
-    const char *prefix1 =
-      getScope()->getVariables()->getVariablePrefix(m_sym);
+    const char *prefix1   = variables->getVariablePrefix(m_sym);
     cg_printf("%s%s%s",
               prefix0.c_str(),
               prefix1,

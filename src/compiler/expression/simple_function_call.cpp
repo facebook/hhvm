@@ -1244,11 +1244,9 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       if (e->is(KindOfSimpleVariable)
        && Type::SameType(e->getCPPType(), Type::Variant)) {
         SimpleVariablePtr sv = dynamic_pointer_cast<SimpleVariable>(e);
-        const string &namePrefix = sv->getNamePrefix();
-        cg_printf("if (%s%s%s.isInitialized()) ",
-                  namePrefix.c_str(),
-                  Option::VariablePrefix,
-                  CodeGenerator::FormatLabel(sv->getName()).c_str());
+        const string &cppName = sv->getAssignableCPPVariable(ar);
+        ASSERT(!cppName.empty());
+        cg_printf("if (%s.isInitialized()) ", cppName.c_str());
       }
       e->preOutputCPP(cg, ar, 0);
       cg_printf("compact%d.add(", m_ciTemp);

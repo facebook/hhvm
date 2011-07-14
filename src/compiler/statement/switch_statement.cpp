@@ -338,10 +338,13 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     varId = cg.createNewLocalId(shared_from_this());
     if (!needsPreOutput &&
         m_exp->hasContext(Expression::LValue) &&
-        m_exp->is(Expression::KindOfSimpleVariable)) {
+        m_exp->is(Expression::KindOfSimpleVariable) &&
+        static_pointer_cast<SimpleVariable>(m_exp)
+          ->hasAssignableCPPVariable()) {
       // use existing variable
-      var = getScope()->getVariables()->getVariableName(
-        ar, static_pointer_cast<SimpleVariable>(m_exp)->getName());
+      var = static_pointer_cast<SimpleVariable>(m_exp)
+              ->getAssignableCPPVariable(ar);
+      ASSERT(!var.empty());
     } else {
       var = string(Option::SwitchPrefix) + lexical_cast<string>(varId);
       string var0; // holds the variable name to call outputCPP on
@@ -659,8 +662,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
     cg_printf("}\n");
 
-    if (closeBrace)
-      cg_indentEnd("}\n");
+    if (closeBrace) cg_indentEnd("}\n");
 
     // now emit the cases
     if (m_cases) {
@@ -676,17 +678,18 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (var.empty()) {
       varId = cg.createNewLocalId(shared_from_this());
       if (m_exp->hasContext(Expression::LValue) &&
-          m_exp->is(Expression::KindOfSimpleVariable)) {
-        SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(m_exp));
-        var = getScope()->getVariables()->getVariableName(
-          ar, sv->getName());
-        if (!sv->isThis() && !sv->isSuperGlobal()) {
-          Symbol *sym = sv->getSymbol();
-          if (sym && !sym->isHidden()) {
-            var = sv->getNamePrefix() + var;
-          }
-        }
+          m_exp->is(Expression::KindOfSimpleVariable) &&
+          static_pointer_cast<SimpleVariable>(m_exp)
+            ->hasAssignableCPPVariable()) {
+        // use existing variable
+        var = static_pointer_cast<SimpleVariable>(m_exp)
+                ->getAssignableCPPVariable(ar);
+        ASSERT(!var.empty());
       } else {
+        ASSERT(!closeBrace);
+        cg_indentBegin("{\n");
+        closeBrace = true;
+
         var = string(Option::SwitchPrefix) + lexical_cast<string>(varId);
         m_exp->getType()->outputCPPDecl(cg, ar, getScope());
         cg_printf(" %s = (", var.c_str());
@@ -714,8 +717,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf("goto break%d;\n", labelId);
         cg.addLabelId("break", labelId);
       }
-      if (closeBrace)
-        cg_indentEnd("}\n");
+      if (closeBrace) cg_indentEnd("}\n");
       cg_printf("\n");
       for (int i = 0; i < m_cases->getCount(); i++) {
         CaseStatementPtr stmt =

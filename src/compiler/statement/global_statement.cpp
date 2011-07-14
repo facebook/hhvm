@@ -162,8 +162,9 @@ void GlobalStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       const string &name = var->getName();
       VariableTablePtr variables = scope->getVariables();
       if (variables->needLocalCopy(name)) {
-        cg_printf("%s%s.assignRef(g->%s);\n",
-                  Option::VariablePrefix, name.c_str(),
+        ASSERT(var->hasAssignableCPPVariable());
+        cg_printf("%s.assignRef(g->%s);\n",
+                  var->getAssignableCPPVariable(ar).c_str(),
                   variables->getGlobalVariableName(ar, name).c_str());
       }
     } else if (exp->is(Expression::KindOfDynamicVariable)) {

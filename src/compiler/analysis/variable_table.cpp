@@ -1546,7 +1546,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                   id.c_str());
       }
 
-      if (needLocalCopy(sym) && !sym->isParameter()) {
+      if (needLocalCopy(sym) && !sym->isParameter() && !isGenScope) {
         type->outputCPPDecl(cg, ar, getBlockScope());
         cg_printf(" %s%s;\n", Option::VariablePrefix,
                   fname.c_str());
@@ -1567,7 +1567,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                 Option::GlobalVariablePrefix, fname.c_str(),
                 getGlobalVariableName(ar, name).c_str());
 
-      if (needLocalCopy(name)) {
+      if (needLocalCopy(name) && !isGenScope) {
         type->outputCPPDecl(cg, ar, getBlockScope());
         cg_printf(" %s%s%s", prefix, Option::VariablePrefix,
                   fname.c_str());

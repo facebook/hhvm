@@ -1030,48 +1030,55 @@ bool TestCodeRun::TestExceptions() {
        "bar();\n");
 
   MVCR("<?php try { throw new Exception('test');} "
-      "catch (Exception $e) {}");
+       "catch (Exception $e) {}");
+
   MVCR("<?php try { try { throw new Exception('test');} "
-      "catch (InvalidArgumentException $e) {} } "
-      "catch (Exception $e) { print 'ok';}");
+       "catch (InvalidArgumentException $e) {} } "
+       "catch (Exception $e) { print 'ok';}");
+
   MVCR("<?php class E extends Exception {} "
-      "try { throw new E(); } catch (E $e) { print 'ok';}");
+       "try { throw new E(); } catch (E $e) { print 'ok';}");
+
   MVCR("<?php class E extends Exception {} class F extends E {}"
-      "try { throw new F(); } catch (E $e) { print 'ok';}");
+       "try { throw new F(); } catch (E $e) { print 'ok';}");
+
   MVCR("<?php class E extends Exception { function __toString(){ return 'E';}} "
-      "class F extends E { function __toString() { return 'F';}}"
-      "try { throw new F(); } catch (E $e) { print $e;}");
+       "class F extends E { function __toString() { return 'F';}}"
+       "try { throw new F(); } catch (E $e) { print $e;}");
+
   MVCR("<?php "
-      "class a extends Exception {"
-      "  function __destruct() {"
-      "    var_dump('__destruct');"
-      "  }"
-      "};"
-      "function foo() {"
-      "  $ex = null;"
-      "  try {"
-      "    throw new A;"
-      "  } catch (Exception $ex) {"
-      "    var_dump(1);"
-      "  }"
-      "  var_dump(2);"
-      "}"
-      "foo();");
+       "class a extends Exception {"
+       "  function __destruct() {"
+       "    var_dump('__destruct');"
+       "  }"
+       "};"
+       "function foo() {"
+       "  $ex = null;"
+       "  try {"
+       "    throw new A;"
+       "  } catch (Exception $ex) {"
+       "    var_dump(1);"
+       "  }"
+       "  var_dump(2);"
+       "}"
+       "foo();");
+
   MVCR("<?php "
-      "function foo($a, $b) { return $a + $b; }"
-      "function myErrorHandler($errno, $errstr, $errfile, $errline) {"
-      "  var_dump($errstr, $errline);"
-      "}"
-      "$old_error_handler = set_error_handler('myErrorHandler');"
-      ""
-      "function bar($a, $b) {"
-      "  if ($a) {"
-      "    $value = $a * foo(1, 2);"
-      "  }"
-      "  return 1 / $b;"
-      "}"
-      "set_error_handler('myErrorHandler');"
-      "$r = bar(1, 0);");
+       "function foo($a, $b) { return $a + $b; }"
+       "function myErrorHandler($errno, $errstr, $errfile, $errline) {"
+       "  var_dump($errstr, $errline);"
+       "}"
+       "$old_error_handler = set_error_handler('myErrorHandler');"
+       ""
+       "function bar($a, $b) {"
+       "  if ($a) {"
+       "    $value = $a * foo(1, 2);"
+       "  }"
+       "  return 1 / $b;"
+       "}"
+       "set_error_handler('myErrorHandler');"
+       "$r = bar(1, 0);");
+
   MVCR("<?php "
        "class a extends Exception {};"
        "class b extends a {"
@@ -1086,6 +1093,7 @@ bool TestCodeRun::TestExceptions() {
        "} catch (b $e) {"
        "  $e->dump();"
        "}");
+
   MVCR("<?php "
        "class X {"
        "  static function eh($errno, $errstr) {"
@@ -1095,6 +1103,21 @@ bool TestCodeRun::TestExceptions() {
        "set_error_handler(array('X', 'eh'));"
        "$g = array();"
        "echo $g['foobar'];");
+
+  MVCR("<?php\n"
+       "function f() { throw new Exception('foo'); }\n"
+       "class X {\n"
+       "  function foo() {\n"
+       "    try {\n"
+       "      f();\n"
+       "    } catch (Exception $this) {\n"
+       "      return $this;\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "$x = new X;\n"
+       "$ex = $x->foo();\n"
+       "var_dump($ex->getMessage());\n");
 
   return true;
 }
@@ -16016,6 +16039,72 @@ bool TestCodeRun::TestSwitchStatement() {
        "g(0);\n"
        "g(0.0);\n");
 
+  {
+    WithOpt w(Option::EnableHipHopSyntax);
+    MVCRO("<?php\n"
+          "class X {\n"
+          "  function foo() {\n"
+          "    switch ($this) {\n"
+          "    case 'foo': echo 'foo'; break;\n"
+          "    case 'bar': echo 'bar'; break;\n"
+          "    default: echo 'def';\n"
+          "    }\n"
+          "  }\n"
+          "  function bar($arg) {\n"
+          "    switch ($this) {\n"
+          "    case $arg: echo 'arg'; break;\n"
+          "    default: echo 'def';\n"
+          "    }\n"
+          "  }\n"
+          "  function baz($arg) {\n"
+          "    switch ($this) {\n"
+          "    case $arg: echo 'arg'; break;\n"
+          "    default: echo 'def';\n"
+          "    }\n"
+          "    yield $arg;\n"
+          "  }\n"
+          "}\n"
+          "$x = new X;\n"
+          "$x->foo();\n"
+          "$x->bar(new stdClass);\n"
+          "$x->bar($x);\n"
+          "foreach ($x->baz($x) as $v) {\n"
+          "  var_dump($v);\n"
+          "}\n",
+          "defdefargargobject(X)#1 (0) {\n"
+          "}\n");
+  }
+
+  MVCR("<?php\n"
+       "switch ($_POST) {\n"
+       "case array(): echo 'empty array'; break;\n"
+       "case $_GET:   echo 'get'; break;\n"
+       "default: echo 'default';\n"
+       "}\n"
+       "switch ($GLOBALS) {\n"
+       "case array(): echo 'empty array'; break;\n"
+       "default: echo 'default';\n"
+       "}\n"
+       "function ret_true($x) { return true; }\n"
+       "switch ($GLOBALS) {\n"
+       "case ret_true($GLOBALS['foo'] = 10): echo '1'; break;\n"
+       "case array(); echo '2'; break;\n"
+       "default: echo '3';\n"
+       "}\n"
+       "var_dump($foo);\n");
+
+  MVCR("<?php\n"
+       "function id($x) { return $x; }\n"
+       "function ret_false($x) { return false; }\n"
+       "function f($x) {\n"
+       "  switch ($x) {\n"
+       "  case ret_false($x = 32); echo 'fail'; break;\n"
+       "  case id($x = 5): echo 'here'; break;\n"
+       "  default: echo 'default';\n"
+       "  }\n"
+       "}\n"
+       "f(32);\n");
+
   return true;
 }
 
@@ -18498,6 +18587,22 @@ bool TestCodeRun::TestGoto() {
   MVCRO("<?php my_lbl: print 'here';",
         "here");
 
+  MVCRO("<?php\n"
+        "function fcn() { return true; }\n"
+        "class X {\n"
+        "  function f($x) {\n"
+        "    goto over_switch;\n"
+        "    switch ($this) {\n"
+        "    case fcn(): echo 'fcn';\n"
+        "    default: echo 'fun';\n"
+        "    }\n"
+        "    over_switch: var_dump($x);\n"
+        "  }\n"
+        "}\n"
+        "$x = new X;\n"
+        "$x->f(42);\n",
+        "int(42)\n");
+
   return true;
 }
 
@@ -19428,6 +19533,57 @@ bool TestCodeRun::TestYield() {
         "}"
         "foreach(foo(3) as $x) { var_dump($x); }",
         "2int(4)\n");
+
+  MVCRO("<?php\n"
+        "$x = 32;\n"
+        "$SOME_VAR = 'foo';\n"
+        "function f($a0, $a1, $a2, $a3) {\n"
+        "  var_dump($a0['SOME_VAR'], $a1, $a2, $a3);\n"
+        "}\n"
+        "function g($a0, $a1, $a2, $a3) {\n"
+        "  var_dump($a0['SOME_VAR'], $a1, $a2, $a3);\n"
+        "}\n"
+        "function h($fcn) {\n"
+        "  global $x;\n"
+        "  $fcn($GLOBALS, $_POST, $x, $x++);\n"
+        "  yield 64;\n"
+        "}\n"
+        "foreach (h(rand(0, 1) ? 'f' : 'g') as $v) {\n"
+        "  var_dump($v);\n"
+        "}\n",
+        "string(3) \"foo\"\n"
+        "array(0) {\n"
+        "}\n"
+        "int(32)\n"
+        "int(32)\n"
+        "int(64)\n");
+
+  // globals and statics
+  MVCRO("<?php\n"
+        "$x = 0;\n"
+        "function f() {\n"
+        "  global $x;\n"
+        "  static $y = 0;\n"
+        "  yield $x++;\n"
+        "  yield $y++;\n"
+        "}\n"
+        "for ($i = 0; $i < 5; $i++) {\n"
+        "  foreach (f() as $value) {\n"
+        "    var_dump($value);\n"
+        "  }\n"
+        "}\n"
+        "var_dump($x);\n",
+        "int(0)\n"
+        "int(0)\n"
+        "int(1)\n"
+        "int(1)\n"
+        "int(2)\n"
+        "int(2)\n"
+        "int(3)\n"
+        "int(3)\n"
+        "int(4)\n"
+        "int(4)\n"
+        "int(5)\n");
 
   return true;
 }

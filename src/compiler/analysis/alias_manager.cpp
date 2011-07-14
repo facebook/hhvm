@@ -2085,6 +2085,17 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         inlineOk = true;
         break;
       case Statement::KindOfCatchStatement:
+        {
+          CatchStatementPtr c(spc(CatchStatement, s));
+          if (c->getVariable()->isThis()) {
+            // Since catching $this results in re-assignment to $this, forcing
+            // a variable table is the easiest way to force v_this to exist as
+            // a local variable in the current scope.  While this is clearly
+            // not optimal, I don't believe there is a compelling reason to
+            // optimize for this case.
+            m_variables->setAttribute(VariableTable::ContainsLDynamicVariable);
+          }
+        }
         break;
       case Statement::KindOfReturnStatement:
         inlineOk = true;

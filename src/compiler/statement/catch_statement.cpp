@@ -61,6 +61,13 @@ void CatchStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   addUserClass(ar, m_className);
   m_variable->analyzeProgram(ar);
   if (m_stmt) m_stmt->analyzeProgram(ar);
+  if (m_variable->isThis()) {
+    // catch (Exception $this) { ... }
+    // See note in alias_manager.cpp about why this forces a variable table
+    VariableTablePtr variables(getScope()->getVariables());
+    variables->forceVariants(ar, VariableTable::AnyVars);
+    variables->setAttribute(VariableTable::ContainsLDynamicVariable);
+  }
 }
 
 ConstructPtr CatchStatement::getNthKid(int n) const {
@@ -129,10 +136,10 @@ void CatchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printString(m_className, ar, shared_from_this());
     cg_indentBegin(")) {\n");
     VariableTablePtr variables = getScope()->getVariables();
-    const string &prefix = m_variable->getNamePrefix();
-    const string &name =
-      variables->getVariableName(ar, m_variable->getName());
-    cg_printf("%s%s = e;\n", prefix.c_str(), name.c_str());
+    ASSERT(m_variable->hasAssignableCPPVariable());
+    const string &cppName =
+      m_variable->getAssignableCPPVariable(ar);
+    cg_printf("%s = e;\n", cppName.c_str());
   } else {
     cg_indentBegin("if (false) {\n");
   }

@@ -444,10 +444,14 @@ void Parser::onStaticVariable(Token &out, Token *exprs, Token &var,
 
 void Parser::onSimpleVariable(Token &out, Token &var) {
   out.reset();
-  if (var.text() == "this" && haveClass()) {
+  if (var.text() == "this") {
     int tokid = m_scanner.peekNextToken();
-    if (tokid == T_OBJECT_OPERATOR) {
+    if (tokid == T_OBJECT_OPERATOR && haveClass()) {
       out->exp() = NEW_EXP0(This);
+      return;
+    }
+    if (tokid == '=') {
+      error("Cannot re-assign $this");
       return;
     }
   }

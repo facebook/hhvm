@@ -16,6 +16,8 @@
 
 #include <compiler/statement/loop_statement.h>
 #include <compiler/analysis/variable_table.h>
+#include <compiler/analysis/function_scope.h>
+#include <util/parser/parser.h>
 
 using namespace HPHP;
 
@@ -58,11 +60,14 @@ void LoopStatement::cppEndBufs(CodeGenerator &cg, AnalysisResultPtr ar) {
     for (std::set<std::string>::iterator it = m_string_bufs.begin(),
            end = m_string_bufs.end(); it != end; ++it) {
 
+      const char *prefix0 = getFunctionScope()->isGenerator() ?
+        TYPED_CONTINUATION_OBJECT_NAME "->" : "";
+
       const char *prefix =
         getScope()->getVariables()->getVariablePrefix(*it);
 
-      cg_printf("concat_assign(%s%s, %s_sbuf_%s%s.detach());\n",
-                prefix, it->c_str(),
+      cg_printf("concat_assign(%s%s%s, %s_sbuf_%s%s.detach());\n",
+                prefix0, prefix, it->c_str(),
                 Option::Option::TempPrefix,
                 prefix, it->c_str());
     }

@@ -2279,7 +2279,7 @@ void AnalysisResult::outputCPPClassMapFile() {
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-  if (Option::GenConcat || Option::GenArrayCreate) {
+  if (Option::GenArrayCreate) {
     cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   }
   cg_printf("\n");
@@ -2446,7 +2446,7 @@ void AnalysisResult::outputRTTIMetaData(const char *filename) {
 }
 
 void AnalysisResult::outputCPPUtilDecl(CodeGenerator::Output output) {
-  if (!Option::GenConcat && !Option::GenArrayCreate) return;
+  if (!Option::GenArrayCreate) return;
 
   string filename = string(Option::SystemFilePrefix) + "cpputil.h";
   string headerPath = m_outputPath + "/" + filename;
@@ -2459,9 +2459,6 @@ void AnalysisResult::outputCPPUtilDecl(CodeGenerator::Output output) {
   cg_printf("\n");
   cg.printImplStarter();
   cg.namespaceBegin();
-  if (Option::GenConcat) {
-    outputConcatDecl(cg);
-  }
   if (Option::GenArrayCreate) {
     outputArrayCreateDecl(cg);
   }
@@ -2470,7 +2467,7 @@ void AnalysisResult::outputCPPUtilDecl(CodeGenerator::Output output) {
 }
 
 void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
-  if (!Option::GenConcat && !Option::GenArrayCreate) return;
+  if (!Option::GenArrayCreate) return;
 
   string filename = string(Option::SystemFilePrefix) + "cpputil.cpp";
   string headerPath = m_outputPath + "/" + filename;
@@ -2478,7 +2475,7 @@ void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
   ofstream f(headerPath.c_str());
   CodeGenerator cg(&f, output);
   cg_printf("\n");
-  if (Option::GenConcat || Option::GenArrayCreate) {
+  if (Option::GenArrayCreate) {
     cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   }
   cg_printInclude("<runtime/base/array/zend_array.h>");
@@ -2487,75 +2484,10 @@ void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
   cg_printInclude("<runtime/base/taint/taint_data.h>");
   cg.printImplStarter();
   cg.namespaceBegin();
-  if (Option::GenConcat) {
-    outputConcatImpl(cg);
-  }
   if (Option::GenArrayCreate) {
     outputArrayCreateImpl(cg);
   }
   cg.namespaceEnd();
-}
-
-void AnalysisResult::outputConcatNumDecl(CodeGenerator &cg, int num) {
-  cg_printf("String concat%d(", num);
-  for (int i = 1; i <= num; i++) {
-    cg_printf("CStrRef s%d", i);
-    if (i < num) {
-      cg_printf(", ");
-    } else {
-      cg_printf(")");
-    }
-  }
-}
-
-void AnalysisResult::outputConcatDecl(CodeGenerator &cg) {
-  for (set<int>::const_iterator iter = m_concatLengths.begin();
-       iter != m_concatLengths.end(); ++iter) {
-    int num = *iter;
-    ASSERT(num > MAX_CONCAT_ARGS);
-    outputConcatNumDecl(cg, num);
-    cg_printf(";\n");
-  }
-}
-
-void AnalysisResult::outputConcatImpl(CodeGenerator &cg) {
-  for (set<int>::const_iterator iter = m_concatLengths.begin();
-       iter != m_concatLengths.end(); ++iter) {
-    int num = *iter;
-    ASSERT(num > MAX_CONCAT_ARGS);
-    outputConcatNumDecl(cg, num);
-    cg_indentBegin(" {\n");
-
-    cg_printf("TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);\n");
-
-    for (int i = 1; i <= num; i++) {
-      cg_printf("int len%d = s%d.size();\n", i, i);
-    }
-    cg_printf("int len =");
-    for (int i = 1; i <= num; i++) {
-      cg_printf(" len%d", i);
-      if (i < num) {
-        cg_printf(" +");
-      } else {
-        cg_printf(";\n");
-      }
-    }
-    cg_printf("char *buf = (char*)malloc(len + 1);\n");
-    cg_printf("if (buf == NULL) {\n");
-    cg_printf("  throw FatalErrorException(0,\"malloc failed: %%d\", len);\n");
-    cg_printf("}\n");
-    for (int i = 1; i <= num; i++) {
-      cg_printf("memcpy(buf");
-      for (int j = 1; j < i; j++) {
-        cg_printf(" + len%d", j);
-      }
-      cg_printf(", s%d.data(), len%d);\n", i, i);
-    }
-    cg_printf("buf[len] = 0;\n");
-    cg_printf("String r = String(buf, len, AttachString);\n");
-    cg_printf("return r;\n");
-    cg_indentEnd("}\n");
-  }
 }
 
 void AnalysisResult::outputArrayCreateDecl(CodeGenerator &cg) {
@@ -2980,8 +2912,7 @@ void AnalysisResult::outputCPPDynamicConstantTable(
   AnalysisResultPtr ar = shared_from_this();
   bool system = output == CodeGenerator::SystemCPP;
   string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
-    (Option::GenHashTableGetConstant ?
-     "dynamic_table_constant.cpp" : "dynamic_table_constant.no.cpp");
+    "dynamic_table_constant.cpp";
   Util::mkdir(tablePath);
   ofstream fTable(tablePath.c_str());
   CodeGenerator cg(&fTable, output);
@@ -3038,7 +2969,7 @@ void AnalysisResult::outputCPPDynamicConstantTable(
     "assumed '%%s'\", s, s);\n"
     "return name;\n"
   };
-  bool useHashTable = (Option::GenHashTableGetConstant && strings.size() > 0);
+  bool useHashTable = (strings.size() > 0);
   if (useHashTable) {
     outputCPPHashTableGetConstant(cg, system, strings, types, dyns);
   } else if (system) {
@@ -3079,27 +3010,6 @@ void AnalysisResult::outputCPPDynamicConstantTable(
               Type::KindOfVariant);
     cg_printf("return getDynamicConstant(g->%stgv_Variant[p->off-1], "
               "name);\n", system ? "s" : "");
-  } else if (strings.size() > 0) {
-    cg_printf("const char* s = name.data();\n");
-    for (JumpTable jt(cg, strings, false, false, false); jt.ready();
-         jt.next()) {
-      const char *name = jt.key();
-      string varName = string(Option::ConstantPrefix) +
-                       CodeGenerator::FormatLabel(name);
-      hphp_const_char_map<bool>::const_iterator it = dyns.find(name);
-      bool dyn = it != dyns.end() && it->second;
-      if (dyn) {
-        string escaped = CodeGenerator::EscapeLabel(name);
-        cg_printf("HASH_RETURN(0x%016llXLL, "
-                  "getDynamicConstant(g->%s, \"%s\"), \"%s\");\n",
-                  hash_string(name), varName.c_str(),
-                 escaped.c_str(), escaped.c_str());
-      } else {
-        cg_printf("HASH_RETURN(0x%016llXLL, %s, \"%s\");\n",
-                  hash_string(name), varName.c_str(),
-                  CodeGenerator::EscapeLabel(name).c_str());
-      }
-    }
   }
 
   if (!useHashTable) {
@@ -3119,8 +3029,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
   bool system = output == CodeGenerator::SystemCPP;
   {
     string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
-      ((Option::GenHashTableInvokeFunc && !system) ?
-        "dynamic_table_func.cpp" : "dynamic_table_func.no.cpp");
+      (!system ? "dynamic_table_func.cpp" : "dynamic_table_func.no.cpp");
     Util::mkdir(tablePath);
     ofstream fTable(tablePath.c_str());
     CodeGenerator cg(&fTable, output);
@@ -3154,17 +3063,14 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
   outputCPPDynamicConstantTable(output);
   if (output != CodeGenerator::SystemCPP) {
     string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
-      (Option::GenHashTableInvokeFile ? "dynamic_table_file.cpp"
-                                      : "dynamic_table_file.no.cpp");
+      "dynamic_table_file.cpp";
     Util::mkdir(tablePath);
     ofstream fTable(tablePath.c_str());
     CodeGenerator cg(&fTable, output);
 
     outputCPPDynamicTablesHeader(cg, false, false);
-    if (Option::GenHashTableInvokeFile) {
-      cg_printf("typedef Variant (*pm_t)(bool incOnce, "
-                "LVariableTable* variables, Globals *globals);\n");
-    }
+    cg_printf("typedef Variant (*pm_t)(bool incOnce, "
+              "LVariableTable* variables, Globals *globals);\n");
     cg.printSection("File Invoke Table");
     vector<const char*> entries;
     BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
@@ -3179,35 +3085,9 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
 
     cg_printf("\n");
     bool needEvalHook = !system && Option::EnableEval == Option::FullEval;
-    if (Option::GenHashTableInvokeFile) {
-      outputCPPHashTableInvokeFile(cg, entries, needEvalHook);
-      cg.namespaceEnd();
-      fTable.close();
-    } else {
-      outputCPPInvokeFileHeader(cg);
-
-      string root;
-
-      for (JumpTable jt(cg, entries, false, false, true); jt.ready();
-           jt.next()) {
-        const char *file = jt.key();
-        cg_printf("HASH_INCLUDE(0x%016llXLL, \"%s\", %s);\n",
-                  hash_string(file), file,
-                  Option::MangleFilename(file, true).c_str());
-      }
-
-      // See if there's an eval'd version
-      if (needEvalHook) outputCPPEvalHook(cg);
-
-      // when we only have one file, we default to running the file
-      if (entries.size() == 1) outputCPPDefaultInvokeFile(cg, entries[0]);
-
-      cg_printf("return throw_missing_file(s.data());\n");
-      cg_indentEnd("}\n");
-
-      cg.namespaceEnd();
-      fTable.close();
-    }
+    outputCPPHashTableInvokeFile(cg, entries, needEvalHook);
+    cg.namespaceEnd();
+    fTable.close();
   }
 }
 
@@ -3321,28 +3201,7 @@ void AnalysisResult::outputCPPHashTableClassDeclaredFlagsLookup(
 }
 
 void AnalysisResult::outputCPPClassDeclaredFlagsLookup(CodeGenerator &cg) {
-  if (Option::GenHashTableGVRoutine) {
-    outputCPPHashTableClassDeclaredFlagsLookup(cg);
-    return;
-  }
-
-  AnalysisResultPtr ar = shared_from_this();
-  vector <const char *> classes;
-  for (StringToClassScopePtrVecMap::const_iterator it = m_classDecs.begin();
-       it != m_classDecs.end(); ++it) {
-    if (!it->second.size() || it->second[0]->isVolatile()) {
-      classes.push_back(it->first.c_str());
-    }
-  }
-  cg_indentBegin("bool GlobalVariables::class_exists(CStrRef s) {\n");
-  for (JumpTable jt(cg, classes, true, false, true); jt.ready(); jt.next()) {
-    const char *name = jt.key();
-    cg_printf("HASH_GUARD_LITSTR(0x%016llXLL, ", hash_string(name));
-    cg_printString(name, ar, ar);
-    cg_printf(") return CDEC(%s);\n", name);
-  }
-  cg_printf("return false;\n");
-  cg_indentEnd("}\n");
+  outputCPPHashTableClassDeclaredFlagsLookup(cg);
 }
 
 void AnalysisResult::outputCPPSystem() {
@@ -3834,16 +3693,10 @@ void AnalysisResult::outputCPPScalarArrays(CodeGenerator &cg, int fileCount,
 void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
   string filename = m_outputPath + "/" + Option::SystemFilePrefix +
     "global_variables";
-  if (!Option::GenHashTableGVRoutine) {
-    filename += "_";
-    filename += lexical_cast<string>(part ? part : 1);
-  }
-  if (part == 1 && Option::GenHashTableGVRoutine) {
+  if (part == 1) {
     filename += ".cpp";
-  } else if (Option::GenHashTableGVRoutine) {
-    return;
   } else {
-    filename += ".no.cpp";
+    return;
   }
   Util::mkdir(filename);
   ofstream f(filename.c_str());
@@ -3853,7 +3706,7 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-  if (Option::GenConcat || Option::GenArrayCreate) {
+  if (Option::GenArrayCreate) {
     cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   }
   if (part == 1 || part == 2) {
@@ -3876,13 +3729,10 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
     getVariables()->outputCPPGlobalVariablesDtor(cg);
     getVariables()->outputCPPGlobalVariablesGetImpl(cg, ar);
     outputCPPClassDeclaredFlagsLookup(cg);
-    if (!Option::GenHashTableGVRoutine) break;
     // Fall through
   case 2: getVariables()->outputCPPGlobalVariablesExists  (cg, ar);
-    if (!Option::GenHashTableGVRoutine) break;
     // Fall through
   case 3: getVariables()->outputCPPGlobalVariablesGetIndex(cg, ar);
-    if (!Option::GenHashTableGVRoutine) break;
     // Fall through
   case 4: getVariables()->outputCPPGlobalVariablesMethods (cg, ar);
     break;
@@ -3902,7 +3752,7 @@ void AnalysisResult::outputCPPGlobalStateFileHeader(CodeGenerator &cg) {
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-  if (Option::GenConcat || Option::GenArrayCreate) {
+  if (Option::GenArrayCreate) {
     cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   }
   if (Option::EnableEval >= Option::LimitedEval) {
@@ -4145,7 +3995,7 @@ void AnalysisResult::outputCPPFiberGlobalState() {
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude("<runtime/base/fiber_reference_map.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-  if (Option::GenConcat || Option::GenArrayCreate) {
+  if (Option::GenArrayCreate) {
     cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   }
   cg_printf("\n");
@@ -4339,7 +4189,7 @@ void AnalysisResult::outputCPPMain() {
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-  if (Option::GenConcat || Option::GenArrayCreate) {
+  if (Option::GenArrayCreate) {
     cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   }
 

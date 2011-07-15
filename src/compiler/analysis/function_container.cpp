@@ -440,7 +440,7 @@ void FunctionContainer::outputCPPCodeInfoTable(
       }
     }
   }
-  if (Option::GenHashTableInvokeFunc && !system) {
+  if (!system) {
     outputCPPHashTableGetCallInfo(cg, system, false, functions, funcs);
     outputCPPHashTableGetCallInfo(cg, system, true, functions, funcs);
     return;

@@ -1139,9 +1139,7 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
 
     cg_indentBegin("void init_static_variables() {\n");
     cg_printf("ScalarArrays::initialize();\n");
-    if (Option::GenHashTableGetConstant) {
-      cg_printf("init_constant_table();\n");
-    }
+    cg_printf("init_constant_table();\n");
     cg_indentEnd("}\n");
     cg_printf("static IMPLEMENT_THREAD_LOCAL"
               "(GlobalArrayWrapper, g_array_wrapper);\n");
@@ -1319,20 +1317,7 @@ void VariableTable::outputCPPGVHashTableGetImpl(CodeGenerator &cg,
 
 void VariableTable::outputCPPGlobalVariablesGetImpl(CodeGenerator &cg,
                                                     AnalysisResultPtr ar) {
-  if (Option::GenHashTableGVRoutine) {
-    outputCPPGVHashTableGetImpl(cg, ar);
-    return;
-  }
-  cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_GETIMPL");
-  cg_indentBegin("Variant &GlobalVariables::getImpl(CStrRef s) {\n");
-  cg_printf("GlobalVariables *g ATTRIBUTE_UNUSED = this;\n");
-  if (!outputCPPJumpTable(cg, ar, NULL, true, true, EitherStatic,
-                          JumpReturnString)) {
-    m_emptyJumpTables.insert(JumpTableGlobalGetImpl);
-  }
-  cg_printf("return LVariableTable::getImpl(s);\n");
-  cg_indentEnd("}\n");
-  cg.ifdefEnd("OMIT_JUMP_TABLE_GLOBAL_GETIMPL");
+  outputCPPGVHashTableGetImpl(cg, ar);
 }
 
 void VariableTable::outputCPPGVHashTableExists(CodeGenerator &cg,
@@ -1352,23 +1337,7 @@ void VariableTable::outputCPPGVHashTableExists(CodeGenerator &cg,
 
 void VariableTable::outputCPPGlobalVariablesExists(CodeGenerator &cg,
                                                    AnalysisResultPtr ar) {
-  if (Option::GenHashTableGVRoutine) {
-    outputCPPGVHashTableExists(cg, ar);
-    return;
-  }
-
-  cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_EXISTS");
-  cg_indentBegin("bool GlobalVariables::exists(CStrRef s) const {\n");
-  cg_printf("const GlobalVariables *g ATTRIBUTE_UNUSED = this;\n");
-  if (!outputCPPJumpTable(cg, ar, NULL, true, false,
-                          EitherStatic, JumpInitializedString)) {
-    m_emptyJumpTables.insert(JumpTableGlobalExists);
-  }
-  cg_printf("if (!LVariableTable::exists(s)) return false;\n");
-  cg_printf("return isInitialized("
-            "const_cast<GlobalVariables*>(this)->get(s));\n");
-  cg_indentEnd("}\n");
-  cg.ifdefEnd("OMIT_JUMP_TABLE_GLOBAL_EXISTS");
+  outputCPPGVHashTableExists(cg, ar);
 }
 
 void VariableTable::outputCPPGVHashTableGetIndex(CodeGenerator &cg,
@@ -1389,22 +1358,7 @@ void VariableTable::outputCPPGVHashTableGetIndex(CodeGenerator &cg,
 
 void VariableTable::outputCPPGlobalVariablesGetIndex(CodeGenerator &cg,
                                                      AnalysisResultPtr ar) {
-  if (Option::GenHashTableGVRoutine) {
-    outputCPPGVHashTableGetIndex(cg, ar);
-    return;
-  }
-
-  cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_GETINDEX");
-  cg_indentBegin("ssize_t GlobalVariables::getIndex(const char* s, "
-                 "int64 hash) const {\n");
-  cg_printf("const GlobalVariables *g ATTRIBUTE_UNUSED = this;\n");
-  if (!outputCPPJumpTable(cg, ar, NULL, false, true, EitherStatic, JumpIndex)) {
-    m_emptyJumpTables.insert(JumpTableGlobalGetIndex);
-  }
-  cg_printf("return m_px ? (m_px->getIndex(s) + %d) : %d;\n",
-            m_symbolVec.size(), ArrayData::invalid_index);
-  cg_indentEnd("}\n");
-  cg.ifdefEnd("OMIT_JUMP_TABLE_GLOBAL_GETINDEX");
+  outputCPPGVHashTableGetIndex(cg, ar);
 }
 
 void VariableTable::outputCPPGlobalVariablesMethods(CodeGenerator &cg,
@@ -1442,31 +1396,7 @@ void VariableTable::outputCPPGlobalVariablesMethods(CodeGenerator &cg,
     "  return Globals::getRefByIdx(idx, k);\n"
     "}\n";
 
-  if (Option::GenHashTableGVRoutine) {
-    cg_printf(text, maxIdx, maxSysIdx, maxSysIdx);
-    return;
-  }
-  cg_indentBegin("CVarRef GlobalVariables::getRefByIdx(ssize_t idx, "
-                 "Variant &k) {\n");
-  cg_printf("GlobalVariables *g ATTRIBUTE_UNUSED = this;\n");
-  cg_indentBegin("static const char *names[] = {\n");
-  for (int i = 0; i < maxIdx; i++) {
-    const string &name = m_symbolVec[i]->getName();
-    cg_printf("\"%s\",\n", CodeGenerator::EscapeLabel(name).c_str());
-  }
-  cg_indentEnd("};\n");
-  cg_indentBegin("if (idx >= 0 && idx < %d) {\n", maxIdx);
-  cg_printf("k = names[idx];\n");
-  cg_printf("switch (idx) {\n");
-  for (int i = 0; i < maxIdx; i++) {
-    const string &name = m_symbolVec[i]->getName();
-    cg_printf("case %d: return %s;\n", i,
-              getGlobalVariableName(ar, name).c_str());
-  }
-  cg_printf("}\n");
-  cg_indentEnd("}\n");
-  cg_printf("return Globals::getRefByIdx(idx, k);\n");
-  cg_indentEnd("}\n");
+  cg_printf(text, maxIdx, maxSysIdx, maxSysIdx);
 }
 
 void VariableTable::outputCPPVariableInit(CodeGenerator &cg,

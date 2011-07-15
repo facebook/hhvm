@@ -136,34 +136,9 @@ public:
   static bool UseRTTIProfileData;
 
   /**
-   * Generate concatN (n > 6) service routines
-   */
-  static bool GenConcat;
-
-  /**
    * Generate array_createN service routines
    */
   static bool GenArrayCreate;
-
-  /**
-   * Generate hash-table lookup based invoke_file
-   */
-  static bool GenHashTableInvokeFile;
-
-  /**
-   * Generate hash-table lookup based function invoke
-   */
-  static bool GenHashTableInvokeFunc;
-
-  /**
-   * Generate hash-table lookup based get_constant
-   */
-  static bool GenHashTableGetConstant;
-
-  /**
-   * Generate hash-table lookup based GlobalVariables::routine
-   */
-  static bool GenHashTableGVRoutine;
 
   static bool UseScalarVariant;
 

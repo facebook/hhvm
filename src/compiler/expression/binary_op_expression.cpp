@@ -979,10 +979,7 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     bool ok = false;
     if (m_op == '.') {
       numConcat = getConcatList(ev, self, hasVoid);
-      ok = hasVoid ||
-           (numConcat > MAX_CONCAT_ARGS &&
-            (!Option::GenConcat ||
-             cg.getOutput() == CodeGenerator::SystemCPP));
+      ok = hasVoid || (numConcat > MAX_CONCAT_ARGS);
     } else if (effect2 && m_op == T_CONCAT_EQUAL) {
       prefix = stringBufferPrefix(cg, ar, m_exp1);
       ok = prefix;
@@ -1194,9 +1191,7 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       bool hasVoid = false;
       int num = getConcatList(ev, self, hasVoid);
       assert(!hasVoid);
-      if ((num <= MAX_CONCAT_ARGS ||
-           (Option::GenConcat &&
-            cg.getOutput() != CodeGenerator::SystemCPP))) {
+      if (num <= MAX_CONCAT_ARGS) {
         assert(num >= 2);
         if (num == 2) {
           cg_printf("concat(");

@@ -291,7 +291,7 @@ void CodeGenerator::printBasicIncludes() {
                    "scalar_integers_remap.h");
     }
     printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-    if (Option::GenConcat || Option::GenArrayCreate) {
+    if (Option::GenArrayCreate) {
       printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
     }
   } else if (getOutput() == CodeGenerator::SystemCPP) {

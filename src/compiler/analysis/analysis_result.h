@@ -594,9 +594,6 @@ private:
   void outputCPPEvalHook(CodeGenerator &cg);
   void outputCPPDefaultInvokeFile(CodeGenerator &cg, const char *file);
 
-  void outputConcatNumDecl(CodeGenerator &cg, int num);
-  void outputConcatDecl(CodeGenerator &cg);
-  void outputConcatImpl(CodeGenerator &cg);
   void outputArrayCreateDecl(CodeGenerator &cg);
   void outputArrayCreateImpl(CodeGenerator &cg);
   void outputCPPHashTableInvokeFile(CodeGenerator &cg,

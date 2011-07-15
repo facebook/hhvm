@@ -3823,27 +3823,40 @@ void Variant::unserialize(VariableUnserializer *uns) {
         throw Exception("Expected '{' but got '%c'", sep);
       }
       if (size > 0) {
+        Array v = Array::Create();
+        ClassInfo::PropertyMap classProperties;
+        ClassInfo::GetClassProperties(classProperties, clsName);
         for (int64 i = 0; i < size; i++) {
           String key = uns->unserializeKey().toString();
           int subLen = 0;
+          bool isPrivate = false;
           if (key.size() > 0 && key.charAt(0) == '\00') {
             if (key.charAt(1) == '*') {
               subLen = 3; // protected
             } else {
               subLen = key.find('\00', 1) + 1; // private, skipping class name
+              isPrivate = true;
               if (subLen == String::npos) {
                 throw Exception("Mangled private object property");
               }
             }
           }
-          Variant tmp;
-          Variant &value = subLen != 0 ?
-            (key.charAt(1) == '*' ?
-             obj->o_lval(key.substr(subLen), tmp, clsName) :
-             obj->o_lval(key.substr(subLen), tmp,
-                         String(key.data() + 1, subLen - 2, AttachLiteral)))
-            : obj->o_lval(key, tmp);
-          value.unserialize(uns);
+          if (isPrivate && classProperties.find(key.substr(subLen)) != classProperties.end()) {
+            Variant &value = v.lvalAt(key, AccessFlags::Key);
+            value.unserialize(uns);
+          } else {
+            Variant tmp;
+            Variant &value = subLen != 0 ?
+              (key.charAt(1) == '*' ?
+               obj->o_lval(key.substr(subLen), tmp, clsName) :
+               obj->o_lval(key.substr(subLen), tmp,
+                           String(key.data() + 1, subLen - 2, AttachLiteral)))
+              : obj->o_lval(key, tmp);
+            value.unserialize(uns);
+          }
+        }
+        if (!v.empty()) {
+          ClassInfo::SetArray(obj.get(), obj->o_getClassPropTable(), v);
         }
       }
       sep = uns->readChar();

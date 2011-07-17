@@ -181,7 +181,7 @@ ObjectData *coo_stdClass() {
 ObjectData *coo___PHP_Incomplete_Class() {
   return NEWOBJ(c___PHP_Incomplete_Class)();
 }
-Variant pm_php$classes$stdclass_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
+Variant pm_php$classes$stdclass_php(bool incOnce, LVariableTable* variables, Globals *globals) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/stdclass.php, pm_php$classes$stdclass_php);
   LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
   return true;

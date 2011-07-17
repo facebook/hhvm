@@ -429,7 +429,6 @@ do { \
     bool &alreadyRun = g->run_ ## n;              \
     if (alreadyRun) { if (incOnce) return true; } \
     else alreadyRun = true;                       \
-    if (!variables) variables = g;                \
   }
 
 // Stack frame injection is also for correctness, and cannot be disabled.

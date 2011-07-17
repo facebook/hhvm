@@ -87,7 +87,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   const VirtualHost *vhost = VirtualHost::GetCurrent();
 
   // reset global symbols to nulls or empty arrays
-  pm_php$globals$symbols_php();
+  pm_php$globals$symbols_php(false, g, g);
 
   Variant &server = g->GV(_SERVER);
   server.set("REQUEST_START_TIME", time(NULL));

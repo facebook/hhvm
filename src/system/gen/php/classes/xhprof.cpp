@@ -196,7 +196,7 @@ namespace hphp_impl_splitter {}
 ObjectData *coo_XhprofFrame() {
   return NEWOBJ(c_XhprofFrame)();
 }
-Variant pm_php$classes$xhprof_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
+Variant pm_php$classes$xhprof_php(bool incOnce, LVariableTable* variables, Globals *globals) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/xhprof.php, pm_php$classes$xhprof_php);
   LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
   return true;

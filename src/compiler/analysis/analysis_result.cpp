@@ -2637,7 +2637,7 @@ void AnalysisResult::outputCPPEvalHook(CodeGenerator &cg) {
 
 void AnalysisResult::outputCPPDefaultInvokeFile(CodeGenerator &cg,
                                                 const char *file) {
-  cg_printf("if (s.empty()) return %s%s(once, variables);\n",
+  cg_printf("if (s.empty()) return %s%s(once, variables, get_globals());\n",
             Option::PseudoMainPrefix,
             Option::MangleFilename(file, true).c_str());
 }
@@ -3076,9 +3076,9 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
     BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
       if (!f->getPseudoMain()) continue;
       entries.push_back(f->getName().c_str());
-      cg_printf("Variant %s%s(bool incOnce = false, "
-                "LVariableTable* variables = NULL, "
-                "Globals *globals = get_globals());\n",
+      cg_printf("Variant %s%s(bool incOnce, "
+                "LVariableTable* variables, "
+                "Globals *globals);\n",
                 Option::PseudoMainPrefix,
                 Option::MangleFilename(f->getName(), true).c_str());
     }
@@ -3561,10 +3561,16 @@ void AnalysisResult::outputCPPGlobalImplementations(CodeGenerator &cg) {
 }
 
 void AnalysisResult::outputCPPSystemImplementations(CodeGenerator &cg) {
+  cg_printf("Globals *globals = get_globals();\n");
   BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
     if (f->hasImpl(shared_from_this())) {
-      cg_printf("%s%s(false);\n", Option::PseudoMainPrefix,
-                f->pseudoMainName().c_str());
+      cg_printf("%s%s(false, ",
+                Option::PseudoMainPrefix, f->pseudoMainName().c_str());
+      if (!f->needPseudoMainVariables()) {
+        cg_printf("NULL, globals);\n");
+      } else {
+        cg_printf("globals, globals);\n");
+      }
     }
   }
 }

@@ -232,6 +232,7 @@ void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
     VariableTablePtr var = getScope()->getVariables();
     var->setAttribute(VariableTable::ContainsLDynamicVariable);
     var->forceVariants(ar, VariableTable::AnyVars);
+    getFileScope()->setHasNonPrivateScope();
   }
 
   UnaryOpExpression::analyzeProgram(ar);
@@ -299,6 +300,9 @@ void IncludeExpression::outputCPPImpl(CodeGenerator &cg,
   if (!m_include.empty()) {
     FileScopePtr fs = ar->findFileScope(m_include);
     if (fs) {
+      if (!fs->needPseudoMainVariables()) {
+        vars = "NULL";
+      }
       cg_printf("%s%s(%s, %s, %s)", Option::PseudoMainPrefix,
                 fs->pseudoMainName().c_str(),
                 once ? "true" : "false",

@@ -287,7 +287,7 @@ namespace hphp_impl_splitter {}
 ObjectData *coo_Directory() {
   return NEWOBJ(c_Directory)();
 }
-Variant pm_php$classes$directory_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
+Variant pm_php$classes$directory_php(bool incOnce, LVariableTable* variables, Globals *globals) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/directory.php, pm_php$classes$directory_php);
   LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
   return true;

@@ -202,7 +202,7 @@ public:
   const std::string &pseudoMainName();
   void outputFileCPP(AnalysisResultPtr ar, CodeGenerator &cg);
   bool load();
-
+  bool needPseudoMainVariables() const;
   std::string outputFilebase() const;
 
   void addPseudoMainVariable(const std::string &name) {
@@ -215,7 +215,7 @@ public:
   FunctionScopeRawPtr getPseudoMain() const {
     return m_pseudoMain;
   }
-
+  void setHasNonPrivateScope() { m_hasNonPrivateInclude = true;}
   void outputCPPForwardStaticDecl(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPForwardDeclHeader(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPDeclHeader(CodeGenerator &cg, AnalysisResultPtr ar);
@@ -274,6 +274,7 @@ private:
   std::set<std::string> m_usedDefaultValueScalarVarArrays;
   std::string m_pseudoMainName;
   std::set<std::string> m_pseudoMainVariables;
+  bool m_hasNonPrivateInclude;
 
   struct lambda {
     std::string rt;

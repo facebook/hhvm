@@ -33,20 +33,21 @@ SystemGlobals::SystemGlobals() {
 }
 
 void SystemGlobals::initialize() {
-  pm_php$classes$arrayaccess_php(false);
-  pm_php$classes$debugger_php(false);
-  pm_php$classes$directory_php(false);
-  pm_php$classes$directoryiterator_php(false);
-  pm_php$classes$exception_php(false);
-  pm_php$classes$iterator_php(false);
-  pm_php$classes$reflection_php(false);
-  pm_php$classes$soapfault_php(false);
-  pm_php$classes$splfile_php(false);
-  pm_php$classes$splobjectstorage_php(false);
-  pm_php$classes$stdclass_php(false);
-  pm_php$classes$xhprof_php(false);
-  pm_php$globals$constants_php(false);
-  pm_php$globals$symbols_php(false);
+  Globals *globals = get_globals();
+  pm_php$classes$arrayaccess_php(false, NULL, globals);
+  pm_php$classes$debugger_php(false, NULL, globals);
+  pm_php$classes$directory_php(false, NULL, globals);
+  pm_php$classes$directoryiterator_php(false, NULL, globals);
+  pm_php$classes$exception_php(false, NULL, globals);
+  pm_php$classes$iterator_php(false, NULL, globals);
+  pm_php$classes$reflection_php(false, NULL, globals);
+  pm_php$classes$soapfault_php(false, NULL, globals);
+  pm_php$classes$splfile_php(false, NULL, globals);
+  pm_php$classes$splobjectstorage_php(false, NULL, globals);
+  pm_php$classes$stdclass_php(false, NULL, globals);
+  pm_php$classes$xhprof_php(false, NULL, globals);
+  pm_php$globals$constants_php(false, NULL, globals);
+  pm_php$globals$symbols_php(false, globals, globals);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

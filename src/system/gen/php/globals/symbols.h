@@ -26,7 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Includes and Functions
-Variant pm_php$globals$symbols_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
+Variant pm_php$globals$symbols_php(bool incOnce, LVariableTable* variables, Globals *globals);
 
 // Constants
 

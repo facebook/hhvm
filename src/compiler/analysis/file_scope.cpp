@@ -40,7 +40,7 @@ using namespace std;
 
 FileScope::FileScope(const string &fileName, int fileSize)
   : BlockScope("", "", StatementPtr(), BlockScope::FileScope),
-    m_size(fileSize), m_fileName(fileName) {
+    m_size(fileSize), m_fileName(fileName), m_hasNonPrivateInclude(false) {
   pushAttribute(); // for global scope
 }
 
@@ -125,6 +125,13 @@ int FileScope::popAttribute() {
 int FileScope::getGlobalAttribute() const {
   ASSERT(m_attributes.size() == 1);
   return m_attributes.back();
+}
+
+bool FileScope::needPseudoMainVariables() const {
+  VariableTablePtr variables = m_pseudoMain->getVariables();
+  return  (m_hasNonPrivateInclude ||
+           variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
+           variables->getSymbols().size() > 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

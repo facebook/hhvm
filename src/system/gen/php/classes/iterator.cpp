@@ -2259,7 +2259,7 @@ ObjectData *coo_MutableArrayIterator() {
 ObjectData *coo_FilterIterator() {
   return NEWOBJ(c_FilterIterator)();
 }
-Variant pm_php$classes$iterator_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
+Variant pm_php$classes$iterator_php(bool incOnce, LVariableTable* variables, Globals *globals) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/iterator.php, pm_php$classes$iterator_php);
   LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
   return true;

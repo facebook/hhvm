@@ -905,14 +905,7 @@ void FunctionScope::outputCPPParamsDecl(CodeGenerator &cg,
       cg_printf("Array args /* = Array() */");
     }
   } else if (m_pseudoMain) {
-    if (showDefault) {
-      cg_printf("bool incOnce = false, LVariableTable* variables = NULL, "
-                "Globals *globals = get_globals()");
-    } else {
-      cg_printf("bool incOnce /* = false */, "
-                "LVariableTable* variables /* = NULL */, "
-                "Globals *globals /* = get_globals() */");
-    }
+    cg_printf("bool incOnce, LVariableTable* variables, Globals *globals");
   } else if (params) {
     if (m_name[0] == '0' && !m_method) {
       cg_printf("void *extra, ");

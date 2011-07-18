@@ -24,6 +24,7 @@ bool TestExtXmlreader::RunTests(const std::string &which) {
   bool ret = true;
 
   RUN_TEST(test_XMLReader);
+  RUN_TEST(test_XMLReader_getattribute);
 
   return ret;
 }
@@ -31,5 +32,15 @@ bool TestExtXmlreader::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtXmlreader::test_XMLReader() {
+  return Count(true);
+}
+
+bool TestExtXmlreader::test_XMLReader_getattribute() {
+  p_XMLReader reader(NEWOBJ(c_XMLReader)());
+  reader->t_xml("<?xml version=\"1.0\" encoding=\"UTF-8\"?><a y=\"\" z=\"1\"></a>");
+  reader->t_read();
+  VS(reader->t_getattribute("x"), null);
+  VS(reader->t_getattribute("y"), String(""));
+  VS(reader->t_getattribute("z"), String("1"));
   return Count(true);
 }

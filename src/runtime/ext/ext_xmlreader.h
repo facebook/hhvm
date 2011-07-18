@@ -89,11 +89,11 @@ class c_XMLReader : public ExtObjectDataFlags<ObjectData::UseGet>, public Sweepa
   DECLARE_METHOD_INVOKE_HELPERS(readouterxml);
   public: bool t_movetonextattribute();
   DECLARE_METHOD_INVOKE_HELPERS(movetonextattribute);
-  public: String t_getattribute(CStrRef name);
+  public: Variant t_getattribute(CStrRef name);
   DECLARE_METHOD_INVOKE_HELPERS(getattribute);
-  public: String t_getattributeno(int64 index);
+  public: Variant t_getattributeno(int64 index);
   DECLARE_METHOD_INVOKE_HELPERS(getattributeno);
-  public: String t_getattributens(CStrRef name, CStrRef namespaceURI);
+  public: Variant t_getattributens(CStrRef name, CStrRef namespaceURI);
   DECLARE_METHOD_INVOKE_HELPERS(getattributens);
   public: bool t_movetoattribute(CStrRef name);
   DECLARE_METHOD_INVOKE_HELPERS(movetoattribute);
@@ -113,7 +113,7 @@ class c_XMLReader : public ExtObjectDataFlags<ObjectData::UseGet>, public Sweepa
   DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: bool t_getparserproperty(int64 property);
   DECLARE_METHOD_INVOKE_HELPERS(getparserproperty);
-  public: String t_lookupnamespace(CStrRef prefix);
+  public: Variant t_lookupnamespace(CStrRef prefix);
   DECLARE_METHOD_INVOKE_HELPERS(lookupnamespace);
   public: bool t_setschema(CStrRef source);
   DECLARE_METHOD_INVOKE_HELPERS(setschema);
@@ -134,7 +134,7 @@ class c_XMLReader : public ExtObjectDataFlags<ObjectData::UseGet>, public Sweepa
 
   private: String read_string_func(xmlreader_read_char_t internal_function);
   private: bool bool_func_no_arg(xmlreader_read_int_t internal_function);
-  private: String string_func_string_arg(String value, xmlreader_read_one_char_t internal_function);
+  private: Variant string_func_string_arg(String value, xmlreader_read_one_char_t internal_function);
   private: bool set_relaxng_schema(String source, int type);
 
  public:

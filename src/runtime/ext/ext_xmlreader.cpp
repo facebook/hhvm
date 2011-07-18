@@ -299,7 +299,7 @@ bool c_XMLReader::bool_func_no_arg(xmlreader_read_int_t internal_function) {
   return false;
 }
 
-String c_XMLReader::string_func_string_arg(String value, xmlreader_read_one_char_t internal_function) {
+Variant c_XMLReader::string_func_string_arg(String value, xmlreader_read_one_char_t internal_function) {
 
   if (value.empty()) {
     raise_warning("Argument cannot be an empty string");
@@ -316,16 +316,16 @@ String c_XMLReader::string_func_string_arg(String value, xmlreader_read_one_char
     xmlFree(retchar);
     return ret;
   } else {
-    return String("");
+    return null;
   }
 }
 
-String c_XMLReader::t_getattribute(CStrRef name) {
+Variant c_XMLReader::t_getattribute(CStrRef name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::getattribute);
   return string_func_string_arg(name, xmlTextReaderGetAttribute);
 }
 
-String c_XMLReader::t_getattributeno(int64 index) {
+Variant c_XMLReader::t_getattributeno(int64 index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::getattributeno);
   char *retchar = NULL;
   if (m_ptr) {
@@ -336,11 +336,11 @@ String c_XMLReader::t_getattributeno(int64 index) {
     xmlFree(retchar);
     return ret;
   } else {
-    return String("");
+    return null;
   }
 }
 
-String c_XMLReader::t_getattributens(CStrRef name, CStrRef namespaceURI) {
+Variant c_XMLReader::t_getattributens(CStrRef name, CStrRef namespaceURI) {
   INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::getattributens);
   if (name.empty() || namespaceURI.empty()) {
     raise_warning("Attribute Name and Namespace URI cannot be empty");
@@ -359,7 +359,7 @@ String c_XMLReader::t_getattributens(CStrRef name, CStrRef namespaceURI) {
     xmlFree(retchar);
     return ret;
   } else {
-    return String("");
+    return null;
   }
 }
 
@@ -445,7 +445,7 @@ bool c_XMLReader::t_getparserproperty(int64 property) {
   return ret;
 }
 
-String c_XMLReader::t_lookupnamespace(CStrRef prefix) {
+Variant c_XMLReader::t_lookupnamespace(CStrRef prefix) {
   INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::lookupnamespace);
   return string_func_string_arg(prefix, xmlTextReaderLookupNamespace);
 }

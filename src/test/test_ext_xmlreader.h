@@ -28,6 +28,7 @@ class TestExtXmlreader : public TestCppExt {
   virtual bool RunTests(const std::string &which);
 
   bool test_XMLReader();
+  bool test_XMLReader_getattribute();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -115,6 +115,8 @@ private:
   int m_rsrcId;                  // for resource serialization
   int m_maxCount;                // for max recursive levels
   int64 m_outputLimit;           // Maximum size of output
+  int m_levelDebugger;           // keep track of levels for DebuggerSerialize
+  int m_maxLevelDebugger;        // for max level of DebuggerSerialize
 
   struct ArrayInfo {
     const ClassInfo *class_info; // The class info if an object

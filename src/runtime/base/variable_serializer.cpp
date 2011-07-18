@@ -35,7 +35,9 @@ namespace HPHP {
 VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
                                        int maxRecur /* = 3 */)
   : m_type(type), m_option(option), m_buf(NULL), m_indent(0),
-    m_valueCount(0), m_referenced(false), m_refCount(1), m_maxCount(maxRecur) {
+    m_valueCount(0), m_referenced(false), m_refCount(1), m_maxCount(maxRecur),
+    m_levelDebugger(0),
+    m_maxLevelDebugger(RuntimeOption::DebuggerDefaultPrintLevel) {
   if (type == Serialize || type == APCSerialize || type == DebuggerSerialize) {
     m_arrayIds = new PointerCounterMap();
   } else {
@@ -373,9 +375,15 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
     indent();
     m_buf->append("*RECURSION*\n");
     break;
+  case DebuggerSerialize:
+    if (m_levelDebugger > m_maxLevelDebugger) {
+      // Not recursion, just cut short of print
+      m_buf->append("s:12:\"...(omitted)\";", 20);
+      break;
+    }
+    // fall through
   case Serialize:
   case APCSerialize:
-  case DebuggerSerialize:
     {
       ASSERT(m_arrayIds);
       PointerCounterMap::const_iterator iter = m_arrayIds->find(ptr);
@@ -791,9 +799,13 @@ bool VariableSerializer::incNestedLevel(void *ptr,
   case JSON:
   case DebuggerDump:
     return ++m_counts[ptr] >= m_maxCount;
+  case DebuggerSerialize:
+    if (++m_levelDebugger > m_maxLevelDebugger) {
+      return true;
+    }
+    // fall through
   case Serialize:
   case APCSerialize:
-  case DebuggerSerialize:
     {
       ASSERT(m_arrayIds);
       int ct = ++m_counts[ptr];
@@ -815,6 +827,9 @@ bool VariableSerializer::incNestedLevel(void *ptr,
 
 void VariableSerializer::decNestedLevel(void *ptr) {
   --m_counts[ptr];
+  if (m_type == DebuggerSerialize) {
+    --m_levelDebugger;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

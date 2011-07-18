@@ -351,6 +351,7 @@ std::string RuntimeOption::DebuggerRpcHostDomain;
 int RuntimeOption::DebuggerDefaultRpcTimeout = 30;
 std::string RuntimeOption::DebuggerStartupDocument;
 std::string RuntimeOption::DebuggerDefaultSandboxPath;
+int RuntimeOption::DebuggerDefaultPrintLevel = 3;
 
 std::string RuntimeOption::SendmailPath;
 std::string RuntimeOption::MailForceExtraParameters;
@@ -1021,6 +1022,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
       DebuggerServerPort = debugger["Port"].getInt16(8089);
       DebuggerStartupDocument = debugger["StartupDocument"].getString();
       DebuggerDefaultSandboxPath = debugger["DefaultSandboxPath"].getString();
+      DebuggerDefaultPrintLevel = debugger["DefaultPrintLevel"].getInt16(3);
 
       DebuggerDefaultRpcPort = debugger["RPC.DefaultPort"].getInt16(8083);
       DebuggerDefaultRpcAuth = debugger["RPC.DefaultAuth"].getString();

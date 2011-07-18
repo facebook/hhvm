@@ -276,11 +276,10 @@ String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */) {
   String value;
   if (maxlen <= 0) {
     try {
-      VariableSerializer vs(VariableSerializer::VarExport, 0, 2);
-      value = vs.serialize(v, true);
-    } catch (NestingLevelTooDeepException &e) {
       VariableSerializer vs(VariableSerializer::VarDump, 0, 2);
       value = vs.serialize(v, true);
+    } catch (StringBufferLimitException &e) {
+      value = "Serialization limit reached";
     } catch (...) {
       ASSERT(false);
       throw;

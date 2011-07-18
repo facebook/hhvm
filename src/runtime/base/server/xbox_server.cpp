@@ -49,6 +49,9 @@ public:
   virtual const char *getRemoteHost() {
     return "127.0.0.1";
   }
+  virtual const uint16 getRemotePort() {
+    return 0;
+  }
   virtual const void *getPostData(int &size) {
     size = m_message.size();
     return m_message.data();

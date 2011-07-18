@@ -45,6 +45,7 @@ LibEventTransport::LibEventTransport(LibEventServer *server,
   }
 
   m_remote_host = m_request->remote_host;
+  m_remote_port = m_request->remote_port;
 
   {
     char buf[6];
@@ -86,6 +87,10 @@ const char *LibEventTransport::getUrl() {
 
 const char *LibEventTransport::getRemoteHost() {
   return m_remote_host.c_str();
+}
+
+const uint16 LibEventTransport::getRemotePort() {
+  return m_remote_port;
 }
 
 const void *LibEventTransport::getPostData(int &size) {

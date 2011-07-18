@@ -41,6 +41,7 @@ void ReplayTransport::recordInput(Transport* transport, const char *filename) {
   hdf["cmd"] = transport->getMethod();
   hdf["url"] = transport->getUrl();
   hdf["remote_host"] = transport->getRemoteHost();
+  hdf["remote_port"] = transport->getRemotePort();
 
   transport->getHeaders(m_requestHeaders);
   int index = 0;
@@ -93,6 +94,9 @@ const char *ReplayTransport::getUrl() {
 
 const char *ReplayTransport::getRemoteHost() {
   return m_hdf["remote_host"].get("");
+}
+const uint16 ReplayTransport::getRemotePort() {
+  return m_hdf["remote_port"].getUInt16(0);
 }
 
 const void *ReplayTransport::getPostData(int &size) {

@@ -314,7 +314,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
 
   server.set("REMOTE_ADDR", String(transport->getRemoteHost(), CopyString));
   server.set("REMOTE_HOST", ""); // I don't think we need to nslookup
-  server.set("REMOTE_PORT", 0);  // TODO: quite useless
+  server.set("REMOTE_PORT", transport->getRemotePort());
 
   server.set("DOCUMENT_ROOT", String(vhost->getDocumentRoot()));
 

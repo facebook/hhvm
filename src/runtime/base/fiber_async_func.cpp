@@ -297,10 +297,9 @@ public:
   }
   void decRefCount() {
     ASSERT(m_refCount);
-    if (atomic_dec(m_refCount) == 0) {
+    if (atomic_dec(m_refCount) == 0 && !m_async) {
       delete this;
     } else {
-      Lock lock(this);
       notify();
     }
   }
@@ -376,7 +375,7 @@ void FiberWorker::doJob(FiberJob *job) {
     }
   }
   m_owner = job->getOwnerThread();
-  job->decRefCount();
+  delete job;
   m_stopped = true; // one-time job
 }
 
@@ -401,18 +400,17 @@ void FiberWorker::onThreadExit() {
 
 class FiberAsyncFuncHandle : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION_NO_SWEEP(FiberAsyncFuncHandle)
+  DECLARE_OBJECT_ALLOCATION(FiberAsyncFuncHandle)
 
-  FiberAsyncFuncHandle(CVarRef function, CArrRef params, bool async) {
+  FiberAsyncFuncHandle(CVarRef function, CArrRef params, bool async) :
+  m_reqId(s_fiber_data->m_reqId), m_async(async) {
     m_job = new FiberJob(s_fiber_data.get(), function, params, async);
     m_job->incRefCount();
   }
 
   ~FiberAsyncFuncHandle() {
-    m_job->decRefCount();
+    if (!m_async || m_reqId == s_fiber_data->m_reqId) m_job->decRefCount();
   }
-
-  void sweep() {}
 
   FiberJob *getJob() { return m_job;}
 
@@ -422,9 +420,11 @@ public:
 
 private:
   FiberJob *m_job;
+  unsigned m_reqId;
+  bool     m_async;
 };
 
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(FiberAsyncFuncHandle)
+IMPLEMENT_OBJECT_ALLOCATION(FiberAsyncFuncHandle)
 
 StaticString FiberAsyncFuncHandle::s_class_name("FiberAsyncFuncHandle");
 

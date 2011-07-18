@@ -237,6 +237,9 @@ class TestCodeRun : public TestBase {
 #define MVCRNW(a)                                                       \
   if (!RecordMulti(a,NULL,__FILE__,__LINE__,true)) return false;
 
+#define MVCRONW(a,b)                                                     \
+  if (!RecordMulti(a,b,__FILE__,__LINE__,true)) return false;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #endif // __TEST_CODE_RUN_H__

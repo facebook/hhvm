@@ -295,7 +295,7 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
     }
 
     bool out_ok = actual == expected;
-    if (!out_ok || !err.empty()) {
+    if (!out_ok || (!nowarnings && !err.empty())) {
       if (out_ok &&
           err.find("symbol lookup error:") != string::npos &&
           err.find("undefined symbol: ") != string::npos) {
@@ -6761,6 +6761,32 @@ bool TestCodeRun::TestObjectPropertyExpression() {
        "}"
        "$x = new X;"
        "$x->foo('this');");
+
+  if (Option::EnableEval >= Option::FullEval) {
+    MVCRONW("<?php "
+            "class X {"
+            "  function ref(&$ref) { $ref = 1; }"
+            "  function bar() {"
+            "    $this->ref($this->priv);"
+            "  }"
+            "};"
+            "class Y extends X { private $priv; }"
+            "class Z extends Y {}"
+            "$z = new Z;"
+            "$z->bar();"
+            "var_dump($z);"
+            "$y = new Y;"
+            "$y->bar();"
+            "var_dump($y);"
+            ,
+            "object(Z)#1 (2) {\n"
+            "  [\"priv:private\"]=>\n"
+            "  NULL\n"
+            "  [\"priv\"]=>\n"
+            "  int(1)\n"
+            "}\n");
+  }
+
   return true;
 }
 
@@ -7595,18 +7621,6 @@ bool TestCodeRun::TestDynamicVariables() {
        "}\n"
        "NULL\n"
        "int(1)\n");
-
-  if (Option::EnableEval < Option::FullEval) {
-    MVCR("<?php "
-         "class X {"
-         "  function foo($t) {"
-         "    $$t = 5;"
-         "    var_dump($this);"
-         "  }"
-         "}"
-         "$x = new X;"
-         "$x->foo('this');");
-  }
 
   return true;
 }
@@ -19484,18 +19498,16 @@ bool TestCodeRun::TestYield() {
         "int(3)\n"
         "int(4)\n");
 
-  if (Option::EnableEval < Option::FullEval) {
-    MVCRO("<?php\n"
-          "class X {\n"
-          "  function foo($t) {\n"
-          "    $$t = 5;\n"
-          "    yield $this;\n"
-          "  }\n"
-          "}\n"
-          "$x = new X;\n"
-          "foreach ($x->foo('this') as $v) { var_dump($v); }\n",
-          "int(5)\n");
-  }
+  MVCRO("<?php\n"
+        "class X {\n"
+        "  function foo($t) {\n"
+        "    $$t = 5;\n"
+        "    yield $this;\n"
+        "  }\n"
+        "}\n"
+        "$x = new X;\n"
+        "foreach ($x->foo('this') as $v) { var_dump($v); }\n",
+        "int(5)\n");
 
   // Test passing null to hphp_get_iterator()
   MVCRO("<?php \n"

@@ -515,7 +515,11 @@ Variant &ObjectData::o_lval(CStrRef propName, CVarRef tmpForGet,
     return ret;
   }
 
-  ret.unset();
+  /* we only get here if its a protected property
+     under hphpi - and then o_getError fatals
+     with a suitable message
+  */
+  ret = o_getError(propName, context);
   return ret;
 }
 

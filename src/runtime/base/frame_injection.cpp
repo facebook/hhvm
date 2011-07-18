@@ -121,6 +121,8 @@ Array FrameInjection::getStackFrame(bool withSelf, bool withThis) {
       } else {
         frame.set(s_type, "::", true);
       }
+    } else if (const char *c = strstr(m_name, "$$")) {
+      frame.set(s_function, String(m_name, c - m_name, CopyString), true);
     } else {
       frame.set(s_function, m_name, true);
     }
@@ -195,7 +197,7 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
     tmp += boost::lexical_cast<std::string>(omitted) +
            " omitted frame" + ((omitted > 1) ? "s" : "");
     Array frame;
-    frame.set(s_function, tmp); 
+    frame.set(s_function, tmp);
     bt.append(frame);
   }
   for (int i = omitted; i < remaining; i++) {

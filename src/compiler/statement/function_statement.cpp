@@ -82,14 +82,19 @@ std::string FunctionStatement::getName() const {
 }
 
 void FunctionStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
-  FunctionScopePtr func = getScope()->getOuterScope()->getContainingFunction();
   FunctionScopeRawPtr fs = getFunctionScope();
   // redeclared functions are automatically volatile
-  if (func && fs->isVolatile()) {
-    func->getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
+  if (fs->isVolatile()) {
+    FunctionScopeRawPtr func =
+      getScope()->getOuterScope()->getContainingFunction();
+    if (func) {
+      func->getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
+    }
   }
-  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-    ar->recordFunctionSource(m_name, m_loc, getFileScope()->getName());
+  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+    const std::string &name = fs->inPseudoMain() ? m_name : fs->getId();
+    ar->recordFunctionSource(name, m_loc,
+                             getFileScope()->getName());
   }
   MethodStatement::analyzeProgramImpl(ar);
 }
@@ -277,7 +282,7 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
               suffix = "_NOMEM";
             }
             cg_printf("FUNCTION_INJECTION%s(%s);\n", suffix,
-                      origFuncName.c_str());
+                      funcScope->getId().c_str());
           }
           outputCPPArgInjections(cg, ar, origFuncName.c_str(),
                                  ClassScopePtr(), funcScope);

@@ -50,7 +50,7 @@ extimpl_$(EXT).cpp: $(OUT_DIR)schema.so
 $(OUT_DIR)lib$(EXT).so: $(if $(EXT),$(OUT_DIR)extmap_$(EXT).pic.o)
 	@echo 'Linking $@ ...'
 	$(V)$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror \
-		-Wl,-soname,lib$(EXT).so $(SO_LDFLAGS) -o $@ $^
+		-Wl,-soname,lib$(EXT).so $(SO_LDFLAGS) -o $@ $^ $(EXTERNAL)
 
 $(OUT_DIR)lib$(EXT).a: $(OBJECTS) $(OUT_DIR)extimpl_$(EXT).o
 	@echo 'Linking $@ ...'

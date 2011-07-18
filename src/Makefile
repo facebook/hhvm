@@ -36,20 +36,7 @@ include $(PROJECT_ROOT)/src/rules.mk
 GIT_SHA1 := $(shell git describe --all --long --abbrev=40 --always)
 CPPFLAGS += -DCOMPILER_ID=\"$(GIT_SHA1)\"
 
-EXCEPTIONS := $(EXT_DIR)/mozilla/%.a $(EXT_DIR)/imap/lib/c-client.a \
-              $(EXT_DIR)/google-perftools/lib/libtcmalloc.a \
-              $(EXT_DIR)/google-perftools/lib/libtcmalloc_minimal.a \
-              $(EXT_DIR)/jemalloc/lib/libjemalloc.a \
-
-STATIC_LIBS := $(filter-out $(EXCEPTIONS), $(ALL_LIBS))
-
-SHARED_LIBS = $(EXT_DIR)/binutils/libbinutils.so \
-              $(EXT_DIR)/imap/lib/libc-client.so.2007 \
-              $(shell find $(EXT_DIR)/mozilla -name "*.so") \
-              $(patsubst %.a, %.so, $(STATIC_LIBS)) \
-              $(LINK_LIBS) \
-
-EXTERNAL += $(SHARED_LIBS)
+EXTERNAL += $(EXTERNAL_SHARED_LIBS)
 
 TARGETS = $(PROGRAMS) $(STATIC_LIB)
 

@@ -1489,9 +1489,9 @@ bool DebuggerClient::processTakeCode() {
 
 bool DebuggerClient::processEval() {
   m_runState = Running;
-  CmdEval().onClient(this);
   m_inputState = TakingCommand;
   m_acLiveListsDirty = true;
+  CmdEval().onClient(this);
   return true;
 }
 

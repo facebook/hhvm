@@ -86,7 +86,7 @@ public:
   bool outputSingleConstant(CodeGenerator &cg, AnalysisResultPtr ar,
                             const std::string &name) const;
 
-  void collectCPPGlobalSymbols(StringPairVec &symbols, CodeGenerator &cg,
+  void collectCPPGlobalSymbols(StringPairSet &symbols, CodeGenerator &cg,
                                AnalysisResultPtr ar);
 
   /**

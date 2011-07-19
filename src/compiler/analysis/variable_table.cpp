@@ -1010,20 +1010,20 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
 ///////////////////////////////////////////////////////////////////////////////
 // global state
 
-void VariableTable::collectCPPGlobalSymbols(StringPairVecVec &symbols,
+void VariableTable::collectCPPGlobalSymbols(StringPairSetVec &symbols,
                                             CodeGenerator &cg,
                                             AnalysisResultPtr ar) {
   ASSERT(symbols.size() == AnalysisResult::GlobalSymbolTypeCount);
   ASSERT(!m_staticGlobals.empty() || m_staticGlobalsVec.empty());
 
   // static global variables
-  StringPairVec *names = &symbols[AnalysisResult::KindOfStaticGlobalVariable];
-  names->resize(m_symbolVec.size());
+  StringPairSet *names = &symbols[AnalysisResult::KindOfStaticGlobalVariable];
+  names->clear();
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     const string &name = m_symbolVec[i]->getName();
-    (*names)[i].first = Option::GlobalVariablePrefix +
-                        CodeGenerator::EscapeLabel(name);
-    (*names)[i].second = getGlobalVariableName(ar, name);
+    names->insert(StringPair(
+      Option::GlobalVariablePrefix + CodeGenerator::EscapeLabel(name),
+      getGlobalVariableName(ar, name)));
   }
 
   // method static variables
@@ -1034,7 +1034,7 @@ void VariableTable::collectCPPGlobalSymbols(StringPairVecVec &symbols,
     StaticGlobalInfoPtr sgi = iter->second;
     if (sgi->func) {
       string name = Option::StaticVariablePrefix + id;
-      names->push_back(pair<string, string>(name, name));
+      names->insert(StringPair(name, name));
     }
   }
 
@@ -1048,7 +1048,7 @@ void VariableTable::collectCPPGlobalSymbols(StringPairVecVec &symbols,
                                                sgi->sym->getName());
     if (!sgi->func && !sgi->sym->isOverride()) {
       string name = Option::StaticPropertyPrefix + id;
-      names->push_back(pair<string, string>(name, name));
+      names->insert(StringPair(name, name));
     }
   }
 }

@@ -444,7 +444,7 @@ public:
   void outputCPPGlobalDeclarations();
   void outputCPPMain();
   void outputCPPScalarArrays(bool system);
-  void outputCPPGlobalVariablesMethods(int part);
+  void outputCPPGlobalVariablesMethods();
   void outputCPPGlobalState();
   void outputCPPFiberGlobalState();
 
@@ -528,13 +528,13 @@ private:
 
   void outputCPPScalarArrays(CodeGenerator &cg, int fileCount, int part);
 
-  void collectCPPGlobalSymbols(StringPairVecVec &symbols,
+  void collectCPPGlobalSymbols(StringPairSetVec &symbols,
                                CodeGenerator &cg);
   void outputCPPGlobalStateFileHeader(CodeGenerator &cg);
   void outputCPPGlobalStateBegin(CodeGenerator &cg, const char *section);
   void outputCPPGlobalStateEnd(CodeGenerator &cg, const char *section);
   void outputCPPGlobalStateSection(CodeGenerator &cg,
-                                   const StringPairVec &names,
+                                   const StringPairSet &names,
                                    const char *section,
                                    const char *prefix = "g->",
                                    const char *name_prefix = "");
@@ -602,9 +602,8 @@ private:
   void outputCPPDynamicClassTables(CodeGenerator::Output output);
   void outputCPPDynamicConstantTable(CodeGenerator::Output output);
   void outputCPPHashTableGetConstant(CodeGenerator &cg, bool system,
-                                     const std::vector<const char *> &strings,
-                                     const std::vector<TypePtr> &types,
-                                     const hphp_const_char_map<bool> &dyns);
+         const std::map<std::string, TypePtr> &constMap,
+         const hphp_const_char_map<bool> &dyns);
   void cloneRTTIFuncs(ClassScopePtr cls,
                       const StringToFunctionScopePtrVecMap &functions);
   void outputInitLiteralVarStrings(CodeGenerator &cg, int fileIndex,

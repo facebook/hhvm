@@ -304,12 +304,14 @@ TypePtr SymbolTable::setType(AnalysisResultConstPtr ar, Symbol *sym,
   return sym->setType(ar, BlockScopeRawPtr(&m_blockScope), type, coerced);
 }
 
-static bool by_name(const Symbol *s1, const Symbol *s2) {
+static bool canonicalizeSymbolComp(const Symbol *s1, const Symbol *s2) {
+  if (s1->isSystem() && !s2->isSystem()) return true;
+  if (!s1->isSystem() && s2->isSystem()) return false;
   return s1->getName() < s2->getName();
 }
 
 void SymbolTable::canonicalizeSymbolOrder() {
-  sort(m_symbolVec.begin(), m_symbolVec.end(), by_name);
+  sort(m_symbolVec.begin(), m_symbolVec.end(), canonicalizeSymbolComp);
 }
 
 void SymbolTable::getSymbols(vector<Symbol*> &syms,

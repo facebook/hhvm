@@ -789,7 +789,7 @@ void AnalysisResult::analyzeProgramFinal() {
     }
   }
   // Keep generated code identical without randomness
-  if (m_system) canonicalizeSymbolOrder();
+  canonicalizeSymbolOrder();
   setPhase(AnalysisResult::CodeGen);
 }
 
@@ -2037,10 +2037,7 @@ DECLARE_JOB(UtilImpl,     outputCPPUtilImpl(m_output));
 DECLARE_JOB(GlobalDecl,   outputCPPGlobalDeclarations());
 DECLARE_JOB(Main,         outputCPPMain());
 DECLARE_JOB(ScalarArrays, outputCPPScalarArrays(false));
-DECLARE_JOB(Global1,      outputCPPGlobalVariablesMethods(1));
-DECLARE_JOB(Global2,      outputCPPGlobalVariablesMethods(2));
-DECLARE_JOB(Global3,      outputCPPGlobalVariablesMethods(3));
-DECLARE_JOB(Global4,      outputCPPGlobalVariablesMethods(4));
+DECLARE_JOB(GlobalVarMeth,outputCPPGlobalVariablesMethods());
 DECLARE_JOB(GlobalState,  outputCPPGlobalState());
 DECLARE_JOB(FiberGlobal,  outputCPPFiberGlobalState());
 
@@ -2181,10 +2178,7 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
       SCHEDULE_JOB(GlobalDecl);
       SCHEDULE_JOB(Main);
       SCHEDULE_JOB(ScalarArrays);
-      SCHEDULE_JOB(Global1);
-      SCHEDULE_JOB(Global2);
-      SCHEDULE_JOB(Global3);
-      SCHEDULE_JOB(Global4);
+      SCHEDULE_JOB(GlobalVarMeth);
       SCHEDULE_JOB(GlobalState);
       SCHEDULE_JOB(FiberGlobal);
     }
@@ -2779,10 +2773,9 @@ void AnalysisResult::outputCPPDynamicClassTables(
 void AnalysisResult::outputCPPHashTableGetConstant(
   CodeGenerator &cg,
   bool system,
-  const vector<const char *> &strings,
-  const vector<TypePtr> &types,
+  const map<string, TypePtr> &constMap,
   const hphp_const_char_map<bool> &dyns) {
-  ASSERT(strings.size() > 0);
+  ASSERT(constMap.size() > 0);
   ASSERT(cg.getCurrentIndentation() == 0);
   const char text1[] =
     "class hashNodeCon {\n"
@@ -2838,7 +2831,7 @@ void AnalysisResult::outputCPPHashTableGetConstant(
     "  return NULL;\n"
     "}\n";
 
-  int tableSize = Util::roundUpToPowerOfTwo(strings.size() * 2);
+  int tableSize = Util::roundUpToPowerOfTwo(constMap.size() * 2);
   cg_printf(text1,
             Type::KindOfBoolean,
             Type::KindOfInt64,
@@ -2847,11 +2840,12 @@ void AnalysisResult::outputCPPHashTableGetConstant(
             Type::KindOfArray,
             Type::KindOfObject,
             Type::KindOfVariant,
-            tableSize, strings.size(),
+            tableSize, constMap.size(),
             system ? "builtin_" : "",
             system ? "" : "  init_builtin_constant_table();\n");
-  for (uint i = 0; i < strings.size(); i++) {
-    const char *name = strings[i];
+  for (map<string, TypePtr>::const_iterator iter = constMap.begin();
+       iter != constMap.end(); iter++) {
+    const char *name = iter->first.c_str();
     string escaped = CodeGenerator::EscapeLabel(name);
     string varName = string(Option::ConstantPrefix) +
                      CodeGenerator::FormatLabel(name);
@@ -2871,7 +2865,7 @@ void AnalysisResult::outputCPPHashTableGetConstant(
                 varName.c_str(), globals,
                 system ? "s" : "");
     } else {
-      TypePtr type = types[i];
+      TypePtr type = iter->second;
       Type::KindOf kindOf = type->getKindOf();
       cg_printf("      (const char *)\"%s\", "
                 "(const char *)-1, "
@@ -2899,8 +2893,8 @@ void AnalysisResult::outputCPPHashTableGetConstant(
         }
         break;
       default:
-        throw Exception("During code gen, constant with type %s is not expected",
-                        type->toString().c_str());
+        throw Exception("During code gen, constant with type %s "
+                        "is not expected", type->toString().c_str());
       }
     }
   }
@@ -2918,16 +2912,14 @@ void AnalysisResult::outputCPPDynamicConstantTable(
   CodeGenerator cg(&fTable, output);
 
   outputCPPDynamicTablesHeader(cg, true, false);
-  vector<const char *> strings;
-  vector<TypePtr> types;
+  map<string, TypePtr> constMap;
   hphp_const_char_map<bool> dyns;
   ConstantTablePtr ct = getConstants();
    vector<string> syms;
   ct->getSymbols(syms);
   BOOST_FOREACH(string sym, syms) {
     if (system || ct->isSepExtension(sym)) {
-      strings.push_back(sym.c_str());
-      types.push_back(ct->getSymbol(sym)->getFinalType());
+      constMap[sym] = ct->getSymbol(sym)->getFinalType();
       dyns[sym.c_str()] = ct->isDynamic(sym);
     }
   }
@@ -2942,8 +2934,7 @@ void AnalysisResult::outputCPPDynamicConstantTable(
         assert(!defClass);
         continue;
       }
-      strings.push_back(sym.c_str());
-      types.push_back(ct->getSymbol(sym)->getFinalType());
+      constMap[sym] = ct->getSymbol(sym)->getFinalType();
       dyns[sym.c_str()] = ct->isDynamic(sym);
     }
     ct->outputCPP(cg, ar);
@@ -2969,9 +2960,9 @@ void AnalysisResult::outputCPPDynamicConstantTable(
     "assumed '%%s'\", s, s);\n"
     "return name;\n"
   };
-  bool useHashTable = (strings.size() > 0);
+  bool useHashTable = (constMap.size() > 0);
   if (useHashTable) {
-    outputCPPHashTableGetConstant(cg, system, strings, types, dyns);
+    outputCPPHashTableGetConstant(cg, system, constMap, dyns);
   } else if (system) {
     cg_printf("void init_builtin_constant_table() {}\n");
   } else {
@@ -3696,14 +3687,9 @@ void AnalysisResult::outputCPPScalarArrays(CodeGenerator &cg, int fileCount,
   cg_indentEnd("}\n");
 }
 
-void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
+void AnalysisResult::outputCPPGlobalVariablesMethods() {
   string filename = m_outputPath + "/" + Option::SystemFilePrefix +
-    "global_variables";
-  if (part == 1) {
-    filename += ".cpp";
-  } else {
-    return;
-  }
+    "global_variables.cpp";
   Util::mkdir(filename);
   ofstream f(filename.c_str());
   CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
@@ -3715,12 +3701,8 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
   if (Option::GenArrayCreate) {
     cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   }
-  if (part == 1 || part == 2) {
-    cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
-  }
-  if (part == 1) {
-    getVariables()->outputCPPGlobalVariablesDtorIncludes(cg, ar);
-  }
+  cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
+  getVariables()->outputCPPGlobalVariablesDtorIncludes(cg, ar);
   cg_printf("\n");
   cg.printImplStarter();
   cg_printf("using namespace std;\n");
@@ -3728,22 +3710,14 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
 
   CodeGenerator::Context con = cg.getContext();
   cg.setContext(CodeGenerator::CppImplementation);
-  switch (part) {
-  case 1:
-    cg_printf("bool has_eval_support = %s;\n",
-              (Option::EnableEval > Option::NoEval) ? "true" : "false");
-    getVariables()->outputCPPGlobalVariablesDtor(cg);
-    getVariables()->outputCPPGlobalVariablesGetImpl(cg, ar);
-    outputCPPClassDeclaredFlagsLookup(cg);
-    // Fall through
-  case 2: getVariables()->outputCPPGlobalVariablesExists  (cg, ar);
-    // Fall through
-  case 3: getVariables()->outputCPPGlobalVariablesGetIndex(cg, ar);
-    // Fall through
-  case 4: getVariables()->outputCPPGlobalVariablesMethods (cg, ar);
-    break;
-  default: ASSERT(false);
-  }
+  cg_printf("bool has_eval_support = %s;\n",
+            (Option::EnableEval > Option::NoEval) ? "true" : "false");
+  getVariables()->outputCPPGlobalVariablesDtor(cg);
+  getVariables()->outputCPPGlobalVariablesGetImpl(cg, ar);
+  outputCPPClassDeclaredFlagsLookup(cg);
+  getVariables()->outputCPPGlobalVariablesExists  (cg, ar);
+  getVariables()->outputCPPGlobalVariablesGetIndex(cg, ar);
+  getVariables()->outputCPPGlobalVariablesMethods (cg, ar);
   cg.setContext(con);
 
   cg.namespaceEnd();
@@ -3788,7 +3762,7 @@ void AnalysisResult::outputCPPGlobalStateEnd(CodeGenerator &cg,
 }
 
 void AnalysisResult::outputCPPGlobalStateSection
-(CodeGenerator &cg, const StringPairVec &names, const char *section,
+(CodeGenerator &cg, const StringPairSet &names, const char *section,
  const char *prefix /* = "g->" */, const char *name_prefix /* = "" */) {
   cg_printf("void get_%s(Array &res);\n", section);
 
@@ -3805,15 +3779,17 @@ void AnalysisResult::outputCPPGlobalStateSection
     if (size > MAXSIZE) {
       unsigned num = (size + MAXSIZE - 1) / MAXSIZE;
       unsigned elems = (size + num - 1) / num;
+      StringPairSet::const_iterator iter = names.begin();
       for (unsigned i = 0, j = 0, end = elems; j < num; j++) {
         cg_indentBegin("static void get_%s_%u(Array &%s) {\n",
                        section, j, section);
         cg_printf("DECLARE_GLOBAL_VARIABLES(g);\n");
         while (i < end) {
           cg_printf("%s.set(\"%s%s\", %s%s%s);\n", section,
-                    name_prefix, names[i].first.c_str(),
-                    prefix, name_prefix, names[i].second.c_str());
+                    name_prefix, iter->first.c_str(),
+                    prefix, name_prefix, iter->second.c_str());
           i++;
+          iter++;
         }
         end += elems;
         if (end > size) end = size;
@@ -3826,10 +3802,11 @@ void AnalysisResult::outputCPPGlobalStateSection
       outputCPPGlobalStateEnd(cg, section);
     } else {
       outputCPPGlobalStateBegin(cg, section);
-      for (unsigned i = 0; i < names.size(); i++) {
+      for (StringPairSet::const_iterator iter = names.begin();
+           iter != names.end(); iter++) {
         cg_printf("%s.set(\"%s%s\", %s%s%s);\n", section,
-                  name_prefix, names[i].first.c_str(),
-                  prefix, name_prefix, names[i].second.c_str());
+                  name_prefix, iter->first.c_str(),
+                  prefix, name_prefix, iter->second.c_str());
       }
       outputCPPGlobalStateEnd(cg, section);
     }
@@ -3848,7 +3825,7 @@ void AnalysisResult::outputCPPGlobalState() {
   AnalysisResultPtr ar = shared_from_this();
   outputCPPGlobalStateFileHeader(cg);
 
-  StringPairVecVec symbols(GlobalSymbolTypeCount);
+  StringPairSetVec symbols(GlobalSymbolTypeCount);
   getVariables()->collectCPPGlobalSymbols(symbols, cg, ar);
   collectCPPGlobalSymbols(symbols, cg);
 
@@ -3899,12 +3876,12 @@ void AnalysisResult::outputCPPGlobalState() {
 ///////////////////////////////////////////////////////////////////////////////
 // fiber_marshal/unmarshal_global_state()
 
-void AnalysisResult::collectCPPGlobalSymbols(StringPairVecVec &symbols,
+void AnalysisResult::collectCPPGlobalSymbols(StringPairSetVec &symbols,
                                              CodeGenerator &cg) {
   AnalysisResultPtr ar = shared_from_this();
 
   // dynamic constants
-  StringPairVec *names = &symbols[KindOfDynamicConstant];
+  StringPairSet *names = &symbols[KindOfDynamicConstant];
   getConstants()->collectCPPGlobalSymbols(*names, cg, ar);
   for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
        iter != m_files.end(); ++iter) {
@@ -3917,7 +3894,7 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairVecVec &symbols,
     if (!f->getPseudoMain()) continue;
     string name = string("run_") + Option::PseudoMainPrefix +
       f->pseudoMainName();
-    names->push_back(pair<string, string>(name, name));
+    names->insert(StringPair(name, name));
   }
 
   // redeclared functions
@@ -3929,11 +3906,11 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairVecVec &symbols,
       const char *name = fname.c_str();
       if (iter->second[0]->isRedeclaring()) {
         string varname = string("cim_") + name;
-        names->push_back(pair<string, string>(varname, varname));
+        names->insert(StringPair(varname, varname));
       }
       if (strcmp(name, "__autoload")) {
         string varname = string(FVF_PREFIX) + name;
-        names->push_back(pair<string, string>(varname, varname));
+        names->insert(StringPair(varname, varname));
       }
     }
   }
@@ -3946,7 +3923,7 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairVecVec &symbols,
     if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
       string varname = string(Option::ClassStaticsObjectPrefix) + name;
       string memname = varname + "->getRedeclaringId()";
-      names->push_back(pair<string, string>(varname, memname));
+      names->insert(StringPair(varname, memname));
     }
   }
   names = &symbols[KindOfRedeclaredClass];
@@ -3955,9 +3932,9 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairVecVec &symbols,
     const char *name = iter->first.c_str();
     if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
       string varname = string(Option::ClassStaticsObjectPrefix) + name;
-      names->push_back(pair<string, string>(varname, varname));
+      names->insert(StringPair(varname, varname));
       varname = string(Option::ClassStaticsCallbackPrefix) + name;
-      names->push_back(pair<string, string>(varname, varname));
+      names->insert(StringPair(varname, varname));
     }
   }
 
@@ -3968,7 +3945,7 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairVecVec &symbols,
     const char *name = iter->first.c_str();
     if (iter->second.size() && iter->second[0]->isVolatile()) {
       string varname = string("CDEC(") + name + ")";
-      names->push_back(pair<string, string>(varname, varname));
+      names->insert(StringPair(varname, varname));
     }
   }
 
@@ -3983,7 +3960,7 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairVecVec &symbols,
           name;
         string memname = string(Option::ClassStaticInitializerFlagPrefix) +
           iter->second[i]->getId();
-        names->push_back(pair<string, string>(varname, memname));
+        names->insert(StringPair(varname, memname));
       }
     }
   }
@@ -4009,7 +3986,7 @@ void AnalysisResult::outputCPPFiberGlobalState() {
   cg_printf("using namespace std;\n");
   cg.namespaceBegin();
 
-  StringPairVecVec symbols(GlobalSymbolTypeCount);
+  StringPairSetVec symbols(GlobalSymbolTypeCount);
   getVariables()->collectCPPGlobalSymbols(symbols, cg, ar);
   collectCPPGlobalSymbols(symbols, cg);
 
@@ -4021,10 +3998,11 @@ void AnalysisResult::outputCPPFiberGlobalState() {
 
   cg_indentBegin("static const char *names[] = {\n");
   for (int i = 0; i < GlobalSymbolTypeCount; i++) {
-    StringPairVec &names = symbols[i];
-    for (unsigned int j = 0; j < names.size(); j++) {
+    StringPairSet &names = symbols[i];
+    for (StringPairSet::const_iterator iter = names.begin();
+         iter != names.end(); iter++) {
       cg_printf("\"%s\",\n",
-                CodeGenerator::EscapeLabel(names[j].first).c_str());
+                CodeGenerator::EscapeLabel(iter->first).c_str());
       index++;
     }
   }
@@ -4048,9 +4026,10 @@ void AnalysisResult::outputCPPFiberGlobalState() {
   for (int type = 0; type < GlobalSymbolTypeCount; type++) {
     if (type == KindOfRedeclaredClassId) continue;
 
-    StringPairVec &names = symbols[type];
-    for (unsigned int i = 0; i < names.size(); i++) {
-      const char *name = names[i].second.c_str();
+    StringPairSet &names = symbols[type];
+    for (StringPairSet::const_iterator iter = names.begin();
+         iter != names.end(); iter++) {
+      const char *name = iter->second.c_str();
       switch (type) {
         case KindOfRedeclaredFunction:
           cg_printf("if (g2->%s) g1->%s = g2->%s;\n", name, name, name);
@@ -4075,9 +4054,10 @@ void AnalysisResult::outputCPPFiberGlobalState() {
   for (int type = 0; type < GlobalSymbolTypeCount; type++) {
     if (type == KindOfRedeclaredClassId) continue;
 
-    StringPairVec &names = symbols[type];
-    for (unsigned int i = 0; i < names.size(); i++) {
-      const char *name = names[i].second.c_str();
+    StringPairSet &names = symbols[type];
+    for (StringPairSet::const_iterator iter = names.begin();
+         iter != names.end(); iter++) {
+      const char *name = iter->second.c_str();
       switch (type) {
         case KindOfRedeclaredFunction:
         case KindOfRedeclaredClass:
@@ -4120,9 +4100,10 @@ void AnalysisResult::outputCPPFiberGlobalState() {
   for (int type = 0; type < GlobalSymbolTypeCount; type++) {
     if (type == KindOfRedeclaredClassId) continue;
 
-    StringPairVec &names = symbols[type];
-    for (unsigned int i = 0; i < names.size(); i++) {
-      const char *name = names[i].second.c_str();
+    StringPairSet &names = symbols[type];
+    for (StringPairSet::const_iterator iter = names.begin();
+         iter != names.end(); iter++) {
+      const char *name = iter->second.c_str();
       switch (type) {
         case KindOfRedeclaredFunction:
           cg_printf("if (g2->%s) g1->%s = g2->%s;\n", name, name, name);
@@ -4149,9 +4130,10 @@ void AnalysisResult::outputCPPFiberGlobalState() {
   for (int type = 0; type < GlobalSymbolTypeCount; type++) {
     if (type == KindOfRedeclaredClassId) continue;
 
-    StringPairVec &names = symbols[type];
-    for (unsigned int i = 0; i < names.size(); i++) {
-      const char *name = names[i].second.c_str();
+    StringPairSet &names = symbols[type];
+    for (StringPairSet::const_iterator iter = names.begin();
+         iter != names.end(); iter++) {
+      const char *name = iter->second.c_str();
       switch (type) {
         case KindOfRedeclaredFunction:
         case KindOfRedeclaredClass:

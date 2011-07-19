@@ -305,7 +305,7 @@ public:
   void outputCPPGlobalVariablesMethods(CodeGenerator &cg,
                                        AnalysisResultPtr ar);
 
-  void collectCPPGlobalSymbols(StringPairVecVec &symbols, CodeGenerator &cg,
+  void collectCPPGlobalSymbols(StringPairSetVec &symbols, CodeGenerator &cg,
                                AnalysisResultPtr ar);
 
   /**

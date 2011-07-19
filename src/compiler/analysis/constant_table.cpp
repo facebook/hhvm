@@ -270,14 +270,14 @@ void ConstantTable::outputCPPDynamicImpl(CodeGenerator &cg,
   }
 }
 
-void ConstantTable::collectCPPGlobalSymbols(StringPairVec &symbols,
+void ConstantTable::collectCPPGlobalSymbols(StringPairSet &symbols,
                                             CodeGenerator &cg,
                                             AnalysisResultPtr ar) {
   BOOST_FOREACH(Symbol *sym, m_symbolVec) {
     if (sym->declarationSet() && sym->isDynamic()) {
       string varname = Option::ConstantPrefix +
                        CodeGenerator::FormatLabel(sym->getName());
-      symbols.push_back(pair<string, string>(varname, varname));
+      symbols.insert(StringPair(varname, varname));
     }
   }
 }

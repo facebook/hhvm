@@ -1123,14 +1123,19 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
     cg_printf("SystemGlobals::initialize();\n");
   }
 
+  set<string> staticInitializers;
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
          m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     StaticGlobalInfoPtr sgi = iter->second;
     if (!sgi->func && !sgi->sym->isOverride() &&
         sgi->cls->needStaticInitializer()) {
-      cg_printf("%s%s();\n", Option::ClassStaticInitializerPrefix,
-                sgi->cls->getId().c_str());
+      staticInitializers.insert(sgi->cls->getId());
     }
+  }
+  for (set<string>::const_iterator iter = staticInitializers.begin();
+       iter != staticInitializers.end(); iter++) {
+    cg_printf("%s%s();\n",
+              Option::ClassStaticInitializerPrefix, iter->c_str());
   }
   cg_indentEnd("}\n");
 

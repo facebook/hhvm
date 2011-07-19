@@ -349,8 +349,6 @@ public:
   // FIBER THREAD
   virtual void doJob(FiberJob *job);
 
-  virtual void onThreadEnter();
-  virtual void onThreadExit();
 private:
   FiberAsyncFuncData *m_owner;
 };
@@ -358,15 +356,12 @@ private:
 static JobQueueDispatcher<FiberJob*, FiberWorker> *s_dispatcher;
 
 void FiberWorker::doJob(FiberJob *job) {
+  hphp_session_init(true);
   ExecutionProfiler ep(ThreadInfo::RuntimeFunctions);
   try {
     job->run();
   } catch (...) {
     Logger::Error("Internal Fiber Engine Error");
-  }
-
-  if (s_dispatcher) {
-    s_dispatcher->addWorker(); // finishing me and starting a new thread
   }
   {
     Lock lock(job);
@@ -376,25 +371,15 @@ void FiberWorker::doJob(FiberJob *job) {
   }
   m_owner = job->getOwnerThread();
   delete job;
-  m_stopped = true; // one-time job
-}
-
-void FiberWorker::onThreadEnter() {
-  hphp_session_init(true);
-}
-
-void FiberWorker::onThreadExit() {
+  
   hphp_context_exit(g_context.getNoCheck(), false, true);
   hphp_session_exit();
-
   if (m_owner && !m_owner->decRefCount()) {
     m_owner->notify();
   }
-
-  if (s_dispatcher) {
-    s_dispatcher->removeWorker(this, (AsyncFunc<FiberWorker>*)m_func, true);
-  }
 }
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

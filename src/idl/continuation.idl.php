@@ -372,6 +372,13 @@ DefineProperty(
     'flags' => IsPrivate,
   ));
 
+DefineProperty(
+  array(
+    'name'  => 'called_class',
+    'type'  => String,
+    'flags' => IsPrivate,
+  ));
+
 DefineFunction(
   array(
     'name'   => '__clone',

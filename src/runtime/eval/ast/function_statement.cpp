@@ -459,7 +459,7 @@ Variant FunctionStatement::invokeClosure(CArrRef params) const {
     }
   }
   EvalFrameInjection *efi = static_cast<EvalFrameInjection*>(fi);
-  c_GeneratorClosure *closure = (c_GeneratorClosure *) efi->getEnv().getClosure();
+  c_GeneratorClosure *closure = (c_GeneratorClosure*)efi->getEnv().getClosure();
   const std::vector<ParameterPtr> &vars =
     ((ClosureExpression *)m_closure)->getVars();
   for (ArrayIter iter(closure->m_vars); iter; ++iter) {

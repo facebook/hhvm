@@ -307,6 +307,11 @@ void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
       FileScopePtr fs = getFileScope();
       if (fs) fs->addClassDependency(ar, ret->getName());
     }
+    if (!getFunctionScope()->usesLSB()) {
+      if (StatementPtr orig = getOrigGeneratorFunc()) {
+        orig->getFunctionScope()->clearUsesLSB();
+      }
+    }
   }
 }
 

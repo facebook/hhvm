@@ -38,14 +38,15 @@ public:
 
   EvalFrameInjection(CStrRef cls, const char *name,
                      VariableEnvironment &env, const char *file,
-                     ObjectData *obj = NULL, int fs = 0)
-    : FrameInjectionFunction(name, fs | FrameInjection::EvalFrame),
+                     ObjectData *obj = NULL, int fs = FrameInjection::Function)
+    : FrameInjectionFunction(name, 0),
       m_class(cls), m_env(env), m_file(file) {
-        m_object = obj ? obj->getRoot() : NULL;
-        if (m_object) {
-          m_object->incRefCount();
-        }
-      }
+    m_flags = fs | FrameInjection::EvalFrame;
+    m_object = obj ? obj->getRoot() : NULL;
+    if (m_object) {
+      m_object->incRefCount();
+    }
+  }
 
   ~EvalFrameInjection() {
     if (m_object && m_object->decRefCount() == 0)  {

@@ -277,6 +277,10 @@ CStrRef FrameInjection::GetStaticClassName(ThreadInfo *info) {
     if (obj) {
       return obj->o_getClassName();
     }
+    if (!(t->m_flags &
+          (PseudoMain|BuiltinFunction|StaticMethod|ObjectMethod))) {
+      break;
+    }
   }
   return empty_string;
 }
@@ -332,15 +336,22 @@ CStrRef FrameInjection::getClassName() const {
 }
 
 ObjectData *FrameInjection::getObjectV() const {
-  if (isObjectMethodFrame()) {
-    const FrameInjectionObjectMethod* ofi =
-      static_cast<const FrameInjectionObjectMethod*>(this);
-    return ofi->getThis();
-  } else if (isEvalFrame()) {
+  // Must check first: an EvalFrame can also be
+  // an ObjectMethodFrame (but its still implemented
+  // using EvalFrameInjection).
+  if (UNLIKELY(isEvalFrame())) {
     const Eval::EvalFrameInjection* efi =
       static_cast<const Eval::EvalFrameInjection*>(this);
     return efi->getThis();
-  } else if (m_flags & PseudoMain) {
+  }
+
+  if (LIKELY(isObjectMethodFrame())) {
+    const FrameInjectionObjectMethod* ofi =
+      static_cast<const FrameInjectionObjectMethod*>(this);
+    return ofi->getThis();
+  }
+
+  if (m_flags & PseudoMain) {
     const FrameInjectionFunction *ffi =
       static_cast<const FrameInjectionFunction*>(this);
     return ffi->getThis();

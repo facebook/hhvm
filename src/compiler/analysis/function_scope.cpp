@@ -1973,7 +1973,9 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
         }
       }
     }
-
+    if (usesLSB()) {
+      cg_printf("cont->setCalledClass(f_get_called_class());\n");
+    }
     cg_printf("return cont;\n");
     cg_indentEnd("}\n");
     cg_indentEnd("};\n");

@@ -47,6 +47,7 @@ class c_Continuation : public ExtObjectData {
   public: Variant m_value;
   public: bool m_running;
   public: Variant m_received;
+  public: Variant m_called_class;
 
   // need to implement
   public: c_Continuation();
@@ -84,6 +85,7 @@ class c_Continuation : public ExtObjectData {
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
+  public: void setCalledClass(CStrRef cls) { m_called_class = cls; }
   // implemented by HPHP
   public: c_Continuation *create(int64 func, int64 extra, bool isMethod, Variant obj = null, Array args = null_array);
   public: void dynConstruct(CArrRef Params);

@@ -462,6 +462,7 @@ void SimpleFunctionCall::updateVtFlags() {
           m_name == "call_user_func_array" ||
           m_name == "forward_static_call" ||
           m_name == "forward_static_call_array" ||
+          m_name == "hphp_create_continuation" ||
           m_name == "get_called_class") {
         f->setNextLSB(true);
       }

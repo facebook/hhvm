@@ -876,8 +876,8 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     string closureName = getClosureName();
     Token new_params;
     prepare_generator(this, stmt, new_params, yieldCount);
-    ModifierExpressionPtr exp = NEW_EXP0(ModifierExpression); // public
-    mth = NEW_STMT(MethodStatement, exp, ref->num(), closureName,
+    ModifierExpressionPtr exp2 = Construct::Clone(exp);
+    mth = NEW_STMT(MethodStatement, exp2, ref->num(), closureName,
                    dynamic_pointer_cast<ExpressionList>(new_params->exp),
                    dynamic_pointer_cast<StatementList>(stmt->stmt),
                    attribute, comment);

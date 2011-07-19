@@ -46,7 +46,7 @@ Variant eval(LVariableTable *vars, CObjRef self, CStrRef code_str,
   // todo: pass in params
   NestedVariableEnvironment env(vars, blk, Array(), self);
   EvalFrameInjection fi(empty_string, "_", env, NULL, NULL,
-                        FrameInjection::PseudoMain);
+                        FrameInjection::PseudoMain|FrameInjection::Function);
   s->eval(env);
   if (env.isReturning()) {
     return env.getRet();

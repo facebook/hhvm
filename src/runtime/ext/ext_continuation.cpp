@@ -20,6 +20,7 @@
 
 #include <runtime/ext/ext_spl.h>
 #include <runtime/ext/ext_variable.h>
+#include <runtime/ext/ext_function.h>
 
 #include <runtime/eval/runtime/variable_environment.h>
 #include <system/lib/systemlib.h>
@@ -39,10 +40,15 @@ p_Continuation f_hphp_create_continuation(CStrRef clsname,
   int64 callInfo = f_hphp_get_call_info(clsname, funcname);
   int64 extra = f_hphp_get_call_info_extra(clsname, funcname);
   CObjRef obj = FrameInjection::GetThis(true);
-  return p_GenericContinuation(
+  p_GenericContinuation cont(
       ((c_GenericContinuation*)coo_GenericContinuation())->
         create(callInfo, extra, isMethod,
                env->getDefinedVariables(), obj, args));
+  if (isMethod) {
+    CStrRef cls = f_get_called_class();
+    cont->setCalledClass(cls);
+  }
+  return cont;
 }
 
 void f_hphp_pack_continuation(CObjRef continuation,
@@ -179,6 +185,7 @@ bool c_Continuation::php_sleep(Variant &ret) {
       mcp.isObj = true; \
       mcp.obj = mcp.rootObj = m_obj.get(); \
       mcp.extra = m_extra; \
+      fi.setStaticClassName(m_called_class); \
       (m_callInfo->getMeth1Args())(mcp, 1, GET_THIS_TYPED(Continuation)); \
     } else { \
       (m_callInfo->getFunc1Args())(m_extra, 1, GET_THIS_TYPED(Continuation)); \

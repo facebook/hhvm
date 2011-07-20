@@ -1896,7 +1896,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
 
     if (m_name == "hphp_create_continuation" &&
         m_params &&
-        (m_params->getCount() == 2 || m_params->getCount() == 3)) {
+        (m_params->getCount() == 3 || m_params->getCount() == 4)) {
       ClassScopePtr cscope;
       FunctionScopePtr fscope(
           getFuncScopeFromParams(
@@ -1924,6 +1924,10 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
 
         // isMethod
         cg_printf("%s, ", cscope ? "true" : "false");
+
+        // origFuncName
+        ((*m_params)[2])->outputCPP(cg, ar);
+        cg_printf(", ");
 
         // function params
 
@@ -1997,8 +2001,8 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
         }
 
         // args
-        if (m_params->getCount() == 3) {
-          ((*m_params)[2])->outputCPP(cg, ar);
+        if (m_params->getCount() == 4) {
+          ((*m_params)[3])->outputCPP(cg, ar);
         } else {
           cg_printf("null_array");
         }

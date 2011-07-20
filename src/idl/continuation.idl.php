@@ -65,6 +65,10 @@ DefineFunction(
         'type'   => String,
       ),
       array(
+        'name'   => 'origFuncName',
+        'type'   => String,
+      ),
+      array(
         'name'   => 'args',
         'type'   => VariantMap,
         'value'  => 'null_array',
@@ -176,6 +180,10 @@ DefineFunction(
       array(
         'name'   => 'isMethod',
         'type'   => Boolean,
+      ),
+      array(
+        'name'   => 'origFuncName',
+        'type'   => String,
       ),
       array(
         'name'   => 'obj',
@@ -316,6 +324,14 @@ DefineFunction(
     ),
   ));
 
+DefineFunction(
+  array(
+    'name'   => 'getOrigFuncName',
+    'return' => array(
+      'type'   => String,
+    ),
+  ));
+
 DefineProperty(
   array(
     'name'  => 'obj',
@@ -374,6 +390,13 @@ DefineProperty(
 
 DefineProperty(
   array(
+    'name'  => 'origFuncName',
+    'type'  => String,
+    'flags' => IsPrivate,
+  ));
+
+DefineProperty(
+  array(
     'name'  => 'called_class',
     'type'  => String,
     'flags' => IsPrivate,
@@ -414,6 +437,10 @@ DefineFunction(
       array(
         'name'   => 'isMethod',
         'type'   => Boolean,
+      ),
+      array(
+        'name'   => 'origFuncName',
+        'type'   => String,
       ),
       array(
         'name'   => 'vars',

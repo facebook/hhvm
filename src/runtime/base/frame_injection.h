@@ -178,12 +178,6 @@ protected:
   int m_line;
   int m_flags;
 
-  inline bool checkClassName(CStrRef cls) {
-    int len = cls.length();
-    if (strncmp(cls.data(), m_name, len) != 0) return false;
-    if (m_name[len] != ':' || m_name[len+1] != ':') return false;
-    return true;
-  }
   Array getStackFrame(bool withSelf, bool withThis);
 };
 

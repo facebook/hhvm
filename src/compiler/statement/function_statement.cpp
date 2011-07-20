@@ -92,7 +92,8 @@ void FunctionStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
     }
   }
   if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    const std::string &name = fs->inPseudoMain() ? m_name : fs->getId();
+    const std::string &name = fs->inPseudoMain() ?
+      m_name : fs->getInjectionId();
     ar->recordFunctionSource(name, m_loc,
                              getFileScope()->getName());
   }
@@ -109,7 +110,7 @@ void FunctionStatement::outputPHPHeader(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   cg_printf("function ");
   if (m_ref) cg_printf("&");
-  if (m_name[0] != '0') {
+  if (!ParserBase::IsClosureOrContinuationName(m_name)) {
     cg_printf("%s", m_name.c_str());
   }
   cg_printf("(");
@@ -281,8 +282,8 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
             if (suffix[0] == '\0' && !funcScope->needsCheckMem()) {
               suffix = "_NOMEM";
             }
-            cg_printf("FUNCTION_INJECTION%s(%s);\n", suffix,
-                      funcScope->getId().c_str());
+            const string &name = funcScope->getInjectionId();
+            cg_printf("FUNCTION_INJECTION%s(%s);\n", suffix, name.c_str());
           }
           outputCPPArgInjections(cg, ar, origFuncName.c_str(),
                                  ClassScopePtr(), funcScope);

@@ -25,7 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 FORWARD_DECLARE_CLASS_BUILTIN(Continuation);
 
-p_Continuation f_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CArrRef args = null_array);
+p_Continuation f_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CStrRef origFuncName, CArrRef args = null_array);
 void f_hphp_pack_continuation(CObjRef continuation, int64 label, CVarRef value);
 void f_hphp_unpack_continuation(CObjRef continuation);
 
@@ -47,12 +47,13 @@ class c_Continuation : public ExtObjectData {
   public: Variant m_value;
   public: bool m_running;
   public: Variant m_received;
+  public: String m_origFuncName;
   public: Variant m_called_class;
 
   // need to implement
   public: c_Continuation();
   public: ~c_Continuation();
-  public: void t___construct(int64 func, int64 extra, bool isMethod, CVarRef obj = null, CArrRef args = null_array);
+  public: void t___construct(int64 func, int64 extra, bool isMethod, CStrRef origFuncName, CVarRef obj = null, CArrRef args = null_array);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: void t_update(int64 label, CVarRef value);
   DECLARE_METHOD_INVOKE_HELPERS(update);
@@ -80,6 +81,8 @@ class c_Continuation : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(send);
   public: Variant t_receive();
   DECLARE_METHOD_INVOKE_HELPERS(receive);
+  public: String t_getorigfuncname();
+  DECLARE_METHOD_INVOKE_HELPERS(getorigfuncname);
   public: Variant t___clone();
   DECLARE_METHOD_INVOKE_HELPERS(__clone);
   public: Variant t___destruct();
@@ -87,7 +90,7 @@ class c_Continuation : public ExtObjectData {
 
   public: void setCalledClass(CStrRef cls) { m_called_class = cls; }
   // implemented by HPHP
-  public: c_Continuation *create(int64 func, int64 extra, bool isMethod, Variant obj = null, Array args = null_array);
+  public: c_Continuation *create(int64 func, int64 extra, bool isMethod, String origFuncName, Variant obj = null, Array args = null_array);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
 protected:
@@ -115,7 +118,7 @@ class c_GenericContinuation : public c_Continuation {
   // need to implement
   public: c_GenericContinuation();
   public: ~c_GenericContinuation();
-  public: void t___construct(int64 func, int64 extra, bool isMethod, CArrRef vars, CVarRef obj = null, CArrRef args = null_array);
+  public: void t___construct(int64 func, int64 extra, bool isMethod, CStrRef origFuncName, CArrRef vars, CVarRef obj = null, CArrRef args = null_array);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: void t_update(int64 label, CVarRef value, CArrRef vars);
   DECLARE_METHOD_INVOKE_HELPERS(update);
@@ -125,7 +128,7 @@ class c_GenericContinuation : public c_Continuation {
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
-  public: c_GenericContinuation *create(int64 func, int64 extra, bool isMethod, Array vars, Variant obj = null, Array args = null_array);
+  public: c_GenericContinuation *create(int64 func, int64 extra, bool isMethod, String origFuncName, Array vars, Variant obj = null, Array args = null_array);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
 

@@ -244,8 +244,9 @@ Array FuncScopeVariableEnvironment::getDefinedVariables() const {
 
 ObjectData *FuncScopeVariableEnvironment::getContinuation() const {
   const vector<ParameterPtr> &params = m_func->getParams();
-  if (m_func->name().find('0') == 0 && params.size() == 1
-   && params[0]->getName().find(CONTINUATION_OBJECT_NAME) == 0) {
+  if (ParserBase::IsContinuationName(m_func->name().c_str()) &&
+      params.size() == 1 &&
+      params[0]->getName().find(CONTINUATION_OBJECT_NAME) == 0) {
     Array args = getParams();
     ASSERT(args.size() == 1);
     ObjectData *obj = args[0].getObjectData();

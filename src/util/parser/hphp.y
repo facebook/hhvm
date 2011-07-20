@@ -293,8 +293,13 @@ void create_generator(Parser *_p, Token &out, Token &params,
     Token fn;      fn.setText(closureName);
     Token fname;   _p->onScalar(fname, T_CONSTANT_ENCAPSED_STRING, fn);
 
+    Token ofn;     ofn.setText(clsname ? "__METHOD__" : "__FUNCTION__");
+    Token oname;   _p->onScalar(oname, clsname ? T_METHOD_C : T_FUNC_C, ofn);
+
     Token param1;  _p->onCallParam(param1, NULL, cname, false);
                    _p->onCallParam(param1, &param1, fname, false);
+                   _p->onCallParam(param1, &param1, oname, false);
+
     if (getArgs) {
       Token cname;   cname.setText("func_get_args");
       Token empty;

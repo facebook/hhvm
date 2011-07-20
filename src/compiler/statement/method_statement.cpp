@@ -27,11 +27,13 @@
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/statement/statement_list.h>
-#include <util/util.h>
+
 #include <compiler/option.h>
 #include <compiler/builtin_symbols.h>
 #include <compiler/analysis/alias_manager.h>
+
 #include <util/parser/parser.h>
+#include <util/util.h>
 
 using namespace HPHP;
 using namespace std;
@@ -69,6 +71,26 @@ string MethodStatement::getFullName() const {
 string MethodStatement::getOriginalFullName() const {
   if (m_originalClassName.empty()) return m_originalName;
   return m_originalClassName + "::" + m_originalName;
+}
+
+string MethodStatement::getOriginalFullNameForInjection() const {
+  FunctionScopeRawPtr funcScope = getFunctionScope();
+  string injectionName;
+  if (getGeneratorFunc()) {
+    injectionName = funcScope->isClosureGenerator() ?
+      m_originalName :
+      m_originalName + "{continuation}";
+  } else if (getOrigGeneratorFunc()) {
+    bool needsOrig = !funcScope->getOrigGenFS()->isClosure();
+    injectionName = needsOrig ?
+      getOrigGeneratorFunc()->getOriginalName() :
+      m_originalName;
+  } else {
+    injectionName = m_originalName;
+  }
+  return m_originalClassName.empty() ?
+    injectionName :
+    m_originalClassName + "::" + injectionName;
 }
 
 bool MethodStatement::isRef(int index /* = -1 */) const {
@@ -388,9 +410,7 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
   // generator
   if (funcScope->isGenerator()) {
     // orig function params
-    ASSERT(getOrigGeneratorFunc());
-    MethodStatementPtr m =
-      dynamic_pointer_cast<MethodStatement>(getOrigGeneratorFunc());
+    MethodStatementPtr m = getOrigGeneratorFunc();
     ASSERT(m);
 
     VariableTablePtr variables = funcScope->getVariables();
@@ -436,7 +456,7 @@ void MethodStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_modifiers->outputPHP(cg, ar);
   cg_printf(" function ");
   if (m_ref) cg_printf("&");
-  if (m_name[0] != '0') {
+  if (!ParserBase::IsClosureOrContinuationName(m_name)) {
     cg_printf("%s", m_originalName.c_str());
   }
   cg_printf("(");
@@ -592,19 +612,20 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
             if (suffix[0] == '\0' && !funcScope->needsCheckMem()) {
               suffix = "_NOMEM";
             }
+            const string &injectionName = getOriginalFullNameForInjection();
             if (m_modifiers->isStatic()) {
               cg_printf("STATIC_METHOD_INJECTION%s(%s, %s);\n", suffix,
                         scope->getOriginalName().c_str(),
-                        origFuncName.c_str());
+                        injectionName.c_str());
             } else if (cg.getOutput() != CodeGenerator::SystemCPP &&
                        !scope->isRedeclaring() && !scope->derivedByDynamic()) {
               cg_printf("INSTANCE_METHOD_INJECTION_ROOTLESS%s(%s, %s);\n",
                         suffix, scope->getOriginalName().c_str(),
-                        origFuncName.c_str());
+                        injectionName.c_str());
             } else if (scope->getOriginalName() != "XhprofFrame") {
               cg_printf("INSTANCE_METHOD_INJECTION%s(%s, %s);\n", suffix,
                         scope->getOriginalName().c_str(),
-                        origFuncName.c_str());
+                        injectionName.c_str());
             }
           }
           outputCPPArgInjections(cg, ar, origFuncName.c_str(),
@@ -970,7 +991,7 @@ bool MethodStatement::outputFFI(CodeGenerator &cg, AnalysisResultPtr ar) {
   // skip constructors
   bool isConstructor = inClass && funcScope->isConstructor(clsScope);
   bool valid = !pseudoMain && !inaccessible && !isConstructor &&
-    (inClass || (m_originalName[0] != '1' && m_originalName[0] != '0'));
+    (inClass || !ParserBase::IsAnonFunctionName(m_originalName));
 
   if (cg.getContext() == CodeGenerator::CppFFIDecl ||
       cg.getContext() == CodeGenerator::CppFFIImpl) {

@@ -18,8 +18,10 @@
 #define __FUNCTION_SCOPE_H__
 
 #include <compiler/analysis/block_scope.h>
-#include <util/json.h>
 #include <compiler/option.h>
+
+#include <util/json.h>
+#include <util/parser/parser.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,6 +99,7 @@ public:
   bool hasImpl() const;
   void setDirectInvoke() { m_directInvoke = true; }
   bool hasDirectInvoke() const { return m_directInvoke; }
+  bool isClosure() const;
   bool isGenerator() const;
   StatementPtr getOrigGenStmt() const;
   FunctionScopePtr getOrigGenFS() const;
@@ -105,7 +108,10 @@ public:
   void setNeedsCheckMem() { m_needsCheckMem = true; }
   bool needsCheckMem() const { return m_needsCheckMem; }
   void setClosureGenerator() { m_closureGenerator = true; }
-  bool isClosureGenerator() const { return m_closureGenerator; }
+  bool isClosureGenerator() const {
+    ASSERT(!m_closureGenerator || isClosure());
+    return m_closureGenerator;
+  }
   bool needsClassParam();
 
   void setInlineSameContext(bool f) { m_inlineSameContext = f; }
@@ -133,6 +139,7 @@ public:
   }
 
   virtual std::string getId() const;
+  std::string getInjectionId() const;
 
   int getRedeclaringId() const {
     return m_redeclaring;

@@ -254,10 +254,15 @@ bool FunctionScope::isMixedVariableArgument() const {
   return res;
 }
 
+bool FunctionScope::isClosure() const {
+  return ParserBase::IsClosureName(name());
+}
+
 bool FunctionScope::isGenerator() const {
   ASSERT(!getOrigGenStmt() ||
-         (name()[0] == '0' && m_paramNames.size() == 1
-         && m_paramNames[0] == CONTINUATION_OBJECT_NAME));
+         (ParserBase::IsContinuationName(name()) &&
+          m_paramNames.size() == 1 &&
+          m_paramNames[0] == CONTINUATION_OBJECT_NAME));
   return getOrigGenStmt();
 }
 
@@ -711,6 +716,28 @@ std::string FunctionScope::getId() const {
   }
   return name + Option::IdPrefix +
     boost::lexical_cast<std::string>(m_redeclaring);
+}
+
+std::string FunctionScope::getInjectionId() const {
+  string injectionName = CodeGenerator::FormatLabel(getOriginalName());
+  MethodStatementPtr stmt =
+    dynamic_pointer_cast<MethodStatement>(getStmt());
+  ASSERT(stmt);
+  if (stmt->getGeneratorFunc()) {
+    injectionName = isClosureGenerator() ?
+      injectionName :
+      injectionName + "{continuation}";
+  } else if (stmt->getOrigGeneratorFunc() &&
+             !getOrigGenFS()->isClosure()) {
+    injectionName = CodeGenerator::FormatLabel(
+      stmt->getOrigGeneratorFunc()->getOriginalName());
+  }
+  if (m_redeclaring < 0) {
+    return injectionName;
+  }
+  const string &redecSuffix = string(Option::IdPrefix) +
+    boost::lexical_cast<std::string>(m_redeclaring);
+  return injectionName + redecSuffix;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1909,7 +1936,7 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
     // of the original generator function + use vars for any
     // surrounding closure generator
     cg_printf("static %sContinuation$%s Build("
-              "int64 func, int64 extra, bool isMethod, ",
+              "int64 func, int64 extra, bool isMethod, CStrRef origFuncName, ",
               Option::SmartPtrPrefix, funcName.c_str());
 
     MethodStatementPtr orig =
@@ -1951,7 +1978,8 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
               Option::SmartPtrPrefix, funcName.c_str(),
               Option::SmartPtrPrefix, funcName.c_str(),
               Option::ClassPrefix,    funcName.c_str());
-    cg_printf("cont->%s__construct(func, extra, isMethod, obj, args);\n",
+    cg_printf("cont->%s__construct"
+              "(func, extra, isMethod, origFuncName, obj, args);\n",
               Option::MethodPrefix);
 
     BOOST_FOREACH(ParameterExpressionPtr param, ctorParams) {

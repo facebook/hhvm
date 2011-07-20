@@ -24,6 +24,8 @@
 
 #include <runtime/eval/analysis/block.h>
 
+#include <util/parser/parser.h>
+
 namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -120,6 +122,24 @@ public:
 
   void setName(const std::string &name) { m_name = AtomicString(name);}
 
+  void setOrigGeneratorFunc(FunctionStatementPtr stmt) {
+    m_origGeneratorFunc = stmt;
+  }
+  FunctionStatementPtr getOrigGeneratorFunc() const {
+    return m_origGeneratorFunc;
+  }
+
+  void setGeneratorFunc(FunctionStatementPtr stmt) {
+    m_generatorFunc = stmt;
+  }
+  FunctionStatementPtr getGeneratorFunc() const {
+    return m_generatorFunc;
+  }
+
+  bool isClosure() const {
+    return ParserBase::IsClosureName(m_name->data());
+  }
+
 protected:
   bool m_ref;
   bool m_hasCallToGetArgs;
@@ -140,6 +160,10 @@ protected:
                   int start = 0) const;
   Variant evalBody(VariableEnvironment &env) const;
   CallInfo m_callInfo;
+
+  FunctionStatementPtr m_origGeneratorFunc;
+  FunctionStatementPtr m_generatorFunc;
+
 private:
   void bindParams(FuncScopeVariableEnvironment &fenv, CArrRef params) const;
   static Variant Invoker(void *ms, CArrRef params);
@@ -148,6 +172,8 @@ private:
   static Variant FSInvoker(void *ms, CArrRef params);
   static Variant FSInvokerFewArgs(void *ms, int count,
                                   INVOKE_FEW_ARGS_IMPL_ARGS);
+
+  std::string computeInjectionName() const;
 
   CallInfo m_closureCallInfo;
 };

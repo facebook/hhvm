@@ -30,6 +30,7 @@ namespace HPHP {
 
 p_Continuation f_hphp_create_continuation(CStrRef clsname,
                                           CStrRef funcname,
+                                          CStrRef origFuncName,
                                           CArrRef args /* = null_array */) {
   Eval::VariableEnvironment *env =
     FrameInjection::GetVariableEnvironment(true);
@@ -42,7 +43,7 @@ p_Continuation f_hphp_create_continuation(CStrRef clsname,
   CObjRef obj = FrameInjection::GetThis(true);
   p_GenericContinuation cont(
       ((c_GenericContinuation*)coo_GenericContinuation())->
-        create(callInfo, extra, isMethod,
+        create(callInfo, extra, isMethod, origFuncName,
                env->getDefinedVariables(), obj, args));
   if (isMethod) {
     CStrRef cls = f_get_called_class();
@@ -96,11 +97,12 @@ c_Continuation::~c_Continuation() {}
 
 void c_Continuation::t___construct(
     int64 func, int64 extra, bool isMethod,
-    CVarRef obj, CArrRef args) {
+    CStrRef origFuncName, CVarRef obj, CArrRef args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::__construct);
-  m_callInfo = (const CallInfo*) func;
-  m_extra    = (void*) extra;
-  m_isMethod = isMethod;
+  m_callInfo     = (const CallInfo*) func;
+  m_extra        = (void*) extra;
+  m_isMethod     = isMethod;
+  m_origFuncName = origFuncName;
 
   if (!obj.isNull()) {
     m_obj = obj.toObject();
@@ -233,6 +235,11 @@ Variant c_Continuation::t_receive() {
   return m_received;
 }
 
+String c_Continuation::t_getorigfuncname() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::getorigfuncname);
+  return m_origFuncName;
+}
+
 Variant c_Continuation::t___clone() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::__clone);
   throw_fatal(
@@ -250,10 +257,13 @@ Variant c_Continuation::t___destruct() {
 c_GenericContinuation::c_GenericContinuation()  {}
 c_GenericContinuation::~c_GenericContinuation() {}
 
-void c_GenericContinuation::t___construct(int64 func, int64 extra, bool isMethod,
-                                   CArrRef vars, CVarRef obj, CArrRef args) {
+void
+c_GenericContinuation::t___construct(int64 func, int64 extra, bool isMethod,
+                                     CStrRef origFuncName, CArrRef vars,
+                                     CVarRef obj, CArrRef args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(GenericContinuation, GenericContinuation::__construct);
-  c_Continuation::t___construct(func, extra, isMethod, obj, args);
+  c_Continuation::t___construct(func, extra, isMethod,
+                                origFuncName, obj, args);
   m_vars = vars;
 }
 

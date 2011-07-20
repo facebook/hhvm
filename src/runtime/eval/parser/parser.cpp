@@ -1026,7 +1026,7 @@ void Parser::onClassConst(Token &out, Token &className, Token &name,
 void Parser::onFunctionStart(Token &name) {
   string funcName = name.text();
   if (funcName.empty()) {
-    funcName = getClosureName();
+    funcName = getAnonFuncName(Closure);
   }
   FunctionStatementPtr func = NEW_STMT(Function, funcName,
                                        m_scanner.detachDocComment());
@@ -1053,7 +1053,9 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
   m_prependingStatements.pop_back();
 
   if (func->hasYield()) {
-    string closureName = getClosureName();
+    AnonFuncKind k = func->name().empty() ?
+      ContinuationFromClosure : Continuation;
+    const string &closureName = getAnonFuncName(k);
     func->setName(closureName);
 
     Token new_params;
@@ -1068,6 +1070,11 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
     Token origGenFunc;
     create_generator(this, out, params, name, closureName, NULL, NULL,
                      hasCallToGetArgs, origGenFunc);
+    FunctionStatementPtr origFunc =
+      origGenFunc->getStmt<FunctionStatement>();
+    ASSERT(origFunc);
+    func->setOrigGeneratorFunc(origFunc);
+    origFunc->setGeneratorFunc(func);
 
   } else {
     StatementListStatementPtr body = stmt->getStmtList();
@@ -1194,7 +1201,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   m_prependingStatements.pop_back();
 
   if (ms->hasYield()) {
-    string closureName = getClosureName();
+    string closureName = getAnonFuncName(ParserBase::Continuation);
     ms->setName(closureName);
     ms->setPublic();
 
@@ -1208,10 +1215,18 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     Token origGenFunc;
     create_generator(this, out, params, name, closureName, clsname.data(),
                      &modifiers, hasCallToGetArgs, origGenFunc);
+    MethodStatementPtr origFunc =
+      origGenFunc->getStmt<MethodStatement>();
+    ASSERT(origFunc);
+    ms->setOrigGeneratorFunc(origFunc);
+    origFunc->setGeneratorFunc(ms);
+
   } else {
     StatementListStatementPtr stmts = stmt->getStmtList();
     if (stmts) stmts->resetLoc(this);
     ms->init(this, ref.num(), params->params(), stmts, hasCallToGetArgs);
+    out.reset();
+    out->stmt() = ms;
   }
   cs->addMethod(ms);
 }

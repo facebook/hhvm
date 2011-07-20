@@ -15,6 +15,7 @@
 */
 
 #include "parser.h"
+#include <runtime/base/macros.h>
 #include <util/hash.h>
 
 using namespace std;
@@ -25,6 +26,42 @@ namespace HPHP {
 
 Mutex ParserBase::s_mutex;
 std::map<int64, int> ParserBase::s_closureIds;
+
+char ParserBase::GetAnonPrefix(AnonFuncKind kind) {
+  CT_ASSERT(Closure == 0 && Continuation <= 9);
+  CT_ASSERT(CharClosure == '0' && CharContinuation <= '9');
+  return '0' + kind;
+}
+
+template <int i>
+static bool NameImpl(const std::string &name) {
+  return !name.empty() && isdigit(name[0]) && i == (name[0] - '0');
+}
+
+bool ParserBase::IsClosureName(const std::string &name) {
+  return NameImpl<Closure>(name);
+}
+
+bool ParserBase::IsCreateFunctionName(const std::string &name) {
+  return NameImpl<CreateFunction>(name);
+}
+
+bool ParserBase::IsContinuationName(const std::string &name) {
+  return NameImpl<ContinuationFromClosure>(name) ||
+         NameImpl<Continuation>(name);
+}
+
+bool ParserBase::IsClosureOrContinuationName(const std::string &name) {
+  return IsClosureName(name) || IsContinuationName(name);
+}
+
+bool ParserBase::IsAnonFunctionName(const std::string &name) {
+  if (name.empty()) return true;
+  char begin = CharClosure;
+  char end   = CharContinuation;
+  char test  = name[0];
+  return begin <= test && test <= end;
+}
 
 void ParserBase::Reset() {
   Lock lock(s_mutex);
@@ -92,7 +129,7 @@ LocationPtr ParserBase::popFuncLocation() {
   return loc;
 }
 
-std::string ParserBase::getClosureName() {
+std::string ParserBase::getAnonFuncName(AnonFuncKind kind) {
   int64 h = hash_string_cs(m_fileName, strlen(m_fileName));
   int closureId;
   {
@@ -102,7 +139,7 @@ std::string ParserBase::getClosureName() {
   }
 
   string ret;
-  ret = "0";
+  ret += GetAnonPrefix(kind);
   ret += lexical_cast<string>(h);
   ret += "_";
   ret += lexical_cast<string>(closureId);

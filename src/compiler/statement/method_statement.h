@@ -50,6 +50,7 @@ public:
   void setName(const std::string name) { m_name = name; }
   std::string getFullName() const;
   std::string getOriginalFullName() const;
+  std::string getOriginalFullNameForInjection() const;
   ExpressionListPtr getParams() { return m_params;}
   StatementListPtr getStmts() { return m_stmt;}
   bool isRef(int index = -1) const;
@@ -77,12 +78,20 @@ public:
 
   const std::string &getDocComment() const { return m_docComment; }
 
-  void setOrigGeneratorFunc(StatementPtr stmt) {
+  void setOrigGeneratorFunc(MethodStatementPtr stmt) {
     m_origGeneratorFunc = stmt;
   }
-  StatementPtr getOrigGeneratorFunc() const {
+  MethodStatementPtr getOrigGeneratorFunc() const {
     return m_origGeneratorFunc;
   }
+
+  void setGeneratorFunc(MethodStatementPtr stmt) {
+    m_generatorFunc = stmt;
+  }
+  MethodStatementPtr getGeneratorFunc() const {
+    return m_generatorFunc;
+  }
+
 protected:
   bool m_method;
   ModifierExpressionPtr m_modifiers;
@@ -96,7 +105,8 @@ protected:
   int m_attribute;
   std::string m_docComment;
   int m_cppLength;
-  StatementPtr m_origGeneratorFunc;
+  MethodStatementPtr m_origGeneratorFunc;
+  MethodStatementPtr m_generatorFunc;
 
   void outputCPPArgInjections(CodeGenerator &cg, AnalysisResultPtr ar,
                               const char *name, ClassScopePtr cls,

@@ -19644,6 +19644,26 @@ bool TestCodeRun::TestYield() {
         "string(1) \"A\"\n"
         "string(1) \"A\"\n");
 
+  // getting the original function
+  MVCRO("<?php\n"
+        "function f($x) {\n"
+        "  yield $x;\n"
+        "}\n"
+        "$c = f(32);\n"
+        "var_dump($c->getOrigFuncName());\n"
+        "class X {\n"
+        "  function f($x) { yield $x; }\n"
+        "}\n"
+        "$x = new X;\n"
+        "$c = $x->f(32);\n"
+        "var_dump($c->getOrigFuncName());\n"
+        "$fcn = function ($x) { yield $x; };\n"
+        "$c = $fcn(32);\n"
+        "var_dump($c->getOrigFuncName());\n",
+        "string(1) \"f\"\n"
+        "string(4) \"X::f\"\n"
+        "string(9) \"{closure}\"\n");
+
   return true;
 }
 

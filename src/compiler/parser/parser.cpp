@@ -687,8 +687,11 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
   fixStaticVars();
 
   FunctionStatementPtr func;
+
   if (yieldCount > 0) {
-    string closureName = getClosureName();
+    AnonFuncKind fKind = name->text().empty() ?
+      ContinuationFromClosure : Continuation;
+    const string &closureName = getAnonFuncName(fKind);
     Token new_params;
     prepare_generator(this, stmt, new_params, yieldCount);
     func = NEW_STMT(FunctionStatement, ref->num(), closureName,
@@ -713,15 +716,21 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
       create_generator(this, out, params, name, closureName, NULL, NULL,
                        hasCallToGetArgs, origGenFunc);
       m_closureGenerator = false;
-      func->setOrigGeneratorFunc(origGenFunc->stmt);
+      MethodStatementPtr origStmt =
+        boost::dynamic_pointer_cast<MethodStatement>(origGenFunc->stmt);
+      ASSERT(origStmt);
+      func->setOrigGeneratorFunc(origStmt);
+      origStmt->setGeneratorFunc(func);
     }
 
   } else {
     string funcName = name->text();
     if (funcName.empty()) {
-      funcName = getClosureName();
+      funcName = getAnonFuncName(Closure);
     } else if (m_lambdaMode) {
-      funcName = "1_" + funcName;
+      string f;
+      f += GetAnonPrefix(CreateFunction);
+      funcName = f + "_" + funcName;
     }
     func = NEW_STMT(FunctionStatement, ref->num(), funcName,
                     old_params, dynamic_pointer_cast<StatementList>(stmt->stmt),
@@ -873,7 +882,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
 
   MethodStatementPtr mth;
   if (yieldCount > 0) {
-    string closureName = getClosureName();
+    const string &closureName = getAnonFuncName(ParserBase::Continuation);
     Token new_params;
     prepare_generator(this, stmt, new_params, yieldCount);
     ModifierExpressionPtr exp2 = Construct::Clone(exp);
@@ -891,7 +900,11 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     Token origGenFunc;
     create_generator(this, out, params, name, closureName, m_clsName.c_str(),
                      &modifiers, hasCallToGetArgs, origGenFunc);
-    mth->setOrigGeneratorFunc(origGenFunc->stmt);
+    MethodStatementPtr origStmt =
+      boost::dynamic_pointer_cast<MethodStatement>(origGenFunc->stmt);
+    ASSERT(origStmt);
+    mth->setOrigGeneratorFunc(origStmt);
+    origStmt->setGeneratorFunc(mth);
 
   } else {
     mth = NEW_STMT(MethodStatement, exp, ref->num(), name->text(),

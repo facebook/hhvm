@@ -59,6 +59,32 @@ public:
   };
 
   /**
+   * These numbers are scattered throughout the code base (often hardcoded).
+   * Do not change unless you change all the occurances.
+   */
+  enum AnonFuncKind {
+    Closure,
+    CreateFunction,
+    ContinuationFromClosure,
+    Continuation
+  };
+
+  enum AnonFuncKindChar {
+    CharClosure = '0',
+    CharCreateFunction,
+    CharContinuationFromClosure,
+    CharContinuation
+  };
+
+  static char GetAnonPrefix(AnonFuncKind kind);
+
+  static bool IsClosureName(const std::string &name);
+  static bool IsCreateFunctionName(const std::string &name);
+  static bool IsContinuationName(const std::string &name);
+  static bool IsClosureOrContinuationName(const std::string &name);
+  static bool IsAnonFunctionName(const std::string &name);
+
+  /**
    * Reset parser static variables. Good for unit tests.
    */
   static void Reset();
@@ -113,7 +139,7 @@ public:
 
   void pushFuncLocation();
   LocationPtr popFuncLocation();
-  std::string getClosureName();
+  std::string getAnonFuncName(AnonFuncKind kind);
 
   // for goto syntax checking
   void pushLabelInfo();

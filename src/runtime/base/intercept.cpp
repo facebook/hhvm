@@ -19,6 +19,8 @@
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
+
+#include <util/parser/parser.h>
 #include <util/lock.h>
 
 using namespace std;
@@ -193,7 +195,7 @@ void rename_function(CStrRef old_name, CStrRef new_name) {
     different names. They also report that they exist,
     even after renaming
   */
-  if (old_name.data()[0] != '1') {
+  if (old_name.data()[0] != ParserBase::CharCreateFunction) {
     StringIMap<String>::iterator iter = funcs.find(old_name);
     if (iter != funcs.end()) {
       if (!iter->second.empty()) {
@@ -205,7 +207,7 @@ void rename_function(CStrRef old_name, CStrRef new_name) {
     }
   }
 
-  if (new_name.data()[0] != '1') {
+  if (new_name.data()[0] != ParserBase::CharCreateFunction) {
     funcs[new_name] = orig_name;
   }
   s_intercept_data->m_has_renamed_functions = true;

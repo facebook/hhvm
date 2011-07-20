@@ -22,6 +22,8 @@
 
 #include <runtime/eval/runtime/eval_frame_injection.h>
 
+#include <util/parser/parser.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // static strings
@@ -33,6 +35,8 @@ static StaticString s_args("args");
 static StaticString s_class("class");
 static StaticString s_object("object");
 static StaticString s_type("type");
+static StaticString s_closureBrackets("{closure}");
+static StaticString s_closureGenBrackets("{closureGen}");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -110,8 +114,9 @@ Array FrameInjection::getStackFrame(bool withSelf, bool withThis) {
     frame.set(s_args, Array::Create(getFileName()), true);
   } else {
     const char *c = strstr(m_name, "::");
+    const char *f = m_name;
     if (c) {
-      frame.set(s_function, String(c + 2), true);
+      f = c + 2;
       frame.set(s_class, getClassName()->copy(), true);
       if (ObjectData *obj = getObjectV()) {
         if (withThis) {
@@ -121,10 +126,22 @@ Array FrameInjection::getStackFrame(bool withSelf, bool withThis) {
       } else {
         frame.set(s_type, "::", true);
       }
-    } else if (const char *c = strstr(m_name, "$$")) {
-      frame.set(s_function, String(m_name, c - m_name, CopyString), true);
-    } else {
-      frame.set(s_function, m_name, true);
+    }
+    ASSERT(f);
+    switch (f[0]) {
+    case ParserBase::CharClosure:
+      frame.set(s_function, s_closureBrackets, true);
+      break;
+    case ParserBase::CharContinuationFromClosure:
+      frame.set(s_function, s_closureGenBrackets, true);
+      break;
+    default:
+      if (const char *c = strstr(f, "$$")) {
+        frame.set(s_function, String(f, c - f, CopyString), true);
+      } else {
+        frame.set(s_function, f, true);
+      }
+      break;
     }
 
     Array args = getArgs();

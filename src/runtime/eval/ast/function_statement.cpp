@@ -36,6 +36,8 @@
 #include <runtime/ext/ext_closure.h>
 #include <system/lib/systemlib.h>
 
+#include <util/parser/parser.h>
+
 namespace HPHP {
 namespace Eval {
 using namespace std;
@@ -291,6 +293,23 @@ const CallInfo *FunctionStatement::getClosureCallInfo() const {
   return &m_closureCallInfo;
 }
 
+std::string
+FunctionStatement::computeInjectionName() const {
+  string injectionName;
+  if (getGeneratorFunc()) {
+    injectionName = isClosure() ?
+      "{closure}" :
+      m_name + "{continuation}";
+  } else if (getOrigGeneratorFunc()) {
+    injectionName = getOrigGeneratorFunc()->isClosure() ?
+      "{closureGen}" :
+      getOrigGeneratorFunc()->name();
+  } else {
+    injectionName = string(m_name->data());
+  }
+  return injectionName;
+}
+
 void FunctionStatement::eval(VariableEnvironment &env) const {
   if (env.isGotoing()) return;
   ENTER_STMT;
@@ -307,7 +326,8 @@ Variant FunctionStatement::invoke(CArrRef params) const {
     return invokeClosure(params);
   }
   FuncScopeVariableEnvironment env(this);
-  EvalFrameInjection fi(empty_string, m_name.c_str(), env, loc()->file);
+  std::string injectionName = computeInjectionName();
+  EvalFrameInjection fi(empty_string, injectionName.c_str(), env, loc()->file);
   if (m_ref) {
     return strongBind(invokeImpl(env, params));
   }
@@ -407,7 +427,8 @@ Variant FunctionStatement::directInvoke(VariableEnvironment &env,
   DECLARE_THREAD_INFO_NOINIT
   FuncScopeVariableEnvironment fenv(this);
   directBind(env, caller, fenv);
-  EvalFrameInjection fi(empty_string, m_name.c_str(), fenv, loc()->file);
+  std::string injectionName = computeInjectionName();
+  EvalFrameInjection fi(empty_string, injectionName.c_str(), fenv, loc()->file);
   if (m_ref) {
     return strongBind(evalBody(fenv));
   } else {
@@ -563,7 +584,7 @@ Variant FunctionStatement::invokeImpl(FuncScopeVariableEnvironment &fenv,
 
 void FunctionStatement::dumpHeader(std::ostream &out) const {
   out << "function " << (m_ref ? "&" : "");
-  if (name()[0] != '0') {
+  if (!ParserBase::IsClosureOrContinuationName(m_name.c_str())) {
     out << m_name.c_str();
   }
   out << "(";

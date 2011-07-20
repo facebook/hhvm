@@ -2307,7 +2307,7 @@ void AnalysisResult::recordSourceInfo(const std::string &file, int line,
 
 void AnalysisResult::recordClassSource(const std::string &clsname,
                                        LocationPtr loc,
-                                       const std::string filename) {
+                                       const std::string &filename) {
   string file; int line;
   if (loc) {
     file = loc->file;
@@ -2321,7 +2321,7 @@ void AnalysisResult::recordClassSource(const std::string &clsname,
 
 void AnalysisResult::recordFunctionSource(const std::string &funcname,
                                           LocationPtr loc,
-                                          const std::string filename) {
+                                          const std::string &filename) {
   string file; int line;
   if (loc) {
     file = loc->file;

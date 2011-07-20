@@ -317,9 +317,9 @@ public:
    */
   void recordSourceInfo(const std::string &file, int line, LocationPtr loc);
   void recordClassSource(const std::string &clsname, LocationPtr loc,
-                         const std::string filename);
+                         const std::string &filename);
   void recordFunctionSource(const std::string &funcname, LocationPtr loc,
-                            const std::string filename);
+                            const std::string &filename);
 
   /**
    * Literal string to String precomputation

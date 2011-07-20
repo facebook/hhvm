@@ -5375,24 +5375,26 @@ Variant ifa_image_type_to_mime_type(void *extra, int count, INVOKE_FEW_ARGS_IMPL
 }
 Variant i_hphp_create_continuation(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 2 || count > 3)) return throw_wrong_arguments("hphp_create_continuation", count, 2, 3, 1);
+  if (UNLIKELY(count < 3 || count > 4)) return throw_wrong_arguments("hphp_create_continuation", count, 3, 4, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 2) return (x_hphp_create_continuation(arg0, arg1));
     CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    return (x_hphp_create_continuation(arg0, arg1, arg2));
+    if (count <= 3) return (x_hphp_create_continuation(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (x_hphp_create_continuation(arg0, arg1, arg2, arg3));
   }
 }
 Variant ifa_hphp_create_continuation(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count < 2 || count > 3)) return throw_wrong_arguments("hphp_create_continuation", count, 2, 3, 1);
+  if (UNLIKELY(count < 3 || count > 4)) return throw_wrong_arguments("hphp_create_continuation", count, 3, 4, 1);
   CVarRef arg0(a0);
   CVarRef arg1(a1);
-  if (count <= 2) return (x_hphp_create_continuation(arg0, arg1));
   CVarRef arg2(a2);
-  return (x_hphp_create_continuation(arg0, arg1, arg2));
+  if (count <= 3) return (x_hphp_create_continuation(arg0, arg1, arg2));
+  CVarRef arg3(a3);
+  return (x_hphp_create_continuation(arg0, arg1, arg2, arg3));
 }
 Variant i_socket_create(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
@@ -38092,7 +38094,7 @@ CallInfo ci_imagecolorsforindex((void*)&i_imagecolorsforindex, (void*)&ifa_image
 CallInfo ci_libxml_set_streams_context((void*)&i_libxml_set_streams_context, (void*)&ifa_libxml_set_streams_context, 1, 0, 0x0000000000000000LL);
 CallInfo ci_dom_node_clone_node((void*)&i_dom_node_clone_node, (void*)&ifa_dom_node_clone_node, 2, 0, 0x0000000000000000LL);
 CallInfo ci_image_type_to_mime_type((void*)&i_image_type_to_mime_type, (void*)&ifa_image_type_to_mime_type, 1, 0, 0x0000000000000000LL);
-CallInfo ci_hphp_create_continuation((void*)&i_hphp_create_continuation, (void*)&ifa_hphp_create_continuation, 3, 0, 0x0000000000000000LL);
+CallInfo ci_hphp_create_continuation((void*)&i_hphp_create_continuation, (void*)&ifa_hphp_create_continuation, 4, 0, 0x0000000000000000LL);
 CallInfo ci_socket_create((void*)&i_socket_create, (void*)&ifa_socket_create, 3, 0, 0x0000000000000000LL);
 CallInfo ci_xmlwriter_write_pi((void*)&i_xmlwriter_write_pi, (void*)&ifa_xmlwriter_write_pi, 3, 0, 0x0000000000000000LL);
 CallInfo ci_posix_getppid((void*)&i_posix_getppid, (void*)&ifa_posix_getppid, 0, 0, 0x0000000000000000LL);

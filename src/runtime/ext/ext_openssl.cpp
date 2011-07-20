@@ -2368,7 +2368,12 @@ Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password,
   unsigned char *outbuf = (unsigned char*)malloc(outlen + 1);
 
   EVP_CIPHER_CTX cipher_ctx;
-  EVP_EncryptInit(&cipher_ctx, cipher_type, key,
+
+  EVP_EncryptInit(&cipher_ctx, cipher_type, NULL, NULL);
+  if (password.size() > keylen) {
+    EVP_CIPHER_CTX_set_key_length(&cipher_ctx, password.size());
+  }
+  EVP_EncryptInit_ex(&cipher_ctx, NULL, NULL, key,
                   (unsigned char *)new_iv.data());
   if (options & k_OPENSSL_ZERO_PADDING) {
     EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
@@ -2430,7 +2435,11 @@ Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password,
   unsigned char *outbuf = (unsigned char*)malloc(outlen + 1);
 
   EVP_CIPHER_CTX cipher_ctx;
-  EVP_DecryptInit(&cipher_ctx, cipher_type, key,
+  EVP_DecryptInit(&cipher_ctx, cipher_type, NULL, NULL);
+  if (password.size() > keylen) {
+    EVP_CIPHER_CTX_set_key_length(&cipher_ctx, password.size());
+  }
+  EVP_DecryptInit_ex(&cipher_ctx, NULL, NULL, key,
                   (unsigned char *)new_iv.data());
   if (options & k_OPENSSL_ZERO_PADDING) {
     EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);

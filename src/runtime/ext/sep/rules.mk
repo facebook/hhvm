@@ -26,7 +26,7 @@ INTERMEDIATE_FILES += $(OUT_DIR)schema.so
 HPHP = $(PROJECT_ROOT)/src/hphp/hphp
 
 include $(PROJECT_ROOT)/src/rules.mk
-TARGETS = $(OUT_DIR)lib$(EXT).so $(OUT_DIR)lib$(EXT).a $(OUT_TOP)test_$(EXT)
+TARGETS = $(if $(EXT),$(OUT_DIR)lib$(EXT).so $(OUT_TOP)test_$(EXT)) $(OUT_DIR)lib$(EXT).a
 
 all: $(TARGETS)
 
@@ -47,7 +47,7 @@ extimpl_$(EXT).cpp: $(OUT_DIR)schema.so
 	-v "SepExtensions.$(EXT).shared=true" \
 	-v "SepExtensions.$(EXT).libpath=$(OUT_ABS)" \
 
-$(OUT_DIR)lib$(EXT).so: $(filter-out $(if $(EXT),%test_ext_$(EXT).pic.o),$(PIC_OBJECTS)) $(OUT_DIR)extimpl_$(EXT).pic.o
+$(OUT_DIR)lib$(EXT).so: $(if $(EXT),$(OUT_DIR)extmap_$(EXT).pic.o)
 	@echo 'Linking $@ ...'
 	$(V)$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror \
 		-Wl,-soname,lib$(EXT).so $(SO_LDFLAGS) -o $@ $^

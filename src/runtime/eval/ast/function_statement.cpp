@@ -212,9 +212,10 @@ void Parameter::addNullDefault(void *parser) {
 
 FunctionStatement::FunctionStatement(STATEMENT_ARGS, const string &name,
                                      const string &doc)
-  : Statement(STATEMENT_PASS), m_name(name),
-    m_maybeIntercepted(-1), m_yieldCount(0), m_closure(NULL),
-    m_invalid(false), m_docComment(doc),
+  : Statement(STATEMENT_PASS),
+    m_invalid(0), m_maybeIntercepted(-1), m_yieldCount(0),
+    m_name(name), m_closure(NULL),
+    m_docComment(doc),
     m_callInfo((void*)Invoker, (void*)InvokerFewArgs, 0, 0, 0),
     m_closureCallInfo((void*)FSInvoker, (void*)FSInvokerFewArgs, 0, 0, 0) {
 }
@@ -233,7 +234,10 @@ void FunctionStatement::init(void *parser, bool ref,
   m_hasCallToGetArgs = has_call_to_get_args;
   const CallInfo* cit1;
   void* vt1;
-  m_invalid = get_call_info_no_eval(cit1, vt1, Variant(m_name));
+  if (get_call_info_no_eval(cit1, vt1, m_name)) {
+    m_invalid =
+      get_call_info_builtin(cit1, vt1, m_name->data(), m_name->hash()) ? -1 : 1;
+  }
 
   bool seenOptional = false;
   set<string> names;

@@ -116,20 +116,21 @@ public:
   int getYieldCount() const { return m_yieldCount;}
   void setClosure(void *closure) { m_closure = closure;}
   bool invalidOverride() const { return m_invalid; }
+  bool ignoredOverride() const { return m_invalid > 0; }
 
   void setName(const std::string &name) { m_name = AtomicString(name);}
 
 protected:
   bool m_ref;
+  bool m_hasCallToGetArgs;
+  char m_invalid;
+  mutable char m_maybeIntercepted;
+  int m_yieldCount;
   AtomicString m_name;
   std::vector<ParameterPtr> m_params;
 
   StatementListStatementPtr m_body;
-  bool m_hasCallToGetArgs;
-  mutable char m_maybeIntercepted;
-  int m_yieldCount;
   void *m_closure;
-  bool m_invalid;
 
   std::string m_docComment;
 

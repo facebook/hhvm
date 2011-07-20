@@ -212,7 +212,9 @@ ClassEvalState &RequestEvalState::declareClass(const ClassStatement *cls) {
 void RequestEvalState::declareFunction(const FunctionStatement *fn) {
   RequestEvalState *self = s_res.get();
   String name = fn->name();
-  if (!fn->invalidOverride() && get_renamed_function(name) == name) {
+  if (fn->invalidOverride()) {
+    if (fn->ignoredOverride()) return;
+  } else if (get_renamed_function(name) == name) {
     std::pair<hphp_const_char_imap<const FunctionStatement*>::iterator,
       bool> p = self->m_functions.insert(make_pair(name, fn));
     if (p.second || (p.first->second == fn && name[0] == '0')) return;

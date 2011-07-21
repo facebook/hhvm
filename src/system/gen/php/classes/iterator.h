@@ -28,6 +28,7 @@
 #include <cls/ArrayIterator.h>
 #include <cls/Iterator.h>
 #include <cls/AppendIterator.h>
+#include <cls/IteratorIterator.h>
 #include <cls/SeekableIterator.h>
 #include <cls/RecursiveIterator.h>
 #include <cls/IteratorAggregate.h>

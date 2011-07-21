@@ -669,157 +669,757 @@ void ClassStatement::toArray(Array &props, Array &vals) const {
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Semantic Checking
+//
+// This section defines the logic to check the semantics of class derivation.
+// The semantic checking is segmented into a few templated functions which
+// implement the core of the logic. These templated functions are designed
+// to be generic enough to work with both hphpi AST trees, and the
+// corresponding ClassInfo data structures for builtin functions.
+
+/**
+ * The SemanticExtractor is glue which makes the templated semantic checking
+ * functions work. It allows the logic functions to implement semantic
+ * checks agnostic to what kind of data structures are present. This is what
+ * allows us to compare AST trees with ClassInfo data structures.
+ *
+ * Note: the findMethod variants are all recursive, but the findVariable
+ * variants are all *not* recursive. methods() and variables() are also *not*
+ * recursive
+ */
+struct SemanticExtractor {
+private:
+  template <typename T>
+  inline std::vector<const T*> extractRawConstPointers(
+      const std::vector< AstPtr<T> > &ptrs) const {
+    std::vector<const T*> rp;
+    rp.reserve(ptrs.size());
+    for (typename std::vector< AstPtr<T> >::const_iterator it = ptrs.begin();
+         it != ptrs.end(); ++it) {
+      rp.push_back((*it).get());
+    }
+    return rp;
+  }
+public:
+
+// ClassStatement* helpers
+  inline bool isAbstract(const ClassStatement *cs) const {
+    return cs->getModifiers() & ClassStatement::Abstract;
+  }
+  inline bool isInterface(const ClassStatement *cs) const {
+    return cs->getModifiers() & ClassStatement::Interface;
+  }
+  inline bool isFinal(const ClassStatement *cs) const {
+    return cs->getModifiers() & ClassStatement::Final;
+  }
+  inline std::string name(const ClassStatement *cs) const {
+    return cs->name().c_str();
+  }
+  inline const MethodStatement *
+  findEvalMethod(const ClassStatement *cs,
+                 const std::string &name,
+                 bool ifaces) const {
+    const ClassStatement *dc;
+    return findEvalMethodWithClass(cs, name, dc, ifaces);
+  }
+  inline const MethodStatement *
+  findEvalMethodWithClass(const ClassStatement *cs,
+                          const std::string &name,
+                          const ClassStatement *&definingClass,
+                          bool ifaces) const {
+    definingClass = NULL;
+    const MethodStatement* ms =
+      cs->findMethod(name.c_str(), true, ifaces);
+    if (ms) {
+      definingClass = ms->getClass();
+      return ms;
+    }
+    return NULL;
+  }
+  inline const ClassInfo::MethodInfo *
+  findBuiltinMethod(const ClassStatement *cs,
+                    const std::string &name,
+                    bool ifaces) const {
+    const ClassInfo *dc;
+    return findBuiltinMethodWithClass(cs, name, dc, ifaces);
+  }
+  inline const ClassInfo::MethodInfo *
+  findBuiltinMethodWithClass(const ClassStatement *cs,
+                             const std::string &name,
+                             const ClassInfo *&definingClass,
+                             bool ifaces) const {
+    definingClass = NULL;
+    const ClassInfo::MethodInfo *result = NULL;
+    const ClassInfo *pci = cs->getBuiltinParentInfo();
+    if (pci) {
+      ClassInfo *ci;
+      result = pci->hasMethod(name.c_str(), ci, ifaces);
+      definingClass = ci;
+    }
+    if (result || !ifaces) return result;
+    vector<const ClassInfo*> builtinIfaces;
+    cs->collectBuiltinInterfaceInfos(builtinIfaces, true);
+    for (vector<const ClassInfo*>::const_iterator it = builtinIfaces.begin();
+         it != builtinIfaces.end(); ++it) {
+      const ClassInfo *ici = *it;
+      ClassInfo *ci;
+      result = ici->hasMethod(name.c_str(), ci, ifaces);
+      definingClass = ci;
+      if (result) return result;
+    }
+    return NULL;
+  }
+  inline std::vector<const MethodStatement*>
+  methods(const ClassStatement *cs) const {
+    return extractRawConstPointers(cs->m_methodsVec);
+  }
+  inline std::vector<const ClassVariable*>
+  variables(const ClassStatement *cs) const {
+    return extractRawConstPointers(cs->m_variablesVec);
+  }
+  inline const ClassVariable* findVariable(const ClassStatement *cs,
+                                           const std::string &name) const {
+    StringMap<ClassVariablePtr>::const_iterator it =
+      cs->m_variables.find(name);
+    return it == cs->m_variables.end() ? NULL : it->second.get();
+  }
+
+// MethodStatement* helpers
+  inline bool isAbstract(const MethodStatement *ms) const {
+    return ms->isAbstract();
+  }
+  inline bool isStatic(const MethodStatement *ms) const {
+    return ms->getModifiers() & ClassStatement::Static;
+  }
+  inline bool isPublic(const MethodStatement *ms) const {
+    return ms->getModifiers() & ClassStatement::Public;
+  }
+  inline bool isProtected(const MethodStatement *ms) const {
+    return ms->getModifiers() & ClassStatement::Protected;
+  }
+  inline bool isPrivate(const MethodStatement *ms) const {
+    return ms->getModifiers() & ClassStatement::Private;
+  }
+  inline std::string name(const MethodStatement *ms) const {
+    return ms->name().c_str();
+  }
+  inline bool refReturn(const MethodStatement *ms) const {
+    return ms->refReturn();
+  }
+  inline size_t numParams(const MethodStatement *ms) const {
+    return ms->getParams().size();
+  }
+  inline std::vector<const Parameter*>
+  getParams(const MethodStatement *ms) const {
+    return extractRawConstPointers(ms->getParams());
+  }
+
+// Parameter* helpers
+  inline bool isOptional(const Parameter *p) const {
+    return p->isOptional();
+  }
+  inline bool isRef(const Parameter *p) const {
+    return p->isRef();
+  }
+  inline std::string type(const Parameter *p) const {
+    return p->type();
+  }
+
+// ClassVariable* helpers
+  inline bool isPublic(const ClassVariable *cv) const {
+    return cv->getModifiers() & ClassStatement::Public;
+  }
+  inline bool isProtected(const ClassVariable *cv) const {
+    return cv->getModifiers() & ClassStatement::Protected;
+  }
+  inline bool isPrivate(const ClassVariable *cv) const {
+    return cv->getModifiers() & ClassStatement::Private;
+  }
+  inline bool isStatic(const ClassVariable *cv) const {
+    return cv->getModifiers() & ClassStatement::Static;
+  }
+  inline bool hasInitialValue(const ClassVariable *cv) const {
+    return cv->hasInitialValue();
+  }
+  inline std::string name(const ClassVariable *cv) const {
+    return cv->name().c_str();
+  }
+
+// ClassInfo* helpers
+  inline bool isAbstract(const ClassInfo *ci) const {
+    return ci->getAttribute() & ClassInfo::IsAbstract;
+  }
+  inline bool isInterface(const ClassInfo *ci) const {
+    return ci->getAttribute() & ClassInfo::IsInterface;
+  }
+  inline bool isFinal(const ClassInfo *ci) const {
+    return ci->getAttribute() & ClassInfo::IsFinal;
+  }
+  inline std::string name(const ClassInfo *ci) const {
+    return ci->getName().c_str();
+  }
+  inline const std::vector<ClassInfo::MethodInfo*>&
+  methods(const ClassInfo *ci) const {
+    return ci->getMethodsVec();
+  }
+  inline const std::vector<ClassInfo::PropertyInfo*>&
+  variables(const ClassInfo *ci) const {
+    return ci->getPropertiesVec();
+  }
+  inline ClassInfo::PropertyInfo*
+  findVariable(const ClassInfo *ci,
+               const std::string &name) const {
+    return ci->getPropertyInfo(name.c_str());
+  }
+  inline ClassInfo::MethodInfo*
+  findEvalMethod(const ClassInfo* ci,
+                 const std::string &name,
+                 bool ifaces) const {
+    const ClassInfo *cs;
+    return findEvalMethodWithClass(ci, name, cs, ifaces);
+  }
+  inline ClassInfo::MethodInfo*
+  findEvalMethodWithClass(const ClassInfo* ci,
+                          const std::string &name,
+                          const ClassInfo* &definingClass,
+                          bool ifaces) const {
+    ClassInfo *dci;
+    ClassInfo::MethodInfo *mi = ci->hasMethod(name.c_str(), dci, ifaces);
+    definingClass = dci;
+    return mi;
+  }
+  inline ClassInfo::MethodInfo*
+  findBuiltinMethod(const ClassInfo* ci,
+                    const std::string &name,
+                    bool ifaces) const {
+    return findEvalMethod(ci, name, ifaces);
+  }
+  inline ClassInfo::MethodInfo*
+  findBuiltinMethodWithClass(const ClassInfo* ci,
+                             const std::string &name,
+                             const ClassInfo* &definingClass,
+                             bool ifaces) const {
+    return findEvalMethodWithClass(ci, name, definingClass, ifaces);
+  }
+
+// ClassInfo::MethodInfo* helpers
+  inline bool isAbstract(const ClassInfo::MethodInfo *mi) const {
+    return mi->attribute & ClassInfo::IsAbstract;
+  }
+  inline bool isStatic(const ClassInfo::MethodInfo *mi) const {
+    return mi->attribute & ClassInfo::IsStatic;
+  }
+  inline bool isPublic(const ClassInfo::MethodInfo *mi) const {
+    return mi->attribute & ClassInfo::IsPublic;
+  }
+  inline bool isProtected(const ClassInfo::MethodInfo *mi) const {
+    return mi->attribute & ClassInfo::IsProtected;
+  }
+  inline bool isPrivate(const ClassInfo::MethodInfo *mi) const {
+    return mi->attribute & ClassInfo::IsPrivate;
+  }
+  inline std::string name(const ClassInfo::MethodInfo *mi) const {
+    return mi->name.c_str();
+  }
+  inline bool refReturn(const ClassInfo::MethodInfo *mi) const {
+    return mi->attribute & ClassInfo::IsReference;
+  }
+  inline size_t numParams(const ClassInfo::MethodInfo *mi) const {
+    return mi->parameters.size();
+  }
+  inline const std::vector<const ClassInfo::ParameterInfo*>&
+  getParams(const ClassInfo::MethodInfo *mi) const {
+    return mi->parameters;
+  }
+
+// ClassInfo::ParameterInfo* helpers
+  inline bool isOptional(const ClassInfo::ParameterInfo *pi) const {
+    return pi->value && *pi->value != '\0';
+  }
+  inline bool isRef(const ClassInfo::ParameterInfo *pi) const {
+    return pi->attribute & ClassInfo::IsReference;
+  }
+  inline std::string type(const ClassInfo::ParameterInfo *pi) const {
+    return pi->type;
+  }
+
+// ClassInfo::PropertyInfo* helpers
+  inline bool isPublic(const ClassInfo::PropertyInfo *pi) const {
+    return pi->attribute & ClassInfo::IsPublic;
+  }
+  inline bool isProtected(const ClassInfo::PropertyInfo *pi) const {
+    return pi->attribute & ClassInfo::IsProtected;
+  }
+  inline bool isPrivate(const ClassInfo::PropertyInfo *pi) const {
+    return pi->attribute & ClassInfo::IsPrivate;
+  }
+  inline bool isStatic(const ClassInfo::PropertyInfo *pi) const {
+    return pi->attribute & ClassInfo::IsStatic;
+  }
+  inline bool hasInitialValue(const ClassInfo::PropertyInfo *pi) const {
+    return false; // TODO: PropertyInfo does not contain this info
+  }
+  inline std::string name(const ClassInfo::PropertyInfo *pi) const {
+    return pi->name.c_str();
+  }
+
+};
+
+static SemanticExtractor s_semanticExtractor;
+
+///////////////////////////////////////////////////////////////////////////////
+// Semantic Checking - Template Functions
+//
+// This section contains templated functions which implement semantic checks
+// for class derivations. This allows us to avoid duplication of this logic
+// when we want to compare different data-structures (say a parent built-in
+// versus an AST node)
+
+/**
+ * Returns if it an error for child to override parent?
+ */
+template <typename Extractor,
+          typename MethodProxyP, typename ParamProxyP,
+          typename MethodProxyC, typename ParamProxyC>
+bool MethodLevelSemanticCheckImpl(bool extendingAbstractClass,
+                                  MethodProxyP parent,
+                                  MethodProxyC child,
+                                  const Extractor &x) {
+  bool incompatible = false;
+  if (extendingAbstractClass &&
+      strcmp(x.name(child).c_str(), "__construct") == 0) {
+    // When a class C extends an abstract class B, the
+    // signature of C::__construct does not have to match
+    // that of B::__construct
+  } else if (x.numParams(child) < x.numParams(parent) ||
+             x.isStatic(child) != x.isStatic(parent)) {
+    incompatible = true;
+  } else if (x.refReturn(child) != x.refReturn(parent)) {
+    // If one signature returns by value and the other returns by
+    // reference then they are not compatible
+    incompatible = true;
+  } else {
+    const vector<ParamProxyP> &p1 = x.getParams(parent);
+    const vector<ParamProxyC> &p2 = x.getParams(child);
+    for (size_t i = 0; !incompatible && i < p2.size(); ++i) {
+      if (i >= p1.size()) {
+        if (!x.isOptional(p2[i])) {
+          incompatible = true;
+        }
+      } else if ((x.isRef(p1[i]) != x.isRef(p2[i])) ||
+                 (x.isOptional(p1[i]) && !x.isOptional(p2[i]))) {
+        incompatible = true;
+      }  else if (x.type(p1[i]) != x.type(p2[i])) {
+        incompatible = true;
+      }
+    }
+  }
+  return incompatible;
+}
+
+/**
+ * Checks to see if child overrides parent's methods correctly
+ * (non-recursively)
+ */
+template <typename Extractor,
+          typename ClassProxyP,       typename ClassProxyC,
+          typename MethEvalProxyP,    typename ParamEvalProxyP,
+          typename MethEvalProxyC,    typename ParamEvalProxyC,
+          typename MethBuiltinProxyC, typename ParamBuiltinProxyC>
+void ClassLevelMethodOverrideCheckImpl(ClassProxyP parent,
+                                       ClassProxyC child,
+                                       const Extractor &x) {
+  if (x.isInterface(parent) || x.isAbstract(parent)) {
+    bool extendingAbstractClass = !x.isInterface(parent);
+    const vector<MethEvalProxyP> &parentMethods =
+      x.methods(parent);
+    for (typename vector<MethEvalProxyP>::const_iterator it =
+           parentMethods.begin();
+         it != parentMethods.end(); ++it) {
+      MethEvalProxyP parentMethod = *it;
+      if (x.isAbstract(parentMethod) || x.isInterface(parent)) {
+        // Interface => that the definition doesn't exist (for now)
+        // with traits, this will change
+        bool found = false;
+        bool incompatible = false;
+
+        MethEvalProxyC childMethod =
+          // fully recursive, no ifaces
+          x.findEvalMethod(child, x.name(parentMethod), false);
+        if (!childMethod) {
+          MethBuiltinProxyC childMethod0 =
+            // fully recursive, no ifaces
+            x.findBuiltinMethod(child, x.name(parentMethod), false);
+          if (childMethod0 && !x.isAbstract(childMethod0)) {
+            found = true;
+            incompatible =
+              MethodLevelSemanticCheckImpl<
+                Extractor,
+                MethEvalProxyP,    ParamEvalProxyP,
+                MethBuiltinProxyC, ParamBuiltinProxyC >(
+                    extendingAbstractClass,
+                    parentMethod,
+                    childMethod0,
+                    x);
+          }
+        } else if (!x.isAbstract(childMethod)) {
+          found = true;
+          incompatible =
+            MethodLevelSemanticCheckImpl<
+              Extractor,
+              MethEvalProxyP, ParamEvalProxyP,
+              MethEvalProxyC, ParamEvalProxyC >(
+                  extendingAbstractClass,
+                  parentMethod,
+                  childMethod,
+                  x);
+        }
+        if (!found) {
+          throw FatalErrorException(0,"Class %s does not implement abstract "
+              "method %s::%s", x.name(child).c_str(),
+              x.name(parent).c_str(), x.name(parentMethod).c_str());
+        }
+        if (incompatible) {
+          throw FatalErrorException(0,"Declaration of %s::%s() must be "
+              "compatible with that of %s::%s()",
+              x.name(child).c_str(),  x.name(parentMethod).c_str(),
+              x.name(parent).c_str(), x.name(parentMethod).c_str());
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Does child override parent's properties correctly?
+ */
+template <typename Extractor,
+          typename ClassProxyP, typename ClassProxyC,
+          typename PropProxyP,  typename PropProxyC>
+void ClassLevelPropertyOverrideCheckImpl(ClassProxyP parent,
+                                         ClassProxyC child,
+                                         const Extractor &x) {
+  const vector<PropProxyP> &parentVariables =
+    x.variables(parent);
+  for (typename vector<PropProxyP>::const_iterator it =
+         parentVariables.begin();
+       it != parentVariables.end(); ++it) {
+    PropProxyP parentVariable = *it;
+    PropProxyC childVariable = x.findVariable(child, x.name(parentVariable));
+    if (childVariable) {
+      int p1 =
+        (x.isPublic(parentVariable)    ? ClassStatement::Public    : 0) |
+        (x.isProtected(parentVariable) ? ClassStatement::Protected : 0) |
+        (x.isPrivate(parentVariable)   ? ClassStatement::Private   : 0);
+      int p2 =
+        (x.isPublic(childVariable)     ? ClassStatement::Public    : 0) |
+        (x.isProtected(childVariable)  ? ClassStatement::Protected : 0) |
+        (x.isPrivate(childVariable)    ? ClassStatement::Private   : 0);
+      if (!p1) p1 = ClassStatement::Public;
+      if (!p2) p2 = ClassStatement::Public;
+      if (p1 < p2) {
+        const char *pn1;
+        if (p1 == ClassStatement::Private)        pn1 = "private";
+        else if (p1 == ClassStatement::Protected) pn1 = "protected";
+        else                                      pn1 = "public";
+        // Illegal strengthening of privacy
+        raise_error(
+            "Access level to %s::$%s must be %s (as in class %s) or weaker",
+            x.name(child).c_str(), x.name(childVariable).c_str(),
+            pn1,                   x.name(parent).c_str());
+      } else if (x.isStatic(parentVariable) &&
+                 p1 == ClassStatement::Protected &&
+                 p2 == ClassStatement::Public &&
+                 x.hasInitialValue(childVariable)) {
+        // No initial value allowed in redefinition of protected to public
+        // static
+
+        // TODO: this is a PHP 5.2-ism, 5.3 cleans this up. Remove this when
+        // we can get around to it
+        raise_error(
+            "Cannot change initial value of property %s::$%s in class %s",
+            x.name(parent).c_str(), x.name(parentVariable).c_str(),
+            x.name(child).c_str());
+      }
+      // Staticness
+      if (p1 != ClassStatement::Private) {
+        if (x.isStatic(parentVariable) && !x.isStatic(childVariable)) {
+          raise_error(
+              "Cannot redeclare static %s::$%s as non-static %s::$%s",
+              x.name(parent).c_str(), x.name(parentVariable).c_str(),
+              x.name(child).c_str(),  x.name(childVariable).c_str());
+        } else if (!x.isStatic(parentVariable) && x.isStatic(childVariable)) {
+          raise_error(
+              "Cannot redeclare non-static %s::$%s as static %s::$%s",
+              x.name(parent).c_str(), x.name(parentVariable).c_str(),
+              x.name(child).c_str(),  x.name(childVariable).c_str());
+        }
+      }
+    }
+  }
+}
+
+template <typename Extractor,
+          typename ClassProxyP, typename MethProxyP,
+          typename ClassProxyC, typename MethProxyC>
+void MethodLevelAccessLevelCheckImpl(ClassProxyP parentClass,
+                                     MethProxyP  parentMethod,
+                                     ClassProxyC childClass,
+                                     MethProxyC  childMethod,
+                                     const Extractor &x) {
+  bool iface       = x.isInterface(childClass);
+  bool ifaceParent = x.isInterface(parentClass);
+
+  if (x.isStatic(childMethod) && !x.isStatic(parentMethod)) {
+    raise_error("Cannot make non static method %s::%s() static in class %s",
+                x.name(parentClass).c_str(), x.name(parentMethod).c_str(),
+                x.name(childClass).c_str());
+  }
+
+  if (!x.isStatic(childMethod) && x.isStatic(parentMethod)) {
+    raise_error("Cannot make static method %s::%s() non static in class %s",
+                x.name(parentClass).c_str(), x.name(parentMethod).c_str(),
+                x.name(childClass).c_str());
+  }
+
+  if (x.isAbstract(childMethod) || iface) {
+    if (!x.isAbstract(parentMethod) && x.isAbstract(childMethod)) {
+      raise_error("Cannot make non abstract method %s::%s() abstract in "
+                  "class %s",
+                  x.name(parentClass).c_str(), x.name(parentMethod).c_str(),
+                  x.name(childClass).c_str());
+    }
+    if (x.isAbstract(parentMethod) || ifaceParent) {
+      raise_error("Cannot re-declare abstract method %s::%s() abstract "
+                  "in class %s",
+                  x.name(parentClass).c_str(), x.name(parentMethod).c_str(),
+                  x.name(childClass).c_str());
+    }
+  }
+
+  int p1 =
+    (x.isPublic(childMethod)     ? ClassStatement::Public    : 0) |
+    (x.isProtected(childMethod)  ? ClassStatement::Protected : 0) |
+    (x.isPrivate(childMethod)    ? ClassStatement::Private   : 0);
+  int p2 =
+    (x.isPublic(parentMethod)    ? ClassStatement::Public    : 0) |
+    (x.isProtected(parentMethod) ? ClassStatement::Protected : 0) |
+    (x.isPrivate(parentMethod)   ? ClassStatement::Private   : 0);
+  if (!p1) p1 = ClassStatement::Public;
+  if (!p2) p2 = ClassStatement::Public;
+  if (p1 > p2) {
+    const char *pn;
+    if (p2 == ClassStatement::Private)        pn = "private";
+    else if (p2 == ClassStatement::Protected) pn = "protected";
+    else                                      pn = "public";
+    // Illegal strengthening of privacy
+    raise_error("Access level to %s::%s() must be %s (as in class %s) "
+                "or weaker",
+                x.name(childClass).c_str(), x.name(childMethod).c_str(),
+                pn, x.name(parentClass).c_str());
+  }
+}
+
+template <typename Extractor,
+          typename ClassEvalProxyP,    typename MethEvalProxyP,
+          typename ClassBuiltinProxyP, typename MethBuiltinProxyP,
+          typename ClassEvalProxyC,    typename MethEvalProxyC>
+void ClassLevelMethodAccessLevelCheckImpl(ClassEvalProxyP parent,
+                                          ClassEvalProxyC child,
+                                          const Extractor &x) {
+  const vector<MethEvalProxyC> &childMethods = x.methods(child);
+  for (typename vector<MethEvalProxyC>::const_iterator it =
+         childMethods.begin();
+       it != childMethods.end(); ++it) {
+    MethEvalProxyC  childMethod = *it;
+    ClassEvalProxyP definingParentClass;
+    MethEvalProxyP  parentMethod =
+      // fully recursive, including ifaces
+      x.findEvalMethodWithClass(
+        parent, x.name(childMethod), definingParentClass, true);
+    if (!parentMethod) {
+      ClassBuiltinProxyP definingParentClass0;
+      MethBuiltinProxyP  parentMethod0 =
+        // fully recursive, including ifaces
+        x.findBuiltinMethodWithClass(
+          parent, x.name(childMethod), definingParentClass0, true);
+      if (!parentMethod0) continue;
+      MethodLevelAccessLevelCheckImpl<
+        Extractor,
+        ClassBuiltinProxyP, MethBuiltinProxyP,
+        ClassEvalProxyC,    MethEvalProxyC >(
+          definingParentClass0,
+          parentMethod0,
+          child,
+          childMethod,
+          x);
+    } else {
+      MethodLevelAccessLevelCheckImpl<
+        Extractor,
+        ClassEvalProxyP, MethEvalProxyP,
+        ClassEvalProxyC, MethEvalProxyC >(
+          definingParentClass,
+          parentMethod,
+          child,
+          childMethod,
+          x);
+    }
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Semantic Checking - ClassStatement specializations
+//
+// This section contains the specializations of the template functions that we
+// will use, so we don't have to keep re-typing the template type parameters
+
+template <>
+void ClassStatement::ClassLevelMethodOverrideCheck
+< const ClassStatement*, const ClassStatement* >
+(const ClassStatement* parent,
+ const ClassStatement* child) {
+  ClassLevelMethodOverrideCheckImpl<
+    SemanticExtractor,
+    const ClassStatement*,        const ClassStatement*,
+    const MethodStatement*,       const Parameter*,
+    const MethodStatement*,       const Parameter*,
+    const ClassInfo::MethodInfo*, const ClassInfo::ParameterInfo* >(
+      parent, child, s_semanticExtractor);
+}
+
+template <>
+void ClassStatement::ClassLevelMethodOverrideCheck
+< const ClassInfo*, const ClassStatement* >
+(const ClassInfo*      parent,
+ const ClassStatement* child) {
+  ClassLevelMethodOverrideCheckImpl<
+    SemanticExtractor,
+    const ClassInfo*,             const ClassStatement*,
+    ClassInfo::MethodInfo*,       const ClassInfo::ParameterInfo*,
+    const MethodStatement*,       const Parameter*,
+    const ClassInfo::MethodInfo*, const ClassInfo::ParameterInfo* >(
+      parent, child, s_semanticExtractor);
+}
+
+template <>
+void ClassStatement::ClassLevelPropertyOverrideCheck
+< const ClassStatement*, const ClassStatement* >
+(const ClassStatement* parent,
+ const ClassStatement* child) {
+  ClassLevelPropertyOverrideCheckImpl<
+    SemanticExtractor,
+    const ClassStatement*, const ClassStatement*,
+    const ClassVariable*,  const ClassVariable* >(
+      parent, child, s_semanticExtractor);
+}
+
+template <>
+void ClassStatement::ClassLevelPropertyOverrideCheck
+< const ClassInfo*, const ClassStatement* >
+(const ClassInfo*      parent,
+ const ClassStatement* child) {
+  ClassLevelPropertyOverrideCheckImpl<
+    SemanticExtractor,
+    const ClassInfo*,         const ClassStatement*,
+    ClassInfo::PropertyInfo*, const ClassVariable* >(
+      parent, child, s_semanticExtractor);
+}
+
+template <>
+void ClassStatement::ClassLevelMethodAccessLevelCheck
+< const ClassStatement*, const ClassStatement* >
+(const ClassStatement* parent,
+ const ClassStatement* child) {
+  ClassLevelMethodAccessLevelCheckImpl<
+    SemanticExtractor,
+    const ClassStatement*, const MethodStatement*,
+    const ClassInfo*,      const ClassInfo::MethodInfo*,
+    const ClassStatement*, const MethodStatement* >(
+      parent, child, s_semanticExtractor);
+}
+
+template <>
+void ClassStatement::ClassLevelMethodAccessLevelCheck
+< const ClassInfo*, const ClassStatement* >
+(const ClassInfo*      parent,
+ const ClassStatement* child) {
+  ClassLevelMethodAccessLevelCheckImpl<
+    SemanticExtractor,
+    const ClassInfo*,      const ClassInfo::MethodInfo*,
+    const ClassInfo*,      const ClassInfo::MethodInfo*,
+    const ClassStatement*, const MethodStatement* >(
+      parent, child, s_semanticExtractor);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Semantic Checking - Entry Points
+//
+// This section contains the core entry points into semantic checking
+
+/**
+ * Child wants to derive from a builtin parent-
+ * check the semantics of that derivation
+ */
+void ClassStatement::BuiltinSemanticCheck(const ClassInfo      *parent,
+                                          const ClassStatement *child) {
+  ASSERT(parent);
+  ASSERT(child);
+
+  // we shouldn't get here *unless* child is a concrete class
+  ASSERT(!s_semanticExtractor.isAbstract(child) &&
+         !s_semanticExtractor.isInterface(child));
+
+  // method inheritance check
+  ClassLevelMethodOverrideCheck(parent, child);
+
+  // property level check
+  ClassLevelPropertyOverrideCheck(parent, child);
+
+  // recurse up the inheritance tree
+  const ClassInfo *pp = parent->getParentClassInfo();
+  if (pp) BuiltinSemanticCheck(pp, child);
+  const ClassInfo::InterfaceVec &ifaces = parent->getInterfacesVec();
+  for (ClassInfo::InterfaceVec::const_iterator it = ifaces.begin();
+       it != ifaces.end(); ++it) {
+    const ClassInfo *iface = ClassInfo::FindInterface(*it);
+    if (iface) BuiltinSemanticCheck(iface, child);
+  }
+}
+
+/**
+ * Main entry point into semantic checking
+ *
+ * If the cls param is NULL, then this means start the semantic check, assuming
+ * this ClassStatement is the class at the bottom of the class hierarchy.
+ * Otherwise, it means that the cls param wants to derive from this
+ * ClassStatement, and we need to check to see if that's ok
+ */
 void ClassStatement::semanticCheck(const ClassStatement *cls)
-  const {
+const {
   loadInterfaceStatements();
   const ClassStatement *parent = parentStatement();
+  const ClassInfo *builtinParent = NULL;
+  if (!parent && !m_parent.empty()) {
+    builtinParent = ClassInfo::FindClass(m_parent.c_str());
+    if (!builtinParent) {
+      builtinParent = ClassInfo::FindInterface(m_parent.c_str());
+    }
+  }
   if (cls) {
-    if (getModifiers() & (Interface|Abstract))  {
-      bool extendingAbstractClass = (getModifiers() & Abstract);
-      for (vector<MethodStatementPtr>::const_iterator it =
-        m_methodsVec.begin(); it != m_methodsVec.end(); ++it) {
-        if ((*it)->isAbstract()) {
-          const MethodStatement *m = cls->findMethod((*it)->name().c_str(),
-              true);
-          bool found = false;
-          bool incompatible = false;
-          if (!m) {
-            // Possibly built in
-            const ClassInfo *pcls = cls->getBuiltinParentInfo();
-            if (pcls) {
-              ClassInfo *methCls;
-              const ClassInfo::MethodInfo *meth =
-                pcls->hasMethod((*it)->name().c_str(), methCls);
-              if (meth) {
-                found = true;
-                if (extendingAbstractClass &&
-                    strcmp(meth->name, "__construct") == 0) {
-                  // When a class C extends an abstract class B, the
-                  // signature of C::__construct does not have to match
-                  // that of B::__construct
-                } else if (meth->parameters.size() < (*it)->getParams().size()
-                    || !(meth->attribute & ClassInfo::IsStatic) !=
-                    !((*it)->getModifiers() & Static)) {
-                  incompatible = true;
-                } else if ((bool)(*it)->refReturn() !=
-                           (bool)(meth->attribute & ClassInfo::IsReference)) {
-                  // If one signature returns by value and the other returns by
-                  // reference then they are not compatible
-                } else {
-                  const vector<ParameterPtr> &p1 = (*it)->getParams();
-                  const vector<const ClassInfo::ParameterInfo *> &p2 =
-                    meth->parameters;
-                  for (uint i = 0; !incompatible && i < p2.size(); ++i) {
-                    if (i >= p1.size()) {
-                      if (!p2[i]->value) {
-                        incompatible = true;
-                      }
-                    } else if ((!p1[i]->isRef() !=
-                          !(p2[i]->attribute & ClassInfo::IsReference)) ||
-                          (p1[i]->isOptional() && !(p2[i]->value))) {
-                      incompatible = true;
-                    }  else if (p1[i]->type() != p2[i]->type) {
-                      incompatible = true;
-                    }
-                  }
-                }
-              }
-            }
-          } else if (!m->isAbstract()) {
-            found = true;
-            if (extendingAbstractClass &&
-                strcmp(m->name().c_str(), "__construct") == 0) {
-              // When a class C extends an abstract class B, the
-              // signature of C::__construct does not have to match
-              // that of B::__construct
-            } else if (m->getParams().size() < (*it)->getParams().size() ||
-                (m->getModifiers() & Static) !=
-                ((*it)->getModifiers() & Static)) {
-              incompatible = true;
-            } else if (m->refReturn() != (*it)->refReturn()) {
-              // If one signature returns by value and the other returns by
-              // reference then they are not compatible
-              incompatible = true;
-            } else {
-              const vector<ParameterPtr> &p1 = (*it)->getParams();
-              const vector<ParameterPtr> &p2 = m->getParams();
-              for (uint i = 0; !incompatible && i < p2.size(); ++i) {
-                if (i >= p1.size()) {
-                  if (!p2[i]->isOptional()) {
-                    incompatible = true;
-                  }
-                } else if (p1[i]->isRef() != p2[i]->isRef() ||
-                    p1[i]->isOptional() && !p2[i]->isOptional()) {
-                  incompatible = true;
-                } else if (p1[i]->type() != p2[i]->type()) {
-                  incompatible = true;
-                }
-              }
-            }
-          }
-          if (!found) {
-            throw FatalErrorException(0,"Class %s does not implement abstract "
-                "method %s::%s", cls->name().c_str(),
-                name().c_str(), (*it)->name().c_str());
-          }
-          if (incompatible) {
-            throw FatalErrorException(0,"Declaration of %s::%s() must be "
-                "compatible with that of %s::%s()",
-                cls->name().c_str(), m->name().c_str(),
-                name().c_str(), (*it)->name().c_str());
-          }
-        }
-      }
-    }
+    // method inheritance check
+    ClassLevelMethodOverrideCheck(this, cls);
 
-    // Property check
-    for (vector<ClassVariablePtr>::const_iterator it = m_variablesVec.begin();
-        it != m_variablesVec.end(); ++it) {
-      StringMap<ClassVariablePtr>::const_iterator vit =
-        cls->m_variables.find((*it)->name());
-      if (vit != m_variables.end()) {
-        int m1 = (*it)->getModifiers();
-        int m2 = vit->second->getModifiers();
-        // Access levels
-        int p1 = m1 & (Public|Protected|Private);
-        if (!p1) p1 = Public;
-        int p2 = m2 & (Public|Protected|Private);
-        if (!p2) p2 = Public;
-        if (p1 < p2) {
-          const char *pn1;
-          if (p1 == Private) pn1 = "private";
-          else if (p1 == Protected) pn1 = "protected";
-          else pn1 = "public";
-          // Illegal strengthening of privacy
-          raise_error("Access level to %s::%s must be %s (as in class %s) "
-              "or weaker", cls->name().c_str(), (*it)->name().c_str(), pn1,
-              name().c_str());
-        } else if (m1 & Static && p1 == Protected && p2 == Public &&
-            vit->second->hasInitialValue()) {
-          // No initial value allowed in redefinition of protected to public
-          // static
-          raise_error("Cannot change initial value of property %s::%s in class"
-          " %s", name().c_str(), (*it)->name().c_str(), cls->name().c_str());
-        }
-        // Staticness
-        if (p1 != Private) {
-          if (m1 & Static && !(m2 & Static)) {
-            raise_error("Cannot redeclare static %s::%s as non-static %s::%s",
-                name().c_str(), (*it)->name().c_str(), cls->name().c_str(),
-                vit->first.c_str());
-          } else if (!(m1 & Static) && m2 & Static) {
-            raise_error("Cannot redeclare non-static %s::%s as static %s::%s",
-                name().c_str(), (*it)->name().c_str(), cls->name().c_str(),
-                vit->first.c_str());
-          }
-        }
-      }
-    }
-
+    // property level check
+    ClassLevelPropertyOverrideCheck(this, cls);
   } else {
-    if (!(getModifiers() & (Interface|Abstract))) {
+    // make sure non-(abstract classes/ifaces) don't declare
+    // abstract methods
+    if (!s_semanticExtractor.isInterface(this) &&
+        !s_semanticExtractor.isAbstract(this)) {
       for (vector<MethodStatementPtr>::const_iterator it =
-        m_methodsVec.begin(); it != m_methodsVec.end(); ++it) {
+             m_methodsVec.begin();
+           it != m_methodsVec.end(); ++it) {
         if ((*it)->isAbstract()) {
           raise_error("Class %s contains abstract method %s and must therefore"
                       " be declared abstract", name().c_str(),
@@ -827,106 +1427,115 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
         }
       }
     }
-    if (parent && parent->getModifiers() & Final) {
-      // Extended a final class
+
+    // make sure a final class is not being extended
+    if (parent && s_semanticExtractor.isFinal(parent)) {
       throw FatalErrorException(0,"Class %s may not inherit from final class "
                                 "(%s)",
-                                name().c_str(), parent->name().c_str());
+                                name().c_str(),
+                                parent->name().c_str());
     }
+    if (builtinParent && s_semanticExtractor.isFinal(builtinParent)) {
+      throw FatalErrorException(0,"Class %s may not inherit from final class "
+                                "(%s)",
+                                name().c_str(),
+                                builtinParent->getName().c_str());
+    }
+
+    // make sure classes don't define each other as their
+    // own parents (no cycles in the inheritance tree).
+    // omit this check for builtin classes (since we assume
+    // that our builtin runtime is sane, plus it's impossible
+    // for a builtin class to extends a user-defind class).
     if (parent) {
       set<const ClassStatement *> seen;
       recursiveParentCheck(seen);
     }
-    // checking against parent methods
-    if (parent || !m_bases.empty()) {
-      bool iface = getModifiers() & Interface;
-      for (vector<MethodStatementPtr>::const_iterator it =
-          m_methodsVec.begin(); it != m_methodsVec.end(); ++it) {
-        const MethodStatement *m = findParentMethod((*it)->name().c_str(),
-            true);
-        if (m == NULL) continue;
-        const ClassStatement *mClass = m->getClass();
-        bool ifaceParent = mClass->getModifiers() & Interface;
 
-        int tmod = (*it)->getModifiers();
-        int pmod = m->getModifiers();
+    // make sure classes don't loosen the access level of
+    // inherited methods
+    if (parent) {
+      ClassLevelMethodAccessLevelCheck(parent, this);
+    } else if (builtinParent) {
+      ClassLevelMethodAccessLevelCheck(builtinParent, this);
+    }
 
-        if ((tmod & Static) && !(pmod & Static)) {
-          raise_error("Cannot make non static method %s::%s() static in "
-              "class %s",
-              mClass->name().c_str(), m->name().c_str(),
-              m_name.c_str());
-        }
-
-        if (!(tmod & Static) && (pmod & Static)) {
-          raise_error("Cannot make static method %s::%s() non static in "
-              "class %s",
-              mClass->name().c_str(), m->name().c_str(),
-              m_name.c_str());
-        }
-
-        if (tmod & Abstract || iface) {
-          if (!(pmod & Abstract) && (tmod & Abstract)) {
-            raise_error("Cannot make non abstract method %s::%s() abstract in "
-                "class %s",
-                mClass->name().c_str(), m->name().c_str(),
-                m_name.c_str());
-          }
-
-          if (pmod & Abstract || ifaceParent) {
-            raise_error("Cannot re-declare abstract method %s::%s() abstract "
-                "in class %s",
-                mClass->name().c_str(), m->name().c_str(),
-                m_name.c_str());
-          }
-        }
-        int m1 = (*it)->getModifiers();
-        int m2 = m->getModifiers();
-        // Access levels
-        int p1 = m1 & (Public|Protected|Private);
-        if (!p1) p1 = Public;
-        int p2 = m2 & (Public|Protected|Private);
-        if (!p2) p2 = Public;
-        if (p1 > p2) {
-          const char *pn;
-          if (p2 == Private) pn = "private";
-          else if (p2 == Protected) pn = "protected";
-          else pn = "public";
-          // Illegal strengthening of privacy
-          raise_error("Access level to %s::%s() must be %s (as in class %s) "
-              "or weaker", name().c_str(), (*it)->name().c_str(), pn,
-              mClass->name().c_str());
-        }
+    // do the same check as above for all the ifaces
+    for (size_t i = 0; i < m_bases.size(); i++) {
+      const ClassStatement *iface = RequestEvalState::findClass(m_bases[i]);
+      const ClassInfo *builtinIface =
+        !iface ? ClassInfo::FindInterface(m_bases[i].c_str()) : NULL;
+      if (iface) {
+        ClassLevelMethodAccessLevelCheck(iface, this);
+      } else if (builtinIface) {
+        ClassLevelMethodAccessLevelCheck(builtinIface, this);
       }
-      // Check for multiple abstract function declarations
+    }
+
+    // Check for multiple abstract function declarations
+    if (!m_parent.empty() || !m_bases.empty()) {
       hphp_const_char_imap<const char*> abstracts;
       abstractMethodCheck(abstracts, true);
     }
     cls = this;
   }
 
+  bool doSemanticCheck =
+    !s_semanticExtractor.isAbstract(cls) &&
+    !s_semanticExtractor.isInterface(cls);
+
+  // make sure the parent class exists and is not an iface. recursively
+  // apply semantic checks to the parent class
   if (parent) {
-    if (parent->getModifiers() & Interface) {
+    if (s_semanticExtractor.isInterface(parent)) {
       raise_error("%s cannot extend %s - it is an interface",
                   name().c_str(), parent->name().c_str());
     }
-    if ((cls->getModifiers() & (Interface|Abstract)) == 0) {
+    if (doSemanticCheck) {
       parent->semanticCheck(cls);
     }
-  } else if (!m_parent.empty() && !f_class_exists(m_parent.c_str(), false)) {
+  } else if (builtinParent) {
+    if (s_semanticExtractor.isInterface(builtinParent)) {
+      raise_error("%s cannot extend %s - it is an interface",
+                  name().c_str(), builtinParent->getName().c_str());
+    }
+    if (doSemanticCheck) {
+      BuiltinSemanticCheck(builtinParent, cls);
+    }
+  } else if (!m_parent.empty()) {
     raise_error("Class '%s' does not exist.", m_parent.c_str());
   }
-  for (unsigned i = 0; i < m_bases.size(); i++) {
+
+  // make sure the ifaces exist and are not classes. recursively
+  // apply semantic checks to the ifaces
+  for (size_t i = 0; i < m_bases.size(); i++) {
     const ClassStatement *iface = RequestEvalState::findClass(m_bases[i]);
+    const ClassInfo *builtinIface = NULL;
+    if (!iface) {
+      // try to find it as a class first (so we can report error)
+      builtinIface = ClassInfo::FindClass(m_bases[i].c_str());
+      if (LIKELY(!builtinIface)) {
+        // ok, now try to find it as an interface
+        builtinIface = ClassInfo::FindInterface(m_bases[i].c_str());
+      }
+    }
     if (iface) {
-      if ((iface->getModifiers() & Interface) == 0) {
+      if (!s_semanticExtractor.isInterface(iface)) {
         raise_error("%s cannot implement %s - it is not an interface",
                     name().c_str(), iface->name().c_str());
       }
-      if ((cls->getModifiers() & (Interface|Abstract)) == 0) {
+      if (doSemanticCheck) {
         iface->semanticCheck(cls);
       }
-    } else if (!f_interface_exists(m_bases[i], false)) {
+    } else if (builtinIface) {
+      if (!s_semanticExtractor.isInterface(builtinIface)) {
+        raise_error("%s cannot implement %s - it is not an interface",
+                    name().c_str(), builtinIface->getName().c_str());
+      }
+      if (doSemanticCheck) {
+        BuiltinSemanticCheck(builtinIface, cls);
+      }
+    } else {
       raise_error("Interface '%s' does not exist.", m_bases[i].c_str());
     }
   }
@@ -1010,6 +1619,27 @@ const ClassInfo *ClassStatement::getBuiltinParentInfo() const {
   return NULL;
 }
 
+/**
+ * Recursively gather all the builtin interfaces which this
+ * class implements. Do not recurse into builtins
+ */
+void ClassStatement::collectBuiltinInterfaceInfos(
+    std::vector<const ClassInfo*>& infos,
+    bool excludeParent) const {
+  const ClassStatement *parent = excludeParent ? NULL : parentStatement();
+  if (parent) parent->collectBuiltinInterfaceInfos(infos, false);
+  for (size_t i = 0; i < m_bases.size(); i++) {
+    const ClassStatement *iface =
+      RequestEvalState::findClass(m_bases[i]);
+    if (iface) {
+      iface->collectBuiltinInterfaceInfos(infos, excludeParent);
+    } else {
+      const ClassInfo *ci = ClassInfo::FindInterface(m_bases[i].c_str());
+      if (ci) infos.push_back(ci);
+    }
+  }
+}
+
 void ClassStatement::recursiveParentCheck(
     std::set<const ClassStatement*> &seen) const {
   if (seen.find(this) != seen.end()) {
@@ -1022,6 +1652,8 @@ void ClassStatement::recursiveParentCheck(
     parent->recursiveParentCheck(seen);
   }
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 ClassStatementMarkerPtr ClassStatement::getMarker() const {
   return m_marker;

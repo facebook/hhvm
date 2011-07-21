@@ -281,7 +281,9 @@ public:
   virtual const MethodMap &getMethods() const = 0;    // non-recursively
   virtual const MethodVec &getMethodsVec() const = 0; // non-recursively
   MethodInfo *getMethodInfo(CStrRef name) const;
-  MethodInfo *hasMethod(CStrRef name, ClassInfo *&classInfo) const;
+  MethodInfo *hasMethod(CStrRef name,
+                        ClassInfo *&classInfo,
+                        bool interfaces = false) const;
   static bool HasAccess(CStrRef className, CStrRef methodName,
                         bool staticCall, bool hasCallObject);
   static bool IsSubClass(CStrRef className1, CStrRef className2,

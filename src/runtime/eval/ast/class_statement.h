@@ -35,6 +35,8 @@ class EvalObjectData;
 class ClassInfoEvaled;
 class ClassEvalState;
 
+struct SemanticExtractor;
+
 class ClassVariable : public Construct {
 public:
   ClassVariable(CONSTRUCT_ARGS, const std::string &name, int modifiers,
@@ -57,6 +59,7 @@ private:
 };
 
 class ClassStatement : public Statement {
+  friend struct SemanticExtractor;
 public:
   enum Modifier {
     Public = 1,
@@ -143,9 +146,29 @@ protected:
   const MethodStatement* findParentMethod(const char* name,
       bool interface) const;
   const ClassInfo *getBuiltinParentInfo() const;
+  void collectBuiltinInterfaceInfos(
+      std::vector<const ClassInfo*>& infos,
+      bool excludeParent) const;
   void abstractMethodCheck(hphp_const_char_imap<const char*> &abstracts,
       bool ifaces) const;
   void recursiveParentCheck(std::set<const ClassStatement*> &seen) const;
+private:
+
+  template <typename ParentClass, typename ChildClass>
+  static void ClassLevelMethodOverrideCheck(ParentClass parent,
+                                            ChildClass  child);
+
+  template <typename ParentClass, typename ChildClass>
+  static void ClassLevelPropertyOverrideCheck(ParentClass parent,
+                                              ChildClass  child);
+
+  template <typename ParentClass, typename ChildClass>
+  static void ClassLevelMethodAccessLevelCheck(ParentClass parent,
+                                               ChildClass  child);
+
+
+  static void BuiltinSemanticCheck(const ClassInfo      *parent,
+                                   const ClassStatement *child);
 };
 
 class ClassStatementMarker : public Statement {

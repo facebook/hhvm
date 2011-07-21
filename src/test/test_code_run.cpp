@@ -16803,6 +16803,29 @@ bool TestCodeRun::TestExtIterator() {
       "}"
       "var_dump('ok');");
 
+  MVCR("<?php\n"
+       "class EvensOnly extends FilterIterator {\n"
+       "  function __construct($it) {\n"
+       "    parent::__construct($it);\n"
+       "  }\n"
+       "  public function accept() {\n"
+       "    return $this->getInnerIterator()->current() % 2 == 0;\n"
+       "  }\n"
+       "}\n"
+       "$i = new EvensOnly(new ArrayIterator(range(0, 10)));\n"
+       "foreach ($i as $v) {\n"
+       "  var_dump($v);\n"
+       "}\n");
+
+  MVCR("<?php\n"
+       "class Proxy extends IteratorIterator {\n"
+       "  function __construct($i) {\n"
+       "    parent::__construct($i);\n"
+       "  }\n"
+       "}\n"
+       "$i = new Proxy(new ArrayIterator(range(0, 5)));\n"
+       "foreach ($i as $v) { var_dump($v); }\n");
+
   return true;
 }
 

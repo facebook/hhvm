@@ -493,7 +493,9 @@ ClassInfo::MethodInfo *ClassInfo::getMethodInfo(CStrRef name) const {
 }
 
 ClassInfo::MethodInfo *ClassInfo::hasMethod(CStrRef name,
-                                            ClassInfo* &classInfo) const {
+                                            ClassInfo* &classInfo,
+                                            bool interfaces /* = false */)
+const {
   ASSERT(!name.isNull());
   classInfo = (ClassInfo *)this;
   const MethodMap &methods = getMethods();
@@ -505,8 +507,18 @@ ClassInfo::MethodInfo *ClassInfo::hasMethod(CStrRef name,
     }
     return m;
   }
+  ClassInfo::MethodInfo *result = NULL;
   const ClassInfo *parent = getParentClassInfo();
-  if (parent) return parent->hasMethod(name, classInfo);
+  if (parent) result = parent->hasMethod(name, classInfo);
+  if (result || !interfaces) return result;
+  // TODO: consider caching the iface lookups
+  const InterfaceVec &ifaces = getInterfacesVec();
+  for (InterfaceVec::const_iterator it = ifaces.begin();
+       it != ifaces.end(); ++it) {
+    const ClassInfo *iface = FindInterface(*it);
+    if (iface) result = iface->hasMethod(name, classInfo, true);
+    if (result) return result;
+  }
   return NULL;
 }
 
@@ -878,7 +890,7 @@ void ClassInfo::GetArray(const ObjectData *obj, const ClassPropTable *ct,
             break;
           default:
             ASSERT(false);
-            break; 
+            break;
           }
         } else {
           switch (p->type) {
@@ -905,7 +917,7 @@ void ClassInfo::GetArray(const ObjectData *obj, const ClassPropTable *ct,
             break;
           default:
             ASSERT(false);
-            break; 
+            break;
           }
         }
       }
@@ -946,7 +958,7 @@ void ClassInfo::SetArray(ObjectData *obj, const ClassPropTable *ct,
       case KindOfString:  *(String*)addr = value; break;
       case KindOfArray:   *(Array*)addr = value;  break;
       case KindOfObject:  *(Object*)addr = value; break;
-      default:            ASSERT(false);          break; 
+      default:            ASSERT(false);          break;
       }
     }
     ct = ct->m_parent;

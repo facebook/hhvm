@@ -20,6 +20,7 @@
 
 // Dependencies
 #include <php/classes/arrayaccess.h>
+#include <php/classes/exception.h>
 #include <runtime/ext/ext.h>
 #include <runtime/eval/eval.h>
 namespace hphp_impl_starter {}
@@ -946,7 +947,7 @@ bool c_ArrayIterator::t_valid() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 700 */
+/* SRC: classes/iterator.php line 796 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_AppendIterator
 Variant c_AppendIterator::os_getInit(CStrRef s) {
   DECLARE_SYSTEM_GLOBALS(g);
@@ -1309,7 +1310,7 @@ struct ObjectStaticCallbacks cw_AppendIterator = {
   c_AppendIterator::os_constant,
   c_AppendIterator::os_get_call_info
 };
-/* SRC: classes/iterator.php line 703 */
+/* SRC: classes/iterator.php line 799 */
 void c_AppendIterator::t___construct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__construct);
   bool oldInCtor = gasInCtor(true);
@@ -1320,7 +1321,7 @@ void c_AppendIterator::t___construct() {
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 718 */
+/* SRC: classes/iterator.php line 814 */
 void c_AppendIterator::t_append(CVarRef v_it) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::append);
   if(!v_it.instanceof(NAMSTR(s_sys_ss2fd353cc, "iterator"))) {
@@ -1336,7 +1337,7 @@ void c_AppendIterator::t_append(CVarRef v_it) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 732 */
+/* SRC: classes/iterator.php line 828 */
 Variant c_AppendIterator::t_getinneriterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::getInnerIterator);
   {
@@ -1348,7 +1349,7 @@ Variant c_AppendIterator::t_getinneriterator() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 746 */
+/* SRC: classes/iterator.php line 842 */
 void c_AppendIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::rewind);
   {
@@ -1384,7 +1385,7 @@ void c_AppendIterator::t_rewind() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 762 */
+/* SRC: classes/iterator.php line 858 */
 bool c_AppendIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::valid);
   {
@@ -1407,7 +1408,7 @@ bool c_AppendIterator::t_valid() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 775 */
+/* SRC: classes/iterator.php line 871 */
 Variant c_AppendIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::current);
   {
@@ -1432,7 +1433,7 @@ Variant c_AppendIterator::t_current() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 793 */
+/* SRC: classes/iterator.php line 889 */
 Variant c_AppendIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::key);
   {
@@ -1457,7 +1458,7 @@ Variant c_AppendIterator::t_key() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 807 */
+/* SRC: classes/iterator.php line 903 */
 void c_AppendIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::next);
   {
@@ -1562,7 +1563,7 @@ void c_AppendIterator::t_next() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 825 */
+/* SRC: classes/iterator.php line 921 */
 Variant c_AppendIterator::t___call(Variant v_func, Variant v_params) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__call);
   {
@@ -1576,6 +1577,454 @@ Variant c_AppendIterator::t___call(Variant v_func, Variant v_params) {
     const Array &tmp3((Array(tmp0)));
     return x_call_user_func_array(VarNR(tmp3), toArray(v_params));
   }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 657 */
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_IteratorIterator
+Variant c_IteratorIterator::os_getInit(CStrRef s) {
+  DECLARE_SYSTEM_GLOBALS(g);
+  int64 hash = s->hash();
+  switch (hash & 1) {
+    case 0:
+      HASH_RETURN_NAMSTR(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"),
+                         null, 8);
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_getInit(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_IteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_IteratorIterator
+Variant c_IteratorIterator::os_get(CStrRef s) {
+  return c_ObjectData::os_get(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_IteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_IteratorIterator
+Variant &c_IteratorIterator::os_lval(CStrRef s) {
+  return c_ObjectData::os_lval(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_IteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_IteratorIterator
+Variant * c_IteratorIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  int64 hash = s->hash();
+  switch (hash & 1) {
+    case 0:
+      HASH_GUARD_STRING(0x46D7EC2E443AFA34LL, IteratorIterator) { return o_realPropPrivate(prop, flags); }
+      break;
+    default:
+      break;
+  }
+  return o_realPropPublic(prop, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_IteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_IteratorIterator
+Variant * c_IteratorIterator::o_realPropPublic(CStrRef s, int flags) const {
+  return c_ObjectData::o_realPropPublic(s, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_IteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_IteratorIterator
+Variant * c_IteratorIterator::o_realPropPrivate(CStrRef s, int flags) const {
+  int64 hash = s->hash();
+  switch (hash & 1) {
+    case 0:
+      HASH_REALPROP_NAMSTR(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"), 8, iterator);
+      break;
+    default:
+      break;
+  }
+  return o_realPropPublic(s, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_IteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_IteratorIterator
+Variant c_IteratorIterator::os_constant(const char *s) {
+  return c_ObjectData::os_constant(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_IteratorIterator
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(IteratorIterator)
+bool c_IteratorIterator::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 1:
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss22bfe43e, "Traversable"));
+      break;
+    case 4:
+      HASH_INSTANCEOF(0x46D7EC2E443AFA34LL, NAMSTR(s_sys_ss5a365068, "IteratorIterator"));
+      break;
+    case 5:
+      HASH_INSTANCEOF(0x39CA0210AC8E528DLL, NAMSTR(s_sys_ss299bd55e, "OuterIterator"));
+      break;
+    case 6:
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ssc64ebfff, "Iterator"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
+ObjectData *c_IteratorIterator::cloneImpl() {
+  ObjectData *obj = coo_IteratorIterator();
+  c_IteratorIterator::cloneSet(obj);
+  return obj;
+}
+void c_IteratorIterator::cloneSet(ObjectData *cl) {
+  c_IteratorIterator *clone = static_cast<c_IteratorIterator*>(cl);
+  ObjectData::cloneSet(clone);
+  clone->m_iterator.setWithRef(m_iterator);
+}
+Variant c_IteratorIterator::doCall(Variant v_name, Variant v_arguments, bool fatal) {
+  return t___call(v_name, !v_arguments.isNull() ? v_arguments : Variant(Array::Create()));
+}
+CallInfo c_IteratorIterator::ci_next((void*)&c_IteratorIterator::i_next, (void*)&c_IteratorIterator::ifa_next, 0, 4, 0x0000000000000000LL);
+CallInfo c_IteratorIterator::ci_key((void*)&c_IteratorIterator::i_key, (void*)&c_IteratorIterator::ifa_key, 0, 4, 0x0000000000000000LL);
+CallInfo c_IteratorIterator::ci_valid((void*)&c_IteratorIterator::i_valid, (void*)&c_IteratorIterator::ifa_valid, 0, 4, 0x0000000000000000LL);
+CallInfo c_IteratorIterator::ci_getinneriterator((void*)&c_IteratorIterator::i_getinneriterator, (void*)&c_IteratorIterator::ifa_getinneriterator, 0, 4, 0x0000000000000000LL);
+CallInfo c_IteratorIterator::ci___construct((void*)&c_IteratorIterator::i___construct, (void*)&c_IteratorIterator::ifa___construct, 1, 4, 0x0000000000000000LL);
+CallInfo c_IteratorIterator::ci_current((void*)&c_IteratorIterator::i_current, (void*)&c_IteratorIterator::ifa_current, 0, 4, 0x0000000000000000LL);
+CallInfo c_IteratorIterator::ci___call((void*)&c_IteratorIterator::i___call, (void*)&c_IteratorIterator::ifa___call, 2, 4, 0x0000000000000000LL);
+CallInfo c_IteratorIterator::ci_rewind((void*)&c_IteratorIterator::i_rewind, (void*)&c_IteratorIterator::ifa_rewind, 0, 4, 0x0000000000000000LL);
+Variant c_IteratorIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_next, coo_IteratorIterator);
+  }
+  c_IteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_IteratorIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::next", 0, 1);
+  return (self->t_next());
+}
+Variant c_IteratorIterator::i_key(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_key, coo_IteratorIterator);
+  }
+  c_IteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_IteratorIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::key", 0, 1);
+  return (self->t_key());
+}
+Variant c_IteratorIterator::i_valid(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_valid, coo_IteratorIterator);
+  }
+  c_IteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_IteratorIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::valid", 0, 1);
+  return (self->t_valid());
+}
+Variant c_IteratorIterator::i_getinneriterator(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_getinneriterator, coo_IteratorIterator);
+  }
+  c_IteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_IteratorIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::getInnerIterator", 0, 1);
+  return (self->t_getinneriterator());
+}
+Variant c_IteratorIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i___construct, coo_IteratorIterator);
+  }
+  c_IteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_IteratorIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 1)) return throw_missing_typed_argument("IteratorIterator::__construct", "traversable", 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("IteratorIterator::__construct", 1, 2);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___construct(arg0), null);
+  }
+}
+Variant c_IteratorIterator::i_current(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_current, coo_IteratorIterator);
+  }
+  c_IteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_IteratorIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::current", 0, 1);
+  return (self->t_current());
+}
+Variant c_IteratorIterator::i___call(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i___call, coo_IteratorIterator);
+  }
+  c_IteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_IteratorIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("IteratorIterator::__call", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t___call(arg0, arg1));
+  }
+}
+Variant c_IteratorIterator::i_rewind(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_rewind, coo_IteratorIterator);
+  }
+  c_IteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_IteratorIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::rewind", 0, 1);
+  return (self->t_rewind());
+}
+Variant c_IteratorIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_next, coo_IteratorIterator);
+  }
+  c_IteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_IteratorIterator*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::next", 0, 1);
+  return (self->t_next());
+}
+Variant c_IteratorIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_key, coo_IteratorIterator);
+  }
+  c_IteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_IteratorIterator*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::key", 0, 1);
+  return (self->t_key());
+}
+Variant c_IteratorIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_valid, coo_IteratorIterator);
+  }
+  c_IteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_IteratorIterator*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::valid", 0, 1);
+  return (self->t_valid());
+}
+Variant c_IteratorIterator::ifa_getinneriterator(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getinneriterator, coo_IteratorIterator);
+  }
+  c_IteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_IteratorIterator*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::getInnerIterator", 0, 1);
+  return (self->t_getinneriterator());
+}
+Variant c_IteratorIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_IteratorIterator);
+  }
+  c_IteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_IteratorIterator*>(mcp.obj));
+  if (UNLIKELY(count < 1)) return throw_missing_typed_argument("IteratorIterator::__construct", "traversable", 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("IteratorIterator::__construct", 1, 2);
+  CVarRef arg0(a0);
+  return (self->t___construct(arg0), null);
+}
+Variant c_IteratorIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_current, coo_IteratorIterator);
+  }
+  c_IteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_IteratorIterator*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::current", 0, 1);
+  return (self->t_current());
+}
+Variant c_IteratorIterator::ifa___call(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___call, coo_IteratorIterator);
+  }
+  c_IteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_IteratorIterator*>(mcp.obj));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("IteratorIterator::__call", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  return (self->t___call(arg0, arg1));
+}
+Variant c_IteratorIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_rewind, coo_IteratorIterator);
+  }
+  c_IteratorIterator *self ATTRIBUTE_UNUSED (static_cast<c_IteratorIterator*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::rewind", 0, 1);
+  return (self->t_rewind());
+}
+bool c_IteratorIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 15) {
+    case 1:
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
+        mcp.ci = &c_IteratorIterator::ci_key;
+        return true;
+      }
+      break;
+    case 4:
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss9943cbf4, "valid")) {
+        mcp.ci = &c_IteratorIterator::ci_valid;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x3106F858B09C7424LL, NAMSTR(s_sys_ss37eff1c8, "getInnerIterator")) {
+        mcp.ci = &c_IteratorIterator::ci_getinneriterator;
+        return true;
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
+        mcp.ci = &c_IteratorIterator::ci_next;
+        return true;
+      }
+      break;
+    case 10:
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss941ca25f, "rewind")) {
+        mcp.ci = &c_IteratorIterator::ci_rewind;
+        return true;
+      }
+      break;
+    case 12:
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ssb3a5c1b3, "current")) {
+        mcp.ci = &c_IteratorIterator::ci_current;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x5D73364F53CEEB6CLL, NAMSTR(s_sys_ssc880eb8a, "__call")) {
+        mcp.ci = &c_IteratorIterator::ci___call;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
+        mcp.ci = &c_IteratorIterator::ci___construct;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_get_call_info(mcp, hash);
+}
+bool c_IteratorIterator::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
+}
+c_IteratorIterator *c_IteratorIterator::create(CVarRef v_iterator) {
+  CountableHelper h(this);
+  init();
+  t___construct(v_iterator);
+  return this;
+}
+void c_IteratorIterator::dynConstruct(CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 1)) throw_missing_typed_argument("IteratorIterator::__construct", "traversable", 1);
+  if (UNLIKELY(count != 1)) throw_wrong_arguments("IteratorIterator::__construct", count, 1, 1, 2);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    (t___construct(arg0));
+  }
+}
+void c_IteratorIterator::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_IteratorIterator::ci___construct;
+  mcp.obj = this;
+}
+struct ObjectStaticCallbacks cw_IteratorIterator = {
+  c_IteratorIterator::os_getInit,
+  c_IteratorIterator::os_get,
+  c_IteratorIterator::os_lval,
+  c_IteratorIterator::os_invoke,
+  c_IteratorIterator::os_constant,
+  c_IteratorIterator::os_get_call_info
+};
+/* SRC: classes/iterator.php line 660 */
+void c_IteratorIterator::t___construct(Variant v_iterator) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(IteratorIterator, IteratorIterator::__construct);
+  bool oldInCtor = gasInCtor(true);
+  if(!v_iterator.instanceof(NAMSTR(s_sys_ssa38f312b, "traversable"))) {
+    throw_unexpected_argument_type(1,"IteratorIterator::__construct()","traversable",v_iterator);
+    return;
+  }
+  if (instanceOf(v_iterator, NAMSTR(s_sys_ssa04330ec, "IteratorAggregate"))) {
+    {
+      {
+        MethodCallPackage mcp0;
+        CVarRef obj0 = v_iterator;
+        mcp0.methodCall((obj0), NAMSTR(s_sys_ssfe98adf4, "getIterator"), 0x570B2E1232A12503LL);
+        const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
+        Variant tmp1(((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0)));
+        v_iterator.assignVal(tmp1);
+      }
+    }
+  }
+  if (instanceOf(v_iterator, NAMSTR(s_sys_ssc64ebfff, "Iterator"))) {
+    {
+      m_iterator.assignVal(v_iterator);
+    }
+  }
+  else {
+    {
+      throw_exception(p_Exception(((c_Exception*)coo_Exception())->create(NAMSTR(s_sys_ss93bb6e5b, "Need to pass a Traversable that is convertable to an iterator"))));
+    }
+  }
+  gasInCtor(oldInCtor);
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 672 */
+Variant c_IteratorIterator::t_getinneriterator() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(IteratorIterator, IteratorIterator::getInnerIterator);
+  return m_iterator;
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 676 */
+Variant c_IteratorIterator::t_valid() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(IteratorIterator, IteratorIterator::valid);
+  {
+    MethodCallPackage mcp0;
+    CVarRef obj0 = m_iterator;
+    mcp0.methodCall((obj0), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
+    const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
+    return wrap_variant((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 680 */
+Variant c_IteratorIterator::t_key() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(IteratorIterator, IteratorIterator::key);
+  {
+    MethodCallPackage mcp0;
+    CVarRef obj0 = m_iterator;
+    mcp0.methodCall((obj0), NAMSTR(s_sys_ss12e90587, "key"), 0x56EDB60C824E8C51LL);
+    const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
+    return wrap_variant((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 684 */
+Variant c_IteratorIterator::t_current() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(IteratorIterator, IteratorIterator::current);
+  {
+    MethodCallPackage mcp0;
+    CVarRef obj0 = m_iterator;
+    mcp0.methodCall((obj0), NAMSTR(s_sys_ssb3a5c1b3, "current"), 0x5B3A4A72846B21DCLL);
+    const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
+    return wrap_variant((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 688 */
+Variant c_IteratorIterator::t_next() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(IteratorIterator, IteratorIterator::next);
+  {
+    MethodCallPackage mcp0;
+    CVarRef obj0 = m_iterator;
+    mcp0.methodCall((obj0), NAMSTR(s_sys_ss50652d33, "next"), 0x3C6D50F3BB8102B8LL);
+    const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
+    return wrap_variant((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 692 */
+Variant c_IteratorIterator::t_rewind() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(IteratorIterator, IteratorIterator::rewind);
+  {
+    MethodCallPackage mcp0;
+    CVarRef obj0 = m_iterator;
+    mcp0.methodCall((obj0), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
+    const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
+    return wrap_variant((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 696 */
+Variant c_IteratorIterator::t___call(Variant v_func, Variant v_params) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(IteratorIterator, IteratorIterator::__call);
+  return x_call_user_func_array(VarNR(Array(ArrayInit(2).set(m_iterator).set(v_func).create())), toArray(v_params));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 228 */
@@ -2164,54 +2613,87 @@ Variant c_MutableArrayIterator::t_currentref() {
   return strongBind(x_hphp_current_ref(ref(m_arr)));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 665 */
+/* SRC: classes/iterator.php line 711 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_FilterIterator
 Variant c_FilterIterator::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
+  DECLARE_SYSTEM_GLOBALS(g);
+  int64 hash = s->hash();
+  switch (hash & 1) {
+    case 1:
+      HASH_RETURN_NAMSTR(0x7794684C8B506749LL, NAMSTR(s_sys_ss6b9db86e, "it"),
+                         null, 2);
+      break;
+    default:
+      break;
+  }
+  return c_IteratorIterator::os_getInit(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_FilterIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_FilterIterator
 Variant c_FilterIterator::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
+  return c_IteratorIterator::os_get(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_FilterIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_FilterIterator
 Variant &c_FilterIterator::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
+  return c_IteratorIterator::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_FilterIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_FilterIterator
 Variant * c_FilterIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  int64 hash = s->hash();
+  switch (hash & 3) {
+    case 0:
+      HASH_GUARD_STRING(0x46D7EC2E443AFA34LL, IteratorIterator) { return c_IteratorIterator::o_realPropPrivate(prop, flags); }
+      break;
+    case 1:
+      HASH_GUARD_STRING(0x7A394042E7488231LL, FilterIterator) { return o_realPropPrivate(prop, flags); }
+      break;
+    default:
+      break;
+  }
   return o_realPropPublic(prop, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_FilterIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_FilterIterator
 Variant * c_FilterIterator::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
+  return c_IteratorIterator::o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_FilterIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_FilterIterator
 Variant * c_FilterIterator::o_realPropPrivate(CStrRef s, int flags) const {
+  int64 hash = s->hash();
+  switch (hash & 1) {
+    case 1:
+      HASH_REALPROP_NAMSTR(0x7794684C8B506749LL, NAMSTR(s_sys_ss6b9db86e, "it"), 2, it);
+      break;
+    default:
+      break;
+  }
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_FilterIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_FilterIterator
 Variant c_FilterIterator::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
+  return c_IteratorIterator::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_FilterIterator
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(FilterIterator)
 bool c_FilterIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
-  switch (hash & 7) {
+  switch (hash & 15) {
     case 1:
       HASH_INSTANCEOF(0x7A394042E7488231LL, NAMSTR(s_sys_ss92c34a85, "FilterIterator"));
       HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss22bfe43e, "Traversable"));
       break;
-    case 5:
+    case 4:
+      HASH_INSTANCEOF(0x46D7EC2E443AFA34LL, NAMSTR(s_sys_ss5a365068, "IteratorIterator"));
+      break;
+    case 13:
       HASH_INSTANCEOF(0x39CA0210AC8E528DLL, NAMSTR(s_sys_ss299bd55e, "OuterIterator"));
       break;
-    case 6:
+    case 14:
       HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ssc64ebfff, "Iterator"));
       break;
     default:
@@ -2226,15 +2708,297 @@ ObjectData *c_FilterIterator::cloneImpl() {
 }
 void c_FilterIterator::cloneSet(ObjectData *cl) {
   c_FilterIterator *clone = static_cast<c_FilterIterator*>(cl);
-  ObjectData::cloneSet(clone);
+  c_IteratorIterator::cloneSet(clone);
+  clone->m_it.setWithRef(m_it);
+}
+Variant c_FilterIterator::doCall(Variant v_name, Variant v_arguments, bool fatal) {
+  return t___call(v_name, !v_arguments.isNull() ? v_arguments : Variant(Array::Create()));
+}
+CallInfo c_FilterIterator::ci_next((void*)&c_FilterIterator::i_next, (void*)&c_FilterIterator::ifa_next, 0, 4, 0x0000000000000000LL);
+CallInfo c_FilterIterator::ci_key((void*)&c_FilterIterator::i_key, (void*)&c_FilterIterator::ifa_key, 0, 4, 0x0000000000000000LL);
+CallInfo c_FilterIterator::ci_valid((void*)&c_FilterIterator::i_valid, (void*)&c_FilterIterator::ifa_valid, 0, 4, 0x0000000000000000LL);
+CallInfo c_FilterIterator::ci_getinneriterator((void*)&c_FilterIterator::i_getinneriterator, (void*)&c_FilterIterator::ifa_getinneriterator, 0, 4, 0x0000000000000000LL);
+CallInfo c_FilterIterator::ci___construct((void*)&c_FilterIterator::i___construct, (void*)&c_FilterIterator::ifa___construct, 1, 4, 0x0000000000000000LL);
+CallInfo c_FilterIterator::ci___clone((void*)&c_FilterIterator::i___clone, (void*)&c_FilterIterator::ifa___clone, 0, 4, 0x0000000000000000LL);
+CallInfo c_FilterIterator::ci_fetch((void*)&c_FilterIterator::i_fetch, (void*)&c_FilterIterator::ifa_fetch, 0, 4, 0x0000000000000000LL);
+CallInfo c_FilterIterator::ci_current((void*)&c_FilterIterator::i_current, (void*)&c_FilterIterator::ifa_current, 0, 4, 0x0000000000000000LL);
+CallInfo c_FilterIterator::ci___call((void*)&c_FilterIterator::i___call, (void*)&c_FilterIterator::ifa___call, 2, 4, 0x0000000000000000LL);
+CallInfo c_FilterIterator::ci_rewind((void*)&c_FilterIterator::i_rewind, (void*)&c_FilterIterator::ifa_rewind, 0, 4, 0x0000000000000000LL);
+Variant c_FilterIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_next, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::next", 0, 1);
+  return (self->t_next(), null);
+}
+Variant c_FilterIterator::i_key(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_key, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::key", 0, 1);
+  return (self->t_key());
+}
+Variant c_FilterIterator::i_valid(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_valid, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::valid", 0, 1);
+  return (self->t_valid());
+}
+Variant c_FilterIterator::i_getinneriterator(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_getinneriterator, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::getInnerIterator", 0, 1);
+  return (self->t_getinneriterator());
+}
+Variant c_FilterIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i___construct, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 1)) return throw_missing_typed_argument("FilterIterator::__construct", "iterator", 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("FilterIterator::__construct", 1, 2);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___construct(arg0), null);
+  }
+}
+Variant c_FilterIterator::i___clone(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i___clone, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::__clone", 0, 1);
+  return (self->t___clone());
+}
+Variant c_FilterIterator::i_fetch(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_fetch, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::fetch", 0, 1);
+  return (self->t_fetch(), null);
+}
+Variant c_FilterIterator::i_current(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_current, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::current", 0, 1);
+  return (self->t_current());
+}
+Variant c_FilterIterator::i___call(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i___call, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("FilterIterator::__call", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t___call(arg0, arg1));
+  }
+}
+Variant c_FilterIterator::i_rewind(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_rewind, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::rewind", 0, 1);
+  return (self->t_rewind(), null);
+}
+Variant c_FilterIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_next, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::next", 0, 1);
+  return (self->t_next(), null);
+}
+Variant c_FilterIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_key, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::key", 0, 1);
+  return (self->t_key());
+}
+Variant c_FilterIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_valid, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::valid", 0, 1);
+  return (self->t_valid());
+}
+Variant c_FilterIterator::ifa_getinneriterator(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getinneriterator, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::getInnerIterator", 0, 1);
+  return (self->t_getinneriterator());
+}
+Variant c_FilterIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  if (UNLIKELY(count < 1)) return throw_missing_typed_argument("FilterIterator::__construct", "iterator", 1);
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("FilterIterator::__construct", 1, 2);
+  CVarRef arg0(a0);
+  return (self->t___construct(arg0), null);
+}
+Variant c_FilterIterator::ifa___clone(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___clone, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::__clone", 0, 1);
+  return (self->t___clone());
+}
+Variant c_FilterIterator::ifa_fetch(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_fetch, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::fetch", 0, 1);
+  return (self->t_fetch(), null);
+}
+Variant c_FilterIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_current, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::current", 0, 1);
+  return (self->t_current());
+}
+Variant c_FilterIterator::ifa___call(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___call, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("FilterIterator::__call", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  return (self->t___call(arg0, arg1));
+}
+Variant c_FilterIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_rewind, coo_FilterIterator);
+  }
+  c_FilterIterator *self ATTRIBUTE_UNUSED (static_cast<c_FilterIterator*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::rewind", 0, 1);
+  return (self->t_rewind(), null);
 }
 bool c_FilterIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
-  return c_ObjectData::os_get_call_info(mcp, hash);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 31) {
+    case 4:
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss9943cbf4, "valid")) {
+        mcp.ci = &c_FilterIterator::ci_valid;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x3106F858B09C7424LL, NAMSTR(s_sys_ss37eff1c8, "getInnerIterator")) {
+        mcp.ci = &c_FilterIterator::ci_getinneriterator;
+        return true;
+      }
+      break;
+    case 10:
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss941ca25f, "rewind")) {
+        mcp.ci = &c_FilterIterator::ci_rewind;
+        return true;
+      }
+      break;
+    case 12:
+      HASH_GUARD_LITSTR(0x5D73364F53CEEB6CLL, NAMSTR(s_sys_ssc880eb8a, "__call")) {
+        mcp.ci = &c_FilterIterator::ci___call;
+        return true;
+      }
+      break;
+    case 17:
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
+        mcp.ci = &c_FilterIterator::ci_key;
+        return true;
+      }
+      break;
+    case 24:
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
+        mcp.ci = &c_FilterIterator::ci_next;
+        return true;
+      }
+      break;
+    case 27:
+      HASH_GUARD_LITSTR(0x0F2CA10C0004BE9BLL, NAMSTR(s_sys_ss960d7a27, "__clone")) {
+        mcp.ci = &c_FilterIterator::ci___clone;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ssf46d6580, "fetch")) {
+        mcp.ci = &c_FilterIterator::ci_fetch;
+        return true;
+      }
+      break;
+    case 28:
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ssb3a5c1b3, "current")) {
+        mcp.ci = &c_FilterIterator::ci_current;
+        return true;
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
+        mcp.ci = &c_FilterIterator::ci___construct;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_IteratorIterator::os_get_call_info(mcp, hash);
 }
 bool c_FilterIterator::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
+}
+c_FilterIterator *c_FilterIterator::create(CVarRef v_it) {
+  CountableHelper h(this);
+  init();
+  t___construct(v_it);
+  return this;
+}
+void c_FilterIterator::dynConstruct(CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 1)) throw_missing_typed_argument("FilterIterator::__construct", "iterator", 1);
+  if (UNLIKELY(count != 1)) throw_wrong_arguments("FilterIterator::__construct", count, 1, 1, 2);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    (t___construct(arg0));
+  }
+}
+void c_FilterIterator::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_FilterIterator::ci___construct;
+  mcp.obj = this;
 }
 struct ObjectStaticCallbacks cw_FilterIterator = {
   c_FilterIterator::os_getInit,
@@ -2244,11 +3008,148 @@ struct ObjectStaticCallbacks cw_FilterIterator = {
   c_FilterIterator::os_constant,
   c_FilterIterator::os_get_call_info
 };
+/* SRC: classes/iterator.php line 714 */
+void c_FilterIterator::t___construct(Variant v_it) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(FilterIterator, FilterIterator::__construct);
+  bool oldInCtor = gasInCtor(true);
+  if(!v_it.instanceof(NAMSTR(s_sys_ss2fd353cc, "iterator"))) {
+    throw_unexpected_argument_type(1,"FilterIterator::__construct()","iterator",v_it);
+    return;
+  }
+  m_it.assignVal(v_it);
+  gasInCtor(oldInCtor);
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 718 */
+void c_FilterIterator::t_rewind() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(FilterIterator, FilterIterator::rewind);
+  {
+    MethodCallPackage mcp0;
+    CVarRef obj0 = m_it;
+    mcp0.methodCall((obj0), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
+    const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
+    (mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0);
+  }
+  t_fetch();
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 723 */
+/* SRC: classes/iterator.php line 725 */
+void c_FilterIterator::t_fetch() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(FilterIterator, FilterIterator::fetch);
+  LOOP_COUNTER(1);
+  {
+    while (true) {
+      {
+        MethodCallPackage mcp0;
+        CVarRef obj0 = m_it;
+        mcp0.methodCall((obj0), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
+        const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
+        if (!(toBoolean((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0)))) break;
+      }
+      LOOP_COUNTER_CHECK(1);
+      {
+        {
+          bool tmp0;
+          {
+            MethodCallPackage mcp1;
+            mcp1.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss6352645d, "accept"), 0x7DFE4A7C2052FD88LL);
+            const CallInfo *cit1 ATTRIBUTE_UNUSED = mcp1.ci;
+            tmp0 = (toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0)));
+          }
+          if (tmp0) {
+            {
+              return;
+            }
+          }
+        }
+        {
+          MethodCallPackage mcp0;
+          CVarRef obj0 = m_it;
+          mcp0.methodCall((obj0), NAMSTR(s_sys_ss50652d33, "next"), 0x3C6D50F3BB8102B8LL);
+          const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
+          (mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0);
+        }
+      }
+    }
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 734 */
+void c_FilterIterator::t_next() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(FilterIterator, FilterIterator::next);
+  {
+    MethodCallPackage mcp0;
+    CVarRef obj0 = m_it;
+    mcp0.methodCall((obj0), NAMSTR(s_sys_ss50652d33, "next"), 0x3C6D50F3BB8102B8LL);
+    const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
+    (mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0);
+  }
+  t_fetch();
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 739 */
+Variant c_FilterIterator::t_valid() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(FilterIterator, FilterIterator::valid);
+  {
+    MethodCallPackage mcp0;
+    CVarRef obj0 = m_it;
+    mcp0.methodCall((obj0), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
+    const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
+    return wrap_variant((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 743 */
+Variant c_FilterIterator::t_key() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(FilterIterator, FilterIterator::key);
+  {
+    MethodCallPackage mcp0;
+    CVarRef obj0 = m_it;
+    mcp0.methodCall((obj0), NAMSTR(s_sys_ss12e90587, "key"), 0x56EDB60C824E8C51LL);
+    const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
+    return wrap_variant((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 747 */
+Variant c_FilterIterator::t_current() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(FilterIterator, FilterIterator::current);
+  {
+    MethodCallPackage mcp0;
+    CVarRef obj0 = m_it;
+    mcp0.methodCall((obj0), NAMSTR(s_sys_ssb3a5c1b3, "current"), 0x5B3A4A72846B21DCLL);
+    const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
+    return wrap_variant((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 751 */
+Variant c_FilterIterator::t___clone() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(FilterIterator, FilterIterator::__clone);
+  return null;
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 755 */
+Variant c_FilterIterator::t_getinneriterator() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(FilterIterator, FilterIterator::getInnerIterator);
+  return m_it;
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 759 */
+Variant c_FilterIterator::t___call(Variant v_func, Variant v_params) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(FilterIterator, FilterIterator::__call);
+  return x_call_user_func_array(VarNR(Array(ArrayInit(2).set(m_it).set(v_func).create())), toArray(v_params));
+}
+namespace hphp_impl_splitter {}
 ObjectData *coo_ArrayIterator() {
   return NEWOBJ(c_ArrayIterator)();
 }
 ObjectData *coo_AppendIterator() {
   return NEWOBJ(c_AppendIterator)();
+}
+ObjectData *coo_IteratorIterator() {
+  return NEWOBJ(c_IteratorIterator)();
 }
 ObjectData *coo_RecursiveIteratorIterator() {
   return NEWOBJ(c_RecursiveIteratorIterator)();
@@ -2263,6 +3164,8 @@ ObjectData *coo_FilterIterator() {
 // Class tables
 ClassPropTable cpt_AppendIterator;
 ClassPropTable cpt_ArrayIterator;
+ClassPropTable cpt_FilterIterator;
+ClassPropTable cpt_IteratorIterator;
 ClassPropTable cpt_RecursiveIteratorIterator;
 static int ctInitializer() {
   const char *ctMapData[] = {
@@ -2279,6 +3182,16 @@ static int ctInitializer() {
     (const char *)GET_PROPERTY_OFFSET(c_ArrayIterator, m_flags),
     (const char *)10,
 
+    (const char *)1, (const char *)1, (const char *)&cpt_FilterIterator, (const char *)&cpt_IteratorIterator,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ssc4be4990, "\000FilterIterator\000it"),
+    (const char *)GET_PROPERTY_OFFSET(c_FilterIterator, m_it),
+    (const char *)10,
+
+    (const char *)1, (const char *)1, (const char *)&cpt_IteratorIterator, (const char *)NULL,
+    (const char *)256, (const char *)&NAMSTR(s_sys_ss8c1ec20c, "\000IteratorIterator\000iterator"),
+    (const char *)GET_PROPERTY_OFFSET(c_IteratorIterator, m_iterator),
+    (const char *)10,
+
     (const char *)1, (const char *)1, (const char *)&cpt_RecursiveIteratorIterator, (const char *)NULL,
     (const char *)256, (const char *)&NAMSTR(s_sys_ss246080da, "\000RecursiveIteratorIterator\000rsrc"),
     (const char *)GET_PROPERTY_OFFSET(c_RecursiveIteratorIterator, m_rsrc),
@@ -2286,8 +3199,8 @@ static int ctInitializer() {
 
     NULL, NULL, NULL,
   };
-  static ClassPropTableEntry entries[4];
-  static ClassPropTableEntry *pentries[5];
+  static ClassPropTableEntry entries[6];
+  static ClassPropTableEntry *pentries[9];
   return ClassInfo::InitClassPropTable(ctMapData, entries, pentries);
 }
 static int ct_initializer = ctInitializer();
@@ -2295,6 +3208,8 @@ static int ct_initializer = ctInitializer();
 // o_getClassPropTable
 const ClassPropTable *c_AppendIterator::o_getClassPropTable() const { return &cpt_AppendIterator; }
 const ClassPropTable *c_ArrayIterator::o_getClassPropTable() const { return &cpt_ArrayIterator; }
+const ClassPropTable *c_FilterIterator::o_getClassPropTable() const { return &cpt_FilterIterator; }
+const ClassPropTable *c_IteratorIterator::o_getClassPropTable() const { return &cpt_IteratorIterator; }
 const ClassPropTable *c_RecursiveIteratorIterator::o_getClassPropTable() const { return &cpt_RecursiveIteratorIterator; }
 
 ///////////////////////////////////////////////////////////////////////////////

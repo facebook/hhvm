@@ -84,12 +84,12 @@ std::map<void*, StackTrace> SmartAllocatorImpl::s_st_deallocs;
 
 SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
                                        int itemSize, int flag)
-  : m_itemCount(itemCount), m_itemSize(itemSize), m_flag(flag),
-    m_row(0), m_col(0),
+  : m_itemCount(itemCount), m_itemSize(itemSize),
+    m_flag(flag), m_row(0), m_col(0),
     m_rowChecked(0), m_colChecked(0), m_linearSize(0), m_linearCount(0),
     m_allocatedBlocks(0), m_multiplier(1), m_maxMultiplier(1),
     m_targetMultiplier(1),
-    m_iter(this), m_linearized(false), m_stats(NULL) {
+    m_linearized(false), m_stats(NULL) {
 
   // automatically pick a good per slab item count
   if (m_itemCount <= 0) {
@@ -290,10 +290,20 @@ int SmartAllocatorImpl::calculateObjects(LinearAllocator &allocator,
   int count = 0;
   int oldSize = size;
   if (m_flag & (NeedRestore | NeedRestoreOnce)) {
-    m_iter.clear();
-    for (m_iter.begin(); m_iter.get(); m_iter.next()) {
-      if (calculate(m_iter.get(), size)) {
-        ++count;
+    FreeMap freeMap;
+    prepareFreeMap(freeMap);
+    int max = m_colMax;
+    int bitIndex = 0;
+    for (unsigned int i = 0; i < m_blocks.size(); i++) {
+      if (i == m_blocks.size() - 1) max = m_col;
+      char *start = (char *)m_blocks[i];
+      for (char *obj = start; obj < start + max;
+           obj += m_itemSize, bitIndex++) {
+        if (!freeMap.test(bitIndex)) {
+          if (calculate(obj, size)) {
+            ++count;
+          }
+        }
       }
     }
     ++count; // we need NULL termination for each type
@@ -316,26 +326,45 @@ void SmartAllocatorImpl::backupObjects(LinearAllocator &allocator) {
 
   // backup variable sized memory
   if (m_flag & (NeedRestore | NeedRestoreOnce)) {
-    for (m_iter.begin(); m_iter.get(); m_iter.next()) {
-      int size = 0;
-      if (calculate(m_iter.get(), size)) {
-        allocator.backup(m_iter.get());
-        backup(m_iter.get(), allocator);
+    FreeMap freeMap;
+    prepareFreeMap(freeMap);
+    int max = m_colMax;
+    int bitIndex = 0;
+    for (unsigned int i = 0; i < m_blocks.size(); i++) {
+      if (i == m_blocks.size() - 1) max = m_col;
+      char *start = (char *)m_blocks[i];
+      for (char *obj = start; obj < start + max;
+           obj += m_itemSize, bitIndex++) {
+        if (!freeMap.test(bitIndex)) {
+          int size = 0;
+          if (calculate(obj, size)) {
+            allocator.backup(obj);
+            backup(obj, allocator);
+          }
+        }
       }
     }
     allocator.backup((void*)NULL); // indicating end of this type
-    m_iter.clear();
   }
 }
 
 void SmartAllocatorImpl::rollbackObjects(LinearAllocator &allocator) {
   // sweep dangling objects
   if (m_flag & (NeedRestore | NeedRestoreOnce | NeedSweep)) {
-    m_iter.clear();
-    for (m_iter.begin(); m_iter.get(); m_iter.next()) {
-      sweep(m_iter.get());
+    FreeMap freeMap;
+    prepareFreeMap(freeMap);
+    int max = m_colMax;
+    int bitIndex = 0;
+    for (unsigned int i = 0; i < m_blocks.size(); i++) {
+      if (i == m_blocks.size() - 1) max = m_col;
+      char *start = (char *)m_blocks[i];
+      for (char *obj = start; obj < start + max;
+           obj += m_itemSize, bitIndex++) {
+        if (!freeMap.test(bitIndex)) {
+          sweep(obj);
+        }
+      }
     }
-    m_iter.clear();
   }
 
   // restore internal pointers
@@ -505,7 +534,7 @@ void SmartAllocatorImpl::checkMemory(bool detailed) {
   }
 }
 
-void SmartAllocatorImpl::prepareIterator(FreeMap &freeMap) {
+void SmartAllocatorImpl::prepareFreeMap(FreeMap &freeMap) {
   ASSERT(freeMap.empty());
   freeMap.resize(m_blocks.size() * m_itemCount);
   for (FreeList::iterator it = m_freelist.begin(); it != m_freelist.end();
@@ -519,66 +548,6 @@ void SmartAllocatorImpl::prepareIterator(FreeMap &freeMap) {
     freeMap.set(idx * m_itemCount +
                 (freed - (int64)m_blocks[idx]) / m_itemSize);
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// PointerIterator
-
-SmartAllocatorImpl::
-PointerIterator::PointerIterator(SmartAllocatorImpl *allocator)
-  : m_allocator(allocator), m_px(NULL), m_prepared(false),
-    m_curRow(0), m_offset(0), m_curFree(0) {
-  ASSERT(allocator);
-  m_itemSize = allocator->getItemSize();
-  m_itemCount = allocator->getItemCount();
-}
-
-void SmartAllocatorImpl::PointerIterator::clear() {
-  m_freeMap.clear();
-  m_prepared = false;
-  m_px = NULL;
-  m_curRow = 0;
-  m_offset = 0;
-  m_curFree = 0;
-}
-
-void SmartAllocatorImpl::PointerIterator::begin() {
-  if (!m_prepared) {
-    m_allocator->prepareIterator(m_freeMap);
-    m_prepared = true;
-  }
-
-  m_px = NULL;
-  m_curRow = 0;
-  m_offset = 0;
-  m_curFree = 0;
-  while (search());
-}
-
-void SmartAllocatorImpl::PointerIterator::next() {
-  ASSERT(m_px);
-  m_offset += m_itemSize;
-  m_curFree++;
-  while (search());
-}
-
-bool SmartAllocatorImpl::PointerIterator::search() {
-  if (m_curRow == m_allocator->m_row && m_offset >= m_allocator->m_col) {
-    m_px = NULL;
-    return false;
-  }
-  if (m_offset >= m_allocator->m_colMax) {
-    m_curRow++;
-    m_offset = 0;
-  } else {
-    m_px = m_allocator->m_blocks[m_curRow] + m_offset;
-    if (!m_freeMap.test(m_curFree)) {
-      return false;
-    }
-    m_offset += m_itemSize;
-    m_curFree++;
-  }
-  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

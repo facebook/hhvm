@@ -262,32 +262,6 @@ private:
   int m_maxMultiplier;    // the max possible multiplier
   int m_targetMultiplier; // updated upon rollback
 
-  class PointerIterator {
-  public:
-    PointerIterator(SmartAllocatorImpl *allocator);
-    void clear();
-
-    void begin();
-    void *get() { return m_px;}
-    void next();
-
-  private:
-    SmartAllocatorImpl *m_allocator;
-    int m_itemSize;
-    int m_itemCount;
-    char *m_px;
-    bool m_prepared;
-    FreeMap m_freeMap;
-
-    int m_curRow;
-    int m_offset;
-    int m_curFree;
-
-    bool search();
-  };
-
-  PointerIterator m_iter;
-
   void copyMemoryBlocks(std::vector<char *> &dest,
                         const std::vector<char *> &src,
                         int lastCol, int lastBlockSize);
@@ -303,8 +277,7 @@ protected:
 
   MemoryUsageStats *m_stats;
 
-  friend class PointerIterator;
-  void prepareIterator(FreeMap &freeMap);
+  void prepareFreeMap(FreeMap &freeMap);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

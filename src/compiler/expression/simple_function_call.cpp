@@ -1830,14 +1830,9 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
           }
           Variant scalarValue;
           if (value->isScalar() &&
-              value->getScalarValue(scalarValue) &&
-              !scalarValue.isAllowedAsConstantValue()) {
-            cg_printf("raise_warning(\"Constants may only evaluate to scalar "
-                      "values\"),");
-            // TODO don't actually define, and return false
-            if (!needAssignment) {
-              cg_printf("true");
-            }
+              value->getScalarValue(scalarValue)) {
+            // If this isn't true, m_dynamicConstant should have been true
+            assert(scalarValue.isAllowedAsConstantValue());
           }
           if (needAssignment) {
             cg_printf("%s%s = ", Option::ConstantPrefix, varName.c_str());

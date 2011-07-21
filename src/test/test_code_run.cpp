@@ -13940,6 +13940,17 @@ bool TestCodeRun::TestConstant() {
   MVCR("<?php "
       "var_dump(define('AF_UNIX', 5));"
       "var_dump(AF_UNIX);");
+  // Arrays aren't allowed as constants
+  MVCR("<?php "
+       "var_dump(define('KONST', array('a', 'bc')));"
+       "var_dump(KONST);"
+       "var_dump(define('FLUB', 1230));"
+       "var_dump(define('FLUB', array(1,23)));"
+       "var_dump(FLUB);"
+       // defeat optimizations
+       "var_dump(define('BLAH', array_map('strlen', array('a', 'bc'))));"
+       "var_dump(BLAH);");
+
   return true;
 }
 

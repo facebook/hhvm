@@ -24,7 +24,7 @@ CVarRef Globals::declareConstant(CStrRef name, Variant &constant,
                                  CVarRef value) {
   if (!value.isAllowedAsConstantValue()) {
     raise_warning("Constants may only evaluate to scalar values");
-    // TODO don't actually define, and return false
+    return false_varNR;
   }
   if (!m_dynamicConstants.exists(name)) {
     m_dynamicConstants.set(name, value);

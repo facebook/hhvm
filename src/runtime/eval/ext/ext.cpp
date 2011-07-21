@@ -194,7 +194,7 @@ Variant EvalDefine::InvokeImpl(VariableEnvironment &env,
       CVarRef v = params.rvalAt(1);
       if (!v.isAllowedAsConstantValue()) {
         raise_warning("Constants may only evaluate to scalar values");
-        // TODO don't actually define it, and return false
+        return false;
       }
       if (!f_defined(n)) {
         return RequestEvalState::declareConstant(n, v);

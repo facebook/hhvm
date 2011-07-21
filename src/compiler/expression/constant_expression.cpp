@@ -176,6 +176,15 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
 
     if (!value || !value->isScalar()) break;
 
+    Variant scalarValue;
+    if (value->getScalarValue(scalarValue) &&
+        !scalarValue.isAllowedAsConstantValue()) {
+      // block further optimization
+      const_cast<Symbol*>(sym)->setDynamic();
+      m_dynamic = true;
+      break;
+    }
+
     if (sym->isSystem() && !value->is(KindOfScalarExpression)) {
       if (ExpressionPtr opt = value->preOptimize(ar)) {
         value = opt;

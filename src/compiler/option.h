@@ -199,6 +199,7 @@ public:
   static const char *CreateObjectOnlyPrefix;
   static const char *PseudoMainPrefix;
   static const char *VariablePrefix;
+  static const char *LabelPrefix;
   static const char *HiddenVariablePrefix;
   static const char *GlobalVariablePrefix;
   static const char *StaticVariablePrefix;

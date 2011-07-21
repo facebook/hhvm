@@ -1098,13 +1098,13 @@ statement_without_expr:
   | T_DECLARE '(' declare_list ')'
     declare_statement                  { _p->onBlock($$, $5); $$ = T_DECLARE;}
 
-  | T_TRY '{'                          { _p->pushLabelScope(true);}
-    inner_statement_list '}'           { _p->popLabelScope(true);}
+  | T_TRY '{'
+    inner_statement_list '}'
     T_CATCH '('
     fully_qualified_class_name
-    T_VARIABLE ')' '{'                 { _p->pushLabelScope(true);}
-    inner_statement_list '}'           { _p->popLabelScope(true);}
-    additional_catches                 { _p->onTry($$,$4,$9,$10,$14,$17);}
+    T_VARIABLE ')' '{'
+    inner_statement_list '}'
+    additional_catches                 { _p->onTry($$,$3,$7,$8,$11,$13);}
 
   | T_THROW expr ';'                   { _p->onThrow($$, $2);}
   | T_GOTO T_STRING ';'                { _p->onGoto($$, $2, true);
@@ -1117,9 +1117,8 @@ additional_catches:
     T_CATCH '('
     fully_qualified_class_name
     T_VARIABLE ')'
-    '{'                                { _p->pushLabelScope(true);}
-    inner_statement_list '}'           { _p->popLabelScope(true);
-                                         _p->onCatch($$, $1, $4, $5, $9);}
+    '{'
+    inner_statement_list '}'           { _p->onCatch($$, $1, $4, $5, $8);}
   |                                    { $$.reset();}
 ;
 

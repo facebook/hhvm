@@ -33,10 +33,14 @@ public:
 
   const std::string &label() { return m_label; }
 
-	void invalidate(ParserBase::GotoError error);
+  void invalidate(ParserBase::GotoError error);
+  int getId() const { return m_id; }
+  void setId(int id) { m_id = id; }
+  void setLabel(const std::string &label) { m_label = label; }
 private:
   std::string m_label;
   ParserBase::GotoError m_error;
+  int m_id;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

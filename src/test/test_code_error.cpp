@@ -505,7 +505,7 @@ bool TestCodeError::TestGotoUndefLabel() {
 
 bool TestCodeError::TestGotoInvalidBlock() {
   VE(GotoInvalidBlock,
-     "<?php goto my_block; try { my_block: } catch (Exception $e) {}");
+     "<?php goto my_block; do { my_block: } while (false);");
 
   VE(GotoInvalidBlock,
      "<?php "
@@ -515,10 +515,6 @@ bool TestCodeError::TestGotoInvalidBlock() {
      "    foo: var_dump($i);"
      "  }"
      "}");
-
-  VE(GotoInvalidBlock,
-     "<?php goto my_block; try { var_dump(0); } catch (Exception $e) {} "
-		 "catch (Exception $b) { my_block: var_dump($b); }");
 
   return true;
 }

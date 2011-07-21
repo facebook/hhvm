@@ -41,6 +41,7 @@ public:
   const std::string &getClassName() const { return m_className; }
   SimpleVariablePtr getVariable() const { return m_variable; }
   StatementPtr getStmt() const { return m_stmt; }
+  void setStmt(StatementPtr s) { m_stmt = s; }
 private:
   std::string m_className;
   std::string m_originalClassName;

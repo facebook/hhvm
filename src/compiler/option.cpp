@@ -100,6 +100,7 @@ const char *Option::InvokeSinglePrefix = "is_";
 const char *Option::CreateObjectOnlyPrefix = "coo_";
 const char *Option::PseudoMainPrefix = "pm_";
 const char *Option::VariablePrefix = "v_";
+const char *Option::LabelPrefix = "l_";
 const char *Option::HiddenVariablePrefix = "h_";
 const char *Option::GlobalVariablePrefix = "gv_";
 const char *Option::StaticVariablePrefix = "sv_";
@@ -313,6 +314,7 @@ void Option::Load(Hdf &config) {
     READ_CG_OPTION(InvokePrefix);
     READ_CG_OPTION(PseudoMainPrefix);
     READ_CG_OPTION(VariablePrefix);
+    READ_CG_OPTION(LabelPrefix);
     READ_CG_OPTION(HiddenVariablePrefix);
     READ_CG_OPTION(GlobalVariablePrefix);
     READ_CG_OPTION(StaticVariablePrefix);

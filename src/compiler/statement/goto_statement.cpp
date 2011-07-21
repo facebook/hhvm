@@ -15,6 +15,7 @@
 */
 
 #include <compiler/statement/goto_statement.h>
+#include <compiler/analysis/function_scope.h>
 
 using namespace HPHP;
 using namespace std;
@@ -26,7 +27,7 @@ using namespace boost;
 GotoStatement::GotoStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, const std::string &label)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
-    m_label(label), m_error((ParserBase::GotoError)0) {
+    m_label(label), m_error((ParserBase::GotoError)0), m_id(0) {
 }
 
 StatementPtr GotoStatement::clone() {
@@ -57,6 +58,10 @@ void GotoStatement::invalidate(ParserBase::GotoError error) {
 // static analysis functions
 
 void GotoStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
+    FunctionScopeRawPtr fs = getFunctionScope();
+    if (fs) fs->setHasGoto();
+  }
 }
 
 ConstructPtr GotoStatement::getNthKid(int n) const {
@@ -92,7 +97,7 @@ void GotoStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void GotoStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (!m_error) {
-    cg_printf("goto %s;\n", m_label.c_str());
+    cg_printf("goto %s%s;\n", Option::LabelPrefix, m_label.c_str());
   } else {
     switch (m_error) {
     case ParserBase::UndefLabel:
@@ -101,7 +106,7 @@ void GotoStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       break;
     case ParserBase::InvalidBlock:
       cg_printf("throw_fatal(\"'goto' into loop or switch statement "
-                "or try/catch block is disallowed\");\n");
+                "is disallowed\");\n");
       break;
     default:
       ASSERT(false);

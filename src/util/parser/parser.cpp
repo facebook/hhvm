@@ -154,18 +154,16 @@ void ParserBase::pushLabelInfo() {
   pushLabelScope();
 }
 
-void ParserBase::pushLabelScope(bool forTryCatch /* = false */) {
+void ParserBase::pushLabelScope() {
   ASSERT(!m_labelInfos.empty());
   LabelInfo &info = m_labelInfos.back();
   info.scopes.push_back(++info.scopeId);
-  if (forTryCatch) info.tryCatchBlockDepth++;
 }
 
-void ParserBase::popLabelScope(bool forTryCatch /* = false */) {
+void ParserBase::popLabelScope() {
   ASSERT(!m_labelInfos.empty());
   LabelInfo &info = m_labelInfos.back();
   info.scopes.pop_back();
-  if (forTryCatch) info.tryCatchBlockDepth--;
 }
 
 void ParserBase::addLabel(const std::string &label,
@@ -183,7 +181,6 @@ void ParserBase::addLabel(const std::string &label,
   LabelStmtInfo labelInfo;
   labelInfo.scopeId         = info.scopes.back();
   labelInfo.stmt            = extractStatement(stmt);
-  labelInfo.inTryCatchBlock = info.inTryCatchBlock();
   labelInfo.loc             = loc;
   info.labels[label]        = labelInfo;
 }
@@ -217,16 +214,7 @@ void ParserBase::popLabelInfo() {
     }
     const LabelStmtInfo &labelInfo = iter->second;
     if (gotoInfo.label.find(YIELD_LABEL_PREFIX) == 0) {
-      // we must disallow yield jumps into try/catch blocks, but
-      // we can allow switch/loops...
-      if (labelInfo.inTryCatchBlock) {
-        // would jump into try/catch block
-        error("yield is not allowed from within a try/catch block: %s",
-              getMessage(labelInfo.loc.get()).c_str());
-        invalidateGoto(gotoInfo.stmt, InvalidBlock);
-      } else {
-        labels.erase(gotoInfo.label);
-      }
+      labels.erase(gotoInfo.label);
       continue;
     }
     int labelScopeId = labelInfo.scopeId;
@@ -238,7 +226,7 @@ void ParserBase::popLabelInfo() {
       }
     }
     if (!found) {
-      error("'goto' into loop or switch statement or try/catch block "
+      error("'goto' into loop or switch statement "
             "is disallowed: %s", getMessage(gotoInfo.loc.get()).c_str());
       invalidateGoto(gotoInfo.stmt, InvalidBlock);
       continue;

@@ -14,19 +14,32 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/base/complex_types.h>
+
 #include <compiler/statement/method_statement.h>
 #include <compiler/statement/return_statement.h>
-#include <compiler/analysis/analysis_result.h>
+#include <compiler/statement/statement_list.h>
+#include <compiler/statement/try_statement.h>
+#include <compiler/statement/label_statement.h>
+#include <compiler/statement/goto_statement.h>
+#include <compiler/statement/exp_statement.h>
+#include <compiler/statement/switch_statement.h>
+#include <compiler/statement/case_statement.h>
+#include <compiler/statement/catch_statement.h>
+
 #include <compiler/expression/modifier_expression.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/parameter_expression.h>
+#include <compiler/expression/assignment_expression.h>
+#include <compiler/expression/simple_variable.h>
+
+#include <compiler/analysis/analysis_result.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/function_scope.h>
-#include <compiler/statement/statement_list.h>
 
 #include <compiler/option.h>
 #include <compiler/builtin_symbols.h>
@@ -238,6 +251,283 @@ void MethodStatement::addParamRTTI(AnalysisResultPtr ar) {
   }
 }
 
+class TryingGotoFixer {
+public:
+  TryingGotoFixer(AnalysisResultPtr ar) : id(0), m_ar(ar) {}
+
+  void fixTryingGotos(StatementPtr s) {
+    findTryingGotosRecur(s);
+    while (labelMap.size()) {
+      LabelInfoMap::iterator it = labelMap.begin(), end = labelMap.end();
+      while (it != end) {
+        if (it->second.trys.size()) {
+          TryStatementRawPtr t = it->second.trys.back();
+          for (int i = it->second.gotos.size(); i--; ) {
+            GotoInfo &gi = it->second.gotos[i];
+            if (gi.trys.size() < it->second.trys.size() ||
+                gi.trys[it->second.trys.size() - 1] != t) {
+              // the goto is not nested in the same try as the label
+              TryInfo & ti = tryMap[t];
+              if (!ti.label) {
+                ti.label = ++id;
+              }
+              string labelStr = lexical_cast<string>(ti.label);
+              if (it->second.trys.size() > 1) {
+                LabelInfo &li = labelMap[labelStr];
+                li.trys = it->second.trys;
+                li.trys.pop_back();
+                li.gotos.push_back(gi);
+              }
+
+              int lid = gi.goto_stmt->getId();
+              if (!lid) {
+                int &id = labelIdMap[gi.goto_stmt->label()];
+                if (!id) id = labelIdMap.size();
+                lid = id;
+                gi.goto_stmt->setId(lid);
+                ti.targets[it->first] = -lid;
+              } else {
+                ti.targets[it->first] = lid;
+              }
+
+
+              gi.goto_stmt->setLabel(labelStr);
+            }
+          }
+        }
+        labelMap.erase(it++);
+      }
+    }
+    fixTryingGotosRecur(s);
+  }
+
+  void findTryingGotosRecur(StatementPtr s) {
+    switch (s->getKindOf()) {
+      case Statement::KindOfMethodStatement:
+      case Statement::KindOfFunctionStatement:
+      case Statement::KindOfClassStatement:
+      case Statement::KindOfInterfaceStatement:
+        // dont recur into declarations
+        return;
+      case Statement::KindOfLabelStatement:
+        if (trys.size()) {
+          LabelStatementRawPtr label_stmt(
+            static_pointer_cast<LabelStatement>(s));
+          LabelInfo &li = labelMap[label_stmt->label()];
+          assert(!li.trys.size());
+          li.trys = trys;
+        }
+        break;
+      case Statement::KindOfGotoStatement: {
+        GotoStatementRawPtr goto_stmt(
+          static_pointer_cast<GotoStatement>(s));
+        LabelInfo &li = labelMap[goto_stmt->label()];
+        li.gotos.push_back(GotoInfo(goto_stmt, trys));
+        break;
+      }
+      case Statement::KindOfTryStatement: {
+        TryStatementRawPtr t(static_pointer_cast<TryStatement>(s));
+        trys.push_back(t);
+        findTryingGotosRecur(t->getBody());
+        trys.pop_back();
+        findTryingGotosRecur(t->getCatches());
+        return;
+      }
+      default:
+        break;
+    }
+    for (int i = s->getKidCount(); i--; ) {
+      StatementPtr child(s->getNthStmt(i));
+      if (child) {
+        findTryingGotosRecur(child);
+      }
+    }
+    return;
+  }
+
+  ExpressionPtr gotoVar(StatementPtr s) {
+    SimpleVariablePtr sv(
+      new SimpleVariable(
+        s->getScope(), s->getLocation(),
+        Expression::KindOfSimpleVariable, "0_gtid"));
+    sv->updateSymbol(SimpleVariablePtr());
+    sv->getSymbol()->setHidden();
+    return sv;
+  }
+
+  StatementPtr replaceGoto(GotoStatementRawPtr goto_stmt, int id) {
+    StatementListPtr sl(new StatementList(
+                          goto_stmt->getScope(), goto_stmt->getLocation(),
+                          Statement::KindOfStatementList));
+    AssignmentExpressionPtr ae(
+      new AssignmentExpression(
+        goto_stmt->getScope(), goto_stmt->getLocation(),
+        Expression::KindOfAssignmentExpression, gotoVar(goto_stmt),
+        goto_stmt->makeScalarExpression(m_ar, Variant(id > 0 ? id : 0)),
+        false));
+    ExpStatementPtr exp(
+      new ExpStatement(goto_stmt->getScope(), goto_stmt->getLocation(),
+                       Statement::KindOfExpStatement, ae));
+    sl->addElement(exp);
+    sl->addElement(goto_stmt);
+    return sl;
+  }
+
+  StatementPtr fixTryingGotosRecur(StatementPtr s) {
+    switch (s->getKindOf()) {
+      case Statement::KindOfMethodStatement:
+      case Statement::KindOfFunctionStatement:
+      case Statement::KindOfClassStatement:
+      case Statement::KindOfInterfaceStatement:
+        // dont recur into declarations
+        return StatementPtr();
+      default: break;
+    }
+
+    for (int i = s->getKidCount(); i--; ) {
+      StatementPtr child(s->getNthStmt(i));
+      if (child) {
+        StatementPtr r = fixTryingGotosRecur(child);
+        if (r) s->setNthKid(i, r);
+      }
+    }
+
+    switch (s->getKindOf()) {
+      case Statement::KindOfGotoStatement: {
+        GotoStatementRawPtr goto_stmt(
+          static_pointer_cast<GotoStatement>(s));
+        if (int id = goto_stmt->getId()) {
+          return replaceGoto(goto_stmt, id);
+        }
+        break;
+      }
+      case Statement::KindOfTryStatement: {
+        TryStatementRawPtr t(static_pointer_cast<TryStatement>(s));
+        TryInfo &ti = tryMap[t];
+        StatementListPtr catches = t->getCatches();
+        bool doTry = ti.targets.size();
+        bool doCatch = catches->hasReachableLabel();
+        if (!doTry && !doCatch) break;
+        StatementListPtr sl(new StatementList(
+                              s->getScope(), s->getLocation(),
+                              Statement::KindOfStatementList));
+        StatementListPtr newBody(new StatementList(
+                                   s->getScope(), s->getLocation(),
+                                   Statement::KindOfStatementList));
+        if (doTry) {
+          StatementListPtr cases(new StatementList(
+                                   s->getScope(), s->getLocation(),
+                                   Statement::KindOfStatementList));
+          for (map<string,int>::iterator it = ti.targets.begin(),
+                 end = ti.targets.end(); it != end; ++it) {
+            StatementPtr g(new GotoStatement(
+                             s->getScope(), s->getLocation(),
+                             Statement::KindOfGotoStatement, it->first));
+            if (it->second < 0) {
+              g = replaceGoto(static_pointer_cast<GotoStatement>(g), 0);
+            }
+            CaseStatementPtr c(new CaseStatement(
+                                 s->getScope(), s->getLocation(),
+                                 Statement::KindOfCaseStatement,
+                                 s->makeScalarExpression(m_ar, abs(it->second)),
+                                 g));
+            cases->addElement(c);
+          }
+          SwitchStatementPtr sw(new SwitchStatement(
+                                  s->getScope(), s->getLocation(),
+                                  Statement::KindOfSwitchStatement,
+                                  gotoVar(s), cases));
+
+          newBody->addElement(sw);
+
+          LabelStatementPtr lab(new LabelStatement(
+                                  s->getScope(), s->getLocation(),
+                                  Statement::KindOfLabelStatement,
+                                  lexical_cast<string>(ti.label)));
+          sl->addElement(lab);
+        }
+        newBody->addElement(t->getBody());
+        sl->addElement(StatementPtr(new TryStatement(
+                                      s->getScope(), s->getLocation(),
+                                      Statement::KindOfTryStatement,
+                                      newBody, catches)));
+        if (doCatch) {
+          if (!ti.label) ti.label = ++id;
+          string afterLab = lexical_cast<string>(ti.label) + "_a";
+          newBody->addElement(StatementPtr(
+                                new GotoStatement(
+                                  s->getScope(), s->getLocation(),
+                                  Statement::KindOfGotoStatement, afterLab)));
+
+          for (int i = 0, n = catches->getCount(); i < n; i++) {
+            CatchStatementPtr c =
+              static_pointer_cast<CatchStatement>((*catches)[i]);
+            StatementPtr body = c->getStmt();
+            string lab = lexical_cast<string>(ti.label) + "_c" +
+              lexical_cast<string>(i);
+            c->setStmt(StatementPtr(
+                         new GotoStatement(
+                           c->getScope(), c->getLocation(),
+                           Statement::KindOfGotoStatement, lab)));
+            StatementListPtr newBody(new StatementList(
+                                       body->getScope(), body->getLocation(),
+                                       Statement::KindOfStatementList));
+            newBody->addElement(StatementPtr(
+                                  new LabelStatement(
+                                    body->getScope(), body->getLocation(),
+                                    Statement::KindOfLabelStatement,
+                                    lab)));
+            newBody->addElement(body);
+            if (i + 1 < n) {
+              newBody->addElement(
+                StatementPtr(new GotoStatement(
+                               body->getScope(), body->getLocation(),
+                               Statement::KindOfGotoStatement, afterLab)));
+            }
+            sl->addElement(newBody);
+          }
+
+          sl->addElement(StatementPtr(
+                           new LabelStatement(
+                             s->getScope(), s->getLocation(),
+                             Statement::KindOfLabelStatement,
+                             afterLab)));
+        }
+        return sl;
+        break;
+      }
+      default:
+        break;
+    }
+    return StatementPtr();
+  }
+
+private:
+  typedef std::vector<TryStatementRawPtr> TryVector;
+  struct GotoInfo {
+    GotoInfo(GotoStatementRawPtr g, const TryVector &t) :
+        goto_stmt(g), trys(t) {}
+    GotoStatementRawPtr goto_stmt;
+    TryVector trys;
+  };
+  typedef std::vector<GotoInfo> GotoVector;
+  struct LabelInfo {
+    TryVector trys;
+    GotoVector gotos;
+  };
+  struct TryInfo {
+    int label;
+    std::map<string,int> targets;
+  };
+  TryVector trys;
+  typedef map<string,LabelInfo> LabelInfoMap;
+  LabelInfoMap labelMap;
+  map<TryStatementRawPtr,TryInfo> tryMap;
+  map<string,int> labelIdMap;
+  int id;
+  AnalysisResultPtr m_ar;
+};
+
 void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   FunctionScopeRawPtr funcScope = getFunctionScope();
 
@@ -263,6 +553,10 @@ void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
         BuiltinSymbols::IsDeclaredDynamic(m_name) ||
         Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {
       funcScope->setDynamic();
+    }
+    if (funcScope->hasGoto() && funcScope->hasTry()) {
+      TryingGotoFixer tgf(ar);
+      tgf.fixTryingGotos(m_stmt);
     }
     // TODO: this may have to expand to a concept of "virtual" functions...
     if (m_method) {

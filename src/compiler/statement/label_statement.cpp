@@ -77,5 +77,5 @@ void LabelStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void LabelStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (m_isValid) cg_printf("%s:;\n", m_label.c_str());
+  if (m_isValid) cg_printf("%s%s:;\n", Option::LabelPrefix, m_label.c_str());
 }

@@ -16,6 +16,7 @@
 
 #include <compiler/statement/try_statement.h>
 #include <compiler/statement/statement_list.h>
+#include <compiler/analysis/function_scope.h>
 
 using namespace HPHP;
 using namespace std;
@@ -52,6 +53,10 @@ int TryStatement::getRecursiveCount() const {
 void TryStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   if (m_tryStmt) m_tryStmt->analyzeProgram(ar);
   m_catches->analyzeProgram(ar);
+  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
+    FunctionScopeRawPtr fs = getFunctionScope();
+    if (fs) fs->setHasTry();
+  }
 }
 
 bool TryStatement::hasDecl() const {

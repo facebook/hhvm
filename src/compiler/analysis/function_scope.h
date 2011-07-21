@@ -127,6 +127,11 @@ public:
   bool nextLSB() const { return m_nextLSB; }
   void setNextLSB(bool f) { m_nextLSB = f; }
 
+  void setHasGoto() { m_hasGoto = true; }
+  void setHasTry() { m_hasTry = true; }
+  bool hasGoto() const { return m_hasGoto; }
+  bool hasTry() const { return m_hasTry; }
+
   /**
    * Either __construct or a class-name constructor.
    */
@@ -493,6 +498,8 @@ private:
   unsigned m_closureGenerator : 1;
   unsigned m_noLSB : 1;
   unsigned m_nextLSB : 1;
+  unsigned m_hasTry : 1;
+  unsigned m_hasGoto : 1;
 
   int m_redeclaring; // multiple definition of the same function
   StatementPtr m_stmtCloned; // cloned method body stmt

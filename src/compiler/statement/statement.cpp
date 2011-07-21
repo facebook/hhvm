@@ -15,6 +15,7 @@
 */
 
 #include <compiler/statement/statement.h>
+#include <compiler/analysis/function_scope.h>
 
 using namespace HPHP;
 
@@ -90,9 +91,12 @@ bool Statement::hasReachableLabel() const {
     case KindOfForStatement:
     case KindOfForEachStatement:
     case KindOfWhileStatement:
-    case KindOfDoStatement:
+    case KindOfDoStatement: {
       // a label inside a loop cant be reached from outside the loop
+      FunctionScopeRawPtr f = getFunctionScope();
+      if (f && f->isGenerator()) break;
       return false;
+    }
     case KindOfLabelStatement:
       return true;
     default:

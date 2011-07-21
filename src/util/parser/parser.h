@@ -143,8 +143,8 @@ public:
 
   // for goto syntax checking
   void pushLabelInfo();
-  void pushLabelScope(bool forTryCatch = false);
-  void popLabelScope(bool forTryCatch = false);
+  void pushLabelScope();
+  void popLabelScope();
   void addLabel(const std::string &label, LocationPtr loc,
                 ScannerToken *stmt);
   void addGoto(const std::string &label, LocationPtr loc,
@@ -196,10 +196,8 @@ protected:
 
   class LabelInfo {
   public:
-    LabelInfo() : scopeId(0), tryCatchBlockDepth(0) {}
-    bool inTryCatchBlock() { return tryCatchBlockDepth > 0; }
+    LabelInfo() : scopeId(0) {}
     int scopeId;
-    int tryCatchBlockDepth;
     LabelScopes scopes;
     LabelMap labels;
     std::vector<GotoInfo> gotos;

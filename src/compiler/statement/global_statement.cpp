@@ -140,7 +140,6 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
       }
     }
   }
-  FunctionScopePtr func = getFunctionScope();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -596,15 +596,16 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_constants->outputCPPClassMap(cg, ar);
 }
 
-bool ClassScope::hasConst(const string &name) {
-  return m_constants->isPresent(name);
+bool ClassScope::hasConst(const string &name) const {
+  const Symbol *sym = m_constants->getSymbol(name);
+  ASSERT(!sym || sym->isPresent());
+  return sym;
 }
 
 Symbol *ClassScope::findProperty(ClassScopePtr &cls,
                                  const string &name,
-                                 AnalysisResultConstPtr ar,
-                                 ConstructPtr construct) {
-  return getVariables()->findProperty(cls, name, ar, construct);
+                                 AnalysisResultConstPtr ar) {
+  return getVariables()->findProperty(cls, name, ar);
 }
 
 TypePtr ClassScope::checkProperty(Symbol *sym, TypePtr type,
@@ -618,13 +619,11 @@ TypePtr ClassScope::checkConst(const std::string &name, TypePtr type,
                                const std::vector<std::string> &bases,
                                BlockScope *&defScope) {
   defScope = NULL;
-  TypePtr t = getConstants()->check(name, type, coerce,
-                                    ar, construct, m_bases, defScope);
-  if (defScope) return t;
-  return t;
+  return getConstants()->check(name, type, coerce,
+                               ar, construct, m_bases, defScope);
 }
 
-ClassScopePtr ClassScope::getParentScope(AnalysisResultConstPtr ar) {
+ClassScopePtr ClassScope::getParentScope(AnalysisResultConstPtr ar) const {
   if (m_parent.empty()) return ClassScopePtr();
   return ar->findClass(m_parent);
 }
@@ -1456,8 +1455,10 @@ void ClassScope::outputForwardDeclaration(CodeGenerator &cg) {
   }
 }
 
-bool ClassScope::hasProperty(const string &name) {
-  return m_variables->isPresent(name);
+bool ClassScope::hasProperty(const string &name) const {
+  const Symbol *sym = m_variables->getSymbol(name);
+  ASSERT(!sym || sym->isPresent());
+  return sym;
 }
 
 void ClassScope::setRedeclaring(AnalysisResultConstPtr ar, int redecId) {

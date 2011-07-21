@@ -170,10 +170,13 @@ void ClassVariable::inferTypes(AnalysisResultPtr ar) {
 
   if (m_modifiers->isStatic()) {
     ClassScopePtr scope = getClassScope();
+    if (m_declaration->getCount()) {
+      // can probably go in analyzeProgram
+      scope->setNeedStaticInitializer();
+    }
     for (int i = 0; i < m_declaration->getCount(); i++) {
       ExpressionPtr exp = (*m_declaration)[i];
       if (exp->is(Expression::KindOfAssignmentExpression)) {
-        scope->setNeedStaticInitializer();
         AssignmentExpressionPtr assignment =
           dynamic_pointer_cast<AssignmentExpression>(exp);
         // If the class variable's type is Object, we have to
@@ -193,8 +196,6 @@ void ClassVariable::inferTypes(AnalysisResultPtr ar) {
           scope->getVariables()->
             setAttribute(VariableTable::ContainsDynamicStatic);
         }
-      } else {
-        scope->setNeedStaticInitializer();
       }
     }
   }

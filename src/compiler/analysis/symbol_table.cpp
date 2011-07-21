@@ -208,8 +208,8 @@ bool SymbolTable::isPresent(const std::string &name) const {
 }
 
 bool SymbolTable::checkDefined(const std::string &name) {
-  if (const Symbol *sym = getSymbol(name)) {
-    return const_cast<Symbol*>(sym)->checkDefined();
+  if (Symbol *sym = getSymbol(name)) {
+    return sym->checkDefined();
   }
   return false;
 }
@@ -223,12 +223,20 @@ bool SymbolTable::isSystem(const std::string &name) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Symbol *SymbolTable::getSymbol(const std::string &name) {
-  std::map<std::string,Symbol>::iterator it = m_symbolMap.find(name);
+const Symbol *SymbolTable::getSymbolImpl(const std::string &name) const {
+  std::map<std::string,Symbol>::const_iterator it = m_symbolMap.find(name);
   if (it != m_symbolMap.end()) {
     return &it->second;
   }
   return NULL;
+}
+
+Symbol *SymbolTable::getSymbol(const std::string &name) {
+  return const_cast<Symbol*>(getSymbolImpl(name));
+}
+
+const Symbol *SymbolTable::getSymbol(const std::string &name) const {
+  return getSymbolImpl(name);
 }
 
 Symbol *SymbolTable::genSymbol(const std::string &name, bool konst) {
@@ -244,8 +252,8 @@ Symbol *SymbolTable::genSymbol(const std::string &name, bool konst) {
   return sym;
 }
 
-TypePtr SymbolTable::getType(const std::string &name) {
-  if (Symbol *sym = getSymbol(name)) {
+TypePtr SymbolTable::getType(const std::string &name) const {
+  if (const Symbol *sym = getSymbol(name)) {
     return sym->getType();
   }
   return TypePtr();

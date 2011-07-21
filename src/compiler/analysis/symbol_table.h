@@ -280,7 +280,7 @@ public:
   /**
    * Find a symbol's inferred type.
    */
-  TypePtr getType(const std::string &name);
+  TypePtr getType(const std::string &name) const;
   TypePtr getFinalType(const std::string &name) const;
 
   /**
@@ -312,9 +312,7 @@ public:
   virtual TypePtr setType(AnalysisResultConstPtr ar, Symbol *sym,
                           TypePtr type, bool coerced);
   Symbol *getSymbol(const std::string &name);
-  const Symbol *getSymbol(const std::string &name) const {
-    return const_cast<SymbolTable*>(this)->getSymbol(name);
-  }
+  const Symbol *getSymbol(const std::string &name) const;
 
   FunctionScopeRawPtr getFunctionScope();
   ClassScopeRawPtr getClassScope();
@@ -330,6 +328,7 @@ protected:
 
   void countTypes(std::map<std::string, int> &counts);
 private:
+  const Symbol* getSymbolImpl(const std::string &name) const;
   bool m_const;
 };
 

@@ -211,13 +211,14 @@ public:
    * its Symbol
    */
   Symbol *findProperty(ClassScopePtr &cls, const std::string &name,
-                       AnalysisResultConstPtr ar, ConstructPtr construct);
+                       AnalysisResultConstPtr ar);
   TypePtr checkProperty(Symbol *sym, TypePtr type,
                         bool coerce, AnalysisResultConstPtr ar);
   /**
    * Walk up to find first parent that has the specified symbol.
    */
-  ClassScopePtr findParent(AnalysisResultConstPtr ar, const std::string &name);
+  ClassScopePtr findParent(AnalysisResultConstPtr ar,
+                           const std::string &name) const;
 
   /**
    * Called when analyze global and static statement.

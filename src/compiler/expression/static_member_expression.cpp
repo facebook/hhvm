@@ -88,7 +88,7 @@ bool StaticMemberExpression::findMember(AnalysisResultPtr ar, string &name,
 
   if (!name.empty()) {
     ClassScopePtr parent = m_resolvedClass;
-    sym = m_resolvedClass->findProperty(parent, name, ar, shared_from_this());
+    sym = m_resolvedClass->findProperty(parent, name, ar);
     if (sym && sym->isStatic()) {
       m_resolvedClass = parent;
     } else {
@@ -169,7 +169,7 @@ ExpressionPtr StaticMemberExpression::postOptimize(AnalysisResultConstPtr ar) {
       ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
       const std::string &name = var->getString();
 
-      sym = cls->findProperty(cls, name, ar, shared_from_this());
+      sym = cls->findProperty(cls, name, ar);
       if (sym && !sym->isIndirectAltered() && sym->isStatic()) {
         ConstructPtr init = sym->getClassInitVal();
         if (init) {
@@ -247,7 +247,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
     if (isRedeclared()) {
       BOOST_FOREACH(ClassScopePtr clsr,
                     ar->findRedeclaredClasses(m_className)) {
-        sym = clsr->findProperty(clsr, name, ar, self);
+        sym = clsr->findProperty(clsr, name, ar);
         if (sym && sym->isStatic()) {
           clsr->checkProperty(sym, type, coerce, ar);
           found = true;

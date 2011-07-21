@@ -236,7 +236,7 @@ public:
                                    bool recursive);
 
   Symbol *findProperty(ClassScopePtr &cls, const std::string &name,
-                       AnalysisResultConstPtr ar, ConstructPtr construct);
+                       AnalysisResultConstPtr ar);
   TypePtr checkProperty(Symbol *sym, TypePtr type,
                         bool coerce, AnalysisResultConstPtr ar);
   TypePtr checkConst(const std::string &name, TypePtr type,
@@ -263,7 +263,7 @@ public:
 
   std::vector<std::string> &getBases() { return m_bases;}
 
-  ClassScopePtr getParentScope(AnalysisResultConstPtr ar);
+  ClassScopePtr getParentScope(AnalysisResultConstPtr ar) const;
 
   void addUsedLiteralStringHeader(const std::string &s) {
     m_usedLiteralStringsHeader.insert(s);
@@ -354,11 +354,11 @@ public:
    const StringToClassScopePtrVecMap &classScopes,
    bool extension = false);
   void outputCPPStaticInitializerDecl(CodeGenerator &cg);
-  bool isInterface() { return m_kindOf == KindOfInterface; }
-  bool isFinal() { return m_kindOf == KindOfFinalClass; }
-  bool isAbstract() { return m_kindOf == KindOfAbstractClass; }
-  bool hasProperty(const std::string &name);
-  bool hasConst(const std::string &name);
+  bool isInterface() const { return m_kindOf == KindOfInterface; }
+  bool isFinal() const { return m_kindOf == KindOfFinalClass; }
+  bool isAbstract() const { return m_kindOf == KindOfAbstractClass; }
+  bool hasProperty(const std::string &name) const;
+  bool hasConst(const std::string &name) const;
   void outputCPPHeader(AnalysisResultPtr ar,
                        CodeGenerator::Output output);
   void outputCPPForwardHeader(AnalysisResultPtr ar,

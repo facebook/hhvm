@@ -274,18 +274,19 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   if (!m_propSym || cls != m_objectClass.lock()) {
     m_objectClass = cls;
     ClassScopePtr parent;
-    m_propSym = cls->findProperty(parent, name, ar, self);
-    assert(m_propSym);
-    if (!parent) {
-      parent = cls;
-    }
-    m_propSymValid = m_propSym->isPresent() &&
-      (!m_propSym->isPrivate() ||
-       getOriginalClass() == parent) &&
-      !m_propSym->isStatic();
+    m_propSym = cls->findProperty(parent, name, ar);
+    if (m_propSym) {
+      if (!parent) {
+        parent = cls;
+      }
+      assert(m_propSym->isPresent());
+      m_propSymValid =
+        (!m_propSym->isPrivate() || getOriginalClass() == parent) &&
+        !m_propSym->isStatic();
 
-    if (m_propSymValid) {
-      parent->addUse(getScope(), BlockScope::UseKindNonStaticRef);
+      if (m_propSymValid) {
+        parent->addUse(getScope(), BlockScope::UseKindNonStaticRef);
+      }
     }
   }
 

@@ -140,7 +140,7 @@ public:
     return false;
   }
 
-  virtual ClassScopePtr getParentScope(AnalysisResultConstPtr ar) {
+  virtual ClassScopePtr getParentScope(AnalysisResultConstPtr ar) const {
     return ClassScopePtr();
   }
 

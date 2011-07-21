@@ -31,7 +31,8 @@ DECLARE_BOOST_TYPES(ClassScope);
 /**
  * These are the only places that a new constant can be declared:
  *
- *   class_constant_declaration: class { const T_STRING = static_scalar,...}
+ *   const T_STRING = static_scalar
+ *   class { const T_STRING = static_scalar,...}
  *   define('NAME', static_scalar)
  */
 class ConstantTable : public SymbolTable {
@@ -107,18 +108,19 @@ public:
   bool hasJumpTable() const { return !m_emptyJumpTable;}
 
   bool isRecursivelyDeclared(AnalysisResultConstPtr ar,
-                             const std::string &name);
+                             const std::string &name) const;
   ConstructPtr getValueRecur(AnalysisResultConstPtr ar, const std::string &name,
-                             ClassScopePtr &defClass);
+                             ClassScopePtr &defClass) const;
   ConstructPtr getDeclarationRecur(AnalysisResultConstPtr ar,
                                    const std::string &name,
-                                   ClassScopePtr &defClass);
+                                   ClassScopePtr &defClass) const;
 
 private:
   bool m_emptyJumpTable;
   bool m_hasDynamic;
 
-  ClassScopePtr findParent(AnalysisResultConstPtr ar, const std::string &name);
+  ClassScopePtr findParent(AnalysisResultConstPtr ar,
+                           const std::string &name) const;
   bool outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                  const Symbol *sym) const;
   void outputCPPConstantSymbol(CodeGenerator &cg, AnalysisResultPtr ar,

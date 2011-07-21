@@ -504,10 +504,10 @@ TypePtr VariableTable::checkVariable(Symbol *sym, TypePtr type,
 
 Symbol *VariableTable::findProperty(ClassScopePtr &cls,
                                     const string &name,
-                                    AnalysisResultConstPtr ar,
-                                    ConstructPtr construct) {
+                                    AnalysisResultConstPtr ar) {
   Symbol *sym = getSymbol(name);
-  if (sym && sym->declarationSet()) {
+  if (sym) {
+    ASSERT(sym->declarationSet());
     if (!sym->isOverride() || !sym->isStatic()) {
       return sym;
     }
@@ -516,15 +516,11 @@ Symbol *VariableTable::findProperty(ClassScopePtr &cls,
 
   if (!sym) {
     if (ClassScopePtr parent = findParent(ar, name)) {
-      sym = parent->findProperty(parent, name, ar, construct);
+      sym = parent->findProperty(parent, name, ar);
       if (sym) {
         cls = parent;
         return sym;
       }
-    }
-
-    if (!cls) {
-      sym = addSymbol(name);
     }
   }
 
@@ -533,11 +529,13 @@ Symbol *VariableTable::findProperty(ClassScopePtr &cls,
 
 TypePtr VariableTable::checkProperty(Symbol *sym, TypePtr type,
                                      bool coerce, AnalysisResultConstPtr ar) {
+  assert(sym->isPresent());
   if (sym->isOverride()) {
     ClassScopePtr parent = findParent(ar, sym->getName());
     assert(parent);
     VariableTablePtr variables = parent->getVariables();
     Symbol *base = variables->getSymbol(sym->getName());
+    assert(base->isPresent());
     assert(base && !base->isPrivate());
     type = variables->setType(ar, base, type, coerce);
   }
@@ -709,7 +707,7 @@ bool VariableTable::isConvertibleSuperGlobal(const string &name) const {
 }
 
 ClassScopePtr VariableTable::findParent(AnalysisResultConstPtr ar,
-                                        const string &name) {
+                                        const string &name) const {
   for (ClassScopePtr parent = m_blockScope.getParentScope(ar);
        parent && !parent->isRedeclaring();
        parent = parent->getParentScope(ar)) {

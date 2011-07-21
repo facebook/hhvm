@@ -217,7 +217,9 @@ void RequestEvalState::declareFunction(const FunctionStatement *fn) {
   } else if (get_renamed_function(name) == name) {
     std::pair<hphp_const_char_imap<const FunctionStatement*>::iterator,
       bool> p = self->m_functions.insert(make_pair(name, fn));
-    if (p.second || (p.first->second == fn && name[0] == '0')) return;
+    if (p.second ||
+        (p.first->second == fn &&
+         ParserBase::IsClosureOrContinuationName(name.c_str()))) return;
   }
 
   raise_error("Cannot redeclare %s()", name.c_str());

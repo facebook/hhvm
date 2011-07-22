@@ -513,12 +513,6 @@ namespace hphp_impl_splitter {}
 ObjectData *coo_SplObjectStorage() {
   return NEWOBJ(c_SplObjectStorage)();
 }
-Variant pm_php$classes$splobjectstorage_php(bool incOnce, LVariableTable* variables, Globals *globals) {
-  PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/splobjectstorage.php, pm_php$classes$splobjectstorage_php);
-  LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
-  return true;
-}
-namespace hphp_impl_splitter {}
 
 // Class tables
 ClassPropTable cpt_SplObjectStorage;

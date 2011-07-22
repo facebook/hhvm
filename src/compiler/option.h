@@ -265,6 +265,7 @@ public:
   static bool GenerateCPPMetaInfo;  // class map
   static bool GenerateCPPNameSpace; // namespace HPHP
   static bool KeepStatementsWithNoEffect;
+  static bool GenerateDummyPseudoMain;
 
   /**
    * When we have an include inside a function or a method, how many levels

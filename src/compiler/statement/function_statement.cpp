@@ -170,7 +170,9 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
       !funcScope->isInlined()) return;
 
   if (context == CodeGenerator::CppPseudoMain &&
-      !pseudoMain) return;
+      (!pseudoMain || getFileScope()->canUseDummyPseudoMain(ar))) {
+    return;
+  }
   if (context == CodeGenerator::CppImplementation &&
       (funcScope->isInlined() || pseudoMain)) return;
 

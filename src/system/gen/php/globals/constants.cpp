@@ -2067,12 +2067,6 @@ const bool k_ZEND_THREAD_SAFE = false;
 /* preface starts */
 extern CallInfo ci_;
 /* preface finishes */
-Variant pm_php$globals$constants_php(bool incOnce, LVariableTable* variables, Globals *globals) {
-  PSEUDOMAIN_INJECTION_BUILTIN(run_init::globals/constants.php, pm_php$globals$constants_php);
-  LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
-  return true;
-}
-namespace hphp_impl_splitter {}
 
 // Class tables
 

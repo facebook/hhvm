@@ -185,6 +185,7 @@ bool Option::GenArrayCreate = true;
 bool Option::UseScalarVariant = true;
 bool Option::UseCallUserFuncFewArgs = true;
 bool Option::KeepStatementsWithNoEffect = false;
+bool Option::GenerateDummyPseudoMain = true;
 
 int Option::ConditionalIncludeExpandLevel = 1;
 

@@ -88,8 +88,9 @@ public:
    * Whether this file has top level non-declaration statements that
    * have CPP implementation.
    */
-  bool hasImpl(AnalysisResultPtr ar) const;
   ExpressionPtr getEffectiveImpl(AnalysisResultConstPtr ar) const;
+
+  bool canUseDummyPseudoMain(AnalysisResultConstPtr ar) const;
 
   /**
    * Parser functions. Parser only deals with a FileScope object, and these

@@ -426,12 +426,6 @@ namespace hphp_impl_splitter {}
 ObjectData *coo_SoapFault() {
   return NEWOBJ(c_SoapFault)();
 }
-Variant pm_php$classes$soapfault_php(bool incOnce, LVariableTable* variables, Globals *globals) {
-  PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/soapfault.php, pm_php$classes$soapfault_php);
-  LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
-  return true;
-}
-namespace hphp_impl_splitter {}
 
 // Class tables
 ClassPropTable cpt_SoapFault;

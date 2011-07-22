@@ -31,6 +31,7 @@
 #include <compiler/statement/function_statement.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/expression/simple_function_call.h>
+#include <runtime/base/complex_types.h>
 
 using namespace HPHP;
 using namespace boost;
@@ -141,8 +142,15 @@ ExpressionPtr FileScope::getEffectiveImpl(AnalysisResultConstPtr ar) const {
   return ExpressionPtr();
 }
 
-bool FileScope::hasImpl(AnalysisResultPtr ar) const {
-  return m_tree && m_tree->hasImpl();
+bool FileScope::canUseDummyPseudoMain(AnalysisResultConstPtr ar) const {
+  ASSERT(!m_pseudoMain->isVolatile());
+  if (!Option::GenerateDummyPseudoMain ||
+      Option::KeepStatementsWithNoEffect) {
+    return false;
+  }
+  ExpressionPtr exp = getEffectiveImpl(ar);
+  Variant val;
+  return (exp && exp->getScalarValue(val) && val.same(true));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

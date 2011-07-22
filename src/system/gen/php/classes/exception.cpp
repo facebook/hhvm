@@ -2253,12 +2253,6 @@ ObjectData *coo_LengthException() {
 ObjectData *coo_DomainException() {
   return NEWOBJ(c_DomainException)();
 }
-Variant pm_php$classes$exception_php(bool incOnce, LVariableTable* variables, Globals *globals) {
-  PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/exception.php, pm_php$classes$exception_php);
-  LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
-  return true;
-}
-namespace hphp_impl_splitter {}
 
 // Class tables
 ClassPropTable cpt_ErrorException;

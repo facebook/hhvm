@@ -2631,15 +2631,23 @@ void AnalysisResult::outputCPPEvalHook(CodeGenerator &cg) {
 
 void AnalysisResult::outputCPPDefaultInvokeFile(CodeGenerator &cg,
                                                 const char *file) {
-  cg_printf("if (s.empty()) return %s%s(once, variables, get_globals());\n",
-            Option::PseudoMainPrefix,
-            Option::MangleFilename(file, true).c_str());
+  FileScopePtr fs = findFileScope(file);
+  cg_printf("if (s.empty()) return ");
+  if (fs->canUseDummyPseudoMain(shared_from_this())) {
+    cg_printf("dummy_pm(once, variables, get_globals());\n");
+  } else {
+    cg_printf("%s%s(once, variables, get_globals());\n",
+              Option::PseudoMainPrefix,
+              Option::MangleFilename(file, true).c_str());
+  }
 }
 
 void AnalysisResult::outputCPPHashTableInvokeFile(
   CodeGenerator &cg, const vector<const char*> &entries, bool needEvalHook) {
   ASSERT(cg.getCurrentIndentation() == 0);
   const char text1[] =
+    "static Variant dummy_pm(bool oncOnce, LVariableTable* variables, "
+    "  Globals *globals) { return true; }\n"
     "class hashNodeFile {\n"
     "public:\n"
     "  hashNodeFile() {}\n"
@@ -2658,7 +2666,7 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
     "    const char *fileMapData[] = {\n";
 
   const char text2[] =
-    "      NULL, NULL,\n"
+    "      NULL, NULL, (const char *)&dummy_pm,\n"
     "    };\n"
     "    hashNodeFile *b = fileBuckets;\n"
     "    for (const char **s = fileMapData; *s; s++, b++) {\n"
@@ -2694,10 +2702,15 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
   cg_printf(text1, tableSize, entries.size());
   BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
     if (!f->getPseudoMain()) continue;
-    cg_printf("      (const char *)\"%s\", (const char *)&%s%s,\n",
-              f->getName().c_str(),
-              Option::PseudoMainPrefix,
-              Option::MangleFilename(f->getName(), true).c_str());
+    cg_printf("      (const char *)\"%s\", (const char *)&",
+              f->getName().c_str());
+    if (f->canUseDummyPseudoMain(shared_from_this())) {
+      cg_printf("dummy_pm,\n");
+    } else {
+      cg_printf("%s%s,\n",
+                Option::PseudoMainPrefix,
+                Option::MangleFilename(f->getName(), true).c_str());
+    }
   }
   cg_printf(text2, tableSize - 1, tableSize - 1);
   outputCPPInvokeFileHeader(cg);
@@ -3067,11 +3080,13 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
     BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
       if (!f->getPseudoMain()) continue;
       entries.push_back(f->getName().c_str());
-      cg_printf("Variant %s%s(bool incOnce, "
-                "LVariableTable* variables, "
-                "Globals *globals);\n",
-                Option::PseudoMainPrefix,
-                Option::MangleFilename(f->getName(), true).c_str());
+      if (!f->canUseDummyPseudoMain(shared_from_this())) {
+        cg_printf("Variant %s%s(bool incOnce, "
+                  "LVariableTable* variables, "
+                  "Globals *globals);\n",
+                  Option::PseudoMainPrefix,
+                  Option::MangleFilename(f->getName(), true).c_str());
+      }
     }
 
     cg_printf("\n");
@@ -3554,7 +3569,7 @@ void AnalysisResult::outputCPPGlobalImplementations(CodeGenerator &cg) {
 void AnalysisResult::outputCPPSystemImplementations(CodeGenerator &cg) {
   cg_printf("Globals *globals = get_globals();\n");
   BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
-    if (f->hasImpl(shared_from_this())) {
+    if (!f->canUseDummyPseudoMain(shared_from_this())) {
       cg_printf("%s%s(false, ",
                 Option::PseudoMainPrefix, f->pseudoMainName().c_str());
       if (!f->needPseudoMainVariables()) {
@@ -3570,8 +3585,10 @@ void AnalysisResult::getCPPFileRunDecls(CodeGenerator &cg,
                                         Type2SymbolSetMap &type2names) {
   SymbolSet &symbols = type2names["bool"];
   BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
-    symbols.insert(string("run_") + Option::PseudoMainPrefix +
-                   f->pseudoMainName());
+    if (!f->canUseDummyPseudoMain(shared_from_this())) {
+      symbols.insert(string("run_") + Option::PseudoMainPrefix +
+                     f->pseudoMainName());
+    }
   }
 }
 
@@ -3892,9 +3909,11 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairSetVec &symbols,
   names = &symbols[KindOfPseudoMain];
   BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
     if (!f->getPseudoMain()) continue;
-    string name = string("run_") + Option::PseudoMainPrefix +
-      f->pseudoMainName();
-    names->insert(StringPair(name, name));
+    if (!f->canUseDummyPseudoMain(ar)) {
+      string name = string("run_") + Option::PseudoMainPrefix +
+        f->pseudoMainName();
+      names->insert(StringPair(name, name));
+    }
   }
 
   // redeclared functions

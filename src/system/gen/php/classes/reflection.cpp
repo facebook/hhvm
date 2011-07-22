@@ -6071,12 +6071,6 @@ ObjectData *coo_ReflectionFunction() {
 ObjectData *coo_ReflectionParameter() {
   return NEWOBJ(c_ReflectionParameter)();
 }
-Variant pm_php$classes$reflection_php(bool incOnce, LVariableTable* variables, Globals *globals) {
-  PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/reflection.php, pm_php$classes$reflection_php);
-  LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
-  return true;
-}
-namespace hphp_impl_splitter {}
 
 // Class tables
 ClassPropTable cpt_ReflectionClass;

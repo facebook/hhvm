@@ -29,12 +29,6 @@ namespace HPHP {
 /* preface starts */
 extern CallInfo ci_;
 /* preface finishes */
-Variant pm_php$classes$arrayaccess_php(bool incOnce, LVariableTable* variables, Globals *globals) {
-  PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/arrayaccess.php, pm_php$classes$arrayaccess_php);
-  LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
-  return true;
-}
-namespace hphp_impl_splitter {}
 
 // Class tables
 

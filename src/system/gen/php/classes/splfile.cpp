@@ -2230,12 +2230,6 @@ ObjectData *coo_SplFileObject() {
 ObjectData *coo_SplFileInfo() {
   return NEWOBJ(c_SplFileInfo)();
 }
-Variant pm_php$classes$splfile_php(bool incOnce, LVariableTable* variables, Globals *globals) {
-  PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/splfile.php, pm_php$classes$splfile_php);
-  LVariableTable *gVariables ATTRIBUTE_UNUSED = (LVariableTable *)g;
-  return true;
-}
-namespace hphp_impl_splitter {}
 
 // Class tables
 ClassPropTable cpt_SplFileInfo;

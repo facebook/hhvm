@@ -62,21 +62,8 @@ public:
   #define gvm_argv stgv_Variant[10]
   #define gvm_http_response_header stgv_Variant[11]
   #define k_SID stgv_Variant[12]
-  bool stgv_bool[14];
-  #define run_pm_php$classes$arrayaccess_php stgv_bool[0]
-  #define run_pm_php$classes$debugger_php stgv_bool[1]
-  #define run_pm_php$classes$directory_php stgv_bool[2]
-  #define run_pm_php$classes$directoryiterator_php stgv_bool[3]
-  #define run_pm_php$classes$exception_php stgv_bool[4]
-  #define run_pm_php$classes$iterator_php stgv_bool[5]
-  #define run_pm_php$classes$reflection_php stgv_bool[6]
-  #define run_pm_php$classes$soapfault_php stgv_bool[7]
-  #define run_pm_php$classes$splfile_php stgv_bool[8]
-  #define run_pm_php$classes$splobjectstorage_php stgv_bool[9]
-  #define run_pm_php$classes$stdclass_php stgv_bool[10]
-  #define run_pm_php$classes$xhprof_php stgv_bool[11]
-  #define run_pm_php$globals$constants_php stgv_bool[12]
-  #define run_pm_php$globals$symbols_php stgv_bool[13]
+  bool stgv_bool[1];
+  #define run_pm_php$globals$symbols_php stgv_bool[0]
 };
 
 // Scalar Arrays

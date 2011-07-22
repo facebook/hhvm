@@ -24,7 +24,6 @@
 #include <compiler/analysis/symbol_table.h>
 #include <compiler/analysis/function_container.h>
 #include <compiler/package.h>
-#include <compiler/analysis/method_slot.h>
 #include <boost/graph/adjacency_list.hpp>
 #include <util/string_bag.h>
 
@@ -425,8 +424,6 @@ public:
     ExpressionPtr exp;
   };
 
-  void genMethodSlots();
-
   void outputCPPDynamicTables(CodeGenerator::Output output);
   void outputCPPClassMapFile();
   void outputCPPSourceInfos();
@@ -611,16 +608,6 @@ private:
          std::vector<std::pair<int, int> > &litVarStrs);
 
   void outputInitLiteralVarStrings();
-  StringToMethodSlotMap stringToMethodSlotMap;
-  CallIndexVectSet callIndexVectSet; // set of methods at this callIndex
-  friend class MethodSlot;
-
-public:
-  const MethodSlot* getMethodSlot(const std::string & mname) const;
-  const MethodSlot* getOrAddMethodSlot(const std::string & mname,
-                                       ConstructPtr self);
-private:
-  MethodSlot* getMethodSlotUpdate(const std::string & mname);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

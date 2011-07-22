@@ -128,29 +128,15 @@ Variant c_XhprofFrame::ifa___construct(MethodCallPackage &mcp, int count, INVOKE
   CVarRef arg0(a0);
   return (self->t___construct(arg0), null);
 }
-bool c_XhprofFrame::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 3) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
-        mcp.ci = &c_XhprofFrame::ci___destruct;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
-        mcp.ci = &c_XhprofFrame::ci___construct;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_get_call_info(mcp, hash);
-}
-bool c_XhprofFrame::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  mcp.obj = this;
-  return os_get_call_info(mcp, hash);
-}
+const MethodCallInfoTable c_XhprofFrame::s_call_info_table[] = {
+  { 0x7F974836AACC1EF3LL, 1, 10, "__destruct", &c_XhprofFrame::ci___destruct },
+  { 0x0D31D0AC229C615FLL, 0, 11, "__construct", &c_XhprofFrame::ci___construct },
+  { 0, 1, 0, 0 }
+};
+const int c_XhprofFrame::s_call_info_index[] = {
+  3,
+  -1,-1,-1,0,
+};
 c_XhprofFrame *c_XhprofFrame::create(CVarRef v_name) {
   CountableHelper h(this);
   init();
@@ -177,8 +163,10 @@ ObjectStaticCallbacks cw_XhprofFrame = {
   c_XhprofFrame::os_lval,
   c_XhprofFrame::os_invoke,
   c_XhprofFrame::os_constant,
-  c_XhprofFrame::os_get_call_info,
-  (ObjectData*(*)(ObjectData*))coo_XhprofFrame
+  (ObjectData*(*)(ObjectData*))coo_XhprofFrame,
+  c_XhprofFrame::s_call_info_table,c_XhprofFrame::s_call_info_index,
+  "XhprofFrame",
+  0
 };
 /* SRC: classes/xhprof.php line 7 */
 void c_XhprofFrame::t___construct(Variant v_name) {

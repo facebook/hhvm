@@ -94,10 +94,6 @@ extern bool get_call_info_builtin(const CallInfo *&ci, void *&extra,
     const char *s, int64 hash = -1);
 extern bool get_call_info_static_method(MethodCallPackage &info);
 extern bool get_call_info_static_method_builtin(MethodCallPackage &info);
-extern bool get_call_info_static_method_with_index(MethodCallPackage &info,
-    MethodIndex mi);
-extern bool get_call_info_static_method_with_index_builtin
-  (MethodCallPackage &info, MethodIndex mi);
 
 /**
  * Class/function meta info entirely encoded here as a const char * array.
@@ -115,6 +111,8 @@ extern const char *g_paramrtti_map[];
 Object create_object(CStrRef s, const Array &params,
                      bool init = true, ObjectData *root = NULL);
 extern Object create_object_only(CStrRef s, ObjectData *root = NULL);
+extern ObjectData *create_object_only_no_init(CStrRef s,
+                                              ObjectData *root = NULL);
 /**
  * Dynamically create a system object.
  */

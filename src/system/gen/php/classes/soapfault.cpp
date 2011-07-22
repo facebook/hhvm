@@ -209,29 +209,15 @@ Variant c_SoapFault::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
   CVarRef arg5(a5);
   return (self->t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
 }
-bool c_SoapFault::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 3) {
-    case 3:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
-        mcp.ci = &c_SoapFault::ci___tostring;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
-        mcp.ci = &c_SoapFault::ci___construct;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_Exception::os_get_call_info(mcp, hash);
-}
-bool c_SoapFault::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  mcp.obj = this;
-  return os_get_call_info(mcp, hash);
-}
+const MethodCallInfoTable c_SoapFault::s_call_info_table[] = {
+  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &c_SoapFault::ci___tostring },
+  { 0x0D31D0AC229C615FLL, 0, 11, "__construct", &c_SoapFault::ci___construct },
+  { 0, 1, 0, 0 }
+};
+const int c_SoapFault::s_call_info_index[] = {
+  3,
+  -1,-1,-1,0,
+};
 c_SoapFault *c_SoapFault::create(CVarRef v_code, CVarRef v_message, CVarRef v_actor //  = null_variant
 , CVarRef v_detail //  = null_variant
 , CVarRef v_name //  = null_variant
@@ -283,8 +269,10 @@ ObjectStaticCallbacks cw_SoapFault = {
   c_SoapFault::os_lval,
   c_SoapFault::os_invoke,
   c_SoapFault::os_constant,
-  c_SoapFault::os_get_call_info,
-  (ObjectData*(*)(ObjectData*))coo_SoapFault
+  (ObjectData*(*)(ObjectData*))coo_SoapFault,
+  c_SoapFault::s_call_info_table,c_SoapFault::s_call_info_index,
+  "SoapFault",
+  &cw_Exception
 };
 /* SRC: classes/soapfault.php line 12 */
 void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_actor //  = null

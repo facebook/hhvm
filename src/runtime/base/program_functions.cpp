@@ -808,7 +808,6 @@ static int execute_program_impl(int argc, char **argv) {
   if (po.mode == "s") po.mode = "server";
   if (po.mode == "t") po.mode = "translate";
 
-  MethodIndexHMap::initialize(false);
   ShmCounters::initialize(true, Logger::Error);
 
   if (!po.lint.empty()) {

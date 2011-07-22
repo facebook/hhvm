@@ -26,6 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 711 */
 FORWARD_DECLARE_CLASS(FilterIterator);
+extern ObjectStaticCallbacks cw_FilterIterator;
 class c_FilterIterator : public c_IteratorIterator {
   public:
 
@@ -35,7 +36,6 @@ class c_FilterIterator : public c_IteratorIterator {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(FilterIterator, FilterIterator)
-  DECLARE_INVOKE_EX(FilterIterator, FilterIterator, IteratorIterator)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -56,9 +56,8 @@ class c_FilterIterator : public c_IteratorIterator {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_FilterIterator 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_FilterIterator 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   c_FilterIterator(ObjectData* r = NULL) : m_it(Variant::nullInit) {
@@ -91,7 +90,6 @@ class c_FilterIterator : public c_IteratorIterator {
   DECLARE_METHOD_INVOKE_HELPERS(accept);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
-extern struct ObjectStaticCallbacks cw_FilterIterator;
 ObjectData *coo_FilterIterator() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -26,6 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 193 */
 FORWARD_DECLARE_CLASS(BadMethodCallException);
+extern ObjectStaticCallbacks cw_BadMethodCallException;
 class c_BadMethodCallException : public c_BadFunctionCallException {
   public:
 
@@ -34,7 +35,6 @@ class c_BadMethodCallException : public c_BadFunctionCallException {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(BadMethodCallException, BadMethodCallException)
-  DECLARE_INVOKE_EX(BadMethodCallException, BadMethodCallException, BadFunctionCallException)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -53,13 +53,11 @@ class c_BadMethodCallException : public c_BadFunctionCallException {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_BadMethodCallException 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_BadMethodCallException 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const int s_call_info_table = 0;
+  static const int s_call_info_index = 0;
 
   public:
 };
-extern struct ObjectStaticCallbacks cw_BadMethodCallException;
 ObjectData *coo_BadMethodCallException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -26,6 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 317 */
 FORWARD_DECLARE_CLASS(PDOException);
+extern ObjectStaticCallbacks cw_PDOException;
 class c_PDOException : public c_Exception {
   public:
 
@@ -34,7 +35,6 @@ class c_PDOException : public c_Exception {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(PDOException, PDOException)
-  DECLARE_INVOKE_EX(PDOException, PDOException, Exception)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -53,9 +53,8 @@ class c_PDOException : public c_Exception {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_PDOException 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_PDOException 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   public: void t___construct();
@@ -64,7 +63,6 @@ class c_PDOException : public c_Exception {
   public: void getConstructor(MethodCallPackage &mcp);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
 };
-extern struct ObjectStaticCallbacks cw_PDOException;
 ObjectData *coo_PDOException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

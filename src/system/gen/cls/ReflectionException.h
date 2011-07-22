@@ -26,6 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/reflection.php line 27 */
 FORWARD_DECLARE_CLASS(ReflectionException);
+extern ObjectStaticCallbacks cw_ReflectionException;
 class c_ReflectionException : public c_Exception {
   public:
 
@@ -34,7 +35,6 @@ class c_ReflectionException : public c_Exception {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(ReflectionException, ReflectionException)
-  DECLARE_INVOKE_EX(ReflectionException, ReflectionException, Exception)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -53,13 +53,11 @@ class c_ReflectionException : public c_Exception {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionException 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionException 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const int s_call_info_table = 0;
+  static const int s_call_info_index = 0;
 
   public:
 };
-extern struct ObjectStaticCallbacks cw_ReflectionException;
 ObjectData *coo_ReflectionException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

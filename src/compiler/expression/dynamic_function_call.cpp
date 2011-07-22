@@ -246,13 +246,14 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     if (lsb) cg_printf("mcp%d.lateStaticBind(fi.getThreadInfo());\n");
     cg_printf("const CallInfo *&cit%d = mcp%d.ci;\n", m_ciTemp, m_ciTemp);
     if (m_classScope) {
-      cg_printf("%s%s::%sget_call_info(mcp%d",
-                Option::ClassPrefix, m_classScope->getId().c_str(),
-                Option::ObjectStaticPrefix, m_ciTemp, m_className.c_str());
+      cg_printf("%s%s.%sget_call_info(mcp%d",
+                Option::ClassWrapperFunctionPrefix,
+                m_classScope->getId().c_str(),
+                Option::ObjectStaticPrefix, m_ciTemp);
     } else if (isRedeclared()) {
       cg_printf("g->%s%s->%sget_call_info(mcp%d",
                 Option::ClassStaticsCallbackPrefix, m_className.c_str(),
-                Option::ObjectStaticPrefix, m_ciTemp, m_className.c_str());
+                Option::ObjectStaticPrefix, m_ciTemp);
     }
   }
   if (nonStatic || !m_class) {

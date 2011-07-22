@@ -26,6 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/soapfault.php line 3 */
 FORWARD_DECLARE_CLASS(SoapFault);
+extern ObjectStaticCallbacks cw_SoapFault;
 class c_SoapFault : public c_Exception {
   public:
 
@@ -41,7 +42,6 @@ class c_SoapFault : public c_Exception {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(SoapFault, SoapFault)
-  DECLARE_INVOKE_EX(SoapFault, SoapFault, Exception)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -61,9 +61,8 @@ class c_SoapFault : public c_Exception {
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_SoapFault 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   c_SoapFault() : m_faultcode(Variant::nullInit), m_faultcodens(Variant::nullInit), m_faultstring(Variant::nullInit), m_faultactor(Variant::nullInit), m_detail(Variant::nullInit), m__name(Variant::nullInit), m_headerfault(Variant::nullInit) {}
@@ -75,7 +74,6 @@ class c_SoapFault : public c_Exception {
   DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
 };
-extern struct ObjectStaticCallbacks cw_SoapFault;
 ObjectData *coo_SoapFault() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -32,13 +32,14 @@ namespace HPHP {
 #define GET_THIS_VALID()   fi.getThisForArrow()
 #define GET_THIS_ARROW()   fi.getThisForArrow()->
 
-#define FORWARD_DECLARE_CLASS(cls)                 \
-  class c_##cls;                                        \
-  typedef SmartObject<c_##cls> p_##cls;                 \
+#define FORWARD_DECLARE_CLASS(cls)              \
+  class c_##cls;                                \
+  typedef SmartObject<c_##cls> p_##cls;         \
 
-#define FORWARD_DECLARE_CLASS_BUILTIN(cls)                      \
-  FORWARD_DECLARE_CLASS(cls)                       \
-  extern ObjectData *coo_##cls();                            \
+#define FORWARD_DECLARE_CLASS_BUILTIN(cls)      \
+  FORWARD_DECLARE_CLASS(cls)                    \
+  extern ObjectData *coo_##cls();               \
+  extern ObjectStaticCallbacks cw_##cls;
 
 #define FORWARD_DECLARE_INTERFACE(cls)                  \
   class c_##cls;                                        \
@@ -120,6 +121,8 @@ namespace HPHP {
   static Variant os_get(CStrRef s);                                     \
   static Variant &os_lval(CStrRef s);                                   \
   static Variant os_constant(const char *s);                            \
+  static const MethodCallInfoTable s_call_info_table[];                 \
+  static const int s_call_info_index[];                                 \
 
 #define DECLARE_INSTANCE_PROP_OPS                                       \
   public:                                                               \
@@ -132,28 +135,6 @@ namespace HPHP {
   public:                                                               \
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;        \
 
-#define DECLARE_COMMON_INVOKES                                          \
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1); \
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);\
-
-#define DECLARE_INVOKE_EX(cls, originalName, parent)                    \
-  virtual bool o_get_call_info_ex(const char *clsname,               \
-      MethodCallPackage &mcp, int64 h) {                                \
-    if (clsname && strcasecmp(clsname, #originalName) == 0) {           \
-      return c_##cls::o_get_call_info(mcp, h);                          \
-    }                                                                   \
-    return c_##parent::o_get_call_info_ex(clsname, mcp, h);             \
-  }                                                                     \
-
-#define DECLARE_INVOKE_EX_WITH_INDEX(cls, originalName, parent)         \
-  virtual bool o_get_call_info_with_index_ex(const char *clsname,       \
-      MethodCallPackage &mcp, MethodIndex mi, int64 h) {                \
-    if (clsname && strcasecmp(clsname, #originalName) == 0) {           \
-      return c_##cls::o_get_call_info_with_index(mcp, mi, h);           \
-    }                                                                   \
-    return c_##parent::o_get_call_info_with_index_ex(clsname, mcp, mi, h);\
-  }                                                                     \
-
 #define DECLARE_CLASS_COMMON_NO_SWEEP(cls, originalName) \
   DECLARE_OBJECT_ALLOCATION_NO_SWEEP(c_##cls)                           \
   protected:                                                            \
@@ -163,6 +144,8 @@ namespace HPHP {
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \
   virtual CStrRef o_getClassName() const { return s_class_name; }       \
+  virtual const ObjectStaticCallbacks *o_get_callbacks() const {        \
+    return cw_##cls; }                                                  \
 
 #define DECLARE_CLASS_COMMON(cls, originalName) \
   DECLARE_OBJECT_ALLOCATION(c_##cls)                                    \
@@ -173,14 +156,14 @@ namespace HPHP {
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \
   virtual CStrRef o_getClassName() const { return s_class_name; }       \
+  virtual const ObjectStaticCallbacks *o_get_callbacks() const {        \
+    return cw_##cls; }                                                  \
 
 #define DECLARE_CLASS_NO_SWEEP(cls, originalName, parent)               \
   DECLARE_CLASS_COMMON_NO_SWEEP(cls, originalName)                      \
   DECLARE_STATIC_PROP_OPS                                               \
   DECLARE_INSTANCE_PROP_OPS                                             \
   DECLARE_INSTANCE_PUBLIC_PROP_OPS                                      \
-  DECLARE_COMMON_INVOKES                                                \
-  DECLARE_INVOKE_EX(cls, originalName, parent)                          \
   public:                                                               \
 
 #define DECLARE_CLASS(cls, originalName, parent)                        \
@@ -188,16 +171,12 @@ namespace HPHP {
   DECLARE_STATIC_PROP_OPS                                               \
   DECLARE_INSTANCE_PROP_OPS                                             \
   DECLARE_INSTANCE_PUBLIC_PROP_OPS                                      \
-  DECLARE_COMMON_INVOKES                                                \
-  DECLARE_INVOKE_EX(cls, originalName, parent)                          \
   public:                                                               \
 
 #define DECLARE_DYNAMIC_CLASS(cls, originalName, parent)                \
   DECLARE_CLASS_COMMON_NO_SWEEP(cls, originalName)                      \
   DECLARE_STATIC_PROP_OPS                                               \
   DECLARE_INSTANCE_PROP_OPS                                             \
-  DECLARE_COMMON_INVOKES                                                \
-  DECLARE_INVOKE_EX(cls, originalName, parent)                          \
   public:                                                               \
 
 #define CLASS_CHECK(exp) (checkClassExists(s, g), (exp))
@@ -308,55 +287,6 @@ do { \
   if (hash == code && !strcasecmp(s, #f)) return o_i_ ## f(params)
 #define HASH_INVOKE_CONSTRUCTOR(code, f, id)                            \
   if (hash == code && !strcasecmp(s, #f)) return o_i_ ## id(params)
-#define HASH_GET_OBJECT_STATIC_CALLBACKS(code, f)                       \
-  if (hash == code && !strcasecmp(s, #f)) return &cw_ ## f
-#define HASH_GET_OBJECT_STATIC_CALLBACKS_VOLATILE(code, f)              \
-  if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(&cw_ ## f)
-#define HASH_CALL_INFO_STATIC_METHOD(code, f)                           \
-  if (hash == code && !strcasecmp(s->data(), #f))                       \
-    return cw_ ## f.os_get_call_info(mcp, -1)
-#define HASH_CALL_INFO_STATIC_METHOD_VOLATILE(code, f)                  \
-  if (hash == code && !strcasecmp(s->data(), #f))                       \
-    return CLASS_CHECK(cw_ ## f.os_get_call_info(mcp, -1))
-#define HASH_CALL_INFO_STATIC_METHOD_REDECLARED(code, f)                \
-  if (hash == code && !strcasecmp(s->data(), #f))                       \
-    return CLASS_CHECK(g->cso_ ## f->os_get_call_info(mcp, -1))
-#define HASH_GET_OBJECT_STATIC_CALLBACKS_REDECLARED(code, f)            \
-  if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(g->cwo_ ## f)
-#define HASH_CALL_INFO_STATIC_METHOD_WITH_INDEX(code, f)                \
-  if (hash == code && !strcasecmp(s->data(), #f))                       \
-    return cw_ ## f.os_get_call_info_with_index(mcp, mi, -1)
-#define HASH_CALL_INFO_STATIC_METHOD_WITH_INDEX_VOLATILE(code, f)       \
-  if (hash == code && !strcasecmp(s->data(), #f))                       \
-    return CLASS_CHECK(cw_ ## f.os_get_call_info_with_index(mcp, mi, -1))
-#define HASH_CALL_INFO_STATIC_METHOD_WITH_INDEX_REDECLARED(code, f)     \
-  if (hash == code && !strcasecmp(s->data(), #f))                       \
-    return CLASS_CHECK(g->cso_ ## f->os_get_call_info_with_index(mcp, mi, -1))
-#define HASH_GET_CLASS_VAR_INIT(code, f)                                \
-  if (hash == code && !strcasecmp(s, #f))                               \
-    return cw_ ## f.os_getInit(var)
-#define HASH_GET_CLASS_VAR_INIT_VOLATILE(code, f)                       \
-  if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(cw_ ## f.os_getInit(var))
-#define HASH_GET_CLASS_VAR_INIT_REDECLARED(code, f)                     \
-  if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(g->cso_ ## f->os_getInit(var))
-#define HASH_CREATE_OBJECT_VOLATILE(code, f)                            \
-  if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(co_ ## f(params, init))
-#define HASH_CREATE_OBJECT_REDECLARED(code, f)                          \
-  if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(g->cso_ ## f->create(params, init, root))
-#define HASH_CREATE_OBJECT_ONLY(code, f)                                     \
-  if (hash == code && !strcasecmp(s, #f)) return coo_ ## f()
-#define HASH_CREATE_OBJECT_ONLY_VOLATILE(code, f)                            \
-  if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(coo_ ## f())
-#define HASH_CREATE_OBJECT_ONLY_REDECLARED(code, f)                     \
-  if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(g->cso_ ## f->createOnlyNoInit(root))
 #define HASH_INCLUDE(code, file, fun)                                   \
   if (hash == code && !strcmp(file, s.c_str())) {                       \
     return pm_ ## fun(once, variables);                                 \

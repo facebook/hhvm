@@ -41,6 +41,7 @@ public:
   void serialize(VariableSerializer *serializer) const;
   virtual CStrRef o_getResourceName() const;
   virtual int o_getResourceId() const { return o_getId(); }
+  virtual const ObjectStaticCallbacks *o_get_callbacks() const { return 0; }
 
   // implementing UnsafePointer
   virtual void protect() { m_static = true; }

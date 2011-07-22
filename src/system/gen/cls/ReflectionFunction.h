@@ -27,6 +27,7 @@ namespace HPHP {
 
 /* SRC: classes/reflection.php line 461 */
 FORWARD_DECLARE_CLASS(ReflectionFunction);
+extern ObjectStaticCallbacks cw_ReflectionFunction;
 class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   public:
 
@@ -35,7 +36,6 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(ReflectionFunction, ReflectionFunction)
-  DECLARE_INVOKE_EX(ReflectionFunction, ReflectionFunction, ReflectionFunctionAbstract)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -54,9 +54,8 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionFunction 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionFunction 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   public: void t___construct(Variant v_name);
@@ -73,7 +72,6 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   DECLARE_METHOD_INVOKE_HELPERS(export);
   DECLARE_METHOD_INVOKE_HELPERS(invoke);
 };
-extern struct ObjectStaticCallbacks cw_ReflectionFunction;
 ObjectData *coo_ReflectionFunction() NEVER_INLINE;
 extern const int64 q_ReflectionFunction_IS_DEPRECATED;
 

@@ -29,6 +29,7 @@ namespace HPHP {
 
 /* SRC: classes/splfile.php line 384 */
 FORWARD_DECLARE_CLASS(SplFileObject);
+extern ObjectStaticCallbacks cw_SplFileObject;
 class c_SplFileObject : public c_SplFileInfo {
   public:
 
@@ -37,7 +38,6 @@ class c_SplFileObject : public c_SplFileInfo {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(SplFileObject, SplFileObject)
-  DECLARE_INVOKE_EX(SplFileObject, SplFileObject, SplFileInfo)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -57,9 +57,8 @@ class c_SplFileObject : public c_SplFileInfo {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplFileObject 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_SplFileObject 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   public: void t___construct(Variant v_filename, Variant v_open_mode = NAMSTR(s_sys_ss0d42ecf6, "r"), Variant v_use_include_path = false, Variant v_context = null);
@@ -124,7 +123,6 @@ class c_SplFileObject : public c_SplFileInfo {
   DECLARE_METHOD_INVOKE_HELPERS(fstat);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
-extern struct ObjectStaticCallbacks cw_SplFileObject;
 ObjectData *coo_SplFileObject() NEVER_INLINE;
 extern const int64 q_SplFileObject_DROP_NEW_LINE;
 extern const int64 q_SplFileObject_READ_AHEAD;

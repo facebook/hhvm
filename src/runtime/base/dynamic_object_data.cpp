@@ -140,27 +140,6 @@ Array DynamicObjectData::o_getDynamicProperties() const {
   }
 }
 
-bool DynamicObjectData::o_get_call_info(MethodCallPackage &info,
-    int64 hash /* = -1*/) {
-  if (!parent.isNull()) {
-    return parent->o_get_call_info(info, hash);
-  } else {
-    info.obj = this;
-    return ObjectData::o_get_call_info(info, hash);
-  }
-}
-
-bool DynamicObjectData::o_get_call_info_ex(const char *clsname,
-      MethodCallPackage &info, int64 hash /* = -1 */) {
-  if (strcasecmp(o_getClassName(), clsname) == 0) {
-    return o_get_call_info(info, hash);
-  } else if(!parent.isNull()) {
-    return parent->o_get_call_info_ex(clsname, info, hash);
-  } else {
-    return ObjectData::o_get_call_info_ex(clsname, info, hash);
-  }
-}
-
 Variant DynamicObjectData::doCall(Variant v_name, Variant v_arguments,
                                   bool fatal) {
   if (!parent.isNull()) {

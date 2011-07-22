@@ -26,6 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 235 */
 FORWARD_DECLARE_CLASS(RuntimeException);
+extern ObjectStaticCallbacks cw_RuntimeException;
 class c_RuntimeException : public c_Exception {
   public:
 
@@ -34,7 +35,6 @@ class c_RuntimeException : public c_Exception {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(RuntimeException, RuntimeException)
-  DECLARE_INVOKE_EX(RuntimeException, RuntimeException, Exception)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -53,13 +53,11 @@ class c_RuntimeException : public c_Exception {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RuntimeException 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RuntimeException 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const int s_call_info_table = 0;
+  static const int s_call_info_index = 0;
 
   public:
 };
-extern struct ObjectStaticCallbacks cw_RuntimeException;
 ObjectData *coo_RuntimeException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

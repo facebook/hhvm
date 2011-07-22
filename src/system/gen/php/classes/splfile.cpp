@@ -770,187 +770,50 @@ Variant c_SplFileObject::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FE
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
-bool c_SplFileObject::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 63) {
-    case 0:
-      HASH_GUARD_LITSTR(0x09637D7CA2E33F00LL, NAMSTR(s_sys_sse27b119d, "fgetc")) {
-        mcp.ci = &c_SplFileObject::ci_fgetc;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x5ACCF9166CD9D043LL, NAMSTR(s_sys_ss8d73fd51, "ftruncate")) {
-        mcp.ci = &c_SplFileObject::ci_ftruncate;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x794FAFD4412AEFC3LL, NAMSTR(s_sys_sse73b3a2c, "eof")) {
-        mcp.ci = &c_SplFileObject::ci_eof;
-        return true;
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss9943cbf4, "valid")) {
-        mcp.ci = &c_SplFileObject::ci_valid;
-        return true;
-      }
-      break;
-    case 6:
-      HASH_GUARD_LITSTR(0x44CE4DB1CE7E9F86LL, NAMSTR(s_sys_ss4ccc4d04, "flock")) {
-        mcp.ci = &c_SplFileObject::ci_flock;
-        return true;
-      }
-      break;
-    case 9:
-      HASH_GUARD_LITSTR(0x4282E0231F600049LL, NAMSTR(s_sys_ssbac40e3d, "fseek")) {
-        mcp.ci = &c_SplFileObject::ci_fseek;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x2FC3A6941D522E0ALL, NAMSTR(s_sys_ss1fa5c668, "setFlags")) {
-        mcp.ci = &c_SplFileObject::ci_setflags;
-        return true;
-      }
-      break;
-    case 14:
-      HASH_GUARD_LITSTR(0x7E978C38D741664ELL, NAMSTR(s_sys_ss15a9d310, "fgetcsv")) {
-        mcp.ci = &c_SplFileObject::ci_fgetcsv;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x732EC1BDA8EC520FLL, NAMSTR(s_sys_ss68d731f7, "getChildren")) {
-        mcp.ci = &c_SplFileObject::ci_getchildren;
-        return true;
-      }
-      break;
-    case 16:
-      HASH_GUARD_LITSTR(0x3A335010F905ACD0LL, NAMSTR(s_sys_ss7165f45b, "setCsvControl")) {
-        mcp.ci = &c_SplFileObject::ci_setcsvcontrol;
-        return true;
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
-        mcp.ci = &c_SplFileObject::ci_key;
-        return true;
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x40044334DA397C15LL, NAMSTR(s_sys_ssf6be66f9, "hasChildren")) {
-        mcp.ci = &c_SplFileObject::ci_haschildren;
-        return true;
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x25F68E7910FE9CDALL, NAMSTR(s_sys_sse8a6ad69, "getMaxLineLen")) {
-        mcp.ci = &c_SplFileObject::ci_getmaxlinelen;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x2B7CAC006AF27F9ALL, NAMSTR(s_sys_ss96f7c57c, "fflush")) {
-        mcp.ci = &c_SplFileObject::ci_fflush;
-        return true;
-      }
-      break;
-    case 27:
-      HASH_GUARD_LITSTR(0x5B33B55D4B7E339BLL, NAMSTR(s_sys_ss764ad06c, "fpassthru")) {
-        mcp.ci = &c_SplFileObject::ci_fpassthru;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ssb3a5c1b3, "current")) {
-        mcp.ci = &c_SplFileObject::ci_current;
-        return true;
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3E4E7C561D3A541ELL, NAMSTR(s_sys_ss6677e6df, "fgetss")) {
-        mcp.ci = &c_SplFileObject::ci_fgetss;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
-        mcp.ci = &c_SplFileObject::ci___construct;
-        return true;
-      }
-      break;
-    case 33:
-      HASH_GUARD_LITSTR(0x27E7DBA875AD17E1LL, NAMSTR(s_sys_ssa20217b5, "getFlags")) {
-        mcp.ci = &c_SplFileObject::ci_getflags;
-        return true;
-      }
-      break;
-    case 34:
-      HASH_GUARD_LITSTR(0x6FE9F691E4A6D962LL, NAMSTR(s_sys_ss3bdd1f72, "getCsvControl")) {
-        mcp.ci = &c_SplFileObject::ci_getcsvcontrol;
-        return true;
-      }
-      break;
-    case 35:
-      HASH_GUARD_LITSTR(0x044B276686B77923LL, NAMSTR(s_sys_ss26e41480, "fscanf")) {
-        mcp.ci = &c_SplFileObject::ci_fscanf;
-        return true;
-      }
-      break;
-    case 37:
-      HASH_GUARD_LITSTR(0x05D72365192CE465LL, NAMSTR(s_sys_ssf5eb6fb9, "fwrite")) {
-        mcp.ci = &c_SplFileObject::ci_fwrite;
-        return true;
-      }
-      break;
-    case 39:
-      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss6a9626a3, "seek")) {
-        mcp.ci = &c_SplFileObject::ci_seek;
-        return true;
-      }
-      break;
-    case 42:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss941ca25f, "rewind")) {
-        mcp.ci = &c_SplFileObject::ci_rewind;
-        return true;
-      }
-      break;
-    case 45:
-      HASH_GUARD_LITSTR(0x1C1216F2B7C16CADLL, NAMSTR(s_sys_ssd0eae9b1, "ftell")) {
-        mcp.ci = &c_SplFileObject::ci_ftell;
-        return true;
-      }
-      break;
-    case 51:
-      HASH_GUARD_LITSTR(0x7AE1BE187F18FDF3LL, NAMSTR(s_sys_ssac2b8cd6, "fgets")) {
-        mcp.ci = &c_SplFileObject::ci_fgets;
-        return true;
-      }
-      break;
-    case 55:
-      HASH_GUARD_LITSTR(0x4CEC6AA30E43D437LL, NAMSTR(s_sys_ssb30ca8a5, "setMaxLineLen")) {
-        mcp.ci = &c_SplFileObject::ci_setmaxlinelen;
-        return true;
-      }
-      break;
-    case 56:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
-        mcp.ci = &c_SplFileObject::ci_next;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0890F9052322E838LL, NAMSTR(s_sys_ss6bb66679, "fstat")) {
-        mcp.ci = &c_SplFileObject::ci_fstat;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_SplFileInfo::os_get_call_info(mcp, hash);
-}
-bool c_SplFileObject::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  mcp.obj = this;
-  return os_get_call_info(mcp, hash);
-}
+const MethodCallInfoTable c_SplFileObject::s_call_info_table[] = {
+  { 0x09637D7CA2E33F00LL, 1, 5, "fgetc", &c_SplFileObject::ci_fgetc },
+  { 0x5ACCF9166CD9D043LL, 1, 9, "ftruncate", &c_SplFileObject::ci_ftruncate },
+  { 0x794FAFD4412AEFC3LL, 0, 3, "eof", &c_SplFileObject::ci_eof },
+  { 0x6413CB5154808C44LL, 1, 5, "valid", &c_SplFileObject::ci_valid },
+  { 0x44CE4DB1CE7E9F86LL, 1, 5, "flock", &c_SplFileObject::ci_flock },
+  { 0x4282E0231F600049LL, 1, 5, "fseek", &c_SplFileObject::ci_fseek },
+  { 0x2FC3A6941D522E0ALL, 1, 8, "setFlags", &c_SplFileObject::ci_setflags },
+  { 0x7E978C38D741664ELL, 1, 7, "fgetcsv", &c_SplFileObject::ci_fgetcsv },
+  { 0x732EC1BDA8EC520FLL, 1, 11, "getChildren", &c_SplFileObject::ci_getchildren },
+  { 0x3A335010F905ACD0LL, 1, 13, "setCsvControl", &c_SplFileObject::ci_setcsvcontrol },
+  { 0x56EDB60C824E8C51LL, 1, 3, "key", &c_SplFileObject::ci_key },
+  { 0x40044334DA397C15LL, 1, 11, "hasChildren", &c_SplFileObject::ci_haschildren },
+  { 0x25F68E7910FE9CDALL, 1, 13, "getMaxLineLen", &c_SplFileObject::ci_getmaxlinelen },
+  { 0x2B7CAC006AF27F9ALL, 0, 6, "fflush", &c_SplFileObject::ci_fflush },
+  { 0x5B33B55D4B7E339BLL, 1, 9, "fpassthru", &c_SplFileObject::ci_fpassthru },
+  { 0x5B3A4A72846B21DCLL, 1, 7, "current", &c_SplFileObject::ci_current },
+  { 0x3E4E7C561D3A541ELL, 1, 6, "fgetss", &c_SplFileObject::ci_fgetss },
+  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_SplFileObject::ci___construct },
+  { 0x27E7DBA875AD17E1LL, 1, 8, "getFlags", &c_SplFileObject::ci_getflags },
+  { 0x6FE9F691E4A6D962LL, 1, 13, "getCsvControl", &c_SplFileObject::ci_getcsvcontrol },
+  { 0x044B276686B77923LL, 1, 6, "fscanf", &c_SplFileObject::ci_fscanf },
+  { 0x05D72365192CE465LL, 1, 6, "fwrite", &c_SplFileObject::ci_fwrite },
+  { 0x7EF5445C77054C67LL, 1, 4, "seek", &c_SplFileObject::ci_seek },
+  { 0x1670096FDE27AF6ALL, 1, 6, "rewind", &c_SplFileObject::ci_rewind },
+  { 0x1C1216F2B7C16CADLL, 1, 5, "ftell", &c_SplFileObject::ci_ftell },
+  { 0x7AE1BE187F18FDF3LL, 1, 5, "fgets", &c_SplFileObject::ci_fgets },
+  { 0x4CEC6AA30E43D437LL, 1, 13, "setMaxLineLen", &c_SplFileObject::ci_setmaxlinelen },
+  { 0x3C6D50F3BB8102B8LL, 1, 4, "next", &c_SplFileObject::ci_next },
+  { 0x0890F9052322E838LL, 0, 5, "fstat", &c_SplFileObject::ci_fstat },
+  { 0, 1, 0, 0 }
+};
+const int c_SplFileObject::s_call_info_index[] = {
+  63,
+  0,-1,-1,1,3,-1,4,-1,
+  -1,5,6,-1,-1,-1,7,8,
+  9,10,-1,-1,-1,11,-1,-1,
+  -1,-1,12,14,15,-1,16,17,
+  -1,18,19,20,-1,21,-1,22,
+  -1,-1,23,-1,-1,24,-1,-1,
+  -1,-1,-1,25,-1,-1,-1,26,
+  27,-1,-1,-1,-1,-1,-1,-1,
+
+};
 c_SplFileObject *c_SplFileObject::create(CVarRef v_filename, CVarRef v_open_mode //  = NAMVAR(s_sys_svs0d42ecf6, "r")
 , CVarRef v_use_include_path //  = false_varNR
 , CVarRef v_context //  = null_variant
@@ -995,8 +858,10 @@ ObjectStaticCallbacks cw_SplFileObject = {
   c_SplFileObject::os_lval,
   c_SplFileObject::os_invoke,
   c_SplFileObject::os_constant,
-  c_SplFileObject::os_get_call_info,
-  (ObjectData*(*)(ObjectData*))coo_SplFileObject
+  (ObjectData*(*)(ObjectData*))coo_SplFileObject,
+  c_SplFileObject::s_call_info_table,c_SplFileObject::s_call_info_index,
+  "SplFileObject",
+  &cw_SplFileInfo
 };
 /* SRC: classes/splfile.php line 392 */
 void c_SplFileObject::t___construct(Variant v_filename, Variant v_open_mode //  = NAMSTR(s_sys_ss0d42ecf6, "r")
@@ -1846,179 +1711,49 @@ Variant c_SplFileInfo::ifa_gettype(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
   return (self->t_gettype());
 }
-bool c_SplFileInfo::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 63) {
-    case 5:
-      HASH_GUARD_LITSTR(0x5676046725D241C5LL, NAMSTR(s_sys_ss4db221b9, "setInfoClass")) {
-        mcp.ci = &c_SplFileInfo::ci_setinfoclass;
-        return true;
-      }
-      break;
-    case 6:
-      HASH_GUARD_LITSTR(0x6B2EAD4A44934786LL, NAMSTR(s_sys_ssb122eff8, "getRealPath")) {
-        mcp.ci = &c_SplFileInfo::ci_getrealpath;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x1D3B08AA0AF50F06LL, NAMSTR(s_sys_ssfc2d4779, "getType")) {
-        mcp.ci = &c_SplFileInfo::ci_gettype;
-        return true;
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x1ADA46FCC8EFEC08LL, NAMSTR(s_sys_ss95821704, "isDir")) {
-        mcp.ci = &c_SplFileInfo::ci_isdir;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x01A800A73CD2604ALL, NAMSTR(s_sys_ssf578e813, "getInode")) {
-        mcp.ci = &c_SplFileInfo::ci_getinode;
-        return true;
-      }
-      break;
-    case 13:
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss077ab997, "getFilename")) {
-        mcp.ci = &c_SplFileInfo::ci_getfilename;
-        return true;
-      }
-      break;
-    case 14:
-      HASH_GUARD_LITSTR(0x32ABF385AD4BE48ELL, NAMSTR(s_sys_ss8b50e6c9, "getOwner")) {
-        mcp.ci = &c_SplFileInfo::ci_getowner;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x569FC7D8E9401C4FLL, NAMSTR(s_sys_ss11bc49d2, "isReadable")) {
-        mcp.ci = &c_SplFileInfo::ci_isreadable;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
-        mcp.ci = &c_SplFileInfo::ci___tostring;
-        return true;
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x1D5801BB72C51C58LL, NAMSTR(s_sys_ssea00c58c, "isLink")) {
-        mcp.ci = &c_SplFileInfo::ci_islink;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x572E108C6731E29CLL, NAMSTR(s_sys_ss7d1afda2, "getBasename")) {
-        mcp.ci = &c_SplFileInfo::ci_getbasename;
-        return true;
-      }
-      break;
-    case 29:
-      HASH_GUARD_LITSTR(0x4C43532D60465F1DLL, NAMSTR(s_sys_ssc09df55f, "isFile")) {
-        mcp.ci = &c_SplFileInfo::ci_isfile;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
-        mcp.ci = &c_SplFileInfo::ci___construct;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x4BC19906B553C59FLL, NAMSTR(s_sys_ssb1c4aa6f, "getATime")) {
-        mcp.ci = &c_SplFileInfo::ci_getatime;
-        return true;
-      }
-      break;
-    case 35:
-      HASH_GUARD_LITSTR(0x638F2A56B8463A63LL, NAMSTR(s_sys_ss9a04b6ca, "isWritable")) {
-        mcp.ci = &c_SplFileInfo::ci_iswritable;
-        return true;
-      }
-      break;
-    case 37:
-      HASH_GUARD_LITSTR(0x5948407CA9CC4DA5LL, NAMSTR(s_sys_ss5ef289b7, "setFileClass")) {
-        mcp.ci = &c_SplFileInfo::ci_setfileclass;
-        return true;
-      }
-      break;
-    case 39:
-      HASH_GUARD_LITSTR(0x00DCC39EDB16AFE7LL, NAMSTR(s_sys_ss135934b0, "getPathInfo")) {
-        mcp.ci = &c_SplFileInfo::ci_getpathinfo;
-        return true;
-      }
-      break;
-    case 42:
-      HASH_GUARD_LITSTR(0x0F9EDEC32565D86ALL, NAMSTR(s_sys_ss1863b3c7, "getGroup")) {
-        mcp.ci = &c_SplFileInfo::ci_getgroup;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x6615B5496D03A6EALL, NAMSTR(s_sys_ss2a6293f6, "getSize")) {
-        mcp.ci = &c_SplFileInfo::ci_getsize;
-        return true;
-      }
-      break;
-    case 43:
-      HASH_GUARD_LITSTR(0x0D6276BAB75513ABLL, NAMSTR(s_sys_ss90f68f81, "getLinkTarget")) {
-        mcp.ci = &c_SplFileInfo::ci_getlinktarget;
-        return true;
-      }
-      break;
-    case 47:
-      HASH_GUARD_LITSTR(0x5640A4755D0078AFLL, NAMSTR(s_sys_ss45739f33, "getCTime")) {
-        mcp.ci = &c_SplFileInfo::ci_getctime;
-        return true;
-      }
-      break;
-    case 52:
-      HASH_GUARD_LITSTR(0x265BDC54C992EE74LL, NAMSTR(s_sys_ss94213325, "getMTime")) {
-        mcp.ci = &c_SplFileInfo::ci_getmtime;
-        return true;
-      }
-      break;
-    case 53:
-      HASH_GUARD_LITSTR(0x337DEC2D48BDFE35LL, NAMSTR(s_sys_ssf99443fd, "openFile")) {
-        mcp.ci = &c_SplFileInfo::ci_openfile;
-        return true;
-      }
-      break;
-    case 56:
-      HASH_GUARD_LITSTR(0x25070641C3D924F8LL, NAMSTR(s_sys_ss164363b4, "getPathname")) {
-        mcp.ci = &c_SplFileInfo::ci_getpathname;
-        return true;
-      }
-      break;
-    case 58:
-      HASH_GUARD_LITSTR(0x3786834B2A0CCB7ALL, NAMSTR(s_sys_ssa9a8d951, "isExecutable")) {
-        mcp.ci = &c_SplFileInfo::ci_isexecutable;
-        return true;
-      }
-      break;
-    case 61:
-      HASH_GUARD_LITSTR(0x4351578037A06E7DLL, NAMSTR(s_sys_ss49fef19f, "getPerms")) {
-        mcp.ci = &c_SplFileInfo::ci_getperms;
-        return true;
-      }
-      break;
-    case 63:
-      HASH_GUARD_LITSTR(0x04C642C6C162243FLL, NAMSTR(s_sys_ss0c3a6c4a, "getPath")) {
-        mcp.ci = &c_SplFileInfo::ci_getpath;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x7D50FA42F9D4923FLL, NAMSTR(s_sys_ss9fa37b08, "getFileInfo")) {
-        mcp.ci = &c_SplFileInfo::ci_getfileinfo;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_get_call_info(mcp, hash);
-}
-bool c_SplFileInfo::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  mcp.obj = this;
-  return os_get_call_info(mcp, hash);
-}
+const MethodCallInfoTable c_SplFileInfo::s_call_info_table[] = {
+  { 0x5676046725D241C5LL, 1, 12, "setInfoClass", &c_SplFileInfo::ci_setinfoclass },
+  { 0x6B2EAD4A44934786LL, 1, 11, "getRealPath", &c_SplFileInfo::ci_getrealpath },
+  { 0x1D3B08AA0AF50F06LL, 0, 7, "getType", &c_SplFileInfo::ci_gettype },
+  { 0x1ADA46FCC8EFEC08LL, 1, 5, "isDir", &c_SplFileInfo::ci_isdir },
+  { 0x01A800A73CD2604ALL, 1, 8, "getInode", &c_SplFileInfo::ci_getinode },
+  { 0x1930CE336D39474DLL, 1, 11, "getFilename", &c_SplFileInfo::ci_getfilename },
+  { 0x32ABF385AD4BE48ELL, 1, 8, "getOwner", &c_SplFileInfo::ci_getowner },
+  { 0x569FC7D8E9401C4FLL, 1, 10, "isReadable", &c_SplFileInfo::ci_isreadable },
+  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &c_SplFileInfo::ci___tostring },
+  { 0x1D5801BB72C51C58LL, 1, 6, "isLink", &c_SplFileInfo::ci_islink },
+  { 0x572E108C6731E29CLL, 1, 11, "getBasename", &c_SplFileInfo::ci_getbasename },
+  { 0x4C43532D60465F1DLL, 1, 6, "isFile", &c_SplFileInfo::ci_isfile },
+  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_SplFileInfo::ci___construct },
+  { 0x4BC19906B553C59FLL, 0, 8, "getATime", &c_SplFileInfo::ci_getatime },
+  { 0x638F2A56B8463A63LL, 1, 10, "isWritable", &c_SplFileInfo::ci_iswritable },
+  { 0x5948407CA9CC4DA5LL, 1, 12, "setFileClass", &c_SplFileInfo::ci_setfileclass },
+  { 0x00DCC39EDB16AFE7LL, 1, 11, "getPathInfo", &c_SplFileInfo::ci_getpathinfo },
+  { 0x0F9EDEC32565D86ALL, 1, 8, "getGroup", &c_SplFileInfo::ci_getgroup },
+  { 0x6615B5496D03A6EALL, 0, 7, "getSize", &c_SplFileInfo::ci_getsize },
+  { 0x0D6276BAB75513ABLL, 1, 13, "getLinkTarget", &c_SplFileInfo::ci_getlinktarget },
+  { 0x5640A4755D0078AFLL, 1, 8, "getCTime", &c_SplFileInfo::ci_getctime },
+  { 0x265BDC54C992EE74LL, 1, 8, "getMTime", &c_SplFileInfo::ci_getmtime },
+  { 0x337DEC2D48BDFE35LL, 1, 8, "openFile", &c_SplFileInfo::ci_openfile },
+  { 0x25070641C3D924F8LL, 1, 11, "getPathname", &c_SplFileInfo::ci_getpathname },
+  { 0x3786834B2A0CCB7ALL, 1, 12, "isExecutable", &c_SplFileInfo::ci_isexecutable },
+  { 0x4351578037A06E7DLL, 1, 8, "getPerms", &c_SplFileInfo::ci_getperms },
+  { 0x04C642C6C162243FLL, 1, 7, "getPath", &c_SplFileInfo::ci_getpath },
+  { 0x7D50FA42F9D4923FLL, 0, 11, "getFileInfo", &c_SplFileInfo::ci_getfileinfo },
+  { 0, 1, 0, 0 }
+};
+const int c_SplFileInfo::s_call_info_index[] = {
+  63,
+  -1,-1,-1,-1,-1,0,1,-1,
+  3,-1,4,-1,-1,5,6,7,
+  -1,-1,-1,8,-1,-1,-1,-1,
+  9,-1,-1,-1,10,11,-1,12,
+  -1,-1,-1,14,-1,15,-1,16,
+  -1,-1,17,19,-1,-1,-1,20,
+  -1,-1,-1,-1,21,22,-1,-1,
+  23,-1,24,-1,-1,25,-1,26,
+
+};
 c_SplFileInfo *c_SplFileInfo::create(CVarRef v_file_name) {
   CountableHelper h(this);
   init();
@@ -2045,8 +1780,10 @@ ObjectStaticCallbacks cw_SplFileInfo = {
   c_SplFileInfo::os_lval,
   c_SplFileInfo::os_invoke,
   c_SplFileInfo::os_constant,
-  c_SplFileInfo::os_get_call_info,
-  (ObjectData*(*)(ObjectData*))coo_SplFileInfo
+  (ObjectData*(*)(ObjectData*))coo_SplFileInfo,
+  c_SplFileInfo::s_call_info_table,c_SplFileInfo::s_call_info_index,
+  "SplFileInfo",
+  0
 };
 /* SRC: classes/splfile.php line 14 */
 void c_SplFileInfo::t___construct(Variant v_file_name) {

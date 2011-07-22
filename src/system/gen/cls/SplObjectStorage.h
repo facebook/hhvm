@@ -27,6 +27,7 @@ namespace HPHP {
 
 /* SRC: classes/splobjectstorage.php line 12 */
 FORWARD_DECLARE_CLASS(SplObjectStorage);
+extern ObjectStaticCallbacks cw_SplObjectStorage;
 class c_SplObjectStorage : public ExtObjectData {
   public:
 
@@ -37,7 +38,6 @@ class c_SplObjectStorage : public ExtObjectData {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(SplObjectStorage, SplObjectStorage)
-  DECLARE_INVOKE_EX(SplObjectStorage, SplObjectStorage, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -58,9 +58,8 @@ class c_SplObjectStorage : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplObjectStorage 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_SplObjectStorage 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   c_SplObjectStorage() : m_index(0LL) {}
@@ -84,7 +83,6 @@ class c_SplObjectStorage : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(current);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
-extern struct ObjectStaticCallbacks cw_SplObjectStorage;
 ObjectData *coo_SplObjectStorage() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

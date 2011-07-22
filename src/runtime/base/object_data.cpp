@@ -173,7 +173,7 @@ ObjectData *coo_ObjectData(ObjectData *) {
 
 inline void checkRedeclaredClass(const RedeclaredObjectStaticCallbacks *r) {
   if (UNLIKELY(r->id < 0)) {
-    throw FatalErrorException(0, "unknown class %s", r->name);
+    throw FatalErrorException(0, "unknown class %s", r->oscb.cls);
   }
 }
 
@@ -229,6 +229,100 @@ Object ObjectStaticCallbacks::createOnly(ObjectData* root /* = NULL */) const {
   return o;
 }
 
+inline ALWAYS_INLINE bool GetCallInfoHelper(bool ex, const char *cls,
+                                            const ObjectStaticCallbacks *osc,
+                                            MethodCallPackage &mcp,
+                                            int64 hash) {
+  const char *globals = 0;
+  CStrRef s = *mcp.name;
+  if (hash < 0) hash = s->hash();
+  bool found = false;
+
+  if (UNLIKELY(!osc)) {
+    if (mcp.obj && mcp.obj->o_get_call_info_hook(cls, mcp, hash)) {
+      return true;
+    }
+  } else {
+    do {
+      if (!ex || found || !strcasecmp(cls, osc->cls)) {
+        if (ex) found = true;
+        if (const int *ix = osc->mcit_ix) {
+          const MethodCallInfoTable *info = osc->mcit;
+
+          int h = hash & ix[0];
+          int o = ix[h + 1];
+          if (o >= 0) {
+            info += o;
+            do {
+              if (LIKELY(hash == info->hash) &&
+                  LIKELY(info->len == s->size()) &&
+                  LIKELY(!strcasecmp(info->name, s->data()))) {
+                mcp.ci = info->ci;
+                return true;
+              }
+              info++;
+            } while (!(info->flags & 1));
+          }
+        }
+      }
+      if (!osc->parent) break;
+      if (UNLIKELY(osc->dynamicParent())) {
+        if (LIKELY(!globals)) {
+          globals = (char*)get_global_variables();
+        }
+        osc = *(ObjectStaticCallbacks**)(globals + ((int64)osc->parent & ~1));
+        if (mcp.obj) {
+          mcp.obj = static_cast<DynamicObjectData*>(mcp.obj)->
+            getRedeclaredParent();
+        }
+      } else {
+        osc = osc->parent;
+      }
+    } while (osc);
+  }
+
+  if (mcp.obj) {
+    mcp.ci = &s_ObjectData_call_handler;
+    if (mcp.obj->hasCall() || mcp.obj->hasCallStatic()) {
+      return true;
+    }
+  } else {
+    ObjectData *obj = FrameInjection::GetThis();
+    ASSERT(!mcp.isObj);
+    StrNR cls = mcp.rootCls;
+    bool ok = false;
+    if (!obj || !obj->o_instanceof(cls)) {
+      obj = create_object_only_no_init(cls);
+      obj->setDummy();
+      ok = obj->hasCallStatic();
+      obj->release();
+      obj = 0;
+    } else {
+      ok = obj->hasCallStatic() || obj->hasCall();
+    }
+    if (ok) {
+      mcp.obj = obj;
+      mcp.ci = &s_ObjectData_call_handler;
+      return true;
+    }
+  }
+
+  mcp.fail();
+  return false;
+}
+
+bool ObjectStaticCallbacks::GetCallInfo(const ObjectStaticCallbacks *osc,
+                                        MethodCallPackage &mcp,
+                                        int64 hash) {
+  return GetCallInfoHelper(false, 0, osc, mcp, hash);
+}
+
+bool ObjectStaticCallbacks::GetCallInfoEx(const char *cls,
+                                          const ObjectStaticCallbacks *osc,
+                                          MethodCallPackage &mcp,
+                                          int64 hash) {
+  return GetCallInfoHelper(true, cls, osc, mcp, hash);
+}
 
 Variant ObjectData::os_getInit(CStrRef s) {
   throw FatalErrorException(0, "unknown property %s", s.c_str());
@@ -257,39 +351,6 @@ Variant ObjectData::os_constant(const char *s) {
   ostringstream msg;
   msg << "unknown class constant " << s;
   throw FatalErrorException(msg.str().c_str());
-}
-
-bool ObjectData::os_get_call_info(MethodCallPackage &info,
-                                  int64 hash /* = -1 */) {
-  if (info.obj) {
-    // For classes that do not inherit from redeclared classes,
-    // o_get_call_info() delegates to os_get_call_info() with info.obj set
-    // beforehand.
-    return info.obj->ObjectData::o_get_call_info(info, hash);
-  }
-  Object obj = FrameInjection::GetThis();
-  ASSERT(!info.isObj);
-  String cls = info.rootCls;
-  if (!obj.instanceof(cls)) {
-    obj = create_object(cls, Array::Create(), false);
-    obj->setDummy();
-  } else {
-    return obj->o_get_call_info(info, hash);
-  }
-  if (!obj->hasCallStatic()) {
-    info.fail();
-    return false;
-  }
-
-  info.ci = &s_ObjectData_call_handler;
-  info.obj = NULL;
-  return true;
-}
-
-bool ObjectData::os_get_call_info_with_index(MethodCallPackage &info,
-                                             MethodIndex mi,
-                                             int64 hash /* = -1 */) {
-  return os_get_call_info(info, hash);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -764,36 +825,23 @@ Variant ObjectData::o_invoke_ex(CStrRef clsname, CStrRef s,
 
 bool ObjectData::o_get_call_info(MethodCallPackage &mcp,
                                  int64 hash /* = -1 */) {
-  // If UseMethodIndex is on, classes will define o_get_call_info_with_index
-  // and this will be a virtual call to the class' version.
-  // If it's off, this will go to ObjectData's version.
-  return o_get_call_info_with_index(mcp, methodIndexExists(*mcp.name), hash);
+  const ObjectStaticCallbacks *osc = o_get_callbacks();
+  mcp.obj = this;
+  return ObjectStaticCallbacks::GetCallInfo(osc, mcp, hash);
 }
 
 bool ObjectData::o_get_call_info_ex(const char *clsname,
                                     MethodCallPackage &mcp,
                                     int64 hash /* = -1 */) {
+  const ObjectStaticCallbacks *osc = o_get_callbacks();
   mcp.obj = this;
-  return ObjectData::o_get_call_info(mcp, hash);
+  return ObjectStaticCallbacks::GetCallInfoEx(clsname, osc, mcp, hash);
 }
 
-bool ObjectData::o_get_call_info_with_index(MethodCallPackage &mcp,
-                                            MethodIndex mi,
-                                            int64 hash /* = -1 */) {
-  mcp.ci = &s_ObjectData_call_handler;
-  if (!hasCall() && !hasCallStatic()) {
-    mcp.fail();
-    return false;
-  }
-  return true;
-}
-
-bool ObjectData::o_get_call_info_with_index_ex(const char *clsname,
-                                               MethodCallPackage &mcp,
-                                               MethodIndex mi,
-                                               int64 hash /* = -1 */) {
-  mcp.obj = this;
-  return ObjectData::o_get_call_info_with_index(mcp, mi, hash);
+bool ObjectData::o_get_call_info_hook(const char *clsname,
+                                      MethodCallPackage &mcp,
+                                      int64 hash /* = -1 */) {
+  return false;
 }
 
 Variant ObjectData::o_throw_fatal(const char *msg) {

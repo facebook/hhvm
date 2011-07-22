@@ -26,6 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/reflection.php line 538 */
 FORWARD_DECLARE_CLASS(ReflectionClass);
+extern ObjectStaticCallbacks cw_ReflectionClass;
 class c_ReflectionClass : public ExtObjectData {
   public:
 
@@ -36,7 +37,6 @@ class c_ReflectionClass : public ExtObjectData {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(ReflectionClass, ReflectionClass)
-  DECLARE_INVOKE_EX(ReflectionClass, ReflectionClass, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -57,9 +57,8 @@ class c_ReflectionClass : public ExtObjectData {
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionClass 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   c_ReflectionClass() : m_name(Variant::nullInit), m_info(Variant::nullInit) {}
@@ -151,7 +150,6 @@ class c_ReflectionClass : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(getproperty);
   DECLARE_METHOD_INVOKE_HELPERS(isinternal);
 };
-extern struct ObjectStaticCallbacks cw_ReflectionClass;
 ObjectData *coo_ReflectionClass() NEVER_INLINE;
 extern const int64 q_ReflectionClass_IS_IMPLICIT_ABSTRACT;
 extern const int64 q_ReflectionClass_IS_EXPLICIT_ABSTRACT;

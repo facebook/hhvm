@@ -25,6 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/xhprof.php line 6 */
 FORWARD_DECLARE_CLASS(XhprofFrame);
+extern ObjectStaticCallbacks cw_XhprofFrame;
 class c_XhprofFrame : public ExtObjectData {
   public:
 
@@ -33,7 +34,6 @@ class c_XhprofFrame : public ExtObjectData {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(XhprofFrame, XhprofFrame)
-  DECLARE_INVOKE_EX(XhprofFrame, XhprofFrame, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -52,9 +52,8 @@ class c_XhprofFrame : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_XhprofFrame 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_XhprofFrame 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   public: void t___construct(Variant v_name);
@@ -65,7 +64,6 @@ class c_XhprofFrame : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
 };
-extern struct ObjectStaticCallbacks cw_XhprofFrame;
 ObjectData *coo_XhprofFrame() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

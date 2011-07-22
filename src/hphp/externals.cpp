@@ -31,7 +31,9 @@ const char *g_paramrtti_map[] = { NULL};
 Object create_object_only(CStrRef s, ObjectData *root) {
   return Object();
 }
-
+ObjectData *create_object_only_no_init(CStrRef s, ObjectData *root) {
+  return 0;
+}
 class GlobalVariables;
 GlobalVariables *get_global_variables() { return NULL;}
 GlobalVariables *get_global_variables_check() { return NULL;}
@@ -88,11 +90,6 @@ bool get_call_info_no_eval(const CallInfo *&ci, void *&extra,
 bool get_call_info_static_method(MethodCallPackage &info) {
   return false;
 }
-bool get_call_info_static_method_with_index(MethodCallPackage &info,
-    MethodIndex mi) {
-  return false;
-}
-
 const ObjectStaticCallbacks * get_object_static_callbacks(CStrRef s) {
   return NULL;
 }
@@ -106,16 +103,6 @@ void fiber_unmarshal_global_state(GlobalVariables *g1, GlobalVariables *g2,
                                   char defstrategy,
                                   const vector<pair<string, char> > &resolver){
 }
-extern const MethodIndex g_methodIndexMapInit[];
-const MethodIndex g_methodIndexMapInit[] = {MethodIndex(0,0)};
-const char * g_methodIndexMapInitName[] = {NULL};
-extern const MethodIndex g_methodIndexMapInitSys[];
-extern const MethodIndex g_methodIndexMapInitNameSys[];
-
-const unsigned g_methodIndexHMapSize = 0;
-const MethodIndexHMap g_methodIndexHMap[] = {MethodIndexHMap()};
-const unsigned g_methodIndexReverseCallIndex[] = {0};
-const char * g_methodIndexReverseIndex[] = {0};
 
 bool has_eval_support = false;
 ///////////////////////////////////////////////////////////////////////////////

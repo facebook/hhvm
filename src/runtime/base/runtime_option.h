@@ -367,8 +367,6 @@ public:
   static int PregBacktraceLimit;
   static int PregRecursionLimit;
   static bool EnablePregErrorLog;
-
-  static bool MethodSlotCalls;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

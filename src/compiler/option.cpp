@@ -237,7 +237,6 @@ bool Option::GenerateDocComments = true;
 bool Option::FlAnnotate = false;
 bool Option::SystemGen = false;
 bool Option::PregenerateCPP = false;
-bool Option::UseMethodIndex = false;
 bool Option::GenerateFFIStaticBinding = true;
 
 int Option::GCCOptimization[] = {0, 0, 0};

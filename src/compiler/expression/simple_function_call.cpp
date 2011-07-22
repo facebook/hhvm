@@ -1373,11 +1373,6 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       needHash = false;
     }
   } else {
-    const MethodSlot *ms = NULL;
-    if (!m_name.empty()) {
-      ConstructPtr self = shared_from_this();
-      ms = ar->getOrAddMethodSlot(m_name, self);
-    }
     if (safeCheck) {
       cg_printf("mcp%d.noFatal();\n", m_ciTemp);
     }
@@ -1413,14 +1408,13 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                 m_ciTemp, getThisString(false).c_str());
       cg_printString(escapedName, ar, shared_from_this());
       cg_printf(");\n");
-      cg_printf("%sparent->%sget_call_info%s(mcp%d",
+      cg_printf("%sparent->%sget_call_info(mcp%d",
                 getThisString(true).c_str(),
                 Option::ObjectPrefix,
-                ms ? "_with_index" : "", m_ciTemp);
+                m_ciTemp);
     } else if (objCall < 0) {
       // Dont know if going to get an object or not
-      cg_printf("mcp%d.dynamicNamedCall%s(", m_ciTemp,
-                ms ? "WithIndex" : "");
+      cg_printf("mcp%d.dynamicNamedCall(", m_ciTemp);
       cg_printString(escapedClass, ar, shared_from_this());
       cg_printf(", ");
       cg_printString(escapedName, ar, shared_from_this());
@@ -1430,10 +1424,11 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       cg_printf(", ");
       cg_printString(escapedName, ar, shared_from_this());
       cg_printf(");\n");
-      cg_printf("%s->%s%s->%sget_call_info%s(mcp%d",
-                cg.getGlobals(ar), Option::ClassStaticsCallbackPrefix,
-                className.c_str(), Option::ObjectStaticPrefix,
-                ms ? "with_index" : "", m_ciTemp);
+      cg_printf("%s->%s%s->%sget_call_info(mcp%d",
+                cg.getGlobals(ar),
+                Option::ClassStaticsCallbackPrefix, className.c_str(),
+                Option::ObjectStaticPrefix,
+                m_ciTemp);
     } else if (m_classScope) {
       // In an object, calling a superclass's method
       if (objCall > 0) {
@@ -1441,19 +1436,21 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                   m_ciTemp, getThisString(false).c_str());
         cg_printString(escapedName, ar, shared_from_this());
         cg_printf(");\n");
-        cg_printf("%s%s::%sget_call_info%s(mcp%d",
-                  Option::ClassPrefix, className.c_str(), Option::ObjectPrefix,
-                  ms ? "_with_index" : "", m_ciTemp);
+        cg_printf("mcp%d.obj = mcp%d.rootObj;\n", m_ciTemp, m_ciTemp);
+        cg_printf("%s%s.%sget_call_info(mcp%d",
+                  Option::ClassWrapperFunctionPrefix, className.c_str(),
+                  Option::ObjectStaticPrefix,
+                  m_ciTemp);
       } else {
         cg_printf("mcp%d.staticMethodCall(", m_ciTemp);
         cg_printString(escapedClass, ar, shared_from_this());
         cg_printf(", ");
         cg_printString(escapedName, ar, shared_from_this());
         cg_printf(");\n");
-        cg_printf("%s%s::%sget_call_info%s(mcp%d",
-                  Option::ClassPrefix, className.c_str(),
+        cg_printf("%s%s.%sget_call_info(mcp%d",
+                  Option::ClassWrapperFunctionPrefix, className.c_str(),
                   Option::ObjectStaticPrefix,
-                  ms ? "_with_index" : "", m_ciTemp);
+                  m_ciTemp);
       }
     } else {
       if (m_class) {
@@ -1467,8 +1464,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
           lsb = true;
         } else {
           m_class->preOutputCPP(cg, ar, 0);
-          cg_printf("mcp%d.dynamicNamedCall%s(", m_ciTemp,
-              ms ? "_with_index" : "");
+          cg_printf("mcp%d.dynamicNamedCall(", m_ciTemp);
           m_class->outputCPP(cg, ar);
         }
         cg_printf(", ");
@@ -1479,15 +1475,11 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         }
       } else {
         // Nonexistent method
-        cg_printf("mcp%d.dynamicNamedCall%s(", m_ciTemp,
-                  ms ? "_with_index" : "");
+        cg_printf("mcp%d.dynamicNamedCall(", m_ciTemp);
         cg_printString(escapedClass, ar, shared_from_this());
         cg_printf(", ");
         cg_printString(escapedName, ar, shared_from_this());
       }
-    }
-    if (ms) {
-      cg_printf(", %s", ms->runObjParam().c_str());
     }
   }
   if (needHash) {

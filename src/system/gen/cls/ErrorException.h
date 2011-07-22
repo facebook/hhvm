@@ -26,6 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 286 */
 FORWARD_DECLARE_CLASS(ErrorException);
+extern ObjectStaticCallbacks cw_ErrorException;
 class c_ErrorException : public c_Exception {
   public:
 
@@ -35,7 +36,6 @@ class c_ErrorException : public c_Exception {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(ErrorException, ErrorException)
-  DECLARE_INVOKE_EX(ErrorException, ErrorException, Exception)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -55,9 +55,8 @@ class c_ErrorException : public c_Exception {
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ErrorException 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   c_ErrorException() : m_severity(Variant::nullInit) {}
@@ -69,7 +68,6 @@ class c_ErrorException : public c_Exception {
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   DECLARE_METHOD_INVOKE_HELPERS(getseverity);
 };
-extern struct ObjectStaticCallbacks cw_ErrorException;
 ObjectData *coo_ErrorException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

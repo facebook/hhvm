@@ -25,6 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/stdclass.php line 8 */
 FORWARD_DECLARE_CLASS(__PHP_Incomplete_Class);
+extern ObjectStaticCallbacks cw___PHP_Incomplete_Class;
 class c___PHP_Incomplete_Class : public ExtObjectData {
   public:
 
@@ -33,7 +34,6 @@ class c___PHP_Incomplete_Class : public ExtObjectData {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(__PHP_Incomplete_Class, __PHP_Incomplete_Class)
-  DECLARE_INVOKE_EX(__PHP_Incomplete_Class, __PHP_Incomplete_Class, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -52,13 +52,11 @@ class c___PHP_Incomplete_Class : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC___PHP_Incomplete_Class 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE___PHP_Incomplete_Class 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const int s_call_info_table = 0;
+  static const int s_call_info_index = 0;
 
   public:
 };
-extern struct ObjectStaticCallbacks cw___PHP_Incomplete_Class;
 ObjectData *coo___PHP_Incomplete_Class() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

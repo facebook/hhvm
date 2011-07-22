@@ -31,16 +31,6 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const MethodIndex g_methodIndexMapInit[];
-const MethodIndex g_methodIndexMapInit[] = {MethodIndex(0,0)};
-const char * g_methodIndexMapInitName[] = {NULL};
-
-
-const unsigned g_methodIndexHMapSize = 0;
-const MethodIndexHMap g_methodIndexHMap[] = {MethodIndexHMap()};
-const unsigned g_methodIndexReverseCallIndex[] = {0};
-const char * g_methodIndexReverseIndex[] = {0};
-
 // Used by test_ext_preg
 static String test_preg_rep(CStrRef a, CStrRef b, CStrRef c) {
   return concat(f_strtoupper(c), a);
@@ -130,6 +120,10 @@ Variant get_class_var_init(CStrRef s, const char *var) {
 
 Object create_object_only(CStrRef s, ObjectData *root /* = NULL */) {
   return create_builtin_object_only(s, root);
+}
+
+ObjectData *create_object_only_no_init(CStrRef s, ObjectData *root) {
+  return create_builtin_object_only_no_init(s, root);
 }
 
 Variant invokeImpl(void *extra, CArrRef params) {
@@ -367,10 +361,6 @@ Variant *get_static_property_lv(CStrRef s, const char *prop) {
 
 bool get_call_info_static_method(MethodCallPackage &info) {
   return NULL;
-}
-bool get_call_info_static_method_with_index(MethodCallPackage &info,
-    MethodIndex mi) {
-  return false;
 }
 
 const ObjectStaticCallbacks * get_object_static_callbacks(CStrRef s) {

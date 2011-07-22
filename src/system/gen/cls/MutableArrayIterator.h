@@ -26,6 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 644 */
 FORWARD_DECLARE_CLASS(MutableArrayIterator);
+extern ObjectStaticCallbacks cw_MutableArrayIterator;
 class c_MutableArrayIterator : public c_ArrayIterator {
   public:
 
@@ -34,7 +35,6 @@ class c_MutableArrayIterator : public c_ArrayIterator {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(MutableArrayIterator, MutableArrayIterator)
-  DECLARE_INVOKE_EX(MutableArrayIterator, MutableArrayIterator, ArrayIterator)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -53,9 +53,8 @@ class c_MutableArrayIterator : public c_ArrayIterator {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_MutableArrayIterator 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_MutableArrayIterator 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   public: void t___construct(VRefParam rv_array, Variant v_flags = 0LL);
@@ -66,7 +65,6 @@ class c_MutableArrayIterator : public c_ArrayIterator {
   DECLARE_METHOD_INVOKE_HELPERS(currentref);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
 };
-extern struct ObjectStaticCallbacks cw_MutableArrayIterator;
 ObjectData *coo_MutableArrayIterator() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

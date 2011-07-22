@@ -25,6 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 10 */
 FORWARD_DECLARE_CLASS(Exception);
+extern ObjectStaticCallbacks cw_Exception;
 class c_Exception : public ExtObjectData {
   public:
 
@@ -39,7 +40,6 @@ class c_Exception : public ExtObjectData {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(Exception, Exception)
-  DECLARE_INVOKE_EX(Exception, Exception, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -59,9 +59,8 @@ class c_Exception : public ExtObjectData {
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_Exception 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   c_Exception() : m_previous(Variant::nullInit), m_file(Variant::nullInit), m_line(Variant::nullInit), m_trace(Variant::nullInit) {}
@@ -90,7 +89,6 @@ class c_Exception : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(gettraceasstring);
   DECLARE_METHOD_INVOKE_HELPERS(gettrace);
 };
-extern struct ObjectStaticCallbacks cw_Exception;
 ObjectData *coo_Exception() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

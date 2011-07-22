@@ -37,6 +37,8 @@ class VariableEnvironment;
 class ArrayIter;
 class MutableArrayIter;
 class ClassPropTable;
+struct ObjectStaticCallbacks;
+struct MethodCallInfoTable;
 
 /**
  * Base class of all user-defined classes. All data members and methods in
@@ -187,10 +189,6 @@ class ObjectData : public CountableNF {
                            CArrRef params, int64 hash, bool fatal = true);
   static Variant os_constant(const char *s);
 
-  static bool os_get_call_info(MethodCallPackage &info, int64 hash = -1);
-  static bool os_get_call_info_with_index(MethodCallPackage &info,
-      MethodIndex mi, int64 hash = -1);
-
   // properties
   virtual Array o_toArray() const;
   virtual Array o_toIterArray(CStrRef context, bool getRef = false);
@@ -255,13 +253,12 @@ class ObjectData : public CountableNF {
                             INVOKE_FEW_ARGS_DECL_ARGS);
   Variant o_root_invoke_few_args(CStrRef s, int64 hash, int count,
                                  INVOKE_FEW_ARGS_DECL_ARGS);
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  virtual bool o_get_call_info_ex(const char *clsname,
-      MethodCallPackage &mcp, int64 hash = -1);
-  virtual bool o_get_call_info_with_index(MethodCallPackage &mcp,
-      MethodIndex mi, int64 hash = -1);
-  virtual bool o_get_call_info_with_index_ex(const char *clsname,
-      MethodCallPackage &mcp, MethodIndex mi, int64 hash = -1);
+  bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  virtual const ObjectStaticCallbacks *o_get_callbacks() const = 0;
+  bool o_get_call_info_ex(const char *clsname,
+                          MethodCallPackage &mcp, int64 hash = -1);
+  virtual bool o_get_call_info_hook(const char *clsname,
+                                    MethodCallPackage &mcp, int64 hash = -1);
 
   // misc
   Variant o_throw_fatal(const char *msg);
@@ -317,9 +314,10 @@ class ObjectData : public CountableNF {
  protected:
   virtual ObjectData* cloneImpl() = 0;
 
+  virtual bool php_sleep(Variant &ret);
+public:
   virtual bool hasCall();
   virtual bool hasCallStatic();
-  virtual bool php_sleep(Variant &ret);
 
  private:
   ObjectData(const ObjectData &) { ASSERT(false);}
@@ -336,6 +334,7 @@ class ObjectData : public CountableNF {
  protected:
   int o_id;                      // a numeric identifier of this object
   mutable Array *o_properties;   // dynamic properties
+
  private:
   mutable int16  o_attribute;    // vairous flags
 
@@ -367,26 +366,50 @@ public:
   }
 };
 
+struct MethodCallInfoTable {
+  int64       hash;
+  int         flags;
+  int         len;
+  const char *name;
+  CallInfo   *ci;
+};
+
 // Callback structure for functions related to static methods
 struct ObjectStaticCallbacks {
-  Object create(CArrRef params, bool init = true, ObjectData* root = NULL) const;
+  Object create(CArrRef params, bool init = true,
+                ObjectData* root = NULL) const;
   Object createOnly(ObjectData *root = NULL) const;
+  inline bool os_get_call_info(MethodCallPackage &info, int64 hash = -1) const {
+    return GetCallInfo(this, info, hash);
+  }
+  static bool GetCallInfo(const ObjectStaticCallbacks *osc,
+                          MethodCallPackage &mcp, int64 hash);
+  static bool GetCallInfoEx(const char *cls,
+                            const ObjectStaticCallbacks *osc,
+                            MethodCallPackage &mcp, int64 hash);
+  bool dynamicParent() const { return (int64)parent & 1; }
 
+  operator const ObjectStaticCallbacks*() const { return this; }
   Variant (*os_getInit)(CStrRef s);
   Variant (*os_get)(CStrRef s);
   Variant &(*os_lval)(CStrRef s);
   Variant (*os_invoke)(const char *c, const char *s,
-                           CArrRef params, int64 hash, bool fatal);
+                       CArrRef params, int64 hash, bool fatal);
   Variant (*os_constant)(const char *s);
-  bool (*os_get_call_info)(MethodCallPackage &info, int64 hash);
   ObjectData *(*createOnlyNoInit)(ObjectData* root);
+
+  const MethodCallInfoTable   *mcit;
+  const int                   *mcit_ix;
+
+  const char                  *cls;
+  const ObjectStaticCallbacks *parent;
 };
 
 struct RedeclaredObjectStaticCallbacks {
   ObjectStaticCallbacks oscb;
   int id;
-  const char *name;
 
+  operator const ObjectStaticCallbacks*() const { return &oscb; }
   int getRedeclaringId() const { return id; }
 
   Variant os_getInit(CStrRef s) const;

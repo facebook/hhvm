@@ -928,35 +928,4 @@ Variant Silencer::disable(CVarRef v) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Fast Method Call
-
-static bool g_methodIndexUseSys ;
-void MethodIndexHMap::initialize(bool useSystem) {
-  g_methodIndexUseSys = useSystem;
-}
-
-MethodIndex MethodIndexHMap::methodIndexExists(CStrRef methodName) {
-  unsigned size =
-    g_methodIndexUseSys ? g_methodIndexHMapSizeSys : g_methodIndexHMapSize;
-  if (!size) return MethodIndex::fail();
-  const MethodIndexHMap *map =
-    g_methodIndexUseSys ? g_methodIndexHMapSys : g_methodIndexHMap;
-  unsigned hash = (unsigned)(methodName->hash() % size);
-  while (map[hash].name && strcasecmp(map[hash].name, methodName.data())!=0) {
-    hash = hash ? hash - 1 : size - 1;
-  }
-  if (!map[hash].name) return MethodIndex::fail();
-  return map[hash].methodIndex;
-}
-
-const char * methodIndexLookupReverse(MethodIndex methodIndex) {
-  const unsigned *callIndex = g_methodIndexUseSys
-    ? g_methodIndexReverseCallIndexSys : g_methodIndexReverseCallIndex;
-  const char **map = g_methodIndexUseSys
-    ?  g_methodIndexReverseIndexSys : g_methodIndexReverseIndex;
-  unsigned callIndexOffset = callIndex[methodIndex.m_callIndex - 1];
-  return map[methodIndex.m_overloadIndex + callIndexOffset - 1];
-}
-
-///////////////////////////////////////////////////////////////////////////////
 }

@@ -335,11 +335,6 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
   if (m_name.empty()) {
     m_nameExp->preOutputCPP(cg, ar, 0);
   }
-  const MethodSlot *ms = NULL;
-  if (!m_name.empty()) {
-    ConstructPtr self = shared_from_this();
-    ms = ar->getOrAddMethodSlot(m_name, self);
-  }
   cg_printf("MethodCallPackage mcp%d;\n", m_ciTemp);
 
   if (!isThis) {
@@ -358,11 +353,7 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
     cg_printf(";\n");
   }
 
-  if (ms) {
-    cg_printf("mcp%d.methodCallWithIndex((", m_ciTemp);
-  } else {
-    cg_printf("mcp%d.methodCall((", m_ciTemp);
-  }
+  cg_printf("mcp%d.methodCall((", m_ciTemp);
   if (isThis) {
     if (!getClassScope() || getClassScope()->derivedByDynamic() ||
         !static_pointer_cast<SimpleVariable>(m_object)->isGuardedThis()) {
@@ -377,9 +368,6 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
   if (!m_name.empty()) {
     uint64 hash = hash_string_i(m_name.c_str());
     cg_printString(m_origName, ar, shared_from_this());
-    if (ms) {
-      cg_printf(", %s", ms->runObjParam().c_str());
-    }
     cg_printf(", 0x%016llXLL);\n", hash);
   } else {
     cg_printf("mth%d, -1);\n", m_ciTemp);

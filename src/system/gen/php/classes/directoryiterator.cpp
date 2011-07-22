@@ -373,91 +373,29 @@ Variant c_RecursiveDirectoryIterator::ifa_rewind(MethodCallPackage &mcp, int cou
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
-bool c_RecursiveDirectoryIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss9943cbf4, "valid")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_valid;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss6a9626a3, "seek")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_seek;
-        return true;
-      }
-      break;
-    case 9:
-      HASH_GUARD_LITSTR(0x430BA7B88ED3A809LL, NAMSTR(s_sys_ssf0e3c7d6, "getSubPathname")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_getsubpathname;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss941ca25f, "rewind")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_rewind;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x732EC1BDA8EC520FLL, NAMSTR(s_sys_ss68d731f7, "getChildren")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_getchildren;
-        return true;
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_key;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci___tostring;
-        return true;
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x40044334DA397C15LL, NAMSTR(s_sys_ssf6be66f9, "hasChildren")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_haschildren;
-        return true;
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_next;
-        return true;
-      }
-      break;
-    case 27:
-      HASH_GUARD_LITSTR(0x7CF26A0E76B5E27BLL, NAMSTR(s_sys_sse3783d41, "getSubPath")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_getsubpath;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ssb3a5c1b3, "current")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_current;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci___construct;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_DirectoryIterator::os_get_call_info(mcp, hash);
-}
-bool c_RecursiveDirectoryIterator::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  mcp.obj = this;
-  return os_get_call_info(mcp, hash);
-}
+const MethodCallInfoTable c_RecursiveDirectoryIterator::s_call_info_table[] = {
+  { 0x6413CB5154808C44LL, 1, 5, "valid", &c_RecursiveDirectoryIterator::ci_valid },
+  { 0x7EF5445C77054C67LL, 1, 4, "seek", &c_RecursiveDirectoryIterator::ci_seek },
+  { 0x430BA7B88ED3A809LL, 1, 14, "getSubPathname", &c_RecursiveDirectoryIterator::ci_getsubpathname },
+  { 0x1670096FDE27AF6ALL, 1, 6, "rewind", &c_RecursiveDirectoryIterator::ci_rewind },
+  { 0x732EC1BDA8EC520FLL, 1, 11, "getChildren", &c_RecursiveDirectoryIterator::ci_getchildren },
+  { 0x56EDB60C824E8C51LL, 1, 3, "key", &c_RecursiveDirectoryIterator::ci_key },
+  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &c_RecursiveDirectoryIterator::ci___tostring },
+  { 0x40044334DA397C15LL, 1, 11, "hasChildren", &c_RecursiveDirectoryIterator::ci_haschildren },
+  { 0x3C6D50F3BB8102B8LL, 1, 4, "next", &c_RecursiveDirectoryIterator::ci_next },
+  { 0x7CF26A0E76B5E27BLL, 1, 10, "getSubPath", &c_RecursiveDirectoryIterator::ci_getsubpath },
+  { 0x5B3A4A72846B21DCLL, 1, 7, "current", &c_RecursiveDirectoryIterator::ci_current },
+  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_RecursiveDirectoryIterator::ci___construct },
+  { 0, 1, 0, 0 }
+};
+const int c_RecursiveDirectoryIterator::s_call_info_index[] = {
+  31,
+  -1,-1,-1,-1,0,-1,-1,1,
+  -1,2,3,-1,-1,-1,-1,4,
+  -1,5,-1,6,-1,7,-1,-1,
+  8,-1,-1,9,10,-1,-1,11,
+
+};
 c_RecursiveDirectoryIterator *c_RecursiveDirectoryIterator::create(CVarRef v_path, CVarRef v_flags //  = NAMVAR(s_sys_svi86af027e, 16LL) /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */
 ) {
   CountableHelper h(this);
@@ -490,8 +428,10 @@ ObjectStaticCallbacks cw_RecursiveDirectoryIterator = {
   c_RecursiveDirectoryIterator::os_lval,
   c_RecursiveDirectoryIterator::os_invoke,
   c_RecursiveDirectoryIterator::os_constant,
-  c_RecursiveDirectoryIterator::os_get_call_info,
-  (ObjectData*(*)(ObjectData*))coo_RecursiveDirectoryIterator
+  (ObjectData*(*)(ObjectData*))coo_RecursiveDirectoryIterator,
+  c_RecursiveDirectoryIterator::s_call_info_table,c_RecursiveDirectoryIterator::s_call_info_index,
+  "RecursiveDirectoryIterator",
+  &cw_DirectoryIterator
 };
 /* SRC: classes/directoryiterator.php line 132 */
 void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags //  = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */
@@ -832,73 +772,26 @@ Variant c_DirectoryIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOK
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("DirectoryIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
-bool c_DirectoryIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss9943cbf4, "valid")) {
-        mcp.ci = &c_DirectoryIterator::ci_valid;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss6a9626a3, "seek")) {
-        mcp.ci = &c_DirectoryIterator::ci_seek;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss941ca25f, "rewind")) {
-        mcp.ci = &c_DirectoryIterator::ci_rewind;
-        return true;
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
-        mcp.ci = &c_DirectoryIterator::ci_key;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
-        mcp.ci = &c_DirectoryIterator::ci___tostring;
-        return true;
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x08D1EA51B78DA5F4LL, NAMSTR(s_sys_ss5baf0fe3, "isDot")) {
-        mcp.ci = &c_DirectoryIterator::ci_isdot;
-        return true;
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
-        mcp.ci = &c_DirectoryIterator::ci_next;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ssb3a5c1b3, "current")) {
-        mcp.ci = &c_DirectoryIterator::ci_current;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
-        mcp.ci = &c_DirectoryIterator::ci___construct;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_SplFileInfo::os_get_call_info(mcp, hash);
-}
-bool c_DirectoryIterator::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  mcp.obj = this;
-  return os_get_call_info(mcp, hash);
-}
+const MethodCallInfoTable c_DirectoryIterator::s_call_info_table[] = {
+  { 0x6413CB5154808C44LL, 1, 5, "valid", &c_DirectoryIterator::ci_valid },
+  { 0x7EF5445C77054C67LL, 1, 4, "seek", &c_DirectoryIterator::ci_seek },
+  { 0x1670096FDE27AF6ALL, 1, 6, "rewind", &c_DirectoryIterator::ci_rewind },
+  { 0x56EDB60C824E8C51LL, 1, 3, "key", &c_DirectoryIterator::ci_key },
+  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &c_DirectoryIterator::ci___tostring },
+  { 0x08D1EA51B78DA5F4LL, 1, 5, "isDot", &c_DirectoryIterator::ci_isdot },
+  { 0x3C6D50F3BB8102B8LL, 1, 4, "next", &c_DirectoryIterator::ci_next },
+  { 0x5B3A4A72846B21DCLL, 1, 7, "current", &c_DirectoryIterator::ci_current },
+  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_DirectoryIterator::ci___construct },
+  { 0, 1, 0, 0 }
+};
+const int c_DirectoryIterator::s_call_info_index[] = {
+  31,
+  -1,-1,-1,-1,0,-1,-1,1,
+  -1,-1,2,-1,-1,-1,-1,-1,
+  -1,3,-1,4,5,-1,-1,-1,
+  6,-1,-1,-1,7,-1,-1,8,
+
+};
 c_DirectoryIterator *c_DirectoryIterator::create(CVarRef v_path) {
   CountableHelper h(this);
   init();
@@ -925,8 +818,10 @@ ObjectStaticCallbacks cw_DirectoryIterator = {
   c_DirectoryIterator::os_lval,
   c_DirectoryIterator::os_invoke,
   c_DirectoryIterator::os_constant,
-  c_DirectoryIterator::os_get_call_info,
-  (ObjectData*(*)(ObjectData*))coo_DirectoryIterator
+  (ObjectData*(*)(ObjectData*))coo_DirectoryIterator,
+  c_DirectoryIterator::s_call_info_table,c_DirectoryIterator::s_call_info_index,
+  "DirectoryIterator",
+  &cw_SplFileInfo
 };
 /* SRC: classes/directoryiterator.php line 14 */
 void c_DirectoryIterator::t___construct(Variant v_path) {

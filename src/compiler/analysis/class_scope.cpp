@@ -928,108 +928,45 @@ void ClassScope::outputCPPDynamicClassCreateImpl
   cg_indentEnd("}\n");
 }
 
-void ClassScope::outputCPPGetCallInfoStaticMethodImpl
-(CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
- const vector<const char*> &classes) {
+void ClassScope::outputCPPGetCallInfoStaticMethodImpl(
+  CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
+  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
   bool useHashTable = (classes.size() > 0);
   cg_indentBegin("bool get_call_info_static_method%s(MethodCallPackage &mcp)"
       " {\n", system ? "_builtin" : "");
-  if (Option::UseMethodIndex) {
-    cg_printf("return get_call_info_static_method_no_index%s(mcp);\n",
-        system ? "_builtin" : "");
-  } else {
-    cg_printf("StringData *s ATTRIBUTE_UNUSED (mcp.rootCls);\n");
 
-    if (!system && Option::EnableEval == Option::FullEval) {
-      cg_printf("bool foundClass = false;\n");
-      cg_printf("if (eval_get_call_info_static_method_hook(mcp, foundClass)) "
-          "return true;\n");
-      cg_indentBegin("else if (foundClass) {\n");
-      cg_printf("mcp.fail();\n");
-      cg_printf("return false;\n");
-      cg_indentEnd("}\n");
-    }
-    if (!useHashTable) {
-      outputCPPClassJumpTable(cg, classScopes, classes,
-          "HASH_CALL_INFO_STATIC_METHOD", true);
-    } else {
-      if (system) {
-        cg_printf("const hashNodeCTD *p = findCTD(StrNR(s));\n"
-                  "if (p) {\n"
-                  "  return "
-                  "((const ObjectStaticCallbacks *)p->ptv1)->"
-                  "os_get_call_info(mcp, -1);\n"
-                  "}\n"
-                  "return ObjectData::os_get_call_info(mcp);\n");
-      } else {
-        cg.printDeclareGlobals();
-        cg_printf("const hashNodeCTD *p = findCTD(StrNR(s));\n"
-                  "if (!p) return get_call_info_static_method_builtin(mcp);\n"
-                  "return getCallbacks(p,s,g)->os_get_call_info(mcp, -1);\n");
-      }
-    }
-    if (!useHashTable) {
-      if (system) {
-        cg_printf("return ObjectData::os_get_call_info(mcp);\n");
-      } else {
-        cg_printf("return get_call_info_static_method_builtin(mcp);\n");
-      }
-    }
+  cg_printf("StringData *s ATTRIBUTE_UNUSED (mcp.rootCls);\n");
+
+  if (!system && Option::EnableEval == Option::FullEval) {
+    cg_printf("bool foundClass = false;\n");
+    cg_printf("if (eval_get_call_info_static_method_hook(mcp, foundClass)) "
+              "return true;\n");
+    cg_indentBegin("else if (foundClass) {\n");
+    cg_printf("mcp.fail();\n");
+    cg_printf("return false;\n");
+    cg_indentEnd("}\n");
   }
-  cg_indentEnd("}\n");
-
-  cg_indentBegin("bool get_call_info_static_method_with_index%s"
-      "(MethodCallPackage &mcp, MethodIndex mi) {\n",
-      system ? "_builtin" : "");
-  if (Option::UseMethodIndex) {
-    cg_printf("StringData *s ATTRIBUTE_UNUSED (mcp.rootCls);\n");
-
-    if (!system && Option::EnableEval == Option::FullEval) {
-      cg_printf("bool foundClass = false;\n");
-      cg_printf("if (eval_get_call_info_static_method_hook(mcp, foundClass)) "
-          "return true;\n");
-      cg_indentBegin("else if (foundClass) {\n");
-      cg_printf("mcp.fail();\n");
-      cg_printf("return false;\n");
-      cg_indentEnd("}\n");
-    }
-    if (!useHashTable) {
-      outputCPPClassJumpTable(cg, classScopes, classes,
-          "HASH_CALL_INFO_STATIC_METHOD_WITH_INDEX", true);
+  if (useHashTable) {
+    if (system) {
+      cg_printf("const hashNodeCTD *p = findCTD(StrNR(s));\n"
+                "const ObjectStaticCallbacks *osc=p?"
+                "(const ObjectStaticCallbacks *)p->ptv1:0;\n"
+                "return ObjectStaticCallbacks::GetCallInfo(osc,mcp,-1);\n");
     } else {
-      if (system) {
-        cg_printf("const hashNodeCTD *p = findCTD(StrNR(s));\n"
-                  "if (p) {\n"
-                  "  return "
-                  "((const ObjectStaticCallbacks *)p->ptv1)->"
-                  "os_get_call_info_with_index(mcp, mi, -1);\n"
-                  "}\n"
-                  "mcp.fail();\n"
-                  "return false;\n");
-      } else {
-        cg.printDeclareGlobals();
-        cg_printf("const hashNodeCTD *p = findCTD(StrNR(s));\n"
-                  "if (!p) return "
-                  "get_call_info_static_method_with_index_builtin"
-                  "(mcp, mi, -1);\n"
-                  "return getCallbacks(p,s,g)->os_get_call_info_with_index"
-                  "(mcp, mi, -1);\n");
-      }
-    }
-    if (!useHashTable) {
-      if (!system) {
-        cg_printf("mcp.fail();\n");
-        cg_printf("return false;\n");
-      } else {
-        cg_printf("return get_call_info_static_method_with_index_builtin(mcp, "
-                  "mi);\n");
-      }
+      cg.printDeclareGlobals();
+      cg_printf("const hashNodeCTD *p = findCTD(StrNR(s));\n"
+                "if (!p) return get_call_info_static_method_builtin(mcp);\n"
+                "return getCallbacks(p,s,g)->os_get_call_info(mcp, -1);\n");
     }
   } else {
-    cg_printf("return get_call_info_static_method%s(mcp);\n",
-        system ? "_builtin" : "");
+    if (system) {
+      cg_printf("return ObjectStaticCallbacks::GetCallInfo(0,mcp,-1);\n");
+    } else {
+      cg_printf("return get_call_info_static_method_builtin(mcp);\n");
+    }
   }
+
   cg_indentEnd("}\n");
 }
 
@@ -1718,8 +1655,6 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
 
   // Invoke tables
   if (Option::GenerateCPPMacros) {
-    outputCPPJumpTable(cg, ar, false, dynamicObject);
-    outputCPPJumpTable(cg, ar, true, dynamicObject);
     bool hasRedec;
     outputCPPCallInfoTableSupport(cg, ar, hasRedec);
     outputCPPHelperClassAllocSupport(cg, ar);
@@ -1740,22 +1675,13 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
         }
       }
     }
-    outputCPPJumpTable(cg, ar, true, dynamicObject, CallInfo);
-    if (derivesFromRedeclaring()) {
-      outputCPPJumpTable(cg, ar, false, dynamicObject, CallInfo);
+    if (classNameCtor()) {
+      funcs.push_back("__construct");
+    }
+    if (funcs.size() || derivesFromRedeclaring()) {
+      outputCPPMethodInvokeTable(cg, ar, funcs, m_functions, false, true);
     } else {
-      cg_indentBegin("bool %s%s::%sget_call_info%s(MethodCallPackage &mcp, "
-                     "%sint64 hash) {\n",
-                     Option::ClassPrefix, getId().c_str(),
-                     Option::ObjectPrefix,
-                     Option::UseMethodIndex ? "_with_index" : "",
-                     Option::UseMethodIndex ? "MethodIndex mi, " : "");
-      cg_printf("mcp.obj = this;\n");
-      cg_printf("return %sget_call_info%s(mcp, %shash);\n",
-                Option::ObjectStaticPrefix,
-                Option::UseMethodIndex ? "_with_index" : "",
-                Option::UseMethodIndex ? "mi, " : "");
-      cg_indentEnd("}\n");
+      m_emptyJumpTables.insert(JumpTableCallInfo);
     }
   }
 
@@ -1803,7 +1729,7 @@ void ClassScope::outputCPPStaticMethodWrappers(CodeGenerator &cg,
 void ClassScope::outputCPPGlobalTableWrappersDecl(CodeGenerator &cg,
                                                   AnalysisResultPtr ar) {
   string id = getId();
-  cg_printf("extern struct %sObjectStaticCallbacks %s%s;\n",
+  cg_printf("extern %sObjectStaticCallbacks %s%s;\n",
             isRedeclaring() ? "Redeclared" : "",
             Option::ClassWrapperFunctionPrefix, id.c_str());
 }
@@ -1828,14 +1754,26 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
             Option::ObjectStaticPrefix);
   cg_printf("%s%s::%sconstant,\n", Option::ClassPrefix, id.c_str(),
             Option::ObjectStaticPrefix);
-  cg_printf("%s%s::%sget_call_info,\n", Option::ClassPrefix, id.c_str(),
-            Option::ObjectStaticPrefix);
-  cg_printf("(ObjectData*(*)(ObjectData*))%s%s\n",
+  cg_printf("(ObjectData*(*)(ObjectData*))%s%s,\n",
             Option::CreateObjectOnlyPrefix, id.c_str());
+  cg_printf("%s%s::s_call_info_table,%s%s::s_call_info_index,\n",
+            Option::ClassPrefix, id.c_str(),
+            Option::ClassPrefix, id.c_str());
+  cg_printf("\"%s\",\n", CodeGenerator::EscapeLabel(getOriginalName()).c_str());
+  if (derivesFromRedeclaring() == DirectFromRedeclared) {
+    cg_printf("(const ObjectStaticCallbacks*)"
+              "(offsetof(GlobalVariables, %s%s)+1)",
+              Option::ClassStaticsCallbackPrefix,
+              CodeGenerator::FormatLabel(m_parent).c_str());
+  } else if (ClassScopeRawPtr par = getParentScope(ar)) {
+    cg_printf("&%s%s\n",
+              Option::ClassWrapperFunctionPrefix, par->getId().c_str());
+  } else {
+    cg_printf("0\n");
+  }
   if (isRedeclaring()) {
     cg_indentEnd("},\n");
-    cg_printf("%d,\"%s\"\n", m_redeclaring,
-              CodeGenerator::EscapeLabel(getOriginalName()).c_str());
+    cg_printf("%d\n", m_redeclaring);
   }
   cg_indentEnd("};\n");
 }
@@ -2015,19 +1953,29 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
   }
 }
 
-void ClassScope::
-outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
-    const vector<const char*> &keys,
-    const StringToFunctionScopePtrVecMap &funcScopes,
-    bool fewArgs, bool staticOnly, ClassScope::TableType type) {
+void ClassScope::outputCPPMethodInvokeTable(
+  CodeGenerator &cg, AnalysisResultPtr ar,
+  const vector<const char*> &keys,
+  const StringToFunctionScopePtrVecMap &funcScopes,
+  bool fewArgs, bool staticOnly) {
   ClassScopePtr self = dynamic_pointer_cast<ClassScope>(shared_from_this());
 
-  bool useMethodIndex = Option::UseMethodIndex && type == CallInfo;
-  shared_ptr<JumpTableBase> jt(useMethodIndex ?
-      (JumpTableBase*) new JumpTableMethodIndex (cg, ar, keys) :
-      (JumpTableBase*) new JumpTable(cg, keys, true, true, type == CallInfo));
-
-  for (; jt->ready(); jt->next()) {
+  string clsid = self->getId();
+  shared_ptr<JumpTable> jt(new JumpTable(cg, keys, true, true, true, true));
+  vector<int> offsets;
+  int prev = -1;
+  cg_indentBegin("const MethodCallInfoTable %s%s::s_call_info_table[] = {\n",
+                 Option::ClassPrefix, clsid.c_str());
+  for (int n = 0; jt->ready(); ++n, jt->next()) {
+    int cur = jt->current();
+    bool changed = false;
+    if (prev != cur) {
+      changed = true;
+      while (++prev != cur) {
+        offsets.push_back(-1);
+      }
+      offsets.push_back(n);
+    }
     const char *name = jt->key();
     string lname = CodeGenerator::FormatLabel(name);
     StringToFunctionScopePtrVecMap::const_iterator iterFuncs =
@@ -2044,54 +1992,35 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
       origName = func->getOriginalName();
     }
     if (fewArgs &&
-        func->getMinParamCount() > Option::InvokeFewArgsCount)
+        func->getMinParamCount() > Option::InvokeFewArgsCount) {
       continue;
+    }
     string id = func->getContainingClass()->getId();
-    if (useMethodIndex) {
-      const MethodSlot* ms = ar->getMethodSlot(name);
-      cg_indentBegin("if (mi.m_overloadIndex == 0x%x) { \n",
-          ms->getOverloadIndex());
-    } else  {
-      int index = -1;
-      cg.checkLiteralString(origName, index, ar, shared_from_this());
-      cg_indentBegin("HASH_GUARD_LITSTR(0x%016llXLL, ",
-                     hash_string_i(origName.c_str()));
-      cg_printString(origName, ar, shared_from_this());
-      cg_printf(") {\n");
-    }
-    switch (type) {
-      case Invoke:
-        {
-          cg_printf("MethodCallPackage mcp;\n");
-          if (staticOnly) {
-            cg_printf("mcp.staticMethodCall(c, s);\n");
-          } else {
-            cg_printf("mcp.methodCallEx(this, s);\n");
-            cg_printf("mcp.obj = this;\n");
-          }
-          cg_printf("return %s%s::%s%s(mcp, ",
+    int index = -1;
+    cg.checkLiteralString(origName, index, ar, shared_from_this());
+    cg_printf("{ 0x%016llXLL, %d, %d, \"%s\", &%s%s::%s%s },\n",
+              hash_string_i(origName.c_str()),
+              (int)changed,
+              (int)origName.size(),
+              CodeGenerator::EscapeLabel(origName).c_str(),
               Option::ClassPrefix, id.c_str(),
-              fewArgs ? Option::InvokeFewArgsPrefix : Option::InvokePrefix,
-              lname.c_str());
-          if (fewArgs) {
-            cg_printf("count, INVOKE_FEW_ARGS_PASS_ARGS);\n");
-          } else {
-            cg_printf("params);\n");
-          }
-        }
-        break;
-      case CallInfo:
-        cg_printf("mcp.ci = &%s%s::%s%s;\n", Option::ClassPrefix,
-                  id.c_str(), Option::CallInfoPrefix, lname.c_str());
-        if (!staticOnly) {
-          cg_printf("mcp.obj = this;\n");
-        }
-        cg_printf("return true;\n");
-        break;
-      default: ASSERT(false);
-    }
-    cg_indentEnd("}\n");
+              Option::CallInfoPrefix, lname.c_str());
   }
+  cg_printf("{ 0, 1, 0, 0 }\n");
+  cg_indentEnd("};\n");
+  cg_indentBegin("const int %s%s::s_call_info_index[] = {\n",
+                 Option::ClassPrefix, clsid.c_str());
+  if (!jt->size()) {
+    cg_printf("0,-1");
+  } else {
+    cg_printf("%d,\n", jt->size() - 1);
+    for (int i = 0, e = jt->size(), s = offsets.size(); i < e; i++) {
+      cg_printf("%d,", i < s ? offsets[i] : -1);
+      if ((i & 7) == 7) cg_printf("\n");
+    }
+  }
+  cg_printf("\n");
+  cg_indentEnd("};\n");
 }
 
 void ClassScope::outputCPPJumpTableDecl(CodeGenerator &cg,
@@ -2120,12 +2049,9 @@ void ClassScope::outputCPPJumpTableDecl(CodeGenerator &cg,
 }
 
 void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
-    AnalysisResultPtr ar, bool staticOnly, bool dynamicObject /* = false */,
-    ClassScope::TableType type /* = Invoke */) {
-  if (type == Invoke) return;
+    AnalysisResultPtr ar, bool staticOnly, bool dynamicObject) {
+#if 0
   string id = getId();
-  const char *clsName = id.c_str();
-
   string scope;
   scope += Option::ClassPrefix;
   scope += id;
@@ -2154,24 +2080,17 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
       parentExpr = string("parent->");
     }
   } else {
+    /* needsInvokeParent(ar) ? */
     parentExpr = string(Option::ClassPrefix) + parent + "::";
   }
   string invokeName;
   invokeName += staticOnly ? Option::ObjectStaticPrefix : Option::ObjectPrefix;
-  switch (type) {
-    case Invoke: invokeName += "invoke"; break;
-    case CallInfo:
-               invokeName += "get_call_info";
-               if (Option::UseMethodIndex) {
-                 invokeName += "_with_index";
-               }
-               break;
-    default: ASSERT(false);
-  }
+
+  invokeName += "get_call_info";
 
   parentExpr += invokeName;
   StringToFunctionScopePtrVecMap flatScopes;
-  bool flatten = type == Invoke && Option::FlattenInvoke;
+  bool flatten = false && Option::FlattenInvoke;
   if (flatten) {
     StringToFunctionScopePtrMap fss;
     collectMethods(ar, fss, true, true);
@@ -2182,7 +2101,7 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
   }
 
   vector<const char *> funcs;
-  findJumpTableMethods(cg, ar, type == CallInfo ? false : staticOnly, funcs);
+  findJumpTableMethods(cg, ar, false, funcs);
 
   if (flatten) {
     funcs.clear();
@@ -2196,91 +2115,30 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
     }
   }
 
-  if (type == CallInfo) {
-    if (classNameCtor()) {
-      funcs.push_back("__construct");
-    }
+  if (classNameCtor()) {
+    funcs.push_back("__construct");
   }
 
   StringToFunctionScopePtrVecMap &funcScopes = flatten ? flatScopes :
     m_functions;
 
-  switch (type) {
-    case Invoke:
-      // output invoke()
-      if (staticOnly) { // os_invoke
-        if (funcs.empty()) {
-          m_emptyJumpTables.insert(JumpTableStaticInvoke);
-        }
-        cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_%s", clsName);
-        cg_indentBegin("Variant %s%s"
-            "(const char *c, const char *s, CArrRef params,"
-            " int64 hash, bool fatal) {\n", scope.c_str(),
-            invokeName.c_str());
-      } else {
-        if (funcs.empty()) {
-          m_emptyJumpTables.insert(JumpTableInvoke);
-        }
-        cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_INVOKE_%s", clsName);
-        cg_indentBegin("Variant %s%s"
-            "(const char *s, CArrRef params,"
-            " int64 hash, bool fatal) {\n", scope.c_str(),
-            invokeName.c_str());
-      }
-      FunctionScope::OutputCPPDynamicInvokeCount(cg);
-      break;
-    case CallInfo:
-      cg_indentBegin("bool %s%s(MethodCallPackage &mcp, %sint64 hash) {\n",
-          scope.c_str(), invokeName.c_str(),
-          Option::UseMethodIndex ? "MethodIndex mi, " : "");
-      cg_printf("CStrRef s ATTRIBUTE_UNUSED (*mcp.name);\n");
-      break;
-    default: ASSERT(false);
-  }
+  cg_indentBegin("bool %s%s(MethodCallPackage &mcp, int64 hash) {\n",
+                 scope.c_str(), invokeName.c_str());
   if (needGlobals) cg.printDeclareGlobals();
-  outputCPPMethodInvokeTable(cg, ar, funcs, funcScopes, false, staticOnly,
-                             type);
+  if (funcs.size()) {
+    cg_printf("CStrRef s ATTRIBUTE_UNUSED (*mcp.name);\n");
 
-  string base = parentExpr;
-  if (flatten && !needsInvokeParent(ar, false)) {
-    base = m_derivesFromRedeclaring ? "c_DynamicObjectData" : "c_ObjectData";
-    base += "::" + invokeName;
-  }
-  switch (type) {
-    case Invoke:
-      if (staticOnly) {
-        cg_printf("return %s(c, s, params, hash, fatal);\n", base.c_str());
-        cg_indentEnd("}\n");
-        cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_%s", clsName);
-      } else {
-        cg_printf("return %s(s, params, hash, fatal);\n", base.c_str());
-        cg_indentEnd("}\n");
-        cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_INVOKE_%s", clsName);
-      }
-      break;
-    case CallInfo:
-      cg_printf("return %s(mcp, hash);\n", parentExpr.c_str());
-      cg_indentEnd("}\n");
-      break;
-    default: ASSERT(false);
-  }
-
-  if (!staticOnly && type == Invoke) {
-    cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_INVOKE_%s", clsName);
-    cg_indentBegin("Variant %s%s_few_args(const char *s, int64 hash, "
-                   "int count", scope.c_str(), invokeName.c_str());
-    for (int i = 0; i < Option::InvokeFewArgsCount; i++) {
-      cg_printf(", CVarRef a%d", i);
-    }
-    cg_printf(") {\n");
-    if (needGlobals) cg.printDeclareGlobals();
-    outputCPPMethodInvokeTable(cg, ar, funcs, funcScopes, true, staticOnly,
-                               Invoke);
-    cg_printf("return %s_few_args(s, hash, count, "
-        "INVOKE_FEW_ARGS_PASS_ARGS);\n", base.c_str());
+    outputCPPMethodInvokeTable(cg, ar, funcs, funcScopes, false, staticOnly);
+    cg_printf("if (hash < 0) hash = s->hash();\n");
+    cg_indentBegin("if (ObjectData::LookupMCP("
+                   "mcp, hash, s, mcit_ix, mcit)) {\n");
+    if (!staticOnly) cg_printf("mcp.obj = this;\n");
+    cg_printf("return true;\n");
     cg_indentEnd("}\n");
-    cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_INVOKE_%s", clsName);
   }
+  cg_printf("return %s(mcp, hash);\n", parentExpr.c_str());
+  cg_indentEnd("}\n");
+#endif
 }
 
 void ClassScope::outputVolatileCheckBegin(CodeGenerator &cg,

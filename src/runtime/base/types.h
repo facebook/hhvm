@@ -334,55 +334,6 @@ private:
   ThreadInfo::Executing m_executing;
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// Fast Method Call
-struct MethodIndex {
-  unsigned int m_callIndex:32;
-  unsigned int m_overloadIndex:32;
-  MethodIndex (unsigned int callIndex, unsigned int overloadIndex) :
-    m_callIndex(callIndex), m_overloadIndex(overloadIndex) {}
-  uint64 val() const { return ((uint64)m_callIndex)<<32|m_overloadIndex; }
-  bool operator== (const MethodIndex& mi) const { return val()==mi.val(); }
-
-  static MethodIndex fail() { return MethodIndex(0,0); }
-  bool isFail() { return val()==0; }
-  private:
-  MethodIndex() {}
-};
-
-struct MethodIndexHMap {
-  MethodIndexHMap() : name(NULL), methodIndex(0,0) {}
-  MethodIndexHMap(const char *name, MethodIndex methodIndex)
-    : name(name), methodIndex(methodIndex) {}
-  const char* name;
-  MethodIndex methodIndex;
-  static MethodIndex methodIndexExists(CStrRef methodName);
-  static void initialize(bool useSystem);
-};
-
-extern const unsigned g_methodIndexHMapSize;
-extern const MethodIndexHMap g_methodIndexHMap[];
-extern const unsigned g_methodIndexReverseCallIndex[];
-extern const char * g_methodIndexReverseIndex[];
-
-extern const unsigned g_methodIndexHMapSizeSys;
-extern const MethodIndexHMap g_methodIndexHMapSys[];
-extern const unsigned g_methodIndexReverseCallIndexSys[];
-extern const char * g_methodIndexReverseIndexSys[];
-
-inline MethodIndex methodIndexExists(CStrRef methodName) {
-  return MethodIndexHMap::methodIndexExists(methodName);
-}
-
-inline MethodIndex methodIndexLookup(CStrRef methodName) {
-  MethodIndex methodIndex = MethodIndexHMap::methodIndexExists(methodName);
-  ASSERT(!methodIndex.isFail());
-  return methodIndex;
-}
-
-const bool g_bypassMILR = true;
-const char * methodIndexLookupReverse(MethodIndex methodIndex) ;
-
 class CallInfo;
 class MethodCallPackage;
 

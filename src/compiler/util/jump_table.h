@@ -49,21 +49,6 @@ protected:
   bool m_quiet;
 };
 
-class JumpTableMethodIndex : public JumpTableBase {
-public:
-  JumpTableMethodIndex(CodeGenerator &cg,
-                       AnalysisResultPtr ar,
-                       const std::vector<const char*> &keys);
-  bool ready() const;
-  void next();
-  const char *key() const;
-private:
-  CodeGenerator &m_cg;
-  AnalysisResultPtr m_ar;
-  const std::vector<const char*> &m_keys;
-  std::vector<const char*>::const_iterator m_iter;
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 #endif // __JUMP_TABLE_H__

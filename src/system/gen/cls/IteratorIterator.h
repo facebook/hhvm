@@ -26,6 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 657 */
 FORWARD_DECLARE_CLASS(IteratorIterator);
+extern ObjectStaticCallbacks cw_IteratorIterator;
 class c_IteratorIterator : public ExtObjectData {
   public:
 
@@ -35,7 +36,6 @@ class c_IteratorIterator : public ExtObjectData {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(IteratorIterator, IteratorIterator)
-  DECLARE_INVOKE_EX(IteratorIterator, IteratorIterator, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -56,9 +56,8 @@ class c_IteratorIterator : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_IteratorIterator 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_IteratorIterator 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   c_IteratorIterator(ObjectData* r = NULL) : m_iterator(Variant::nullInit) {
@@ -85,7 +84,6 @@ class c_IteratorIterator : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(__call);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
-extern struct ObjectStaticCallbacks cw_IteratorIterator;
 ObjectData *coo_IteratorIterator() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

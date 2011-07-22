@@ -1527,25 +1527,6 @@ void MethodCallPackage::methodCall(CVarRef self, CStrRef method,
   s->o_get_call_info(*this, prehash);
 }
 
-void MethodCallPackage::methodCallWithIndex(ObjectData *self, CStrRef method,
-                                            MethodIndex mi,
-                                            int64 prehash /* = -1 */) {
-  isObj = true;
-  rootObj = self;
-  name = &method;
-  self->o_get_call_info_with_index(*this, mi, prehash);
-}
-
-void MethodCallPackage::methodCallWithIndex(CVarRef self, CStrRef method,
-                                            MethodIndex mi,
-                                            int64 prehash /* = -1 */) {
-  isObj = true;
-  ObjectData *s = self.objectForCall();
-  rootObj = s;
-  name = &method;
-  s->o_get_call_info_with_index(*this, mi, prehash);
-}
-
 void MethodCallPackage::dynamicNamedCall(CVarRef self, CStrRef method,
                                          int64 prehash /* = -1 */) {
   name = &method;
@@ -1567,27 +1548,6 @@ void MethodCallPackage::dynamicNamedCall(CVarRef self, CStrRef method,
   }
 }
 
-void MethodCallPackage::dynamicNamedCallWithIndex(CVarRef self, CStrRef method,
-    MethodIndex mi, int64 prehash /* = -1 */) {
-  name = &method;
-  if (self.is(KindOfObject)) {
-    isObj = true;
-    rootObj = self.getObjectData();
-    rootObj->o_get_call_info_with_index(*this, mi, prehash);
-  } else {
-    String str = self.toString();
-    ObjectData *obj = FrameInjection::GetThis();
-    if (!obj || !obj->o_instanceof(str)) {
-      rootCls = str.get();
-      get_call_info_static_method_with_index(*this, mi);
-    } else {
-      isObj = true;
-      rootObj = obj;
-      obj->o_get_call_info_with_index_ex(str->data(), *this, mi, prehash);
-    }
-  }
-}
-
 void MethodCallPackage::dynamicNamedCall(CStrRef self, CStrRef method,
     int64 prehash /* = -1 */) {
   rootCls = self.get();
@@ -1599,20 +1559,6 @@ void MethodCallPackage::dynamicNamedCall(CStrRef self, CStrRef method,
     isObj = true;
     rootObj = obj;
     obj->o_get_call_info_ex(self, *this, prehash);
-  }
-}
-
-void MethodCallPackage::dynamicNamedCallWithIndex(CStrRef self, CStrRef method,
-    MethodIndex mi, int64 prehash /* = -1 */) {
-  rootCls = self.get();
-  name = &method;
-  ObjectData *obj = FrameInjection::GetThis();
-  if (!obj || !obj->o_instanceof(self)) {
-    get_call_info_static_method_with_index(*this, mi);
-  } else {
-    isObj = true;
-    rootObj = obj;
-    obj->o_get_call_info_with_index_ex(self, *this, mi, prehash);
   }
 }
 

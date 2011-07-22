@@ -189,7 +189,8 @@ bool eval_get_call_info_static_method_hook(MethodCallPackage &info,
   }
 
   if (foundClass) {
-    return ObjectData::os_get_call_info(info);
+    // deal with callStatic
+    return ObjectStaticCallbacks::GetCallInfo(0, info, -1);
   }
   return false;
 }

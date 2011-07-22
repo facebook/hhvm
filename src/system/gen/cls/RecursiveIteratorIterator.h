@@ -27,6 +27,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 228 */
 FORWARD_DECLARE_CLASS(RecursiveIteratorIterator);
+extern ObjectStaticCallbacks cw_RecursiveIteratorIterator;
 class c_RecursiveIteratorIterator : public ExtObjectData {
   public:
 
@@ -36,7 +37,6 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(RecursiveIteratorIterator, RecursiveIteratorIterator)
-  DECLARE_INVOKE_EX(RecursiveIteratorIterator, RecursiveIteratorIterator, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -57,9 +57,8 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RecursiveIteratorIterator 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RecursiveIteratorIterator 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   c_RecursiveIteratorIterator() : m_rsrc(Variant::nullInit) {}
@@ -81,7 +80,6 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(current);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
-extern struct ObjectStaticCallbacks cw_RecursiveIteratorIterator;
 ObjectData *coo_RecursiveIteratorIterator() NEVER_INLINE;
 extern const int64 q_RecursiveIteratorIterator_LEAVES_ONLY;
 extern const int64 q_RecursiveIteratorIterator_SELF_FIRST;

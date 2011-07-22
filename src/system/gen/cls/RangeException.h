@@ -26,6 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 259 */
 FORWARD_DECLARE_CLASS(RangeException);
+extern ObjectStaticCallbacks cw_RangeException;
 class c_RangeException : public c_RuntimeException {
   public:
 
@@ -34,7 +35,6 @@ class c_RangeException : public c_RuntimeException {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(RangeException, RangeException)
-  DECLARE_INVOKE_EX(RangeException, RangeException, RuntimeException)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -53,13 +53,11 @@ class c_RangeException : public c_RuntimeException {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RangeException 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RangeException 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const int s_call_info_table = 0;
+  static const int s_call_info_index = 0;
 
   public:
 };
-extern struct ObjectStaticCallbacks cw_RangeException;
 ObjectData *coo_RangeException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -26,6 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 796 */
 FORWARD_DECLARE_CLASS(AppendIterator);
+extern ObjectStaticCallbacks cw_AppendIterator;
 class c_AppendIterator : public ExtObjectData {
   public:
 
@@ -35,7 +36,6 @@ class c_AppendIterator : public ExtObjectData {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(AppendIterator, AppendIterator)
-  DECLARE_INVOKE_EX(AppendIterator, AppendIterator, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -56,9 +56,8 @@ class c_AppendIterator : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_AppendIterator 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_AppendIterator 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   c_AppendIterator(ObjectData* r = NULL) : m_iterators(Variant::nullInit) {
@@ -87,7 +86,6 @@ class c_AppendIterator : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(__call);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
-extern struct ObjectStaticCallbacks cw_AppendIterator;
 ObjectData *coo_AppendIterator() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

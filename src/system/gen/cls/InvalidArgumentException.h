@@ -26,6 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 211 */
 FORWARD_DECLARE_CLASS(InvalidArgumentException);
+extern ObjectStaticCallbacks cw_InvalidArgumentException;
 class c_InvalidArgumentException : public c_LogicException {
   public:
 
@@ -34,7 +35,6 @@ class c_InvalidArgumentException : public c_LogicException {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(InvalidArgumentException, InvalidArgumentException)
-  DECLARE_INVOKE_EX(InvalidArgumentException, InvalidArgumentException, LogicException)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -53,13 +53,11 @@ class c_InvalidArgumentException : public c_LogicException {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_InvalidArgumentException 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_InvalidArgumentException 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const int s_call_info_table = 0;
+  static const int s_call_info_index = 0;
 
   public:
 };
-extern struct ObjectStaticCallbacks cw_InvalidArgumentException;
 ObjectData *coo_InvalidArgumentException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

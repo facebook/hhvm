@@ -311,79 +311,36 @@ Variant c_SplObjectStorage::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplObjectStorage::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
-bool c_SplObjectStorage::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss9943cbf4, "valid")) {
-        mcp.ci = &c_SplObjectStorage::ci_valid;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss941ca25f, "rewind")) {
-        mcp.ci = &c_SplObjectStorage::ci_rewind;
-        return true;
-      }
-      break;
-    case 12:
-      HASH_GUARD_LITSTR(0x62DD82BFEB88A4ACLL, NAMSTR(s_sys_ss8e95cc19, "attach")) {
-        mcp.ci = &c_SplObjectStorage::ci_attach;
-        return true;
-      }
-      break;
-    case 16:
-      HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss0d54babb, "count")) {
-        mcp.ci = &c_SplObjectStorage::ci_count;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x61B94551FA22D290LL, NAMSTR(s_sys_ss3382a209, "contains")) {
-        mcp.ci = &c_SplObjectStorage::ci_contains;
-        return true;
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
-        mcp.ci = &c_SplObjectStorage::ci_key;
-        return true;
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x3C7D0AC0EBA9A695LL, NAMSTR(s_sys_ss4e3b07b3, "detach")) {
-        mcp.ci = &c_SplObjectStorage::ci_detach;
-        return true;
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
-        mcp.ci = &c_SplObjectStorage::ci_next;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ssb3a5c1b3, "current")) {
-        mcp.ci = &c_SplObjectStorage::ci_current;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_get_call_info(mcp, hash);
-}
-bool c_SplObjectStorage::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  mcp.obj = this;
-  return os_get_call_info(mcp, hash);
-}
+const MethodCallInfoTable c_SplObjectStorage::s_call_info_table[] = {
+  { 0x6413CB5154808C44LL, 1, 5, "valid", &c_SplObjectStorage::ci_valid },
+  { 0x1670096FDE27AF6ALL, 1, 6, "rewind", &c_SplObjectStorage::ci_rewind },
+  { 0x62DD82BFEB88A4ACLL, 1, 6, "attach", &c_SplObjectStorage::ci_attach },
+  { 0x5CEFA5A265104D10LL, 1, 5, "count", &c_SplObjectStorage::ci_count },
+  { 0x61B94551FA22D290LL, 0, 8, "contains", &c_SplObjectStorage::ci_contains },
+  { 0x56EDB60C824E8C51LL, 1, 3, "key", &c_SplObjectStorage::ci_key },
+  { 0x3C7D0AC0EBA9A695LL, 1, 6, "detach", &c_SplObjectStorage::ci_detach },
+  { 0x3C6D50F3BB8102B8LL, 1, 4, "next", &c_SplObjectStorage::ci_next },
+  { 0x5B3A4A72846B21DCLL, 1, 7, "current", &c_SplObjectStorage::ci_current },
+  { 0, 1, 0, 0 }
+};
+const int c_SplObjectStorage::s_call_info_index[] = {
+  31,
+  -1,-1,-1,-1,0,-1,-1,-1,
+  -1,-1,1,-1,2,-1,-1,-1,
+  3,5,-1,-1,-1,6,-1,-1,
+  7,-1,-1,-1,8,-1,-1,-1,
+
+};
 ObjectStaticCallbacks cw_SplObjectStorage = {
   c_SplObjectStorage::os_getInit,
   c_SplObjectStorage::os_get,
   c_SplObjectStorage::os_lval,
   c_SplObjectStorage::os_invoke,
   c_SplObjectStorage::os_constant,
-  c_SplObjectStorage::os_get_call_info,
-  (ObjectData*(*)(ObjectData*))coo_SplObjectStorage
+  (ObjectData*(*)(ObjectData*))coo_SplObjectStorage,
+  c_SplObjectStorage::s_call_info_table,c_SplObjectStorage::s_call_info_index,
+  "SplObjectStorage",
+  0
 };
 void c_SplObjectStorage::init() {
   m_storage = s_sys_sa00000000;

@@ -377,7 +377,6 @@ public:
     m_hookHandler = hookHandler;
   }
 
-  static bool UseMethodIndex;
 private:
   /**
    * Directory that has system HPHP files for loading builtin classes, etc.

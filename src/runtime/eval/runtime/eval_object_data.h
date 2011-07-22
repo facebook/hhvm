@@ -51,13 +51,13 @@ public:
   virtual Variant o_setError(CStrRef prop, CStrRef context);
 
    // methods
+  virtual const ObjectStaticCallbacks *o_get_callbacks() const { return 0; }
   virtual CStrRef o_getClassName() const;
   virtual const MethodStatement *getMethodStatement(const char* name) const;
   virtual const MethodStatement *getConstructorStatement() const;
 
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  virtual bool o_get_call_info_ex(const char *clsname,
-      MethodCallPackage &mcp, int64 hash = -1);
+  virtual bool o_get_call_info_hook(const char *clsname,
+                                    MethodCallPackage &mcp, int64 hash = -1);
 
   virtual bool o_instanceof(CStrRef s) const;
 

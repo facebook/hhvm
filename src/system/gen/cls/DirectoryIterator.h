@@ -28,6 +28,7 @@ namespace HPHP {
 
 /* SRC: classes/directoryiterator.php line 11 */
 FORWARD_DECLARE_CLASS(DirectoryIterator);
+extern ObjectStaticCallbacks cw_DirectoryIterator;
 class c_DirectoryIterator : public c_SplFileInfo {
   public:
 
@@ -36,7 +37,6 @@ class c_DirectoryIterator : public c_SplFileInfo {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(DirectoryIterator, DirectoryIterator)
-  DECLARE_INVOKE_EX(DirectoryIterator, DirectoryIterator, SplFileInfo)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -56,9 +56,8 @@ class c_DirectoryIterator : public c_SplFileInfo {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DirectoryIterator 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_DirectoryIterator 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   public: void t___construct(Variant v_path);
@@ -83,7 +82,6 @@ class c_DirectoryIterator : public c_SplFileInfo {
   DECLARE_METHOD_INVOKE_HELPERS(isdot);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
-extern struct ObjectStaticCallbacks cw_DirectoryIterator;
 ObjectData *coo_DirectoryIterator() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

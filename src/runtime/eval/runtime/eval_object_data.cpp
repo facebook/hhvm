@@ -217,51 +217,41 @@ const CallInfo *EvalObjectData::t___invokeCallInfoHelper(void *&extra) {
   return DynamicObjectData::t___invokeCallInfoHelper(extra);
 }
 
-bool EvalObjectData::o_get_call_info(MethodCallPackage &mcp,
-    int64 hash /* = -1 */) {
-  const ClassEvalState::MethodTable &meths = m_cls.getMethodTable();
-  ClassEvalState::MethodTable::const_iterator it =
-    meths.find(mcp.name->c_str());
-  if (it != meths.end()) {
-    if (it->second.first) {
-      mcp.extra = (void*)it->second.first;
-      mcp.obj = this;
-      mcp.ci = it->second.first->getCallInfo();
-      return true;
-    } else {
-      return DynamicObjectData::o_get_call_info(mcp, hash);
-    }
-  } else {
-    mcp.obj = this;
-    return ObjectData::o_get_call_info(mcp, hash);
-  }
-
-}
-bool EvalObjectData::o_get_call_info_ex(const char *clsname,
-      MethodCallPackage &mcp, int64 hash /* = -1 */) {
-  if (m_cls.getClass()->subclassOf(clsname)) {
-    bool foundClass;
-    const MethodStatement *ms =
-      RequestEvalState::findMethod(clsname, mcp.name->c_str(),
-          foundClass);
-    if (ms) {
-      mcp.extra = (void*)ms;
-      mcp.obj = this;
-      mcp.ci = ms->getCallInfo();
-      return true;
-    } else {
-      // Possibly builtin class has this method
-      const ClassEvalState::MethodTable &meths = m_cls.getMethodTable();
-      if (meths.find(mcp.name->c_str()) == meths.end()) {
-        // Absolutely nothing in the hierarchy has this method
-        mcp.obj = this;
-        return ObjectData::o_get_call_info(mcp, hash);
+bool EvalObjectData::o_get_call_info_hook(const char *clsname,
+                                          MethodCallPackage &mcp,
+                                          int64 hash /* = -1 */) {
+  if (!clsname) {
+    const ClassEvalState::MethodTable &meths = m_cls.getMethodTable();
+    ClassEvalState::MethodTable::const_iterator it =
+      meths.find(mcp.name->c_str());
+    if (it != meths.end()) {
+      if (it->second.first) {
+        mcp.extra = (void*)it->second.first;
+        mcp.ci = it->second.first->getCallInfo();
+        return true;
       }
     }
-    // Know it's a builtin parent so no need for _ex
-    return DynamicObjectData::o_get_call_info(mcp, hash);
+    if (ObjectData *p = parent.get()) {
+      return p->o_get_call_info(mcp, hash);
+    }
+  } else {
+    if (m_cls.getClass()->subclassOf(clsname)) {
+      bool foundClass;
+      const MethodStatement *ms =
+        RequestEvalState::findMethod(clsname, mcp.name->c_str(),
+                                     foundClass);
+      if (ms) {
+        mcp.extra = (void*)ms;
+        mcp.obj = this;
+        mcp.ci = ms->getCallInfo();
+        return true;
+      }
+    }
+    if (ObjectData *p = parent.get()) {
+      return p->o_get_call_info_ex(clsname, mcp, hash);
+    }
   }
-  return DynamicObjectData::o_get_call_info_ex(clsname, mcp, hash);
+  return false;
 }
 
 Variant EvalObjectData::doCall(Variant v_name, Variant v_arguments,

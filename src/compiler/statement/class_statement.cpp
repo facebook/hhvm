@@ -252,9 +252,6 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
 
   cg_printf("DECLARE_CLASS_COMMON%s(%s, %s)\n", sweep,
             clsName, CodeGenerator::EscapeLabel(originalName).c_str());
-  cg_printf("DECLARE_INVOKE_EX%s(%s, %s, %s)\n",
-      Option::UseMethodIndex ? "WITH_INDEX" : "", clsName,
-            CodeGenerator::EscapeLabel(originalName).c_str(), parent);
 
   cg.printSection("DECLARE_STATIC_PROP_OPS");
   cg_printf("public:\n");
@@ -311,19 +308,12 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   }
 
   cg.printSection("DECLARE_COMMON_INVOKE");
-  cg.printf("static bool os_get_call_info(MethodCallPackage &mcp, "
-      "int64 hash = -1);\n");
-  if (Option::UseMethodIndex) {
-    cg.printf("virtual bool o_get_call_info_with_index(MethodCallPackage &mcp,"
-        " MethodIndex mi, int64 hash = -1);\n");
+  if (classScope->hasJumpTable(ClassScope::JumpTableCallInfo)) {
+    cg.printf("static const MethodCallInfoTable s_call_info_table[];\n");
+    cg.printf("static const int s_call_info_index[];\n");
   } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_%s 1\n", clsName);
-  }
-  if (classScope->hasJumpTable(ClassScope::JumpTableInvoke)) {
-    cg.printf("virtual bool o_get_call_info(MethodCallPackage &mcp, "
-        "int64 hash = -1);\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_INVOKE_%s 1\n", clsName);
+    cg.printf("static const int s_call_info_table = 0;\n");
+    cg.printf("static const int s_call_info_index = 0;\n");
   }
 
   cg_printf("\n");
@@ -411,6 +401,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (Option::GenerateCPPMacros) {
         classScope->outputForwardDeclaration(cg);
       }
+      classScope->outputCPPGlobalTableWrappersDecl(cg, ar);
 
       bool system = cg.getOutput() == CodeGenerator::SystemCPP;
       ClassScopePtr parCls;
@@ -637,7 +628,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
       cg_indentEnd("};\n");
 
-      classScope->outputCPPGlobalTableWrappersDecl(cg, ar);
       classScope->outputCPPDynamicClassDecl(cg);
 
       if (m_stmt) {

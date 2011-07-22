@@ -25,6 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/directory.php line 3 */
 FORWARD_DECLARE_CLASS(Directory);
+extern ObjectStaticCallbacks cw_Directory;
 class c_Directory : public ExtObjectData {
   public:
 
@@ -35,7 +36,6 @@ class c_Directory : public ExtObjectData {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(Directory, Directory)
-  DECLARE_INVOKE_EX(Directory, Directory, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -55,9 +55,8 @@ class c_Directory : public ExtObjectData {
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_Directory 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   c_Directory() : m_path(Variant::nullInit), m_handle(Variant::nullInit) {}
@@ -73,7 +72,6 @@ class c_Directory : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(read);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
-extern struct ObjectStaticCallbacks cw_Directory;
 ObjectData *coo_Directory() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

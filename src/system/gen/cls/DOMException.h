@@ -26,6 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 311 */
 FORWARD_DECLARE_CLASS(DOMException);
+extern ObjectStaticCallbacks cw_DOMException;
 class c_DOMException : public c_Exception {
   public:
 
@@ -34,7 +35,6 @@ class c_DOMException : public c_Exception {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(DOMException, DOMException)
-  DECLARE_INVOKE_EX(DOMException, DOMException, Exception)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -53,9 +53,8 @@ class c_DOMException : public c_Exception {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMException 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_DOMException 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   public: void t___construct(Variant v_message, Variant v_code);
@@ -64,7 +63,6 @@ class c_DOMException : public c_Exception {
   public: void getConstructor(MethodCallPackage &mcp);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
 };
-extern struct ObjectStaticCallbacks cw_DOMException;
 ObjectData *coo_DOMException() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -86,22 +86,16 @@ void c_stdClass::cloneSet(ObjectData *cl) {
   c_stdClass *clone = static_cast<c_stdClass*>(cl);
   ObjectData::cloneSet(clone);
 }
-bool c_stdClass::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
-  return c_ObjectData::os_get_call_info(mcp, hash);
-}
-bool c_stdClass::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  mcp.obj = this;
-  return os_get_call_info(mcp, hash);
-}
 ObjectStaticCallbacks cw_stdClass = {
   c_stdClass::os_getInit,
   c_stdClass::os_get,
   c_stdClass::os_lval,
   c_stdClass::os_invoke,
   c_stdClass::os_constant,
-  c_stdClass::os_get_call_info,
-  (ObjectData*(*)(ObjectData*))coo_stdClass
+  (ObjectData*(*)(ObjectData*))coo_stdClass,
+  c_stdClass::s_call_info_table,c_stdClass::s_call_info_index,
+  "stdClass",
+  0
 };
 /* SRC: classes/stdclass.php line 8 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT___PHP_Incomplete_Class
@@ -160,22 +154,16 @@ void c___PHP_Incomplete_Class::cloneSet(ObjectData *cl) {
   c___PHP_Incomplete_Class *clone = static_cast<c___PHP_Incomplete_Class*>(cl);
   ObjectData::cloneSet(clone);
 }
-bool c___PHP_Incomplete_Class::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
-  return c_ObjectData::os_get_call_info(mcp, hash);
-}
-bool c___PHP_Incomplete_Class::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  mcp.obj = this;
-  return os_get_call_info(mcp, hash);
-}
 ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
   c___PHP_Incomplete_Class::os_getInit,
   c___PHP_Incomplete_Class::os_get,
   c___PHP_Incomplete_Class::os_lval,
   c___PHP_Incomplete_Class::os_invoke,
   c___PHP_Incomplete_Class::os_constant,
-  c___PHP_Incomplete_Class::os_get_call_info,
-  (ObjectData*(*)(ObjectData*))coo___PHP_Incomplete_Class
+  (ObjectData*(*)(ObjectData*))coo___PHP_Incomplete_Class,
+  c___PHP_Incomplete_Class::s_call_info_table,c___PHP_Incomplete_Class::s_call_info_index,
+  "__PHP_Incomplete_Class",
+  0
 };
 ObjectData *coo_stdClass() {
   return NEWOBJ(c_stdClass)();

@@ -89,8 +89,7 @@ public:
   };
 
   enum JumpTableName {
-    JumpTableInvoke,
-    JumpTableStaticInvoke
+    JumpTableCallInfo
   };
 
 public:
@@ -408,13 +407,8 @@ public:
   virtual bool addFunction(AnalysisResultConstPtr ar,
                            FunctionScopePtr funcScope);
 
-  enum TableType {
-    Invoke,
-    CallInfo
-  };
   void outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
-                          bool staticOnly, bool dynamicObject = false,
-                          TableType type = Invoke);
+                          bool staticOnly, bool dynamicObject);
 
   void outputVolatileCheckBegin(CodeGenerator &cg,
                                 AnalysisResultPtr ar,
@@ -520,7 +514,7 @@ private:
     (CodeGenerator &cg, AnalysisResultPtr ar,
      const std::vector <const char*> &keys,
      const StringToFunctionScopePtrVecMap &funcScopes, bool fewArgs,
-     bool staticOnly, TableType type);
+     bool staticOnly);
   void outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
       AnalysisResultPtr ar, const std::vector<const char*> &keys,
       const StringToFunctionScopePtrVecMap &funcScopes, bool fewArgs);

@@ -25,6 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/splfile.php line 11 */
 FORWARD_DECLARE_CLASS(SplFileInfo);
+extern ObjectStaticCallbacks cw_SplFileInfo;
 class c_SplFileInfo : public ExtObjectData {
   public:
 
@@ -34,7 +35,6 @@ class c_SplFileInfo : public ExtObjectData {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(SplFileInfo, SplFileInfo)
-  DECLARE_INVOKE_EX(SplFileInfo, SplFileInfo, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -55,9 +55,8 @@ class c_SplFileInfo : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplFileInfo 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_SplFileInfo 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   c_SplFileInfo() : m_rsrc(Variant::nullInit) {}
@@ -121,7 +120,6 @@ class c_SplFileInfo : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(openfile);
   DECLARE_METHOD_INVOKE_HELPERS(gettype);
 };
-extern struct ObjectStaticCallbacks cw_SplFileInfo;
 ObjectData *coo_SplFileInfo() NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////

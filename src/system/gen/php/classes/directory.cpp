@@ -191,41 +191,18 @@ Variant c_Directory::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Directory::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
-bool c_Directory::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s ATTRIBUTE_UNUSED (*mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 7) {
-    case 1:
-      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ssf052ec6b, "close")) {
-        mcp.ci = &c_Directory::ci_close;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x1F479267E49EF301LL, NAMSTR(s_sys_sse896cb09, "read")) {
-        mcp.ci = &c_Directory::ci_read;
-        return true;
-      }
-      break;
-    case 2:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss941ca25f, "rewind")) {
-        mcp.ci = &c_Directory::ci_rewind;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
-        mcp.ci = &c_Directory::ci___construct;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_get_call_info(mcp, hash);
-}
-bool c_Directory::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  mcp.obj = this;
-  return os_get_call_info(mcp, hash);
-}
+const MethodCallInfoTable c_Directory::s_call_info_table[] = {
+  { 0x78AE97BFBEBF5341LL, 1, 5, "close", &c_Directory::ci_close },
+  { 0x1F479267E49EF301LL, 0, 4, "read", &c_Directory::ci_read },
+  { 0x1670096FDE27AF6ALL, 1, 6, "rewind", &c_Directory::ci_rewind },
+  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_Directory::ci___construct },
+  { 0, 1, 0, 0 }
+};
+const int c_Directory::s_call_info_index[] = {
+  7,
+  -1,0,2,-1,-1,-1,-1,3,
+
+};
 c_Directory *c_Directory::create(CVarRef v_path) {
   CountableHelper h(this);
   init();
@@ -252,8 +229,10 @@ ObjectStaticCallbacks cw_Directory = {
   c_Directory::os_lval,
   c_Directory::os_invoke,
   c_Directory::os_constant,
-  c_Directory::os_get_call_info,
-  (ObjectData*(*)(ObjectData*))coo_Directory
+  (ObjectData*(*)(ObjectData*))coo_Directory,
+  c_Directory::s_call_info_table,c_Directory::s_call_info_index,
+  "Directory",
+  0
 };
 /* SRC: classes/directory.php line 7 */
 void c_Directory::t___construct(Variant v_path) {

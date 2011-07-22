@@ -27,6 +27,7 @@ namespace HPHP {
 
 /* SRC: classes/directoryiterator.php line 122 */
 FORWARD_DECLARE_CLASS(RecursiveDirectoryIterator);
+extern ObjectStaticCallbacks cw_RecursiveDirectoryIterator;
 class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   public:
 
@@ -35,7 +36,6 @@ class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(RecursiveDirectoryIterator, RecursiveDirectoryIterator)
-  DECLARE_INVOKE_EX(RecursiveDirectoryIterator, RecursiveDirectoryIterator, DirectoryIterator)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -55,9 +55,8 @@ class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RecursiveDirectoryIterator 1
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RecursiveDirectoryIterator 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   public: void t___construct(Variant v_path, Variant v_flags = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */);
@@ -88,7 +87,6 @@ class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   DECLARE_METHOD_INVOKE_HELPERS(current);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
-extern struct ObjectStaticCallbacks cw_RecursiveDirectoryIterator;
 ObjectData *coo_RecursiveDirectoryIterator() NEVER_INLINE;
 extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_SELF;
 extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_FILEINFO;

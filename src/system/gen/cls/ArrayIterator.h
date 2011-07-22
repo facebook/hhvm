@@ -28,6 +28,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 329 */
 FORWARD_DECLARE_CLASS(ArrayIterator);
+extern ObjectStaticCallbacks cw_ArrayIterator;
 class c_ArrayIterator : public ExtObjectData {
   public:
 
@@ -38,7 +39,6 @@ class c_ArrayIterator : public ExtObjectData {
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(ArrayIterator, ArrayIterator)
-  DECLARE_INVOKE_EX(ArrayIterator, ArrayIterator, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:
@@ -58,9 +58,8 @@ class c_ArrayIterator : public ExtObjectData {
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
 
   // DECLARE_COMMON_INVOKE
-  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ArrayIterator 1
-  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  static const MethodCallInfoTable s_call_info_table[];
+  static const int s_call_info_index[];
 
   public:
   c_ArrayIterator() : m_arr(Variant::nullInit), m_flags(Variant::nullInit) {}
@@ -113,7 +112,6 @@ class c_ArrayIterator : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
   DECLARE_METHOD_INVOKE_HELPERS(offsetset);
 };
-extern struct ObjectStaticCallbacks cw_ArrayIterator;
 ObjectData *coo_ArrayIterator() NEVER_INLINE;
 extern const int64 q_ArrayIterator_STD_PROP_LIST;
 extern const int64 q_ArrayIterator_ARRAY_AS_PROPS;

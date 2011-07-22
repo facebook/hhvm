@@ -182,7 +182,7 @@ public:
   void onBreak(Token &out, Token *expr);
   void onContinue(Token &out, Token *expr);
   void onReturn(Token &out, Token *expr, bool checkYield = true);
-  void onYield(Token &out, Token *expr);
+  void onYield(Token &out, Token *expr, bool assign);
   void onGlobal(Token &out, Token &expr);
   void onGlobalVar(Token &out, Token *exprs, Token &expr);
   void onStatic(Token &out, Token &expr);

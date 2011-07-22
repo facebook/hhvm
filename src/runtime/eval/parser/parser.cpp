@@ -96,7 +96,8 @@ extern void create_generator(Parser *_p, Token &out, Token &params,
                              Token &name, const std::string &closureName,
                              const char *clsname, Token *modifiers,
                              bool getArgs, Token &origGenFunc);
-extern void transform_yield(Parser *_p, Token &stmts, int index, Token *expr);
+extern void transform_yield(Parser *_p, Token &stmts, int index,
+                            Token *expr, bool assign);
 extern void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
                               Token &value, Token &stmt, int count,
                               bool hasValue, bool byRef);
@@ -1428,7 +1429,7 @@ void Parser::onReturn(Token &out, Token *expr, bool checkYield /* = true */) {
   }
 }
 
-void Parser::onYield(Token &out, Token *expr) {
+void Parser::onYield(Token &out, Token *expr, bool assign) {
   if (!RuntimeOption::EnableHipHopSyntax) {
     error("Yield is not enabled: %s", getMessage().c_str());
     return;
@@ -1460,7 +1461,7 @@ void Parser::onYield(Token &out, Token *expr) {
   int index = func->addYield();
 
   Token stmts;
-  transform_yield(this, stmts, index, expr);
+  transform_yield(this, stmts, index, expr, assign);
 
   out.reset();
   out->stmt() = stmts->getStmtList();

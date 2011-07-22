@@ -19809,6 +19809,42 @@ bool TestCodeRun::TestYield() {
         "string(4) \"X::f\"\n"
         "string(9) \"{closure}\"\n");
 
+  MVCRO("<?php "
+        "function gen() {"
+        "  yield 1;"
+        "  yield 2;"
+        "  try {"
+        "    $a = yield 3;"
+        "  } catch (Exception $e) {"
+        "    var_dump($e->getMessage());"
+        "    yield 4;"
+        "  }"
+        "  yield 5;"
+        "}"
+        "foreach (gen() as $x) { var_dump($x); }"
+        "$g = gen();"
+        "$g->next();"
+        "var_dump($g->current());"
+        "$g->next();"
+        "var_dump($g->current());"
+        "$g->next();"
+        "var_dump($g->current());"
+        "$g->raise(new Exception('foobar'));"
+        "var_dump($g->current());"
+        "$g->next();"
+        "var_dump($g->current());"
+        ,
+        "int(1)\n"
+        "int(2)\n"
+        "int(3)\n"
+        "int(5)\n"
+        "int(1)\n"
+        "int(2)\n"
+        "int(3)\n"
+        "string(6) \"foobar\"\n"
+        "int(4)\n"
+        "int(5)\n");
+
   return true;
 }
 

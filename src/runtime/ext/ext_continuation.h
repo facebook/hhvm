@@ -23,14 +23,15 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-FORWARD_DECLARE_CLASS_BUILTIN(Continuation);
 
+FORWARD_DECLARE_CLASS_BUILTIN(Continuation);
 p_Continuation f_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CStrRef origFuncName, CArrRef args = null_array);
 void f_hphp_pack_continuation(CObjRef continuation, int64 label, CVarRef value);
 void f_hphp_unpack_continuation(CObjRef continuation);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Continuation
+
 class c_Continuation : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(Continuation)
@@ -42,13 +43,14 @@ class c_Continuation : public ExtObjectData {
   public: Object m_obj;
   public: Array m_args;
   public: int64 m_label;
-  public: bool m_done;
   public: int64 m_index;
   public: Variant m_value;
-  public: bool m_running;
   public: Variant m_received;
   public: String m_origFuncName;
-  public: Variant m_called_class;
+  public: String m_called_class;
+  public: bool m_done;
+  public: bool m_running;
+  public: bool m_should_throw;
 
   // need to implement
   public: c_Continuation();
@@ -79,6 +81,10 @@ class c_Continuation : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(valid);
   public: void t_send(CVarRef v);
   DECLARE_METHOD_INVOKE_HELPERS(send);
+  public: void t_raise(CVarRef v);
+  DECLARE_METHOD_INVOKE_HELPERS(raise);
+  public: void t_raised();
+  DECLARE_METHOD_INVOKE_HELPERS(raised);
   public: Variant t_receive();
   DECLARE_METHOD_INVOKE_HELPERS(receive);
   public: String t_getorigfuncname();

@@ -90,8 +90,9 @@ void f_hphp_unpack_continuation(CObjRef continuation) {
 static StaticString s___cont__("__cont__");
 
 c_Continuation::c_Continuation() :
-  m_label(0LL), m_done(false), m_index(-1LL),
-  m_value(Variant::nullInit), m_running(false), m_received(Variant::nullInit),
+  m_label(0LL), m_index(-1LL),
+  m_value(Variant::nullInit), m_received(Variant::nullInit),
+  m_done(false), m_running(false), m_should_throw(false),
   m_callInfo(NULL), m_extra(NULL), m_isMethod(false) {}
 c_Continuation::~c_Continuation() {}
 
@@ -195,7 +196,6 @@ bool c_Continuation::php_sleep(Variant &ret) {
   } catch (Object e) { \
     if (e.instanceof("exception")) { \
       m_running = false; \
-      m_done = true; \
       throw_exception(e); \
     } else { \
       throw; \
@@ -226,12 +226,37 @@ void c_Continuation::t_send(CVarRef v) {
     throw_exception(
       Object(SystemLib::AllocExceptionObject("Need to call next() first")));
   }
+
   m_received.assignVal(v);
   NEXT_IMPL;
 }
 
+void c_Continuation::t_raise(CVarRef v) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::raise);
+  if (m_index < 0LL) {
+    throw_exception(
+      Object(SystemLib::AllocExceptionObject("Need to call next() first")));
+  }
+
+  m_received.assignVal(v);
+  m_should_throw = true;
+  NEXT_IMPL;
+}
+
+void c_Continuation::t_raised() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::raised);
+  if (m_should_throw) {
+    m_should_throw = false;
+    throw_exception(m_received);
+  }
+}
+
 Variant c_Continuation::t_receive() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::receive);
+  if (m_should_throw) {
+    m_should_throw = false;
+    throw_exception(m_received);
+  }
   return m_received;
 }
 

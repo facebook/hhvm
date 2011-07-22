@@ -318,6 +318,28 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => 'raise',
+    'return' => array(
+      'type'   => null,
+    ),
+    'args'   => array(
+      array(
+        'name'   => 'v',
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => 'raised',
+    'return' => array(
+      'type'   => null,
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => 'receive',
     'return' => array(
       'type'   => Variant,
@@ -355,13 +377,6 @@ DefineProperty(
 
 DefineProperty(
   array(
-    'name'  => 'done',
-    'type'  => Boolean,
-    'flags' => IsPrivate,
-  ));
-
-DefineProperty(
-  array(
     'name'  => 'index',
     'type'  => Int64,
     'flags' => IsPrivate,
@@ -371,13 +386,6 @@ DefineProperty(
   array(
     'name'  => 'value',
     'type'  => Variant,
-    'flags' => IsPrivate,
-  ));
-
-DefineProperty(
-  array(
-    'name'  => 'running',
-    'type'  => Boolean,
     'flags' => IsPrivate,
   ));
 
@@ -399,6 +407,20 @@ DefineProperty(
   array(
     'name'  => 'called_class',
     'type'  => String,
+    'flags' => IsPrivate,
+  ));
+
+DefineProperty(
+  array(
+    'name'  => 'done',
+    'type'  => Boolean,
+    'flags' => IsPrivate,
+  ));
+
+DefineProperty(
+  array(
+    'name'  => 'running',
+    'type'  => Boolean,
     'flags' => IsPrivate,
   ));
 

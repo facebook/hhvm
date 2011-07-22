@@ -150,7 +150,7 @@ static void on_constant(Parser *_p, Token &out, Token *stmts,
 // continuation transformations
 
 static void on_yield_assign(Parser *_p, Token &out, Token &var, Token *expr) {
-  Token yield;    _p->onYield(yield, expr);
+  Token yield;    _p->onYield(yield, expr, true);
   Token rhs;
   {
     Token name;   name.setText(CONTINUATION_OBJECT_NAME);
@@ -173,7 +173,7 @@ static void on_yield_assign(Parser *_p, Token &out, Token &var, Token *expr) {
 
 static void on_yield_list_assign(Parser *_p, Token &out, Token &var,
                                  Token *expr) {
-  Token yield;    _p->onYield(yield, expr);
+  Token yield;    _p->onYield(yield, expr, true);
   Token rhs;
   {
     Token name;   name.setText(CONTINUATION_OBJECT_NAME);
@@ -335,7 +335,8 @@ void create_generator(Parser *_p, Token &out, Token &params,
   }
 }
 
-void transform_yield(Parser *_p, Token &stmts, int index, Token *expr) {
+void transform_yield(Parser *_p, Token &stmts, int index,
+                     Token *expr, bool assign) {
   Token update;
   {
     // hphp_pack_contination(v___cont__, label, value)
@@ -386,7 +387,25 @@ void transform_yield(Parser *_p, Token &stmts, int index, Token *expr) {
   Token stmts2;  _p->addStatement(stmts2, stmts1, ret);
   Token stmts3;  _p->addStatement(stmts3, stmts2, label);
 
-  _p->finishStatement(stmts, stmts3); stmts = 1;
+  if (assign) {
+    _p->finishStatement(stmts, stmts3); stmts = 1;
+  } else {
+    Token raised;
+    {
+      Token name;   name.setText(CONTINUATION_OBJECT_NAME);
+      Token var;    _p->onSynthesizedVariable(var, name);
+      Token pn;     pn.setText("raised");
+      Token pname;  _p->onName(pname, pn, Parser::VarName);
+      _p->pushObject(var); _p->appendProperty(pname);
+      Token empty;  empty = 1; _p->appendMethodParams(empty);
+      _p->popObject(raised);
+    }
+    Token stmt;     _p->onExpStatement(stmt, raised);
+
+    Token stmts4;   _p->addStatement(stmts4, stmts3, stmt);
+    _p->finishStatement(stmts, stmts4); stmts = 1;
+  }
+
 }
 
 // convert a foreach (by ref or not) to a normal for statement with
@@ -1062,9 +1081,9 @@ statement_without_expr:
   | T_RETURN expr_without_variable ';' { _p->onReturn($$, &$2);}
   | T_RETURN variable ';'              { _p->onReturn($$, &$2);}
 
-  | T_YIELD T_BREAK ';'                { _p->onYield($$, NULL);}
-  | T_YIELD expr_without_variable ';'  { _p->onYield($$, &$2);}
-  | T_YIELD variable ';'               { _p->onYield($$, &$2);}
+  | T_YIELD T_BREAK ';'                { _p->onYield($$, NULL, false);}
+  | T_YIELD expr_without_variable ';'  { _p->onYield($$, &$2, false);}
+  | T_YIELD variable ';'               { _p->onYield($$, &$2, false);}
   | variable '='
     T_YIELD expr_without_variable ';'  { on_yield_assign(_p, $$, $1, &$4);}
   | variable '=' T_YIELD variable ';'  { on_yield_assign(_p, $$, $1, &$4);}

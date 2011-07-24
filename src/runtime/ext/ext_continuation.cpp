@@ -196,6 +196,7 @@ bool c_Continuation::php_sleep(Variant &ret) {
   } catch (Object e) { \
     if (e.instanceof("exception")) { \
       m_running = false; \
+      m_done = true; \
       throw_exception(e); \
     } else { \
       throw; \

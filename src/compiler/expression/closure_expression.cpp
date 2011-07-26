@@ -80,8 +80,12 @@ ClosureExpression::ClosureExpression
 ExpressionPtr ClosureExpression::clone() {
   ClosureExpressionPtr exp(new ClosureExpression(*this));
   Expression::deepCopy(exp);
+
+  // don't clone the function statement or the vars, since
+  // they are shared with the function scope
   exp->m_func = m_func;
-  exp->m_vars = Clone(m_vars);
+  exp->m_vars = m_vars;
+
   exp->m_values = Clone(m_values);
   return exp;
 }

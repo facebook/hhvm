@@ -40,7 +40,7 @@ void StaticMemberExpression::unset(VariableEnvironment &env) const {
 bool StaticMemberExpression::exist(VariableEnvironment &env, int op) const {
   String cls = m_class->get(env);
   String variable(m_variable->get(env));
-  Variant *lv = get_static_property_lv(cls.data(), variable.data());
+  Variant *lv = get_static_property_lv(cls, variable.data());
   if (op == T_ISSET) {
     return lv != NULL && !lv->isNull();
   }
@@ -51,7 +51,7 @@ bool StaticMemberExpression::exist(VariableEnvironment &env, int op) const {
 Variant &StaticMemberExpression::lval(VariableEnvironment &env) const {
   String cls = m_class->get(env);
   String variable(m_variable->get(env));
-  Variant *lv = get_static_property_lv(cls.data(), variable.data());
+  Variant *lv = get_static_property_lv(cls, variable.data());
   if (lv) {
     return *lv;
   }

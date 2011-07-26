@@ -32,16 +32,21 @@ class JumpTableBase {
 class JumpTable : public JumpTableBase {
 public:
   JumpTable(CodeGenerator &cg, const std::vector<const char*> &keys,
-            bool caseInsensitive, bool hasPrehash, bool useString);
+            bool caseInsensitive, bool hasPrehash, bool useString,
+            bool quiet = false);
   bool ready() const;
   void next();
   const char *key() const;
+  int current() const;
+  bool last() const;
+  int size() const { return m_size; }
 protected:
   CodeGenerator &m_cg;
   CodeGenerator::MapIntToStringVec::const_iterator m_iter;
   CodeGenerator::MapIntToStringVec m_table;
   uint m_subIter;
-
+  int m_size;
+  bool m_quiet;
 };
 
 class JumpTableMethodIndex : public JumpTableBase {

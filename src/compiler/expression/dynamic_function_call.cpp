@@ -251,7 +251,7 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                 Option::ObjectStaticPrefix, m_ciTemp, m_className.c_str());
     } else if (isRedeclared()) {
       cg_printf("g->%s%s->%sget_call_info(mcp%d",
-                Option::ClassStaticsObjectPrefix, m_className.c_str(),
+                Option::ClassStaticsCallbackPrefix, m_className.c_str(),
                 Option::ObjectStaticPrefix, m_ciTemp, m_className.c_str());
     }
   }

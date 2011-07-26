@@ -77,7 +77,7 @@ Variant f_constant(CStrRef name) {
     }
     // taking care of volatile class
     if (class_exists(className)) {
-      return get_class_constant(className.c_str(), constantName, false);
+      return get_class_constant(className, constantName, false);
     } else {
       return null;
     }

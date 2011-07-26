@@ -764,13 +764,14 @@ void c_ArrayIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ArrayIterator::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_ArrayIterator = {
+ObjectStaticCallbacks cw_ArrayIterator = {
   c_ArrayIterator::os_getInit,
   c_ArrayIterator::os_get,
   c_ArrayIterator::os_lval,
   c_ArrayIterator::os_invoke,
   c_ArrayIterator::os_constant,
-  c_ArrayIterator::os_get_call_info
+  c_ArrayIterator::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_ArrayIterator
 };
 /* SRC: classes/iterator.php line 336 */
 void c_ArrayIterator::t___construct(Variant v_array, Variant v_flags //  = 0LL
@@ -1302,13 +1303,14 @@ void c_AppendIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_AppendIterator::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_AppendIterator = {
+ObjectStaticCallbacks cw_AppendIterator = {
   c_AppendIterator::os_getInit,
   c_AppendIterator::os_get,
   c_AppendIterator::os_lval,
   c_AppendIterator::os_invoke,
   c_AppendIterator::os_constant,
-  c_AppendIterator::os_get_call_info
+  c_AppendIterator::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_AppendIterator
 };
 /* SRC: classes/iterator.php line 799 */
 void c_AppendIterator::t___construct() {
@@ -1914,13 +1916,14 @@ void c_IteratorIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_IteratorIterator::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_IteratorIterator = {
+ObjectStaticCallbacks cw_IteratorIterator = {
   c_IteratorIterator::os_getInit,
   c_IteratorIterator::os_get,
   c_IteratorIterator::os_lval,
   c_IteratorIterator::os_invoke,
   c_IteratorIterator::os_constant,
-  c_IteratorIterator::os_get_call_info
+  c_IteratorIterator::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_IteratorIterator
 };
 /* SRC: classes/iterator.php line 660 */
 void c_IteratorIterator::t___construct(Variant v_iterator) {
@@ -2365,13 +2368,14 @@ void c_RecursiveIteratorIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_RecursiveIteratorIterator::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_RecursiveIteratorIterator = {
+ObjectStaticCallbacks cw_RecursiveIteratorIterator = {
   c_RecursiveIteratorIterator::os_getInit,
   c_RecursiveIteratorIterator::os_get,
   c_RecursiveIteratorIterator::os_lval,
   c_RecursiveIteratorIterator::os_invoke,
   c_RecursiveIteratorIterator::os_constant,
-  c_RecursiveIteratorIterator::os_get_call_info
+  c_RecursiveIteratorIterator::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_RecursiveIteratorIterator
 };
 /* SRC: classes/iterator.php line 237 */
 void c_RecursiveIteratorIterator::t___construct(Variant v_iterator, Variant v_mode //  = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */
@@ -2587,13 +2591,14 @@ void c_MutableArrayIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_MutableArrayIterator::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_MutableArrayIterator = {
+ObjectStaticCallbacks cw_MutableArrayIterator = {
   c_MutableArrayIterator::os_getInit,
   c_MutableArrayIterator::os_get,
   c_MutableArrayIterator::os_lval,
   c_MutableArrayIterator::os_invoke,
   c_MutableArrayIterator::os_constant,
-  c_MutableArrayIterator::os_get_call_info
+  c_MutableArrayIterator::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_MutableArrayIterator
 };
 /* SRC: classes/iterator.php line 645 */
 void c_MutableArrayIterator::t___construct(VRefParam rv_array, Variant v_flags //  = 0LL
@@ -3000,13 +3005,14 @@ void c_FilterIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_FilterIterator::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_FilterIterator = {
+ObjectStaticCallbacks cw_FilterIterator = {
   c_FilterIterator::os_getInit,
   c_FilterIterator::os_get,
   c_FilterIterator::os_lval,
   c_FilterIterator::os_invoke,
   c_FilterIterator::os_constant,
-  c_FilterIterator::os_get_call_info
+  c_FilterIterator::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_FilterIterator
 };
 /* SRC: classes/iterator.php line 714 */
 void c_FilterIterator::t___construct(Variant v_it) {

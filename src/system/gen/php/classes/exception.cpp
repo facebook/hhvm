@@ -141,13 +141,14 @@ void c_PDOException::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_PDOException::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_PDOException = {
+ObjectStaticCallbacks cw_PDOException = {
   c_PDOException::os_getInit,
   c_PDOException::os_get,
   c_PDOException::os_lval,
   c_PDOException::os_invoke,
   c_PDOException::os_constant,
-  c_PDOException::os_get_call_info
+  c_PDOException::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_PDOException
 };
 /* SRC: classes/exception.php line 318 */
 void c_PDOException::t___construct() {
@@ -224,13 +225,14 @@ bool c_UnexpectedValueException::o_get_call_info(MethodCallPackage &mcp, int64 h
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_UnexpectedValueException = {
+ObjectStaticCallbacks cw_UnexpectedValueException = {
   c_UnexpectedValueException::os_getInit,
   c_UnexpectedValueException::os_get,
   c_UnexpectedValueException::os_lval,
   c_UnexpectedValueException::os_invoke,
   c_UnexpectedValueException::os_constant,
-  c_UnexpectedValueException::os_get_call_info
+  c_UnexpectedValueException::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_UnexpectedValueException
 };
 /* SRC: classes/exception.php line 251 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OverflowException
@@ -301,13 +303,14 @@ bool c_OverflowException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_OverflowException = {
+ObjectStaticCallbacks cw_OverflowException = {
   c_OverflowException::os_getInit,
   c_OverflowException::os_get,
   c_OverflowException::os_lval,
   c_OverflowException::os_invoke,
   c_OverflowException::os_constant,
-  c_OverflowException::os_get_call_info
+  c_OverflowException::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_OverflowException
 };
 /* SRC: classes/exception.php line 243 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfBoundsException
@@ -378,13 +381,14 @@ bool c_OutOfBoundsException::o_get_call_info(MethodCallPackage &mcp, int64 hash)
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_OutOfBoundsException = {
+ObjectStaticCallbacks cw_OutOfBoundsException = {
   c_OutOfBoundsException::os_getInit,
   c_OutOfBoundsException::os_get,
   c_OutOfBoundsException::os_lval,
   c_OutOfBoundsException::os_invoke,
   c_OutOfBoundsException::os_constant,
-  c_OutOfBoundsException::os_get_call_info
+  c_OutOfBoundsException::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_OutOfBoundsException
 };
 /* SRC: classes/exception.php line 173 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LogicException
@@ -454,13 +458,14 @@ bool c_LogicException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_LogicException = {
+ObjectStaticCallbacks cw_LogicException = {
   c_LogicException::os_getInit,
   c_LogicException::os_get,
   c_LogicException::os_lval,
   c_LogicException::os_invoke,
   c_LogicException::os_constant,
-  c_LogicException::os_get_call_info
+  c_LogicException::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_LogicException
 };
 /* SRC: classes/exception.php line 259 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RangeException
@@ -531,13 +536,14 @@ bool c_RangeException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_RangeException = {
+ObjectStaticCallbacks cw_RangeException = {
   c_RangeException::os_getInit,
   c_RangeException::os_get,
   c_RangeException::os_lval,
   c_RangeException::os_invoke,
   c_RangeException::os_constant,
-  c_RangeException::os_get_call_info
+  c_RangeException::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_RangeException
 };
 /* SRC: classes/exception.php line 211 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_InvalidArgumentException
@@ -610,13 +616,14 @@ bool c_InvalidArgumentException::o_get_call_info(MethodCallPackage &mcp, int64 h
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_InvalidArgumentException = {
+ObjectStaticCallbacks cw_InvalidArgumentException = {
   c_InvalidArgumentException::os_getInit,
   c_InvalidArgumentException::os_get,
   c_InvalidArgumentException::os_lval,
   c_InvalidArgumentException::os_invoke,
   c_InvalidArgumentException::os_constant,
-  c_InvalidArgumentException::os_get_call_info
+  c_InvalidArgumentException::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_InvalidArgumentException
 };
 /* SRC: classes/exception.php line 268 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_UnderflowException
@@ -685,13 +692,14 @@ bool c_UnderflowException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_UnderflowException = {
+ObjectStaticCallbacks cw_UnderflowException = {
   c_UnderflowException::os_getInit,
   c_UnderflowException::os_get,
   c_UnderflowException::os_lval,
   c_UnderflowException::os_invoke,
   c_UnderflowException::os_constant,
-  c_UnderflowException::os_get_call_info
+  c_UnderflowException::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_UnderflowException
 };
 /* SRC: classes/exception.php line 227 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfRangeException
@@ -762,13 +770,14 @@ bool c_OutOfRangeException::o_get_call_info(MethodCallPackage &mcp, int64 hash) 
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_OutOfRangeException = {
+ObjectStaticCallbacks cw_OutOfRangeException = {
   c_OutOfRangeException::os_getInit,
   c_OutOfRangeException::os_get,
   c_OutOfRangeException::os_lval,
   c_OutOfRangeException::os_invoke,
   c_OutOfRangeException::os_constant,
-  c_OutOfRangeException::os_get_call_info
+  c_OutOfRangeException::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_OutOfRangeException
 };
 /* SRC: classes/exception.php line 193 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_BadMethodCallException
@@ -844,13 +853,14 @@ bool c_BadMethodCallException::o_get_call_info(MethodCallPackage &mcp, int64 has
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_BadMethodCallException = {
+ObjectStaticCallbacks cw_BadMethodCallException = {
   c_BadMethodCallException::os_getInit,
   c_BadMethodCallException::os_get,
   c_BadMethodCallException::os_lval,
   c_BadMethodCallException::os_invoke,
   c_BadMethodCallException::os_constant,
-  c_BadMethodCallException::os_get_call_info
+  c_BadMethodCallException::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_BadMethodCallException
 };
 /* SRC: classes/exception.php line 235 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RuntimeException
@@ -918,13 +928,14 @@ bool c_RuntimeException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_RuntimeException = {
+ObjectStaticCallbacks cw_RuntimeException = {
   c_RuntimeException::os_getInit,
   c_RuntimeException::os_get,
   c_RuntimeException::os_lval,
   c_RuntimeException::os_invoke,
   c_RuntimeException::os_constant,
-  c_RuntimeException::os_get_call_info
+  c_RuntimeException::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_RuntimeException
 };
 /* SRC: classes/exception.php line 10 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Exception
@@ -1348,13 +1359,14 @@ void c_Exception::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Exception::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_Exception = {
+ObjectStaticCallbacks cw_Exception = {
   c_Exception::os_getInit,
   c_Exception::os_get,
   c_Exception::os_lval,
   c_Exception::os_invoke,
   c_Exception::os_constant,
-  c_Exception::os_get_call_info
+  c_Exception::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_Exception
 };
 void c_Exception::init() {
   m_message = NAMSTR(s_sys_ss00000000, "");
@@ -1789,13 +1801,14 @@ void c_ErrorException::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ErrorException::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_ErrorException = {
+ObjectStaticCallbacks cw_ErrorException = {
   c_ErrorException::os_getInit,
   c_ErrorException::os_get,
   c_ErrorException::os_lval,
   c_ErrorException::os_invoke,
   c_ErrorException::os_constant,
-  c_ErrorException::os_get_call_info
+  c_ErrorException::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_ErrorException
 };
 /* SRC: classes/exception.php line 288 */
 void c_ErrorException::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
@@ -1953,13 +1966,14 @@ void c_DOMException::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMException::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_DOMException = {
+ObjectStaticCallbacks cw_DOMException = {
   c_DOMException::os_getInit,
   c_DOMException::os_get,
   c_DOMException::os_lval,
   c_DOMException::os_invoke,
   c_DOMException::os_constant,
-  c_DOMException::os_get_call_info
+  c_DOMException::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_DOMException
 };
 /* SRC: classes/exception.php line 312 */
 void c_DOMException::t___construct(Variant v_message, Variant v_code) {
@@ -2040,13 +2054,14 @@ bool c_BadFunctionCallException::o_get_call_info(MethodCallPackage &mcp, int64 h
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_BadFunctionCallException = {
+ObjectStaticCallbacks cw_BadFunctionCallException = {
   c_BadFunctionCallException::os_getInit,
   c_BadFunctionCallException::os_get,
   c_BadFunctionCallException::os_lval,
   c_BadFunctionCallException::os_invoke,
   c_BadFunctionCallException::os_constant,
-  c_BadFunctionCallException::os_get_call_info
+  c_BadFunctionCallException::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_BadFunctionCallException
 };
 /* SRC: classes/exception.php line 219 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LengthException
@@ -2117,13 +2132,14 @@ bool c_LengthException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_LengthException = {
+ObjectStaticCallbacks cw_LengthException = {
   c_LengthException::os_getInit,
   c_LengthException::os_get,
   c_LengthException::os_lval,
   c_LengthException::os_invoke,
   c_LengthException::os_constant,
-  c_LengthException::os_get_call_info
+  c_LengthException::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_LengthException
 };
 /* SRC: classes/exception.php line 202 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DomainException
@@ -2194,13 +2210,14 @@ bool c_DomainException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_DomainException = {
+ObjectStaticCallbacks cw_DomainException = {
   c_DomainException::os_getInit,
   c_DomainException::os_get,
   c_DomainException::os_lval,
   c_DomainException::os_invoke,
   c_DomainException::os_constant,
-  c_DomainException::os_get_call_info
+  c_DomainException::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_DomainException
 };
 ObjectData *coo_PDOException() {
   return NEWOBJ(c_PDOException)();

@@ -31,7 +31,7 @@ NewObjectExpression::NewObjectExpression(EXPRESSION_ARGS, NamePtr name,
 
 Variant NewObjectExpression::eval(VariableEnvironment &env) const {
   String name(m_name->get(env));
-  Object o(create_object_only(name.data()));
+  Object o(create_object_only(name));
   SET_LINE;
 
   const MethodStatement* ms = o.get()->getConstructorStatement();
@@ -40,7 +40,7 @@ Variant NewObjectExpression::eval(VariableEnvironment &env) const {
     return o;
   }
 
-  // Handle builtins 
+  // Handle builtins
   MethodCallPackage mcp1;
   mcp1.construct(o);
   const CallInfo* cit1 = mcp1.ci;

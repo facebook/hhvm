@@ -3281,13 +3281,11 @@ void AnalysisResult::getCPPRedeclaredFunctionDecl
 
 void AnalysisResult::getCPPRedeclaredClassDecl
 (CodeGenerator &cg, Type2SymbolSetMap &type2names) {
-  SymbolSet &statics = type2names["ClassStaticsPtr"];
-  SymbolSet &callbacks = type2names["ObjectStaticCallbacks*"];
+  SymbolSet &callbacks = type2names["RedeclaredObjectStaticCallbacksConst*"];
   for (StringToClassScopePtrVecMap::const_iterator iter =
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
     const char *name = iter->first.c_str();
     if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
-      statics.insert(string(Option::ClassStaticsObjectPrefix) + name);
       callbacks.insert(string(Option::ClassStaticsCallbackPrefix) + name);
     }
   }
@@ -3298,8 +3296,22 @@ void AnalysisResult::outputCPPRedeclaredClassImpl(CodeGenerator &cg) {
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
     if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
       const char *name = iter->first.c_str();
-      cg_printf("%s%s = ClassStaticsPtr(NEWOBJ(ClassStatics)(\"%s\"));\n",
-                Option::ClassStaticsObjectPrefix, name, name);
+      cg_printf("static const RedeclaredObjectStaticCallbacks %s%s = {\n"
+                "  {\n"
+                "    c_ObjectData::os_getInit,\n"
+                "    c_ObjectData::os_get,\n"
+                "    c_ObjectData::os_lval,\n"
+                "    c_ObjectData::os_invoke,\n"
+                "    c_ObjectData::os_constant,\n"
+                "    c_ObjectData::os_get_call_info,\n"
+                "    coo_ObjectData\n"
+                "  },\n"
+                "  -1, \"%s\"\n"
+                "};\n",
+                Option::ClassWrapperFunctionNullPrefix, name, name);
+      cg_printf("%s%s = &%s%s;\n",
+                Option::ClassStaticsCallbackPrefix, name,
+                Option::ClassWrapperFunctionNullPrefix, name);
     }
   }
 }
@@ -3568,7 +3580,7 @@ void AnalysisResult::outputCPPGlobalImplementations(CodeGenerator &cg) {
                      iter->first.c_str());
       cg.printDeclareGlobals();
       cg_printf("return g->%s%s->getRedeclaringId();\n",
-                Option::ClassStaticsObjectPrefix, iter->first.c_str());
+                Option::ClassStaticsCallbackPrefix, iter->first.c_str());
       cg_indentEnd("}\n");
     }
   }
@@ -3949,7 +3961,7 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairSetVec &symbols,
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
     const char *name = iter->first.c_str();
     if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
-      string varname = string(Option::ClassStaticsObjectPrefix) + name;
+      string varname = string(Option::ClassStaticsCallbackPrefix) + name;
       string memname = varname + "->getRedeclaringId()";
       names->insert(StringPair(varname, memname));
     }
@@ -3959,9 +3971,7 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairSetVec &symbols,
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
     const char *name = iter->first.c_str();
     if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
-      string varname = string(Option::ClassStaticsObjectPrefix) + name;
-      names->insert(StringPair(varname, varname));
-      varname = string(Option::ClassStaticsCallbackPrefix) + name;
+      string varname = string(Option::ClassStaticsCallbackPrefix) + name;
       names->insert(StringPair(varname, varname));
     }
   }

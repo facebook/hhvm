@@ -265,8 +265,8 @@ OPT =
 endif
 
 ifdef RELEASE
-CPPFLAGS += -DRELEASE
-ifdef WWW_INTERN
+CPPFLAGS += -DRELEASE -fmerge-constants
+ifdef OPT_SIZE
 OPT = -Os
 else
 OPT = -O3

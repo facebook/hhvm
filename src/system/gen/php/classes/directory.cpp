@@ -246,13 +246,14 @@ void c_Directory::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Directory::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_Directory = {
+ObjectStaticCallbacks cw_Directory = {
   c_Directory::os_getInit,
   c_Directory::os_get,
   c_Directory::os_lval,
   c_Directory::os_invoke,
   c_Directory::os_constant,
-  c_Directory::os_get_call_info
+  c_Directory::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_Directory
 };
 /* SRC: classes/directory.php line 7 */
 void c_Directory::t___construct(Variant v_path) {

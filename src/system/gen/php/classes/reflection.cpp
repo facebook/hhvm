@@ -426,13 +426,14 @@ bool c_ReflectionFunctionAbstract::o_get_call_info(MethodCallPackage &mcp, int64
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_ReflectionFunctionAbstract = {
+ObjectStaticCallbacks cw_ReflectionFunctionAbstract = {
   c_ReflectionFunctionAbstract::os_getInit,
   c_ReflectionFunctionAbstract::os_get,
   c_ReflectionFunctionAbstract::os_lval,
   c_ReflectionFunctionAbstract::os_invoke,
   c_ReflectionFunctionAbstract::os_constant,
-  c_ReflectionFunctionAbstract::os_get_call_info
+  c_ReflectionFunctionAbstract::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_ReflectionFunctionAbstract
 };
 /* SRC: classes/reflection.php line 261 */
 Variant c_ReflectionFunctionAbstract::t_getname() {
@@ -684,13 +685,14 @@ bool c_ReflectionObject::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_ReflectionObject = {
+ObjectStaticCallbacks cw_ReflectionObject = {
   c_ReflectionObject::os_getInit,
   c_ReflectionObject::os_get,
   c_ReflectionObject::os_lval,
   c_ReflectionObject::os_invoke,
   c_ReflectionObject::os_constant,
-  c_ReflectionObject::os_get_call_info
+  c_ReflectionObject::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_ReflectionObject
 };
 /* SRC: classes/reflection.php line 1299 */
 Variant c_ReflectionObject::t_export(Variant v_obj, CVarRef v_ret) {
@@ -778,13 +780,14 @@ bool c_ReflectionException::o_get_call_info(MethodCallPackage &mcp, int64 hash) 
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_ReflectionException = {
+ObjectStaticCallbacks cw_ReflectionException = {
   c_ReflectionException::os_getInit,
   c_ReflectionException::os_get,
   c_ReflectionException::os_lval,
   c_ReflectionException::os_invoke,
   c_ReflectionException::os_constant,
-  c_ReflectionException::os_get_call_info
+  c_ReflectionException::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_ReflectionException
 };
 /* SRC: classes/reflection.php line 538 */
 const int64 q_ReflectionClass_IS_IMPLICIT_ABSTRACT = 16LL;
@@ -2051,13 +2054,14 @@ void c_ReflectionClass::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionClass::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_ReflectionClass = {
+ObjectStaticCallbacks cw_ReflectionClass = {
   c_ReflectionClass::os_getInit,
   c_ReflectionClass::os_get,
   c_ReflectionClass::os_lval,
   c_ReflectionClass::os_invoke,
   c_ReflectionClass::os_constant,
-  c_ReflectionClass::os_get_call_info
+  c_ReflectionClass::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_ReflectionClass
 };
 /* SRC: classes/reflection.php line 546 */
 void c_ReflectionClass::t___construct(Variant v_name) {
@@ -3371,13 +3375,14 @@ void c_ReflectionExtension::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionExtension::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_ReflectionExtension = {
+ObjectStaticCallbacks cw_ReflectionExtension = {
   c_ReflectionExtension::os_getInit,
   c_ReflectionExtension::os_get,
   c_ReflectionExtension::os_lval,
   c_ReflectionExtension::os_invoke,
   c_ReflectionExtension::os_constant,
-  c_ReflectionExtension::os_get_call_info
+  c_ReflectionExtension::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_ReflectionExtension
 };
 /* SRC: classes/reflection.php line 1838 */
 void c_ReflectionExtension::t___construct(Variant v_name) {
@@ -4058,13 +4063,14 @@ void c_ReflectionMethod::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionMethod::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_ReflectionMethod = {
+ObjectStaticCallbacks cw_ReflectionMethod = {
   c_ReflectionMethod::os_getInit,
   c_ReflectionMethod::os_get,
   c_ReflectionMethod::os_lval,
   c_ReflectionMethod::os_invoke,
   c_ReflectionMethod::os_constant,
-  c_ReflectionMethod::os_get_call_info
+  c_ReflectionMethod::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_ReflectionMethod
 };
 /* SRC: classes/reflection.php line 1584 */
 void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMSTR(s_sys_ss00000000, "")
@@ -4863,13 +4869,14 @@ void c_ReflectionProperty::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionProperty::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_ReflectionProperty = {
+ObjectStaticCallbacks cw_ReflectionProperty = {
   c_ReflectionProperty::os_getInit,
   c_ReflectionProperty::os_get,
   c_ReflectionProperty::os_lval,
   c_ReflectionProperty::os_invoke,
   c_ReflectionProperty::os_constant,
-  c_ReflectionProperty::os_get_call_info
+  c_ReflectionProperty::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_ReflectionProperty
 };
 /* SRC: classes/reflection.php line 1330 */
 void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
@@ -5353,13 +5360,14 @@ void c_ReflectionFunction::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionFunction::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_ReflectionFunction = {
+ObjectStaticCallbacks cw_ReflectionFunction = {
   c_ReflectionFunction::os_getInit,
   c_ReflectionFunction::os_get,
   c_ReflectionFunction::os_lval,
   c_ReflectionFunction::os_invoke,
   c_ReflectionFunction::os_constant,
-  c_ReflectionFunction::os_get_call_info
+  c_ReflectionFunction::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_ReflectionFunction
 };
 /* SRC: classes/reflection.php line 465 */
 void c_ReflectionFunction::t___construct(Variant v_name) {
@@ -5863,13 +5871,14 @@ void c_ReflectionParameter::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionParameter::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_ReflectionParameter = {
+ObjectStaticCallbacks cw_ReflectionParameter = {
   c_ReflectionParameter::os_getInit,
   c_ReflectionParameter::os_get,
   c_ReflectionParameter::os_lval,
   c_ReflectionParameter::os_invoke,
   c_ReflectionParameter::os_constant,
-  c_ReflectionParameter::os_get_call_info
+  c_ReflectionParameter::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_ReflectionParameter
 };
 /* SRC: classes/reflection.php line 49 */
 void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {

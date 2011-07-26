@@ -218,12 +218,11 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
     if (m_class->is(KindOfScalarExpression)) {
       ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
                         getString().c_str(), "static") == 0);
-      cg_printf("FrameInjection::GetStaticClassName(fi.getThreadInfo())"
-                ".data()");
+      cg_printf("FrameInjection::GetStaticClassName(fi.getThreadInfo())");
     } else {
       cg_printf("get_static_class_name(");
       m_class->outputCPP(cg, ar);
-      cg_printf(").data()");
+      cg_printf(")");
     }
     cg_printf(", \"%s\")", m_varName.c_str());
     return;
@@ -267,7 +266,7 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
       ClassScope::OutputVolatileCheckBegin(cg, ar, getScope(), m_origClassName);
     }
     cg_printf("%s->%s%s->os_constant(\"%s\")", cg.getGlobals(ar),
-              Option::ClassStaticsObjectPrefix,
+              Option::ClassStaticsCallbackPrefix,
               m_className.c_str(), m_varName.c_str());
     if (outsideClass) {
       ClassScope::OutputVolatileCheckEnd(cg);

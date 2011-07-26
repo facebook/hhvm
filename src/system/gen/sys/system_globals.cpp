@@ -23,7 +23,6 @@ namespace HPHP {
 SystemGlobals::SystemGlobals() {
   memset(&stgv_bool, 0, sizeof(stgv_bool));
   memset(&stgv_CallInfoPtr, 0, sizeof(stgv_CallInfoPtr));
-  memset(&stgv_ObjectStaticCallbacksPtr, 0, sizeof(stgv_ObjectStaticCallbacksPtr));
 
   // Primitive Function/Method Static Variables
 

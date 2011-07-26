@@ -130,14 +130,14 @@ Array f_get_class_vars(CStrRef class_name) {
     if (!(properties[i]->attribute & ClassInfo::IsStatic) &&
         properties[i]->isVisible(cls)) {
       ret.set(properties[i]->name,
-              get_class_var_init(class_name.c_str(), properties[i]->name));
+              get_class_var_init(class_name, properties[i]->name));
     }
   }
   for (unsigned int i = 0; i < properties.size(); i++) {
     if (properties[i]->attribute & ClassInfo::IsStatic &&
         properties[i]->isVisible(cls)) {
       ret.set(properties[i]->name,
-              get_static_property(class_name.c_str(), properties[i]->name));
+              get_static_property(class_name, properties[i]->name));
     }
   }
   return ret;

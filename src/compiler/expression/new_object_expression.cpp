@@ -264,7 +264,7 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       if (outsideClass) {
         ClassScope::OutputVolatileCheckBegin(cg, ar, getScope(), cname);
       }
-      cg_printf("g->%s%s->createOnly()", Option::ClassStaticsObjectPrefix,
+      cg_printf("g->%s%s->createOnly()", Option::ClassStaticsCallbackPrefix,
                 m_name.c_str());
       if (outsideClass) {
         ClassScope::OutputVolatileCheckEnd(cg);
@@ -274,7 +274,7 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       if (isStatic()) {
         cg_printf("FrameInjection::GetStaticClassName(fi.getThreadInfo())");
       } else if (!cname.empty()) {
-        cg_printf("\"%s\"", cname.c_str());
+        cg_printString(cname, ar, getScope(), true);
       } else if (m_nameExp->is(Expression::KindOfSimpleVariable)) {
         m_nameExp->outputCPP(cg, ar);
       } else {

@@ -28,9 +28,9 @@ Variant eval(LVariableTable *vars, CObjRef self, CStrRef code_str,
              bool prepend_php = true);
 
 bool eval_invoke_hook(Variant &res, const char *s, CArrRef params, int64 hash);
-bool eval_get_class_var_init_hook(Variant &res, const char *s,
+bool eval_get_class_var_init_hook(Variant &res, CStrRef s,
                                   const char *var);
-ObjectData *eval_create_object_only_hook(const char *s, ObjectData *root);
+ObjectData *eval_create_object_only_hook(CStrRef s, ObjectData *root);
 /**
  * eval_try_autoload is hphpi's mechanism for invoking the autoload facility.
  * It returns true if any autoload handlers are executed, false otherwise.
@@ -38,14 +38,14 @@ ObjectData *eval_create_object_only_hook(const char *s, ObjectData *root);
  * if the given class or interface exists.
  */
 bool eval_try_autoload(const char *s);
-bool eval_invoke_static_method_hook(Variant &res, const char *s,
+bool eval_invoke_static_method_hook(Variant &res, CStrRef s,
                                     const char* method, CArrRef params,
                                     bool &foundClass);
-bool eval_get_static_property_hook(Variant &res, const char *s,
+bool eval_get_static_property_hook(Variant &res, CStrRef s,
                                    const char* prop);
-bool eval_get_static_property_lv_hook(Variant *&res, const char *s,
+bool eval_get_static_property_lv_hook(Variant *&res, CStrRef s,
                                       const char *prop);
-bool eval_get_class_constant_hook(Variant &res, const char *s,
+bool eval_get_class_constant_hook(Variant &res, CStrRef s,
                                   const char* constant);
 bool eval_constant_hook(Variant &res, CStrRef name);
 bool eval_invoke_file_hook(Variant &res, CStrRef path, bool once,

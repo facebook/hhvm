@@ -369,6 +369,9 @@ public:
 
 // Callback structure for functions related to static methods
 struct ObjectStaticCallbacks {
+  Object create(CArrRef params, bool init = true, ObjectData* root = NULL) const;
+  Object createOnly(ObjectData *root = NULL) const;
+
   Variant (*os_getInit)(CStrRef s);
   Variant (*os_get)(CStrRef s);
   Variant &(*os_lval)(CStrRef s);
@@ -376,7 +379,33 @@ struct ObjectStaticCallbacks {
                            CArrRef params, int64 hash, bool fatal);
   Variant (*os_constant)(const char *s);
   bool (*os_get_call_info)(MethodCallPackage &info, int64 hash);
+  ObjectData *(*createOnlyNoInit)(ObjectData* root);
 };
+
+struct RedeclaredObjectStaticCallbacks {
+  ObjectStaticCallbacks oscb;
+  int id;
+  const char *name;
+
+  int getRedeclaringId() const { return id; }
+
+  Variant os_getInit(CStrRef s) const;
+  Variant os_get(CStrRef s) const;
+  Variant &os_lval(CStrRef s) const;
+  Variant os_invoke(const char *c, const char *s,
+                    CArrRef params, int64 hash = -1, bool fatal = true) const;
+  Variant os_constant(const char *s) const;
+  bool os_get_call_info(MethodCallPackage &info, int64 hash = -1) const;
+  ObjectData *createOnlyNoInit(ObjectData* root = NULL) const;
+  Object create(CArrRef params, bool init = true,
+                ObjectData* root = NULL) const;
+  Object createOnly(ObjectData *root = NULL) const;
+};
+
+typedef const RedeclaredObjectStaticCallbacks
+RedeclaredObjectStaticCallbacksConst;
+
+ObjectData *coo_ObjectData(ObjectData *);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Calculate item sizes for object allocators

@@ -277,13 +277,14 @@ void c_SoapFault::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapFault::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_SoapFault = {
+ObjectStaticCallbacks cw_SoapFault = {
   c_SoapFault::os_getInit,
   c_SoapFault::os_get,
   c_SoapFault::os_lval,
   c_SoapFault::os_invoke,
   c_SoapFault::os_constant,
-  c_SoapFault::os_get_call_info
+  c_SoapFault::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_SoapFault
 };
 /* SRC: classes/soapfault.php line 12 */
 void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_actor //  = null

@@ -376,13 +376,14 @@ bool c_SplObjectStorage::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_SplObjectStorage = {
+ObjectStaticCallbacks cw_SplObjectStorage = {
   c_SplObjectStorage::os_getInit,
   c_SplObjectStorage::os_get,
   c_SplObjectStorage::os_lval,
   c_SplObjectStorage::os_invoke,
   c_SplObjectStorage::os_constant,
-  c_SplObjectStorage::os_get_call_info
+  c_SplObjectStorage::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_SplObjectStorage
 };
 void c_SplObjectStorage::init() {
   m_storage = s_sys_sa00000000;

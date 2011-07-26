@@ -94,13 +94,14 @@ bool c_stdClass::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw_stdClass = {
+ObjectStaticCallbacks cw_stdClass = {
   c_stdClass::os_getInit,
   c_stdClass::os_get,
   c_stdClass::os_lval,
   c_stdClass::os_invoke,
   c_stdClass::os_constant,
-  c_stdClass::os_get_call_info
+  c_stdClass::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_stdClass
 };
 /* SRC: classes/stdclass.php line 8 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT___PHP_Incomplete_Class
@@ -167,13 +168,14 @@ bool c___PHP_Incomplete_Class::o_get_call_info(MethodCallPackage &mcp, int64 has
   mcp.obj = this;
   return os_get_call_info(mcp, hash);
 }
-struct ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
+ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
   c___PHP_Incomplete_Class::os_getInit,
   c___PHP_Incomplete_Class::os_get,
   c___PHP_Incomplete_Class::os_lval,
   c___PHP_Incomplete_Class::os_invoke,
   c___PHP_Incomplete_Class::os_constant,
-  c___PHP_Incomplete_Class::os_get_call_info
+  c___PHP_Incomplete_Class::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo___PHP_Incomplete_Class
 };
 ObjectData *coo_stdClass() {
   return NEWOBJ(c_stdClass)();

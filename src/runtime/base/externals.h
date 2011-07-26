@@ -48,26 +48,26 @@ Variant invoke_builtin(const char *s, const Array &params, int64 hash,
  */
 struct ObjectStaticCallbacks;
 extern const ObjectStaticCallbacks *
-  get_object_static_callbacks(const char *s);
+  get_object_static_callbacks(CStrRef s);
 extern const ObjectStaticCallbacks *
-  get_builtin_object_static_callbacks(const char *s);
+  get_builtin_object_static_callbacks(CStrRef s);
 
 /**
  * Getting a static property
  */
-extern Variant get_static_property(const char *s, const char *prop);
-extern Variant get_builtin_static_property(const char *s, const char *prop);
-extern Variant *get_static_property_lv(const char *s, const char *prop);
-extern Variant *get_builtin_static_property_lv(const char *s, const char *prop);
+extern Variant get_static_property(CStrRef s, const char *prop);
+extern Variant get_builtin_static_property(CStrRef s, const char *prop);
+extern Variant *get_static_property_lv(CStrRef s, const char *prop);
+extern Variant *get_builtin_static_property_lv(CStrRef s, const char *prop);
 
 // defined in builtin_functions.cpp
-Variant &get_static_property_lval(const char *s, const char *prop);
+Variant &get_static_property_lval(CStrRef s, const char *prop);
 
 /**
  * Getting the init value of a class variable
  */
-extern Variant get_class_var_init(const char *s, const char *var);
-extern Variant get_builtin_class_var_init(const char *s, const char *var);
+extern Variant get_class_var_init(CStrRef s, const char *var);
+extern Variant get_builtin_class_var_init(CStrRef s, const char *var);
 
 /**
  * Getting a constant
@@ -78,9 +78,9 @@ extern Variant get_builtin_constant(CStrRef name, bool error = true);
 /**
  * Getting a class constant
  */
-extern Variant get_class_constant(const char *s, const char *prop,
+extern Variant get_class_constant(CStrRef s, const char *prop,
                                   bool fatal = true);
-extern Variant get_builtin_class_constant(const char *s, const char *prop,
+extern Variant get_builtin_class_constant(CStrRef s, const char *prop,
                                           bool fatal = true);
 
 /**
@@ -112,17 +112,17 @@ extern const char *g_paramrtti_map[];
 /**
  * Dynamically create an object.
  */
-Object create_object(const char *s, const Array &params,
+Object create_object(CStrRef s, const Array &params,
                      bool init = true, ObjectData *root = NULL);
-extern Object create_object_only(const char *s, ObjectData *root = NULL);
+extern Object create_object_only(CStrRef s, ObjectData *root = NULL);
 /**
  * Dynamically create a system object.
  */
-extern Object create_builtin_object(const char *s, const Array &params,
+extern Object create_builtin_object(CStrRef s, const Array &params,
                                     bool init = true, ObjectData *root = NULL);
-extern Object create_builtin_object_only(const char *s,
+extern Object create_builtin_object_only(CStrRef s,
                                          ObjectData *root = NULL);
-extern ObjectData *create_builtin_object_only_no_init(const char *s,
+extern ObjectData *create_builtin_object_only_no_init(CStrRef s,
                                                       ObjectData *root = NULL);
 /**
  * Dynamically include a file.

@@ -256,7 +256,7 @@ Array f_hphp_get_class_info(CVarRef name) {
       if (info->valueText && *info->valueText) {
         arr.set(info->name, info->getValue());
       } else {
-        arr.set(info->name, get_class_constant(className.data(), info->name));
+        arr.set(info->name, get_class_constant(className, info->name));
       }
     }
     ret.set("constants", arr);
@@ -334,7 +334,7 @@ void f_hphp_set_property(CObjRef obj, CStrRef cls, CStrRef prop,
 }
 
 Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop) {
-  return get_static_property(cls.data(), prop.data());
+  return get_static_property(cls, prop.data());
 }
 
 void f_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value) {

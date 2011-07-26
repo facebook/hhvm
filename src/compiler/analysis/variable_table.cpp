@@ -1058,8 +1058,6 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
   cg_printf("memset(&%sbool, 0, sizeof(%sbool));\n", prefix, prefix);
   cg_printf("memset(&%sCallInfoPtr, 0, sizeof(%sCallInfoPtr));\n",
             prefix, prefix);
-  cg_printf("memset(&%sObjectStaticCallbacksPtr, 0, "
-            "sizeof(%sObjectStaticCallbacksPtr));\n", prefix, prefix);
 
   cg.printSection("Primitive Function/Method Static Variables");
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
@@ -1750,7 +1748,7 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
   const char *op = "::";
   const char *gl = "";
   if (dynamicObject == ClassScope::DirectFromRedeclared) {
-    cprefix = Option::ClassStaticsObjectPrefix;
+    cprefix = Option::ClassStaticsCallbackPrefix;
     op = "->";
     gl = "g->";
     parent = parentName;

@@ -171,13 +171,14 @@ void c_XhprofFrame::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_XhprofFrame::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_XhprofFrame = {
+ObjectStaticCallbacks cw_XhprofFrame = {
   c_XhprofFrame::os_getInit,
   c_XhprofFrame::os_get,
   c_XhprofFrame::os_lval,
   c_XhprofFrame::os_invoke,
   c_XhprofFrame::os_constant,
-  c_XhprofFrame::os_get_call_info
+  c_XhprofFrame::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_XhprofFrame
 };
 /* SRC: classes/xhprof.php line 7 */
 void c_XhprofFrame::t___construct(Variant v_name) {

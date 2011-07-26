@@ -362,12 +362,11 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
     if (m_class->is(KindOfScalarExpression)) {
       ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
                         getString().c_str(), "static") == 0);
-      cg_printf("FrameInjection::GetStaticClassName(fi.getThreadInfo())"
-                ".data()");
+      cg_printf("FrameInjection::GetStaticClassName(fi.getThreadInfo())");
     } else {
       cg_printf("get_static_class_name(");
       m_class->outputCPP(cg, ar);
-      cg_printf(").data()");
+      cg_printf(")");
     }
 
     cg_printf(", toString(");
@@ -426,7 +425,7 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
   } else {
     if (m_context & (LValue | RefValue | UnsetContext)) {
       if (isRedeclared()) {
-        cg_printf("g->%s%s->%slval(", Option::ClassStaticsObjectPrefix,
+        cg_printf("g->%s%s->%slval(", Option::ClassStaticsCallbackPrefix,
                   CodeGenerator::FormatLabel(m_className).c_str(),
                   Option::ObjectStaticPrefix);
       } else {
@@ -436,7 +435,7 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
       }
     } else {
       if (isRedeclared()) {
-        cg_printf("g->%s%s->%sget(", Option::ClassStaticsObjectPrefix,
+        cg_printf("g->%s%s->%sget(", Option::ClassStaticsCallbackPrefix,
                   CodeGenerator::FormatLabel(m_className).c_str(),
                   Option::ObjectStaticPrefix);
       } else {

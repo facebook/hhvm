@@ -167,6 +167,69 @@ Variant ObjectData::i_dummy(MethodCallPackage &mcp, CArrRef params,
 ///////////////////////////////////////////////////////////////////////////////
 // static methods and properties
 
+ObjectData *coo_ObjectData(ObjectData *) {
+  throw FatalErrorException("unknown class");
+}
+
+inline void checkRedeclaredClass(const RedeclaredObjectStaticCallbacks *r) {
+  if (UNLIKELY(r->id < 0)) {
+    throw FatalErrorException(0, "unknown class %s", r->name);
+  }
+}
+
+Variant RedeclaredObjectStaticCallbacks::os_getInit(CStrRef s) const {
+  return oscb.os_getInit(s);
+}
+Variant RedeclaredObjectStaticCallbacks::os_get(CStrRef s) const {
+  return oscb.os_get(s);
+}
+Variant &RedeclaredObjectStaticCallbacks::os_lval(CStrRef s) const {
+  return oscb.os_lval(s);
+}
+Variant RedeclaredObjectStaticCallbacks::os_invoke(
+  const char *c, const char *s, CArrRef params, int64 hash, bool fatal) const {
+  return oscb.os_invoke(c, s, params, hash, fatal);
+}
+Variant RedeclaredObjectStaticCallbacks::os_constant(const char *s) const {
+  return oscb.os_constant(s);
+}
+bool RedeclaredObjectStaticCallbacks::os_get_call_info(
+  MethodCallPackage &info, int64 hash) const {
+  return oscb.os_get_call_info(info, hash);
+}
+ObjectData *RedeclaredObjectStaticCallbacks::createOnlyNoInit(
+  ObjectData* root) const {
+  return oscb.createOnlyNoInit(root);
+}
+Object RedeclaredObjectStaticCallbacks::create(CArrRef params, bool init,
+                                                      ObjectData* root) const {
+  return oscb.create(params, init, root);
+}
+Object RedeclaredObjectStaticCallbacks::createOnly(ObjectData *root) const {
+  return oscb.createOnly(root);
+}
+
+Object ObjectStaticCallbacks::create(CArrRef params, bool init /* = true */,
+                            ObjectData* root /* = NULL */) const {
+  Object o(createOnlyNoInit(root));
+  o.get()->init();
+  if (init) {
+    MethodCallPackage mcp;
+    mcp.construct(o);
+    if (mcp.ci) {
+      (mcp.ci->getMeth())(mcp, params);
+    }
+  }
+  return o;
+}
+
+Object ObjectStaticCallbacks::createOnly(ObjectData* root /* = NULL */) const {
+  Object o(createOnlyNoInit(root));
+  o.get()->init();
+  return o;
+}
+
+
 Variant ObjectData::os_getInit(CStrRef s) {
   throw FatalErrorException(0, "unknown property %s", s.c_str());
 }

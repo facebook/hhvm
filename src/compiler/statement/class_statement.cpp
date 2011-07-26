@@ -372,10 +372,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (classScope->isVolatile()) {
       string name = CodeGenerator::FormatLabel(m_name);
       if (classScope->isRedeclaring()) {
-        cg_printf("g->%s%s = ClassStaticsPtr(NEWOBJ(%s%s)());\n",
-                  Option::ClassStaticsObjectPrefix,
-                  name.c_str(),
-                  Option::ClassStaticsPrefix, classScope->getId().c_str());
         cg_printf("g->%s%s = &%s%s;\n",
                   Option::ClassStaticsCallbackPrefix,
                   name.c_str(),
@@ -408,7 +404,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   string clsNameStr = classScope->getId();
   const char *clsName = clsNameStr.c_str();
-  bool redeclared = classScope->isRedeclaring();
 
   switch (cg.getContext()) {
   case CodeGenerator::CppDeclaration:
@@ -645,49 +640,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       classScope->outputCPPGlobalTableWrappersDecl(cg, ar);
       classScope->outputCPPDynamicClassDecl(cg);
 
-      if (redeclared) {
-        cg_indentBegin("class %s%s : public ClassStatics {\n",
-                       Option::ClassStaticsPrefix, clsName);
-        cg_printf("public:\n");
-        cg_printf("DECLARE_OBJECT_ALLOCATION_NO_SWEEP(%s%s);\n",
-                  Option::ClassStaticsPrefix, clsName);
-        cg_printf("%s%s() : ClassStatics(%d) {}\n",
-                  Option::ClassStaticsPrefix, clsName,
-                  classScope->getRedeclaringId());
-        cg_indentBegin("Variant %sgetInit(CStrRef s) {\n",
-                       Option::ObjectStaticPrefix);
-        cg_printf("return %s%s::%sgetInit(s);\n", Option::ClassPrefix,
-                  clsName, Option::ObjectStaticPrefix);
-        cg_indentEnd("}\n");
-        cg_indentBegin("Variant %sget(CStrRef s) {\n",
-                       Option::ObjectStaticPrefix);
-        cg_printf("return %s%s::%sget(s);\n", Option::ClassPrefix,
-                  clsName, Option::ObjectStaticPrefix);
-        cg_indentEnd("}\n");
-        cg_indentBegin("Variant &%slval(CStrRef s) {\n",
-                  Option::ObjectStaticPrefix);
-        cg_printf("return %s%s::%slval(s);\n", Option::ClassPrefix,
-                  clsName, Option::ObjectStaticPrefix);
-        cg_indentEnd("}\n");
-        cg_indentBegin("ObjectData *createOnlyNoInit"
-                       "(ObjectData* root = NULL) {\n");
-        cg_printf("return %s%s(root);\n",
-                  Option::CreateObjectOnlyPrefix, clsName);
-        cg_indentEnd("}\n");
-        cg_indentBegin("Variant %sconstant(const char* s) {\n",
-                       Option::ObjectStaticPrefix);
-        cg_printf("return %s%s::%sconstant(s);\n", Option::ClassPrefix,
-                  clsName, Option::ObjectStaticPrefix);
-        cg_indentEnd("}\n");
-        cg_indentBegin("bool %sget_call_info(MethodCallPackage &mcp, "
-          "int64 hash = -1) {\n",
-            Option::ObjectStaticPrefix);
-        cg_printf("return %s%s::%sget_call_info(mcp, hash);\n",
-            Option::ClassPrefix, clsName, Option::ObjectStaticPrefix);
-        cg_indentEnd("}\n");
-        cg_indentEnd("};\n");
-      }
-
       if (m_stmt) {
         cg.setContext(CodeGenerator::CppClassConstantsDecl);
         m_stmt->outputCPP(cg, ar);
@@ -704,11 +656,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
 
       classScope->outputCPPSupportMethodsImpl(cg, ar);
-
-      if (redeclared) {
-        cg_printf("IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(%s%s);\n",
-                  Option::ClassStaticsPrefix, clsName);
-      }
 
       bool needsInit = classScope->needsInitMethod();
       if (needsInit) {

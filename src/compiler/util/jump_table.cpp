@@ -60,28 +60,31 @@ const char *JumpTableMethodIndex::key() const {
 
 JumpTable::JumpTable(CodeGenerator &cg,
                      const vector<const char*> &keys, bool caseInsensitive,
-                     bool hasPrehash, bool useString)
-  : m_cg(cg), m_subIter(0) {
+                     bool hasPrehash, bool useString, bool quiet /* = false */)
+    : m_cg(cg), m_subIter(0), m_quiet(quiet) {
   if (keys.empty()) {
+    m_size = 0;
     m_iter = m_table.end();
     return;
   }
-  int tableSize = Util::roundUpToPowerOfTwo(keys.size() * 2);
+  int tableSize = m_size = Util::roundUpToPowerOfTwo(keys.size() * 2);
   CodeGenerator::BuildJumpTable(keys, m_table, tableSize, caseInsensitive);
-  if (hasPrehash) {
-    m_cg_printf("if (hash < 0) ");
-  } else {
-    m_cg_printf("int64 ");
-  }
-  if (useString) {
-    m_cg_printf("hash = s->hash();\n");
-  } else {
-    m_cg_printf("hash = hash_string(s);\n");
-  }
-  m_cg.printStartOfJumpTable(tableSize);
   m_iter = m_table.begin();
-  if (ready()) {
-    m_cg_indentBegin("case %d:\n", m_iter->first);
+  if (!quiet) {
+    if (hasPrehash) {
+      m_cg_printf("if (hash < 0) ");
+    } else {
+      m_cg_printf("int64 ");
+    }
+    if (useString) {
+      m_cg_printf("hash = s->hash();\n");
+    } else {
+      m_cg_printf("hash = hash_string(s);\n");
+    }
+    m_cg.printStartOfJumpTable(tableSize);
+    if (ready()) {
+      m_cg_indentBegin("case %d:\n", m_iter->first);
+    }
   }
 }
 
@@ -89,17 +92,28 @@ void JumpTable::next() {
   ASSERT(ready());
   m_subIter++;
   if (m_subIter >= m_iter->second.size()) {
-    m_cg_indentEnd("  break;\n");
     m_subIter = 0;
     ++m_iter;
-    if (m_iter == m_table.end()) {
-      m_cg_printf("default:\n");
-      m_cg_printf("  break;\n");
-      m_cg_indentEnd("}\n");
-    } else {
-      m_cg_indentBegin("case %d:\n", m_iter->first);
+    if (!m_quiet) {
+      m_cg_indentEnd("  break;\n");
+      if (m_iter == m_table.end()) {
+        m_cg_printf("default:\n");
+        m_cg_printf("  break;\n");
+        m_cg_indentEnd("}\n");
+      } else {
+        m_cg_indentBegin("case %d:\n", m_iter->first);
+      }
     }
   }
+}
+
+int JumpTable::current() const {
+  return m_iter->first;
+}
+
+bool JumpTable::last() const {
+  ASSERT(ready());
+  return m_subIter + 1 == m_iter->second.size();
 }
 
 bool JumpTable::ready() const {

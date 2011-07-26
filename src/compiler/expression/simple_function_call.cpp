@@ -1431,7 +1431,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       cg_printString(escapedName, ar, shared_from_this());
       cg_printf(");\n");
       cg_printf("%s->%s%s->%sget_call_info%s(mcp%d",
-                cg.getGlobals(ar), Option::ClassStaticsObjectPrefix,
+                cg.getGlobals(ar), Option::ClassStaticsCallbackPrefix,
                 className.c_str(), Option::ObjectStaticPrefix,
                 ms ? "with_index" : "", m_ciTemp);
     } else if (m_classScope) {

@@ -63,7 +63,7 @@ bool eval_invoke_hook(Variant &res, const char *s, CArrRef params, int64 hash) {
   }
   return false;
 }
-bool eval_get_class_var_init_hook(Variant &res, const char *s,
+bool eval_get_class_var_init_hook(Variant &res, CStrRef s,
                                   const char *var) {
   Eval::ClassEvalState *ce = Eval::RequestEvalState::findClassState(s, true);
   if (ce) {
@@ -76,7 +76,7 @@ bool eval_get_class_var_init_hook(Variant &res, const char *s,
   }
   return false;
 }
-ObjectData *eval_create_object_only_hook(const char *s, ObjectData *root) {
+ObjectData *eval_create_object_only_hook(CStrRef s, ObjectData *root) {
   Eval::ClassEvalState *ce = Eval::RequestEvalState::findClassState(s, true);
   if (ce) {
     Object tmp = ce->getClass()->create(*ce, root);
@@ -87,7 +87,7 @@ ObjectData *eval_create_object_only_hook(const char *s, ObjectData *root) {
 bool eval_try_autoload(const char *s) {
   return AutoloadHandler::s_instance->invokeHandler(String(s, CopyString));
 }
-bool eval_invoke_static_method_hook(Variant &res, const char *s,
+bool eval_invoke_static_method_hook(Variant &res, CStrRef s,
                                     const char* method, CArrRef params,
                                     bool &foundClass) {
   const MethodStatement *ms = Eval::RequestEvalState::findMethod(s, method,
@@ -100,7 +100,7 @@ bool eval_invoke_static_method_hook(Variant &res, const char *s,
   }
   return false;
 }
-bool eval_get_static_property_hook(Variant &res, const char *s,
+bool eval_get_static_property_hook(Variant &res, CStrRef s,
                                    const char* prop) {
   Variant *v;
   if (eval_get_static_property_lv_hook(v, s, prop)) {
@@ -109,7 +109,7 @@ bool eval_get_static_property_hook(Variant &res, const char *s,
   }
   return false;
 }
-bool eval_get_static_property_lv_hook(Variant *&res, const char *s,
+bool eval_get_static_property_lv_hook(Variant *&res, CStrRef s,
                                       const char *prop) {
   const Eval::ClassStatement *cls = Eval::RequestEvalState::findClass(s, true);
   const Eval::ClassStatement *starter = cls;
@@ -129,7 +129,7 @@ bool eval_get_static_property_lv_hook(Variant *&res, const char *s,
   }
   return false;
 }
-bool eval_get_class_constant_hook(Variant &res, const char *s,
+bool eval_get_class_constant_hook(Variant &res, CStrRef s,
                                   const char* constant) {
   const Eval::ClassStatement *cls = Eval::RequestEvalState::findClass(s, true);
   if (cls) {
@@ -179,8 +179,8 @@ bool eval_get_call_info_hook(const CallInfo *&ci, void *&extra, const char *s,
 
 bool eval_get_call_info_static_method_hook(MethodCallPackage &info,
                                            bool &foundClass) {
-  const char *s ATTRIBUTE_UNUSED = info.rootCls->data();
-  const MethodStatement *ms = Eval::RequestEvalState::findMethod(s,
+  const MethodStatement *ms =
+    Eval::RequestEvalState::findMethod(info.rootCls->data(),
       info.name->data(), foundClass, true);
   if (ms) {
     info.ci = ms->getCallInfo();

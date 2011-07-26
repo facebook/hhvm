@@ -35,15 +35,14 @@ Variant ClassConstantExpression::eval(VariableEnvironment &env) const {
   DECLARE_THREAD_INFO;
   check_recursion(info);
   String cls = m_class->get(env);
-  return get_class_constant(cls.c_str(), m_constant.c_str());
+  return get_class_constant(cls, m_constant.c_str());
 }
 
 bool ClassConstantExpression::evalStaticScalar(VariableEnvironment &env,
                                                Variant &r) const {
   String cls = m_class->get(env);
-  const char *s = cls.c_str();
   const char *constant = m_constant.c_str();
-  if (eval_get_class_constant_hook(r, s, constant)) return true;
+  if (eval_get_class_constant_hook(r, cls, constant)) return true;
   return false;
 }
 

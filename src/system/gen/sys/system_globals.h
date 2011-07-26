@@ -46,8 +46,7 @@ public:
   static void initialize();
 
   CallInfo* stgv_CallInfoPtr[1];
-  ClassStaticsPtr stgv_ClassStaticsPtr[1];
-  ObjectStaticCallbacks* stgv_ObjectStaticCallbacksPtr[1];
+  RedeclaredObjectStaticCallbacksConst* stgv_RedeclaredObjectStaticCallbacksConstPtr[1];
   Variant stgv_Variant[13];
   #define gvm_HTTP_RAW_POST_DATA stgv_Variant[0]
   #define gvm__COOKIE stgv_Variant[1]

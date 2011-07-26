@@ -291,58 +291,24 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
   ASSERT(cg.getCurrentIndentation() == 0);
   const char text1[] =
     "\n"
-    "class hashNodeFunc {\n"
-    "public:\n"
-    "  hashNodeFunc() {}\n"
-    "  hashNodeFunc(int64 h, const char *n, bool off, const void *d) :\n"
-    "    hash(h), name(n), offset(off), data(d), next(NULL) {}\n"
+    "struct hashNodeFunc {\n"
     "  int64 hash;\n"
-    "  const char *name;\n"
     "  bool offset;\n"
-    "  const void *data;\n"
-    "  hashNodeFunc *next;\n"
-    "};\n";
-  const char text1s[] =
-    "\n"
-    "class hashNodeFunc {\n"
-    "public:\n"
-    "  hashNodeFunc() {}\n"
-    "  hashNodeFunc(int64 h, const char *n, const void *d) :\n"
-    "    hash(h), name(n), data(d), next(NULL) {}\n"
-    "  int64 hash;\n"
+    "  bool end;\n"
     "  const char *name;\n"
     "  const void *data;\n"
-    "  hashNodeFunc *next;\n"
-    "};\n";
-  const char text2[] =
-    "static hashNodeFunc *funcMapTable[%d];\n"
-    "static hashNodeFunc funcBuckets[%d];\n"
-    "\n"
-    "static class %sFuncTableInitializer {\n"
-    "  public: %sFuncTableInitializer() {\n"
-    "    const char *funcMapData[] = {\n";
+    "};\n"
+    "static const hashNodeFunc funcBuckets[] = {\n";
 
   const char text3[] =
-    "    hashNodeFunc *b = funcBuckets;\n"
-    "    for (const char **s = funcMapData; *s; s++, b++) {\n"
-    "      const char *name = *s++;\n"
-    "%s"
-    "      const void *data = *s;\n"
-    "      int64 hash = hash_string(name, strlen(name));\n"
-    "      hashNodeFunc *node = new(b) hashNodeFunc(hash, name%s, data);\n"
-    "      int h = hash & %d;\n"
-    "      if (funcMapTable[h]) node->next = funcMapTable[h];\n"
-    "      funcMapTable[h] = node;\n"
-    "    }\n"
-    "  }\n"
-    "} func_table_initializer;\n"
-    "\n"
     "static inline const hashNodeFunc *"
     "findFunc(const char *name, int64 hash) {\n"
-    "  for (const hashNodeFunc *p = funcMapTable[hash & %d]; p; "
-    "p = p->next) {\n"
-    "    if (p->hash == hash && !strcasecmp(p->name, name)) return p;\n"
-    "  }\n"
+    "  const hashNodeFunc *p = funcMapTable[hash & %d];\n"
+    "  if (UNLIKELY(!p)) return NULL;\n"
+    "  do {\n"
+    "    if (LIKELY(p->hash == hash) && (LIKELY(p->name==name)||"
+    "LIKELY(!strcasecmp(p->name, name)))) return p;\n"
+    "  } while (!p++->end);\n"
     "  return NULL;\n"
     "}\n"
     "\n";
@@ -350,8 +316,8 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
   const char text4[] =
     "  if (hash < 0) hash = hash_string(s);\n"
     "  const hashNodeFunc *p = findFunc(s, hash);\n"
-    "  if (p) {\n"
-    "    if (p->offset) {\n"
+    "  if (LIKELY(p!=0)) {\n"
+    "    if (UNLIKELY(p->offset)) {\n"
     "      const char *addr = (const char *)g + (int64)p->data;\n"
     "      ci = *(const CallInfo **)addr;\n"
     "      return ci != 0;\n"
@@ -364,20 +330,28 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
   const char text4s[] =
     "  if (hash < 0) hash = hash_string(s);\n"
     "  const hashNodeFunc *p = findFunc(s, hash);\n"
-    "  if (p) {\n"
+    "  if (LIKELY(p!=0)) {\n"
     "    ci = (const CallInfo *)p->data;\n"
     "    return true;\n"
     "  }\n";
 
   int numEntries = funcs.size();
   if (!noEval && numEntries > 0) {
-    int tableSize = Util::roundUpToPowerOfTwo(numEntries * 2);
-    cg_printf(system ? text1s : text1);
-    cg_printf(text2, tableSize, numEntries,
-              (system ? "Sys" : ""),
-              (system ? "Sys" : ""));
-    for (int i = 0; i < numEntries; i++) {
-      const char *name = funcs[i];
+    JumpTable jt(cg, funcs, true, true, true, true);
+    cg_printf(text1);
+
+    vector<int> offsets;
+    int prev = -1;
+    for (int n = 0; jt.ready(); ++n, jt.next()) {
+      int cur = jt.current();
+      if (prev != cur) {
+        while (++prev != cur) {
+          offsets.push_back(-1);
+        }
+        offsets.push_back(n);
+      }
+      const char *name = jt.key();
+
       StringToFunctionScopePtrVecMap::const_iterator iterFuncs =
         functions->find(name);iterFuncs =
       functions->find(name);
@@ -385,27 +359,37 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
       // We have assumptions that function names do not contain ".."
       // (e.g., call_user_func0 ~ call_user_func6)
       if (strstr(name, "..")) assert(false);
-      cg_printf("      (const char *)\"%s\", ",
-                CodeGenerator::EscapeLabel(name).c_str());
-      if (!system) {
-        cg_printf("(const char *)%d, ",
-                  iterFuncs->second[0]->isRedeclaring() ? 1 : 0);
-      }
       FunctionScopePtr func = iterFuncs->second[0];
+      cg_printf(" {0x%016llXLL,%d,%d,\"%s\",",
+                hash_string_i(name),
+                (int)func->isRedeclaring(), (int)jt.last(),
+                CodeGenerator::EscapeLabel(name).c_str());
+
       if (func->isRedeclaring()) {
         assert(!system);
         string lname(CodeGenerator::FormatLabel(name));
-        cg_printf("(const char *)(offsetof(GlobalVariables, GCI(%s))),\n",
+        cg_printf("(const void *)(offsetof(GlobalVariables, GCI(%s)))",
                   lname.c_str());
       } else {
-        cg_printf("(const char *)&%s%s,\n",
+        cg_printf("&%s%s",
                   Option::CallInfoPrefix, func->getId().c_str());
       }
+      cg_printf("},\n");
     }
-    cg_printf("      NULL, NULL, %s\n    };\n", system ? "" : "NULL, ");
-    cg_printf(text3, (system ? "" : "      bool offset = *s++;\n"),
-              (system ? "" : ", offset"),
-              tableSize - 1, tableSize - 1);
+    cg_printf("};\n");
+    cg_indentBegin("static const hashNodeFunc *funcMapTable[] = {\n");
+    for (int i = 0, e = jt.size(), s = offsets.size(); i < e; i++) {
+      int o = i < s ? offsets[i] : -1;
+      if (o < 0) {
+        cg_printf("0,");
+      } else {
+        cg_printf("funcBuckets+%d,", o);
+      }
+      if ((i & 7) == 7) cg_printf("\n");
+    }
+    cg_printf("\n");
+    cg_indentEnd("};\n");
+    cg_printf(text3, jt.size() - 1);
   }
   outputGetCallInfoHeader(cg, system ? "_builtin" : noEval ? "_no_eval" : 0,
                           !system);
@@ -442,7 +426,9 @@ void FunctionContainer::outputCPPCodeInfoTable(
   }
   if (!system) {
     outputCPPHashTableGetCallInfo(cg, system, false, functions, funcs);
-    outputCPPHashTableGetCallInfo(cg, system, true, functions, funcs);
+    if (!system) {
+      outputCPPHashTableGetCallInfo(cg, system, true, functions, funcs);
+    }
     return;
   }
   if (!system) cg_printf("static ");

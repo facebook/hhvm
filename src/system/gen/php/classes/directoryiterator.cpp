@@ -484,13 +484,14 @@ void c_RecursiveDirectoryIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_RecursiveDirectoryIterator::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_RecursiveDirectoryIterator = {
+ObjectStaticCallbacks cw_RecursiveDirectoryIterator = {
   c_RecursiveDirectoryIterator::os_getInit,
   c_RecursiveDirectoryIterator::os_get,
   c_RecursiveDirectoryIterator::os_lval,
   c_RecursiveDirectoryIterator::os_invoke,
   c_RecursiveDirectoryIterator::os_constant,
-  c_RecursiveDirectoryIterator::os_get_call_info
+  c_RecursiveDirectoryIterator::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_RecursiveDirectoryIterator
 };
 /* SRC: classes/directoryiterator.php line 132 */
 void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags //  = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */
@@ -918,13 +919,14 @@ void c_DirectoryIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DirectoryIterator::ci___construct;
   mcp.obj = this;
 }
-struct ObjectStaticCallbacks cw_DirectoryIterator = {
+ObjectStaticCallbacks cw_DirectoryIterator = {
   c_DirectoryIterator::os_getInit,
   c_DirectoryIterator::os_get,
   c_DirectoryIterator::os_lval,
   c_DirectoryIterator::os_invoke,
   c_DirectoryIterator::os_constant,
-  c_DirectoryIterator::os_get_call_info
+  c_DirectoryIterator::os_get_call_info,
+  (ObjectData*(*)(ObjectData*))coo_DirectoryIterator
 };
 /* SRC: classes/directoryiterator.php line 14 */
 void c_DirectoryIterator::t___construct(Variant v_path) {

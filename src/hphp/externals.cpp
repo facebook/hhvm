@@ -28,7 +28,7 @@ const char *g_source_cls2file[] = { NULL};
 const char *g_source_func2file[] = { NULL};
 const char *g_paramrtti_map[] = { NULL};
 
-Object create_object_only(const char *s, ObjectData *root) {
+Object create_object_only(CStrRef s, ObjectData *root) {
   return Object();
 }
 
@@ -57,19 +57,19 @@ Variant invoke_file(CStrRef path, bool once /* = false */,
 
 Variant get_constant(CStrRef name, bool error) { return name;}
 Variant get_builtin_constant(CStrRef name, bool error) { return name;}
-Variant get_class_constant(const char *s, const char *prop,
+Variant get_class_constant(CStrRef s, const char *prop,
                            bool fatal /* = true */) {
   return null;
 }
 
-Variant get_static_property(const char *s, const char *prop) {
+Variant get_static_property(CStrRef s, const char *prop) {
   return Variant();
 }
-Variant *get_static_property_lv(const char *s, const char *prop) {
+Variant *get_static_property_lv(CStrRef s, const char *prop) {
   return NULL;
 }
 
-Variant get_class_var_init(const char *s, const char *var) {
+Variant get_class_var_init(CStrRef s, const char *var) {
   return null;
 }
 
@@ -93,7 +93,7 @@ bool get_call_info_static_method_with_index(MethodCallPackage &info,
   return false;
 }
 
-const ObjectStaticCallbacks * get_object_static_callbacks(const char *s) {
+const ObjectStaticCallbacks * get_object_static_callbacks(CStrRef s) {
   return NULL;
 }
 

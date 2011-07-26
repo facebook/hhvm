@@ -542,7 +542,7 @@ void throw_instance_method_fatal(const char *name) {
   }
 }
 
-Object create_object(const char *s, CArrRef params, bool init /* = true */,
+Object create_object(CStrRef s, CArrRef params, bool init /* = true */,
                      ObjectData *root /* = NULL */) {
   Object o(create_object_only(s, root));
   if (init) {
@@ -606,15 +606,17 @@ void throw_pending_exception(ThreadInfo *info) {
 }
 
 bool get_call_info(const CallInfo *&ci, void *&extra, CVarRef func) {
-  if (func.isObject()) {
-    ObjectData *d = func.objectForCall();
+  Variant::TypedValueAccessor tv_func = func.getTypedAccessor();
+  if (Variant::GetAccessorType(tv_func) == KindOfObject) {
+    ObjectData *d = Variant::GetObjectData(tv_func);
     ci = d->t___invokeCallInfoHelper(extra);
     return ci != NULL;
   }
-  CStrRef sref  = func.toString();
-  const char *s = sref.data();
-  int64 hash    = sref->hash();
-  return get_call_info(ci, extra, s, hash);
+  if (LIKELY(Variant::IsString(tv_func))) {
+    StringData *sd = Variant::GetStringData(tv_func);
+    return get_call_info(ci, extra, sd->data(), sd->hash());
+  }
+  return false;
 }
 
 bool get_call_info_no_eval(const CallInfo *&ci, void *&extra, CStrRef name) {
@@ -1346,7 +1348,7 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
   }
   if (empty(m_handlers)) {
     m_running = l_running;
-    return false; 
+    return false;
   }
   Object autoloadException;
   for (ArrayIter iter(m_handlers); iter; ++iter) {
@@ -1482,7 +1484,7 @@ bool autoloadInterfaceNoThrow(CStrRef name, bool *declared) {
   return declared && *declared;
 }
 
-Variant &get_static_property_lval(const char *s, const char *prop) {
+Variant &get_static_property_lval(CStrRef s, const char *prop) {
   Variant *ret = get_static_property_lv(s, prop);
   if (ret) return *ret;
   return Variant::lvalBlackHole();

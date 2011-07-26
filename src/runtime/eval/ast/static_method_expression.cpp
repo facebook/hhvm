@@ -45,7 +45,7 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
   if (!vco.isNull()) co = vco.toObject();
   bool withinClass = !co.isNull() && co->o_instanceof(cname.data());
   bool foundClass;
-  const MethodStatement *ms = RequestEvalState::findMethod(cname.data(),
+  const MethodStatement *ms = RequestEvalState::findMethod(cname,
                                                            name.data(),
                                                            foundClass);
   if (withinClass) {

@@ -326,6 +326,7 @@ bool RuntimeOption::EnableObjDestructCall = false;
 bool RuntimeOption::CheckSymLink = false;
 bool RuntimeOption::NativeXHP = true;
 int RuntimeOption::ScannerType = 0;
+bool RuntimeOption::SandboxCheckMd5 = false;
 
 bool RuntimeOption::EnableStrict = false;
 int RuntimeOption::StrictLevel = 1; // StrictBasic, cf strict_mode.h
@@ -1043,6 +1044,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     SandboxFromCommonRoot = sandbox["FromCommonRoot"].getBool();
     SandboxDirectoriesRoot = sandbox["DirectoriesRoot"].getString();
     SandboxLogsRoot = sandbox["LogsRoot"].getString();
+    SandboxCheckMd5 = sandbox["CheckMd5"].getBool(false);
+    if (!SandboxMode) SandboxCheckMd5 = false;
     sandbox["ServerVariables"].get(SandboxServerVariables);
   }
   {

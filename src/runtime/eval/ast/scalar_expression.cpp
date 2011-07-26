@@ -15,6 +15,7 @@
 */
 
 #include <runtime/eval/ast/scalar_expression.h>
+#include <runtime/eval/runtime/file_repository.h>
 #include <util/parser/hphp.tab.hpp>
 #include <util/util.h>
 
@@ -88,6 +89,9 @@ Variant ScalarExpression::getValue() const {
   case SBool:
     return (bool)m_num.num;
   case SString:
+    if (m_subtype == T_FILE) {
+      return FileRepository::translateFileName(m_value.c_str());
+    }
     return String(m_value);
   case SInt:
     return m_num.num;

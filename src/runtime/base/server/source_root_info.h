@@ -51,7 +51,9 @@ public:
     return m_sandboxCond == SandboxError;
   }
   void handleError(Transport *t);
-
+  static const std::string &GetCurrentSourceRoot() {
+    return (*s_path);
+  }
 private:
   String m_user;
   String m_sandbox;
@@ -62,6 +64,7 @@ private:
     SandboxOff
   } m_sandboxCond;
   Array m_serverVars;
+  static DECLARE_THREAD_LOCAL(std::string, s_path);
 
   std::string parseSandboxServerVariable(const std::string &format) const;
 };

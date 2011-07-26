@@ -80,7 +80,8 @@ bool TestParser::VerifyParser(const char *input, const char *output,
     std::vector<Eval::StaticStatementPtr> statics;
     Eval::Block::VariableIndices variableIndices;
     Eval::Parser::Reset();
-    Eval::StatementPtr tree = Eval::Parser::ParseString(input, statics,
+    Eval::StatementPtr tree = Eval::Parser::ParseString(input, NULL,
+                                                        statics,
                                                         variableIndices);
     ostringstream code;
     tree->dump(code);

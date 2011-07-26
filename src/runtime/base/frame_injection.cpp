@@ -381,13 +381,13 @@ ObjectData *FrameInjection::getObjectV() const {
 }
 
 String FrameInjection::getFileName() {
-  if (m_flags & PseudoMain) {
-    return m_name[0] == '_' ? m_name : m_name + 10;
-  }
   if (isEvalFrame()) {
     Eval::EvalFrameInjection *efi =
       static_cast<Eval::EvalFrameInjection*>(this);
     return efi->getFileNameEval();
+  }
+  if (m_flags & PseudoMain) {
+    return m_name[0] == '_' ? m_name : m_name + 10;
   }
   if (isParserFrame()) {
     Eval::ParserFrameInjection *pfi =

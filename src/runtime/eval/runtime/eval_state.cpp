@@ -154,7 +154,9 @@ void RequestEvalState::reset() {
 
   for (map<string, PhpFile*>::const_iterator it =
          m_evaledFiles.begin(); it != m_evaledFiles.end(); ++it) {
-    it->second->decRef();
+    if (it->second->decRef() == 0) {
+      FileRepository::onZeroRef(it->second);
+    }
   }
   m_codeContainers.clear();
   m_evaledFiles.clear();

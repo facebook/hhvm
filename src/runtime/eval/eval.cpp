@@ -37,7 +37,8 @@ Variant eval(LVariableTable *vars, CObjRef self, CStrRef code_str,
   vector<StaticStatementPtr> statics;
   Block::VariableIndices variableIndices;
   String code_str2 = prepend_php ? concat("<?php ", code_str) : code_str;
-  Eval::StatementPtr s = Eval::Parser::ParseString(code_str2.data(), statics,
+  Eval::StatementPtr s = Eval::Parser::ParseString(code_str2.data(), NULL,
+                                                   statics,
                                                    variableIndices);
   Block blk(statics, variableIndices);
   // install string code container to globals

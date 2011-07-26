@@ -61,6 +61,7 @@
 #include <libgen.h>
 
 #include <runtime/eval/runtime/eval_state.h>
+#include <runtime/eval/runtime/file_repository.h>
 #include <runtime/eval/parser/parser.h>
 
 using namespace std;
@@ -834,9 +835,15 @@ static int execute_program_impl(int argc, char **argv) {
     hphp_process_init();
     std::vector<Eval::StaticStatementPtr> statics;
     Eval::Block::VariableIndices variableIndices;
+    std::string &fileName = po.parse;
+    struct stat s;
+    if (!Eval::FileRepository::findFile(fileName, &s)) return 0;
     Eval::Parser::Reset();
-    Eval::StatementPtr tree =
-      Eval::Parser::ParseFile(po.parse.c_str(), statics, variableIndices);
+    bool created;
+    Eval::PhpFile *f =
+      Eval::FileRepository::readFile(fileName, s, created);
+    if (!f) return 0;
+    const Eval::StatementPtr &tree = f->getTree();
     tree->dump(cout);
     return 0;
   }
@@ -1058,7 +1065,6 @@ void hphp_session_init(bool blank_warmup /* = false */) {
   init_thread_locals();
   ThreadInfo::s_threadInfo->onSessionInit();
   MemoryManager::TheMemoryManager()->resetStats();
-
   if (!s_warmup_state->done) {
     free_global_variables(); // just to be safe
     init_global_variables();

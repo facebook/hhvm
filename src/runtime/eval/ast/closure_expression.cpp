@@ -49,7 +49,7 @@ Variant ClosureExpression::eval(VariableEnvironment &env) const {
   m_func->eval(env);
   Array vars;
   for (unsigned int i = 0; i < m_vars.size(); i++) {
-    ParameterPtr param = m_vars[i];
+    Parameter *param = m_vars[i].get();
     String name = param->getName();
     if (param->isRef()) {
       vars.append(ref(env.get(name)));

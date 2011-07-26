@@ -26,8 +26,11 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+IMPLEMENT_THREAD_LOCAL(string, SourceRootInfo::s_path);
+
 SourceRootInfo::SourceRootInfo(const char *host)
   : m_sandboxCond(RuntimeOption::SandboxMode ? SandboxOn : SandboxOff) {
+  s_path->clear();
   if (!sandboxOn()) return;
   Variant matches;
   Variant r = preg_match(String(RuntimeOption::SandboxPattern.c_str(),
@@ -51,15 +54,18 @@ SourceRootInfo::SourceRootInfo(const char *host)
 
     createFromUserConfig();
   }
+  *s_path = m_path.c_str();
 }
 
 SourceRootInfo::SourceRootInfo(const std::string &user,
                                const std::string &sandbox)
     : m_sandboxCond(RuntimeOption::SandboxMode ? SandboxOn : SandboxOff) {
+  s_path->clear();
   if (!sandboxOn()) return;
   m_user = user;
   m_sandbox = sandbox;
   createFromUserConfig();
+  *s_path = m_path.c_str();
 }
 
 void SourceRootInfo::createFromCommonRoot(const String &sandboxName) {
@@ -229,6 +235,7 @@ string SourceRootInfo::parseSandboxServerVariable(const string &format) const {
 
 string SourceRootInfo::path() const {
   if (sandboxOn()) {
+    // Should return RuntimeOption::SourceRoot if m_data is empty?
     return string(m_path.data(), m_path.size());
   } else {
     return RuntimeOption::SourceRoot;

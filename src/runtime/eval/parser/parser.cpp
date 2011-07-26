@@ -192,41 +192,32 @@ ParserFrameInjection::ParserFrameInjection(
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-StatementPtr Parser::ParseString(const char *input,
+StatementPtr Parser::ParseString(const char *input, const char *fileName,
                                  vector<StaticStatementPtr> &statics,
                                  Block::VariableIndices &variableIndices) {
   ASSERT(input);
   int len = strlen(input);
   Scanner scanner(input, len, RuntimeOption::ScannerType);
-  Parser parser(scanner, "string", statics);
-  if (parser.parse()) {
-    variableIndices = parser.varIndices();
-    return parser.getTree();
-  }
-  raise_error("Error parsing %s: %s", input, parser.getMessage().c_str());
-  return StatementPtr();
-}
-
-StatementPtr Parser::ParseFile(const char *fileName,
-                               vector<StaticStatementPtr> &statics,
-                               Block::VariableIndices &variableIndices) {
-  ASSERT(fileName);
-  try {
-    Scanner scanner(fileName, RuntimeOption::ScannerType);
-    Parser parser(scanner, fileName, statics);
-    try {
-      if (parser.parse()) {
-        variableIndices = parser.varIndices();
-        return parser.getTree();
-      }
-    } catch (FatalErrorException &e) {
-      if (parser.m_errorHandled) throw;
-      parser.error("%s", e.getMessage().c_str());
+  Parser parser(scanner, fileName ? fileName : "string", statics);
+  if (!fileName) {
+    if (parser.parse()) {
+      variableIndices = parser.varIndices();
+      return parser.getTree();
     }
-    parser.error("Parse error: %s", parser.errString().c_str());
-  } catch (FileOpenException &e) {
-    // ignore
+    raise_error("Error parsing %s: %s", input, parser.getMessage().c_str());
+    return StatementPtr();
   }
+
+  try {
+    if (parser.parse()) {
+      variableIndices = parser.varIndices();
+      return parser.getTree();
+    }
+  } catch (FatalErrorException &e) {
+    if (parser.m_errorHandled) throw;
+    parser.error("%s", e.getMessage().c_str());
+  }
+  parser.error("Parse error: %s", parser.errString().c_str());
   return StatementPtr();
 }
 

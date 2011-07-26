@@ -16,13 +16,19 @@
 #include <runtime/eval/runtime/eval_frame_injection.h>
 #include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/eval/parser/parser.h>
+#include <runtime/eval/runtime/file_repository.h>
 
 namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 String EvalFrameInjection::getFileNameEval() {
-  return m_file;
+  std::string file(m_file);
+  if (m_flags & PseudoMain) {
+    if (m_name[0] == '_') return m_name;
+    file = m_name + 10;
+  }
+  return FileRepository::translateFileName(file);
 }
 
 Array EvalFrameInjection::getArgsEval() {

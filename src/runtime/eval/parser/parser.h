@@ -157,13 +157,9 @@ private:
 
 class Parser : public ParserBase {
 public:
-  static StatementPtr ParseString(const char *input,
+  static StatementPtr ParseString(const char *input, const char *fileName,
                                   std::vector<StaticStatementPtr> &statics,
                                   Block::VariableIndices &variableIndice);
-
-  static StatementPtr ParseFile(const char *fileName,
-                                std::vector<StaticStatementPtr> &statics,
-                                Block::VariableIndices &variableIndices);
 
 public:
   Parser(Scanner &scanner, const char *fileName,

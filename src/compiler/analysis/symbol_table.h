@@ -46,7 +46,7 @@ public:
   Symbol() : m_parameter(-1) { m_flags_val = 0; }
 
   void import(BlockScopeRawPtr scope, const Symbol &src_sym);
-  void beginLocal();
+  void beginLocal(BlockScopeRawPtr scope);
   void endLocal(BlockScopeRawPtr scope);
 
   void setName(const std::string &name) { m_name = name; }
@@ -218,6 +218,8 @@ private:
 
   int                 m_parameter;
   ConstructPtr        m_initVal;
+
+  void triggerUpdates(BlockScopeRawPtr scope) const;
 
   static TypePtr CoerceTo(AnalysisResultConstPtr ar,
                           TypePtr &curType, TypePtr type);

@@ -467,7 +467,7 @@ bool LiveDict::color(TypePtr type) {
           // do not allow coalescing of symbols which are parameters/use vars
           // in the generator (sym->isParameter() will be false b/c we are in
           // the scope of the generator function)
-          FunctionScopePtr origScope(sv->getFunctionScope()->getOrigGenFS());
+          FunctionScopeRawPtr origScope(sv->getFunctionScope()->getOrigGenFS());
           ASSERT(origScope);
           Symbol *origSym =
             origScope->getVariables()->getSymbol(sv->getName());

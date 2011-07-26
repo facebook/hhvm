@@ -715,8 +715,8 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*params)[i]);
         const string &name = param->getName();
-        TypePtr ret = param->isRef() ? Type::Variant : param->getType();
-        variables->addParamLike(name, ret, ar, param,
+        ASSERT(!param->isRef() || param->getType()->is(Type::KindOfVariant));
+        variables->addParamLike(name, param->getType(), ar, param,
                                 funcScope->isFirstPass());
       }
     }
@@ -728,8 +728,8 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*useVars)[i]);
         const string &name = param->getName();
-        TypePtr ret = param->isRef() ? Type::Variant : Type::Some;
-        variables->addParamLike(name, ret, ar, param,
+        ASSERT(!param->isRef() || param->getType()->is(Type::KindOfVariant));
+        variables->addParamLike(name, param->getType(), ar, param,
                                 funcScope->isFirstPass());
       }
     }

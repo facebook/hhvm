@@ -36,6 +36,7 @@ DECLARE_BOOST_TYPES(Expression);
 DECLARE_BOOST_TYPES(SimpleFunctionCall);
 DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(ParameterExpression);
+DECLARE_BOOST_TYPES(MethodStatement);
 
 class CodeGenerator;
 
@@ -101,8 +102,8 @@ public:
   bool hasDirectInvoke() const { return m_directInvoke; }
   bool isClosure() const;
   bool isGenerator() const;
-  StatementPtr getOrigGenStmt() const;
-  FunctionScopePtr getOrigGenFS() const;
+  MethodStatementRawPtr getOrigGenStmt() const;
+  FunctionScopeRawPtr getOrigGenFS() const;
   void setNeedsRefTemp() { m_needsRefTemp = true; }
   bool needsRefTemp() const { return m_needsRefTemp; }
   void setNeedsCheckMem() { m_needsCheckMem = true; }

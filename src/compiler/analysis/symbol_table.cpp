@@ -17,11 +17,17 @@
 #include <compiler/analysis/symbol_table.h>
 #include <compiler/analysis/type.h>
 #include <compiler/analysis/analysis_result.h>
-#include <util/logger.h>
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/file_scope.h>
+#include <compiler/analysis/function_scope.h>
+
+#include <compiler/expression/expression_list.h>
+#include <compiler/expression/parameter_expression.h>
+
 #include <runtime/base/complex_types.h>
 #include <runtime/base/variable_serializer.h>
+
+#include <util/logger.h>
 
 using namespace std;
 using namespace HPHP;
@@ -58,29 +64,37 @@ TypePtr Symbol::setType(AnalysisResultConstPtr ar, BlockScopeRawPtr scope,
   type = CoerceTo(ar, m_coerced, type);
   if (ar->getPhase() >= AnalysisResult::AnalyzeAll &&
       !Type::SameType(oldType, type)) {
-    int useKind = BlockScope::UseKindNonStaticRef;
-    if (isConstant()) {
-      useKind = BlockScope::UseKindConstRef;
-      if (m_declaration) {
-        scope = m_declaration->getScope();
-      }
-    } else if (isStatic()) {
-      useKind = BlockScope::UseKindStaticRef;
-    } else if (isParameter()) {
-      useKind = BlockScope::UseKindCaller;
-    }
-    if (isPassClosureVar()) {
-      useKind |= BlockScope::UseKindClosure;
-    }
-    scope->addUpdates(useKind);
+    triggerUpdates(scope);
   }
 
   return type;
 }
 
-void Symbol::beginLocal() {
+void Symbol::beginLocal(BlockScopeRawPtr scope) {
   m_prevCoerced = m_coerced;
-  m_coerced.reset();
+  if (isClosureVar()) {
+    ExpressionListPtr useVars =
+      scope->getContainingFunction()->getClosureVars();
+    ASSERT(useVars);
+    // linear scan for now, since most use var lists are
+    // fairly short
+    bool found = false;
+    for (int i = 0; i < useVars->getCount(); i++) {
+      ParameterExpressionPtr param =
+        dynamic_pointer_cast<ParameterExpression>((*useVars)[i]);
+      if (m_name == param->getName()) {
+        // bootstrap use var with parameter type
+        m_coerced = param->getType();
+        found = true;
+        break;
+      }
+    }
+    if (!found) ASSERT(false);
+    ASSERT(!isRefClosureVar() ||
+           (m_coerced && m_coerced->is(Type::KindOfVariant)));
+  } else {
+    m_coerced.reset();
+  }
 }
 
 void Symbol::endLocal(BlockScopeRawPtr scope) {
@@ -90,20 +104,27 @@ void Symbol::endLocal(BlockScopeRawPtr scope) {
     m_coerced = Type::Variant;
   }
   if (!Type::SameType(m_coerced, m_prevCoerced)) {
-    int useKind = BlockScope::UseKindNonStaticRef;
-    if (isConstant()) {
-      useKind = BlockScope::UseKindConstRef;
-      if (m_declaration) {
-        scope = m_declaration->getScope();
-      }
-    } else if (isStatic()) {
-      useKind = BlockScope::UseKindStaticRef;
-    } else if (isParameter()) {
-      useKind = BlockScope::UseKindCaller;
-    }
-    scope->addUpdates(useKind);
+    triggerUpdates(scope);
   }
   m_prevCoerced.reset();
+}
+
+void Symbol::triggerUpdates(BlockScopeRawPtr scope) const {
+  int useKind = BlockScope::UseKindNonStaticRef;
+  if (isConstant()) {
+    useKind = BlockScope::UseKindConstRef;
+    if (m_declaration) {
+      scope = m_declaration->getScope();
+    }
+  } else if (isStatic()) {
+    useKind = BlockScope::UseKindStaticRef;
+  } else if (isParameter()) {
+    useKind = BlockScope::UseKindCaller;
+  }
+  if (isPassClosureVar()) {
+    useKind |= BlockScope::UseKindClosure;
+  }
+  scope->addUpdates(useKind);
 }
 
 void Symbol::import(BlockScopeRawPtr scope, const Symbol &src_sym) {
@@ -177,7 +198,7 @@ void SymbolTable::import(SymbolTablePtr src) {
 void SymbolTable::beginLocal() {
   for (unsigned int i = 0, s = m_symbolVec.size(); i < s; i++) {
     Symbol *sym = m_symbolVec[i];
-    sym->beginLocal();
+    sym->beginLocal(BlockScopeRawPtr(&m_blockScope));
   }
 }
 

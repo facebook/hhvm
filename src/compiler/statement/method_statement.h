@@ -78,17 +78,20 @@ public:
 
   const std::string &getDocComment() const { return m_docComment; }
 
-  void setOrigGeneratorFunc(MethodStatementPtr stmt) {
+  // these pointers must be raw (weak) pointers to prevent cycles
+  // in the reference graph
+
+  void setOrigGeneratorFunc(MethodStatementRawPtr stmt) {
     m_origGeneratorFunc = stmt;
   }
-  MethodStatementPtr getOrigGeneratorFunc() const {
+  MethodStatementRawPtr getOrigGeneratorFunc() const {
     return m_origGeneratorFunc;
   }
 
-  void setGeneratorFunc(MethodStatementPtr stmt) {
+  void setGeneratorFunc(MethodStatementRawPtr stmt) {
     m_generatorFunc = stmt;
   }
-  MethodStatementPtr getGeneratorFunc() const {
+  MethodStatementRawPtr getGeneratorFunc() const {
     return m_generatorFunc;
   }
 
@@ -105,8 +108,8 @@ protected:
   int m_attribute;
   std::string m_docComment;
   int m_cppLength;
-  MethodStatementPtr m_origGeneratorFunc;
-  MethodStatementPtr m_generatorFunc;
+  MethodStatementRawPtr m_origGeneratorFunc;
+  MethodStatementRawPtr m_generatorFunc;
 
   void outputCPPArgInjections(CodeGenerator &cg, AnalysisResultPtr ar,
                               const char *name, ClassScopePtr cls,

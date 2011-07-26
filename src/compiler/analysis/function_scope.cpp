@@ -268,15 +268,15 @@ bool FunctionScope::isGenerator() const {
   return getOrigGenStmt();
 }
 
-StatementPtr FunctionScope::getOrigGenStmt() const {
-  if (!getStmt()) return StatementPtr();
+MethodStatementRawPtr FunctionScope::getOrigGenStmt() const {
+  if (!getStmt()) return MethodStatementRawPtr();
   MethodStatementPtr m =
     dynamic_pointer_cast<MethodStatement>(getStmt());
-  return m ? m->getOrigGeneratorFunc() : StatementPtr();
+  return m ? m->getOrigGeneratorFunc() : MethodStatementRawPtr();
 }
 
-FunctionScopePtr FunctionScope::getOrigGenFS() const {
-  StatementPtr origStmt = getOrigGenStmt();
+FunctionScopeRawPtr FunctionScope::getOrigGenFS() const {
+  MethodStatementRawPtr origStmt = getOrigGenStmt();
   return origStmt ? origStmt->getFunctionScope() : FunctionScopeRawPtr();
 }
 
@@ -1941,8 +1941,7 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
               "int64 func, int64 extra, bool isMethod, CStrRef origFuncName, ",
               Option::SmartPtrPrefix, funcName.c_str());
 
-    MethodStatementPtr orig =
-      dynamic_pointer_cast<MethodStatement>(getOrigGenStmt());
+    MethodStatementRawPtr orig = getOrigGenStmt();
     ASSERT(orig);
     ExpressionListPtr params = orig->getParams();
 

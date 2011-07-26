@@ -119,8 +119,10 @@ void ClosureExpression::setNthKid(int n, ConstructPtr cp) {
 // static analysis functions
 
 void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
-  m_func->analyzeProgram(ar);
+  // sanity check:
+  ASSERT(getScope() == getClosureFunction()->getScope()->getOuterScope());
 
+  m_func->analyzeProgram(ar);
   if (m_vars) {
     m_values->analyzeProgram(ar);
 
@@ -173,13 +175,16 @@ void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
 
 TypePtr ClosureExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                       bool coerce) {
-  if (m_values) m_values->inferAndCheck(ar, Type::Some, false);
   if (m_vars) {
     ASSERT(m_values && m_values->getCount() == m_vars->getCount());
+
     // containing function's variable table (not closure function's)
     VariableTablePtr variables = getScope()->getVariables();
+
     // closure function's variable table
     VariableTablePtr cvariables = m_func->getFunctionScope()->getVariables();
+
+    // force all reference use vars into variant for this function scope
     for (int i = 0; i < m_vars->getCount(); i++) {
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
@@ -187,9 +192,32 @@ TypePtr ClosureExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       if (param->isRef()) {
         variables->forceVariant(ar, name, VariableTable::AnyVars);
       }
-      ExpressionPtr e = ((*m_values)[i]);
-      TypePtr t = param->isRef() ? Type::Variant : e->getType();
-      cvariables->addParamLike(name, t, ar, shared_from_this(),
+    }
+
+    // infer the types of the values
+    m_values->inferAndCheck(ar, Type::Some, false);
+
+    // coerce the types inferred from m_values into m_vars
+    for (int i = 0; i < m_vars->getCount(); i++) {
+      ExpressionPtr value = (*m_values)[i];
+      ParameterExpressionPtr var =
+        dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
+      ASSERT(!var->getExpectedType());
+      ASSERT(!var->getImplementedType());
+      TypePtr origVarType(var->getActualType() ?
+          var->getActualType() : Type::Some);
+      var->setActualType(Type::Coerce(ar, origVarType, value->getType()));
+      ASSERT(!var->isRef() || var->getType()->is(Type::KindOfVariant));
+    }
+
+    // bootstrap the closure function's variable table with
+    // the types from m_vars
+    for (int i = 0; i < m_vars->getCount(); i++) {
+      ParameterExpressionPtr param =
+        dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
+      const string &name = param->getName();
+      cvariables->addParamLike(name, param->getType(), ar,
+                               shared_from_this(),
                                getScope()->isFirstPass());
     }
   }

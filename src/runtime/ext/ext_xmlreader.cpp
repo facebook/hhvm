@@ -174,7 +174,10 @@ bool c_XMLReader::t_xml(CStrRef source, CStrRef encoding /*= null_string*/, int6
     xmlTextReaderPtr reader = xmlNewTextReader(inputbfr, uri);
 
     if (reader != NULL) {
-      int ret = xmlTextReaderSetup(reader, NULL, uri, encoding.data(), options);
+      int ret = 0;
+#if LIBXML_VERSION >= 20628
+      ret = xmlTextReaderSetup(reader, NULL, uri, encoding.data(), options);
+#endif
       if (ret == 0) {
         m_ptr = reader;
         m_input = inputbfr;

@@ -65,8 +65,44 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
       m_closureGenerator(false), m_noLSB(false), m_nextLSB(false),
       m_hasTry(false), m_hasGoto(false),
       m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0) {
+  init(ar);
+}
+
+FunctionScope::FunctionScope(FunctionScopePtr orig,
+                             AnalysisResultConstPtr ar,
+                             const string &name,
+                             const string &originalName,
+                             StatementPtr stmt,
+                             ModifierExpressionPtr modifiers)
+    : BlockScope(name, orig->m_docComment, stmt,
+                 BlockScope::FunctionScope),
+      m_minParam(orig->m_minParam), m_maxParam(orig->m_maxParam),
+      m_attribute(orig->m_attribute), m_modifiers(modifiers),
+      m_hasVoid(orig->m_hasVoid), m_method(orig->m_method),
+      m_refReturn(orig->m_refReturn), m_virtual(orig->m_virtual),
+      m_hasOverride(orig->m_hasOverride),
+      m_perfectVirtual(orig->m_perfectVirtual),
+      m_overriding(orig->m_overriding), m_volatile(orig->m_volatile),
+      m_pseudoMain(orig->m_pseudoMain), m_magicMethod(orig->m_magicMethod),
+      m_system(orig->m_system), m_inlineable(orig->m_inlineable),
+      m_sep(orig->m_sep), m_containsThis(orig->m_containsThis),
+      m_containsBareThis(orig->m_containsBareThis), m_nrvoFix(orig->m_nrvoFix),
+      m_inlineAsExpr(orig->m_inlineAsExpr),
+      m_inlineSameContext(orig->m_inlineSameContext),
+      m_contextSensitive(orig->m_contextSensitive),
+      m_directInvoke(orig->m_directInvoke), m_needsRefTemp(orig->m_needsRefTemp),
+      m_needsCheckMem(orig->m_needsCheckMem),
+      m_closureGenerator(orig->m_closureGenerator), m_noLSB(orig->m_noLSB),
+      m_nextLSB(orig->m_nextLSB), m_redeclaring(orig->m_redeclaring),
+      m_inlineIndex(orig->m_inlineIndex), m_optFunction(orig->m_optFunction) {
+  init(ar);
+  m_originalName = originalName;
+  setParamCounts(ar, m_minParam, m_maxParam);
+}
+
+void FunctionScope::init(AnalysisResultConstPtr ar) {
   bool canInline = true;
-  if (inPseudoMain) {
+  if (m_pseudoMain) {
     canInline = false;
     m_variables->forceVariants(ar, VariableTable::AnyVars);
     setReturnType(ar, Type::Variant);
@@ -76,7 +112,7 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
     m_returnType = Type::Variant;
   }
 
-  if (!strcasecmp(name.c_str(), "__autoload")) {
+  if (!strcasecmp(m_name.c_str(), "__autoload")) {
     setVolatile();
   }
 
@@ -106,12 +142,12 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
     m_volatile = true;
   }
 
-  m_dynamic = Option::IsDynamicFunction(method, m_name) ||
+  m_dynamic = Option::IsDynamicFunction(m_method, m_name) ||
     Option::EnableEval == Option::FullEval || Option::AllDynamic;
   m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
     Option::DynamicInvokeFunctions.end();
-  if (modifiers) {
-    m_virtual = modifiers->isAbstract();
+  if (m_modifiers) {
+    m_virtual = m_modifiers->isAbstract();
   }
 
   if (m_stmt) {

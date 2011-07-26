@@ -33,6 +33,7 @@ int64 f_hphp_get_call_info(CStrRef cls, CStrRef func);
 int64 f_hphp_get_call_info_extra(CStrRef cls, CStrRef func);
 Variant f_class_implements(CVarRef obj, bool autoload = true);
 Variant f_class_parents(CVarRef obj, bool autoload = true);
+Variant f_class_uses(CVarRef obj, bool autoload = true);
 Variant f_iterator_apply(CVarRef obj, CVarRef func, CArrRef params = null_array);
 Variant f_iterator_count(CVarRef obj);
 Variant f_iterator_to_array(CVarRef obj, bool use_keys = true);

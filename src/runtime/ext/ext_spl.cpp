@@ -176,7 +176,7 @@ Variant f_class_implements(CVarRef obj, bool autoload /* = true */) {
     return false;
   }
 
-  const ClassInfo *info = ClassInfo::FindClass(clsname);
+  const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(clsname);
   if (info == NULL) {
     return false;
   }
@@ -201,7 +201,7 @@ Variant f_class_parents(CVarRef obj, bool autoload /* = true */) {
     return false;
   }
 
-  const ClassInfo *info = ClassInfo::FindClass(clsname);
+  const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(clsname);
   if (info == NULL) {
     return false;
   }
@@ -211,6 +211,30 @@ Variant f_class_parents(CVarRef obj, bool autoload /* = true */) {
   info->getAllParentsVec(parents);
   for (unsigned int i = 0; i < parents.size(); i++) {
     ret.set(parents[i], parents[i]);
+  }
+
+  return ret;
+}
+
+Variant f_class_uses(CVarRef obj, bool autoload /* = true */) {
+  String clsname;
+  if (obj.isString()) {
+    clsname = obj.toString();
+  } else if (obj.isObject()) {
+    clsname = obj.toObject()->o_getClassName();
+  } else {
+    return false;
+  }
+
+  const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(clsname);
+  if (!info) {
+    return false;
+  }
+
+  Array ret(Array::Create());
+  const ClassInfo::TraitVec &traits = info->getTraitsVec();
+  for (unsigned int i = 0; i < traits.size(); i++) {
+    ret.set(traits[i], traits[i]);
   }
 
   return ret;

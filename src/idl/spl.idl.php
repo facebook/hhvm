@@ -205,6 +205,31 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "class_uses",
+    'desc'   => "This function returns an array with the names of the traits that the given class uses.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "An array on success, or FALSE on error.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "obj",
+        'type'   => Variant,
+        'desc'   => "An object (class instance) or a string (class name).",
+      ),
+      array(
+        'name'   => "autoload",
+        'type'   => Boolean,
+        'value'  => "true",
+        'desc'   => "Whether to allow this function to load the class automatically through the __autoload magic method.",
+      ),
+    ),
+  ));
+
+
+DefineFunction(
+  array(
     'name'   => "iterator_apply",
     'desc'   => "Calls a function for every element in an iterator.",
     'flags'  =>  HasDocComment,

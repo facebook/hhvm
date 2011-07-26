@@ -20,6 +20,9 @@
 #include <compiler/analysis/block_scope.h>
 #include <compiler/analysis/function_container.h>
 #include <compiler/statement/class_statement.h>
+#include <compiler/statement/method_statement.h>
+#include <compiler/statement/trait_prec_statement.h>
+#include <compiler/statement/trait_alias_statement.h>
 #include <util/json.h>
 #include <util/case_insensitive.h>
 #include <compiler/option.h>
@@ -48,6 +51,7 @@ public:
     KindOfAbstractClass,
     KindOfFinalClass,
     KindOfInterface,
+    KindOfTrait
   };
 
 #define DECLARE_MAGIC(prefix, prev)                                     \
@@ -321,6 +325,33 @@ public:
     m_usedClassesFullHeader.insert(s);
   }
 
+  void addUsedTrait(const std::string &s) {
+    if (!usesTrait(s)) {
+      m_usedTraitNames.push_back(s);
+    }
+  }
+
+  void addUsedTraits(const std::vector<std::string> &names) {
+    for (unsigned i = 0; i < names.size(); i++) {
+      if (!usesTrait(names[i])) {
+        m_usedTraitNames.push_back(names[i]);
+      }
+    }
+  }
+
+  const std::vector<std::string> &getUsedTraitNames() const {
+    return m_usedTraitNames;
+  }
+
+  const std::vector<std::pair<std::string, std::string> > &getTraitAliases()
+    const {
+    return m_traitAliases;
+  }
+
+  void addTraitAlias(TraitAliasStatementPtr aliasStmt);
+
+  void importUsedTraits(AnalysisResultPtr ar);
+
   /**
    * Output class meta info for g_class_map.
    */
@@ -355,8 +386,11 @@ public:
    const StringToClassScopePtrVecMap &classScopes,
    bool extension = false);
   bool isInterface() const { return m_kindOf == KindOfInterface; }
-  bool isFinal() const { return m_kindOf == KindOfFinalClass; }
-  bool isAbstract() const { return m_kindOf == KindOfAbstractClass; }
+  bool isFinal() const { return m_kindOf == KindOfFinalClass ||
+                                m_kindOf == KindOfTrait; }
+  bool isAbstract() const { return m_kindOf == KindOfAbstractClass ||
+                                   m_kindOf == KindOfTrait; }
+  bool isTrait() const { return m_kindOf == KindOfTrait; }
   bool hasProperty(const std::string &name) const;
   bool hasConst(const std::string &name) const;
   void outputCPPHeader(AnalysisResultPtr ar,
@@ -495,6 +529,11 @@ private:
   bool m_sep;
   bool m_needsCppCtor;
   bool m_needsInit;
+  enum TraitStatus {
+    NOT_FLATTENED,
+    BEING_FLATTENED,
+    FLATTENED
+  } m_traitStatus;
 
   std::set<JumpTableName> m_emptyJumpTables;
   std::set<std::string> m_usedLiteralStringsHeader;
@@ -510,6 +549,65 @@ private:
   std::set<UsedClassConst> m_usedClassConstsHeader;
   std::set<std::string> m_usedClassesHeader;
   std::set<std::string> m_usedClassesFullHeader;
+  std::vector<std::string> m_usedTraitNames;
+  // m_traitAliases is used to support ReflectionClass::getTraitAliases
+  std::vector<std::pair<std::string, std::string> > m_traitAliases;
+
+  struct TraitMethod {
+    const ClassScopePtr      m_trait;
+    const MethodStatementPtr m_method;
+    const std::string        m_originalName;
+    ModifierExpressionPtr    m_modifiers;
+    const StatementPtr       m_ruleStmt; // for methods imported via aliasing
+    TraitMethod(ClassScopePtr trait, MethodStatementPtr method,
+                ModifierExpressionPtr modifiers, StatementPtr ruleStmt) :
+        m_trait(trait), m_method(method),
+        m_originalName(method->getOriginalName()), m_modifiers(modifiers),
+        m_ruleStmt(ruleStmt) {
+    }
+    TraitMethod(ClassScopePtr trait, MethodStatementPtr method,
+                ModifierExpressionPtr modifiers, StatementPtr ruleStmt,
+                const std::string &originalName) :
+        m_trait(trait), m_method(method), m_originalName(originalName),
+        m_modifiers(modifiers), m_ruleStmt(ruleStmt) {
+    }
+  };
+
+  typedef std::list<TraitMethod> TraitMethodList;
+  std::map<std::string, TraitMethodList> m_importMethToTraitMap;
+
+  void addImportTraitMethod(const TraitMethod &traitMethod,
+                            const std::string &methName);
+
+  void setImportTraitMethodModifiers(const std::string &methName,
+                                     ClassScopePtr traitCls,
+                                     ModifierExpressionPtr modifiers);
+
+  void importTraitMethod(const TraitMethod &traitMethod,
+                         AnalysisResultPtr ar,
+                         const std::string &methName);
+
+  void importTraitProperties(AnalysisResultPtr ar);
+
+  void findTraitMethodsToImport(AnalysisResultPtr ar, ClassScopePtr trait);
+
+  MethodStatementPtr findTraitMethod(AnalysisResultPtr ar,
+                                     ClassScopePtr trait,
+                                     const std::string &methodName,
+                                     std::set<ClassScopePtr> &visitedTraits);
+
+  void applyTraitRules(AnalysisResultPtr ar);
+
+  void applyTraitPrecRule(TraitPrecStatementPtr stmt);
+
+  void applyTraitAliasRule(AnalysisResultPtr ar, TraitAliasStatementPtr stmt);
+
+  ClassScopePtr findSingleTraitWithMethod(AnalysisResultPtr ar,
+                                          const std::string &methodName) const;
+
+  bool usesTrait(const std::string &traitName) const;
+
+  bool hasMethod(const std::string &methodName) const;
 
   std::string getBaseHeaderFilename();
 

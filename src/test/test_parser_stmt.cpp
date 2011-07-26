@@ -55,6 +55,7 @@ bool TestParserStmt::RunTests(const std::string &which) {
   RUN_TEST(TestThrowStatement);
   RUN_TEST(TestGotoStatement);
   RUN_TEST(TestYieldStatement);
+  RUN_TEST(TestUseTraitStatement);
 
   return ret;
 }
@@ -726,6 +727,21 @@ bool TestParserStmt::TestYieldStatement() {
     "$" CONTINUATION_OBJECT_NAME "->done();\n"
     "}\n"
     "}\n");
+
+  return true;
+}
+
+bool TestParserStmt::TestUseTraitStatement() {
+  // GO: TODO: enable this once traits are implemented in hphpi
+  return true;
+
+  V("<?php trait T1 { public function F() {} } "
+    "trait T2 { public function F() {} } "
+    "class C { use T1, T2 { T1::F insteadof T2; T2::F as private G; } } ",
+    "trait T1 {\npublic function F() {\n}\n}\n"
+    "trait T2 {\npublic function F() {\n}\n}\n"
+    "class C {\nuse T1, T2 {\nT1::F insteadof T2;\nT2::F as private G;\n"
+    "}\n}\n");
 
   return true;
 }

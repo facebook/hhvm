@@ -54,6 +54,7 @@ class TestParserStmt : public TestParser {
   bool TestThrowStatement();
   bool TestGotoStatement();
   bool TestYieldStatement();
+  bool TestUseTraitStatement();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

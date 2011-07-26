@@ -17861,6 +17861,15 @@ Variant ifa_file_get_contents(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS)
   CVarRef arg4(a4);
   return (x_file_get_contents(arg0, arg1, arg2, arg3, arg4));
 }
+Variant i_get_declared_traits(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("get_declared_traits", 0, 1);
+  return (x_get_declared_traits());
+}
+Variant ifa_get_declared_traits(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("get_declared_traits", 0, 1);
+  return (x_get_declared_traits());
+}
 Variant i_uniqid(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 2)) return throw_toomany_arguments("uniqid", 2, 1);
@@ -18398,6 +18407,25 @@ Variant ifa_drawsetclippath(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg0(a0);
   CVarRef arg1(a1);
   return (x_drawsetclippath(arg0, arg1));
+}
+Variant i_trait_exists(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("trait_exists", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (x_trait_exists(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (x_trait_exists(arg0, arg1));
+  }
+}
+Variant ifa_trait_exists(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("trait_exists", count, 1, 2, 1);
+  CVarRef arg0(a0);
+  if (count <= 1) return (x_trait_exists(arg0));
+  CVarRef arg1(a1);
+  return (x_trait_exists(arg0, arg1));
 }
 Variant i_magickconstituteimage(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
@@ -30344,6 +30372,25 @@ Variant ifa_array_unshift(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count >= 6) p.append(a5);
   return (x_array_unshift(count, arg0, arg1, p));
 }
+Variant i_class_uses(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("class_uses", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (x_class_uses(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (x_class_uses(arg0, arg1));
+  }
+}
+Variant ifa_class_uses(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("class_uses", count, 1, 2, 1);
+  CVarRef arg0(a0);
+  if (count <= 1) return (x_class_uses(arg0));
+  CVarRef arg1(a1);
+  return (x_class_uses(arg0, arg1));
+}
 Variant i_stat(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("stat", count, 1, 1, 1);
@@ -30560,23 +30607,6 @@ Variant ifa_extension_loaded(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) 
   CVarRef arg0(a0);
   return (x_extension_loaded(arg0));
 }
-Variant i_openssl_get_cipher_methods(void *extra, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 1)) return throw_toomany_arguments("openssl_get_cipher_methods", 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    if (count <= 0) return (x_openssl_get_cipher_methods());
-    CVarRef arg0((ad->getValue(pos)));
-    return (x_openssl_get_cipher_methods(arg0));
-  }
-}
-Variant ifa_openssl_get_cipher_methods(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count > 1)) return throw_toomany_arguments("openssl_get_cipher_methods", 1, 1);
-  if (count <= 0) return (x_openssl_get_cipher_methods());
-  CVarRef arg0(a0);
-  return (x_openssl_get_cipher_methods(arg0));
-}
 Variant i_mb_detect_order(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 1)) return throw_toomany_arguments("mb_detect_order", 1, 1);
@@ -30593,6 +30623,23 @@ Variant ifa_mb_detect_order(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count <= 0) return (x_mb_detect_order());
   CVarRef arg0(a0);
   return (x_mb_detect_order(arg0));
+}
+Variant i_openssl_get_cipher_methods(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("openssl_get_cipher_methods", 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) return (x_openssl_get_cipher_methods());
+    CVarRef arg0((ad->getValue(pos)));
+    return (x_openssl_get_cipher_methods(arg0));
+  }
+}
+Variant ifa_openssl_get_cipher_methods(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("openssl_get_cipher_methods", 1, 1);
+  if (count <= 0) return (x_openssl_get_cipher_methods());
+  CVarRef arg0(a0);
+  return (x_openssl_get_cipher_methods(arg0));
 }
 Variant i_magickmapimage(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
@@ -38895,6 +38942,7 @@ CallInfo ci_ob_flush((void*)&i_ob_flush, (void*)&ifa_ob_flush, 0, 0, 0x000000000
 CallInfo ci_md5_file((void*)&i_md5_file, (void*)&ifa_md5_file, 2, 0, 0x0000000000000000LL);
 CallInfo ci_drawgetexception((void*)&i_drawgetexception, (void*)&ifa_drawgetexception, 1, 0, 0x0000000000000000LL);
 CallInfo ci_file_get_contents((void*)&i_file_get_contents, (void*)&ifa_file_get_contents, 5, 0, 0x0000000000000000LL);
+CallInfo ci_get_declared_traits((void*)&i_get_declared_traits, (void*)&ifa_get_declared_traits, 0, 0, 0x0000000000000000LL);
 CallInfo ci_uniqid((void*)&i_uniqid, (void*)&ifa_uniqid, 2, 0, 0x0000000000000000LL);
 CallInfo ci_strncasecmp((void*)&i_strncasecmp, (void*)&ifa_strncasecmp, 3, 0, 0x0000000000000000LL);
 CallInfo ci_magicksetimagepixels((void*)&i_magicksetimagepixels, (void*)&ifa_magicksetimagepixels, 8, 0, 0x0000000000000000LL);
@@ -38925,6 +38973,7 @@ CallInfo ci_dom_element_set_id_attribute_node((void*)&i_dom_element_set_id_attri
 CallInfo ci_is_null((void*)&i_is_null, (void*)&ifa_is_null, 1, 0, 0x0000000000000000LL);
 CallInfo ci_octdec((void*)&i_octdec, (void*)&ifa_octdec, 1, 0, 0x0000000000000000LL);
 CallInfo ci_drawsetclippath((void*)&i_drawsetclippath, (void*)&ifa_drawsetclippath, 2, 0, 0x0000000000000000LL);
+CallInfo ci_trait_exists((void*)&i_trait_exists, (void*)&ifa_trait_exists, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magickconstituteimage((void*)&i_magickconstituteimage, (void*)&ifa_magickconstituteimage, 6, 0, 0x0000000000000000LL);
 CallInfo ci_pcntl_wexitstatus((void*)&i_pcntl_wexitstatus, (void*)&ifa_pcntl_wexitstatus, 1, 0, 0x0000000000000000LL);
 CallInfo ci_iterator_apply((void*)&i_iterator_apply, (void*)&ifa_iterator_apply, 3, 0, 0x0000000000000000LL);
@@ -39596,6 +39645,7 @@ CallInfo ci_icu_transliterate((void*)&i_icu_transliterate, (void*)&ifa_icu_trans
 CallInfo ci_mb_eregi_replace((void*)&i_mb_eregi_replace, (void*)&ifa_mb_eregi_replace, 4, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileinfo_getatime((void*)&i_hphp_splfileinfo_getatime, (void*)&ifa_hphp_splfileinfo_getatime, 1, 0, 0x0000000000000000LL);
 CallInfo ci_array_unshift((void*)&i_array_unshift, (void*)&ifa_array_unshift, 2, 1, 0x0000000000000001LL);
+CallInfo ci_class_uses((void*)&i_class_uses, (void*)&ifa_class_uses, 2, 0, 0x0000000000000000LL);
 CallInfo ci_stat((void*)&i_stat, (void*)&ifa_stat, 1, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_directoryiterator_key((void*)&i_hphp_directoryiterator_key, (void*)&ifa_hphp_directoryiterator_key, 1, 0, 0x0000000000000000LL);
 CallInfo ci_posix_getpid((void*)&i_posix_getpid, (void*)&ifa_posix_getpid, 0, 0, 0x0000000000000000LL);
@@ -39610,8 +39660,8 @@ CallInfo ci_mcrypt_enc_get_algorithms_name((void*)&i_mcrypt_enc_get_algorithms_n
 CallInfo ci_hphp_splfileobject_rewind((void*)&i_hphp_splfileobject_rewind, (void*)&ifa_hphp_splfileobject_rewind, 1, 0, 0x0000000000000000LL);
 CallInfo ci_fprintf((void*)&i_fprintf, (void*)&ifa_fprintf, 2, 1, 0x0000000000000000LL);
 CallInfo ci_extension_loaded((void*)&i_extension_loaded, (void*)&ifa_extension_loaded, 1, 0, 0x0000000000000000LL);
-CallInfo ci_openssl_get_cipher_methods((void*)&i_openssl_get_cipher_methods, (void*)&ifa_openssl_get_cipher_methods, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mb_detect_order((void*)&i_mb_detect_order, (void*)&ifa_mb_detect_order, 1, 0, 0x0000000000000000LL);
+CallInfo ci_openssl_get_cipher_methods((void*)&i_openssl_get_cipher_methods, (void*)&ifa_openssl_get_cipher_methods, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickmapimage((void*)&i_magickmapimage, (void*)&ifa_magickmapimage, 3, 0, 0x0000000000000000LL);
 CallInfo ci_get_magic_quotes_runtime((void*)&i_get_magic_quotes_runtime, (void*)&ifa_get_magic_quotes_runtime, 0, 0, 0x0000000000000000LL);
 CallInfo ci_pixelsetopacityquantum((void*)&i_pixelsetopacityquantum, (void*)&ifa_pixelsetopacityquantum, 2, 0, 0x0000000000000000LL);
@@ -42989,6 +43039,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_drawpathlinetoverticalabsolute;
         return true;
       }
+      HASH_GUARD(0x68D5866E2F3D07F3LL, trait_exists) {
+        ci = &ci_trait_exists;
+        return true;
+      }
       break;
     case 2041:
       HASH_GUARD(0x376FB2649384A7F9LL, str_pad) {
@@ -43619,6 +43673,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 2456:
       HASH_GUARD(0x501AAD31C8086998LL, posix_getcwd) {
         ci = &ci_posix_getcwd;
+        return true;
+      }
+      break;
+    case 2457:
+      HASH_GUARD(0x3B7F5477708BA999LL, get_declared_traits) {
+        ci = &ci_get_declared_traits;
         return true;
       }
       break;
@@ -44319,6 +44379,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 2886:
       HASH_GUARD(0x00D8FE7A00252B46LL, escapeshellarg) {
         ci = &ci_escapeshellarg;
+        return true;
+      }
+      break;
+    case 2892:
+      HASH_GUARD(0x1C0F3DE630E1EB4CLL, class_uses) {
+        ci = &ci_class_uses;
         return true;
       }
       break;

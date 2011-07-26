@@ -528,3 +528,169 @@ bool TestCodeError::TestAbstractProperty() {
 
   return true;
 }
+
+bool TestCodeError::TestUnknownTrait() {
+  VE(UnknownTrait, "<?php class C { use T; }");
+
+  VE(UnknownTrait, "<?php trait T1 { use T2; }");
+
+  return true;
+}
+
+bool TestCodeError::TestMethodInMultipleTraits() {
+  VE(MethodInMultipleTraits,
+     "<?php\n"
+     "trait T1 {\n"
+     "  public function Func() { }\n"
+     "}\n"
+     "trait T2 {\n"
+     "  public function Func() { }\n"
+     "}\n"
+     "class C {\n"
+     "  use T1, T2;\n"
+     "}\n");
+
+  VE(MethodInMultipleTraits,
+     "<?php\n"
+     "trait T1 {\n"
+     "  public function Func() { }\n"
+     "}\n"
+     "trait T2 {\n"
+     "  public function Func() { }\n"
+     "}\n"
+     "trait T3 {\n"
+     "  use T2;\n"
+     "}\n"
+     "class C {\n"
+     "  use T1, T3;\n"
+     "}\n");
+
+  VE(MethodInMultipleTraits,
+     "<?php\n"
+     "trait T1 {\n"
+     "  public function Func() { }\n"
+     "}\n"
+     "trait T2 {\n"
+     "  use T1;\n"
+     "}\n"
+     "trait T3 {\n"
+     "  use T1;\n"
+     "}\n"
+     "class C {\n"
+     "  use T2, T3;\n"
+     "}\n");
+
+  VE(MethodInMultipleTraits,
+     "<?php\n"
+     "trait T1 {\n"
+     "  public function Func1() { }\n"
+     "}\n"
+     "trait T2 {\n"
+     "  public function Func2() { }\n"
+     "}\n"
+     "trait T3 {\n"
+     "  use T2 {\n"
+     "    T2::Func2 as Func1;\n"
+     "  }\n"
+     "}\n"
+     "class C {\n"
+     "  use T1, T3;\n"
+     "}\n");
+
+  return true;
+}
+
+bool TestCodeError::TestUnknownTraitMethod() {
+  VE(UnknownTraitMethod,
+     "<?php\n"
+     "trait T1 {\n"
+     "  public function Func1() { }\n"
+     "}\n"
+     "class C {\n"
+     "  use T1 {\n"
+     "    T1::Func2 as Func3;\n"
+     "  }\n"
+     "}\n");
+
+  return true;
+}
+
+bool TestCodeError::TestInvalidAccessModifier() {
+  VE(InvalidAccessModifier,
+    "<?php\n"
+     "trait T1 {\n"
+     "  public function Func1() { }\n"
+     "}\n"
+     "class C {\n"
+     "  use T1 {\n"
+     "    T1::Func1 as static Func2;\n"
+     "  }\n"
+     "}\n");
+
+  return true;
+}
+
+bool TestCodeError::TestCyclicDependentTraits() {
+  VE(CyclicDependentTraits,
+     "<?php\n"
+     "trait T1 {\n"
+     "  use T2;\n"
+     "}\n"
+     "trait T2 {\n"
+     "  use T1;\n"
+     "}\n");
+
+  VE(CyclicDependentTraits,
+     "<?php\n"
+     "trait T1 {\n"
+     "  use T1;\n"
+     "}\n");
+
+  VE(CyclicDependentTraits,
+     "<?php\n"
+     "trait T1 {\n"
+     "  use T2;\n"
+     "}\n"
+     "trait T2 {\n"
+     "  use T3;\n"
+     "}\n"
+     "trait T3 {\n"
+     "  use T1;\n"
+     "}\n");
+
+  return true;
+}
+
+bool TestCodeError::TestInvalidTraitStatement() {
+  VE(InvalidTraitStatement,
+     "<?php\n"
+     "trait T {\n"
+     "  const y = 3;\n"
+     "}\n");
+
+  return true;
+}
+
+bool TestCodeError::TestRedeclaredTrait() {
+  VE(RedeclaredTrait,
+     "<?php\n"
+     "trait T {}\n"
+     "trait T {}\n");
+
+  VE(RedeclaredTrait,
+     "<?php\n"
+     "trait T {}\n"
+     "class T {}\n");
+
+  VE(RedeclaredTrait,
+     "<?php\n"
+     "class T {}\n"
+     "trait T {}\n");
+
+  VE(RedeclaredTrait,
+     "<?php\n"
+     "interface T {}\n"
+     "trait T {}\n");
+
+  return true;
+}

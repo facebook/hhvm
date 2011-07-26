@@ -75,6 +75,17 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "get_declared_traits",
+    'desc'   => "Gets the declared traits.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => VariantMap,
+      'desc'   => "Returns an array of the names of the declared traits in the current script.",
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "class_exists",
     'desc'   => "This function checks whether or not the given class has been defined.",
     'flags'  =>  HasDocComment,
@@ -121,6 +132,30 @@ DefineFunction(
       ),
     ),
     'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "trait_exists",
+    'desc'   => "Checks if the given trait has been defined.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "Returns TRUE if the trait given by trait_name has been defined, FALSE otherwise.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "trait_name",
+        'type'   => String,
+        'desc'   => "The trait name",
+      ),
+      array(
+        'name'   => "autoload",
+        'type'   => Boolean,
+        'value'  => "true",
+        'desc'   => "Whether to call __autoload or not by default.",
+      ),
+    ),
   ));
 
 DefineFunction(

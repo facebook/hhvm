@@ -954,6 +954,10 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_XHP_ENUM
 %token T_XHP_REQUIRED
 
+%token T_TRAIT
+%token T_INSTEADOF
+%token T_TRAIT_C
+
 %%
 
 start:
@@ -971,6 +975,7 @@ top_statement:
                                          $$ = $1;}
   | function_declaration_statement     { _p->nns(); $$ = $1;}
   | class_declaration_statement        { _p->nns(); $$ = $1;}
+  | trait_declaration_statement        { _p->nns(); $$ = $1;}
   | T_HALT_COMPILER '(' ')' ';'        { $$.reset();}
   | T_NAMESPACE namespace_name ';'     { _p->onNamespaceStart($2.text());
                                          $$.reset();}
@@ -1172,7 +1177,7 @@ class_declaration_statement:
     extends_from                       { $2.setText(_p->nsDecl($2.text()));
                                          _p->onClassStart($1.num(), $2, &$3);}
     implements_list '{'
-    class_statement_list '}'           { _p->onClass($$,$1,$2,$3,$5,$7);}
+    class_statement_list '}'           { _p->onClass($$,$1.num(),$2,$3,$5,$7);}
 
   | class_entry_type T_XHP_LABEL
     extends_from                       { $2.xhpLabel();
@@ -1180,7 +1185,7 @@ class_declaration_statement:
                                          _p->onClassStart($1.num(), $2, &$3);}
     implements_list '{'                { _p->scanner().xhpStatement();}
     xhp_class_statement_list '}'       { xhp_collect_attributes(_p, $9, $8);
-                                         _p->onClass($$,$1,$2,$3,$5,$9);
+                                         _p->onClass($$,$1.num(),$2,$3,$5,$9);
                                          _p->xhpResetAttributes();
                                          _p->scanner().xhpReset();}
 
@@ -1188,6 +1193,14 @@ class_declaration_statement:
                                          _p->onClassStart(T_INTERFACE, $2, 0);}
     interface_extends_list '{'
     class_statement_list '}'           { _p->onInterface($$,$2,$4,$6);}
+;
+trait_declaration_statement:
+    T_TRAIT T_STRING                   { $2.setText(_p->nsDecl($2.text()));
+                                         _p->onClassStart(T_TRAIT, $2, 0);}
+    '{' class_statement_list '}'       { Token t_ext, t_imp;
+                                         t_ext.reset(); t_imp.reset();
+                                         _p->onClass($$,T_TRAIT,$2,t_ext,t_imp,
+                                                     $5);}
 ;
 class_entry_type:
     T_CLASS                            { $$ = T_CLASS;}
@@ -1211,6 +1224,11 @@ interface_list:
     fully_qualified_class_name         { _p->onInterfaceName($$, NULL, $1);}
   | interface_list ','
     fully_qualified_class_name         { _p->onInterfaceName($$, &$1, $3);}
+;
+trait_list:
+    fully_qualified_class_name         { _p->onTraitName($$, NULL, $1);}
+  | trait_list ','
+    fully_qualified_class_name         { _p->onTraitName($$, &$1, $3);}
 ;
 
 foreach_optional_arg:
@@ -1394,8 +1412,38 @@ class_statement:
     xhp_category_stmt ';'              { xhp_category_stmt(_p,$$,$2);}
   | T_XHP_CHILDREN
     xhp_children_stmt ';'              { xhp_children_stmt(_p,$$,$2);}
+  | T_USE trait_list ';'               { Token t; t.reset();
+                                         _p->onTraitUse($$,$2,t); }
+  | T_USE trait_list '{'
+    trait_rules  '}'                   { _p->onTraitUse($$,$2,$4); }
 ;
-
+trait_rules:
+    trait_rules trait_precedence_rule  { _p->onTraitRule($$,$1,$2); }
+  | trait_rules trait_alias_rule       { _p->onTraitRule($$,$1,$2); }
+  | /* empty */                        { $$.reset(); }
+;
+trait_precedence_rule:
+    class_namespace_string
+    T_PAAMAYIM_NEKUDOTAYIM
+    T_STRING
+    T_INSTEADOF trait_list ';'         { _p->onTraitPrecRule($$,$1,$3,$5); }
+;
+trait_alias_rule:
+    trait_alias_rule_method T_AS
+    method_modifiers T_STRING ';'      { _p->onTraitAliasRuleModify($$,$1,$3,
+                                                                    $4);}
+  | trait_alias_rule_method T_AS
+    non_empty_member_modifiers ';'     { Token t; t.reset();
+                                         _p->onTraitAliasRuleModify($$,$1,$3,
+                                                                    t);}
+;
+trait_alias_rule_method:
+    class_namespace_string
+    T_PAAMAYIM_NEKUDOTAYIM
+    T_STRING                           { _p->onTraitAliasRuleStart($$,$1,$3);}
+  | T_STRING                           { Token t; t.reset();
+                                         _p->onTraitAliasRuleStart($$,t,$1);}
+;
 xhp_attribute_stmt:
     xhp_attribute_decl                 { xhp_attribute_list(_p,$$,
                                          _p->xhpGetAttributes(),$1);}
@@ -1782,6 +1830,8 @@ xhp_bareword:
   | T_FILE                             { $$ = $1;}
   | T_DIR                              { $$ = $1;}
   | T_NS_C                             { $$ = $1;}
+  | T_TRAIT                            { $$ = $1;}
+  | T_TRAIT_C                          { $$ = $1;}
 ;
 
 function_call:
@@ -1856,6 +1906,7 @@ common_scalar:
   | T_FILE                             { _p->onScalar($$, T_FILE,     $1);}
   | T_DIR                              { _p->onScalar($$, T_DIR,      $1);}
   | T_CLASS_C                          { _p->onScalar($$, T_CLASS_C,  $1);}
+  | T_TRAIT_C                          { _p->onScalar($$, T_TRAIT_C,  $1);}
   | T_METHOD_C                         { _p->onScalar($$, T_METHOD_C, $1);}
   | T_FUNC_C                           { _p->onScalar($$, T_FUNC_C,   $1);}
   | T_NS_C                             { _p->onScalar($$, T_NS_C,  $1);}

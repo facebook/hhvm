@@ -748,6 +748,7 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
   int subtype = 0;
   switch (type) {
   case T_CLASS_C:
+  case T_TRAIT_C:
     subtype = type;
     type = T_STRING;
     stext = getCurrentClass();
@@ -1108,7 +1109,7 @@ void Parser::onClassStart(int type, Token &name, Token *parent) {
   cs->setModifiers(mod);
 }
 
-void Parser::onClass(Token &out, Token &type, Token &name, Token &base,
+void Parser::onClass(Token &out, int type, Token &name, Token &base,
                      Token &baseInterface, Token &stmt) {
   out.reset();
   ClassStatementPtr cs = peekClass();
@@ -1135,6 +1136,34 @@ void Parser::onInterfaceName(Token &out, Token *names, Token &name) {
     out.reset();
   }
   out->strings().push_back(name.text());
+}
+
+void Parser::onTraitUse(Token &out, Token &traits, Token &rules) {
+  ASSERT(0); // GO: IMPLEMENT
+}
+
+void Parser::onTraitName(Token &out, Token *names, Token &name) {
+  ASSERT(0); // GO: IMPLEMENT
+}
+
+void Parser::onTraitRule(Token &out, Token &stmtList, Token &newStmt) {
+  ASSERT(0); // GO: IMPLEMENT
+}
+
+void Parser::onTraitPrecRule(Token &out, Token &className, Token &methodName,
+                             Token &otherClasses) {
+  ASSERT(0); // GO: IMPLEMENT
+}
+
+void Parser::onTraitAliasRuleStart(Token &out, Token &className,
+                                   Token &methodName) {
+  ASSERT(0); // GO: IMPLEMENT
+}
+
+void Parser::onTraitAliasRuleModify(Token &out, Token &rule,
+                                    Token &accessModifiers,
+                                    Token &newMethodName) {
+  ASSERT(0); // GO: IMPLEMENT
 }
 
 void Parser::onClassVariableModifer(Token &mod) {

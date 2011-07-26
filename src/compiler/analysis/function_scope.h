@@ -69,6 +69,10 @@ public:
                 FileScopePtr file,
                 bool inPseudoMain = false);
 
+  FunctionScope(FunctionScopePtr orig, AnalysisResultConstPtr ar,
+                const std::string &name, const std::string &originalName,
+                StatementPtr stmt, ModifierExpressionPtr modifiers);
+
   /**
    * System functions.
    */
@@ -163,9 +167,10 @@ public:
   }
 
   /**
-   * Get original name of the function, without case being lowered.
+   * Get/set original name of the function, without case being lowered.
    */
   const std::string &getOriginalName() const;
+  void setOriginalName(const std::string &name) { m_originalName = name; }
 
   std::string getDocName() const;
   std::string getDocFullName() const;
@@ -470,6 +475,8 @@ private:
   void outputCPPSubClassParam(CodeGenerator &cg,
                               AnalysisResultPtr ar,
                               ParameterExpressionPtr param);
+
+  void init(AnalysisResultConstPtr ar);
 
   static StringToFunctionInfoPtrMap s_refParamInfo;
 

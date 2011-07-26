@@ -108,7 +108,7 @@ void StaticMemberExpression::analyzeProgram(AnalysisResultPtr ar) {
       if (m_resolvedClass) {
         m_resolvedClass->addUse(getScope(), BlockScope::UseKindStaticRef);
         if (!sym && !m_dynamicClass && !name.empty() &&
-            ar->getPhase() == AnalysisResult::AnalyzeAll) {
+            ar->getPhase() == AnalysisResult::AnalyzeFinal) {
           Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
         }
       }

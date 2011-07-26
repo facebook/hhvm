@@ -207,6 +207,7 @@ public:
   std::string genCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar);
   void setCPPTemp(const std::string &s) { m_cppTemp = s; }
   BlockScopeRawPtr getOriginalScope();
+  void setOriginalScope(BlockScopeRawPtr scope);
   ClassScopeRawPtr getOriginalClass();
   FunctionScopeRawPtr getOriginalFunction();
   std::string originalClassName(CodeGenerator &cg, bool withComma);
@@ -223,6 +224,7 @@ public:
    */
   virtual unsigned getCanonHash() const;
   virtual bool canonCompare(ExpressionPtr e) const;
+  bool equals(ExpressionPtr other);
   void setCanonID(unsigned id) { m_canon_id = id; }
   unsigned getCanonID() const { return m_canon_id; }
   void setCanonPtr(ExpressionPtr e) { m_canonPtr = e; }

@@ -29,6 +29,7 @@
 #include <compiler/analysis/constant_table.h>
 #include <util/util.h>
 #include <compiler/statement/interface_statement.h>
+#include <compiler/statement/use_trait_statement.h>
 #include <compiler/option.h>
 #include <sstream>
 #include <algorithm>
@@ -67,6 +68,7 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
   case T_CLASS:     kindOf = ClassScope::KindOfObjectClass;   break;
   case T_ABSTRACT:  kindOf = ClassScope::KindOfAbstractClass; break;
   case T_FINAL:     kindOf = ClassScope::KindOfFinalClass;    break;
+  case T_TRAIT:     kindOf = ClassScope::KindOfTrait;         break;
   default:
     ASSERT(false);
   }
@@ -114,7 +116,7 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
         MethodStatementPtr meth =
           dynamic_pointer_cast<MethodStatement>((*m_stmt)[i]);
         if (meth && classScope && meth->getName() == classScope->getName()
-         && !meth->getModifiers()->isStatic()) {
+            && !meth->getModifiers()->isStatic() && !classScope->isTrait()) {
           // class-name constructor
           classScope->setAttribute(ClassScope::ClassNameConstructor);
         }
@@ -122,7 +124,30 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
       IParseHandlerPtr ph = dynamic_pointer_cast<IParseHandler>((*m_stmt)[i]);
       ph->onParseRecur(ar, classScope);
     }
+
+    for (int i = 0; i < m_stmt->getCount(); i++) {
+      UseTraitStatementPtr useTrait =
+        dynamic_pointer_cast<UseTraitStatement>((*m_stmt)[i]);
+      if (useTrait) {
+        vector<string> usedTraits;
+        useTrait->getUsedTraitNames(usedTraits);
+        classScope->addUsedTraits(usedTraits);
+      }
+    }
   }
+}
+
+StatementPtr ClassStatement::addClone(StatementPtr origStmt) {
+  ASSERT(m_stmt);
+  StatementPtr newStmt = Clone(origStmt);
+  MethodStatementPtr newMethStmt =
+    dynamic_pointer_cast<MethodStatement>(newStmt);
+  if (newMethStmt) {
+    newMethStmt->setClassName(m_name);
+    newMethStmt->setOriginalClassName(m_originalName);
+  }
+  m_stmt->addElement(newStmt);
+  return newStmt;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -146,13 +171,35 @@ void ClassStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_stmt) {
     m_stmt->analyzeProgram(ar);
   }
+
+  ClassScopePtr clsScope = getClassScope();
+
+  // Check that every trait stmt is either a method, class_var, or trait_use
+  if (clsScope->isTrait()) {
+    StatementListPtr stmts = getStmts();
+    if (stmts) {
+      for (int s = 0; s < stmts->getCount(); s++) {
+        StatementPtr stmt = (*stmts)[s];
+        if(!dynamic_pointer_cast<UseTraitStatement>(stmt) &&
+           !dynamic_pointer_cast<MethodStatement>(stmt) &&
+           !dynamic_pointer_cast<ClassVariable>(stmt)) {
+          Compiler::Error(Compiler::InvalidTraitStatement, stmt);
+        }
+      }
+    }
+  }
+
   if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
+
+  clsScope->importUsedTraits(ar);
+
   ar->recordClassSource(m_name, m_loc, getFileScope()->getName());
   for (unsigned int i = 0; i < bases.size(); i++) {
     ClassScopePtr cls = ar->findClass(bases[i]);
     if (cls) {
       if ((!cls->isInterface() && (m_parent.empty() || i > 0 )) ||
-          (cls->isInterface() && (!m_parent.empty() && i == 0 ))) {
+          (cls->isInterface() && (!m_parent.empty() && i == 0 )) ||
+          (cls->isTrait())) {
         Compiler::Error(Compiler::InvalidDerivation, shared_from_this(),
                         cls->getOriginalName());
       }
@@ -198,14 +245,18 @@ void ClassStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();
   if (!classScope->isUserClass()) return;
 
-  switch (m_type) {
-  case T_CLASS:                              break;
-  case T_ABSTRACT: cg_printf("abstract ");   break;
-  case T_FINAL:    cg_printf("final ");      break;
-  default:
-    ASSERT(false);
+  if (m_type == T_TRAIT) {
+    cg_printf("trait %s", m_originalName.c_str());
+  } else {
+    switch (m_type) {
+      case T_CLASS:                              break;
+      case T_ABSTRACT: cg_printf("abstract ");   break;
+      case T_FINAL:    cg_printf("final ");      break;
+      default:
+        ASSERT(false);
+    }
+    cg_printf("class %s", m_originalName.c_str());
   }
-  cg_printf("class %s", m_originalName.c_str());
 
   if (!m_parent.empty()) {
     cg_printf(" extends %s", m_originalParent.c_str());
@@ -234,6 +285,7 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
                                         const char *originalName,
                                         const char *parent) {
   ClassScopeRawPtr classScope = getClassScope();
+  if (classScope->isTrait()) return;
   VariableTablePtr variables = classScope->getVariables();
   ConstantTablePtr constants = classScope->getConstants();
   const char *sweep =
@@ -308,6 +360,7 @@ void ClassStatement::getCtorAndInitInfo(bool &needsCppCtor, bool &needsInit) {
 
 void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();
+  if (classScope->isTrait()) return;
   if (cg.getContext() == CodeGenerator::NoContext) {
     if (classScope->isVolatile()) {
       string name = CodeGenerator::FormatLabel(m_name);

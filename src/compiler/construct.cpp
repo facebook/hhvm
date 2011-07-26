@@ -41,12 +41,19 @@ Construct::Construct(BlockScopePtr scope, LocationPtr loc)
       m_containedEffects(0), m_effectsTag(0) {
 }
 
-void Construct::resetScope(BlockScopeRawPtr scope) {
+void Construct::resetScope(BlockScopeRawPtr scope, bool resetOrigScope) {
   setBlockScope(scope);
+  if (resetOrigScope) {
+    ExpressionPtr expr =
+      boost::dynamic_pointer_cast<Expression>(shared_from_this());
+    if (expr) {
+      expr->setOriginalScope(scope);
+    }
+  }
   for (int i = 0, n = getKidCount(); i < n; i++) {
     if (ConstructPtr kid = getNthKid(i)) {
       if (FunctionWalker::SkipRecurse(kid)) continue;
-      kid->resetScope(scope);
+      kid->resetScope(scope, resetOrigScope);
     }
   }
 }

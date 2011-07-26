@@ -153,7 +153,7 @@ public:
   ClassScopeRawPtr getClassScope() const {
     return m_blockScope->getContainingClass();
   }
-  void resetScope(BlockScopeRawPtr scope);
+  void resetScope(BlockScopeRawPtr scope, bool resetOrigScope=false);
 
   virtual int getLocalEffects() const { return UnknownEffect;}
   int getChildrenEffects() const;

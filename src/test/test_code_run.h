@@ -191,6 +191,9 @@ class TestCodeRun : public TestBase {
   bool TestClosure();
   bool TestNamespace();
 
+  // PHP 5.4
+  bool TestTraits();
+
   // HipHop specific
   bool TestYield();
   bool TestHint();

@@ -73,6 +73,10 @@ public:
     ContextSensitive       = (1 << 26), //                  x
     NoDefaultSweep         = (1 << 27), //    x
     IsSystem               = (1 << 28), //    x             x
+
+    IsTrait                = (1 << 29), //    x
+    UsesTraits             = (1 << 30), //    x
+    HasAliasedMethods      = (1u << 31),//    x
   };
 
   class ConstantInfo {
@@ -130,16 +134,19 @@ public:
     bool isVisible(const ClassInfo *context) const;
   };
 
-  typedef StringIMap<ClassInfo *>       ClassMap;
-  typedef std::vector<String>           ClassVec;
-  typedef StringISet                    InterfaceSet;
-  typedef std::vector<String>           InterfaceVec;
-  typedef StringIMap<MethodInfo *>      MethodMap;
-  typedef std::vector<MethodInfo *>     MethodVec;
-  typedef StringMap<PropertyInfo *>     PropertyMap;
-  typedef std::vector<PropertyInfo *>   PropertyVec;
-  typedef StringMap<ConstantInfo *>     ConstantMap;
-  typedef std::vector<ConstantInfo *>   ConstantVec;
+  typedef StringIMap<ClassInfo *>                 ClassMap;
+  typedef std::vector<String>                     ClassVec;
+  typedef StringISet                              InterfaceSet;
+  typedef std::vector<String>                     InterfaceVec;
+  typedef StringISet                              TraitSet;
+  typedef std::vector<String>                     TraitVec;
+  typedef StringIMap<MethodInfo *>                MethodMap;
+  typedef std::vector<MethodInfo *>               MethodVec;
+  typedef StringMap<PropertyInfo *>               PropertyMap;
+  typedef std::vector<PropertyInfo *>             PropertyVec;
+  typedef StringMap<ConstantInfo *>               ConstantMap;
+  typedef std::vector<ConstantInfo *>             ConstantVec;
+  typedef std::vector<std::pair<String, String> > TraitAliasVec;
 
 public:
   /**
@@ -183,14 +190,34 @@ public:
   static Array GetInterfaces(bool declaredOnly);
 
   /**
+   * Return a list of declared traits.
+   */
+  static Array GetTraits(bool declaredOnly);
+
+  /**
    * Whether an interface exists.
    */
   static bool HasInterface(CStrRef name);
 
   /**
+   * Whether a trait exists.
+   */
+  static bool HasTrait(CStrRef name);
+
+  /**
    * Locate one interface.
    */
   static const ClassInfo *FindInterface(CStrRef name);
+
+  /**
+   * Locate one trait.
+   */
+  static const ClassInfo *FindTrait(CStrRef name);
+
+  /**
+   * Locate either a class, interface, or trait.
+   */
+  static const ClassInfo *FindClassInterfaceOrTrait(CStrRef name);
 
   /**
    * Locate one constant (excluding dynamic and redeclared constants)
@@ -219,7 +246,7 @@ public:
   /**
    * Return lists of names for auto-complete purposes.
    */
-  static void GetClassSymbolNames(CArrRef names, bool interface,
+  static void GetClassSymbolNames(CArrRef names, bool interface, bool trait,
                                   std::vector<String> &classes,
                                   std::vector<String> *clsMethods,
                                   std::vector<String> *clsProperties,
@@ -265,6 +292,9 @@ public:
   }
   virtual const InterfaceSet &getInterfaces() const = 0;
   virtual const InterfaceVec &getInterfacesVec() const = 0;
+  virtual const TraitSet &getTraits() const = 0;
+  virtual const TraitVec &getTraitsVec() const = 0;
+  virtual const TraitAliasVec &getTraitAliasesVec() const = 0;
   bool derivesFrom(CStrRef name, bool considerInterface) const;
 
   void getAllParentsVec(ClassVec &parents) const; // recursive
@@ -311,6 +341,7 @@ protected:
   static ClassInfo *s_userFuncs;   // all user functions
   static ClassMap s_classes;       // all classes
   static ClassMap s_interfaces;    // all interfaces
+  static ClassMap s_traits;        // all traits
 
   static ClassInfoHook *s_hook;
 
@@ -342,6 +373,9 @@ public:
   CStrRef getParentClass() const { return m_parent;}
   const InterfaceSet &getInterfaces() const { return m_interfaces;}
   const InterfaceVec &getInterfacesVec() const { return m_interfacesVec;}
+  const TraitSet &getTraits() const { return m_traits;}
+  const TraitVec &getTraitsVec() const { return m_traitsVec;}
+  const TraitAliasVec &getTraitAliasesVec() const { return m_traitAliasesVec;}
   const MethodMap &getMethods() const { return m_methods;}
   const MethodVec &getMethodsVec() const { return m_methodsVec;}
   const PropertyMap &getProperties() const { return m_properties;}
@@ -350,15 +384,18 @@ public:
   const ConstantVec &getConstantsVec() const { return m_constantsVec;}
 
 private:
-  String m_parent;              // parent class name
-  InterfaceSet m_interfaces;    // all interfaces
-  InterfaceVec m_interfacesVec; // all interfaces in declaration order
-  MethodMap    m_methods;       // all methods
-  MethodVec    m_methodsVec;    // all methods in declaration order
-  PropertyMap  m_properties;    // all properties
-  PropertyVec  m_propertiesVec; // all properties in declaration order
-  ConstantMap  m_constants;     // all constants
-  ConstantVec  m_constantsVec;  // all constants in declaration order
+  String        m_parent;          // parent class name
+  InterfaceSet  m_interfaces;      // all interfaces
+  InterfaceVec  m_interfacesVec;   // all interfaces in declaration order
+  TraitSet      m_traits;          // all used traits
+  TraitVec      m_traitsVec;       // all used traits
+  TraitAliasVec m_traitAliasesVec; // all trait aliases
+  MethodMap     m_methods;         // all methods
+  MethodVec     m_methodsVec;      // all methods in declaration order
+  PropertyMap   m_properties;      // all properties
+  PropertyVec   m_propertiesVec;   // all properties in declaration order
+  ConstantMap   m_constants;       // all constants
+  ConstantVec   m_constantsVec;    // all constants in declaration order
 };
 
 /**
@@ -382,6 +419,15 @@ public:
   }
   const InterfaceVec &getInterfacesVec() const {
     return current()->getInterfacesVec();
+  }
+  const TraitSet &getTraits() const {
+    return current()->getTraits();
+  }
+  const TraitVec &getTraitsVec() const {
+    return current()->getTraitsVec();
+  }
+  const TraitAliasVec &getTraitAliasesVec() const {
+    return current()->getTraitAliasesVec();
   }
   const MethodMap &getMethods() const {
     return current()->getMethods();
@@ -426,10 +472,12 @@ public:
   virtual Array getUserFunctions() const = 0;
   virtual Array getClasses() const = 0;
   virtual Array getInterfaces() const = 0;
+  virtual Array getTraits() const = 0;
   virtual Array getConstants() const = 0;
   virtual const ClassInfo::MethodInfo *findFunction(CStrRef name) const = 0;
   virtual const ClassInfo *findClass(CStrRef name) const = 0;
   virtual const ClassInfo *findInterface(CStrRef name) const = 0;
+  virtual const ClassInfo *findTrait(CStrRef name) const = 0;
   virtual const ClassInfo::ConstantInfo *findConstant(CStrRef name) const = 0;
 };
 

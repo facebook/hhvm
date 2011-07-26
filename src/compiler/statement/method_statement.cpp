@@ -198,13 +198,26 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
 
   classScope->addFunction(ar, fs);
 
+  setSpecialMethod(classScope);
+
+  m_className = classScope->getName();
+  m_originalClassName = classScope->getOriginalName();
+  if (m_params) {
+    for (int i = 0; i < m_params->getCount(); i++) {
+      ParameterExpressionPtr param =
+        dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+      param->parseHandler(classScope);
+    }
+  }
+  FunctionScope::RecordFunctionInfo(m_name, fs);
+}
+
+void MethodStatement::setSpecialMethod(ClassScopePtr classScope) {
   if (m_name == "__construct") {
     classScope->setAttribute(ClassScope::HasConstructor);
   } else if (m_name == "__destruct") {
     classScope->setAttribute(ClassScope::HasDestructor);
-  }
-
-  if (m_name == "__call") {
+  } else if (m_name == "__call") {
     classScope->setAttribute(ClassScope::HasUnknownMethodHandler);
   } else if (m_name == "__get") {
     classScope->setAttribute(ClassScope::HasUnknownPropGetter);
@@ -217,17 +230,14 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
   } else if (m_name == "__invoke") {
     classScope->setAttribute(ClassScope::HasInvokeMethod);
   }
+}
 
-  m_className = classScope->getName();
-  m_originalClassName = classScope->getOriginalName();
-  if (m_params) {
-    for (int i = 0; i < m_params->getCount(); i++) {
-      ParameterExpressionPtr param =
-        dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
-      param->parseHandler(classScope);
-    }
-  }
-  FunctionScope::RecordFunctionInfo(m_name, fs);
+void MethodStatement::addTraitMethodToScope(AnalysisResultConstPtr ar,
+                                            ClassScopePtr classScope) {
+  FunctionScopeRawPtr funcScope = getFunctionScope();
+  classScope->addFunction(ar, funcScope);
+  setSpecialMethod(classScope);
+  FunctionScope::RecordFunctionInfo(m_name, funcScope);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

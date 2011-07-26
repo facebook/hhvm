@@ -1879,6 +1879,10 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
   int nkid = s->getKidCount();
 
   switch (stype) {
+  case Statement::KindOfUseTraitStatement:
+  case Statement::KindOfTraitPrecStatement:
+  case Statement::KindOfTraitAliasStatement:
+    return StatementPtr();
   case Statement::KindOfStaticStatement:
     clear();
     ret = Converge;

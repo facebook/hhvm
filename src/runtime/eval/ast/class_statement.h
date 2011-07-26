@@ -70,7 +70,8 @@ public:
     Static = 8,
     Abstract = 16,
     Final = 32,
-    Interface = 64
+    Interface = 64,
+    Trait = 128
   };
 
   ClassStatement(STATEMENT_ARGS, const std::string &name,

@@ -55,6 +55,7 @@ public:
   const std::string &getOriginalName() const { return m_originalName;}
   std::string getName() const { return m_name;}
   void setName(const std::string name) { m_name = name; }
+  void setOriginalName(const std::string name) { m_originalName = name; }
   std::string getFullName() const;
   std::string getOriginalFullName() const;
   std::string getOriginalFullNameForInjection() const;
@@ -66,6 +67,10 @@ public:
 
   ModifierExpressionPtr getModifiers() {
     return m_modifiers;
+  }
+
+  void setModifiers(ModifierExpressionPtr newModifiers) {
+    m_modifiers = newModifiers;
   }
 
   void outputCPPStaticMethodWrapper(CodeGenerator &cg,
@@ -102,6 +107,14 @@ public:
     return m_generatorFunc;
   }
 
+  void setClassName(const std::string &name) { m_className = name; }
+  void setOriginalClassName(const std::string &name) {
+    m_originalClassName = name;
+  }
+
+  void addTraitMethodToScope(AnalysisResultConstPtr ar,
+                             ClassScopePtr classScope);
+
 protected:
   bool m_method;
   ModifierExpressionPtr m_modifiers;
@@ -117,6 +130,8 @@ protected:
   int m_cppLength;
   MethodStatementRawPtr m_origGeneratorFunc;
   MethodStatementRawPtr m_generatorFunc;
+
+  void setSpecialMethod(ClassScopePtr classScope);
 
   void outputCPPArgInjections(CodeGenerator &cg, AnalysisResultPtr ar,
                               const char *name, ClassScopePtr cls,

@@ -113,26 +113,32 @@ class ClassInfoEvaled : public ClassInfo, public AtomicCountable {
   virtual CStrRef getParentClass() const { return m_parentClass; }
 
   // implementing ClassInfo
-  const InterfaceSet &getInterfaces()    const { return m_interfaces;}
-  const InterfaceVec &getInterfacesVec() const { return m_interfacesVec;}
-  const MethodMap    &getMethods()       const { return m_methods;}
-  const MethodVec    &getMethodsVec()    const { return m_methodsVec;}
-  const PropertyMap  &getProperties()    const { return m_properties;}
-  const PropertyVec  &getPropertiesVec() const { return m_propertiesVec;}
-  const ConstantMap  &getConstants()     const { return m_constants;}
-  const ConstantVec  &getConstantsVec()  const { return m_constantsVec;}
+  const InterfaceSet  &getInterfaces()      const { return m_interfaces;}
+  const InterfaceVec  &getInterfacesVec()   const { return m_interfacesVec;}
+  const TraitSet      &getTraits()          const { return m_traits;}
+  const TraitVec      &getTraitsVec()       const { return m_traitsVec;}
+  const TraitAliasVec &getTraitAliasesVec() const { return m_traitAliasesVec;}
+  const MethodMap     &getMethods()         const { return m_methods;}
+  const MethodVec     &getMethodsVec()      const { return m_methodsVec;}
+  const PropertyMap   &getProperties()      const { return m_properties;}
+  const PropertyVec   &getPropertiesVec()   const { return m_propertiesVec;}
+  const ConstantMap   &getConstants()       const { return m_constants;}
+  const ConstantVec   &getConstantsVec()    const { return m_constantsVec;}
 
  private:
   friend class ClassStatement;
-  String       m_parentClass;
-  InterfaceSet m_interfaces;    // all interfaces
-  InterfaceVec m_interfacesVec; // all interfaces
-  MethodMap    m_methods;       // all methods
-  MethodVec    m_methodsVec;    // in source order
-  PropertyMap  m_properties;    // all properties
-  PropertyVec  m_propertiesVec; // in source order
-  ConstantMap  m_constants;     // all constants
-  ConstantVec  m_constantsVec;  // in source order
+  String        m_parentClass;
+  InterfaceSet  m_interfaces;      // all interfaces
+  InterfaceVec  m_interfacesVec;   // all interfaces
+  TraitSet      m_traits;          // all traits
+  TraitVec      m_traitsVec;       // all traits
+  TraitAliasVec m_traitAliasesVec; // trait aliases
+  MethodMap     m_methods;         // all methods
+  MethodVec     m_methodsVec;      // in source order
+  PropertyMap   m_properties;      // all properties
+  PropertyVec   m_propertiesVec;   // in source order
+  ConstantMap   m_constants;       // all constants
+  ConstantVec   m_constantsVec;    // in source order
 };
 
 class RequestEvalState {
@@ -164,10 +170,12 @@ public:
   static Array getUserFunctionsInfo();
   static Array getClassesInfo();
   static Array getInterfacesInfo();
+  static Array getTraitsInfo();
   static Array getConstants();
   static const ClassInfo::MethodInfo *findFunctionInfo(CStrRef name);
   static const ClassInfo *findClassInfo(const char *name);
   static const ClassInfo *findInterfaceInfo(const char *name);
+  static const ClassInfo *findTraitInfo(const char *name);
   static const ClassInfo::ConstantInfo *findConstantInfo(const char *name);
 
   // Global state getters
@@ -205,6 +213,7 @@ private:
   StringIMap<SmartPtr<EvalMethodInfo> > m_methodInfos;
   std::map<std::string, SmartPtr<ClassInfoEvaled> > m_classInfos;
   std::map<std::string, SmartPtr<ClassInfoEvaled> > m_interfaceInfos;
+  std::map<std::string, SmartPtr<ClassInfoEvaled> > m_traitInfos;
   std::set<EvalObjectData*> m_livingObjects;
   int64 m_ids;
   VariantStack m_argStack;

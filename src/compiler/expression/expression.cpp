@@ -279,6 +279,11 @@ BlockScopeRawPtr Expression::getOriginalScope() {
   return m_originalScope;
 }
 
+void Expression::setOriginalScope(BlockScopeRawPtr scope) {
+  m_originalScope = scope;
+  m_originalScopeSet = true;
+}
+
 ClassScopeRawPtr Expression::getOriginalClass() {
   BlockScopeRawPtr scope = getOriginalScope();
   return scope ? scope->getContainingClass() : ClassScopeRawPtr();
@@ -568,6 +573,34 @@ bool Expression::canonCompare(ExpressionPtr e) const {
   }
 
   return true;
+}
+
+bool Expression::equals(ExpressionPtr other) {
+  if (!other) return false;
+
+  // So that we can leverage canonCompare()
+  setCanonID(0);
+  other->setCanonID(0);
+
+  if (other->getKindOf() != getKindOf()) {
+    return false;
+  }
+
+  int nKids = getKidCount();
+  if (nKids != other->getKidCount()) {
+    return false;
+  }
+
+  for (int i = 0; i < nKids; i++) {
+    ExpressionPtr thisKid = getNthExpr(i);
+    ExpressionPtr otherKid = other->getNthExpr(i);
+
+    if (!thisKid->equals(otherKid)) {
+      return false;
+    }
+  }
+
+  return canonCompare(other);
 }
 
 ExpressionPtr Expression::getCanonTypeInfPtr() const {

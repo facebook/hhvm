@@ -49,6 +49,26 @@ StatementPtr ClassVariable::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
+static bool isEquivRedecl(const std::string &name,
+                          ExpressionPtr exp,
+                          ModifierExpressionPtr modif,
+                          Symbol * symbol) {
+  ASSERT(exp);
+  ASSERT(modif);
+  ASSERT(symbol);
+  if (symbol->getName()     != name                 ||
+      symbol->isProtected() != modif->isProtected() ||
+      symbol->isPrivate()   != modif->isPrivate()   ||
+      symbol->isPublic()    != modif->isPublic()    ||
+      symbol->isStatic()    != modif->isStatic())
+    return false;
+
+  ExpressionPtr symDeclExp =
+    dynamic_pointer_cast<Expression>(symbol->getDeclaration());
+  if (!exp) return !symDeclExp;
+  return exp->equals(symDeclExp);
+}
+
 void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
                                  ClassScopePtr scope) {
   ModifierExpressionPtr modifiers =
@@ -119,6 +139,50 @@ void ClassVariable::analyzeProgram(AnalysisResultPtr ar) {
       Compiler::Error(Compiler::InvalidOverride, exp);
     }
   }
+}
+
+void ClassVariable::addTraitPropsToScope(AnalysisResultPtr ar,
+                                         ClassScopePtr scope) {
+  ModifierExpressionPtr modifiers = scope->setModifiers(m_modifiers);
+  VariableTablePtr variables = scope->getVariables();
+
+  for (int i = 0; i < m_declaration->getCount(); i++) {
+    ExpressionPtr exp = (*m_declaration)[i];
+
+    SimpleVariablePtr var;
+    ExpressionPtr value;
+    if (exp->is(Expression::KindOfAssignmentExpression)) {
+      AssignmentExpressionPtr assignment =
+        dynamic_pointer_cast<AssignmentExpression>(exp);
+      var = dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
+      value = assignment->getValue();
+    } else {
+      var = dynamic_pointer_cast<SimpleVariable>(exp);
+      value = makeConstant(ar, "null");
+    }
+
+    const string &name = var->getName();
+    Symbol *sym;
+    ClassScopePtr prevScope = variables->isPresent(name) ? scope :
+      scope->getVariables()->findParent(ar, name, sym);
+
+    if (prevScope &&
+        !isEquivRedecl(name, exp, m_modifiers,
+                       prevScope->getVariables()->getSymbol(name))) {
+      Compiler::Error(Compiler::DeclaredVariableTwice, exp);
+      m_declaration->removeElement(i--);
+    } else {
+      if (prevScope != scope) { // Property is new or override, so add it
+        variables->add(name, Type::Variant, false, ar, exp, m_modifiers);
+        variables->getSymbol(name)->setValue(exp);
+        variables->setClassInitVal(name, value);
+        variables->markOverride(ar, name);
+      } else {
+        m_declaration->removeElement(i--);
+      }
+    }
+  }
+  scope->setModifiers(modifiers);
 }
 
 ConstructPtr ClassVariable::getNthKid(int n) const {

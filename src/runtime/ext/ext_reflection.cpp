@@ -184,6 +184,9 @@ Array f_hphp_get_class_info(CVarRef name) {
   if (cls == NULL) {
     cls = ClassInfo::FindInterface(className);
   }
+  if (cls == NULL) {
+    cls = ClassInfo::FindTrait(className);
+  }
 
   Array ret;
   if (cls == NULL) {
@@ -205,6 +208,28 @@ Array f_hphp_get_class_info(CVarRef name) {
     ret.set("interfaces", arr);
   }
 
+  // traits
+  {
+    Array arr = Array::Create();
+    const ClassInfo::TraitVec &traits = cls->getTraitsVec();
+    for (ClassInfo::TraitVec::const_iterator iter = traits.begin();
+         iter != traits.end(); ++iter) {
+      arr.set(*iter, 1);
+    }
+    ret.set("traits", arr);
+  }
+
+  // trait aliases
+  {
+    Array arr = Array::Create();
+    const ClassInfo::TraitAliasVec &aliases = cls->getTraitAliasesVec();
+    for (ClassInfo::TraitAliasVec::const_iterator iter = aliases.begin();
+         iter != aliases.end(); ++iter) {
+      arr.set(iter->first, iter->second);
+    }
+    ret.set("trait_aliases", arr);
+  }
+
   // attributes
   {
     int attribute = cls->getAttribute();
@@ -213,6 +238,7 @@ Array f_hphp_get_class_info(CVarRef name) {
     ret.set("abstract",   (bool)(attribute & ClassInfo::IsAbstract));
     ret.set("interface",  (bool)(attribute & ClassInfo::IsInterface));
     ret.set("final",      (bool)(attribute & ClassInfo::IsFinal));
+    ret.set("trait",      (bool)(attribute & ClassInfo::IsTrait));
     ret.set("modifiers",  get_modifiers(attribute, true));
   }
 
@@ -342,10 +368,7 @@ void f_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value) {
 }
 
 String f_hphp_get_original_class_name(CStrRef name) {
-  const ClassInfo *cls = ClassInfo::FindClass(name);
-  if (cls == NULL) {
-    cls = ClassInfo::FindInterface(name);
-  }
+  const ClassInfo *cls = ClassInfo::FindClassInterfaceOrTrait(name);
   return cls->getName();
 }
 

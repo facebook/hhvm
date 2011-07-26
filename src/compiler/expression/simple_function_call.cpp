@@ -430,6 +430,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
     if (!m_class && !m_redeclared && !m_dynamicInvoke && !m_funcScope &&
         (m_className.empty() ||
          (m_classScope &&
+          !m_classScope->isTrait() &&
           !m_classScope->derivesFromRedeclaring() &&
           !m_classScope->getAttribute(
             ClassScope::HasUnknownStaticMethodHandler) &&

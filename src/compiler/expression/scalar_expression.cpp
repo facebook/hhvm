@@ -50,6 +50,15 @@ ScalarExpression::ScalarExpression
 
 ScalarExpression::ScalarExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
+ int type, const std::string &value, const std::string &translated,
+ bool quoted /* false */)
+    : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ScalarExpression)),
+      m_type(type), m_value(value), m_originalValue(value),
+      m_translated(translated) {
+}
+
+ScalarExpression::ScalarExpression
+(EXPRESSION_CONSTRUCTOR_PARAMETERS,
  CVarRef value, bool quoted /* = true */)
     : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ScalarExpression)),
       m_quoted(quoted) {
@@ -116,16 +125,23 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
       case T_NS_C:
         m_translated = m_value;
         break;
+     //  case T_TRAIT_C: Note: T_TRAIT_C is translated at parse time
       case T_CLASS_C:
       case T_METHOD_C: {
+        if (!m_translated.empty()) break;
+
         BlockScopeRawPtr b = getScope();
         while (b && b->is(BlockScope::FunctionScope)) {
           b = b->getOuterScope();
         }
         m_translated.clear();
         if (b && b->is(BlockScope::ClassScope)) {
-          m_translated =
-            dynamic_pointer_cast<ClassScope>(b)->getOriginalName();
+          ClassScopePtr clsScope = dynamic_pointer_cast<ClassScope>(b);
+
+          // For traits, don't fill this yet -- it must be imported first
+          if (!clsScope->isTrait()) {
+            m_translated = clsScope->getOriginalName();
+          }
         }
         if (m_type == T_METHOD_C) {
           if (FunctionScopePtr func = getFunctionScope()) {
@@ -223,6 +239,7 @@ TypePtr ScalarExpression::inferenceImpl(AnalysisResultConstPtr ar,
 
   case T_CONSTANT_ENCAPSED_STRING:
   case T_ENCAPSED_AND_WHITESPACE:
+  case T_TRAIT_C:
   case T_CLASS_C:
   case T_NS_C:
   case T_METHOD_C:
@@ -287,6 +304,7 @@ bool ScalarExpression::isLiteralString() const {
   case T_CONSTANT_ENCAPSED_STRING:
   case T_ENCAPSED_AND_WHITESPACE:
     ASSERT(m_quoted); // fall through
+  case T_TRAIT_C:
   case T_CLASS_C:
   case T_NS_C:
   case T_METHOD_C:
@@ -314,7 +332,7 @@ std::string ScalarExpression::getLiteralString() const {
   }
 
   if (m_type == T_CLASS_C || m_type == T_NS_C || m_type == T_METHOD_C ||
-      m_type == T_FUNC_C) {
+      m_type == T_FUNC_C || m_type == T_TRAIT_C) {
     return m_translated;
   }
 
@@ -369,6 +387,7 @@ void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
     break;
   case T_LINE:
+  case T_TRAIT_C:
   case T_CLASS_C:
   case T_METHOD_C:
   case T_FUNC_C:
@@ -394,6 +413,7 @@ std::string ScalarExpression::getCPPLiteralString(bool *binary /* = NULL */) {
     output += "\"";
     break;
   }
+  case T_TRAIT_C:
   case T_CLASS_C:
   case T_NS_C:
   case T_METHOD_C:
@@ -451,6 +471,7 @@ void ScalarExpression::outputCPPString(CodeGenerator &cg,
     }
     break;
   }
+  case T_TRAIT_C:
   case T_CLASS_C:
   case T_NS_C:
   case T_METHOD_C:
@@ -549,6 +570,7 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   case T_CONSTANT_ENCAPSED_STRING:
   case T_ENCAPSED_AND_WHITESPACE:
   case T_STRING:
+  case T_TRAIT_C:
   case T_CLASS_C:
   case T_NS_C:
   case T_METHOD_C:
@@ -631,6 +653,7 @@ Variant ScalarExpression::getVariant() {
       return strtoll(m_value.c_str(), NULL, 0);
     case T_LINE:
       return String(m_translated).toInt64();
+    case T_TRAIT_C:
     case T_CLASS_C:
     case T_NS_C:
     case T_METHOD_C:
@@ -652,6 +675,7 @@ bool ScalarExpression::getString(const std::string *&s) const {
     case T_NUM_STRING:
       s = &m_value;
       return true;
+    case T_TRAIT_C:
     case T_CLASS_C:
     case T_NS_C:
     case T_METHOD_C:

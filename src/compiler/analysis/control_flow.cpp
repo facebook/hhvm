@@ -236,6 +236,11 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
         if (FunctionWalker::SkipRecurse(s)) assert(false);
         Statement::KindOf stype = s->getKindOf();
         switch (stype) {
+          case Statement::KindOfUseTraitStatement:
+          case Statement::KindOfTraitPrecStatement:
+          case Statement::KindOfTraitAliasStatement:
+            assert(false);
+            break;
           case Statement::KindOfStaticStatement:
             addEdge(s, BeforeConstruct, s, AfterConstruct);
             break;

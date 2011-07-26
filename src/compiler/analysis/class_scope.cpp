@@ -35,6 +35,11 @@
 #include <compiler/statement/statement_list.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/class_info.h>
+#include <compiler/statement/class_variable.h>
+#include <compiler/statement/class_constant.h>
+#include <compiler/statement/use_trait_statement.h>
+#include <compiler/statement/trait_prec_statement.h>
+#include <compiler/statement/trait_alias_statement.h>
 #include <runtime/base/zend/zend_string.h>
 #include <util/util.h>
 
@@ -52,7 +57,8 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
     m_kindOf(kindOf), m_parent(parent), m_bases(bases), m_attribute(0),
     m_redeclaring(-1), m_volatile(false),
     m_derivesFromRedeclaring(FromNormal), m_derivedByDynamic(false),
-    m_sep(false), m_needsCppCtor(false), m_needsInit(true) {
+    m_sep(false), m_needsCppCtor(false), m_needsInit(true),
+    m_traitStatus(NOT_FLATTENED) {
 
   m_dynamic = Option::IsDynamicClass(m_name);
 
@@ -72,7 +78,8 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     m_kindOf(KindOfObjectClass), m_parent(parent), m_bases(bases),
     m_attribute(0), m_dynamic(false), m_redeclaring(-1), m_volatile(false),
     m_derivesFromRedeclaring(FromNormal), m_derivedByDynamic(false),
-    m_sep(false), m_needsCppCtor(false), m_needsInit(true) {
+    m_sep(false), m_needsCppCtor(false), m_needsInit(true),
+    m_traitStatus(NOT_FLATTENED) {
   BOOST_FOREACH(FunctionScopePtr f, methods) {
     if (f->getName() == "__construct") setAttribute(HasConstructor);
     else if (f->getName() == "__destruct") setAttribute(HasDestructor);
@@ -330,6 +337,358 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
   }
 }
 
+void ClassScope::importTraitProperties(AnalysisResultPtr ar) {
+
+  for (unsigned i = 0; i < m_usedTraitNames.size(); i++) {
+    ClassScopePtr tCls = ar->findClass(m_usedTraitNames[i]);
+    if (!tCls) continue;
+    ClassStatementPtr tStmt =
+      dynamic_pointer_cast<ClassStatement>(tCls->getStmt());
+    StatementListPtr tStmts = tStmt->getStmts();
+    if (!tStmts) continue;
+    for (int s = 0; s < tStmts->getCount(); s++) {
+      ClassVariablePtr prop =
+        dynamic_pointer_cast<ClassVariable>((*tStmts)[s]);
+      if (prop) {
+        ClassVariablePtr cloneProp = dynamic_pointer_cast<ClassVariable>(
+          dynamic_pointer_cast<ClassStatement>(m_stmt)->addClone(prop));
+        cloneProp->resetScope(shared_from_this(), true);
+        cloneProp->addTraitPropsToScope(ar,
+                      dynamic_pointer_cast<ClassScope>(shared_from_this()));
+      }
+    }
+  }
+}
+
+void ClassScope::importTraitMethod(const TraitMethod &traitMethod,
+                                   AnalysisResultPtr ar,
+                                   const string &methName) {
+  MethodStatementPtr meth = traitMethod.m_method;
+  const string &origMethName = traitMethod.m_originalName;
+  ModifierExpressionPtr modifiers = traitMethod.m_modifiers;
+
+  // Check for errors before cloning
+  if (modifiers && modifiers->isStatic()) {
+    Compiler::Error(Compiler::InvalidAccessModifier, traitMethod.m_ruleStmt);
+    return;
+  }
+
+  MethodStatementPtr cloneMeth = dynamic_pointer_cast<MethodStatement>(
+    dynamic_pointer_cast<ClassStatement>(m_stmt)->addClone(meth));
+  cloneMeth->setName(methName);
+  cloneMeth->setOriginalName(origMethName);
+  // Note: keep previous modifiers if none specified when importing the trait
+  if (modifiers && modifiers->getCount()) {
+    cloneMeth->setModifiers(modifiers);
+  }
+  FunctionScopePtr funcScope = meth->getFunctionScope();
+  FunctionScopePtr cloneFuncScope
+    (new HPHP::FunctionScope(funcScope, ar, methName, origMethName, cloneMeth,
+                             cloneMeth->getModifiers()));
+  cloneMeth->resetScope(cloneFuncScope, true);
+  cloneFuncScope->setOuterScope(shared_from_this());
+
+  cloneMeth->addTraitMethodToScope(ar,
+               dynamic_pointer_cast<ClassScope>(shared_from_this()));
+  cloneMeth->analyzeProgram(ar);
+}
+
+void ClassScope::addImportTraitMethod(const TraitMethod &traitMethod,
+                                      const string &methName) {
+  m_importMethToTraitMap[methName].push_back(traitMethod);
+}
+
+void
+ClassScope::setImportTraitMethodModifiers(const string &methName,
+                                          ClassScopePtr traitCls,
+                                          ModifierExpressionPtr modifiers) {
+  TraitMethodList &methList = m_importMethToTraitMap[methName];
+
+  for (TraitMethodList::iterator iter = methList.begin();
+       iter != methList.end(); iter++) {
+    if (iter->m_trait == traitCls) {
+      iter->m_modifiers = modifiers;
+      return;
+    }
+  }
+}
+
+MethodStatementPtr
+ClassScope::findTraitMethod(AnalysisResultPtr ar,
+                            ClassScopePtr trait,
+                            const string &methodName,
+                            set<ClassScopePtr> &visitedTraits) {
+  if (visitedTraits.find(trait) != visitedTraits.end()) {
+    return MethodStatementPtr();
+  }
+  visitedTraits.insert(trait);
+
+  ClassStatementPtr tStmt =
+    dynamic_pointer_cast<ClassStatement>(trait->getStmt());
+  StatementListPtr tStmts = tStmt->getStmts();
+
+  // Look in the current trait
+  for (int s = 0; s < tStmts->getCount(); s++) {
+    MethodStatementPtr meth =
+      dynamic_pointer_cast<MethodStatement>((*tStmts)[s]);
+    if (meth) {    // Handle methods
+      if (meth->getName() == methodName) {
+        return meth;
+      }
+    }
+  }
+
+  // Look into children traits
+  for (int s = 0; s < tStmts->getCount(); s++) {
+    UseTraitStatementPtr useTraitStmt =
+      dynamic_pointer_cast<UseTraitStatement>((*tStmts)[s]);
+    if (useTraitStmt) {
+      vector<string> usedTraits;
+      useTraitStmt->getUsedTraitNames(usedTraits);
+      for (unsigned i = 0; i < usedTraits.size(); i++) {
+        MethodStatementPtr foundMethod =
+          findTraitMethod(ar, ar->findClass(usedTraits[i]), methodName,
+                          visitedTraits);
+        if (foundMethod) return foundMethod;
+      }
+    }
+  }
+  return MethodStatementPtr(); // not found
+}
+
+void ClassScope::findTraitMethodsToImport(AnalysisResultPtr ar,
+                                          ClassScopePtr trait) {
+  ClassStatementPtr tStmt =
+    dynamic_pointer_cast<ClassStatement>(trait->getStmt());
+  StatementListPtr tStmts = tStmt->getStmts();
+  if (!tStmts) return;
+
+  for (int s = 0; s < tStmts->getCount(); s++) {
+    MethodStatementPtr meth =
+      dynamic_pointer_cast<MethodStatement>((*tStmts)[s]);
+    if (meth) {
+      TraitMethod traitMethod(trait, meth, ModifierExpressionPtr(),
+                              MethodStatementPtr());
+      addImportTraitMethod(traitMethod, meth->getName());
+    }
+  }
+}
+
+void ClassScope::applyTraitPrecRule(TraitPrecStatementPtr stmt) {
+  const string methodName = Util::toLower(stmt->getMethodName());
+  const string selectedTraitName = Util::toLower(stmt->getTraitName());
+  set<string> otherTraitNames;
+  stmt->getOtherTraitNames(otherTraitNames);
+
+  map<string,TraitMethodList>::iterator methIter =
+    m_importMethToTraitMap.find(methodName);
+  if (methIter == m_importMethToTraitMap.end()) {
+    Compiler::Error(Compiler::UnknownObjectMethod, stmt);
+    return;
+  }
+  bool foundSelectedTrait = false;
+
+  TraitMethodList &methList = methIter->second;
+  for (TraitMethodList::iterator nextTraitIter = methList.begin();
+       nextTraitIter != methList.end(); ) {
+    TraitMethodList::iterator traitIter = nextTraitIter++;
+    string availTraitName = traitIter->m_trait->getName();
+    if (availTraitName == selectedTraitName) {
+      foundSelectedTrait = true;
+    } else {
+      if (otherTraitNames.find(availTraitName) != otherTraitNames.end()) {
+        otherTraitNames.erase(availTraitName);
+        methList.erase(traitIter);
+      }
+    }
+  }
+
+  // Report error if didn't find the selected trait
+  if (!foundSelectedTrait) {
+    Compiler::Error(Compiler::UnknownTrait, stmt);
+  }
+
+  // Sanity checking: otherTraitNames should be empty now
+  if (otherTraitNames.size()) {
+    Compiler::Error(Compiler::UnknownTrait, stmt);
+  }
+}
+
+bool ClassScope::hasMethod(const string &methodName) const {
+  return m_functions.find(methodName) != m_functions.end();
+}
+
+ClassScopePtr
+ClassScope::findSingleTraitWithMethod(AnalysisResultPtr ar,
+                                      const string &methodName) const {
+  ClassScopePtr trait = ClassScopePtr();
+
+  for (unsigned i = 0; i < m_usedTraitNames.size(); i++) {
+    ClassScopePtr tCls = ar->findClass(m_usedTraitNames[i]);
+    if (!tCls) continue;
+
+    if (tCls->hasMethod(methodName)) {
+      if (trait) { // more than one trait contains method
+        return ClassScopePtr();
+      }
+      trait = tCls;
+    }
+  }
+  return trait;
+}
+
+void ClassScope::addTraitAlias(TraitAliasStatementPtr aliasStmt) {
+  const string &traitName = aliasStmt->getTraitName();
+  const string &origMethName = aliasStmt->getMethodName();
+  const string &newMethName = aliasStmt->getNewMethodName();
+  string origName = traitName.empty() ? "(null)" : traitName;
+  origName += "::" + origMethName;
+  m_traitAliases.push_back(pair<string, string>(newMethName, origName));
+}
+
+void ClassScope::applyTraitAliasRule(AnalysisResultPtr ar,
+                                     TraitAliasStatementPtr stmt) {
+  const string traitName = Util::toLower(stmt->getTraitName());
+  const string origMethName = Util::toLower(stmt->getMethodName());
+  const string newMethName = Util::toLower(stmt->getNewMethodName());
+
+  // Get the trait's "class"
+  ClassScopePtr traitCls;
+  if (traitName.empty()) {
+    traitCls = findSingleTraitWithMethod(ar, origMethName);
+  } else {
+    traitCls = ar->findClass(traitName);
+  }
+  if (!traitCls || !(traitCls->isTrait())) {
+    Compiler::Error(Compiler::UnknownTrait, stmt);
+    return;
+  }
+
+  // Keep record of alias rule
+  addTraitAlias(stmt);
+
+  // Get the method
+  set<ClassScopePtr> visitedTraits;
+  MethodStatementPtr methStmt = findTraitMethod(ar, traitCls, origMethName,
+                                                visitedTraits);
+  if (!methStmt) {
+    Compiler::Error(Compiler::UnknownTraitMethod, stmt);
+    return;
+  }
+
+  if (origMethName == newMethName) {
+    setImportTraitMethodModifiers(origMethName, traitCls, stmt->getModifiers());
+  }
+  else {
+    // Insert renamed entry into the set of methods to be imported
+    TraitMethod traitMethod(traitCls, methStmt, stmt->getModifiers(), stmt,
+                            stmt->getNewMethodName());
+    addImportTraitMethod(traitMethod, newMethName);
+  }
+}
+
+void ClassScope::applyTraitRules(AnalysisResultPtr ar) {
+  ClassStatementPtr classStmt = dynamic_pointer_cast<ClassStatement>(getStmt());
+  ASSERT(classStmt);
+  StatementListPtr stmts = classStmt->getStmts();
+  if (!stmts) return;
+  for (int s = 0; s < stmts->getCount(); s++) {
+    StatementPtr stmt = (*stmts)[s];
+
+    UseTraitStatementPtr useStmt =
+      dynamic_pointer_cast<UseTraitStatement>(stmt);
+    if (!useStmt) continue;
+
+    StatementListPtr rules = useStmt->getStmts();
+    for (int r = 0; r < rules->getCount(); r++) {
+      StatementPtr rule = (*rules)[r];
+      TraitPrecStatementPtr precStmt =
+        dynamic_pointer_cast<TraitPrecStatement>(rule);
+      if (precStmt) {
+        applyTraitPrecRule(precStmt);
+      } else {
+        TraitAliasStatementPtr aliasStmt =
+          dynamic_pointer_cast<TraitAliasStatement>(rule);
+        ASSERT(aliasStmt);
+        applyTraitAliasRule(ar, aliasStmt);
+      }
+    }
+  }
+}
+
+void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
+  if (m_traitStatus == FLATTENED) return;
+  if (m_traitStatus == BEING_FLATTENED) {
+    Compiler::Error(Compiler::CyclicDependentTraits, getStmt());
+    return;
+  }
+  if (m_usedTraitNames.size() == 0) {
+    m_traitStatus = FLATTENED;
+    return;
+  }
+  m_traitStatus = BEING_FLATTENED;
+
+  // Find trait methods to be imported
+  for (unsigned i = 0; i < m_usedTraitNames.size(); i++) {
+    ClassScopePtr tCls = ar->findClass(m_usedTraitNames[i]);
+    if (!tCls || !(tCls->isTrait())) {
+      Compiler::Error(Compiler::UnknownTrait, getStmt());
+      continue;
+    }
+    // First, make sure the used trait is flattened
+    tCls->importUsedTraits(ar);
+
+    findTraitMethodsToImport(ar, tCls);
+  }
+
+  // Apply rules
+  applyTraitRules(ar);
+
+  // Apply precedence of current class over used traits
+  for (map<string,TraitMethodList>::iterator
+         iter = m_importMethToTraitMap.begin();
+       iter != m_importMethToTraitMap.end(); ) {
+    map<string,TraitMethodList>::iterator thisiter = iter;
+    iter++;
+    if (findFunction(ar, thisiter->first, 0, 0) != FunctionScopePtr()) {
+      m_importMethToTraitMap.erase(thisiter);
+    }
+  }
+
+  // Actually import the methods
+  for (map<string,TraitMethodList>::const_iterator
+         iter = m_importMethToTraitMap.begin();
+       iter != m_importMethToTraitMap.end(); iter++) {
+
+    // The rules may rule out a method from all traits.
+    // In this case, simply don't import the method.
+    if (iter->second.size() == 0) {
+      continue;
+    }
+    // Consistency checking: each name must only refer to one imported method
+    if (iter->second.size() > 1) {
+      Compiler::Error(Compiler::MethodInMultipleTraits, getStmt());
+    } else {
+      TraitMethodList::const_iterator traitMethIter = iter->second.begin();
+      importTraitMethod(*traitMethIter, ar, iter->first);
+    }
+  }
+
+  // Import trait properties
+  importTraitProperties(ar);
+
+  m_traitStatus = FLATTENED;
+}
+
+bool ClassScope::usesTrait(const string &traitName) const {
+  for (unsigned i = 0; i < m_usedTraitNames.size(); i++) {
+    if (traitName == m_usedTraitNames[i]) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool ClassScope::needsInvokeParent(AnalysisResultConstPtr ar,
                                    bool considerSelf /* = true */) {
   // check all functions this class has
@@ -541,6 +900,7 @@ void ClassScope::setSystem() {
 }
 
 bool ClassScope::needLazyStaticInitializer() {
+  if (isTrait()) return false;
   return getVariables()->getAttribute(VariableTable::ContainsDynamicStatic) ||
     getConstants()->hasDynamic();
 }
@@ -552,6 +912,9 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (isRedeclaring()) attribute |= ClassInfo::IsRedeclared;
   if (isVolatile()) attribute |= ClassInfo::IsVolatile;
   if (isInterface()) attribute |= ClassInfo::IsInterface|ClassInfo::IsAbstract;
+  if (isTrait()) attribute |= ClassInfo::IsTrait;
+  if (m_usedTraitNames.size() > 0) attribute |= ClassInfo::UsesTraits;
+  if (m_traitAliases.size() > 0) attribute |= ClassInfo::HasAliasedMethods;
   if (m_kindOf == KindOfAbstractClass) attribute |= ClassInfo::IsAbstract;
   if (m_kindOf == KindOfFinalClass) attribute |= ClassInfo::IsFinal;
   if (needLazyStaticInitializer()) attribute |= ClassInfo::IsLazyInit;
@@ -598,6 +961,25 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf("\"%s\", ", CodeGenerator::EscapeLabel(base).c_str());
   }
   cg_printf("NULL,\n");
+
+  // traits
+  if (attribute & ClassInfo::UsesTraits) {
+    for (unsigned i = 0; i < m_usedTraitNames.size(); i++) {
+      cg_printf("\"%s\", ",
+                CodeGenerator::EscapeLabel(m_usedTraitNames[i]).c_str());
+    }
+    cg_printf("NULL,\n");
+  }
+
+  // trait alias rules
+  if (attribute & ClassInfo::HasAliasedMethods) {
+    for (unsigned i = 0; i < m_traitAliases.size(); i++) {
+      cg_printf("\"%s\", \"%s\", ",
+                CodeGenerator::EscapeLabel(m_traitAliases[i].first).c_str(),
+                CodeGenerator::EscapeLabel(m_traitAliases[i].second).c_str());
+    }
+    cg_printf("NULL,\n");
+  }
 
   // methods
   for (unsigned int i = 0; i < m_functionsVec.size(); i++) {
@@ -816,6 +1198,7 @@ void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
 }
 
 void ClassScope::outputCPPDynamicClassDecl(CodeGenerator &cg) {
+  if (isTrait()) return;
   string clsStr = getId();
   const char *clsName = clsStr.c_str();
   cg_printf("ObjectData *%s%s(%s) NEVER_INLINE;\n",
@@ -832,6 +1215,7 @@ void ClassScope::outputCPPDynamicClassCreateDecl(CodeGenerator &cg) {
 
 void ClassScope::outputCPPDynamicClassImpl(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
+  if (isTrait()) return;
   string clsStr = getId();
   const char *clsName = clsStr.c_str();
   cg_indentBegin("ObjectData *%s%s(%s) {\n",
@@ -2024,6 +2408,9 @@ bool ClassScope::hasProperty(const string &name) const {
 }
 
 void ClassScope::setRedeclaring(AnalysisResultConstPtr ar, int redecId) {
+  if (isTrait()) {
+    Compiler::Error(Compiler::RedeclaredTrait, m_stmt);
+  }
   m_redeclaring = redecId;
   setVolatile(); // redeclared class is also volatile
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
@@ -2087,6 +2474,7 @@ std::string ClassScope::getForwardHeaderFilename() {
 
 void ClassScope::outputCPPHeader(AnalysisResultPtr ar,
                                  CodeGenerator::Output output) {
+  if (isTrait()) return;
   string filename = getHeaderFilename();
   string root = ar->getOutputPath() + "/";
   Util::mkdir(root + filename);
@@ -2118,6 +2506,7 @@ void ClassScope::outputCPPHeader(AnalysisResultPtr ar,
 
 void ClassScope::outputCPPForwardHeader(AnalysisResultPtr ar,
                                         CodeGenerator::Output output) {
+  if (isTrait()) return;
   string filename = getForwardHeaderFilename();
   string root = ar->getOutputPath() + "/";
   Util::mkdir(root + filename);
@@ -2235,6 +2624,7 @@ void ClassScope::outputCPPForwardHeader(AnalysisResultPtr ar,
 
 void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
                                              AnalysisResultPtr ar) {
+  if (isTrait()) return;
   string clsNameStr = getId();
   const char *clsName = clsNameStr.c_str();
   string parent = "ObjectData";
@@ -2441,6 +2831,7 @@ void ClassScope::outputCPPStaticMethodWrappers(CodeGenerator &cg,
                                                AnalysisResultPtr ar,
                                                set<string> &done,
                                                const char *cls) {
+  if (isTrait()) return;
   const StringToFunctionScopePtrVecMap &fmap = getFunctions();
   for (StringToFunctionScopePtrVecMap::const_iterator it = fmap.begin();
        it != fmap.end(); ++it) {
@@ -2459,6 +2850,7 @@ void ClassScope::outputCPPStaticMethodWrappers(CodeGenerator &cg,
 
 void ClassScope::outputCPPGlobalTableWrappersDecl(CodeGenerator &cg,
                                                   AnalysisResultPtr ar) {
+  if (isTrait()) return;
   string id = getId();
   cg_printf("extern const %sObjectStaticCallbacks %s%s;\n",
             isRedeclaring() ? "Redeclared" : "",
@@ -2479,6 +2871,7 @@ string ClassScope::getClassPropTableId(AnalysisResultPtr ar) {
 
 void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
                                                   AnalysisResultPtr ar) {
+  if (isTrait()) return;
   string id = getId();
   string prop = getClassPropTableId(ar);
   cg_indentBegin("const %sObjectStaticCallbacks %s%s = {\n",
@@ -2578,7 +2971,7 @@ void ClassScope::findJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar,
 void ClassScope::outputCPPMethodInvokeBareObjectSupport(
     CodeGenerator &cg, AnalysisResultPtr ar,
     FunctionScopePtr func, bool fewArgs) {
-
+  if (isTrait()) return;
   if (Option::InvokeWithSpecificArgs && !fewArgs &&
       !ar->isSystem() && !ar->isSepExtension() &&
       func->getMaxParamCount() == 0 && !func->isVariableArgument()) {
@@ -2626,6 +3019,7 @@ void ClassScope::outputCPPMethodInvokeBareObjectSupport(
 void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
     AnalysisResultPtr ar, const vector<const char*> &keys,
     const StringToFunctionScopePtrVecMap &funcScopes, bool fewArgs) {
+  if (isTrait()) return;
   string id = getId();
   ClassScopePtr self = dynamic_pointer_cast<ClassScope>(shared_from_this());
   for (vector<const char*>::const_iterator it = keys.begin();
@@ -2790,6 +3184,7 @@ void ClassScope::outputCPPMethodInvokeTable(
 
 void ClassScope::outputCPPJumpTableDecl(CodeGenerator &cg,
     AnalysisResultPtr ar) {
+  if (isTrait()) return;
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
          m_functions.begin(); iter != m_functions.end(); ++iter) {
     FunctionScopePtr func = iter->second[0];
@@ -2816,6 +3211,7 @@ void ClassScope::outputCPPJumpTableDecl(CodeGenerator &cg,
 void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
     AnalysisResultPtr ar, bool staticOnly, bool dynamicObject) {
 #if 0
+  if (isTrait()) return;
   string id = getId();
   string scope;
   scope += Option::ClassPrefix;

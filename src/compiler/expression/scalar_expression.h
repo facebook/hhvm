@@ -30,6 +30,9 @@ public:
   ScalarExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                    int type, const std::string &value, bool quoted = false);
   ScalarExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
+                   int type, const std::string &value,
+                   const std::string &translated, bool quoted = false);
+  ScalarExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                    CVarRef value, bool quoted = true);
 
   // change case to lower so to make it case insensitive

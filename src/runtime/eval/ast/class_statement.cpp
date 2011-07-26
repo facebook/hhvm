@@ -481,6 +481,8 @@ void ClassStatement::dump(std::ostream &out) const {
   }
   if (m_modifiers & Interface) {
     out << "interface ";
+  } else if (m_modifiers & Trait) {
+    out << "trait ";
   } else {
     out << "class ";
   }
@@ -555,6 +557,7 @@ void ClassStatement::getInfo(ClassInfoEvaled &info) const {
   if (m_modifiers & Interface) attr |= ClassInfo::IsInterface;
   if (m_modifiers & Abstract) attr |= ClassInfo::IsAbstract;
   if (m_modifiers & Final) attr |= ClassInfo::IsFinal;
+  if (m_modifiers & Trait) attr |= ClassInfo::IsTrait;
   if (attr == 0) attr = ClassInfo::IsNothing;
 
   info.m_attribute = (ClassInfo::Attribute)attr;

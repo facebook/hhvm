@@ -157,10 +157,18 @@ public:
   void onParam(Token &out, Token *params, Token &type, Token &var,
                bool ref, Token *defValue);
   void onClassStart(int type, Token &name, Token *parent);
-  void onClass(Token &out, Token &type, Token &name, Token &base,
+  void onClass(Token &out, int type, Token &name, Token &base,
                Token &baseInterface, Token &stmt);
   void onInterface(Token &out, Token &name, Token &base, Token &stmt);
   void onInterfaceName(Token &out, Token *names, Token &name);
+  void onTraitUse(Token &out, Token &traits, Token &rules);
+  void onTraitName(Token &out, Token *names, Token &name);
+  void onTraitRule(Token &out, Token &stmtList, Token &newStmt);
+  void onTraitPrecRule(Token &out, Token &className, Token &methodName,
+                       Token &otherClasses);
+  void onTraitAliasRuleStart(Token &out, Token &className, Token &methodName);
+  void onTraitAliasRuleModify(Token &out, Token &rule, Token &accessModifiers,
+                         Token &newMethodName);
   void onMethodStart(Token &name, Token &mods);
   void onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
                 Token &name, Token &params, Token &stmt, bool reloc = true);
@@ -225,6 +233,7 @@ private:
   std::vector<std::vector<StatementPtr> > m_prependingStatements;
   std::string m_clsName; // for T_CLASS_C inside a closure
   std::string m_funcName;
+  bool m_inTrait;
 
   // parser output
   StatementListPtr m_tree;

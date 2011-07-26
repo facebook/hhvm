@@ -484,6 +484,7 @@ void FileScope::outputCPPDeclarations(CodeGenerator &cg,
     for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
          it != m_classes.end(); ++it) {
       BOOST_FOREACH(ClassScopePtr cls, it->second) {
+        if (cls->isTrait()) continue;
         cg_printInclude(cls->getHeaderFilename());
       }
     }

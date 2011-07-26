@@ -35,6 +35,7 @@ ClassInfo *ClassInfo::s_systemFuncs = NULL;
 ClassInfo *ClassInfo::s_userFuncs = NULL;
 ClassInfo::ClassMap ClassInfo::s_classes;
 ClassInfo::ClassMap ClassInfo::s_interfaces;
+ClassInfo::ClassMap ClassInfo::s_traits;
 ClassInfoHook *ClassInfo::s_hook = NULL;
 
 Array ClassInfo::GetSystemFunctions() {
@@ -145,12 +146,39 @@ Array ClassInfo::GetInterfaces(bool declaredOnly) {
   return ret;
 }
 
+Array ClassInfo::GetTraits(bool declaredOnly) {
+  ASSERT(s_loaded);
+
+  Array ret = Array::Create();
+  for (ClassMap::const_iterator iter = s_traits.begin();
+       iter != s_traits.end(); ++iter) {
+    if (!declaredOnly || iter->second->isDeclared()) {
+      ret.append(iter->first);
+    }
+  }
+  if (s_hook) {
+    Array dyn = s_hook->getTraits();
+    if (!dyn.isNull()) {
+      ret.merge(dyn);
+    }
+  }
+  return ret;
+}
+
 bool ClassInfo::HasInterface(CStrRef name) {
   ASSERT(!name.isNull());
   ASSERT(s_loaded);
 
   if (s_hook && s_hook->findInterface(name)) return true;
   return s_interfaces.find(name) != s_interfaces.end();
+}
+
+bool ClassInfo::HasTrait(CStrRef name) {
+  ASSERT(!name.isNull());
+  ASSERT(s_loaded);
+
+  if (s_hook && s_hook->findTrait(name)) return true;
+  return s_traits.find(name) != s_traits.end();
 }
 
 // NOTE: FindInterface() currently cannot find interfaces redeclared by
@@ -168,6 +196,29 @@ const ClassInfo *ClassInfo::FindInterface(CStrRef name) {
     return iter->second;
   }
   return NULL;
+}
+
+// NOTE: FindTrait() currently cannot find traits redeclared by
+// classes.
+const ClassInfo *ClassInfo::FindTrait(CStrRef name) {
+  ASSERT(!name.isNull());
+  ASSERT(s_loaded);
+
+  if (s_hook) {
+    const ClassInfo *trait = s_hook->findTrait(name);
+    if (trait) return trait;
+  }
+  ClassMap::const_iterator iter = s_traits.find(name);
+  if (iter != s_traits.end()) {
+    return iter->second;
+  }
+  return NULL;
+}
+
+const ClassInfo *ClassInfo::FindClassInterfaceOrTrait(CStrRef name) {
+  const ClassInfo *r;
+  (r = FindClass(name)) || (r = FindInterface(name)) || (r = FindTrait(name));
+  return r;
 }
 
 const ClassInfo::ConstantInfo *ClassInfo::FindConstant(CStrRef name) {
@@ -259,12 +310,19 @@ void ClassInfo::GetClassMethods(MethodVec &ret, CStrRef classname,
         classInfo = FindInterface(classname);
         type = 2;
       }
+      if (classInfo == NULL) {
+        classInfo = FindTrait(classname);
+        type = 3;
+      }
       break;
     case 1:
       classInfo = FindClass(classname);
       break;
     case 2:
       classInfo = FindInterface(classname);
+      break;
+    case 3:
+      classInfo = FindTrait(classname);
       break;
     default:
       ASSERT(false);
@@ -274,7 +332,7 @@ void ClassInfo::GetClassMethods(MethodVec &ret, CStrRef classname,
       const ClassInfo::MethodVec &methods = classInfo->getMethodsVec();
       ret.insert(ret.end(), methods.begin(), methods.end());
 
-      if (type != 2) {
+      if (type < 2) {
         CStrRef parentClass = classInfo->getParentClass();
         if (!parentClass.empty()) {
           GetClassMethods(ret, parentClass, 1);
@@ -308,7 +366,7 @@ void ClassInfo::GetClassProperties(PropertyVec &props, CStrRef classname) {
   }
 }
 
-void ClassInfo::GetClassSymbolNames(CArrRef names, bool interface,
+void ClassInfo::GetClassSymbolNames(CArrRef names, bool interface, bool trait,
                                     std::vector<String> &classes,
                                     std::vector<String> *clsMethods,
                                     std::vector<String> *clsProperties,
@@ -321,6 +379,8 @@ void ClassInfo::GetClassSymbolNames(CArrRef names, bool interface,
       const ClassInfo *cls;
       if (interface) {
         cls = FindInterface(clsname.data());
+      } else if (trait) {
+        cls = FindTrait(clsname.data());
       } else {
         try {
           cls = FindClass(clsname.data());
@@ -381,9 +441,11 @@ void ClassInfo::GetSymbolNames(std::vector<String> &classes,
     clsConstants->reserve(constSize);
   }
 
-  GetClassSymbolNames(GetClasses(true), false, classes,
+  GetClassSymbolNames(GetClasses(true), false, false, classes,
                       clsMethods, clsProperties, clsConstants);
-  GetClassSymbolNames(GetInterfaces(true), true, classes,
+  GetClassSymbolNames(GetInterfaces(true), true, false, classes,
+                      clsMethods, clsProperties, clsConstants);
+  GetClassSymbolNames(GetTraits(true), false, true, classes,
                       clsMethods, clsProperties, clsConstants);
 
   if (clsMethods && methodSize < clsMethods->size()) {
@@ -575,7 +637,7 @@ const char *ClassInfo::getConstructor() const {
   if (hasMethod("__construct", defClass)) {
     return "__construct";
   }
-  if (hasMethod(m_name, defClass)) {
+  if (!(m_attribute & IsTrait) && hasMethod(m_name, defClass)) {
     return m_name;
   }
   return NULL;
@@ -697,6 +759,25 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
     m_interfacesVec.push_back(iface_name);
   }
   p++;
+
+  if (m_attribute & ClassInfo::UsesTraits) {
+    while (*p) {
+      String trait_name = makeStaticString(*p++);
+      ASSERT(m_traits.find(trait_name) == m_traits.end());
+      m_traits.insert(trait_name);
+      m_traitsVec.push_back(trait_name);
+    }
+    p++;
+  }
+
+  if (m_attribute & ClassInfo::HasAliasedMethods) {
+    while (*p) {
+      String new_name = makeStaticString(*p++);
+      String old_name = makeStaticString(*p++);
+      m_traitAliasesVec.push_back(pair<String, String>(new_name, old_name));
+    }
+    p++;
+  }
 
   while (*p) {
     MethodInfo *method = new MethodInfo();
@@ -823,10 +904,17 @@ void ClassInfo::Load() {
     } else if (attribute & IsInterface) {
       ASSERT(s_classes.find(info->m_name) == s_classes.end());
       ASSERT(s_interfaces.find(info->m_name) == s_interfaces.end());
+      ASSERT(s_traits.find(info->m_name) == s_traits.end());
       s_interfaces[info->m_name] = info;
+    } else if (attribute & IsTrait) {
+      ASSERT(s_classes.find(info->m_name) == s_classes.end());
+      ASSERT(s_interfaces.find(info->m_name) == s_interfaces.end());
+      ASSERT(s_traits.find(info->m_name) == s_traits.end());
+      s_traits[info->m_name] = info;
     } else {
       ASSERT(s_classes.find(info->m_name) == s_classes.end());
       ASSERT(s_interfaces.find(info->m_name) == s_interfaces.end());
+      ASSERT(s_traits.find(info->m_name) == s_traits.end());
       s_classes[info->m_name] = info;
     }
   }

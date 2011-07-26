@@ -63,10 +63,14 @@ class c_ReflectionClass : public ExtObjectData {
   public: Variant t_getconstants();
   public: Variant t_getconstant(CVarRef v_name);
   public: Array t_getinterfaces();
+  public: Array t_gettraits();
   public: Array t_getinterfacenames();
+  public: Array t_gettraitnames();
+  public: Array t_gettraitaliases();
   public: Variant t_isinterface();
   public: Variant t_isabstract();
   public: Variant t_isfinal();
+  public: Variant t_istrait();
   public: Variant t_getmodifiers();
   public: bool t_isinstance(CVarRef v_obj);
   public: Object t_newinstance(int num_args, Array args = Array());
@@ -83,6 +87,8 @@ class c_ReflectionClass : public ExtObjectData {
   public: Variant t_getextensionname();
   DECLARE_METHOD_INVOKE_HELPERS(getmethods);
   DECLARE_METHOD_INVOKE_HELPERS(isiterateable);
+  DECLARE_METHOD_INVOKE_HELPERS(gettraitnames);
+  DECLARE_METHOD_INVOKE_HELPERS(istrait);
   DECLARE_METHOD_INVOKE_HELPERS(getstaticpropertyvalue);
   DECLARE_METHOD_INVOKE_HELPERS(isuserdefined);
   DECLARE_METHOD_INVOKE_HELPERS(newinstance);
@@ -109,6 +115,7 @@ class c_ReflectionClass : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(getstartline);
   DECLARE_METHOD_INVOKE_HELPERS(getconstants);
   DECLARE_METHOD_INVOKE_HELPERS(getdoccomment);
+  DECLARE_METHOD_INVOKE_HELPERS(gettraitaliases);
   DECLARE_METHOD_INVOKE_HELPERS(isinterface);
   DECLARE_METHOD_INVOKE_HELPERS(issubclassof);
   DECLARE_METHOD_INVOKE_HELPERS(hasproperty);
@@ -123,6 +130,7 @@ class c_ReflectionClass : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(getname);
   DECLARE_METHOD_INVOKE_HELPERS(getproperty);
   DECLARE_METHOD_INVOKE_HELPERS(isinternal);
+  DECLARE_METHOD_INVOKE_HELPERS(gettraits);
 };
 ObjectData *coo_ReflectionClass() NEVER_INLINE;
 extern const int64 q_ReflectionClass$$IS_IMPLICIT_ABSTRACT;

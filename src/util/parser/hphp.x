@@ -126,6 +126,8 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"print"                { SETTOKEN; return T_PRINT;}
 <ST_IN_SCRIPTING>"class"                { SETTOKEN; return T_CLASS;}
 <ST_IN_SCRIPTING>"interface"            { SETTOKEN; return T_INTERFACE;}
+<ST_IN_SCRIPTING>"trait"                { SETTOKEN; return T_TRAIT;}
+<ST_IN_SCRIPTING>"insteadof"            { SETTOKEN; return T_INSTEADOF;}
 <ST_IN_SCRIPTING>"extends"              { SETTOKEN; return T_EXTENDS;}
 <ST_IN_SCRIPTING>"implements"           { SETTOKEN; return T_IMPLEMENTS;}
 
@@ -362,6 +364,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"__CLASS__"            { SETTOKEN; return T_CLASS_C; }
+<ST_IN_SCRIPTING>"__TRAIT__"            { SETTOKEN; return T_TRAIT_C; }
 <ST_IN_SCRIPTING>"__FUNCTION__"         { SETTOKEN; return T_FUNC_C;  }
 <ST_IN_SCRIPTING>"__METHOD__"           { SETTOKEN; return T_METHOD_C;}
 <ST_IN_SCRIPTING>"__LINE__"             { SETTOKEN; return T_LINE;    }

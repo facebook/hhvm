@@ -43,6 +43,9 @@ public:
   ModifierExpressionPtr getModifiers() const { return m_modifiers; }
 
   void getCtorAndInitInfo(bool &needsCppCtor, bool &needsInit);
+
+  void addTraitPropsToScope(AnalysisResultPtr ar, ClassScopePtr scope);
+
 private:
 
   void getCtorAndInitInfo(

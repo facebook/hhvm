@@ -836,7 +836,7 @@ void AnalysisResult::getScopesSet(BlockScopeRawPtrQueue &v) {
     for (ClassScopePtrVec::iterator it = iter->second.begin(),
            e = iter->second.end(); it != e; ++it) {
       ClassScopePtr cls = *it;
-      if (cls->isUserClass()) {
+      if (cls->isUserClass() && !cls->isTrait()) {
         v.push_back(cls);
         getFuncScopesSet(v, cls);
       }
@@ -2619,7 +2619,7 @@ void AnalysisResult::outputCPPExtClassImpl(CodeGenerator &cg) {
        iter != m_systemClasses.end(); ++iter) {
     ClassScopePtr cls = iter->second;
     bool extension = cls->getAttribute(ClassScope::Extension);
-    if (cls->isInterface()) continue;
+    if (cls->isInterface() || cls->isTrait()) continue;
 
     classes.push_back(cls->getOriginalName().c_str());
     merged[cls->getName()].push_back(cls);
@@ -2638,7 +2638,7 @@ void AnalysisResult::outputCPPExtClassImpl(CodeGenerator &cg) {
     for (ClassScopePtrVec::const_iterator iter2 = iter->second.begin();
          iter2 != iter->second.end(); ++iter2) {
       ClassScopePtr cls = *iter2;
-      if (!cls->isInterface()) {
+      if (!cls->isInterface() && !cls->isTrait()) {
         classes.push_back(cls->getOriginalName().c_str());
         break;
       }
@@ -3134,7 +3134,7 @@ void AnalysisResult::outputCPPDynamicClassTables(
       for (ClassScopePtrVec::const_iterator iter2 = iter->second.begin();
           iter2 != iter->second.end(); ++iter2) {
         cls = *iter2;
-        if (cls->isUserClass() && !cls->isInterface()) {
+        if (cls->isUserClass() && !cls->isInterface() && !cls->isTrait()) {
           classes.push_back(cls->getOriginalName().c_str());
           classScopes[cls->getName()].push_back(cls);
           if (!system) {
@@ -3148,14 +3148,14 @@ void AnalysisResult::outputCPPDynamicClassTables(
   }
   if (system) {
     BOOST_FOREACH(tie(n, cls), m_systemClasses) {
-      if (!cls->isInterface() && !cls->isSepExtension()) {
+      if (!cls->isInterface() && !cls->isSepExtension() && !cls->isTrait()) {
         classes.push_back(cls->getOriginalName().c_str());
       }
     }
     outputCPPExtClassImpl(cg);
   } else {
     BOOST_FOREACH(tie(n, cls), m_systemClasses) {
-      if (!cls->isInterface() && cls->isSepExtension()) {
+      if (!cls->isInterface() && cls->isSepExtension() && !cls->isTrait()) {
         classes.push_back(cls->getOriginalName().c_str());
         cls->outputCPPDynamicClassDecl(cg);
         cls->outputCPPGlobalTableWrappersDecl(cg, ar);

@@ -61,6 +61,12 @@ inline Variant x_class_parents(CVarRef obj, bool autoload = true) {
   return f_class_parents(obj, autoload);
 }
 
+inline Variant x_class_uses(CVarRef obj, bool autoload = true) {
+  FUNCTION_INJECTION_BUILTIN(class_uses);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  return f_class_uses(obj, autoload);
+}
+
 inline Variant x_iterator_apply(CVarRef obj, CVarRef func, CArrRef params = null_array) {
   FUNCTION_INJECTION_BUILTIN(iterator_apply);
   return f_iterator_apply(obj, func, params);

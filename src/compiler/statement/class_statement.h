@@ -45,6 +45,7 @@ public:
   virtual void getAllParents(AnalysisResultConstPtr ar,
                              std::vector<std::string> &names);
   void getCtorAndInitInfo(bool &needsCppCtor, bool &needsInit);
+  StatementPtr addClone(StatementPtr origStmt);
 private:
   int m_type;
   std::string m_parent;

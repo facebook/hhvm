@@ -40,6 +40,10 @@ Array f_get_declared_interfaces() {
   return ClassInfo::GetInterfaces(true);
 }
 
+Array f_get_declared_traits() {
+  return ClassInfo::GetTraits(true);
+}
+
 bool f_class_exists(CStrRef class_name, bool autoload /* = true */) {
   const ClassInfo *info = ClassInfo::FindClass(class_name);
 
@@ -80,6 +84,30 @@ bool f_interface_exists(CStrRef interface_name, bool autoload /* = true */) {
     // XXX we currently do not update cso for interfaces, which means that
     // if the name is declared, and getCurrent() is still info itself, it must
     // be an interface.
+    return info->getCurrent()->isClassInfoRedeclared();
+  }
+
+  return false;
+}
+
+bool f_trait_exists(CStrRef trait_name, bool autoload /* = true */) {
+  const ClassInfo *info = ClassInfo::FindTrait(trait_name);
+
+  if (autoload && (!info || (info->getAttribute() & ClassInfo::IsVolatile))) {
+    AutoloadHandler::s_instance->invokeHandler(trait_name);
+    if (!info && ClassInfo::FindTrait(trait_name)) {
+      return true;
+    }
+  }
+
+  if (info) {
+    return info->isDeclared();
+  }
+
+  // look for traits redeclared by classes
+  info = ClassInfo::FindClass(trait_name);
+  if (info && info->isClassInfoRedeclared()) {
+    if (!info->isDeclared()) return false;
     return info->getCurrent()->isClassInfoRedeclared();
   }
 

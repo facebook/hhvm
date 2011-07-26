@@ -35,6 +35,12 @@ inline Array x_get_declared_interfaces() {
   return f_get_declared_interfaces();
 }
 
+inline Array x_get_declared_traits() {
+  FUNCTION_INJECTION_BUILTIN(get_declared_traits);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  return f_get_declared_traits();
+}
+
 inline bool x_class_exists(CStrRef class_name, bool autoload = true) {
   FUNCTION_INJECTION_BUILTIN(class_exists);
   return f_class_exists(class_name, autoload);
@@ -43,6 +49,12 @@ inline bool x_class_exists(CStrRef class_name, bool autoload = true) {
 inline bool x_interface_exists(CStrRef interface_name, bool autoload = true) {
   FUNCTION_INJECTION_BUILTIN(interface_exists);
   return f_interface_exists(interface_name, autoload);
+}
+
+inline bool x_trait_exists(CStrRef trait_name, bool autoload = true) {
+  FUNCTION_INJECTION_BUILTIN(trait_exists);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  return f_trait_exists(trait_name, autoload);
 }
 
 inline Array x_get_class_methods(CVarRef class_or_object) {

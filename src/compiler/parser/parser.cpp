@@ -72,6 +72,9 @@
 #include <compiler/statement/throw_statement.h>
 #include <compiler/statement/goto_statement.h>
 #include <compiler/statement/label_statement.h>
+#include <compiler/statement/use_trait_statement.h>
+#include <compiler/statement/trait_prec_statement.h>
+#include <compiler/statement/trait_alias_statement.h>
 
 #include <compiler/analysis/function_scope.h>
 
@@ -159,6 +162,7 @@ Parser::Parser(Scanner &scanner, const char *fileName,
 
   newScope();
   m_staticVars.push_back(StringToExpressionPtrVecMap());
+  m_inTrait = false;
 
   Lock lock(m_ar->getMutex());
   m_ar->addFileScope(m_file);
@@ -481,14 +485,25 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
 
   ScalarExpressionPtr exp;
   switch (type) {
+    case T_METHOD_C:
+      if (m_inTrait) {
+        exp = NEW_EXP(ScalarExpression, type, scalar->text(),
+                      m_clsName + "::" + m_funcName);
+      } else {
+        exp = NEW_EXP(ScalarExpression, type, scalar->text());
+      }
+      break;
     case T_STRING:
     case T_LNUMBER:
     case T_DNUMBER:
     case T_LINE:
-    case T_METHOD_C:
     case T_FUNC_C:
     case T_CLASS_C:
       exp = NEW_EXP(ScalarExpression, type, scalar->text());
+      break;
+    case T_TRAIT_C:
+      exp = NEW_EXP(ScalarExpression, type, scalar->text(),
+                    m_inTrait ? m_clsName : "");
       break;
     case T_NS_C:
       exp = NEW_EXP(ScalarExpression, type, m_namespace);
@@ -785,9 +800,10 @@ void Parser::onClassStart(int type, Token &name, Token *parent) {
   pushComment();
   newScope();
   m_clsName = name.text();
+  m_inTrait = type == T_TRAIT;
 }
 
-void Parser::onClass(Token &out, Token &type, Token &name, Token &base,
+void Parser::onClass(Token &out, int type, Token &name, Token &base,
                      Token &baseInterface, Token &stmt) {
   StatementListPtr stmtList;
   if (stmt->stmt) {
@@ -795,7 +811,7 @@ void Parser::onClass(Token &out, Token &type, Token &name, Token &base,
   }
 
   ClassStatementPtr cls = NEW_STMT
-    (ClassStatement, type->num(), name->text(), base->text(),
+    (ClassStatement, type, name->text(), base->text(),
      dynamic_pointer_cast<ExpressionList>(baseInterface->exp),
      popComment(), stmtList);
   out->stmt = cls;
@@ -807,6 +823,7 @@ void Parser::onClass(Token &out, Token &type, Token &name, Token &base,
     out->stmt = NEW_STMT0(StatementList);
   }
   m_clsName.clear();
+  m_inTrait = false;
 }
 
 void Parser::onInterface(Token &out, Token &name, Token &base, Token &stmt) {
@@ -834,6 +851,85 @@ void Parser::onInterfaceName(Token &out, Token *names, Token &name) {
   }
   expList->addElement(NEW_EXP(ScalarExpression, T_STRING, name->text()));
   out->exp = expList;
+}
+
+void Parser::onTraitUse(Token &out, Token &traits, Token &rules) {
+  if (!rules->stmt) {
+    rules->stmt = NEW_STMT0(StatementList);
+  }
+  out->stmt = NEW_STMT(UseTraitStatement,
+                       dynamic_pointer_cast<ExpressionList>(traits->exp),
+                       dynamic_pointer_cast<StatementList>(rules->stmt));
+}
+
+void Parser::onTraitName(Token &out, Token *names, Token &name) {
+  ExpressionPtr expList;
+  if (names) {
+    expList = names->exp;
+  } else {
+    expList = NEW_EXP0(ExpressionList);
+  }
+  expList->addElement(NEW_EXP(ScalarExpression, T_STRING, name->text()));
+  out->exp = expList;
+}
+
+void Parser::onTraitRule(Token &out, Token &stmtList, Token &newStmt) {
+  if (!stmtList->stmt) {
+    out->stmt = NEW_STMT0(StatementList);
+  } else {
+    out->stmt = stmtList->stmt;
+  }
+  ASSERT(newStmt->stmt);
+  out->stmt->addElement(newStmt->stmt);
+}
+
+void Parser::onTraitPrecRule(Token &out, Token &traitName, Token &methodName,
+                             Token &otherTraits) {
+  ASSERT(otherTraits->exp);
+  ScalarExpressionPtr expTraitName = NEW_EXP(ScalarExpression, T_STRING,
+                                             traitName->text());
+  ScalarExpressionPtr expMethodName = NEW_EXP(ScalarExpression, T_STRING,
+                                              methodName->text());
+  out->stmt = NEW_STMT(TraitPrecStatement, expTraitName, expMethodName,
+                       dynamic_pointer_cast<ExpressionList>(otherTraits->exp));
+}
+
+void Parser::onTraitAliasRuleStart(Token &out, Token &traitName,
+                                   Token &methodName) {
+  ScalarExpressionPtr expTraitName = NEW_EXP(ScalarExpression, T_STRING,
+                                             traitName->text());
+  ScalarExpressionPtr expMethodName = NEW_EXP(ScalarExpression, T_STRING,
+                                              methodName->text());
+
+  ModifierExpressionPtr expModifiers = NEW_EXP0(ModifierExpression);
+
+  ScalarExpressionPtr expNewMethodName = NEW_EXP(ScalarExpression, T_STRING,
+                                                 methodName->text());
+
+  out->stmt = NEW_STMT(TraitAliasStatement, expTraitName, expMethodName,
+                       expModifiers, expNewMethodName);
+}
+
+void Parser::onTraitAliasRuleModify(Token &out, Token &rule,
+                                    Token &accessModifiers,
+                                    Token &newMethodName) {
+  TraitAliasStatementPtr ruleStmt=
+    dynamic_pointer_cast<TraitAliasStatement>(rule->stmt);
+
+  ASSERT(ruleStmt);
+
+  if (!newMethodName->text().empty()) {
+    ScalarExpressionPtr expNewMethodName =
+      NEW_EXP(ScalarExpression, T_STRING, newMethodName->text());
+    ruleStmt->setNewMethodName(expNewMethodName);
+  }
+
+  if (accessModifiers->exp) {
+    ruleStmt->setModifiers(dynamic_pointer_cast<ModifierExpression>
+                           (accessModifiers->exp));
+  }
+
+  out->stmt = ruleStmt;
 }
 
 void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,

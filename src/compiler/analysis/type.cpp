@@ -48,32 +48,34 @@ TypePtr Type::AutoObject  (new Type(Type::KindOfAutoObject  ));
 TypePtr Type::Any         (new Type(Type::KindOfAny         ));
 TypePtr Type::Some        (new Type(Type::KindOfSome        ));
 
-Type::TypePtrMap Type::TypeHintTypes;
+Type::TypePtrMap Type::s_TypeHintTypes;
+
+void Type::InitTypeHintMap() {
+  ASSERT(s_TypeHintTypes.empty());
+  s_TypeHintTypes["array"] = Type::Array;
+  if (Option::EnableHipHopExperimentalSyntax) {
+    s_TypeHintTypes["vector"]  = Type::Array;
+    s_TypeHintTypes["map"]     = Type::Array;
+    s_TypeHintTypes["set"]     = Type::Array;
+  }
+  if (Option::EnableHipHopSyntax) {
+    s_TypeHintTypes["bool"]    = Type::Boolean;
+    s_TypeHintTypes["boolean"] = Type::Boolean;
+    s_TypeHintTypes["int"]     = Type::Int64;
+    s_TypeHintTypes["integer"] = Type::Int64;
+    s_TypeHintTypes["real"]    = Type::Double;
+    s_TypeHintTypes["double"]  = Type::Double;
+    s_TypeHintTypes["float"]   = Type::Double;
+    s_TypeHintTypes["string"]  = Type::String;
+  }
+}
 
 const Type::TypePtrMap &Type::GetTypeHintTypes() {
-  if (TypeHintTypes.empty()) {
-    TypeHintTypes["array"] = Type::Array;
-    if (Option::EnableHipHopExperimentalSyntax) {
-      TypeHintTypes["vector"]  = Type::Array;
-      TypeHintTypes["map"]     = Type::Array;
-      TypeHintTypes["set"]     = Type::Array;
-    }
-    if (Option::EnableHipHopSyntax) {
-      TypeHintTypes["bool"]    = Type::Boolean;
-      TypeHintTypes["boolean"] = Type::Boolean;
-      TypeHintTypes["int"]     = Type::Int64;
-      TypeHintTypes["integer"] = Type::Int64;
-      TypeHintTypes["real"]    = Type::Double;
-      TypeHintTypes["double"]  = Type::Double;
-      TypeHintTypes["float"]   = Type::Double;
-      TypeHintTypes["string"]  = Type::String;
-    }
-  }
-  return TypeHintTypes;
+  return s_TypeHintTypes;
 }
 
 void Type::ResetTypeHintTypes() {
-  TypeHintTypes.clear();
+  s_TypeHintTypes.clear();
 }
 
 TypePtr Type::CreateObjectType(const std::string &classname) {

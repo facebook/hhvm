@@ -23,6 +23,7 @@
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/analysis/alias_manager.h>
 #include <compiler/analysis/code_error.h>
+#include <compiler/analysis/type.h>
 #include <util/json.h>
 #include <util/logger.h>
 #include <compiler/analysis/symbol_table.h>
@@ -537,6 +538,9 @@ int process(const ProgramOptions &po) {
     Logger::Error("%s\n", errs.c_str());
     return false;
   }
+
+  // load the type hints
+  Type::InitTypeHintMap();
 
   if (po.target != "php" || po.format != "pickled") {
     if (!BuiltinSymbols::Load(ar, po.target == "cpp" && po.format == "sys")) {

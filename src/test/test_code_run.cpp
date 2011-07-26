@@ -19,6 +19,7 @@
 #include <compiler/builtin_symbols.h>
 #include <compiler/code_generator.h>
 #include <compiler/analysis/analysis_result.h>
+#include <compiler/analysis/type.h>
 #include <util/util.h>
 #include <util/process.h>
 #include <compiler/option.h>
@@ -47,7 +48,6 @@ TestCodeRun::TestCodeRun() : m_perfMode(false) {
 bool TestCodeRun::preTest() {
   if (!CleanUp()) return false;
   m_infos.clear();
-  Type::ResetTypeHintTypes();
   return true;
 }
 
@@ -90,6 +90,10 @@ bool TestCodeRun::GenerateFiles(const char *input,
   if (subdir && subdir[0]) fullPath = fullPath + "/" + subdir;
   fullPath += "/main.php";
   if (!GenerateMainPHP(fullPath, input)) return false;
+
+  // load the type hints
+  Type::ResetTypeHintTypes();
+  Type::InitTypeHintMap();
 
   AnalysisResultPtr ar(new AnalysisResult());
   string path = string("runtime/tmp/") + subdir;

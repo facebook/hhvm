@@ -24,6 +24,10 @@
 
 #define NEW_TYPE(s) TypePtr(new Type(Type::KindOf ## s))
 
+class TestCodeRun;
+struct ProgramOptions;
+int process(const ProgramOptions&);
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -35,6 +39,8 @@ DECLARE_BOOST_TYPES(BlockScope);
 DECLARE_BOOST_TYPES(ClassScope);
 
 class Type : public JSON::ISerializable {
+  friend int ::process(const ProgramOptions&);
+  friend class ::TestCodeRun;
 public:
   typedef int KindOf;
 
@@ -97,7 +103,6 @@ public:
 
   typedef hphp_string_imap<TypePtr> TypePtrMap;
   static const TypePtrMap &GetTypeHintTypes();
-  static void ResetTypeHintTypes();
 
   /**
    * Uncertain types: types that are ambiguous yet.
@@ -258,7 +263,17 @@ private:
                                 TypePtr type1,
                                 TypePtr type2);
 
-  static TypePtrMap TypeHintTypes;
+  /**
+   * Must not be invoked concurrently
+   */
+  static void InitTypeHintMap();
+
+  /**
+   * Must not be invoked concurrently
+   */
+  static void ResetTypeHintTypes();
+
+  static TypePtrMap s_TypeHintTypes;
 
   const KindOf m_kindOf;
   const std::string m_name;

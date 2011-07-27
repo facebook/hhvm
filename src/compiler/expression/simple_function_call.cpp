@@ -1736,7 +1736,8 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       } else {
         cg.pushCallInfo(m_ciTemp);
         FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar,
-                                          m_arrayParams ? 0 : -1, false);
+                                          m_arrayParams ? 0 : -1, false,
+                                          -1, -1, -1, m_arrayParams);
         cg.popCallInfo();
       }
     }
@@ -2014,7 +2015,14 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                 CONTINUATION_OBJECT_NAME,
                 Option::MethodPrefix);
       m_params->removeElement(0); // remove cont obj
-      FunctionScope::OutputCPPArguments(m_params, m_funcScope,
+
+      // fetch the function scope for Continuation::update()
+      ClassScopePtr cls = ar->findClass("continuation");
+      ASSERT(cls && !cls->isRedeclaring());
+      FunctionScopePtr func = cls->findFunction(ar, "update", false);
+      ASSERT(func);
+
+      FunctionScope::OutputCPPArguments(m_params, func,
                                         cg, ar, 0, false);
       cg_printf(")");
       return;

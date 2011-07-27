@@ -517,7 +517,17 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
     TypePtr expType;
     if (valid && !canSetParamType && i < m_maxParam &&
         (!Option::HardTypeHints || !m_paramTypeSpecs[i])) {
-      expType = param->inferAndCheck(ar, getParamType(i), false);
+      /**
+       * What is this magic, you might ask?
+       *
+       * Here, we take advantage of implicit conversion from every type to
+       * Variant. Essentially, we don't really care what type comes out of this
+       * expression since it'll just get converted anyways. Doing it this way
+       * allows us to generate less temporaries along the way.
+       */
+      expType = getParamType(i);
+      if (expType->is(Type::KindOfVariant)) expType = Type::Some;
+      expType = param->inferAndCheck(ar, expType, false);
     } else {
       expType = param->inferAndCheck(ar, Type::Some, false);
     }
@@ -537,6 +547,13 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
         TypePtr paramType = getParamType(i);
         if (canSetParamType) {
           paramType = setParamType(ar, i, expType);
+        }
+        // See note above. If we have an implemented type, however, we
+        // should set the paramType to the implemented type to avoid an
+        // un-necessary cast
+        if (paramType->is(Type::KindOfVariant)) {
+          TypePtr it(param->getImplementedType());
+          paramType = it ? it : expType;
         }
         if (valid) {
           if (!Type::IsLegalCast(ar, expType, paramType) &&
@@ -1097,7 +1114,9 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
                                        bool variableArgument,
                                        int extraArgArrayId /* = -1 */,
                                        int extraArgArrayHash /* = -1 */,
-                                       int extraArgArrayIndex /* = -1 */) {
+                                       int extraArgArrayIndex /* = -1 */,
+                                       bool ignoreFuncParamTypes /* = false */)
+{
   int paramCount = params ? params->getOutputCount() : 0;
   ASSERT(extraArg <= paramCount);
   int iMax = paramCount - extraArg;
@@ -1168,7 +1187,25 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
       // the actual argument will always has a ref in the callee.
       bool wrap = false;
       bool scalar = param->isScalar();
-      if (Expression::CheckVarNR(param)) {
+      bool isValidFuncIdx = func && i < func->getMaxParamCount();
+      TypePtr expType(
+          isValidFuncIdx && !ignoreFuncParamTypes ?
+            // the common case, where we read the param type from the function
+            // scope
+            func->getParamType(i) :
+
+            // the uncommon case
+            !func && !ignoreFuncParamTypes ?
+
+              // if we don't have a function, then we can assume its param type
+              // is Variant.  however, we only want to do this if we aren't
+              // ignoring function param types
+              Type::Variant :
+
+              // in this case, just use the expected type from the parameter
+              // ast node (that's the default behavior of CheckVarNR)
+              TypePtr());
+      if (Expression::CheckVarNR(param, expType)) {
         if (scalar) {
           ASSERT(!cg.hasScalarVariant());
           cg.setScalarVariant();
@@ -1177,7 +1214,7 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
             (!Option::UseScalarVariant && !param->isLiteralNull())) {
           wrap = true;
         }
-        if (func && i < func->getMaxParamCount()) {
+        if (isValidFuncIdx) {
           VariableTablePtr variables = func->getVariables();
           if (variables->isLvalParam(func->getParamName(i))) {
             // Callee expects a Variant instead of CVarRef

@@ -72,6 +72,7 @@ void NewObjectExpression::analyzeProgram(AnalysisResultPtr ar) {
       if (ClassScopePtr cls = resolveClass()) {
         m_name = m_className;
         func = cls->findConstructor(ar, true);
+        if (func) func->addCaller(getScope());
       }
     }
 
@@ -79,9 +80,11 @@ void NewObjectExpression::analyzeProgram(AnalysisResultPtr ar) {
       markRefParams(func, "", canInvokeFewArgs());
     }
 
-    TypePtr at(getActualType());
-    if (at && at->isSpecificObject() && !getExpectedType()) {
-      setExpectedType(at);
+    if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+      TypePtr at(getActualType());
+      if (at && at->isSpecificObject() && !getExpectedType()) {
+        setExpectedType(at);
+      }
     }
   }
 }
@@ -90,6 +93,7 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                         bool coerce) {
   reset();
   m_classScope.reset();
+  FunctionScopePtr prev = m_funcScope;
   m_funcScope.reset();
   ConstructPtr self = shared_from_this();
   if (!m_name.empty() && !isStatic()) {
@@ -124,6 +128,7 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
         m_params->inferAndCheck(ar, Type::Some, false);
       }
     } else {
+      if (func != prev) func->addCaller(getScope());
       m_extraArg = func->inferParamTypes(ar, self, m_params,
                                          valid);
       m_variableArgument = func->isVariableArgument();

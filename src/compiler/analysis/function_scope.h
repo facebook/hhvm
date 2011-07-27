@@ -329,7 +329,8 @@ public:
                                  int extraArg, bool variableArgument,
                                  int extraArgArrayId = -1,
                                  int extraArgArrayHash = -1,
-                                 int extraArgArrayIndex = -1);
+                                 int extraArgArrayIndex = -1,
+                                 bool ignoreFuncParamTypes = false);
 
   /**
    * Only generate arguments that have effects. This is for keeping those

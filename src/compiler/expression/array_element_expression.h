@@ -31,6 +31,7 @@ public:
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
+  ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
   virtual int getLocalEffects() const { return m_localEffects; }
   virtual bool isRefable(bool checkError = false) const { return true;}
   bool isTemporary() const;
@@ -61,6 +62,7 @@ public:
 private:
   void setEffect(Effect effect);
   void clearEffect(Effect effect);
+  bool hasEffect(Effect effect) const;
 
   ExpressionPtr m_variable;
   ExpressionPtr m_offset;

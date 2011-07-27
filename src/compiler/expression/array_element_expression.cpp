@@ -256,6 +256,10 @@ void ArrayElementExpression::clearEffect(Effect effect) {
   }
 }
 
+bool ArrayElementExpression::hasEffect(Effect effect) const {
+  return m_localEffects & effect;
+}
+
 ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (!(m_context & (RefValue|LValue|UnsetContext|OprLValue|
                      InvokeArgument|DeepReference|DeepOprLValue))) {
@@ -282,6 +286,16 @@ ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
         }
       }
     }
+  }
+  return ExpressionPtr();
+}
+
+ExpressionPtr ArrayElementExpression::postOptimize(AnalysisResultConstPtr ar) {
+  if (!hasEffect(AccessorEffect)) return ExpressionPtr();
+  TypePtr at(m_variable->getActualType());
+  if (at && (at->is(Type::KindOfString) || at->is(Type::KindOfArray))) {
+    clearEffect(AccessorEffect);
+    return dynamic_pointer_cast<Expression>(shared_from_this());
   }
   return ExpressionPtr();
 }
@@ -380,13 +394,8 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
   }
 
   if (varType && Type::SameType(varType, Type::String)) {
-    clearEffect(AccessorEffect);
     m_implementedType.reset();
     return Type::String;
-  }
-
-  if (varType && Type::SameType(varType, Type::Array)) {
-    clearEffect(AccessorEffect);
   }
 
   TypePtr ret = propagateTypes(ar, Type::Variant);

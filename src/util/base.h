@@ -173,18 +173,6 @@ public:
   template <class S>
   hphp_raw_ptr(const hphp_raw_ptr<S> &p) : ptr(p.get()) {}
 
-  friend bool operator==(const hphp_raw_ptr<T> &p1, const hphp_raw_ptr<T> &p2) {
-    return p1.ptr == p2.ptr;
-  }
-
-  friend bool operator!=(const hphp_raw_ptr<T> &p1, const hphp_raw_ptr<T> &p2) {
-    return p1.ptr != p2.ptr;
-  }
-
-  friend bool operator<(const hphp_raw_ptr<T> &p1, const hphp_raw_ptr<T> &p2) {
-    return (size_t)p1.ptr < (size_t)p2.ptr;
-  }
-
   boost::shared_ptr<T> lock() const {
     return ptr ? boost::static_pointer_cast<T>(ptr->shared_from_this()) :
       boost::shared_ptr<T>();
@@ -207,6 +195,24 @@ public:
 private:
   T     *ptr;
 };
+
+#define IMPLEMENT_PTR_OPERATORS(A, B) \
+  template <class T, class U> \
+  inline bool operator==(const A<T> &p1, const B<U> &p2) { \
+    return p1.get() == p2.get(); \
+  } \
+  template <class T, class U> \
+  inline bool operator!=(const A<T> &p1, const B<U> &p2) { \
+    return p1.get() != p2.get(); \
+  } \
+  template <class T, class U> \
+  inline bool operator<(const A<T> &p1, const B<U> &p2) { \
+    return intptr_t(p1.get()) < intptr_t(p2.get()); \
+  }
+
+IMPLEMENT_PTR_OPERATORS(hphp_raw_ptr, hphp_raw_ptr);
+IMPLEMENT_PTR_OPERATORS(hphp_raw_ptr, boost::shared_ptr);
+IMPLEMENT_PTR_OPERATORS(boost::shared_ptr, hphp_raw_ptr);
 
 template<typename T>
 class hphp_const_char_map :

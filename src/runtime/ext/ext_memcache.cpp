@@ -270,13 +270,18 @@ Variant c_Memcache::t_get(CVarRef key, VRefParam flags /*= null*/) {
 
       return return_val;
     }
-  } else if (key.isString()) {
+  } else {
     char *payload = NULL;
     size_t payload_len = 0;
     uint32_t flags = 0;
 
     memcached_return_t ret;
     String skey = key.toString();
+
+    if (skey.length() == 0) {
+      return false;
+    }
+
     payload = memcached_get(&m_memcache, skey.c_str(), skey.length(),
                             &payload_len, &flags, &ret);
 
@@ -294,7 +299,6 @@ Variant c_Memcache::t_get(CVarRef key, VRefParam flags /*= null*/) {
 
     return retval;
   }
-
   return false;
 }
 

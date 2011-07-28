@@ -16,13 +16,6 @@
 */
 
 /**
- * This file contains code from MurmurHash, by Austin Appleby. The licensing
- * information for MurmurHash as specified on its website,
- * http://sites.google.com/site/murmurhash/, is as follows: "For business
- * purposes, Murmurhash is under the MIT license.
- */
-
-/**
  * FurcHash -- a consistent hash function using a binary decision tree.
  * Based on an algorithm by Mark Rabkin with two changes:
  *    1) Uses MurmurHash64A to hash the original key and to generate
@@ -45,13 +38,11 @@
 #include <string.h>
 #include <math.h>
 
+#include "hash_murmur.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* Seed constant for MurmurHash64A selected by search for optimum diffusion
- * including recursive application.
- */
-#define SEED 4193360111ul
 
 /* Maximum number tries for in-range result before just returning 0. */
 #define MAX_TRIES 32
@@ -64,75 +55,6 @@ namespace HPHP {
 /* Size of cache for hash values; should be > MAXTRIES * (FURCSHIFT + 1) */
 #define FURC_CACHE_SIZE 1024
 
-/**
- * MurmurHash2, 64-bit versions, by Austin Appleby
- *
- * The same caveats as 32-bit MurmurHash2 apply here - beware of alignment
- * and endian-ness issues if used across multiple platforms.
- *
- * 64-bit hash for 64-bit platforms
- */
-uint64_t murmur_hash_64A(const void* const key, const size_t len,
-                         const uint32_t seed) {
-    const uint64_t m = 0xc6a4a7935bd1e995ULL;
-    const int r = 47;
-
-    uint64_t h = seed ^ (len * m);
-
-    const uint64_t * data = (const uint64_t *)key;
-    const uint64_t * end = data + (len/8);
-
-    while(data != end) {
-        uint64_t k = *data++;
-
-        k *= m;
-        k ^= k >> r;
-        k *= m;
-
-        h ^= k;
-        h *= m;
-    }
-
-    const uint8_t * data2 = (const uint8_t*)data;
-
-    switch(len & 7) {
-        case 7: h ^= (uint64_t)data2[6] << 48;
-        case 6: h ^= (uint64_t)data2[5] << 40;
-        case 5: h ^= (uint64_t)data2[4] << 32;
-        case 4: h ^= (uint64_t)data2[3] << 24;
-        case 3: h ^= (uint64_t)data2[2] << 16;
-        case 2: h ^= (uint64_t)data2[1] << 8;
-        case 1: h ^= (uint64_t)data2[0];
-                h *= m;
-    };
-
-    h ^= h >> r;
-    h *= m;
-    h ^= h >> r;
-
-    return h;
-}
-
-/* MurmurHash64A performance-optimized for hash of uint64_t keys and seed = M0 */
-static uint64_t murmur_rehash_64A(uint64_t k) {
-    const uint64_t m = 0xc6a4a7935bd1e995ULL;
-    const int r = 47;
-
-    uint64_t h = (uint64_t)SEED ^ (sizeof(uint64_t) * m);
-
-    k *= m;
-    k ^= k >> r;
-    k *= m;
-
-    h ^= k;
-    h *= m;
-
-    h ^= h >> r;
-    h *= m;
-    h ^= h >> r;
-
-    return h;
-}
 
 /**
  * furc_get_bit -- the bitstream generator

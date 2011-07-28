@@ -97,6 +97,12 @@ inline bool x_furchash_hphp_ext_supported() {
   return f_furchash_hphp_ext_supported();
 }
 
+inline int64 x_hphp_murmurhash(CStrRef key, int len, int seed) {
+  FUNCTION_INJECTION_BUILTIN(hphp_murmurhash);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  return f_hphp_murmurhash(key, len, seed);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

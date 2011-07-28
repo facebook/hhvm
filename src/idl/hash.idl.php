@@ -351,6 +351,33 @@ DefineFunction(
     ),
   ));
 
+DefineFunction(
+  array(
+    'name'   => "hphp_murmurhash",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Int64,
+      'desc'   => "Returns the Int64 hash of the first len input characters",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "key",
+        'type'   => String,
+        'desc'   => "The key to hash",
+      ),
+      array(
+        'name'   => "len",
+        'type'   => Int32,
+        'desc'   => "Number of bytes to use from the hash",
+      ),
+      array(
+        'name'   => "seed",
+        'type'   => Int32,
+        'desc'   => "The seed to use for hashing",
+      ),
+    ),
+  ));
+
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
 //

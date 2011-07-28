@@ -39,6 +39,7 @@ class TestExtHash : public TestCppExt {
   bool test_hash_update();
   bool test_furchash_hphp_ext();
   bool test_furchash_hphp_ext_supported();
+  bool test_hphp_murmurhash();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

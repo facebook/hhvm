@@ -29,6 +29,7 @@
 #include <runtime/ext/hash/hash_haval.h>
 
 #include <runtime/ext/hash/hash_furc.h>
+#include <runtime/ext/hash/hash_murmur.h>
 
 #if defined(HPHP_OSS)
 #define furc_hash furc_hash_internal
@@ -383,6 +384,13 @@ int f_furchash_hphp_ext(CStrRef key, int len, int nPart) {
 
 bool f_furchash_hphp_ext_supported() {
   return true;
+}
+
+int64 f_hphp_murmurhash(CStrRef key, int len, int seed) {
+  if (len > key.size()) {
+    len = key.size();
+  }
+  return murmur_hash_64A(key, len, seed);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

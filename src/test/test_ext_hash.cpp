@@ -34,6 +34,7 @@ bool TestExtHash::RunTests(const std::string &which) {
   RUN_TEST(test_hash_update);
   RUN_TEST(test_furchash_hphp_ext);
   RUN_TEST(test_furchash_hphp_ext_supported);
+  RUN_TEST(test_hphp_murmurhash);
 
   return ret;
 }
@@ -187,3 +188,9 @@ bool TestExtHash::test_furchash_hphp_ext_supported() {
   // Nothing much to test here, unless duplicating the function logic
   return Count(true);
 }
+
+bool TestExtHash::test_hphp_murmurhash() {
+  VS(f_hphp_murmurhash("abc", 3, 1234),1090430250323801564)
+  return Count(true);
+}
+

@@ -27168,6 +27168,25 @@ Variant ifa_timezone_abbreviations_list(void *extra, int count, INVOKE_FEW_ARGS_
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("timezone_abbreviations_list", 0, 1);
   return (x_timezone_abbreviations_list());
 }
+Variant i_hphp_murmurhash(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 3)) return throw_wrong_arguments("hphp_murmurhash", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (x_hphp_murmurhash(arg0, arg1, arg2));
+  }
+}
+Variant ifa_hphp_murmurhash(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 3)) return throw_wrong_arguments("hphp_murmurhash", count, 3, 3, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  CVarRef arg2(a2);
+  return (x_hphp_murmurhash(arg0, arg1, arg2));
+}
 Variant i_magickradialblurimage(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("magickradialblurimage", count, 2, 2, 1);
@@ -27485,15 +27504,6 @@ Variant ifa_gmdate(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg1(a1);
   return (x_gmdate(arg0, arg1));
 }
-Variant i_posix_getgid(void *extra, CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("posix_getgid", 0, 1);
-  return (x_posix_getgid());
-}
-Variant ifa_posix_getgid(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("posix_getgid", 0, 1);
-  return (x_posix_getgid());
-}
 Variant i_sinh(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("sinh", count, 1, 1, 1);
@@ -27508,6 +27518,15 @@ Variant ifa_sinh(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("sinh", count, 1, 1, 1);
   CVarRef arg0(a0);
   return (x_sinh(arg0));
+}
+Variant i_posix_getgid(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("posix_getgid", 0, 1);
+  return (x_posix_getgid());
+}
+Variant ifa_posix_getgid(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("posix_getgid", 0, 1);
+  return (x_posix_getgid());
 }
 Variant i_hphp_get_call_info(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
@@ -39313,6 +39332,7 @@ CallInfo ci_drawpathcurvetoabsolute((void*)&i_drawpathcurvetoabsolute, (void*)&i
 CallInfo ci_hphp_set_error_page((void*)&i_hphp_set_error_page, (void*)&ifa_hphp_set_error_page, 1, 0, 0x0000000000000000LL);
 CallInfo ci_preg_match((void*)&i_preg_match, (void*)&ifa_preg_match, 5, 0, 0x0000000000000004LL);
 CallInfo ci_timezone_abbreviations_list((void*)&i_timezone_abbreviations_list, (void*)&ifa_timezone_abbreviations_list, 0, 0, 0x0000000000000000LL);
+CallInfo ci_hphp_murmurhash((void*)&i_hphp_murmurhash, (void*)&ifa_hphp_murmurhash, 3, 0, 0x0000000000000000LL);
 CallInfo ci_magickradialblurimage((void*)&i_magickradialblurimage, (void*)&ifa_magickradialblurimage, 2, 0, 0x0000000000000000LL);
 CallInfo ci_posix_geteuid((void*)&i_posix_geteuid, (void*)&ifa_posix_geteuid, 0, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_fetch_lengths((void*)&i_mysql_fetch_lengths, (void*)&ifa_mysql_fetch_lengths, 1, 0, 0x0000000000000000LL);
@@ -39331,8 +39351,8 @@ CallInfo ci_drawsetstrokecolor((void*)&i_drawsetstrokecolor, (void*)&ifa_drawset
 CallInfo ci_drawpathlinetohorizontalrelative((void*)&i_drawpathlinetohorizontalrelative, (void*)&ifa_drawpathlinetohorizontalrelative, 2, 0, 0x0000000000000000LL);
 CallInfo ci_gmmktime((void*)&i_gmmktime, (void*)&ifa_gmmktime, 6, 0, 0x0000000000000000LL);
 CallInfo ci_gmdate((void*)&i_gmdate, (void*)&ifa_gmdate, 2, 0, 0x0000000000000000LL);
-CallInfo ci_posix_getgid((void*)&i_posix_getgid, (void*)&ifa_posix_getgid, 0, 0, 0x0000000000000000LL);
 CallInfo ci_sinh((void*)&i_sinh, (void*)&ifa_sinh, 1, 0, 0x0000000000000000LL);
+CallInfo ci_posix_getgid((void*)&i_posix_getgid, (void*)&ifa_posix_getgid, 0, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_get_call_info((void*)&i_hphp_get_call_info, (void*)&ifa_hphp_get_call_info, 2, 0, 0x0000000000000000LL);
 CallInfo ci_apc_fetch((void*)&i_apc_fetch, (void*)&ifa_apc_fetch, 3, 0, 0x0000000000000002LL);
 CallInfo ci_fileowner((void*)&i_fileowner, (void*)&ifa_fileowner, 1, 0, 0x0000000000000000LL);
@@ -48380,6 +48400,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 5495:
       HASH_GUARD(0x412521E7ADB21577LL, iconv_mime_decode_headers) {
         ci = &ci_iconv_mime_decode_headers;
+        return true;
+      }
+      HASH_GUARD(0x4D2715A831B9D577LL, hphp_murmurhash) {
+        ci = &ci_hphp_murmurhash;
         return true;
       }
       HASH_GUARD(0x1E154D823451B577LL, magicksetresolution) {

@@ -507,6 +507,7 @@ Variant FunctionStatement::invokeClosure(ObjectData *closure,
   ASSERT(closure);
   ASSERT(m_closure);
   FuncScopeVariableEnvironment fenv(this);
+  fenv.setClosure(closure);
   bindParams(fenv, params);
 
   p_GeneratorClosure c(closure);

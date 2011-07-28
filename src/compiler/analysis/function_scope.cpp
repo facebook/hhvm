@@ -268,6 +268,12 @@ bool FunctionScope::isGenerator() const {
   return getOrigGenStmt();
 }
 
+bool FunctionScope::isGeneratorFromClosure() const {
+  bool res = isGenerator() && getOrigGenFS()->isClosure();
+  ASSERT(!res || getOrigGenFS()->isClosureGenerator());
+  return res;
+}
+
 MethodStatementRawPtr FunctionScope::getOrigGenStmt() const {
   if (!getStmt()) return MethodStatementRawPtr();
   MethodStatementPtr m =
@@ -900,14 +906,8 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
     ParameterExpressionPtrVec useVars;
     if (needsAnonClosureClass(useVars)) {
-      VariableTablePtr variables = getVariables();
-      cg_printf("%sClosure$%s *closure ATTRIBUTE_UNUSED = "
-                "(%sClosure$%s*)extra;\n",
-                Option::ClassPrefix,
-                CodeGenerator::FormatLabel(m_name).c_str(),
-                Option::ClassPrefix,
-                CodeGenerator::FormatLabel(m_name).c_str());
       if (!m_closureGenerator) {
+        VariableTablePtr variables = getVariables();
         BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
           const string &name = param->getName();
           Symbol *sym = variables->getSymbol(name);
@@ -1827,6 +1827,7 @@ void FunctionScope::getClosureUseVars(
     bool filterUsed /* = true */) {
   useVars.clear();
   if (!m_closureVars) return;
+  ASSERT(isClosure());
   VariableTablePtr variables = getVariables();
   for (int i = 0; i < m_closureVars->getCount(); i++) {
     ParameterExpressionPtr param =
@@ -1843,6 +1844,7 @@ static U pair_first_elem(pair<U, V> p) { return p.first; }
 
 bool FunctionScope::needsAnonClosureClass(ParameterExpressionPtrVec &useVars) {
   useVars.clear();
+  if (!isClosure()) return false;
   ParameterExpressionPtrIdxPairVec useVars0;
   getClosureUseVars(useVars0, !m_closureGenerator);
   useVars.resize(useVars0.size());
@@ -1851,15 +1853,15 @@ bool FunctionScope::needsAnonClosureClass(ParameterExpressionPtrVec &useVars) {
             useVars0.end(),
             useVars.begin(),
             pair_first_elem<ParameterExpressionPtr, int>);
-  if (!m_closureVars) return false;
-  return useVars.size() > 0;
+  return useVars.size() > 0 || getVariables()->hasStaticLocals();
 }
 
 bool FunctionScope::needsAnonClosureClass(
     ParameterExpressionPtrIdxPairVec &useVars) {
+  useVars.clear();
+  if (!isClosure()) return false;
   getClosureUseVars(useVars, !m_closureGenerator);
-  if (!m_closureVars) return false;
-  return useVars.size() > 0;
+  return useVars.size() > 0 || getVariables()->hasStaticLocals();
 }
 
 void FunctionScope::outputCPPSubClassParam(CodeGenerator &cg,
@@ -1906,18 +1908,27 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
               Option::ClassPrefix, funcName.c_str());
 
     VariableTablePtr variables = getVariables();
-    BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
-      const string &name = param->getName();
-      Symbol *sym = variables->getSymbol(name);
-      TypePtr t(sym->getFinalType());
-      t->outputCPPDecl(cg, ar, shared_from_this());
-      const string &varName = variables->getVariableName(ar, sym);
-      cg_printf(" %s;\n", varName.c_str());
+    if (!useVars.empty()) {
+      BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
+        const string &name = param->getName();
+        Symbol *sym = variables->getSymbol(name);
+        TypePtr t(sym->getFinalType());
+        t->outputCPPDecl(cg, ar, shared_from_this());
+        const string &varName = variables->getVariableName(ar, sym);
+        cg_printf(" %s;\n", varName.c_str());
+      }
+      cg_printf("\n");
     }
 
-    cg_printf("%sClosure$%s(const CallInfo *func, void *extra, ",
+    if (variables->hasStaticLocals()) {
+      variables->outputCPPStaticLocals(cg, ar);
+      cg_printf("\n");
+    }
+
+    cg_printf("%sClosure$%s(const CallInfo *func, void *extra",
               Option::ClassPrefix, funcName.c_str());
 
+    if (!useVars.empty()) cg_printf(", ");
     bool hasEmit = false;
     BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
       if (!hasEmit) hasEmit = true;
@@ -1964,11 +1975,19 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
     vector<Symbol*> symbols;
     variables->getSymbols(symbols, true);
 
-    BOOST_FOREACH(Symbol *sym, symbols) {
-      const string &varName = variables->getVariableName(ar, sym);
-      TypePtr type = sym->getFinalType();
-      type->outputCPPDecl(cg, ar, shared_from_this());
-      cg_printf(" %s;\n", varName.c_str());
+    if (!symbols.empty()) {
+      BOOST_FOREACH(Symbol *sym, symbols) {
+        const string &varName = variables->getVariableName(ar, sym);
+        TypePtr type = sym->getFinalType();
+        type->outputCPPDecl(cg, ar, shared_from_this());
+        cg_printf(" %s;\n", varName.c_str());
+      }
+      cg_printf("\n");
+    }
+
+    if (variables->hasStaticLocals()) {
+      variables->outputCPPStaticLocals(cg, ar);
+      cg_printf("\n");
     }
 
     // constructor is bootstrapped with all the parameters

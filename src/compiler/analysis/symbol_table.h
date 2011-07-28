@@ -41,6 +41,10 @@ DECLARE_BOOST_TYPES(BlockScope);
 typedef std::set<std::string> SymbolSet;
 typedef std::map<std::string, std::set<std::string> > Type2SymbolSetMap;
 
+class Symbol;
+typedef hphp_string_map<Symbol*> StringToSymbolMap;
+typedef std::vector<Symbol*>     SymbolVec;
+
 class Symbol {
 public:
   Symbol() : m_parameter(-1) { m_flags_val = 0; }

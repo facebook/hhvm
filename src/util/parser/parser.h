@@ -78,11 +78,12 @@ public:
 
   static char GetAnonPrefix(AnonFuncKind kind);
 
-  static bool IsClosureName(const std::string &name);
-  static bool IsCreateFunctionName(const std::string &name);
-  static bool IsContinuationName(const std::string &name);
-  static bool IsClosureOrContinuationName(const std::string &name);
-  static bool IsAnonFunctionName(const std::string &name);
+  static bool IsClosureName                (const std::string &name);
+  static bool IsCreateFunctionName         (const std::string &name);
+  static bool IsContinuationName           (const std::string &name);
+  static bool IsContinuationFromClosureName(const std::string &name);
+  static bool IsClosureOrContinuationName  (const std::string &name);
+  static bool IsAnonFunctionName           (const std::string &name);
 
   /**
    * Reset parser static variables. Good for unit tests.

@@ -39,7 +39,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // StaticGlobalInfo
 
-string VariableTable::StaticGlobalInfo::getId
+string VariableTable::StaticGlobalInfo::GetId
 (ClassScopePtr cls, FunctionScopePtr func,
  const string &name) {
   ASSERT(cls || func);
@@ -343,14 +343,22 @@ void VariableTable::addStaticVariable(Symbol *sym,
   sym->setStatic();
   m_hasStatic = true;
 
-  VariableTablePtr globalVariables = ar->getVariables();
-  StaticGlobalInfoPtr sgi(new StaticGlobalInfo());
-  sgi->sym = sym;
-  sgi->variables = this;
-  sgi->cls = getClassScope();
-  sgi->func = member ? FunctionScopeRawPtr() : getFunctionScope();
+  FunctionScopeRawPtr funcScope = getFunctionScope();
+  if (funcScope &&
+      (funcScope->isClosure() || funcScope->isGeneratorFromClosure())) {
+    // static variables for closures/closure generators are local to the
+    // function scope
+    m_staticLocalsVec.push_back(sym);
+  } else {
+    VariableTablePtr globalVariables = ar->getVariables();
+    StaticGlobalInfoPtr sgi(new StaticGlobalInfo());
+    sgi->sym = sym;
+    sgi->variables = this;
+    sgi->cls = getClassScope();
+    sgi->func = member ? FunctionScopeRawPtr() : getFunctionScope();
 
-  globalVariables->m_staticGlobalsVec.push_back(sgi);
+    globalVariables->m_staticGlobalsVec.push_back(sgi);
+  }
 }
 
 void VariableTable::addStaticVariable(Symbol *sym,
@@ -772,7 +780,7 @@ void VariableTable::canonicalizeStaticGlobals() {
   for (unsigned int i = 0; i < m_staticGlobalsVec.size(); i++) {
     StaticGlobalInfoPtr &sgi = m_staticGlobalsVec[i];
     if (!sgi->sym->getDeclaration()) continue;
-    string id = StaticGlobalInfo::getId(sgi->cls, sgi->func,
+    string id = StaticGlobalInfo::GetId(sgi->cls, sgi->func,
                                         sgi->sym->getName());
     ASSERT(m_staticGlobals.find(id) == m_staticGlobals.end());
     m_staticGlobals[id] = sgi;
@@ -893,7 +901,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
          m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     StaticGlobalInfoPtr sgi = iter->second;
     // id can change if we discover it is redeclared
-    const string &id = StaticGlobalInfo::getId(sgi->cls, sgi->func,
+    const string &id = StaticGlobalInfo::GetId(sgi->cls, sgi->func,
                                                sgi->sym->getName());
     if (!sgi->func && !sgi->sym->isOverride()) {
       TypePtr varType = sgi->sym->getFinalType();
@@ -1024,7 +1032,7 @@ void VariableTable::collectCPPGlobalSymbols(StringPairSetVec &symbols,
        m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     StaticGlobalInfoPtr sgi = iter->second;
     // id can change if we discover it is redeclared
-    const string &id = StaticGlobalInfo::getId(sgi->cls, sgi->func,
+    const string &id = StaticGlobalInfo::GetId(sgi->cls, sgi->func,
                                                sgi->sym->getName());
     if (!sgi->func && !sgi->sym->isOverride()) {
       string name = Option::StaticPropertyPrefix + id;
@@ -1076,7 +1084,7 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
     if (!sgi->func && !sgi->sym->isOverride()) {
       TypePtr varType = sgi->sym->getFinalType();
       if (varType->isPrimitive()) {
-        const string &id = StaticGlobalInfo::getId(sgi->cls, sgi->func,
+        const string &id = StaticGlobalInfo::GetId(sgi->cls, sgi->func,
                                                    sgi->sym->getName());
         const char *initializer = varType->getCPPInitializer();
         ASSERT(initializer);
@@ -1411,11 +1419,32 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   bool isGenScope = false;
+  FunctionScopeRawPtr func;
   if (m_blockScope.is(BlockScope::FunctionScope)) {
-    FunctionScope &fscope = static_cast<FunctionScope&>(m_blockScope);
-    if (fscope.isGenerator()) {
+    func = FunctionScopeRawPtr(static_cast<FunctionScope*>(&m_blockScope));
+    if (func->isGenerator()) {
       isGenScope = true;
     }
+  }
+
+  ParameterExpressionPtrVec useVars;
+  if (func->needsAnonClosureClass(useVars)) {
+    cg_printf("%sClosure$%s *closure ATTRIBUTE_UNUSED = "
+              "(%sClosure$%s*)extra;\n",
+              Option::ClassPrefix,
+              CodeGenerator::FormatLabel(func->getName()).c_str(),
+              Option::ClassPrefix,
+              CodeGenerator::FormatLabel(func->getName()).c_str());
+  }
+
+  if (isGenScope) {
+    const string &name = CodeGenerator::FormatLabel(m_blockScope.getName());
+    cg_printf("%sContinuation$%s *%s ATTRIBUTE_UNUSED = "
+              "(%sContinuation$%s*) %s%s.get();\n",
+              Option::ClassPrefix,    name.c_str(),
+              TYPED_CONTINUATION_OBJECT_NAME,
+              Option::ClassPrefix,    name.c_str(),
+              Option::VariablePrefix, CONTINUATION_OBJECT_NAME);
   }
 
   bool declared = false;
@@ -1429,7 +1458,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
 
     if (sym->isStatic()) {
-      string id = StaticGlobalInfo::getId
+      string id = StaticGlobalInfo::GetId
         (getClassScope(), getFunctionScope(), name);
 
       TypePtr type = sym->getFinalType();
@@ -1449,13 +1478,19 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                   Option::InitPrefix, Option::StaticVariablePrefix,
                   id.c_str(), cname);
       } else {
-        cg_printf(" &%s%s ATTRIBUTE_UNUSED = g->%s%s;\n",
+        const char *g =
+          getFunctionScope()->isClosure() ?
+            "closure" :
+            getFunctionScope()->isGeneratorFromClosure() ?
+              TYPED_CONTINUATION_OBJECT_NAME :
+              "g";
+        cg_printf(" &%s%s ATTRIBUTE_UNUSED = %s->%s%s;\n",
                   Option::StaticVariablePrefix, fname.c_str(),
-                  Option::StaticVariablePrefix, id.c_str());
-        cg_printf("bool &%s%s%s ATTRIBUTE_UNUSED = g->%s%s%s;\n",
+                  g, Option::StaticVariablePrefix, id.c_str());
+        cg_printf("bool &%s%s%s ATTRIBUTE_UNUSED = %s->%s%s%s;\n",
                   Option::InitPrefix, Option::StaticVariablePrefix,
                   fname.c_str(),
-                  Option::InitPrefix, Option::StaticVariablePrefix,
+                  g, Option::InitPrefix, Option::StaticVariablePrefix,
                   id.c_str());
       }
 
@@ -1524,21 +1559,11 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf("\n");
   }
 
-  if (isGenScope) {
-    const string &name = CodeGenerator::FormatLabel(m_blockScope.getName());
-    cg_printf("%sContinuation$%s *%s ATTRIBUTE_UNUSED = "
-              "(%sContinuation$%s*) %s%s.get();\n",
-              Option::ClassPrefix,    name.c_str(),
-              TYPED_CONTINUATION_OBJECT_NAME,
-              Option::ClassPrefix,    name.c_str(),
-              Option::VariablePrefix, CONTINUATION_OBJECT_NAME);
-  }
-
   if (Option::GenerateCPPMacros && getAttribute(ContainsDynamicVariable) &&
       cg.getOutput() != CodeGenerator::SystemCPP && !inPseudoMain) {
-    string paramPrefix = isGenScope ?
-      string(TYPED_CONTINUATION_OBJECT_NAME) + "->" : string("");
-    outputCPPVariableTable(cg, ar, paramPrefix.c_str());
+    const char *paramPrefix = isGenScope ?
+      TYPED_CONTINUATION_OBJECT_NAME "->" : "";
+    outputCPPVariableTable(cg, ar, paramPrefix);
     ar->m_variableTableFunctions.insert(getScopePtr()->getName());
   }
 }
@@ -2093,6 +2118,28 @@ void VariableTable::outputCPPStaticVariables(CodeGenerator &cg,
     }
   }
   cg_printf("NULL,\n");
+}
+
+void VariableTable::outputCPPStaticLocals(CodeGenerator &cg,
+                                          AnalysisResultPtr ar) {
+  for (SymbolVec::const_iterator it = m_staticLocalsVec.begin();
+       it != m_staticLocalsVec.end(); ++it) {
+    const Symbol *sym = *it;
+    ASSERT(sym->getDeclaration());
+    FunctionScopeRawPtr func = m_blockScope.getContainingFunction();
+    ASSERT(func && (func->isClosure() || func->isGeneratorFromClosure()));
+    const string &id = StaticGlobalInfo::GetId(ClassScopePtr(),
+                                               func, sym->getName());
+    TypePtr varType(sym->getFinalType());
+
+    // static variable
+    varType->outputCPPDecl(cg, ar, BlockScopeRawPtr());
+    cg_printf(" %s%s;\n", Option::StaticVariablePrefix, id.c_str());
+
+    // initializer
+    cg_printf("bool %s%s%s;\n",
+              Option::InitPrefix, Option::StaticVariablePrefix, id.c_str());
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

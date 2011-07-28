@@ -438,6 +438,11 @@ BeginClass(
   array(
     'name'   => 'GenericContinuation',
     'parent' => 'Continuation',
+    'footer' => <<<EOT
+public:
+  LVariableTable m_statics;
+EOT
+,
   )
 );
 

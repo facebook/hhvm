@@ -281,6 +281,7 @@ public:
                               ClassScope::Derivation dynamicObject);
   void outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPStaticVariables(CodeGenerator &cg, AnalysisResultPtr ar);
+  void outputCPPStaticLocals(CodeGenerator &cg, AnalysisResultPtr ar);
 
   void outputCPPGlobalVariablesDtorIncludes(CodeGenerator &cg,
                                             AnalysisResultPtr ar);
@@ -325,9 +326,11 @@ public:
     FunctionScopePtr func;
 
     // get unique identifier for this variable
-    static std::string getId(ClassScopePtr cls,
+    static std::string GetId(ClassScopePtr cls,
                              FunctionScopePtr func, const std::string &name);
   };
+
+  bool hasStaticLocals() const { return !m_staticLocalsVec.empty(); }
 
 private:
   enum StaticSelection {
@@ -354,6 +357,9 @@ private:
 
   StaticGlobalInfoPtrVec m_staticGlobalsVec;
   StringToStaticGlobalInfoPtrMap m_staticGlobals;
+
+  /** static symbols local to this variable table (ie for closures) */
+  SymbolVec m_staticLocalsVec;
 
   bool isGlobalTable(AnalysisResultConstPtr ar) const;
 

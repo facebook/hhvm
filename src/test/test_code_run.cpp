@@ -19109,6 +19109,25 @@ bool TestCodeRun::TestClosure() {
         "var_dump($f());\n",
         "int(32)\n");
 
+  MVCRO("<?php\n"
+        "function mkC() {\n"
+        "  return function () {\n"
+        "    static $x = 0;\n"
+        "    return $x++;\n"
+        "  };\n"
+        "}\n"
+        "$c0 = mkC();\n"
+        "var_dump($c0());\n"
+        "var_dump($c0());\n"
+        "\n"
+        "$c1 = mkC();\n"
+        "var_dump($c1());\n"
+        "var_dump($c1());\n",
+        "int(0)\n"
+        "int(1)\n"
+        "int(0)\n"
+        "int(1)\n");
+
   return true;
 }
 
@@ -19919,6 +19938,33 @@ bool TestCodeRun::TestYield() {
         "string(33) \"Got yieldedException, re-raising.\"\n"
         "string(32) \"Continuation is already finished\"\n");
 
+  MVCRO("<?php\n"
+        "function makeClosureCont() {\n"
+        "  return function () {\n"
+        "    static $x = 0;\n"
+        "    yield $x++;\n"
+        "    yield $x++;\n"
+        "  };\n"
+        "}\n"
+        "function gen() {\n"
+        "  static $x = 0;\n"
+        "  yield $x++;\n"
+        "  yield $x++;\n"
+        "}\n"
+        "$cc = makeClosureCont();\n"
+        "foreach ($cc() as $v) { var_dump($v); }\n"
+        "$cc1 = makeClosureCont();\n"
+        "foreach ($cc1() as $v) { var_dump($v); }\n"
+        "foreach (gen() as $v) { var_dump($v); }\n"
+        "foreach (gen() as $v) { var_dump($v); }\n",
+        "int(0)\n"
+        "int(1)\n"
+        "int(0)\n"
+        "int(1)\n"
+        "int(0)\n"
+        "int(1)\n"
+        "int(2)\n"
+        "int(3)\n");
 
   return true;
 }

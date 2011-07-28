@@ -137,7 +137,8 @@ class c_GenericContinuation : public c_Continuation {
   public: c_GenericContinuation *create(int64 func, int64 extra, bool isMethod, String origFuncName, Array vars, Variant obj = null, Array args = null_array);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-
+public:
+  LVariableTable m_statics;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

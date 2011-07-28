@@ -253,7 +253,7 @@ void ClosureExpression::outputCPPImpl(CodeGenerator &cg,
   const string &origName = m_func->getOriginalName();
 
   if (needsAnonCls) {
-    cg_printf("%sClosure$%s(NEWOBJ(%sClosure$%s)(&%s%s, NULL, ",
+    cg_printf("%sClosure$%s(NEWOBJ(%sClosure$%s)(&%s%s, NULL",
               Option::SmartPtrPrefix, origName.c_str(),
               Option::ClassPrefix, origName.c_str(),
               Option::CallInfoPrefix, origName.c_str());
@@ -266,7 +266,7 @@ void ClosureExpression::outputCPPImpl(CodeGenerator &cg,
 
   bool hasEmit = false;
   if (needsAnonCls) {
-    ASSERT(m_vars && m_vars->getCount());
+    if (!useVars.empty()) cg_printf(", ");
     BOOST_FOREACH(ParameterExpressionPtrIdxPair paramPair, useVars) {
       ParameterExpressionPtr param(paramPair.first);
       ExpressionPtr value((*m_values)[paramPair.second]);

@@ -23,10 +23,15 @@
 #include <runtime/eval/runtime/eval_state.h>
 #include <runtime/eval/parser/parser.h>
 
+#include <runtime/ext/ext_closure.h>
+#include <runtime/ext/ext_continuation.h>
+
 namespace HPHP {
 namespace Eval {
 using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
+
+static StaticString s_Continuation("Continuation");
 
 VariableEnvironment::VariableEnvironment()
     : m_currentClass(NULL), m_breakLevel(0), m_returning(false),
@@ -192,8 +197,25 @@ FuncScopeVariableEnvironment::~FuncScopeVariableEnvironment() {
 
 void FuncScopeVariableEnvironment::flagStatic(CStrRef name, int64 hash) {
   if (!m_staticEnv) {
-    m_staticEnv = m_func->getStaticVars(*this);
+    void *closure = getClosure();
+    if (UNLIKELY(closure != NULL)) {
+      // statics for closures live on a closure
+      c_GeneratorClosure *typedClosure = (c_GeneratorClosure*) closure;
+      m_staticEnv = &typedClosure->m_statics;
+    } else {
+      bool isContClosure =
+        ParserBase::IsContinuationFromClosureName(m_func->name().c_str());
+      if (UNLIKELY(isContClosure)) {
+        ObjectData *cont = getContinuation();
+        ASSERT(cont != NULL);
+        c_GenericContinuation *typedCont = (c_GenericContinuation*) cont;
+        m_staticEnv = &typedCont->m_statics;
+      } else {
+        m_staticEnv = m_func->getStaticVars(*this);
+      }
+    }
   }
+  ASSERT(m_staticEnv != NULL);
   if (!m_staticEnv->exists(name.data())) {
     m_staticEnv->get(name) = m_func->getStaticValue(*this, name);
   }
@@ -250,7 +272,7 @@ ObjectData *FuncScopeVariableEnvironment::getContinuation() const {
     Array args = getParams();
     ASSERT(args.size() == 1);
     ObjectData *obj = args[0].getObjectData();
-    if (obj->o_instanceof("Continuation")) return obj;
+    if (LIKELY(obj->o_instanceof(s_Continuation))) return obj;
   }
   return NULL;
 }

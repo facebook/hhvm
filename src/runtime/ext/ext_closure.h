@@ -117,7 +117,8 @@ public:
     CArrRef vars) :
     c_Closure(callInfo, extraData), m_vars(vars) {}
 public:
-  Array m_vars;
+  Array          m_vars;    /* use variables */
+  LVariableTable m_statics; /* static variables */
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -51,6 +51,10 @@ bool ParserBase::IsContinuationName(const std::string &name) {
          NameImpl<Continuation>(name);
 }
 
+bool ParserBase::IsContinuationFromClosureName(const std::string &name) {
+  return NameImpl<ContinuationFromClosure>(name);
+}
+
 bool ParserBase::IsClosureOrContinuationName(const std::string &name) {
   return IsClosureName(name) || IsContinuationName(name);
 }

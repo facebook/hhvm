@@ -1054,7 +1054,7 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
   m_prependingStatements.pop_back();
 
   if (func->hasYield()) {
-    AnonFuncKind k = func->name().empty() ?
+    AnonFuncKind k = name->text().empty() ?
       ContinuationFromClosure : Continuation;
     const string &closureName = getAnonFuncName(k);
     func->setName(closureName);

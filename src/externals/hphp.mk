@@ -15,6 +15,8 @@ ifndef NO_GOLD
 LD_CMD += -B$(EXT_DIR)/binutils/
 endif
 
+EXTERNAL_CPPFLAGS=
+
 ifdef MAC_OS_X
 
 EXTERNAL_CPPFLAGS += \

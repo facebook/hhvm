@@ -39,7 +39,7 @@ public:
   static void Info(const char *fmt, ...);
   static void Verbose(const char *fmt, ...);
 
-  // log messages without escaping
+  // Log messages without escaping.
   static void RawError(const std::string &msg);
   static void RawWarning(const std::string &msg);
   static void RawInfo(const std::string &msg);
@@ -48,6 +48,9 @@ public:
   // Log additional injected stacktrace.
   static void Log(bool err, CArrRef stackTrace, bool escape = true,
                   bool escapeMore = false);
+
+  // Convenience functions for stringifying.
+  static std::string StringOfFrame(CArrRef frame, int i, bool escape = false);
   static std::string StringOfStackTrace(CArrRef stackTrace);
 
 protected:

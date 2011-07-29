@@ -347,7 +347,9 @@ public:
   FiberWorker() : m_owner(0) {}
 
   // FIBER THREAD
+  virtual void onThreadEnter();
   virtual void doJob(FiberJob *job);
+  virtual void onThreadExit();
 
 private:
   FiberAsyncFuncData *m_owner;
@@ -355,8 +357,11 @@ private:
 
 static JobQueueDispatcher<FiberJob*, FiberWorker> *s_dispatcher;
 
-void FiberWorker::doJob(FiberJob *job) {
+void FiberWorker::onThreadEnter() {
   hphp_session_init(true);
+}
+
+void FiberWorker::doJob(FiberJob *job) {
   ExecutionProfiler ep(ThreadInfo::RuntimeFunctions);
   try {
     job->run();
@@ -373,13 +378,14 @@ void FiberWorker::doJob(FiberJob *job) {
   delete job;
   
   hphp_context_exit(g_context.getNoCheck(), false, true);
-  hphp_session_exit();
   if (m_owner && !m_owner->decRefCount()) {
     m_owner->notify();
   }
 }
 
-
+void FiberWorker::onThreadExit() {
+  hphp_session_exit();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

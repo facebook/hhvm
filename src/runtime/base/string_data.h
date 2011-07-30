@@ -84,7 +84,6 @@ class StringData {
 
   StringData() : m_data(NULL), _count(0), m_len(0) {
     m_hash = 0;
-    TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
   }
 
   /**
@@ -108,6 +107,7 @@ class StringData {
     TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
     return m_data;
   }
+  // This method should only be used internally by the String class.
   const char *dataIgnoreTaint() const { return m_data; }
   int size() const { return m_len & LenMask;}
   bool empty() const { return size() == 0;}
@@ -186,16 +186,16 @@ class StringData {
     ASSERT(s);
     int len = size();
     if (s->size() != len) return false;
-    if (data() == s->data()) return true;
-    return !memcmp(data(), s->data(), len);
+    if (m_data == s->m_data) return true;
+    return !memcmp(m_data, s->m_data, len);
   }
 
   bool isame(const StringData *s) const {
     ASSERT(s);
     int len = size();
     if (s->size() != len) return false;
-    if (data() == s->data()) return true;
-    return !strncasecmp(data(), s->data(), len);
+    if (m_data == s->m_data) return true;
+    return !strncasecmp(m_data, s->m_data, len);
   }
 
   /**

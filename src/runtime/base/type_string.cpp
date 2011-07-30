@@ -120,7 +120,9 @@ String String::lastToken(char delimiter) {
 int String::find(char ch, int pos /* = 0 */,
                  bool caseSensitive /* = true */) const {
   if (empty()) return -1;
-  return string_find(m_px->data(), m_px->size(), ch, pos, caseSensitive);
+  // Ignore taint in comparison functions.
+  return string_find(m_px->dataIgnoreTaint(), m_px->size(), ch, pos,
+                     caseSensitive);
 }
 
 int String::find(const char *s, int pos /* = 0 */,
@@ -130,7 +132,8 @@ int String::find(const char *s, int pos /* = 0 */,
   if (*s && *(s+1) == 0) {
     return find(*s, pos, caseSensitive);
   }
-  return string_find(m_px->data(), m_px->size(), s, strlen(s),
+  // Ignore taint in comparison functions.
+  return string_find(m_px->dataIgnoreTaint(), m_px->size(), s, strlen(s),
                      pos, caseSensitive);
 }
 
@@ -139,16 +142,19 @@ int String::find(CStrRef s, int pos /* = 0 */,
                  bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   if (s.size() == 1) {
-    return find(*s.data(), pos, caseSensitive);
+    return find(*s.dataIgnoreTaint(), pos, caseSensitive);
   }
-  return string_find(m_px->data(), m_px->size(), s.data(), s.size(),
-                     pos, caseSensitive);
+  // Ignore taint in comparison functions.
+  return string_find(m_px->dataIgnoreTaint(), m_px->size(),
+                     s.dataIgnoreTaint(), s.size(), pos, caseSensitive);
 }
 
 int String::rfind(char ch, int pos /* = -1 */,
                   bool caseSensitive /* = true */) const {
   if (empty()) return -1;
-  return string_rfind(m_px->data(), m_px->size(), ch, pos, caseSensitive);
+  // Ignore taint in comparison functions.
+  return string_rfind(m_px->dataIgnoreTaint(), m_px->size(), ch,
+                      pos, caseSensitive);
 }
 
 int String::rfind(const char *s, int pos /* = -1 */,
@@ -158,7 +164,8 @@ int String::rfind(const char *s, int pos /* = -1 */,
   if (*s && *(s+1) == 0) {
     return rfind(*s, pos, caseSensitive);
   }
-  return string_rfind(m_px->data(), m_px->size(), s, strlen(s),
+  // Ignore taint in comparison functions.
+  return string_rfind(m_px->dataIgnoreTaint(), m_px->size(), s, strlen(s),
                       pos, caseSensitive);
 }
 
@@ -166,10 +173,11 @@ int String::rfind(CStrRef s, int pos /* = -1 */,
                   bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   if (s.size() == 1) {
-    return rfind(*s.data(), pos, caseSensitive);
+    return rfind(*s.dataIgnoreTaint(), pos, caseSensitive);
   }
-  return string_rfind(m_px->data(), m_px->size(), s.data(), s.size(),
-                      pos, caseSensitive);
+  // Ignore taint in comparison functions.
+  return string_rfind(m_px->dataIgnoreTaint(), m_px->size(),
+                      s.dataIgnoreTaint(), s.size(), pos, caseSensitive);
 }
 
 String String::replace(int start, int length, CStrRef replacement) const {

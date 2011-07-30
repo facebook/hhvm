@@ -130,8 +130,7 @@ String StringBuffer::detach() {
 }
 
 String StringBuffer::copy() {
-  TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
-
+  // REGISTER_ACCESSED() is called by data()
   String r = String(data(), size(), CopyString);
   return r;
 }
@@ -152,6 +151,7 @@ void StringBuffer::absorb(StringBuffer &buf) {
     buf.m_size = size;
     buf.reset();
   } else {
+    // REGISTER_ACCESSED()/REGISTER_MUTATED() are called by append()/detach()
     append(buf.detach());
   }
 }
@@ -218,8 +218,8 @@ void StringBuffer::appendHelper(char ch) {
 
 
 void StringBuffer::append(CStrRef s) {
+  // REGISTER_MUTATED() is called by data()
   append(s.data(), s.size());
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
 }
 
 void StringBuffer::appendHelper(const char *s, int len) {

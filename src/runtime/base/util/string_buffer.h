@@ -58,7 +58,13 @@ public:
   int size() const { return m_pos;}
   int length() const { return m_pos;}
   const char *data() const;
+private:
+  // This method is only used internally for particular operations which do
+  // not lead to mutation or creation of strings and do not require support
+  // for taint propagation. There is probably no reason to use this method
+  // where it isn't already used.
   const char *dataIgnoreTaint() const;
+public:
   char charAt(int pos) const;
 
   /**

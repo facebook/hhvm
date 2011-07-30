@@ -142,7 +142,8 @@ void StringData::append(const char *s, int len) {
 
   if (!isMalloced()) {
     int newlen;
-    m_data = string_concat(data(), size(), s, len, newlen);
+    // We are mutating, so we don't need to repropagate our own taint
+    m_data = string_concat(m_data, size(), s, len, newlen);
     if (isShared()) {
       m_shared->decRef();
     }
@@ -150,7 +151,8 @@ void StringData::append(const char *s, int len) {
     m_hash = 0;
   } else if (m_data == s) {
     int newlen;
-    char *newdata = string_concat(data(), size(), s, len, newlen);
+    // We are mutating, so we don't need to repropagate our own taint
+    char *newdata = string_concat(m_data, size(), s, len, newlen);
     releaseData();
     m_data = newdata;
     m_len = newlen;
@@ -201,7 +203,7 @@ void StringData::escalate() {
   ASSERT(len);
 
   char *buf = (char*)malloc(len+1);
-  memcpy(buf, data(), len);
+  memcpy(buf, m_data, len);
   buf[len] = '\0';
   m_len = len;
   m_data = buf;
@@ -220,7 +222,7 @@ StringData *StringData::Escalate(StringData *in) {
 }
 
 void StringData::dump() const {
-  const char *p = data();
+  const char *p = m_data;
   int len = size();
 
   printf("StringData(%d) (%s%s%s%s%d): [", _count,
@@ -280,7 +282,8 @@ void StringData::setChar(int offset, CStrRef substring) {
       char *buf = (char *)Util::safe_malloc(newlen + 1);
       memset(buf, ' ', newlen);
       buf[newlen] = 0;
-      memcpy(buf, data(), len);
+    // We are mutating, so we don't need to repropagate our own taint
+      memcpy(buf, m_data, len);
       if (!substring.empty()) buf[offset] = substring.data()[0];
       assign(buf, newlen, AttachString);
     }
@@ -303,10 +306,12 @@ void StringData::removeChar(int offset) {
   if (isImmutable()) {
     char *data = (char*)malloc(len);
     if (offset) {
-      memcpy(data, this->data(), offset);
+      // We are mutating, so we don't need to repropagate our own taint
+      memcpy(data, m_data, offset);
     }
     if (offset < len - 1) {
-      memcpy(data + offset, this->data() + offset + 1, len - offset - 1);
+      // We are mutating, so we don't need to repropagate our own taint
+      memcpy(data + offset, m_data + offset + 1, len - offset - 1);
     }
     data[len] = 0;
     m_len = len;
@@ -353,7 +358,8 @@ void StringData::set(CVarRef key, CStrRef v) {
 void StringData::setStatic() const {
   _count = (1 << 30);
   ASSERT(!isShared()); // because we are gonna reuse the space!
-  m_hash = hash_string(data(), size());
+  // We don't want to collect taint for a hash
+  m_hash = hash_string(m_data, size());
   ASSERT(m_hash >= 0);
   int64 lval; double dval;
   if (isNumericWithVal(lval, dval, 1) == KindOfNull) {
@@ -370,7 +376,8 @@ DataType StringData::isNumericWithVal(int64 &lval, double &dval,
   DataType ret = KindOfNull;
   int len = size();
   if (len) {
-    ret = is_numeric_string(data(), size(), &lval, &dval, allow_errors);
+    // Not involved in further string construction/mutation; no taint pickup
+    ret = is_numeric_string(m_data, size(), &lval, &dval, allow_errors);
     if (ret == KindOfNull && !isShared() && allow_errors) {
       m_hash |= (1ull << 63);
     }
@@ -409,7 +416,8 @@ bool StringData::isInteger() const {
 }
 
 bool StringData::isValidVariableName() const {
-  return is_valid_var_name(data(), size());
+  // Not involved in further string construction/mutation; no taint pickup
+  return is_valid_var_name(m_data, size());
 }
 
 int64 StringData::hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
@@ -460,12 +468,14 @@ bool StringData::toBoolean() const {
 }
 
 int64 StringData::toInt64(int base /* = 10 */) const {
-  return strtoll(data(), NULL, base);
+  // Taint absorbtion unnecessary; taint is recreated later for numerics
+  return strtoll(m_data, NULL, base);
 }
 
 double StringData::toDouble() const {
   int len = size();
-  if (len) return zend_strtod(data(), NULL);
+  // Taint absorbtion unnecessary; taint is recreated later for numerics
+  if (len) return zend_strtod(m_data, NULL);
   return 0;
 }
 
@@ -525,7 +535,8 @@ int StringData::compare(const StringData *v2) const {
     int len1 = size();
     int len2 = v2->size();
     int len = len1 < len2 ? len1 : len2;
-    ret = memcmp(data(), v2->data(), len);
+    // No taint absorption on self-contained string ops like compare
+    ret = memcmp(m_data, v2->m_data, len);
     if (ret) return ret;
     if (len1 == len2) return 0;
     return len < len1 ? 1 : -1;
@@ -539,7 +550,8 @@ int64 StringData::getSharedStringHash() const {
 }
 
 int64 StringData::hashHelper() const {
-  int64 h = hash_string_inline(data(), size());
+  // We don't want to collect taint for a hash
+  int64 h = hash_string_inline(m_data, size());
   m_hash |= h;
   return h;
 }
@@ -570,7 +582,7 @@ void StringData::restore(const char *&data) {
 // Debug
 
 std::string StringData::toCPPString() const {
-  return std::string(data(), size());
+  return std::string(m_data, size());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -83,13 +83,13 @@ void SubListElement::dump(std::ostream &out) const {
 }
 
 static bool IsAbnormal(ExpressionPtr rhs) {
-  if (rhs->is<VariableExpression>() ||
-      rhs->is<ArrayElementExpression>() ||
-      rhs->is<ObjectPropertyExpression>() ||
-      rhs->is<FunctionCallExpression>() ||
-      rhs->is<IncludeExpression>() ||
-      rhs->is<AssignmentOpExpression>() ||
-      rhs->is<AssignmentRefExpression>()) {
+  if (rhs->isKindOf(Expression::KindOfVariableExpression) ||
+      rhs->isKindOf(Expression::KindOfArrayElementExpression) ||
+      rhs->isKindOf(Expression::KindOfObjectPropertyExpression) ||
+      rhs->isKindOf(Expression::KindOfFunctionCallExpression) ||
+      rhs->isKindOf(Expression::KindOfIncludeExpression) ||
+      rhs->isKindOf(Expression::KindOfAssignmentOpExpression) ||
+      rhs->isKindOf(Expression::KindOfAssignmentRefExpression)) {
     return false;
   }
 
@@ -117,7 +117,8 @@ static bool IsAbnormal(ExpressionPtr rhs) {
 ListAssignmentExpression::ListAssignmentExpression(EXPRESSION_ARGS,
                                                    ListElementPtr lhs,
                                                    ExpressionPtr rhs)
-  : Expression(EXPRESSION_PASS), m_lhs(lhs), m_rhs(rhs) {
+  : Expression(KindOfListAssignmentExpression, EXPRESSION_PASS),
+    m_lhs(lhs), m_rhs(rhs) {
   m_abnormal = IsAbnormal(rhs);
 }
 

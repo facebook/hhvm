@@ -24,7 +24,8 @@ namespace Eval {
 AssignmentRefExpression::AssignmentRefExpression(EXPRESSION_ARGS,
                                                  LvalExpressionPtr lhs,
                                                  ExpressionPtr rhs)
-  : Expression(EXPRESSION_PASS), m_lhs(lhs), m_rhs(rhs) {}
+  : Expression(KindOfAssignmentRefExpression, EXPRESSION_PASS),
+  m_lhs(lhs), m_rhs(rhs) {}
 
 Variant AssignmentRefExpression::eval(VariableEnvironment &env) const {
   return m_lhs->setRef(env, m_rhs->refval(env));

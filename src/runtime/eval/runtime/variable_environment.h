@@ -20,6 +20,7 @@
 #include <runtime/eval/runtime/assoc_list.h>
 #include <runtime/eval/base/eval_base.h>
 #include <runtime/eval/ast/class_statement.h>
+#include <runtime/eval/analysis/block.h>
 #include <stack>
 
 namespace HPHP {
@@ -48,6 +49,9 @@ public:
   virtual const ClassStatement *currentClassStatement() const;
   virtual String currentContext() const;
   virtual Array getParams() const = 0;
+  virtual Variant &getVar(CStrRef s, SuperGlobal sg) {
+    return LVariableTable::getVar(s, sg);
+  }
   virtual bool refReturn() const { return false; }
   virtual Array getDefinedVariables() const;
 
@@ -101,10 +105,10 @@ public:
   /**
    * Storing temporary variables for TempExpressionList.
    */
-  std::vector<Variant> &createTempVariables();
+  Variant *createTempVariables(int size, int &oldPrevSize);
   Variant getTempVariable(int index);
-  void releaseTempVariables();
-
+  void releaseTempVariables(int size, int oldPrevSize);
+  static void InitTempStack();
 protected:
   Variant m_currentObject;
   const char* m_currentClass;
@@ -130,6 +134,7 @@ public:
   virtual bool exists(CStrRef name) const;
   virtual Variant &getImpl(CStrRef s);
   virtual Array getParams() const;
+  virtual Variant &getVar(CStrRef s, SuperGlobal sg);
 };
 
 /**
@@ -144,6 +149,7 @@ public:
   virtual void setIdx(int idx, Variant *v);
   virtual bool refReturn() const;
   virtual Array getParams() const;
+  virtual Variant &getVar(CStrRef s, SuperGlobal sg);
   virtual bool exists(CStrRef name) const;
   virtual Variant &getImpl(CStrRef s);
   void incArgc() { m_argc++; }
@@ -183,11 +189,13 @@ public:
   virtual bool exists(CStrRef s) const;
   virtual Variant &getImpl(CStrRef s);
   virtual Array getParams() const;
+  virtual Variant &getVar(CStrRef s, SuperGlobal sg);
   virtual Array getDefinedVariables() const;
 private:
   LVariableTable *m_ext;
   std::vector<Variant*> m_byIdx;
   const Block &m_block;
+  Variant m_global;
   Array m_params;
 };
 

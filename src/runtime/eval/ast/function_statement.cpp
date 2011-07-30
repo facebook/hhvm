@@ -172,6 +172,10 @@ String Parameter::getName() const {
   return m_name->get();
 }
 
+bool Parameter::getSuperGlobal(SuperGlobal &sg) {
+  return m_name->getSuperGlobal(sg);
+}
+
 void Parameter::getInfo(ClassInfo::ParameterInfo &info,
                         VariableEnvironment &env) const {
   int attr = 0;
@@ -216,7 +220,7 @@ FunctionStatement::FunctionStatement(STATEMENT_ARGS, const string &name,
                                      const string &doc)
   : Statement(STATEMENT_PASS),
     m_invalid(0), m_maybeIntercepted(-1), m_yieldCount(0),
-    m_name(name), m_closure(NULL),
+    m_name(StringName::GetStaticName(name)), m_closure(NULL),
     m_docComment(doc),
     m_callInfo((void*)Invoker, (void*)InvokerFewArgs, 0, 0, 0),
     m_closureCallInfo((void*)FSInvoker, (void*)FSInvokerFewArgs, 0, 0, 0) {
@@ -242,15 +246,15 @@ void FunctionStatement::init(void *parser, bool ref,
   }
 
   bool seenOptional = false;
-  set<string> names;
+  set<String> names;
   m_callInfo.m_argCount = m_closureCallInfo.m_argCount = m_params.size();
   for (unsigned int i = 0; i < m_params.size(); i++) {
     ParameterPtr param = m_params[i];
 
-    std::string name = param->name();
+    String name = param->getName();
     if (names.find(name) != names.end()) {
       raise_notice("%s:%d %s() has 2 parameters with the same name: $%s",
-                   m_loc.file, m_loc.line0, m_name.c_str(), name.c_str());
+                   m_loc.file, m_loc.line0, m_name->data(), name.c_str());
     } else {
       names.insert(name);
     }
@@ -282,7 +286,7 @@ String FunctionStatement::fullName() const {
 }
 
 void FunctionStatement::changeName(const std::string &name) {
-  m_name = name;
+  m_name = StringName::GetStaticName(name);
 }
 
 const CallInfo *FunctionStatement::getCallInfo() const {
@@ -299,7 +303,7 @@ FunctionStatement::computeInjectionName() const {
   if (getGeneratorFunc()) {
     injectionName = isClosure() ?
       "{closure}" :
-      m_name + "{continuation}";
+      String(m_name) + "{continuation}";
   } else if (getOrigGeneratorFunc()) {
     injectionName = getOrigGeneratorFunc()->isClosure() ?
       "{closureGen}" :
@@ -342,15 +346,16 @@ void FunctionStatement::directBind(VariableEnvironment &env,
   const vector<ExpressionPtr> &args = caller->params();
   vector<ExpressionPtr>::const_iterator it = args.begin() + start;
   VariantStack &as = RequestEvalState::argStack();
+  ASSERT(!hasYield());
   for (; it != args.end() && piter != m_params.end(); ++it, ++piter) {
-    Variant v;
     if ((*piter)->isRef() || (*it)->isRefParam()) {
+      Variant v;
       // should throw if it's ref and not lval
       v.assignRef((*it)->refval(env));
       (*piter)->bind(fenv, v, true);
       as.pushRef(v);
     } else {
-      v = (*it)->eval(env);
+      CVarRef v = (*it)->eval(env);
       (*piter)->bind(fenv, v);
       as.push(v);
     }
@@ -376,7 +381,8 @@ void FunctionStatement::directBind(VariableEnvironment &env,
       throw_strict(TooManyArgumentsException(name().c_str()),
                    StrictMode::StrictBasic);
     }
-    as.push((*it)->eval(env));
+    CVarRef v = (*it)->eval(env);
+    as.push(v);
     fenv.incArgc();
   }
 }
@@ -540,12 +546,10 @@ LVariableTable *FunctionStatement::getStaticVars(VariableEnvironment &env)
 void FunctionStatement::bindParams(FuncScopeVariableEnvironment &fenv,
                                    CArrRef params) const {
   VariantStack &as = RequestEvalState::argStack();
-
   for (ArrayIter iter(params); !iter.end(); iter.next()) {
     as.push(iter.second());
     fenv.incArgc();
   }
-
   vector<ParameterPtr>::const_iterator piter = m_params.begin();
   for (ArrayIter iter(params); !iter.end() && piter != m_params.end();
        ++piter, iter.next()) {
@@ -585,8 +589,8 @@ Variant FunctionStatement::invokeImpl(FuncScopeVariableEnvironment &fenv,
 
 void FunctionStatement::dumpHeader(std::ostream &out) const {
   out << "function " << (m_ref ? "&" : "");
-  if (!ParserBase::IsClosureOrContinuationName(m_name.c_str())) {
-    out << m_name.c_str();
+  if (!ParserBase::IsClosureOrContinuationName(m_name->data())) {
+    out << m_name->data();
   }
   out << "(";
   dumpVector(out, m_params);

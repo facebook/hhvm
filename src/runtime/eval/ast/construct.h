@@ -57,10 +57,6 @@ public:
   }
 
   template <class T>
-  bool is() {
-    return dynamic_cast<T*>(this);
-  }
-  template <class T>
   T *cast() {
     return dynamic_cast<T*>(this);
   }

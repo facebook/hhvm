@@ -62,6 +62,20 @@ class RVariableTable : public Array {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+enum SuperGlobal {
+  SgServer = 0,
+  SgGet,
+  SgPost,
+  SgFiles,
+  SgCookie,
+  SgSession,
+  SgRequest,
+  SgEnv,
+  SgGlobals,
+  SgHttpResponseHeader,
+  SgNormal
+};
+
 /**
  * L-value variable table that can get/set a variable's value by its name. The
  * reason we have both RVariableTable and LVariableTable, instead of just this
@@ -76,6 +90,10 @@ class LVariableTable : public Array {
   Variant &get(CVarRef s) { return getImpl(s.toString()); }
   Variant &get(CStrRef s) { return getImpl(s); }
   Variant &get(litstr  s) { return getImpl(s);}
+  virtual Variant &getVar(CStrRef s, SuperGlobal sg) {
+    ASSERT(sg == SgNormal);
+    return getImpl(s);
+  }
 
   /**
    * Code-generated sub-class may override this function by generating one

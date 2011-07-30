@@ -23,7 +23,7 @@ namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 ThisExpression::ThisExpression(EXPRESSION_ARGS)
-  : LvalExpression(EXPRESSION_PASS) {}
+  : LvalExpression(KindOfThisExpression, EXPRESSION_PASS) {}
 
 Variant ThisExpression::eval(VariableEnvironment &env) const {
   return env.currentObject();

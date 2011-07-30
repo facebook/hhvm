@@ -16,6 +16,7 @@
 
 #include <runtime/eval/ast/scalar_expression.h>
 #include <runtime/eval/runtime/file_repository.h>
+#include <runtime/eval/ast/name.h>
 #include <util/parser/hphp.tab.hpp>
 #include <util/util.h>
 
@@ -26,8 +27,9 @@ using namespace std;
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, int type,
                                    const string &value, int subtype /* = 0 */)
-    : Expression(EXPRESSION_PASS),
-      m_value(value), m_type(type), m_subtype(subtype), m_binary(false) {
+    : Expression(KindOfScalarExpression, EXPRESSION_PASS),
+      m_value(StringName::GetStaticName(value)),
+      m_type(type), m_subtype(subtype), m_binary(false) {
   switch (type) {
   case T_NUM_STRING: {
     const char *s = value.c_str();
@@ -45,7 +47,7 @@ ScalarExpression::ScalarExpression(EXPRESSION_ARGS, int type,
     break;
   }
   case T_DNUMBER: {
-    m_num.dbl = String(m_value).toDouble();
+    m_num.dbl = m_value->toDouble();
     m_kind = SDouble;
     break;
   }
@@ -59,24 +61,29 @@ ScalarExpression::ScalarExpression(EXPRESSION_ARGS, int type,
 }
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS)
-    : Expression(EXPRESSION_PASS), m_type(0), m_subtype(0), m_kind(SNull) {}
+    : Expression(KindOfScalarExpression, EXPRESSION_PASS),
+  m_type(0), m_subtype(0), m_kind(SNull) {}
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, bool b)
-    : Expression(EXPRESSION_PASS), m_type(0), m_subtype(0), m_kind(SBool) {
+    : Expression(KindOfScalarExpression, EXPRESSION_PASS),
+    m_type(0), m_subtype(0), m_kind(SBool) {
   m_num.num = b ? 1 : 0;
 }
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, const string &s)
-    : Expression(EXPRESSION_PASS),
-      m_value(s), m_type(0), m_subtype(0), m_kind(SString) {}
+    : Expression(KindOfScalarExpression, EXPRESSION_PASS),
+      m_value(StringName::GetStaticName(s)),
+      m_type(0), m_subtype(0), m_kind(SString) {}
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, const char *s)
-    : Expression(EXPRESSION_PASS),
-      m_value(s, CopyString), m_type(0), m_subtype(0), m_kind(SString) {}
+    : Expression(KindOfScalarExpression, EXPRESSION_PASS),
+      m_value(StringName::GetStaticName(s)),
+      m_type(0), m_subtype(0), m_kind(SString) {}
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, CStrRef s)
-    : Expression(EXPRESSION_PASS),
-      m_value(s.get()), m_type(0), m_subtype(0), m_kind(SString) {}
+    : Expression(KindOfScalarExpression, EXPRESSION_PASS),
+      m_value(StringName::GetStaticName(s.data())),
+      m_type(0), m_subtype(0), m_kind(SString) {}
 
 Variant ScalarExpression::eval(VariableEnvironment &env) const {
   return getValue();
@@ -91,9 +98,9 @@ Variant ScalarExpression::getValue() const {
   case SString:
     if (m_subtype == T_FILE) {
       return FileRepository::translateFileName
-               (string(m_value.c_str(), m_value.size()));
+               (string(m_value->data(), m_value->size()));
     }
-    return String(m_value);
+    return m_value;
   case SInt:
     return m_num.num;
   case SDouble:
@@ -123,14 +130,14 @@ void ScalarExpression::dump(std::ostream &out) const {
       break;
     case SString:
       if (m_type == T_NUM_STRING) {
-        out << string(m_value.c_str(), m_value.size());
+        out << string(m_value->data(), m_value->size());
       } else {
-        out << Util::escapeStringForPHP(m_value.c_str(), m_value.size());
+        out << Util::escapeStringForPHP(m_value->data(), m_value->size());
       }
       break;
     case SInt:
     case SDouble:
-      out << string(m_value.c_str(), m_value.size());
+      out << string(m_value->data(), m_value->size());
       break;
     default:
       ASSERT(false);

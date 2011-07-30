@@ -28,8 +28,8 @@ namespace Eval {
 
 StaticMemberExpression::StaticMemberExpression(EXPRESSION_ARGS,
     const NamePtr &cls, const NamePtr &variable)
-  : LvalExpression(EXPRESSION_PASS), m_class(cls),
-    m_variable(variable) {}
+  : LvalExpression(KindOfStaticMemberExpression, EXPRESSION_PASS),
+  m_class(cls), m_variable(variable) {}
 
 void StaticMemberExpression::unset(VariableEnvironment &env) const {
   String cls = m_class->get(env);

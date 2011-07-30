@@ -45,6 +45,7 @@ private:
       const CallInfo *cit,
       void *extra,
       VariableEnvironment &env) const;
+  void *m_builtinPtr;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

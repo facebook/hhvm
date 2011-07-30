@@ -279,6 +279,7 @@ public:
   static bool CheckMemory;
   static bool UseHphpArray;
   static bool UseSmallArray;
+  static bool UseArgArray;
   static bool UseDirectCopy;
   static bool EnableApc;
   static bool EnableConstLoad;

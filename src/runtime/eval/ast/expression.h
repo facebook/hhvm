@@ -33,8 +33,39 @@ class ByteCodeProgram;
 
 class Expression : public Construct {
 public:
-  Expression(EXPRESSION_ARGS);
-  Expression(const Location *loc) : Construct(loc) {}
+  enum KindOf {
+    KindOfArrayElementExpression,
+    KindOfArrayExpression,
+    KindOfAssignmentOpExpression,
+    KindOfAssignmentRefExpression,
+    KindOfBinaryOpExpression,
+    KindOfClassConstantExpression,
+    KindOfClosureExpression,
+    KindOfConstantExpression,
+    KindOfEncapsListExpression,
+    KindOfFunctionCallExpression,
+    KindOfIncludeExpression,
+    KindOfIncOpExpression,
+    KindOfInstanceOfExpression,
+    KindOfIssetExpression,
+    KindOfListAssignmentExpression,
+    KindOfObjectPropertyExpression,
+    KindOfQOpExpression,
+    KindOfRefParamExpression,
+    KindOfScalarExpression,
+    KindOfStaticMemberExpression,
+    KindOfTempExpression,
+    KindOfTempExpressionList,
+    KindOfThisExpression,
+    KindOfUnaryOpExpression,
+    KindOfVariableExpression,
+  };
+  Expression(KindOf kindOf, EXPRESSION_ARGS) : Construct(CONSTRUCT_PASS),
+    m_kindOf(kindOf) {}
+
+  Expression(KindOf kindOf, const Location *loc) : Construct(loc),
+    m_kindOf(kindOf) {}
+  bool isKindOf(KindOf kindOf) { return m_kindOf == kindOf; }
   virtual ~Expression() {}
   virtual Variant eval(VariableEnvironment &env) const = 0;
   virtual bool evalStaticScalar(VariableEnvironment &env, Variant &r) const {
@@ -45,10 +76,8 @@ public:
   virtual Variant evalExist(VariableEnvironment &env) const;
   virtual const LvalExpression *toLval() const;
   virtual bool isRefParam() const;
-
-  static Variant evalVector(const std::vector<ExpressionPtr> &v,
-                            VariableEnvironment &env);
-
+protected:
+  KindOf m_kindOf;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

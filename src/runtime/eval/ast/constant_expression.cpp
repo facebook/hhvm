@@ -26,7 +26,8 @@ using namespace std;
 
 ConstantExpression::ConstantExpression(EXPRESSION_ARGS,
                                        const string &constant)
-  : Expression(EXPRESSION_PASS), m_constant(constant) {}
+  : Expression(KindOfConstantExpression, EXPRESSION_PASS),
+  m_constant(constant) {}
 
 Variant ConstantExpression::eval(VariableEnvironment &env) const {
   if (m_constant[0] == '\\') {

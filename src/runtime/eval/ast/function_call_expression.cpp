@@ -25,7 +25,24 @@ namespace Eval {
 FunctionCallExpression::FunctionCallExpression(EXPRESSION_ARGS,
                                                const std::vector<ExpressionPtr>
                                                &params)
-  : Expression(EXPRESSION_PASS), m_params(params) {}
+  : Expression(KindOfFunctionCallExpression, EXPRESSION_PASS),
+  m_params(params) {}
+
+ArgArray *FunctionCallExpression::prepareArgArray(VariableEnvironment &env,
+  const CallInfo* ci, unsigned int count) const {
+  ArgArray *args = NEW(ArgArray)(count);
+  ArgArray::Argument *argp = args->getStack();
+  for (unsigned int i = 0; i < count; ++i, argp++) {
+    if (ci->mustBeRef(i)) {
+      argp->m_val.assignRef(m_params[i]->refval(env));
+    } else if (ci->isRef(i)) {
+      argp->m_val.assignRef(m_params[i]->refval(env, 0));
+    } else {
+      argp->m_val.assign(m_params[i]->eval(env));
+    }
+  }
+  return args;
+}
 
 Array FunctionCallExpression::getParams(VariableEnvironment &env) const {
   Array params;

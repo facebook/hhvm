@@ -58,7 +58,7 @@ void CaseStatement::dump(std::ostream &out) const {
 SwitchStatement::SwitchStatement(STATEMENT_ARGS, ExpressionPtr source,
                 const std::vector<CaseStatementPtr> &cases)
   : Statement(STATEMENT_PASS), m_source(source), m_cases(cases) {
-  m_simpleVar = m_source->is<VariableExpression>();
+  m_simpleVar = m_source->isKindOf(Expression::KindOfVariableExpression);
 }
 
 void SwitchStatement::eval(VariableEnvironment &env) const {

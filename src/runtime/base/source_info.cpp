@@ -58,7 +58,7 @@ bool SourceInfo::translate(StackTrace::FramePtr f) {
   return false;
 }
 
-void SourceInfo::getDeclaredFunctions(const char *filename,
+void SourceInfo::getDeclaredFunctions(CStrRef filename,
                                       std::vector<const char *> &functions) {
   if (!m_loaded) load();
 
@@ -69,7 +69,7 @@ void SourceInfo::getDeclaredFunctions(const char *filename,
   }
 }
 
-void SourceInfo::getDeclaredClasses(const char *filename,
+void SourceInfo::getDeclaredClasses(CStrRef filename,
                                     std::vector<const char *> &classes) {
   if (!m_loaded) load();
 
@@ -80,7 +80,7 @@ void SourceInfo::getDeclaredClasses(const char *filename,
   }
 }
 
-const char *SourceInfo::getClassDeclaringFile(const char *name,
+const char *SourceInfo::getClassDeclaringFile(CStrRef name,
                                               int *line /* = NULL */) {
   if (!m_loaded) load();
   if (s_hook) {
@@ -97,7 +97,7 @@ const char *SourceInfo::getClassDeclaringFile(const char *name,
   return NULL;
 }
 
-const char *SourceInfo::getFunctionDeclaringFile(const char *name,
+const char *SourceInfo::getFunctionDeclaringFile(CStrRef name,
                                                  int *line /* = NULL */) {
   if (!m_loaded) load();
   if (s_hook) {

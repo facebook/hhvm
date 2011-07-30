@@ -17,12 +17,28 @@
 #include <runtime/eval/ast/name.h>
 #include <runtime/eval/ast/expression.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/eval/analysis/block.h>
+#include <tbb/concurrent_hash_map.h>
 #include <util/util.h>
 
 namespace HPHP {
 namespace Eval {
 using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
+
+typedef tbb::concurrent_hash_map<std::string, StringData *,
+                                 stringHashCompare> NameMap;
+static NameMap s_nameMap;
+
+StringData *StringName::GetStaticName(const std::string &name) {
+  NameMap::accessor acc;
+  if (s_nameMap.insert(acc, name)) {
+    StringData *sd = new StringData(name.data(), name.size(), CopyString);
+    sd->setStatic();
+    acc->second = sd;
+  }
+  return acc->second;
+}
 
 Name::Name(CONSTRUCT_ARGS) : Construct(CONSTRUCT_PASS) {}
 
@@ -56,11 +72,20 @@ NamePtr Name::LateStatic(CONSTRUCT_ARGS) {
 
 StringName::StringName(CONSTRUCT_ARGS, const string &name,
                        bool isSp /* = false */)
-  : Name(CONSTRUCT_PASS), m_name(name), m_isSp(isSp) {
+  : Name(CONSTRUCT_PASS), m_name(GetStaticName(name)), m_isSp(isSp),
+  m_sg(VariableIndex::isSuperGlobal(m_name)) {
 }
 
 StringName::StringName(CONSTRUCT_ARGS, CStrRef name, bool isSp /* = false */)
-  : Name(CONSTRUCT_PASS), m_name(name.get()), m_isSp(isSp) {
+  : Name(CONSTRUCT_PASS),
+//  m_name(GetStaticName(string(name.data(), name.size()))), m_isSp(isSp),
+  m_name(name.get()), m_isSp(isSp), m_sg(VariableIndex::isSuperGlobal(m_name)) {
+  ASSERT(m_name->isStatic());
+}
+
+bool StringName::getSuperGlobal(SuperGlobal &sg) {
+  sg = m_sg;
+  return true;
 }
 
 String StringName::get(VariableEnvironment &env) const {
@@ -82,7 +107,7 @@ void StringName::dump(std::ostream &out) const {
   if (!originalText.empty()) {
     out << originalText;
   } else {
-    out << m_name.c_str();
+    out << m_name->data();
   }
 }
 

@@ -82,21 +82,36 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
   // Handle builtins
   MethodCallPackage mcp1;
   mcp1.dynamicNamedCall(cname, name, -1);
-  const CallInfo* cit1 = mcp1.ci;
+  const CallInfo* ci = mcp1.ci;
   // If the lookup failed dynamicNamedCall() must throw an exception,
-  // so if we reach here cit1 must not be NULL
-  ASSERT(cit1);
-  ArrayInit ai(m_params.size());
-  for (unsigned int i = 0; i < m_params.size(); ++i) {
-    if (cit1->mustBeRef(i)) {
+  // so if we reach here ci must not be NULL
+  ASSERT(ci);
+  unsigned int count = m_params.size();
+  if (count <= 6) {
+    CVarRef a0 = (count > 0) ? evalParam(env, ci, 0) : null;
+    CVarRef a1 = (count > 1) ? evalParam(env, ci, 1) : null;
+    CVarRef a2 = (count > 2) ? evalParam(env, ci, 2) : null;
+    CVarRef a3 = (count > 3) ? evalParam(env, ci, 3) : null;
+    CVarRef a4 = (count > 4) ? evalParam(env, ci, 4) : null;
+    CVarRef a5 = (count > 5) ? evalParam(env, ci, 5) : null;
+    return
+      strongBind((ci->getMethFewArgs())(mcp1, count, a0, a1, a2, a3, a4, a5));
+  }
+  if (RuntimeOption::UseArgArray) {
+    ArgArray *args = prepareArgArray(env, ci, count);
+    return strongBind((ci->getMeth())(mcp1, args));
+  }
+  ArrayInit ai(count);
+  for (unsigned int i = 0; i < count; ++i) {
+    if (ci->mustBeRef(i)) {
       ai.setRef(m_params[i]->refval(env));
-    } else if (cit1->isRef(i)) {
+    } else if (ci->isRef(i)) {
       ai.setRef(m_params[i]->refval(env, 0));
     } else {
       ai.set(m_params[i]->eval(env));
     }
   }
-  return strongBind((cit1->getMeth())(mcp1, Array(ai.create())));
+  return strongBind((ci->getMeth())(mcp1, Array(ai.create())));
 }
 
 void StaticMethodExpression::dump(std::ostream &out) const {

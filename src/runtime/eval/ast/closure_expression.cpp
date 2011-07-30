@@ -28,7 +28,7 @@ using namespace std;
 ClosureExpression::ClosureExpression(EXPRESSION_ARGS,
                                      FunctionStatementPtr func,
                                      const vector<ParameterPtr> &vars)
-    : Expression(EXPRESSION_PASS), m_func(func) {
+    : Expression(KindOfClosureExpression, EXPRESSION_PASS), m_func(func) {
   func->setClosure(this);
 
   // push the vars in reverse order, not retaining duplicates
@@ -51,10 +51,14 @@ Variant ClosureExpression::eval(VariableEnvironment &env) const {
   for (unsigned int i = 0; i < m_vars.size(); i++) {
     Parameter *param = m_vars[i].get();
     String name = param->getName();
+    SuperGlobal sg;
+    if (!param->getSuperGlobal(sg)) {
+      sg = VariableIndex::isSuperGlobal(name);
+    }
     if (param->isRef()) {
-      vars.append(ref(env.get(name)));
+      vars.append(ref(env.getVar(name, sg)));
     } else {
-      vars.append(env.get(name));
+      vars.append(env.getVar(name, sg));
     }
   }
 

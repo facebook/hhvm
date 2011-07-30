@@ -30,6 +30,20 @@ ForStatement::ForStatement(STATEMENT_ARGS,
   : Statement(STATEMENT_PASS), m_init(init), m_cond(cond), m_next(next),
     m_body(body) {}
 
+static Variant evalVector(const std::vector<ExpressionPtr> &v,
+                          VariableEnvironment &env) {
+  if (LIKELY(v.size() == 1)) return v[0]->eval(env);
+
+  for (unsigned int i  = 0; i < v.size(); i++) {
+    CVarRef res = v[i]->eval(env);
+    if (i == v.size() - 1) return res;
+  }
+  return null;
+}
+
+#define EVAL_LOOP_EXPR(v, env) \
+  (LIKELY(v.size() == 1) ? v[0]->eval(env) : evalVector(v, env))
+
 void ForStatement::eval(VariableEnvironment &env) const {
   DECLARE_THREAD_INFO;
 
@@ -39,10 +53,10 @@ void ForStatement::eval(VariableEnvironment &env) const {
   }
   ENTER_STMT;
   LOOP_COUNTER(1);
-  Expression::evalVector(m_init, env);
+  EVAL_LOOP_EXPR(m_init, env);
 
   begin:
-  if (!m_cond.empty() && !Expression::evalVector(m_cond, env)) {
+  if (!m_cond.empty() && !EVAL_LOOP_EXPR(m_cond, env)) {
     goto end;
   }
 
@@ -52,7 +66,7 @@ void ForStatement::eval(VariableEnvironment &env) const {
   if (m_body) EVAL_STMT_HANDLE_GOTO(m_body, env);
   EVAL_STMT_HANDLE_GOTO_END(restart);
 
-  Expression::evalVector(m_next, env);
+  EVAL_LOOP_EXPR(m_next, env);
   goto begin;
   end:;
 }

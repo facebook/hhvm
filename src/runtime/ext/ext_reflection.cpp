@@ -267,7 +267,7 @@ Array f_hphp_get_class_info(CVarRef name) {
                          cls->getLine2())) {
       int line = 0;
       const char *file = SourceInfo::TheSourceInfo.
-        getClassDeclaringFile(className.data(), &line);
+        getClassDeclaringFile(className, &line);
       set_source_info(ret, file, line, line);
     }
     set_doc_comment(ret, cls->getDocComment());

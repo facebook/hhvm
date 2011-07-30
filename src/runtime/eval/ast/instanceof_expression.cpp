@@ -23,7 +23,8 @@ namespace Eval {
 
 InstanceOfExpression::InstanceOfExpression(EXPRESSION_ARGS, ExpressionPtr obj,
                                            NamePtr name)
-  : Expression(EXPRESSION_PASS), m_obj(obj), m_name(name) {}
+  : Expression(KindOfInstanceOfExpression, EXPRESSION_PASS),
+   m_obj(obj), m_name(name) {}
 
 Variant InstanceOfExpression::eval(VariableEnvironment &env) const {
   Variant obj(m_obj->eval(env));

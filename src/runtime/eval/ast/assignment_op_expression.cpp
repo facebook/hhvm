@@ -16,6 +16,8 @@
 
 #include <runtime/eval/ast/assignment_op_expression.h>
 #include <runtime/eval/ast/lval_expression.h>
+#include <runtime/eval/strict_mode.h>
+#include <runtime/eval/ast/variable_expression.h>
 #include <util/parser/hphp.tab.hpp>
 
 namespace HPHP {
@@ -25,11 +27,42 @@ namespace Eval {
 AssignmentOpExpression::AssignmentOpExpression(EXPRESSION_ARGS, int op,
                                                LvalExpressionPtr lhs,
                                                ExpressionPtr rhs)
-  : Expression(EXPRESSION_PASS), m_op(op), m_lhs(lhs), m_rhs(rhs) {}
+  : Expression(KindOfAssignmentOpExpression, EXPRESSION_PASS),
+  m_op(op), m_lhs(lhs), m_rhs(rhs) {}
 
 Variant AssignmentOpExpression::eval(VariableEnvironment &env) const {
   Variant rhs(m_rhs->eval(env));
   if (m_op == '=') return m_lhs->set(env, rhs);
+  if (m_lhs->isKindOf(Expression::KindOfVariableExpression)) {
+    Variant &lhs = m_lhs->lval(env);
+    Variant::TypedValueAccessor lhsAcc = lhs.getTypedAccessor();
+    DataType lhsType = Variant::GetAccessorType(lhsAcc);
+    Variant::TypedValueAccessor rhsAcc = rhs.getTypedAccessor();
+    DataType rhsType = Variant::GetAccessorType(rhsAcc);
+    if (lhsType == HPHP::KindOfInt64 && rhsType == HPHP::KindOfInt64) {
+      int64 &lv = *Variant::GetInt64Data(lhsAcc);
+      int64 rv = Variant::GetInt64(rhsAcc);
+      switch (m_op) {
+      case T_PLUS_EQUAL:     return lv += rv;
+      case T_MINUS_EQUAL:    return lv -= rv;
+      case T_MUL_EQUAL:      return lv *= rv;
+      case T_AND_EQUAL:      return lv &= rv;
+      case T_OR_EQUAL:       return lv |= rv;
+      case T_XOR_EQUAL:      return lv ^= rv;
+      case T_SL_EQUAL:       return lv <<= rv;
+      case T_SR_EQUAL:       return lv >>= rv;
+      default:               break;
+      }
+    }
+    if (RuntimeOption::EnableStrict) {
+      if (!VariableExpression::checkCompatibleAssignment(lhs, rhs)) {
+        throw_strict(TypeVariableChangeException(
+                     location_to_string(m_lhs->loc())),
+                     StrictMode::StrictHardCore);
+      }
+    }
+    return m_lhs->LvalExpression::setOpVariant(lhs, m_op, rhs);
+  }
   return m_lhs->setOp(env, m_op, rhs);
 }
 

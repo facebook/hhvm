@@ -23,18 +23,6 @@ namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-Expression::Expression(EXPRESSION_ARGS) : Construct(CONSTRUCT_PASS) {}
-
-Variant Expression::evalVector(const std::vector<ExpressionPtr> &v,
-                               VariableEnvironment &env) {
-  Variant res;
-  for (std::vector<ExpressionPtr>::const_iterator it = v.begin();
-       it != v.end(); ++it) {
-    res = (*it)->eval(env);
-  }
-  return res;
-}
-
 Variant Expression::refval(VariableEnvironment &env, int strict /* = 2 */)
   const {
   if (strict == 2) {

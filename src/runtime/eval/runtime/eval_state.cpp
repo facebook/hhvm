@@ -217,7 +217,7 @@ void RequestEvalState::declareFunction(const FunctionStatement *fn) {
   if (fn->invalidOverride()) {
     if (fn->ignoredOverride()) return;
   } else if (get_renamed_function(name) == name) {
-    std::pair<hphp_const_char_imap<const FunctionStatement*>::iterator,
+    std::pair<StringIMap<const FunctionStatement*>::iterator,
       bool> p = self->m_functions.insert(make_pair(name, fn));
     if (p.second ||
         (p.first->second == fn &&
@@ -311,14 +311,14 @@ const MethodStatement *RequestEvalState::findMethod(const char *cname,
   return NULL;
 }
 
-const Function *RequestEvalState::findFunction(const char *name) {
+const Function *RequestEvalState::findFunction(CStrRef name) {
   const Function *f = findUserFunction(name);
   if (f) return f;
   return evalOverrides.findFunction(name);
 }
-const FunctionStatement *RequestEvalState::findUserFunction(const char *name) {
+const FunctionStatement *RequestEvalState::findUserFunction(CStrRef name) {
   RequestEvalState *self = s_res.get();
-  hphp_const_char_imap<const FunctionStatement*>::const_iterator it =
+  StringIMap<const FunctionStatement*>::const_iterator it =
     self->m_functions.find(name);
   if (it != self->m_functions.end()) {
     return it->second;
@@ -429,7 +429,7 @@ string RequestEvalState::unique() {
 Array RequestEvalState::getUserFunctionsInfo() {
   RequestEvalState *self = s_res.get();
   Array ret;
-  for (hphp_const_char_imap<const FunctionStatement*>::const_iterator it =
+  for (StringIMap<const FunctionStatement*>::const_iterator it =
          self->m_functions.begin(); it != self->m_functions.end(); ++it) {
     ret.append(it->first);
   }
@@ -626,7 +626,7 @@ void RequestEvalState::fiberInit(RequestEvalState *res,
     addCodeContainer(*it);
   }
   // Functions
-  for (hphp_const_char_imap<const FunctionStatement*>::iterator it =
+  for (StringIMap<const FunctionStatement*>::iterator it =
       res->m_functions.begin(); it != res->m_functions.end(); ++it) {
     m_functions[it->first] = it->second;
   }
@@ -710,15 +710,15 @@ void RequestEvalState::fiberExit(RequestEvalState *res,
     addCodeContainer(*it);
   }
   // Functions
-  for (hphp_const_char_imap<const FunctionStatement*>::iterator it =
+  for (StringIMap<const FunctionStatement*>::iterator it =
       res->m_functions.begin(); it != res->m_functions.end(); ++it) {
-    hphp_const_char_imap<const FunctionStatement*>::iterator fit =
+    StringIMap<const FunctionStatement*>::iterator fit =
       m_functions.find(it->first);
     if (fit == m_functions.end()) {
       m_functions[it->first] = it->second;
     } else if (fit->second != it->second) {
       raise_error("Different function of the same name (%s) defined in fiber",
-                  fit->first);
+                  fit->first.c_str());
     }
   }
   // Constants
@@ -815,7 +815,7 @@ public:
   EvalSourceInfoHook() {
     if (HPHP::has_eval_support) SourceInfo::SetHook(this);
   }
-  virtual const char *getClassDeclaringFile(const char *name,
+  virtual const char *getClassDeclaringFile(CStrRef name,
                                             int *line = NULL) {
     const ClassStatement *f = RequestEvalState::findClass(name);
     if (f) {
@@ -825,7 +825,7 @@ public:
       return NULL;
     }
   }
-  virtual const char *getFunctionDeclaringFile(const char *name,
+  virtual const char *getFunctionDeclaringFile(CStrRef name,
                                                int *line = NULL) {
     const FunctionStatement *f = RequestEvalState::findUserFunction(name);
     if (f) {
@@ -849,7 +849,7 @@ void RequestEvalState::info() {
     cerr << " " << it->first << " " << it->second.getClass()->name() << endl;
   }
   cerr << "Functions:" << endl;
-    for (hphp_const_char_imap<const FunctionStatement*>::const_iterator it =
+    for (StringIMap<const FunctionStatement*>::const_iterator it =
          self->m_functions.begin(); it != self->m_functions.end(); ++it) {
     cerr << " " << it->second->name() << endl;
   }

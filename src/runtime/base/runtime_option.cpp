@@ -288,6 +288,7 @@ bool RuntimeOption::EnableMemoryManager = true;
 bool RuntimeOption::CheckMemory = false;
 bool RuntimeOption::UseHphpArray = false;
 bool RuntimeOption::UseSmallArray = false;
+bool RuntimeOption::UseArgArray = false;
 bool RuntimeOption::UseDirectCopy = false;
 bool RuntimeOption::EnableApc = true;
 bool RuntimeOption::EnableConstLoad = false;
@@ -711,6 +712,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     CheckMemory = server["CheckMemory"].getBool();
     UseHphpArray = server["UseHphpArray"].getBool(false);
     UseSmallArray = server["UseSmallArray"].getBool(false);
+    UseArgArray = server["UseArgArray"].getBool(false);
+    if (!has_eval_support) UseArgArray = false;
     UseDirectCopy = server["UseDirectCopy"].getBool(false);
     AlwaysUseRelativePath = server["AlwaysUseRelativePath"].getBool(false);
 

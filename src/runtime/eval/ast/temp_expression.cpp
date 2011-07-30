@@ -24,11 +24,11 @@ namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TempExpression::TempExpression(ExpressionPtr exp, int index /* = 0 */)
-    : Expression(exp->loc()), m_exp(exp), m_index(index) {
-}
+    : Expression(KindOfTempExpression, exp->loc()),
+  m_exp(exp), m_index(index) {}
 
 Variant TempExpression::eval(VariableEnvironment &env) const {
-  if (m_exp->is<VariableExpression>()) {
+  if (m_exp->isKindOf(Expression::KindOfVariableExpression)) {
     return m_exp->eval(env);
   }
   return env.getTempVariable(m_index);

@@ -26,7 +26,7 @@ namespace Eval {
 CatchBlock::CatchBlock(CONSTRUCT_ARGS, const string &ename,
                        const string &vname, StatementPtr body)
   : Construct(CONSTRUCT_PASS), m_ename(ename),
-    m_vname(vname), m_body(body) {}
+    m_vname(vname), m_sg(VariableIndex::isSuperGlobal(vname)), m_body(body) {}
 
 bool CatchBlock::match(CObjRef exn) const {
   return exn.instanceof(m_ename.c_str());
@@ -35,7 +35,7 @@ bool CatchBlock::match(CObjRef exn) const {
 bool CatchBlock::proc(CObjRef exn, VariableEnvironment &env) const {
   if (exn.instanceof(m_ename.c_str())) {
     if (m_body) {
-      env.get(String(m_vname)) = exn;
+      env.getVar(m_vname, m_sg) = exn;
       m_body->eval(env);
     }
     return true;
@@ -63,7 +63,9 @@ void TryStatement::eval(VariableEnvironment &env) const {
          it != m_catches.end(); ++it) {
       if ((*it)->match(e)) {
         if ((*it)->body()) {
-          env.get(String((*it)->vname())) = e;
+          String s = (*it)->vname();
+          SuperGlobal sg = (*it)->sg();
+          env.getVar(s, sg) = e;
           EVAL_STMT((*it)->body(), env);
         }
         return;

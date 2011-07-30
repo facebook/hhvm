@@ -784,6 +784,7 @@ AtomicString::AtomicString(const char *s,
   if (m_px) {
     m_px->setAtomic();
     m_px->incAtomicCount();
+    m_px->preCompute();
   }
 }
 
@@ -793,6 +794,7 @@ AtomicString::AtomicString(const std::string &s) {
   if (m_px) {
     m_px->setAtomic();
     m_px->incAtomicCount();
+    m_px->preCompute();
   }
 }
 
@@ -804,10 +806,12 @@ AtomicString::AtomicString(StringData *str) {
     }
     AtomicSmartPtr<StringData>::operator=(str);
   }
+  if (m_px) m_px->preCompute();
 }
 
 AtomicString &AtomicString::operator=(const AtomicString &s) {
   AtomicSmartPtr<StringData>::operator=(s);
+  if (m_px) m_px->preCompute();
   return *this;
 }
 

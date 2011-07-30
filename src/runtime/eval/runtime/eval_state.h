@@ -148,8 +148,8 @@ public:
   static const MethodStatement *findMethod(const char *cname, const char *name,
                                            bool &foundClass,
                                            bool autoload = false);
-  static const FunctionStatement *findUserFunction(const char *name);
-  static const Function *findFunction(const char *name);
+  static const FunctionStatement *findUserFunction(CStrRef name);
+  static const Function *findFunction(CStrRef name);
   static bool findConstant(CStrRef name, Variant &ret);
   static bool includeFile(Variant &res, CStrRef path, bool once,
                           LVariableTable* variables,
@@ -194,7 +194,7 @@ private:
   std::list<SmartPtr<CodeContainer> > m_codeContainers;
 
   StringIMap<ClassEvalState> m_classes;
-  hphp_const_char_imap<const FunctionStatement*> m_functions;
+  StringIMap<const FunctionStatement*> m_functions;
   std::map<const FunctionStatement*, LVariableTable> m_functionStatics;
   typedef std::map<const MethodStatement*,
     std::map<std::string, LVariableTable, string_lessi> > MethodStatics;

@@ -21,6 +21,7 @@
 #include <runtime/base/variable_unserializer.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/execution_context.h>
+#include <runtime/base/array/arg_array.h>
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/eval/runtime/code_coverage.h>
 #include <runtime/ext/ext_process.h>
@@ -440,6 +441,57 @@ Variant o_invoke_failed(const char *cls, const char *meth,
 }
 
 Array collect_few_args(int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (RuntimeOption::UseArgArray) {
+    if (count == 0) return Array();
+    ArgArray *args = NEW(ArgArray)(count);
+    ArgArray::Argument *argp = args->getStack();
+    if (count > 0) {
+      argp->m_val.assign(a0);
+      argp++;
+    }
+    if (count > 1) {
+      argp->m_val.assign(a1);
+      argp++;
+    }
+    if (count > 2) {
+      argp->m_val.assign(a2);
+      argp++;
+    }
+#if INVOKE_FEW_ARGS_COUNT > 3
+    if (count > 3) {
+      argp->m_val.assign(a3);
+      argp++;
+    }
+    if (count > 4) {
+      argp->m_val.assign(a4);
+      argp++;
+    }
+    if (count > 5) {
+      argp->m_val.assign(a5);
+      argp++;
+    }
+#endif
+#if INVOKE_FEW_ARGS_COUNT > 6
+    if (count > 6) {
+      argp->m_val.assign(a6);
+      argp++;
+    }
+    if (count > 7) {
+      argp->m_val.assign(a7);
+      argp++;
+    }
+    if (count > 8) {
+      argp->m_val.assign(a8);
+      argp++;
+    }
+    if (count > 9) {
+      argp->m_val.assign(a9);
+      argp++;
+    }
+#endif
+    if (count > 10) ASSERT(false);
+    return args;
+  }
   switch (count) {
   case 0: {
     return Array();
@@ -497,6 +549,57 @@ Array collect_few_args(int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 }
 
 Array collect_few_args_ref(int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (RuntimeOption::UseArgArray) {
+    if (count == 0) return Array();
+    ArgArray *args = NEW(ArgArray)(count);
+    ArgArray::Argument *argp = args->getStack();
+    if (count > 0) {
+      argp->m_val.assignRef(a0);
+      argp++;
+    }
+    if (count > 1) {
+      argp->m_val.assignRef(a1);
+      argp++;
+    }
+    if (count > 2) {
+      argp->m_val.assignRef(a2);
+      argp++;
+    }
+#if INVOKE_FEW_ARGS_COUNT > 3
+    if (count > 3) {
+      argp->m_val.assignRef(a3);
+      argp++;
+    }
+    if (count > 4) {
+      argp->m_val.assignRef(a4);
+      argp++;
+    }
+    if (count > 5) {
+      argp->m_val.assignRef(a5);
+      argp++;
+    }
+#endif
+#if INVOKE_FEW_ARGS_COUNT > 6
+    if (count > 6) {
+      argp->m_val.assignRef(a6);
+      argp++;
+    }
+    if (count > 7) {
+      argp->m_val.assignRef(a7);
+      argp++;
+    }
+    if (count > 8) {
+      argp->m_val.assignRef(a8);
+      argp++;
+    }
+    if (count > 9) {
+      argp->m_val.assignRef(a9);
+      argp++;
+    }
+#endif
+    if (count > 10) ASSERT(false);
+    return args;
+  }
   switch (count) {
   case 0: {
     return Array();

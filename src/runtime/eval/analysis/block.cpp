@@ -29,31 +29,59 @@ void VariableIndex::set(CStrRef name, int idx) {
   m_sg = isSuperGlobal(name);
 }
 
-VariableIndex::SuperGlobal VariableIndex::isSuperGlobal(CStrRef name) {
-  if (name == "GLOBALS") {
-    return Globals;
+
+static String s_GLOBALS;
+static String s__SERVER;
+static String s__GET;
+static String s__POST;
+static String s__FILES;
+static String s__COOKIE;
+static String s__SESSION;
+static String s__REQUEST;
+static String s__ENV;
+static String s_http_response_header;
+
+static bool loaded = false;
+void VariableIndex::SetupSuperGlobals() {
+  s_GLOBALS = StringName::GetStaticName("GLOBALS");
+  s__SERVER = StringName::GetStaticName("_SERVER");
+  s__GET = StringName::GetStaticName("_GET");
+  s__POST = StringName::GetStaticName("_POST");
+  s__FILES = StringName::GetStaticName("_FILES");
+  s__COOKIE = StringName::GetStaticName("_COOKIE");
+  s__SESSION = StringName::GetStaticName("_SESSION");
+  s__REQUEST = StringName::GetStaticName("_REQUEST");
+  s__ENV = StringName::GetStaticName("_ENV");
+  s_http_response_header = StringName::GetStaticName("http_response_header");
+  loaded = true;
+}
+
+SuperGlobal VariableIndex::isSuperGlobal(CStrRef name) {
+  ASSERT(loaded);
+  if (name == s_GLOBALS) {
+    return SgGlobals;
   } else if (name.data()[0] == '_') {
-    if (name == "_SERVER") {
-      return Server;
-    } else if (name == "_GET") {
-      return Get;
-    } else if (name == "_POST") {
-      return Post;
-    } else if (name == "_FILES") {
-      return Files;
-    } else if (name == "_COOKIE") {
-      return Cookie;
-    } else if (name == "_SESSION") {
-      return Session;
-    } else if (name == "_REQUEST") {
-      return Request;
-    } else if (name == "_ENV") {
-      return Env;
+    if (name == s__SERVER) {
+      return SgServer;
+    } else if (name == s__GET) {
+      return SgGet;
+    } else if (name == s__POST) {
+      return SgPost;
+    } else if (name == s__FILES) {
+      return SgFiles;
+    } else if (name == s__COOKIE) {
+      return SgCookie;
+    } else if (name == s__SESSION) {
+      return SgSession;
+    } else if (name == s__REQUEST) {
+      return SgRequest;
+    } else if (name == s__ENV) {
+      return SgEnv;
     }
-  } else if (name == "http_response_header") {
-    return HttpResponseHeader;
+  } else if (name == s_http_response_header) {
+    return SgHttpResponseHeader;
   }
-  return Normal;
+  return SgNormal;
 }
 
 Block::Block() {}
@@ -77,12 +105,12 @@ void Block::declareStaticStatement(StaticStatementPtr stat) {
 }
 
 int Block::declareVariable(CStrRef var) {
-  string svar(var.data(), var.size());
-  VariableIndices::const_iterator it = m_variableIndices.find(svar);
+  ASSERT(var->isStatic());
+  VariableIndices::const_iterator it = m_variableIndices.find(var);
   if (it == m_variableIndices.end()) {
     int i = m_variableIndices.size();
-    m_variableIndices[svar].set(svar, i);
-    m_variables.push_back(var.data());
+    m_variableIndices[var].set(var, i);
+    m_variables.push_back(var.get());
     return i;
   }
   return it->second.idx();

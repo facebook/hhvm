@@ -1019,7 +1019,7 @@ class Variant {
    * Low level access that should be restricted to internal use.
    */
   int64 *getInt64Data() const {
-    ASSERT(getType() == KindOfInt64);
+    ASSERT(getType() == KindOfInt64 || getType() == KindOfInt32);
     return m_type == KindOfVariant ? &m_data.pvar->m_data.num : &m_data.num;
   }
   double *getDoubleData() const {
@@ -1097,6 +1097,12 @@ class Variant {
     ASSERT(acc->m_type == KindOfInt32 ||
            acc->m_type == KindOfInt64);
     return acc->m_data.num;
+  }
+  static int64 *GetInt64Data(TypedValueAccessor acc) {
+    ASSERT(acc);
+    ASSERT(acc->m_type == KindOfInt32 ||
+           acc->m_type == KindOfInt64);
+    return &acc->m_data.num;
   }
   static double GetDouble(TypedValueAccessor acc) {
     ASSERT(acc && acc->m_type == KindOfDouble);

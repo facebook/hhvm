@@ -29,8 +29,10 @@ using namespace std;
 ArrayElementExpression::ArrayElementExpression(EXPRESSION_ARGS,
                                                ExpressionPtr arr,
                                                ExpressionPtr idx)
-  : LvalExpression(EXPRESSION_PASS), m_arr(arr), m_idx(idx) {
-  m_reverseOrder = m_idx && m_arr->is<VariableExpression>();
+  : LvalExpression(KindOfArrayElementExpression, EXPRESSION_PASS),
+  m_arr(arr), m_idx(idx) {
+  m_reverseOrder = m_idx &&
+                   m_arr->isKindOf(Expression::KindOfVariableExpression);
 }
 
 Variant ArrayElementExpression::eval(VariableEnvironment &env) const {
@@ -38,14 +40,14 @@ Variant ArrayElementExpression::eval(VariableEnvironment &env) const {
     SET_LINE;
     throw InvalidOperandException("Cannot use [] in read context");
   }
-  Variant arr, idx;
   if (m_reverseOrder) {
-    idx = m_idx->eval(env);
-    arr = m_arr->eval(env);
-  } else {
-    arr = m_arr->eval(env);
-    idx = m_idx->eval(env);
+    Variant idx(m_idx->eval(env));
+    Variant arr(m_arr->eval(env));
+    SET_LINE;
+    return arr.rvalAt(idx, AccessFlags::Error);
   }
+  Variant arr(m_arr->eval(env));
+  Variant idx(m_idx->eval(env));
   SET_LINE;
   return arr.rvalAt(idx, AccessFlags::Error);
 }

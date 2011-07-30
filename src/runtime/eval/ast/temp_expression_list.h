@@ -104,7 +104,7 @@ private:
   /**
    * Evaluate offset expressions and store as temp variables.
    */
-  bool evalOffsets(VariableEnvironment &env) const;
+  int evalOffsets(VariableEnvironment &env, int &oldPrevSize) const;
   friend class TempExpressionHelper;
 };
 
@@ -118,7 +118,8 @@ public:
 
 private:
   VariableEnvironment &m_env;
-  bool m_release;
+  int m_size;
+  int m_oldPrevSize;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

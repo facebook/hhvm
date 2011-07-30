@@ -422,6 +422,15 @@ struct StringDataHashCompare {
   }
 };
 
+struct stringHashCompare {
+  bool equal(const std::string &s1, const std::string &s2) const {
+    return s1 == s2;
+  }
+  size_t hash(const std::string &s) const {
+    return hash_string(s.c_str());
+  }
+};
+
 typedef hphp_hash_set<String, hphp_string_hash, hphp_string_isame> StringISet;
 
 template<typename T>

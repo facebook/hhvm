@@ -448,12 +448,13 @@ void Parser::onSimpleVariable(Token &out, Token &var) {
     }
   }
   int idx = -1;
+  String svar = StringName::GetStaticName(var.text());
   if (haveFunc()) {
-    idx = peekFunc()->declareVariable(var.text());
+    idx = peekFunc()->declareVariable(svar);
   } else {
-    idx = m_fileBlock.declareVariable(var.text());
+    idx = m_fileBlock.declareVariable(svar);
   }
-  out->exp() = NEW_EXP(Variable, Name::fromString(this, var.text()), idx);
+  out->exp() = NEW_EXP(Variable, Name::fromString(this, svar), idx);
 }
 
 void Parser::onSynthesizedVariable(Token &out, Token &var) {

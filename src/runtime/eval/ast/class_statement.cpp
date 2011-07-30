@@ -35,7 +35,7 @@ using namespace std;
 
 ClassVariable::ClassVariable(CONSTRUCT_ARGS, const string &name, int modifiers,
     ExpressionPtr value, const string &doc, ClassStatement *cls)
-  : Construct(CONSTRUCT_PASS), m_name(name),
+  : Construct(CONSTRUCT_PASS), m_name(StringName::GetStaticName(name)),
     m_modifiers(modifiers), m_value(value), m_docComment(doc), m_cls(cls) {
 }
 
@@ -69,13 +69,13 @@ void ClassVariable::setStatic(VariableEnvironment &env, LVariableTable &st)
         }
       }
     }
-    st.get(m_name) = val;
+    st.get(String(m_name)) = val;
   }
 }
 
 void ClassVariable::dump(std::ostream &out) const {
   ClassStatement::dumpModifiers(out, m_modifiers, true);
-  out << "$" << m_name.c_str();
+  out << "$" << m_name->data();
   if (m_value) {
     out  << " = ";
     m_value->dump(out);
@@ -102,8 +102,9 @@ void ClassVariable::eval(VariableEnvironment &env, Variant &res) const {
 
 ClassStatement::ClassStatement(STATEMENT_ARGS, const string &name,
                                const string &parent, const string &doc)
-  : Statement(STATEMENT_PASS), m_name(name),
-    m_modifiers(0), m_parent(parent), m_docComment(doc),
+  : Statement(STATEMENT_PASS), m_name(StringName::GetStaticName(name)),
+    m_modifiers(0), m_parent(StringName::GetStaticName(parent)),
+    m_docComment(doc),
     m_marker(new ClassStatementMarker(STATEMENT_PASS, this)),
     m_delayDeclaration(false) { }
 
@@ -111,7 +112,7 @@ void ClassStatement::finish() {
 }
 
 const ClassStatement *ClassStatement::parentStatement() const {
-  if (!m_parent.empty()) {
+  if (!m_parent->empty()) {
     return RequestEvalState::findClass(m_parent, true);
   }
   return NULL;
@@ -125,7 +126,7 @@ void ClassStatement::loadInterfaceStatements() const {
 
 void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
   ClassEvalState::MethodTable &mtable = ce.getMethodTable();
-  if (!m_parent.empty()) {
+  if (!m_parent->empty()) {
     const ClassStatement* parent_cls = parentStatement();
     if (parent_cls) {
       parent_cls->loadMethodTable(ce);
@@ -171,7 +172,7 @@ void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
                                   (*it)->name().c_str(), al,
                                   mmit ?
                                   mmit->getClass()->name().c_str() :
-                                  m_parent.c_str());
+                                  m_parent->data());
       }
       mit->second.first = it->get();
       mit->second.second = (*it)->getModifiers();
@@ -183,7 +184,7 @@ void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
   }
 
   hphp_const_char_imap<MethodStatementPtr>::const_iterator it =
-    m_methods.find(m_name.c_str());
+    m_methods.find(m_name->data());
   if (it != m_methods.end()) {
     ce.getConstructor() = it->second.get();
   }
@@ -200,7 +201,7 @@ void ClassStatement::eval(VariableEnvironment &env) const {
     // Class might not be valid to declare yet. If the parent and bases
     // have not been defined then don't declare until execution hits the
     // marker.
-    if (!m_parent.empty() && !f_class_exists(m_parent, false)) {
+    if (!m_parent->empty() && !f_class_exists(m_parent, false)) {
       return;
     }
     for (uint i = 0; i < m_bases.size(); ++i) {
@@ -320,7 +321,7 @@ void ClassStatement::initializeStatics(LVariableTable &statics) const {
 
 void ClassStatement::addBases(const std::vector<String> &bases) {
   for (unsigned i = 0; i < bases.size(); i++) {
-    m_bases.push_back(AtomicString(bases[i].get()));
+    m_bases.push_back(StringName::GetStaticName(bases[i].data()));
   }
 }
 
@@ -343,28 +344,28 @@ void ClassStatement::addVariable(ClassVariablePtr v) {
 void ClassStatement::addMethod(MethodStatementPtr m) {
   if (m_methods.find(m->name().c_str()) != m_methods.end()) {
     raise_error("Cannot redeclare %s::%s()",
-                m_name.c_str(), m->name().c_str());
+                m_name->data(), m->name().c_str());
   }
   if (m->getModifiers() & Abstract) {
     if (m->getModifiers() & Private) {
       raise_error("Cannot declare abstract %s::%s() private",
-                  m_name.c_str(), m->name().c_str());
+                  m_name->data(), m->name().c_str());
     }
     if (m->getModifiers() & Final) {
       raise_error("Cannot declare abstract %s::%s() final",
-                  m_name.c_str(), m->name().c_str());
+                  m_name->data(), m->name().c_str());
     }
     if (m->hasBody()) {
       raise_error("Abstract %s::%s() cannot contain body",
-                  m_name.c_str(), m->name().c_str());
+                  m_name->data(), m->name().c_str());
     }
   } else if (!m->hasBody()) {
     if (!(m_modifiers & Interface)) {
       raise_error("Non-abstract %s::%s() must contain body",
-                  m_name.c_str(), m->name().c_str());
+                  m_name->data(), m->name().c_str());
     } else if (m->getModifiers() & Protected) {
       raise_error("Access type for interface method %s::%s() must be "
-                  "omitted", m_name.c_str(), m->name().c_str());
+                  "omitted", m_name->data(), m->name().c_str());
     }
   }
 
@@ -373,17 +374,17 @@ void ClassStatement::addMethod(MethodStatementPtr m) {
 }
 void ClassStatement::addConstant(const string &name, ExpressionPtr v) {
   // Array is the only one allowed by the grammer but disallowed semantically
-  if (v->is<ArrayExpression>()) {
+  if (v->isKindOf(Expression::KindOfArrayExpression)) {
     raise_error("Arrays are not allowed in class constants");
   }
-  m_constantNames.push_back(AtomicString(name));
+  m_constantNames.push_back(StringName::GetStaticName(name));
   m_constants[m_constantNames.back()] = v;
 }
 
 bool ClassStatement::instanceOf(const char *c) const {
-  if (strcasecmp(m_name.c_str(), c) == 0) return true;
+  if (strcasecmp(m_name->data(), c) == 0) return true;
   for (unsigned i = 0; i < m_bases.size(); i++) {
-    if (strcasecmp(m_bases[i].c_str(), c) == 0) return true;
+    if (strcasecmp(m_bases[i]->data(), c) == 0) return true;
   }
   for (unsigned i = 0; i < m_bases.size(); i++) {
     const ClassStatement *iface = RequestEvalState::findClass(m_bases[i]);
@@ -477,9 +478,9 @@ void ClassStatement::dump(std::ostream &out) const {
   } else {
     out << "class ";
   }
-  out << m_name.c_str();
-  if (!m_parent.empty()) {
-    out << " extends " << m_parent.c_str();
+  out << m_name->data();
+  if (!m_parent->empty()) {
+    out << " extends " << m_parent->data();
   }
   if (!m_bases.empty()) {
     if (m_modifiers & Interface) {
@@ -489,7 +490,7 @@ void ClassStatement::dump(std::ostream &out) const {
     }
     for (unsigned int i = 0; i < m_bases.size(); i++) {
       if (i > 0) out << ", ";
-      out << m_bases[i].c_str();
+      out << m_bases[i]->data();
     }
   }
   out << " {\n";
@@ -592,13 +593,13 @@ bool ClassStatement::hasAccess(const char *context, Modifier level) const {
   ASSERT(context);
   switch (level) {
   case Public: return true;
-  case Private: return strcasecmp(context, m_name.c_str()) == 0;
+  case Private: return strcasecmp(context, m_name->data()) == 0;
   case Protected:
     {
       if (!*context) return false;
-      if (strcasecmp(context, m_name.c_str()) == 0) return true;
+      if (strcasecmp(context, m_name->data()) == 0) return true;
       const ClassStatement *cls = RequestEvalState::findClass(context);
-      return cls->subclassOf(m_name.c_str()) || subclassOf(context);
+      return cls->subclassOf(m_name->data()) || subclassOf(context);
     }
   default:
     ASSERT(false);
@@ -641,7 +642,7 @@ void ClassStatement::failPropertyAccess(CStrRef prop, const char *context,
   else if (mods & Protected) level = Protected;
   if (level == ClassStatement::Private) mod = "private";
   throw FatalErrorException(0, "Attempt to access %s %s::%s%s%s",
-      mod, m_name.c_str(), prop.data(),
+      mod, m_name->data(), prop.data(),
       *context ? " from " : "",
       *context ? context : "");
 }
@@ -1427,10 +1428,10 @@ const {
   loadInterfaceStatements();
   const ClassStatement *parent = parentStatement();
   const ClassInfo *builtinParent = NULL;
-  if (!parent && !m_parent.empty()) {
-    builtinParent = ClassInfo::FindClass(m_parent.c_str());
+  if (!parent && !m_parent->empty()) {
+    builtinParent = ClassInfo::FindClass(m_parent->data());
     if (!builtinParent) {
-      builtinParent = ClassInfo::FindInterface(m_parent.c_str());
+      builtinParent = ClassInfo::FindInterface(m_parent->data());
     }
   }
   if (cls) {
@@ -1502,7 +1503,7 @@ const {
     for (size_t i = 0; i < m_bases.size(); i++) {
       const ClassStatement *iface = RequestEvalState::findClass(m_bases[i]);
       const ClassInfo *builtinIface =
-        !iface ? ClassInfo::FindInterface(m_bases[i].c_str()) : NULL;
+        !iface ? ClassInfo::FindInterface(m_bases[i]->data()) : NULL;
       if (iface) {
         ClassLevelMethodAccessLevelCheck(iface, this);
       } else if (builtinIface) {
@@ -1511,7 +1512,7 @@ const {
     }
 
     // Check for multiple abstract function declarations
-    if (!m_parent.empty() || !m_bases.empty()) {
+    if (!m_parent->empty() || !m_bases.empty()) {
       hphp_const_char_imap<const char*> abstracts;
       abstractMethodCheck(abstracts, true);
     }
@@ -1538,8 +1539,8 @@ const {
     if (doSemanticCheck) {
       BuiltinSemanticCheck(builtinParent, cls);
     }
-  } else if (!m_parent.empty()) {
-    raise_error("Class '%s' does not exist.", m_parent.c_str());
+  } else if (!m_parent->empty()) {
+    raise_error("Class '%s' does not exist.", m_parent->data());
   }
 
   // make sure the ifaces exist and are not classes. recursively
@@ -1549,10 +1550,10 @@ const {
     const ClassInfo *builtinIface = NULL;
     if (!iface) {
       // try to find it as a class first (so we can report error)
-      builtinIface = ClassInfo::FindClass(m_bases[i].c_str());
+      builtinIface = ClassInfo::FindClass(m_bases[i]->data());
       if (LIKELY(!builtinIface)) {
         // ok, now try to find it as an interface
-        builtinIface = ClassInfo::FindInterface(m_bases[i].c_str());
+        builtinIface = ClassInfo::FindInterface(m_bases[i]->data());
       }
     }
     if (iface) {
@@ -1572,7 +1573,7 @@ const {
         BuiltinSemanticCheck(builtinIface, cls);
       }
     } else {
-      raise_error("Interface '%s' does not exist.", m_bases[i].c_str());
+      raise_error("Interface '%s' does not exist.", m_bases[i]->data());
     }
   }
 }
@@ -1638,7 +1639,7 @@ void ClassStatement::abstractMethodCheck(
             if (ait != abstracts.end() && ait->second != ici->getName()) {
               raise_error("Can't inherit abstract function %s::%s (previously "
                           "declared abstract in %s)",
-                          m_bases[i].c_str(), (*mit)->name.c_str(),
+                          m_bases[i]->data(), (*mit)->name.c_str(),
                           ait->second);
             }
             abstracts[(*mit)->name] = ici->getName();
@@ -1651,7 +1652,7 @@ void ClassStatement::abstractMethodCheck(
 const ClassInfo *ClassStatement::getBuiltinParentInfo() const {
   const ClassStatement *parent = parentStatement();
   if (parent) return parent->getBuiltinParentInfo();
-  if (!m_parent.empty()) return ClassInfo::FindClass(m_parent.c_str());
+  if (!m_parent->empty()) return ClassInfo::FindClass(m_parent->data());
   return NULL;
 }
 
@@ -1670,7 +1671,7 @@ void ClassStatement::collectBuiltinInterfaceInfos(
     if (iface) {
       iface->collectBuiltinInterfaceInfos(infos, excludeParent);
     } else {
-      const ClassInfo *ci = ClassInfo::FindInterface(m_bases[i].c_str());
+      const ClassInfo *ci = ClassInfo::FindInterface(m_bases[i]->data());
       if (ci) infos.push_back(ci);
     }
   }

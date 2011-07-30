@@ -62,7 +62,8 @@ class StringData {
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
   void setRefCount(int n) { _count = n;}
-  /* Only call setStatic() in a thread-neutral context! */
+  /* Only call preCompute() and setStatic() in a thread-neutral context! */
+  void preCompute() const;
   void setStatic() const;
   bool isStatic() const { return _count == (1 << 30); }
 

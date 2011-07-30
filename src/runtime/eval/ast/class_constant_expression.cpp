@@ -29,7 +29,8 @@ namespace Eval {
 
 ClassConstantExpression::ClassConstantExpression(EXPRESSION_ARGS,
     const NamePtr &cls, const string &constant)
-  : Expression(EXPRESSION_PASS), m_class(cls), m_constant(constant) {}
+  : Expression(KindOfClassConstantExpression, EXPRESSION_PASS),
+  m_class(cls), m_constant(constant) {}
 
 Variant ClassConstantExpression::eval(VariableEnvironment &env) const {
   DECLARE_THREAD_INFO;

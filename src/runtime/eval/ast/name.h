@@ -37,6 +37,7 @@ public:
 	}
   virtual int64 hash() const;
   virtual String get() const { return String(); }
+  virtual bool getSuperGlobal(SuperGlobal &sg) { return false; }
   virtual bool isSp() const;
   static NamePtr fromString(CONSTRUCT_ARGS, const std::string &name,
       bool isSp = false);
@@ -60,11 +61,14 @@ public:
   virtual String get(VariableEnvironment &env) const;
   virtual int64 hash() const;
   virtual String get() const;
+  virtual bool getSuperGlobal(SuperGlobal &sg);
   virtual bool isSp() const;
   virtual void dump(std::ostream &out) const;
+  static StringData *GetStaticName(const std::string &name);
 private:
-  AtomicString m_name;
+  StringData *m_name;
   bool m_isSp;
+  SuperGlobal m_sg;
 };
 
 class ExprName : public Name {

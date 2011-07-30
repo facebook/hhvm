@@ -49,7 +49,7 @@ private:
     SDouble,
     SString
   };
-  AtomicString m_value;
+  StringData *m_value;
   union {
     int64 num;
     double dbl;

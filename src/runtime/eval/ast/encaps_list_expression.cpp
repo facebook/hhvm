@@ -24,7 +24,8 @@ namespace Eval {
 EncapsListExpression::EncapsListExpression(EXPRESSION_ARGS,
                                            std::vector<ExpressionPtr> encaps,
                                            bool shell)
-  : Expression(EXPRESSION_PASS), m_encaps(encaps), m_shell(shell) {}
+  : Expression(KindOfEncapsListExpression, EXPRESSION_PASS),
+  m_encaps(encaps), m_shell(shell) {}
 
 Variant EncapsListExpression::eval(VariableEnvironment &env) const {
   String result = "";

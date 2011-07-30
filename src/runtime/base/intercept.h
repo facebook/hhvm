@@ -72,6 +72,8 @@ void rename_function(CStrRef old_name, CStrRef new_name);
  */
 String get_renamed_function(CStrRef name);
 
+extern DECLARE_THREAD_LOCAL_NO_CHECK(bool, s_hasRenamedFunction);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

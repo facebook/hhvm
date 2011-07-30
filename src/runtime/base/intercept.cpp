@@ -31,12 +31,12 @@ namespace HPHP {
 class InterceptRequestData : public RequestEventHandler {
 public:
   InterceptRequestData()
-      : m_use_allowed_functions(false), m_has_renamed_functions(false) {
+      : m_use_allowed_functions(false) {
   }
 
   void clear() {
+    *s_hasRenamedFunction = false;
     m_use_allowed_functions = false;
-    m_has_renamed_functions = false;
     m_allowed_functions.clear();
     m_renamed_functions.clear();
     m_global_handler.reset();
@@ -53,7 +53,6 @@ public:
 
 public:
   bool m_use_allowed_functions;
-  bool m_has_renamed_functions;
   StringISet m_allowed_functions;
   StringIMap<String> m_renamed_functions;
 
@@ -61,6 +60,7 @@ public:
   StringIMap<Variant> m_intercept_handlers;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(InterceptRequestData, s_intercept_data);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(bool, s_hasRenamedFunction);
 
 static Mutex s_mutex;
 static hphp_string_imap<vector<char*> > s_registered_flags;
@@ -210,11 +210,11 @@ void rename_function(CStrRef old_name, CStrRef new_name) {
   if (new_name.data()[0] != ParserBase::CharCreateFunction) {
     funcs[new_name] = orig_name;
   }
-  s_intercept_data->m_has_renamed_functions = true;
+  *s_hasRenamedFunction = true;
 }
 
 String get_renamed_function(CStrRef name) {
-  if (s_intercept_data->m_has_renamed_functions) {
+  if (*s_hasRenamedFunction) {
     StringIMap<String> &funcs = s_intercept_data->m_renamed_functions;
     StringIMap<String>::const_iterator iter = funcs.find(name);
     if (iter != funcs.end()) {

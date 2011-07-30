@@ -29,22 +29,10 @@ class VariableEnvironment;
 
 class VariableIndex {
 public:
-  enum SuperGlobal {
-    Server = 0,
-    Get,
-    Post,
-    Files,
-    Cookie,
-    Session,
-    Request,
-    Env,
-    Globals,
-    HttpResponseHeader,
-    Normal
-  };
   void set(CStrRef name, int idx);
   int idx() const { return m_idx; }
   SuperGlobal superGlobal() const { return m_sg; }
+  static void SetupSuperGlobals();
   static SuperGlobal isSuperGlobal(CStrRef name);
 private:
   int m_idx;
@@ -54,7 +42,7 @@ private:
 class Block {
 public:
   // Varname -> idx
-  typedef std::map<std::string, VariableIndex> VariableIndices;
+  typedef StringMap<VariableIndex> VariableIndices;
 
   Block();
   ~Block();
@@ -64,11 +52,11 @@ public:
   Variant getStaticValue(VariableEnvironment &env, CStrRef name) const;
   int declareVariable(CStrRef var);
   const VariableIndices &varIndices() const;
-  const std::vector<std::string> &variables() const { return m_variables;}
+  const std::vector<StringData *> &variables() const { return m_variables;}
 protected:
   StringMap<ExpressionPtr> m_staticStmts;
   VariableIndices m_variableIndices;
-  std::vector<std::string> m_variables; // in declaration order
+  std::vector<StringData *> m_variables; // in declaration order
 };
 
 ///////////////////////////////////////////////////////////////////////////////

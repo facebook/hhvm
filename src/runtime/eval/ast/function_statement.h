@@ -19,6 +19,7 @@
 
 #include <runtime/eval/base/function.h>
 #include <runtime/eval/ast/statement.h>
+#include <runtime/eval/ast/name.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/class_info.h>
 
@@ -59,6 +60,7 @@ public:
   const std::string &type() const { return m_type; }
   std::string name() const;
   String getName() const;
+  bool getSuperGlobal(SuperGlobal &sg);
 
 private:
   std::string m_type;
@@ -120,7 +122,9 @@ public:
   bool invalidOverride() const { return m_invalid; }
   bool ignoredOverride() const { return m_invalid > 0; }
 
-  void setName(const std::string &name) { m_name = AtomicString(name);}
+  void setName(const std::string &name) {
+    m_name = StringName::GetStaticName(name);
+  }
 
   void setOrigGeneratorFunc(FunctionStatementPtr stmt) {
     m_origGeneratorFunc = stmt;
@@ -146,7 +150,7 @@ protected:
   char m_invalid;
   mutable char m_maybeIntercepted;
   int m_yieldCount;
-  AtomicString m_name;
+  StringData *m_name;
   std::vector<ParameterPtr> m_params;
 
   StatementListStatementPtr m_body;

@@ -20,7 +20,7 @@ namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 RefParamExpression::RefParamExpression(EXPRESSION_ARGS, LvalExpressionPtr lv)
-  : LvalExpression(EXPRESSION_PASS), m_lv(lv) {}
+  : LvalExpression(KindOfRefParamExpression, EXPRESSION_PASS), m_lv(lv) {}
 
 Variant &RefParamExpression::lval(VariableEnvironment &env) const {
   return m_lv->lval(env);

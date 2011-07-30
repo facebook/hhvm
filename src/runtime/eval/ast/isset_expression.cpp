@@ -24,7 +24,7 @@ using namespace std;
 
 IssetExpression::IssetExpression(EXPRESSION_ARGS,
                                  const std::vector<ExpressionPtr> &exps)
-  : Expression(EXPRESSION_PASS), m_exps(exps) {}
+  : Expression(KindOfIssetExpression, EXPRESSION_PASS), m_exps(exps) {}
 
 Variant IssetExpression::eval(VariableEnvironment &env) const {
   for (vector<ExpressionPtr>::const_iterator it = m_exps.begin();

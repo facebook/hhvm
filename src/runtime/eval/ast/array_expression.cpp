@@ -89,7 +89,7 @@ void ArrayPairRef::dump(std::ostream &out) const {
 
 ArrayExpression::ArrayExpression(EXPRESSION_ARGS,
                                  const std::vector<ArrayPairPtr> &elems)
-  : Expression(EXPRESSION_PASS), m_elems(elems) {}
+  : Expression(KindOfArrayExpression, EXPRESSION_PASS), m_elems(elems) {}
 
 
 Variant ArrayExpression::eval(VariableEnvironment &env) const {

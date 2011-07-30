@@ -26,11 +26,10 @@ namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TempExpressionList::TempExpressionList(ExpressionPtr exp)
-    : LvalExpression(exp->loc()), m_last(exp) {
-}
+    : LvalExpression(KindOfTempExpressionList, exp->loc()), m_last(exp) {}
 
 int TempExpressionList::append(ExpressionPtr offset) {
-  if (offset->is<VariableExpression>()) {
+  if (offset->isKindOf(Expression::KindOfVariableExpression)) {
     return -1;
   }
   int index = m_offsets.size();
@@ -66,16 +65,17 @@ void TempExpressionList::takeOffsets(TempExpressionListPtr exp) {
   exp->m_temps.clear();
 }
 
-bool TempExpressionList::evalOffsets(VariableEnvironment &env) const {
-  if (!m_offsets.empty()) {
-    vector<Variant> &temps = env.createTempVariables();
-    temps.reserve(m_offsets.size());
-    for (unsigned int i = 0; i < m_offsets.size(); i++) {
-      temps.push_back(m_offsets[i]->eval(env));
+int TempExpressionList::evalOffsets(VariableEnvironment &env,
+                                    int &oldPrevSize) const {
+  int size = m_offsets.size();
+  if (size) {
+    Variant *temps = env.createTempVariables(size, oldPrevSize);
+    for (int i = 0; i < size; i++) {
+      // temps[i] may be uninitialized after previous ~Variant()
+      new(&temps[i]) Variant(m_offsets[i]->eval(env));
     }
-    return true;
   }
-  return false;
+  return size;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -83,13 +83,11 @@ bool TempExpressionList::evalOffsets(VariableEnvironment &env) const {
 TempExpressionHelper::TempExpressionHelper(const TempExpressionList *exp,
                                            VariableEnvironment &env)
     : m_env(env) {
-  m_release = exp->evalOffsets(env);
+  m_size = exp->evalOffsets(env, m_oldPrevSize);
 }
 
 TempExpressionHelper::~TempExpressionHelper() {
-  if (m_release) {
-    m_env.releaseTempVariables();
-  }
+  if (m_size) m_env.releaseTempVariables(m_size, m_oldPrevSize);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -355,8 +355,7 @@ void StringData::set(CVarRef key, CStrRef v) {
   setChar(key.toInt32(), v);
 }
 
-void StringData::setStatic() const {
-  _count = (1 << 30);
+void StringData::preCompute() const {
   ASSERT(!isShared()); // because we are gonna reuse the space!
   // We don't want to collect taint for a hash
   m_hash = hash_string(m_data, size());
@@ -365,6 +364,11 @@ void StringData::setStatic() const {
   if (isNumericWithVal(lval, dval, 1) == KindOfNull) {
     m_hash |= (1ull << 63);
   }
+}
+
+void StringData::setStatic() const {
+  _count = (1 << 30);
+  preCompute();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

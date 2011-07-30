@@ -34,10 +34,12 @@ public:
   bool match(CObjRef exn) const;
   const StatementPtr &body() const { return m_body; }
   const std::string &vname() const { return m_vname; }
+  SuperGlobal sg() const { return m_sg; }
   virtual void dump(std::ostream &out) const;
 private:
   std::string m_ename;
   std::string m_vname;
+  SuperGlobal m_sg;
   StatementPtr m_body;
 };
 

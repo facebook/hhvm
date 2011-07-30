@@ -27,8 +27,9 @@ namespace Eval {
 ObjectPropertyExpression::ObjectPropertyExpression(EXPRESSION_ARGS,
                                                    ExpressionPtr obj,
                                                    NamePtr name)
-  : LvalExpression(EXPRESSION_PASS), m_obj(obj), m_name(name) {
-  m_reverseOrder = m_obj->is<VariableExpression>();
+  : LvalExpression(KindOfObjectPropertyExpression, EXPRESSION_PASS),
+  m_obj(obj), m_name(name) {
+  m_reverseOrder = m_obj->isKindOf(Expression::KindOfVariableExpression);
 }
 
 Variant ObjectPropertyExpression::eval(VariableEnvironment &env) const {

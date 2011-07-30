@@ -20,6 +20,7 @@
 #include <util/stack_trace.h>
 #include <util/mutex.h>
 #include <util/case_insensitive.h>
+#include <runtime/base/complex_types.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,20 +46,20 @@ public:
   /**
    * Returns a list of functions declared in specified file.
    */
-  void getDeclaredFunctions(const char *filename,
+  void getDeclaredFunctions(CStrRef filename,
                             std::vector<const char *> &functions);
 
   /**
    * Returns a list of classes declared in specified file.
    */
-  void getDeclaredClasses(const char *filename,
+  void getDeclaredClasses(CStrRef filename,
                           std::vector<const char *> &classes);
 
   /**
    * Which file contains this class/function's declaration.
    */
-  const char *getClassDeclaringFile(const char *name, int *line = NULL);
-  const char *getFunctionDeclaringFile(const char *name, int *line = NULL);
+  const char *getClassDeclaringFile(CStrRef name, int *line = NULL);
+  const char *getFunctionDeclaringFile(CStrRef name, int *line = NULL);
 
   static void SetHook(SourceInfoHook *hook) { s_hook = hook; }
 
@@ -97,9 +98,9 @@ private:
 class SourceInfoHook {
 public:
   virtual ~SourceInfoHook() {}
-  virtual const char *getClassDeclaringFile(const char *name,
+  virtual const char *getClassDeclaringFile(CStrRef name,
                                             int *line = NULL) = 0;
-  virtual const char *getFunctionDeclaringFile(const char *name,
+  virtual const char *getFunctionDeclaringFile(CStrRef name,
                                                int *line = NULL) = 0;
 };
 

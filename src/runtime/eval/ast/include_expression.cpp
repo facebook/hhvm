@@ -25,8 +25,8 @@ using namespace std;
 
 IncludeExpression::IncludeExpression(EXPRESSION_ARGS, bool include, bool once,
                                      ExpressionPtr file)
-  : Expression(EXPRESSION_PASS), m_file(file), m_include(include), m_once(once)
-{
+  : Expression(KindOfIncludeExpression, EXPRESSION_PASS),
+  m_file(file), m_include(include), m_once(once) {
   m_localDir = loc()->file;
   size_t fileIdx = m_localDir.rfind('/');
   if (fileIdx == string::npos) {

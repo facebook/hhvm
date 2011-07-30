@@ -19,6 +19,7 @@
 
 #include <runtime/eval/ast/statement.h>
 #include <runtime/base/class_info.h>
+#include <runtime/base/string_data.h>
 #include <util/case_insensitive.h>
 
 namespace HPHP {
@@ -51,7 +52,7 @@ public:
   int64 getHash() const { return m_name->hash(); }
   bool hasInitialValue() const { return m_value; }
 private:
-  AtomicString m_name;
+  StringData *m_name;
   int m_modifiers;
   ExpressionPtr m_value;
   std::string m_docComment;
@@ -89,7 +90,7 @@ public:
   bool instanceOf(const char *c) const;
   bool subclassOf(const char *c) const;
   bool isBaseClass() const {
-    return m_parent.empty() && m_bases.empty();
+    return m_parent->empty() && m_bases.empty();
   }
 
   // Eval is called at declaration, not invocation
@@ -125,17 +126,17 @@ public:
   ClassStatementMarkerPtr getMarker() const;
   void delayDeclaration() { m_delayDeclaration = true; }
 protected:
-  AtomicString m_name;
+  StringData *m_name;
   int m_modifiers;
 
-  AtomicString m_parent;
-  std::vector<AtomicString> m_bases;
+  StringData *m_parent;
+  std::vector<StringData *> m_bases;
 
   StringMap<ClassVariablePtr> m_variables;
   std::vector<ClassVariablePtr> m_variablesVec;
   hphp_const_char_imap<MethodStatementPtr> m_methods;
   std::vector<MethodStatementPtr> m_methodsVec;
-  std::vector<AtomicString> m_constantNames;
+  std::vector<StringData *> m_constantNames;
   StringMap<ExpressionPtr> m_constants;
 
   std::string m_docComment;

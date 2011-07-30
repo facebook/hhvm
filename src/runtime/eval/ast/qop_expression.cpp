@@ -22,7 +22,8 @@ namespace Eval {
 
 QOpExpression::QOpExpression(EXPRESSION_ARGS, ExpressionPtr cond,
                              ExpressionPtr t, ExpressionPtr f)
-  : Expression(EXPRESSION_PASS), m_cond(cond), m_true(t), m_false(f) {}
+  : Expression(KindOfQOpExpression, EXPRESSION_PASS),
+  m_cond(cond), m_true(t), m_false(f) {}
 
 Variant QOpExpression::eval(VariableEnvironment &env) const {
   Variant cond(m_cond->eval(env));

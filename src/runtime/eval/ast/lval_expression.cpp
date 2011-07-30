@@ -21,9 +21,6 @@ namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-LvalExpression::LvalExpression(EXPRESSION_ARGS) : Expression(EXPRESSION_PASS)
-{}
-
 bool LvalExpression::weakLval(VariableEnvironment &env, Variant* &v) const {
   v = &lval(env);
   return true;

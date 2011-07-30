@@ -26,48 +26,54 @@ namespace Eval {
 
 VariableExpression::VariableExpression(EXPRESSION_ARGS, NamePtr name,
                                        int idx /* = -1 */)
-  : LvalExpression(EXPRESSION_PASS), m_name(name), m_idx(idx) { }
+  : LvalExpression(KindOfVariableExpression, EXPRESSION_PASS),
+  m_name(name), m_idx(idx) {}
 
-Variant &VariableExpression::getRef(VariableEnvironment &env,
-                                    bool initNotice) const {
+inline Variant &VariableExpression::getRef(VariableEnvironment &env) const {
   Variant *var = NULL;
-  String name;
   if (m_idx == -1 || !(var = env.getIdx(m_idx))) {
-    name = m_name->get(env);
-    var =  &env.get(name);
-    if (m_idx != -1) env.setIdx(m_idx, var);
-  }
-  /* note that 'if (!env.exists(str, name->hash()))' does not work
-   * as undefined local variables are still in the (function) environment */
-  if (initNotice && !var->isInitialized()) {
-    if (name.empty()) {
-      name = m_name->get();
+    CStrRef s = m_name->get(env);
+    SuperGlobal sg;
+    if (!m_name->getSuperGlobal(sg)) {
+      sg = VariableIndex::isSuperGlobal(s);
     }
-    SET_LINE;
-    raise_notice("Undefined variable: %s", name.c_str());
+    var =  &env.getVar(s, sg);
+    if (m_idx != -1) env.setIdx(m_idx, var);
   }
   return *var;
 }
 
+Variant &VariableExpression::getRefCheck(VariableEnvironment &env) const {
+  Variant &var = getRef(env);
+  /* note that 'if (!env.exists(str, name->hash()))' does not work
+   * as undefined local variables are still in the (function) environment */
+  if (!var.isInitialized()) {
+    SET_LINE;
+    raise_notice("Undefined variable: %s", m_name->get(env).c_str());
+  }
+  return var;
+}
+
 Variant VariableExpression::eval(VariableEnvironment &env) const {
-  return getRef(env, true);
+  return getRefCheck(env);
 }
 
 Variant VariableExpression::evalExist(VariableEnvironment &env) const {
-  return getRef(env, false);
+  return getRef(env);
 }
 
 Variant &VariableExpression::lval(VariableEnvironment &env) const {
-  return getRef(env, false);
+  return getRef(env);
 }
 
 bool VariableExpression::weakLval(VariableEnvironment &env, Variant* &v) const
 {
-  v = &getRef(env, true);
+  v = &getRefCheck(env);
   return true;
 }
 
-bool checkCompatibleAssignment(const Variant &left, const Variant &right) {
+bool VariableExpression::checkCompatibleAssignment(CVarRef left,
+                                                   CVarRef right) {
   bool ok = true;
   if (left.isNull()) {
     // everything is ok with NULL

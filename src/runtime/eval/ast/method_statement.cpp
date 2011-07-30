@@ -31,7 +31,8 @@ MethodStatement::MethodStatement(STATEMENT_ARGS, const string &name,
                                  const string &doc)
   : FunctionStatement(STATEMENT_PASS, name, doc), m_class(cls),
     m_modifiers(modifiers),
-    m_fullName(string(cls->name().c_str()) + "::" + name) {
+    m_fullName(StringName::GetStaticName(
+               string(cls->name().c_str()) + "::" + name)) {
   if ((m_modifiers & (ClassStatement::Public | ClassStatement::Protected |
                       ClassStatement::Private)) == 0) {
     m_modifiers |= ClassStatement::Public;
@@ -75,7 +76,7 @@ Variant MethodStatement::invokeInstance(CObjRef obj, CArrRef params,
   MethScopeVariableEnvironment env(this);
   env.setCurrentObject(obj);
   String clsName(m_class->name());
-  EvalFrameInjection fi(clsName, m_fullName.c_str(), env,
+  EvalFrameInjection fi(clsName, m_fullName->data(), env,
                         loc()->file, obj.get(), FrameInjection::ObjectMethod);
   if (m_ref) {
     return strongBind(invokeImpl(env, params));
@@ -97,7 +98,7 @@ invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
   directBind(env, caller, fenv);
   fenv.setCurrentObject(obj);
   String clsName(m_class->name());
-  EvalFrameInjection fi(clsName, m_fullName.c_str(), fenv,
+  EvalFrameInjection fi(clsName, m_fullName->data(), fenv,
                         loc()->file, obj.get(), FrameInjection::ObjectMethod);
   if (m_ref) {
     return strongBind(evalBody(fenv));
@@ -112,7 +113,7 @@ Variant MethodStatement::invokeStatic(const char* cls, CArrRef params,
   MethScopeVariableEnvironment env(this);
   env.setCurrentClass(cls);
   String clsName(m_class->name());
-  EvalFrameInjection fi(clsName, m_fullName.c_str(), env, loc()->file,
+  EvalFrameInjection fi(clsName, m_fullName->data(), env, loc()->file,
                         NULL, FrameInjection::StaticMethod);
   if (m_ref) {
     return strongBind(invokeImpl(env, params));
@@ -132,7 +133,7 @@ invokeStaticDirect(CStrRef cls, VariableEnvironment &env,
   EvalFrameInjection::EvalStaticClassNameHelper helper(cls, sp);
   DECLARE_THREAD_INFO_NOINIT
   String clsName(m_class->name());
-  EvalFrameInjection fi(clsName, m_fullName.c_str(), fenv,
+  EvalFrameInjection fi(clsName, m_fullName->data(), fenv,
                         loc()->file, NULL, FrameInjection::StaticMethod);
   if (m_ref) {
     return strongBind(evalBody(fenv));
@@ -142,7 +143,7 @@ invokeStaticDirect(CStrRef cls, VariableEnvironment &env,
 
 Variant MethodStatement::evalBody(VariableEnvironment &env) const {
   if (isAbstract()) {
-    raise_error("Cannot call abstract method %s()", m_fullName.c_str());
+    raise_error("Cannot call abstract method %s()", m_fullName->data());
   }
   if (m_ref) {
     return strongBind(FunctionStatement::evalBody(env));
@@ -178,7 +179,7 @@ void MethodStatement::attemptAccess(const char *context) const {
   if (level == ClassStatement::Protected) {
     while (!cs->hasAccess(context, level)) {
       while ((cs = cs->parentStatement())) {
-        if (cs->findMethod(m_name.c_str())) {
+        if (cs->findMethod(m_name->data())) {
           break;
         }
       }
@@ -194,8 +195,8 @@ void MethodStatement::attemptAccess(const char *context) const {
   // special case when handling parent's private constructors that are allowed
   if (!access) {
     if (level == ClassStatement::Private &&
-        (strcasecmp(m_name.c_str(), "__construct") == 0 ||
-         strcasecmp(m_name.c_str(), getClass()->name().c_str()) == 0)) {
+        (strcasecmp(m_name->data(), "__construct") == 0 ||
+         strcasecmp(m_name->data(), getClass()->name().c_str()) == 0)) {
       access = cs->hasAccess(context, ClassStatement::Protected);
     }
   }
@@ -204,7 +205,7 @@ void MethodStatement::attemptAccess(const char *context) const {
     const char *mod = "protected";
     if (level == ClassStatement::Private) mod = "private";
     throw FatalErrorException(0, "Attempt to call %s %s::%s()%s%s",
-                              mod, getClass()->name().c_str(), m_name.c_str(),
+                              mod, getClass()->name().c_str(), m_name->data(),
                               context[0] ? " from " : "",
                               context[0] ? context : "");
   }
@@ -217,7 +218,7 @@ bool MethodStatement::isAbstract() const {
 
 Variant MethodStatement::MethInvoker(MethodCallPackage &mcp, CArrRef params) {
   const MethodStatement *ms = (const MethodStatement*)mcp.extra;
-  bool check = strcasecmp(ms->m_name.c_str(), "__invoke") != 0;
+  bool check = strcasecmp(ms->m_name->data(), "__invoke") != 0;
   bool isStatic = ms->getModifiers() & ClassStatement::Static;
   if (isStatic || !mcp.obj) {
     String cn;

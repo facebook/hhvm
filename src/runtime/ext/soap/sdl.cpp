@@ -160,7 +160,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, bool include,
       throw SoapException("Parsing WSDL: Couldn't load from '%s'", struri);
     }
     String msg = response.detach();
-    wsdl = soap_xmlParseMemory(msg.data(), msg.size());
+    wsdl = soap_xmlParseMemory(msg.data(), msg.size(), false);
     wsdl->URL = xmlCharStrdup(struri);
   } else {
     wsdl = soap_xmlParseFile(struri);

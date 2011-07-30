@@ -339,7 +339,7 @@ ObjectStaticCallbacks cw_SplObjectStorage = {
   c_SplObjectStorage::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SplObjectStorage,
   c_SplObjectStorage::s_call_info_table,c_SplObjectStorage::s_call_info_index,
-  "SplObjectStorage",
+  &c_SplObjectStorage::s_class_name,
   0
 };
 void c_SplObjectStorage::init() {

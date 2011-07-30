@@ -94,7 +94,7 @@ ObjectStaticCallbacks cw_stdClass = {
   c_stdClass::os_constant,
   (ObjectData*(*)(ObjectData*))coo_stdClass,
   c_stdClass::s_call_info_table,c_stdClass::s_call_info_index,
-  "stdClass",
+  &c_stdClass::s_class_name,
   0
 };
 /* SRC: classes/stdclass.php line 8 */
@@ -162,7 +162,7 @@ ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
   c___PHP_Incomplete_Class::os_constant,
   (ObjectData*(*)(ObjectData*))coo___PHP_Incomplete_Class,
   c___PHP_Incomplete_Class::s_call_info_table,c___PHP_Incomplete_Class::s_call_info_index,
-  "__PHP_Incomplete_Class",
+  &c___PHP_Incomplete_Class::s_class_name,
   0
 };
 ObjectData *coo_stdClass() {

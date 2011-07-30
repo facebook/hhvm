@@ -189,7 +189,7 @@ void EvalObjectData::o_setPrivate(CStrRef cls, CStrRef s, CVarRef v) {
   m_privates.lvalAt(cls).set(s, v, true);
 }
 
-CStrRef EvalObjectData::o_getClassName() const {
+CStrRef EvalObjectData::o_getClassNameHook() const {
   return m_class_name;
 }
 

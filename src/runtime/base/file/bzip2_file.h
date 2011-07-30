@@ -32,7 +32,7 @@ public:
 
   static StaticString s_class_name;
   // overriding ResourceData
-  CStrRef o_getClassName() const { return s_class_name; }
+  CStrRef o_getClassNameHook() const { return s_class_name; }
 
   BZ2File();
   virtual ~BZ2File();

@@ -143,7 +143,6 @@ namespace HPHP {
   public:                                                               \
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \
-  virtual CStrRef o_getClassName() const { return s_class_name; }       \
   virtual const ObjectStaticCallbacks *o_get_callbacks() const {        \
     return cw_##cls; }                                                  \
 
@@ -155,7 +154,6 @@ namespace HPHP {
   public:                                                               \
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \
-  virtual CStrRef o_getClassName() const { return s_class_name; }       \
   virtual const ObjectStaticCallbacks *o_get_callbacks() const {        \
     return cw_##cls; }                                                  \
 

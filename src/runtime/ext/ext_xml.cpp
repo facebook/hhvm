@@ -31,7 +31,7 @@ public:
   virtual ~XmlParser();
   void cleanupImpl();
   static StaticString s_class_name;
-  virtual CStrRef o_getClassName() const;
+  virtual CStrRef o_getClassNameHook() const;
 
   int case_folding;
   XML_Parser parser;
@@ -94,7 +94,7 @@ void XmlParser::sweep() {
 
 StaticString XmlParser::s_class_name("xml");
 
-CStrRef XmlParser::o_getClassName() const {
+CStrRef XmlParser::o_getClassNameHook() const {
   return s_class_name;
 }
 

@@ -48,7 +48,7 @@ public:
 
   static StaticString s_class_name;
   // overriding ResourceData
-  virtual CStrRef o_getClassName() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
   bool parse(const char *buf, int bufsize);
   Variant extract(CVarRef filename, CVarRef callbackfunc, int decode,

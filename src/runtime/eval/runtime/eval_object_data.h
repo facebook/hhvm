@@ -52,7 +52,7 @@ public:
 
    // methods
   virtual const ObjectStaticCallbacks *o_get_callbacks() const { return 0; }
-  virtual CStrRef o_getClassName() const;
+  virtual CStrRef o_getClassNameHook() const;
   virtual const MethodStatement *getMethodStatement(const char* name) const;
   virtual const MethodStatement *getConstructorStatement() const;
 

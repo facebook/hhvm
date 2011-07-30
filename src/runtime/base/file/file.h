@@ -65,7 +65,7 @@ public:
   static StaticString s_resource_name;
 
   // overriding ResourceData
-  CStrRef o_getClassName() const { return s_class_name; }
+  CStrRef o_getClassNameHook() const { return s_class_name; }
   CStrRef o_getResourceName() const { return s_resource_name; }
   int o_getResourceId() const {
     // This is different from Zend where each resource is assigned a unique id.

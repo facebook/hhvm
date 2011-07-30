@@ -96,6 +96,19 @@ void ObjectData::destruct() {
 ///////////////////////////////////////////////////////////////////////////////
 // class info
 
+CStrRef ObjectData::o_getClassName() const {
+  const ObjectStaticCallbacks *osc = o_get_callbacks();
+  if (UNLIKELY(!osc)) {
+    return o_getClassNameHook();
+  }
+  return *osc->cls;
+}
+
+CStrRef ObjectData::o_getClassNameHook() const {
+  throw FatalErrorException("Class didnt provide a name");
+  return empty_string;
+}
+
 bool ObjectData::o_isClass(const char *s) const {
   return strcasecmp(s, o_getClassName()) == 0;
 }
@@ -244,7 +257,7 @@ inline ALWAYS_INLINE bool GetCallInfoHelper(bool ex, const char *cls,
     }
   } else {
     do {
-      if (!ex || found || !strcasecmp(cls, osc->cls)) {
+      if (!ex || found || !strcasecmp(cls, osc->cls->data())) {
         if (ex) found = true;
         if (const int *ix = osc->mcit_ix) {
           const MethodCallInfoTable *info = osc->mcit;

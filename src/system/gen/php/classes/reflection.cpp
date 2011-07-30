@@ -373,7 +373,7 @@ ObjectStaticCallbacks cw_ReflectionFunctionAbstract = {
   c_ReflectionFunctionAbstract::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionFunctionAbstract,
   c_ReflectionFunctionAbstract::s_call_info_table,c_ReflectionFunctionAbstract::s_call_info_index,
-  "ReflectionFunctionAbstract",
+  &c_ReflectionFunctionAbstract::s_class_name,
   0
 };
 /* SRC: classes/reflection.php line 261 */
@@ -623,7 +623,7 @@ ObjectStaticCallbacks cw_ReflectionObject = {
   c_ReflectionObject::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionObject,
   c_ReflectionObject::s_call_info_table,c_ReflectionObject::s_call_info_index,
-  "ReflectionObject",
+  &c_ReflectionObject::s_class_name,
   &cw_ReflectionClass
 };
 /* SRC: classes/reflection.php line 1299 */
@@ -712,7 +712,7 @@ ObjectStaticCallbacks cw_ReflectionException = {
   c_ReflectionException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionException,
   c_ReflectionException::s_call_info_table,c_ReflectionException::s_call_info_index,
-  "ReflectionException",
+  &c_ReflectionException::s_class_name,
   &cw_Exception
 };
 /* SRC: classes/reflection.php line 538 */
@@ -1798,7 +1798,7 @@ ObjectStaticCallbacks cw_ReflectionClass = {
   c_ReflectionClass::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionClass,
   c_ReflectionClass::s_call_info_table,c_ReflectionClass::s_call_info_index,
-  "ReflectionClass",
+  &c_ReflectionClass::s_class_name,
   0
 };
 /* SRC: classes/reflection.php line 546 */
@@ -3068,7 +3068,7 @@ ObjectStaticCallbacks cw_ReflectionExtension = {
   c_ReflectionExtension::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionExtension,
   c_ReflectionExtension::s_call_info_table,c_ReflectionExtension::s_call_info_index,
-  "ReflectionExtension",
+  &c_ReflectionExtension::s_class_name,
   0
 };
 /* SRC: classes/reflection.php line 1838 */
@@ -3678,7 +3678,7 @@ ObjectStaticCallbacks cw_ReflectionMethod = {
   c_ReflectionMethod::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionMethod,
   c_ReflectionMethod::s_call_info_table,c_ReflectionMethod::s_call_info_index,
-  "ReflectionMethod",
+  &c_ReflectionMethod::s_class_name,
   &cw_ReflectionFunctionAbstract
 };
 /* SRC: classes/reflection.php line 1584 */
@@ -4413,7 +4413,7 @@ ObjectStaticCallbacks cw_ReflectionProperty = {
   c_ReflectionProperty::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionProperty,
   c_ReflectionProperty::s_call_info_table,c_ReflectionProperty::s_call_info_index,
-  "ReflectionProperty",
+  &c_ReflectionProperty::s_class_name,
   0
 };
 /* SRC: classes/reflection.php line 1330 */
@@ -4877,7 +4877,7 @@ ObjectStaticCallbacks cw_ReflectionFunction = {
   c_ReflectionFunction::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionFunction,
   c_ReflectionFunction::s_call_info_table,c_ReflectionFunction::s_call_info_index,
-  "ReflectionFunction",
+  &c_ReflectionFunction::s_class_name,
   &cw_ReflectionFunctionAbstract
 };
 /* SRC: classes/reflection.php line 465 */
@@ -5327,7 +5327,7 @@ ObjectStaticCallbacks cw_ReflectionParameter = {
   c_ReflectionParameter::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionParameter,
   c_ReflectionParameter::s_call_info_table,c_ReflectionParameter::s_call_info_index,
-  "ReflectionParameter",
+  &c_ReflectionParameter::s_class_name,
   0
 };
 /* SRC: classes/reflection.php line 49 */

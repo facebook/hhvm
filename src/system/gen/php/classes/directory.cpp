@@ -231,7 +231,7 @@ ObjectStaticCallbacks cw_Directory = {
   c_Directory::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Directory,
   c_Directory::s_call_info_table,c_Directory::s_call_info_index,
-  "Directory",
+  &c_Directory::s_class_name,
   0
 };
 /* SRC: classes/directory.php line 7 */

@@ -34,7 +34,7 @@ public:
 
   static StaticString s_class_name;
   // overriding ResourceData
-  virtual CStrRef o_getClassName() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
   virtual bool isResource() const { return !m_dir.isNull();}
   String getPathName();
 
@@ -58,7 +58,7 @@ public:
 
   static StaticString s_class_name;
   // overriding ResourceData
-  virtual CStrRef o_getClassName() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
   virtual bool isResource() const { return !m_dir.isNull();}
   void rewind();
   void next();
@@ -75,7 +75,7 @@ public:
 
   static StaticString s_class_name;
   // overriding ResourceData
-  virtual CStrRef o_getClassName() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
   virtual bool isResource() const { return !m_iterator.isNull();}
 
 public:

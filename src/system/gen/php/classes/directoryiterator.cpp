@@ -430,7 +430,7 @@ ObjectStaticCallbacks cw_RecursiveDirectoryIterator = {
   c_RecursiveDirectoryIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_RecursiveDirectoryIterator,
   c_RecursiveDirectoryIterator::s_call_info_table,c_RecursiveDirectoryIterator::s_call_info_index,
-  "RecursiveDirectoryIterator",
+  &c_RecursiveDirectoryIterator::s_class_name,
   &cw_DirectoryIterator
 };
 /* SRC: classes/directoryiterator.php line 132 */
@@ -820,7 +820,7 @@ ObjectStaticCallbacks cw_DirectoryIterator = {
   c_DirectoryIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DirectoryIterator,
   c_DirectoryIterator::s_call_info_table,c_DirectoryIterator::s_call_info_index,
-  "DirectoryIterator",
+  &c_DirectoryIterator::s_class_name,
   &cw_SplFileInfo
 };
 /* SRC: classes/directoryiterator.php line 14 */

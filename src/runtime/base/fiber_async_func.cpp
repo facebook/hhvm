@@ -376,7 +376,7 @@ void FiberWorker::doJob(FiberJob *job) {
   }
   m_owner = job->getOwnerThread();
   delete job;
-  
+
   hphp_context_exit(g_context.getNoCheck(), false, true);
   if (m_owner && !m_owner->decRefCount()) {
     m_owner->notify();
@@ -407,7 +407,7 @@ public:
 
   static StaticString s_class_name;
   // overriding ResourceData
-  virtual CStrRef o_getClassName() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
 private:
   FiberJob *m_job;

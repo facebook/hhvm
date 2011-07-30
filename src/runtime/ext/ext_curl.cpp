@@ -90,7 +90,7 @@ private:
 public:
   static StaticString s_class_name;
   // overriding ResourceData
-  virtual CStrRef o_getClassName() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
   CurlResource(CStrRef url) : m_emptyPost(true) {
     m_cp = curl_easy_init();
@@ -926,7 +926,7 @@ public:
 
   static StaticString s_class_name;
   // overriding ResourceData
-  CStrRef o_getClassName() const { return s_class_name; }
+  CStrRef o_getClassNameHook() const { return s_class_name; }
 
   CurlMultiResource() {
     m_multi = curl_multi_init();
@@ -1074,7 +1074,7 @@ public:
 
   static StaticString s_class_name;
   // overriding ResourceData
-  virtual CStrRef o_getClassName() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
   LibEventHttpHandle(LibEventHttpClientPtr client) : m_client(client) {
   }

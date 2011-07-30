@@ -68,7 +68,7 @@ public:
 
   static StaticString s_class_name;
   // overriding ResourceData
-  virtual CStrRef o_getClassName() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 };
 IMPLEMENT_OBJECT_ALLOCATION(MessageQueue)
 
@@ -286,7 +286,7 @@ public:
 
   static StaticString s_class_name;
   // overriding ResourceData
-  virtual CStrRef o_getClassName() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
   bool op(bool acquire) {
     struct sembuf sop;

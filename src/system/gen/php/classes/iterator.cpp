@@ -672,7 +672,7 @@ ObjectStaticCallbacks cw_ArrayIterator = {
   c_ArrayIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ArrayIterator,
   c_ArrayIterator::s_call_info_table,c_ArrayIterator::s_call_info_index,
-  "ArrayIterator",
+  &c_ArrayIterator::s_class_name,
   0
 };
 /* SRC: classes/iterator.php line 336 */
@@ -1168,7 +1168,7 @@ ObjectStaticCallbacks cw_AppendIterator = {
   c_AppendIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_AppendIterator,
   c_AppendIterator::s_call_info_table,c_AppendIterator::s_call_info_index,
-  "AppendIterator",
+  &c_AppendIterator::s_class_name,
   0
 };
 /* SRC: classes/iterator.php line 799 */
@@ -1743,7 +1743,7 @@ ObjectStaticCallbacks cw_IteratorIterator = {
   c_IteratorIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_IteratorIterator,
   c_IteratorIterator::s_call_info_table,c_IteratorIterator::s_call_info_index,
-  "IteratorIterator",
+  &c_IteratorIterator::s_class_name,
   0
 };
 /* SRC: classes/iterator.php line 660 */
@@ -2160,7 +2160,7 @@ ObjectStaticCallbacks cw_RecursiveIteratorIterator = {
   c_RecursiveIteratorIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_RecursiveIteratorIterator,
   c_RecursiveIteratorIterator::s_call_info_table,c_RecursiveIteratorIterator::s_call_info_index,
-  "RecursiveIteratorIterator",
+  &c_RecursiveIteratorIterator::s_class_name,
   0
 };
 /* SRC: classes/iterator.php line 237 */
@@ -2371,7 +2371,7 @@ ObjectStaticCallbacks cw_MutableArrayIterator = {
   c_MutableArrayIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_MutableArrayIterator,
   c_MutableArrayIterator::s_call_info_table,c_MutableArrayIterator::s_call_info_index,
-  "MutableArrayIterator",
+  &c_MutableArrayIterator::s_class_name,
   &cw_ArrayIterator
 };
 /* SRC: classes/iterator.php line 645 */
@@ -2739,7 +2739,7 @@ ObjectStaticCallbacks cw_FilterIterator = {
   c_FilterIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_FilterIterator,
   c_FilterIterator::s_call_info_table,c_FilterIterator::s_call_info_index,
-  "FilterIterator",
+  &c_FilterIterator::s_class_name,
   &cw_IteratorIterator
 };
 /* SRC: classes/iterator.php line 714 */

@@ -160,7 +160,7 @@ static StaticString s_TestResource("TestResource");
 class TestResource : public ResourceData {
 public:
   // overriding ResourceData
-  CStrRef o_getClassName() const { return s_TestResource; }
+  CStrRef o_getClassNameHook() const { return s_TestResource; }
 };
 
 bool TestExtVariable::test_is_resource() {

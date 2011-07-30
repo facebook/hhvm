@@ -121,7 +121,8 @@ class ObjectData : public CountableNF {
   virtual ObjectData *getRedeclaredParent() const { return 0; }
 
   // class info
-  virtual CStrRef o_getClassName() const = 0;
+  virtual CStrRef o_getClassName() const;
+  virtual CStrRef o_getClassNameHook() const;
   virtual bool isResource() const { return false;}
   bool o_isClass(const char *s) const;
   int o_getId() const { return o_id;}
@@ -401,7 +402,7 @@ struct ObjectStaticCallbacks {
   const MethodCallInfoTable   *mcit;
   const int                   *mcit_ix;
 
-  const char                  *cls;
+  const StaticString          *cls;
   const ObjectStaticCallbacks *parent;
 };
 

@@ -165,7 +165,7 @@ ObjectStaticCallbacks cw_XhprofFrame = {
   c_XhprofFrame::os_constant,
   (ObjectData*(*)(ObjectData*))coo_XhprofFrame,
   c_XhprofFrame::s_call_info_table,c_XhprofFrame::s_call_info_index,
-  "XhprofFrame",
+  &c_XhprofFrame::s_class_name,
   0
 };
 /* SRC: classes/xhprof.php line 7 */

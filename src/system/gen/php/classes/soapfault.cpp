@@ -271,7 +271,7 @@ ObjectStaticCallbacks cw_SoapFault = {
   c_SoapFault::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SoapFault,
   c_SoapFault::s_call_info_table,c_SoapFault::s_call_info_index,
-  "SoapFault",
+  &c_SoapFault::s_class_name,
   &cw_Exception
 };
 /* SRC: classes/soapfault.php line 12 */

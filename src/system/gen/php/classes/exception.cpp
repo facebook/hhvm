@@ -138,7 +138,7 @@ ObjectStaticCallbacks cw_PDOException = {
   c_PDOException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_PDOException,
   c_PDOException::s_call_info_table,c_PDOException::s_call_info_index,
-  "PDOException",
+  &c_PDOException::s_class_name,
   &cw_Exception
 };
 /* SRC: classes/exception.php line 318 */
@@ -216,7 +216,7 @@ ObjectStaticCallbacks cw_UnexpectedValueException = {
   c_UnexpectedValueException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_UnexpectedValueException,
   c_UnexpectedValueException::s_call_info_table,c_UnexpectedValueException::s_call_info_index,
-  "UnexpectedValueException",
+  &c_UnexpectedValueException::s_class_name,
   &cw_RuntimeException
 };
 /* SRC: classes/exception.php line 251 */
@@ -288,7 +288,7 @@ ObjectStaticCallbacks cw_OverflowException = {
   c_OverflowException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_OverflowException,
   c_OverflowException::s_call_info_table,c_OverflowException::s_call_info_index,
-  "OverflowException",
+  &c_OverflowException::s_class_name,
   &cw_RuntimeException
 };
 /* SRC: classes/exception.php line 243 */
@@ -360,7 +360,7 @@ ObjectStaticCallbacks cw_OutOfBoundsException = {
   c_OutOfBoundsException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_OutOfBoundsException,
   c_OutOfBoundsException::s_call_info_table,c_OutOfBoundsException::s_call_info_index,
-  "OutOfBoundsException",
+  &c_OutOfBoundsException::s_class_name,
   &cw_RuntimeException
 };
 /* SRC: classes/exception.php line 173 */
@@ -431,7 +431,7 @@ ObjectStaticCallbacks cw_LogicException = {
   c_LogicException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_LogicException,
   c_LogicException::s_call_info_table,c_LogicException::s_call_info_index,
-  "LogicException",
+  &c_LogicException::s_class_name,
   &cw_Exception
 };
 /* SRC: classes/exception.php line 259 */
@@ -503,7 +503,7 @@ ObjectStaticCallbacks cw_RangeException = {
   c_RangeException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_RangeException,
   c_RangeException::s_call_info_table,c_RangeException::s_call_info_index,
-  "RangeException",
+  &c_RangeException::s_class_name,
   &cw_RuntimeException
 };
 /* SRC: classes/exception.php line 211 */
@@ -577,7 +577,7 @@ ObjectStaticCallbacks cw_InvalidArgumentException = {
   c_InvalidArgumentException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_InvalidArgumentException,
   c_InvalidArgumentException::s_call_info_table,c_InvalidArgumentException::s_call_info_index,
-  "InvalidArgumentException",
+  &c_InvalidArgumentException::s_class_name,
   &cw_LogicException
 };
 /* SRC: classes/exception.php line 268 */
@@ -647,7 +647,7 @@ ObjectStaticCallbacks cw_UnderflowException = {
   c_UnderflowException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_UnderflowException,
   c_UnderflowException::s_call_info_table,c_UnderflowException::s_call_info_index,
-  "UnderflowException",
+  &c_UnderflowException::s_class_name,
   &cw_RuntimeException
 };
 /* SRC: classes/exception.php line 227 */
@@ -719,7 +719,7 @@ ObjectStaticCallbacks cw_OutOfRangeException = {
   c_OutOfRangeException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_OutOfRangeException,
   c_OutOfRangeException::s_call_info_table,c_OutOfRangeException::s_call_info_index,
-  "OutOfRangeException",
+  &c_OutOfRangeException::s_class_name,
   &cw_LogicException
 };
 /* SRC: classes/exception.php line 193 */
@@ -796,7 +796,7 @@ ObjectStaticCallbacks cw_BadMethodCallException = {
   c_BadMethodCallException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_BadMethodCallException,
   c_BadMethodCallException::s_call_info_table,c_BadMethodCallException::s_call_info_index,
-  "BadMethodCallException",
+  &c_BadMethodCallException::s_class_name,
   &cw_BadFunctionCallException
 };
 /* SRC: classes/exception.php line 235 */
@@ -865,7 +865,7 @@ ObjectStaticCallbacks cw_RuntimeException = {
   c_RuntimeException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_RuntimeException,
   c_RuntimeException::s_call_info_table,c_RuntimeException::s_call_info_index,
-  "RuntimeException",
+  &c_RuntimeException::s_class_name,
   &cw_Exception
 };
 /* SRC: classes/exception.php line 10 */
@@ -1246,7 +1246,7 @@ ObjectStaticCallbacks cw_Exception = {
   c_Exception::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Exception,
   c_Exception::s_call_info_table,c_Exception::s_call_info_index,
-  "Exception",
+  &c_Exception::s_class_name,
   0
 };
 void c_Exception::init() {
@@ -1676,7 +1676,7 @@ ObjectStaticCallbacks cw_ErrorException = {
   c_ErrorException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ErrorException,
   c_ErrorException::s_call_info_table,c_ErrorException::s_call_info_index,
-  "ErrorException",
+  &c_ErrorException::s_class_name,
   &cw_Exception
 };
 /* SRC: classes/exception.php line 288 */
@@ -1832,7 +1832,7 @@ ObjectStaticCallbacks cw_DOMException = {
   c_DOMException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMException,
   c_DOMException::s_call_info_table,c_DOMException::s_call_info_index,
-  "DOMException",
+  &c_DOMException::s_class_name,
   &cw_Exception
 };
 /* SRC: classes/exception.php line 312 */
@@ -1914,7 +1914,7 @@ ObjectStaticCallbacks cw_BadFunctionCallException = {
   c_BadFunctionCallException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_BadFunctionCallException,
   c_BadFunctionCallException::s_call_info_table,c_BadFunctionCallException::s_call_info_index,
-  "BadFunctionCallException",
+  &c_BadFunctionCallException::s_class_name,
   &cw_LogicException
 };
 /* SRC: classes/exception.php line 219 */
@@ -1986,7 +1986,7 @@ ObjectStaticCallbacks cw_LengthException = {
   c_LengthException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_LengthException,
   c_LengthException::s_call_info_table,c_LengthException::s_call_info_index,
-  "LengthException",
+  &c_LengthException::s_class_name,
   &cw_LogicException
 };
 /* SRC: classes/exception.php line 202 */
@@ -2058,7 +2058,7 @@ ObjectStaticCallbacks cw_DomainException = {
   c_DomainException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DomainException,
   c_DomainException::s_call_info_table,c_DomainException::s_call_info_index,
-  "DomainException",
+  &c_DomainException::s_class_name,
   &cw_LogicException
 };
 ObjectData *coo_PDOException() {

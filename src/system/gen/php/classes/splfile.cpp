@@ -860,7 +860,7 @@ ObjectStaticCallbacks cw_SplFileObject = {
   c_SplFileObject::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SplFileObject,
   c_SplFileObject::s_call_info_table,c_SplFileObject::s_call_info_index,
-  "SplFileObject",
+  &c_SplFileObject::s_class_name,
   &cw_SplFileInfo
 };
 /* SRC: classes/splfile.php line 392 */
@@ -1782,7 +1782,7 @@ ObjectStaticCallbacks cw_SplFileInfo = {
   c_SplFileInfo::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SplFileInfo,
   c_SplFileInfo::s_call_info_table,c_SplFileInfo::s_call_info_index,
-  "SplFileInfo",
+  &c_SplFileInfo::s_class_name,
   0
 };
 /* SRC: classes/splfile.php line 14 */

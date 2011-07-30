@@ -3285,7 +3285,11 @@ void AnalysisResult::outputCPPRedeclaredClassImpl(CodeGenerator &cg) {
   for (StringToClassScopePtrVecMap::const_iterator iter =
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
     if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
-      const char *name = iter->first.c_str();
+      string s = CodeGenerator::EscapeLabel(iter->first);
+      string l = CodeGenerator::FormatLabel(iter->first);
+      const char *str = s.c_str();
+      const char *lab = l.c_str();
+      cg_printf("static StaticString s_%s = \"%s\";\n", lab, str);
       cg_printf("static const RedeclaredObjectStaticCallbacks %s%s = {\n"
                 "  {\n"
                 "    c_ObjectData::os_getInit,\n"
@@ -3294,14 +3298,14 @@ void AnalysisResult::outputCPPRedeclaredClassImpl(CodeGenerator &cg) {
                 "    c_ObjectData::os_invoke,\n"
                 "    c_ObjectData::os_constant,\n"
                 "    coo_ObjectData,\n"
-                "    0,0,\"%s\",0\n"
+                "    0,0,&s_%s,0\n"
                 "  },\n"
                 "  -1\n"
                 "};\n",
-                Option::ClassWrapperFunctionNullPrefix, name, name);
+                Option::ClassWrapperFunctionNullPrefix, lab, lab);
       cg_printf("%s%s = &%s%s;\n",
-                Option::ClassStaticsCallbackPrefix, name,
-                Option::ClassWrapperFunctionNullPrefix, name);
+                Option::ClassStaticsCallbackPrefix, lab,
+                Option::ClassWrapperFunctionNullPrefix, lab);
     }
   }
 }

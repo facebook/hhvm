@@ -1759,7 +1759,7 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
   cg_printf("%s%s::s_call_info_table,%s%s::s_call_info_index,\n",
             Option::ClassPrefix, id.c_str(),
             Option::ClassPrefix, id.c_str());
-  cg_printf("\"%s\",\n", CodeGenerator::EscapeLabel(getOriginalName()).c_str());
+  cg_printf("&%s%s::s_class_name,\n", Option::ClassPrefix, id.c_str());
   if (derivesFromRedeclaring() == DirectFromRedeclared) {
     cg_printf("(const ObjectStaticCallbacks*)"
               "(offsetof(GlobalVariables, %s%s)+1)",

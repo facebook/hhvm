@@ -97,7 +97,7 @@ class HashContext : public SweepableResourceData {
 public:
   static StaticString s_class_name;
   // overriding ResourceData
-  virtual CStrRef o_getClassName() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
   HashContext(HashEnginePtr ops_, void *context_, int options_)
     : ops(ops_), context(context_), options(options_), key(NULL) {

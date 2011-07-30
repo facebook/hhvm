@@ -115,7 +115,7 @@ public:
 
   static StaticString s_class_name;
   // overriding ResourceData
-  virtual CStrRef o_getClassName() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
   bool isPrivate() {
     ASSERT(m_key);
@@ -256,7 +256,7 @@ public:
 
   static StaticString s_class_name;
   // overriding ResourceData
-  virtual CStrRef o_getClassName() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
   static X509_REQ *Get(CVarRef var, Object &ocsr) {
     ocsr = Get(var);
@@ -2464,7 +2464,7 @@ Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password,
 Variant f_openssl_digest(CStrRef data, CStrRef method,
                          bool raw_output /* = false */) {
   const EVP_MD *mdtype = EVP_get_digestbyname(method);
-  
+
   if (!mdtype) {
     raise_warning("Unknown signature algorithm");
     return false;
@@ -2507,7 +2507,7 @@ static void openssl_add_method(const OBJ_NAME *name, void *arg)
 Array f_openssl_get_cipher_methods(bool aliases /* = false */) {
   Array ret = Array::Create();
   OBJ_NAME_do_all_sorted(OBJ_NAME_TYPE_CIPHER_METH,
-    aliases ? openssl_add_method_or_alias: openssl_add_method, 
+    aliases ? openssl_add_method_or_alias: openssl_add_method,
     &ret);
   return ret;
 }
@@ -2515,7 +2515,7 @@ Array f_openssl_get_cipher_methods(bool aliases /* = false */) {
 Array f_openssl_get_md_methods(bool aliases /* = false */) {
   Array ret = Array::Create();
   OBJ_NAME_do_all_sorted(OBJ_NAME_TYPE_MD_METH,
-    aliases ? openssl_add_method_or_alias: openssl_add_method, 
+    aliases ? openssl_add_method_or_alias: openssl_add_method,
     &ret);
   return ret;
 }

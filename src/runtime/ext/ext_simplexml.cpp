@@ -34,7 +34,7 @@ public:
 
   static StaticString s_class_name;
   // overriding ResourceData
-  virtual CStrRef o_getClassName() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
   XmlDocWrapper(xmlDocPtr doc) : m_doc(doc) {
   }

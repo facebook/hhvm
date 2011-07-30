@@ -491,7 +491,7 @@ public:
 
   static StaticString s_class_name;
   // overriding ResourceData
-  virtual CStrRef o_getClassName() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
   int close() {
     // Although the PHP doc about proc_close() says that the pipes need to be

@@ -19,28 +19,52 @@
 
 #ifdef TAINTED
 
-// Taint bits have the semantic of being propagated by OR; untainted then
-// implies a semantic of propagation by AND.
+#include <runtime/base/taint/taint_trace_node.h>
+
+/*
+ * Taint bits have the semantic of being propagated by OR; untainted then
+ * implies a semantic of propagation by AND. Note that some taint bits are
+ * bit-packed flags and do not function as taints.
+ */
+#define TAINT_BIT_NONE     (0x00)
 #define TAINT_BIT_HTML     (0x01)
 #define TAINT_BIT_SQL      (0x02)
 #define TAINT_BIT_MUTATED  (0x04)
-#define TAINT_BIT_ALL      (0x07) // Does not include TRACED bit
-#define TAINT_BIT_TRACED   (0x08)
-#define TAINT_BIT_NONE     (0x00)
+#define TAINT_BIT_TRACE    (0x08)
+#define TAINT_BIT_ALL      (0x0f)
+
+#define TAINT_BITS_RESERVED    (0xe0000000)
+#define TAINT_GET_TAINT(bits)  ((bits) & (~TAINT_BITS_RESERVED))
+#define TAINT_GET_FLAGS(bits)  ((bits) & (TAINT_BITS_RESERVED))
 
 namespace HPHP {
 
-typedef int bitstring;
+typedef int taint_t;
 
 class TaintData {
 public:
-  TaintData() : m_taint_bits(TAINT_BIT_NONE) { }
-  bitstring getTaint() const { return m_taint_bits; }
-  void setTaint(bitstring bits) { m_taint_bits |= bits; }
-  void unsetTaint(bitstring bits) { m_taint_bits &= (~bits); }
+  TaintData() : m_taint_bits(TAINT_BIT_NONE), m_taint_trace() { }
+
+  taint_t getTaint() const { return TAINT_GET_TAINT(m_taint_bits); }
+  taint_t getRawTaint() const { return m_taint_bits; }
+  void setTaint(taint_t bits) { m_taint_bits |= bits; }
+  void unsetTaint(taint_t bits) {
+    m_taint_bits &= (~bits);
+    if (bits & TAINT_BIT_HTML) { dropTaintTrace(); }
+  }
+
+  const TaintTraceNodePtr& getTaintTrace() const { return m_taint_trace; }
+  void setTaintTrace(TaintTraceNodePtr trace);
+  void setTaintTrace(TaintTraceDataPtr data);
+  void attachTaintTrace(TaintTraceNodePtr trace);
+  void attachTaintTrace(TaintTraceDataPtr data);
+  void dropTaintTrace();
+
   void dump() const;
+
 private:
-  bitstring m_taint_bits;
+  taint_t m_taint_bits;
+  TaintTraceNodePtr m_taint_trace;
 };
 
 }

@@ -23,6 +23,7 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/array/array_iterator.h>
+#include <runtime/base/taint/taint_observer.h>
 
 #define PREG_PATTERN_ORDER          1
 #define PREG_SET_ORDER              2
@@ -83,6 +84,7 @@ public:
   ~PCRECache() { }
 
   void cleanup() {
+    TAINT_OBSERVER_CAP_STACK();
     for (PCREStringMap::iterator it = m_cache.begin(); it != m_cache.end();
          ++it) {
       delete it->second;
@@ -93,12 +95,14 @@ public:
   }
 
   pcre_cache_entry *find(CStrRef regex) {
+    TAINT_OBSERVER_CAP_STACK();
     PCREStringMap::const_iterator it = m_cache.find(regex.get());
     if (it != m_cache.end()) return it->second;
     return NULL;
   }
 
   void set(CStrRef regex, pcre_cache_entry *pce) {
+    TAINT_OBSERVER_CAP_STACK();
     PCREStringMap::iterator it = m_cache.find(regex.get());
     if (it != m_cache.end()) {
       delete it->second;

@@ -338,8 +338,6 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
 #ifdef TAINTED
   taint_array_variant(g->GV(_GET), "$_GET");
   taint_array_variant(g->GV(_POST), "$_POST");
-  taint_array_variant(g->GV(_SERVER), "$_SERVER");
-  taint_array_variant(g->GV(_COOKIE), "$_COOKIE");
 #endif
 }
 

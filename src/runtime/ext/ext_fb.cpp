@@ -52,8 +52,8 @@ const int64 k_TAINT_NONE = 0x0;
 const int64 k_TAINT_HTML = 0x1;
 const int64 k_TAINT_SQL = 0x2;
 const int64 k_TAINT_MUTATED = 0x4;
-const int64 k_TAINT_ALL = 0x7;
 const int64 k_TAINT_TRACE = 0x8;
+const int64 k_TAINT_ALL = 0xf;
 
 ///////////////////////////////////////////////////////////////////////////////
 

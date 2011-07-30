@@ -935,6 +935,15 @@ public:
               pf->first->setMark(BlockScope::MarkReady);
               visitor->enqueue(pf->first);
             }
+          } else if (pf->second & useKinds && m == BlockScope::MarkProcessing) {
+            // This is conservative: If we have a user who is currently
+            // processing (yes, this can potentially happen if we add a user
+            // *after* the initial dep graph has been formed), then we have no
+            // guarantee that the scope read this scope's updates in its
+            // entirety. Thus, we must force it to run again in order to be
+            // able to observe all the updates.
+            assert(pf->first->getNumDepsToWaitFor() == 0);
+            pf->first->setForceRerun(true);
           }
         }
         scope->setMark(BlockScope::MarkProcessed);

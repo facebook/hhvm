@@ -16,13 +16,15 @@
 
 #ifdef TAINTED
 
+#include <runtime/base/complex_types.h>
+#include <runtime/base/taint/taint_data.h>
 #include <runtime/base/taint/taint_observer.h>
 
 namespace HPHP {
 
 IMPLEMENT_THREAD_LOCAL(TaintObserver*, TaintObserver::instance);
 
-void TaintObserver::RegisterAccessed(TaintData const& td) {
+void TaintObserver::RegisterAccessed(const TaintData& td) {
   if (!*instance) {
     return;
   }
@@ -38,7 +40,7 @@ void TaintObserver::RegisterAccessed(TaintData const& td) {
   *instance = tc;
 }
 
-void TaintObserver::RegisterMutated(TaintData& td) {
+void TaintObserver::RegisterMutated(TaintData& td, const char *s) {
   if (!*instance) {
     return;
   }

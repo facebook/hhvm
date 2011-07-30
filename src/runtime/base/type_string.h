@@ -91,6 +91,9 @@ public:
   const char *data() const {
     return m_px ? m_px->data() : "";
   }
+  const char *dataIgnoreTaint() const {
+    return m_px ? m_px->dataIgnoreTaint() : "";
+  }
   const char *c_str() const {
     return m_px ? m_px->data() : "";
   }

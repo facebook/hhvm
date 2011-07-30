@@ -46,7 +46,7 @@ StringData::StringData(const char *data,
   m_hash = 0;
   assignHelper(data, len, mode);
 
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
+  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, m_data);
 }
 
 StringData::StringData(const char *data, int len, StringDataMode mode)
@@ -59,7 +59,7 @@ StringData::StringData(const char *data, int len, StringDataMode mode)
     throw InvalidArgumentException("len>=2^29: %d", len);
   }
   assignHelper(data, len, mode);
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
+  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, m_data);
 }
 
 StringData::StringData(SharedVariant *shared)
@@ -73,7 +73,7 @@ StringData::StringData(SharedVariant *shared)
   m_len = m_shared->stringLength() | IsShared;
   ASSERT(m_data);
 
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
+  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, m_data);
 }
 
 void StringData::releaseData() {
@@ -173,7 +173,7 @@ void StringData::append(const char *s, int len) {
     throw FatalErrorException(0, "String length exceeded 2^29 - 1: %d", len);
   }
 
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
+  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, m_data);
 }
 
 StringData *StringData::copy(bool sharedMemory /* = false */) const {

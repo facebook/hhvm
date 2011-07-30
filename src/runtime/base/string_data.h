@@ -22,9 +22,9 @@
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/macros.h>
 #include <util/hash.h>
+#include <runtime/base/util/exceptions.h>
 #include <runtime/base/taint/taint_observer.h>
 #include <runtime/base/taint/taint_data.h>
-#include <runtime/base/util/exceptions.h>
 
 namespace HPHP {
 
@@ -108,6 +108,7 @@ class StringData {
     TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
     return m_data;
   }
+  const char *dataIgnoreTaint() const { return m_data; }
   int size() const { return m_len & LenMask;}
   bool empty() const { return size() == 0;}
   bool isLiteral() const { return m_len & IsLiteral;}

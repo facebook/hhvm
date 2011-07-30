@@ -19,6 +19,9 @@
 
 #ifdef TAINTED
 
+#include <util/thread_local.h>
+#include <runtime/base/taint/taint_data.h>
+
 /**
  * The purpose of this class is to keep track of which strings are getting
  * "read" and which strings are getting created. This allows us to
@@ -48,15 +51,11 @@ public:
   }
   ~TaintObserver() { *instance = m_previous; }
 
-  /**
-   * This functions needs to be called whenever data inside strings is accessed.
-   */
-  static void RegisterAccessed(TaintData const& td);
+  // This functions needs to be called whenever data inside strings is accessed.
+  static void RegisterAccessed(const TaintData& td);
 
-  /**
-   * This function needs to be called whenever a string is created or mutated.
-   */
-  static void RegisterMutated(TaintData& td);
+  // This function needs to be called whenever a string is created or mutated.
+  static void RegisterMutated(TaintData& td, const char *s);
 
 private:
   bitstring m_set_mask;
@@ -83,14 +82,14 @@ private:
 #define TAINT_OBSERVER_REGISTER_ACCESSED(td) \
   TaintObserver::RegisterAccessed((td))
 
-#define TAINT_OBSERVER_REGISTER_MUTATED(td) \
-  TaintObserver::RegisterMutated((td))
+#define TAINT_OBSERVER_REGISTER_MUTATED(td, s) \
+  TaintObserver::RegisterMutated((td), (s))
 
 #else
 
 #define TAINT_OBSERVER(set, clear) /* do nothing (note: not ; friendly) */
 #define TAINT_OBSERVER_REGISTER_ACCESSED(td) /* do nothing */
-#define TAINT_OBSERVER_REGISTER_MUTATED(td) /* do nothing */
+#define TAINT_OBSERVER_REGISTER_MUTATED(td, s) /* do nothing */
 
 #endif // TAINTED
 

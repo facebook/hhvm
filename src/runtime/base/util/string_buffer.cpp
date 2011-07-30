@@ -32,7 +32,7 @@ StringBuffer::StringBuffer(int initialSize /* = 1024 */)
   : m_initialSize(initialSize), m_maxBytes(0), m_size(initialSize), m_pos(0) {
   ASSERT(initialSize > 0);
   m_buffer = (char *)Util::safe_malloc(initialSize + 1);
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
+  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
 }
 
 StringBuffer::StringBuffer(const char *filename)
@@ -54,13 +54,13 @@ StringBuffer::StringBuffer(const char *filename)
       ::close(fd);
     }
   }
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
+  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
 }
 
 StringBuffer::StringBuffer(char *data, int len)
   : m_buffer(data), m_initialSize(1024), m_maxBytes(0), m_size(len),
     m_pos(len) {
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
+  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
 }
 
 StringBuffer::~StringBuffer() {
@@ -69,7 +69,16 @@ StringBuffer::~StringBuffer() {
   }
 }
 
-const char *StringBuffer::data() {
+const char *StringBuffer::data() const {
+  TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
+  if (m_buffer && m_pos) {
+    m_buffer[m_pos] = '\0'; // fixup
+    return m_buffer;
+  }
+  return NULL;
+}
+
+const char *StringBuffer::dataIgnoreTaint() const {
   if (m_buffer && m_pos) {
     m_buffer[m_pos] = '\0'; // fixup
     return m_buffer;
@@ -130,7 +139,7 @@ String StringBuffer::copy() {
 void StringBuffer::absorb(StringBuffer &buf) {
   if (empty()) {
     TAINT_OBSERVER_REGISTER_ACCESSED(buf.getTaintDataRefConst());
-    TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
+    TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
 
     char *buffer = m_buffer;
     int size = m_size;

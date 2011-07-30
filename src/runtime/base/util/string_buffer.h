@@ -57,7 +57,8 @@ public:
   bool empty() const { return m_pos == 0;}
   int size() const { return m_pos;}
   int length() const { return m_pos;}
-  const char *data();
+  const char *data() const;
+  const char *dataIgnoreTaint() const;
   char charAt(int pos) const;
 
   /**
@@ -96,7 +97,7 @@ public:
   void append(CStrRef s);
   void append(CVarRef s) { append(s.toString()); }
   void append(const char *s, int len) {
-    TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
+    TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
     ASSERT(len >= 0);
     if (m_buffer && m_pos + len <= m_size) {
       memcpy(m_buffer + m_pos, s, len);

@@ -285,7 +285,7 @@ inline String x_crypt(CStrRef str, CStrRef salt = "") {
 
 inline String x_md5(CStrRef str, bool raw_output = false) {
   FUNCTION_INJECTION_BUILTIN(md5);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_HTML);
   return f_md5(str, raw_output);
 }
 

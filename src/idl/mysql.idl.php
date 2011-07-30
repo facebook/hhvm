@@ -983,6 +983,10 @@ DefineFunction(
         'desc'   => "resource that is being evaluated. This result comes from a call to mysql_query().",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -1000,6 +1004,10 @@ DefineFunction(
         'type'   => Variant,
         'desc'   => "resource that is being evaluated. This result comes from a call to mysql_query().",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1024,6 +1032,10 @@ DefineFunction(
         'value'  => "3",
         'desc'   => "The type of array that is to be fetched. It's a constant and can take the following values: MYSQL_ASSOC, MYSQL_NUM, and MYSQL_BOTH.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1073,6 +1085,10 @@ DefineFunction(
         'desc'   => "An optional array of parameters to pass to the constructor for class_name objects.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -1102,6 +1118,10 @@ DefineFunction(
         'desc'   => "The name or offset of the field being retrieved.\n\nIt can be the field's offset, the field's name, or the field's table dot field name (tablename.fieldname). If the column name has been aliased ('select foo as bar from...'), use the alias instead of the column name. If undefined, the first field is retrieved.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -1125,6 +1145,10 @@ DefineFunction(
         'value'  => "-1",
         'desc'   => "The numerical field offset. If the field offset is not specified, the next field that was not yet retrieved by this function is retrieved. The field_offset starts at 0.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 

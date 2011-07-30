@@ -1088,6 +1088,10 @@ DefineFunction(
         'desc'   => "If the optional raw_output is set to TRUE, then the md5 digest is instead returned in raw binary format with a length of 16.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_HTML",
+    ),
   ));
 
 DefineFunction(

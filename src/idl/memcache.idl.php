@@ -262,6 +262,10 @@ DefineFunction(
         'value'  => "null",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -908,6 +912,10 @@ DefineFunction(
         'value'  => "null",
         'desc'   => "If present, flags fetched along with the values will be written to this parameter. These flags are the same as the ones given to for example Memcache::set(). The lowest byte of the int is reserved for pecl/memcache internal usage (e.g. to indicate compression and serialization status).",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 

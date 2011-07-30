@@ -255,19 +255,19 @@ inline bool x_mysql_data_seek(CVarRef result, int row) {
 
 inline Variant x_mysql_fetch_row(CVarRef result) {
   FUNCTION_INJECTION_BUILTIN(mysql_fetch_row);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   return f_mysql_fetch_row(result);
 }
 
 inline Variant x_mysql_fetch_assoc(CVarRef result) {
   FUNCTION_INJECTION_BUILTIN(mysql_fetch_assoc);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   return f_mysql_fetch_assoc(result);
 }
 
 inline Variant x_mysql_fetch_array(CVarRef result, int result_type = 3) {
   FUNCTION_INJECTION_BUILTIN(mysql_fetch_array);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   return f_mysql_fetch_array(result, result_type);
 }
 
@@ -279,19 +279,19 @@ inline Variant x_mysql_fetch_lengths(CVarRef result) {
 
 inline Variant x_mysql_fetch_object(CVarRef result, CStrRef class_name = "stdClass", CArrRef params = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_fetch_object);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   return f_mysql_fetch_object(result, class_name, params);
 }
 
 inline Variant x_mysql_result(CVarRef result, int row, CVarRef field = null_variant) {
   FUNCTION_INJECTION_BUILTIN(mysql_result);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   return f_mysql_result(result, row, field);
 }
 
 inline Variant x_mysql_fetch_field(CVarRef result, int field = -1) {
   FUNCTION_INJECTION_BUILTIN(mysql_fetch_field);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   return f_mysql_fetch_field(result, field);
 }
 

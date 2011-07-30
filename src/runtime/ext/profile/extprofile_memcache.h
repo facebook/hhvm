@@ -57,7 +57,7 @@ inline bool x_memcache_replace(CObjRef memcache, CStrRef key, CVarRef var, int f
 
 inline Variant x_memcache_get(CObjRef memcache, CVarRef key, VRefParam flags = null) {
   FUNCTION_INJECTION_BUILTIN(memcache_get);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   return f_memcache_get(memcache, key, flags);
 }
 

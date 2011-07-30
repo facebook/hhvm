@@ -811,6 +811,10 @@ DefineFunction(
       'type'   => Variant,
       'desc'   => "Returns the next result or FALSE otherwise. The Memcached::getResultCode() will return Memcached::RES_END if result set is exhausted.",
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -821,6 +825,10 @@ DefineFunction(
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the results or FALSE on failure. Use Memcached::getResultCode() if necessary.",
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -871,6 +879,10 @@ DefineFunction(
         'desc'   => "The variable to store the CAS token in.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -906,6 +918,10 @@ DefineFunction(
         'desc'   => "The variable to store the CAS token in.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -935,6 +951,10 @@ DefineFunction(
         'value'  => "null_variant",
         'desc'   => "The result callback or NULL.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -971,6 +991,10 @@ DefineFunction(
         'desc'   => "The result callback or NULL.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -1000,6 +1024,10 @@ DefineFunction(
         'value'  => "0",
         'desc'   => "The flags for the get operation.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1035,6 +1063,10 @@ DefineFunction(
         'value'  => "0",
         'desc'   => "The flags for the get operation.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 

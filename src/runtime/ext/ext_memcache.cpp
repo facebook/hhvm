@@ -223,6 +223,7 @@ bool c_Memcache::t_replace(CStrRef key, CVarRef var, int flag /*= 0*/,
 
 Variant c_Memcache::t_get(CVarRef key, VRefParam flags /*= null*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::get);
+  TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   if (key.is(KindOfArray)) {
     std::vector<const char *> real_keys;
     std::vector<size_t> key_len;

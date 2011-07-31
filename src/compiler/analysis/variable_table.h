@@ -58,12 +58,6 @@ public:
     ContainsGetDefinedVars = 1024,
   };
 
-  enum VariableProperty {
-    VariablePresent = 1,
-    VariableStatic = 2,
-    VariablePrivate = 4
-  };
-
   enum JumpTableType {
     JumpReturn,
     JumpRealProp,
@@ -185,10 +179,10 @@ public:
    */
   TypePtr add(const std::string &name, TypePtr type, bool implicit,
               AnalysisResultConstPtr ar, ConstructPtr construct,
-              ModifierExpressionPtr modifiers, bool checkError = true);
+              ModifierExpressionPtr modifiers);
   TypePtr add(Symbol *sym, TypePtr type, bool implicit,
               AnalysisResultConstPtr ar, ConstructPtr construct,
-              ModifierExpressionPtr modifiers, bool checkError = true);
+              ModifierExpressionPtr modifiers);
 
   /**
    * Called to note whether a class variable overrides
@@ -201,11 +195,9 @@ public:
    * Called when a variable is used or being evaluated (r-value).
    */
   TypePtr checkVariable(const std::string &name, TypePtr type, bool coerce,
-                        AnalysisResultConstPtr ar, ConstructPtr construct,
-                        int &properties);
+                        AnalysisResultConstPtr ar, ConstructPtr construct);
   TypePtr checkVariable(Symbol *sym, TypePtr type, bool coerce,
-                        AnalysisResultConstPtr ar, ConstructPtr construct,
-                        int &properties);
+                        AnalysisResultConstPtr ar, ConstructPtr construct);
   /**
    * Find the class which contains the property, and return
    * its Symbol

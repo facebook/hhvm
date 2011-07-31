@@ -251,9 +251,7 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         tmpType = Type::Variant;
         coerce = true;
       }
-      int p;
-      ret = variables->checkVariable(m_sym, tmpType, coerce,
-                                     ar, construct, p);
+      ret = variables->checkVariable(m_sym, tmpType, coerce, ar, construct);
     }
   }
 

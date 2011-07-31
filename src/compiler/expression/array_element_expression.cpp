@@ -351,9 +351,7 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
               ret = vars->add(m_globalName, type, true, ar, self,
                               ModifierExpressionPtr());
             } else {
-              int p;
-              ret =
-                vars->checkVariable(m_globalName, type, coerce, ar, self, p);
+              ret = vars->checkVariable(m_globalName, type, coerce, ar, self);
             }
             getScope()->getVariables()->addSuperGlobal(m_globalName);
             return ret;

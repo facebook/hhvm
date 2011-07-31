@@ -319,9 +319,7 @@ TypePtr VariableTable::addParamLike(const string &name, TypePtr type,
     ret = add(name, ret, false, ar,
               construct, ModifierExpressionPtr());
   } else {
-    int p;
-    ret = checkVariable(name, ret, true, ar,
-                        construct, p);
+    ret = checkVariable(name, ret, true, ar, construct);
     if (ret->is(Type::KindOfSome)) {
       // This is probably too conservative. The problem is that
       // a function never called will have parameter types of Any.
@@ -397,17 +395,15 @@ bool VariableTable::markOverride(AnalysisResultPtr ar, const string &name) {
 TypePtr VariableTable::add(const string &name, TypePtr type,
                            bool implicit, AnalysisResultConstPtr ar,
                            ConstructPtr construct,
-                           ModifierExpressionPtr modifiers,
-                           bool checkError /* = true */) {
+                           ModifierExpressionPtr modifiers) {
   return add(addSymbol(name), type, implicit, ar,
-             construct, modifiers, checkError);
+             construct, modifiers);
 }
 
 TypePtr VariableTable::add(Symbol *sym, TypePtr type,
                            bool implicit, AnalysisResultConstPtr ar,
                            ConstructPtr construct,
-                           ModifierExpressionPtr modifiers,
-                           bool checkError /* = true */) {
+                           ModifierExpressionPtr modifiers) {
   if (getAttribute(InsideStaticStatement)) {
     addStaticVariable(sym, ar);
     if (ClassScope::NeedStaticArray(getClassScope(), getFunctionScope())) {
@@ -419,7 +415,7 @@ TypePtr VariableTable::add(Symbol *sym, TypePtr type,
     AnalysisResult::Locker lock(ar);
     if (!isGlobalTable(ar)) {
       lock->getVariables()->add(sym->getName(), type, implicit,
-                                ar, construct, modifiers, false);
+                                ar, construct, modifiers);
     }
     ASSERT(type->is(Type::KindOfSome) || type->is(Type::KindOfAny));
     TypePtr varType = ar->getVariables()->getFinalType(sym->getName());
@@ -432,7 +428,7 @@ TypePtr VariableTable::add(Symbol *sym, TypePtr type,
     // A variable used in a pseudomain
     // only need to do this once... should mark the sym.
     ar->lock()->getVariables()->add(sym->getName(), type, implicit, ar,
-                                    construct, modifiers, checkError);
+                                    construct, modifiers);
   }
 
   if (modifiers) {
@@ -463,22 +459,20 @@ TypePtr VariableTable::add(Symbol *sym, TypePtr type,
 
 TypePtr VariableTable::checkVariable(const string &name, TypePtr type,
                                      bool coerce, AnalysisResultConstPtr ar,
-                                     ConstructPtr construct, int &properties) {
+                                     ConstructPtr construct) {
   return checkVariable(addSymbol(name), type,
-                       coerce, ar, construct, properties);
+                       coerce, ar, construct);
 }
 
 TypePtr VariableTable::checkVariable(Symbol *sym, TypePtr type,
                                      bool coerce, AnalysisResultConstPtr ar,
-                                     ConstructPtr construct, int &properties) {
-  properties = 0;
+                                     ConstructPtr construct) {
 
   // Variable used in pseudomain
   if (!sym->isHidden() && isPseudoMainTable()) {
     // only need to do this once... should mark the sym.
     ar->lock()->getVariables()->checkVariable(sym->getName(), type,
-                                              coerce, ar, construct,
-                                              properties);
+                                              coerce, ar, construct);
   }
 
   if (!sym->declarationSet()) {
@@ -492,11 +486,6 @@ TypePtr VariableTable::checkVariable(Symbol *sym, TypePtr type,
     type = setType(ar, sym, type, coerce);
     sym->setDeclaration(construct);
     return type;
-  }
-
-  properties = VariablePresent;
-  if (sym->isStatic()) {
-    properties |= VariableStatic;
   }
 
   return setType(ar, sym, type, coerce);

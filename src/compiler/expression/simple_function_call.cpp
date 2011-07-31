@@ -1676,6 +1676,9 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
     if (!m_class && m_className.empty()) {
       if (m_valid) {
         assert(m_arrayParams && m_ciTemp < 0);
+        if (getClassScope() && m_funcScope->isUserFunction()) {
+          cg_printf("HPHP::");
+        }
         cg_printf("%s%s(NULL, ", Option::InvokePrefix,
                   m_funcScope->getId().c_str());
       } else if (canInvokeFewArgs() && !m_arrayParams) {

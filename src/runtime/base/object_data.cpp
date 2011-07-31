@@ -46,6 +46,7 @@ static CallInfo s_ObjectData_call_handler((void*)ObjectData::callHandler,
     CallInfo::VarArgs | CallInfo::Method | CallInfo::CallMagicMethod, 0);
 
 static StaticString s___callStatic("__callStatic");
+static StaticString s_serialize("serialize");
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructor/destructor
@@ -659,49 +660,29 @@ Array ObjectData::o_getDynamicProperties() const {
 
 Variant ObjectData::o_invoke(CStrRef s, CArrRef params, int64 hash /* = -1 */,
                              bool fatal /* = true */) {
-  StringData *sd = s.get();
-  ASSERT(sd && sd->data());
-  return o_invoke(sd->data(), params, hash < 0 ? sd->hash() : hash,
-                  fatal);
+  MethodCallPackage mcp;
+  if (!fatal) mcp.noFatal();
+  mcp.methodCall(this, s, hash);
+  return (mcp.ci->getMeth())(mcp, params);
 }
 
 Variant ObjectData::o_root_invoke(CStrRef s, CArrRef params,
                                   int64 hash /* = -1 */,
                                   bool fatal /* = true */) {
-  StringData *sd = s.get();
-  ASSERT(sd && sd->data());
-  return o_root_invoke(sd->data(), params,
-      hash < 0 ? sd->hash() : hash, fatal);
+  return getRoot()->o_invoke(s, params, hash, fatal);
 }
 
 Variant ObjectData::o_invoke_few_args(CStrRef s, int64 hash, int count,
                                       INVOKE_FEW_ARGS_IMPL_ARGS) {
-  StringData *sd = s.get();
-  ASSERT(sd && sd->data());
-  return o_invoke_few_args(sd->data(), hash < 0 ? sd->hash() : hash,
-      count, INVOKE_FEW_ARGS_PASS_ARGS);
+  MethodCallPackage mcp;
+  mcp.methodCall(this, s, hash);
+  return (mcp.ci->getMethFewArgs())(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
 Variant ObjectData::o_root_invoke_few_args(CStrRef s, int64 hash, int count,
                                            INVOKE_FEW_ARGS_IMPL_ARGS) {
-  StringData *sd = s.get();
-  ASSERT(sd && sd->data());
-  return o_root_invoke_few_args(sd->data(),
-      hash < 0 ? sd->hash() : hash, count, INVOKE_FEW_ARGS_PASS_ARGS);
-}
-
-Variant ObjectData::o_invoke(const char *s, CArrRef params, int64 hash,
-                             bool fatal /* = true */) {
-  MethodCallPackage mcp;
-  if (!fatal) mcp.noFatal();
-  String str(s);
-  mcp.methodCall(this, str, hash);
-  return (mcp.ci->getMeth())(mcp, params);
-}
-
-Variant ObjectData::o_root_invoke(const char *s, CArrRef params, int64 hash,
-                                  bool fatal /* = true */) {
-  return o_invoke(s, params, hash, fatal);
+  return getRoot()->o_invoke_few_args(s, hash, count,
+                                      INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
 Variant ObjectData::o_invoke_ex(CStrRef clsname, CStrRef s,
@@ -716,20 +697,6 @@ Variant ObjectData::o_invoke_ex(CStrRef clsname, CStrRef s,
     o_invoke_failed(clsname.data(), s.data(), fatal);
   }
   return null;
-}
-
-Variant ObjectData::o_invoke_few_args(const char *s, int64 hash, int count,
-                                      INVOKE_FEW_ARGS_IMPL_ARGS) {
-  MethodCallPackage mcp;
-  String str(s);
-  mcp.methodCall(this, str, hash);
-  return (mcp.ci->getMethFewArgs())(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS);
-}
-
-Variant ObjectData::o_root_invoke_few_args(const char *s, int64 hash,
-                                           int count,
-                                           INVOKE_FEW_ARGS_IMPL_ARGS) {
-  return o_invoke_few_args(s, hash, count, INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
 bool ObjectData::o_get_call_info(MethodCallPackage &mcp,
@@ -795,7 +762,7 @@ void ObjectData::serialize(VariableSerializer *serializer) const {
               serializer->getType() == VariableSerializer::DebuggerSerialize) &&
              o_instanceof("Serializable")) {
     Variant ret =
-      const_cast<ObjectData*>(this)->o_invoke("serialize", Array(), -1);
+      const_cast<ObjectData*>(this)->o_invoke(s_serialize, Array(), -1);
     if (ret.isString()) {
       serializer->writeSerializableObject(o_getClassName(), ret.toString());
     } else if (ret.isNull()) {
@@ -1031,15 +998,6 @@ Variant ObjectData::NullConstructor(MethodCallPackage &info, CArrRef params) {
 Variant ObjectData::NullConstructorFewArgs(MethodCallPackage &info, int count,
       INVOKE_FEW_ARGS_IMPL_ARGS) {
   return null_variant;
-}
-
-Variant ExtObjectData::o_root_invoke(const char *s, CArrRef ps, int64 h,
-    bool f /* = true */) {
-  return root->o_invoke(s, ps, h, f);
-}
-Variant ExtObjectData::o_root_invoke_few_args(const char *s, int64 h, int count,
-                          INVOKE_FEW_ARGS_IMPL_ARGS) {
-  return root->o_invoke_few_args(s, h, count, INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
 Object ObjectData::fiberMarshal(FiberReferenceMap &refMap) const {

@@ -850,16 +850,10 @@ class Variant {
   bool o_isset(CStrRef propName, CStrRef context = null_string) const;
   void o_unset(CStrRef propName, CStrRef context = null_string);
 
-  Variant o_invoke(const char *s, CArrRef params, int64 hash = -1);
   Variant o_invoke(CStrRef s, CArrRef params, int64 hash = -1);
-  Variant o_root_invoke(const char *s, CArrRef params, int64 hash = -1);
   Variant o_root_invoke(CStrRef s, CArrRef params, int64 hash = -1);
   Variant o_invoke_ex(CStrRef clsname, CStrRef s, CArrRef params);
-  Variant o_invoke_few_args(const char *s, int64 hash, int count,
-                            INVOKE_FEW_ARGS_DECL_ARGS);
   Variant o_invoke_few_args(CStrRef s, int64 hash, int count,
-                            INVOKE_FEW_ARGS_DECL_ARGS);
-  Variant o_root_invoke_few_args(const char *s, int64 hash, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
   Variant o_root_invoke_few_args(CStrRef s, int64 hash, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);

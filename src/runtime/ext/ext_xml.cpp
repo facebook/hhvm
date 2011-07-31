@@ -332,7 +332,7 @@ static Variant xml_call_handler(XmlParser *parser, CVarRef handler,
         retval = invoke(handler.toString().c_str(), args, -1);
       } else {
         retval = parser->object.toObject()->
-          o_invoke(handler.toString().c_str(), args, -1);
+          o_invoke(handler.toString(), args, -1);
       }
     } else if (handler.isArray() && handler.getArrayData()->size() == 2 &&
                (handler[0].isString() || handler[0].isObject()) &&

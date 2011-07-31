@@ -86,6 +86,7 @@ static StaticString s_s("s");
 static StaticString s_scalar("scalar");
 static StaticString s_array("Array");
 static StaticString s_1("1");
+static StaticString s_unserialize("unserialize");
 
 ///////////////////////////////////////////////////////////////////////////////
 // local helpers
@@ -2764,35 +2765,11 @@ Variant Variant::o_setPublicRef(CStrRef propName, CVarRef val) {
   return m_data.pobj->o_setPublicRef(propName, val, false);
 }
 
-Variant Variant::o_invoke(const char *s, CArrRef params,
-                          int64 hash /* = -1 */) {
-  if (m_type == KindOfObject) {
-    return m_data.pobj->o_invoke(s, params, hash);
-  } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_invoke(s, params, hash);
-  } else {
-    throw InvalidOperandException(
-        "Call to a member function on a non-object");
-  }
-}
-
 Variant Variant::o_invoke(CStrRef s, CArrRef params, int64 hash /* = -1 */) {
   if (m_type == KindOfObject) {
     return m_data.pobj->o_invoke(s, params, hash);
   } else if (m_type == KindOfVariant) {
     return m_data.pvar->o_invoke(s, params, hash);
-  } else {
-    throw InvalidOperandException(
-        "Call to a member function on a non-object");
-  }
-}
-
-Variant Variant::o_root_invoke(const char *s, CArrRef params,
-                               int64 hash /* = -1 */) {
-  if (m_type == KindOfObject) {
-    return m_data.pobj->o_root_invoke(s, params, hash);
-  } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_root_invoke(s, params, hash);
   } else {
     throw InvalidOperandException(
         "Call to a member function on a non-object");
@@ -2822,20 +2799,6 @@ Variant Variant::o_invoke_ex(CStrRef clsname, CStrRef s, CArrRef params) {
   }
 }
 
-Variant Variant::o_invoke_few_args(const char *s, int64 hash, int count,
-                                   INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (m_type == KindOfObject) {
-    return m_data.pobj->o_invoke_few_args(s, hash, count,
-                                          INVOKE_FEW_ARGS_PASS_ARGS);
-  } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_invoke_few_args(s, hash, count,
-                                          INVOKE_FEW_ARGS_PASS_ARGS);
-  } else {
-    throw InvalidOperandException(
-        "Call to a member function on a non-object");
-  }
-}
-
 Variant Variant::o_invoke_few_args(CStrRef s, int64 hash, int count,
                                    INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (m_type == KindOfObject) {
@@ -2844,20 +2807,6 @@ Variant Variant::o_invoke_few_args(CStrRef s, int64 hash, int count,
   } else if (m_type == KindOfVariant) {
     return m_data.pvar->o_invoke_few_args(s, hash, count,
                                           INVOKE_FEW_ARGS_PASS_ARGS);
-  } else {
-    throw InvalidOperandException(
-        "Call to a member function on a non-object");
-  }
-}
-
-Variant Variant::o_root_invoke_few_args(const char *s, int64 hash, int count,
-                                        INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (m_type == KindOfObject) {
-    return m_data.pobj->o_root_invoke_few_args(s, hash, count,
-                                               INVOKE_FEW_ARGS_PASS_ARGS);
-  } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_root_invoke_few_args(s, hash, count,
-                                               INVOKE_FEW_ARGS_PASS_ARGS);
   } else {
     throw InvalidOperandException(
         "Call to a member function on a non-object");
@@ -3875,7 +3824,7 @@ void Variant::unserialize(VariableUnserializer *uns) {
         if (!obj->o_instanceof("Serializable")) {
           raise_error("%s didn't implement Serializable", clsName.data());
         }
-        obj->o_invoke("unserialize", CREATE_VECTOR1(serialized), -1);
+        obj->o_invoke(s_unserialize, CREATE_VECTOR1(serialized), -1);
       } catch (ClassNotFoundException &e) {
         if (!uns->allowUnknownSerializableClass()) {
           throw;

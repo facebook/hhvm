@@ -243,18 +243,8 @@ class ObjectData : public CountableNF {
   CVarRef set(CStrRef s, CVarRef v);
 
   // methods
-  virtual Variant o_invoke(const char *s, CArrRef params, int64 hash,
-                           bool fatal = true);
-  virtual Variant o_root_invoke(const char *s, CArrRef params, int64 hash,
-                                bool fatal = false);
   Variant o_invoke_ex(CStrRef clsname, CStrRef s,
                       CArrRef params, bool fatal = true);
-
-  virtual Variant o_invoke_few_args(const char *s, int64 hash, int count,
-                                    INVOKE_FEW_ARGS_DECL_ARGS);
-
-  virtual Variant o_root_invoke_few_args(const char *s, int64 hash, int count,
-                                         INVOKE_FEW_ARGS_DECL_ARGS);
 
   // method invocation with CStrRef
   Variant o_invoke(CStrRef s, CArrRef params, int64 hash = -1,
@@ -364,9 +354,6 @@ typedef ObjectData c_ObjectData; // purely for easier code generation
 class ExtObjectData : public ObjectData {
 public:
   ExtObjectData() : root(this) {}
-  Variant o_root_invoke(const char *s, CArrRef ps, int64 h, bool f = true);
-  Variant o_root_invoke_few_args(const char *s, int64 h, int count,
-                                 INVOKE_FEW_ARGS_DECL_ARGS);
   virtual void setRoot(ObjectData *r) { root = r; }
   virtual ObjectData *getRoot() { return root; }
 protected: ObjectData *root;

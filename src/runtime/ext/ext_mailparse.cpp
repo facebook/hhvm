@@ -359,7 +359,8 @@ Variant f_mailparse_uudecode_all(CObjRef fp) {
     if (strncmp(line.data(), "begin ", 6) == 0) {
       /* parse out the file name.
        * The next 4 bytes are an octal number for perms; ignore it */
-      char *origfilename = (char*)line.data() + 10;
+       // TODO: Update gcc and get rid of this dumb workaround.
+      char *origfilename = (char *)((size_t)line.data() + (10 * sizeof(char)));
       /* NUL terminate the filename */
       int len = strlen(origfilename);
       while (isspace(origfilename[len-1])) {

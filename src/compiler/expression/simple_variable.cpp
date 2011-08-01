@@ -252,6 +252,9 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         coerce = true;
       }
       ret = variables->checkVariable(m_sym, tmpType, coerce, ar, construct);
+      if (ret && (ret->is(Type::KindOfSome) || ret->is(Type::KindOfAny))) {
+        ret = Type::Variant;
+      }
     }
   }
 

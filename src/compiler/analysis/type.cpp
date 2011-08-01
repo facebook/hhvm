@@ -692,7 +692,7 @@ std::string Type::toString() const {
   case KindOfString:      return "String";
   case KindOfArray:       return "Array";
   case KindOfVariant:     return "Variant";
-  case KindOfSome:
+  case KindOfSome:        return "Some";
   case KindOfAny:         return "Any";
   case KindOfObject:      return string("Object - ") + m_name;
   case KindOfNumeric:     return "Numeric";

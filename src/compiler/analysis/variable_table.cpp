@@ -476,13 +476,6 @@ TypePtr VariableTable::checkVariable(Symbol *sym, TypePtr type,
   }
 
   if (!sym->declarationSet()) {
-    bool isLocal = !sym->isGlobal() && !sym->isSystem();
-    if (isLocal && !getAttribute(ContainsLDynamicVariable) &&
-        m_blockScope.isFirstPass()) {
-      type = Type::Variant;
-      coerce = true;
-    }
-
     type = setType(ar, sym, type, coerce);
     sym->setDeclaration(construct);
     return type;

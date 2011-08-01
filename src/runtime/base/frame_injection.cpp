@@ -139,7 +139,11 @@ Array FrameInjection::getStackFrame(bool withSelf, bool withThis) {
       if (const char *c = strstr(f, "$$")) {
         frame.set(s_function, String(f, c - f, CopyString), true);
       } else {
-        frame.set(s_function, f, true);
+        if (isEvalFrame()) {
+          frame.set(s_function, String(f, CopyString), true);
+        } else {
+          frame.set(s_function, f, true);
+        }
       }
       break;
     }

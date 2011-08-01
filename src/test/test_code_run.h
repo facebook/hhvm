@@ -194,6 +194,9 @@ class TestCodeRun : public TestBase {
   // HipHop specific
   bool TestYield();
   bool TestHint();
+#ifdef TAINTED
+  bool TestTaint();
+#endif
 
   // debugging purpose
   bool TestAdHoc();

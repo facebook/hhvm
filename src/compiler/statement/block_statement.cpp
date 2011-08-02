@@ -26,7 +26,8 @@ using namespace boost;
 
 BlockStatement::BlockStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, StatementListPtr stmts)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES), m_stmts(stmts) {
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(BlockStatement)),
+    m_stmts(stmts) {
 }
 
 StatementPtr BlockStatement::clone() {

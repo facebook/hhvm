@@ -27,7 +27,7 @@ using namespace boost;
 IfBranchStatement::IfBranchStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr condition, StatementPtr stmt)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(IfBranchStatement)),
     m_condition(condition), m_stmt(stmt) {
 }
 

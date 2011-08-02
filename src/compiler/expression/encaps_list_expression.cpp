@@ -28,7 +28,7 @@ using namespace boost;
 
 EncapsListExpression::EncapsListExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS, int type, ExpressionListPtr expList)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(EncapsListExpression)),
     m_type(type), m_exps(expList) {
 }
 
@@ -91,13 +91,11 @@ ExpressionPtr EncapsListExpression::preOptimize(AnalysisResultConstPtr ar) {
       ExpressionPtr exp =
         BinaryOpExpressionPtr(new BinaryOpExpression(
                                 getScope(), getLocation(),
-                                Expression::KindOfBinaryOpExpression,
                                 (*m_exps)[0], (*m_exps)[1], '.'));
       for (int i = 2; i < count; i++) {
         exp =
           BinaryOpExpressionPtr(new BinaryOpExpression(
                                   getScope(), getLocation(),
-                                  Expression::KindOfBinaryOpExpression,
                                   exp, (*m_exps)[i], '.'));
       }
       return exp;

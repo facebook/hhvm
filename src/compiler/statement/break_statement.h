@@ -25,6 +25,8 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(BreakStatement);
 
 class BreakStatement : public Statement {
+protected:
+  BreakStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS, ExpressionPtr exp);
 public:
   BreakStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp);
 

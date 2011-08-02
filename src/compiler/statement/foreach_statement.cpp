@@ -35,7 +35,7 @@ ForEachStatement::ForEachStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr array, ExpressionPtr name, bool nameRef,
  ExpressionPtr value, bool valueRef, StatementPtr stmt)
-  : LoopStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : LoopStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ForEachStatement)),
     m_array(array), m_name(name), m_value(value), m_ref(valueRef),
     m_stmt(stmt) {
   if (!m_value) {
@@ -161,7 +161,7 @@ void ForEachStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
-void ForEachStatement::preOutputCPPImpl(CodeGenerator &cg, 
+void ForEachStatement::preOutputCPPImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   m_array->preOutputCPPTemp(cg, ar, true);
   if (m_name) m_name->preOutputCPPTemp(cg, ar, true);

@@ -39,7 +39,7 @@ FunctionStatement::FunctionStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  bool ref, const std::string &name, ExpressionListPtr params,
  StatementListPtr stmt, int attr, const std::string &docComment)
-  : MethodStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES,
+  : MethodStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(FunctionStatement),
                     ModifierExpressionPtr(), ref, name, params, stmt, attr,
                     docComment, false), m_ignored(false) {
 }

@@ -37,7 +37,8 @@ using namespace boost;
 ClassConstantExpression::ClassConstantExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr classExp, const std::string &varName)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+  : Expression(
+      EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ClassConstantExpression)),
     StaticClassName(classExp), m_varName(varName), m_defScope(NULL),
     m_valid(false) {
 }

@@ -25,7 +25,8 @@ using namespace boost;
 
 ContinueStatement::ContinueStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp)
-  : BreakStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES, exp) {
+  : BreakStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ContinueStatement),
+                   exp) {
   m_name = "continue";
 }
 

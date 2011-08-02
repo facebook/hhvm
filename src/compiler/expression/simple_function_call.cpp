@@ -99,7 +99,7 @@ public:
 SimpleFunctionCall::SimpleFunctionCall
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  const std::string &name, ExpressionListPtr params, ExpressionPtr cls)
-  : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES,
+  : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(SimpleFunctionCall),
                  ExpressionPtr(), name, params, cls),
     m_type(UnknownType), m_dynamicConstant(false),
     m_builtinFunction(false), m_noPrefix(false), m_dynamicInvoke(false),
@@ -404,8 +404,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
           strs.push_back(name);
 
           SimpleVariablePtr var(new SimpleVariable(
-                                  e->getScope(), e->getLocation(),
-                                  KindOfSimpleVariable, name));
+                                  e->getScope(), e->getLocation(), name));
           var->copyContext(e);
           var->updateSymbol(SimpleVariablePtr());
           new_params.push_back(e);
@@ -576,7 +575,6 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
                 static_pointer_cast<UnaryOpExpression>(vars)->getExpression()));
             ExpressionListPtr rep(
               new ExpressionList(getScope(), getLocation(),
-                                 Expression::KindOfExpressionList,
                                  ExpressionList::ListKindWrapped));
             string root_name;
             int n = arr ? arr->getCount() : 0;
@@ -603,8 +601,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
               }
               if (!name.isValidVariableName()) continue;
               SimpleVariablePtr var(
-                new SimpleVariable(getScope(), getLocation(),
-                                   KindOfSimpleVariable, name.data()));
+                new SimpleVariable(getScope(), getLocation(), name.data()));
               var->updateSymbol(SimpleVariablePtr());
               ExpressionPtr val(ap->getValue());
               if (!val->isScalar()) {
@@ -612,31 +609,26 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
                   root_name = "t" + lexical_cast<string>(
                     getFunctionScope()->nextInlineIndex());
                   SimpleVariablePtr rv(
-                    new SimpleVariable(getScope(), getLocation(),
-                                       KindOfSimpleVariable, root_name));
+                    new SimpleVariable(getScope(), getLocation(), root_name));
                   rv->updateSymbol(SimpleVariablePtr());
                   rv->getSymbol()->setHidden();
                   ExpressionPtr root(
                     new AssignmentExpression(getScope(), getLocation(),
-                                             KindOfAssignmentExpression,
                                              rv, (*m_params)[0], false));
                   rep->insertElement(root);
                 }
 
                 SimpleVariablePtr rv(
-                  new SimpleVariable(getScope(), getLocation(),
-                                     KindOfSimpleVariable, root_name));
+                  new SimpleVariable(getScope(), getLocation(), root_name));
                 rv->updateSymbol(SimpleVariablePtr());
                 rv->getSymbol()->setHidden();
                 ExpressionPtr offset(makeScalarExpression(ar, voff));
                 val = ExpressionPtr(
                   new ArrayElementExpression(getScope(), getLocation(),
-                                             KindOfArrayElementExpression,
                                              rv, offset));
               }
               ExpressionPtr a(
                 new AssignmentExpression(getScope(), getLocation(),
-                                         KindOfAssignmentExpression,
                                          var, val, ref));
               rep->addElement(a);
               k++;
@@ -647,18 +639,15 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
               }
             } else {
               ExpressionListPtr unset_list
-                (new ExpressionList(getScope(), getLocation(),
-                                    KindOfExpressionList));
+                (new ExpressionList(getScope(), getLocation()));
 
               SimpleVariablePtr rv(
-                new SimpleVariable(getScope(), getLocation(),
-                                   KindOfSimpleVariable, root_name));
+                new SimpleVariable(getScope(), getLocation(), root_name));
               rv->updateSymbol(SimpleVariablePtr());
               unset_list->addElement(rv);
 
               ExpressionPtr unset(
                 new UnaryOpExpression(getScope(), getLocation(),
-                                      KindOfUnaryOpExpression,
                                       unset_list, T_UNSET, true));
               rep->addElement(unset);
             }
@@ -889,7 +878,6 @@ ExpressionPtr SimpleFunctionCall::postOptimize(AnalysisResultConstPtr ar) {
     }
     if (!m_params->getCount()) {
       ExpressionPtr rep(new UnaryOpExpression(getScope(), getLocation(),
-                                              KindOfUnaryOpExpression,
                                               ExpressionPtr(), T_ARRAY, true));
       return replaceValue(rep);
     }
@@ -2247,8 +2235,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
           ExpressionListPtr p2;
           if (testOnly) {
             p2 = ExpressionListPtr(
-              new ExpressionList(call->getScope(), call->getLocation(),
-                                 Expression::KindOfExpressionList));
+              new ExpressionList(call->getScope(), call->getLocation()));
             p2->addElement(call->makeScalarExpression(ar, v));
             name = "function_exists";
           } else {
@@ -2259,7 +2246,6 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
           }
           SimpleFunctionCallPtr rep(
             NewSimpleFunctionCall(call->getScope(), call->getLocation(),
-                                  Expression::KindOfSimpleFunctionCall,
                                   name, p2, ExpressionPtr()));
           return rep;
         }
@@ -2343,8 +2329,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
         ExpressionListPtr p2;
         if (testOnly) {
           p2 = ExpressionListPtr(
-            new ExpressionList(call->getScope(), call->getLocation(),
-                               Expression::KindOfExpressionList));
+            new ExpressionList(call->getScope(), call->getLocation()));
           p2->addElement(cl);
           cl.reset();
           smethod = "class_exists";
@@ -2356,7 +2341,6 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
         }
         SimpleFunctionCallPtr rep(
           NewSimpleFunctionCall(call->getScope(), call->getLocation(),
-                                Expression::KindOfSimpleFunctionCall,
                                 smethod, p2, cl));
         return rep;
       }

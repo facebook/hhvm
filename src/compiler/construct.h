@@ -69,8 +69,9 @@ public:
  */
 class Construct : public boost::enable_shared_from_this<Construct>,
                   public JSON::ISerializable {
-public:
+protected:
   Construct(BlockScopePtr scope, LocationPtr loc);
+public:
   virtual ~Construct() {}
 
   enum Effect {

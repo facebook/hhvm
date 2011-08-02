@@ -29,7 +29,7 @@ using namespace boost;
 CaseStatement::CaseStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr condition, StatementPtr stmt)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(CaseStatement)),
     m_condition(condition), m_stmt(stmt) {
 }
 

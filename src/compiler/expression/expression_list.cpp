@@ -32,8 +32,10 @@ using namespace boost;
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
 
-ExpressionList::ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS, ListKind kind)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES), m_outputCount(-1),
+ExpressionList::ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,
+                               ListKind kind)
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ExpressionList)),
+    m_outputCount(-1),
     m_arrayElements(false), m_kind(kind) {
 }
 

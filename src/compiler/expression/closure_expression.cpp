@@ -35,13 +35,12 @@ TypePtr ClosureExpression::s_ClosureType =
 ClosureExpression::ClosureExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS, FunctionStatementPtr func,
  ExpressionListPtr vars)
-    : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+    : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ClosureExpression)),
       m_func(func) {
 
   if (vars) {
     m_vars = ExpressionListPtr
-      (new ExpressionList(vars->getScope(), vars->getLocation(),
-                          KindOfExpressionList));
+      (new ExpressionList(vars->getScope(), vars->getLocation()));
     // push the vars in reverse order, not retaining duplicates
     set<string> seenBefore;
     for (int i = vars->getCount() - 1; i >= 0; i--) {
@@ -56,8 +55,7 @@ ClosureExpression::ClosureExpression
 
     if (m_vars) {
       m_values = ExpressionListPtr
-        (new ExpressionList(m_vars->getScope(), m_vars->getLocation(),
-                            KindOfExpressionList));
+        (new ExpressionList(m_vars->getScope(), m_vars->getLocation()));
       for (int i = 0; i < m_vars->getCount(); i++) {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
@@ -65,7 +63,6 @@ ClosureExpression::ClosureExpression
 
         SimpleVariablePtr var(new SimpleVariable(param->getScope(),
                                                  param->getLocation(),
-                                                 KindOfSimpleVariable,
                                                  name));
         if (param->isRef()) {
           var->setContext(RefValue);

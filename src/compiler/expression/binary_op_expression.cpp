@@ -41,7 +41,7 @@ using namespace boost;
 BinaryOpExpression::BinaryOpExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr exp1, ExpressionPtr exp2, int op)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(BinaryOpExpression)),
     m_exp1(exp1), m_exp2(exp2), m_op(op), m_assign(false), m_canThrow(false) {
   switch (m_op) {
   case T_PLUS_EQUAL:
@@ -368,13 +368,11 @@ static ExpressionPtr makeIsNull(AnalysisResultConstPtr ar,
   /* Replace "$x === null" with an is_null call; this requires slightly
    * less work at runtime. */
   ExpressionListPtr expList =
-    ExpressionListPtr(new ExpressionList(exp->getScope(), loc,
-      Expression::KindOfExpressionList));
+    ExpressionListPtr(new ExpressionList(exp->getScope(), loc));
   expList->insertElement(exp);
 
   SimpleFunctionCallPtr call
     (new SimpleFunctionCall(exp->getScope(), loc,
-                            Expression::KindOfSimpleFunctionCall,
                             "is_null", expList, ExpressionPtr()));
 
   call->setValid();
@@ -385,7 +383,6 @@ static ExpressionPtr makeIsNull(AnalysisResultConstPtr ar,
   if (invert) {
     result = ExpressionPtr(new UnaryOpExpression(
                              exp->getScope(), loc,
-                             Expression::KindOfUnaryOpExpression,
                              result, '!', true));
   }
 
@@ -416,7 +413,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
                                m_op == T_BOOLEAN_AND) ? m_exp2 : m_exp1;
           rep = ExpressionPtr(
               new UnaryOpExpression(
-                getScope(), getLocation(), KindOfUnaryOpExpression,
+                getScope(), getLocation(),
                 rep, T_BOOL_CAST, true));
           rep->setActualType(Type::Boolean);
           return replaceValue(rep);
@@ -531,13 +528,13 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
         ExpressionPtr rep = useFirst ? m_exp1 : m_exp2;
         rep = ExpressionPtr(
           new UnaryOpExpression(
-            getScope(), getLocation(), KindOfUnaryOpExpression,
+            getScope(), getLocation(),
             rep, T_BOOL_CAST, true));
         rep->setActualType(Type::Boolean);
         if (!useFirst) {
           ExpressionListPtr l(
             new ExpressionList(
-              getScope(), getLocation(), KindOfExpressionList,
+              getScope(), getLocation(),
               ExpressionList::ListKindComma));
           l->addElement(m_exp1);
           l->addElement(rep);

@@ -40,7 +40,8 @@ using namespace boost;
 
 StatementList::StatementList
 (STATEMENT_CONSTRUCTOR_PARAMETERS)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES), m_included(false) {
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(StatementList)),
+    m_included(false) {
 }
 
 StatementPtr StatementList::clone() {
@@ -246,24 +247,20 @@ bool StatementList::mergeConcatAssign() {
           exp2 = binaryOpExp->getExp2();
           exp1 = BinaryOpExpressionPtr
             (new BinaryOpExpression(getScope(), getLocation(),
-                                    Expression::KindOfBinaryOpExpression,
                                     exp1, exp2, '.'));
         }
         if (isAssignment) {
           exp = AssignmentExpressionPtr
             (new AssignmentExpression(exp->getScope(), exp->getLocation(),
-                                      Expression::KindOfAssignmentExpression,
                                       var, exp1,
                                       false));
         } else {
           exp = BinaryOpExpressionPtr
             (new BinaryOpExpression(getScope(), getLocation(),
-                                    Expression::KindOfBinaryOpExpression,
                                     var, exp1, T_CONCAT_EQUAL));
         }
         expStmt = ExpStatementPtr
-          (new ExpStatement(getScope(), getLocation(),
-                            Statement::KindOfExpStatement, exp));
+          (new ExpStatement(getScope(), getLocation(), exp));
 
         m_stmts[i - length] = expStmt;
         for (j = i - (length - 1); i > j; i--) removeElement(j);

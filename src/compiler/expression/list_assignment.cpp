@@ -115,7 +115,7 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
 ListAssignment::ListAssignment
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionListPtr variables, ExpressionPtr array)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ListAssignment)),
     m_variables(variables), m_array(array), m_rhsKind(Regular) {
   setLValue();
 

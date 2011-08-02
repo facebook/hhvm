@@ -93,14 +93,13 @@ using namespace std;
 using namespace boost;
 
 #define NEW_EXP0(cls)                                           \
-  cls##Ptr(new cls(BlockScopePtr(), getLocation(), Expression::KindOf##cls))
+  cls##Ptr(new cls(BlockScopePtr(), getLocation()))
 #define NEW_EXP(cls, e...)                                      \
-  cls##Ptr(new cls(BlockScopePtr(), getLocation(), \
-                   Expression::KindOf##cls, ##e))
+  cls##Ptr(new cls(BlockScopePtr(), getLocation(), ##e))
 #define NEW_STMT0(cls)                                          \
-  cls##Ptr(new cls(BlockScopePtr(), getLocation(), Statement::KindOf##cls))
+  cls##Ptr(new cls(BlockScopePtr(), getLocation()))
 #define NEW_STMT(cls, e...)                                     \
-  cls##Ptr(new cls(BlockScopePtr(), getLocation(), Statement::KindOf##cls, ##e))
+  cls##Ptr(new cls(BlockScopePtr(), getLocation(), ##e))
 
 using namespace HPHP::Compiler;
 
@@ -123,8 +122,9 @@ SimpleFunctionCallPtr NewSimpleFunctionCall(
   const std::string &name, ExpressionListPtr params,
   ExpressionPtr cls) {
   return SimpleFunctionCallPtr(
-    new RealSimpleFunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES,
-                               name, params, cls));
+    new RealSimpleFunctionCall(
+      EXPRESSION_CONSTRUCTOR_DERIVED_PARAMETER_VALUES,
+      name, params, cls));
 }
 
 namespace Compiler {
@@ -348,8 +348,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
 
     SimpleFunctionCallPtr call
       (new RealSimpleFunctionCall
-       (BlockScopePtr(), getLocation(),
-        Expression::KindOfSimpleFunctionCall, name->text(),
+       (BlockScopePtr(), getLocation(), name->text(),
         dynamic_pointer_cast<ExpressionList>(params->exp), clsExp));
     out->exp = call;
 

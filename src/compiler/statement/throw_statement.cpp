@@ -25,7 +25,8 @@ using namespace boost;
 
 ThrowStatement::ThrowStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES), m_exp(exp) {
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ThrowStatement)),
+    m_exp(exp) {
 }
 
 StatementPtr ThrowStatement::clone() {

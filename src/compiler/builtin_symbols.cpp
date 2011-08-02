@@ -204,8 +204,7 @@ void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
     while (*p) {
       int flags = (int)(int64)(*p++);
       ModifierExpressionPtr modifiers(
-        new ModifierExpression(BlockScopePtr(), LocationPtr(),
-                               Expression::KindOfModifierExpression));
+        new ModifierExpression(BlockScopePtr(), LocationPtr()));
       if (flags & ClassInfo::IsProtected) {
         modifiers->add(T_PROTECTED);
       } else if (flags & ClassInfo::IsPrivate) {

@@ -45,10 +45,10 @@ using namespace boost;
 // constructors/destructors
 
 FunctionCall::FunctionCall
-(EXPRESSION_CONSTRUCTOR_PARAMETERS,
+(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS,
  ExpressionPtr nameExp, const std::string &name, ExpressionListPtr params,
  ExpressionPtr classExp)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+  : Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETER_VALUES),
     StaticClassName(classExp), m_nameExp(nameExp),
     m_ciTemp(-1), m_params(params), m_valid(false),
     m_extraArg(0), m_variableArgument(false), m_voidReturn(false),
@@ -268,8 +268,7 @@ static ExpressionPtr cloneForInlineRecur(InlineCloneInfo &info,
         name = prefix + sv->getName();
       }
       SimpleVariablePtr rep(new SimpleVariable(
-                              exp->getScope(), exp->getLocation(),
-                              exp->getKindOf(), name));
+                              exp->getScope(), exp->getLocation(), name));
       rep->copyContext(sv);
       rep->updateSymbol(SimpleVariablePtr());
       rep->getSymbol()->setHidden();
@@ -407,7 +406,6 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
   InlineCloneInfo info(m_funcScope);
   info.elist = ExpressionListPtr(new ExpressionList(
                                    getScope(), getLocation(),
-                                   KindOfExpressionList,
                                    ExpressionList::ListKindWrapped));
   std::ostringstream oss;
   oss << fs->nextInlineIndex() << "_" << m_name << "_";
@@ -419,7 +417,6 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
       SimpleVariablePtr var
         (new SimpleVariable(getScope(),
                             obj->getLocation(),
-                            KindOfSimpleVariable,
                             prefix + "this"));
       var->updateSymbol(SimpleVariablePtr());
       var->getSymbol()->setHidden();
@@ -428,7 +425,6 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
       AssignmentExpressionPtr ae
         (new AssignmentExpression(getScope(),
                                   obj->getLocation(),
-                                  KindOfAssignmentExpression,
                                   var, obj, false));
       info.elist->addElement(ae);
       info.sepm[var->getName()] = var;
@@ -464,7 +460,6 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
     SimpleVariablePtr var
       (new SimpleVariable(getScope(),
                           (i < nAct ? arg.get() : this)->getLocation(),
-                          KindOfSimpleVariable,
                           prefix + param->getName()));
     var->updateSymbol(SimpleVariablePtr());
     var->getSymbol()->setHidden();
@@ -473,7 +468,7 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
     bool ref = m_funcScope->isRefParam(i);
     AssignmentExpressionPtr ae
       (new AssignmentExpression(getScope(),
-                                arg->getLocation(), KindOfAssignmentExpression,
+                                arg->getLocation(),
                                 var, arg, ref));
     info.elist->addElement(ae);
     if (i < nAct && (ref || !arg->isScalar())) {
@@ -488,7 +483,7 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
 
   if (info.sepm.size()) {
     ExpressionListPtr unset_list
-      (new ExpressionList(getScope(), getLocation(), KindOfExpressionList));
+      (new ExpressionList(getScope(), getLocation()));
 
     for (StringToExpressionPtrMap::iterator it = info.sepm.begin(),
            end = info.sepm.end(); it != end; ++it) {
@@ -498,7 +493,7 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
     }
 
     ExpressionPtr unset(
-      new UnaryOpExpression(getScope(), getLocation(), KindOfUnaryOpExpression,
+      new UnaryOpExpression(getScope(), getLocation(),
                             unset_list, T_UNSET, true));
     i = info.elist->getCount();
     ExpressionPtr ret = (*info.elist)[--i];
@@ -506,7 +501,7 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
       info.elist->insertElement(unset, i);
     } else {
       ExpressionListPtr result_list
-        (new ExpressionList(getScope(), getLocation(), KindOfExpressionList,
+        (new ExpressionList(getScope(), getLocation(),
                             ExpressionList::ListKindLeft));
       result_list->addElement(ret);
       result_list->addElement(unset);
@@ -726,14 +721,12 @@ void FunctionCall::optimizeArgArray(AnalysisResultPtr ar) {
   }
   if (isScalar) {
     ExpressionPtr argArrayPairs =
-      ExpressionListPtr(new ExpressionList(getScope(), getLocation(),
-                                           Expression::KindOfExpressionList));
+      ExpressionListPtr(new ExpressionList(getScope(), getLocation()));
     for (int i = iMax; i < paramCount; i++) {
       ExpressionPtr param = (*m_params)[i];
       argArrayPairs->addElement(
         ArrayPairExpressionPtr(new ArrayPairExpression(
                                  getScope(), param->getLocation(),
-                                 Expression::KindOfArrayPairExpression,
                                  ExpressionPtr(), param, false)));
     }
     string text;

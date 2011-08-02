@@ -44,7 +44,7 @@ ClassStatement::ClassStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  int type, const string &name, const string &parent,
  ExpressionListPtr base, const string &docComment, StatementListPtr stmt)
-  : InterfaceStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES,
+  : InterfaceStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ClassStatement),
                        name, base, docComment, stmt),
     m_type(type), m_ignored(false) {
   m_parent = Util::toLower(parent);

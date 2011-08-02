@@ -38,7 +38,9 @@ using namespace boost;
 
 IncludeExpression::IncludeExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp, int op)
-  : UnaryOpExpression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES, exp, op, true),
+  : UnaryOpExpression(
+      EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(IncludeExpression),
+      exp, op, true),
     m_documentRoot(false), m_privateScope(false), m_depsSet(false) {
 }
 

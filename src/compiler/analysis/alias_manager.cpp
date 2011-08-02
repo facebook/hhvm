@@ -251,7 +251,6 @@ void AliasManager::clear() {
 void AliasManager::beginScope() {
   if (m_noAdd) return;
   ExpressionPtr e(new ScalarExpression(BlockScopePtr(), LocationPtr(),
-                                       Expression::KindOfScalarExpression,
                                        T_STRING, string("begin")));
   m_accessList.add(e);
   m_stack.push_back(m_accessList.size());
@@ -293,7 +292,6 @@ void AliasManager::endScope() {
     bm.import(cs.m_exprs);
     ExpressionPtr
       e(new ScalarExpression(BlockScopePtr(), LocationPtr(),
-                             Expression::KindOfScalarExpression,
                              T_STRING, string("end")));
     bm.add(e);
     m_stack.pop_back();
@@ -1241,7 +1239,6 @@ ExpressionPtr AliasManager::canonicalizeNode(
                 b->setReplacement(
                   ExpressionPtr(new BinaryOpExpression(
                                   b->getScope(), b->getLocation(),
-                                  Expression::KindOfBinaryOpExpression,
                                   lhs, rhs, getOpForAssignmentOp(b->getOp()))));
                 m_replaced++;
               }
@@ -1258,12 +1255,10 @@ ExpressionPtr AliasManager::canonicalizeNode(
                 if (u->getFront()) {
                   ExpressionPtr inc
                     (new ScalarExpression(u->getScope(), u->getLocation(),
-                                          Expression::KindOfScalarExpression,
                                           T_LNUMBER, string("1")));
 
                   val = ExpressionPtr(
                     new BinaryOpExpression(u->getScope(), u->getLocation(),
-                                           Expression::KindOfBinaryOpExpression,
                                            val, inc,
                                            u->getOp() == T_INC ? '+' : '-'));
 
@@ -1378,7 +1373,6 @@ ExpressionPtr AliasManager::canonicalizeNode(
                               ExpressionListPtr el(
                                 new ExpressionList(
                                   a->getScope(), a->getLocation(),
-                                  Expression::KindOfExpressionList,
                                   ExpressionList::ListKindWrapped));
                               a = spc(AssignmentExpression, a->clone());
                               el->addElement(a);
@@ -1494,7 +1488,6 @@ ExpressionPtr AliasManager::canonicalizeNode(
             if (m_variables->getAttribute(VariableTable::ContainsCompact)) {
               rep = ExpressionPtr(
                 new UnaryOpExpression(e->getScope(), e->getLocation(),
-                                      Expression::KindOfUnaryOpExpression,
                                       rep, T_UNSET_CAST, true));
             }
             return e->replaceValue(canonicalizeRecurNonNull(rep));
@@ -1580,7 +1573,6 @@ ExpressionPtr AliasManager::canonicalizeNode(
           canonicalizeNonNull(ExpressionPtr(
                                 new BinaryOpExpression(
                                   bop->getScope(), bop->getLocation(),
-                                  Expression::KindOfBinaryOpExpression,
                                   lhs, rhs, rop))));
       }
       if (rop) {
@@ -1597,7 +1589,6 @@ ExpressionPtr AliasManager::canonicalizeNode(
                 ExpressionPtr op1 = bop->getExp2();
                 ExpressionPtr rhs(
                   (new BinaryOpExpression(e->getScope(), e->getLocation(),
-                                          Expression::KindOfBinaryOpExpression,
                                           op0->clone(), op1->clone(), rop)));
 
                 lhs = lhs->clone();
@@ -1606,7 +1597,6 @@ ExpressionPtr AliasManager::canonicalizeNode(
                   canonicalizeRecurNonNull(
                     ExpressionPtr(new AssignmentExpression(
                                     e->getScope(), e->getLocation(),
-                                    Expression::KindOfAssignmentExpression,
                                     lhs, rhs, false))));
               }
               alt = spc(AssignmentExpression,alt)->getVariable();
@@ -1648,12 +1638,10 @@ ExpressionPtr AliasManager::canonicalizeNode(
                     b2->setContext(Expression::DeadStore);
                     ExpressionPtr r(new BinaryOpExpression(
                                       bop->getScope(), bop->getLocation(),
-                                      Expression::KindOfBinaryOpExpression,
                                       op0->clone(), bop->getExp2(),
                                       rop));
                     ExpressionPtr b(new BinaryOpExpression(
                                       bop->getScope(), bop->getLocation(),
-                                      Expression::KindOfBinaryOpExpression,
                                       lhs, r, bop->getOp()));
                     return e->replaceValue(canonicalizeRecurNonNull(b));
                   }
@@ -1993,7 +1981,6 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
         endInExpression(es);
         kid->computeLocalExprAltered();
         ExpressionPtr e(new ScalarExpression(BlockScopePtr(), LocationPtr(),
-                                             Expression::KindOfScalarExpression,
                                              T_STRING, string("io")));
         add(m_accessList, e);
       }

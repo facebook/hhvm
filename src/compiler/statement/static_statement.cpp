@@ -35,7 +35,8 @@ using namespace boost;
 
 StaticStatement::StaticStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES), m_exp(exp) {
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(StaticStatement)),
+    m_exp(exp) {
 }
 
 StatementPtr StaticStatement::clone() {
@@ -63,7 +64,6 @@ void StaticStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
         variable = dynamic_pointer_cast<SimpleVariable>(exp);
         exp = AssignmentExpressionPtr
           (new AssignmentExpression(exp->getScope(), exp->getLocation(),
-                                    Expression::KindOfAssignmentExpression,
                                     variable,
                                     CONSTANT("null"),
                                     false));

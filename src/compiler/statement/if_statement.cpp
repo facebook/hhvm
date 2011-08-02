@@ -31,7 +31,7 @@ using namespace boost;
 
 IfStatement::IfStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, StatementListPtr stmts)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES), 
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(IfStatement)),
   m_stmts(stmts), m_hasCondCSE(false) {
 }
 

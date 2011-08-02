@@ -39,7 +39,7 @@ using namespace boost;
 
 ConstantExpression::ConstantExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS, const string &name)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ConstantExpression)),
     m_name(name), m_valid(false), m_dynamic(false), m_visited(false) {
 }
 

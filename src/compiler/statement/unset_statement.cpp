@@ -35,7 +35,8 @@ using namespace boost;
 
 UnsetStatement::UnsetStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES), m_exp(exp) {
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(UnsetStatement)),
+    m_exp(exp) {
   exp->setContext(Expression::UnsetContext);
 }
 

@@ -56,11 +56,24 @@ using namespace boost;
 // constructors/destructors
 
 MethodStatement::MethodStatement
+(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS,
+ ModifierExpressionPtr modifiers, bool ref, const string &name,
+ ExpressionListPtr params, StatementListPtr stmt, int attr,
+ const string &docComment, bool method /* = true */)
+  : Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES),
+    m_method(method), m_modifiers(modifiers),
+    m_ref(ref), m_originalName(name),
+    m_params(params), m_stmt(stmt), m_attribute(attr),
+    m_docComment(docComment), m_cppLength(-1) {
+  m_name = Util::toLower(name);
+}
+
+MethodStatement::MethodStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ModifierExpressionPtr modifiers, bool ref, const string &name,
  ExpressionListPtr params, StatementListPtr stmt, int attr,
  const string &docComment, bool method /* = true */)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(MethodStatement)),
     m_method(method), m_modifiers(modifiers),
     m_ref(ref), m_originalName(name),
     m_params(params), m_stmt(stmt), m_attribute(attr),
@@ -348,8 +361,7 @@ public:
   ExpressionPtr gotoVar(StatementPtr s) {
     SimpleVariablePtr sv(
       new SimpleVariable(
-        s->getScope(), s->getLocation(),
-        Expression::KindOfSimpleVariable, "0_gtid"));
+        s->getScope(), s->getLocation(), "0_gtid"));
     sv->updateSymbol(SimpleVariablePtr());
     sv->getSymbol()->setHidden();
     return sv;
@@ -357,17 +369,15 @@ public:
 
   StatementPtr replaceGoto(GotoStatementRawPtr goto_stmt, int id) {
     StatementListPtr sl(new StatementList(
-                          goto_stmt->getScope(), goto_stmt->getLocation(),
-                          Statement::KindOfStatementList));
+                          goto_stmt->getScope(), goto_stmt->getLocation()));
     AssignmentExpressionPtr ae(
       new AssignmentExpression(
         goto_stmt->getScope(), goto_stmt->getLocation(),
-        Expression::KindOfAssignmentExpression, gotoVar(goto_stmt),
+        gotoVar(goto_stmt),
         goto_stmt->makeScalarExpression(m_ar, Variant(id > 0 ? id : 0)),
         false));
     ExpStatementPtr exp(
-      new ExpStatement(goto_stmt->getScope(), goto_stmt->getLocation(),
-                       Statement::KindOfExpStatement, ae));
+      new ExpStatement(goto_stmt->getScope(), goto_stmt->getLocation(), ae));
     sl->addElement(exp);
     sl->addElement(goto_stmt);
     return sl;
@@ -409,55 +419,46 @@ public:
         bool doCatch = catches->hasReachableLabel();
         if (!doTry && !doCatch) break;
         StatementListPtr sl(new StatementList(
-                              s->getScope(), s->getLocation(),
-                              Statement::KindOfStatementList));
+                              s->getScope(), s->getLocation()));
         StatementListPtr newBody(new StatementList(
-                                   s->getScope(), s->getLocation(),
-                                   Statement::KindOfStatementList));
+                                   s->getScope(), s->getLocation()));
         if (doTry) {
           StatementListPtr cases(new StatementList(
-                                   s->getScope(), s->getLocation(),
-                                   Statement::KindOfStatementList));
+                                   s->getScope(), s->getLocation()));
           for (map<string,int>::iterator it = ti.targets.begin(),
                  end = ti.targets.end(); it != end; ++it) {
             StatementPtr g(new GotoStatement(
-                             s->getScope(), s->getLocation(),
-                             Statement::KindOfGotoStatement, it->first));
+                             s->getScope(), s->getLocation(), it->first));
             if (it->second < 0) {
               g = replaceGoto(static_pointer_cast<GotoStatement>(g), 0);
             }
             CaseStatementPtr c(new CaseStatement(
                                  s->getScope(), s->getLocation(),
-                                 Statement::KindOfCaseStatement,
                                  s->makeScalarExpression(m_ar, abs(it->second)),
                                  g));
             cases->addElement(c);
           }
           SwitchStatementPtr sw(new SwitchStatement(
                                   s->getScope(), s->getLocation(),
-                                  Statement::KindOfSwitchStatement,
                                   gotoVar(s), cases));
 
           newBody->addElement(sw);
 
           LabelStatementPtr lab(new LabelStatement(
                                   s->getScope(), s->getLocation(),
-                                  Statement::KindOfLabelStatement,
                                   lexical_cast<string>(ti.label)));
           sl->addElement(lab);
         }
         newBody->addElement(t->getBody());
         sl->addElement(StatementPtr(new TryStatement(
                                       s->getScope(), s->getLocation(),
-                                      Statement::KindOfTryStatement,
                                       newBody, catches)));
         if (doCatch) {
           if (!ti.label) ti.label = ++id;
           string afterLab = lexical_cast<string>(ti.label) + "_a";
           newBody->addElement(StatementPtr(
                                 new GotoStatement(
-                                  s->getScope(), s->getLocation(),
-                                  Statement::KindOfGotoStatement, afterLab)));
+                                  s->getScope(), s->getLocation(), afterLab)));
 
           for (int i = 0, n = catches->getCount(); i < n; i++) {
             CatchStatementPtr c =
@@ -467,31 +468,26 @@ public:
               lexical_cast<string>(i);
             c->setStmt(StatementPtr(
                          new GotoStatement(
-                           c->getScope(), c->getLocation(),
-                           Statement::KindOfGotoStatement, lab)));
+                           c->getScope(), c->getLocation(), lab)));
             StatementListPtr newBody(new StatementList(
-                                       body->getScope(), body->getLocation(),
-                                       Statement::KindOfStatementList));
+                                       body->getScope(), body->getLocation()));
             newBody->addElement(StatementPtr(
                                   new LabelStatement(
                                     body->getScope(), body->getLocation(),
-                                    Statement::KindOfLabelStatement,
                                     lab)));
             newBody->addElement(body);
             if (i + 1 < n) {
               newBody->addElement(
                 StatementPtr(new GotoStatement(
                                body->getScope(), body->getLocation(),
-                               Statement::KindOfGotoStatement, afterLab)));
+                               afterLab)));
             }
             sl->addElement(newBody);
           }
 
           sl->addElement(StatementPtr(
                            new LabelStatement(
-                             s->getScope(), s->getLocation(),
-                             Statement::KindOfLabelStatement,
-                             afterLab)));
+                             s->getScope(), s->getLocation(), afterLab)));
         }
         return sl;
         break;
@@ -689,8 +685,8 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
         ExpressionPtr constant =
           makeConstant(ar, funcScope->inPseudoMain() ? "true" : "null");
         ReturnStatementPtr returnStmt =
-          ReturnStatementPtr(new ReturnStatement(getScope(), getLocation(),
-            Statement::KindOfReturnStatement, constant));
+          ReturnStatementPtr(
+            new ReturnStatement(getScope(), getLocation(), constant));
         m_stmt->addElement(returnStmt);
       }
     }

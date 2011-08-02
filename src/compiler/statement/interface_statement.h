@@ -28,6 +28,10 @@ DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(InterfaceStatement);
 
 class InterfaceStatement : public Statement, public IParseHandler {
+protected:
+  InterfaceStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS,
+                     const std::string &name, ExpressionListPtr base,
+                     const std::string &docComment, StatementListPtr stmt);
 public:
   InterfaceStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                      const std::string &name, ExpressionListPtr base,

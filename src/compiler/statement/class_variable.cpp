@@ -35,7 +35,7 @@ using namespace boost;
 ClassVariable::ClassVariable
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ModifierExpressionPtr modifiers, ExpressionListPtr declaration)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ClassVariable)),
     m_modifiers(modifiers), m_declaration(declaration) {
 }
 

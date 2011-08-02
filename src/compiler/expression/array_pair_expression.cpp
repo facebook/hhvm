@@ -29,7 +29,7 @@ using namespace std;
 ArrayPairExpression::ArrayPairExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr name, ExpressionPtr value, bool ref)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ArrayPairExpression)),
     m_name(name), m_value(value), m_ref(ref) {
   if (m_ref) {
     m_value->setContext(Expression::RefValue);

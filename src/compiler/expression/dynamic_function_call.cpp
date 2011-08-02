@@ -35,7 +35,7 @@ using namespace boost;
 DynamicFunctionCall::DynamicFunctionCall
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr name, ExpressionListPtr params, ExpressionPtr cls)
-  : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES,
+  : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(DynamicFunctionCall),
                  name, "", params, cls) {
 }
 
@@ -77,7 +77,6 @@ ExpressionPtr DynamicFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
       }
       return ExpressionPtr(NewSimpleFunctionCall(
         getScope(), getLocation(),
-        Expression::KindOfSimpleFunctionCall,
         name, m_params, cls));
     }
   }

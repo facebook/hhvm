@@ -28,7 +28,7 @@ using namespace boost;
 DoStatement::DoStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  StatementPtr stmt, ExpressionPtr condition)
-  : LoopStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : LoopStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(DoStatement)),
     m_stmt(stmt), m_condition(condition) {
 }
 

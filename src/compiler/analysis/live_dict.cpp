@@ -638,9 +638,8 @@ public:
       StatementPtr sub = (*sl)[ix];
       e->setLocation(sub->getLocation());
       e->setBlockScope(sub->getScope());
-      ExpStatementPtr exp(new ExpStatement(
-                            sub->getScope(), sub->getLocation(),
-                            Statement::KindOfExpStatement, e));
+      ExpStatementPtr exp(
+          new ExpStatement(sub->getScope(), sub->getLocation(), e));
       sl->insertElement(exp, ix);
     }
   }

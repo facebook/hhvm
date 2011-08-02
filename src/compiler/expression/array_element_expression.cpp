@@ -36,7 +36,7 @@ using namespace boost;
 ArrayElementExpression::ArrayElementExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr variable, ExpressionPtr offset)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ArrayElementExpression)),
     LocalEffectsContainer(AccessorEffect),
     m_variable(variable), m_offset(offset), m_global(false),
     m_dynamicGlobal(false) {
@@ -146,7 +146,7 @@ bool ArrayElementExpression::appendClass(ExpressionPtr cls) {
     m_variable = StaticMemberExpressionPtr
       (new StaticMemberExpression(
         m_variable->getScope(), m_variable->getLocation(),
-        Expression::KindOfStaticMemberExpression, cls, m_variable));
+        cls, m_variable));
     m_global = m_dynamicGlobal = false;
     m_globalName.clear();
     return true;

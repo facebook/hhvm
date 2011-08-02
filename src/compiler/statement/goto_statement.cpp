@@ -26,7 +26,7 @@ using namespace boost;
 
 GotoStatement::GotoStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, const std::string &label)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(GotoStatement)),
     m_label(label), m_error((ParserBase::GotoError)0), m_id(0) {
 }
 

@@ -26,7 +26,7 @@ using namespace boost;
 
 ModifierExpression::ModifierExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES) {
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ModifierExpression)) {
 }
 
 ExpressionPtr ModifierExpression::clone() {

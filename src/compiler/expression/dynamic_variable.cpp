@@ -29,7 +29,8 @@ using namespace boost;
 
 DynamicVariable::DynamicVariable
 (EXPRESSION_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES), m_exp(exp) {
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(DynamicVariable)),
+    m_exp(exp) {
 }
 
 ExpressionPtr DynamicVariable::clone() {

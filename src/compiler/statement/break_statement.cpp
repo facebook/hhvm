@@ -25,8 +25,16 @@ using namespace boost;
 // constructors/destructors
 
 BreakStatement::BreakStatement
+(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS, ExpressionPtr exp)
+  : Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES),
+    m_exp(exp) {
+  m_name = "break";
+}
+
+BreakStatement::BreakStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES), m_exp(exp) {
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(BreakStatement)),
+    m_exp(exp) {
   m_name = "break";
 }
 

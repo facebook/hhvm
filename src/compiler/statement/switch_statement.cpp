@@ -35,7 +35,7 @@ using namespace boost;
 
 SwitchStatement::SwitchStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp, StatementListPtr cases)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(SwitchStatement)),
     m_exp(exp), m_cases(cases) {
   if (m_cases && m_exp->is(Expression::KindOfSimpleVariable)) {
     for (int i = m_cases->getCount(); i--; ) {

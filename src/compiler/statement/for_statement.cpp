@@ -38,7 +38,7 @@ static void setListKind(ExpressionPtr e)
 ForStatement::ForStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr exp1, ExpressionPtr exp2, ExpressionPtr exp3, StatementPtr stmt)
-  : LoopStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : LoopStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ForStatement)),
     m_exp1(exp1), m_exp2(exp2), m_exp3(exp3), m_stmt(stmt) {
 
   setListKind(m_exp1);

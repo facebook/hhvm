@@ -27,6 +27,11 @@ DECLARE_BOOST_TYPES(UnaryOpExpression);
 
 class UnaryOpExpression : public Expression,
                           public LocalEffectsContainer {
+private:
+  void ctorInit();
+protected:
+  UnaryOpExpression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS,
+                    ExpressionPtr exp, int op, bool front);
 public:
   UnaryOpExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                     ExpressionPtr exp, int op, bool front);

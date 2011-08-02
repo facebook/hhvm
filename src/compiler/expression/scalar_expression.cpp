@@ -44,14 +44,14 @@ using namespace boost;
 ScalarExpression::ScalarExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  int type, const std::string &value, bool quoted /* = false */)
-    : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+    : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ScalarExpression)),
       m_type(type), m_value(value), m_originalValue(value), m_quoted(quoted) {
 }
 
 ScalarExpression::ScalarExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  CVarRef value, bool quoted /* = true */)
-    : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+    : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ScalarExpression)),
       m_quoted(quoted) {
   if (!value.isNull()) {
     String serialized = f_serialize(value);

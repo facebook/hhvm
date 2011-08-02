@@ -29,6 +29,13 @@ DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(MethodStatement);
 
 class MethodStatement : public Statement, public IParseHandler {
+protected:
+  MethodStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS,
+                  ModifierExpressionPtr modifiers, bool ref,
+                  const std::string &name,
+                  ExpressionListPtr params, StatementListPtr stmt, int attr,
+                  const std::string &docComment,
+                  bool method = true);
 public:
   MethodStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                   ModifierExpressionPtr modifiers, bool ref,

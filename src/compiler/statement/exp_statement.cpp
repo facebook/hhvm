@@ -34,7 +34,8 @@ using namespace boost;
 
 ExpStatement::ExpStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES), m_exp(exp) {
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ExpStatement)),
+    m_exp(exp) {
 }
 
 StatementPtr ExpStatement::clone() {
@@ -74,11 +75,9 @@ void ExpStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   }
   ScalarExpressionPtr exp
     (new ScalarExpression(getScope(), assign->getValue()->getLocation(),
-                          Expression::KindOfScalarExpression,
                           T_STRING, file, true));
   IncludeExpressionPtr include
     (new IncludeExpression(getScope(), assign->getLocation(),
-                           Expression::KindOfIncludeExpression,
                            exp, T_INCLUDE_ONCE));
   include->setDocumentRoot(); // autoload always starts from document root
   include->onParse(ar, scope);

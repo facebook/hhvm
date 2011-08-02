@@ -36,9 +36,9 @@ CatchStatement::CatchStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  const std::string &className, const std::string &variable,
  StatementPtr stmt)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
-    m_variable(new SimpleVariable(scope, loc, Expression::KindOfSimpleVariable,
-                                  variable)), m_stmt(stmt), m_valid(true) {
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(CatchStatement)),
+    m_variable(new SimpleVariable(scope, loc, variable)),
+    m_stmt(stmt), m_valid(true) {
   m_variable->setContext(Expression::LValue);
   m_className = Util::toLower(className);
   m_originalClassName = className;

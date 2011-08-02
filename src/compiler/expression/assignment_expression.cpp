@@ -45,7 +45,7 @@ using namespace boost;
 AssignmentExpression::AssignmentExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr variable, ExpressionPtr value, bool ref)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(AssignmentExpression)),
     m_variable(variable), m_value(value), m_ref(ref) {
   m_variable->setContext(Expression::DeepAssignmentLHS);
   m_variable->setContext(Expression::AssignmentLHS);
@@ -208,7 +208,6 @@ ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstPtr ar) {
     if (val != m_value) {
       ExpressionListPtr rep(new ExpressionList(
                               getScope(), getLocation(),
-                              KindOfExpressionList,
                               ExpressionList::ListKindWrapped));
       rep->addElement(m_value);
       m_value = val->clone();
@@ -241,13 +240,13 @@ ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstPtr ar) {
             }
             ExpressionPtr rep(
               new AssignmentExpression(
-                getScope(), getLocation(), KindOfAssignmentExpression,
+                getScope(), getLocation(),
                 m_variable->replaceValue(Clone(ae->getVariable())),
                 makeScalarExpression(ar, v), false));
             if (!isUnused()) {
               ExpressionListPtr el(
                 new ExpressionList(
-                  getScope(), getLocation(), KindOfExpressionList,
+                  getScope(), getLocation(),
                   ExpressionList::ListKindWrapped));
               el->addElement(rep);
               el->addElement(val);

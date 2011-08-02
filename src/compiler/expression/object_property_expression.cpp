@@ -36,7 +36,8 @@ using namespace boost;
 ObjectPropertyExpression::ObjectPropertyExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr object, ExpressionPtr property)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+  : Expression(
+      EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ObjectPropertyExpression)),
     LocalEffectsContainer(AccessorEffect),
     m_object(object), m_property(property), m_propSym(NULL) {
   m_valid = false;

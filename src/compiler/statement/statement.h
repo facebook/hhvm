@@ -19,10 +19,14 @@
 
 #include <compiler/expression/expression.h>
 
-#define STATEMENT_CONSTRUCTOR_PARAMETERS        \
+#define STATEMENT_CONSTRUCTOR_BASE_PARAMETERS                           \
   BlockScopePtr scope, LocationPtr loc, Statement::KindOf kindOf
-#define STATEMENT_CONSTRUCTOR_PARAMETER_VALUES  \
+#define STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES                     \
   scope, loc, kindOf
+#define STATEMENT_CONSTRUCTOR_PARAMETERS                                \
+  BlockScopePtr scope, LocationPtr loc
+#define STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(kindOf)                  \
+  scope, loc, Statement::KindOf##kindOf
 #define DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS                        \
   virtual void analyzeProgramImpl(AnalysisResultPtr ar);                \
   virtual StatementPtr clone();                                         \
@@ -35,8 +39,7 @@
   virtual int getKidCount() const;                                      \
   virtual void setNthKid(int n, ConstructPtr cp)
 #define NULL_STATEMENT()                                                \
-  BlockStatementPtr(new BlockStatement(getScope(), getLocation(), \
-                                       KindOfBlockStatement,      \
+  BlockStatementPtr(new BlockStatement(getScope(), getLocation(),       \
                                        StatementListPtr()))
 
 namespace HPHP {
@@ -83,8 +86,10 @@ public:
   };
   static const char *Names[];
 
+protected:
+  Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS);
+
 public:
-  Statement(STATEMENT_CONSTRUCTOR_PARAMETERS);
 
   /**
    * Type checking without RTTI.

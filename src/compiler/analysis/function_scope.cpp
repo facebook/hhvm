@@ -648,8 +648,7 @@ void FunctionScope::addModifier(int mod) {
   if (!m_modifiers) {
     m_modifiers =
       ModifierExpressionPtr(new ModifierExpression(
-                              shared_from_this(), LocationPtr(),
-                              Expression::KindOfModifierExpression));
+                              shared_from_this(), LocationPtr()));
   }
   m_modifiers->add(mod);
 }

@@ -37,14 +37,13 @@ using namespace boost;
 StaticMemberExpression::StaticMemberExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr classExp, ExpressionPtr exp)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(StaticMemberExpression)),
     StaticClassName(classExp), m_exp(exp), m_valid(false),
     m_dynamicClass(false) {
   if (exp->is(KindOfSimpleVariable)) {
     SimpleVariablePtr s(dynamic_pointer_cast<SimpleVariable>(exp));
     m_exp = ExpressionPtr
       (new ScalarExpression(getScope(), getLocation(),
-                            KindOfScalarExpression,
                             T_STRING, s->getName(), true));
 
   } else {

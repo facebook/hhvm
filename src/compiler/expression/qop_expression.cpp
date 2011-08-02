@@ -27,7 +27,7 @@ using namespace boost;
 QOpExpression::QOpExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr condition, ExpressionPtr expYes, ExpressionPtr expNo)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(QOpExpression)),
     m_condition(condition), m_expYes(expYes), m_expNo(expNo) {
 }
 

@@ -25,7 +25,7 @@ using namespace boost;
 
 LabelStatement::LabelStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, const std::string &label)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(LabelStatement)),
     m_label(label), m_isValid(true) {
 }
 

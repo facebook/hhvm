@@ -21,10 +21,16 @@
 #include <compiler/analysis/type.h>
 #include <compiler/analysis/analysis_result.h>
 
-#define EXPRESSION_CONSTRUCTOR_PARAMETERS       \
+#define EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS                          \
   BlockScopePtr scope, LocationPtr loc, Expression::KindOf kindOf
-#define EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES \
+#define EXPRESSION_CONSTRUCTOR_BASE_PARAMETER_VALUES                    \
   scope, loc, kindOf
+#define EXPRESSION_CONSTRUCTOR_PARAMETERS                               \
+  BlockScopePtr scope, LocationPtr loc
+#define EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(kindOf)                 \
+  scope, loc, Expression::KindOf##kindOf
+#define EXPRESSION_CONSTRUCTOR_DERIVED_PARAMETER_VALUES                 \
+  scope, loc
 #define DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS                       \
   virtual void analyzeProgram(AnalysisResultPtr ar);                    \
   virtual ExpressionPtr clone();                                        \
@@ -133,8 +139,10 @@ public:
     BadPassByRef = 1,
   };
 
+protected:
+  Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS);
+
 public:
-  Expression(EXPRESSION_CONSTRUCTOR_PARAMETERS);
 
   /**
    * Set this expression's context.

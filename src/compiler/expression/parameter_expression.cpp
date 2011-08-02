@@ -35,7 +35,7 @@ ParameterExpression::ParameterExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  const std::string &type, const std::string &name, bool ref,
  ExpressionPtr defaultValue)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ParameterExpression)),
     m_originalType(type), m_name(name), m_ref(ref), m_hasRTTI(false),
     m_defaultValue(defaultValue) {
   m_type = Util::toLower(type);

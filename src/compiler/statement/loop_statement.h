@@ -25,8 +25,9 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(LoopStatement);
 
 class LoopStatement : public Statement {
- public:
-  LoopStatement(STATEMENT_CONSTRUCTOR_PARAMETERS);
+protected:
+  LoopStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS);
+public:
   void clearStringBufs();
   void addStringBuf(const std::string &name);
   void removeStringBuf(const std::string &name);
@@ -34,7 +35,7 @@ class LoopStatement : public Statement {
   void cppDeclareBufs(CodeGenerator &cg, AnalysisResultPtr ar);
   void cppEndBufs(CodeGenerator &cg, AnalysisResultPtr ar);
   bool checkStringBuf(const std::string &name);
- private:
+private:
   std::set<std::string>  m_string_bufs;
   LoopStatementWeakPtr m_outer;
 };

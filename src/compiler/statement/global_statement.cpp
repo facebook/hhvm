@@ -34,7 +34,7 @@ using namespace boost;
 
 GlobalStatement::GlobalStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(GlobalStatement)),
     m_exp(exp) {
 
   set<string> seen;

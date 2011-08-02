@@ -28,7 +28,7 @@ using namespace boost;
 WhileStatement::WhileStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr condition, StatementPtr stmt)
-  : LoopStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : LoopStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(WhileStatement)),
     m_condition(condition), m_stmt(stmt) {
 }
 

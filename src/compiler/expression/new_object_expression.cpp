@@ -33,7 +33,7 @@ using namespace boost;
 NewObjectExpression::NewObjectExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr variable, ExpressionListPtr params)
-  : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES,
+  : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(NewObjectExpression),
                  variable, "", params, variable),
     m_dynamic(false) {
   /*

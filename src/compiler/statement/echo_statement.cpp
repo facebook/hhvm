@@ -26,7 +26,8 @@ using namespace boost;
 
 EchoStatement::EchoStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES), m_exp(exp) {
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(EchoStatement)),
+    m_exp(exp) {
 }
 
 StatementPtr EchoStatement::clone() {

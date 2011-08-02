@@ -40,11 +40,7 @@ using namespace boost;
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
 
-UnaryOpExpression::UnaryOpExpression
-(EXPRESSION_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp, int op, bool front)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    m_exp(exp), m_op(op), m_front(front),
-    m_silencer(-1) {
+inline void UnaryOpExpression::ctorInit() {
   switch (m_op) {
   case T_INC:
   case T_DEC:
@@ -81,6 +77,22 @@ UnaryOpExpression::UnaryOpExpression
   default:
     break;
   }
+}
+
+UnaryOpExpression::UnaryOpExpression
+(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS, ExpressionPtr exp, int op, bool front)
+  : Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETER_VALUES),
+    m_exp(exp), m_op(op), m_front(front),
+    m_silencer(-1) {
+  ctorInit();
+}
+
+UnaryOpExpression::UnaryOpExpression
+(EXPRESSION_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp, int op, bool front)
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(UnaryOpExpression)),
+    m_exp(exp), m_op(op), m_front(front),
+    m_silencer(-1) {
+  ctorInit();
 }
 
 ExpressionPtr UnaryOpExpression::clone() {

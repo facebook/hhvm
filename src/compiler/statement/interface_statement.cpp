@@ -35,10 +35,21 @@ using namespace boost;
 // constructors/destructors
 
 InterfaceStatement::InterfaceStatement
+(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS,
+ const std::string &name, ExpressionListPtr base,
+ const std::string &docComment, StatementListPtr stmt)
+  : Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES),
+    m_originalName(name), m_base(base),
+    m_docComment(docComment), m_stmt(stmt) {
+  m_name = Util::toLower(name);
+  if (m_base) m_base->toLower();
+}
+
+InterfaceStatement::InterfaceStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  const std::string &name, ExpressionListPtr base,
  const std::string &docComment, StatementListPtr stmt)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(InterfaceStatement)),
     m_originalName(name), m_base(base),
     m_docComment(docComment), m_stmt(stmt) {
   m_name = Util::toLower(name);

@@ -33,7 +33,8 @@ using namespace boost;
 
 ClassConstant::ClassConstant
 (STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES), m_exp(exp) {
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ClassConstant)),
+    m_exp(exp) {
 }
 
 StatementPtr ClassConstant::clone() {

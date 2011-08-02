@@ -28,7 +28,7 @@ using namespace boost;
 TryStatement::TryStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  StatementPtr tryStmt, StatementListPtr catches)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(TryStatement)),
     m_tryStmt(tryStmt), m_catches(catches) {
 }
 

@@ -21,8 +21,8 @@
 
 using namespace HPHP;
 
-LoopStatement::LoopStatement(STATEMENT_CONSTRUCTOR_PARAMETERS) :
-    Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES) {
+LoopStatement::LoopStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS) :
+    Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES) {
 }
 
 void LoopStatement::addStringBuf(const std::string &name) {

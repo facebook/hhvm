@@ -53,7 +53,7 @@ Expression::ExprClass Expression::Classes[] = {
   DECLARE_EXPRESSION_TYPES(DEC_EXPR_CLASSES)
 };
 
-Expression::Expression(EXPRESSION_CONSTRUCTOR_PARAMETERS)
+Expression::Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS)
     : Construct(scope, loc), m_kindOf(kindOf), m_context(RValue),
       m_originalScopeSet(false), m_canon_id(0), m_canonPtr(), m_error(0),
       m_unused(false) {
@@ -67,7 +67,6 @@ ExpressionPtr Expression::replaceValue(ExpressionPtr rep) {
       prevent "bad pass by reference" errors.
     */
     ExpressionListPtr el(new ExpressionList(getScope(), getLocation(),
-                                            Expression::KindOfExpressionList,
                                             ExpressionList::ListKindWrapped));
     el->addElement(rep);
     rep = el;
@@ -171,7 +170,6 @@ void Expression::insertElement(ExpressionPtr exp, int index /* = 0 */) {
 ExpressionPtr Expression::unneededHelper() {
   ExpressionListPtr elist = ExpressionListPtr
     (new ExpressionList(getScope(), getLocation(),
-                        Expression::KindOfExpressionList,
                         ExpressionList::ListKindWrapped));
 
   bool change = false;
@@ -211,7 +209,6 @@ ExpressionPtr Expression::unneeded() {
     getScope()->addUpdates(BlockScope::UseKindCaller);
     return ScalarExpressionPtr
       (new ScalarExpression(getScope(), getLocation(),
-                            Expression::KindOfScalarExpression,
                             T_LNUMBER, string("0")));
   }
 
@@ -499,7 +496,6 @@ ExpressionPtr Expression::MakeConstant(AnalysisResultConstPtr ar,
                                        const std::string &value) {
   ConstantExpressionPtr exp(new ConstantExpression(
                               scope, loc,
-                              Expression::KindOfConstantExpression,
                               value));
   if (value == "true" || value == "false") {
     if (ar->getPhase() >= AnalysisResult::PostOptimize) {
@@ -597,7 +593,6 @@ ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstPtr ar,
                                                CVarRef value) {
   if (value.isArray()) {
     ExpressionListPtr el(new ExpressionList(scope, loc,
-                                            KindOfExpressionList,
                                             ExpressionList::ListKindParam));
 
     for (ArrayIter iter(value); iter; ++iter) {
@@ -605,23 +600,19 @@ ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstPtr ar,
       ExpressionPtr v(MakeScalarExpression(ar, scope, loc, iter.second()));
       if (!k || !v) return ExpressionPtr();
       ArrayPairExpressionPtr ap(
-        new ArrayPairExpression(scope, loc, KindOfArrayPairExpression,
-                                k, v, false));
+        new ArrayPairExpression(scope, loc, k, v, false));
       el->addElement(ap);
     }
     if (!el->getCount()) el.reset();
     return ExpressionPtr(
-      new UnaryOpExpression(scope, loc, KindOfUnaryOpExpression,
-                            el, T_ARRAY, true));
+      new UnaryOpExpression(scope, loc, el, T_ARRAY, true));
   } else if (value.isNull()) {
     return MakeConstant(ar, scope, loc, "null");
   } else if (value.isBoolean()) {
     return MakeConstant(ar, scope, loc, value ? "true" : "false");
   } else {
     return ScalarExpressionPtr
-      (new ScalarExpression(scope, loc,
-                            Expression::KindOfScalarExpression,
-                            value));
+      (new ScalarExpression(scope, loc, value));
   }
 }
 

@@ -25,16 +25,18 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(UnaryOpExpression);
 
-class UnaryOpExpression : public Expression {
+class UnaryOpExpression : public Expression,
+                          public LocalEffectsContainer {
 public:
   UnaryOpExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                     ExpressionPtr exp, int op, bool front);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  DECL_AND_IMPL_LOCAL_EFFECTS_METHODS;
+
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
   ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
   virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
-  virtual int getLocalEffects() const;
   virtual bool isTemporary() const;
   virtual bool isRefable(bool checkError = false) const;
   virtual bool isScalar() const;
@@ -58,7 +60,6 @@ protected:
   int m_op;
   bool m_front;
   int m_silencer;
-  int m_localEffects;
 
 private:
   bool preCompute(CVarRef value, Variant &result);

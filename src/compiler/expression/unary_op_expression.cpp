@@ -44,7 +44,7 @@ UnaryOpExpression::UnaryOpExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp, int op, bool front)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
     m_exp(exp), m_op(op), m_front(front),
-    m_silencer(-1), m_localEffects(0) {
+    m_silencer(-1) {
   switch (m_op) {
   case T_INC:
   case T_DEC:
@@ -168,10 +168,6 @@ void UnaryOpExpression::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-int UnaryOpExpression::getLocalEffects() const {
-  return m_localEffects;
-}
 
 void UnaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeFinal && m_op == '@') {

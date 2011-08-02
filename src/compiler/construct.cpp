@@ -101,6 +101,24 @@ int Construct::getContainedEffects() const {
   return m_containedEffects;
 }
 
+void LocalEffectsContainer::setLocalEffect(Construct::Effect effect) {
+  if ((m_localEffects & effect) != effect) {
+    effectsCallback();
+    m_localEffects |= effect;
+  }
+}
+
+void LocalEffectsContainer::clearLocalEffect(Construct::Effect effect) {
+  if (m_localEffects & effect) {
+    effectsCallback();
+    m_localEffects &= ~effect;
+  }
+}
+
+bool LocalEffectsContainer::hasLocalEffect(Construct::Effect effect) const {
+  return m_localEffects & effect;
+}
+
 ExpressionPtr Construct::makeConstant(AnalysisResultConstPtr ar,
                                       const std::string &value) const {
   return Expression::MakeConstant(ar, getScope(), getLocation(), value);

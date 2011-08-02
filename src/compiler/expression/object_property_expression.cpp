@@ -37,8 +37,8 @@ ObjectPropertyExpression::ObjectPropertyExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr object, ExpressionPtr property)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    m_object(object), m_property(property),
-    m_localEffects(AccessorEffect), m_propSym(NULL) {
+    LocalEffectsContainer(AccessorEffect),
+    m_object(object), m_property(property), m_propSym(NULL) {
   m_valid = false;
   m_propSymValid = false;
   m_object->setContext(Expression::ObjectContext);
@@ -104,7 +104,7 @@ void ObjectPropertyExpression::setContext(Context context) {
   if (!m_valid &&
       (m_context & (LValue|RefValue)) &&
       !(m_context & AssignmentLHS)) {
-    setEffect(CreateEffect);
+    setLocalEffect(CreateEffect);
   }
   if (context == InvokeArgument) {
     setContext(NoLValueWrapper);
@@ -130,7 +130,7 @@ void ObjectPropertyExpression::clearContext(Context context) {
   }
 
   if (!(m_context & (LValue|RefValue))) {
-    clearEffect(CreateEffect);
+    clearLocalEffect(CreateEffect);
   }
   if (context == InvokeArgument) {
     clearContext(NoLValueWrapper);
@@ -183,20 +183,6 @@ void ObjectPropertyExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void ObjectPropertyExpression::setEffect(Effect effect) {
-  if ((m_localEffects & effect) != effect) {
-    recomputeEffects();
-    m_localEffects |= effect;
-  }
-}
-
-void ObjectPropertyExpression::clearEffect(Effect effect) {
-  if (m_localEffects & effect) {
-    recomputeEffects();
-    m_localEffects &= ~effect;
-  }
-}
-
 TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
                                              TypePtr type, bool coerce) {
   m_valid = false;
@@ -244,15 +230,6 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     return Type::Variant;
   }
 
-  int prop = hasContext(AssignmentLHS) ? ClassScope::MayHaveUnknownPropSetter :
-    hasContext(ExistContext) ? ClassScope::MayHaveUnknownPropTester :
-    hasContext(UnsetContext) && hasContext(LValue) ?
-    ClassScope::MayHavePropUnsetter : ClassScope::MayHaveUnknownPropGetter;
-  if ((m_context & (AssignmentLHS|OprLValue)) ||
-      !cls->implementsAccessor(prop)) {
-    clearEffect(AccessorEffect);
-  }
-
   // resolved to this class
   if (m_context & RefValue) {
     type = Type::Variant;
@@ -296,14 +273,39 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     ret = cls->checkProperty(m_propSym, type, coerce, ar);
     assert(m_object->getType()->isSpecificObject());
     m_valid = true;
-
-    clearEffect(AccessorEffect);
-    clearEffect(CreateEffect);
     return ret;
   } else {
     m_actualType = Type::Variant;
     return m_actualType;
   }
+}
+
+ExpressionPtr
+ObjectPropertyExpression::postOptimize(AnalysisResultConstPtr ar) {
+  bool changed = false;
+  if (m_objectClass && hasLocalEffect(AccessorEffect)) {
+    int prop = hasContext(AssignmentLHS) ?
+      ClassScope::MayHaveUnknownPropSetter :
+      hasContext(ExistContext) ?
+        ClassScope::MayHaveUnknownPropTester :
+        hasContext(UnsetContext) && hasContext(LValue) ?
+          ClassScope::MayHavePropUnsetter :
+          ClassScope::MayHaveUnknownPropGetter;
+    if ((m_context & (AssignmentLHS|OprLValue)) ||
+        !m_objectClass->implementsAccessor(prop)) {
+      clearLocalEffect(AccessorEffect);
+      changed = true;
+    }
+  }
+  if (m_valid &&
+      (hasLocalEffect(AccessorEffect) || hasLocalEffect(CreateEffect))) {
+    clearLocalEffect(AccessorEffect);
+    clearLocalEffect(CreateEffect);
+    changed = true;
+  }
+  return changed ?
+    dynamic_pointer_cast<Expression>(shared_from_this()) :
+    ExpressionPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -320,12 +322,6 @@ void ObjectPropertyExpression::outputPHP(CodeGenerator &cg,
     m_property->outputPHP(cg, ar);
     cg_printf("}");
   }
-}
-
-void ObjectPropertyExpression::preOutputStash(CodeGenerator &cg,
-                                              AnalysisResultPtr ar,
-                                              int state) {
-  Expression::preOutputStash(cg, ar, state);
 }
 
 bool ObjectPropertyExpression::preOutputCPP(CodeGenerator &cg,

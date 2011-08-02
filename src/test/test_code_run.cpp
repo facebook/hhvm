@@ -14338,6 +14338,25 @@ bool TestCodeRun::TestAssignment() {
        "  var_dump($expected, $list_expected);"
        "}"
        "foo();");
+
+  MVCR("<?php\n"
+       "function g($key, $old, $new, $s = false) {\n"
+       "  $diff = array();\n"
+       "  if ($old !== $new) {\n"
+       "    if ($s) {\n"
+       "      $old = f($old, true);\n"
+       "      $new = f($new, true);\n"
+       "    }\n"
+       "    $diff['old'][$key] = $old;\n"
+       "    $diff['new'][$key] = $new;\n"
+       "  }\n"
+       "  return $diff;\n"
+       "}\n"
+       "function f($a0, $a1) {\n"
+       "  return 'should_be_modified';\n"
+       "}\n"
+       "var_dump(g('key', 'old', 'new', true));\n");
+
   return true;
 }
 

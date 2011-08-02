@@ -275,6 +275,28 @@ protected:
   void addUserClass(AnalysisResultPtr ar, const std::string &name);
 };
 
+class LocalEffectsContainer {
+public:
+  int getLocalEffects() const { return m_localEffects; }
+  virtual void effectsCallback() = 0;
+protected:
+  LocalEffectsContainer(Construct::Effect localEffect) :
+    m_localEffects(localEffect) {}
+  LocalEffectsContainer() :
+    m_localEffects(0) {}
+  void setLocalEffect  (Construct::Effect effect);
+  void clearLocalEffect(Construct::Effect effect);
+  bool hasLocalEffect  (Construct::Effect effect) const;
+protected:
+  int m_localEffects;
+};
+
+#define DECL_AND_IMPL_LOCAL_EFFECTS_METHODS \
+  virtual int getLocalEffects() const { \
+    return LocalEffectsContainer::getLocalEffects(); \
+  } \
+  virtual void effectsCallback() { recomputeEffects(); }
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 #endif // __CONSTRUCT_H__

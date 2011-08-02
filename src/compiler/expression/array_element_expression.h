@@ -24,15 +24,18 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ArrayElementExpression);
 
-class ArrayElementExpression : public Expression {
+class ArrayElementExpression : public Expression,
+                               public LocalEffectsContainer {
 public:
   ArrayElementExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                          ExpressionPtr variable, ExpressionPtr offset);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  DECL_AND_IMPL_LOCAL_EFFECTS_METHODS;
+
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
   ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
-  virtual int getLocalEffects() const { return m_localEffects; }
+
   virtual bool isRefable(bool checkError = false) const { return true;}
   bool isTemporary() const;
 
@@ -60,17 +63,12 @@ public:
   virtual bool canonCompare(ExpressionPtr e) const;
 
 private:
-  void setEffect(Effect effect);
-  void clearEffect(Effect effect);
-  bool hasEffect(Effect effect) const;
-
   ExpressionPtr m_variable;
   ExpressionPtr m_offset;
   bool m_global;
   bool m_dynamicGlobal;
   std::string m_globalName;
   std::string m_text;
-  int m_localEffects;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

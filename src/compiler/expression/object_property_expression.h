@@ -27,13 +27,16 @@ DECLARE_BOOST_TYPES(ObjectPropertyExpression);
 DECLARE_BOOST_TYPES(ClassScope);
 class Symbol;
 
-class ObjectPropertyExpression : public Expression {
+class ObjectPropertyExpression : public Expression,
+                                 public LocalEffectsContainer {
 public:
   ObjectPropertyExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                            ExpressionPtr object, ExpressionPtr property);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  virtual int getLocalEffects() const { return m_localEffects; }
+  DECL_AND_IMPL_LOCAL_EFFECTS_METHODS;
+
+  ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
   virtual bool isRefable(bool checkError = false) const { return true;}
 
   virtual void setContext(Context context);
@@ -45,7 +48,6 @@ public:
   virtual void outputCPPExistTest(CodeGenerator &cg, AnalysisResultPtr ar,
                                   int op);
   virtual void outputCPPUnset(CodeGenerator &cg, AnalysisResultPtr ar);
-  void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar, int state);
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
   bool isTemporary() const;
   bool isNonPrivate(AnalysisResultPtr ar);
@@ -54,16 +56,11 @@ public:
   bool outputCPPObject(CodeGenerator &cg, AnalysisResultPtr ar,
                        bool noEvalOnError = false);
 private:
-  void setEffect(Effect effect);
-  void clearEffect(Effect effect);
-
   ExpressionPtr m_object;
   ExpressionPtr m_property;
 
   unsigned m_valid : 1;
   unsigned m_propSymValid : 1;
-
-  int m_localEffects;
 
   Symbol *m_propSym;
   ClassScopeRawPtr m_objectClass;

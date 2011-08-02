@@ -362,8 +362,10 @@ static bool compareArrays(ArrayElementExpressionPtr e1,
       e1->getOffset()->getCanonID() != e2->getOffset()->getCanonID()) {
     return false;
   }
+  assert(e1->getOffset()->getCanonID() != 0);
 
-  if (e1->getVariable()->getCanonID() == e2->getVariable()->getCanonID()) {
+  if (e1->getVariable()->getCanonID() == e2->getVariable()->getCanonID() &&
+      e1->getVariable()->getCanonID() != 0) {
     return true;
   }
 
@@ -1122,6 +1124,14 @@ ExpressionPtr AliasManager::canonicalizeNode(
   if ((e->getContext() & (Expression::AssignmentLHS|
                           Expression::OprLValue)) ||
       (!doAccessChains && e->hasContext(Expression::AccessContext))) {
+    ExpressionPtr ret;
+    if (!m_noAdd) {
+      if (m_preOpt) ret = e->preOptimize(m_arp);
+      if (m_postOpt) ret = e->postOptimize(m_arp);
+      if (ret) {
+        return canonicalizeRecurNonNull(ret);
+      }
+    }
     e->setCanonPtr(ExpressionPtr());
     e->setCanonID(0);
     return ExpressionPtr();
@@ -1146,7 +1156,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
   }
 
   ExpressionPtr ret;
-  if (!m_noAdd) {
+  if (!m_noAdd && !doAccessChains) {
     if (m_preOpt) ret = e->preOptimize(m_arp);
     if (m_postOpt) ret = e->postOptimize(m_arp);
     if (ret) {

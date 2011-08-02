@@ -37,8 +37,9 @@ ArrayElementExpression::ArrayElementExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr variable, ExpressionPtr offset)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+    LocalEffectsContainer(AccessorEffect),
     m_variable(variable), m_offset(offset), m_global(false),
-    m_dynamicGlobal(false), m_localEffects(AccessorEffect) {
+    m_dynamicGlobal(false) {
   m_variable->setContext(Expression::AccessContext);
 
   if (m_variable->is(Expression::KindOfSimpleVariable)) {
@@ -242,24 +243,6 @@ bool ArrayElementExpression::canonCompare(ExpressionPtr e) const {
   return m_offset && Expression::canonCompare(e);
 }
 
-void ArrayElementExpression::setEffect(Effect effect) {
-  if ((m_localEffects & effect) != effect) {
-    recomputeEffects();
-    m_localEffects |= effect;
-  }
-}
-
-void ArrayElementExpression::clearEffect(Effect effect) {
-  if (m_localEffects & effect) {
-    recomputeEffects();
-    m_localEffects &= ~effect;
-  }
-}
-
-bool ArrayElementExpression::hasEffect(Effect effect) const {
-  return m_localEffects & effect;
-}
-
 ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (!(m_context & (RefValue|LValue|UnsetContext|OprLValue|
                      InvokeArgument|DeepReference|DeepOprLValue))) {
@@ -291,10 +274,10 @@ ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 ExpressionPtr ArrayElementExpression::postOptimize(AnalysisResultConstPtr ar) {
-  if (!hasEffect(AccessorEffect)) return ExpressionPtr();
+  if (!hasLocalEffect(AccessorEffect)) return ExpressionPtr();
   TypePtr at(m_variable->getActualType());
   if (at && (at->is(Type::KindOfString) || at->is(Type::KindOfArray))) {
-    clearEffect(AccessorEffect);
+    clearLocalEffect(AccessorEffect);
     return dynamic_pointer_cast<Expression>(shared_from_this());
   }
   return ExpressionPtr();
@@ -315,12 +298,12 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
   if (m_offset &&
       !(m_context & (UnsetContext | ExistContext |
                      InvokeArgument | LValue | RefValue))) {
-    setEffect(DiagnosticEffect);
+    setLocalEffect(DiagnosticEffect);
   }
   if (m_context & (AssignmentLHS|OprLValue)) {
-    clearEffect(AccessorEffect);
+    clearLocalEffect(AccessorEffect);
   } else if (m_context & (LValue | RefValue)) {
-    setEffect(CreateEffect);
+    setLocalEffect(CreateEffect);
   }
 
   // handling $GLOBALS[...]
@@ -328,7 +311,7 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
     SimpleVariablePtr var =
       dynamic_pointer_cast<SimpleVariable>(m_variable);
     if (var->getName() == "GLOBALS") {
-      clearEffect(AccessorEffect);
+      clearLocalEffect(AccessorEffect);
       m_global = true;
       m_dynamicGlobal = true;
       getScope()->getVariables()->
@@ -343,7 +326,7 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
           m_globalName = offset->getIdentifier();
           if (!m_globalName.empty()) {
             m_dynamicGlobal = false;
-            clearEffect(DiagnosticEffect);
+            clearLocalEffect(DiagnosticEffect);
             getScope()->getVariables()->
               setAttribute(VariableTable::NeedGlobalPointer);
             TypePtr ret;

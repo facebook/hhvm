@@ -281,7 +281,8 @@ public:
                               ClassScope::Derivation dynamicObject);
   void outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPStaticVariables(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPStaticLocals(CodeGenerator &cg, AnalysisResultPtr ar);
+  void outputCPPStaticLocals(CodeGenerator &cg, AnalysisResultPtr ar,
+                             bool forInitList);
 
   void outputCPPGlobalVariablesDtorIncludes(CodeGenerator &cg,
                                             AnalysisResultPtr ar);

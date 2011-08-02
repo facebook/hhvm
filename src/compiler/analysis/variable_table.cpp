@@ -2121,7 +2121,9 @@ void VariableTable::outputCPPStaticVariables(CodeGenerator &cg,
 }
 
 void VariableTable::outputCPPStaticLocals(CodeGenerator &cg,
-                                          AnalysisResultPtr ar) {
+                                          AnalysisResultPtr ar,
+                                          bool forInitList) {
+  bool hasEmit = false;
   for (SymbolVec::const_iterator it = m_staticLocalsVec.begin();
        it != m_staticLocalsVec.end(); ++it) {
     const Symbol *sym = *it;
@@ -2132,13 +2134,21 @@ void VariableTable::outputCPPStaticLocals(CodeGenerator &cg,
                                                func, sym->getName());
     TypePtr varType(sym->getFinalType());
 
-    // static variable
-    varType->outputCPPDecl(cg, ar, BlockScopeRawPtr());
-    cg_printf(" %s%s;\n", Option::StaticVariablePrefix, id.c_str());
+    if (!forInitList) {
+      // static variable
+      varType->outputCPPDecl(cg, ar, BlockScopeRawPtr());
+      cg_printf(" %s%s;\n", Option::StaticVariablePrefix, id.c_str());
 
-    // initializer
-    cg_printf("bool %s%s%s;\n",
-              Option::InitPrefix, Option::StaticVariablePrefix, id.c_str());
+      // initializer
+      cg_printf("bool %s%s%s;\n",
+                Option::InitPrefix, Option::StaticVariablePrefix, id.c_str());
+    } else {
+      if (hasEmit) cg_printf(", ");
+      // only initializer
+      cg_printf("%s%s%s(false)",
+                Option::InitPrefix, Option::StaticVariablePrefix, id.c_str());
+    }
+    hasEmit = true;
   }
 }
 

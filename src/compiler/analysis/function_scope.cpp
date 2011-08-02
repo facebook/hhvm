@@ -1921,7 +1921,7 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
 
     if (variables->hasStaticLocals()) {
-      variables->outputCPPStaticLocals(cg, ar);
+      variables->outputCPPStaticLocals(cg, ar, false);
       cg_printf("\n");
     }
 
@@ -1939,7 +1939,12 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
     // TODO: non ref variants can be directly assigned to the member
     // variable in the initialization list, giving an ever-so-slight
     // gain in performance
-    cg_indentBegin(") : %sClosure(func, extra) {\n", Option::ClassPrefix);
+    cg_printf(") : %sClosure(func, extra)", Option::ClassPrefix);
+    if (variables->hasStaticLocals()) {
+      cg_printf(", ");
+      variables->outputCPPStaticLocals(cg, ar, true);
+    }
+    cg_indentBegin(" {\n");
     BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
       const string &name = param->getName();
       Symbol *sym = variables->getSymbol(name);
@@ -1986,8 +1991,15 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
 
     if (variables->hasStaticLocals()) {
-      variables->outputCPPStaticLocals(cg, ar);
+      variables->outputCPPStaticLocals(cg, ar, false);
       cg_printf("\n");
+
+      // no arg ctor w/ init list of static locals
+      cg_printf("%sContinuation$%s() : ",
+                Option::ClassPrefix,
+                funcName.c_str());
+      variables->outputCPPStaticLocals(cg, ar, true);
+      cg_printf(" {}\n");
     }
 
     // constructor is bootstrapped with all the parameters

@@ -26,6 +26,7 @@ clobber:
 	$(V)$(RM) $(filter-out $(SUB_PROGRAMS) $(SUB_LIB_TARGETS), $(TARGETS))
 	$(V)find $(OUT_DIR) -name "*.[od]" | xargs $(RM)
 	$(V)find . -name "*~" | xargs $(RM)
+	$(V)rm -f runtime/base/memory/smart_allocator.inc_gen
 
 .PHONY: clean
 clean: clobber

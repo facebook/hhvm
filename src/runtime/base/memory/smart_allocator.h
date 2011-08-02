@@ -154,7 +154,7 @@ class SmartAllocatorImpl {
 public:
   enum Name {
 #define SMART_ALLOCATOR_ENTRY(x) x,
-#include "smart_allocator.inc"
+#include "smart_allocator.inc_gen"
 #undef SMART_ALLOCATOR_ENTRY
   };
 

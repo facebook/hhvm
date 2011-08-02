@@ -140,7 +140,7 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
   } else {
     static const char *TypeNames[] = {
 #define SMART_ALLOCATOR_ENTRY(x) #x,
-#include "smart_allocator.inc"
+#include "smart_allocator.inc_gen"
 #undef SMART_ALLOCATOR_ENTRY
     };
     ASSERT(nameEnum < (int)(sizeof(TypeNames)/sizeof(TypeNames[0])));

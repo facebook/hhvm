@@ -49,6 +49,21 @@ hphpi: hphp | test-obj
 test-setup: compiler-setup
 test: compiler shared-lib-target
 
+SMART_ALLOCATOR_INC = runtime/base/memory/smart_allocator.core.inc
+
+HOOK_RULE_FILE = $(wildcard compiler/hook.mk)
+ifneq ($(strip $(HOOK_RULE_FILE)),)
+ include hook.mk
+endif
+
+SA_INC_GEN = runtime/base/memory/smart_allocator.inc_gen
+
+GEN_SMART_ALLOC = $(shell test -f $(SA_INC_GEN) || cat $(SMART_ALLOCATOR_INC) > $(SA_INC_GEN))
+
+$(SA_INC_GEN):
+	$(V)echo $(SMART_ALLOCATOR_INC)
+	$(V)cat $(SMART_ALLOCATOR_INC) > $(SA_INC_GEN)
+
 .PHONY: shared-lib-target
 shared-lib-target:
 	$(V)$(MAKE) SHARED=1 $(SHARED_LIB)

@@ -38,7 +38,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "hash_murmur.h"
+#include <runtime/ext/hash/hash_murmur.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

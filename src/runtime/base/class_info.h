@@ -36,7 +36,7 @@ struct ClassPropTableEntry;
 class ClassInfo {
 public:
   enum Attribute {                      //  class   prop   func  method param
-    IsSystem               = (1 <<  0), //    x             x
+    IsOverride             = (1 <<  0), //           x
     IsRedeclared           = (1 <<  1), //    x             x
     IsVolatile             = (1 <<  2), //    x             x
 
@@ -72,8 +72,7 @@ public:
     NoProfile              = (1 << 25), //                  x      x
     ContextSensitive       = (1 << 26), //                  x
     NoDefaultSweep         = (1 << 27), //    x
-
-    IsOverride             = (1 << 28),
+    IsSystem               = (1 << 28), //    x             x
   };
 
   class ConstantInfo {
@@ -235,10 +234,6 @@ public:
   static void GetArray(const ObjectData *obj, const ClassPropTable *ct,
                        Array &props, bool pubOnly);
   static void SetArray(ObjectData *obj, const ClassPropTable *ct, CArrRef props);
-  static int InitClassPropTable(const char *ctMapData[],
-                                ClassPropTableEntry entries[],
-                                ClassPropTableEntry *pentries[]);
-
   static void SetHook(ClassInfoHook *hook) { s_hook = hook; }
 
 public:
@@ -439,10 +434,10 @@ public:
 };
 
 struct ClassPropTableEntry {
-  int64 flags;
+  short         flags;
+  short         type;
+  int           offset;
   StaticString *keyName;
-  int64 offset;
-  int64 type;
   bool isPublic() const { return flags & ClassInfo::IsPublic; }
   bool isPrivate() const { return flags & ClassInfo::IsPrivate; }
   bool isOverride() const { return flags & ClassInfo::IsOverride; }
@@ -450,18 +445,11 @@ struct ClassPropTableEntry {
 
 class ClassPropTable {
 public:
-  ClassPropTable() : m_count(0), m_pcount(0), m_parent(NULL), m_entries(NULL),
-    m_pentries(NULL) {}
-  ClassPropTable(int64 count, int64 pcount, ClassPropTable *parent,
-    ClassPropTableEntry *p, ClassPropTableEntry **pp) :
-    m_count(count), m_pcount(pcount), m_parent(parent),
-    m_entries(p), m_pentries(pp) { }
-
-  int64 m_count;
-  int64 m_pcount;
-  ClassPropTable *m_parent;
-  ClassPropTableEntry *m_entries;
-  ClassPropTableEntry **m_pentries;
+  int m_count;
+  int m_pcount;
+  const ClassPropTable *m_parent;
+  const ClassPropTableEntry *m_entries;
+  const ClassPropTableEntry **m_pentries;
 };
 
 #define GET_PROPERTY_OFFSET(c, n) \

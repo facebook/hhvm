@@ -39,7 +39,7 @@ namespace HPHP {
 #define FORWARD_DECLARE_CLASS_BUILTIN(cls)      \
   FORWARD_DECLARE_CLASS(cls)                    \
   extern ObjectData *coo_##cls();               \
-  extern ObjectStaticCallbacks cw_##cls;
+  extern const ObjectStaticCallbacks cw_##cls;
 
 #define FORWARD_DECLARE_INTERFACE(cls)                  \
   class c_##cls;                                        \
@@ -129,7 +129,6 @@ namespace HPHP {
   virtual Variant *o_realProp(CStrRef prop, int flags,                  \
                         CStrRef context = null_string) const;           \
   Variant *o_realPropPrivate(CStrRef s, int flags) const;               \
-  virtual const ClassPropTable *o_getClassPropTable() const;            \
 
 #define DECLARE_INSTANCE_PUBLIC_PROP_OPS                                \
   public:                                                               \

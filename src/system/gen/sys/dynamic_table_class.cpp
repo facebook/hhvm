@@ -29,48 +29,48 @@ namespace HPHP {
 
 
 // Class Invoke Tables
-extern ObjectStaticCallbacks cw_ReflectionFunctionAbstract;
-extern ObjectStaticCallbacks cw_PDOException;
-extern ObjectStaticCallbacks cw_ReflectionObject;
-extern ObjectStaticCallbacks cw_SplFileObject;
-extern ObjectStaticCallbacks cw_UnexpectedValueException;
-extern ObjectStaticCallbacks cw_stdClass;
-extern ObjectStaticCallbacks cw_ReflectionException;
-extern ObjectStaticCallbacks cw_OverflowException;
-extern ObjectStaticCallbacks cw_SplFileInfo;
-extern ObjectStaticCallbacks cw_ArrayIterator;
-extern ObjectStaticCallbacks cw_IteratorIterator;
-extern ObjectStaticCallbacks cw_AppendIterator;
-extern ObjectStaticCallbacks cw_OutOfBoundsException;
-extern ObjectStaticCallbacks cw_LogicException;
-extern ObjectStaticCallbacks cw_RangeException;
-extern ObjectStaticCallbacks cw_SplObjectStorage;
-extern ObjectStaticCallbacks cw_InvalidArgumentException;
-extern ObjectStaticCallbacks cw_ReflectionClass;
-extern ObjectStaticCallbacks cw_UnderflowException;
-extern ObjectStaticCallbacks cw_ReflectionExtension;
-extern ObjectStaticCallbacks cw_OutOfRangeException;
-extern ObjectStaticCallbacks cw_ReflectionMethod;
-extern ObjectStaticCallbacks cw_BadMethodCallException;
-extern ObjectStaticCallbacks cw_ReflectionProperty;
-extern ObjectStaticCallbacks cw___PHP_Incomplete_Class;
-extern ObjectStaticCallbacks cw_Exception;
-extern ObjectStaticCallbacks cw_RuntimeException;
-extern ObjectStaticCallbacks cw_ReflectionFunction;
-extern ObjectStaticCallbacks cw_XhprofFrame;
-extern ObjectStaticCallbacks cw_ErrorException;
-extern ObjectStaticCallbacks cw_RecursiveDirectoryIterator;
-extern ObjectStaticCallbacks cw_DirectoryIterator;
-extern ObjectStaticCallbacks cw_DOMException;
-extern ObjectStaticCallbacks cw_BadFunctionCallException;
-extern ObjectStaticCallbacks cw_LengthException;
-extern ObjectStaticCallbacks cw_DomainException;
-extern ObjectStaticCallbacks cw_RecursiveIteratorIterator;
-extern ObjectStaticCallbacks cw_MutableArrayIterator;
-extern ObjectStaticCallbacks cw_Directory;
-extern ObjectStaticCallbacks cw_FilterIterator;
-extern ObjectStaticCallbacks cw_SoapFault;
-extern ObjectStaticCallbacks cw_ReflectionParameter;
+extern const ObjectStaticCallbacks cw_ReflectionFunctionAbstract;
+extern const ObjectStaticCallbacks cw_PDOException;
+extern const ObjectStaticCallbacks cw_ReflectionObject;
+extern const ObjectStaticCallbacks cw_SplFileObject;
+extern const ObjectStaticCallbacks cw_UnexpectedValueException;
+extern const ObjectStaticCallbacks cw_stdClass;
+extern const ObjectStaticCallbacks cw_ReflectionException;
+extern const ObjectStaticCallbacks cw_OverflowException;
+extern const ObjectStaticCallbacks cw_SplFileInfo;
+extern const ObjectStaticCallbacks cw_ArrayIterator;
+extern const ObjectStaticCallbacks cw_IteratorIterator;
+extern const ObjectStaticCallbacks cw_AppendIterator;
+extern const ObjectStaticCallbacks cw_OutOfBoundsException;
+extern const ObjectStaticCallbacks cw_LogicException;
+extern const ObjectStaticCallbacks cw_RangeException;
+extern const ObjectStaticCallbacks cw_SplObjectStorage;
+extern const ObjectStaticCallbacks cw_InvalidArgumentException;
+extern const ObjectStaticCallbacks cw_ReflectionClass;
+extern const ObjectStaticCallbacks cw_UnderflowException;
+extern const ObjectStaticCallbacks cw_ReflectionExtension;
+extern const ObjectStaticCallbacks cw_OutOfRangeException;
+extern const ObjectStaticCallbacks cw_ReflectionMethod;
+extern const ObjectStaticCallbacks cw_BadMethodCallException;
+extern const ObjectStaticCallbacks cw_ReflectionProperty;
+extern const ObjectStaticCallbacks cw___PHP_Incomplete_Class;
+extern const ObjectStaticCallbacks cw_Exception;
+extern const ObjectStaticCallbacks cw_RuntimeException;
+extern const ObjectStaticCallbacks cw_ReflectionFunction;
+extern const ObjectStaticCallbacks cw_XhprofFrame;
+extern const ObjectStaticCallbacks cw_ErrorException;
+extern const ObjectStaticCallbacks cw_RecursiveDirectoryIterator;
+extern const ObjectStaticCallbacks cw_DirectoryIterator;
+extern const ObjectStaticCallbacks cw_DOMException;
+extern const ObjectStaticCallbacks cw_BadFunctionCallException;
+extern const ObjectStaticCallbacks cw_LengthException;
+extern const ObjectStaticCallbacks cw_DomainException;
+extern const ObjectStaticCallbacks cw_RecursiveIteratorIterator;
+extern const ObjectStaticCallbacks cw_MutableArrayIterator;
+extern const ObjectStaticCallbacks cw_Directory;
+extern const ObjectStaticCallbacks cw_FilterIterator;
+extern const ObjectStaticCallbacks cw_SoapFault;
+extern const ObjectStaticCallbacks cw_ReflectionParameter;
 ObjectData *coo_DOMDocumentFragment() {
   return NEWOBJ(c_DOMDocumentFragment)();
 }
@@ -205,7 +205,7 @@ void c_DOMDocumentFragment::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMDocumentFragment::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMDocumentFragment = {
+const ObjectStaticCallbacks cw_DOMDocumentFragment = {
   c_DOMDocumentFragment::os_getInit,
   c_DOMDocumentFragment::os_get,
   c_DOMDocumentFragment::os_lval,
@@ -214,7 +214,7 @@ ObjectStaticCallbacks cw_DOMDocumentFragment = {
   (ObjectData*(*)(ObjectData*))coo_DOMDocumentFragment,
   c_DOMDocumentFragment::s_call_info_table,c_DOMDocumentFragment::s_call_info_index,
   &c_DOMDocumentFragment::s_class_name,
-  &cw_DOMNode
+  0,&cw_DOMNode
 };
 ObjectData *coo_DOMText() {
   return NEWOBJ(c_DOMText)();
@@ -464,7 +464,7 @@ void c_DOMText::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMText::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMText = {
+const ObjectStaticCallbacks cw_DOMText = {
   c_DOMText::os_getInit,
   c_DOMText::os_get,
   c_DOMText::os_lval,
@@ -473,7 +473,7 @@ ObjectStaticCallbacks cw_DOMText = {
   (ObjectData*(*)(ObjectData*))coo_DOMText,
   c_DOMText::s_call_info_table,c_DOMText::s_call_info_index,
   &c_DOMText::s_class_name,
-  &cw_DOMCharacterData
+  0,&cw_DOMCharacterData
 };
 ObjectData *coo_DebuggerClient() {
   return NEWOBJ(c_DebuggerClient)();
@@ -1336,7 +1336,7 @@ void c_DebuggerClient::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DebuggerClient::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DebuggerClient = {
+const ObjectStaticCallbacks cw_DebuggerClient = {
   c_DebuggerClient::os_getInit,
   c_DebuggerClient::os_get,
   c_DebuggerClient::os_lval,
@@ -1345,7 +1345,7 @@ ObjectStaticCallbacks cw_DebuggerClient = {
   (ObjectData*(*)(ObjectData*))coo_DebuggerClient,
   c_DebuggerClient::s_call_info_table,c_DebuggerClient::s_call_info_index,
   &c_DebuggerClient::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_EncodingDetector() {
   return NEWOBJ(c_EncodingDetector)();
@@ -1545,7 +1545,7 @@ void c_EncodingDetector::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_EncodingDetector::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_EncodingDetector = {
+const ObjectStaticCallbacks cw_EncodingDetector = {
   c_EncodingDetector::os_getInit,
   c_EncodingDetector::os_get,
   c_EncodingDetector::os_lval,
@@ -1554,7 +1554,7 @@ ObjectStaticCallbacks cw_EncodingDetector = {
   (ObjectData*(*)(ObjectData*))coo_EncodingDetector,
   c_EncodingDetector::s_call_info_table,c_EncodingDetector::s_call_info_index,
   &c_EncodingDetector::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_DOMCDATASection() {
   return NEWOBJ(c_DOMCDATASection)();
@@ -1675,7 +1675,7 @@ void c_DOMCDATASection::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMCDATASection::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMCDATASection = {
+const ObjectStaticCallbacks cw_DOMCDATASection = {
   c_DOMCDATASection::os_getInit,
   c_DOMCDATASection::os_get,
   c_DOMCDATASection::os_lval,
@@ -1684,7 +1684,7 @@ ObjectStaticCallbacks cw_DOMCDATASection = {
   (ObjectData*(*)(ObjectData*))coo_DOMCDATASection,
   c_DOMCDATASection::s_call_info_table,c_DOMCDATASection::s_call_info_index,
   &c_DOMCDATASection::s_class_name,
-  &cw_DOMText
+  0,&cw_DOMText
 };
 ObjectData *coo_Locale() {
   return NEWOBJ(c_Locale)();
@@ -1803,7 +1803,7 @@ void c_Locale::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Locale::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_Locale = {
+const ObjectStaticCallbacks cw_Locale = {
   c_Locale::os_getInit,
   c_Locale::os_get,
   c_Locale::os_lval,
@@ -1812,7 +1812,7 @@ ObjectStaticCallbacks cw_Locale = {
   (ObjectData*(*)(ObjectData*))coo_Locale,
   c_Locale::s_call_info_table,c_Locale::s_call_info_index,
   &c_Locale::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_Closure() {
   return NEWOBJ(c_Closure)();
@@ -1967,7 +1967,7 @@ void c_Closure::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Closure::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_Closure = {
+const ObjectStaticCallbacks cw_Closure = {
   c_Closure::os_getInit,
   c_Closure::os_get,
   c_Closure::os_lval,
@@ -1976,7 +1976,7 @@ ObjectStaticCallbacks cw_Closure = {
   (ObjectData*(*)(ObjectData*))coo_Closure,
   c_Closure::s_call_info_table,c_Closure::s_call_info_index,
   &c_Closure::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_DOMDocumentType() {
   return NEWOBJ(c_DOMDocumentType)();
@@ -2165,7 +2165,7 @@ void c_DOMDocumentType::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMDocumentType::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMDocumentType = {
+const ObjectStaticCallbacks cw_DOMDocumentType = {
   c_DOMDocumentType::os_getInit,
   c_DOMDocumentType::os_get,
   c_DOMDocumentType::os_lval,
@@ -2174,7 +2174,7 @@ ObjectStaticCallbacks cw_DOMDocumentType = {
   (ObjectData*(*)(ObjectData*))coo_DOMDocumentType,
   c_DOMDocumentType::s_call_info_table,c_DOMDocumentType::s_call_info_index,
   &c_DOMDocumentType::s_class_name,
-  &cw_DOMNode
+  0,&cw_DOMNode
 };
 ObjectData *coo_GenericContinuation() {
   return NEWOBJ(c_GenericContinuation)();
@@ -2385,7 +2385,7 @@ void c_GenericContinuation::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_GenericContinuation::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_GenericContinuation = {
+const ObjectStaticCallbacks cw_GenericContinuation = {
   c_GenericContinuation::os_getInit,
   c_GenericContinuation::os_get,
   c_GenericContinuation::os_lval,
@@ -2394,7 +2394,7 @@ ObjectStaticCallbacks cw_GenericContinuation = {
   (ObjectData*(*)(ObjectData*))coo_GenericContinuation,
   c_GenericContinuation::s_call_info_table,c_GenericContinuation::s_call_info_index,
   &c_GenericContinuation::s_class_name,
-  &cw_Continuation
+  &c_GenericContinuation::os_prop_table,&cw_Continuation
 };
 ObjectData *coo_SQLite3Stmt() {
   return NEWOBJ(c_SQLite3Stmt)();
@@ -2680,7 +2680,7 @@ void c_SQLite3Stmt::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SQLite3Stmt::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_SQLite3Stmt = {
+const ObjectStaticCallbacks cw_SQLite3Stmt = {
   c_SQLite3Stmt::os_getInit,
   c_SQLite3Stmt::os_get,
   c_SQLite3Stmt::os_lval,
@@ -2689,7 +2689,7 @@ ObjectStaticCallbacks cw_SQLite3Stmt = {
   (ObjectData*(*)(ObjectData*))coo_SQLite3Stmt,
   c_SQLite3Stmt::s_call_info_table,c_SQLite3Stmt::s_call_info_index,
   &c_SQLite3Stmt::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_DOMNodeList() {
   return NEWOBJ(c_DOMNodeList)();
@@ -2922,7 +2922,7 @@ void c_DOMNodeList::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMNodeList::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMNodeList = {
+const ObjectStaticCallbacks cw_DOMNodeList = {
   c_DOMNodeList::os_getInit,
   c_DOMNodeList::os_get,
   c_DOMNodeList::os_lval,
@@ -2931,7 +2931,7 @@ ObjectStaticCallbacks cw_DOMNodeList = {
   (ObjectData*(*)(ObjectData*))coo_DOMNodeList,
   c_DOMNodeList::s_call_info_table,c_DOMNodeList::s_call_info_index,
   &c_DOMNodeList::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_Normalizer() {
   return NEWOBJ(c_Normalizer)();
@@ -3110,7 +3110,7 @@ void c_Normalizer::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Normalizer::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_Normalizer = {
+const ObjectStaticCallbacks cw_Normalizer = {
   c_Normalizer::os_getInit,
   c_Normalizer::os_get,
   c_Normalizer::os_lval,
@@ -3119,7 +3119,7 @@ ObjectStaticCallbacks cw_Normalizer = {
   (ObjectData*(*)(ObjectData*))coo_Normalizer,
   c_Normalizer::s_call_info_table,c_Normalizer::s_call_info_index,
   &c_Normalizer::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_DOMCharacterData() {
   return NEWOBJ(c_DOMCharacterData)();
@@ -3445,7 +3445,7 @@ void c_DOMCharacterData::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMCharacterData::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMCharacterData = {
+const ObjectStaticCallbacks cw_DOMCharacterData = {
   c_DOMCharacterData::os_getInit,
   c_DOMCharacterData::os_get,
   c_DOMCharacterData::os_lval,
@@ -3454,7 +3454,7 @@ ObjectStaticCallbacks cw_DOMCharacterData = {
   (ObjectData*(*)(ObjectData*))coo_DOMCharacterData,
   c_DOMCharacterData::s_call_info_table,c_DOMCharacterData::s_call_info_index,
   &c_DOMCharacterData::s_class_name,
-  &cw_DOMNode
+  0,&cw_DOMNode
 };
 ObjectData *coo_DOMEntityReference() {
   return NEWOBJ(c_DOMEntityReference)();
@@ -3575,7 +3575,7 @@ void c_DOMEntityReference::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMEntityReference::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMEntityReference = {
+const ObjectStaticCallbacks cw_DOMEntityReference = {
   c_DOMEntityReference::os_getInit,
   c_DOMEntityReference::os_get,
   c_DOMEntityReference::os_lval,
@@ -3584,7 +3584,7 @@ ObjectStaticCallbacks cw_DOMEntityReference = {
   (ObjectData*(*)(ObjectData*))coo_DOMEntityReference,
   c_DOMEntityReference::s_call_info_table,c_DOMEntityReference::s_call_info_index,
   &c_DOMEntityReference::s_class_name,
-  &cw_DOMNode
+  0,&cw_DOMNode
 };
 ObjectData *coo_SimpleXMLElementIterator() {
   return NEWOBJ(c_SimpleXMLElementIterator)();
@@ -3791,7 +3791,7 @@ void c_SimpleXMLElementIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SimpleXMLElementIterator::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_SimpleXMLElementIterator = {
+const ObjectStaticCallbacks cw_SimpleXMLElementIterator = {
   c_SimpleXMLElementIterator::os_getInit,
   c_SimpleXMLElementIterator::os_get,
   c_SimpleXMLElementIterator::os_lval,
@@ -3800,7 +3800,7 @@ ObjectStaticCallbacks cw_SimpleXMLElementIterator = {
   (ObjectData*(*)(ObjectData*))coo_SimpleXMLElementIterator,
   c_SimpleXMLElementIterator::s_call_info_table,c_SimpleXMLElementIterator::s_call_info_index,
   &c_SimpleXMLElementIterator::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_GeneratorClosure() {
   return NEWOBJ(c_GeneratorClosure)();
@@ -3910,7 +3910,7 @@ void c_GeneratorClosure::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_GeneratorClosure::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_GeneratorClosure = {
+const ObjectStaticCallbacks cw_GeneratorClosure = {
   c_GeneratorClosure::os_getInit,
   c_GeneratorClosure::os_get,
   c_GeneratorClosure::os_lval,
@@ -3919,7 +3919,7 @@ ObjectStaticCallbacks cw_GeneratorClosure = {
   (ObjectData*(*)(ObjectData*))coo_GeneratorClosure,
   c_GeneratorClosure::s_call_info_table,c_GeneratorClosure::s_call_info_index,
   &c_GeneratorClosure::s_class_name,
-  &cw_Closure
+  0,&cw_Closure
 };
 ObjectData *coo_DateTimeZone() {
   return NEWOBJ(c_DateTimeZone)();
@@ -4170,7 +4170,7 @@ void c_DateTimeZone::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DateTimeZone::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DateTimeZone = {
+const ObjectStaticCallbacks cw_DateTimeZone = {
   c_DateTimeZone::os_getInit,
   c_DateTimeZone::os_get,
   c_DateTimeZone::os_lval,
@@ -4179,7 +4179,7 @@ ObjectStaticCallbacks cw_DateTimeZone = {
   (ObjectData*(*)(ObjectData*))coo_DateTimeZone,
   c_DateTimeZone::s_call_info_table,c_DateTimeZone::s_call_info_index,
   &c_DateTimeZone::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_DOMNodeIterator() {
   return NEWOBJ(c_DOMNodeIterator)();
@@ -4386,7 +4386,7 @@ void c_DOMNodeIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMNodeIterator::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMNodeIterator = {
+const ObjectStaticCallbacks cw_DOMNodeIterator = {
   c_DOMNodeIterator::os_getInit,
   c_DOMNodeIterator::os_get,
   c_DOMNodeIterator::os_lval,
@@ -4395,7 +4395,7 @@ ObjectStaticCallbacks cw_DOMNodeIterator = {
   (ObjectData*(*)(ObjectData*))coo_DOMNodeIterator,
   c_DOMNodeIterator::s_call_info_table,c_DOMNodeIterator::s_call_info_index,
   &c_DOMNodeIterator::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_DOMImplementation() {
   return NEWOBJ(c_DOMImplementation)();
@@ -4604,7 +4604,7 @@ void c_DOMImplementation::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMImplementation::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMImplementation = {
+const ObjectStaticCallbacks cw_DOMImplementation = {
   c_DOMImplementation::os_getInit,
   c_DOMImplementation::os_get,
   c_DOMImplementation::os_lval,
@@ -4613,7 +4613,7 @@ ObjectStaticCallbacks cw_DOMImplementation = {
   (ObjectData*(*)(ObjectData*))coo_DOMImplementation,
   c_DOMImplementation::s_call_info_table,c_DOMImplementation::s_call_info_index,
   &c_DOMImplementation::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_SoapHeader() {
   return NEWOBJ(c_SoapHeader)();
@@ -4764,7 +4764,7 @@ void c_SoapHeader::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapHeader::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_SoapHeader = {
+const ObjectStaticCallbacks cw_SoapHeader = {
   c_SoapHeader::os_getInit,
   c_SoapHeader::os_get,
   c_SoapHeader::os_lval,
@@ -4773,7 +4773,7 @@ ObjectStaticCallbacks cw_SoapHeader = {
   (ObjectData*(*)(ObjectData*))coo_SoapHeader,
   c_SoapHeader::s_call_info_table,c_SoapHeader::s_call_info_index,
   &c_SoapHeader::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_DOMNotation() {
   return NEWOBJ(c_DOMNotation)();
@@ -4962,7 +4962,7 @@ void c_DOMNotation::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMNotation::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMNotation = {
+const ObjectStaticCallbacks cw_DOMNotation = {
   c_DOMNotation::os_getInit,
   c_DOMNotation::os_get,
   c_DOMNotation::os_lval,
@@ -4971,7 +4971,7 @@ ObjectStaticCallbacks cw_DOMNotation = {
   (ObjectData*(*)(ObjectData*))coo_DOMNotation,
   c_DOMNotation::s_call_info_table,c_DOMNotation::s_call_info_index,
   &c_DOMNotation::s_class_name,
-  &cw_DOMNode
+  0,&cw_DOMNode
 };
 ObjectData *coo_DebuggerProxy() {
   return NEWOBJ(c_DebuggerProxy)();
@@ -5126,7 +5126,7 @@ void c_DebuggerProxy::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DebuggerProxy::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DebuggerProxy = {
+const ObjectStaticCallbacks cw_DebuggerProxy = {
   c_DebuggerProxy::os_getInit,
   c_DebuggerProxy::os_get,
   c_DebuggerProxy::os_lval,
@@ -5135,7 +5135,7 @@ ObjectStaticCallbacks cw_DebuggerProxy = {
   (ObjectData*(*)(ObjectData*))coo_DebuggerProxy,
   c_DebuggerProxy::s_call_info_table,c_DebuggerProxy::s_call_info_index,
   &c_DebuggerProxy::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_Memcached() {
   return NEWOBJ(c_Memcached)();
@@ -6479,7 +6479,7 @@ void c_Memcached::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Memcached::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_Memcached = {
+const ObjectStaticCallbacks cw_Memcached = {
   c_Memcached::os_getInit,
   c_Memcached::os_get,
   c_Memcached::os_lval,
@@ -6488,7 +6488,7 @@ ObjectStaticCallbacks cw_Memcached = {
   (ObjectData*(*)(ObjectData*))coo_Memcached,
   c_Memcached::s_call_info_table,c_Memcached::s_call_info_index,
   &c_Memcached::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_XMLReader() {
   return NEWOBJ(c_XMLReader)();
@@ -7283,7 +7283,7 @@ void c_XMLReader::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_XMLReader::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_XMLReader = {
+const ObjectStaticCallbacks cw_XMLReader = {
   c_XMLReader::os_getInit,
   c_XMLReader::os_get,
   c_XMLReader::os_lval,
@@ -7292,7 +7292,7 @@ ObjectStaticCallbacks cw_XMLReader = {
   (ObjectData*(*)(ObjectData*))coo_XMLReader,
   c_XMLReader::s_call_info_table,c_XMLReader::s_call_info_index,
   &c_XMLReader::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_DOMComment() {
   return NEWOBJ(c_DOMComment)();
@@ -7419,7 +7419,7 @@ void c_DOMComment::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMComment::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMComment = {
+const ObjectStaticCallbacks cw_DOMComment = {
   c_DOMComment::os_getInit,
   c_DOMComment::os_get,
   c_DOMComment::os_lval,
@@ -7428,7 +7428,7 @@ ObjectStaticCallbacks cw_DOMComment = {
   (ObjectData*(*)(ObjectData*))coo_DOMComment,
   c_DOMComment::s_call_info_table,c_DOMComment::s_call_info_index,
   &c_DOMComment::s_class_name,
-  &cw_DOMCharacterData
+  0,&cw_DOMCharacterData
 };
 ObjectData *coo_SQLite3() {
   return NEWOBJ(c_SQLite3)();
@@ -7944,7 +7944,7 @@ void c_SQLite3::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SQLite3::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_SQLite3 = {
+const ObjectStaticCallbacks cw_SQLite3 = {
   c_SQLite3::os_getInit,
   c_SQLite3::os_get,
   c_SQLite3::os_lval,
@@ -7953,7 +7953,7 @@ ObjectStaticCallbacks cw_SQLite3 = {
   (ObjectData*(*)(ObjectData*))coo_SQLite3,
   c_SQLite3::s_call_info_table,c_SQLite3::s_call_info_index,
   &c_SQLite3::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_DOMAttr() {
   return NEWOBJ(c_DOMAttr)();
@@ -8181,7 +8181,7 @@ void c_DOMAttr::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMAttr::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMAttr = {
+const ObjectStaticCallbacks cw_DOMAttr = {
   c_DOMAttr::os_getInit,
   c_DOMAttr::os_get,
   c_DOMAttr::os_lval,
@@ -8190,7 +8190,7 @@ ObjectStaticCallbacks cw_DOMAttr = {
   (ObjectData*(*)(ObjectData*))coo_DOMAttr,
   c_DOMAttr::s_call_info_table,c_DOMAttr::s_call_info_index,
   &c_DOMAttr::s_class_name,
-  &cw_DOMNode
+  0,&cw_DOMNode
 };
 ObjectData *coo_SoapVar() {
   return NEWOBJ(c_SoapVar)();
@@ -8350,7 +8350,7 @@ void c_SoapVar::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapVar::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_SoapVar = {
+const ObjectStaticCallbacks cw_SoapVar = {
   c_SoapVar::os_getInit,
   c_SoapVar::os_get,
   c_SoapVar::os_lval,
@@ -8359,7 +8359,7 @@ ObjectStaticCallbacks cw_SoapVar = {
   (ObjectData*(*)(ObjectData*))coo_SoapVar,
   c_SoapVar::s_call_info_table,c_SoapVar::s_call_info_index,
   &c_SoapVar::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_DOMNamedNodeMap() {
   return NEWOBJ(c_DOMNamedNodeMap)();
@@ -8646,7 +8646,7 @@ void c_DOMNamedNodeMap::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMNamedNodeMap::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMNamedNodeMap = {
+const ObjectStaticCallbacks cw_DOMNamedNodeMap = {
   c_DOMNamedNodeMap::os_getInit,
   c_DOMNamedNodeMap::os_get,
   c_DOMNamedNodeMap::os_lval,
@@ -8655,7 +8655,7 @@ ObjectStaticCallbacks cw_DOMNamedNodeMap = {
   (ObjectData*(*)(ObjectData*))coo_DOMNamedNodeMap,
   c_DOMNamedNodeMap::s_call_info_table,c_DOMNamedNodeMap::s_call_info_index,
   &c_DOMNamedNodeMap::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_SQLite3Result() {
   return NEWOBJ(c_SQLite3Result)();
@@ -8901,7 +8901,7 @@ void c_SQLite3Result::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SQLite3Result::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_SQLite3Result = {
+const ObjectStaticCallbacks cw_SQLite3Result = {
   c_SQLite3Result::os_getInit,
   c_SQLite3Result::os_get,
   c_SQLite3Result::os_lval,
@@ -8910,7 +8910,7 @@ ObjectStaticCallbacks cw_SQLite3Result = {
   (ObjectData*(*)(ObjectData*))coo_SQLite3Result,
   c_SQLite3Result::s_call_info_table,c_SQLite3Result::s_call_info_index,
   &c_SQLite3Result::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_SimpleXMLElement() {
   return NEWOBJ(c_SimpleXMLElement)();
@@ -9616,7 +9616,7 @@ void c_SimpleXMLElement::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SimpleXMLElement::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_SimpleXMLElement = {
+const ObjectStaticCallbacks cw_SimpleXMLElement = {
   c_SimpleXMLElement::os_getInit,
   c_SimpleXMLElement::os_get,
   c_SimpleXMLElement::os_lval,
@@ -9625,7 +9625,7 @@ ObjectStaticCallbacks cw_SimpleXMLElement = {
   (ObjectData*(*)(ObjectData*))coo_SimpleXMLElement,
   c_SimpleXMLElement::s_call_info_table,c_SimpleXMLElement::s_call_info_index,
   &c_SimpleXMLElement::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_Memcache() {
   return NEWOBJ(c_Memcache)();
@@ -10353,7 +10353,7 @@ void c_Memcache::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Memcache::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_Memcache = {
+const ObjectStaticCallbacks cw_Memcache = {
   c_Memcache::os_getInit,
   c_Memcache::os_get,
   c_Memcache::os_lval,
@@ -10362,7 +10362,7 @@ ObjectStaticCallbacks cw_Memcache = {
   (ObjectData*(*)(ObjectData*))coo_Memcache,
   c_Memcache::s_call_info_table,c_Memcache::s_call_info_index,
   &c_Memcache::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_DOMProcessingInstruction() {
   return NEWOBJ(c_DOMProcessingInstruction)();
@@ -10571,7 +10571,7 @@ void c_DOMProcessingInstruction::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMProcessingInstruction::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMProcessingInstruction = {
+const ObjectStaticCallbacks cw_DOMProcessingInstruction = {
   c_DOMProcessingInstruction::os_getInit,
   c_DOMProcessingInstruction::os_get,
   c_DOMProcessingInstruction::os_lval,
@@ -10580,7 +10580,7 @@ ObjectStaticCallbacks cw_DOMProcessingInstruction = {
   (ObjectData*(*)(ObjectData*))coo_DOMProcessingInstruction,
   c_DOMProcessingInstruction::s_call_info_table,c_DOMProcessingInstruction::s_call_info_index,
   &c_DOMProcessingInstruction::s_class_name,
-  &cw_DOMNode
+  0,&cw_DOMNode
 };
 ObjectData *coo_EncodingMatch() {
   return NEWOBJ(c_EncodingMatch)();
@@ -10787,7 +10787,7 @@ void c_EncodingMatch::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_EncodingMatch::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_EncodingMatch = {
+const ObjectStaticCallbacks cw_EncodingMatch = {
   c_EncodingMatch::os_getInit,
   c_EncodingMatch::os_get,
   c_EncodingMatch::os_lval,
@@ -10796,7 +10796,7 @@ ObjectStaticCallbacks cw_EncodingMatch = {
   (ObjectData*(*)(ObjectData*))coo_EncodingMatch,
   c_EncodingMatch::s_call_info_table,c_EncodingMatch::s_call_info_index,
   &c_EncodingMatch::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_PDOStatement() {
   return NEWOBJ(c_PDOStatement)();
@@ -11555,7 +11555,7 @@ void c_PDOStatement::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_PDOStatement::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_PDOStatement = {
+const ObjectStaticCallbacks cw_PDOStatement = {
   c_PDOStatement::os_getInit,
   c_PDOStatement::os_get,
   c_PDOStatement::os_lval,
@@ -11564,7 +11564,7 @@ ObjectStaticCallbacks cw_PDOStatement = {
   (ObjectData*(*)(ObjectData*))coo_PDOStatement,
   c_PDOStatement::s_call_info_table,c_PDOStatement::s_call_info_index,
   &c_PDOStatement::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_SoapClient() {
   return NEWOBJ(c_SoapClient)();
@@ -12000,7 +12000,7 @@ void c_SoapClient::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapClient::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_SoapClient = {
+const ObjectStaticCallbacks cw_SoapClient = {
   c_SoapClient::os_getInit,
   c_SoapClient::os_get,
   c_SoapClient::os_lval,
@@ -12009,7 +12009,7 @@ ObjectStaticCallbacks cw_SoapClient = {
   (ObjectData*(*)(ObjectData*))coo_SoapClient,
   c_SoapClient::s_call_info_table,c_SoapClient::s_call_info_index,
   &c_SoapClient::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_SoapParam() {
   return NEWOBJ(c_SoapParam)();
@@ -12133,7 +12133,7 @@ void c_SoapParam::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapParam::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_SoapParam = {
+const ObjectStaticCallbacks cw_SoapParam = {
   c_SoapParam::os_getInit,
   c_SoapParam::os_get,
   c_SoapParam::os_lval,
@@ -12142,7 +12142,7 @@ ObjectStaticCallbacks cw_SoapParam = {
   (ObjectData*(*)(ObjectData*))coo_SoapParam,
   c_SoapParam::s_call_info_table,c_SoapParam::s_call_info_index,
   &c_SoapParam::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_DateTime() {
   return NEWOBJ(c_DateTime)();
@@ -12518,7 +12518,7 @@ void c_DateTime::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DateTime::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DateTime = {
+const ObjectStaticCallbacks cw_DateTime = {
   c_DateTime::os_getInit,
   c_DateTime::os_get,
   c_DateTime::os_lval,
@@ -12527,7 +12527,7 @@ ObjectStaticCallbacks cw_DateTime = {
   (ObjectData*(*)(ObjectData*))coo_DateTime,
   c_DateTime::s_call_info_table,c_DateTime::s_call_info_index,
   &c_DateTime::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_Collator() {
   return NEWOBJ(c_Collator)();
@@ -13008,7 +13008,7 @@ void c_Collator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Collator::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_Collator = {
+const ObjectStaticCallbacks cw_Collator = {
   c_Collator::os_getInit,
   c_Collator::os_get,
   c_Collator::os_lval,
@@ -13017,7 +13017,7 @@ ObjectStaticCallbacks cw_Collator = {
   (ObjectData*(*)(ObjectData*))coo_Collator,
   c_Collator::s_call_info_table,c_Collator::s_call_info_index,
   &c_Collator::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_PDO() {
   return NEWOBJ(c_PDO)();
@@ -13736,7 +13736,7 @@ void c_PDO::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_PDO::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_PDO = {
+const ObjectStaticCallbacks cw_PDO = {
   c_PDO::os_getInit,
   c_PDO::os_get,
   c_PDO::os_lval,
@@ -13745,7 +13745,7 @@ ObjectStaticCallbacks cw_PDO = {
   (ObjectData*(*)(ObjectData*))coo_PDO,
   c_PDO::s_call_info_table,c_PDO::s_call_info_index,
   &c_PDO::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_ImageSprite() {
   return NEWOBJ(c_ImageSprite)();
@@ -14143,7 +14143,7 @@ void c_ImageSprite::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ImageSprite::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_ImageSprite = {
+const ObjectStaticCallbacks cw_ImageSprite = {
   c_ImageSprite::os_getInit,
   c_ImageSprite::os_get,
   c_ImageSprite::os_lval,
@@ -14152,7 +14152,7 @@ ObjectStaticCallbacks cw_ImageSprite = {
   (ObjectData*(*)(ObjectData*))coo_ImageSprite,
   c_ImageSprite::s_call_info_table,c_ImageSprite::s_call_info_index,
   &c_ImageSprite::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_Continuation() {
   return NEWOBJ(c_Continuation)();
@@ -14676,7 +14676,7 @@ void c_Continuation::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Continuation::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_Continuation = {
+const ObjectStaticCallbacks cw_Continuation = {
   c_Continuation::os_getInit,
   c_Continuation::os_get,
   c_Continuation::os_lval,
@@ -14685,7 +14685,7 @@ ObjectStaticCallbacks cw_Continuation = {
   (ObjectData*(*)(ObjectData*))coo_Continuation,
   c_Continuation::s_call_info_table,c_Continuation::s_call_info_index,
   &c_Continuation::s_class_name,
-  0
+  &c_Continuation::os_prop_table,0
 };
 ObjectData *coo_DOMEntity() {
   return NEWOBJ(c_DOMEntity)();
@@ -14874,7 +14874,7 @@ void c_DOMEntity::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMEntity::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMEntity = {
+const ObjectStaticCallbacks cw_DOMEntity = {
   c_DOMEntity::os_getInit,
   c_DOMEntity::os_get,
   c_DOMEntity::os_lval,
@@ -14883,7 +14883,7 @@ ObjectStaticCallbacks cw_DOMEntity = {
   (ObjectData*(*)(ObjectData*))coo_DOMEntity,
   c_DOMEntity::s_call_info_table,c_DOMEntity::s_call_info_index,
   &c_DOMEntity::s_class_name,
-  &cw_DOMNode
+  0,&cw_DOMNode
 };
 ObjectData *coo_XMLWriter() {
   return NEWOBJ(c_XMLWriter)();
@@ -16063,7 +16063,7 @@ void c_XMLWriter::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_XMLWriter::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_XMLWriter = {
+const ObjectStaticCallbacks cw_XMLWriter = {
   c_XMLWriter::os_getInit,
   c_XMLWriter::os_get,
   c_XMLWriter::os_lval,
@@ -16072,7 +16072,7 @@ ObjectStaticCallbacks cw_XMLWriter = {
   (ObjectData*(*)(ObjectData*))coo_XMLWriter,
   c_XMLWriter::s_call_info_table,c_XMLWriter::s_call_info_index,
   &c_XMLWriter::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_DOMXPath() {
   return NEWOBJ(c_DOMXPath)();
@@ -16386,7 +16386,7 @@ void c_DOMXPath::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMXPath::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMXPath = {
+const ObjectStaticCallbacks cw_DOMXPath = {
   c_DOMXPath::os_getInit,
   c_DOMXPath::os_get,
   c_DOMXPath::os_lval,
@@ -16395,7 +16395,7 @@ ObjectStaticCallbacks cw_DOMXPath = {
   (ObjectData*(*)(ObjectData*))coo_DOMXPath,
   c_DOMXPath::s_call_info_table,c_DOMXPath::s_call_info_index,
   &c_DOMXPath::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_SoapServer() {
   return NEWOBJ(c_SoapServer)();
@@ -16746,7 +16746,7 @@ void c_SoapServer::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapServer::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_SoapServer = {
+const ObjectStaticCallbacks cw_SoapServer = {
   c_SoapServer::os_getInit,
   c_SoapServer::os_get,
   c_SoapServer::os_lval,
@@ -16755,7 +16755,7 @@ ObjectStaticCallbacks cw_SoapServer = {
   (ObjectData*(*)(ObjectData*))coo_SoapServer,
   c_SoapServer::s_call_info_table,c_SoapServer::s_call_info_index,
   &c_SoapServer::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_DOMNode() {
   return NEWOBJ(c_DOMNode)();
@@ -17385,7 +17385,7 @@ void c_DOMNode::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMNode::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMNode = {
+const ObjectStaticCallbacks cw_DOMNode = {
   c_DOMNode::os_getInit,
   c_DOMNode::os_get,
   c_DOMNode::os_lval,
@@ -17394,7 +17394,7 @@ ObjectStaticCallbacks cw_DOMNode = {
   (ObjectData*(*)(ObjectData*))coo_DOMNode,
   c_DOMNode::s_call_info_table,c_DOMNode::s_call_info_index,
   &c_DOMNode::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_SpoofChecker() {
   return NEWOBJ(c_SpoofChecker)();
@@ -17644,7 +17644,7 @@ void c_SpoofChecker::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SpoofChecker::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_SpoofChecker = {
+const ObjectStaticCallbacks cw_SpoofChecker = {
   c_SpoofChecker::os_getInit,
   c_SpoofChecker::os_get,
   c_SpoofChecker::os_lval,
@@ -17653,7 +17653,7 @@ ObjectStaticCallbacks cw_SpoofChecker = {
   (ObjectData*(*)(ObjectData*))coo_SpoofChecker,
   c_SpoofChecker::s_call_info_table,c_SpoofChecker::s_call_info_index,
   &c_SpoofChecker::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_DOMDocument() {
   return NEWOBJ(c_DOMDocument)();
@@ -18652,7 +18652,7 @@ void c_DOMDocument::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMDocument::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMDocument = {
+const ObjectStaticCallbacks cw_DOMDocument = {
   c_DOMDocument::os_getInit,
   c_DOMDocument::os_get,
   c_DOMDocument::os_lval,
@@ -18661,7 +18661,7 @@ ObjectStaticCallbacks cw_DOMDocument = {
   (ObjectData*(*)(ObjectData*))coo_DOMDocument,
   c_DOMDocument::s_call_info_table,c_DOMDocument::s_call_info_index,
   &c_DOMDocument::s_class_name,
-  &cw_DOMNode
+  0,&cw_DOMNode
 };
 ObjectData *coo_LibXMLError() {
   return NEWOBJ(c_LibXMLError)();
@@ -18771,7 +18771,7 @@ void c_LibXMLError::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_LibXMLError::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_LibXMLError = {
+const ObjectStaticCallbacks cw_LibXMLError = {
   c_LibXMLError::os_getInit,
   c_LibXMLError::os_get,
   c_LibXMLError::os_lval,
@@ -18780,7 +18780,7 @@ ObjectStaticCallbacks cw_LibXMLError = {
   (ObjectData*(*)(ObjectData*))coo_LibXMLError,
   c_LibXMLError::s_call_info_table,c_LibXMLError::s_call_info_index,
   &c_LibXMLError::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_DOMElement() {
   return NEWOBJ(c_DOMElement)();
@@ -19478,7 +19478,7 @@ void c_DOMElement::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMElement::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMElement = {
+const ObjectStaticCallbacks cw_DOMElement = {
   c_DOMElement::os_getInit,
   c_DOMElement::os_get,
   c_DOMElement::os_lval,
@@ -19487,7 +19487,7 @@ ObjectStaticCallbacks cw_DOMElement = {
   (ObjectData*(*)(ObjectData*))coo_DOMElement,
   c_DOMElement::s_call_info_table,c_DOMElement::s_call_info_index,
   &c_DOMElement::s_class_name,
-  &cw_DOMNode
+  0,&cw_DOMNode
 };
 struct hashNodeCTD {
   int64 hash;
@@ -19700,107 +19700,42 @@ Variant get_builtin_class_constant(CStrRef s, const char *constant, bool fatal /
 }
 
 // Class tables
-ClassPropTable cpt_Continuation;
-ClassPropTable cpt_GenericContinuation;
-static int ctInitializer() {
-  const char *ctMapData[] = {
-    (const char *)10, (const char *)10, (const char *)&cpt_Continuation, (const char *)NULL,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ssc9ae0c06, "\000Continuation\000obj"),
-    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_obj),
-    (const char *)9,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ss9621feb5, "\000Continuation\000args"),
-    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_args),
-    (const char *)8,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ss40877955, "\000Continuation\000label"),
-    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_label),
-    (const char *)4,
-    (const char *)256, (const char *)&NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index"),
-    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_index),
-    (const char *)4,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ss4e65aff3, "\000Continuation\000value"),
-    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_value),
-    (const char *)10,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ss19136311, "\000Continuation\000received"),
-    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_received),
-    (const char *)10,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ss0a6d9bb5, "\000Continuation\000origFuncName"),
-    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_origFuncName),
-    (const char *)7,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ss07090831, "\000Continuation\000called_class"),
-    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_called_class),
-    (const char *)7,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done"),
-    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_done),
-    (const char *)2,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ssde0dbfb2, "\000Continuation\000running"),
-    (const char *)GET_PROPERTY_OFFSET(c_Continuation, m_running),
-    (const char *)2,
+static const ClassPropTableEntry cpt_table_entries[] = {
+  { 256, 9,GET_PROPERTY_OFFSET(c_Continuation, m_obj),&NAMSTR(s_sys_ssc9ae0c06, "\000Continuation\000obj") },
+  { 256, 8,GET_PROPERTY_OFFSET(c_Continuation, m_args),&NAMSTR(s_sys_ss9621feb5, "\000Continuation\000args") },
+  { 256, 4,GET_PROPERTY_OFFSET(c_Continuation, m_label),&NAMSTR(s_sys_ss40877955, "\000Continuation\000label") },
+  { 256, 4,GET_PROPERTY_OFFSET(c_Continuation, m_index),&NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index") },
+  { 256, 10,GET_PROPERTY_OFFSET(c_Continuation, m_value),&NAMSTR(s_sys_ss4e65aff3, "\000Continuation\000value") },
+  { 256, 10,GET_PROPERTY_OFFSET(c_Continuation, m_received),&NAMSTR(s_sys_ss19136311, "\000Continuation\000received") },
+  { 256, 7,GET_PROPERTY_OFFSET(c_Continuation, m_origFuncName),&NAMSTR(s_sys_ss0a6d9bb5, "\000Continuation\000origFuncName") },
+  { 256, 7,GET_PROPERTY_OFFSET(c_Continuation, m_called_class),&NAMSTR(s_sys_ss07090831, "\000Continuation\000called_class") },
+  { 256, 2,GET_PROPERTY_OFFSET(c_Continuation, m_done),&NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done") },
+  { 256, 2,GET_PROPERTY_OFFSET(c_Continuation, m_running),&NAMSTR(s_sys_ssde0dbfb2, "\000Continuation\000running") },
 
-    (const char *)1, (const char *)1, (const char *)&cpt_GenericContinuation, (const char *)&cpt_Continuation,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ss020cf65e, "\000GenericContinuation\000vars"),
-    (const char *)GET_PROPERTY_OFFSET(c_GenericContinuation, m_vars),
-    (const char *)8,
+  { 256, 8,GET_PROPERTY_OFFSET(c_GenericContinuation, m_vars),&NAMSTR(s_sys_ss020cf65e, "\000GenericContinuation\000vars") },
 
-    NULL, NULL, NULL,
-  };
-  static ClassPropTableEntry entries[11];
-  static ClassPropTableEntry *pentries[13];
-  return ClassInfo::InitClassPropTable(ctMapData, entries, pentries);
-}
-static int ct_initializer = ctInitializer();
-
-// o_getClassPropTable
-const ClassPropTable *c_Closure::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_Collator::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_Continuation::o_getClassPropTable() const { return &cpt_Continuation; }
-const ClassPropTable *c_DOMAttr::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMCDATASection::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMCharacterData::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMComment::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMDocument::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMDocumentFragment::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMDocumentType::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMElement::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMEntity::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMEntityReference::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMImplementation::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMNamedNodeMap::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMNode::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMNodeIterator::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMNodeList::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMNotation::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMProcessingInstruction::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMText::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DOMXPath::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DateTime::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DateTimeZone::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DebuggerClient::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_DebuggerProxy::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_EncodingDetector::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_EncodingMatch::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_GeneratorClosure::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_GenericContinuation::o_getClassPropTable() const { return &cpt_GenericContinuation; }
-const ClassPropTable *c_ImageSprite::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_LibXMLError::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_Locale::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_Memcache::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_Memcached::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_Normalizer::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_PDO::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_PDOStatement::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_SQLite3::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_SQLite3Result::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_SQLite3Stmt::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_SimpleXMLElement::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_SimpleXMLElementIterator::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_SoapClient::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_SoapHeader::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_SoapParam::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_SoapServer::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_SoapVar::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_SpoofChecker::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_XMLReader::o_getClassPropTable() const { return NULL; }
-const ClassPropTable *c_XMLWriter::o_getClassPropTable() const { return NULL; }
+};
+static const ClassPropTableEntry *cpt_private_entries[] = {
+  cpt_table_entries+0,
+  cpt_table_entries+1,
+  cpt_table_entries+2,
+  cpt_table_entries+3,
+  cpt_table_entries+4,
+  cpt_table_entries+5,
+  cpt_table_entries+6,
+  cpt_table_entries+7,
+  cpt_table_entries+8,
+  cpt_table_entries+9,
+  0,
+  cpt_table_entries+10,
+  0,
+};
+const ClassPropTable c_Continuation::os_prop_table = {
+  10,10,0,cpt_table_entries+0,cpt_private_entries+0
+};
+const ClassPropTable c_GenericContinuation::os_prop_table = {
+  1,1,&c_Continuation::os_prop_table,cpt_table_entries+10,cpt_private_entries+11
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

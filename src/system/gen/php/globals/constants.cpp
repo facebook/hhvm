@@ -2068,9 +2068,5 @@ const bool k_ZEND_THREAD_SAFE = false;
 extern CallInfo ci_;
 /* preface finishes */
 
-// Class tables
-
-// o_getClassPropTable
-
 ///////////////////////////////////////////////////////////////////////////////
 }

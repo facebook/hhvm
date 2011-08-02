@@ -25,7 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/stdclass.php line 4 */
 FORWARD_DECLARE_CLASS(stdClass);
-extern ObjectStaticCallbacks cw_stdClass;
+extern const ObjectStaticCallbacks cw_stdClass;
 class c_stdClass : public ExtObjectData {
   public:
 

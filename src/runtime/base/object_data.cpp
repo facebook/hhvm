@@ -35,7 +35,7 @@ namespace HPHP {
 // statics
 
 // current maximum object identifier
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(int, ObjectData::os_max_id);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(int, ObjectData::os_max_id);
 
 int ObjectData::GetMaxId() {
   return *(ObjectData::os_max_id.getCheck());
@@ -102,6 +102,14 @@ CStrRef ObjectData::o_getClassName() const {
     return o_getClassNameHook();
   }
   return *osc->cls;
+}
+
+const ClassPropTable *ObjectData::o_getClassPropTable() const {
+  const ObjectStaticCallbacks *osc = o_get_callbacks();
+  if (UNLIKELY(!osc)) {
+    return 0;
+  }
+  return osc->cpt;
 }
 
 CStrRef ObjectData::o_getClassNameHook() const {

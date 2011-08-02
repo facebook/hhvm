@@ -27,7 +27,7 @@ namespace HPHP {
 
 /* SRC: classes/directoryiterator.php line 122 */
 FORWARD_DECLARE_CLASS(RecursiveDirectoryIterator);
-extern ObjectStaticCallbacks cw_RecursiveDirectoryIterator;
+extern const ObjectStaticCallbacks cw_RecursiveDirectoryIterator;
 class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   public:
 

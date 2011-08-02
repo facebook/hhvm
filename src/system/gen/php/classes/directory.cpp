@@ -223,7 +223,7 @@ void c_Directory::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Directory::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_Directory = {
+const ObjectStaticCallbacks cw_Directory = {
   c_Directory::os_getInit,
   c_Directory::os_get,
   c_Directory::os_lval,
@@ -232,7 +232,7 @@ ObjectStaticCallbacks cw_Directory = {
   (ObjectData*(*)(ObjectData*))coo_Directory,
   c_Directory::s_call_info_table,c_Directory::s_call_info_index,
   &c_Directory::s_class_name,
-  0
+  &c_Directory::os_prop_table,0
 };
 /* SRC: classes/directory.php line 7 */
 void c_Directory::t___construct(Variant v_path) {
@@ -269,27 +269,17 @@ ObjectData *coo_Directory() {
 }
 
 // Class tables
-ClassPropTable cpt_Directory;
-static int ctInitializer() {
-  const char *ctMapData[] = {
-    (const char *)2, (const char *)0, (const char *)&cpt_Directory, (const char *)NULL,
-    (const char *)64, (const char *)&NAMSTR(s_sys_ssf362b3c4, "path"),
-    (const char *)GET_PROPERTY_OFFSET(c_Directory, m_path),
-    (const char *)10,
-    (const char *)64, (const char *)&NAMSTR(s_sys_ss46eeef5c, "handle"),
-    (const char *)GET_PROPERTY_OFFSET(c_Directory, m_handle),
-    (const char *)10,
+static const ClassPropTableEntry cpt_table_entries[] = {
+  { 64, 10,GET_PROPERTY_OFFSET(c_Directory, m_path),&NAMSTR(s_sys_ssf362b3c4, "path") },
+  { 64, 10,GET_PROPERTY_OFFSET(c_Directory, m_handle),&NAMSTR(s_sys_ss46eeef5c, "handle") },
 
-    NULL, NULL, NULL,
-  };
-  static ClassPropTableEntry entries[2];
-  static ClassPropTableEntry *pentries[1];
-  return ClassInfo::InitClassPropTable(ctMapData, entries, pentries);
-}
-static int ct_initializer = ctInitializer();
-
-// o_getClassPropTable
-const ClassPropTable *c_Directory::o_getClassPropTable() const { return &cpt_Directory; }
+};
+static const ClassPropTableEntry *cpt_private_entries[] = {
+  0,
+};
+const ClassPropTable c_Directory::os_prop_table = {
+  2,0,0,cpt_table_entries+0,cpt_private_entries+0
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

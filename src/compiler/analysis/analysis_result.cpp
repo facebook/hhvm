@@ -3267,7 +3267,7 @@ void AnalysisResult::outputCPPRedeclaredClassImpl(CodeGenerator &cg) {
                 "    c_ObjectData::os_invoke,\n"
                 "    c_ObjectData::os_constant,\n"
                 "    coo_ObjectData,\n"
-                "    0,0,&s_%s,0\n"
+                "    0,0,&s_%s,0,0\n"
                 "  },\n"
                 "  -1\n"
                 "};\n",
@@ -4762,16 +4762,6 @@ void AnalysisResult::cloneRTTIFuncs(const char *RTTIDirectory) {
       }
     }
   }
-}
-
-StringToClassScopePtrVecMap AnalysisResult::getMergedClasses() {
-  StringToClassScopePtrVecMap merged(m_classDecs);
-  for (StringToClassScopePtrMap::const_iterator iter = m_systemClasses.begin();
-       iter != m_systemClasses.end(); ++iter) {
-    ClassScopePtr cls = iter->second;
-    merged[cls->getName()].push_back(cls);
-  }
-  return merged;
 }
 
 StringToClassScopePtrVecMap AnalysisResult::getExtensionClasses() {

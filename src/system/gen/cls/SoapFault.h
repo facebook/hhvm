@@ -26,7 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/soapfault.php line 3 */
 FORWARD_DECLARE_CLASS(SoapFault);
-extern ObjectStaticCallbacks cw_SoapFault;
+extern const ObjectStaticCallbacks cw_SoapFault;
 class c_SoapFault : public c_Exception {
   public:
 
@@ -52,7 +52,6 @@ class c_SoapFault : public c_Exception {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual const ClassPropTable *o_getClassPropTable() const;
   #define OMIT_JUMP_TABLE_CLASS_realProp_SoapFault 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapFault 1
 
@@ -65,6 +64,7 @@ class c_SoapFault : public c_Exception {
   static const int s_call_info_index[];
 
   public:
+  static const ClassPropTable os_prop_table;
   c_SoapFault() : m_faultcode(Variant::nullInit), m_faultcodens(Variant::nullInit), m_faultstring(Variant::nullInit), m_faultactor(Variant::nullInit), m_detail(Variant::nullInit), m__name(Variant::nullInit), m_headerfault(Variant::nullInit) {}
   public: void t___construct(Variant v_code, Variant v_message, Variant v_actor = null, Variant v_detail = null, Variant v_name = null, Variant v_header = null);
   public: c_SoapFault *create(CVarRef v_code, CVarRef v_message, CVarRef v_actor = null_variant, CVarRef v_detail = null_variant, CVarRef v_name = null_variant, CVarRef v_header = null_variant);

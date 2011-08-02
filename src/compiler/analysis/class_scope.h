@@ -374,6 +374,8 @@ public:
    */
   void outputCPPSupportMethodsImpl(CodeGenerator &cg, AnalysisResultPtr ar);
 
+  std::string getClassPropTableId(AnalysisResultPtr ar);
+
   /**
    * These output wrappers for class methods so that class definitions don't
    * have to be used in generating global jump tables.
@@ -452,8 +454,8 @@ public:
   }
 
   bool canSkipCreateMethod() const;
+  bool checkHasPropTable();
 
-  bool hasGetClassPropTable() const { return m_getClassPropTable; }
   typedef std::map<std::string,
                    std::pair<ClassScopePtr, std::vector<const Symbol *> > >
     ClassPropTableMap;
@@ -478,7 +480,6 @@ private:
   bool m_sep;
   bool m_needsCppCtor;
   bool m_needsInit;
-  bool m_getClassPropTable;
 
   std::set<JumpTableName> m_emptyJumpTables;
   std::set<std::string> m_usedLiteralStringsHeader;
@@ -520,8 +521,7 @@ private:
       const StringToFunctionScopePtrVecMap &funcScopes, bool fewArgs);
   hphp_const_char_imap<int> m_implemented;
 
-  ClassScopePtr getNextParentWithProp(AnalysisResultPtr ar,
-                                      ClassPropTableMap tables);
+  ClassScopePtr getNextParentWithProp(AnalysisResultPtr ar);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

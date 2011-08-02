@@ -25,7 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/xhprof.php line 6 */
 FORWARD_DECLARE_CLASS(XhprofFrame);
-extern ObjectStaticCallbacks cw_XhprofFrame;
+extern const ObjectStaticCallbacks cw_XhprofFrame;
 class c_XhprofFrame : public ExtObjectData {
   public:
 

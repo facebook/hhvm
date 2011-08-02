@@ -282,9 +282,6 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   cg.printSection("DECLARE_INSTANCE_PROP_OPS");
   cg_printf("public:\n");
 
-  if (classScope->hasGetClassPropTable()) {
-    cg_printf("virtual const ClassPropTable *o_getClassPropTable() const;\n");
-  }
   if (variables->hasJumpTable(VariableTable::JumpTableClassRealProp)) {
     cg_printf("virtual Variant *o_realProp(CStrRef s, int flags,\n");
     cg_printf("                            CStrRef context = null_string) "
@@ -483,6 +480,11 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                     m_originalName.c_str(),
                     dyn || !parCls ? "DynamicObjectData" :
                     parCls->getId().c_str());
+        }
+
+        if (classScope->checkHasPropTable()) {
+          cg_printf("static const ClassPropTable %sprop_table;\n",
+                    Option::ObjectStaticPrefix);
         }
 
         bool hasGet = classScope->getAttribute(

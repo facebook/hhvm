@@ -26,7 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 286 */
 FORWARD_DECLARE_CLASS(ErrorException);
-extern ObjectStaticCallbacks cw_ErrorException;
+extern const ObjectStaticCallbacks cw_ErrorException;
 class c_ErrorException : public c_Exception {
   public:
 
@@ -46,7 +46,6 @@ class c_ErrorException : public c_Exception {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual const ClassPropTable *o_getClassPropTable() const;
   #define OMIT_JUMP_TABLE_CLASS_realProp_ErrorException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ErrorException 1
 
@@ -59,6 +58,7 @@ class c_ErrorException : public c_Exception {
   static const int s_call_info_index[];
 
   public:
+  static const ClassPropTable os_prop_table;
   c_ErrorException() : m_severity(Variant::nullInit) {}
   public: void t___construct(Variant v_message = NAMSTR(s_sys_ss00000000, ""), Variant v_code = 0LL, Variant v_severity = 0LL, Variant v_filename = null, Variant v_lineno = null);
   public: c_ErrorException *create(CVarRef v_message = NAMVAR(s_sys_svs00000000, ""), CVarRef v_code = NAMVAR(s_sys_svif01bca90, 0LL), CVarRef v_severity = NAMVAR(s_sys_svif01bca90, 0LL), CVarRef v_filename = null_variant, CVarRef v_lineno = null_variant);

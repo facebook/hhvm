@@ -30,9 +30,5 @@ namespace HPHP {
 extern CallInfo ci_;
 /* preface finishes */
 
-// Class tables
-
-// o_getClassPropTable
-
 ///////////////////////////////////////////////////////////////////////////////
 }

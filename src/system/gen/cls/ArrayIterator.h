@@ -28,7 +28,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 329 */
 FORWARD_DECLARE_CLASS(ArrayIterator);
-extern ObjectStaticCallbacks cw_ArrayIterator;
+extern const ObjectStaticCallbacks cw_ArrayIterator;
 class c_ArrayIterator : public ExtObjectData {
   public:
 
@@ -49,7 +49,6 @@ class c_ArrayIterator : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual const ClassPropTable *o_getClassPropTable() const;
   #define OMIT_JUMP_TABLE_CLASS_realProp_ArrayIterator 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ArrayIterator 1
 
@@ -62,6 +61,7 @@ class c_ArrayIterator : public ExtObjectData {
   static const int s_call_info_index[];
 
   public:
+  static const ClassPropTable os_prop_table;
   c_ArrayIterator() : m_arr(Variant::nullInit), m_flags(Variant::nullInit) {}
   public: void t___construct(Variant v_array, Variant v_flags = 0LL);
   public: c_ArrayIterator *create(CVarRef v_array, CVarRef v_flags = NAMVAR(s_sys_svif01bca90, 0LL));

@@ -847,7 +847,7 @@ ClassInfo::MethodInfo::~MethodInfo() {
 void ClassInfo::GetArray(const ObjectData *obj, const ClassPropTable *ct,
                          Array &props, bool pubOnly) {
   while (ct) {
-    ClassPropTableEntry *p = ct->m_entries;
+    const ClassPropTableEntry *p = ct->m_entries;
     for (int64 i = 0; i < ct->m_count; i++, p++) {
       if (!pubOnly || p->isPublic()) {
         if (p->isOverride()) {
@@ -939,8 +939,8 @@ void ClassInfo::GetArray(const ObjectData *obj, const ClassPropTable *ct,
 void ClassInfo::SetArray(ObjectData *obj, const ClassPropTable *ct,
                          CArrRef props) {
   while (ct) {
-    for (ClassPropTableEntry **pp = ct->m_pentries; *pp; pp++) {
-      ClassPropTableEntry *p = *pp;
+    for (const ClassPropTableEntry **pp = ct->m_pentries; *pp; pp++) {
+      const ClassPropTableEntry *p = *pp;
       ASSERT(p->isPrivate());
       const char *addr = ((const char *)obj) + p->offset;
       if (LIKELY(p->type == KindOfVariant)) {
@@ -973,32 +973,6 @@ void ClassInfo::SetArray(ObjectData *obj, const ClassPropTable *ct,
     }
   }
   obj->o_setArray(props);
-}
-
-int ClassInfo::InitClassPropTable(const char *ctMapData[],
-                                  ClassPropTableEntry entries[],
-                                  ClassPropTableEntry *pentries[]) {
-  ClassPropTableEntry *ce = entries;
-  ClassPropTableEntry **cpe = pentries;
-  for (const char **s = ctMapData; *s;) {
-    int64 count = (int64)(*s++);
-    int64 pcount = (int64)(*s++);
-    ClassPropTable *ct = (ClassPropTable *)(*s++);
-    ClassPropTable *pt = (ClassPropTable *)(*s++);
-    new (ct) ClassPropTable(count, pcount, pt, ce, cpe);
-    ClassPropTableEntry *t = ce;
-    for (int64 i = 0; i < count; i++, ce++) {
-      ce->flags = (int64)(*s++);
-      ce->keyName = (StaticString *)(*s++);
-      ce->offset = (int64)(*s++);
-      ce->type = (int64)(*s++);
-    }
-    for (int64 i = 0; i < count; i++, t++) {
-      if (t->isPrivate()) *cpe++ = t;
-    }
-    *cpe++ = NULL;
-  }
-  return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

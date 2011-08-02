@@ -130,7 +130,7 @@ void c_PDOException::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_PDOException::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_PDOException = {
+const ObjectStaticCallbacks cw_PDOException = {
   c_PDOException::os_getInit,
   c_PDOException::os_get,
   c_PDOException::os_lval,
@@ -139,7 +139,7 @@ ObjectStaticCallbacks cw_PDOException = {
   (ObjectData*(*)(ObjectData*))coo_PDOException,
   c_PDOException::s_call_info_table,c_PDOException::s_call_info_index,
   &c_PDOException::s_class_name,
-  &cw_Exception
+  &c_Exception::os_prop_table,&cw_Exception
 };
 /* SRC: classes/exception.php line 318 */
 void c_PDOException::t___construct() {
@@ -208,7 +208,7 @@ void c_UnexpectedValueException::cloneSet(ObjectData *cl) {
   c_UnexpectedValueException *clone = static_cast<c_UnexpectedValueException*>(cl);
   c_RuntimeException::cloneSet(clone);
 }
-ObjectStaticCallbacks cw_UnexpectedValueException = {
+const ObjectStaticCallbacks cw_UnexpectedValueException = {
   c_UnexpectedValueException::os_getInit,
   c_UnexpectedValueException::os_get,
   c_UnexpectedValueException::os_lval,
@@ -217,7 +217,7 @@ ObjectStaticCallbacks cw_UnexpectedValueException = {
   (ObjectData*(*)(ObjectData*))coo_UnexpectedValueException,
   c_UnexpectedValueException::s_call_info_table,c_UnexpectedValueException::s_call_info_index,
   &c_UnexpectedValueException::s_class_name,
-  &cw_RuntimeException
+  &c_Exception::os_prop_table,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 251 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OverflowException
@@ -280,7 +280,7 @@ void c_OverflowException::cloneSet(ObjectData *cl) {
   c_OverflowException *clone = static_cast<c_OverflowException*>(cl);
   c_RuntimeException::cloneSet(clone);
 }
-ObjectStaticCallbacks cw_OverflowException = {
+const ObjectStaticCallbacks cw_OverflowException = {
   c_OverflowException::os_getInit,
   c_OverflowException::os_get,
   c_OverflowException::os_lval,
@@ -289,7 +289,7 @@ ObjectStaticCallbacks cw_OverflowException = {
   (ObjectData*(*)(ObjectData*))coo_OverflowException,
   c_OverflowException::s_call_info_table,c_OverflowException::s_call_info_index,
   &c_OverflowException::s_class_name,
-  &cw_RuntimeException
+  &c_Exception::os_prop_table,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 243 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfBoundsException
@@ -352,7 +352,7 @@ void c_OutOfBoundsException::cloneSet(ObjectData *cl) {
   c_OutOfBoundsException *clone = static_cast<c_OutOfBoundsException*>(cl);
   c_RuntimeException::cloneSet(clone);
 }
-ObjectStaticCallbacks cw_OutOfBoundsException = {
+const ObjectStaticCallbacks cw_OutOfBoundsException = {
   c_OutOfBoundsException::os_getInit,
   c_OutOfBoundsException::os_get,
   c_OutOfBoundsException::os_lval,
@@ -361,7 +361,7 @@ ObjectStaticCallbacks cw_OutOfBoundsException = {
   (ObjectData*(*)(ObjectData*))coo_OutOfBoundsException,
   c_OutOfBoundsException::s_call_info_table,c_OutOfBoundsException::s_call_info_index,
   &c_OutOfBoundsException::s_class_name,
-  &cw_RuntimeException
+  &c_Exception::os_prop_table,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 173 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LogicException
@@ -423,7 +423,7 @@ void c_LogicException::cloneSet(ObjectData *cl) {
   c_LogicException *clone = static_cast<c_LogicException*>(cl);
   c_Exception::cloneSet(clone);
 }
-ObjectStaticCallbacks cw_LogicException = {
+const ObjectStaticCallbacks cw_LogicException = {
   c_LogicException::os_getInit,
   c_LogicException::os_get,
   c_LogicException::os_lval,
@@ -432,7 +432,7 @@ ObjectStaticCallbacks cw_LogicException = {
   (ObjectData*(*)(ObjectData*))coo_LogicException,
   c_LogicException::s_call_info_table,c_LogicException::s_call_info_index,
   &c_LogicException::s_class_name,
-  &cw_Exception
+  &c_Exception::os_prop_table,&cw_Exception
 };
 /* SRC: classes/exception.php line 259 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RangeException
@@ -495,7 +495,7 @@ void c_RangeException::cloneSet(ObjectData *cl) {
   c_RangeException *clone = static_cast<c_RangeException*>(cl);
   c_RuntimeException::cloneSet(clone);
 }
-ObjectStaticCallbacks cw_RangeException = {
+const ObjectStaticCallbacks cw_RangeException = {
   c_RangeException::os_getInit,
   c_RangeException::os_get,
   c_RangeException::os_lval,
@@ -504,7 +504,7 @@ ObjectStaticCallbacks cw_RangeException = {
   (ObjectData*(*)(ObjectData*))coo_RangeException,
   c_RangeException::s_call_info_table,c_RangeException::s_call_info_index,
   &c_RangeException::s_class_name,
-  &cw_RuntimeException
+  &c_Exception::os_prop_table,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 211 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_InvalidArgumentException
@@ -569,7 +569,7 @@ void c_InvalidArgumentException::cloneSet(ObjectData *cl) {
   c_InvalidArgumentException *clone = static_cast<c_InvalidArgumentException*>(cl);
   c_LogicException::cloneSet(clone);
 }
-ObjectStaticCallbacks cw_InvalidArgumentException = {
+const ObjectStaticCallbacks cw_InvalidArgumentException = {
   c_InvalidArgumentException::os_getInit,
   c_InvalidArgumentException::os_get,
   c_InvalidArgumentException::os_lval,
@@ -578,7 +578,7 @@ ObjectStaticCallbacks cw_InvalidArgumentException = {
   (ObjectData*(*)(ObjectData*))coo_InvalidArgumentException,
   c_InvalidArgumentException::s_call_info_table,c_InvalidArgumentException::s_call_info_index,
   &c_InvalidArgumentException::s_class_name,
-  &cw_LogicException
+  &c_Exception::os_prop_table,&cw_LogicException
 };
 /* SRC: classes/exception.php line 268 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_UnderflowException
@@ -639,7 +639,7 @@ void c_UnderflowException::cloneSet(ObjectData *cl) {
   c_UnderflowException *clone = static_cast<c_UnderflowException*>(cl);
   c_RuntimeException::cloneSet(clone);
 }
-ObjectStaticCallbacks cw_UnderflowException = {
+const ObjectStaticCallbacks cw_UnderflowException = {
   c_UnderflowException::os_getInit,
   c_UnderflowException::os_get,
   c_UnderflowException::os_lval,
@@ -648,7 +648,7 @@ ObjectStaticCallbacks cw_UnderflowException = {
   (ObjectData*(*)(ObjectData*))coo_UnderflowException,
   c_UnderflowException::s_call_info_table,c_UnderflowException::s_call_info_index,
   &c_UnderflowException::s_class_name,
-  &cw_RuntimeException
+  &c_Exception::os_prop_table,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 227 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfRangeException
@@ -711,7 +711,7 @@ void c_OutOfRangeException::cloneSet(ObjectData *cl) {
   c_OutOfRangeException *clone = static_cast<c_OutOfRangeException*>(cl);
   c_LogicException::cloneSet(clone);
 }
-ObjectStaticCallbacks cw_OutOfRangeException = {
+const ObjectStaticCallbacks cw_OutOfRangeException = {
   c_OutOfRangeException::os_getInit,
   c_OutOfRangeException::os_get,
   c_OutOfRangeException::os_lval,
@@ -720,7 +720,7 @@ ObjectStaticCallbacks cw_OutOfRangeException = {
   (ObjectData*(*)(ObjectData*))coo_OutOfRangeException,
   c_OutOfRangeException::s_call_info_table,c_OutOfRangeException::s_call_info_index,
   &c_OutOfRangeException::s_class_name,
-  &cw_LogicException
+  &c_Exception::os_prop_table,&cw_LogicException
 };
 /* SRC: classes/exception.php line 193 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_BadMethodCallException
@@ -788,7 +788,7 @@ void c_BadMethodCallException::cloneSet(ObjectData *cl) {
   c_BadMethodCallException *clone = static_cast<c_BadMethodCallException*>(cl);
   c_BadFunctionCallException::cloneSet(clone);
 }
-ObjectStaticCallbacks cw_BadMethodCallException = {
+const ObjectStaticCallbacks cw_BadMethodCallException = {
   c_BadMethodCallException::os_getInit,
   c_BadMethodCallException::os_get,
   c_BadMethodCallException::os_lval,
@@ -797,7 +797,7 @@ ObjectStaticCallbacks cw_BadMethodCallException = {
   (ObjectData*(*)(ObjectData*))coo_BadMethodCallException,
   c_BadMethodCallException::s_call_info_table,c_BadMethodCallException::s_call_info_index,
   &c_BadMethodCallException::s_class_name,
-  &cw_BadFunctionCallException
+  &c_Exception::os_prop_table,&cw_BadFunctionCallException
 };
 /* SRC: classes/exception.php line 235 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RuntimeException
@@ -857,7 +857,7 @@ void c_RuntimeException::cloneSet(ObjectData *cl) {
   c_RuntimeException *clone = static_cast<c_RuntimeException*>(cl);
   c_Exception::cloneSet(clone);
 }
-ObjectStaticCallbacks cw_RuntimeException = {
+const ObjectStaticCallbacks cw_RuntimeException = {
   c_RuntimeException::os_getInit,
   c_RuntimeException::os_get,
   c_RuntimeException::os_lval,
@@ -866,7 +866,7 @@ ObjectStaticCallbacks cw_RuntimeException = {
   (ObjectData*(*)(ObjectData*))coo_RuntimeException,
   c_RuntimeException::s_call_info_table,c_RuntimeException::s_call_info_index,
   &c_RuntimeException::s_class_name,
-  &cw_Exception
+  &c_Exception::os_prop_table,&cw_Exception
 };
 /* SRC: classes/exception.php line 10 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Exception
@@ -1238,7 +1238,7 @@ void c_Exception::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Exception::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_Exception = {
+const ObjectStaticCallbacks cw_Exception = {
   c_Exception::os_getInit,
   c_Exception::os_get,
   c_Exception::os_lval,
@@ -1247,7 +1247,7 @@ ObjectStaticCallbacks cw_Exception = {
   (ObjectData*(*)(ObjectData*))coo_Exception,
   c_Exception::s_call_info_table,c_Exception::s_call_info_index,
   &c_Exception::s_class_name,
-  0
+  &c_Exception::os_prop_table,0
 };
 void c_Exception::init() {
   m_message = NAMSTR(s_sys_ss00000000, "");
@@ -1668,7 +1668,7 @@ void c_ErrorException::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ErrorException::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_ErrorException = {
+const ObjectStaticCallbacks cw_ErrorException = {
   c_ErrorException::os_getInit,
   c_ErrorException::os_get,
   c_ErrorException::os_lval,
@@ -1677,7 +1677,7 @@ ObjectStaticCallbacks cw_ErrorException = {
   (ObjectData*(*)(ObjectData*))coo_ErrorException,
   c_ErrorException::s_call_info_table,c_ErrorException::s_call_info_index,
   &c_ErrorException::s_class_name,
-  &cw_Exception
+  &c_ErrorException::os_prop_table,&cw_Exception
 };
 /* SRC: classes/exception.php line 288 */
 void c_ErrorException::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
@@ -1824,7 +1824,7 @@ void c_DOMException::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMException::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_DOMException = {
+const ObjectStaticCallbacks cw_DOMException = {
   c_DOMException::os_getInit,
   c_DOMException::os_get,
   c_DOMException::os_lval,
@@ -1833,7 +1833,7 @@ ObjectStaticCallbacks cw_DOMException = {
   (ObjectData*(*)(ObjectData*))coo_DOMException,
   c_DOMException::s_call_info_table,c_DOMException::s_call_info_index,
   &c_DOMException::s_class_name,
-  &cw_Exception
+  &c_Exception::os_prop_table,&cw_Exception
 };
 /* SRC: classes/exception.php line 312 */
 void c_DOMException::t___construct(Variant v_message, Variant v_code) {
@@ -1906,7 +1906,7 @@ void c_BadFunctionCallException::cloneSet(ObjectData *cl) {
   c_BadFunctionCallException *clone = static_cast<c_BadFunctionCallException*>(cl);
   c_LogicException::cloneSet(clone);
 }
-ObjectStaticCallbacks cw_BadFunctionCallException = {
+const ObjectStaticCallbacks cw_BadFunctionCallException = {
   c_BadFunctionCallException::os_getInit,
   c_BadFunctionCallException::os_get,
   c_BadFunctionCallException::os_lval,
@@ -1915,7 +1915,7 @@ ObjectStaticCallbacks cw_BadFunctionCallException = {
   (ObjectData*(*)(ObjectData*))coo_BadFunctionCallException,
   c_BadFunctionCallException::s_call_info_table,c_BadFunctionCallException::s_call_info_index,
   &c_BadFunctionCallException::s_class_name,
-  &cw_LogicException
+  &c_Exception::os_prop_table,&cw_LogicException
 };
 /* SRC: classes/exception.php line 219 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LengthException
@@ -1978,7 +1978,7 @@ void c_LengthException::cloneSet(ObjectData *cl) {
   c_LengthException *clone = static_cast<c_LengthException*>(cl);
   c_LogicException::cloneSet(clone);
 }
-ObjectStaticCallbacks cw_LengthException = {
+const ObjectStaticCallbacks cw_LengthException = {
   c_LengthException::os_getInit,
   c_LengthException::os_get,
   c_LengthException::os_lval,
@@ -1987,7 +1987,7 @@ ObjectStaticCallbacks cw_LengthException = {
   (ObjectData*(*)(ObjectData*))coo_LengthException,
   c_LengthException::s_call_info_table,c_LengthException::s_call_info_index,
   &c_LengthException::s_class_name,
-  &cw_LogicException
+  &c_Exception::os_prop_table,&cw_LogicException
 };
 /* SRC: classes/exception.php line 202 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DomainException
@@ -2050,7 +2050,7 @@ void c_DomainException::cloneSet(ObjectData *cl) {
   c_DomainException *clone = static_cast<c_DomainException*>(cl);
   c_LogicException::cloneSet(clone);
 }
-ObjectStaticCallbacks cw_DomainException = {
+const ObjectStaticCallbacks cw_DomainException = {
   c_DomainException::os_getInit,
   c_DomainException::os_get,
   c_DomainException::os_lval,
@@ -2059,7 +2059,7 @@ ObjectStaticCallbacks cw_DomainException = {
   (ObjectData*(*)(ObjectData*))coo_DomainException,
   c_DomainException::s_call_info_table,c_DomainException::s_call_info_index,
   &c_DomainException::s_class_name,
-  &cw_LogicException
+  &c_Exception::os_prop_table,&cw_LogicException
 };
 ObjectData *coo_PDOException() {
   return NEWOBJ(c_PDOException)();
@@ -2114,46 +2114,26 @@ ObjectData *coo_DomainException() {
 }
 
 // Class tables
-ClassPropTable cpt_ErrorException;
-ClassPropTable cpt_Exception;
-static int ctInitializer() {
-  const char *ctMapData[] = {
-    (const char *)1, (const char *)0, (const char *)&cpt_ErrorException, (const char *)&cpt_Exception,
-    (const char *)128, (const char *)&NAMSTR(s_sys_ssb84c8cfa, "severity"),
-    (const char *)GET_PROPERTY_OFFSET(c_ErrorException, m_severity),
-    (const char *)10,
+static const ClassPropTableEntry cpt_table_entries[] = {
+  { 128, 10,GET_PROPERTY_OFFSET(c_ErrorException, m_severity),&NAMSTR(s_sys_ssb84c8cfa, "severity") },
 
-    (const char *)6, (const char *)0, (const char *)&cpt_Exception, (const char *)NULL,
-    (const char *)128, (const char *)&NAMSTR(s_sys_ss155366df, "message"),
-    (const char *)GET_PROPERTY_OFFSET(c_Exception, m_message),
-    (const char *)10,
-    (const char *)128, (const char *)&NAMSTR(s_sys_ssab7a1dec, "code"),
-    (const char *)GET_PROPERTY_OFFSET(c_Exception, m_code),
-    (const char *)10,
-    (const char *)128, (const char *)&NAMSTR(s_sys_ss90291821, "previous"),
-    (const char *)GET_PROPERTY_OFFSET(c_Exception, m_previous),
-    (const char *)10,
-    (const char *)128, (const char *)&NAMSTR(s_sys_ss8ce7db5b, "file"),
-    (const char *)GET_PROPERTY_OFFSET(c_Exception, m_file),
-    (const char *)10,
-    (const char *)128, (const char *)&NAMSTR(s_sys_ssddf8728c, "line"),
-    (const char *)GET_PROPERTY_OFFSET(c_Exception, m_line),
-    (const char *)10,
-    (const char *)128, (const char *)&NAMSTR(s_sys_ss94c9ce77, "trace"),
-    (const char *)GET_PROPERTY_OFFSET(c_Exception, m_trace),
-    (const char *)10,
+  { 128, 10,GET_PROPERTY_OFFSET(c_Exception, m_message),&NAMSTR(s_sys_ss155366df, "message") },
+  { 128, 10,GET_PROPERTY_OFFSET(c_Exception, m_code),&NAMSTR(s_sys_ssab7a1dec, "code") },
+  { 128, 10,GET_PROPERTY_OFFSET(c_Exception, m_previous),&NAMSTR(s_sys_ss90291821, "previous") },
+  { 128, 10,GET_PROPERTY_OFFSET(c_Exception, m_file),&NAMSTR(s_sys_ss8ce7db5b, "file") },
+  { 128, 10,GET_PROPERTY_OFFSET(c_Exception, m_line),&NAMSTR(s_sys_ssddf8728c, "line") },
+  { 128, 10,GET_PROPERTY_OFFSET(c_Exception, m_trace),&NAMSTR(s_sys_ss94c9ce77, "trace") },
 
-    NULL, NULL, NULL,
-  };
-  static ClassPropTableEntry entries[7];
-  static ClassPropTableEntry *pentries[2];
-  return ClassInfo::InitClassPropTable(ctMapData, entries, pentries);
-}
-static int ct_initializer = ctInitializer();
-
-// o_getClassPropTable
-const ClassPropTable *c_ErrorException::o_getClassPropTable() const { return &cpt_ErrorException; }
-const ClassPropTable *c_Exception::o_getClassPropTable() const { return &cpt_Exception; }
+};
+static const ClassPropTableEntry *cpt_private_entries[] = {
+  0,
+};
+const ClassPropTable c_ErrorException::os_prop_table = {
+  1,0,&c_Exception::os_prop_table,cpt_table_entries+0,cpt_private_entries+0
+};
+const ClassPropTable c_Exception::os_prop_table = {
+  6,0,0,cpt_table_entries+1,cpt_private_entries+0
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

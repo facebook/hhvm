@@ -28,7 +28,7 @@ namespace HPHP {
 
 /* SRC: classes/directoryiterator.php line 11 */
 FORWARD_DECLARE_CLASS(DirectoryIterator);
-extern ObjectStaticCallbacks cw_DirectoryIterator;
+extern const ObjectStaticCallbacks cw_DirectoryIterator;
 class c_DirectoryIterator : public c_SplFileInfo {
   public:
 

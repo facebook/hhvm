@@ -26,7 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 227 */
 FORWARD_DECLARE_CLASS(OutOfRangeException);
-extern ObjectStaticCallbacks cw_OutOfRangeException;
+extern const ObjectStaticCallbacks cw_OutOfRangeException;
 class c_OutOfRangeException : public c_LogicException {
   public:
 

@@ -222,7 +222,7 @@ class ObjectData : public CountableNF {
   virtual void o_setArray(CArrRef properties);
 
   virtual void o_getArray(Array &props, bool pubOnly = false) const;
-  virtual const ClassPropTable *o_getClassPropTable() const { return NULL; }
+  const ClassPropTable *o_getClassPropTable() const;
   void o_set(const Array properties);
   Variant o_argval(bool byRef, CStrRef s, bool error = true,
       CStrRef context = null_string);
@@ -403,6 +403,7 @@ struct ObjectStaticCallbacks {
   const int                   *mcit_ix;
 
   const StaticString          *cls;
+  const ClassPropTable        *cpt;
   const ObjectStaticCallbacks *parent;
 };
 

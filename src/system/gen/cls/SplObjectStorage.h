@@ -27,7 +27,7 @@ namespace HPHP {
 
 /* SRC: classes/splobjectstorage.php line 12 */
 FORWARD_DECLARE_CLASS(SplObjectStorage);
-extern ObjectStaticCallbacks cw_SplObjectStorage;
+extern const ObjectStaticCallbacks cw_SplObjectStorage;
 class c_SplObjectStorage : public ExtObjectData {
   public:
 
@@ -48,7 +48,6 @@ class c_SplObjectStorage : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual const ClassPropTable *o_getClassPropTable() const;
   virtual Variant *o_realProp(CStrRef s, int flags,
                               CStrRef context = null_string) const;
   Variant *o_realPropPrivate(CStrRef s, int flags) const;
@@ -62,6 +61,7 @@ class c_SplObjectStorage : public ExtObjectData {
   static const int s_call_info_index[];
 
   public:
+  static const ClassPropTable os_prop_table;
   c_SplObjectStorage() : m_index(0LL) {}
   void init();
   public: void t_rewind();

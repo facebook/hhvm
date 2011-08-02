@@ -26,7 +26,7 @@ namespace HPHP {
 static Mutex s_thread_info_mutex;
 static std::set<ThreadInfo*> s_thread_infos;
 
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(ThreadInfo, ThreadInfo::s_threadInfo);
 
 ThreadInfo::ThreadInfo() : m_executing(Idling) {
   m_mm = MemoryManager::TheMemoryManager().getNoCheck();

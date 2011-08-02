@@ -664,7 +664,7 @@ void c_ArrayIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ArrayIterator::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_ArrayIterator = {
+const ObjectStaticCallbacks cw_ArrayIterator = {
   c_ArrayIterator::os_getInit,
   c_ArrayIterator::os_get,
   c_ArrayIterator::os_lval,
@@ -673,7 +673,7 @@ ObjectStaticCallbacks cw_ArrayIterator = {
   (ObjectData*(*)(ObjectData*))coo_ArrayIterator,
   c_ArrayIterator::s_call_info_table,c_ArrayIterator::s_call_info_index,
   &c_ArrayIterator::s_class_name,
-  0
+  &c_ArrayIterator::os_prop_table,0
 };
 /* SRC: classes/iterator.php line 336 */
 void c_ArrayIterator::t___construct(Variant v_array, Variant v_flags //  = 0LL
@@ -1160,7 +1160,7 @@ void c_AppendIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_AppendIterator::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_AppendIterator = {
+const ObjectStaticCallbacks cw_AppendIterator = {
   c_AppendIterator::os_getInit,
   c_AppendIterator::os_get,
   c_AppendIterator::os_lval,
@@ -1169,7 +1169,7 @@ ObjectStaticCallbacks cw_AppendIterator = {
   (ObjectData*(*)(ObjectData*))coo_AppendIterator,
   c_AppendIterator::s_call_info_table,c_AppendIterator::s_call_info_index,
   &c_AppendIterator::s_class_name,
-  0
+  &c_AppendIterator::os_prop_table,0
 };
 /* SRC: classes/iterator.php line 799 */
 void c_AppendIterator::t___construct() {
@@ -1735,7 +1735,7 @@ void c_IteratorIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_IteratorIterator::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_IteratorIterator = {
+const ObjectStaticCallbacks cw_IteratorIterator = {
   c_IteratorIterator::os_getInit,
   c_IteratorIterator::os_get,
   c_IteratorIterator::os_lval,
@@ -1744,7 +1744,7 @@ ObjectStaticCallbacks cw_IteratorIterator = {
   (ObjectData*(*)(ObjectData*))coo_IteratorIterator,
   c_IteratorIterator::s_call_info_table,c_IteratorIterator::s_call_info_index,
   &c_IteratorIterator::s_class_name,
-  0
+  &c_IteratorIterator::os_prop_table,0
 };
 /* SRC: classes/iterator.php line 660 */
 void c_IteratorIterator::t___construct(Variant v_iterator) {
@@ -2152,7 +2152,7 @@ void c_RecursiveIteratorIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_RecursiveIteratorIterator::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_RecursiveIteratorIterator = {
+const ObjectStaticCallbacks cw_RecursiveIteratorIterator = {
   c_RecursiveIteratorIterator::os_getInit,
   c_RecursiveIteratorIterator::os_get,
   c_RecursiveIteratorIterator::os_lval,
@@ -2161,7 +2161,7 @@ ObjectStaticCallbacks cw_RecursiveIteratorIterator = {
   (ObjectData*(*)(ObjectData*))coo_RecursiveIteratorIterator,
   c_RecursiveIteratorIterator::s_call_info_table,c_RecursiveIteratorIterator::s_call_info_index,
   &c_RecursiveIteratorIterator::s_class_name,
-  0
+  &c_RecursiveIteratorIterator::os_prop_table,0
 };
 /* SRC: classes/iterator.php line 237 */
 void c_RecursiveIteratorIterator::t___construct(Variant v_iterator, Variant v_mode //  = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */
@@ -2363,7 +2363,7 @@ void c_MutableArrayIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_MutableArrayIterator::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_MutableArrayIterator = {
+const ObjectStaticCallbacks cw_MutableArrayIterator = {
   c_MutableArrayIterator::os_getInit,
   c_MutableArrayIterator::os_get,
   c_MutableArrayIterator::os_lval,
@@ -2372,7 +2372,7 @@ ObjectStaticCallbacks cw_MutableArrayIterator = {
   (ObjectData*(*)(ObjectData*))coo_MutableArrayIterator,
   c_MutableArrayIterator::s_call_info_table,c_MutableArrayIterator::s_call_info_index,
   &c_MutableArrayIterator::s_class_name,
-  &cw_ArrayIterator
+  &c_ArrayIterator::os_prop_table,&cw_ArrayIterator
 };
 /* SRC: classes/iterator.php line 645 */
 void c_MutableArrayIterator::t___construct(VRefParam rv_array, Variant v_flags //  = 0LL
@@ -2731,7 +2731,7 @@ void c_FilterIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_FilterIterator::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_FilterIterator = {
+const ObjectStaticCallbacks cw_FilterIterator = {
   c_FilterIterator::os_getInit,
   c_FilterIterator::os_get,
   c_FilterIterator::os_lval,
@@ -2740,7 +2740,7 @@ ObjectStaticCallbacks cw_FilterIterator = {
   (ObjectData*(*)(ObjectData*))coo_FilterIterator,
   c_FilterIterator::s_call_info_table,c_FilterIterator::s_call_info_index,
   &c_FilterIterator::s_class_name,
-  &cw_IteratorIterator
+  &c_FilterIterator::os_prop_table,&cw_IteratorIterator
 };
 /* SRC: classes/iterator.php line 714 */
 void c_FilterIterator::t___construct(Variant v_it) {
@@ -2896,55 +2896,44 @@ ObjectData *coo_FilterIterator() {
 }
 
 // Class tables
-ClassPropTable cpt_AppendIterator;
-ClassPropTable cpt_ArrayIterator;
-ClassPropTable cpt_FilterIterator;
-ClassPropTable cpt_IteratorIterator;
-ClassPropTable cpt_RecursiveIteratorIterator;
-static int ctInitializer() {
-  const char *ctMapData[] = {
-    (const char *)1, (const char *)1, (const char *)&cpt_AppendIterator, (const char *)NULL,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ssb3fce46e, "\000AppendIterator\000iterators"),
-    (const char *)GET_PROPERTY_OFFSET(c_AppendIterator, m_iterators),
-    (const char *)10,
+static const ClassPropTableEntry cpt_table_entries[] = {
+  { 256, 10,GET_PROPERTY_OFFSET(c_AppendIterator, m_iterators),&NAMSTR(s_sys_ssb3fce46e, "\000AppendIterator\000iterators") },
 
-    (const char *)2, (const char *)0, (const char *)&cpt_ArrayIterator, (const char *)NULL,
-    (const char *)128, (const char *)&NAMSTR(s_sys_ss7cb08d68, "arr"),
-    (const char *)GET_PROPERTY_OFFSET(c_ArrayIterator, m_arr),
-    (const char *)10,
-    (const char *)128, (const char *)&NAMSTR(s_sys_ss28fae70d, "flags"),
-    (const char *)GET_PROPERTY_OFFSET(c_ArrayIterator, m_flags),
-    (const char *)10,
+  { 128, 10,GET_PROPERTY_OFFSET(c_ArrayIterator, m_arr),&NAMSTR(s_sys_ss7cb08d68, "arr") },
+  { 128, 10,GET_PROPERTY_OFFSET(c_ArrayIterator, m_flags),&NAMSTR(s_sys_ss28fae70d, "flags") },
 
-    (const char *)1, (const char *)1, (const char *)&cpt_FilterIterator, (const char *)&cpt_IteratorIterator,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ssc4be4990, "\000FilterIterator\000it"),
-    (const char *)GET_PROPERTY_OFFSET(c_FilterIterator, m_it),
-    (const char *)10,
+  { 256, 10,GET_PROPERTY_OFFSET(c_FilterIterator, m_it),&NAMSTR(s_sys_ssc4be4990, "\000FilterIterator\000it") },
 
-    (const char *)1, (const char *)1, (const char *)&cpt_IteratorIterator, (const char *)NULL,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ss8c1ec20c, "\000IteratorIterator\000iterator"),
-    (const char *)GET_PROPERTY_OFFSET(c_IteratorIterator, m_iterator),
-    (const char *)10,
+  { 256, 10,GET_PROPERTY_OFFSET(c_IteratorIterator, m_iterator),&NAMSTR(s_sys_ss8c1ec20c, "\000IteratorIterator\000iterator") },
 
-    (const char *)1, (const char *)1, (const char *)&cpt_RecursiveIteratorIterator, (const char *)NULL,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ss246080da, "\000RecursiveIteratorIterator\000rsrc"),
-    (const char *)GET_PROPERTY_OFFSET(c_RecursiveIteratorIterator, m_rsrc),
-    (const char *)10,
+  { 256, 10,GET_PROPERTY_OFFSET(c_RecursiveIteratorIterator, m_rsrc),&NAMSTR(s_sys_ss246080da, "\000RecursiveIteratorIterator\000rsrc") },
 
-    NULL, NULL, NULL,
-  };
-  static ClassPropTableEntry entries[6];
-  static ClassPropTableEntry *pentries[9];
-  return ClassInfo::InitClassPropTable(ctMapData, entries, pentries);
-}
-static int ct_initializer = ctInitializer();
-
-// o_getClassPropTable
-const ClassPropTable *c_AppendIterator::o_getClassPropTable() const { return &cpt_AppendIterator; }
-const ClassPropTable *c_ArrayIterator::o_getClassPropTable() const { return &cpt_ArrayIterator; }
-const ClassPropTable *c_FilterIterator::o_getClassPropTable() const { return &cpt_FilterIterator; }
-const ClassPropTable *c_IteratorIterator::o_getClassPropTable() const { return &cpt_IteratorIterator; }
-const ClassPropTable *c_RecursiveIteratorIterator::o_getClassPropTable() const { return &cpt_RecursiveIteratorIterator; }
+};
+static const ClassPropTableEntry *cpt_private_entries[] = {
+  cpt_table_entries+0,
+  0,
+  cpt_table_entries+3,
+  0,
+  cpt_table_entries+4,
+  0,
+  cpt_table_entries+5,
+  0,
+};
+const ClassPropTable c_AppendIterator::os_prop_table = {
+  1,1,0,cpt_table_entries+0,cpt_private_entries+0
+};
+const ClassPropTable c_ArrayIterator::os_prop_table = {
+  2,0,0,cpt_table_entries+1,cpt_private_entries+1
+};
+const ClassPropTable c_FilterIterator::os_prop_table = {
+  1,1,&c_IteratorIterator::os_prop_table,cpt_table_entries+3,cpt_private_entries+2
+};
+const ClassPropTable c_IteratorIterator::os_prop_table = {
+  1,1,0,cpt_table_entries+4,cpt_private_entries+4
+};
+const ClassPropTable c_RecursiveIteratorIterator::os_prop_table = {
+  1,1,0,cpt_table_entries+5,cpt_private_entries+6
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

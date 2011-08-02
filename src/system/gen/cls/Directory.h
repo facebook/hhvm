@@ -25,7 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/directory.php line 3 */
 FORWARD_DECLARE_CLASS(Directory);
-extern ObjectStaticCallbacks cw_Directory;
+extern const ObjectStaticCallbacks cw_Directory;
 class c_Directory : public ExtObjectData {
   public:
 
@@ -46,7 +46,6 @@ class c_Directory : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual const ClassPropTable *o_getClassPropTable() const;
   #define OMIT_JUMP_TABLE_CLASS_realProp_Directory 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Directory 1
 
@@ -59,6 +58,7 @@ class c_Directory : public ExtObjectData {
   static const int s_call_info_index[];
 
   public:
+  static const ClassPropTable os_prop_table;
   c_Directory() : m_path(Variant::nullInit), m_handle(Variant::nullInit) {}
   public: void t___construct(Variant v_path);
   public: c_Directory *create(CVarRef v_path);

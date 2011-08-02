@@ -26,7 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 277 */
 FORWARD_DECLARE_CLASS(UnexpectedValueException);
-extern ObjectStaticCallbacks cw_UnexpectedValueException;
+extern const ObjectStaticCallbacks cw_UnexpectedValueException;
 class c_UnexpectedValueException : public c_RuntimeException {
   public:
 

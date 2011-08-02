@@ -25,7 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/splfile.php line 11 */
 FORWARD_DECLARE_CLASS(SplFileInfo);
-extern ObjectStaticCallbacks cw_SplFileInfo;
+extern const ObjectStaticCallbacks cw_SplFileInfo;
 class c_SplFileInfo : public ExtObjectData {
   public:
 
@@ -45,7 +45,6 @@ class c_SplFileInfo : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual const ClassPropTable *o_getClassPropTable() const;
   virtual Variant *o_realProp(CStrRef s, int flags,
                               CStrRef context = null_string) const;
   Variant *o_realPropPrivate(CStrRef s, int flags) const;
@@ -59,6 +58,7 @@ class c_SplFileInfo : public ExtObjectData {
   static const int s_call_info_index[];
 
   public:
+  static const ClassPropTable os_prop_table;
   c_SplFileInfo() : m_rsrc(Variant::nullInit) {}
   public: void t___construct(Variant v_file_name);
   public: c_SplFileInfo *create(CVarRef v_file_name);

@@ -42,7 +42,7 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(ExecutionContext, g_context);
 
 ExecutionContext::ExecutionContext()
   : m_transport(NULL),

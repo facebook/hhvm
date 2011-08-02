@@ -27,7 +27,7 @@ namespace HPHP {
 
 /* SRC: classes/reflection.php line 1571 */
 FORWARD_DECLARE_CLASS(ReflectionMethod);
-extern ObjectStaticCallbacks cw_ReflectionMethod;
+extern const ObjectStaticCallbacks cw_ReflectionMethod;
 class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   public:
 
@@ -48,7 +48,6 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual const ClassPropTable *o_getClassPropTable() const;
   #define OMIT_JUMP_TABLE_CLASS_realProp_ReflectionMethod 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionMethod 1
 
@@ -61,6 +60,7 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   static const int s_call_info_index[];
 
   public:
+  static const ClassPropTable os_prop_table;
   c_ReflectionMethod() : m_name(Variant::nullInit), m_class(Variant::nullInit) {}
   public: void t___construct(Variant v_cls, Variant v_name = NAMSTR(s_sys_ss00000000, ""));
   public: c_ReflectionMethod *create(CVarRef v_cls, CVarRef v_name = NAMVAR(s_sys_svs00000000, ""));

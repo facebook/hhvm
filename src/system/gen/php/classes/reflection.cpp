@@ -365,7 +365,7 @@ const int c_ReflectionFunctionAbstract::s_call_info_index[] = {
   12,-1,-1,-1,-1,-1,-1,-1,
 
 };
-ObjectStaticCallbacks cw_ReflectionFunctionAbstract = {
+const ObjectStaticCallbacks cw_ReflectionFunctionAbstract = {
   c_ReflectionFunctionAbstract::os_getInit,
   c_ReflectionFunctionAbstract::os_get,
   c_ReflectionFunctionAbstract::os_lval,
@@ -374,7 +374,7 @@ ObjectStaticCallbacks cw_ReflectionFunctionAbstract = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionFunctionAbstract,
   c_ReflectionFunctionAbstract::s_call_info_table,c_ReflectionFunctionAbstract::s_call_info_index,
   &c_ReflectionFunctionAbstract::s_class_name,
-  0
+  &c_ReflectionFunctionAbstract::os_prop_table,0
 };
 /* SRC: classes/reflection.php line 261 */
 Variant c_ReflectionFunctionAbstract::t_getname() {
@@ -615,7 +615,7 @@ const int c_ReflectionObject::s_call_info_index[] = {
   1,
   0,-1,
 };
-ObjectStaticCallbacks cw_ReflectionObject = {
+const ObjectStaticCallbacks cw_ReflectionObject = {
   c_ReflectionObject::os_getInit,
   c_ReflectionObject::os_get,
   c_ReflectionObject::os_lval,
@@ -624,7 +624,7 @@ ObjectStaticCallbacks cw_ReflectionObject = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionObject,
   c_ReflectionObject::s_call_info_table,c_ReflectionObject::s_call_info_index,
   &c_ReflectionObject::s_class_name,
-  &cw_ReflectionClass
+  &c_ReflectionClass::os_prop_table,&cw_ReflectionClass
 };
 /* SRC: classes/reflection.php line 1298 */
 Variant c_ReflectionObject::t_export(Variant v_obj, CVarRef v_ret) {
@@ -704,7 +704,7 @@ void c_ReflectionException::cloneSet(ObjectData *cl) {
   c_ReflectionException *clone = static_cast<c_ReflectionException*>(cl);
   c_Exception::cloneSet(clone);
 }
-ObjectStaticCallbacks cw_ReflectionException = {
+const ObjectStaticCallbacks cw_ReflectionException = {
   c_ReflectionException::os_getInit,
   c_ReflectionException::os_get,
   c_ReflectionException::os_lval,
@@ -713,7 +713,7 @@ ObjectStaticCallbacks cw_ReflectionException = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionException,
   c_ReflectionException::s_call_info_table,c_ReflectionException::s_call_info_index,
   &c_ReflectionException::s_class_name,
-  &cw_Exception
+  &c_Exception::os_prop_table,&cw_Exception
 };
 /* SRC: classes/reflection.php line 538 */
 const int64 q_ReflectionClass_IS_IMPLICIT_ABSTRACT = 16LL;
@@ -1790,7 +1790,7 @@ void c_ReflectionClass::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionClass::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_ReflectionClass = {
+const ObjectStaticCallbacks cw_ReflectionClass = {
   c_ReflectionClass::os_getInit,
   c_ReflectionClass::os_get,
   c_ReflectionClass::os_lval,
@@ -1799,7 +1799,7 @@ ObjectStaticCallbacks cw_ReflectionClass = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionClass,
   c_ReflectionClass::s_call_info_table,c_ReflectionClass::s_call_info_index,
   &c_ReflectionClass::s_class_name,
-  0
+  &c_ReflectionClass::os_prop_table,0
 };
 /* SRC: classes/reflection.php line 546 */
 void c_ReflectionClass::t___construct(Variant v_name) {
@@ -3043,7 +3043,7 @@ void c_ReflectionExtension::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionExtension::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_ReflectionExtension = {
+const ObjectStaticCallbacks cw_ReflectionExtension = {
   c_ReflectionExtension::os_getInit,
   c_ReflectionExtension::os_get,
   c_ReflectionExtension::os_lval,
@@ -3052,7 +3052,7 @@ ObjectStaticCallbacks cw_ReflectionExtension = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionExtension,
   c_ReflectionExtension::s_call_info_table,c_ReflectionExtension::s_call_info_index,
   &c_ReflectionExtension::s_class_name,
-  0
+  &c_ReflectionExtension::os_prop_table,0
 };
 /* SRC: classes/reflection.php line 1837 */
 void c_ReflectionExtension::t___construct(Variant v_name) {
@@ -3653,7 +3653,7 @@ void c_ReflectionMethod::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionMethod::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_ReflectionMethod = {
+const ObjectStaticCallbacks cw_ReflectionMethod = {
   c_ReflectionMethod::os_getInit,
   c_ReflectionMethod::os_get,
   c_ReflectionMethod::os_lval,
@@ -3662,7 +3662,7 @@ ObjectStaticCallbacks cw_ReflectionMethod = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionMethod,
   c_ReflectionMethod::s_call_info_table,c_ReflectionMethod::s_call_info_index,
   &c_ReflectionMethod::s_class_name,
-  &cw_ReflectionFunctionAbstract
+  &c_ReflectionMethod::os_prop_table,&cw_ReflectionFunctionAbstract
 };
 /* SRC: classes/reflection.php line 1583 */
 void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMSTR(s_sys_ss00000000, "")
@@ -4388,7 +4388,7 @@ void c_ReflectionProperty::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionProperty::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_ReflectionProperty = {
+const ObjectStaticCallbacks cw_ReflectionProperty = {
   c_ReflectionProperty::os_getInit,
   c_ReflectionProperty::os_get,
   c_ReflectionProperty::os_lval,
@@ -4397,7 +4397,7 @@ ObjectStaticCallbacks cw_ReflectionProperty = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionProperty,
   c_ReflectionProperty::s_call_info_table,c_ReflectionProperty::s_call_info_index,
   &c_ReflectionProperty::s_class_name,
-  0
+  &c_ReflectionProperty::os_prop_table,0
 };
 /* SRC: classes/reflection.php line 1329 */
 void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
@@ -4852,7 +4852,7 @@ void c_ReflectionFunction::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionFunction::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_ReflectionFunction = {
+const ObjectStaticCallbacks cw_ReflectionFunction = {
   c_ReflectionFunction::os_getInit,
   c_ReflectionFunction::os_get,
   c_ReflectionFunction::os_lval,
@@ -4861,7 +4861,7 @@ ObjectStaticCallbacks cw_ReflectionFunction = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionFunction,
   c_ReflectionFunction::s_call_info_table,c_ReflectionFunction::s_call_info_index,
   &c_ReflectionFunction::s_class_name,
-  &cw_ReflectionFunctionAbstract
+  &c_ReflectionFunctionAbstract::os_prop_table,&cw_ReflectionFunctionAbstract
 };
 /* SRC: classes/reflection.php line 465 */
 void c_ReflectionFunction::t___construct(Variant v_name) {
@@ -5302,7 +5302,7 @@ void c_ReflectionParameter::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionParameter::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_ReflectionParameter = {
+const ObjectStaticCallbacks cw_ReflectionParameter = {
   c_ReflectionParameter::os_getInit,
   c_ReflectionParameter::os_get,
   c_ReflectionParameter::os_lval,
@@ -5311,7 +5311,7 @@ ObjectStaticCallbacks cw_ReflectionParameter = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionParameter,
   c_ReflectionParameter::s_call_info_table,c_ReflectionParameter::s_call_info_index,
   &c_ReflectionParameter::s_class_name,
-  0
+  &c_ReflectionParameter::os_prop_table,0
 };
 /* SRC: classes/reflection.php line 49 */
 void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
@@ -5515,75 +5515,50 @@ ObjectData *coo_ReflectionParameter() {
 }
 
 // Class tables
-ClassPropTable cpt_ReflectionClass;
-ClassPropTable cpt_ReflectionExtension;
-ClassPropTable cpt_ReflectionFunctionAbstract;
-ClassPropTable cpt_ReflectionMethod;
-ClassPropTable cpt_ReflectionParameter;
-ClassPropTable cpt_ReflectionProperty;
-extern ClassPropTable cpt_Exception;
-static int ctInitializer() {
-  const char *ctMapData[] = {
-    (const char *)2, (const char *)1, (const char *)&cpt_ReflectionClass, (const char *)NULL,
-    (const char *)64, (const char *)&NAMSTR(s_sys_ssdc3cbddc, "name"),
-    (const char *)GET_PROPERTY_OFFSET(c_ReflectionClass, m_name),
-    (const char *)10,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ss84e1d89d, "\000ReflectionClass\000info"),
-    (const char *)GET_PROPERTY_OFFSET(c_ReflectionClass, m_info),
-    (const char *)10,
+static const ClassPropTableEntry cpt_table_entries[] = {
+  { 64, 10,GET_PROPERTY_OFFSET(c_ReflectionClass, m_name),&NAMSTR(s_sys_ssdc3cbddc, "name") },
+  { 256, 10,GET_PROPERTY_OFFSET(c_ReflectionClass, m_info),&NAMSTR(s_sys_ss84e1d89d, "\000ReflectionClass\000info") },
 
-    (const char *)2, (const char *)2, (const char *)&cpt_ReflectionExtension, (const char *)NULL,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ss8bbc8ede, "\000ReflectionExtension\000name"),
-    (const char *)GET_PROPERTY_OFFSET(c_ReflectionExtension, m_name),
-    (const char *)10,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ss5596f6c8, "\000ReflectionExtension\000info"),
-    (const char *)GET_PROPERTY_OFFSET(c_ReflectionExtension, m_info),
-    (const char *)10,
+  { 256, 10,GET_PROPERTY_OFFSET(c_ReflectionExtension, m_name),&NAMSTR(s_sys_ss8bbc8ede, "\000ReflectionExtension\000name") },
+  { 256, 10,GET_PROPERTY_OFFSET(c_ReflectionExtension, m_info),&NAMSTR(s_sys_ss5596f6c8, "\000ReflectionExtension\000info") },
 
-    (const char *)1, (const char *)0, (const char *)&cpt_ReflectionFunctionAbstract, (const char *)NULL,
-    (const char *)128, (const char *)&NAMSTR(s_sys_ss33988b3e, "info"),
-    (const char *)GET_PROPERTY_OFFSET(c_ReflectionFunctionAbstract, m_info),
-    (const char *)10,
+  { 128, 10,GET_PROPERTY_OFFSET(c_ReflectionFunctionAbstract, m_info),&NAMSTR(s_sys_ss33988b3e, "info") },
 
-    (const char *)2, (const char *)0, (const char *)&cpt_ReflectionMethod, (const char *)&cpt_ReflectionFunctionAbstract,
-    (const char *)64, (const char *)&NAMSTR(s_sys_ssdc3cbddc, "name"),
-    (const char *)GET_PROPERTY_OFFSET(c_ReflectionMethod, m_name),
-    (const char *)10,
-    (const char *)64, (const char *)&NAMSTR(s_sys_ssc82dbd12, "class"),
-    (const char *)GET_PROPERTY_OFFSET(c_ReflectionMethod, m_class),
-    (const char *)10,
+  { 64, 10,GET_PROPERTY_OFFSET(c_ReflectionMethod, m_name),&NAMSTR(s_sys_ssdc3cbddc, "name") },
+  { 64, 10,GET_PROPERTY_OFFSET(c_ReflectionMethod, m_class),&NAMSTR(s_sys_ssc82dbd12, "class") },
 
-    (const char *)1, (const char *)0, (const char *)&cpt_ReflectionParameter, (const char *)NULL,
-    (const char *)64, (const char *)&NAMSTR(s_sys_ss33988b3e, "info"),
-    (const char *)GET_PROPERTY_OFFSET(c_ReflectionParameter, m_info),
-    (const char *)10,
+  { 64, 10,GET_PROPERTY_OFFSET(c_ReflectionParameter, m_info),&NAMSTR(s_sys_ss33988b3e, "info") },
 
-    (const char *)3, (const char *)0, (const char *)&cpt_ReflectionProperty, (const char *)NULL,
-    (const char *)64, (const char *)&NAMSTR(s_sys_ss33988b3e, "info"),
-    (const char *)GET_PROPERTY_OFFSET(c_ReflectionProperty, m_info),
-    (const char *)10,
-    (const char *)64, (const char *)&NAMSTR(s_sys_ssdc3cbddc, "name"),
-    (const char *)GET_PROPERTY_OFFSET(c_ReflectionProperty, m_name),
-    (const char *)10,
-    (const char *)64, (const char *)&NAMSTR(s_sys_ssc82dbd12, "class"),
-    (const char *)GET_PROPERTY_OFFSET(c_ReflectionProperty, m_class),
-    (const char *)10,
+  { 64, 10,GET_PROPERTY_OFFSET(c_ReflectionProperty, m_info),&NAMSTR(s_sys_ss33988b3e, "info") },
+  { 64, 10,GET_PROPERTY_OFFSET(c_ReflectionProperty, m_name),&NAMSTR(s_sys_ssdc3cbddc, "name") },
+  { 64, 10,GET_PROPERTY_OFFSET(c_ReflectionProperty, m_class),&NAMSTR(s_sys_ssc82dbd12, "class") },
 
-    NULL, NULL, NULL,
-  };
-  static ClassPropTableEntry entries[11];
-  static ClassPropTableEntry *pentries[9];
-  return ClassInfo::InitClassPropTable(ctMapData, entries, pentries);
-}
-static int ct_initializer = ctInitializer();
-
-// o_getClassPropTable
-const ClassPropTable *c_ReflectionClass::o_getClassPropTable() const { return &cpt_ReflectionClass; }
-const ClassPropTable *c_ReflectionExtension::o_getClassPropTable() const { return &cpt_ReflectionExtension; }
-const ClassPropTable *c_ReflectionFunctionAbstract::o_getClassPropTable() const { return &cpt_ReflectionFunctionAbstract; }
-const ClassPropTable *c_ReflectionMethod::o_getClassPropTable() const { return &cpt_ReflectionMethod; }
-const ClassPropTable *c_ReflectionParameter::o_getClassPropTable() const { return &cpt_ReflectionParameter; }
-const ClassPropTable *c_ReflectionProperty::o_getClassPropTable() const { return &cpt_ReflectionProperty; }
+};
+static const ClassPropTableEntry *cpt_private_entries[] = {
+  cpt_table_entries+1,
+  0,
+  cpt_table_entries+2,
+  cpt_table_entries+3,
+  0,
+};
+const ClassPropTable c_ReflectionClass::os_prop_table = {
+  2,1,0,cpt_table_entries+0,cpt_private_entries+0
+};
+const ClassPropTable c_ReflectionExtension::os_prop_table = {
+  2,2,0,cpt_table_entries+2,cpt_private_entries+2
+};
+const ClassPropTable c_ReflectionFunctionAbstract::os_prop_table = {
+  1,0,0,cpt_table_entries+4,cpt_private_entries+4
+};
+const ClassPropTable c_ReflectionMethod::os_prop_table = {
+  2,0,&c_ReflectionFunctionAbstract::os_prop_table,cpt_table_entries+5,cpt_private_entries+4
+};
+const ClassPropTable c_ReflectionParameter::os_prop_table = {
+  1,0,0,cpt_table_entries+7,cpt_private_entries+4
+};
+const ClassPropTable c_ReflectionProperty::os_prop_table = {
+  3,0,0,cpt_table_entries+8,cpt_private_entries+4
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

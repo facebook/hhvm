@@ -29,7 +29,7 @@ namespace HPHP {
 
 /* SRC: classes/splfile.php line 384 */
 FORWARD_DECLARE_CLASS(SplFileObject);
-extern ObjectStaticCallbacks cw_SplFileObject;
+extern const ObjectStaticCallbacks cw_SplFileObject;
 class c_SplFileObject : public c_SplFileInfo {
   public:
 

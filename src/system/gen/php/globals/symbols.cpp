@@ -69,9 +69,5 @@ Variant pm_php$globals$symbols_php(bool incOnce, LVariableTable* variables, Glob
 }
 namespace hphp_impl_splitter {}
 
-// Class tables
-
-// o_getClassPropTable
-
 ///////////////////////////////////////////////////////////////////////////////
 }

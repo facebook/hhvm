@@ -26,7 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 644 */
 FORWARD_DECLARE_CLASS(MutableArrayIterator);
-extern ObjectStaticCallbacks cw_MutableArrayIterator;
+extern const ObjectStaticCallbacks cw_MutableArrayIterator;
 class c_MutableArrayIterator : public c_ArrayIterator {
   public:
 

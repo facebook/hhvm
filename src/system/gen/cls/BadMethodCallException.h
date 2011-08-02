@@ -26,7 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 193 */
 FORWARD_DECLARE_CLASS(BadMethodCallException);
-extern ObjectStaticCallbacks cw_BadMethodCallException;
+extern const ObjectStaticCallbacks cw_BadMethodCallException;
 class c_BadMethodCallException : public c_BadFunctionCallException {
   public:
 

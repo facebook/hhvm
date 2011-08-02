@@ -26,7 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 711 */
 FORWARD_DECLARE_CLASS(FilterIterator);
-extern ObjectStaticCallbacks cw_FilterIterator;
+extern const ObjectStaticCallbacks cw_FilterIterator;
 class c_FilterIterator : public c_IteratorIterator {
   public:
 
@@ -46,7 +46,6 @@ class c_FilterIterator : public c_IteratorIterator {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual const ClassPropTable *o_getClassPropTable() const;
   virtual Variant *o_realProp(CStrRef s, int flags,
                               CStrRef context = null_string) const;
   Variant *o_realPropPrivate(CStrRef s, int flags) const;
@@ -60,6 +59,7 @@ class c_FilterIterator : public c_IteratorIterator {
   static const int s_call_info_index[];
 
   public:
+  static const ClassPropTable os_prop_table;
   c_FilterIterator(ObjectData* r = NULL) : m_it(Variant::nullInit) {
     setAttribute(HasCall);
   }

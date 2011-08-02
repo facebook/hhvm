@@ -157,7 +157,7 @@ void c_XhprofFrame::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_XhprofFrame::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_XhprofFrame = {
+const ObjectStaticCallbacks cw_XhprofFrame = {
   c_XhprofFrame::os_getInit,
   c_XhprofFrame::os_get,
   c_XhprofFrame::os_lval,
@@ -166,7 +166,7 @@ ObjectStaticCallbacks cw_XhprofFrame = {
   (ObjectData*(*)(ObjectData*))coo_XhprofFrame,
   c_XhprofFrame::s_call_info_table,c_XhprofFrame::s_call_info_index,
   &c_XhprofFrame::s_class_name,
-  0
+  0,0
 };
 /* SRC: classes/xhprof.php line 7 */
 void c_XhprofFrame::t___construct(Variant v_name) {
@@ -185,10 +185,6 @@ namespace hphp_impl_splitter {}
 ObjectData *coo_XhprofFrame() {
   return NEWOBJ(c_XhprofFrame)();
 }
-
-// Class tables
-
-// o_getClassPropTable
 
 ///////////////////////////////////////////////////////////////////////////////
 }

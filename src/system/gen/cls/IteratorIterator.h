@@ -26,7 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 657 */
 FORWARD_DECLARE_CLASS(IteratorIterator);
-extern ObjectStaticCallbacks cw_IteratorIterator;
+extern const ObjectStaticCallbacks cw_IteratorIterator;
 class c_IteratorIterator : public ExtObjectData {
   public:
 
@@ -46,7 +46,6 @@ class c_IteratorIterator : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual const ClassPropTable *o_getClassPropTable() const;
   virtual Variant *o_realProp(CStrRef s, int flags,
                               CStrRef context = null_string) const;
   Variant *o_realPropPrivate(CStrRef s, int flags) const;
@@ -60,6 +59,7 @@ class c_IteratorIterator : public ExtObjectData {
   static const int s_call_info_index[];
 
   public:
+  static const ClassPropTable os_prop_table;
   c_IteratorIterator(ObjectData* r = NULL) : m_iterator(Variant::nullInit) {
     setAttribute(HasCall);
   }

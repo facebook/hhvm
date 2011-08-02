@@ -25,7 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/stdclass.php line 8 */
 FORWARD_DECLARE_CLASS(__PHP_Incomplete_Class);
-extern ObjectStaticCallbacks cw___PHP_Incomplete_Class;
+extern const ObjectStaticCallbacks cw___PHP_Incomplete_Class;
 class c___PHP_Incomplete_Class : public ExtObjectData {
   public:
 

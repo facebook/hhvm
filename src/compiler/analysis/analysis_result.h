@@ -362,7 +362,6 @@ public:
                             bool longName = false);
   void addNamedLiteralVarString(const std::string &s);
   void addNamedScalarVarArray(const std::string &s);
-  StringToClassScopePtrVecMap getMergedClasses();
   StringToClassScopePtrVecMap getExtensionClasses();
 private:
   Package *m_package;

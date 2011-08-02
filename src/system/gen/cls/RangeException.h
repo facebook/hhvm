@@ -26,7 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 259 */
 FORWARD_DECLARE_CLASS(RangeException);
-extern ObjectStaticCallbacks cw_RangeException;
+extern const ObjectStaticCallbacks cw_RangeException;
 class c_RangeException : public c_RuntimeException {
   public:
 

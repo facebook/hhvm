@@ -331,7 +331,7 @@ const int c_SplObjectStorage::s_call_info_index[] = {
   7,-1,-1,-1,8,-1,-1,-1,
 
 };
-ObjectStaticCallbacks cw_SplObjectStorage = {
+const ObjectStaticCallbacks cw_SplObjectStorage = {
   c_SplObjectStorage::os_getInit,
   c_SplObjectStorage::os_get,
   c_SplObjectStorage::os_lval,
@@ -340,7 +340,7 @@ ObjectStaticCallbacks cw_SplObjectStorage = {
   (ObjectData*(*)(ObjectData*))coo_SplObjectStorage,
   c_SplObjectStorage::s_call_info_table,c_SplObjectStorage::s_call_info_index,
   &c_SplObjectStorage::s_class_name,
-  0
+  &c_SplObjectStorage::os_prop_table,0
 };
 void c_SplObjectStorage::init() {
   m_storage = s_sys_sa00000000;
@@ -473,27 +473,19 @@ ObjectData *coo_SplObjectStorage() {
 }
 
 // Class tables
-ClassPropTable cpt_SplObjectStorage;
-static int ctInitializer() {
-  const char *ctMapData[] = {
-    (const char *)2, (const char *)2, (const char *)&cpt_SplObjectStorage, (const char *)NULL,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage"),
-    (const char *)GET_PROPERTY_OFFSET(c_SplObjectStorage, m_storage),
-    (const char *)10,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index"),
-    (const char *)GET_PROPERTY_OFFSET(c_SplObjectStorage, m_index),
-    (const char *)4,
+static const ClassPropTableEntry cpt_table_entries[] = {
+  { 256, 10,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_storage),&NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage") },
+  { 256, 4,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_index),&NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index") },
 
-    NULL, NULL, NULL,
-  };
-  static ClassPropTableEntry entries[2];
-  static ClassPropTableEntry *pentries[3];
-  return ClassInfo::InitClassPropTable(ctMapData, entries, pentries);
-}
-static int ct_initializer = ctInitializer();
-
-// o_getClassPropTable
-const ClassPropTable *c_SplObjectStorage::o_getClassPropTable() const { return &cpt_SplObjectStorage; }
+};
+static const ClassPropTableEntry *cpt_private_entries[] = {
+  cpt_table_entries+0,
+  cpt_table_entries+1,
+  0,
+};
+const ClassPropTable c_SplObjectStorage::os_prop_table = {
+  2,2,0,cpt_table_entries+0,cpt_private_entries+0
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -203,7 +203,7 @@ static void ThreadLocalSingletonOnThreadExit(void *obj) {
 }
 
 // ThreadLocalSingleton has NoCheck property
-template<typename T>
+template <typename T>
 class ThreadLocalSingleton {
 public:
   ThreadLocalSingleton() { getKey(); }
@@ -263,7 +263,7 @@ T *ThreadLocalSingleton<T>::getCheck() {
   return p;
 }
 
-template<typename T>
+template <typename T>
 pthread_key_t ThreadLocalSingleton<T>::s_key;
 template<typename T>
 __thread T *ThreadLocalSingleton<T>::s_singleton;
@@ -323,6 +323,9 @@ struct ThreadLocalProxy {
 #define DECLARE_THREAD_LOCAL_NO_CHECK(T, f) \
   __thread ThreadLocalNoCheck<T> f
 #define IMPLEMENT_THREAD_LOCAL_NO_CHECK(T, f) \
+  __thread ThreadLocalNoCheck<T> f
+#define IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(T, f) \
+  __attribute((section(".tbss.hot")))             \
   __thread ThreadLocalNoCheck<T> f
 
 #define DECLARE_THREAD_LOCAL_PROXY(T, N, f) \
@@ -542,6 +545,7 @@ public:
 
 #define DECLARE_THREAD_LOCAL_NO_CHECK(T, f) ThreadLocalNoCheck<T> f
 #define IMPLEMENT_THREAD_LOCAL_NO_CHECK(T, f) ThreadLocalNoCheck<T> f
+#define IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(T, f) ThreadLocalNoCheck<T> f
 
 #define DECLARE_THREAD_LOCAL_PROXY(T, N, f) ThreadLocalProxy<T, N> f
 #define IMPLEMENT_THREAD_LOCAL_PROXY(T, N, f) ThreadLocalProxy<T, N> f

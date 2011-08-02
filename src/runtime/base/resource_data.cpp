@@ -22,7 +22,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // resources have a separate id space
-static IMPLEMENT_THREAD_LOCAL_NO_CHECK(int, os_max_resource_id);
+static IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(int, os_max_resource_id);
 
 int ResourceData::GetMaxResourceId() {
   return *(os_max_resource_id.getCheck());

@@ -263,7 +263,7 @@ void c_SoapFault::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapFault::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_SoapFault = {
+const ObjectStaticCallbacks cw_SoapFault = {
   c_SoapFault::os_getInit,
   c_SoapFault::os_get,
   c_SoapFault::os_lval,
@@ -272,7 +272,7 @@ ObjectStaticCallbacks cw_SoapFault = {
   (ObjectData*(*)(ObjectData*))coo_SoapFault,
   c_SoapFault::s_call_info_table,c_SoapFault::s_call_info_index,
   &c_SoapFault::s_class_name,
-  &cw_Exception
+  &c_SoapFault::os_prop_table,&cw_Exception
 };
 /* SRC: classes/soapfault.php line 12 */
 void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_actor //  = null
@@ -417,43 +417,22 @@ ObjectData *coo_SoapFault() {
 }
 
 // Class tables
-ClassPropTable cpt_SoapFault;
-extern ClassPropTable cpt_Exception;
-static int ctInitializer() {
-  const char *ctMapData[] = {
-    (const char *)7, (const char *)0, (const char *)&cpt_SoapFault, (const char *)&cpt_Exception,
-    (const char *)64, (const char *)&NAMSTR(s_sys_ssff0553c0, "faultcode"),
-    (const char *)GET_PROPERTY_OFFSET(c_SoapFault, m_faultcode),
-    (const char *)10,
-    (const char *)64, (const char *)&NAMSTR(s_sys_ssb9540e00, "faultcodens"),
-    (const char *)GET_PROPERTY_OFFSET(c_SoapFault, m_faultcodens),
-    (const char *)10,
-    (const char *)64, (const char *)&NAMSTR(s_sys_ssff4490ec, "faultstring"),
-    (const char *)GET_PROPERTY_OFFSET(c_SoapFault, m_faultstring),
-    (const char *)10,
-    (const char *)64, (const char *)&NAMSTR(s_sys_ss5b7cf41f, "faultactor"),
-    (const char *)GET_PROPERTY_OFFSET(c_SoapFault, m_faultactor),
-    (const char *)10,
-    (const char *)64, (const char *)&NAMSTR(s_sys_ss2235bf3d, "detail"),
-    (const char *)GET_PROPERTY_OFFSET(c_SoapFault, m_detail),
-    (const char *)10,
-    (const char *)64, (const char *)&NAMSTR(s_sys_ssee3a4fdd, "_name"),
-    (const char *)GET_PROPERTY_OFFSET(c_SoapFault, m__name),
-    (const char *)10,
-    (const char *)64, (const char *)&NAMSTR(s_sys_ss40793385, "headerfault"),
-    (const char *)GET_PROPERTY_OFFSET(c_SoapFault, m_headerfault),
-    (const char *)10,
+static const ClassPropTableEntry cpt_table_entries[] = {
+  { 64, 10,GET_PROPERTY_OFFSET(c_SoapFault, m_faultcode),&NAMSTR(s_sys_ssff0553c0, "faultcode") },
+  { 64, 10,GET_PROPERTY_OFFSET(c_SoapFault, m_faultcodens),&NAMSTR(s_sys_ssb9540e00, "faultcodens") },
+  { 64, 10,GET_PROPERTY_OFFSET(c_SoapFault, m_faultstring),&NAMSTR(s_sys_ssff4490ec, "faultstring") },
+  { 64, 10,GET_PROPERTY_OFFSET(c_SoapFault, m_faultactor),&NAMSTR(s_sys_ss5b7cf41f, "faultactor") },
+  { 64, 10,GET_PROPERTY_OFFSET(c_SoapFault, m_detail),&NAMSTR(s_sys_ss2235bf3d, "detail") },
+  { 64, 10,GET_PROPERTY_OFFSET(c_SoapFault, m__name),&NAMSTR(s_sys_ssee3a4fdd, "_name") },
+  { 64, 10,GET_PROPERTY_OFFSET(c_SoapFault, m_headerfault),&NAMSTR(s_sys_ss40793385, "headerfault") },
 
-    NULL, NULL, NULL,
-  };
-  static ClassPropTableEntry entries[7];
-  static ClassPropTableEntry *pentries[1];
-  return ClassInfo::InitClassPropTable(ctMapData, entries, pentries);
-}
-static int ct_initializer = ctInitializer();
-
-// o_getClassPropTable
-const ClassPropTable *c_SoapFault::o_getClassPropTable() const { return &cpt_SoapFault; }
+};
+static const ClassPropTableEntry *cpt_private_entries[] = {
+  0,
+};
+const ClassPropTable c_SoapFault::os_prop_table = {
+  7,0,&c_Exception::os_prop_table,cpt_table_entries+0,cpt_private_entries+0
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

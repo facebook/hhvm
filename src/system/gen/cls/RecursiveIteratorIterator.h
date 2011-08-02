@@ -27,7 +27,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 228 */
 FORWARD_DECLARE_CLASS(RecursiveIteratorIterator);
-extern ObjectStaticCallbacks cw_RecursiveIteratorIterator;
+extern const ObjectStaticCallbacks cw_RecursiveIteratorIterator;
 class c_RecursiveIteratorIterator : public ExtObjectData {
   public:
 
@@ -47,7 +47,6 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual const ClassPropTable *o_getClassPropTable() const;
   virtual Variant *o_realProp(CStrRef s, int flags,
                               CStrRef context = null_string) const;
   Variant *o_realPropPrivate(CStrRef s, int flags) const;
@@ -61,6 +60,7 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   static const int s_call_info_index[];
 
   public:
+  static const ClassPropTable os_prop_table;
   c_RecursiveIteratorIterator() : m_rsrc(Variant::nullInit) {}
   public: void t___construct(Variant v_iterator, Variant v_mode = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */, Variant v_flags = 0LL);
   public: c_RecursiveIteratorIterator *create(CVarRef v_iterator, CVarRef v_mode = NAMVAR(s_sys_svif01bca90, 0LL) /* RecursiveIteratorIterator::LEAVES_ONLY */, CVarRef v_flags = NAMVAR(s_sys_svif01bca90, 0LL));

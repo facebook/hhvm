@@ -852,7 +852,7 @@ void c_SplFileObject::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SplFileObject::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_SplFileObject = {
+const ObjectStaticCallbacks cw_SplFileObject = {
   c_SplFileObject::os_getInit,
   c_SplFileObject::os_get,
   c_SplFileObject::os_lval,
@@ -861,7 +861,7 @@ ObjectStaticCallbacks cw_SplFileObject = {
   (ObjectData*(*)(ObjectData*))coo_SplFileObject,
   c_SplFileObject::s_call_info_table,c_SplFileObject::s_call_info_index,
   &c_SplFileObject::s_class_name,
-  &cw_SplFileInfo
+  &c_SplFileInfo::os_prop_table,&cw_SplFileInfo
 };
 /* SRC: classes/splfile.php line 392 */
 void c_SplFileObject::t___construct(Variant v_filename, Variant v_open_mode //  = NAMSTR(s_sys_ss0d42ecf6, "r")
@@ -1774,7 +1774,7 @@ void c_SplFileInfo::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SplFileInfo::ci___construct;
   mcp.obj = this;
 }
-ObjectStaticCallbacks cw_SplFileInfo = {
+const ObjectStaticCallbacks cw_SplFileInfo = {
   c_SplFileInfo::os_getInit,
   c_SplFileInfo::os_get,
   c_SplFileInfo::os_lval,
@@ -1783,7 +1783,7 @@ ObjectStaticCallbacks cw_SplFileInfo = {
   (ObjectData*(*)(ObjectData*))coo_SplFileInfo,
   c_SplFileInfo::s_call_info_table,c_SplFileInfo::s_call_info_index,
   &c_SplFileInfo::s_class_name,
-  0
+  &c_SplFileInfo::os_prop_table,0
 };
 /* SRC: classes/splfile.php line 14 */
 void c_SplFileInfo::t___construct(Variant v_file_name) {
@@ -1971,24 +1971,17 @@ ObjectData *coo_SplFileInfo() {
 }
 
 // Class tables
-ClassPropTable cpt_SplFileInfo;
-static int ctInitializer() {
-  const char *ctMapData[] = {
-    (const char *)1, (const char *)1, (const char *)&cpt_SplFileInfo, (const char *)NULL,
-    (const char *)256, (const char *)&NAMSTR(s_sys_ss25b53cd5, "\000SplFileInfo\000rsrc"),
-    (const char *)GET_PROPERTY_OFFSET(c_SplFileInfo, m_rsrc),
-    (const char *)10,
+static const ClassPropTableEntry cpt_table_entries[] = {
+  { 256, 10,GET_PROPERTY_OFFSET(c_SplFileInfo, m_rsrc),&NAMSTR(s_sys_ss25b53cd5, "\000SplFileInfo\000rsrc") },
 
-    NULL, NULL, NULL,
-  };
-  static ClassPropTableEntry entries[1];
-  static ClassPropTableEntry *pentries[2];
-  return ClassInfo::InitClassPropTable(ctMapData, entries, pentries);
-}
-static int ct_initializer = ctInitializer();
-
-// o_getClassPropTable
-const ClassPropTable *c_SplFileInfo::o_getClassPropTable() const { return &cpt_SplFileInfo; }
+};
+static const ClassPropTableEntry *cpt_private_entries[] = {
+  cpt_table_entries+0,
+  0,
+};
+const ClassPropTable c_SplFileInfo::os_prop_table = {
+  1,1,0,cpt_table_entries+0,cpt_private_entries+0
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

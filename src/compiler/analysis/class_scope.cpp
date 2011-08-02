@@ -47,8 +47,7 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
     m_kindOf(kindOf), m_parent(parent), m_bases(bases), m_attribute(0),
     m_redeclaring(-1), m_volatile(false), m_needStaticInitializer(false),
     m_derivesFromRedeclaring(FromNormal), m_derivedByDynamic(false),
-    m_sep(false), m_needsCppCtor(false), m_needsInit(true),
-    m_getClassPropTable(false) {
+    m_sep(false), m_needsCppCtor(false), m_needsInit(true) {
 
   m_dynamic = Option::IsDynamicClass(m_name);
 
@@ -69,8 +68,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     m_attribute(0), m_dynamic(false), m_redeclaring(-1), m_volatile(false),
     m_needStaticInitializer(false),
     m_derivesFromRedeclaring(FromNormal), m_derivedByDynamic(false),
-    m_sep(false), m_needsCppCtor(false), m_needsInit(true),
-    m_getClassPropTable(false) {
+    m_sep(false), m_needsCppCtor(false), m_needsInit(true) {
   BOOST_FOREACH(FunctionScopePtr f, methods) {
     if (f->getName() == "__construct") setAttribute(HasConstructor);
     else if (f->getName() == "__destruct") setAttribute(HasDestructor);
@@ -1098,14 +1096,12 @@ void ClassScope::outputCPPGetClassConstantImpl
   cg_indentEnd("}\n");
 }
 
-static int buildClassPropTableMap(
+static bool buildClassPropTableMap(
   CodeGenerator &cg,
   const StringToClassScopePtrVecMap &classScopes,
-  ClassScope::ClassPropTableMap &tables,
-  int &totalPrivateEntries) {
+  ClassScope::ClassPropTableMap &tables) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
   int totalEntries = 0;
-  totalPrivateEntries = 0;
   for (StringToClassScopePtrVecMap::const_iterator iter = classScopes.begin();
        iter != classScopes.end(); ++iter) {
     const ClassScopePtrVec &classes = iter->second;
@@ -1120,27 +1116,37 @@ static int buildClassPropTableMap(
         const Symbol *sym = symbolVec[j];
         if (sym->isStatic() || (dynamicObject && !sym->isPrivate())) continue;
         entries.push_back(sym);
-        if (sym->isPrivate()) totalPrivateEntries++;
       }
       tables[cls->getId()] =
         pair<ClassScopePtr, vector<const Symbol *> >(cls, entries);
       if (entries.size() > 0) {
         totalEntries += entries.size();
-        totalPrivateEntries++; // for the ending NULL
       }
     }
   }
-  return totalEntries;
+  return totalEntries > 0;
 }
 
-ClassScopePtr ClassScope::getNextParentWithProp(
-  AnalysisResultPtr ar,
-  ClassPropTableMap tables) {
+bool ClassScope::checkHasPropTable() {
+  VariableTablePtr variables = getVariables();
+  bool nsp = variables->hasNonStaticPrivate();
+  if (nsp || derivesFromRedeclaring()) return nsp;
+
+  const std::vector<Symbol*> &symbolVec = variables->getSymbols();
+
+  for (unsigned int j = 0; j < symbolVec.size(); j++) {
+    const Symbol *sym = symbolVec[j];
+    if (!sym->isStatic()) return true;
+  }
+
+  return false;
+}
+
+ClassScopePtr ClassScope::getNextParentWithProp(AnalysisResultPtr ar) {
+
   if (derivesFromRedeclaring() == DirectFromRedeclared) return ClassScopePtr();
   ClassScopePtr parentCls = getParentScope(ar);
-  while (parentCls) {
-    ClassPropTableMap::const_iterator iter = tables.find(parentCls->getId());
-    if (iter != tables.end() && iter->second.second.size() > 0) break;
+  while (parentCls && !parentCls->checkHasPropTable()) {
     parentCls = parentCls->getParentScope(ar);
   }
   return parentCls;
@@ -1151,131 +1157,105 @@ void ClassScope::outputCPPGetClassPropTableImpl(
   const StringToClassScopePtrVecMap &classScopes,
   bool extension /* = false */) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  const char text1[] =
-    "static int ctInitializer() {\n"
-    "  const char *ctMapData[] = {\n";
-
-    const char text2[] =
-    "    NULL, NULL, NULL,\n"
-    "  };\n"
-    "  static ClassPropTableEntry entries[%d];\n"
-    "  static ClassPropTableEntry *pentries[%d];\n"
-    "  return ClassInfo::InitClassPropTable(ctMapData, entries, pentries);\n"
-    "}\n"
-    "static int ct_initializer = ctInitializer();\n";
 
   ClassPropTableMap tables;
-  ClassPropTableMap globalTables;
-  int totalPrivateEntries = 0;
-  buildClassPropTableMap(cg, ar->getMergedClasses(), globalTables,
-                         totalPrivateEntries);
-  int totalEntries = buildClassPropTableMap(cg, classScopes, tables,
-                                            totalPrivateEntries);
+  if (!buildClassPropTableMap(cg, classScopes, tables)) return;
+
   cg.printSection("Class tables");
+  cg_indentBegin("static const ClassPropTableEntry %stable_entries[] = {\n",
+                 Option::ClassPropTablePrefix);
+
+  for (ClassPropTableMap::const_iterator iter = tables.begin();
+       iter != tables.end(); iter++) {
+    const vector<const Symbol *> &entries = iter->second.second;
+    if (entries.size() == 0) continue;
+    ClassScopePtr cls = iter->second.first;
+
+    for (unsigned int i = 0; i < entries.size(); i++) {
+      const Symbol *sym = entries[i];
+      string prop(sym->getName());
+      int flags = 0;
+      if (sym->isPublic())    flags |= ClassInfo::IsPublic;
+      if (sym->isProtected()) flags |= ClassInfo::IsProtected;
+      if (sym->isPrivate()) {
+        ASSERT(!sym->isOverride());
+        flags |= ClassInfo::IsPrivate;
+        prop = '\0' + cls->getOriginalName() + '\0' + prop;
+      }
+      ASSERT(!sym->isStatic());
+      if (sym->isOverride()) {
+        ASSERT(!system);
+        flags |= ClassInfo::IsOverride;
+      }
+      cg_printf("{ %d, %d,", flags, sym->getFinalType()->getDataType());
+      cg_printf("GET_PROPERTY_OFFSET(%s%s, %s%s),",
+                Option::ClassPrefix, cls->getId().c_str(),
+                Option::PropertyPrefix, sym->getName().c_str());
+      cg_printf("&", flags);
+      cg_printString(prop, ar, cls);
+      cg_printf(" },\n");
+    }
+    cg_printf("\n");
+  }
+  cg_indentEnd("};\n");
+  int curIndex = 0;
+  bool haveZero = false;
+  std::vector<int> privateCounts;
+  cg_indentBegin("static const ClassPropTableEntry *%sprivate_entries[] = {\n",
+                 Option::ClassPropTablePrefix);
+  for (ClassPropTableMap::const_iterator iter = tables.begin();
+       iter != tables.end(); iter++) {
+    const vector<const Symbol *> &entries = iter->second.second;
+    if (entries.size()) {
+      int pCount = 0;
+      for (unsigned int i = 0; i < entries.size(); i++) {
+        const Symbol *sym = entries[i];
+        if (sym->isPrivate()) {
+          cg_printf("%stable_entries+%d,\n",
+                    Option::ClassPropTablePrefix, curIndex);
+          pCount++;
+          haveZero = false;
+        }
+        curIndex++;
+      }
+      if (!haveZero) {
+        cg_printf("0,\n");
+        haveZero = true;
+      }
+      privateCounts.push_back(pCount);
+    }
+  }
+  cg_indentEnd("};\n");
+
+  curIndex = 0;
+  int curOffset = 0;
+  int privateOffset = 0;
   for (ClassPropTableMap::const_iterator iter = tables.begin();
        iter != tables.end(); iter++) {
     if (iter->second.second.size() > 0) {
-      cg_printf("ClassPropTable %s%s;\n", Option::ClassPropTablePrefix,
-                iter->first.c_str());
-    }
-  }
-  map<ClassScopePtr, ClassScopePtr> childParentMap;
-  for (ClassPropTableMap::const_iterator iter = tables.begin();
-       iter != tables.end(); iter++) {
-    ClassScopePtr cls = iter->second.first;
-    childParentMap[cls] = cls->getNextParentWithProp(ar, globalTables);
-  }
-  set<string> externals;
-  for (map<ClassScopePtr, ClassScopePtr>::const_iterator iter =
-       childParentMap.begin(); iter != childParentMap.end(); iter++) {
-    ClassScopePtr parentCls = iter->second;
-    if (parentCls && tables.find(parentCls->getId()) == tables.end()) {
-      externals.insert(parentCls->getId());
-    }
-  }
-  for (set<string>::const_iterator iter = externals.begin();
-       iter != externals.end(); iter++) {
-    cg_printf("extern ClassPropTable %s%s;\n",
-              Option::ClassPropTablePrefix, iter->c_str());
-  }
-  if (totalEntries > 0) {
-    cg_printf(text1);
-    for (ClassPropTableMap::const_iterator iter = tables.begin();
-         iter != tables.end(); iter++) {
-      const vector<const Symbol *> &entries = iter->second.second;
-      if (entries.size() == 0) continue;
-      int privateCount = 0;
-      for (unsigned int i = 0; i < entries.size(); i++) {
-        if (entries[i]->isPrivate()) privateCount++;
-      }
-      ClassScopePtr cls = iter->second.first;
-      const string &clsId = iter->first;
-      cg_printf("    (const char *)%d, (const char *)%d, (const char *)&%s%s, ",
-                entries.size(), privateCount,
-                Option::ClassPropTablePrefix, clsId.c_str());
-      ClassScopePtr parentCls = childParentMap[cls];
+      int pCount = privateCounts[curIndex++];
+      if (pCount && privateOffset) privateOffset++;
+      cg_indentBegin("const ClassPropTable %s%s::%sprop_table = {\n",
+                Option::ClassPrefix, iter->first.c_str(),
+                Option::ObjectStaticPrefix);
+      cg_printf("%d,%d,",
+                (int)iter->second.second.size(), pCount);
+      ClassScopePtr parentCls = iter->second.first->getNextParentWithProp(ar);
       if (parentCls) {
-        cg_printf("(const char *)&%s%s,\n",
-                  Option::ClassPropTablePrefix, parentCls->getId().c_str());
+        cg_printf("&%s%s::%sprop_table,",
+                  Option::ClassPrefix, parentCls->getId().c_str(),
+                  Option::ObjectStaticPrefix);
       } else {
-        cg_printf("(const char *)NULL,\n");
+        cg_printf("0,");
       }
+      cg_printf("%stable_entries+%d,",
+                Option::ClassPropTablePrefix, curOffset);
+      cg_printf("%sprivate_entries+%d\n",
+                Option::ClassPropTablePrefix, privateOffset);
+      cg_indentEnd("};\n");
 
-      for (unsigned int i = 0; i < entries.size(); i++) {
-        const Symbol *sym = entries[i];
-        string prop(sym->getName());
-        int flags = 0;
-        if (sym->isPublic())    flags |= ClassInfo::IsPublic;
-        if (sym->isProtected()) flags |= ClassInfo::IsProtected;
-        if (sym->isPrivate()) {
-          ASSERT(!sym->isOverride());
-          flags |= ClassInfo::IsPrivate;
-          prop = '\0' + cls->getOriginalName() + '\0' + prop;
-        }
-        ASSERT(!sym->isStatic());
-        if (sym->isOverride()) {
-          ASSERT(!system);
-          flags |= ClassInfo::IsOverride;
-        }
-        cg_printf("    (const char *)%d, (const char *)&", flags);
-        cg_printString(prop, ar, cls);
-        cg_printf(",\n");
-        cg_printf("    (const char *)GET_PROPERTY_OFFSET(%s%s, %s%s),\n",
-                  Option::ClassPrefix, cls->getId().c_str(),
-                  Option::PropertyPrefix, sym->getName().c_str());
-        cg_printf("    (const char *)%d,\n",
-                  sym->getFinalType()->getDataType());
-      }
-      cg_printf("\n");
-    }
-    cg_printf(text2, totalEntries, totalPrivateEntries);
-  }
-  cg.printSection("o_getClassPropTable");
-  for (ClassPropTableMap::const_iterator iter = tables.begin();
-       iter != tables.end(); iter++) {
-    ClassScopePtr cls = iter->second.first;
-    ClassScope::Derivation dynamicObject = cls->derivesFromRedeclaring();
-    if (!extension && cls->isUserClass() &&
-        iter->second.second.size() == 0 && !dynamicObject) {
-      continue;
-    }
-    cls->m_getClassPropTable = true;
-    cg_printf("const ClassPropTable *%s%s::o_getClassPropTable() const ",
-              Option::ClassPrefix,
-              cls->getId().c_str());
-    if (iter->second.second.size() == 0) {
-      if (dynamicObject) {
-        cls = ClassScopePtr();
-      } else {
-        cls = childParentMap[cls];
-      }
-    }
-    if (cls) {
-        cg_printf("{ return &%s%s; }\n",
-                  Option::ClassPropTablePrefix,
-                  cls->getId().c_str());
-    } else {
-      cg_printf("{ return NULL; }\n");
+      curOffset += iter->second.second.size();
+      privateOffset += pCount;
     }
   }
 }
@@ -1729,15 +1709,26 @@ void ClassScope::outputCPPStaticMethodWrappers(CodeGenerator &cg,
 void ClassScope::outputCPPGlobalTableWrappersDecl(CodeGenerator &cg,
                                                   AnalysisResultPtr ar) {
   string id = getId();
-  cg_printf("extern %sObjectStaticCallbacks %s%s;\n",
+  cg_printf("extern const %sObjectStaticCallbacks %s%s;\n",
             isRedeclaring() ? "Redeclared" : "",
             Option::ClassWrapperFunctionPrefix, id.c_str());
+}
+
+string ClassScope::getClassPropTableId(AnalysisResultPtr ar) {
+  if (checkHasPropTable()) return getId();
+
+  if (ClassScopePtr p = getParentScope(ar)) {
+    return p->getClassPropTableId(ar);
+  }
+
+  return "";
 }
 
 void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
                                                   AnalysisResultPtr ar) {
   string id = getId();
-  cg_indentBegin("%sObjectStaticCallbacks %s%s = {\n",
+  string prop = getClassPropTableId(ar);
+  cg_indentBegin("const %sObjectStaticCallbacks %s%s = {\n",
                  isRedeclaring() ? "Redeclared" : "",
                  Option::ClassWrapperFunctionPrefix, id.c_str());
   if (isRedeclaring()) {
@@ -1760,6 +1751,13 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
             Option::ClassPrefix, id.c_str(),
             Option::ClassPrefix, id.c_str());
   cg_printf("&%s%s::s_class_name,\n", Option::ClassPrefix, id.c_str());
+  if (prop.empty()) {
+    cg_printf("0,");
+  } else {
+    cg_printf("&%s%s::%sprop_table,",
+              Option::ClassPrefix, prop.c_str(),
+              Option::ObjectStaticPrefix);
+  }
   if (derivesFromRedeclaring() == DirectFromRedeclared) {
     cg_printf("(const ObjectStaticCallbacks*)"
               "(offsetof(GlobalVariables, %s%s)+1)",

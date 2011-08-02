@@ -26,7 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 173 */
 FORWARD_DECLARE_CLASS(LogicException);
-extern ObjectStaticCallbacks cw_LogicException;
+extern const ObjectStaticCallbacks cw_LogicException;
 class c_LogicException : public c_Exception {
   public:
 

@@ -26,7 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/reflection.php line 46 */
 FORWARD_DECLARE_CLASS(ReflectionParameter);
-extern ObjectStaticCallbacks cw_ReflectionParameter;
+extern const ObjectStaticCallbacks cw_ReflectionParameter;
 class c_ReflectionParameter : public ExtObjectData {
   public:
 
@@ -46,7 +46,6 @@ class c_ReflectionParameter : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual const ClassPropTable *o_getClassPropTable() const;
   #define OMIT_JUMP_TABLE_CLASS_realProp_ReflectionParameter 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionParameter 1
 
@@ -59,6 +58,7 @@ class c_ReflectionParameter : public ExtObjectData {
   static const int s_call_info_index[];
 
   public:
+  static const ClassPropTable os_prop_table;
   c_ReflectionParameter() : m_info(Variant::nullInit) {}
   public: void t___construct(Variant v_func, Variant v_param);
   public: c_ReflectionParameter *create(CVarRef v_func, CVarRef v_param);

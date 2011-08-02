@@ -25,7 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 10 */
 FORWARD_DECLARE_CLASS(Exception);
-extern ObjectStaticCallbacks cw_Exception;
+extern const ObjectStaticCallbacks cw_Exception;
 class c_Exception : public ExtObjectData {
   public:
 
@@ -50,7 +50,6 @@ class c_Exception : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual const ClassPropTable *o_getClassPropTable() const;
   #define OMIT_JUMP_TABLE_CLASS_realProp_Exception 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Exception 1
 
@@ -63,6 +62,7 @@ class c_Exception : public ExtObjectData {
   static const int s_call_info_index[];
 
   public:
+  static const ClassPropTable os_prop_table;
   c_Exception() : m_previous(Variant::nullInit), m_file(Variant::nullInit), m_line(Variant::nullInit), m_trace(Variant::nullInit) {}
   void init();
   public: void t___init__();

@@ -86,7 +86,7 @@ void c_stdClass::cloneSet(ObjectData *cl) {
   c_stdClass *clone = static_cast<c_stdClass*>(cl);
   ObjectData::cloneSet(clone);
 }
-ObjectStaticCallbacks cw_stdClass = {
+const ObjectStaticCallbacks cw_stdClass = {
   c_stdClass::os_getInit,
   c_stdClass::os_get,
   c_stdClass::os_lval,
@@ -95,7 +95,7 @@ ObjectStaticCallbacks cw_stdClass = {
   (ObjectData*(*)(ObjectData*))coo_stdClass,
   c_stdClass::s_call_info_table,c_stdClass::s_call_info_index,
   &c_stdClass::s_class_name,
-  0
+  0,0
 };
 /* SRC: classes/stdclass.php line 8 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT___PHP_Incomplete_Class
@@ -154,7 +154,7 @@ void c___PHP_Incomplete_Class::cloneSet(ObjectData *cl) {
   c___PHP_Incomplete_Class *clone = static_cast<c___PHP_Incomplete_Class*>(cl);
   ObjectData::cloneSet(clone);
 }
-ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
+const ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
   c___PHP_Incomplete_Class::os_getInit,
   c___PHP_Incomplete_Class::os_get,
   c___PHP_Incomplete_Class::os_lval,
@@ -163,7 +163,7 @@ ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
   (ObjectData*(*)(ObjectData*))coo___PHP_Incomplete_Class,
   c___PHP_Incomplete_Class::s_call_info_table,c___PHP_Incomplete_Class::s_call_info_index,
   &c___PHP_Incomplete_Class::s_class_name,
-  0
+  0,0
 };
 ObjectData *coo_stdClass() {
   return NEWOBJ(c_stdClass)();
@@ -171,10 +171,6 @@ ObjectData *coo_stdClass() {
 ObjectData *coo___PHP_Incomplete_Class() {
   return NEWOBJ(c___PHP_Incomplete_Class)();
 }
-
-// Class tables
-
-// o_getClassPropTable
 
 ///////////////////////////////////////////////////////////////////////////////
 }

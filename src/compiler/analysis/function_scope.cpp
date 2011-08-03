@@ -520,6 +520,17 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
       param->clearContext(Expression::RefValue);
       param->clearContext(Expression::NoRefWrapper);
     }
+    bool isRefVararg = (i >= m_maxParam && isReferenceVariableArgument());
+    if ((i < m_maxParam && isRefParam(i)) || isRefVararg) {
+      param->setContext(Expression::LValue);
+      param->setContext(Expression::RefValue);
+      param->inferAndCheck(ar, Type::Variant, true);
+    } else if (!(param->getContext() & Expression::RefParameter)) {
+      param->clearContext(Expression::LValue);
+      param->clearContext(Expression::RefValue);
+      param->clearContext(Expression::InvokeArgument);
+      param->clearContext(Expression::NoRefWrapper);
+    }
     TypePtr expType;
     if (valid && !canSetParamType && i < m_maxParam &&
         (!Option::HardTypeHints || !m_paramTypeSpecs[i])) {
@@ -536,17 +547,6 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
       expType = param->inferAndCheck(ar, expType, false);
     } else {
       expType = param->inferAndCheck(ar, Type::Some, false);
-    }
-    bool isRefVararg = (i >= m_maxParam && isReferenceVariableArgument());
-    if ((i < m_maxParam && isRefParam(i)) || isRefVararg) {
-      param->setContext(Expression::LValue);
-      param->setContext(Expression::RefValue);
-      param->inferAndCheck(ar, Type::Variant, true);
-    } else if (!(param->getContext() & Expression::RefParameter)) {
-      param->clearContext(Expression::LValue);
-      param->clearContext(Expression::RefValue);
-      param->clearContext(Expression::InvokeArgument);
-      param->clearContext(Expression::NoRefWrapper);
     }
     if (i < m_maxParam) {
       if (!Option::HardTypeHints || !m_paramTypeSpecs[i]) {

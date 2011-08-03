@@ -94,6 +94,7 @@ public:
   void append(unsigned char c) { append((char)c);}
   void append(litstr  s) { ASSERT(s); append(s, strlen(s));}
   void append(CStrRef s);
+  void append(CVarRef s) { append(s.toString()); }
   void append(const char *s, int len) {
     TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data);
     ASSERT(len >= 0);

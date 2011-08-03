@@ -225,7 +225,7 @@ void ClassStatement::evalImpl(VariableEnvironment &env) const {
     for (vector<MethodStatementPtr>::const_iterator it = m_methodsVec.begin();
          it != m_methodsVec.end(); ++it) {
 
-      const MethodStatementPtr child_method = *it;
+      const MethodStatement *child_method = it->get();
 
       const ClassStatement* cs = this;
       while ((cs = cs->parentStatement())) {

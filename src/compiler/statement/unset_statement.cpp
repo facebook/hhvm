@@ -52,7 +52,7 @@ StatementPtr UnsetStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void UnsetStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void UnsetStatement::analyzeProgram(AnalysisResultPtr ar) {
   m_exp->analyzeProgram(ar);
 }
 

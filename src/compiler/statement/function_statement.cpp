@@ -81,7 +81,7 @@ std::string FunctionStatement::getName() const {
   return string("Function ") + getScope()->getName();
 }
 
-void FunctionStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void FunctionStatement::analyzeProgram(AnalysisResultPtr ar) {
   FunctionScopeRawPtr fs = getFunctionScope();
   // redeclared functions are automatically volatile
   if (fs->isVolatile()) {
@@ -97,7 +97,7 @@ void FunctionStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
     ar->recordFunctionSource(name, m_loc,
                              getFileScope()->getName());
   }
-  MethodStatement::analyzeProgramImpl(ar);
+  MethodStatement::analyzeProgram(ar);
 }
 
 void FunctionStatement::inferTypes(AnalysisResultPtr ar) {

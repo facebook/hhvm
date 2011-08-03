@@ -45,7 +45,7 @@ StatementPtr WhileStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void WhileStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void WhileStatement::analyzeProgram(AnalysisResultPtr ar) {
   m_condition->analyzeProgram(ar);
   if (m_stmt) m_stmt->analyzeProgram(ar);
 }

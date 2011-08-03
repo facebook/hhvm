@@ -57,7 +57,7 @@ StatementPtr CatchStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void CatchStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void CatchStatement::analyzeProgram(AnalysisResultPtr ar) {
   addUserClass(ar, m_className);
   m_variable->analyzeProgram(ar);
   if (m_stmt) m_stmt->analyzeProgram(ar);

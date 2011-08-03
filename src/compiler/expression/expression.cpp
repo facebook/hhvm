@@ -704,7 +704,10 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                                 int state) {
   if (hasCPPTemp() || isScalar()) return;
   bool fastCast = needsFastCastTemp(ar);
-  if (!isLocalExprAltered() && !hasEffect() && !fastCast) return;
+  if (!isLocalExprAltered() && !hasEffect() &&
+      !fastCast && !(state & StashAll)) {
+    return;
+  }
 
   bool killCast = false;
 

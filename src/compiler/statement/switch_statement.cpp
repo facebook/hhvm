@@ -66,7 +66,7 @@ int SwitchStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void SwitchStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void SwitchStatement::analyzeProgram(AnalysisResultPtr ar) {
   m_exp->analyzeProgram(ar);
   if (m_cases) m_cases->analyzeProgram(ar);
 

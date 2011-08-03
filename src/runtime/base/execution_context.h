@@ -302,13 +302,16 @@ private:
 
 class Silencer {
 public:
-  Silencer();
-  ~Silencer();
+  Silencer() : m_active(false) {}
+  Silencer(bool);
+
+  ~Silencer() { if (m_active) disableHelper(); }
   void enable();
-  void disable();
+  void disable() { disableHelper(); m_active = false; }
   Variant disable(CVarRef v);
 
 private:
+  void disableHelper();
   bool m_active;
   int m_errorReportingValue;
 };

@@ -901,11 +901,8 @@ const ResourceMap &PersistentObjectStore::getMap(const char *type) {
 // silencer
 
 
-Silencer::Silencer() : m_active(false) {
-}
-
-Silencer::~Silencer() {
-  disable();
+Silencer::Silencer(bool e) : m_active(false) {
+  if (e) enable();
 }
 
 void Silencer::enable() {
@@ -914,11 +911,10 @@ void Silencer::enable() {
   m_active = true;
 }
 
-void Silencer::disable() {
+void Silencer::disableHelper() {
   if (m_active) {
     if (g_context->getErrorReportingLevel() == 0)
       g_context->setErrorReportingLevel(m_errorReportingValue);
-    m_active = false;
   }
 }
 

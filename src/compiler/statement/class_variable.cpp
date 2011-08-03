@@ -87,7 +87,7 @@ void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ClassVariable::analyzeProgramImpl(AnalysisResultPtr ar) {
+void ClassVariable::analyzeProgram(AnalysisResultPtr ar) {
   m_declaration->analyzeProgram(ar);
   AnalysisResult::Phase phase = ar->getPhase();
   if (phase != AnalysisResult::AnalyzeAll) {

@@ -524,7 +524,7 @@ private:
   AnalysisResultPtr m_ar;
 };
 
-void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
   FunctionScopeRawPtr funcScope = getFunctionScope();
 
   if (m_params) {

@@ -28,7 +28,7 @@
 #define STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(kindOf)                  \
   scope, loc, Statement::KindOf##kindOf
 #define DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS                        \
-  virtual void analyzeProgramImpl(AnalysisResultPtr ar);                \
+  virtual void analyzeProgram(AnalysisResultPtr ar);                    \
   virtual StatementPtr clone();                                         \
   virtual void inferTypes(AnalysisResultPtr ar);                        \
   virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);      \
@@ -112,9 +112,6 @@ public:
     return boost::dynamic_pointer_cast<Statement>(getNthKid(n));
   }
 
-  virtual void analyzeProgram(AnalysisResultPtr ar);
-  virtual void analyzeProgramImpl(AnalysisResultPtr ar) = 0;
-
   virtual void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
   virtual void outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) = 0;
 
@@ -152,10 +149,6 @@ public:
   }
 
   virtual int getRecursiveCount() const { return 1; }
-
-  int requireSilencers(int count);
-  void endRequireSilencers(int old);
-  int getSilencerCount();
 
 protected:
   KindOf m_kindOf;

@@ -51,7 +51,7 @@ int IfStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void IfStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void IfStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_stmts) m_stmts->analyzeProgram(ar);
 }
 

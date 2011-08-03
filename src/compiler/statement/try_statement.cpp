@@ -50,7 +50,7 @@ int TryStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void TryStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void TryStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_tryStmt) m_tryStmt->analyzeProgram(ar);
   m_catches->analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {

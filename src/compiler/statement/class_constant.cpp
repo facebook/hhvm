@@ -69,7 +69,7 @@ void ClassConstant::onParseRecur(AnalysisResultConstPtr ar,
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ClassConstant::analyzeProgramImpl(AnalysisResultPtr ar) {
+void ClassConstant::analyzeProgram(AnalysisResultPtr ar) {
   m_exp->analyzeProgram(ar);
 }
 

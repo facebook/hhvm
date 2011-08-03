@@ -50,7 +50,7 @@ StatementPtr BreakStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void BreakStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void BreakStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_exp) m_exp->analyzeProgram(ar);
 }
 

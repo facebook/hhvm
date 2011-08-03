@@ -42,7 +42,7 @@ StatementPtr EchoStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void EchoStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void EchoStatement::analyzeProgram(AnalysisResultPtr ar) {
   for (int i = 0; i < m_exp->getCount(); i++) {
     (*m_exp)[i]->analyzeProgram(ar);
   }

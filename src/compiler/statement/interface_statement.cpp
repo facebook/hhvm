@@ -134,7 +134,7 @@ void InterfaceStatement::checkVolatile(AnalysisResultConstPtr ar) {
   }
 }
 
-void InterfaceStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void InterfaceStatement::analyzeProgram(AnalysisResultPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();
   if (m_stmt) {
     m_stmt->analyzeProgram(ar);

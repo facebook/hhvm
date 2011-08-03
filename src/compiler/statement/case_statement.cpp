@@ -74,7 +74,7 @@ string CaseStatement::getLiteralString() const {
   return exp->getLiteralString();
 }
 
-void CaseStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void CaseStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_condition) m_condition->analyzeProgram(ar);
   if (m_stmt) m_stmt->analyzeProgram(ar);
 }

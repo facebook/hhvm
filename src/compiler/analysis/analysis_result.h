@@ -243,15 +243,6 @@ public:
   void addFileScope(FileScopePtr fileScope);
 
   /**
-   * To implement the silence operator correctly, we need to keep trace
-   * of the current statement being parsed.
-   */
-  void pushStatement(StatementPtr stmt);
-  void popStatement();
-  StatementPtr getStatement() const { return m_stmt; }
-  StatementPtr getStatementForSilencer() const;
-
-  /**
    * Declarations
    */
   bool declareFunction(FunctionScopePtr funcScope) const;

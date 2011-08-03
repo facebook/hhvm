@@ -44,7 +44,7 @@ StatementPtr IfBranchStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void IfBranchStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void IfBranchStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_condition) m_condition->analyzeProgram(ar);
   if (m_stmt) m_stmt->analyzeProgram(ar);
 }

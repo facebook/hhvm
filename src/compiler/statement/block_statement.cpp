@@ -45,7 +45,7 @@ int BlockStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void BlockStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void BlockStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_stmts) m_stmts->analyzeProgram(ar);
 }
 

@@ -41,7 +41,7 @@ StatementPtr ThrowStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ThrowStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void ThrowStatement::analyzeProgram(AnalysisResultPtr ar) {
   m_exp->analyzeProgram(ar);
 }
 

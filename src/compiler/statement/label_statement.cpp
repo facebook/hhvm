@@ -42,7 +42,7 @@ StatementPtr LabelStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void LabelStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void LabelStatement::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 ConstructPtr LabelStatement::getNthKid(int n) const {

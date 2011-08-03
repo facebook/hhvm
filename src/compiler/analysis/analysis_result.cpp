@@ -147,37 +147,6 @@ FileScopePtr AnalysisResult::findFileScope(const std::string &name) const {
   return FileScopePtr();
 }
 
-void AnalysisResult::pushStatement(StatementPtr stmt) {
-  m_stmt = stmt;
-  m_stmts.push_back(stmt);
-}
-
-void AnalysisResult::popStatement() {
-  ASSERT(!m_stmts.empty());
-  m_stmts.pop_back();
-  if (m_stmts.empty()) {
-    m_stmt.reset();
-  } else {
-    m_stmt = m_stmts.back();
-  }
-}
-
-StatementPtr AnalysisResult::getStatementForSilencer() const {
-  // Because of how we parse if/else statements, we need
-  // to handle them differently
-  if (m_stmt && m_stmt->is(Statement::KindOfIfBranchStatement)) {
-    if (m_stmts.size() < 3)
-      return StatementPtr();
-    // If the current statement is an IfBranchStatement, we want to
-    // return the enclosing IfStatement. The parser guarantees that
-    // each IfBranchStatement is the grandchild of the enclosing
-    // IfStatement.
-    ASSERT(m_stmts[m_stmts.size()-3]->is(Statement::KindOfIfStatement));
-    return m_stmts[m_stmts.size()-3];
-  }
-  return m_stmt;
-}
-
 FunctionScopePtr AnalysisResult::findFunction(
   const std::string &funcName) const {
   StringToFunctionScopePtrVecMap::const_iterator bit =

@@ -57,7 +57,7 @@ void GotoStatement::invalidate(ParserBase::GotoError error) {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void GotoStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void GotoStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     FunctionScopeRawPtr fs = getFunctionScope();
     if (fs) fs->setHasGoto();

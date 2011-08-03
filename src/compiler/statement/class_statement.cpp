@@ -132,7 +132,7 @@ string ClassStatement::getName() const {
   return string("Class ") + getScope()->getName();
 }
 
-void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void ClassStatement::analyzeProgram(AnalysisResultPtr ar) {
   vector<string> bases;
   if (!m_parent.empty()) bases.push_back(m_parent);
   if (m_base) m_base->getStrings(bases);

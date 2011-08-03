@@ -64,7 +64,6 @@ protected:
   ExpressionPtr m_exp;
   int m_op;
   bool m_front;
-  int m_silencer;
 
 private:
   bool preCompute(CVarRef value, Variant &result);

@@ -62,7 +62,7 @@ StatementPtr GlobalStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void GlobalStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void GlobalStatement::analyzeProgram(AnalysisResultPtr ar) {
   m_exp->analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
     FunctionScopePtr fs = getFunctionScope();

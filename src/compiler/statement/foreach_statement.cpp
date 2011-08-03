@@ -71,7 +71,7 @@ StatementPtr ForEachStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ForEachStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void ForEachStatement::analyzeProgram(AnalysisResultPtr ar) {
   m_array->analyzeProgram(ar);
   if (m_name) m_name->analyzeProgram(ar);
   m_value->analyzeProgram(ar);

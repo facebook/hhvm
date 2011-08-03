@@ -45,7 +45,7 @@ StatementPtr DoStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void DoStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void DoStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_stmt) m_stmt->analyzeProgram(ar);
   m_condition->analyzeProgram(ar);
 }

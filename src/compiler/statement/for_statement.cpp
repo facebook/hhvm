@@ -61,7 +61,7 @@ StatementPtr ForStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ForStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void ForStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_exp1) m_exp1->analyzeProgram(ar);
   if (m_exp2) m_exp2->analyzeProgram(ar);
   if (m_exp3) m_exp3->analyzeProgram(ar);

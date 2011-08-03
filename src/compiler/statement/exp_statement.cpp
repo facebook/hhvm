@@ -87,7 +87,7 @@ void ExpStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ExpStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
+void ExpStatement::analyzeProgram(AnalysisResultPtr ar) {
   m_exp->analyzeProgram(ar);
 }
 

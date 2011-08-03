@@ -82,16 +82,14 @@ inline void UnaryOpExpression::ctorInit() {
 UnaryOpExpression::UnaryOpExpression
 (EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS, ExpressionPtr exp, int op, bool front)
   : Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETER_VALUES),
-    m_exp(exp), m_op(op), m_front(front),
-    m_silencer(-1) {
+    m_exp(exp), m_op(op), m_front(front) {
   ctorInit();
 }
 
 UnaryOpExpression::UnaryOpExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp, int op, bool front)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(UnaryOpExpression)),
-    m_exp(exp), m_op(op), m_front(front),
-    m_silencer(-1) {
+    m_exp(exp), m_op(op), m_front(front) {
   ctorInit();
 }
 
@@ -182,17 +180,7 @@ void UnaryOpExpression::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
 // static analysis functions
 
 void UnaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal && m_op == '@') {
-    StatementPtr stmt = ar->getStatementForSilencer();
-    ASSERT(stmt);
-    m_silencer = stmt->requireSilencers(1);
-  }
   if (m_exp) m_exp->analyzeProgram(ar);
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal && m_op == '@') {
-    StatementPtr stmt = ar->getStatementForSilencer();
-    ASSERT(stmt);
-    stmt->endRequireSilencers(m_silencer);
-  }
 }
 
 bool UnaryOpExpression::preCompute(CVarRef value, Variant &result) {
@@ -268,8 +256,7 @@ bool UnaryOpExpression::canonCompare(ExpressionPtr e) const {
     static_pointer_cast<UnaryOpExpression>(e);
 
   return m_op == u->m_op &&
-    m_front == u->m_front &&
-    m_silencer == u->m_silencer;
+    m_front == u->m_front;
 }
 
 ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
@@ -650,23 +637,14 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
   if (m_op == '@') {
     if (isUnused()) m_exp->setUnused(true);
-    bool inExpression = cg.inExpression();
-    bool doit = state & FixOrder;
-    if (!doit) {
-      cg.setInExpression(false);
-      if (m_exp->preOutputCPP(cg, ar, state)) {
-        doit = true;
-      }
-      cg.setInExpression(inExpression);
-    }
-    if (doit && inExpression) {
-      cg_printf("%s%d.enable();\n", Option::SilencerPrefix, m_silencer);
+    bool doit = (state & FixOrder) || m_exp->hasEffect();
+    if (doit && cg.inExpression()) {
+      cg.wrapExpressionBegin();
+      std::string tmp = genCPPTemp(cg, ar);
+      cg_printf("Silencer %s(true);\n", tmp.c_str());
       m_exp->preOutputCPP(cg, ar, 0);
-      int s = m_silencer;
-      m_silencer = -1;
-      this->preOutputStash(cg, ar, state | FixOrder);
-      m_silencer = s;
-      cg_printf("%s%d.disable();\n", Option::SilencerPrefix, m_silencer);
+      this->preOutputStash(cg, ar, state | FixOrder | StashAll);
+      cg_printf("%s.disable();\n", tmp.c_str());
     }
     return doit;
   } else if (m_op == T_PRINT && m_exp && !m_exp->hasEffect()) {
@@ -850,11 +828,6 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
         }
         break;
       case '@':
-        if (m_silencer >= 0) {
-          cg_printf("(%s%d.enable(),%s%d.disable(",
-                    Option::SilencerPrefix, m_silencer,
-                    Option::SilencerPrefix, m_silencer);
-        }
         break;
       case T_FILE:
         cg_printf("get_source_filename(\"%s\")", getLocation()->file);
@@ -876,13 +849,8 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
         }
         break;
       case '@':
-        if (m_silencer < 0 && isUnused()) {
+        if (isUnused()) {
           m_exp->outputCPPUnneeded(cg, ar);
-        } else if (!m_exp->hasCPPTemp() && !m_exp->getActualType()) {
-          // Void needs to return something to silenceDec
-          cg_printf("(");
-          m_exp->outputCPP(cg, ar);
-          cg_printf(",null)");
         } else {
           m_exp->outputCPP(cg, ar);
         }
@@ -929,9 +897,6 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       cg_printf(")");
       break;
     case '@':
-      if (m_silencer >= 0) {
-        cg_printf("))");
-      }
       break;
     default:
       break;

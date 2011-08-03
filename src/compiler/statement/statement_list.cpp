@@ -132,7 +132,7 @@ bool StatementList::hasRetExp() const {
   return false;
 }
 
-void StatementList::analyzeProgramImpl(AnalysisResultPtr ar) {
+void StatementList::analyzeProgram(AnalysisResultPtr ar) {
   m_included = true;
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
     StatementPtr stmt = m_stmts[i];

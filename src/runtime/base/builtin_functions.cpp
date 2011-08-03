@@ -569,23 +569,10 @@ void check_request_surprise(ThreadInfo *info) {
   RequestInjectionData &p = info->m_reqInjectionData;
   bool do_timedout, do_memExceeded, do_signaled;
 
-  p.surpriseMutex.lock();
-
-  // Even though we checked surprise outside of the lock, we don't need to
-  // check again, because the only code that can ever set surprised to false
-  // is right here - and this function is never called from another thread.
-
-  p.surprised = false;
-
-  do_timedout = p.timedout && !p.debugger;
-  do_memExceeded = p.memExceeded;
-  do_signaled = p.signaled;
-
-  p.timedout = false;
-  p.memExceeded = false;
-  p.signaled = false;
-
-  p.surpriseMutex.unlock();
+  ssize_t flags = p.fetchAndClearFlags();
+  do_timedout = (flags & RequestInjectionData::TimedOutFlag) && !p.debugger;
+  do_memExceeded = (flags & RequestInjectionData::MemExceededFlag);
+  do_signaled = (flags & RequestInjectionData::SignaledFlag);
 
   if (do_timedout && !info->m_pendingException) {
     generate_request_timeout_exception();

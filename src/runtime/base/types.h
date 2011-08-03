@@ -199,26 +199,33 @@ inline RefResult ref(CVarRef v) {
 
 class RequestInjectionData {
 public:
+  static const ssize_t MemExceededFlag = 1;
+  static const ssize_t TimedOutFlag = 2;
+  static const ssize_t SignaledFlag = 4;
+
   RequestInjectionData()
-    : started(0), timeoutSeconds(-1), memExceeded(false), timedout(false),
-      signaled(false), surprised(false), debugger(false), debuggerIdle(0) {
+    : conditionFlags(0), started(0), timeoutSeconds(-1), debugger(false),
+      debuggerIdle(0) {
   }
+  
+  volatile ssize_t conditionFlags; // condition flags can indicate if a thread
+                                   // has exceeded the memory limit, timed out,
+                                   // or received a signal
 
   time_t started;      // when a request was started
   int timeoutSeconds;  // how many seconds to timeout
-
-  bool memExceeded;    // memory limit was exceeded
-  bool timedout;       // flag to set when timeout is detected
-  bool signaled;       // flag to set when a signal was raised
-
-  bool surprised;      // any surprise happened
-  Mutex surpriseMutex; // mutex protecting per-request data
 
   bool debugger;       // whether there is a DebuggerProxy attached to me
   int  debuggerIdle;   // skipping this many interrupts while proxy is idle
   std::stack<void *> interrupts;   // CmdInterrupts this thread's handling
 
   void reset();
+  
+  void setMemExceededFlag();
+  void setTimedOutFlag();
+  void setSignaledFlag();
+  ssize_t fetchAndClearFlags();
+
   void onSessionInit();
 };
 
@@ -294,12 +301,12 @@ extern bool SegFaulting;
 inline void check_request_timeout(ThreadInfo *info) {
   if (SegFaulting) pause_and_exit();
   info->m_mm->refreshStats();
-  if (info->m_reqInjectionData.surprised) check_request_surprise(info);
+  if (info->m_reqInjectionData.conditionFlags) check_request_surprise(info);
 }
 
 inline void check_request_timeout_nomemcheck(ThreadInfo *info) {
   if (SegFaulting) pause_and_exit();
-  if (info->m_reqInjectionData.surprised) check_request_surprise(info);
+  if (info->m_reqInjectionData.conditionFlags) check_request_surprise(info);
 }
 
 void throw_pending_exception(ThreadInfo *info) ATTRIBUTE_COLD

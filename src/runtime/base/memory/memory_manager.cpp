@@ -117,9 +117,7 @@ void MemoryManager::resetStats() {
 void MemoryManager::refreshStatsHelperExceeded() {
   RequestInjectionData &data =
     ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
-  Lock lock(data.surpriseMutex);
-  data.memExceeded = true;
-  data.surprised = true;
+  data.setMemExceededFlag();
 }
 
 #ifdef USE_JEMALLOC

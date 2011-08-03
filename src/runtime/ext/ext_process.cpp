@@ -269,10 +269,7 @@ static void pcntl_signal_handler(int signo) {
     s_signal_handlers->signaled[signo] = 1;
     RequestInjectionData &data = ThreadInfo::s_threadInfo.getNoCheck()->
                                    m_reqInjectionData;
-    data.surpriseMutex.lock();
-    data.signaled = true;
-    data.surprised = true;
-    data.surpriseMutex.unlock();
+    data.setSignaledFlag();
   }
 }
 class SignalHandlersStaticInitializer {

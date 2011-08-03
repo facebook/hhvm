@@ -91,12 +91,32 @@ void RequestInjectionData::onSessionInit() {
 }
 
 void RequestInjectionData::reset() {
-  memExceeded = false;
-  timedout    = false;
-  signaled    = false;
-  surprised   = false;
+  __sync_fetch_and_and(&conditionFlags, 0);
   debugger    = false;
   while (!interrupts.empty()) interrupts.pop();
+}
+
+void RequestInjectionData::setMemExceededFlag() {
+  __sync_fetch_and_or(&conditionFlags, RequestInjectionData::MemExceededFlag);
+}
+
+void RequestInjectionData::setTimedOutFlag() {
+  __sync_fetch_and_or(&conditionFlags, RequestInjectionData::TimedOutFlag);
+}
+
+void RequestInjectionData::setSignaledFlag() {
+  __sync_fetch_and_or(&conditionFlags, RequestInjectionData::SignaledFlag);
+}
+
+ssize_t RequestInjectionData::fetchAndClearFlags() {
+  ssize_t flags;
+  for (;;) {
+    flags = conditionFlags;
+    if (__sync_bool_compare_and_swap(&conditionFlags, flags, 0)) {
+      break;
+    }
+  }
+  return flags;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

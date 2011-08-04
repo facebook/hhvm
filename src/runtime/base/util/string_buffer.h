@@ -128,7 +128,7 @@ public:
   /**
    * Json-escape the string and then append it.
    */
-  void appendJsonEscape(const char *s, int len, bool loose);
+  void appendJsonEscape(const char *s, int len, int options);
 
   StringBuffer &operator+=(int n)     { append(n); return *this;}
   StringBuffer &operator+=(char c)    { append(c); return *this;}

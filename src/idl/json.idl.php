@@ -63,6 +63,12 @@ DefineConstant(
 
 DefineConstant(
   array(
+    'name'   => "JSON_UNESCAPED_SLASHES",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
     'name'   => "JSON_FB_LOOSE",
     'type'   => Int64,
   ));

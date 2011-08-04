@@ -24,6 +24,7 @@
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/zend/utf8_decode.h>
 #include <runtime/base/taint/taint_observer.h>
+#include <runtime/ext/ext_json.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -252,7 +253,7 @@ void StringBuffer::appendHelper(const char *s, int len) {
   (((us & 0xf) << 12)      | (((us >> 4) & 0xf) << 8) |   \
   (((us >> 8) & 0xf) << 4) | ((us >> 12) & 0xf))          \
 
-void StringBuffer::appendJsonEscape(const char *s, int len, bool loose) {
+void StringBuffer::appendJsonEscape(const char *s, int len, int options) {
   if (len == 0) {
     append("\"\"", 2);
   } else {
@@ -261,7 +262,7 @@ void StringBuffer::appendJsonEscape(const char *s, int len, bool loose) {
     int start = size();
     append('"');
 
-    UTF8To16Decoder decoder(s, len, loose);
+    UTF8To16Decoder decoder(s, len, options & k_JSON_FB_LOOSE);
     for (;;) {
       int c = decoder.decode();
       if (c == UTF8_END) {
@@ -277,14 +278,54 @@ void StringBuffer::appendJsonEscape(const char *s, int len, bool loose) {
       ASSERT(c >= 0);
       unsigned short us = (unsigned short)c;
       switch (us) {
-      case '"':  append("\\\"", 2); break;
+      case '"':
+        if (options & k_JSON_HEX_QUOT) {
+          append("\\u0022", 6);
+        } else {
+          append("\\\"", 2);
+        }
+        break;
       case '\\': append("\\\\", 2); break;
-      case '/':  append("\\/", 2);  break;
+      case '/':
+        if (options & k_JSON_UNESCAPED_SLASHES) {
+          append('/');
+        } else {
+          append("\\/", 2);
+        }
+        break;
       case '\b': append("\\b", 2);  break;
       case '\f': append("\\f", 2);  break;
       case '\n': append("\\n", 2);  break;
       case '\r': append("\\r", 2);  break;
       case '\t': append("\\t", 2);  break;
+      case '<':
+        if (options & k_JSON_HEX_TAG) {
+          append("\\u003C", 6);
+        } else {
+          append('<');
+        }
+        break;
+      case '>':
+        if (options & k_JSON_HEX_TAG) {
+          append("\\u003E", 6);
+        } else {
+          append('>');
+        }
+        break;
+      case '&':
+        if (options & k_JSON_HEX_AMP) {
+          append("\\u0026", 6);
+        } else {
+          append('&');
+        }
+        break;
+      case '\'':
+        if (options & k_JSON_HEX_APOS) {
+          append("\\u0027", 6);
+        } else {
+          append('\'');
+        }
+        break;
       default:
         if (us >= ' ' && (us & 127) == us) {
           append((char)us);

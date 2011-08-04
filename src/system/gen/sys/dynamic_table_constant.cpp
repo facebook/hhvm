@@ -2089,7 +2089,7 @@ public:
   hashNodeCon *next;
 };
 static hashNodeCon *conMapTable[8192];
-static hashNodeCon conBuckets[2109];
+static hashNodeCon conBuckets[2110];
 
 void init_builtin_constant_table() {
   const char *conMapData[] = {
@@ -2632,6 +2632,7 @@ void init_builtin_constant_table() {
       (const char *)"JSON_HEX_QUOT", (const char *)-1, (const char *)32, (const char *)&k_JSON_HEX_QUOT,
       (const char *)"JSON_HEX_TAG", (const char *)-1, (const char *)32, (const char *)&k_JSON_HEX_TAG,
       (const char *)"JSON_NUMERIC_CHECK", (const char *)-1, (const char *)32, (const char *)&k_JSON_NUMERIC_CHECK,
+      (const char *)"JSON_UNESCAPED_SLASHES", (const char *)-1, (const char *)32, (const char *)&k_JSON_UNESCAPED_SLASHES,
       (const char *)"LATT_HASCHILDREN", (const char *)-1, (const char *)32, (const char *)&k_LATT_HASCHILDREN,
       (const char *)"LATT_HASNOCHILDREN", (const char *)-1, (const char *)32, (const char *)&k_LATT_HASNOCHILDREN,
       (const char *)"LATT_MARKED", (const char *)-1, (const char *)32, (const char *)&k_LATT_MARKED,

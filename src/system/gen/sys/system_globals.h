@@ -93,6 +93,7 @@ extern const int64 k_JSON_HEX_APOS;
 extern const int64 k_JSON_HEX_QUOT;
 extern const int64 k_JSON_HEX_TAG;
 extern const int64 k_JSON_NUMERIC_CHECK;
+extern const int64 k_JSON_UNESCAPED_SLASHES;
 extern const double k_NAN;
 extern const int64 k_OPENSSL_RAW_DATA;
 extern const int64 k_OPENSSL_ZERO_PADDING;

@@ -29,6 +29,7 @@ const int64 k_JSON_HEX_APOS      = 1<<2;
 const int64 k_JSON_HEX_QUOT      = 1<<3;
 const int64 k_JSON_FORCE_OBJECT  = 1<<4;
 const int64 k_JSON_NUMERIC_CHECK = 1<<5;
+const int64 k_JSON_UNESCAPED_SLASHES = 1<<6;
 // intentionally higher so when PHP adds more options we're fine
 const int64 k_JSON_FB_LOOSE      = 1<<20;
 
@@ -40,7 +41,7 @@ String f_json_encode(CVarRef value, CVarRef options /* = 0 */) {
     json_options = k_JSON_FB_LOOSE;
   }
 
-  VariableSerializer vs(VariableSerializer::JSON, (json_options & k_JSON_FB_LOOSE) ? 1 : 0);
+  VariableSerializer vs(VariableSerializer::JSON, json_options);
   return vs.serialize(value, true);
 }
 

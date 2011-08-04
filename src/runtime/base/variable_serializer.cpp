@@ -26,6 +26,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/util/request_local.h>
+#include <runtime/ext/ext_json.h>
 
 using namespace std;
 
@@ -259,6 +260,22 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
   case JSON:
     {
       if (len < 0) len = strlen(v);
+
+      if (m_option & k_JSON_NUMERIC_CHECK) {
+        int64 lval; double dval;
+        switch (is_numeric_string(v, len, &lval, &dval, 0)) {
+          case KindOfInt32:
+          case KindOfInt64:
+            write(lval);
+            return;
+          case KindOfDouble:
+            write(dval);
+            return;
+          default:
+            break;
+        }
+      }
+
       m_buf->appendJsonEscape(v, len, m_option);
     }
     break;
@@ -526,6 +543,11 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
   case JSON:
   case DebuggerDump:
     info.is_vector = m_objClass.empty() && arr->isVectorData();
+    if (info.is_vector && m_type == JSON) {
+      info.is_vector = (m_option & k_JSON_FORCE_OBJECT)
+                       ? false : info.is_vector;
+    }
+
     if (info.is_vector) {
       m_buf->append('[');
     } else {

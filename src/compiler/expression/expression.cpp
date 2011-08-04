@@ -305,8 +305,17 @@ string Expression::originalClassName(CodeGenerator &cg, bool withComma) {
   return withComma ? "" : "null_string";
 }
 
+void Expression::resetTypes() {
+  m_actualType     .reset();
+  m_expectedType   .reset();
+  m_implementedType.reset();
+}
+
 TypePtr Expression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                   bool coerce) {
+  IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
+  ASSERT(type);
+  resetTypes();
   TypePtr actualType = inferTypes(ar, type, coerce);
   if (type->is(Type::KindOfSome) || type->is(Type::KindOfAny)) {
     m_actualType = actualType;
@@ -321,6 +330,7 @@ TypePtr Expression::checkTypesImpl(AnalysisResultConstPtr ar,
                                    TypePtr actualType, bool coerce) {
   TypePtr ret;
   actualType = propagateTypes(ar, actualType);
+  ASSERT(actualType);
   if (coerce) {
     ret = Type::Coerce(ar, expectedType, actualType);
     setTypes(ar, actualType, expectedType);
@@ -328,11 +338,15 @@ TypePtr Expression::checkTypesImpl(AnalysisResultConstPtr ar,
     ret = Type::Intersection(ar, actualType, expectedType);
     setTypes(ar, actualType, ret);
   }
+  ASSERT(ret);
   return ret;
 }
 
 void Expression::setTypes(AnalysisResultConstPtr ar, TypePtr actualType,
                           TypePtr expectedType) {
+  ASSERT(actualType);
+  ASSERT(expectedType);
+
   m_actualType = actualType;
   if (!expectedType->is(Type::KindOfAny) &&
       !expectedType->is(Type::KindOfSome)) {
@@ -374,15 +388,11 @@ void Expression::setDynamicByIdentifier(AnalysisResultPtr ar,
     }
   } else if (IsIdentifier(id)) {
     fi = ar->findFunction(id);
-    if (fi) {
-      fi->setDynamic();
-    }
+    if (fi) fi->setDynamic();
     ClassScopePtr ci = ar->findClass(id, AnalysisResult::MethodName);
     if (ci) {
       fi = ci->findFunction(ar, id, false);
-      if (fi) {
-        fi->setDynamic();
-      }
+      if (fi) fi->setDynamic();
     }
   }
 }
@@ -440,9 +450,11 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
                                          bool coerce, ExpressionPtr variable,
                                          ExpressionPtr
                                          value /* =ExpressionPtr() */) {
+  ASSERT(type);
   TypePtr ret = type;
   if (value) {
     ret = value->inferAndCheck(ar, Type::Some, false);
+    ASSERT(ret);
   }
 
   BlockScopePtr scope = getScope();
@@ -452,11 +464,9 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
       dynamic_pointer_cast<ConstantExpression>(variable);
     BlockScope *defScope = NULL;
     std::vector<std::string> bases;
-    scope->getConstants()->check(exp->getName(), ret, true, ar, variable,
+    scope->getConstants()->check(getScope(), exp->getName(), ret,
+                                 true, ar, variable,
                                  bases, defScope);
-  } else if (variable->is(Expression::KindOfDynamicVariable)) {
-    // simptodo: not too sure about this
-    getFileScope()->setAttribute(FileScope::ContainsLDynamicVariable);
   } else if (variable->is(Expression::KindOfSimpleVariable)) {
     SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
     if (var->getName() == "this" && getClassScope()) {

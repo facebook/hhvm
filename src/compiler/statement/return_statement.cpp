@@ -132,6 +132,9 @@ void ReturnStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 void ReturnStatement::inferTypes(AnalysisResultPtr ar) {
+  ASSERT(getFunctionScope().get() == getScope().get());
+  IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
+
   FunctionScopePtr funcScope = getFunctionScope();
   if (m_exp) {
     if (funcScope) {

@@ -120,6 +120,8 @@ void ForEachStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 void ForEachStatement::inferTypes(AnalysisResultPtr ar) {
+  IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
+
   m_array->inferAndCheck(ar, m_ref ? Type::Variant : Type::Array, m_ref);
   if (m_name) {
     m_name->inferAndCheck(ar, Type::Primitive, true);
@@ -130,7 +132,7 @@ void ForEachStatement::inferTypes(AnalysisResultPtr ar) {
     if (!actualType ||
         actualType->is(Type::KindOfVariant) ||
         actualType->is(Type::KindOfObject)) {
-      ar->forceClassVariants(getClassScope(), false);
+      ar->forceClassVariants(getClassScope(), false, true);
     }
   }
   if (m_stmt) {

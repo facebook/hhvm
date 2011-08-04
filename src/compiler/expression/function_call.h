@@ -51,7 +51,6 @@ public:
   ExpressionPtr getNameExp() const { return m_nameExp; }
   ExpressionListPtr getParams() const { return m_params; }
   void setNoInline() { m_noInline = true; }
-  void setFunctionAndClassScope(FunctionScopePtr fsp, ClassScopePtr csp);
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                     int state);
   void deepCopy(FunctionCallPtr exp);

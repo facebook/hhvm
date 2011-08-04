@@ -402,7 +402,7 @@ void ClassScope::setVolatile() {
 FunctionScopePtr ClassScope::findFunction(AnalysisResultConstPtr ar,
                                           const std::string &name,
                                           bool recursive,
-                                          bool exclIntfBase /*= false */) {
+                                          bool exclIntfBase /* = false */) {
   ASSERT(Util::toLower(name) == name);
   StringToFunctionScopePtrVecMap::const_iterator iter;
   iter = m_functions.find(name);
@@ -431,7 +431,8 @@ FunctionScopePtr ClassScope::findFunction(AnalysisResultConstPtr ar,
       if (func) return func;
     }
   }
-  if (derivesFromRedeclaring() == DirectFromRedeclared) {
+  if (!Option::AllDynamic &&
+      derivesFromRedeclaring() == DirectFromRedeclared) {
     setDynamic(ar, name);
   }
 
@@ -444,8 +445,7 @@ FunctionScopePtr ClassScope::findConstructor(AnalysisResultConstPtr ar,
   string name;
   if (classNameCtor()) {
     name = getName();
-  }
-  else {
+  } else {
     name = "__construct";
   }
   iter = m_functions.find(name);
@@ -458,12 +458,12 @@ FunctionScopePtr ClassScope::findConstructor(AnalysisResultConstPtr ar,
   if (recursive && derivesFromRedeclaring() != DirectFromRedeclared) {
     ClassScopePtr super = ar->findClass(m_parent);
     if (super) {
-      FunctionScopePtr func =
-        super->findConstructor(ar, true);
+      FunctionScopePtr func = super->findConstructor(ar, true);
       if (func) return func;
     }
   }
-  if (derivesFromRedeclaring() == DirectFromRedeclared) {
+  if (!Option::AllDynamic &&
+      derivesFromRedeclaring() == DirectFromRedeclared) {
     setDynamic(ar, name);
   }
 
@@ -606,19 +606,21 @@ Symbol *ClassScope::findProperty(ClassScopePtr &cls,
   return getVariables()->findProperty(cls, name, ar);
 }
 
-TypePtr ClassScope::checkProperty(Symbol *sym, TypePtr type,
+TypePtr ClassScope::checkProperty(BlockScopeRawPtr context,
+                                  Symbol *sym, TypePtr type,
                                   bool coerce, AnalysisResultConstPtr ar) {
-  return getVariables()->checkProperty(sym, type, coerce, ar);
+  return getVariables()->checkProperty(context, sym, type, coerce, ar);
 }
 
-TypePtr ClassScope::checkConst(const std::string &name, TypePtr type,
+TypePtr ClassScope::checkConst(BlockScopeRawPtr context,
+                               const std::string &name, TypePtr type,
                                bool coerce, AnalysisResultConstPtr ar,
                                ConstructPtr construct,
                                const std::vector<std::string> &bases,
                                BlockScope *&defScope) {
   defScope = NULL;
-  return getConstants()->check(name, type, coerce,
-                                    ar, construct, m_bases, defScope);
+  return getConstants()->check(context, name, type, coerce,
+                               ar, construct, m_bases, defScope);
 }
 
 void ClassScope::getAllParents(AnalysisResultConstPtr ar,

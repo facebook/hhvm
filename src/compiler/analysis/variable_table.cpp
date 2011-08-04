@@ -193,17 +193,6 @@ bool VariableTable::isInherited(const string &name) const {
     (!sym->isGlobal() && !sym->isSystem() && !sym->getDeclaration());
 }
 
-bool VariableTable::definedByParent(AnalysisResultConstPtr ar,
-                                    const string &name) {
-  if (isPrivate(name)) return false;
-  ClassScopePtr cls = findParent(ar, name);
-  if (cls) {
-    return !cls->getVariables()->isPrivate(name);
-  } else {
-    return false;
-  }
-}
-
 const char *VariableTable::getVariablePrefix(const string &name) const {
   return getVariablePrefix(getSymbol(name));
 }
@@ -378,10 +367,10 @@ bool VariableTable::markOverride(AnalysisResultPtr ar, const string &name) {
   bool ret = false;
   if (!sym->isStatic() ||
       (sym->isPublic() && !sym->getClassInitVal())) {
-    ClassScopePtr parent = findParent(ar, name);
+    Symbol *s2;
+    ClassScopePtr parent = findParent(ar, name, s2);
     if (parent) {
-      Symbol *s2 = parent->getVariables()->getSymbol(name);
-      ASSERT(s2);
+      ASSERT(s2 && s2->isPresent());
       if (!s2->isPrivate()) {
         if (!sym->isStatic() || s2->isProtected()) {
           if (sym->isPrivate()) {
@@ -505,7 +494,7 @@ Symbol *VariableTable::findProperty(ClassScopePtr &cls,
   }
 
   if (!sym) {
-    if (ClassScopePtr parent = findParent(ar, name)) {
+    if (ClassScopePtr parent = findParent(ar, name, sym)) {
       sym = parent->findProperty(parent, name, ar);
       if (sym) {
         cls = parent;
@@ -517,19 +506,24 @@ Symbol *VariableTable::findProperty(ClassScopePtr &cls,
   return sym;
 }
 
-TypePtr VariableTable::checkProperty(Symbol *sym, TypePtr type,
+TypePtr VariableTable::checkProperty(BlockScopeRawPtr context,
+                                     Symbol *sym, TypePtr type,
                                      bool coerce, AnalysisResultConstPtr ar) {
   assert(sym->isPresent());
   if (sym->isOverride()) {
-    ClassScopePtr parent = findParent(ar, sym->getName());
-    assert(parent);
-    VariableTablePtr variables = parent->getVariables();
-    Symbol *base = variables->getSymbol(sym->getName());
-    assert(base->isPresent());
-    assert(base && !base->isPrivate());
-    type = variables->setType(ar, base, type, coerce);
+    Symbol *base;
+    ClassScopePtr parent = findParent(ar, sym->getName(), base);
+    ASSERT(parent);
+    ASSERT(parent.get() != &m_blockScope);
+    ASSERT(base && !base->isPrivate());
+    if (context->is(BlockScope::FunctionScope)) {
+      GET_LOCK(parent);
+      type = parent->getVariables()->setType(ar, base, type, coerce);
+    } else {
+      TRY_LOCK(parent);
+      type = parent->getVariables()->setType(ar, base, type, coerce);
+    }
   }
-
   return setType(ar, sym, type, coerce);
 }
 
@@ -614,7 +608,7 @@ void VariableTable::forceVariants(AnalysisResultConstPtr ar, int varClass) {
       for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
         Symbol *sym = m_symbolVec[i];
         if (!sym->isHidden() && sym->declarationSet() &&
-            mask & GetVarClassMask(sym->isPrivate(), sym->isStatic())) {
+            mask & GetVarClassMaskForSym(sym)) {
           setType(ar, sym, Type::Variant, true);
           sym->setIndirectAltered();
         }
@@ -638,7 +632,7 @@ void VariableTable::forceVariant(AnalysisResultConstPtr ar,
   if (!mask) return;
   if (Symbol *sym = getSymbol(name)) {
     if (!sym->isHidden() && sym->declarationSet() &&
-        mask & GetVarClassMask(sym->isPrivate(), sym->isStatic())) {
+        mask & GetVarClassMaskForSym(sym)) {
       setType(ar, sym, Type::Variant, true);
       sym->setIndirectAltered();
     }
@@ -654,7 +648,7 @@ TypePtr VariableTable::setType(AnalysisResultConstPtr ar,
 TypePtr VariableTable::setType(AnalysisResultConstPtr ar, Symbol *sym,
                                TypePtr type, bool coerce) {
   bool force_coerce = coerce;
-  int mask = GetVarClassMask(sym->isPrivate(), sym->isStatic());
+  int mask = GetVarClassMaskForSym(sym);
   if (m_forcedVariants & mask && !sym->isHidden()) {
     type = Type::Variant;
     force_coerce = true;
@@ -697,13 +691,15 @@ bool VariableTable::isConvertibleSuperGlobal(const string &name) const {
 }
 
 ClassScopePtr VariableTable::findParent(AnalysisResultConstPtr ar,
-                                        const string &name) const {
+                                        const string &name,
+                                        const Symbol *&sym) const {
+  sym = NULL;
   for (ClassScopePtr parent = m_blockScope.getParentScope(ar);
        parent && !parent->isRedeclaring();
        parent = parent->getParentScope(ar)) {
-    if (parent->hasProperty(name)) {
-      return parent;
-    }
+    sym = parent->getVariables()->getSymbol(name);
+    ASSERT(!sym || sym->isPresent());
+    if (sym) return parent;
   }
   return ClassScopePtr();
 }

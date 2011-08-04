@@ -30,6 +30,7 @@
 #include <compiler/statement/exp_statement.h>
 #include <compiler/expression/parameter_expression.h>
 #include <compiler/analysis/class_scope.h>
+#include <util/atomic.h>
 #include <util/util.h>
 #include <runtime/base/class_info.h>
 #include <runtime/base/type_conversions.h>
@@ -375,8 +376,13 @@ string FunctionScope::getOriginalFullName() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void FunctionScope::addCaller(BlockScopePtr caller) {
+void FunctionScope::addCaller(BlockScopePtr caller,
+                              bool careAboutReturn /* = true */) {
   addUse(caller, UseKindCaller);
+}
+
+void FunctionScope::addNewObjCaller(BlockScopePtr caller) {
+  addUse(caller, UseKindCaller & ~UseKindCallerReturn);
 }
 
 bool FunctionScope::matchParams(FunctionScopePtr func) {
@@ -482,7 +488,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
         Compiler::Error(Compiler::TooFewArgument, exp, m_stmt);
       }
       valid = false;
-      setDynamic();
+      if (!Option::AllDynamic) setDynamic();
     }
     return 0;
   }
@@ -493,7 +499,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
       Compiler::Error(Compiler::TooFewArgument, exp, m_stmt);
     }
     valid = false;
-    setDynamic();
+    if (!Option::AllDynamic) setDynamic();
   }
   if (params->getCount() > m_maxParam) {
     if (isVariableArgument()) {
@@ -503,7 +509,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
         Compiler::Error(Compiler::TooManyArgument, exp, m_stmt);
       }
       valid = false;
-      setDynamic();
+      if (!Option::AllDynamic) setDynamic();
     }
   }
 
@@ -511,6 +517,11 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
   for (int i = 0; i < params->getCount(); i++) {
     ExpressionPtr param = (*params)[i];
     if (i < m_maxParam && param->hasContext(Expression::RefParameter)) {
+      /**
+       * This should be very un-likely, since call time pass by ref is a
+       * deprecated, not very widely used (at least in FB codebase) feature.
+       */
+      TRY_LOCK_THIS();
       Symbol *sym = getVariables()->addSymbol(m_paramNames[i]);
       sym->setLvalParam();
       sym->setCallTimeRef();
@@ -532,6 +543,11 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
       param->clearContext(Expression::NoRefWrapper);
     }
     TypePtr expType;
+    /**
+     * Duplicate the logic of getParamType(i), w/o the mutation
+     */
+    TypePtr paramType(i < m_maxParam ? m_paramTypes[i] : TypePtr());
+    if (!paramType) paramType = Type::Some;
     if (valid && !canSetParamType && i < m_maxParam &&
         (!Option::HardTypeHints || !m_paramTypeSpecs[i])) {
       /**
@@ -542,17 +558,27 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
        * expression since it'll just get converted anyways. Doing it this way
        * allows us to generate less temporaries along the way.
        */
-      expType = getParamType(i);
-      if (expType->is(Type::KindOfVariant)) expType = Type::Some;
-      expType = param->inferAndCheck(ar, expType, false);
+      TypePtr optParamType(
+          paramType->is(Type::KindOfVariant) ? Type::Some : paramType);
+      expType = param->inferAndCheck(ar, optParamType, false);
     } else {
       expType = param->inferAndCheck(ar, Type::Some, false);
     }
     if (i < m_maxParam) {
       if (!Option::HardTypeHints || !m_paramTypeSpecs[i]) {
-        TypePtr paramType = getParamType(i);
         if (canSetParamType) {
-          paramType = setParamType(ar, i, expType);
+          if (!Type::SameType(paramType, expType) &&
+              !paramType->is(Type::KindOfVariant)) {
+            TRY_LOCK_THIS();
+            paramType = setParamType(ar, i, expType);
+          } else {
+            // do nothing - how is this safe?  well, if we ever observe
+            // paramType == expType, then this means at some point in the past,
+            // somebody called setParamType() with expType.  thus, by calling
+            // setParamType() again with expType, we contribute no "new"
+            // information. this argument also still applies in the face of
+            // concurrency
+          }
         }
         // See note above. If we have an implemented type, however, we
         // should set the paramType to the implemented type to avoid an
@@ -588,7 +614,7 @@ TypePtr FunctionScope::setParamType(AnalysisResultConstPtr ar, int index,
   if (!paramType) paramType = Type::Some;
   type = Type::Coerce(ar, paramType, type);
   if (type && !Type::SameType(paramType, type)) {
-    addUpdates(UseKindNonStaticRef);
+    addUpdates(UseKindCallerParam);
     if (!isFirstPass()) {
       Logger::Verbose("Corrected type of parameter %d of %s: %s -> %s",
                       index, m_name.c_str(),
@@ -654,6 +680,9 @@ void FunctionScope::addModifier(int mod) {
 }
 
 void FunctionScope::setReturnType(AnalysisResultConstPtr ar, TypePtr type) {
+  if (inTypeInference()) {
+    getInferTypesMutex().assertOwnedBySelf();
+  }
   // no change can be made to virtual function's prototype
   if (m_overriding) return;
 
@@ -668,23 +697,26 @@ void FunctionScope::setReturnType(AnalysisResultConstPtr ar, TypePtr type) {
     type = Type::Coerce(ar, m_returnType, type);
   }
   m_returnType = type;
+  ASSERT(m_returnType);
 }
 
 void FunctionScope::pushReturnType() {
+  getInferTypesMutex().assertOwnedBySelf();
   m_prevReturn = m_returnType;
   m_hasVoid = false;
   if (m_overriding || m_perfectVirtual || m_pseudoMain) return;
   m_returnType.reset();
 }
 
-void FunctionScope::popReturnType() {
-  if (m_overriding || m_perfectVirtual || m_pseudoMain) return;
+bool FunctionScope::popReturnType() {
+  getInferTypesMutex().assertOwnedBySelf();
+  if (m_overriding || m_perfectVirtual || m_pseudoMain) return false;
 
   if (m_returnType) {
     if (m_prevReturn) {
       if (Type::SameType(m_returnType, m_prevReturn)) {
         m_prevReturn.reset();
-        return;
+        return false;
       }
       if (!isFirstPass()) {
         Logger::Verbose("Corrected function return type %s -> %s",
@@ -693,11 +725,22 @@ void FunctionScope::popReturnType() {
       }
     }
   } else if (!m_prevReturn) {
-    return;
+    return false;
   }
 
   m_prevReturn.reset();
-  addUpdates(UseKindCaller);
+  addUpdates(UseKindCallerReturn);
+#ifdef HPHP_INSTRUMENT_TYPE_INF
+  atomic_inc(RescheduleException::s_NumRetTypesChanged);
+#endif /* HPHP_INSTRUMENT_TYPE_INF */
+  return true;
+}
+
+void FunctionScope::resetReturnType() {
+  getInferTypesMutex().assertOwnedBySelf();
+  if (m_overriding || m_perfectVirtual || m_pseudoMain) return;
+  m_returnType = m_prevReturn;
+  m_prevReturn.reset();
 }
 
 void FunctionScope::addRetExprToFix(ExpressionPtr e) {

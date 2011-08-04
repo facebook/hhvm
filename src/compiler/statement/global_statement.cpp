@@ -111,6 +111,8 @@ StatementPtr GlobalStatement::postOptimize(AnalysisResultConstPtr ar) {
 }
 
 void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
+  IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
+
   BlockScopePtr scope = getScope();
   for (int i = 0; i < m_exp->getCount(); i++) {
     ExpressionPtr exp = (*m_exp)[i];
@@ -133,11 +135,8 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
     } else {
       variables->forceVariants(ar, VariableTable::AnyVars);
       variables->setAttribute(VariableTable::ContainsLDynamicVariable);
-      if (exp->is(Expression::KindOfDynamicVariable)) {
-        exp->inferAndCheck(ar, Type::Any, true);
-      } else {
-        assert(false);
-      }
+      ASSERT(exp->is(Expression::KindOfDynamicVariable));
+      exp->inferAndCheck(ar, Type::Any, true);
     }
   }
 }

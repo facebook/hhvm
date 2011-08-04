@@ -667,13 +667,15 @@ void MethodStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
+  IMPLEMENT_INFER_AND_CHECK_ASSERT(getFunctionScope());
+
   FunctionScopeRawPtr funcScope = getFunctionScope();
   bool pseudoMain = funcScope->inPseudoMain();
 
   if (m_stmt && funcScope->isFirstPass()) {
-    if (m_stmt->hasRetExp() ||
-        pseudoMain ||
-        funcScope->getReturnType()) {
+    if (pseudoMain ||
+        funcScope->getReturnType() ||
+        m_stmt->hasRetExp()) {
       bool lastIsReturn = false;
       if (m_stmt->getCount()) {
         StatementPtr lastStmt = (*m_stmt)[m_stmt->getCount()-1];
@@ -696,15 +698,15 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
     m_params->inferAndCheck(ar, Type::Any, false);
   }
 
-  // must also include params and use vars if this is a
-  // generator
+  // must also include params and use vars if this is a generator. note: we are
+  // OK reading the params from the AST nodes of the original generator
+  // function, since we have the dependency links set up
   if (funcScope->isGenerator()) {
     // orig function params
-    MethodStatementPtr m = getOrigGeneratorFunc();
+    MethodStatementRawPtr m = getOrigGeneratorFunc();
     ASSERT(m);
 
     VariableTablePtr variables = funcScope->getVariables();
-
     ExpressionListPtr params = m->getParams();
     if (params) {
       for (int i = 0; i < params->getCount(); i++) {
@@ -729,7 +731,6 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
                                 funcScope->isFirstPass());
       }
     }
-
   }
 
   if (m_stmt) {

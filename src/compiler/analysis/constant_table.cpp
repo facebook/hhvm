@@ -144,7 +144,8 @@ const {
   return ConstructPtr();
 }
 
-TypePtr ConstantTable::checkBases(const std::string &name, TypePtr type,
+TypePtr ConstantTable::checkBases(BlockScopeRawPtr context,
+                                  const std::string &name, TypePtr type,
                                   bool coerce, AnalysisResultConstPtr ar,
                                   ConstructPtr construct,
                                   const std::vector<std::string> &bases,
@@ -153,7 +154,8 @@ TypePtr ConstantTable::checkBases(const std::string &name, TypePtr type,
   defScope = NULL;
   ClassScopePtr parent = findParent(ar, name);
   if (parent) {
-    actualType = parent->checkConst(name, type, coerce, ar, construct,
+    actualType = parent->checkConst(context, name, type,
+                                    coerce, ar, construct,
                                     parent->getBases(), defScope);
     if (defScope) return actualType;
   }
@@ -161,18 +163,22 @@ TypePtr ConstantTable::checkBases(const std::string &name, TypePtr type,
     const string &base = bases[i];
     ClassScopePtr super = ar->findClass(base);
     if (!super || super->isRedeclaring()) continue;
-    actualType = super->checkConst(name, type, coerce, ar, construct,
+    actualType = super->checkConst(context, name, type,
+                                   coerce, ar, construct,
                                    super->getBases(), defScope);
     if (defScope) return actualType;
   }
   return actualType;
 }
 
-TypePtr ConstantTable::check(const std::string &name, TypePtr type,
+TypePtr ConstantTable::check(BlockScopeRawPtr context,
+                             const std::string &name, TypePtr type,
                              bool coerce, AnalysisResultConstPtr ar,
                              ConstructPtr construct,
                              const std::vector<std::string> &bases,
                              BlockScope *&defScope) {
+  ASSERT(!m_blockScope.is(BlockScope::FunctionScope));
+  bool isClassScope = m_blockScope.is(BlockScope::ClassScope);
   TypePtr actualType;
   defScope = NULL;
   if (name == "true" || name == "false") {
@@ -181,22 +187,31 @@ TypePtr ConstantTable::check(const std::string &name, TypePtr type,
     Symbol *sym = getSymbol(name);
     if (!sym) {
       if (ar->getPhase() != AnalysisResult::AnalyzeInclude) {
-        actualType = checkBases(name, type, coerce, ar, construct,
-                                bases, defScope);
+        actualType = checkBases(context, name, type, coerce,
+                                ar, construct, bases, defScope);
         if (defScope) return actualType;
         Compiler::Error(Compiler::UseUndeclaredConstant, construct);
-        if (m_blockScope.is(BlockScope::ClassScope)) {
-          actualType = Type::Variant;
-        } else {
-          actualType = Type::String;
-        }
+        actualType = isClassScope ? Type::Variant : Type::String;
       }
     } else {
       ASSERT(sym->isPresent());
       ASSERT(sym->getType());
       ASSERT(sym->isConstant());
       defScope = &m_blockScope;
-      return setType(ar, sym, type, coerce);
+      if (isClassScope) {
+        // if the current scope is a function scope, grab the lock.
+        // otherwise if it's a class scope, then *try* to grab the lock.
+        if (context->is(BlockScope::FunctionScope)) {
+          GET_LOCK(BlockScopeRawPtr(&m_blockScope));
+          return setType(ar, sym, type, coerce);
+        } else {
+          TRY_LOCK(BlockScopeRawPtr(&m_blockScope));
+          return setType(ar, sym, type, coerce);
+        }
+      } else {
+        Lock lock(m_blockScope.getMutex());
+        return setType(ar, sym, type, coerce);
+      }
     }
   }
 

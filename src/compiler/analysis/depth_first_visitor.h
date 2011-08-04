@@ -20,14 +20,30 @@
 #include <compiler/analysis/block_scope.h>
 #include <compiler/expression/expression.h>
 #include <compiler/statement/statement.h>
+#include <compiler/analysis/analysis_result.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-template <class T>
+struct Pre        {};
+struct InferTypes {};
+struct Post       {};
+
+template <typename When>
+inline int GetPhaseInterestMask() {
+  return BlockScope::UseKindAny;
+}
+
+template <>
+inline int GetPhaseInterestMask<InferTypes>() {
+  return BlockScope::UseKindAny & ~BlockScope::UseKindCallerInline;
+}
+
+template <typename When,
+          template <typename> class T>
 class DepthFirstVisitor {
 public:
-  DepthFirstVisitor(T d) : m_data(d) {
+  DepthFirstVisitor(T<When> d) : m_data(d) {
     setup();
   }
 
@@ -89,67 +105,35 @@ public:
     return flags;
   }
 
-  void visitDependencies(BlockScopeRawPtr scope,
-                         BlockScopeRawPtrQueue &queue) {
-    scope->setMark(BlockScope::MarkProcessingDeps);
-    const BlockScopeRawPtrVec &deps = scope->getDeps();
-    for (size_t i = 0; i < deps.size(); i++) {
-      BlockScopeRawPtr dep = deps[i];
-      if (dep->getMark() == BlockScope::MarkWaitingInQueue) {
-        this->visitDependencies(dep, queue);
-      }
-    }
-
-    scope->setMark(BlockScope::MarkProcessing);
-    if (int useKinds = this->visitScope(scope)) {
-      scope->changed(queue, useKinds);
-    }
-    scope->setMark(BlockScope::MarkProcessedInQueue);
-  }
-
-  void visitDepthFirst(BlockScopeRawPtrQueue &scopes) {
-    BlockScopeRawPtrQueue::iterator end = scopes.end();
-    for (BlockScopeRawPtrQueue::iterator it = scopes.begin(); it != end; ++it) {
-      (*it)->setMark(BlockScope::MarkWaitingInQueue);
-    }
-
-    while (true) {
-      BlockScopeRawPtrQueue::iterator it = scopes.begin();
-      if (it == end) break;
-      if ((*it)->getMark() == BlockScope::MarkWaitingInQueue) {
-        this->visitDependencies(*it, scopes);
-      }
-      assert((*it)->getMark() == BlockScope::MarkProcessedInQueue);
-      (*it)->setMark(BlockScope::MarkProcessed);
-      scopes.erase(it);
-    }
-  }
-
   bool activateScope(BlockScopeRawPtr scope) {
     if (scope->getMark() == BlockScope::MarkProcessed) {
       const BlockScopeRawPtrFlagsVec &ordered =
         scope->getOrderedUsers();
       for (BlockScopeRawPtrFlagsVec::const_iterator it = ordered.begin(),
-             end = ordered.end(); it != end; ++it) {
+           end = ordered.end(); it != end; ++it) {
         BlockScopeRawPtrFlagsVec::value_type pf = *it;
-        int m = pf->first->getMark();
-        if (m == BlockScope::MarkWaiting ||
-            m == BlockScope::MarkReady) {
-          pf->first->setNumDepsToWaitFor(
-            pf->first->getNumDepsToWaitFor() + 1);
+        if (pf->second & GetPhaseInterestMask<When>()) {
+          int m = pf->first->getMark();
+          if (m == BlockScope::MarkWaiting ||
+              m == BlockScope::MarkReady) {
+            pf->first->incNumDepsToWaitFor();
+          }
         }
       }
     }
 
-    const BlockScopeRawPtrVec &deps = scope->getDeps();
+    const BlockScopeRawPtrFlagsPtrVec &deps = scope->getDeps();
     int numDeps = 0;
-    for (size_t i = 0; i < deps.size(); i++) {
-      BlockScopeRawPtr dep = deps[i];
-      int m = dep->getMark();
-      if (m == BlockScope::MarkWaiting ||
-          m == BlockScope::MarkReady ||
-          m == BlockScope::MarkProcessing) {
-        numDeps++;
+    for (BlockScopeRawPtrFlagsPtrVec::const_iterator it = deps.begin(),
+         end = deps.end(); it != end; ++it) {
+      const BlockScopeRawPtrFlagsPtrPair &p(*it);
+      if (*p.second & GetPhaseInterestMask<When>()) {
+        int m = p.first->getMark();
+        if (m == BlockScope::MarkWaiting ||
+            m == BlockScope::MarkReady ||
+            m == BlockScope::MarkProcessing) {
+          numDeps++;
+        }
       }
     }
 
@@ -162,52 +146,82 @@ public:
     return false;
   }
 
-  void visitParallelDeps(
-    BlockScopeRawPtr scope, BlockScopeRawPtrQueue &queue) {
-
-    scope->setLockedMark(BlockScope::MarkProcessingDeps);
-    const BlockScopeRawPtrVec &deps = scope->getDeps();
-    {
-      Lock ldeps(BlockScope::s_depsMutex);
-      for (size_t i = 0; i < deps.size(); i++) {
-        BlockScopeRawPtr dep = deps[i];
-        int m = dep->getLockedMark();
-        if (m == BlockScope::MarkWaitingInQueue) {
-          BlockScope::s_depsMutex.unlock();
-          this->visitParallelDeps(dep, queue);
-          BlockScope::s_depsMutex.lock();
+  void collectOrdering(BlockScopeRawPtrQueue &queue,
+                       BlockScopeRawPtr      scope) {
+    ASSERT(scope->getMark() != BlockScope::MarkProcessingDeps);
+    scope->setMark(BlockScope::MarkProcessingDeps);
+    const BlockScopeRawPtrFlagsPtrVec &deps = scope->getDeps();
+    for (BlockScopeRawPtrFlagsPtrVec::const_iterator it = deps.begin(),
+         end = deps.end(); it != end; ++it) {
+      const BlockScopeRawPtrFlagsPtrPair &p(*it);
+      if (*p.second & GetPhaseInterestMask<When>()) {
+        if (p.first->getMark() == BlockScope::MarkWaitingInQueue) {
+          collectOrdering(queue, p.first);
         }
       }
     }
-
-    Lock l1(BlockScope::s_depsMutex);
-    Lock l2(BlockScope::s_jobStateMutex);
-    if (activateScope(scope)) {
-      this->enqueue(scope);
-    }
+    queue.push_back(scope);
   }
 
-  bool visitParallel(BlockScopeRawPtrQueue &scopes, bool first = true) {
-    BlockScopeRawPtrQueue::iterator end = scopes.end();
+  /**
+   * Assumes that scopes contains no duplicate entries
+   */
+  bool visitParallel(const BlockScopeRawPtrQueue &scopes,
+                     bool first, BlockScopeRawPtrQueue &enqueued) {
     bool ret = false;
-    for (BlockScopeRawPtrQueue::iterator it = scopes.begin(); it != end; ++it) {
+    int numSetMarks = 0;
+    enqueued.clear();
+    for (BlockScopeRawPtrQueue::const_iterator it = scopes.begin();
+         it != scopes.end(); ++it) {
       BlockScopeRawPtr scope = *it;
       if (!first) {
         if (scope->getMark() != BlockScope::MarkWaiting) {
           assert(scope->getMark() == BlockScope::MarkProcessed);
           continue;
         }
+      } else {
+        ASSERT((*it)->getNumDepsToWaitFor() == 0);
       }
-      (*it)->setMark(BlockScope::MarkWaitingInQueue);
+      scope->setMark(BlockScope::MarkWaitingInQueue);
+      numSetMarks++;
       ret = true;
     }
 
-    for (BlockScopeRawPtrQueue::iterator it = scopes.begin(); it != end; ++it) {
-      BlockScopeRawPtr scope = *it;
-      if (scope->getLockedMark() == BlockScope::MarkWaitingInQueue) {
-        visitParallelDeps(scope, scopes);
+    BlockScopeRawPtrQueue buffer;
+    for (BlockScopeRawPtrQueue::const_iterator it = scopes.begin();
+         it != scopes.end(); ++it) {
+      if ((*it)->getMark() == BlockScope::MarkWaitingInQueue) {
+        collectOrdering(buffer, *it);
       }
     }
+    ASSERT((int)buffer.size() == numSetMarks);
+
+#ifdef HPHP_DETAILED_TYPE_INF_ASSERT
+    // verify:
+    // (1) every scope in scopes is either MarkProcessingDeps OR
+    //     MarkProcessed
+    for (BlockScopeRawPtrQueue::const_iterator it = scopes.begin();
+         it != scopes.end(); ++it) {
+      int m = (*it)->getMark();
+      ASSERT(m == BlockScope::MarkProcessingDeps ||
+             m == BlockScope::MarkProcessed);
+    }
+#endif /* HPHP_DETAILED_TYPE_INF_ASSERT */
+
+    {
+      Lock l1(BlockScope::s_depsMutex);
+      Lock l2(BlockScope::s_jobStateMutex);
+      for (BlockScopeRawPtrQueue::const_iterator it = buffer.begin();
+           it != buffer.end(); ++it) {
+        if (activateScope(*it)) {
+          enqueue(*it);
+          enqueued.push_back(*it);
+        }
+      }
+    }
+
+    // assert that we will make some progress in this iteration
+    ASSERT(!ret || !enqueued.empty());
     return ret;
   }
 
@@ -215,9 +229,9 @@ public:
   StatementPtr visit(StatementPtr) { return StatementPtr(); }
   int visit(BlockScopeRawPtr scope) { return 0; }
   void enqueue(BlockScopeRawPtr scope) {}
-  T &data() { return m_data; }
+  T<When> &data() { return m_data; }
 private:
-  T     m_data;
+  T<When>     m_data;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

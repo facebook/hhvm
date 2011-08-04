@@ -39,18 +39,16 @@ public:
   virtual bool canonCompare(ExpressionPtr e) const;
   void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                       int state);
-  
+
   ExpressionPtr getExp() { return m_exp; }
 
 private:
-  bool findMember(AnalysisResultPtr ar, std::string &name,
-                  Symbol *&sym);
+  bool findMember(AnalysisResultPtr ar, std::string &name, Symbol *&sym);
 
-  ExpressionPtr m_exp;
-
-  bool m_valid;
+  ExpressionPtr    m_exp;
+  bool             m_valid;
   ClassScopeRawPtr m_resolvedClass;
-  bool m_dynamicClass;
+  bool             m_dynamicClass;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

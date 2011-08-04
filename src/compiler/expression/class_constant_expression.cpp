@@ -161,13 +161,26 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
     return Type::Variant;
   }
 
-  if (cls->getConstants()->isDynamic(m_varName) || !isPresent()) {
+  ASSERT(cls);
+  ClassScopePtr defClass = cls;
+  bool isDynamic = false;
+  ConstructPtr decl;
+  // we want to read dynamic-ness and declaration atomically
+  if (getScope()->is(BlockScope::FunctionScope)) {
+    GET_LOCK(cls);
+    isDynamic = cls->getConstants()->isDynamic(m_varName);
+    decl = cls->getConstants()->getDeclarationRecur(ar, m_varName, defClass);
+  } else {
+    ASSERT(getScope()->is(BlockScope::ClassScope));
+    TRY_LOCK(cls);
+    isDynamic = cls->getConstants()->isDynamic(m_varName);
+    decl = cls->getConstants()->getDeclarationRecur(ar, m_varName, defClass);
+  }
+
+  if (isDynamic || !isPresent()) {
     getScope()->getVariables()->
       setAttribute(VariableTable::NeedGlobalPointer);
   }
-  ClassScopePtr defClass = cls;
-  ConstructPtr decl =
-    cls->getConstants()->getDeclarationRecur(ar, m_varName, defClass);
   if (decl) { // No decl means an extension class or derived from redeclaring
     cls = defClass;
     m_valid = true;
@@ -175,8 +188,11 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
       cls->addUse(getScope(), BlockScope::UseKindConstRef);
     }
   }
+
   BlockScope *defScope;
-  TypePtr t = cls->checkConst(m_varName, type, coerce, ar,
+  // checkConst grabs locks for us
+  TypePtr t = cls->checkConst(getScope(), m_varName, type,
+                              coerce, ar,
                               shared_from_this(),
                               cls->getBases(), defScope);
   if (defScope) {

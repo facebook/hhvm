@@ -45,6 +45,7 @@
 #include <runtime/base/array/small_array.h>
 #include <runtime/ext/ext_json.h>
 #include <runtime/base/zend/zend_printf.h>
+#include <util/atomic.h>
 #include <util/logger.h>
 #include <util/util.h>
 #include <util/hash.h>
@@ -59,11 +60,16 @@ using namespace boost;
 ///////////////////////////////////////////////////////////////////////////////
 // initialization
 
+IMPLEMENT_THREAD_LOCAL(BlockScopeRawPtr,
+                       AnalysisResult::s_currentScopeThreadLocal);
+
+IMPLEMENT_THREAD_LOCAL(BlockScopeRawPtrFlagsHashMap,
+                       AnalysisResult::s_changedScopesMapThreadLocal);
+
 AnalysisResult::AnalysisResult()
   : BlockScope("Root", "", StatementPtr(), BlockScope::ProgramScope),
     m_arrayLitstrKeyMaxSize(0), m_arrayIntegerKeyMaxSize(0),
     m_package(NULL), m_parseOnDemand(false), m_phase(ParseAllFiles),
-    m_dynamicClass(false), m_dynamicFunction(false),
     m_scalarArraysCounter(0), m_paramRTTICounter(0),
     m_scalarArraySortedAvgLen(0), m_scalarArraySortedIndex(0),
     m_scalarArraySortedSumLen(0), m_scalarArrayCompressedTextSize(0),
@@ -441,6 +447,9 @@ void AnalysisResult::canonicalizeSymbolOrder() {
 
 void AnalysisResult::link(FileScopePtr user, FileScopePtr provider) {
   if (user != provider) {
+    bool needsLock = getPhase() != AnalyzeAll &&
+                     getPhase() != AnalyzeFinal;
+    ConditionalLock lock(m_depGraphMutex, needsLock);
     add_edge(user->vertex(), provider->vertex(), m_depGraph);
   }
 }
@@ -854,6 +863,14 @@ struct OptVisitor {
     m_dispatcher->waitEmpty();
   }
 
+  int getQueuedJobs() {
+    return m_dispatcher->getQueuedJobs();
+  }
+
+  int getActiveWorker() {
+    return m_dispatcher->getActiveWorker();
+  }
+
   AnalysisResultPtr m_ar;
   unsigned m_nscope;
   JobQueueDispatcher<BlockScope *, OptWorker<When> > *m_dispatcher;
@@ -865,10 +882,18 @@ public:
   OptWorker() {}
 
   virtual void doJob(BlockScope *scope) {
+#ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
+    atomic_inc(AnalysisResult::s_NumDoJobCalls);
+    ConcurrentBlockScopeRawPtrIntHashMap::accessor acc;
+    AnalysisResult::s_DoJobUniqueScopes.insert(acc,
+      BlockScopeRawPtr(scope));
+    acc->second += 1;
+#endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
     try {
-      DepthFirstVisitor<OptVisitor<When> > *visitor =
-        (DepthFirstVisitor<OptVisitor<When> >*)m_opaque;
+      DepthFirstVisitor<When, OptVisitor > *visitor =
+        (DepthFirstVisitor<When, OptVisitor >*)m_opaque;
       {
+        Lock ldep(BlockScope::s_depsMutex);
         Lock lstate(BlockScope::s_jobStateMutex);
         assert(scope->getMark() == BlockScope::MarkReady);
         if (scope->getNumDepsToWaitFor()) {
@@ -879,54 +904,135 @@ public:
       }
 
       scope->setForceRerun(false);
+      scope->setNeedsReschedule(false);
+
+      // creates on demand
+      AnalysisResult::s_changedScopesMapThreadLocal->clear();
       int useKinds = visitor->visitScope(BlockScopeRawPtr(scope));
+      ASSERT(useKinds >= 0);
 
       {
         Lock l2(BlockScope::s_depsMutex);
         Lock l1(BlockScope::s_jobStateMutex);
-        const BlockScopeRawPtrFlagsVec &ordered = scope->getOrderedUsers();
-        for (BlockScopeRawPtrFlagsVec::const_iterator it = ordered.begin(),
-               end = ordered.end(); it != end; ++it) {
-          BlockScopeRawPtrFlagsVec::value_type pf = *it;
-          int m = pf->first->getMark();
-          if (pf->second & useKinds && m == BlockScope::MarkProcessed) {
-            bool ready = visitor->activateScope(pf->first);
-            assert(!ready);
-            m = BlockScope::MarkWaiting;
-          }
 
-          if (m == BlockScope::MarkWaiting || m == BlockScope::MarkReady) {
-            int nd = pf->first->getNumDepsToWaitFor();
-            assert(nd >= 1);
-            pf->first->setNumDepsToWaitFor(--nd);
-            if (!nd && m == BlockScope::MarkWaiting) {
-              pf->first->setMark(BlockScope::MarkReady);
-              visitor->enqueue(pf->first);
+        ASSERT(scope->getMark() == BlockScope::MarkProcessing);
+        ASSERT(scope->getNumDepsToWaitFor() == 0);
+        scope->assertNumDepsSanity();
+
+        // re-enqueue changed scopes, regardless of rescheduling exception.
+        // this is because we might have made changes to other scopes which we
+        // do not undo, so we need to announce their updates
+        BlockScopeRawPtrFlagsHashMap::const_iterator localIt =
+          AnalysisResult::s_changedScopesMapThreadLocal->begin();
+        BlockScopeRawPtrFlagsHashMap::const_iterator localEnd =
+          AnalysisResult::s_changedScopesMapThreadLocal->end();
+        for (; localIt != localEnd; ++localIt) {
+          const BlockScopeRawPtrFlagsVec &ordered =
+            localIt->first->getOrderedUsers();
+          for (BlockScopeRawPtrFlagsVec::const_iterator userIt =
+                 ordered.begin(), userEnd = ordered.end();
+               userIt != userEnd; ++userIt) {
+            BlockScopeRawPtrFlagsVec::value_type pf = *userIt;
+            if ((pf->second & GetPhaseInterestMask<When>()) &&
+                (pf->second & localIt->second)) {
+              int m = pf->first->getMark();
+              switch (m) {
+              case BlockScope::MarkWaiting:
+              case BlockScope::MarkReady:
+                ; // no-op
+                break;
+              case BlockScope::MarkProcessing:
+#ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
+                atomic_inc(AnalysisResult::s_NumForceRerunGlobal);
+#endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
+                pf->first->setForceRerun(true);
+                break;
+              case BlockScope::MarkProcessed:
+#ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
+                atomic_inc(AnalysisResult::s_NumReactivateGlobal);
+#endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
+                if (visitor->activateScope(pf->first)) {
+                  visitor->enqueue(pf->first);
+                }
+                break;
+              default: ASSERT(false);
+              }
             }
-          } else if (pf->second & useKinds && m == BlockScope::MarkProcessing) {
-            // This is conservative: If we have a user who is currently
-            // processing (yes, this can potentially happen if we add a user
-            // *after* the initial dep graph has been formed), then we have no
-            // guarantee that the scope read this scope's updates in its
-            // entirety. Thus, we must force it to run again in order to be
-            // able to observe all the updates.
-            assert(pf->first->getNumDepsToWaitFor() == 0);
-            pf->first->setForceRerun(true);
           }
         }
-        scope->setMark(BlockScope::MarkProcessed);
-        if (scope->forceRerun()) {
+        AnalysisResult::s_changedScopesMapThreadLocal.destroy();
+
+        if (scope->needsReschedule()) {
+          // This signals an error in visitScope() which the scope can possibly
+          // recover from if run again. an example is a lock contention error
+          // (where the scope had to bail out). thus, we simply want to
+          // re-enqueue it (w/o activating dependents, since this scope hasn't
+          // actually finished running)
+          scope->setRescheduleFlags(
+              scope->rescheduleFlags() | useKinds);
           if (visitor->activateScope(BlockScopeRawPtr(scope))) {
             visitor->enqueue(BlockScopeRawPtr(scope));
           }
         } else {
-          const BlockScopeRawPtrVec &deps = scope->getDeps();
-          for (size_t i = 0; i < deps.size(); i++) {
-            BlockScopeRawPtr dep = deps[i];
-            if (dep->getMark() == BlockScope::MarkProcessing) {
-              bool ready = visitor->activateScope(BlockScopeRawPtr(scope));
-              assert(!ready);
-              break;
+          useKinds |= scope->rescheduleFlags();
+          scope->setRescheduleFlags(0);
+
+          const BlockScopeRawPtrFlagsVec &ordered = scope->getOrderedUsers();
+          for (BlockScopeRawPtrFlagsVec::const_iterator it = ordered.begin(),
+               end = ordered.end(); it != end; ++it) {
+            BlockScopeRawPtrFlagsVec::value_type pf = *it;
+            if (pf->second & GetPhaseInterestMask<When>()) {
+              int m = pf->first->getMark();
+              if (pf->second & useKinds && m == BlockScope::MarkProcessed) {
+#ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
+                atomic_inc(AnalysisResult::s_NumReactivateUseKinds);
+#endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
+                bool ready = visitor->activateScope(pf->first);
+                assert(!ready);
+                m = BlockScope::MarkWaiting;
+              }
+
+              if (m == BlockScope::MarkWaiting || m == BlockScope::MarkReady) {
+                int nd = pf->first->getNumDepsToWaitFor();
+                assert(nd >= 1);
+                if (!pf->first->decNumDepsToWaitFor() &&
+                    m == BlockScope::MarkWaiting) {
+                  pf->first->setMark(BlockScope::MarkReady);
+                  visitor->enqueue(pf->first);
+                }
+              } else if (pf->second & useKinds &&
+                         m == BlockScope::MarkProcessing) {
+                // This is conservative: If we have a user who is currently
+                // processing (yes, this can potentially happen if we add a
+                // user *after* the initial dep graph has been formed), then we
+                // have no guarantee that the scope read this scope's updates
+                // in its entirety. Thus, we must force it to run again in
+                // order to be able to observe all the updates.
+#ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
+                atomic_inc(AnalysisResult::s_NumForceRerunUseKinds);
+#endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
+                assert(pf->first->getNumDepsToWaitFor() == 0);
+                pf->first->setForceRerun(true);
+              }
+            }
+          }
+          scope->setMark(BlockScope::MarkProcessed);
+          if (scope->forceRerun()) {
+            if (visitor->activateScope(BlockScopeRawPtr(scope))) {
+              visitor->enqueue(BlockScopeRawPtr(scope));
+            }
+          } else {
+            const BlockScopeRawPtrFlagsPtrVec &deps = scope->getDeps();
+            for (BlockScopeRawPtrFlagsPtrVec::const_iterator it = deps.begin(),
+                 end = deps.end(); it != end; ++it) {
+              const BlockScopeRawPtrFlagsPtrPair &p(*it);
+              if (*p.second & GetPhaseInterestMask<When>()) {
+                if (p.first->getMark() == BlockScope::MarkProcessing) {
+                  bool ready = visitor->activateScope(BlockScopeRawPtr(scope));
+                  assert(!ready);
+                  break;
+                }
+              }
             }
           }
         }
@@ -937,35 +1043,263 @@ public:
   }
 };
 
-struct Pre {};
-struct Post {};
+// Pre, InferTypes, and Post defined in depth_first_visitor.h
 
-typedef OptVisitor<Pre> PreOptVisitor;
-typedef OptWorker<Pre> PreOptWorker;
-typedef OptVisitor<Post> PostOptVisitor;
-typedef OptWorker<Post> PostOptWorker;
+typedef   OptVisitor<Pre>          PreOptVisitor;
+typedef   OptWorker<Pre>           PreOptWorker;
+typedef   OptVisitor<InferTypes>   InferTypesVisitor;
+typedef   OptWorker<InferTypes>    InferTypesWorker;
+typedef   OptVisitor<Post>         PostOptVisitor;
+typedef   OptWorker<Post>          PostOptWorker;
+
+/**
+ * Unfortunately we cannot template specialize on something like this w/o
+ * complaints about incomplete class declarations:
+ *
+ *   template <class When>
+ *   void DepthFirstVisitor<When, OptVisitor>::setup() { ... }
+ *
+ * And as such, this evil exists
+ */
+
+#define IMPLEMENT_OPT_VISITOR_SETUP(worker) \
+  do { \
+    unsigned int threadCount = Option::ParserThreadCount; \
+    if (threadCount > this->m_data.m_nscope) { \
+      threadCount = this->m_data.m_nscope; \
+    } \
+    if (threadCount <= 0) threadCount = 1; \
+    this->m_data.m_dispatcher = \
+      new JobQueueDispatcher<BlockScope *, worker >( \
+        threadCount, true, 0, this); \
+  } while (0)
+
+#define IMPLEMENT_OPT_VISITOR_ENQUEUE(scope) \
+  do { \
+    ASSERT((scope)->getMark() == BlockScope::MarkReady); \
+    this->m_data.m_dispatcher->enqueue((scope).get()); \
+  } while (0)
 
 template<>
-void DepthFirstVisitor<PreOptVisitor>::setup() {
-    unsigned int threadCount = Option::ParserThreadCount;
-    if (threadCount > this->m_data.m_nscope) {
-      threadCount = this->m_data.m_nscope;
-    }
-    if (threadCount <= 0) threadCount = 1;
-
-    this->m_data.m_dispatcher =
-      new JobQueueDispatcher<BlockScope *, PreOptWorker >(
-        threadCount, true, 0, this);
+void DepthFirstVisitor<Pre, OptVisitor>::setup() {
+  IMPLEMENT_OPT_VISITOR_SETUP(PreOptWorker);
 }
 
 template<>
-void DepthFirstVisitor<PreOptVisitor>::enqueue(
+void DepthFirstVisitor<InferTypes, OptVisitor>::setup() {
+  IMPLEMENT_OPT_VISITOR_SETUP(InferTypesWorker);
+}
+
+template<>
+void DepthFirstVisitor<Post, OptVisitor>::setup() {
+  IMPLEMENT_OPT_VISITOR_SETUP(PostOptWorker);
+}
+
+template<>
+void DepthFirstVisitor<Pre, OptVisitor>::enqueue(BlockScopeRawPtr scope) {
+  IMPLEMENT_OPT_VISITOR_ENQUEUE(scope);
+}
+
+template<>
+void DepthFirstVisitor<InferTypes, OptVisitor>::enqueue(
   BlockScopeRawPtr scope) {
-  this->m_data.m_dispatcher->enqueue(scope.get());
+  IMPLEMENT_OPT_VISITOR_ENQUEUE(scope);
 }
 
 template<>
-int DepthFirstVisitor<PreOptVisitor>::visitScope(BlockScopeRawPtr scope) {
+void DepthFirstVisitor<Post, OptVisitor>::enqueue(BlockScopeRawPtr scope) {
+  IMPLEMENT_OPT_VISITOR_ENQUEUE(scope);
+}
+
+template <typename When>
+void
+AnalysisResult::preWaitCallback(bool first,
+                                const BlockScopeRawPtrQueue &scopes,
+                                void *opaque) {
+  // default is no-op
+}
+
+template <typename When>
+bool
+AnalysisResult::postWaitCallback(bool first,
+                                 bool again,
+                                 const BlockScopeRawPtrQueue &scopes,
+                                 void *opaque) {
+  // default is no-op
+  return again;
+}
+
+#ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
+int AnalysisResult::s_NumDoJobCalls         = 0;
+int AnalysisResult::s_NumForceRerunGlobal   = 0;
+int AnalysisResult::s_NumReactivateGlobal   = 0;
+int AnalysisResult::s_NumForceRerunUseKinds = 0;
+int AnalysisResult::s_NumReactivateUseKinds = 0;
+
+ConcurrentBlockScopeRawPtrIntHashMap
+  AnalysisResult::s_DoJobUniqueScopes;
+
+static inline int CountScopesWaiting(const BlockScopeRawPtrQueue &scopes) {
+  int s = 0;
+  for (BlockScopeRawPtrQueue::const_iterator it = scopes.begin();
+       it != scopes.end(); ++it) {
+    int m = (*it)->getMark();
+    ASSERT(m == BlockScope::MarkWaiting ||
+           m == BlockScope::MarkProcessed);
+    if (m == BlockScope::MarkWaiting) s++;
+  }
+  return s;
+}
+
+static inline void DumpScope(BlockScopeRawPtr scope, const char *prefix,
+                             bool newline = true) {
+  ASSERT(scope->is(BlockScope::FunctionScope) ||
+         scope->is(BlockScope::ClassScope));
+  const char *type = scope->is(BlockScope::FunctionScope) ?
+    "function" : "class";
+  std::cout << prefix << type << " " << scope->getName() << " @ "
+            << scope->getContainingFile()->getName();
+  if (newline) std::cout << std::endl;
+}
+
+static inline void DumpScopeWithDeps(BlockScopeRawPtr scope) {
+  ASSERT(scope->is(BlockScope::FunctionScope) ||
+         scope->is(BlockScope::ClassScope));
+  DumpScope(scope, "");
+  const BlockScopeRawPtrFlagsVec &ordered = scope->getOrderedUsers();
+  for (BlockScopeRawPtrFlagsVec::const_iterator it = ordered.begin(),
+       end = ordered.end(); it != end; ++it) {
+    BlockScopeRawPtrFlagsVec::value_type pf = *it;
+    string prefix = "    ";
+    prefix += "(";
+    prefix += boost::lexical_cast<string>(pf->second);
+    prefix += ") ";
+    DumpScope(pf->first, prefix.c_str());
+  }
+}
+
+typedef std::pair<BlockScopeRawPtr, int> BIPair;
+struct BIPairCmp {
+  inline bool operator()(const BIPair &lhs, const BIPair &rhs) const {
+    return lhs.second > rhs.second;
+  }
+};
+#endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
+
+template <typename When>
+void
+AnalysisResult::processScopesParallel(const char *id,
+                                      void *opaque /* = NULL */) {
+  BlockScopeRawPtrQueue scopes;
+  getScopesSet(scopes);
+
+#ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
+  std::cout << "processScopesParallel(" << id << "): "
+    << scopes.size() << " scopes" << std::endl;
+#endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
+
+  DepthFirstVisitor<When, OptVisitor> dfv(
+    OptVisitor<When>(shared_from_this(), scopes.size()));
+
+  bool first = true;
+  bool again;
+  dfv.data().start();
+  do {
+
+#ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
+    std::cout << "-----------------------------------" << std::endl;
+    AnalysisResult::s_NumDoJobCalls         = 0;
+    AnalysisResult::s_NumForceRerunGlobal   = 0;
+    AnalysisResult::s_NumReactivateGlobal   = 0;
+    AnalysisResult::s_NumForceRerunUseKinds = 0;
+    AnalysisResult::s_NumReactivateUseKinds = 0;
+
+    AnalysisResult::s_DoJobUniqueScopes.clear();
+#endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
+
+#ifdef HPHP_INSTRUMENT_TYPE_INF
+    ASSERT(RescheduleException::s_NumReschedules          == 0);
+    ASSERT(RescheduleException::s_NumForceRerunSelfCaller == 0);
+    ASSERT(RescheduleException::s_NumRetTypesChanged      == 0);
+    ASSERT(BaseTryLock::s_LockProfileMap.empty());
+#endif /* HPHP_INSTRUMENT_TYPE_INF */
+
+    BlockScopeRawPtrQueue enqueued;
+    again = dfv.visitParallel(scopes, first, enqueued);
+    preWaitCallback<When>(first, scopes, opaque);
+
+#ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
+    {
+      std::cout << "Enqueued " << enqueued.size() <<
+        " scopes in visitParallel()" << std::endl;
+      if (enqueued.size() < 100) {
+        for (BlockScopeRawPtrQueue::const_iterator it = enqueued.begin();
+             it != enqueued.end(); ++it) {
+          DumpScopeWithDeps(*it);
+        }
+      }
+      Timer timer(Timer::WallTime, "dfv.wait()");
+      dfv.data().wait();
+    }
+#else
+    dfv.data().wait();
+#endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
+
+    ASSERT(!dfv.data().getQueuedJobs());
+    ASSERT(!dfv.data().getActiveWorker());
+
+#ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
+    std::cout << "Number of doJob() calls: "
+      << AnalysisResult::s_NumDoJobCalls << std::endl;
+    std::cout << "Number of scopes which got doJob() called: "
+      << AnalysisResult::s_DoJobUniqueScopes.size() << std::endl;
+    std::vector<BIPair> v(
+        AnalysisResult::s_DoJobUniqueScopes.begin(),
+        AnalysisResult::s_DoJobUniqueScopes.end());
+    if (!v.empty()) {
+      sort(v.begin(), v.end(), BIPairCmp());
+      std::vector<BIPair>::const_iterator end =
+        v.size() > 20 ? v.begin() + 20 : v.end();
+      for (std::vector<BIPair>::const_iterator it = v.begin();
+          it != end; ++it) {
+        string prefix;
+        prefix += boost::lexical_cast<string>((*it).second);
+        prefix += " times: ";
+        DumpScope((*it).first, prefix.c_str());
+      }
+      std::cout << "Number of global force reruns: "
+        << AnalysisResult::s_NumForceRerunGlobal << std::endl;
+      std::cout << "Number of global reactivates: "
+        << AnalysisResult::s_NumReactivateGlobal << std::endl;
+      std::cout << "Number of use kind force reruns: "
+        << AnalysisResult::s_NumForceRerunUseKinds << std::endl;
+      std::cout << "Number of use kind reactivates: "
+        << AnalysisResult::s_NumReactivateUseKinds << std::endl;
+    }
+    int numWaiting = CountScopesWaiting(scopes);
+    std::cout << "Number of waiting scopes: " << numWaiting << std::endl;
+#endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
+
+    again = postWaitCallback<When>(first, again, scopes, opaque);
+    first = false;
+  } while (again);
+  dfv.data().stop();
+
+  for (BlockScopeRawPtrQueue::iterator
+       it = scopes.begin(), end = scopes.end();
+       it != end; ++it) {
+    ASSERT((*it)->getMark() == BlockScope::MarkProcessed);
+    ASSERT((*it)->getNumDepsToWaitFor() == 0);
+    ASSERT(!(*it)->needsReschedule());
+    ASSERT((*it)->rescheduleFlags() == 0);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// pre-opt
+
+template<>
+int DepthFirstVisitor<Pre, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
   int updates, all_updates = 0;
   StatementPtr stmt = scope->getStmt();
   if (MethodStatementPtr m =
@@ -1004,44 +1338,37 @@ int DepthFirstVisitor<PreOptVisitor>::visitScope(BlockScopeRawPtr scope) {
 }
 
 template<>
-ExpressionPtr DepthFirstVisitor<PreOptVisitor>::visit(ExpressionPtr e) {
+ExpressionPtr DepthFirstVisitor<Pre, OptVisitor>::visit(ExpressionPtr e) {
   return e->preOptimize(this->m_data.m_ar);
 }
 
 template<>
-StatementPtr DepthFirstVisitor<PreOptVisitor>::visit(StatementPtr stmt) {
+StatementPtr DepthFirstVisitor<Pre, OptVisitor>::visit(StatementPtr stmt) {
   return stmt->preOptimize(this->m_data.m_ar);
 }
 
 void AnalysisResult::preOptimize() {
   setPhase(FirstPreOptimize);
-  BlockScopeRawPtrQueue scopes;
-  getScopesSet(scopes);
-  DepthFirstVisitor<PreOptVisitor> dfv(
-    PreOptVisitor(shared_from_this(), scopes.size()));
-
-  bool first = true;
-  bool again;
-  dfv.data().start();
-  do {
-    again = dfv.visitParallel(scopes, first);
-    first = false;
-    dfv.data().wait();
-  } while (again);
-  dfv.data().stop();
+  processScopesParallel<Pre>("PreOptimize");
 }
 
-struct InferTypesVisitor {
-  InferTypesVisitor(AnalysisResultPtr ar,
-                    BlockScopeRawPtrQueue *queue) :
-      m_ar(ar), m_queue(queue) {}
-
-  AnalysisResultPtr m_ar;
-  BlockScopeRawPtrQueue *m_queue;
-};
+///////////////////////////////////////////////////////////////////////////////
+// infer types
 
 template<>
-int DepthFirstVisitor<InferTypesVisitor>::visitScope(BlockScopeRawPtr scope) {
+int
+DepthFirstVisitor<InferTypes, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
+  // acquire a lock on the scope
+  SimpleLock lock(scope->getInferTypesMutex());
+
+  // set the thread local to this scope-
+  // use an object to do this so if an exception is thrown we can take
+  // advantage of stack-unwinding
+  //
+  // NOTE: this *must* happen *after* the lock has been acquired, since there
+  // is code which depends on this ordering
+  SetCurrentScope sc(scope);
+
   StatementPtr stmt = scope->getStmt();
   MethodStatementPtr m =
     dynamic_pointer_cast<MethodStatement>(stmt);
@@ -1052,51 +1379,115 @@ int DepthFirstVisitor<InferTypesVisitor>::visitScope(BlockScopeRawPtr scope) {
     scope->getContainingFunction()->pushReturnType();
   }
 
-  BlockScopeRawPtrQueue *changed = scope->getChangedScopes();
   int ret = 0;
-  bool done;
-  do {
-    scope->clearUpdated();
-    if (m) {
-      scope->getContainingFunction()->clearRetExprs();
-      m->inferFunctionTypes(this->m_data.m_ar);
-    } else {
-      for (int i = 0, n = stmt->getKidCount(); i < n; i++) {
-        StatementPtr kid(
-          dynamic_pointer_cast<Statement>(stmt->getNthKid(i)));
-        if (kid) {
-          kid->inferTypes(this->m_data.m_ar);
+  try {
+    bool done;
+    do {
+      scope->clearUpdated();
+      if (m) {
+        scope->getContainingFunction()->clearRetExprs();
+        m->inferFunctionTypes(this->m_data.m_ar);
+      } else {
+        for (int i = 0, n = stmt->getKidCount(); i < n; i++) {
+          StatementPtr kid(
+            dynamic_pointer_cast<Statement>(stmt->getNthKid(i)));
+          if (kid) {
+            kid->inferTypes(this->m_data.m_ar);
+          }
         }
       }
-    }
 
-    done = !scope->getUpdated();
+      done = !scope->getUpdated();
+      ret |= scope->getUpdated();
+      scope->incPass();
+    } while (!done);
+
+    if (m) {
+      bool changed = scope->getContainingFunction()->popReturnType();
+      if (changed && scope->selfUser() & BlockScope::UseKindCallerReturn) {
+        // for a recursive caller, we must let the scope run again, because
+        // there are potentially AST nodes which are interested in the updated
+        // return type
+#ifdef HPHP_INSTRUMENT_TYPE_INF
+        atomic_inc(RescheduleException::s_NumForceRerunSelfCaller);
+#endif /* HPHP_INSTRUMENT_TYPE_INF */
+        scope->setForceRerun(true);
+      }
+      if (pushPrev) {
+        scope->getVariables()->endLocal();
+        ret = 0; // since we really care about the updated flags *after*
+                 // endLocal()
+      }
+      scope->getContainingFunction()->fixRetExprs();
+      ret |= scope->getUpdated();
+      scope->clearUpdated();
+    }
+  } catch (RescheduleException &e) {
+    // potential deadlock detected- reschedule
+    // this scope to run at a later time
+#ifdef HPHP_INSTRUMENT_TYPE_INF
+    atomic_inc(RescheduleException::s_NumReschedules);
+#endif /* HPHP_INSTRUMENT_TYPE_INF */
     ret |= scope->getUpdated();
-    scope->incPass();
-
-    for (BlockScopeRawPtrQueue::iterator it = changed->begin(),
-           end = changed->end(); it != end; ) {
-      done = false;
-      BlockScopeRawPtr bs = *it;
-      changed->erase(it++);
-      bs->changed(*this->m_data.m_queue, bs->getUpdated());
-      bs->clearUpdated();
+    if (m) {
+      scope->getContainingFunction()->resetReturnType();
+      if (pushPrev) {
+        scope->getVariables()->resetLocal();
+        ret = 0; // since we really care about the updated flags *after*
+                 // resetLocal()
+      }
+      scope->getContainingFunction()->fixRetExprs();
+      ret |= scope->getUpdated();
+      scope->clearUpdated();
     }
-  } while (!done);
-
-  if (m) {
-    scope->getContainingFunction()->popReturnType();
-    if (pushPrev) {
-      scope->getVariables()->endLocal();
-      ret = 0;
-    }
-    scope->getContainingFunction()->fixRetExprs();
-    ret |= scope->getUpdated();
-    scope->clearUpdated();
+    scope->setNeedsReschedule(true);
   }
+
+  // inc regardless of reschedule exception or not, since these are the
+  // semantics of run id
+  scope->incRunId();
 
   return ret;
 }
+
+template<>
+bool AnalysisResult::postWaitCallback<InferTypes>(
+    bool first, bool again, const BlockScopeRawPtrQueue &scopes, void *opaque) {
+
+#ifdef HPHP_INSTRUMENT_TYPE_INF
+  std::cout << "Number of rescheduled: " <<
+    RescheduleException::s_NumReschedules << std::endl;
+  RescheduleException::s_NumReschedules = 0;
+
+  std::cout << "Number of force rerun self callers: " <<
+    RescheduleException::s_NumForceRerunSelfCaller << std::endl;
+  RescheduleException::s_NumForceRerunSelfCaller = 0;
+
+  std::cout << "Number of return types changed: " <<
+    RescheduleException::s_NumRetTypesChanged << std::endl;
+  RescheduleException::s_NumRetTypesChanged = 0;
+
+  std::cout << "Lock contention: " << std::endl;
+  for (LProfileMap::const_iterator it = BaseTryLock::s_LockProfileMap.begin();
+       it != BaseTryLock::s_LockProfileMap.end(); ++it) {
+    const LEntry &entry = it->first;
+    int count = it->second;
+    std::cout << "(" << entry.first << "@" << entry.second << "): " <<
+      count << std::endl;
+  }
+
+  BaseTryLock::s_LockProfileMap.clear();
+#endif /* HPHP_INSTRUMENT_TYPE_INF */
+
+  return again;
+}
+
+#ifdef HPHP_INSTRUMENT_TYPE_INF
+int RescheduleException::s_NumReschedules          = 0;
+int RescheduleException::s_NumForceRerunSelfCaller = 0;
+int RescheduleException::s_NumRetTypesChanged      = 0;
+LProfileMap BaseTryLock::s_LockProfileMap;
+#endif /* HPHP_INSTRUMENT_TYPE_INF */
 
 void AnalysisResult::inferTypes() {
   if (isSystem()) {
@@ -1106,48 +1497,39 @@ void AnalysisResult::inferTypes() {
 
   setPhase(FirstInference);
   BlockScopeRawPtrQueue scopes;
-
-  DepthFirstVisitor<InferTypesVisitor> dfv(
-    InferTypesVisitor(shared_from_this(), &scopes));
-  BlockScopeRawPtrQueue changed;
-
   getScopesSet(scopes);
-  for (BlockScopeRawPtrQueue::iterator it = scopes.begin(), end = scopes.end();
+
+  for (BlockScopeRawPtrQueue::iterator
+       it = scopes.begin(), end = scopes.end();
        it != end; ++it) {
-    (*it)->setChangedScopes(&changed);
+    (*it)->setInTypeInference(true);
     (*it)->clearUpdated();
+    ASSERT((*it)->getNumDepsToWaitFor() == 0);
   }
-  dfv.visitDepthFirst(scopes);
 
-  getScopesSet(scopes);
-  for (BlockScopeRawPtrQueue::iterator it = scopes.begin(), end = scopes.end();
+#ifdef HPHP_INSTRUMENT_TYPE_INF
+  ASSERT(RescheduleException::s_NumReschedules          == 0);
+  ASSERT(RescheduleException::s_NumForceRerunSelfCaller == 0);
+  ASSERT(BaseTryLock::s_LockProfileMap.empty());
+#endif /* HPHP_INSTRUMENT_TYPE_INF */
+
+  processScopesParallel<InferTypes>("InferTypes");
+
+  for (BlockScopeRawPtrQueue::iterator
+       it = scopes.begin(), end = scopes.end();
        it != end; ++it) {
-    (*it)->setChangedScopes(0);
+    (*it)->setInTypeInference(false);
     (*it)->clearUpdated();
+    ASSERT((*it)->getMark() == BlockScope::MarkProcessed);
+    ASSERT((*it)->getNumDepsToWaitFor() == 0);
   }
 }
 
-template<>
-void DepthFirstVisitor<PostOptVisitor>::setup() {
-    unsigned int threadCount = Option::ParserThreadCount;
-    if (threadCount > this->m_data.m_nscope) {
-      threadCount = this->m_data.m_nscope;
-    }
-    if (threadCount <= 0) threadCount = 1;
-
-    this->m_data.m_dispatcher =
-      new JobQueueDispatcher<BlockScope *, PostOptWorker >(
-        threadCount, true, 0, this);
-}
+///////////////////////////////////////////////////////////////////////////////
+// post-opt
 
 template<>
-void DepthFirstVisitor<PostOptVisitor>::enqueue(
-  BlockScopeRawPtr scope) {
-  this->m_data.m_dispatcher->enqueue(scope.get());
-}
-
-template<>
-int DepthFirstVisitor<PostOptVisitor>::visit(BlockScopeRawPtr scope) {
+int DepthFirstVisitor<Post, OptVisitor>::visit(BlockScopeRawPtr scope) {
   scope->clearUpdated();
   StatementPtr stmt = scope->getStmt();
   bool done = false;
@@ -1172,12 +1554,12 @@ int DepthFirstVisitor<PostOptVisitor>::visit(BlockScopeRawPtr scope) {
 }
 
 template<>
-ExpressionPtr DepthFirstVisitor<PostOptVisitor>::visit(ExpressionPtr e) {
+ExpressionPtr DepthFirstVisitor<Post, OptVisitor>::visit(ExpressionPtr e) {
   return e->postOptimize(this->m_data.m_ar);
 }
 
 template<>
-StatementPtr DepthFirstVisitor<PostOptVisitor>::visit(StatementPtr stmt) {
+StatementPtr DepthFirstVisitor<Post, OptVisitor>::visit(StatementPtr stmt) {
   return stmt->postOptimize(this->m_data.m_ar);
 }
 
@@ -1193,47 +1575,45 @@ public:
   }
 };
 
-void AnalysisResult::postOptimize() {
-  setPhase(AnalysisResult::PostOptimize);
-
-  BlockScopeRawPtrQueue scopes;
-  getScopesSet(scopes);
-
-  DepthFirstVisitor<PostOptVisitor> dfv(
-    PostOptVisitor(shared_from_this(), scopes.size()));
-
-  unsigned int threadCount = Option::ParserThreadCount;
-  if (threadCount > scopes.size()) {
-    threadCount = scopes.size();
-  }
-  if (threadCount <= 0) threadCount = 1;
-
-  JobQueueDispatcher<FinalWorker::JobType, FinalWorker> dispatcher(
-    threadCount, true, 0, this);
-
-  bool first = true;
-  bool again;
-  dfv.data().start();
-  do {
-    again = dfv.visitParallel(scopes, first);
-    if (first && Option::ControlFlow) {
-      for (BlockScopeRawPtrQueue::iterator it = scopes.begin(),
-             end = scopes.end(); it != end; ++it) {
-        BlockScopeRawPtr scope = *it;
-        if (MethodStatementPtr m =
-            dynamic_pointer_cast<MethodStatement>(scope->getStmt())) {
-          dispatcher.enqueue(m);
-        }
+template<>
+void AnalysisResult::preWaitCallback<Post>(
+    bool first, const BlockScopeRawPtrQueue &scopes, void *opaque) {
+  ASSERT(opaque);
+  JobQueueDispatcher<FinalWorker::JobType, FinalWorker> *dispatcher
+    = (JobQueueDispatcher<FinalWorker::JobType, FinalWorker> *) opaque;
+  if (first && Option::ControlFlow) {
+    for (BlockScopeRawPtrQueue::const_iterator it = scopes.begin(),
+           end = scopes.end(); it != end; ++it) {
+      BlockScopeRawPtr scope = *it;
+      if (MethodStatementPtr m =
+          dynamic_pointer_cast<MethodStatement>(scope->getStmt())) {
+        dispatcher->enqueue(m);
       }
     }
-    first = false;
-    dfv.data().wait();
-  } while (again);
-  dfv.data().stop();
+  }
+}
 
+void AnalysisResult::postOptimize() {
+  setPhase(AnalysisResult::PostOptimize);
   if (Option::ControlFlow) {
+    BlockScopeRawPtrQueue scopes;
+    getScopesSet(scopes);
+
+    unsigned int threadCount = Option::ParserThreadCount;
+    if (threadCount > scopes.size()) {
+      threadCount = scopes.size();
+    }
+    if (threadCount <= 0) threadCount = 1;
+
+    JobQueueDispatcher<FinalWorker::JobType, FinalWorker> dispatcher(
+      threadCount, true, 0, this);
+
+    processScopesParallel<Post>("PostOptimize", &dispatcher);
+
     dispatcher.start();
     dispatcher.stop();
+  } else {
+    processScopesParallel<Post>("PostOptimize");
   }
 }
 
@@ -1568,12 +1948,18 @@ string AnalysisResult::prepareFile(const char *root, const string &fileName,
   return fullPath;
 }
 
-void AnalysisResult::forceClassVariants(ClassScopePtr curScope, bool doStatic) {
+void
+AnalysisResult::forceClassVariants(
+    ClassScopePtr curScope,
+    bool doStatic,
+    bool acquireLocks /* = false */) {
   if (curScope) {
+    COND_TRY_LOCK(curScope, acquireLocks);
     curScope->getVariables()->forceVariants(
       shared_from_this(), VariableTable::GetVarClassMask(true, doStatic));
   }
 
+  ConditionalLock lock(getMutex(), acquireLocks);
   if (m_classForcedVariants[doStatic]) {
     return;
   }
@@ -1583,18 +1969,25 @@ void AnalysisResult::forceClassVariants(ClassScopePtr curScope, bool doStatic) {
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
     BOOST_FOREACH(ClassScopePtr cls, iter->second) {
+      COND_TRY_LOCK(cls, acquireLocks);
       cls->getVariables()->forceVariants(
         ar, VariableTable::GetVarClassMask(false, doStatic));
     }
   }
 }
 
-void AnalysisResult::forceClassVariants(const std::string &name,
-                                        ClassScopePtr curScope, bool doStatic) {
+void AnalysisResult::forceClassVariants(
+    const std::string &name,
+    ClassScopePtr curScope,
+    bool doStatic,
+    bool acquireLocks /* = false */) {
   if (curScope) {
+    COND_TRY_LOCK(curScope, acquireLocks);
     curScope->getVariables()->forceVariant(
       shared_from_this(), name, VariableTable::GetVarClassMask(true, doStatic));
   }
+
+  ConditionalLock lock(getMutex(), acquireLocks);
   if (m_classForcedVariants[doStatic]) {
     return;
   }
@@ -1603,6 +1996,7 @@ void AnalysisResult::forceClassVariants(const std::string &name,
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
     BOOST_FOREACH(ClassScopePtr cls, iter->second) {
+      COND_TRY_LOCK(cls, acquireLocks);
       cls->getVariables()->forceVariant(
         ar, name, VariableTable::GetVarClassMask(false, doStatic));
     }

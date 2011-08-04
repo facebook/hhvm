@@ -178,6 +178,7 @@ void SwitchStatement::inferTypes(AnalysisResultPtr ar) {
         defaultCount++;
       }
     }
+    // TODO: this really belongs in analyzeProgram()
     if (defaultCount > 1 && getScope()->isFirstPass()) {
       Compiler::Error(Compiler::MoreThanOneDefault, m_cases);
     }

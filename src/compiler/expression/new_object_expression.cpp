@@ -72,7 +72,7 @@ void NewObjectExpression::analyzeProgram(AnalysisResultPtr ar) {
       if (ClassScopePtr cls = resolveClass()) {
         m_name = m_className;
         func = cls->findConstructor(ar, true);
-        if (func) func->addCaller(getScope());
+        if (func) func->addNewObjCaller(getScope());
       }
     }
 
@@ -128,9 +128,8 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
         m_params->inferAndCheck(ar, Type::Some, false);
       }
     } else {
-      if (func != prev) func->addCaller(getScope());
-      m_extraArg = func->inferParamTypes(ar, self, m_params,
-                                         valid);
+      if (func != prev) func->addNewObjCaller(getScope());
+      m_extraArg = func->inferParamTypes(ar, self, m_params, valid);
       m_variableArgument = func->isVariableArgument();
     }
     if (valid) {
@@ -144,7 +143,6 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     }
     return Type::CreateObjectType(m_name);
   } else {
-    ar->containsDynamicClass();
     if (m_params) {
       m_params->markParams(canInvokeFewArgs());
     }

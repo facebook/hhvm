@@ -14,24 +14,53 @@
    +----------------------------------------------------------------------+
 */
 
-#include "mutex.h"
+#ifndef __BITS_H__
+#define __BITS_H__
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Mutex::Mutex(bool reentrant /* = true */) {
-  pthread_mutexattr_init(&m_mutexattr);
-  if (reentrant) {
-    pthread_mutexattr_settype(&m_mutexattr, PTHREAD_MUTEX_RECURSIVE);
-  } else {
-#if defined(__APPLE__)
-    pthread_mutexattr_settype(&m_mutexattr, PTHREAD_MUTEX_DEFAULT);
-#else
-    pthread_mutexattr_settype(&m_mutexattr, PTHREAD_MUTEX_ADAPTIVE_NP);
-#endif
-  }
-  pthread_mutex_init(&m_mutex, &m_mutexattr);
-}
+template <typename T>
+struct BitInfo {
+  static const T NumBits  = sizeof(T) * 8;
+  static const T HighMask = 0x1 << (NumBits - 1);
+};
+
+template <unsigned int i, unsigned int m>
+struct BitCountImpl {
+  enum { value = ((i & m) ? 1 : 0) + BitCountImpl< i, (m >> 1) >::value };
+};
+
+template <unsigned int i>
+struct BitCountImpl<i, 0> {
+  enum { value = 0 };
+};
+
+template <unsigned int i>
+struct BitCount: public BitCountImpl<i,
+                                     BitInfo<unsigned int>::HighMask>
+{};
+
+template <unsigned int i, bool p, unsigned int m>
+struct BitPhaseImpl {
+  enum {
+    value = ((i & m) ? (p ? 0 : 1) : (p ? 1 : 0)) +
+             BitPhaseImpl<i, i & m, (m >> 1)>::value
+  };
+};
+
+template <unsigned int i, bool p>
+struct BitPhaseImpl<i, p, 0> {
+  enum { value = 0 };
+};
+
+template <unsigned int i>
+struct BitPhase : public BitPhaseImpl<i,
+                                      i & BitInfo<unsigned int>::HighMask,
+                                      BitInfo<unsigned int>::HighMask>
+{};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#endif // __BITS_H__

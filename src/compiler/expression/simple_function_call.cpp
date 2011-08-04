@@ -268,6 +268,7 @@ void SimpleFunctionCall::setupScopes(AnalysisResultConstPtr ar) {
   if (func && !func->isRedeclaring()) {
     if (m_funcScope != func) {
       m_funcScope = func;
+      ASSERT(ar->getPhase() != AnalysisResult::FirstInference);
       Construct::recomputeEffects();
       m_funcScope->addCaller(getScope());
     }
@@ -296,7 +297,9 @@ void SimpleFunctionCall::setNthKid(int n, ConstructPtr cp) {
 void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
   FunctionCall::analyzeProgram(ar);
   if (m_class) {
-    setDynamicByIdentifier(ar, m_name);
+    if (!Option::AllDynamic) {
+      setDynamicByIdentifier(ar, m_name);
+    }
   } else if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
     addDependencies(ar);
   }
@@ -912,8 +915,11 @@ TypePtr SimpleFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
 
 TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                           bool coerce) {
+  ASSERT(type);
+  IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
+
+  resetTypes();
   reset();
-  m_implementedType.reset();
 
   if (m_class) {
     m_class->inferAndCheck(ar, Type::Any, false);
@@ -941,16 +947,25 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         if (!varName.empty()) {
           ExpressionPtr value = (*m_params)[1];
           TypePtr varType = value->inferAndCheck(ar, Type::Some, false);
-          BlockScopePtr block = ar->findConstantDeclarer(varName);
+
+          BlockScopePtr block;
           bool newlyDeclared = false;
-          if (!block) {
-            getFileScope()->declareConstant(ar, varName);
+          {
+            Lock lock(ar->getMutex());
             block = ar->findConstantDeclarer(varName);
-            ASSERT(block);
-            newlyDeclared = true;
+            if (!block) {
+              FileScopeRawPtr fs(getFileScope());
+              GET_LOCK(fs); // file scope cannot depend on a function scope
+              fs->declareConstant(ar, varName);
+              block = ar->findConstantDeclarer(varName);
+              newlyDeclared = true;
+            }
           }
+
+          ASSERT(block);
           ConstantTablePtr constants = block->getConstants();
           if (constants != ar->getConstants()) {
+            TRY_LOCK(block);
             if (value && !value->isScalar()) {
               constants->setDynamic(ar, varName);
               varType = Type::Variant;
@@ -961,8 +976,10 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                 setAttribute(VariableTable::NeedGlobalPointer);
             } else {
               if (newlyDeclared) {
-                constants->add(varName, varType, value, ar, self);
                 const Symbol *sym = constants->getSymbol(varName);
+                ASSERT(!sym || !sym->declarationSet());
+                constants->add(varName, varType, value, ar, self);
+                sym = constants->getSymbol(varName);
                 assert(sym);
                 m_extra = (void *)sym;
               } else {
@@ -1020,10 +1037,11 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     if (func && !func->isStatic()) {
       ClassScopePtr clsThis = getOriginalClass();
       FunctionScopePtr funcThis = getOriginalFunction();
-      if (!clsThis ||
+      if (!Option::AllDynamic &&
+          (!clsThis ||
           (clsThis != m_classScope &&
            !clsThis->derivesFrom(ar, m_className, true, false)) ||
-          funcThis->isStatic()) {
+          funcThis->isStatic())) {
         func->setDynamic();
       }
     }
@@ -1057,8 +1075,10 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
     return checkTypesImpl(ar, type, Type::Variant, coerce);
   } else if (func != m_funcScope) {
+    ASSERT(!m_funcScope ||
+           !func->hasUser(getScope(), BlockScope::UseKindCaller));
     m_funcScope = func;
-    m_funcScope->addCaller(getScope());
+    m_funcScope->addCaller(getScope(), !type->is(Type::KindOfAny));
     Construct::recomputeEffects();
   }
 
@@ -1067,8 +1087,12 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
   beforeCheck(ar);
 
   m_valid = true;
-  TypePtr rtype = checkParamsAndReturn(ar, type, coerce, func, m_arrayParams);
+  TypePtr rtype = checkParamsAndReturn(ar, type, coerce,
+                                       func, m_arrayParams);
 
+  // this is ok un-guarded b/c this value never gets un-set (once its
+  // true its always true) and the value itself doesn't get read
+  // until outputCPP time
   if (m_arrayParams && func && !m_builtinFunction) func->setDirectInvoke();
 
   if (m_safe) {
@@ -1096,6 +1120,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
   }
 
+  ASSERT(rtype);
   return rtype;
 }
 

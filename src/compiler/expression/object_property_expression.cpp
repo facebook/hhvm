@@ -198,14 +198,14 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     // any type inference could be wrong. Instead, we just force variants on
     // all class variables.
     if (m_context & (LValue | RefValue)) {
-      ar->forceClassVariants(getOriginalClass(), false);
+      ar->forceClassVariants(getOriginalClass(), false, true);
     }
 
     return Type::Variant; // we have to use a variant to hold dynamic value
   }
 
   ScalarExpressionPtr exp = dynamic_pointer_cast<ScalarExpression>(m_property);
-  string name = exp->getString();
+  const string &name = exp->getString();
   ASSERT(!name.empty());
 
   m_property->inferAndCheck(ar, Type::String, false);
@@ -226,7 +226,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
 
   if (!cls) {
     if (m_context & (LValue | RefValue | DeepReference | UnsetContext)) {
-      ar->forceClassVariants(name, getOriginalClass(), false);
+      ar->forceClassVariants(name, getOriginalClass(), false, true);
     }
     return Type::Variant;
   }
@@ -249,6 +249,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     }
   }
 
+  ASSERT(cls);
   if (!m_propSym || cls != m_objectClass.lock()) {
     m_objectClass = cls;
     ClassScopePtr parent;
@@ -264,7 +265,9 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
         !m_propSym->isStatic();
 
       if (m_propSymValid) {
-        m_symOwner->addUse(getScope(), BlockScope::UseKindNonStaticRef);
+        m_symOwner->addUse(getScope(),
+                           BlockScope::GetNonStaticRefUseKind(
+                             m_propSym->getHash()));
       }
     }
   }
@@ -273,7 +276,15 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   if (m_propSymValid && (!cls->derivesFromRedeclaring() ||
                          m_propSym->isPrivate())) {
     assert(m_symOwner);
-    ret = m_symOwner->checkProperty(m_propSym, type, coerce, ar);
+    TypePtr t(m_propSym->getType());
+    if (t && t->is(Type::KindOfVariant)) {
+      // only check property if we could possibly do some work
+      ret = t;
+    } else {
+      ASSERT(getScope()->is(BlockScope::FunctionScope));
+      GET_LOCK(m_symOwner);
+      ret = m_symOwner->checkProperty(getScope(), m_propSym, type, coerce, ar);
+    }
     assert(m_object->getType()->isSpecificObject());
     m_valid = true;
     return ret;

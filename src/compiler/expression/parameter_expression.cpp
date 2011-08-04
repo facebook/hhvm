@@ -157,11 +157,12 @@ TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar,
   if (ret->isPrimitive() &&
       m_defaultValue &&
       (p = dynamic_pointer_cast<ConstantExpression>(m_defaultValue)) &&
-      p->isNull())
+      p->isNull()) {
     // if we have a primitive type on the LHS w/ a default
     // of null, then don't bother to infer it's type, since we will
     // not specialize for this case
     ret = Type::Some;
+  }
 
   // we still want the above to run, so to record errors and infer defaults
   if (m_ref && forInference) {
@@ -179,7 +180,7 @@ TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   VariableTablePtr variables = getScope()->getVariables();
   // Functions that can be called dynamically have to have
   // variant parameters, even if they have a type hint
-  if (getFunctionScope()->isDynamic() ||
+  if ((Option::AllDynamic || getFunctionScope()->isDynamic()) ||
       getFunctionScope()->isRedeclaring() ||
       getFunctionScope()->isVirtual()) {
     if (!Option::HardTypeHints || !ret->isExactType()) {
@@ -190,6 +191,8 @@ TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 
   if (m_defaultValue && !m_ref) {
     ret = m_defaultValue->inferAndCheck(ar, ret, false);
+    // TODO: emit compiler error when default value does not
+    // match the type spec (if we have a type spec)
   }
 
   // parameters are like variables, but we need to remember these are

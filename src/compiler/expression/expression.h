@@ -415,6 +415,8 @@ protected:
   bool outputLineMap(CodeGenerator &cg, AnalysisResultPtr ar,
                      bool force = false);
 
+  void resetTypes();
+
  private:
   static ExprClass Classes[];
   void outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar);

@@ -230,22 +230,40 @@ TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     actualType = Type::Variant;
     m_valid = true;
   } else {
-    BlockScopePtr scope = ar->findConstantDeclarer(m_name);
-    if (!scope) {
-      scope = getFileScope();
-      getFileScope()->declareConstant(ar, m_name);
+    BlockScopePtr scope;
+    {
+      Lock lock(ar->getMutex());
+      scope = ar->findConstantDeclarer(m_name);
+      if (!scope) {
+        scope = getFileScope();
+        // guarded by ar lock
+        getFileScope()->declareConstant(ar, m_name);
+      }
     }
+    ASSERT(scope);
+    ASSERT(scope->is(BlockScope::ProgramScope) ||
+           scope->is(BlockScope::FileScope));
     ConstantTablePtr constants = scope->getConstants();
+
+    ConstructPtr value;
+    bool isDynamic;
+    {
+      Lock lock(scope->getMutex()); // since not class/function scope
+      // read value and dynamic-ness together + check() atomically
+      value = constants->getValue(m_name);
+      isDynamic = constants->isDynamic(m_name);
+      BlockScope *defScope = NULL;
+      std::vector<std::string> bases;
+      actualType = constants->check(getScope(), m_name, type, coerce,
+                                    ar, self, bases, defScope);
+    }
+
     if (!m_valid) {
-      if (ar->isSystemConstant(m_name) || constants->getValue(m_name)) {
+      if (ar->isSystemConstant(m_name) || value) {
         m_valid = true;
       }
     }
-    BlockScope *defScope = NULL;
-    std::vector<std::string> bases;
-    actualType = constants->check(m_name, type, coerce, ar, self, bases,
-                                  defScope);
-    if (!m_dynamic && constants->isDynamic(m_name)) {
+    if (!m_dynamic && isDynamic) {
       m_dynamic = true;
       actualType = Type::Variant;
     }

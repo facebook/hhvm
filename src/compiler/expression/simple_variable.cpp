@@ -212,6 +212,9 @@ static inline TypePtr GetAssertedInType(AnalysisResultPtr ar,
 
 TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                       bool coerce) {
+  IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
+
+  resetTypes();
   TypePtr ret;
   ConstructPtr construct = shared_from_this();
   BlockScopePtr scope = getScope();
@@ -255,8 +258,9 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     } else if (m_globals) {
       ret = Type::Array;
     } else if (scope->is(BlockScope::ClassScope)) {
+      ASSERT(getClassScope().get() == scope.get());
       // ClassVariable expression will come to this block of code
-      ret = getClassScope()->checkProperty(m_sym, type, true, ar);
+      ret = getClassScope()->checkProperty(getScope(), m_sym, type, true, ar);
     } else {
       TypePtr tmpType = type;
       if (m_context & RefValue) {

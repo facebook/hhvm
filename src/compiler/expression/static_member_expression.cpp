@@ -197,6 +197,7 @@ ExpressionPtr StaticMemberExpression::postOptimize(AnalysisResultConstPtr ar) {
  */
 TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
                                            TypePtr type, bool coerce) {
+  ASSERT(getScope()->is(BlockScope::FunctionScope));
   ConstructPtr self = shared_from_this();
 
   bool modified = m_context & (LValue | RefValue | UnsetContext | RefParameter);
@@ -209,9 +210,9 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
       if (m_exp->is(Expression::KindOfScalarExpression)) {
         ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
         const std::string &name = var->getString();
-        ar->forceClassVariants(name, getOriginalClass(), true);
+        ar->forceClassVariants(name, getOriginalClass(), true, true);
       } else {
-        ar->forceClassVariants(getOriginalClass(), true);
+        ar->forceClassVariants(getOriginalClass(), true, true);
       }
     }
     m_class->inferAndCheck(ar, Type::Any, false);
@@ -248,16 +249,26 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
                     ar->findRedeclaredClasses(m_className)) {
         sym = clsr->findProperty(clsr, name, ar);
         if (sym && sym->isStatic()) {
-          clsr->checkProperty(sym, type, coerce, ar);
+          {
+            GET_LOCK(clsr);
+            clsr->checkProperty(getScope(), sym, type, coerce, ar);
+          }
           found = true;
         }
       }
       tp = Type::Variant;
       sym = NULL;
     } else if (sym) {
-      tp = m_resolvedClass->checkProperty(sym, type, coerce, ar);
+      ASSERT(m_resolvedClass);
+      {
+        GET_LOCK(m_resolvedClass);
+        tp = m_resolvedClass->checkProperty(getScope(), sym, type, coerce, ar);
+      }
       found = true;
       if (modified) {
+        // concurrent modifications here are OK because:
+        // 1) you never clear the bit (you only set it to true)
+        // 2) the value isn't read in type inference
         sym->setIndirectAltered();
       }
     } else {
@@ -278,11 +289,13 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
                       ar->findRedeclaredClasses(m_className)) {
           int mask = clsr == getOriginalClass() ?
             VariableTable::AnyStaticVars : VariableTable::NonPrivateStaticVars;
+          GET_LOCK(clsr);
           clsr->getVariables()->forceVariants(ar, mask);
         }
       } else {
         int mask = m_resolvedClass == getOriginalClass() ?
           VariableTable::AnyStaticVars : VariableTable::NonPrivateStaticVars;
+        GET_LOCK(m_resolvedClass);
         m_resolvedClass->getVariables()->forceVariants(ar, mask);
       }
     }

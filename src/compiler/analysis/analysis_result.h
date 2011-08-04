@@ -24,8 +24,12 @@
 #include <compiler/analysis/symbol_table.h>
 #include <compiler/analysis/function_container.h>
 #include <compiler/package.h>
-#include <boost/graph/adjacency_list.hpp>
+
 #include <util/string_bag.h>
+#include <util/thread_local.h>
+
+#include <boost/graph/adjacency_list.hpp>
+#include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -164,9 +168,6 @@ public:
   void inferTypes();
   void postOptimize();
 
-  void containsDynamicFunctionCall() { m_dynamicFunction = true;}
-  void containsDynamicClass() { m_dynamicClass = true;}
-
   /**
    * Scalar array handling.
    */
@@ -193,13 +194,19 @@ public:
    * Force all class variables to be variants, since l-val or reference
    * of dynamic properties are used.
    */
-  void forceClassVariants(ClassScopePtr curScope, bool doStatic);
+  void forceClassVariants(
+      ClassScopePtr curScope,
+      bool doStatic,
+      bool acquireLocks = false);
 
   /**
    * Force specified variable of all classes to be variants.
    */
-  void forceClassVariants(const std::string &name, ClassScopePtr curScope,
-                          bool doStatic);
+  void forceClassVariants(
+      const std::string &name,
+      ClassScopePtr curScope,
+      bool doStatic,
+      bool acquireLocks = false);
 
   /**
    * Code generation functions.
@@ -381,8 +388,6 @@ private:
   StringToFileScopePtrMap m_constDecs;
   std::set<std::string> m_constRedeclared;
 
-  bool m_dynamicClass;
-  bool m_dynamicFunction;
   bool m_classForcedVariants[2];
 
   StatementPtrVec m_stmts;
@@ -456,6 +461,7 @@ private:
   typedef boost::adjacency_list<boost::setS, boost::vecS> Graph;
   typedef boost::graph_traits<Graph>::vertex_descriptor vertex_descriptor;
   typedef boost::graph_traits<Graph>::adjacency_iterator adjacency_iterator;
+  Mutex m_depGraphMutex;
   Graph m_depGraph;
   typedef std::map<vertex_descriptor, FileScopePtr> VertexToFileScopePtrMap;
   VertexToFileScopePtrMap m_fileVertMap;
@@ -598,7 +604,235 @@ private:
          std::vector<std::pair<int, int> > &litVarStrs);
 
   void outputInitLiteralVarStrings();
+
+public:
+  static DECLARE_THREAD_LOCAL(BlockScopeRawPtr, s_currentScopeThreadLocal);
+  static DECLARE_THREAD_LOCAL(BlockScopeRawPtrFlagsHashMap,
+                              s_changedScopesMapThreadLocal);
+
+#ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
+  static int                                  s_NumDoJobCalls;
+  static ConcurrentBlockScopeRawPtrIntHashMap s_DoJobUniqueScopes;
+  static int                                  s_NumForceRerunGlobal;
+  static int                                  s_NumReactivateGlobal;
+  static int                                  s_NumForceRerunUseKinds;
+  static int                                  s_NumReactivateUseKinds;
+#endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
+
+private:
+  template <typename Visitor>
+  void processScopesParallel(const char *id, void *opaque = NULL);
+
+  template <typename Visitor>
+  void preWaitCallback(bool first,
+                       const BlockScopeRawPtrQueue &scopes,
+                       void *opaque);
+
+  template <typename Visitor>
+  bool postWaitCallback(bool first,
+                        bool again,
+                        const BlockScopeRawPtrQueue &scopes,
+                        void *opaque);
 };
+
+///////////////////////////////////////////////////////////////////////////////
+// Type Inference
+
+class RescheduleException : public Exception {
+public:
+  RescheduleException(BlockScopeRawPtr scope) :
+    Exception(false), m_scope(scope) {}
+  BlockScopeRawPtr &getScope() { return m_scope; }
+#ifdef HPHP_INSTRUMENT_TYPE_INF
+  static int s_NumReschedules;
+  static int s_NumForceRerunSelfCaller;
+  static int s_NumRetTypesChanged;
+#endif /* HPHP_INSTRUMENT_TYPE_INF */
+private:
+  BlockScopeRawPtr m_scope;
+};
+
+class SetCurrentScope {
+public:
+  SetCurrentScope(BlockScopeRawPtr scope) {
+    ASSERT(!((*AnalysisResult::s_currentScopeThreadLocal).get()));
+    *AnalysisResult::s_currentScopeThreadLocal = scope;
+    scope->setInVisitScopes(true);
+  }
+  ~SetCurrentScope() {
+    (*AnalysisResult::s_currentScopeThreadLocal)->setInVisitScopes(false);
+    AnalysisResult::s_currentScopeThreadLocal.destroy();
+  }
+};
+
+#define IMPLEMENT_INFER_AND_CHECK_ASSERT(scope) \
+  do { \
+    ASSERT(AnalysisResult::s_currentScopeThreadLocal->get()); \
+    ASSERT(AnalysisResult::s_currentScopeThreadLocal->get() == \
+           (scope).get()); \
+    (scope)->getInferTypesMutex().assertOwnedBySelf(); \
+  } while (0)
+
+#ifdef HPHP_INSTRUMENT_TYPE_INF
+typedef std::pair < const char *, int > LEntry;
+
+struct LEntryHasher {
+  bool equal(const LEntry &l1, const LEntry &l2) const {
+    ASSERT(l1.first);
+    ASSERT(l2.first);
+    return l1.second == l2.second &&
+           strcmp(l1.first, l2.first) == 0;
+  }
+  size_t hash(const LEntry &l) const {
+    ASSERT(l.first);
+    return hash_string(l.first) ^ l.second;
+  }
+};
+
+typedef tbb::concurrent_hash_map < LEntry, int, LEntryHasher >
+        LProfileMap;
+#endif /* HPHP_INSTRUMENT_TYPE_INF */
+
+class BaseTryLock {
+  friend class TryLock;
+  friend class ConditionalTryLock;
+public:
+#ifdef HPHP_INSTRUMENT_TYPE_INF
+  static LProfileMap s_LockProfileMap;
+#endif /* HPHP_INSTRUMENT_TYPE_INF */
+private:
+  inline bool acquireImpl(BlockScopeRawPtr scopeToLock) {
+    // A class scope can NEVER grab a lock on a function scope
+    BlockScopeRawPtr current =
+      *(AnalysisResult::s_currentScopeThreadLocal.get());
+    ASSERT(current);
+    ASSERT(!current->is(BlockScope::ClassScope) ||
+           !scopeToLock->is(BlockScope::FunctionScope));
+    return m_mutex.tryLock();
+  }
+#ifdef HPHP_INSTRUMENT_TYPE_INF
+  BaseTryLock(BlockScopeRawPtr scopeToLock,
+              const char * fromFunction,
+              int fromLine,
+              bool lockCondition = true,
+              bool profile = true)
+    : m_profiler(profile),
+      m_mutex(scopeToLock->getInferTypesMutex()),
+      m_acquired(false) {
+    if (LIKELY(lockCondition)) {
+      bool success = acquireImpl(scopeToLock);
+      if (UNLIKELY(!success)) {
+        // put entry in profiler
+        LProfileMap::accessor acc;
+        LEntry key(fromFunction, fromLine);
+        if (!s_LockProfileMap.insert(acc, key)) {
+          // pre-existing
+          acc->second++;
+        } else {
+          acc->second = 1;
+        }
+        // could not acquire lock, throw reschedule exception
+        throw RescheduleException(scopeToLock);
+      }
+      ASSERT(success);
+      m_acquired = true;
+      m_mutex.assertOwnedBySelf();
+    }
+  }
+#else
+  BaseTryLock(BlockScopeRawPtr scopeToLock,
+              bool lockCondition = true,
+              bool profile = true)
+    : m_profiler(profile),
+      m_mutex(scopeToLock->getInferTypesMutex()),
+      m_acquired(false) {
+    if (LIKELY(lockCondition)) {
+      bool success = acquireImpl(scopeToLock);
+      if (UNLIKELY(!success)) {
+        // could not acquire lock, throw reschedule exception
+        throw RescheduleException(scopeToLock);
+      }
+      ASSERT(success);
+      m_acquired = true;
+      m_mutex.assertOwnedBySelf();
+    }
+  }
+#endif /* HPHP_INSTRUMENT_TYPE_INF */
+
+  ~BaseTryLock() {
+    if (m_acquired) m_mutex.unlock();
+  }
+
+  LockProfiler     m_profiler;
+  InferTypesMutex& m_mutex;
+  bool             m_acquired;
+};
+
+class TryLock : public BaseTryLock {
+public:
+#ifdef HPHP_INSTRUMENT_TYPE_INF
+  TryLock(BlockScopeRawPtr scopeToLock,
+          const char * fromFunction,
+          int fromLine,
+          bool profile = true) :
+    BaseTryLock(scopeToLock, fromFunction, fromLine, true, profile) {}
+#else
+  TryLock(BlockScopeRawPtr scopeToLock,
+          bool profile = true) :
+    BaseTryLock(scopeToLock, true, profile) {}
+#endif /* HPHP_INSTRUMENT_TYPE_INF */
+};
+
+class ConditionalTryLock : public BaseTryLock {
+public:
+#ifdef HPHP_INSTRUMENT_TYPE_INF
+  ConditionalTryLock(BlockScopeRawPtr scopeToLock,
+                     const char * fromFunction,
+                     int fromLine,
+                     bool condition,
+                     bool profile = true) :
+    BaseTryLock(scopeToLock, fromFunction, fromLine, condition, profile) {}
+#else
+  ConditionalTryLock(BlockScopeRawPtr scopeToLock,
+                     bool condition,
+                     bool profile = true) :
+    BaseTryLock(scopeToLock, condition, profile) {}
+#endif /* HPHP_INSTRUMENT_TYPE_INF */
+};
+
+#define GET_LOCK(scopeToLock) \
+  SimpleLock _lock((scopeToLock)->getInferTypesMutex())
+
+#define COND_GET_LOCK(scopeToLock, condition) \
+  SimpleConditionalLock _clock((scopeToLock)->getInferTypesMutex(), \
+                               (condition))
+
+#define GET_LOCK_THIS() \
+  SimpleLock _lock(this->getInferTypesMutex())
+
+#define COND_GET_LOCK_THIS(condition) \
+  SimpleConditionalLock _clock(this->getInferTypesMutex(), (condition))
+
+#ifdef HPHP_INSTRUMENT_TYPE_INF
+  #define TRY_LOCK(scopeToLock) \
+    TryLock _tl((scopeToLock), __PRETTY_FUNCTION__, __LINE__)
+
+  #define COND_TRY_LOCK(scopeToLock, condition) \
+    ConditionalTryLock _ctl((scopeToLock), __PRETTY_FUNCTION__, \
+                            __LINE__, condition)
+#else
+  #define TRY_LOCK(scopeToLock) \
+    TryLock _tl((scopeToLock))
+
+  #define COND_TRY_LOCK(scopeToLock, condition) \
+    ConditionalTryLock _ctl((scopeToLock), (condition))
+#endif /* HPHP_INSTRUMENT_TYPE_INF */
+
+#define TRY_LOCK_THIS() \
+  TRY_LOCK(BlockScopeRawPtr(this))
+
+#define COND_TRY_LOCK_THIS(condition) \
+  COND_TRY_LOCK(BlockScopeRawPtr(this), condition)
 
 ///////////////////////////////////////////////////////////////////////////////
 }

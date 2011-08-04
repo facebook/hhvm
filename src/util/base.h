@@ -137,11 +137,24 @@ struct string_hash {
   size_t operator()(const std::string &s) const {
     return __gnu_cxx::__stl_hash_string(s.c_str());
   }
+  size_t hash(const std::string &s) const {
+    return operator()(s);
+  }
+  bool equal(const std::string &lhs,
+             const std::string &rhs) const {
+    return lhs == rhs;
+  }
 };
 
 struct int64_hash {
   size_t operator() (const int64 v) const {
     return (size_t)hash_int64(v);
+  }
+  size_t hash(const int64 v) const {
+    return operator()(v);
+  }
+  bool equal(const int64 lhs, const int64 rhs) const {
+    return lhs == rhs;
   }
 };
 
@@ -150,12 +163,25 @@ struct pointer_hash {
   size_t operator() (const T *const &p) const {
     return (size_t)hash_int64(intptr_t(p));
   }
+  size_t hash(const T *const &p) const {
+    return operator()(p);
+  }
+  bool equal(const T *const &lhs,
+             const T *const &rhs) const {
+    return lhs == rhs;
+  }
 };
 
 template<typename T>
 struct smart_pointer_hash {
   size_t operator() (const T &p) const {
     return (size_t)hash_int64(intptr_t(p.get()));
+  }
+  size_t hash (const T &p) const {
+    return operator()(p);
+  }
+  bool equal(const T &lhs, const T &rhs) const {
+    return lhs.get() == rhs.get();
   }
 };
 

@@ -38,8 +38,11 @@ BlockScope::BlockScope(const std::string &name, const std::string &docComment,
                        StatementPtr stmt, KindOf kind)
   : m_attributeClassInfo(0), m_docComment(docComment), m_stmt(stmt),
     m_kind(kind), m_loopNestedLevel(0),
-    m_pass(0), m_updated(0), m_mark(MarkWaitingInQueue), m_changedScopes(0),
-    m_effectsTag(1), m_forceRerun(false) {
+    m_pass(0), m_updated(0), m_runId(0), m_mark(MarkWaitingInQueue),
+    m_effectsTag(1), m_numDepsToWaitFor(0),
+    m_forceRerun(false), m_inTypeInference(false),
+    m_inVisitScopes(false), m_needsReschedule(false),
+    m_rescheduleFlags(0), m_selfUser(0) {
   m_originalName = name;
   m_name = Util::toLower(name);
   m_variables = VariableTablePtr(new VariableTable(*this));
@@ -120,12 +123,33 @@ ClassScopePtr BlockScope::findExactClass(const std::string &className) {
   return ClassScopePtr();
 }
 
+bool BlockScope::hasUser(BlockScopeRawPtr user, int useKinds) const {
+  if (is(ClassScope) ?
+        static_cast<const HPHP::ClassScope*>(this)->isUserClass() :
+        is(FunctionScope) &&
+        static_cast<const HPHP::FunctionScope*>(this)->isUserFunction()) {
+
+    if (user.get() == this) {
+      return m_selfUser & useKinds;
+    }
+
+    Lock lock(s_depsMutex);
+    BlockScopeRawPtrFlagsHashMap::const_iterator it =
+      m_userMap.find(user);
+    return it != m_userMap.end() && it->second & useKinds;
+  }
+  return true; // builtins/systems always have a user of anybody
+}
+
 void BlockScope::addUse(BlockScopeRawPtr user, int useKinds) {
   if (is(ClassScope) ? static_cast<HPHP::ClassScope*>(this)->isUserClass() :
       is(FunctionScope) &&
       static_cast<HPHP::FunctionScope*>(this)->isUserFunction()) {
 
-    if (user.get() == this) return;
+    if (user.get() == this) {
+      m_selfUser |= useKinds;
+      return;
+    }
 
     Lock lock(s_depsMutex);
     Lock l2(s_jobStateMutex);
@@ -134,7 +158,8 @@ void BlockScope::addUse(BlockScopeRawPtr user, int useKinds) {
                                                                 useKinds));
     if (val.second) {
       m_orderedUsers.push_back(&*val.first);
-      user->m_orderedDeps.push_back(BlockScopeRawPtr(this));
+      user->m_orderedDeps.push_back(
+          std::make_pair(BlockScopeRawPtr(this), &(val.first->second)));
       ASSERT(user->getMark() != BlockScope::MarkReady &&
              user->getMark() != BlockScope::MarkWaiting);
     } else {
@@ -144,21 +169,44 @@ void BlockScope::addUse(BlockScopeRawPtr user, int useKinds) {
 }
 
 void BlockScope::addUpdates(int f) {
-  if (!m_updated && m_changedScopes && getMark() != MarkProcessing) {
-    m_changedScopes->push_back(BlockScopeRawPtr(this));
+  ASSERT(f > 0);
+  if (inTypeInference()) {
+    // we *must* have the mutex
+    getInferTypesMutex().assertOwnedBySelf();
+
+    m_updated |= f;
+
+    // If this scope is currently being processed by this thread, don't bother
+    // adding it to the updated map. otherwise, add it
+    if (AnalysisResult::s_currentScopeThreadLocal->get() != this) {
+      BlockScopeRawPtr self(this);
+      std::pair< BlockScopeRawPtrFlagsHashMap::iterator, bool > val =
+        AnalysisResult::s_changedScopesMapThreadLocal->insert(
+          BlockScopeRawPtrFlagsHashMap::value_type(self, f));
+      if (!val.second) {
+        // not new, or the updated bits together
+        val.first->second |= f;
+      }
+    }
+  } else {
+    m_updated |= f;
   }
-  m_updated |= f;
 }
 
-void BlockScope::changed(BlockScopeRawPtrQueue &todo, int useKinds) {
-  for (BlockScopeRawPtrFlagsVec::iterator it = m_orderedUsers.begin(),
-         end = m_orderedUsers.end(); it != end; ++it) {
-    BlockScopeRawPtrFlagsVec::value_type pf = *it;
-    if (pf->second & useKinds && pf->first->getMark() >= MarkProcessedInQueue) {
-      if (pf->first->getMark() == MarkProcessed) {
-        todo.push_back(pf->first);
+void BlockScope::announceUpdates(int f) {
+  ASSERT(f > 0);
+  if (inTypeInference()) {
+    // If this scope is currently being processed by this thread, don't bother
+    // adding it to the updated map. otherwise, add it
+    if (AnalysisResult::s_currentScopeThreadLocal->get() != this) {
+      BlockScopeRawPtr self(this);
+      std::pair< BlockScopeRawPtrFlagsHashMap::iterator, bool > val =
+        AnalysisResult::s_changedScopesMapThreadLocal->insert(
+          BlockScopeRawPtrFlagsHashMap::value_type(self, f));
+      if (!val.second) {
+        // not new, or the updated bits together
+        val.first->second |= f;
       }
-      pf->first->setMark(MarkWaitingInQueue);
     }
   }
 }

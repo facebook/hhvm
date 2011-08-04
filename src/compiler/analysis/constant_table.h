@@ -70,7 +70,8 @@ public:
   /**
    * Called when a constant is used or being evaluated (r-value).
    */
-  TypePtr check(const std::string &name, TypePtr type, bool coerce,
+  TypePtr check(BlockScopeRawPtr context,
+                const std::string &name, TypePtr type, bool coerce,
                 AnalysisResultConstPtr ar, ConstructPtr construct,
                 const std::vector<std::string> &bases,
                 BlockScope *&defScope);
@@ -126,7 +127,8 @@ private:
   void outputCPPConstantSymbol(CodeGenerator &cg, AnalysisResultPtr ar,
                                Symbol *sym);
 
-  TypePtr checkBases(const std::string &name, TypePtr type,
+  TypePtr checkBases(BlockScopeRawPtr context,
+                     const std::string &name, TypePtr type,
                      bool coerce, AnalysisResultConstPtr ar,
                      ConstructPtr construct,
                      const std::vector<std::string> &bases,

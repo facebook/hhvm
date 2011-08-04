@@ -57,11 +57,29 @@ TypePtr Symbol::CoerceTo(AnalysisResultConstPtr ar,
 TypePtr Symbol::setType(AnalysisResultConstPtr ar, BlockScopeRawPtr scope,
                         TypePtr type, bool coerced) {
   if (!type) return type;
+  if (ar->getPhase() == AnalysisResult::FirstInference) {
+    // at this point, you *must* have a lock (if you are user scope)
+    if (scope->is(BlockScope::FunctionScope)) {
+      FunctionScopeRawPtr f =
+        boost::static_pointer_cast<FunctionScope>(scope);
+      if (f->isUserFunction()) {
+        f->getInferTypesMutex().assertOwnedBySelf();
+      }
+    } else if (scope->is(BlockScope::ClassScope)) {
+      ClassScopeRawPtr c =
+        boost::static_pointer_cast<ClassScope>(scope);
+      if (c->isUserClass()) {
+        c->getInferTypesMutex().assertOwnedBySelf();
+      }
+    }
+  }
   TypePtr oldType = m_coerced;
   if (!oldType) oldType = Type::Some;
   if (!coerced) return oldType;
 
   type = CoerceTo(ar, m_coerced, type);
+  ASSERT(!isRefClosureVar() || (type && type->is(Type::KindOfVariant)));
+
   if (ar->getPhase() >= AnalysisResult::AnalyzeAll &&
       !Type::SameType(oldType, type)) {
     triggerUpdates(scope);
@@ -97,9 +115,37 @@ void Symbol::beginLocal(BlockScopeRawPtr scope) {
   }
 }
 
+void Symbol::resetLocal(BlockScopeRawPtr scope) {
+  if (!m_prevCoerced) return;
+  if (!m_coerced) {
+    // We either A) have not processed this symbol yet or B) we did not process
+    // it in lvalue context. Either way, restore the previous type information,
+    // since we can get away with it (we haven't broadcast any updates about
+    // this symbol's type)
+    m_coerced = m_prevCoerced;
+    m_prevCoerced.reset();
+    return;
+  }
+  // At this point, we've processed some type information about this symbol.
+  // Since we might have broadcast an update about this symbol (it could have
+  // been a parameter, constant, or global variable), we need to keep this type
+  // information around (even though it is potentially partially incomplete).
+  // Note that this is always the conservative thing to do (since we know this
+  // scope is going to be run again).
+  if (m_coerced->is(Type::KindOfSome) ||
+      m_coerced->is(Type::KindOfAny)) {
+    m_coerced = Type::Variant;
+  }
+  if (!Type::SameType(m_coerced, m_prevCoerced)) {
+    triggerUpdates(scope);
+  }
+  m_prevCoerced.reset();
+}
+
 void Symbol::endLocal(BlockScopeRawPtr scope) {
   if (!m_prevCoerced) return;
-  if (!m_coerced || m_coerced->is(Type::KindOfSome) ||
+  if (!m_coerced ||
+      m_coerced->is(Type::KindOfSome) ||
       m_coerced->is(Type::KindOfAny)) {
     m_coerced = Type::Variant;
   }
@@ -110,16 +156,53 @@ void Symbol::endLocal(BlockScopeRawPtr scope) {
 }
 
 void Symbol::triggerUpdates(BlockScopeRawPtr scope) const {
-  int useKind = BlockScope::UseKindNonStaticRef;
+  int useKind = BlockScope::GetNonStaticRefUseKind(getHash());
   if (isConstant()) {
     useKind = BlockScope::UseKindConstRef;
     if (m_declaration) {
-      scope = m_declaration->getScope();
+      BlockScopeRawPtr declScope(m_declaration->getScope());
+
+      /**
+       * Constants can only belong to a file or class scope
+       */
+      ASSERT(scope->is(BlockScope::FileScope) ||
+             scope->is(BlockScope::ClassScope));
+
+      /**
+       * Constants can only be declared in a function or
+       * class scope
+       */
+      ASSERT(declScope->is(BlockScope::FunctionScope) ||
+             declScope->is(BlockScope::ClassScope));
+
+      /**
+       * For class scopes, the declaration scope *must*
+       * match the scope the symbol lives in
+       */
+      ASSERT(!scope->is(BlockScope::ClassScope) ||
+             scope == declScope);
+
+      /**
+       * For file scopes, the declaration scope *must*
+       * live in a function scope
+       */
+      ASSERT(!scope->is(BlockScope::FileScope) ||
+             declScope->is(BlockScope::FunctionScope));
+
+      /**
+       * This is really only for file scopes (constants created with
+       * define('FOO', ...)). const FOO = 1 outside of a class is re-written
+       * into a define('FOO', 1) by earlier phases of the compiler
+       */
+      if (scope->is(BlockScope::FileScope)) {
+        declScope->announceUpdates(BlockScope::UseKindConstRef);
+        return;
+      }
     }
   } else if (isStatic()) {
     useKind = BlockScope::UseKindStaticRef;
   } else if (isParameter()) {
-    useKind = BlockScope::UseKindCaller;
+    useKind = BlockScope::UseKindCallerParam;
   }
   if (isPassClosureVar()) {
     useKind |= BlockScope::UseKindClosure;
@@ -196,16 +279,26 @@ void SymbolTable::import(SymbolTablePtr src) {
 }
 
 void SymbolTable::beginLocal() {
+  BlockScopeRawPtr p(&m_blockScope);
   for (unsigned int i = 0, s = m_symbolVec.size(); i < s; i++) {
     Symbol *sym = m_symbolVec[i];
-    sym->beginLocal(BlockScopeRawPtr(&m_blockScope));
+    sym->beginLocal(p);
   }
 }
 
 void SymbolTable::endLocal() {
+  BlockScopeRawPtr p(&m_blockScope);
   for (unsigned int i = 0, s = m_symbolVec.size(); i < s; i++) {
     Symbol *sym = m_symbolVec[i];
-    sym->endLocal(BlockScopeRawPtr(&m_blockScope));
+    sym->endLocal(p);
+  }
+}
+
+void SymbolTable::resetLocal() {
+  BlockScopeRawPtr p(&m_blockScope);
+  for (unsigned int i = 0, s = m_symbolVec.size(); i < s; i++) {
+    Symbol *sym = m_symbolVec[i];
+    sym->resetLocal(p);
   }
 }
 

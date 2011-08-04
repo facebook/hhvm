@@ -169,6 +169,9 @@ StatementPtr ClassVariable::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 void ClassVariable::inferTypes(AnalysisResultPtr ar) {
+  ASSERT(getScope().get() == getClassScope().get());
+  IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
+
   m_declaration->inferAndCheck(ar, Type::Variant, false);
 
   if (m_modifiers->isStatic()) {

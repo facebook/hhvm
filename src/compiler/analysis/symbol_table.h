@@ -47,14 +47,20 @@ typedef std::vector<Symbol*>     SymbolVec;
 
 class Symbol {
 public:
-  Symbol() : m_parameter(-1) { m_flags_val = 0; }
+  Symbol() : m_hash(0), m_parameter(-1) { m_flags_val = 0; }
 
   void import(BlockScopeRawPtr scope, const Symbol &src_sym);
-  void beginLocal(BlockScopeRawPtr scope);
-  void endLocal(BlockScopeRawPtr scope);
 
-  void setName(const std::string &name) { m_name = name; }
+  void beginLocal(BlockScopeRawPtr scope);
+  void endLocal  (BlockScopeRawPtr scope);
+  void resetLocal(BlockScopeRawPtr scope);
+
+  void setName(const std::string &name) {
+    m_name = name;
+    m_hash = (unsigned int) hash_string_inline(m_name.c_str(), m_name.size());
+  }
   const std::string &getName() const { return m_name; }
+  unsigned int getHash() const { return m_hash; }
 
   TypePtr getType() const { return m_coerced; }
   TypePtr getFinalType() const;
@@ -170,7 +176,8 @@ public:
     m_initVal = initVal;
   }
 private:
-  std::string m_name;
+  std::string  m_name;
+  unsigned int m_hash;
   union {
     unsigned m_flags_val;
     struct {
@@ -249,6 +256,7 @@ public:
 
   void beginLocal();
   void endLocal();
+  void resetLocal();
 
   /**
    * Import system symbols into this.

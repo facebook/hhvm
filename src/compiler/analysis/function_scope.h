@@ -224,7 +224,9 @@ public:
   TypePtr getReturnType() const {
     return m_prevReturn ? m_prevReturn : m_returnType;
   }
-  void popReturnType();
+  bool popReturnType();
+  void resetReturnType();
+
   void addRetExprToFix(ExpressionPtr e);
   void clearRetExprs();
   void fixRetExprs();
@@ -289,6 +291,7 @@ public:
    */
   int inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
                       ExpressionListPtr params, bool &valid);
+
   TypePtr setParamType(AnalysisResultConstPtr ar, int index, TypePtr type);
   TypePtr getParamType(int index);
   TypePtr getParamTypeSpec(int index) { return m_paramTypeSpecs[index]; }
@@ -415,7 +418,9 @@ public:
 
   bool needsAnonClosureClass(ParameterExpressionPtrIdxPairVec &useVars);
 
-  void addCaller(BlockScopePtr caller);
+  void addCaller(BlockScopePtr caller, bool careAboutReturn = true);
+  void addNewObjCaller(BlockScopePtr caller);
+
   ReadWriteMutex &getInlineMutex() { return m_inlineMutex; }
 
   DECLARE_BOOST_TYPES(FunctionInfo);
@@ -474,6 +479,7 @@ private:
   TypePtr m_returnType;
   TypePtr m_prevReturn;
   ModifierExpressionPtr m_modifiers;
+
   unsigned m_hasVoid : 1;
   unsigned m_method : 1;
   unsigned m_refReturn : 1; // whether it's "function &get_reference()"

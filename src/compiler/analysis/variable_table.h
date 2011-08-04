@@ -99,6 +99,10 @@ public:
     return (statics ? 2 : 1) << (privates ? 2 : 0);
   }
 
+  static int GetVarClassMaskForSym(const Symbol *sym) {
+    return GetVarClassMask(sym->isPrivate(), sym->isStatic());
+  }
+
 public:
   VariableTable(BlockScope &blockScope);
 
@@ -194,15 +198,34 @@ public:
    * Find the class which contains the property, and return
    * its Symbol
    */
-  Symbol *findProperty(ClassScopePtr &cls, const std::string &name,
+  Symbol *findProperty(ClassScopePtr &cls,
+                       const std::string &name,
                        AnalysisResultConstPtr ar);
-  TypePtr checkProperty(Symbol *sym, TypePtr type,
+
+  /**
+   * Caller is responsible for grabbing a lock on this class scope,
+   * This function will be responsible for grabbing (and releasing)
+   * a lock on the parent scope if necessary.
+   */
+  TypePtr checkProperty(BlockScopeRawPtr context,
+                        Symbol *sym, TypePtr type,
                         bool coerce, AnalysisResultConstPtr ar);
+
   /**
    * Walk up to find first parent that has the specified symbol.
    */
   ClassScopePtr findParent(AnalysisResultConstPtr ar,
-                           const std::string &name) const;
+                           const std::string &name,
+                           const Symbol *&sym) const;
+
+  ClassScopePtr findParent(AnalysisResultConstPtr ar,
+                           const std::string &name,
+                           Symbol *&sym) {
+    const Symbol *ss;
+    ClassScopePtr p = findParent(ar, name, ss); // const version
+    sym = const_cast<Symbol*>(ss);
+    return p;
+  }
 
   /**
    * Called when analyze global and static statement.
@@ -361,8 +384,6 @@ private:
   virtual TypePtr setType(AnalysisResultConstPtr ar, Symbol *sym,
                           TypePtr type, bool coerce);
   virtual void dumpStats(std::map<std::string, int> &typeCounts);
-
-  bool definedByParent(AnalysisResultConstPtr ar, const std::string &name);
 
   void outputCPPGlobalVariablesHeader(CodeGenerator &cg,
                                       AnalysisResultPtr ar);

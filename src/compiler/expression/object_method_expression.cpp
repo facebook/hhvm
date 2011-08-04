@@ -158,6 +158,9 @@ ExpressionPtr ObjectMethodExpression::preOptimize(AnalysisResultConstPtr ar) {
 
 TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
                                               TypePtr type, bool coerce) {
+  ASSERT(type);
+  IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
+  resetTypes();
   reset();
 
   ConstructPtr self = shared_from_this();
@@ -203,7 +206,9 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
           !cls->getAttribute(ClassScope::HasUnknownMethodHandler) &&
           !cls->getAttribute(ClassScope::InheritsUnknownMethodHandler)) {
         if (ar->classMemberExists(m_name, AnalysisResult::MethodName)) {
-          setDynamicByIdentifier(ar, m_name);
+          if (!Option::AllDynamic) {
+            setDynamicByIdentifier(ar, m_name);
+          }
         } else {
           Compiler::Error(Compiler::UnknownObjectMethod, self);
         }
@@ -214,7 +219,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
       return checkTypesImpl(ar, type, Type::Variant, coerce);
     }
     m_funcScope = func;
-    func->addCaller(getScope());
+    func->addCaller(getScope(), !type->is(Type::KindOfAny));
   }
 
   bool valid = true;
@@ -244,10 +249,14 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
     setInvokeParams(ar);
     checkTypesImpl(ar, type, Type::Variant, coerce);
     m_valid = false; // so we use invoke() syntax
-    func->setDynamic();
+    if (!Option::AllDynamic) {
+      func->setDynamic();
+    }
+    ASSERT(m_actualType);
     return m_actualType;
   }
 
+  ASSERT(func);
   return checkParamsAndReturn(ar, type, coerce, func, false);
 }
 

@@ -318,6 +318,7 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
         setAttribute(VariableTable::NeedGlobalPointer);
       VariableTablePtr vars = ar->getVariables();
 
+      Lock l(ar->getMutex());
       if (m_offset && m_offset->is(Expression::KindOfScalarExpression)) {
         ScalarExpressionPtr offset =
           dynamic_pointer_cast<ScalarExpression>(m_offset);
@@ -345,9 +346,8 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
       }
 
       if (hasContext(LValue) || hasContext(RefValue)) {
-        ar->getVariables()->forceVariants(ar, VariableTable::AnyVars);
-        ar->getVariables()->
-          setAttribute(VariableTable::ContainsLDynamicVariable);
+        vars->forceVariants(ar, VariableTable::AnyVars);
+        vars->setAttribute(VariableTable::ContainsLDynamicVariable);
       }
       if (m_offset) {
         m_offset->inferAndCheck(ar, Type::Primitive, false);

@@ -240,7 +240,11 @@ TypePtr ScalarExpression::inferenceImpl(AnalysisResultConstPtr ar,
 
 TypePtr ScalarExpression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                         bool coerce) {
-  if (ar->getPhase() == AnalysisResult::FirstInference &&
+  IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
+  resetTypes();
+
+  if (!Option::AllDynamic &&
+      ar->getPhase() == AnalysisResult::FirstInference &&
       getScope()->isFirstPass() &&
       isLiteralString() && m_value.find(' ') == string::npos) {
     setDynamicByIdentifier(ar, m_value);

@@ -48,6 +48,43 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+template <typename MutexT>
+class BaseConditionalLock {
+public:
+  BaseConditionalLock(MutexT &mutex, bool condition, bool profile = true)
+    : m_profiler(profile), m_mutex(mutex), m_acquired(false) {
+    if (condition) {
+      m_mutex.lock(); // must not throw
+      m_acquired = true;
+    }
+  }
+  ~BaseConditionalLock() {
+    if (m_acquired) {
+      m_mutex.unlock(); // must not throw
+    }
+  }
+private:
+  LockProfiler m_profiler;
+  MutexT&      m_mutex;
+  bool         m_acquired;
+};
+
+class ConditionalLock : public BaseConditionalLock<Mutex> {
+public:
+  ConditionalLock(Mutex &mutex,
+                  bool condition, bool profile = true)
+    : BaseConditionalLock<Mutex>(mutex, condition, profile)
+  {}
+  ConditionalLock(Synchronizable *obj,
+                  bool condition, bool profile = true)
+    : BaseConditionalLock<Mutex>(obj->getMutex(), condition, profile)
+  {}
+  ConditionalLock(SynchronizableMulti *obj,
+                  bool condition, bool profile = true)
+    : BaseConditionalLock<Mutex>(obj->getMutex(), condition, profile)
+  {}
+};
+
 /**
  * Just a helper class that automatically unlocks a mutex when it goes out of
  * scope.
@@ -57,27 +94,32 @@ private:
  *   // inside lock
  * } // unlock here
  */
-class Lock {
+class Lock : public ConditionalLock {
 public:
   Lock(Mutex &mutex, bool profile = true)
-    : m_profiler(profile), m_mutex(mutex) {
-    m_mutex.lock();
-  }
+    : ConditionalLock(mutex, true, profile) {}
   Lock(Synchronizable *obj, bool profile = true)
-    : m_profiler(profile), m_mutex(obj->getMutex()) {
-    m_mutex.lock();
-  }
+    : ConditionalLock(obj, true, profile) {}
   Lock(SynchronizableMulti *obj, bool profile = true)
-    : m_profiler(profile), m_mutex(obj->getMutex()) {
-    m_mutex.lock();
-  }
-  ~Lock() {
-    m_mutex.unlock();
-  }
+    : ConditionalLock(obj, true, profile) {}
+};
 
-private:
-  LockProfiler m_profiler;
-  Mutex &m_mutex;
+class SimpleConditionalLock : public BaseConditionalLock<SimpleMutex> {
+public:
+  SimpleConditionalLock(SimpleMutex &mutex,
+                        bool condition, bool profile = true)
+    : BaseConditionalLock<SimpleMutex>(mutex, condition, profile)
+  {
+    if (condition) {
+      mutex.assertOwnedBySelf();
+    }
+  }
+};
+
+class SimpleLock : public SimpleConditionalLock {
+public:
+  SimpleLock(SimpleMutex &mutex, bool profile = true)
+    : SimpleConditionalLock(mutex, true, profile) {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

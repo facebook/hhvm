@@ -129,6 +129,8 @@ StatementPtr StaticStatement::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 void StaticStatement::inferTypes(AnalysisResultPtr ar) {
+  IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
+
   BlockScopePtr scope = getScope();
   if (scope->inPseudoMain()) { // static just means to unset at global level
     for (int i = 0; i < m_exp->getCount(); i++) {
@@ -137,15 +139,12 @@ void StaticStatement::inferTypes(AnalysisResultPtr ar) {
         AssignmentExpressionPtr assignment_exp =
           dynamic_pointer_cast<AssignmentExpression>(exp);
         ExpressionPtr variable = assignment_exp->getVariable();
-        if (variable->is(Expression::KindOfSimpleVariable)) {
-          SimpleVariablePtr var =
-            dynamic_pointer_cast<SimpleVariable>(variable);
-          assert(var->hasContext(Expression::Declaration));
-          scope->getVariables()->forceVariant(ar, var->getName(),
-                                              VariableTable::AnyStaticVars);
-        } else {
-          ASSERT(false);
-        }
+        ASSERT(variable->is(Expression::KindOfSimpleVariable));
+        SimpleVariablePtr var =
+          dynamic_pointer_cast<SimpleVariable>(variable);
+        ASSERT(var->hasContext(Expression::Declaration));
+        scope->getVariables()->forceVariant(ar, var->getName(),
+                                            VariableTable::AnyStaticVars);
       } else {
         // Expression was optimized away; remove it
         m_exp->removeElement(i--);
@@ -162,30 +161,27 @@ void StaticStatement::inferTypes(AnalysisResultPtr ar) {
       AssignmentExpressionPtr assignment_exp =
         dynamic_pointer_cast<AssignmentExpression>(exp);
       ExpressionPtr variable = assignment_exp->getVariable();
-      if (variable->is(Expression::KindOfSimpleVariable)) {
-        SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
-        assert(var->hasContext(Expression::Declaration));
-        const std::string &name = var->getName();
-        /* If we have already seen this variable in the current scope and
-           it is not a static variable, record this variable as "redeclared"
-           to force Variant type.
-         */
-        if (getScope()->isFirstPass()) {
-          variables->checkRedeclared(name, KindOfStaticStatement);
-        }
-        /* If this is not a top-level static statement, the variable also
-           needs to be Variant type. This should not be a common use case in
-           php code.
-         */
-        if (!isTopLevel()) {
-          variables->addNestedStatic(name);
-        }
+      ASSERT(variable->is(Expression::KindOfSimpleVariable));
+      SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
+      ASSERT(var->hasContext(Expression::Declaration));
+      const std::string &name = var->getName();
+      /* If we have already seen this variable in the current scope and
+         it is not a static variable, record this variable as "redeclared"
+         to force Variant type.
+       */
+      if (getScope()->isFirstPass()) {
+        variables->checkRedeclared(name, KindOfStaticStatement);
+      }
+      /* If this is not a top-level static statement, the variable also
+         needs to be Variant type. This should not be a common use case in
+         php code.
+       */
+      if (!isTopLevel()) {
+        variables->addNestedStatic(name);
+      }
 
-        if (variables->needLocalCopy(name)) {
-          variables->forceVariant(ar, name, VariableTable::AnyStaticVars);
-        }
-      } else {
-        ASSERT(false);
+      if (variables->needLocalCopy(name)) {
+        variables->forceVariant(ar, name, VariableTable::AnyStaticVars);
       }
     } else {
       // Expression was optimized away; remove it

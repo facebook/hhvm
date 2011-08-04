@@ -530,8 +530,17 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
                                            TypePtr type, bool coerce,
                                            FunctionScopePtr func,
                                            bool arrayParams) {
+#ifdef HPHP_DETAILED_TYPE_INF_ASSERT
+  ASSERT(func->hasUser(getScope(), BlockScope::UseKindCaller));
+#endif /* HPHP_DETAILED_TYPE_INF_ASSERT */
   ConstructPtr self = shared_from_this();
-  TypePtr frt = func->getReturnType();
+  TypePtr frt;
+  {
+    TRY_LOCK(func);
+    func->getInferTypesMutex().assertOwnedBySelf();
+    ASSERT(!func->inVisitScopes() || getScope() == func);
+    frt = func->getReturnType();
+  }
   if (!frt) {
     m_voidReturn = true;
     setActualType(TypePtr());
@@ -546,6 +555,7 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
     m_voidReturn = false;
     m_voidWrapper = false;
     type = checkTypesImpl(ar, type, frt, coerce);
+    ASSERT(m_actualType);
   }
   if (arrayParams) {
     m_extraArg = 0;
@@ -559,6 +569,7 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
   } else {
     m_implementedType = Type::Variant;
   }
+  ASSERT(type);
 
   return type;
 }
@@ -699,12 +710,6 @@ void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (staticClassName) {
     cg_printf(")");
   }
-}
-
-void FunctionCall::setFunctionAndClassScope(FunctionScopePtr fsp,
-                                            ClassScopePtr csp) {
-  m_funcScope = fsp;
-  m_classScope = csp;
 }
 
 void FunctionCall::optimizeArgArray(AnalysisResultPtr ar) {

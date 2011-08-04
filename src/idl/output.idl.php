@@ -78,6 +78,10 @@ DefineFunction(
         'desc'   => "If the optional parameter erase is set to FALSE, the buffer will not be deleted until the script finishes. This causes that flushing and cleaning functions would issue a notice and return FALSE if called.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -88,6 +92,10 @@ DefineFunction(
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -100,6 +108,10 @@ DefineFunction(
       'type'   => null,
       'desc'   => "No value is returned.",
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -110,6 +122,10 @@ DefineFunction(
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure. Reasons for failure are first that you called the function without an active buffer or that for some reason a buffer could not be deleted (possible for special buffer).",
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -122,6 +138,10 @@ DefineFunction(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure. Reasons for failure are first that you called the function without an active buffer or that for some reason a buffer could not be deleted (possible for special buffer).",
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -132,6 +152,10 @@ DefineFunction(
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -144,6 +168,10 @@ DefineFunction(
       'type'   => String,
       'desc'   => "Returns the contents of the output buffer and end output buffering. If output buffering isn't active then FALSE is returned.",
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -154,6 +182,10 @@ DefineFunction(
     'return' => array(
       'type'   => String,
       'desc'   => "This will return the contents of the output buffer or FALSE, if output buffering isn't active.",
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -166,6 +198,10 @@ DefineFunction(
       'type'   => String,
       'desc'   => "Returns the output buffer or FALSE if no buffering is active.",
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -177,6 +213,10 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns the length of the output buffer contents or FALSE if no buffering is active.",
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -187,6 +227,10 @@ DefineFunction(
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the level of nested output buffering handlers or zero if output buffering is not active.",
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -205,6 +249,10 @@ DefineFunction(
         'value'  => "false",
         'desc'   => "TRUE to return all active output buffer levels. If FALSE or not set, only the top level output buffer is returned.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -226,6 +274,10 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -245,6 +297,10 @@ DefineFunction(
         'desc'   => "TRUE to turn implicit flushing on, FALSE otherwise.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -255,6 +311,10 @@ DefineFunction(
     'return' => array(
       'type'   => StringVec,
       'desc'   => "This will return an array with the output handlers in use (if any). If output_buffering is enabled or an anonymous function was used with ob_start(), ob_list_handlers() will return \"default output handler\".",
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -279,6 +339,10 @@ DefineFunction(
         'desc'   => "The variable value.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -289,6 +353,10 @@ DefineFunction(
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -313,6 +381,10 @@ DefineFunction(
         'desc'   => "Message to write to the log.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -334,6 +406,10 @@ DefineFunction(
         'type'   => String,
         'desc'   => "Value to write to log.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -357,6 +433,10 @@ DefineFunction(
         'desc'   => "An integer to add up.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -375,6 +455,10 @@ DefineFunction(
         'desc'   => "Name of the entry.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -386,6 +470,10 @@ DefineFunction(
       'type'   => VariantMap,
       'desc'   => "Array of thread statuses.",
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -396,6 +484,10 @@ DefineFunction(
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Array of all I/O so far for current thread.",
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -414,6 +506,10 @@ DefineFunction(
         'type'   => String,
         'desc'   => "Specifies the logical name to replace with.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -434,6 +530,10 @@ DefineFunction(
         'desc'   => "same as in microtime() to specify output format, except it defaults to true for float format.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -452,6 +552,10 @@ DefineFunction(
         'value'  => "true",
         'desc'   => "Specifies what format to use, whether to serialize into a string.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 

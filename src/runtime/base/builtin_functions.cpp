@@ -224,8 +224,14 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
   return null;
 }
 
+// get_user_func_handler takes a Variant 'function', decodes it into
+// 'classname' and 'methodname', and sets up MethodCallPackage 'mcp'
+// appropriately for the given function. It also sets 'doBind' to
+// indicate whether the caller needs to set the late bound class.
 bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp,
-                           String &classname, String &methodname) {
+                           String &classname, String &methodname,
+                           bool &doBind) {
+  doBind = false;
   mcp.noFatal();
 
   if (function.isObject()) {
@@ -241,12 +247,20 @@ bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp,
     if (c != 0 && c != String::npos && c + 2 < sfunction.size()) {
       classname = sfunction.substr(0, c);
       methodname = sfunction.substr(c + 2);
+      if (classname->same(s_self.get())) {
+        classname = FrameInjection::GetClassName(true);
+      } else if (classname->same(s_parent.get())) {
+        classname = FrameInjection::GetParentClassName(true);
+      } else {
 #ifdef ENABLE_LATE_STATIC_BINDING
-      if (classname->same(s_static.get())) {
-        ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-        classname = FrameInjection::GetStaticClassName(ti);
-      }
+        if (classname->same(s_static.get())) {
+          ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+          classname = FrameInjection::GetStaticClassName(ti);
+        } else {
+          doBind = true;
+        }
 #endif
+      }
       mcp.dynamicNamedCall(classname, methodname);
       if (mcp.ci) return true;
       raise_warning("call_user_func to non-existent function %s",
@@ -303,6 +317,15 @@ bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp,
         sclass = FrameInjection::GetClassName(true);
       } else if (sclass->same(s_parent.get())) {
         sclass = FrameInjection::GetParentClassName(true);
+      } else {
+#ifdef ENABLE_LATE_STATIC_BINDING
+        if (sclass->same(s_static.get())) {
+          ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+          sclass = FrameInjection::GetStaticClassName(ti);
+        } else {
+          doBind = true;
+        }
+#endif
       }
       ObjectData *obj = FrameInjection::GetThis(true);
       if (obj && obj->o_instanceof(sclass)) {
@@ -313,12 +336,6 @@ bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp,
         }
         return false;
       }
-#ifdef ENABLE_LATE_STATIC_BINDING
-      if (sclass->same(s_static.get())) {
-        ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-        sclass = FrameInjection::GetStaticClassName(ti);
-      }
-#endif
       classname = sclass;
       methodname = method;
       mcp.dynamicNamedCall(classname, methodname);

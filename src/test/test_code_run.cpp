@@ -18311,6 +18311,22 @@ bool TestCodeRun::TestLateStaticBinding() {
         "C::c();",
         "CCC");
 
+  MVCRO("<?php\n"
+        "class A {\n"
+        "  public static function foo() {\n"
+        "    var_dump(get_called_class());\n"
+        "  }\n"
+        "}\n"
+        "class B extends A {}\n"
+        "$array = array('foo');\n"
+        "array_map('B::foo', $array);\n"
+        "call_user_func('B::foo');\n"
+        "call_user_func(array('B', 'foo'));\n",
+
+        "string(1) \"B\"\n"
+        "string(1) \"B\"\n"
+        "string(1) \"B\"\n");
+
   return true;
 }
 

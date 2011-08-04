@@ -336,7 +336,8 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
  * the method name. Therefore caller must provide the holders.
  */
 bool get_user_func_handler(CVarRef function, MethodCallPackage& mcp,
-                           String &classname, String &methodname);
+                           String &classname, String &methodname,
+                           bool &doBind);
 
 Variant invoke(CStrRef function, CArrRef params, int64 hash = -1,
                bool tryInterp = true, bool fatal = true);

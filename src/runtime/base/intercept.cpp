@@ -213,16 +213,14 @@ void rename_function(CStrRef old_name, CStrRef new_name) {
   s_intercept_data->m_has_renamed_functions = true;
 }
 
-String get_renamed_function(CStrRef name, bool *renamed /* = NULL */) {
+String get_renamed_function(CStrRef name) {
   if (s_intercept_data->m_has_renamed_functions) {
     StringIMap<String> &funcs = s_intercept_data->m_renamed_functions;
     StringIMap<String>::const_iterator iter = funcs.find(name);
     if (iter != funcs.end()) {
-      if (renamed) *renamed = true;
       return iter->second;
     }
   }
-  if (renamed) *renamed = false;
   return name;
 }
 

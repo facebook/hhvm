@@ -48,12 +48,10 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
 
   String name = var.toString();
   String originalName = name;
-  bool renamed = false;
 
-  name = get_renamed_function(name, &renamed);
+  name = get_renamed_function(name);
   if (name[0] == '\\') {
     name = name.substr(1); // try namespaced function first
-    renamed = true;
   }
 
   // fast path for interpreted fn
@@ -64,8 +62,7 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
 
   if (originalName[0] == '\\') {
     name = originalName.lastToken('\\');
-    name = get_renamed_function(name, &renamed);
-    renamed = true;
+    name = get_renamed_function(name);
     fs = RequestEvalState::findFunction(name.data());
     if (fs) {
       return strongBind(fs->directInvoke(env, this));

@@ -957,7 +957,7 @@ static void outputStringBufExprs(ExpressionPtrVec &ev,
                                  CodeGenerator &cg, AnalysisResultPtr ar) {
   for (size_t i = 0; i < ev.size(); i++) {
     ExpressionPtr exp = ev[i];
-    cg_printf(".add(");
+    cg_printf(".addWithTaint(");
     outputStringExpr(cg, ar, exp, true);
     cg_printf(")");
   }
@@ -1012,7 +1012,7 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         bool is_void = !exp->getActualType();
         exp->preOutputCPP(cg, ar, 0);
         if (!is_void) {
-          cg_printf("%s.append(", buf.c_str());
+          cg_printf("%s.appendWithTaint(", buf.c_str());
           outputStringExpr(cg, ar, exp, true);
           cg_printf(")");
         } else {
@@ -1022,7 +1022,7 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       }
 
       if (numConcat && !prefix) {
-        cg_printf("CStrRef %s(%s.detach());\n",
+        cg_printf("CStrRef %s(%s.detachWithTaint());\n",
                   m_cppTemp.c_str(), buf.c_str());
         if (m_op == T_CONCAT_EQUAL) {
           m_exp1->outputCPP(cg, ar);
@@ -1207,7 +1207,7 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       } else {
         cg_printf("StringBuffer()");
         outputStringBufExprs(ev, cg, ar);
-        cg_printf(".detach()");
+        cg_printf(".detachWithTaint()");
       }
     }
     return;

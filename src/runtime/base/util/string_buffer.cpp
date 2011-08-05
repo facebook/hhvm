@@ -113,7 +113,7 @@ char *StringBuffer::detach(int &size) {
   return NULL;
 }
 
-String StringBuffer::detach() {
+String StringBuffer::detachImpl() {
   TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
 #ifdef TAINTED
   m_taint_data.unsetTaint(TAINT_BIT_ALL);
@@ -131,6 +131,12 @@ String StringBuffer::detach() {
 
 String StringBuffer::copy() {
   // REGISTER_ACCESSED() is called by data()
+  String r = String(data(), size(), CopyString);
+  return r;
+}
+
+String StringBuffer::copyWithTaint() {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   String r = String(data(), size(), CopyString);
   return r;
 }

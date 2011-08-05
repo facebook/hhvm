@@ -72,8 +72,14 @@ public:
    * object any more.
    */
   char *detach(int &size);
-  String detach();
+  String detach() { return detachImpl(); }
+  String detachWithTaint() {
+    TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+    return detachImpl();
+  }
+  String detachImpl();
   String copy();
+  String copyWithTaint();
   void reset();
   void clear() { reset();}
   void resize(int size);
@@ -101,6 +107,10 @@ public:
   void append(unsigned char c) { append((char)c);}
   void append(litstr  s) { ASSERT(s); append(s, strlen(s));}
   void append(CStrRef s);
+  void appendWithTaint(CStrRef s) {
+    TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+    append(s);
+  }
   void append(CVarRef s) { append(s.toString()); }
   void append(const char *s, int len) {
     TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
@@ -112,6 +122,7 @@ public:
     }
     appendHelper(s, len);
   }
+  void appendWithTaint(const char *s, int len) { append(s, len); }
   void appendHelper(const char *s, int len);
   void append(const std::string &s) { append(s.data(), s.size());}
   /**
@@ -124,14 +135,23 @@ public:
   StringBuffer &operator+=(litstr  s) { append(s); return *this;}
   StringBuffer &operator+=(CStrRef s) { append(s); return *this;}
 
+  StringBuffer &add(CStrRef s) { append(s); return *this; }
+  StringBuffer &addWithTaint(CStrRef s) { appendWithTaint(s); return *this; }
   StringBuffer &add(const char *s, int len) { append(s, len); return *this; }
-  StringBuffer &add(CStrRef s)        { append(s); return *this; }
+  StringBuffer &addWithTaint(const char *s, int len) {
+    appendWithTaint(s, len);
+    return *this;
+  }
 
   /**
    * Append what buf has, and reset buf. Internally, if this StringBuffer
    * is empty, it will swap with buf, so to avoid one string copying.
    */
   void absorb(StringBuffer &buf);
+  void absorbWithTaint(StringBuffer &buf) {
+    TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+    absorb(buf);
+  }
 
   /**
    * Write data.

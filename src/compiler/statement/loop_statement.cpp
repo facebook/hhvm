@@ -66,7 +66,7 @@ void LoopStatement::cppEndBufs(CodeGenerator &cg, AnalysisResultPtr ar) {
       const char *prefix =
         getScope()->getVariables()->getVariablePrefix(*it);
 
-      cg_printf("concat_assign(%s%s%s, %s_sbuf_%s%s.detach());\n",
+      cg_printf("concat_assign(%s%s%s, %s_sbuf_%s%s.detachWithTaint());\n",
                 prefix0, prefix, it->c_str(),
                 Option::Option::TempPrefix,
                 prefix, it->c_str());

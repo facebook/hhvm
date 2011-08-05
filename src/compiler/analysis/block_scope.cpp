@@ -135,12 +135,8 @@ void BlockScope::addUse(BlockScopeRawPtr user, int useKinds) {
     if (val.second) {
       m_orderedUsers.push_back(&*val.first);
       user->m_orderedDeps.push_back(BlockScopeRawPtr(this));
-      if (user->getMark() == BlockScope::MarkReady ||
-          user->getMark() == BlockScope::MarkWaiting) {
-        if (getMark() != BlockScope::MarkProcessed) {
-          user->setNumDepsToWaitFor(user->getNumDepsToWaitFor()+1);
-        }
-      }
+      ASSERT(user->getMark() != BlockScope::MarkReady &&
+             user->getMark() != BlockScope::MarkWaiting);
     } else {
       val.first->second |= useKinds;
     }

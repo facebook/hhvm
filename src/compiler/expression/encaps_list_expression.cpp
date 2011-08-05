@@ -18,6 +18,7 @@
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/binary_op_expression.h>
 #include <compiler/analysis/code_error.h>
+#include <runtime/base/builtin_functions.h>
 
 using namespace HPHP;
 using namespace std;
@@ -87,7 +88,7 @@ ExpressionPtr EncapsListExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (m_type != '`' && m_type != '\'' && m_exps) {
     int count = m_exps->getCount();
     // turn into cascaded concat
-    if (count > 2) {
+    if (count > 1) {
       ExpressionPtr exp =
         BinaryOpExpressionPtr(new BinaryOpExpression(
                                 getScope(), getLocation(),
@@ -138,23 +139,50 @@ void EncapsListExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_type == '`') cg_printf(")");
 }
 
+static void outputListElement(ExpressionPtr exp, CodeGenerator &cg,
+                              AnalysisResultPtr ar) {
+  if (exp->is(Expression::KindOfScalarExpression)) {
+    TypePtr actType = exp->getActualType();
+    bool str = actType && actType->is(Type::KindOfString);
+    if (!str) cg_printf("toString(");
+    exp->outputCPP(cg, ar);
+    if (!str) cg_printf(")");
+  } else {
+    exp->outputCPP(cg, ar);
+  }
+}
+
 void EncapsListExpression::outputCPPImpl(CodeGenerator &cg,
                                          AnalysisResultPtr ar) {
   if (m_type == '`') cg_printf("f_shell_exec(");
 
   if (m_exps) {
-    for (int i = 0; i < m_exps->getCount(); i++) {
-      ExpressionPtr exp = (*m_exps)[i];
-      if (i > 0) cg_printf(" + ");
-      if (exp->is(Expression::KindOfScalarExpression)) {
-        TypePtr actType = exp->getActualType();
-        bool str = actType && actType->is(Type::KindOfString);
-        if (!str) cg_printf("toString(");
-        exp->outputCPP(cg, ar);
-        if (!str) cg_printf(")");
+    int n = m_exps->getCount();
+    assert(n > 0);
+    if (n == 1) {
+      ExpressionPtr exp = (*m_exps)[0];
+      outputListElement(exp, cg, ar);
+    } else if (n <= MAX_CONCAT_ARGS) {
+      if (n == 2) {
+        cg_printf("concat(");
       } else {
-        exp->outputCPP(cg, ar);
+        cg_printf("concat%d(", n);
       }
+      for (int i = 0; i < n; i++) {
+        ExpressionPtr exp = (*m_exps)[i];
+        if (i > 0) cg_printf(", ");
+        outputListElement(exp, cg, ar);
+      }
+      cg_printf(")");
+    } else {
+      cg_printf("StringBuffer()");
+      for (int i = 0; i < n; i++) {
+        ExpressionPtr exp = (*m_exps)[i];
+        cg_printf(".addWithTaint(");
+        outputListElement(exp, cg, ar);
+        cg_printf(")");
+      }
+      cg_printf(".detachWithTaint()");
     }
   } else {
     cg_printf("\"\"");

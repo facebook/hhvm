@@ -918,8 +918,6 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                         injectionName.c_str());
             }
           }
-          outputCPPArgInjections(cg, ar, origFuncName.c_str(),
-                                 scope, funcScope);
           if (m_name == "__offsetget_lval") {
             ParameterExpressionPtr param =
               dynamic_pointer_cast<ParameterExpression>((*m_params)[0]);
@@ -930,6 +928,8 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                       Option::VariablePrefix, param->getName().c_str());
             cg_printf("return v;\n");
           } else {
+            outputCPPArgInjections(cg, ar, origFuncName.c_str(),
+                                   scope, funcScope);
             if (funcScope->isConstructor(scope)) {
               cg_printf("bool oldInCtor = gasInCtor(true);\n");
             } else if (m_name == "__destruct") {
@@ -1030,23 +1030,26 @@ void MethodStatement::outputCPPArgInjections(CodeGenerator &cg,
       if (Option::GenArrayCreate && !hasRefParam()) {
         if (ar->m_arrayIntegerKeyMaxSize < n) ar->m_arrayIntegerKeyMaxSize = n;
         outputParamArrayCreate(cg, true);
-        cg_printf(", %s);\n", funcScope->isRefReturn() ? "ref(r)" : "r");
       } else {
         cg_printf("(Array(ArrayInit(%d)", n);
         for (int i = 0; i < n; i++) {
           ParameterExpressionPtr param =
             dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
           const string &paramName = param->getName();
-          cg_printf(".set%s(%d, %s%s)", param->isRef() ? "Ref" : "",
-                    i, Option::VariablePrefix, paramName.c_str());
+          cg_printf(".set%s(%d, %s%s%s)", param->isRef() ? "Ref" : "",
+                    i, param->isRef() ? "r" : "",
+                    Option::VariablePrefix, paramName.c_str());
         }
-        cg_printf(".create())), %s);\n",
-                  funcScope->isRefReturn() ? "ref(r)" : "r");
+        cg_printf(".create()))");
       }
     } else {
-      cg_printf("INTERCEPT_INJECTION(\"%s\", null_array, %s);\n",
-                name, funcScope->isRefReturn() ? "ref(r)" : "r");
+      cg_printf("INTERCEPT_INJECTION(\"%s\", null_array", name);
     }
+    TypePtr t = funcScope->getReturnType();
+    bool refRet = funcScope->isRefReturn() && t && Type::IsMappedToVariant(t);
+    cg_printf(", %s);\n",
+              !funcScope->getReturnType() ? "" :
+              refRet ? "strongBind(r)" : "r");
   }
 
   if (Option::GenRTTIProfileData && m_params) {

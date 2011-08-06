@@ -490,7 +490,7 @@ do { \
 
 #define INTERCEPT_INJECTION_ALWAYS(name, func, args, rr)                \
   static char intercepted = -1;                                         \
-  if (intercepted) {                                                    \
+  if (UNLIKELY(intercepted)) {                                          \
     Variant r, h = get_intercept_handler(name, &intercepted);           \
     if (!h.isNull() && handle_intercept(h, func, args, r)) return rr;   \
   }                                                                     \

@@ -368,6 +368,10 @@ ifdef HAVE_SNAPPY
 CPPFLAGS += -DHAVE_SNAPPY
 endif
 
+ifdef ENABLE_INTERCEPT
+CPPFLAGS += -DENABLE_INTERCEPT
+endif
+
 # facebook specific stuff
 CPPFLAGS += -DFACEBOOK -DHAVE_QUICKLZ
 CPPFLAGS += -DCUF_ASYNC_DEPRECATION_MSG='"call_user_func_async() is deprecated, please use fb_call_user_func_async() instead"'

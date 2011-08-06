@@ -61,8 +61,8 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   }
 
   if (originalName[0] == '\\') {
-    name = originalName.lastToken('\\');
-    name = get_renamed_function(name);
+    originalName = originalName.lastToken('\\');
+    name = get_renamed_function(originalName);
     fs = RequestEvalState::findFunction(name.data());
     if (fs) {
       return strongBind(fs->directInvoke(env, this));
@@ -72,7 +72,7 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   // Handle builtins
   const CallInfo* cit1;
   void* vt1;
-  get_call_info_or_fail(cit1, vt1, name);
+  get_call_info_or_fail(cit1, vt1, originalName);
   // If the lookup failed get_call_info_or_fail() must throw an exception,
   // so if we reach here cit1 must not be NULL
   ASSERT(cit1);

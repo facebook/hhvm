@@ -10,16 +10,14 @@ override OUTDIR_BY_TYPE=
 
 # We want files to be sorted by size, so that larger files are dispatched by
 # distcc earlier
-CXX_NOOPT_SOURCES := $(shell echo `find . -name "*.no.cpp"`)
-RECURSIVE_SOURCES := $(shell echo `find . -name "*.cpp"`)
-SIZE_SORTED_SOURCES := $(wildcard ./sys/*.cpp) \
-  $(shell echo `if [ -e cpp/ ]; then ls -S ./cpp/*.cpp; fi`)
-CXX_SOURCES := $(filter-out $(CXX_NOOPT_SOURCES), $(SIZE_SORTED_SOURCES) \
-  $(filter-out $(SIZE_SORTED_SOURCES), $(RECURSIVE_SOURCES)))
+RECURSIVE_SOURCES := $(shell find . -name "*.cpp")
+CXX_NOOPT_SOURCES := $(filter %.no.cpp, $(RECURSIVE_SOURCES))
+SIZE_SORTED_SOURCES := $(shell ls -S $(filter-out %.no.cpp, $(RECURSIVE_SOURCES)))
+CXX_SOURCES := $(SIZE_SORTED_SOURCES)
 
 ifdef RANDOMIZE_CXX_SOURCES
-CXX_SOURCES := $(shell echo $(CXX_SOURCES) | \
-  perl -MList::Util=shuffle -ne'$$,=" "; print shuffle split/ /')
+CXX_SOURCES := $(shell perl -MList::Util=shuffle
+	-ne'$$,=" "; print shuffle split/ /' $(CXX_SOURCES))
 endif
 
 -include sep_extensions.mk
@@ -56,9 +54,8 @@ RUNTIME_DIRS = \
 	$(HPHP_OBJ_DIR)/src/util
 endif
 
-ADDITIONAL_OBJS += \
-	$(filter-out $(shell find $(RUNTIME_DIRS) -name "*.pic.o"), \
-	$(shell find $(RUNTIME_DIRS) -name "*.o"))
+ADDITIONAL_OBJS += $(shell find $(RUNTIME_DIRS) -name "*.o" -\! -name "*.pic.o")
+
 TARGETS = $(STATIC_LIB) $(SHARED_LIB)
 
 else # HPHP_BUILD_LIBRARY

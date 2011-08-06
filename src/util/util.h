@@ -34,7 +34,7 @@ namespace HPHP { namespace Util {
 #define NEVER_INLINE  __attribute__((noinline))
 #define LIKELY(pred)   __builtin_expect((pred), true)
 #define UNLIKELY(pred) __builtin_expect((pred), false)
-
+#define HOT_FUNC       __attribute__ ((section (".text.hot.builtin")))
 /**
  * Split a string into a list of tokens by character delimiter.
  */

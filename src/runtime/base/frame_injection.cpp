@@ -432,39 +432,39 @@ ObjectData *FrameInjectionFunction::getThisForArrow() {
   throw FatalErrorException("Using $this when not in object context");
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 FIFunctionMem::FIFunctionMem(const char *name)
   : FrameInjectionFunction(name, 0) {
   // Do nothing
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 FIFunctionMem::~FIFunctionMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
 #endif
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 FIFunctionNoMem::FIFunctionNoMem(const char *name)
   : FrameInjectionFunction(name, 0) {
   // Do nothing
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 FIFunctionNoMem::~FIFunctionNoMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout_nomemcheck(m_info);
 #endif
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 FIFunctionFS::FIFunctionFS(const char *name, int fs)
   : FrameInjectionFunction(name, fs) {
   // Do nothing
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 FIFunctionFS::~FIFunctionFS() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
@@ -473,26 +473,26 @@ FIFunctionFS::~FIFunctionFS() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 FIStaticMethodMem::FIStaticMethodMem(const char *name)
   : FrameInjectionStaticMethod(name) {
   // Do nothing
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 FIStaticMethodMem::~FIStaticMethodMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
 #endif
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 FIStaticMethodNoMem::FIStaticMethodNoMem(const char *name)
   : FrameInjectionStaticMethod(name) {
   // Do nothing
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 FIStaticMethodNoMem::~FIStaticMethodNoMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout_nomemcheck(m_info);
@@ -515,26 +515,26 @@ ObjectData *FrameInjectionObjectMethod::getThisForArrow() {
   throw FatalErrorException("Using $this when not in object context");
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 FIObjectMethodMem::FIObjectMethodMem(const char *name, ObjectData *obj)
  : FrameInjectionObjectMethod(name, obj) {
   // Do nothing
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 FIObjectMethodMem::~FIObjectMethodMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
 #endif
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 FIObjectMethodNoMem::FIObjectMethodNoMem(const char *name, ObjectData *obj)
  : FrameInjectionObjectMethod(name, obj) {
   // Do nothing
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 FIObjectMethodNoMem::~FIObjectMethodNoMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout_nomemcheck(m_info);

@@ -265,7 +265,7 @@ OPT =
 endif
 
 ifdef RELEASE
-CPPFLAGS += -DRELEASE -fmerge-constants
+CPPFLAGS += -DRELEASE -fmerge-all-constants
 ifdef OPT_SIZE
 OPT = -Os
 else
@@ -392,7 +392,7 @@ AR_CMD = $(TIMECMD) $(AR) -crs
 LD_CMD = $(TIMECMD) $(LINKER)
 
 ifndef NO_GOLD
-LDFLAGS += -Xlinker --export-dynamic -Xlinker --no-warn-search-mismatch -Wl,--build-id
+LDFLAGS += -Xlinker --export-dynamic -Xlinker --no-warn-search-mismatch -Wl,--build-id,--icf=all,--gc-sections
 else
 LDFLAGS += -rdynamic
 endif
@@ -497,7 +497,7 @@ endef
 
 define LINK_OBJECTS
 $(ECHO_LINK)
-$(LV)$(LD_CMD) -o $@ $(LDFLAGS) $(filter %.o,$^) $(LIBS)
+$(LV)$(LD_CMD) -o $@ $(LDFLAGS) $(sort $(filter %.o,$^)) $(LIBS)
 endef
 
 OBJECT_FILES = $(addprefix $(OUT_DIR),$(patsubst %.$(2),%.o,$(1)))

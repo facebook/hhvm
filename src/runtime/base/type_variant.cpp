@@ -126,7 +126,7 @@ Variant::Variant(const std::string & v) : _count(0), m_type(KindOfString) {
   s->incRefCount();
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 Variant::Variant(CArrRef v) : _count(0), m_type(KindOfArray) {
   ArrayData *a = v.get();
   if (a) {
@@ -187,7 +187,7 @@ Variant::Variant(Variant *v) : _count(0), m_type(KindOfVariant) {
 }
 
 // the version of the high frequency function that is not inlined
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 Variant::Variant(CVarRef v) {
   constructValHelper(v);
 }
@@ -259,17 +259,17 @@ inline ALWAYS_INLINE void Variant::destructImpl() {
 #endif
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 void Variant::destruct() {
   destructImpl();
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 Variant::~Variant() {
   if (IS_REFCOUNTED_TYPE(m_type)) destructImpl();
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 Variant &Variant::assign(CVarRef v) {
   AssignValHelper(this, &v);
   return *this;
@@ -1587,7 +1587,7 @@ void Variant::escalate(bool mutableIteration /* = false */) {
 ///////////////////////////////////////////////////////////////////////////////
 // type conversions
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 bool Variant::toBooleanHelper() const {
   ASSERT(m_type > KindOfInt64);
   switch (m_type) {
@@ -1699,7 +1699,7 @@ Object Variant::toObjectHelper() const {
   return Object(SystemLib::AllocStdClassObject());
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 VarNR Variant::toKey() const {
   if (m_type == KindOfString || m_type == KindOfStaticString) {
     int64 n;
@@ -3008,7 +3008,7 @@ CVarRef Variant::set(CStrRef key, CVarRef v, bool isString /* = false */) {
   return SetImpl<CStrRef>(this, key, v, isString);
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 CVarRef Variant::set(CVarRef key, CVarRef v) {
   return SetImpl<CVarRef>(this, key, v, false);
 }

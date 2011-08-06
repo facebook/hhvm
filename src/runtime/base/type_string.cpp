@@ -134,7 +134,7 @@ int String::find(const char *s, int pos /* = 0 */,
                      pos, caseSensitive);
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 int String::find(CStrRef s, int pos /* = 0 */,
                  bool caseSensitive /* = true */) const {
   if (empty()) return -1;
@@ -262,7 +262,7 @@ String &String::operator=(const std::string & s) {
   return *this;
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 String &String::operator=(CStrRef str) {
   SmartPtr<StringData>::operator=(str.m_px);
   return *this;
@@ -329,7 +329,7 @@ String String::operator+(litstr str) const {
   return NEW(StringData)(ret, len, AttachString);
 }
 
-__attribute__ ((section (".text.hot")))
+HOT_FUNC
 String String::operator+(CStrRef str) const {
   if (empty()) return str;
 

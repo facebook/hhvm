@@ -192,19 +192,19 @@ ParserFrameInjection::ParserFrameInjection(
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-StatementPtr Parser::ParseString(const char *input, const char *fileName,
+StatementPtr Parser::ParseString(CStrRef input, const char *fileName,
                                  vector<StaticStatementPtr> &statics,
                                  Block::VariableIndices &variableIndices) {
-  ASSERT(input);
-  int len = strlen(input);
-  Scanner scanner(input, len, RuntimeOption::ScannerType);
+  ASSERT(!input.empty());
+  Scanner scanner(input.data(), input.size(), RuntimeOption::ScannerType);
   Parser parser(scanner, fileName ? fileName : "string", statics);
   if (!fileName) {
     if (parser.parse()) {
       variableIndices = parser.varIndices();
       return parser.getTree();
     }
-    raise_error("Error parsing %s: %s", input, parser.getMessage().c_str());
+    raise_error("Error parsing %s: %s", input.data(),
+                parser.getMessage().c_str());
     return StatementPtr();
   }
 

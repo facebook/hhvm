@@ -90,7 +90,8 @@ Variant ScalarExpression::getValue() const {
     return (bool)m_num.num;
   case SString:
     if (m_subtype == T_FILE) {
-      return FileRepository::translateFileName(m_value.c_str());
+      return FileRepository::translateFileName
+               (string(m_value.c_str(), m_value.size()));
     }
     return String(m_value);
   case SInt:

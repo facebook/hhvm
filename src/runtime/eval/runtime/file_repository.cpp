@@ -253,7 +253,7 @@ PhpFile *FileRepository::readFile(const string &name,
     }
   }
   StatementPtr stmt =
-    Parser::ParseString(input, name.c_str(), sts, variableIndices);
+    Parser::ParseString(strHelper, name.c_str(), sts, variableIndices);
   if (stmt) {
     created = true;
     PhpFile *p = new PhpFile(stmt, sts, variableIndices,

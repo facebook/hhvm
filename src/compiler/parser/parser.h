@@ -81,7 +81,7 @@ public:
 DECLARE_BOOST_TYPES(Parser);
 class Parser : public ParserBase {
 public:
-  static StatementListPtr ParseString(const char *input, AnalysisResultPtr ar,
+  static StatementListPtr ParseString(CStrRef input, AnalysisResultPtr ar,
                                       const char *fileName = NULL,
                                       bool lambdaMode = false);
 

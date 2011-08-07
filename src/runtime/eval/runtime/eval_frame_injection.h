@@ -41,6 +41,7 @@ public:
                      ObjectData *obj = NULL, int fs = FrameInjection::Function)
     : FrameInjectionFunction(name, 0),
       m_class(cls), m_env(env), m_file(file) {
+    ASSERT(file);
     m_flags = fs | FrameInjection::EvalFrame;
     m_object = obj ? obj->getRoot() : NULL;
     if (m_object) {

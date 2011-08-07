@@ -131,21 +131,21 @@ namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-StatementListPtr Parser::ParseString(const char *input, AnalysisResultPtr ar,
+StatementListPtr Parser::ParseString(CStrRef input, AnalysisResultPtr ar,
                                      const char *fileName /* = NULL */,
                                      bool lambdaMode /* = false */) {
-  ASSERT(input);
+  ASSERT(!input.empty());
   if (!fileName || !*fileName) fileName = "string";
 
-  int len = strlen(input);
-  Scanner scanner(input, len, Option::ScannerType, fileName);
+  int len = input.size();
+  Scanner scanner(input.data(), len, Option::ScannerType, fileName);
   Parser parser(scanner, fileName, ar, len);
   parser.m_lambdaMode = lambdaMode;
   if (parser.parse()) {
     return parser.getTree();
   }
   Logger::Error("Error parsing %s: %s\n%s\n", fileName,
-                parser.getMessage().c_str(), input);
+                parser.getMessage().c_str(), input.data());
   return StatementListPtr();
 }
 

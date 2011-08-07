@@ -37,7 +37,7 @@ Variant eval(LVariableTable *vars, CObjRef self, CStrRef code_str,
   vector<StaticStatementPtr> statics;
   Block::VariableIndices variableIndices;
   String code_str2 = prepend_php ? concat("<?php ", code_str) : code_str;
-  Eval::StatementPtr s = Eval::Parser::ParseString(code_str2.data(), NULL,
+  Eval::StatementPtr s = Eval::Parser::ParseString(code_str2, NULL,
                                                    statics,
                                                    variableIndices);
   Block blk(statics, variableIndices);
@@ -46,7 +46,7 @@ Variant eval(LVariableTable *vars, CObjRef self, CStrRef code_str,
   RequestEvalState::addCodeContainer(scc);
   // todo: pass in params
   NestedVariableEnvironment env(vars, blk, Array(), self);
-  EvalFrameInjection fi(empty_string, "_", env, NULL, NULL,
+  EvalFrameInjection fi(empty_string, "_", env, "string", NULL,
                         FrameInjection::PseudoMain|FrameInjection::Function);
   s->eval(env);
   if (env.isReturning()) {

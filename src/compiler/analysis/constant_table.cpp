@@ -194,13 +194,9 @@ TypePtr ConstantTable::check(const std::string &name, TypePtr type,
     } else {
       ASSERT(sym->isPresent());
       ASSERT(sym->getType());
+      ASSERT(sym->isConstant());
       defScope = &m_blockScope;
-      actualType = sym->getType();
-      if (actualType->is(Type::KindOfSome) ||
-          actualType->is(Type::KindOfAny)) {
-        setType(ar, sym, type, true);
-        return type;
-      }
+      return setType(ar, sym, type, coerce);
     }
   }
 

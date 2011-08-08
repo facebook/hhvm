@@ -50,6 +50,7 @@
 #include <runtime/eval/debugger/cmd/cmd_extension.h>
 #include <runtime/eval/debugger/cmd/cmd_signal.h>
 #include <runtime/eval/debugger/cmd/cmd_macro.h>
+#include <runtime/eval/debugger/cmd/cmd_config.h>
 //tag: new_cmd.php inserts new command here, do NOT remove/modify this line
 
 #endif // __HPHP_EVAL_DEBUGGER_CMD_ALL_H__

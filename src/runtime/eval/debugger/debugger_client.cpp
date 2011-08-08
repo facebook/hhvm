@@ -344,8 +344,8 @@ String DebuggerClient::FormatTitle(const char *title) {
 ///////////////////////////////////////////////////////////////////////////////
 
 DebuggerClient::DebuggerClient()
-    : m_tutorial(0),
-      m_printFunction(""),
+    : m_tutorial(0), m_printFunction(""),
+      m_bypassAccessCheck(false),
       m_mainThread(this, &DebuggerClient::run), m_stopped(false),
       m_inputState(TakingCommand), m_runState(NotYet),
       m_signum(CmdSignal::SignalNone), m_sigTime(0),
@@ -1205,6 +1205,7 @@ void DebuggerClient::shiftCommand() {
 DebuggerCommand *DebuggerClient::createCommand() {
   // give gdb users some love
   if (m_command == "bt") return new CmdWhere();
+  if (m_command == "set") return new CmdConfig();
 
   switch (tolower(m_command[0])) {
     case 'a': return (match("abort")     ) ? new CmdAbort    () : NULL;
@@ -1780,6 +1781,7 @@ void DebuggerClient::loadConfig() {
 
   m_tutorial = m_config["Tutorial"].getInt32(0);
   std::string pprint = m_config["PrettyPrint"].getString("hphpd_print_value");
+  m_bypassAccessCheck = m_config["BypassAccessCheck"].getBool();
 
   m_printFunction = (boost::format(
     "(function_exists(\"%s\") ? %s($_) : print_r($_));")  % pprint % pprint)

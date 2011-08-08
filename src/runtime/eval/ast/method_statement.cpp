@@ -166,6 +166,9 @@ void MethodStatement::getInfo(ClassInfo::MethodInfo &info) const {
 }
 
 void MethodStatement::attemptAccess(const char *context) const {
+  if (g_context->getDebuggerBypassCheck()) {
+    return;
+  }
   int mods = getModifiers();
   const ClassStatement *cs = getClass();
   ClassStatement::Modifier level = ClassStatement::Public;

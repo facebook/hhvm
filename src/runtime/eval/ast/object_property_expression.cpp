@@ -32,16 +32,25 @@ ObjectPropertyExpression::ObjectPropertyExpression(EXPRESSION_ARGS,
 }
 
 Variant ObjectPropertyExpression::eval(VariableEnvironment &env) const {
+  String name;
+  Variant obj;
   if (m_reverseOrder) {
-    String name(m_name->get(env));
-    Variant obj(m_obj->eval(env));
-    SET_LINE;
+    name = m_name->get(env);
+    obj = m_obj->eval(env);
+  } else {
+    obj = m_obj->eval(env);
+    name = m_name->get(env);
+  }
+  SET_LINE;
+  if (!g_context->getDebuggerBypassCheck()) {
     return obj.o_get(name);
   }
-  Variant obj(m_obj->eval(env));
-  String name(m_name->get(env));
-  SET_LINE;
-  return obj.o_get(name);
+  Variant v = obj.o_get(name, false);
+  if (!v.isNull()) return v;
+  CStrRef context = obj.isObject() ?
+                      obj.getObjectData()->o_getClassName() :
+                      null_string;
+  return obj.o_get(name, true, context);
 }
 
 Variant ObjectPropertyExpression::evalExist(VariableEnvironment &env) const {

@@ -122,6 +122,7 @@ void CmdPrint::sendImpl(DebuggerThriftBuffer &thrift) {
   thrift.write(m_ret);
   thrift.write(m_output);
   thrift.write(m_frame);
+  thrift.write(m_bypassAccessCheck);
 }
 
 void CmdPrint::recvImpl(DebuggerThriftBuffer &thrift) {
@@ -129,6 +130,7 @@ void CmdPrint::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_ret);
   thrift.read(m_output);
   thrift.read(m_frame);
+  thrift.read(m_bypassAccessCheck);
 }
 
 void CmdPrint::list(DebuggerClient *client) {
@@ -275,6 +277,7 @@ bool CmdPrint::onClient(DebuggerClient *client) {
     }
   }
   m_body = client->argRest(index);
+  m_bypassAccessCheck = client->getBypassAccessCheck();
   if (watch) {
     client->addWatch(format, m_body);
   }
@@ -283,8 +286,10 @@ bool CmdPrint::onClient(DebuggerClient *client) {
 }
 
 bool CmdPrint::onServer(DebuggerProxy *proxy) {
+  g_context->setDebuggerBypassCheck(m_bypassAccessCheck);
   m_ret = DebuggerProxy::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
                                     m_output, !proxy->isLocal(), m_frame);
+  g_context->setDebuggerBypassCheck(false);
   return proxy->send(this);
 }
 

@@ -609,6 +609,9 @@ bool ClassStatement::hasAccess(const char *context, Modifier level) const {
 bool ClassStatement::attemptPropertyAccess(CStrRef prop, const char *context,
                                            int &mods,
                                            bool rec /* = false */) const {
+  if (g_context->getDebuggerBypassCheck()) {
+    return true;
+  }
   StringMap<ClassVariablePtr>::const_iterator it = m_variables.find(prop);
   if (it == m_variables.end()) {
     const ClassStatement *par = parentStatement();

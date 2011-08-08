@@ -258,6 +258,11 @@ public:
   const MacroPtrVec &getMacros() const { return m_macros;}
   bool deleteMacro(int index);
 
+  /**
+   * Config
+   */
+  bool getBypassAccessCheck() const { return m_bypassAccessCheck;}
+  void setBypassAccessCheck(bool val) { m_bypassAccessCheck = val;}
 private:
   enum InputState {
     TakingCommand,
@@ -275,6 +280,7 @@ private:
   int m_tutorial;
   std::string m_printFunction;
   std::set<std::string> m_tutorialVisited;
+  bool m_bypassAccessCheck;
 
   DebuggerClientOptions m_options;
   AsyncFunc<DebuggerClient> m_mainThread;

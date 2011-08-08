@@ -29,7 +29,7 @@ public:
   static std::string FormatResult(const char *format, CVarRef ret);
 
 public:
-  CmdPrint() : DebuggerCommand(KindOfPrint) {}
+  CmdPrint() : DebuggerCommand(KindOfPrint), m_bypassAccessCheck(false) {}
 
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
@@ -47,6 +47,7 @@ private:
   Variant m_ret;
   String m_output;
   int m_frame;
+  bool m_bypassAccessCheck;
 
   bool processList(DebuggerClient *client);
   bool processClear(DebuggerClient *client);

@@ -25,7 +25,7 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdEval);
 class CmdEval : public DebuggerCommand {
 public:
-  CmdEval() : DebuggerCommand(KindOfEval) {}
+  CmdEval() : DebuggerCommand(KindOfEval), m_bypassAccessCheck(false) {}
 
   virtual bool onClient(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
@@ -36,6 +36,7 @@ public:
 private:
   String m_output;
   int m_frame;
+  bool m_bypassAccessCheck;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

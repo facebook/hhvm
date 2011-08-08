@@ -67,6 +67,7 @@ public:
     KindOfEval                = 1000,
     KindOfShell               = 1001,
     KindOfMacro               = 1002,
+    KindOfConfig              = 1003,
 
     // DebuggerProxy -> DebuggerClient
     KindOfInterrupt           = 10000,

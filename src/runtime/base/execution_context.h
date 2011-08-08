@@ -216,6 +216,9 @@ public:
   const VirtualHost *getVirtualHost() const { return m_vhost; }
   void setVirtualHost(const VirtualHost *vhost) { m_vhost = vhost; }
 
+  bool getDebuggerBypassCheck() const { return m_debuggerBypassCheck; }
+  void setDebuggerBypassCheck(bool bypass) { m_debuggerBypassCheck = bypass; }
+
 private:
   class OutputBuffer {
   public:
@@ -276,6 +279,8 @@ private:
   // helper functions
   void resetCurrentBuffer();
   void executeFunctions(CArrRef funcs);
+
+  bool m_debuggerBypassCheck;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

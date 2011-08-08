@@ -555,7 +555,7 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   } catch (Object &e) {
     sb.append(Debugger::ColorStderr(e.toString()));
   } catch (...) {
-    sb.append(Debugger::ColorStderr(String("(unknown exception was thrown")));
+    sb.append(Debugger::ColorStderr(String("(unknown exception was thrown)")));
   }
   g_context->setStdout(NULL, NULL);
   if (log) {

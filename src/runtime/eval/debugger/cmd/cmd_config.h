@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,40 +14,26 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_eval.h>
+#ifndef __HPHP_EVAL_DEBUGGER_CMD_CONFIG_H__
+#define __HPHP_EVAL_DEBUGGER_CMD_CONFIG_H__
+
+#include <runtime/eval/debugger/debugger_command.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-void CmdEval::sendImpl(DebuggerThriftBuffer &thrift) {
-  DebuggerCommand::sendImpl(thrift);
-  thrift.write(m_output);
-  thrift.write(m_frame);
-  thrift.write(m_bypassAccessCheck);
-}
+DECLARE_BOOST_TYPES(CmdConfig);
+class CmdConfig : public DebuggerCommand {
+public:
+  CmdConfig() : DebuggerCommand(KindOfConfig) {}
 
-void CmdEval::recvImpl(DebuggerThriftBuffer &thrift) {
-  DebuggerCommand::recvImpl(thrift);
-  thrift.read(m_output);
-  thrift.read(m_frame);
-  thrift.read(m_bypassAccessCheck);
-}
-
-bool CmdEval::onClient(DebuggerClient *client) {
-  m_body = client->getCode();
-  m_frame = client->getFrame();
-  m_bypassAccessCheck = client->getBypassAccessCheck();
-  CmdEvalPtr res = client->xend<CmdEval>(this);
-  client->print(res->m_output);
-  return true;
-}
-
-bool CmdEval::onServer(DebuggerProxy *proxy) {
-  g_context->setDebuggerBypassCheck(m_bypassAccessCheck);
-  DebuggerProxy::ExecutePHP(m_body, m_output, !proxy->isLocal(), m_frame);
-  g_context->setDebuggerBypassCheck(false);
-  return proxy->send(this);
-}
+  virtual bool help(DebuggerClient *client);
+  virtual bool onClient(DebuggerClient *client);
+private:
+  void listVars(DebuggerClient *client);
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
+
+#endif // __HPHP_EVAL_DEBUGGER_CMD_CONFIG_H__

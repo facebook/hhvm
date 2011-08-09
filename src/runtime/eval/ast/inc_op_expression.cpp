@@ -38,7 +38,7 @@ Variant IncOpExpression::eval(VariableEnvironment &env) const {
     }
     CVarRef rhs = m_front ? null : Variant(0);
     if (RuntimeOption::EnableStrict) {
-      if (!VariableExpression::checkCompatibleAssignment(lhs, rhs)) {
+      if (!VariableExpression::CheckCompatibleAssignment(lhs, rhs)) {
         SET_LINE;
         throw_strict(TypeVariableChangeException(
                      location_to_string(m_exp->loc())),

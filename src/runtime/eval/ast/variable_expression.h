@@ -39,8 +39,7 @@ public:
   virtual Variant setOp(VariableEnvironment &env, int op, CVarRef rhs) const;
   NamePtr getName() const;
   virtual void dump(std::ostream &out) const;
-  static bool checkCompatibleAssignment(const Variant &left,
-                                        const Variant &right);
+  static bool CheckCompatibleAssignment(CVarRef left, CVarRef right);
 private:
   NamePtr m_name;
   int m_idx;

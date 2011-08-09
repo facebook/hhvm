@@ -99,7 +99,9 @@ Variant &ArrayElementExpression::lval(VariableEnvironment &env) const {
   Variant &arr = larr->lval(env);
   if (m_idx) {
     Variant idx(m_idx->eval(env));
-    SET_LINE;
+    if (UNLIKELY(!idx.canBeValidKey())) {
+      SET_LINE;
+    }
     return arr.lvalAt(idx);
   } else {
     SET_LINE;
@@ -123,9 +125,10 @@ bool ArrayElementExpression::weakLval(VariableEnvironment &env,
   if (!ok || !arr->is(KindOfArray)) {
     return false;
   }
+  Array &a(arr->asArrRef());
   SET_LINE;
-  if (arr->toArray().exists(idx)) {
-    v = &arr->lvalAt(idx);
+  if (a.exists(idx)) {
+    v = &a.lvalAt(idx);
     return true;
   }
   return false;

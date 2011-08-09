@@ -619,6 +619,16 @@ class Variant {
     if (m_type == KindOfObject) return m_data.pobj;
     return toObjectHelper();
   }
+  /**
+   * Whether or not calling toKey() will throw a bad type exception
+   */
+  bool  canBeValidKey() const {
+    switch (getType()) {
+    case KindOfArray:  return false;
+    case KindOfObject: return isResource();
+    default:           return true;
+    }
+  }
   VarNR toKey   () const;
   /* Creating a temporary Array, String, or Object with no ref-counting and
    * no type checking, use it only when we have checked the variant type and

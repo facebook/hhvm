@@ -72,32 +72,36 @@ bool VariableExpression::weakLval(VariableEnvironment &env, Variant* &v) const
   return true;
 }
 
-bool VariableExpression::checkCompatibleAssignment(CVarRef left,
-                                                   CVarRef right) {
-  bool ok = true;
-  if (left.isNull()) {
+bool VariableExpression::CheckCompatibleAssignment(CVarRef left, CVarRef right) {
+  DataType lhs = left.getType();
+  if (lhs == KindOfUninit || lhs == KindOfNull) {
     // everything is ok with NULL
-  } else if (left.isBoolean()) {
-    ok = right.isBoolean();
-  } else if (left.isNumeric()) {
-    ok = right.isNumeric();
-  } else if (left.isString()) {
-    ok = right.isString();
-  } else if (left.isArray()) {
-    ok = right.isArray();
-  } else if (left.isObject()) {
-    //TODO? check class of right derives from class of left ?
-    ok = right.isObject();
-  } else {
+    return true;
+  }
+  DataType rhs = right.getType();
+  switch (lhs) {
+  case KindOfBoolean: return rhs == KindOfBoolean;
+  case KindOfDouble:  return rhs == KindOfDouble;
+  case KindOfArray:   return rhs == KindOfArray;
+  case KindOfObject:  return rhs == KindOfObject;
+
+  case KindOfStaticString:
+  case KindOfString:
+    return rhs == KindOfStaticString || rhs == KindOfString;
+
+  case KindOfInt32:
+  case KindOfInt64:
+    return rhs == KindOfInt32 || rhs == KindOfInt64;
+  default:
     ASSERT(false);
   }
-  return ok;
+  return true;
 }
 
 Variant VariableExpression::set(VariableEnvironment &env, CVarRef val) const {
   Variant &lhs = lval(env);
   if (RuntimeOption::EnableStrict) {
-    if (!checkCompatibleAssignment(lhs, val)) {
+    if (!CheckCompatibleAssignment(lhs, val)) {
       throw_strict(TypeVariableChangeException(location_to_string(loc())),
                    StrictMode::StrictHardCore);
     }
@@ -108,7 +112,7 @@ Variant VariableExpression::set(VariableEnvironment &env, CVarRef val) const {
 Variant VariableExpression::setRef(VariableEnvironment &env, CVarRef val) const {
   Variant &lhs = lval(env);
   if (RuntimeOption::EnableStrict) {
-    if (!checkCompatibleAssignment(lhs, val)) {
+    if (!CheckCompatibleAssignment(lhs, val)) {
       throw_strict(TypeVariableChangeException(location_to_string(loc())),
                    StrictMode::StrictHardCore);
     }
@@ -120,7 +124,7 @@ Variant VariableExpression::setOp(VariableEnvironment &env, int op, CVarRef rhs)
   const {
   Variant &lhs = lval(env);
   if (RuntimeOption::EnableStrict) {
-    if (!checkCompatibleAssignment(lhs, rhs)) {
+    if (!CheckCompatibleAssignment(lhs, rhs)) {
       throw_strict(TypeVariableChangeException(location_to_string(loc())),
                    StrictMode::StrictHardCore);
     }

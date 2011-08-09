@@ -55,7 +55,7 @@ Variant AssignmentOpExpression::eval(VariableEnvironment &env) const {
       }
     }
     if (RuntimeOption::EnableStrict) {
-      if (!VariableExpression::checkCompatibleAssignment(lhs, rhs)) {
+      if (!VariableExpression::CheckCompatibleAssignment(lhs, rhs)) {
         throw_strict(TypeVariableChangeException(
                      location_to_string(m_lhs->loc())),
                      StrictMode::StrictHardCore);

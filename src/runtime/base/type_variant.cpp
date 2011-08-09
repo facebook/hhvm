@@ -608,8 +608,9 @@ bool Variant::isScalar() const {
 }
 
 bool Variant::isResource() const {
-  if (is(KindOfObject)) {
-    return toObject()->isResource();
+  TypedValueAccessor acc = getTypedAccessor();
+  if (GetAccessorType(acc) == KindOfObject) {
+    return GetObjectData(acc)->isResource();
   }
   return false;
 }

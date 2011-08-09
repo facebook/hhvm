@@ -98,7 +98,7 @@ public:
   static String translateFileName(const std::string &file);
   static void onZeroRef(PhpFile *f);
 private:
-  static Mutex s_lock;
+  static ReadWriteMutex s_lock;
   static hphp_hash_map<std::string, PhpFileWrapper*, string_hash> s_files;
   static hphp_hash_map<std::string, PhpFile*, string_hash> s_md5Files;
 

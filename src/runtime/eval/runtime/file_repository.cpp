@@ -75,7 +75,7 @@ Variant PhpFile::eval(LVariableTable *vars) {
   return true;
 }
 
-Mutex FileRepository::s_lock;
+ReadWriteMutex FileRepository::s_lock;
 hphp_hash_map<string, PhpFileWrapper*, string_hash> FileRepository::s_files;
 hphp_hash_map<string, PhpFile*, string_hash> FileRepository::s_md5Files;
 
@@ -88,7 +88,7 @@ static class FileDumpInitializer {
 bool FileRepository::fileDump(const char *filename) {
   std::ofstream out(filename);
   if (out.fail()) return false;
-  Lock lock(s_lock);
+  ReadLock lock(s_lock);
   out << "s_files: " << s_files.size() << endl;
   for (hphp_hash_map<string, PhpFileWrapper*, string_hash>::const_iterator it =
        s_files.begin(); it != s_files.end(); it++) {
@@ -114,7 +114,7 @@ void FileRepository::onDelete(PhpFile *f) {
 void FileRepository::onZeroRef(PhpFile *f) {
   ASSERT(f->getRef() == 0);
   if (RuntimeOption::SandboxCheckMd5) {
-    Lock lock(s_lock);
+    WriteLock lock(s_lock);
     onDelete(f);
   } else {
     onDelete(f);
@@ -124,7 +124,6 @@ void FileRepository::onZeroRef(PhpFile *f) {
 PhpFile *FileRepository::checkoutFile(const string &rname,
                                       const struct stat &s) {
   PhpFile *ret = NULL;
-  Lock lock(s_lock);
   string name;
 
   if (rname[0] == '/') {
@@ -135,55 +134,73 @@ PhpFile *FileRepository::checkoutFile(const string &rname,
     name = RuntimeOption::SourceRoot + "/" + rname;
   }
 
-  hphp_hash_map<string, PhpFileWrapper*, string_hash>::iterator it =
-    s_files.find(name);
-  if (it == s_files.end()) {
-    bool created;
-    ret = readFile(name, s, created);
-    if (ret) {
-      s_files[name] = new PhpFileWrapper(s, ret);
-      ret->incRef();
-      if (created) {
-        if (RuntimeOption::SandboxCheckMd5) {
-          s_md5Files[ret->getMd5()] = ret;
-        }
-      } else {
+  bool created = false;
+  bool changed = false;
+  {
+    ReadLock lock(s_lock);
+    hphp_hash_map<string, PhpFileWrapper*, string_hash>::iterator it =
+      s_files.find(name);
+    if (it == s_files.end()) {
+      ret = readFile(name, s, created);
+      if (!ret) return NULL;
+    } else if (it->second->isChanged(s)) {
+      ret = readFile(name, s, created);
+      if (!ret) return NULL;
+      PhpFile *f = it->second->getPhpFile();
+      if (ret == f) {
         if (RuntimeOption::SandboxCheckMd5) {
           ASSERT(s_md5Files.find(ret->getMd5())->second == ret);
         }
+        ret->incRef();
+        return ret;
+      }
+      changed = true;
+    } else {
+      // should be the common case after the initial startup
+      ret = it->second->getPhpFile();
+      ret->incRef();
+      return ret;
+    }
+  }
+
+  WriteLock lock(s_lock);
+  hphp_hash_map<string, PhpFileWrapper*, string_hash>::iterator it =
+    s_files.find(name);
+  if (it == s_files.end()) {
+    if (changed) {
+      if (created) delete ret;
+      return NULL;
+    }
+    s_files[name] = new PhpFileWrapper(s, ret);
+    ret->incRef();
+    if (created) {
+      if (RuntimeOption::SandboxCheckMd5) {
+        s_md5Files[ret->getMd5()] = ret;
+      }
+    } else {
+      if (RuntimeOption::SandboxCheckMd5) {
+        ASSERT(s_md5Files.find(ret->getMd5())->second == ret);
       }
     }
-  } else if (it->second->isChanged(s)) {
-      bool created;
-      ret = readFile(name, s, created);
-      if (ret) {
-        PhpFile *f = it->second->getPhpFile();
-        if (LIKELY(created)) {
-          assert(ret != f);
-        } else {
-          if (RuntimeOption::SandboxCheckMd5) {
-            ASSERT(s_md5Files.find(ret->getMd5())->second == ret);
-          }
-        }
-        if (LIKELY(f != ret)) {
-          string oldMd5 = f->getMd5();
-          if (f->decRef() == 0) {
-            onDelete(f);
-          }
-          if (RuntimeOption::SandboxCheckMd5) {
-            s_md5Files[ret->getMd5()] = ret;
-          }
-          delete(it->second);
-          it->second = new PhpFileWrapper(s, ret);
-          ret->incRef();
-        }
-      }
   } else {
-    ret = it->second->getPhpFile();
+    if (!changed || !it->second->isChanged(s)) {
+      if (created) delete ret;
+      ret = it->second->getPhpFile();
+    } else {
+      PhpFile *f = it->second->getPhpFile();
+      string oldMd5 = f->getMd5();
+      if (f->decRef() == 0) {
+        onDelete(f);
+      }
+      if (RuntimeOption::SandboxCheckMd5) {
+        s_md5Files[ret->getMd5()] = ret;
+      }
+      delete(it->second);
+      it->second = new PhpFileWrapper(s, ret);
+      ret->incRef();
+    }
   }
-  if (ret) {
-    ret->incRef();
-  }
+  ret->incRef();
   return ret;
 }
 
@@ -220,6 +237,7 @@ PhpFile *FileRepository::readFile(const string &name,
     throw FatalErrorException(0, "file %s is too big", name.c_str());
   }
   int fileSize = s.st_size;
+  if (!fileSize) return NULL;
   int fd = open(name.c_str(), O_RDONLY);
   if (!fd) return NULL; // ignore file open exception
   char *input = (char *)malloc(fileSize + 1);

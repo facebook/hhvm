@@ -1033,6 +1033,8 @@ template <typename Extractor,
 void ClassLevelMethodOverrideCheckImpl(ClassProxyP parent,
                                        ClassProxyC child,
                                        const Extractor &x) {
+  ASSERT(!x.isInterface(child) &&
+         !x.isAbstract(child));
   if (x.isInterface(parent) || x.isAbstract(parent)) {
     bool extendingAbstractClass = !x.isInterface(parent);
     const vector<MethEvalProxyP> &parentMethods =
@@ -1103,6 +1105,8 @@ template <typename Extractor,
 void ClassLevelPropertyOverrideCheckImpl(ClassProxyP parent,
                                          ClassProxyC child,
                                          const Extractor &x) {
+  // TODO: remove the calls to raise_debugging in the abstract child
+  // class case once the errors go away in www
   const vector<PropProxyP> &parentVariables =
     x.variables(parent);
   for (typename vector<PropProxyP>::const_iterator it =
@@ -1127,10 +1131,15 @@ void ClassLevelPropertyOverrideCheckImpl(ClassProxyP parent,
         else if (p1 == ClassStatement::Protected) pn1 = "protected";
         else                                      pn1 = "public";
         // Illegal strengthening of privacy
-        raise_error(
-            "Access level to %s::$%s must be %s (as in class %s) or weaker",
-            x.name(child).c_str(), x.name(childVariable).c_str(),
-            pn1,                   x.name(parent).c_str());
+#define RAISE_ARGUMENTS_PRIVACY \
+  "Access level to %s::$%s must be %s (as in class %s) or weaker", \
+  x.name(child).c_str(), x.name(childVariable).c_str(), \
+  pn1,                   x.name(parent).c_str()
+        if (x.isAbstract(child)) {
+          raise_debugging(RAISE_ARGUMENTS_PRIVACY);
+        } else {
+          raise_error(RAISE_ARGUMENTS_PRIVACY);
+        }
       } else if (x.isStatic(parentVariable) &&
                  p1 == ClassStatement::Protected &&
                  p2 == ClassStatement::Public &&
@@ -1140,23 +1149,38 @@ void ClassLevelPropertyOverrideCheckImpl(ClassProxyP parent,
 
         // TODO: this is a PHP 5.2-ism, 5.3 cleans this up. Remove this when
         // we can get around to it
-        raise_error(
-            "Cannot change initial value of property %s::$%s in class %s",
-            x.name(parent).c_str(), x.name(parentVariable).c_str(),
-            x.name(child).c_str());
+#define RAISE_ARGUMENTS_INIT_VAL \
+  "Cannot change initial value of property %s::$%s in class %s", \
+  x.name(parent).c_str(), x.name(parentVariable).c_str(), \
+  x.name(child).c_str()
+        if (x.isAbstract(child)) {
+          raise_debugging(RAISE_ARGUMENTS_INIT_VAL);
+        } else {
+          raise_error(RAISE_ARGUMENTS_INIT_VAL);
+        }
       }
       // Staticness
       if (p1 != ClassStatement::Private) {
         if (x.isStatic(parentVariable) && !x.isStatic(childVariable)) {
-          raise_error(
-              "Cannot redeclare static %s::$%s as non-static %s::$%s",
-              x.name(parent).c_str(), x.name(parentVariable).c_str(),
-              x.name(child).c_str(),  x.name(childVariable).c_str());
+#define RAISE_ARGUMENTS_STATIC_NONSTATIC \
+  "Cannot redeclare static %s::$%s as non-static %s::$%s", \
+  x.name(parent).c_str(), x.name(parentVariable).c_str(), \
+  x.name(child).c_str(),  x.name(childVariable).c_str()
+          if (x.isAbstract(child)) {
+            raise_debugging(RAISE_ARGUMENTS_STATIC_NONSTATIC);
+          } else {
+            raise_error(RAISE_ARGUMENTS_STATIC_NONSTATIC);
+          }
         } else if (!x.isStatic(parentVariable) && x.isStatic(childVariable)) {
-          raise_error(
-              "Cannot redeclare non-static %s::$%s as static %s::$%s",
-              x.name(parent).c_str(), x.name(parentVariable).c_str(),
-              x.name(child).c_str(),  x.name(childVariable).c_str());
+#define RAISE_ARGUMENTS_NONSTATIC_STATIC \
+  "Cannot redeclare non-static %s::$%s as static %s::$%s", \
+  x.name(parent).c_str(), x.name(parentVariable).c_str(), \
+  x.name(child).c_str(),  x.name(childVariable).c_str()
+          if (x.isAbstract(child)) {
+            raise_debugging(RAISE_ARGUMENTS_NONSTATIC_STATIC);
+          } else {
+            raise_error(RAISE_ARGUMENTS_NONSTATIC_STATIC);
+          }
         }
       }
     }
@@ -1369,12 +1393,12 @@ void ClassStatement::BuiltinSemanticCheck(const ClassInfo      *parent,
   ASSERT(parent);
   ASSERT(child);
 
-  // we shouldn't get here *unless* child is a concrete class
-  ASSERT(!s_semanticExtractor.isAbstract(child) &&
-         !s_semanticExtractor.isInterface(child));
+  ASSERT(!s_semanticExtractor.isInterface(child));
 
-  // method inheritance check
-  ClassLevelMethodOverrideCheck(parent, child);
+  if (!s_semanticExtractor.isAbstract(child)) {
+    // method inheritance check, for non-abstract classes
+    ClassLevelMethodOverrideCheck(parent, child);
+  }
 
   // property level check
   ClassLevelPropertyOverrideCheck(parent, child);
@@ -1410,8 +1434,10 @@ const {
     }
   }
   if (cls) {
-    // method inheritance check
-    ClassLevelMethodOverrideCheck(this, cls);
+    if (!s_semanticExtractor.isAbstract(cls)) {
+      // method inheritance check
+      ClassLevelMethodOverrideCheck(this, cls);
+    }
 
     // property level check
     ClassLevelPropertyOverrideCheck(this, cls);
@@ -1483,9 +1509,7 @@ const {
     cls = this;
   }
 
-  bool doSemanticCheck =
-    !s_semanticExtractor.isAbstract(cls) &&
-    !s_semanticExtractor.isInterface(cls);
+  bool doSemanticCheck = !s_semanticExtractor.isInterface(cls);
 
   // make sure the parent class exists and is not an iface. recursively
   // apply semantic checks to the parent class

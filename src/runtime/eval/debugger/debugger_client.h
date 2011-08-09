@@ -47,6 +47,7 @@ public:
   static const char *HighlightForeColor;
   static const char *HighlightBgColor;
   static const char *DefaultCodeColors[];
+  static const int MinPrintLevel = 2;
 
 public:
   static void LoadColors(Hdf hdf);
@@ -263,6 +264,8 @@ public:
    */
   bool getBypassAccessCheck() const { return m_bypassAccessCheck;}
   void setBypassAccessCheck(bool val) { m_bypassAccessCheck = val;}
+  int getPrintLevel() const { return m_printLevel;}
+  void setPrintLevel(int val) { m_printLevel = val;}
 private:
   enum InputState {
     TakingCommand,
@@ -281,6 +284,7 @@ private:
   std::string m_printFunction;
   std::set<std::string> m_tutorialVisited;
   bool m_bypassAccessCheck;
+  int m_printLevel;
 
   DebuggerClientOptions m_options;
   AsyncFunc<DebuggerClient> m_mainThread;

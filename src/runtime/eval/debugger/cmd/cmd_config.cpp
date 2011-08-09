@@ -59,6 +59,16 @@ bool CmdConfig::onClient(DebuggerClient *client) {
     }
     return true;
   }
+  if (var == "PrintLevel" || var == "pl") {
+    int pl = strtol(value.c_str(), NULL, 10);
+    if (pl > 0 && pl < DebuggerClient::MinPrintLevel) {
+      client->error("%d is invalid for PrintLevel(pl)");
+      return true;
+    }
+    client->setPrintLevel(pl);
+    client->print("PrintLevel(pl) is set to %d", pl);
+    return true;
+  }
 
   listVars(client);
   return true;
@@ -67,6 +77,7 @@ bool CmdConfig::onClient(DebuggerClient *client) {
 void CmdConfig::listVars(DebuggerClient *client) {
   client->print("BypassAccessCheck(bac) %s", client->getBypassAccessCheck() ?
                                              "on" : "off");
+  client->print("PrintLevel(pl) %d", client->getPrintLevel());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

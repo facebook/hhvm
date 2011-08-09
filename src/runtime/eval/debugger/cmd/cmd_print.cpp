@@ -119,10 +119,17 @@ std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
 
 void CmdPrint::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
+  if (m_printLevel > 0) {
+    g_context->setDebuggerPrintLevel(m_printLevel);
+  }
   thrift.write(m_ret);
+  if (m_printLevel > 0) {
+    g_context->setDebuggerPrintLevel(-1);
+  }
   thrift.write(m_output);
   thrift.write(m_frame);
   thrift.write(m_bypassAccessCheck);
+  thrift.write(m_printLevel);
 }
 
 void CmdPrint::recvImpl(DebuggerThriftBuffer &thrift) {
@@ -131,6 +138,7 @@ void CmdPrint::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_output);
   thrift.read(m_frame);
   thrift.read(m_bypassAccessCheck);
+  thrift.read(m_printLevel);
 }
 
 void CmdPrint::list(DebuggerClient *client) {
@@ -278,6 +286,8 @@ bool CmdPrint::onClient(DebuggerClient *client) {
   }
   m_body = client->argRest(index);
   m_bypassAccessCheck = client->getBypassAccessCheck();
+  m_printLevel = client->getPrintLevel();
+  ASSERT(m_printLevel <= 0 || m_printLevel >= DebuggerClient::MinPrintLevel);
   if (watch) {
     client->addWatch(format, m_body);
   }

@@ -218,6 +218,8 @@ public:
 
   bool getDebuggerBypassCheck() const { return m_debuggerBypassCheck; }
   void setDebuggerBypassCheck(bool bypass) { m_debuggerBypassCheck = bypass; }
+  int getDebuggerPrintLevel() const { return m_debuggerPrintLevel; }
+  void setDebuggerPrintLevel(int level) { m_debuggerPrintLevel = level; }
 
 private:
   class OutputBuffer {
@@ -281,6 +283,7 @@ private:
   void executeFunctions(CArrRef funcs);
 
   bool m_debuggerBypassCheck;
+  int m_debuggerPrintLevel;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

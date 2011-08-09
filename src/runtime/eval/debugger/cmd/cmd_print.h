@@ -48,6 +48,7 @@ private:
   String m_output;
   int m_frame;
   bool m_bypassAccessCheck;
+  int m_printLevel;
 
   bool processList(DebuggerClient *client);
   bool processClear(DebuggerClient *client);

@@ -1782,6 +1782,10 @@ void DebuggerClient::loadConfig() {
   m_tutorial = m_config["Tutorial"].getInt32(0);
   std::string pprint = m_config["PrettyPrint"].getString("hphpd_print_value");
   m_bypassAccessCheck = m_config["BypassAccessCheck"].getBool();
+  m_printLevel = m_config["PrintLevel"].getInt16(3);
+  if (m_printLevel > 0 && m_printLevel < MinPrintLevel) {
+    m_printLevel = MinPrintLevel;
+  }
 
   m_printFunction = (boost::format(
     "(function_exists(\"%s\") ? %s($_) : print_r($_));")  % pprint % pprint)

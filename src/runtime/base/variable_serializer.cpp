@@ -36,8 +36,8 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
                                        int maxRecur /* = 3 */)
   : m_type(type), m_option(option), m_buf(NULL), m_indent(0),
     m_valueCount(0), m_referenced(false), m_refCount(1), m_maxCount(maxRecur),
-    m_levelDebugger(0),
-    m_maxLevelDebugger(RuntimeOption::DebuggerDefaultPrintLevel) {
+    m_levelDebugger(0) {
+  m_maxLevelDebugger = g_context->getDebuggerPrintLevel();
   if (type == Serialize || type == APCSerialize || type == DebuggerSerialize) {
     m_arrayIds = new PointerCounterMap();
   } else {
@@ -376,7 +376,7 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
     m_buf->append("*RECURSION*\n");
     break;
   case DebuggerSerialize:
-    if (m_levelDebugger > m_maxLevelDebugger) {
+    if (m_maxLevelDebugger > 0 && m_levelDebugger > m_maxLevelDebugger) {
       // Not recursion, just cut short of print
       m_buf->append("s:12:\"...(omitted)\";", 20);
       break;
@@ -800,7 +800,7 @@ bool VariableSerializer::incNestedLevel(void *ptr,
   case DebuggerDump:
     return ++m_counts[ptr] >= m_maxCount;
   case DebuggerSerialize:
-    if (++m_levelDebugger > m_maxLevelDebugger) {
+    if (m_maxLevelDebugger > 0 && ++m_levelDebugger > m_maxLevelDebugger) {
       return true;
     }
     // fall through
@@ -827,7 +827,7 @@ bool VariableSerializer::incNestedLevel(void *ptr,
 
 void VariableSerializer::decNestedLevel(void *ptr) {
   --m_counts[ptr];
-  if (m_type == DebuggerSerialize) {
+  if (m_type == DebuggerSerialize && m_maxLevelDebugger > 0) {
     --m_levelDebugger;
   }
 }

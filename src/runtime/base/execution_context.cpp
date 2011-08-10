@@ -31,7 +31,7 @@
 #include <runtime/base/server/server_stats.h>
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/base/taint/taint_data.h>
-#include <runtime/base/taint/taint_helper.h>
+#include <runtime/base/taint/taint_warning.h>
 #include <runtime/ext/ext_string.h>
 #include <util/logger.h>
 #include <util/process.h>
@@ -189,10 +189,10 @@ void ExecutionContext::write(CStrRef s) {
 #ifdef TAINTED
   if (!getTransport() && !m_out) {
     // We are running a PHP script and we are about to echo to stdout
-    taint_warn_if_tainted(s, TAINT_BIT_HTML);
+    TaintWarning::WarnIfTainted(s, TAINT_BIT_HTML);
   } else if (getTransport() && m_buffers.size() == 2) {
     // We are responding to a request and we are about to echo to stdout
-    taint_warn_if_tainted(s, TAINT_BIT_HTML);
+    TaintWarning::WarnIfTainted(s, TAINT_BIT_HTML);
   }
 #endif
   write(s.data(), s.size());

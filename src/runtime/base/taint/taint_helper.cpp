@@ -16,42 +16,14 @@
 
 #ifdef TAINTED
 
-#include <map>
-#include <boost/assign.hpp>
-
-#include <runtime/base/types.h>
-#include <runtime/base/array/array_iterator.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/array/array_iterator.h>
 #include <runtime/base/taint/taint_data.h>
 #include <runtime/base/taint/taint_helper.h>
 #include <runtime/base/taint/taint_observer.h>
 #include <runtime/base/taint/taint_trace.h>
 
 namespace HPHP {
-
-std::map<int, std::string> taint_names = boost::assign::map_list_of
-  (TAINT_BIT_HTML,    "HTML-unsafe")
-  (TAINT_BIT_SQL,     "SQL-unsafe")
-  (TAINT_BIT_MUTATED, "non-static");
-
-void taint_warn_if_tainted(CStrRef s, const taint_t bit) {
-  TaintData td = s.get()->getTaintDataRefConst();
-
-  if (td.getTaint() & bit) {
-    std::string buf = "Using a " + taint_names[bit] + " (tainted) string!\n";
-
-    if (bit & TAINT_BIT_HTML) {
-      buf += TaintTracer::ExtractTrace(td.getTaintTrace());
-    }
-    buf += "\n";
-
-    buf += "---begin echo output---\n";
-    buf += s.c_str();
-    buf += "\n";
-    buf += "----end echo output----\n";
-    raise_warning(buf);
-  }
-}
 
 void taint_array_variant(Variant& v, const std::string s, bool iskey) {
   ASSERT(!TaintObserver::IsActive());

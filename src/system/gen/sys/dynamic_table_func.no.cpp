@@ -11749,6 +11749,15 @@ Variant ifa_mysql_pconnect_with_db(void *extra, int count, INVOKE_FEW_ARGS_IMPL_
   CVarRef arg5(a5);
   return (x_mysql_pconnect_with_db(arg0, arg1, arg2, arg3, arg4, arg5));
 }
+Variant i_fb_get_taint_warning_counts(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("fb_get_taint_warning_counts", 0, 1);
+  return (x_fb_get_taint_warning_counts());
+}
+Variant ifa_fb_get_taint_warning_counts(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("fb_get_taint_warning_counts", 0, 1);
+  return (x_fb_get_taint_warning_counts());
+}
 Variant i_imagepsslantfont(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("imagepsslantfont", count, 2, 2, 1);
@@ -38481,6 +38490,7 @@ CallInfo ci_drawpathstart((void*)&i_drawpathstart, (void*)&ifa_drawpathstart, 1,
 CallInfo ci_proc_nice((void*)&i_proc_nice, (void*)&ifa_proc_nice, 1, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_thread_is_warmup_enabled((void*)&i_hphp_thread_is_warmup_enabled, (void*)&ifa_hphp_thread_is_warmup_enabled, 0, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_pconnect_with_db((void*)&i_mysql_pconnect_with_db, (void*)&ifa_mysql_pconnect_with_db, 7, 0, 0x0000000000000000LL);
+CallInfo ci_fb_get_taint_warning_counts((void*)&i_fb_get_taint_warning_counts, (void*)&ifa_fb_get_taint_warning_counts, 0, 0, 0x0000000000000000LL);
 CallInfo ci_imagepsslantfont((void*)&i_imagepsslantfont, (void*)&ifa_imagepsslantfont, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimagemattecolor((void*)&i_magickgetimagemattecolor, (void*)&ifa_magickgetimagemattecolor, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mb_strstr((void*)&i_mb_strstr, (void*)&ifa_mb_strstr, 4, 0, 0x0000000000000000LL);
@@ -42596,6 +42606,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1842:
       HASH_GUARD(0x2B1C192C419B8732LL, drawgetexception) {
         ci = &ci_drawgetexception;
+        return true;
+      }
+      break;
+    case 1851:
+      HASH_GUARD(0x5540879E019D473BLL, fb_get_taint_warning_counts) {
+        ci = &ci_fb_get_taint_warning_counts;
         return true;
       }
       break;

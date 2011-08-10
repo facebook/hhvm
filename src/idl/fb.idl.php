@@ -836,6 +836,18 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "fb_get_taint_warning_counts",
+    'desc'   => "Get counts of various suppressed taint warnings.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Int64Vec,
+      'desc'   => "The array of warning counts.",
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
     'name'   => "fb_enable_html_taint_trace",
     'desc'   => "Enable an optional tracing feature.",
     'flags'  =>  HasDocComment | HipHopSpecific,

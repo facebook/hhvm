@@ -21,7 +21,6 @@
 
 namespace HPHP {
 
-void taint_warn_if_tainted(CStrRef s, const taint_t bit);
 void taint_array_variant(Variant& v, const std::string s, bool iskey=false);
 
 }

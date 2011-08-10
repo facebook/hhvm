@@ -329,6 +329,10 @@ bool RuntimeOption::NativeXHP = true;
 int RuntimeOption::ScannerType = 0;
 bool RuntimeOption::SandboxCheckMd5 = false;
 
+#ifdef TAINTED
+bool RuntimeOption::EnableTaintWarnings = false;
+#endif
+
 bool RuntimeOption::EnableStrict = false;
 int RuntimeOption::StrictLevel = 1; // StrictBasic, cf strict_mode.h
 bool RuntimeOption::StrictFatal = false;
@@ -1014,6 +1018,10 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     NativeXHP = eval["NativeXHP"].getBool(true);
     if (EnableXHP && !NativeXHP) ScannerType |= Scanner::PreprocessXHP;
     else ScannerType &= ~Scanner::PreprocessXHP;
+
+#ifdef TAINTED
+    EnableTaintWarnings = eval["EnableTaintWarnings"].getBool();
+#endif
 
     EnableStrict = eval["EnableStrict"].getBool();
     StrictLevel = eval["StrictLevel"].getInt32(1); // StrictBasic

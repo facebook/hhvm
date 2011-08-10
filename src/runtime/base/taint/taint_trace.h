@@ -61,7 +61,9 @@ private:
  */
 class TaintTracerRequestData : public RequestEventHandler {
 public:
-  virtual void requestInit() { m_enabled_html = false; }
+  virtual void requestInit() {
+    m_enabled_html = false;
+  }
   virtual void requestShutdown() {
     m_enabled_html = false;
     m_stringset.clear();

@@ -28,6 +28,7 @@
 #include <runtime/base/intercept.h>
 #include <runtime/base/taint/taint_data.h>
 #include <runtime/base/taint/taint_trace.h>
+#include <runtime/base/taint/taint_warning.h>
 
 #include <util/parser/parser.h>
 
@@ -896,6 +897,10 @@ bool f_fb_get_taint(CStrRef str, int taint) {
 #else
   return false;
 #endif
+}
+
+Array f_fb_get_taint_warning_counts() {
+  return TaintWarning::GetCounts();
 }
 
 void f_fb_enable_html_taint_trace() {

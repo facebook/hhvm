@@ -331,6 +331,10 @@ public:
   static bool NativeXHP;
   static int ScannerType;
 
+#ifdef TAINTED
+  static bool EnableTaintWarnings;
+#endif
+
   static bool EnableStrict;
   static int StrictLevel;
   static bool StrictFatal;

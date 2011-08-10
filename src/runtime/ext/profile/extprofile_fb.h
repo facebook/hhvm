@@ -194,6 +194,11 @@ inline bool x_fb_get_taint(CStrRef str, int taint) {
   return f_fb_get_taint(str, taint);
 }
 
+inline void x_fb_enable_html_taint_trace() {
+  FUNCTION_INJECTION_BUILTIN(fb_enable_html_taint_trace);
+  f_fb_enable_html_taint_trace();
+}
+
 inline Variant x_fb_const_fetch(CVarRef key) {
   FUNCTION_INJECTION_BUILTIN(fb_const_fetch);
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);

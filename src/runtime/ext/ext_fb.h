@@ -54,6 +54,7 @@ Array f_fb_crossall_query(CStrRef sql, int max_thread = 50, bool retry_query_on_
 void f_fb_set_taint(VRefParam str, int taint);
 void f_fb_unset_taint(VRefParam str, int taint);
 bool f_fb_get_taint(CStrRef str, int taint);
+void f_fb_enable_html_taint_trace();
 Variant f_fb_const_fetch(CVarRef key);
 bool f_fb_output_compression(bool new_value);
 void f_fb_set_exit_callback(CVarRef function);

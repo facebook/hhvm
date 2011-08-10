@@ -39,7 +39,9 @@ void TaintObserver::RegisterAccessed(const TaintData& td) {
 
   // Absorb the taint and any trace data.
   tc->m_current_taint.setTaint(td.getTaint());
-  tc->m_current_taint.attachTaintTrace(td.getTaintTrace());
+  if (TaintTracer::IsEnabledHtml()) {
+    tc->m_current_taint.attachTaintTrace(td.getTaintTrace());
+  }
 }
 
 void TaintObserver::RegisterMutated(TaintData& td, const char *s) {
@@ -58,25 +60,29 @@ void TaintObserver::RegisterMutated(TaintData& td, const char *s) {
     td.attachTaintTrace(NEW(TaintTraceData)(TaintTracer::Trace(s, true)));
   }
 
-  ASSERT(!(TAINT_ISSET_HTML_NO_TRACE(set_mask) &&
-           TAINT_ISSET_HTML_NO_TRACE(clear_mask)));
+  if (TaintTracer::IsEnabledHtml()) {
+    ASSERT(!(TAINT_ISSET_HTML_NO_TRACE(set_mask) &&
+             TAINT_ISSET_HTML_NO_TRACE(clear_mask)));
 
-  // Propagate TRACE, kill TRACE, or perform tracing as desired.
-  if (TAINT_ISSET_HTML_NO_TRACE(set_mask)) {
-    set_mask = TAINT_GET_TAINT(set_mask);
-  } else if (TAINT_ISSET_HTML_NO_TRACE(clear_mask)) {
-    t &= ~TAINT_BIT_TRACE_HTML;
-  } else if ((t & TAINT_BIT_HTML) && (t & TAINT_BIT_TRACE_HTML) &&
-             TAINT_ISSET_HTML_CLEAN(tc->m_current_taint.getRawTaint())) {
-    t &= ~TAINT_BIT_TRACE_HTML;
-    TaintTraceDataPtr ttd = TaintTracer::CreateTrace();
-    tc->m_current_taint.attachTaintTrace(ttd);
+    // Propagate TRACE, kill TRACE, or perform tracing as desired.
+    if (TAINT_ISSET_HTML_NO_TRACE(set_mask)) {
+      set_mask = TAINT_GET_TAINT(set_mask);
+    } else if (TAINT_ISSET_HTML_NO_TRACE(clear_mask)) {
+      t &= ~TAINT_BIT_TRACE_HTML;
+    } else if ((t & TAINT_BIT_HTML) && (t & TAINT_BIT_TRACE_HTML) &&
+               TAINT_ISSET_HTML_CLEAN(tc->m_current_taint.getRawTaint())) {
+      t &= ~TAINT_BIT_TRACE_HTML;
+      TaintTraceDataPtr ttd = TaintTracer::CreateTrace();
+      tc->m_current_taint.attachTaintTrace(ttd);
+    }
   }
 
   // Propagate the taint and any trace data.
   td.setTaint(set_mask | (~clear_mask & t));
-  td.setTaintTrace(tc->m_current_taint.getTaintTrace());
-  ASSERT(td.getTaintTrace()->getCount() > 1);
+  if (TaintTracer::IsEnabledHtml()) {
+    td.setTaintTrace(tc->m_current_taint.getTaintTrace());
+    ASSERT(td.getTaintTrace()->getCount() > 1);
+  }
 }
 
 }

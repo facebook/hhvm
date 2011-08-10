@@ -24,7 +24,7 @@
 
 namespace HPHP {
 
-IMPLEMENT_REQUEST_LOCAL(TaintTraceStore, TaintTracer::s_tracestore);
+IMPLEMENT_REQUEST_LOCAL(TaintTracerRequestData, TaintTracer::s_requestdata);
 IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(TaintTraceData);
 IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(TaintTraceNode);
 
@@ -60,15 +60,14 @@ TaintTraceDataPtr::TaintTraceDataPtr(const TaintTraceDataPtr& ttd)
 /*
  * TaintTracer methods
  */
-int TaintTracer::s_btdepth = 10;
-
 String TaintTracer::Trace(String str, bool copy) {
-  TAINT_OBSERVER_CAP_STACK();
-  if (copy && !s_tracestore->find(str)) {
+  ASSERT(!TaintObserver::IsActive());
+
+  if (copy && !s_requestdata->find(str)) {
     String str_copy(str.c_str(), CopyString);
-    return s_tracestore->insert(str_copy);
+    return s_requestdata->insert(str_copy);
   } else {
-    return s_tracestore->insert(str);
+    return s_requestdata->insert(str);
   }
 }
 
@@ -109,7 +108,7 @@ TaintTraceDataPtr TaintTracer::CreateTrace() {
   }
 
   TaintTraceDataPtr ttd = head;
-  for (int i = 1; i < s_btdepth && it; ++it, ++i) {
+  for (int i = 1; it; ++it, ++i) {
     frame = it.second().toArray();
     ttd = ttd->attachData(TraceFrameAsString(frame, i));
   }

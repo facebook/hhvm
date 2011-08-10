@@ -16154,6 +16154,15 @@ Variant ifa_openssl_pkcs7_decrypt(void *extra, int count, INVOKE_FEW_ARGS_IMPL_A
   CVarRef arg3(a3);
   return (x_openssl_pkcs7_decrypt(arg0, arg1, arg2, arg3));
 }
+Variant i_fb_enable_html_taint_trace(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("fb_enable_html_taint_trace", 0, 1);
+  return (x_fb_enable_html_taint_trace(), null);
+}
+Variant ifa_fb_enable_html_taint_trace(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("fb_enable_html_taint_trace", 0, 1);
+  return (x_fb_enable_html_taint_trace(), null);
+}
 Variant i_hphp_object_pointer(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("hphp_object_pointer", count, 1, 1, 1);
@@ -38718,6 +38727,7 @@ CallInfo ci_ignore_user_abort((void*)&i_ignore_user_abort, (void*)&ifa_ignore_us
 CallInfo ci_imagesetthickness((void*)&i_imagesetthickness, (void*)&ifa_imagesetthickness, 2, 0, 0x0000000000000000LL);
 CallInfo ci_str_pad((void*)&i_str_pad, (void*)&ifa_str_pad, 4, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_pkcs7_decrypt((void*)&i_openssl_pkcs7_decrypt, (void*)&ifa_openssl_pkcs7_decrypt, 4, 0, 0x0000000000000000LL);
+CallInfo ci_fb_enable_html_taint_trace((void*)&i_fb_enable_html_taint_trace, (void*)&ifa_fb_enable_html_taint_trace, 0, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_object_pointer((void*)&i_hphp_object_pointer, (void*)&ifa_hphp_object_pointer, 1, 0, 0x0000000000000000LL);
 CallInfo ci_pagelet_server_task_result((void*)&i_pagelet_server_task_result, (void*)&ifa_pagelet_server_task_result, 3, 0, 0x0000000000000006LL);
 CallInfo ci_asinh((void*)&i_asinh, (void*)&ifa_asinh, 1, 0, 0x0000000000000000LL);
@@ -47108,6 +47118,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 4675:
       HASH_GUARD(0x78183A24F2ACB243LL, strtotime) {
         ci = &ci_strtotime;
+        return true;
+      }
+      break;
+    case 4680:
+      HASH_GUARD(0x4AE39118E7F65248LL, fb_enable_html_taint_trace) {
+        ci = &ci_fb_enable_html_taint_trace;
         return true;
       }
       break;

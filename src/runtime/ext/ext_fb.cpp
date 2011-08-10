@@ -27,6 +27,7 @@
 #include <runtime/base/array/zend_array.h>
 #include <runtime/base/intercept.h>
 #include <runtime/base/taint/taint_data.h>
+#include <runtime/base/taint/taint_trace.h>
 
 #include <util/parser/parser.h>
 
@@ -895,6 +896,10 @@ bool f_fb_get_taint(CStrRef str, int taint) {
 #else
   return false;
 #endif
+}
+
+void f_fb_enable_html_taint_trace() {
+  TaintTracer::EnableHtml();
 }
 
 bool f_fb_output_compression(bool new_value) {

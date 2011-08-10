@@ -40,7 +40,7 @@ public:
   TaintTraceData(String str) : m_string(str) { }
 
   const TaintTraceDataPtr& getNext() const { return m_next; }
-  String getStr() const { return m_string; }
+  CStrRef getStr() const { return m_string; }
 
   TaintTraceDataPtr attachData(String str) {
     m_next = NEW(TaintTraceData)(str);
@@ -59,10 +59,16 @@ private:
 /*
  * A wrapper around StringMap (hash_set<String>) for RequestLocal use.
  */
-class TaintTraceStore : public RequestEventHandler {
+class TaintTracerRequestData : public RequestEventHandler {
 public:
-  virtual void requestInit() { }
-  virtual void requestShutdown() { m_stringset.clear(); }
+  virtual void requestInit() { m_enabled_html = false; }
+  virtual void requestShutdown() {
+    m_enabled_html = false;
+    m_stringset.clear();
+  }
+
+  bool isEnabledHtml() { return m_enabled_html; }
+  void enableHtml() { m_enabled_html = true; }
 
   const String insert(String str) {
     return *(m_stringset.insert(str).first);
@@ -72,6 +78,7 @@ public:
   }
 
 private:
+  bool m_enabled_html;
   StringSet m_stringset;
 };
 
@@ -86,8 +93,8 @@ public:
   static TaintTraceDataPtr CreateTrace();
   static std::string ExtractTrace(const TaintTraceNodePtr& root);
 
-  static int GetDepth() { return s_btdepth; }
-  static void SetDepth(int n) { s_btdepth = n; }
+  static bool IsEnabledHtml() { return s_requestdata->isEnabledHtml(); }
+  static void EnableHtml() { s_requestdata->enableHtml(); }
 
 private:
   static String TraceFrameAsString(Array frame, int i);
@@ -96,8 +103,7 @@ private:
   static void ExtractInternal(const TaintTraceNodePtr& root,
       hphp_string_set& sourceset, hphp_string_set& frameset);
 
-  DECLARE_STATIC_REQUEST_LOCAL(TaintTraceStore, s_tracestore);
-  static int s_btdepth;
+  DECLARE_STATIC_REQUEST_LOCAL(TaintTracerRequestData, s_requestdata);
 };
 
 }

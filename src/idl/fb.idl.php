@@ -836,6 +836,17 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "fb_enable_html_taint_trace",
+    'desc'   => "Enable an optional tracing feature.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => null,
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
     'name'   => "fb_const_fetch",
     'desc'   => "Fetches a constant string from a special store that's compiled into the executable. This is faster than apc_fetch(), which needs locking between different threads. This store is immutable and loaded once with strings that are never changed. Therefore, no locking is needed when accessed by different threads.",
     'flags'  =>  HasDocComment | HipHopSpecific,

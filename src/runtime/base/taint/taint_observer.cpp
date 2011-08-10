@@ -26,9 +26,7 @@ namespace HPHP {
 IMPLEMENT_THREAD_LOCAL(TaintObserver*, TaintObserver::instance);
 
 void TaintObserver::RegisterAccessed(const TaintData& td) {
-  if (!*instance || (*instance)->m_cap_stack) {
-    return;
-  }
+  if (!IsActive()) { return; }
 
   // Prevent recursive calls into the TaintObserver.
   TaintObserver *tc = *instance;
@@ -45,9 +43,7 @@ void TaintObserver::RegisterAccessed(const TaintData& td) {
 }
 
 void TaintObserver::RegisterMutated(TaintData& td, const char *s) {
-  if (!*instance || (*instance)->m_cap_stack) {
-    return;
-  }
+  if (!IsActive()) { return; }
 
   // Prevent recursive calls into the TaintObserver.
   TaintObserver *tc = *instance;

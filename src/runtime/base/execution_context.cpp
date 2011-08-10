@@ -30,8 +30,8 @@
 #include <runtime/base/debug/backtrace.h>
 #include <runtime/base/server/server_stats.h>
 #include <runtime/eval/debugger/debugger.h>
-#include <runtime/base/taint/taint_helper.h>
 #include <runtime/base/taint/taint_data.h>
+#include <runtime/base/taint/taint_helper.h>
 #include <runtime/ext/ext_string.h>
 #include <util/logger.h>
 #include <util/process.h>

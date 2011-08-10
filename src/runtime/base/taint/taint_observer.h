@@ -110,6 +110,8 @@ public:
   // This function needs to be called whenever a string is created or mutated.
   static void RegisterMutated(TaintData& td, const char *s);
 
+  static bool IsActive() { return *instance && !(*instance)->m_cap_stack; }
+
 private:
   TaintData m_current_taint;
   taint_t m_set_mask;

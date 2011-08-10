@@ -54,7 +54,7 @@ void taint_warn_if_tainted(CStrRef s, const taint_t bit) {
 }
 
 void taint_array_variant(Variant& v, const std::string s, bool iskey) {
-  TAINT_OBSERVER_CAP_STACK();
+  ASSERT(!TaintObserver::IsActive());
 
   if (v.isString()) {
     TaintData& td = v.asStrRef().get()->getTaintDataRef();
@@ -80,7 +80,7 @@ void taint_array_variant(Variant& v, const std::string s, bool iskey) {
   }
 
   if (v.isArray()) {
-    Array a = v.toArray();
+    CArrRef a = v.asCArrRef();
     for (ArrayIter iter(a); iter; ++iter) {
       // Taint the key if it is actually a string (in cases where we have a
       // URI like /foo.php?123=hello, the key will have type int, so we skip

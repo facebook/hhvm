@@ -278,7 +278,8 @@ void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
   bool method = false;
   if (m_class || !m_className.empty()) {
     if (!m_class && !m_classScope && !isRedeclared()) {
-      cg_printf("throw_fatal(\"unknown class %s\")", m_className.c_str());
+      const string &name = CodeGenerator::EscapeLabel(m_className);
+      cg_printf("throw_fatal(\"unknown class %s\")", name.c_str());
       return;
     }
     method = true;

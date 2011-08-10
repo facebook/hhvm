@@ -799,7 +799,7 @@ void ClassScope::outputCPPHashTableClassVarInit
     if (cls->isRedeclaring()) {
       ASSERT(!system);
       cg_printf("GET_CS_OFFSET(%s)*2+1,0",
-                cls->getName().c_str());
+                CodeGenerator::FormatLabel(cls->getName()).c_str());
     } else {
       string clsFmt = CodeGenerator::FormatLabel(clsName);
       cg_printf("%s(int64)&%s%s,&%s%s",

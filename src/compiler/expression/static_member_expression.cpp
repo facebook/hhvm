@@ -375,9 +375,8 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
   }
 
   if (hasContext(UnsetContext) && hasContext(LValue)) {
-    cg_printf("throw_fatal_unset_static_property(\"%s\"",
-              m_origClassName.c_str());
-
+    const string &name = CodeGenerator::EscapeLabel(m_origClassName);
+    cg_printf("throw_fatal_unset_static_property(\"%s\"", name.c_str());
     cg_printf(", toString(");
     m_exp->outputCPP(cg, ar);
     cg_printf(").data())");
@@ -386,7 +385,8 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
 
   if (!m_valid) {
     if (!m_resolvedClass && !isRedeclared()) {
-      cg_printf("throw_fatal(\"unknown class %s\")", m_origClassName.c_str());
+      const string &name = CodeGenerator::EscapeLabel(m_origClassName);
+      cg_printf("throw_fatal(\"unknown class %s\")", name.c_str());
     } else {
       cg_printf("throw_fatal(\"Access to undeclared static property: ");
       outputPHP(cg, ar);

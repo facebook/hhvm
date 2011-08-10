@@ -870,6 +870,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                       funcSection.c_str());
           }
         }
+        origFuncName = CodeGenerator::EscapeLabel(origFuncName);
 
         if (m_name == "__offsetget_lval") {
           cg_printf(" &%s%s::___offsetget_lval(",
@@ -902,20 +903,20 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
             if (suffix[0] == '\0' && !funcScope->needsCheckMem()) {
               suffix = "_NOMEM";
             }
-            const string &injectionName = getOriginalFullNameForInjection();
+            const string &injectionName =
+              CodeGenerator::EscapeLabel(getOriginalFullNameForInjection());
+            const string &scopeName =
+              CodeGenerator::EscapeLabel(scope->getOriginalName());
             if (m_modifiers->isStatic()) {
               cg_printf("STATIC_METHOD_INJECTION%s(%s, %s);\n", suffix,
-                        scope->getOriginalName().c_str(),
-                        injectionName.c_str());
+                        scopeName.c_str(), injectionName.c_str());
             } else if (cg.getOutput() != CodeGenerator::SystemCPP &&
                        !scope->isRedeclaring() && !scope->derivedByDynamic()) {
               cg_printf("INSTANCE_METHOD_INJECTION_ROOTLESS%s(%s, %s);\n",
-                        suffix, scope->getOriginalName().c_str(),
-                        injectionName.c_str());
+                        suffix, scopeName.c_str(), injectionName.c_str());
             } else if (scope->getOriginalName() != "XhprofFrame") {
               cg_printf("INSTANCE_METHOD_INJECTION%s(%s, %s);\n", suffix,
-                        scope->getOriginalName().c_str(),
-                        injectionName.c_str());
+                        scopeName.c_str(), injectionName.c_str());
             }
           }
           if (m_name == "__offsetget_lval") {

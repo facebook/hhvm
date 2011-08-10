@@ -3069,8 +3069,9 @@ void AnalysisResult::getCPPClassDeclaredFlags
   SymbolSet &symbols = type2names["bool"];
   for (StringToClassScopePtrVecMap::const_iterator it = m_classDecs.begin();
        it != m_classDecs.end(); ++it) {
+    const string &name = CodeGenerator::FormatLabel(Util::toLower(it->first));
     if (!it->second.size() || it->second[0]->isVolatile()) {
-      symbols.insert(string("cdec_") + Util::toLower(it->first));
+      symbols.insert(string("cdec_") + name);
     }
   }
 }
@@ -3160,12 +3161,15 @@ void AnalysisResult::outputCPPHashTableClassDeclaredFlagsLookup(
   int tableSize = Util::roundUpToPowerOfTwo(classes.size() * 2);
   cg_printf(text1, tableSize, classes.size());
   for (unsigned int i = 0; i < classes.size(); i++) {
-    const char *lowerName = classes[i].first;
+    const string &lowerFormatName =
+      CodeGenerator::FormatLabel(string(classes[i].first));
     const char *originalName = classes[i].second;
-    string varName = string("cdec_") + lowerName;
-    cg_printf("      (const char *)\"%s\",\n", originalName);
+    const string &originalEscapedName =
+      CodeGenerator::EscapeLabel(string(originalName));
+    string varName = string("cdec_") + lowerFormatName;
+    cg_printf("      (const char *)\"%s\",\n", originalEscapedName.c_str());
     cg_printf("      (const char *)&(");
-    cg_printString(originalName, ar, ar);
+    cg_printString(originalName, ar, ar); // does escaping
     cg_printf("),\n      (const char *)GET_GV_OFFSET(%s),\n",
               varName.c_str());
   }
@@ -3242,7 +3246,7 @@ void AnalysisResult::getCPPRedeclaredClassDecl
   SymbolSet &callbacks = type2names["RedeclaredObjectStaticCallbacksConst*"];
   for (StringToClassScopePtrVecMap::const_iterator iter =
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
-    const char *name = iter->first.c_str();
+    const string &name = CodeGenerator::FormatLabel(iter->first);
     if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
       callbacks.insert(string(Option::ClassStaticsCallbackPrefix) + name);
     }
@@ -3520,8 +3524,9 @@ void AnalysisResult::outputCPPGlobalDeclarations() {
   for (StringToClassScopePtrVecMap::const_iterator iter =
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
     if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
+      const string &name = CodeGenerator::FormatLabel(iter->first);
       cg_printf("int %s%s();\n", Option::ClassStaticsIdGetterPrefix,
-                     iter->first.c_str());
+                     name.c_str());
     }
   }
   cg.namespaceEnd();
@@ -3538,11 +3543,12 @@ void AnalysisResult::outputCPPGlobalImplementations(CodeGenerator &cg) {
   for (StringToClassScopePtrVecMap::const_iterator iter =
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
     if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
+      const string &name = CodeGenerator::FormatLabel(iter->first);
       cg_indentBegin("int %s%s() {\n", Option::ClassStaticsIdGetterPrefix,
-                     iter->first.c_str());
+                     name.c_str());
       cg.printDeclareGlobals();
       cg_printf("return g->%s%s->getRedeclaringId();\n",
-                Option::ClassStaticsCallbackPrefix, iter->first.c_str());
+                Option::ClassStaticsCallbackPrefix, name.c_str());
       cg_indentEnd("}\n");
     }
   }
@@ -3921,9 +3927,9 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairSetVec &symbols,
   names = &symbols[KindOfRedeclaredClassId];
   for (StringToClassScopePtrVecMap::const_iterator iter =
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
-    const char *name = iter->first.c_str();
+    std::string cname = CodeGenerator::FormatLabel(iter->first);
     if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
-      string varname = string(Option::ClassStaticsCallbackPrefix) + name;
+      string varname = string(Option::ClassStaticsCallbackPrefix) + cname;
       string memname = varname + "->getRedeclaringId()";
       names->insert(StringPair(varname, memname));
     }
@@ -3931,9 +3937,9 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairSetVec &symbols,
   names = &symbols[KindOfRedeclaredClass];
   for (StringToClassScopePtrVecMap::const_iterator iter =
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
-    const char *name = iter->first.c_str();
+    std::string cname = CodeGenerator::FormatLabel(iter->first);
     if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
-      string varname = string(Option::ClassStaticsCallbackPrefix) + name;
+      string varname = string(Option::ClassStaticsCallbackPrefix) + cname;
       names->insert(StringPair(varname, varname));
     }
   }
@@ -3942,9 +3948,9 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairSetVec &symbols,
   names = &symbols[KindOfVolatileClass];
   for (StringToClassScopePtrVecMap::const_iterator iter =
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
-    const char *name = iter->first.c_str();
+    std::string cname = CodeGenerator::FormatLabel(iter->first);
     if (iter->second.size() && iter->second[0]->isVolatile()) {
-      string varname = string("CDEC(") + name + ")";
+      string varname = string("CDEC(") + cname + ")";
       names->insert(StringPair(varname, varname));
     }
   }
@@ -3953,11 +3959,11 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairSetVec &symbols,
   names = &symbols[KindOfLazyStaticInitializer];
   for (StringToClassScopePtrVecMap::const_iterator iter =
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
-    const char *name = iter->first.c_str();
+    std::string cname = CodeGenerator::FormatLabel(iter->first);
     for (unsigned int i = 0; i < iter->second.size(); i++) {
       if (iter->second[i]->needLazyStaticInitializer()) {
         string varname = string(Option::ClassStaticInitializerFlagPrefix) +
-          name;
+          cname;
         string memname = string(Option::ClassStaticInitializerFlagPrefix) +
           iter->second[i]->getId();
         names->insert(StringPair(varname, memname));
@@ -4038,13 +4044,15 @@ void AnalysisResult::outputCPPFiberGlobalState() {
           if (strncmp(name, "cso_", 4)) {
             cg_printf("if (g2->%s) g1->%s = g2->%s;\n", name, name, name);
           } else {
-            cg_printf("if (g2->%s.get()) g1->%s = g2->%s;\n",name, name, name);
+            cg_printf("if (g2->%s.get()) g1->%s = g2->%s;\n",
+                      name, name, name);
           }
           break;
         case KindOfPseudoMain:
         case KindOfVolatileClass:
         case KindOfLazyStaticInitializer:
-          cg_printf("if (g2->%s) g1->%s = true;\n", name, name);
+          cg_printf("if (g2->%s) g1->%s = true;\n",
+                    name, name);
           break;
         default:
           break;
@@ -4112,7 +4120,8 @@ void AnalysisResult::outputCPPFiberGlobalState() {
           if (strncmp(name, "cso_", 4)) {
             cg_printf("if (g2->%s) g1->%s = g2->%s;\n", name, name, name);
           } else {
-            cg_printf("if (g2->%s.get()) g1->%s = g2->%s;\n",name, name, name);
+            cg_printf("if (g2->%s.get()) g1->%s = g2->%s;\n",
+                      name, name, name);
           }
           break;
         case KindOfPseudoMain:
@@ -4274,8 +4283,9 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
                 "ClassInfo::IsVolatile%s), \"%s\", "
                 "(const char *)%s%s,\n",
                 isInterface ? " | ClassInfo::IsInterface" : "",
-                iter->first.c_str(),
-                Option::ClassStaticsIdGetterPrefix, iter->first.c_str());
+                CodeGenerator::EscapeLabel(iter->first).c_str(),
+                Option::ClassStaticsIdGetterPrefix,
+                CodeGenerator::FormatLabel(iter->first).c_str());
     }
     BOOST_FOREACH(ClassScopePtr cls, iter->second) {
       cls->outputCPPClassMap(cg, ar);

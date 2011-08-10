@@ -1272,7 +1272,7 @@ int FunctionScope::outputCPPInvokeArgCountCheck(
   const char *sysret = (system && ret) ? "return " : "";
   const char *level = (system ? (constructor ? ", 2" : ", 1") : "");
   int guarded = system && (ret || constructor) ? m_minParam : 0;
-  string fullname = getOriginalFullName();
+  string fullname = CodeGenerator::EscapeLabel(getOriginalFullName());
   if (checkMissing) {
     bool fullGuard = ret && (system || Option::HardTypeHints);
     for (int i = 0; i < m_minParam; i++) {

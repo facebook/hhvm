@@ -93,6 +93,9 @@ void ClassVariable::analyzeProgram(AnalysisResultPtr ar) {
   if (phase != AnalysisResult::AnalyzeAll) {
     return;
   }
+  if (m_modifiers->isAbstract()) {
+    Compiler::Error(Compiler::AbstractProperty, shared_from_this());
+  }
   ClassScopePtr scope = getClassScope();
   for (int i = 0; i < m_declaration->getCount(); i++) {
     ExpressionPtr exp = (*m_declaration)[i];

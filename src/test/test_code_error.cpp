@@ -518,3 +518,13 @@ bool TestCodeError::TestGotoInvalidBlock() {
 
   return true;
 }
+
+bool TestCodeError::TestAbstractProperty() {
+  VE(AbstractProperty,
+     "<?php abstract class F { abstract $f; }");
+
+  VE(AbstractProperty,
+     "<?php class F { abstract $f; }");
+
+  return true;
+}

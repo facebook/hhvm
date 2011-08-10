@@ -1457,6 +1457,15 @@ const {
       }
     }
 
+    // make sure no properties are declared abstract
+    for (vector<ClassVariablePtr>::const_iterator it =
+           m_variablesVec.begin();
+         it != m_variablesVec.end(); ++it) {
+      if ((*it)->getModifiers() & Abstract) {
+        raise_error("Properties cannot be declared abstract");
+      }
+    }
+
     // make sure a final class is not being extended
     if (parent && s_semanticExtractor.isFinal(parent)) {
       throw FatalErrorException(0,"Class %s may not inherit from final class "

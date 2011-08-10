@@ -71,10 +71,12 @@ extern const int64 k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE;
 extern const int64 k_XHPROF_FLAGS_MALLOC;
 extern const int64 k_TAINT_NONE;
 extern const int64 k_TAINT_HTML;
-extern const int64 k_TAINT_SQL;
 extern const int64 k_TAINT_MUTATED;
+extern const int64 k_TAINT_SQL;
+extern const int64 k_TAINT_SHELL;
+extern const int64 k_TAINT_TRACE_HTML;
 extern const int64 k_TAINT_ALL;
-extern const int64 k_TAINT_TRACE;
+extern const int64 k_TAINT_TRACE_SELF;
 
 ///////////////////////////////////////////////////////////////////////////////
 

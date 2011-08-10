@@ -17,8 +17,6 @@
 #ifndef __HPHP_TAINT_DATA_H__
 #define __HPHP_TAINT_DATA_H__
 
-#ifdef TAINTED
-
 #include <runtime/base/taint/taint_trace_node.h>
 
 /*
@@ -26,16 +24,20 @@
  * implies a semantic of propagation by AND. Note that some taint bits are
  * bit-packed flags and do not function as taints.
  */
-#define TAINT_BIT_NONE     (0x00)
-#define TAINT_BIT_HTML     (0x01)
-#define TAINT_BIT_SQL      (0x02)
-#define TAINT_BIT_MUTATED  (0x04)
-#define TAINT_BIT_TRACE    (0x08)
-#define TAINT_BIT_ALL      (0x0f)
+#define TAINT_BIT_NONE        (0x00)
+#define TAINT_BIT_HTML        (0x01)
+#define TAINT_BIT_MUTATED     (0x02)
+#define TAINT_BIT_SQL         (0x04)
+#define TAINT_BIT_SHELL       (0x08)
+#define TAINT_BIT_TRACE_HTML  (0x10)
+#define TAINT_BIT_ALL         (0x1f)
+#define TAINT_BIT_TRACE_SELF  (0x20)
 
 #define TAINT_BITS_RESERVED    (0xe0000000)
 #define TAINT_GET_TAINT(bits)  ((bits) & (~TAINT_BITS_RESERVED))
 #define TAINT_GET_FLAGS(bits)  ((bits) & (TAINT_BITS_RESERVED))
+
+#ifdef TAINTED
 
 namespace HPHP {
 

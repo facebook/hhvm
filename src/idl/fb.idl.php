@@ -91,6 +91,9 @@ DefineConstant(
     'type'   => Int64,
   ));
 
+// The following TAINT_* constants are used for an implementation of
+// dynamic taint analysis. See runtime/base/taint/README for details.
+
 DefineConstant(
   array(
     'name'   => "TAINT_NONE",
@@ -105,13 +108,25 @@ DefineConstant(
 
 DefineConstant(
   array(
+    'name'   => "TAINT_MUTATED",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
     'name'   => "TAINT_SQL",
     'type'   => Int64,
   ));
 
 DefineConstant(
   array(
-    'name'   => "TAINT_MUTATED",
+    'name'   => "TAINT_SHELL",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "TAINT_TRACE_HTML",
     'type'   => Int64,
   ));
 
@@ -123,7 +138,7 @@ DefineConstant(
 
 DefineConstant(
   array(
-    'name'   => "TAINT_TRACE",
+    'name'   => "TAINT_TRACE_SELF",
     'type'   => Int64,
   ));
 

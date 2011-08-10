@@ -26,6 +26,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/array/zend_array.h>
 #include <runtime/base/intercept.h>
+#include <runtime/base/taint/taint_data.h>
 
 #include <util/parser/parser.h>
 
@@ -47,13 +48,14 @@ const int64 k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE =
 const int64 k_FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE =
   FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;
 
-// TODO: Get rid of magic numbers when tainting is shipped.
-const int64 k_TAINT_NONE = 0x0;
-const int64 k_TAINT_HTML = 0x1;
-const int64 k_TAINT_SQL = 0x2;
-const int64 k_TAINT_MUTATED = 0x4;
-const int64 k_TAINT_TRACE = 0x8;
-const int64 k_TAINT_ALL = 0xf;
+const int64 k_TAINT_NONE = TAINT_BIT_NONE;
+const int64 k_TAINT_HTML = TAINT_BIT_HTML;
+const int64 k_TAINT_MUTATED = TAINT_BIT_MUTATED;
+const int64 k_TAINT_SQL = TAINT_BIT_SQL;
+const int64 k_TAINT_SHELL = TAINT_BIT_SHELL;
+const int64 k_TAINT_TRACE_HTML = TAINT_BIT_TRACE_HTML;
+const int64 k_TAINT_ALL = TAINT_BIT_ALL;
+const int64 k_TAINT_TRACE_SELF = TAINT_BIT_TRACE_SELF;
 
 ///////////////////////////////////////////////////////////////////////////////
 

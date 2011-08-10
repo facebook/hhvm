@@ -62,17 +62,17 @@ void TaintObserver::RegisterMutated(TaintData& td, const char *s) {
     td.attachTaintTrace(NEW(TaintTraceData)(TaintTracer::Trace(s, true)));
   }
 
-  ASSERT(!(TAINT_ISSET_NO_TRACE(set_mask) &&
-           TAINT_ISSET_NO_TRACE(clear_mask)));
+  ASSERT(!(TAINT_ISSET_HTML_NO_TRACE(set_mask) &&
+           TAINT_ISSET_HTML_NO_TRACE(clear_mask)));
 
   // Propagate TRACE, kill TRACE, or perform tracing as desired.
-  if (TAINT_ISSET_NO_TRACE(set_mask)) {
+  if (TAINT_ISSET_HTML_NO_TRACE(set_mask)) {
     set_mask = TAINT_GET_TAINT(set_mask);
-  } else if (TAINT_ISSET_NO_TRACE(clear_mask)) {
-    t &= ~TAINT_BIT_TRACE;
-  } else if ((t & TAINT_BIT_HTML) && (t & TAINT_BIT_TRACE) &&
+  } else if (TAINT_ISSET_HTML_NO_TRACE(clear_mask)) {
+    t &= ~TAINT_BIT_TRACE_HTML;
+  } else if ((t & TAINT_BIT_HTML) && (t & TAINT_BIT_TRACE_HTML) &&
              TAINT_ISSET_HTML_CLEAN(tc->m_current_taint.getRawTaint())) {
-    t &= ~TAINT_BIT_TRACE;
+    t &= ~TAINT_BIT_TRACE_HTML;
     TaintTraceDataPtr ttd = TaintTracer::CreateTrace();
     tc->m_current_taint.attachTaintTrace(ttd);
   }

@@ -2089,7 +2089,7 @@ public:
   hashNodeCon *next;
 };
 static hashNodeCon *conMapTable[8192];
-static hashNodeCon conBuckets[2107];
+static hashNodeCon conBuckets[2109];
 
 void init_builtin_constant_table() {
   const char *conMapData[] = {
@@ -3773,8 +3773,10 @@ void init_builtin_constant_table() {
       (const char *)"TAINT_HTML", (const char *)-1, (const char *)32, (const char *)&k_TAINT_HTML,
       (const char *)"TAINT_MUTATED", (const char *)-1, (const char *)32, (const char *)&k_TAINT_MUTATED,
       (const char *)"TAINT_NONE", (const char *)-1, (const char *)32, (const char *)&k_TAINT_NONE,
+      (const char *)"TAINT_SHELL", (const char *)-1, (const char *)32, (const char *)&k_TAINT_SHELL,
       (const char *)"TAINT_SQL", (const char *)-1, (const char *)32, (const char *)&k_TAINT_SQL,
-      (const char *)"TAINT_TRACE", (const char *)-1, (const char *)32, (const char *)&k_TAINT_TRACE,
+      (const char *)"TAINT_TRACE_HTML", (const char *)-1, (const char *)32, (const char *)&k_TAINT_TRACE_HTML,
+      (const char *)"TAINT_TRACE_SELF", (const char *)-1, (const char *)32, (const char *)&k_TAINT_TRACE_SELF,
       (const char *)"THOUSEP", (const char *)-1, (const char *)32, (const char *)&k_THOUSEP,
       (const char *)"TRUE", (const char *)-1, (const char *)2, (const char *)&k_TRUE,
       (const char *)"TYPEAPPLICATION", (const char *)-1, (const char *)32, (const char *)&k_TYPEAPPLICATION,

@@ -70,8 +70,8 @@
 // instead of tracing. When this flag is set in clear_mask, we IGNORE all
 // TRACE bits and do not propagate. If it is set in both, something is
 // horribly, horribly wrong.
-#define TAINT_FLAG_NO_TRACE         (0x40000000)
-#define TAINT_ISSET_NO_TRACE(bits)  ((bits) & TAINT_FLAG_NO_TRACE)
+#define TAINT_FLAG_HTML_NO_TRACE         (0x40000000)
+#define TAINT_ISSET_HTML_NO_TRACE(bits)  ((bits) & TAINT_FLAG_HTML_NO_TRACE)
 
 // This flag is set in a TaintObserver's m_current_taint when it encounters
 // an HTML-untainted string. It allows us to determine when an HTML-tainted

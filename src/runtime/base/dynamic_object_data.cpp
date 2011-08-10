@@ -88,24 +88,6 @@ void DynamicObjectData::cloneSet(ObjectData *clone) {
 ///////////////////////////////////////////////////////////////////////////////
 // instance methods and properties
 
-Variant *DynamicObjectData::o_realProp(
-  CStrRef propName, int flags, CStrRef context /* = null_string */) const {
-  if (!parent.isNull()) {
-    return parent->o_realProp(propName, flags, context);
-  } else {
-    return ObjectData::o_realProp(propName, flags, context);
-  }
-}
-
-Variant *DynamicObjectData::o_realPropPublic(CStrRef propName,
-                                             int flags) const {
-  if (!parent.isNull()) {
-    return parent->o_realPropPublic(propName, flags);
-  } else {
-    return ObjectData::o_realPropPublic(propName, flags);
-  }
-}
-
 void DynamicObjectData::o_getArray(Array &props, bool pubOnly /* = false */)
 const {
   if (!parent.isNull()) {

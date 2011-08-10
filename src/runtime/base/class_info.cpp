@@ -848,7 +848,9 @@ void ClassInfo::GetArray(const ObjectData *obj, const ClassPropTable *ct,
                          Array &props, bool pubOnly) {
   while (ct) {
     const ClassPropTableEntry *p = ct->m_entries;
-    for (int64 i = 0; i < ct->m_count; i++, p++) {
+    int off = ct->m_offset;
+    do {
+      p += off;
       if (!pubOnly || p->isPublic()) {
         if (p->isOverride()) {
           /* The actual property is stored in a base class,
@@ -921,11 +923,10 @@ void ClassInfo::GetArray(const ObjectData *obj, const ClassPropTable *ct,
           }
         }
       }
-    }
+    } while ((off = p->next) != 0);
     ct = ct->m_parent;
     if (!ct) {
-      ObjectData *parent =
-        (const_cast<ObjectData *>(obj))->getRedeclaredParent();
+      ObjectData *parent = obj->getRedeclaredParent();
       if (parent) {
         ASSERT(parent != obj);
         obj = parent;

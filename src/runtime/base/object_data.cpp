@@ -117,6 +117,51 @@ CStrRef ObjectData::o_getClassNameHook() const {
   return empty_string;
 }
 
+inline ALWAYS_INLINE bool InstanceOfHelper(CStrRef s,
+                                           const ObjectData *obj,
+                                           const ObjectStaticCallbacks *osc) {
+  const char *globals = 0;
+  int64 hash = s->hash();
+
+  if (UNLIKELY(!osc)) {
+    return obj->o_instanceof_hook(s);
+  } else {
+    do {
+      if (const int *ix = osc->instanceof_index) {
+        const InstanceOfInfo *info = osc->instanceof_table;
+
+        int h = hash & ix[0];
+        int o = ix[h + 1];
+        if (o >= 0) {
+          info += o;
+          do {
+            if (hash == info->hash &&
+                LIKELY(!strcasecmp(info->name, s->data()))) {
+              return true;
+            }
+          } while (!info++->flags);
+        }
+      }
+      if (!osc->redeclaredParent) break;
+      if (LIKELY(!globals)) {
+        globals = (char*)get_global_variables();
+      }
+      osc = *(ObjectStaticCallbacks**)(globals + osc->redeclaredParent);
+    } while (osc);
+  }
+
+  return false;
+}
+
+bool ObjectData::o_instanceof(CStrRef s) const {
+  const ObjectStaticCallbacks *osc = o_get_callbacks();
+  return InstanceOfHelper(s, this, osc);
+}
+
+bool ObjectData::o_instanceof_hook(CStrRef s) const {
+  return false;
+}
+
 bool ObjectData::o_isClass(const char *s) const {
   return strcasecmp(s, o_getClassName()) == 0;
 }
@@ -207,10 +252,6 @@ Variant RedeclaredObjectStaticCallbacks::os_get(CStrRef s) const {
 Variant &RedeclaredObjectStaticCallbacks::os_lval(CStrRef s) const {
   return oscb.os_lval(s);
 }
-Variant RedeclaredObjectStaticCallbacks::os_invoke(
-  const char *c, const char *s, CArrRef params, int64 hash, bool fatal) const {
-  return oscb.os_invoke(c, s, params, hash, fatal);
-}
 Variant RedeclaredObjectStaticCallbacks::os_constant(const char *s) const {
   return oscb.os_constant(s);
 }
@@ -286,12 +327,12 @@ inline ALWAYS_INLINE bool GetCallInfoHelper(bool ex, const char *cls,
           }
         }
       }
-      if (!osc->parent) break;
-      if (UNLIKELY(osc->dynamicParent())) {
+      if (!osc->parent) {
+        if (LIKELY(!osc->redeclaredParent)) break;
         if (LIKELY(!globals)) {
           globals = (char*)get_global_variables();
         }
-        osc = *(ObjectStaticCallbacks**)(globals + ((int64)osc->parent & ~1));
+        osc = *(ObjectStaticCallbacks**)(globals + osc->redeclaredParent);
         if (mcp.obj) {
           mcp.obj = static_cast<DynamicObjectData*>(mcp.obj)->
             getRedeclaredParent();
@@ -357,12 +398,12 @@ Variant &ObjectData::os_lval(CStrRef s) {
   throw FatalErrorException(0, "unknown static property %s", s.c_str());
 }
 
-Variant ObjectData::os_invoke(const char *c, const char *s,
+Variant ObjectData::os_invoke(CStrRef c, CStrRef s,
                               CArrRef params, int64 hash,
                               bool fatal /* = true */) {
   Object obj = FrameInjection::GetThis();
   if (!obj.instanceof(c)) {
-    obj = create_object(c, Array::Create(), false);
+    obj = create_object_only_no_init(c);
     obj->setDummy();
   }
   return obj->o_invoke_ex(c, s, params, fatal);
@@ -419,18 +460,210 @@ MutableArrayIter ObjectData::begin(Variant *key, Variant &val,
   return MutableArrayIter(arr, key, val);
 }
 
+Variant *ObjectData::RealPropPublicHelper(
+  CStrRef propName, int64 hash, int flags, const ObjectData *obj,
+  const ObjectStaticCallbacks *osc) {
+  const char *globals = 0;
+  do {
+    if (const ClassPropTable *cpt = osc->cpt) {
+      do {
+        const int *ix = cpt->m_hash_entries;
+        int h = hash & cpt->m_size_mask;
+        int o = ix[h];
+        if (o >= 0) {
+          const ClassPropTableEntry *prop = cpt->m_entries + o;
+          do {
+            if (!(prop->flags & ClassInfo::IsPrivate) &&
+                hash == prop->hash &&
+                LIKELY(!strcmp(prop->keyName->data(),
+                               propName->data()))) {
+              const char *addr = ((const char *)obj) + prop->offset;
+              if (LIKELY(prop->type == KindOfVariant)) {
+                return (Variant*)addr;
+              }
+              if (flags & (RealPropCreate|RealPropWrite)) break;
+              if (LIKELY(!globals)) globals = (char*)get_global_variables();
+              Variant *res = &((Globals*)globals)->__realPropProxy;
+              switch (prop->type) {
+                case KindOfBoolean:
+                  *res = *(bool*)addr;
+                  break;
+                case KindOfInt32:
+                  *res = *(int*)addr;
+                  break;
+                case KindOfInt64:
+                  *res = *(int64*)addr;
+                  break;
+                case KindOfDouble:
+                  *res = *(double*)addr;
+                  break;
+                case KindOfString:
+                  *res = *(String*)addr;
+                  break;
+                case KindOfArray:
+                  *res = *(Array*)addr;
+                  break;
+                case KindOfObject:
+                  *res = *(Object*)addr;
+                  break;
+                default:
+                  ASSERT(false);
+                  break;
+              }
+              return res;
+            }
+          } while (!(prop++->flags & ClassInfo::IsRedeclared));
+        }
+        cpt = cpt->m_parent;
+      } while (cpt);
+    }
+    if (LIKELY(!osc->redeclaredParent)) break;
+    if (LIKELY(!globals)) {
+      globals = (char*)get_global_variables();
+    }
+    osc = *(ObjectStaticCallbacks**)(globals + osc->redeclaredParent);
+    obj = obj->getRedeclaredParent();
+  } while (osc);
+
+  if (propName.size() > 0 &&
+      !(flags & RealPropNoDynamic) &&
+      (obj->o_properties ||
+       ((flags & RealPropCreate) &&
+        (obj->o_properties = NEW(Array)(), true)))) {
+    return obj->o_properties->lvalPtr(propName,
+                                      flags & RealPropWrite,
+                                      flags & RealPropCreate);
+  }
+
+  return NULL;
+}
+
 Variant *ObjectData::o_realProp(CStrRef propName, int flags,
                                 CStrRef context /* = null_string */) const {
-  return o_realPropPublic(propName, flags);
+  const ObjectStaticCallbacks *orig = o_get_callbacks();
+  if (UNLIKELY(!orig)) {
+    return o_realPropHook(propName, flags, context);
+  }
+
+  const char *globals = 0;
+
+  int64 hash = propName->hash();
+
+  const StringData *ctx = context.get();
+  if (!ctx) {
+    ctx = FrameInjection::GetClassName(false).get();
+  }
+  if (ctx->size()) {
+    const ObjectStaticCallbacks *osc = orig;
+    const ObjectData *obj = this;
+    int64 c_hash = ctx->hash();
+    do {
+      if (const int *ix = osc->instanceof_index) {
+        const InstanceOfInfo *info = osc->instanceof_table;
+
+        int h = c_hash & ix[0];
+        int o = ix[h + 1];
+        if (o >= 0) {
+          info += o;
+          do {
+            if (c_hash == info->hash &&
+                LIKELY(!strcasecmp(info->name, ctx->data()))) {
+              osc = info->cb;
+              if (UNLIKELY(int64(osc) & 1)) {
+                if (LIKELY(!globals)) {
+                  globals = (char*)get_global_variables();
+                }
+                osc = *(ObjectStaticCallbacks**)(globals - 1 + int64(osc));
+              }
+              goto found_private_class;
+            }
+          } while (!info++->flags);
+        }
+      }
+      if (!osc->redeclaredParent) break;
+      if (LIKELY(!globals)) {
+        globals = (char*)get_global_variables();
+      }
+      osc = *(ObjectStaticCallbacks**)(globals + osc->redeclaredParent);
+      obj = obj->getRedeclaredParent();
+    } while (osc);
+    goto do_public;
+
+    found_private_class:
+    const ClassPropTable *cpt = osc->cpt;
+    if (cpt && *cpt->m_pentries) {
+      const int *ix = cpt->m_hash_entries;
+      int h = hash & cpt->m_size_mask;
+      int o = ix[h];
+      if (o >= 0) {
+        const ClassPropTableEntry *prop = cpt->m_entries + o;
+        do {
+          if (prop->flags & ClassInfo::IsPrivate &&
+              hash == prop->hash &&
+              LIKELY(!strcmp(prop->keyName->data() + prop->prop_offset,
+                             propName->data()))) {
+            const char *addr = ((const char *)obj) + prop->offset;
+            if (LIKELY(prop->type == KindOfVariant)) {
+              return (Variant*)addr;
+            }
+            if (flags & (RealPropCreate|RealPropWrite)) break;
+            if (LIKELY(!globals)) globals = (char*)get_global_variables();
+            Variant *res = &((Globals*)globals)->__realPropProxy;
+            switch (prop->type) {
+              case KindOfBoolean:
+                *res = *(bool*)addr;
+                break;
+              case KindOfInt32:
+                *res = *(int*)addr;
+                break;
+              case KindOfInt64:
+                *res = *(int64*)addr;
+                break;
+              case KindOfDouble:
+                *res = *(double*)addr;
+                break;
+              case KindOfString:
+                *res = *(String*)addr;
+                break;
+              case KindOfArray:
+                *res = *(Array*)addr;
+                break;
+              case KindOfObject:
+                *res = *(Object*)addr;
+                break;
+              default:
+                ASSERT(false);
+                break;
+            }
+            return res;
+          }
+        } while (!(prop++->flags & ClassInfo::IsRedeclared));
+      }
+    }
+  }
+
+  do_public:
+  return RealPropPublicHelper(propName, hash, flags, this, orig);
 }
 
 Variant *ObjectData::o_realPropPublic(CStrRef propName, int flags) const {
+  const ObjectStaticCallbacks *orig = o_get_callbacks();
+  if (UNLIKELY(!orig)) {
+    return o_realPropHook(propName, flags, empty_string);
+  }
+  return RealPropPublicHelper(propName, propName->hash(), flags, this, orig);
+}
+
+Variant *ObjectData::o_realPropHook(CStrRef propName, int flags,
+                                    CStrRef context /* = null_string */) const {
   if (propName.size() > 0 &&
       !(flags & RealPropNoDynamic) &&
       (o_properties ||
-       ((flags & RealPropCreate) && (o_properties = NEW(Array)(), true)))) {
+       ((flags & RealPropCreate) &&
+        (o_properties = NEW(Array)(), true)))) {
     return o_properties->lvalPtr(propName,
-                                 flags & RealPropWrite, flags & RealPropCreate);
+                                      flags & RealPropWrite,
+                                      flags & RealPropCreate);
   }
   return NULL;
 }
@@ -599,7 +832,7 @@ void ObjectData::o_setArray(CArrRef properties) {
     if (key.empty() || key.charAt(0) != '\0') {
       // non-private property
       CVarRef secondRef = iter.secondRef();
-      o_setPublicWithRef(key, secondRef, false);
+      o_setPublicWithRef(key, secondRef, true);
     }
   }
 }

@@ -60,7 +60,6 @@ public:
 
   enum JumpTableType {
     JumpReturn,
-    JumpRealProp,
     JumpSet,
     JumpInitialized,
     JumpInitializedString,
@@ -80,13 +79,6 @@ public:
     JumpTableClassStaticGetInit,
     JumpTableClassStaticGet,
     JumpTableClassStaticLval,
-
-    // this order is significant in outputCPPPropertyOp()
-    JumpTableClassGetArray,
-    JumpTableClassSetArray,
-    JumpTableClassRealProp,
-    JumpTableClassRealPropPublic,
-    JumpTableClassRealPropPrivate,
   };
 
   enum AlteredVarClass {
@@ -386,12 +378,6 @@ private:
                           bool *declaredGlobals = NULL);
   bool outputCPPPrivateSelector(CodeGenerator &cg, AnalysisResultPtr ar,
                                 const char *op, const char *args);
-  void outputCPPPropertyOp(CodeGenerator &cg, AnalysisResultPtr ar,
-      const char *cls, const char *parent, const char *op, const char *argsDec,
-      const char *args, const char *ret, bool cnst, JumpTableType type,
-      bool varOnly, ClassScope::Derivation dynamicObject,
-      JumpTableName jtname);
-
   void outputCPPVariableInit(CodeGenerator &cg, AnalysisResultPtr ar,
                              bool inPseudoMain, const std::string &name);
   void checkSystemGVOrder(SymbolSet &variants, unsigned int max);

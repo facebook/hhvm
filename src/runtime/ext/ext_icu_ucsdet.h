@@ -39,8 +39,6 @@ namespace HPHP {
 FORWARD_DECLARE_CLASS_BUILTIN(EncodingDetector);
 class c_EncodingDetector : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(EncodingDetector)
-  END_CLASS_MAP(EncodingDetector)
   DECLARE_CLASS(EncodingDetector, EncodingDetector, ObjectData)
 
   // need to implement
@@ -63,7 +61,7 @@ class c_EncodingDetector : public ExtObjectData {
   public: c_EncodingDetector *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
   private: UCharsetDetector *m_encoding_detector;
 };
@@ -74,8 +72,6 @@ class c_EncodingDetector : public ExtObjectData {
 FORWARD_DECLARE_CLASS_BUILTIN(EncodingMatch);
 class c_EncodingMatch : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(EncodingMatch)
-  END_CLASS_MAP(EncodingMatch)
   DECLARE_CLASS(EncodingMatch, EncodingMatch, ObjectData)
 
   // need to implement
@@ -100,7 +96,7 @@ class c_EncodingMatch : public ExtObjectData {
   public: c_EncodingMatch *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
   public: const UCharsetMatch *m_encoding_match;
   private: void validate();

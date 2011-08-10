@@ -77,8 +77,6 @@ String f_xmlwriter_output_memory(CObjRef xmlwriter, bool flush = true);
 FORWARD_DECLARE_CLASS_BUILTIN(XMLWriter);
 class c_XMLWriter : public ExtObjectData, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(XMLWriter)
-  END_CLASS_MAP(XMLWriter)
   DECLARE_CLASS(XMLWriter, XMLWriter, ObjectData)
 
   // need to implement
@@ -177,7 +175,7 @@ class c_XMLWriter : public ExtObjectData, public Sweepable {
   public: c_XMLWriter *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
  public:
   SmartObject<File>  m_uri;

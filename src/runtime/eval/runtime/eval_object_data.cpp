@@ -111,8 +111,8 @@ Array EvalObjectData::o_toArray() const {
   return props;
 }
 
-Variant *EvalObjectData::o_realProp(CStrRef s, int flags,
-                                    CStrRef context /* = null_string */) const {
+Variant *EvalObjectData::o_realPropHook(
+  CStrRef s, int flags, CStrRef context /* = null_string */) const {
   CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
   if (Variant *priv =
       const_cast<Array&>(m_privates).lvalPtr(c, flags & RealPropWrite, false)) {
@@ -125,7 +125,8 @@ Variant *EvalObjectData::o_realProp(CStrRef s, int flags,
       !m_cls.getClass()->attemptPropertyAccess(s, c, mods)) {
     return NULL;
   }
-  return DynamicObjectData::o_realProp(s, flags);
+  if (parent.get()) return parent->o_realProp(s, flags);
+  return ObjectData::o_realPropHook(s, flags, context);
 }
 
 Variant EvalObjectData::o_getError(CStrRef prop, CStrRef context) {
@@ -202,7 +203,7 @@ const MethodStatement* EvalObjectData::getConstructorStatement() const {
   return m_cls.getConstructor();
 }
 
-bool EvalObjectData::o_instanceof(CStrRef s) const {
+bool EvalObjectData::o_instanceof_hook(CStrRef s) const {
   return m_cls.getClass()->subclassOf(s.data()) ||
     (!parent.isNull() && parent->o_instanceof(s));
 }

@@ -62,8 +62,6 @@ extern const int64 q_XMLReader_SUBST_ENTITIES;
 FORWARD_DECLARE_CLASS_BUILTIN(XMLReader);
 class c_XMLReader : public ExtObjectDataFlags<ObjectData::UseGet>, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(XMLReader)
-  END_CLASS_MAP(XMLReader)
   DECLARE_CLASS(XMLReader, XMLReader, ObjectData)
 
   // need to implement

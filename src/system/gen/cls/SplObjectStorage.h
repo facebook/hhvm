@@ -36,7 +36,6 @@ class c_SplObjectStorage : public ExtObjectData {
   int64 m_index;
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(SplObjectStorage, SplObjectStorage)
 
   // DECLARE_STATIC_PROP_OPS
@@ -45,16 +44,6 @@ class c_SplObjectStorage : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_SplObjectStorage 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplObjectStorage 1
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_SplObjectStorage 1
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  virtual Variant *o_realProp(CStrRef s, int flags,
-                              CStrRef context = null_string) const;
-  Variant *o_realPropPrivate(CStrRef s, int flags) const;
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplObjectStorage 1
 
   // DECLARE_COMMON_INVOKE
   static const MethodCallInfoTable s_call_info_table[];

@@ -32,8 +32,6 @@ namespace HPHP {
 FORWARD_DECLARE_CLASS_BUILTIN(Closure);
 class c_Closure : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(Closure)
-  END_CLASS_MAP(Closure)
   DECLARE_CLASS(Closure, Closure, ObjectData)
 
   // need to implement
@@ -85,10 +83,6 @@ private:
 FORWARD_DECLARE_CLASS_BUILTIN(GeneratorClosure);
 class c_GeneratorClosure : public c_Closure {
  public:
-  BEGIN_CLASS_MAP(GeneratorClosure)
-  RECURSIVE_PARENT_CLASS(Closure)
-  END_CLASS_MAP(GeneratorClosure)
-
   // Closure is deliberately passed in as the original name,
   // so that get_class() on a GeneratorClosure returns
   // the string "Closure"

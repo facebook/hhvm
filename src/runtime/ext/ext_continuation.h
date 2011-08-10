@@ -34,9 +34,6 @@ void f_hphp_unpack_continuation(CObjRef continuation);
 
 class c_Continuation : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(Continuation)
-  PARENT_CLASS(Iterator)
-  END_CLASS_MAP(Continuation)
   DECLARE_CLASS(Continuation, Continuation, ObjectData)
 
   // properties
@@ -114,9 +111,6 @@ private:
 FORWARD_DECLARE_CLASS_BUILTIN(GenericContinuation);
 class c_GenericContinuation : public c_Continuation {
  public:
-  BEGIN_CLASS_MAP(GenericContinuation)
-  RECURSIVE_PARENT_CLASS(Continuation)
-  END_CLASS_MAP(GenericContinuation)
   DECLARE_CLASS(GenericContinuation, GenericContinuation, Continuation)
 
   // properties

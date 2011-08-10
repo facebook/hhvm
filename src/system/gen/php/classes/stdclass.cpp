@@ -45,38 +45,19 @@ Variant &c_stdClass::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_stdClass
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_stdClass
-Variant * c_stdClass::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_stdClass
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_stdClass
-Variant * c_stdClass::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_stdClass
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_stdClass
-Variant * c_stdClass::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_stdClass
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_stdClass
 Variant c_stdClass::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_stdClass
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(stdClass)
-bool c_stdClass::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_INSTANCEOF(0x3D69936178BA13F7LL, NAMSTR(s_sys_ss426361a3, "stdClass"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_stdClass::s_instanceof_table[] = {
+  {0x3D69936178BA13F7LL,1,"stdClass",&cw_stdClass},
+};
+const int c_stdClass::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
 ObjectData *c_stdClass::cloneImpl() {
   ObjectData *obj = coo_stdClass();
   c_stdClass::cloneSet(obj);
@@ -90,12 +71,12 @@ const ObjectStaticCallbacks cw_stdClass = {
   c_stdClass::os_getInit,
   c_stdClass::os_get,
   c_stdClass::os_lval,
-  c_stdClass::os_invoke,
   c_stdClass::os_constant,
   (ObjectData*(*)(ObjectData*))coo_stdClass,
   c_stdClass::s_call_info_table,c_stdClass::s_call_info_index,
+  c_stdClass::s_instanceof_table,c_stdClass::s_instanceof_index,
   &c_stdClass::s_class_name,
-  0,0
+  0,0,0
 };
 /* SRC: classes/stdclass.php line 8 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT___PHP_Incomplete_Class
@@ -113,38 +94,19 @@ Variant &c___PHP_Incomplete_Class::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL___PHP_Incomplete_Class
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp___PHP_Incomplete_Class
-Variant * c___PHP_Incomplete_Class::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp___PHP_Incomplete_Class
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC___PHP_Incomplete_Class
-Variant * c___PHP_Incomplete_Class::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC___PHP_Incomplete_Class
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE___PHP_Incomplete_Class
-Variant * c___PHP_Incomplete_Class::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE___PHP_Incomplete_Class
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT___PHP_Incomplete_Class
 Variant c___PHP_Incomplete_Class::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT___PHP_Incomplete_Class
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(__PHP_Incomplete_Class)
-bool c___PHP_Incomplete_Class::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 0:
-      HASH_INSTANCEOF(0x6576EACCCE24D694LL, NAMSTR(s_sys_ssd8c10a25, "__PHP_Incomplete_Class"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c___PHP_Incomplete_Class::s_instanceof_table[] = {
+  {0x6576EACCCE24D694LL,1,"__PHP_Incomplete_Class",&cw___PHP_Incomplete_Class},
+};
+const int c___PHP_Incomplete_Class::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c___PHP_Incomplete_Class::cloneImpl() {
   ObjectData *obj = coo___PHP_Incomplete_Class();
   c___PHP_Incomplete_Class::cloneSet(obj);
@@ -158,12 +120,12 @@ const ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
   c___PHP_Incomplete_Class::os_getInit,
   c___PHP_Incomplete_Class::os_get,
   c___PHP_Incomplete_Class::os_lval,
-  c___PHP_Incomplete_Class::os_invoke,
   c___PHP_Incomplete_Class::os_constant,
   (ObjectData*(*)(ObjectData*))coo___PHP_Incomplete_Class,
   c___PHP_Incomplete_Class::s_call_info_table,c___PHP_Incomplete_Class::s_call_info_index,
+  c___PHP_Incomplete_Class::s_instanceof_table,c___PHP_Incomplete_Class::s_instanceof_index,
   &c___PHP_Incomplete_Class::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_stdClass() {
   return NEWOBJ(c_stdClass)();

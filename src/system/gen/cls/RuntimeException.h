@@ -33,7 +33,6 @@ class c_RuntimeException : public c_Exception {
   // Properties
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(RuntimeException, RuntimeException)
 
   // DECLARE_STATIC_PROP_OPS
@@ -42,15 +41,6 @@ class c_RuntimeException : public c_Exception {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_RuntimeException 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RuntimeException 1
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_RuntimeException 1
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_RuntimeException 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RuntimeException 1
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RuntimeException 1
 
   // DECLARE_COMMON_INVOKE
   static const int s_call_info_table = 0;

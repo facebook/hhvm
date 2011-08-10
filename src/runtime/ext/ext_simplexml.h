@@ -43,11 +43,6 @@ class c_SimpleXMLElement :
                                 ObjectData::UseSet|
                                 ObjectData::UseUnset> {
  public:
-  BEGIN_CLASS_MAP(SimpleXMLElement)
-  PARENT_CLASS(ArrayAccess)
-  PARENT_CLASS(IteratorAggregate)
-  PARENT_CLASS(Countable)
-  END_CLASS_MAP(SimpleXMLElement)
   DECLARE_CLASS(SimpleXMLElement, SimpleXMLElement, ObjectData)
 
   // need to implement
@@ -104,7 +99,7 @@ class c_SimpleXMLElement :
   public: c_SimpleXMLElement *create(String data, int64 options = 0, bool data_is_url = false, String ns = "", bool is_prefix = false);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
  public:
   Object m_doc;
@@ -131,8 +126,6 @@ class c_SimpleXMLElement :
 FORWARD_DECLARE_CLASS_BUILTIN(LibXMLError);
 class c_LibXMLError : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(LibXMLError)
-  END_CLASS_MAP(LibXMLError)
   DECLARE_CLASS(LibXMLError, LibXMLError, ObjectData)
 
   // need to implement
@@ -147,7 +140,7 @@ class c_LibXMLError : public ExtObjectData {
   public: c_LibXMLError *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 
@@ -157,9 +150,6 @@ class c_LibXMLError : public ExtObjectData {
 FORWARD_DECLARE_CLASS_BUILTIN(SimpleXMLElementIterator);
 class c_SimpleXMLElementIterator : public ExtObjectData, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(SimpleXMLElementIterator)
-  PARENT_CLASS(Iterator)
-  END_CLASS_MAP(SimpleXMLElementIterator)
   DECLARE_CLASS(SimpleXMLElementIterator, SimpleXMLElementIterator, ObjectData)
 
   // need to implement
@@ -184,7 +174,7 @@ class c_SimpleXMLElementIterator : public ExtObjectData, public Sweepable {
   public: c_SimpleXMLElementIterator *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 public:
   void reset_iterator(c_SimpleXMLElement *parent);

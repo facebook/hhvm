@@ -79,8 +79,6 @@ extern const int64 q_Collator_UPPER_FIRST;
 FORWARD_DECLARE_CLASS_BUILTIN(Collator);
 class c_Collator : public ExtObjectData, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(Collator)
-  END_CLASS_MAP(Collator)
   DECLARE_CLASS(Collator, Collator, ObjectData)
 
   // need to implement
@@ -122,7 +120,7 @@ class c_Collator : public ExtObjectData, public Sweepable {
   public: c_Collator *create(String locale);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
  private:
   String     m_locale;
@@ -138,8 +136,6 @@ extern const int64 q_Locale_VALID_LOCALE;
 FORWARD_DECLARE_CLASS_BUILTIN(Locale);
 class c_Locale : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(Locale)
-  END_CLASS_MAP(Locale)
   DECLARE_CLASS(Locale, Locale, ObjectData)
 
   // need to implement
@@ -154,7 +150,7 @@ class c_Locale : public ExtObjectData {
   public: c_Locale *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 extern const int64 q_Normalizer_NONE;
@@ -173,8 +169,6 @@ extern const int64 q_Normalizer_NFKC;
 FORWARD_DECLARE_CLASS_BUILTIN(Normalizer);
 class c_Normalizer : public ExtObjectData, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(Normalizer)
-  END_CLASS_MAP(Normalizer)
   DECLARE_CLASS(Normalizer, Normalizer, ObjectData)
 
   // need to implement
@@ -199,7 +193,7 @@ class c_Normalizer : public ExtObjectData, public Sweepable {
   public: c_Normalizer *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 

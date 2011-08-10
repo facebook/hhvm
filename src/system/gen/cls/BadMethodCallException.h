@@ -33,7 +33,6 @@ class c_BadMethodCallException : public c_BadFunctionCallException {
   // Properties
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(BadMethodCallException, BadMethodCallException)
 
   // DECLARE_STATIC_PROP_OPS
@@ -42,15 +41,6 @@ class c_BadMethodCallException : public c_BadFunctionCallException {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_BadMethodCallException 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_BadMethodCallException 1
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_BadMethodCallException 1
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_BadMethodCallException 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_BadMethodCallException 1
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_BadMethodCallException 1
 
   // DECLARE_COMMON_INVOKE
   static const int s_call_info_table = 0;

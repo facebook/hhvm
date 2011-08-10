@@ -32,7 +32,6 @@ class c_stdClass : public ExtObjectData {
   // Properties
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(stdClass, stdClass)
 
   // DECLARE_STATIC_PROP_OPS
@@ -41,15 +40,6 @@ class c_stdClass : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_stdClass 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_stdClass 1
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_stdClass 1
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_stdClass 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_stdClass 1
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_stdClass 1
 
   // DECLARE_COMMON_INVOKE
   static const int s_call_info_table = 0;

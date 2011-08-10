@@ -54,30 +54,6 @@ Variant &c_RecursiveDirectoryIterator::os_lval(CStrRef s) {
   return c_DirectoryIterator::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RecursiveDirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_RecursiveDirectoryIterator
-Variant * c_RecursiveDirectoryIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x71089C29FE923FA7LL, SplFileInfo) { return c_SplFileInfo::o_realPropPrivate(prop, flags); }
-      break;
-    default:
-      break;
-  }
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_RecursiveDirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RecursiveDirectoryIterator
-Variant * c_RecursiveDirectoryIterator::o_realPropPublic(CStrRef s, int flags) const {
-  return c_DirectoryIterator::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RecursiveDirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RecursiveDirectoryIterator
-Variant * c_RecursiveDirectoryIterator::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RecursiveDirectoryIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_RecursiveDirectoryIterator
 Variant c_RecursiveDirectoryIterator::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -107,31 +83,21 @@ Variant c_RecursiveDirectoryIterator::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_RecursiveDirectoryIterator
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(RecursiveDirectoryIterator)
-bool c_RecursiveDirectoryIterator::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 15) {
-    case 1:
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss22bfe43e, "Traversable"));
-      break;
-    case 3:
-      HASH_INSTANCEOF(0x191964700AF036D3LL, NAMSTR(s_sys_ss49963173, "RecursiveIterator"));
-      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ssc1c38583, "SeekableIterator"));
-      break;
-    case 7:
-      HASH_INSTANCEOF(0x71089C29FE923FA7LL, NAMSTR(s_sys_ss914a58e9, "SplFileInfo"));
-      break;
-    case 8:
-      HASH_INSTANCEOF(0x464D3427431A6ED8LL, NAMSTR(s_sys_ss80c39bb4, "RecursiveDirectoryIterator"));
-      break;
-    case 14:
-      HASH_INSTANCEOF(0x7754323897E8A15ELL, NAMSTR(s_sys_ssc72eef1f, "DirectoryIterator"));
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ssc64ebfff, "Iterator"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_RecursiveDirectoryIterator::s_instanceof_table[] = {
+  {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
+  {0x191964700AF036D3LL,0,"RecursiveIterator",(const ObjectStaticCallbacks*)2},
+  {0x60C47E7FE145DC43LL,1,"SeekableIterator",(const ObjectStaticCallbacks*)2},
+  {0x71089C29FE923FA7LL,1,"SplFileInfo",&cw_SplFileInfo},
+  {0x464D3427431A6ED8LL,1,"RecursiveDirectoryIterator",&cw_RecursiveDirectoryIterator},
+  {0x7754323897E8A15ELL,0,"DirectoryIterator",&cw_DirectoryIterator},
+  {0x0636A5F84AF9D29ELL,1,"Iterator",(const ObjectStaticCallbacks*)2},
+};
+const int c_RecursiveDirectoryIterator::s_instanceof_index[] = {
+  15,
+  -1,0,-1,1,-1,-1,-1,3,
+  4,-1,-1,-1,-1,-1,5,-1,
+
+};
 ObjectData *c_RecursiveDirectoryIterator::cloneImpl() {
   ObjectData *obj = coo_RecursiveDirectoryIterator();
   c_RecursiveDirectoryIterator::cloneSet(obj);
@@ -426,12 +392,12 @@ const ObjectStaticCallbacks cw_RecursiveDirectoryIterator = {
   c_RecursiveDirectoryIterator::os_getInit,
   c_RecursiveDirectoryIterator::os_get,
   c_RecursiveDirectoryIterator::os_lval,
-  c_RecursiveDirectoryIterator::os_invoke,
   c_RecursiveDirectoryIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_RecursiveDirectoryIterator,
   c_RecursiveDirectoryIterator::s_call_info_table,c_RecursiveDirectoryIterator::s_call_info_index,
+  c_RecursiveDirectoryIterator::s_instanceof_table,c_RecursiveDirectoryIterator::s_instanceof_index,
   &c_RecursiveDirectoryIterator::s_class_name,
-  &c_SplFileInfo::os_prop_table,&cw_DirectoryIterator
+  &c_SplFileInfo::os_prop_table,0,&cw_DirectoryIterator
 };
 /* SRC: classes/directoryiterator.php line 132 */
 void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags //  = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */
@@ -538,57 +504,25 @@ Variant &c_DirectoryIterator::os_lval(CStrRef s) {
   return c_SplFileInfo::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DirectoryIterator
-Variant * c_DirectoryIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x71089C29FE923FA7LL, SplFileInfo) { return c_SplFileInfo::o_realPropPrivate(prop, flags); }
-      break;
-    default:
-      break;
-  }
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DirectoryIterator
-Variant * c_DirectoryIterator::o_realPropPublic(CStrRef s, int flags) const {
-  return c_SplFileInfo::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DirectoryIterator
-Variant * c_DirectoryIterator::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DirectoryIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DirectoryIterator
 Variant c_DirectoryIterator::os_constant(const char *s) {
   return c_SplFileInfo::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DirectoryIterator
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DirectoryIterator)
-bool c_DirectoryIterator::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 15) {
-    case 1:
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss22bfe43e, "Traversable"));
-      break;
-    case 3:
-      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ssc1c38583, "SeekableIterator"));
-      break;
-    case 7:
-      HASH_INSTANCEOF(0x71089C29FE923FA7LL, NAMSTR(s_sys_ss914a58e9, "SplFileInfo"));
-      break;
-    case 14:
-      HASH_INSTANCEOF(0x7754323897E8A15ELL, NAMSTR(s_sys_ssc72eef1f, "DirectoryIterator"));
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ssc64ebfff, "Iterator"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_DirectoryIterator::s_instanceof_table[] = {
+  {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
+  {0x60C47E7FE145DC43LL,1,"SeekableIterator",(const ObjectStaticCallbacks*)2},
+  {0x71089C29FE923FA7LL,1,"SplFileInfo",&cw_SplFileInfo},
+  {0x7754323897E8A15ELL,0,"DirectoryIterator",&cw_DirectoryIterator},
+  {0x0636A5F84AF9D29ELL,1,"Iterator",(const ObjectStaticCallbacks*)2},
+};
+const int c_DirectoryIterator::s_instanceof_index[] = {
+  15,
+  -1,0,-1,1,-1,-1,-1,2,
+  -1,-1,-1,-1,-1,-1,3,-1,
+
+};
 ObjectData *c_DirectoryIterator::cloneImpl() {
   ObjectData *obj = coo_DirectoryIterator();
   c_DirectoryIterator::cloneSet(obj);
@@ -816,12 +750,12 @@ const ObjectStaticCallbacks cw_DirectoryIterator = {
   c_DirectoryIterator::os_getInit,
   c_DirectoryIterator::os_get,
   c_DirectoryIterator::os_lval,
-  c_DirectoryIterator::os_invoke,
   c_DirectoryIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DirectoryIterator,
   c_DirectoryIterator::s_call_info_table,c_DirectoryIterator::s_call_info_index,
+  c_DirectoryIterator::s_instanceof_table,c_DirectoryIterator::s_instanceof_index,
   &c_DirectoryIterator::s_class_name,
-  &c_SplFileInfo::os_prop_table,&cw_SplFileInfo
+  &c_SplFileInfo::os_prop_table,0,&cw_SplFileInfo
 };
 /* SRC: classes/directoryiterator.php line 14 */
 void c_DirectoryIterator::t___construct(Variant v_path) {

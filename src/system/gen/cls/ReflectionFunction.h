@@ -34,7 +34,6 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   // Properties
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(ReflectionFunction, ReflectionFunction)
 
   // DECLARE_STATIC_PROP_OPS
@@ -43,15 +42,6 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionFunction 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionFunction 1
   static Variant os_constant(const char *s);
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_ReflectionFunction 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionFunction 1
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionFunction 1
 
   // DECLARE_COMMON_INVOKE
   static const MethodCallInfoTable s_call_info_table[];

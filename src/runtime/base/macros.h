@@ -49,25 +49,6 @@ namespace HPHP {
   class c_##cls;                                        \
   typedef Object               p_##cls                  \
 
-#define BEGIN_CLASS_MAP(cls)                            \
-  public:                                               \
-  virtual bool o_instanceof(CStrRef s) const {          \
-    if (strcasecmp(s.data(), #cls) == 0) return true;   \
-
-#define PARENT_CLASS(parent)                            \
-    if (strcasecmp(s.data(), #parent) == 0) return true;\
-
-#define CLASS_MAP_REDECLARED()                          \
-    if (parent->o_instanceof(s)) return true;           \
-
-#define RECURSIVE_PARENT_CLASS(parent)                  \
-    if (strcasecmp(s.data(), #parent) == 0) return true;\
-    if (c_##parent::o_instanceof(s)) return true;       \
-
-#define END_CLASS_MAP(cls)                              \
-    return false;                                       \
-  }                                                     \
-
 #define INVOKE_FEW_ARGS_COUNT 6
 
 #define INVOKE_FEW_ARGS_DECL3                                           \
@@ -124,16 +105,6 @@ namespace HPHP {
   static const MethodCallInfoTable s_call_info_table[];                 \
   static const int s_call_info_index[];                                 \
 
-#define DECLARE_INSTANCE_PROP_OPS                                       \
-  public:                                                               \
-  virtual Variant *o_realProp(CStrRef prop, int flags,                  \
-                        CStrRef context = null_string) const;           \
-  Variant *o_realPropPrivate(CStrRef s, int flags) const;               \
-
-#define DECLARE_INSTANCE_PUBLIC_PROP_OPS                                \
-  public:                                                               \
-  virtual Variant *o_realPropPublic(CStrRef s, int flags) const;        \
-
 #define DECLARE_CLASS_COMMON_NO_SWEEP(cls, originalName) \
   DECLARE_OBJECT_ALLOCATION_NO_SWEEP(c_##cls)                           \
   protected:                                                            \
@@ -142,6 +113,8 @@ namespace HPHP {
   public:                                                               \
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \
+  static const InstanceOfInfo s_instanceof_table[];                     \
+  static const int s_instanceof_index[];                                \
   virtual const ObjectStaticCallbacks *o_get_callbacks() const {        \
     return cw_##cls; }                                                  \
 
@@ -153,27 +126,24 @@ namespace HPHP {
   public:                                                               \
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \
+  static const InstanceOfInfo s_instanceof_table[];                     \
+  static const int s_instanceof_index[];                                \
   virtual const ObjectStaticCallbacks *o_get_callbacks() const {        \
     return cw_##cls; }                                                  \
 
 #define DECLARE_CLASS_NO_SWEEP(cls, originalName, parent)               \
   DECLARE_CLASS_COMMON_NO_SWEEP(cls, originalName)                      \
   DECLARE_STATIC_PROP_OPS                                               \
-  DECLARE_INSTANCE_PROP_OPS                                             \
-  DECLARE_INSTANCE_PUBLIC_PROP_OPS                                      \
   public:                                                               \
 
 #define DECLARE_CLASS(cls, originalName, parent)                        \
   DECLARE_CLASS_COMMON(cls, originalName)                               \
   DECLARE_STATIC_PROP_OPS                                               \
-  DECLARE_INSTANCE_PROP_OPS                                             \
-  DECLARE_INSTANCE_PUBLIC_PROP_OPS                                      \
   public:                                                               \
 
 #define DECLARE_DYNAMIC_CLASS(cls, originalName, parent)                \
   DECLARE_CLASS_COMMON_NO_SWEEP(cls, originalName)                      \
   DECLARE_STATIC_PROP_OPS                                               \
-  DECLARE_INSTANCE_PROP_OPS                                             \
   public:                                                               \
 
 #define CLASS_CHECK(exp) (checkClassExists(s, g), (exp))
@@ -229,25 +199,6 @@ namespace HPHP {
 #define HASH_EXISTS_STRING(code, str, len)                              \
   if (hash == code && s.length() == len &&                              \
       memcmp(s.data(), str, len) == 0) return true
-#define HASH_REALPROP_NAMSTR(code, str, len, prop)                      \
-do {                                                                    \
-  const char *s1 = s.data();                                            \
-  const char *s2 = str.data();                                          \
-  if ((s1 == s2) ||                                                     \
-      (hash == code && s.length() == len &&                             \
-      memcmp(s1, s2, len) == 0))                                        \
-    return const_cast<Variant*>(&m_##prop);                             \
-} while (0)
-#define HASH_REALPROP_TYPED_NAMSTR(code, str, len, prop)                \
-do {                                                                    \
-  const char *s1 = s.data();                                            \
-  const char *s2 = str.data();                                          \
-  if (!(flags&(RealPropCreate|RealPropWrite)) &&                        \
-      ((s1 == s2) ||                                                    \
-      (hash == code && s.length() == len &&                             \
-      memcmp(s1, s2, len) == 0)))                                       \
-    return g->__realPropProxy = m_##prop,&g->__realPropProxy;           \
-} while (0)
 #define HASH_INITIALIZED(code, name, str)                               \
   if (hash == code && strcmp(s, str) == 0)                              \
     return isInitialized(name)
@@ -288,10 +239,6 @@ do { \
   if (hash == code && !strcmp(file, s.c_str())) {                       \
     return pm_ ## fun(once, variables);                                 \
   }
-#define HASH_INSTANCEOF(code, str)                                      \
-  if ((s.data() == str.data()) ||                                       \
-      (hash == code &&                                                  \
-       strcasecmp(s.data(), str.data()) == 0)) return true;             \
 
 ///////////////////////////////////////////////////////////////////////////////
 // global variable macros

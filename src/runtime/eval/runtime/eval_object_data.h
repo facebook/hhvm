@@ -43,8 +43,8 @@ public:
   virtual Array o_toArray() const;
   virtual void o_getArray(Array &props, bool pubOnly = false) const;
   virtual void o_setArray(CArrRef props);
-  virtual Variant *o_realProp(CStrRef prop, int flags,
-                              CStrRef context = null_string) const;
+  virtual Variant *o_realPropHook(CStrRef prop, int flags,
+                                  CStrRef context = null_string) const;
   void o_setPrivate(CStrRef cls, CStrRef s, CVarRef v);
 
   virtual Variant o_getError(CStrRef prop, CStrRef context);
@@ -59,7 +59,7 @@ public:
   virtual bool o_get_call_info_hook(const char *clsname,
                                     MethodCallPackage &mcp, int64 hash = -1);
 
-  virtual bool o_instanceof(CStrRef s) const;
+  virtual bool o_instanceof_hook(CStrRef s) const;
 
   virtual Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
 

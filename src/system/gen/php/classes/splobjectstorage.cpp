@@ -60,66 +60,23 @@ Variant &c_SplObjectStorage::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplObjectStorage
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SplObjectStorage
-Variant * c_SplObjectStorage::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x5BA243B9FBA7A64FLL, SplObjectStorage) { return o_realPropPrivate(prop, flags); }
-      break;
-    default:
-      break;
-  }
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_SplObjectStorage
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplObjectStorage
-Variant * c_SplObjectStorage::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplObjectStorage
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplObjectStorage
-Variant * c_SplObjectStorage::o_realPropPrivate(CStrRef s, int flags) const {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 2:
-      HASH_REALPROP_TYPED_NAMSTR(0x4B27521443880CAELL, NAMSTR(s_sys_ssc0ff3081, "index"), 5, index);
-      break;
-    case 3:
-      HASH_REALPROP_NAMSTR(0x17AC96477E2B6DC3LL, NAMSTR(s_sys_ss64fc2cb1, "storage"), 7, storage);
-      break;
-    default:
-      break;
-  }
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplObjectStorage
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SplObjectStorage
 Variant c_SplObjectStorage::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SplObjectStorage
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(SplObjectStorage)
-bool c_SplObjectStorage::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 1:
-      HASH_INSTANCEOF(0x795F86375EE263D1LL, NAMSTR(s_sys_ss5b753b53, "Countable"));
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss22bfe43e, "Traversable"));
-      break;
-    case 6:
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ssc64ebfff, "Iterator"));
-      break;
-    case 7:
-      HASH_INSTANCEOF(0x5BA243B9FBA7A64FLL, NAMSTR(s_sys_ss0ec14ee2, "SplObjectStorage"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_SplObjectStorage::s_instanceof_table[] = {
+  {0x795F86375EE263D1LL,0,"Countable",(const ObjectStaticCallbacks*)2},
+  {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
+  {0x0636A5F84AF9D29ELL,1,"Iterator",(const ObjectStaticCallbacks*)2},
+  {0x5BA243B9FBA7A64FLL,1,"SplObjectStorage",&cw_SplObjectStorage},
+};
+const int c_SplObjectStorage::s_instanceof_index[] = {
+  7,
+  -1,0,-1,-1,-1,-1,2,3,
+
+};
 ObjectData *c_SplObjectStorage::cloneImpl() {
   ObjectData *obj = coo_SplObjectStorage();
   c_SplObjectStorage::cloneSet(obj);
@@ -335,12 +292,12 @@ const ObjectStaticCallbacks cw_SplObjectStorage = {
   c_SplObjectStorage::os_getInit,
   c_SplObjectStorage::os_get,
   c_SplObjectStorage::os_lval,
-  c_SplObjectStorage::os_invoke,
   c_SplObjectStorage::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SplObjectStorage,
   c_SplObjectStorage::s_call_info_table,c_SplObjectStorage::s_call_info_index,
+  c_SplObjectStorage::s_instanceof_table,c_SplObjectStorage::s_instanceof_index,
   &c_SplObjectStorage::s_class_name,
-  &c_SplObjectStorage::os_prop_table,0
+  &c_SplObjectStorage::os_prop_table,0,0
 };
 void c_SplObjectStorage::init() {
   m_storage = s_sys_sa00000000;
@@ -474,8 +431,8 @@ ObjectData *coo_SplObjectStorage() {
 
 // Class tables
 static const ClassPropTableEntry cpt_table_entries[] = {
-  { 256, 10,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_storage),&NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage") },
-  { 256, 4,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_index),&NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index") },
+  {0x17AC96477E2B6DC3LL,1,18,258,10,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_storage),&NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage") },
+  {0x4B27521443880CAELL,0,18,258,4,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_index),&NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index") },
 
 };
 static const ClassPropTableEntry *cpt_private_entries[] = {
@@ -483,8 +440,12 @@ static const ClassPropTableEntry *cpt_private_entries[] = {
   cpt_table_entries+1,
   0,
 };
+static const int cpt_hash_entries[] = {
+  -1,-1,-1,0,-1,-1,1,-1,
+};
 const ClassPropTable c_SplObjectStorage::os_prop_table = {
-  2,2,0,cpt_table_entries+0,cpt_private_entries+0
+  7,0,cpt_hash_entries+0,
+  0,cpt_table_entries+0,cpt_private_entries+0
 };
 
 ///////////////////////////////////////////////////////////////////////////////

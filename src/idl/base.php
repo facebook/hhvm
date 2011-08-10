@@ -698,18 +698,6 @@ EOT
   }
   $parents = array();
   fprintf($f, " {\n public:\n");
-  fprintf($f, "  BEGIN_CLASS_MAP(%s)\n", $clsname);
-  if ($class['parent']) {
-    $p = $class['parent'];
-    fprintf($f, "  RECURSIVE_PARENT_CLASS(%s)\n", $p);
-  }
-  foreach ($class['ifaces'] as $p) {
-    fprintf($f, "  PARENT_CLASS(%s)\n", $p);
-  }
-  foreach ($parents as $p) {
-    fprintf($f, "  RECURSIVE_PARENT_CLASS(%s)\n", $p);
-  }
-  fprintf($f, "  END_CLASS_MAP(%s)\n", $clsname);
   fprintf($f, "  DECLARE_CLASS(%s, %s, %s)\n", $clsname, $clsname,
           $class['parent'] ? $class['parent'] : 'ObjectData');
 

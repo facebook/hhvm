@@ -621,6 +621,29 @@ TypePtr ClassScope::checkConst(const std::string &name, TypePtr type,
                                     ar, construct, m_bases, defScope);
 }
 
+void ClassScope::getAllParents(AnalysisResultConstPtr ar,
+                               std::vector<std::string> &names) {
+  if (m_stmt) {
+    if (isInterface()) {
+      boost::dynamic_pointer_cast<InterfaceStatement>
+        (m_stmt)->getAllParents(ar, names);
+    } else {
+      boost::dynamic_pointer_cast<ClassStatement>
+        (m_stmt)->getAllParents(ar, names);
+    }
+  } else {
+    for (unsigned i = 0; i < m_bases.size(); i++) {
+      const string &base = m_bases[i];
+      names.push_back(base);
+      if (ClassScopePtr cls = ar->findClass(base)) {
+        if (!cls->isRedeclaring()) {
+          cls->getAllParents(ar, names);
+        }
+      }
+    }
+  }
+}
+
 ClassScopePtr ClassScope::getParentScope(AnalysisResultConstPtr ar) const {
   if (m_parent.empty()) return ClassScopePtr();
   return ar->findClass(m_parent);
@@ -1096,10 +1119,16 @@ void ClassScope::outputCPPGetClassConstantImpl
   cg_indentEnd("}\n");
 }
 
+static int propTableSize(int entries) {
+  int size = Util::roundUpToPowerOfTwo(entries * 2);
+  return size < 8 ? 8 : size;
+}
+
 static bool buildClassPropTableMap(
   CodeGenerator &cg,
   const StringToClassScopePtrVecMap &classScopes,
   ClassScope::ClassPropTableMap &tables) {
+  typedef ClassScope::IndexedSym IndexedSym;
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
   int totalEntries = 0;
   for (StringToClassScopePtrVecMap::const_iterator iter = classScopes.begin();
@@ -1112,16 +1141,40 @@ static bool buildClassPropTableMap(
         cls->getVariables()->getSymbols();
       ClassScope::Derivation dynamicObject = cls->derivesFromRedeclaring();
       vector<const Symbol *> entries;
-      for (unsigned int j = 0; j < symbolVec.size(); j++) {
+      for (unsigned j = 0; j < symbolVec.size(); j++) {
         const Symbol *sym = symbolVec[j];
         if (sym->isStatic() || (dynamicObject && !sym->isPrivate())) continue;
         entries.push_back(sym);
       }
-      tables[cls->getId()] =
-        pair<ClassScopePtr, vector<const Symbol *> >(cls, entries);
-      if (entries.size() > 0) {
-        totalEntries += entries.size();
+      if (!entries.size()) continue;
+      ClassScope::ClassPropTableInfo &info = tables[cls->getId()];
+      info.cls = cls;
+      int tableSize = propTableSize(entries.size());
+
+      unsigned p = 0;
+      for (unsigned j = 0; j < entries.size(); j++) {
+        const Symbol *sym = entries[j];
+        int hash = hash_string_i(sym->getName().c_str(),
+                                 sym->getName().size()) & (tableSize - 1);
+        int pix = -1;
+        if (sym->isPrivate()) {
+          pix = p++;
+        }
+        info.syms[hash].push_back(IndexedSym(j, pix, sym));
       }
+      info.actualIndex.resize(entries.size() + 1, -1);
+      info.privateIndex.resize(p);
+      int newIndex = 0;
+      for (map<int, vector<IndexedSym> >::iterator it = info.syms.begin(),
+             end = info.syms.end(); it != end; ++it) {
+        const vector<IndexedSym> &v = it->second;
+        for (int k = 0, s = v.size(); k < s; k++, newIndex++) {
+          const IndexedSym &is = v[k];
+          info.actualIndex[is.origIndex] = newIndex;
+          if (is.privIndex >= 0) info.privateIndex[is.privIndex] = newIndex;
+        }
+      }
+      totalEntries += entries.size();
     }
   }
   return totalEntries > 0;
@@ -1167,96 +1220,138 @@ void ClassScope::outputCPPGetClassPropTableImpl(
 
   for (ClassPropTableMap::const_iterator iter = tables.begin();
        iter != tables.end(); iter++) {
-    const vector<const Symbol *> &entries = iter->second.second;
-    if (entries.size() == 0) continue;
-    ClassScopePtr cls = iter->second.first;
+    const ClassPropTableInfo &info = iter->second;
+    assert(info.syms.size());
+    ClassScopePtr cls = info.cls;
+    for (map<int, vector<IndexedSym> >::const_iterator it = info.syms.begin(),
+           end = info.syms.end(); it != end; ++it) {
+      const vector<IndexedSym> &v = it->second;
+      for (int k = 0, s = v.size(); k < s; k++) {
+        const Symbol *sym = v[k].sym;
+        int cur = info.actualIndex[v[k].origIndex];
+        int next = info.actualIndex[v[k].origIndex + 1];
+        if (next < 0) next = cur;
 
-    for (unsigned int i = 0; i < entries.size(); i++) {
-      const Symbol *sym = entries[i];
-      string prop(sym->getName());
-      int flags = 0;
-      if (sym->isPublic())    flags |= ClassInfo::IsPublic;
-      if (sym->isProtected()) flags |= ClassInfo::IsProtected;
-      if (sym->isPrivate()) {
-        ASSERT(!sym->isOverride());
-        flags |= ClassInfo::IsPrivate;
-        prop = '\0' + cls->getOriginalName() + '\0' + prop;
+        string prop(sym->getName());
+        int flags = 0;
+        if (sym->isPublic())    flags |= ClassInfo::IsPublic;
+        if (sym->isProtected()) flags |= ClassInfo::IsProtected;
+        if (sym->isPrivate()) {
+          ASSERT(!sym->isOverride());
+          flags |= ClassInfo::IsPrivate;
+          prop = '\0' + cls->getOriginalName() + '\0' + prop;
+        }
+        ASSERT(!sym->isStatic());
+        if (sym->isOverride()) {
+          ASSERT(!system);
+          flags |= ClassInfo::IsOverride;
+        }
+        if (k == s - 1) flags |= ClassInfo::IsRedeclared;
+        cg_printf("{0x%016llXLL,%d,%d,%d,%d,",
+                  hash_string_i(sym->getName().c_str(), sym->getName().size()),
+                  next - cur, prop.size() - sym->getName().size(),
+                  flags, sym->getFinalType()->getDataType());
+        cg_printf("GET_PROPERTY_OFFSET(%s%s, %s%s),",
+                  Option::ClassPrefix, cls->getId().c_str(),
+                  Option::PropertyPrefix, sym->getName().c_str());
+        cg_printf("&");
+        cg_printString(prop, ar, cls);
+        cg_printf(" },\n");
       }
-      ASSERT(!sym->isStatic());
-      if (sym->isOverride()) {
-        ASSERT(!system);
-        flags |= ClassInfo::IsOverride;
-      }
-      cg_printf("{ %d, %d,", flags, sym->getFinalType()->getDataType());
-      cg_printf("GET_PROPERTY_OFFSET(%s%s, %s%s),",
-                Option::ClassPrefix, cls->getId().c_str(),
-                Option::PropertyPrefix, sym->getName().c_str());
-      cg_printf("&", flags);
-      cg_printString(prop, ar, cls);
-      cg_printf(" },\n");
     }
     cg_printf("\n");
   }
   cg_indentEnd("};\n");
   int curIndex = 0;
-  bool haveZero = false;
-  std::vector<int> privateCounts;
+  int privateEntries = 0;
   cg_indentBegin("static const ClassPropTableEntry *%sprivate_entries[] = {\n",
                  Option::ClassPropTablePrefix);
   for (ClassPropTableMap::const_iterator iter = tables.begin();
        iter != tables.end(); iter++) {
-    const vector<const Symbol *> &entries = iter->second.second;
-    if (entries.size()) {
-      int pCount = 0;
-      for (unsigned int i = 0; i < entries.size(); i++) {
-        const Symbol *sym = entries[i];
-        if (sym->isPrivate()) {
-          cg_printf("%stable_entries+%d,\n",
-                    Option::ClassPropTablePrefix, curIndex);
-          pCount++;
-          haveZero = false;
-        }
-        curIndex++;
-      }
-      if (!haveZero) {
-        cg_printf("0,\n");
-        haveZero = true;
-      }
-      privateCounts.push_back(pCount);
+    const ClassPropTableInfo &info = iter->second;
+    unsigned psize = info.privateIndex.size();
+    for (unsigned i = 0; i < psize; i++) {
+      cg_printf("%stable_entries+%d,\n",
+                Option::ClassPropTablePrefix,
+                curIndex + info.privateIndex[i]);
+    }
+    curIndex += info.actualIndex.size() - 1;
+
+    if (psize) {
+      privateEntries += psize + 1;
+      cg_printf("0,\n");
     }
   }
+  if (!privateEntries) {
+    cg_printf("0\n");
+    privateEntries++;
+  }
+  cg_indentEnd("};\n");
+
+  cg_indentBegin("static const int %shash_entries[] = {\n",
+                 Option::ClassPropTablePrefix);
+
+  for (ClassPropTableMap::const_iterator iter = tables.begin();
+       iter != tables.end(); iter++) {
+    const ClassPropTableInfo &info = iter->second;
+    assert(info.syms.size());
+    int n = 0, m = 0;
+    for (map<int, vector<IndexedSym> >::const_iterator it = info.syms.begin(),
+           end = info.syms.end(); it != end; ++it) {
+      while (n < it->first) {
+        cg_printf("-1,");
+        n++;
+      }
+      cg_printf("%d,", m);
+      n++;
+      m += it->second.size();
+    }
+    int sz = propTableSize(info.actualIndex.size() - 1);
+    assert(n <= sz);
+    while (n < sz) {
+      cg_printf("-1,");
+      n++;
+    }
+    cg_printf("\n");
+  }
+
   cg_indentEnd("};\n");
 
   curIndex = 0;
   int curOffset = 0;
   int privateOffset = 0;
+  int hashOffset = 0;
   for (ClassPropTableMap::const_iterator iter = tables.begin();
        iter != tables.end(); iter++) {
-    if (iter->second.second.size() > 0) {
-      int pCount = privateCounts[curIndex++];
-      if (pCount && privateOffset) privateOffset++;
-      cg_indentBegin("const ClassPropTable %s%s::%sprop_table = {\n",
-                Option::ClassPrefix, iter->first.c_str(),
-                Option::ObjectStaticPrefix);
-      cg_printf("%d,%d,",
-                (int)iter->second.second.size(), pCount);
-      ClassScopePtr parentCls = iter->second.first->getNextParentWithProp(ar);
-      if (parentCls) {
-        cg_printf("&%s%s::%sprop_table,",
-                  Option::ClassPrefix, parentCls->getId().c_str(),
-                  Option::ObjectStaticPrefix);
-      } else {
-        cg_printf("0,");
-      }
-      cg_printf("%stable_entries+%d,",
-                Option::ClassPropTablePrefix, curOffset);
-      cg_printf("%sprivate_entries+%d\n",
-                Option::ClassPropTablePrefix, privateOffset);
-      cg_indentEnd("};\n");
+    const ClassPropTableInfo &info = iter->second;
+    ASSERT(info.syms.size() > 0);
 
-      curOffset += iter->second.second.size();
-      privateOffset += pCount;
+    int pCount = info.privateIndex.size();
+    cg_indentBegin("const ClassPropTable %s%s::%sprop_table = {\n",
+                   Option::ClassPrefix, iter->first.c_str(),
+                   Option::ObjectStaticPrefix);
+    int tableSize = propTableSize(info.actualIndex.size() - 1);
+    cg_printf("%d,%d,", tableSize - 1, info.actualIndex[0]);
+    cg_printf("%shash_entries+%d,\n",
+              Option::ClassPropTablePrefix, hashOffset);
+    hashOffset += tableSize;
+    ClassScopePtr parentCls = info.cls->getNextParentWithProp(ar);
+    if (parentCls) {
+      cg_printf("&%s%s::%sprop_table,",
+                Option::ClassPrefix, parentCls->getId().c_str(),
+                Option::ObjectStaticPrefix);
+    } else {
+      cg_printf("0,");
     }
+    cg_printf("%stable_entries+%d,",
+              Option::ClassPropTablePrefix, curOffset);
+    cg_printf("%sprivate_entries+%d\n",
+              Option::ClassPropTablePrefix,
+              pCount ? privateOffset : privateEntries - 1);
+    cg_indentEnd("};\n");
+
+    curOffset += info.actualIndex.size() - 1;
+    privateOffset += pCount + (pCount > 0);
   }
 }
 
@@ -1541,9 +1636,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
   }
 
   // instanceof
-  if (!isExtensionClass()) { // Extension class uses macros
-    cg_indentBegin("bool %s%s::o_instanceof(CStrRef s) const {\n",
-                   Option::ClassPrefix, clsName);
+  {
     vector<string> bases;
     getAllParents(ar, bases);
     // Eliminate duplicates
@@ -1551,23 +1644,63 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     bases.erase(unique(bases.begin(), bases.end()), bases.end());
     vector<const char *> ancestors;
     // Convert to char * and add self
-    ancestors.push_back(m_originalName.c_str());
+    ancestors.push_back(m_name.c_str());
     for (unsigned int i = 0; i < bases.size(); i++) {
       ancestors.push_back(bases[i].c_str());
     }
-    for (JumpTable jt(cg, ancestors, true, false, true);
-         jt.ready(); jt.next()) {
+    cg_indentBegin("const InstanceOfInfo %s%s::s_instanceof_table[] = {\n",
+                   Option::ClassPrefix, clsName);
+    vector<int> offsets;
+    int n = 0;
+    JumpTable jt(cg, ancestors, true, false, true, true);
+    for (; jt.ready(); ++n, jt.next()) {
+      unsigned cur = jt.current();
+      if (offsets.size() <= cur) {
+        offsets.resize(cur, -1);
+        offsets.push_back(n);
+      }
       const char *name = jt.key();
-      string nameStr(name);
-      cg_printf("HASH_INSTANCEOF(0x%016llXLL, ", hash_string_i(name));
-      cg_printString(nameStr, ar, shared_from_this());
-      cg_printf(");\n");
+      ClassScopePtr cls;
+      bool knownClass;
+      if (name == m_name) {
+        cls = static_pointer_cast<ClassScope>(shared_from_this());
+        knownClass = true;
+      } else {
+         cls = ar->findClass(name);
+         knownClass = !cls->isRedeclaring();
+      }
+      if (knownClass) {
+        name = cls->getOriginalName().c_str();
+      }
+      cg_printf("{0x%016llXLL,%d,\"%s\",",
+                hash_string_i(name), jt.last(),
+                CodeGenerator::EscapeLabel(name).c_str());
+      if (knownClass) {
+        if (cls->isInterface()) {
+          cg_printf("(const ObjectStaticCallbacks*)2},\n");
+        } else {
+          cg_printf("&%s%s%s},\n",
+                    Option::ClassWrapperFunctionPrefix,
+                    cls->getId().c_str(),
+                    cls->isRedeclaring() ? ".oscb" : "");
+        }
+      } else {
+        cg_printf("(const ObjectStaticCallbacks*)"
+                  "(offsetof(GlobalVariables, %s%s)+1)},\n",
+                  Option::ClassStaticsCallbackPrefix,
+                  CodeGenerator::FormatLabel(Util::toLower(name)).c_str());
+      }
     }
-    if (derivesFromRedeclaring()) {
-      cg_printf("if (parent->o_instanceof(s)) return true;\n");
+    cg_indentEnd("};\n");
+    cg_indentBegin("const int %s%s::s_instanceof_index[] = {\n",
+                   Option::ClassPrefix, clsName);
+    cg_printf("%d,\n", jt.size() - 1);
+    for (int i = 0, e = jt.size(), s = offsets.size(); i < e; i++) {
+      cg_printf("%d,", i < s ? offsets[i] : -1);
+      if ((i & 7) == 7) cg_printf("\n");
     }
-    cg_printf("return false;\n");
-    cg_indentEnd("}\n");
+    cg_printf("\n");
+    cg_indentEnd("};\n");
   }
 
   // Cloning
@@ -1717,8 +1850,10 @@ void ClassScope::outputCPPGlobalTableWrappersDecl(CodeGenerator &cg,
 string ClassScope::getClassPropTableId(AnalysisResultPtr ar) {
   if (checkHasPropTable()) return getId();
 
-  if (ClassScopePtr p = getParentScope(ar)) {
-    return p->getClassPropTableId(ar);
+  if (derivesFromRedeclaring() != DirectFromRedeclared) {
+    if (ClassScopePtr p = getParentScope(ar)) {
+      return p->getClassPropTableId(ar);
+    }
   }
 
   return "";
@@ -1741,13 +1876,14 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
             Option::ObjectStaticPrefix);
   cg_printf("%s%s::%slval,\n", Option::ClassPrefix, id.c_str(),
             Option::ObjectStaticPrefix);
-  cg_printf("%s%s::%sinvoke,\n", Option::ClassPrefix, id.c_str(),
-            Option::ObjectStaticPrefix);
   cg_printf("%s%s::%sconstant,\n", Option::ClassPrefix, id.c_str(),
             Option::ObjectStaticPrefix);
   cg_printf("(ObjectData*(*)(ObjectData*))%s%s,\n",
             Option::CreateObjectOnlyPrefix, id.c_str());
   cg_printf("%s%s::s_call_info_table,%s%s::s_call_info_index,\n",
+            Option::ClassPrefix, id.c_str(),
+            Option::ClassPrefix, id.c_str());
+  cg_printf("%s%s::s_instanceof_table,%s%s::s_instanceof_index,\n",
             Option::ClassPrefix, id.c_str(),
             Option::ClassPrefix, id.c_str());
   cg_printf("&%s%s::s_class_name,\n", Option::ClassPrefix, id.c_str());
@@ -1758,12 +1894,24 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
               Option::ClassPrefix, prop.c_str(),
               Option::ObjectStaticPrefix);
   }
-  if (derivesFromRedeclaring() == DirectFromRedeclared) {
-    cg_printf("(const ObjectStaticCallbacks*)"
-              "(offsetof(GlobalVariables, %s%s)+1)",
+
+  ClassScopeRawPtr par;
+  if (derivesFromRedeclaring() != FromNormal) {
+    par = ClassScopeRawPtr(this);
+    do {
+      par = par->getParentScope(ar);
+    } while (par && !par->isRedeclaring());
+  }
+  if (par) {
+    cg_printf("offsetof(GlobalVariables, %s%s),",
               Option::ClassStaticsCallbackPrefix,
-              CodeGenerator::FormatLabel(m_parent).c_str());
-  } else if (ClassScopeRawPtr par = getParentScope(ar)) {
+              CodeGenerator::FormatLabel(par->m_name).c_str());
+  } else {
+    cg_printf("0,");
+  }
+
+  if (derivesFromRedeclaring() != DirectFromRedeclared &&
+      (par = getParentScope(ar))) {
     cg_printf("&%s%s\n",
               Option::ClassWrapperFunctionPrefix, par->getId().c_str());
   } else {

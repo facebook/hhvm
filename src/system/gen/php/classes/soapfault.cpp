@@ -76,63 +76,20 @@ Variant &c_SoapFault::os_lval(CStrRef s) {
   return c_Exception::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapFault
-Variant * c_SoapFault::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SoapFault
-Variant * c_SoapFault::o_realPropPublic(CStrRef s, int flags) const {
-  int64 hash = s->hash();
-  switch (hash & 15) {
-    case 1:
-      HASH_REALPROP_NAMSTR(0x223FBAE23D3926D1LL, NAMSTR(s_sys_ssb9540e00, "faultcodens"), 11, faultcodens);
-      break;
-    case 2:
-      HASH_REALPROP_NAMSTR(0x6AB66433A5A06842LL, NAMSTR(s_sys_ss5b7cf41f, "faultactor"), 10, faultactor);
-      HASH_REALPROP_NAMSTR(0x3B9257D5A7BFC952LL, NAMSTR(s_sys_ss2235bf3d, "detail"), 6, detail);
-      break;
-    case 7:
-      HASH_REALPROP_NAMSTR(0x7F0FEC816F538D87LL, NAMSTR(s_sys_ss40793385, "headerfault"), 11, headerfault);
-      break;
-    case 9:
-      HASH_REALPROP_NAMSTR(0x6C2E2F7FE9DC8A09LL, NAMSTR(s_sys_ssee3a4fdd, "_name"), 5, _name);
-      break;
-    case 13:
-      HASH_REALPROP_NAMSTR(0x58CB312B3F4C8D8DLL, NAMSTR(s_sys_ssff0553c0, "faultcode"), 9, faultcode);
-      HASH_REALPROP_NAMSTR(0x6CDD9F7B80D687ADLL, NAMSTR(s_sys_ssff4490ec, "faultstring"), 11, faultstring);
-      break;
-    default:
-      break;
-  }
-  return c_Exception::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapFault
-Variant * c_SoapFault::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapFault
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapFault
 Variant c_SoapFault::os_constant(const char *s) {
   return c_Exception::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapFault
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(SoapFault)
-bool c_SoapFault::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 0:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      break;
-    case 1:
-      HASH_INSTANCEOF(0x32E5C767255D2515LL, NAMSTR(s_sys_ss01cbd710, "SoapFault"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_SoapFault::s_instanceof_table[] = {
+  {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
+  {0x32E5C767255D2515LL,1,"SoapFault",&cw_SoapFault},
+};
+const int c_SoapFault::s_instanceof_index[] = {
+  3,
+  0,1,-1,-1,
+};
 ObjectData *c_SoapFault::cloneImpl() {
   ObjectData *obj = coo_SoapFault();
   c_SoapFault::cloneSet(obj);
@@ -267,12 +224,12 @@ const ObjectStaticCallbacks cw_SoapFault = {
   c_SoapFault::os_getInit,
   c_SoapFault::os_get,
   c_SoapFault::os_lval,
-  c_SoapFault::os_invoke,
   c_SoapFault::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SoapFault,
   c_SoapFault::s_call_info_table,c_SoapFault::s_call_info_index,
+  c_SoapFault::s_instanceof_table,c_SoapFault::s_instanceof_index,
   &c_SoapFault::s_class_name,
-  &c_SoapFault::os_prop_table,&cw_Exception
+  &c_SoapFault::os_prop_table,0,&cw_Exception
 };
 /* SRC: classes/soapfault.php line 12 */
 void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_actor //  = null
@@ -418,20 +375,24 @@ ObjectData *coo_SoapFault() {
 
 // Class tables
 static const ClassPropTableEntry cpt_table_entries[] = {
-  { 64, 10,GET_PROPERTY_OFFSET(c_SoapFault, m_faultcode),&NAMSTR(s_sys_ssff0553c0, "faultcode") },
-  { 64, 10,GET_PROPERTY_OFFSET(c_SoapFault, m_faultcodens),&NAMSTR(s_sys_ssb9540e00, "faultcodens") },
-  { 64, 10,GET_PROPERTY_OFFSET(c_SoapFault, m_faultstring),&NAMSTR(s_sys_ssff4490ec, "faultstring") },
-  { 64, 10,GET_PROPERTY_OFFSET(c_SoapFault, m_faultactor),&NAMSTR(s_sys_ss5b7cf41f, "faultactor") },
-  { 64, 10,GET_PROPERTY_OFFSET(c_SoapFault, m_detail),&NAMSTR(s_sys_ss2235bf3d, "detail") },
-  { 64, 10,GET_PROPERTY_OFFSET(c_SoapFault, m__name),&NAMSTR(s_sys_ssee3a4fdd, "_name") },
-  { 64, 10,GET_PROPERTY_OFFSET(c_SoapFault, m_headerfault),&NAMSTR(s_sys_ss40793385, "headerfault") },
+  {0x223FBAE23D3926D1LL,6,0,66,10,GET_PROPERTY_OFFSET(c_SoapFault, m_faultcodens),&NAMSTR(s_sys_ssb9540e00, "faultcodens") },
+  {0x6AB66433A5A06842LL,1,0,64,10,GET_PROPERTY_OFFSET(c_SoapFault, m_faultactor),&NAMSTR(s_sys_ss5b7cf41f, "faultactor") },
+  {0x3B9257D5A7BFC952LL,2,0,66,10,GET_PROPERTY_OFFSET(c_SoapFault, m_detail),&NAMSTR(s_sys_ss2235bf3d, "detail") },
+  {0x7F0FEC816F538D87LL,0,0,66,10,GET_PROPERTY_OFFSET(c_SoapFault, m_headerfault),&NAMSTR(s_sys_ss40793385, "headerfault") },
+  {0x6C2E2F7FE9DC8A09LL,-1,0,66,10,GET_PROPERTY_OFFSET(c_SoapFault, m__name),&NAMSTR(s_sys_ssee3a4fdd, "_name") },
+  {0x58CB312B3F4C8D8DLL,-5,0,64,10,GET_PROPERTY_OFFSET(c_SoapFault, m_faultcode),&NAMSTR(s_sys_ssff0553c0, "faultcode") },
+  {0x6CDD9F7B80D687ADLL,-5,0,66,10,GET_PROPERTY_OFFSET(c_SoapFault, m_faultstring),&NAMSTR(s_sys_ssff4490ec, "faultstring") },
 
 };
 static const ClassPropTableEntry *cpt_private_entries[] = {
-  0,
+  0
+};
+static const int cpt_hash_entries[] = {
+  -1,0,1,-1,-1,-1,-1,3,-1,4,-1,-1,-1,5,-1,-1,
 };
 const ClassPropTable c_SoapFault::os_prop_table = {
-  7,0,&c_Exception::os_prop_table,cpt_table_entries+0,cpt_private_entries+0
+  15,5,cpt_hash_entries+0,
+  &c_Exception::os_prop_table,cpt_table_entries+0,cpt_private_entries+0
 };
 
 ///////////////////////////////////////////////////////////////////////////////

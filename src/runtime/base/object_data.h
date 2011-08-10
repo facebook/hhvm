@@ -117,7 +117,8 @@ class ObjectData : public CountableNF {
    * hierarchy. It is also worth noting that o_instanceof will always return
    * false for classes that are descendents of ResourceData.
    */
-  virtual bool o_instanceof(CStrRef s) const = 0;
+  bool o_instanceof(CStrRef s) const;
+  virtual bool o_instanceof_hook(CStrRef s) const;
   virtual ObjectData *getRedeclaredParent() const { return 0; }
 
   // class info
@@ -186,7 +187,7 @@ class ObjectData : public CountableNF {
   static Variant os_get(CStrRef s);
   static Variant &os_lval(CStrRef s);
 
-  static Variant os_invoke(const char *c, const char *s,
+  static Variant os_invoke(CStrRef c, CStrRef s,
                            CArrRef params, int64 hash, bool fatal = true);
   static Variant os_constant(const char *s);
 
@@ -194,9 +195,11 @@ class ObjectData : public CountableNF {
   virtual Array o_toArray() const;
   virtual Array o_toIterArray(CStrRef context, bool getRef = false);
   virtual Array o_getDynamicProperties() const;
-  virtual Variant *o_realProp(CStrRef s, int flags,
-                              CStrRef context = null_string) const;
-  virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
+  Variant *o_realProp(CStrRef s, int flags,
+                      CStrRef context = null_string) const;
+  Variant *o_realPropPublic(CStrRef s, int flags) const;
+  virtual Variant *o_realPropHook(CStrRef s, int flags,
+                                  CStrRef context = null_string) const;
   bool o_exists(CStrRef s, CStrRef context = null_string) const;
   Variant o_get(CStrRef s, bool error = true,
                 CStrRef context = null_string);
@@ -332,6 +335,9 @@ public:
   inline Variant o_setPublicImpl(CStrRef propName, T v,
                                  bool forInit);
 
+  static Variant *RealPropPublicHelper(CStrRef propName, int64 hash, int flags,
+                                       const ObjectData *obj,
+                                       const ObjectStaticCallbacks *osc);
  protected:
   int o_id;                      // a numeric identifier of this object
   mutable Array *o_properties;   // dynamic properties
@@ -375,6 +381,13 @@ struct MethodCallInfoTable {
   CallInfo   *ci;
 };
 
+struct InstanceOfInfo {
+  int64                       hash;
+  int                         flags;
+  const char                  *name;
+  const ObjectStaticCallbacks *cb;
+};
+
 // Callback structure for functions related to static methods
 struct ObjectStaticCallbacks {
   Object create(CArrRef params, bool init = true,
@@ -388,22 +401,21 @@ struct ObjectStaticCallbacks {
   static bool GetCallInfoEx(const char *cls,
                             const ObjectStaticCallbacks *osc,
                             MethodCallPackage &mcp, int64 hash);
-  bool dynamicParent() const { return (int64)parent & 1; }
 
   operator const ObjectStaticCallbacks*() const { return this; }
   Variant (*os_getInit)(CStrRef s);
   Variant (*os_get)(CStrRef s);
   Variant &(*os_lval)(CStrRef s);
-  Variant (*os_invoke)(const char *c, const char *s,
-                       CArrRef params, int64 hash, bool fatal);
   Variant (*os_constant)(const char *s);
   ObjectData *(*createOnlyNoInit)(ObjectData* root);
 
   const MethodCallInfoTable   *mcit;
   const int                   *mcit_ix;
-
+  const InstanceOfInfo        *instanceof_table;
+  const int                   *instanceof_index;
   const StaticString          *cls;
   const ClassPropTable        *cpt;
+  int64                       redeclaredParent;
   const ObjectStaticCallbacks *parent;
 };
 
@@ -417,8 +429,6 @@ struct RedeclaredObjectStaticCallbacks {
   Variant os_getInit(CStrRef s) const;
   Variant os_get(CStrRef s) const;
   Variant &os_lval(CStrRef s) const;
-  Variant os_invoke(const char *c, const char *s,
-                    CArrRef params, int64 hash = -1, bool fatal = true) const;
   Variant os_constant(const char *s) const;
   bool os_get_call_info(MethodCallPackage &info, int64 hash = -1) const;
   ObjectData *createOnlyNoInit(ObjectData* root = NULL) const;

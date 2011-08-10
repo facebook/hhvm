@@ -434,6 +434,9 @@ public:
 };
 
 struct ClassPropTableEntry {
+  int64         hash;
+  int           next;
+  int           prop_offset;
   short         flags;
   short         type;
   int           offset;
@@ -441,12 +444,14 @@ struct ClassPropTableEntry {
   bool isPublic() const { return flags & ClassInfo::IsPublic; }
   bool isPrivate() const { return flags & ClassInfo::IsPrivate; }
   bool isOverride() const { return flags & ClassInfo::IsOverride; }
+  const ClassPropTableEntry *nextByOrder() const { return this + 1; }
 };
 
 class ClassPropTable {
 public:
-  int m_count;
-  int m_pcount;
+  int m_size_mask;
+  int m_offset;
+  const int *m_hash_entries;
   const ClassPropTable *m_parent;
   const ClassPropTableEntry *m_entries;
   const ClassPropTableEntry **m_pentries;

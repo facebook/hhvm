@@ -33,7 +33,6 @@ class c_RangeException : public c_RuntimeException {
   // Properties
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(RangeException, RangeException)
 
   // DECLARE_STATIC_PROP_OPS
@@ -42,15 +41,6 @@ class c_RangeException : public c_RuntimeException {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_RangeException 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RangeException 1
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_RangeException 1
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_RangeException 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RangeException 1
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RangeException 1
 
   // DECLARE_COMMON_INVOKE
   static const int s_call_info_table = 0;

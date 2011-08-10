@@ -46,8 +46,6 @@ extern const int q_SpoofChecker_CHAR_LIMIT;
 FORWARD_DECLARE_CLASS_BUILTIN(SpoofChecker);
 class c_SpoofChecker : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(SpoofChecker)
-  END_CLASS_MAP(SpoofChecker)
   DECLARE_CLASS(SpoofChecker, SpoofChecker, ObjectData)
 
   // need to implement
@@ -70,7 +68,7 @@ class c_SpoofChecker : public ExtObjectData {
   public: c_SpoofChecker *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
   private: USpoofChecker *m_spoof_checker;
 };

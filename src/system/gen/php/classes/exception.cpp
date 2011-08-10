@@ -45,41 +45,20 @@ Variant &c_PDOException::os_lval(CStrRef s) {
   return c_Exception::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PDOException
-Variant * c_PDOException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_PDOException
-Variant * c_PDOException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_Exception::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDOException
-Variant * c_PDOException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDOException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOException
 Variant c_PDOException::os_constant(const char *s) {
   return c_Exception::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(PDOException)
-bool c_PDOException::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 0:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      break;
-    case 1:
-      HASH_INSTANCEOF(0x5D8785ACD19F77BDLL, NAMSTR(s_sys_ss8e0a632f, "PDOException"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_PDOException::s_instanceof_table[] = {
+  {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
+  {0x5D8785ACD19F77BDLL,1,"PDOException",&cw_PDOException},
+};
+const int c_PDOException::s_instanceof_index[] = {
+  3,
+  0,1,-1,-1,
+};
 ObjectData *c_PDOException::cloneImpl() {
   ObjectData *obj = coo_PDOException();
   c_PDOException::cloneSet(obj);
@@ -134,12 +113,12 @@ const ObjectStaticCallbacks cw_PDOException = {
   c_PDOException::os_getInit,
   c_PDOException::os_get,
   c_PDOException::os_lval,
-  c_PDOException::os_invoke,
   c_PDOException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_PDOException,
   c_PDOException::s_call_info_table,c_PDOException::s_call_info_index,
+  c_PDOException::s_instanceof_table,c_PDOException::s_instanceof_index,
   &c_PDOException::s_class_name,
-  &c_Exception::os_prop_table,&cw_Exception
+  &c_Exception::os_prop_table,0,&cw_Exception
 };
 /* SRC: classes/exception.php line 318 */
 void c_PDOException::t___construct() {
@@ -163,42 +142,22 @@ Variant &c_UnexpectedValueException::os_lval(CStrRef s) {
   return c_RuntimeException::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_UnexpectedValueException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_UnexpectedValueException
-Variant * c_UnexpectedValueException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_UnexpectedValueException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_UnexpectedValueException
-Variant * c_UnexpectedValueException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_RuntimeException::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_UnexpectedValueException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_UnexpectedValueException
-Variant * c_UnexpectedValueException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_UnexpectedValueException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_UnexpectedValueException
 Variant c_UnexpectedValueException::os_constant(const char *s) {
   return c_RuntimeException::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_UnexpectedValueException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(UnexpectedValueException)
-bool c_UnexpectedValueException::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 1:
-      HASH_INSTANCEOF(0x5AA2EE582E0D3849LL, NAMSTR(s_sys_ss7c2432f2, "UnexpectedValueException"));
-      break;
-    case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss5e40e701, "RuntimeException"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_UnexpectedValueException::s_instanceof_table[] = {
+  {0x5AA2EE582E0D3849LL,1,"UnexpectedValueException",&cw_UnexpectedValueException},
+  {0x47D93E6F80B66A94LL,0,"Exception",&cw_Exception},
+  {0x1078CB3118A8B3DCLL,1,"RuntimeException",&cw_RuntimeException},
+};
+const int c_UnexpectedValueException::s_instanceof_index[] = {
+  7,
+  -1,0,-1,-1,1,-1,-1,-1,
+
+};
 ObjectData *c_UnexpectedValueException::cloneImpl() {
   ObjectData *obj = coo_UnexpectedValueException();
   c_UnexpectedValueException::cloneSet(obj);
@@ -212,12 +171,12 @@ const ObjectStaticCallbacks cw_UnexpectedValueException = {
   c_UnexpectedValueException::os_getInit,
   c_UnexpectedValueException::os_get,
   c_UnexpectedValueException::os_lval,
-  c_UnexpectedValueException::os_invoke,
   c_UnexpectedValueException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_UnexpectedValueException,
   c_UnexpectedValueException::s_call_info_table,c_UnexpectedValueException::s_call_info_index,
+  c_UnexpectedValueException::s_instanceof_table,c_UnexpectedValueException::s_instanceof_index,
   &c_UnexpectedValueException::s_class_name,
-  &c_Exception::os_prop_table,&cw_RuntimeException
+  &c_Exception::os_prop_table,0,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 251 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OverflowException
@@ -235,42 +194,22 @@ Variant &c_OverflowException::os_lval(CStrRef s) {
   return c_RuntimeException::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_OverflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_OverflowException
-Variant * c_OverflowException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_OverflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_OverflowException
-Variant * c_OverflowException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_RuntimeException::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_OverflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OverflowException
-Variant * c_OverflowException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OverflowException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_OverflowException
 Variant c_OverflowException::os_constant(const char *s) {
   return c_RuntimeException::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_OverflowException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(OverflowException)
-bool c_OverflowException::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 1:
-      HASH_INSTANCEOF(0x0E4CCE95F6A727D9LL, NAMSTR(s_sys_ssbc297b7f, "OverflowException"));
-      break;
-    case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss5e40e701, "RuntimeException"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_OverflowException::s_instanceof_table[] = {
+  {0x0E4CCE95F6A727D9LL,1,"OverflowException",&cw_OverflowException},
+  {0x47D93E6F80B66A94LL,0,"Exception",&cw_Exception},
+  {0x1078CB3118A8B3DCLL,1,"RuntimeException",&cw_RuntimeException},
+};
+const int c_OverflowException::s_instanceof_index[] = {
+  7,
+  -1,0,-1,-1,1,-1,-1,-1,
+
+};
 ObjectData *c_OverflowException::cloneImpl() {
   ObjectData *obj = coo_OverflowException();
   c_OverflowException::cloneSet(obj);
@@ -284,12 +223,12 @@ const ObjectStaticCallbacks cw_OverflowException = {
   c_OverflowException::os_getInit,
   c_OverflowException::os_get,
   c_OverflowException::os_lval,
-  c_OverflowException::os_invoke,
   c_OverflowException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_OverflowException,
   c_OverflowException::s_call_info_table,c_OverflowException::s_call_info_index,
+  c_OverflowException::s_instanceof_table,c_OverflowException::s_instanceof_index,
   &c_OverflowException::s_class_name,
-  &c_Exception::os_prop_table,&cw_RuntimeException
+  &c_Exception::os_prop_table,0,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 243 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfBoundsException
@@ -307,42 +246,22 @@ Variant &c_OutOfBoundsException::os_lval(CStrRef s) {
   return c_RuntimeException::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_OutOfBoundsException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_OutOfBoundsException
-Variant * c_OutOfBoundsException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_OutOfBoundsException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_OutOfBoundsException
-Variant * c_OutOfBoundsException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_RuntimeException::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_OutOfBoundsException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OutOfBoundsException
-Variant * c_OutOfBoundsException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OutOfBoundsException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_OutOfBoundsException
 Variant c_OutOfBoundsException::os_constant(const char *s) {
   return c_RuntimeException::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_OutOfBoundsException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(OutOfBoundsException)
-bool c_OutOfBoundsException::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 1:
-      HASH_INSTANCEOF(0x227C70ED5B143841LL, NAMSTR(s_sys_ss0c50ad86, "OutOfBoundsException"));
-      break;
-    case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss5e40e701, "RuntimeException"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_OutOfBoundsException::s_instanceof_table[] = {
+  {0x227C70ED5B143841LL,1,"OutOfBoundsException",&cw_OutOfBoundsException},
+  {0x47D93E6F80B66A94LL,0,"Exception",&cw_Exception},
+  {0x1078CB3118A8B3DCLL,1,"RuntimeException",&cw_RuntimeException},
+};
+const int c_OutOfBoundsException::s_instanceof_index[] = {
+  7,
+  -1,0,-1,-1,1,-1,-1,-1,
+
+};
 ObjectData *c_OutOfBoundsException::cloneImpl() {
   ObjectData *obj = coo_OutOfBoundsException();
   c_OutOfBoundsException::cloneSet(obj);
@@ -356,12 +275,12 @@ const ObjectStaticCallbacks cw_OutOfBoundsException = {
   c_OutOfBoundsException::os_getInit,
   c_OutOfBoundsException::os_get,
   c_OutOfBoundsException::os_lval,
-  c_OutOfBoundsException::os_invoke,
   c_OutOfBoundsException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_OutOfBoundsException,
   c_OutOfBoundsException::s_call_info_table,c_OutOfBoundsException::s_call_info_index,
+  c_OutOfBoundsException::s_instanceof_table,c_OutOfBoundsException::s_instanceof_index,
   &c_OutOfBoundsException::s_class_name,
-  &c_Exception::os_prop_table,&cw_RuntimeException
+  &c_Exception::os_prop_table,0,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 173 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LogicException
@@ -379,41 +298,20 @@ Variant &c_LogicException::os_lval(CStrRef s) {
   return c_Exception::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_LogicException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_LogicException
-Variant * c_LogicException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_LogicException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_LogicException
-Variant * c_LogicException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_Exception::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_LogicException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LogicException
-Variant * c_LogicException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LogicException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_LogicException
 Variant c_LogicException::os_constant(const char *s) {
   return c_Exception::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_LogicException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(LogicException)
-bool c_LogicException::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 0:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      break;
-    case 3:
-      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ssa37fe34e, "LogicException"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_LogicException::s_instanceof_table[] = {
+  {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
+  {0x4860DC2F9B0E6D4BLL,1,"LogicException",&cw_LogicException},
+};
+const int c_LogicException::s_instanceof_index[] = {
+  3,
+  0,-1,-1,1,
+};
 ObjectData *c_LogicException::cloneImpl() {
   ObjectData *obj = coo_LogicException();
   c_LogicException::cloneSet(obj);
@@ -427,12 +325,12 @@ const ObjectStaticCallbacks cw_LogicException = {
   c_LogicException::os_getInit,
   c_LogicException::os_get,
   c_LogicException::os_lval,
-  c_LogicException::os_invoke,
   c_LogicException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_LogicException,
   c_LogicException::s_call_info_table,c_LogicException::s_call_info_index,
+  c_LogicException::s_instanceof_table,c_LogicException::s_instanceof_index,
   &c_LogicException::s_class_name,
-  &c_Exception::os_prop_table,&cw_Exception
+  &c_Exception::os_prop_table,0,&cw_Exception
 };
 /* SRC: classes/exception.php line 259 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RangeException
@@ -450,42 +348,22 @@ Variant &c_RangeException::os_lval(CStrRef s) {
   return c_RuntimeException::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_RangeException
-Variant * c_RangeException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_RangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RangeException
-Variant * c_RangeException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_RuntimeException::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RangeException
-Variant * c_RangeException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RangeException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_RangeException
 Variant c_RangeException::os_constant(const char *s) {
   return c_RuntimeException::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_RangeException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(RangeException)
-bool c_RangeException::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 3:
-      HASH_INSTANCEOF(0x6AF83706F76A9D53LL, NAMSTR(s_sys_ss6e6aaece, "RangeException"));
-      break;
-    case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss5e40e701, "RuntimeException"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_RangeException::s_instanceof_table[] = {
+  {0x6AF83706F76A9D53LL,1,"RangeException",&cw_RangeException},
+  {0x47D93E6F80B66A94LL,0,"Exception",&cw_Exception},
+  {0x1078CB3118A8B3DCLL,1,"RuntimeException",&cw_RuntimeException},
+};
+const int c_RangeException::s_instanceof_index[] = {
+  7,
+  -1,-1,-1,0,1,-1,-1,-1,
+
+};
 ObjectData *c_RangeException::cloneImpl() {
   ObjectData *obj = coo_RangeException();
   c_RangeException::cloneSet(obj);
@@ -499,12 +377,12 @@ const ObjectStaticCallbacks cw_RangeException = {
   c_RangeException::os_getInit,
   c_RangeException::os_get,
   c_RangeException::os_lval,
-  c_RangeException::os_invoke,
   c_RangeException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_RangeException,
   c_RangeException::s_call_info_table,c_RangeException::s_call_info_index,
+  c_RangeException::s_instanceof_table,c_RangeException::s_instanceof_index,
   &c_RangeException::s_class_name,
-  &c_Exception::os_prop_table,&cw_RuntimeException
+  &c_Exception::os_prop_table,0,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 211 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_InvalidArgumentException
@@ -522,44 +400,22 @@ Variant &c_InvalidArgumentException::os_lval(CStrRef s) {
   return c_LogicException::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_InvalidArgumentException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_InvalidArgumentException
-Variant * c_InvalidArgumentException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_InvalidArgumentException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_InvalidArgumentException
-Variant * c_InvalidArgumentException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_LogicException::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_InvalidArgumentException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_InvalidArgumentException
-Variant * c_InvalidArgumentException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_InvalidArgumentException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_InvalidArgumentException
 Variant c_InvalidArgumentException::os_constant(const char *s) {
   return c_LogicException::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_InvalidArgumentException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(InvalidArgumentException)
-bool c_InvalidArgumentException::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 3:
-      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ssa37fe34e, "LogicException"));
-      break;
-    case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      break;
-    case 5:
-      HASH_INSTANCEOF(0x085A4F6FD393D475LL, NAMSTR(s_sys_ss079dd82d, "InvalidArgumentException"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_InvalidArgumentException::s_instanceof_table[] = {
+  {0x4860DC2F9B0E6D4BLL,1,"LogicException",&cw_LogicException},
+  {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
+  {0x085A4F6FD393D475LL,1,"InvalidArgumentException",&cw_InvalidArgumentException},
+};
+const int c_InvalidArgumentException::s_instanceof_index[] = {
+  7,
+  -1,-1,-1,0,1,2,-1,-1,
+
+};
 ObjectData *c_InvalidArgumentException::cloneImpl() {
   ObjectData *obj = coo_InvalidArgumentException();
   c_InvalidArgumentException::cloneSet(obj);
@@ -573,12 +429,12 @@ const ObjectStaticCallbacks cw_InvalidArgumentException = {
   c_InvalidArgumentException::os_getInit,
   c_InvalidArgumentException::os_get,
   c_InvalidArgumentException::os_lval,
-  c_InvalidArgumentException::os_invoke,
   c_InvalidArgumentException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_InvalidArgumentException,
   c_InvalidArgumentException::s_call_info_table,c_InvalidArgumentException::s_call_info_index,
+  c_InvalidArgumentException::s_instanceof_table,c_InvalidArgumentException::s_instanceof_index,
   &c_InvalidArgumentException::s_class_name,
-  &c_Exception::os_prop_table,&cw_LogicException
+  &c_Exception::os_prop_table,0,&cw_LogicException
 };
 /* SRC: classes/exception.php line 268 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_UnderflowException
@@ -596,40 +452,22 @@ Variant &c_UnderflowException::os_lval(CStrRef s) {
   return c_RuntimeException::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_UnderflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_UnderflowException
-Variant * c_UnderflowException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_UnderflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_UnderflowException
-Variant * c_UnderflowException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_RuntimeException::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_UnderflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_UnderflowException
-Variant * c_UnderflowException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_UnderflowException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_UnderflowException
 Variant c_UnderflowException::os_constant(const char *s) {
   return c_RuntimeException::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_UnderflowException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(UnderflowException)
-bool c_UnderflowException::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 4:
-      HASH_INSTANCEOF(0x5E623FEAF7B068D4LL, NAMSTR(s_sys_ssb8a9ecc6, "UnderflowException"));
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss5e40e701, "RuntimeException"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_UnderflowException::s_instanceof_table[] = {
+  {0x5E623FEAF7B068D4LL,0,"UnderflowException",&cw_UnderflowException},
+  {0x47D93E6F80B66A94LL,0,"Exception",&cw_Exception},
+  {0x1078CB3118A8B3DCLL,1,"RuntimeException",&cw_RuntimeException},
+};
+const int c_UnderflowException::s_instanceof_index[] = {
+  7,
+  -1,-1,-1,-1,0,-1,-1,-1,
+
+};
 ObjectData *c_UnderflowException::cloneImpl() {
   ObjectData *obj = coo_UnderflowException();
   c_UnderflowException::cloneSet(obj);
@@ -643,12 +481,12 @@ const ObjectStaticCallbacks cw_UnderflowException = {
   c_UnderflowException::os_getInit,
   c_UnderflowException::os_get,
   c_UnderflowException::os_lval,
-  c_UnderflowException::os_invoke,
   c_UnderflowException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_UnderflowException,
   c_UnderflowException::s_call_info_table,c_UnderflowException::s_call_info_index,
+  c_UnderflowException::s_instanceof_table,c_UnderflowException::s_instanceof_index,
   &c_UnderflowException::s_class_name,
-  &c_Exception::os_prop_table,&cw_RuntimeException
+  &c_Exception::os_prop_table,0,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 227 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfRangeException
@@ -666,42 +504,22 @@ Variant &c_OutOfRangeException::os_lval(CStrRef s) {
   return c_LogicException::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_OutOfRangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_OutOfRangeException
-Variant * c_OutOfRangeException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_OutOfRangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_OutOfRangeException
-Variant * c_OutOfRangeException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_LogicException::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_OutOfRangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OutOfRangeException
-Variant * c_OutOfRangeException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OutOfRangeException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_OutOfRangeException
 Variant c_OutOfRangeException::os_constant(const char *s) {
   return c_LogicException::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_OutOfRangeException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(OutOfRangeException)
-bool c_OutOfRangeException::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 3:
-      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ssa37fe34e, "LogicException"));
-      break;
-    case 4:
-      HASH_INSTANCEOF(0x622D4DF07E2A01FCLL, NAMSTR(s_sys_ss0a60a5a3, "OutOfRangeException"));
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_OutOfRangeException::s_instanceof_table[] = {
+  {0x4860DC2F9B0E6D4BLL,1,"LogicException",&cw_LogicException},
+  {0x622D4DF07E2A01FCLL,0,"OutOfRangeException",&cw_OutOfRangeException},
+  {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
+};
+const int c_OutOfRangeException::s_instanceof_index[] = {
+  7,
+  -1,-1,-1,0,1,-1,-1,-1,
+
+};
 ObjectData *c_OutOfRangeException::cloneImpl() {
   ObjectData *obj = coo_OutOfRangeException();
   c_OutOfRangeException::cloneSet(obj);
@@ -715,12 +533,12 @@ const ObjectStaticCallbacks cw_OutOfRangeException = {
   c_OutOfRangeException::os_getInit,
   c_OutOfRangeException::os_get,
   c_OutOfRangeException::os_lval,
-  c_OutOfRangeException::os_invoke,
   c_OutOfRangeException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_OutOfRangeException,
   c_OutOfRangeException::s_call_info_table,c_OutOfRangeException::s_call_info_index,
+  c_OutOfRangeException::s_instanceof_table,c_OutOfRangeException::s_instanceof_index,
   &c_OutOfRangeException::s_class_name,
-  &c_Exception::os_prop_table,&cw_LogicException
+  &c_Exception::os_prop_table,0,&cw_LogicException
 };
 /* SRC: classes/exception.php line 193 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_BadMethodCallException
@@ -738,47 +556,23 @@ Variant &c_BadMethodCallException::os_lval(CStrRef s) {
   return c_BadFunctionCallException::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_BadMethodCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_BadMethodCallException
-Variant * c_BadMethodCallException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_BadMethodCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_BadMethodCallException
-Variant * c_BadMethodCallException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_BadFunctionCallException::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_BadMethodCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_BadMethodCallException
-Variant * c_BadMethodCallException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_BadMethodCallException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_BadMethodCallException
 Variant c_BadMethodCallException::os_constant(const char *s) {
   return c_BadFunctionCallException::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_BadMethodCallException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(BadMethodCallException)
-bool c_BadMethodCallException::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 0:
-      HASH_INSTANCEOF(0x06335FF83CDEA590LL, NAMSTR(s_sys_ss033e1025, "BadMethodCallException"));
-      break;
-    case 3:
-      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ssa37fe34e, "LogicException"));
-      break;
-    case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      break;
-    case 6:
-      HASH_INSTANCEOF(0x66282FC8E4EF4E46LL, NAMSTR(s_sys_ss57956ee3, "BadFunctionCallException"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_BadMethodCallException::s_instanceof_table[] = {
+  {0x06335FF83CDEA590LL,1,"BadMethodCallException",&cw_BadMethodCallException},
+  {0x4860DC2F9B0E6D4BLL,1,"LogicException",&cw_LogicException},
+  {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
+  {0x66282FC8E4EF4E46LL,1,"BadFunctionCallException",&cw_BadFunctionCallException},
+};
+const int c_BadMethodCallException::s_instanceof_index[] = {
+  7,
+  0,-1,-1,1,2,-1,3,-1,
+
+};
 ObjectData *c_BadMethodCallException::cloneImpl() {
   ObjectData *obj = coo_BadMethodCallException();
   c_BadMethodCallException::cloneSet(obj);
@@ -792,12 +586,12 @@ const ObjectStaticCallbacks cw_BadMethodCallException = {
   c_BadMethodCallException::os_getInit,
   c_BadMethodCallException::os_get,
   c_BadMethodCallException::os_lval,
-  c_BadMethodCallException::os_invoke,
   c_BadMethodCallException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_BadMethodCallException,
   c_BadMethodCallException::s_call_info_table,c_BadMethodCallException::s_call_info_index,
+  c_BadMethodCallException::s_instanceof_table,c_BadMethodCallException::s_instanceof_index,
   &c_BadMethodCallException::s_class_name,
-  &c_Exception::os_prop_table,&cw_BadFunctionCallException
+  &c_Exception::os_prop_table,0,&cw_BadFunctionCallException
 };
 /* SRC: classes/exception.php line 235 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RuntimeException
@@ -815,39 +609,20 @@ Variant &c_RuntimeException::os_lval(CStrRef s) {
   return c_Exception::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RuntimeException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_RuntimeException
-Variant * c_RuntimeException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_RuntimeException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RuntimeException
-Variant * c_RuntimeException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_Exception::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RuntimeException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RuntimeException
-Variant * c_RuntimeException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RuntimeException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_RuntimeException
 Variant c_RuntimeException::os_constant(const char *s) {
   return c_Exception::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_RuntimeException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(RuntimeException)
-bool c_RuntimeException::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 0:
-      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss5e40e701, "RuntimeException"));
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_RuntimeException::s_instanceof_table[] = {
+  {0x1078CB3118A8B3DCLL,0,"RuntimeException",&cw_RuntimeException},
+  {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
+};
+const int c_RuntimeException::s_instanceof_index[] = {
+  3,
+  0,-1,-1,-1,
+};
 ObjectData *c_RuntimeException::cloneImpl() {
   ObjectData *obj = coo_RuntimeException();
   c_RuntimeException::cloneSet(obj);
@@ -861,12 +636,12 @@ const ObjectStaticCallbacks cw_RuntimeException = {
   c_RuntimeException::os_getInit,
   c_RuntimeException::os_get,
   c_RuntimeException::os_lval,
-  c_RuntimeException::os_invoke,
   c_RuntimeException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_RuntimeException,
   c_RuntimeException::s_call_info_table,c_RuntimeException::s_call_info_index,
+  c_RuntimeException::s_instanceof_table,c_RuntimeException::s_instanceof_index,
   &c_RuntimeException::s_class_name,
-  &c_Exception::os_prop_table,&cw_Exception
+  &c_Exception::os_prop_table,0,&cw_Exception
 };
 /* SRC: classes/exception.php line 10 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Exception
@@ -914,61 +689,19 @@ Variant &c_Exception::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Exception
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_Exception
-Variant * c_Exception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_Exception
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Exception
-Variant * c_Exception::o_realPropPublic(CStrRef s, int flags) const {
-  int64 hash = s->hash();
-  switch (hash & 15) {
-    case 1:
-      HASH_REALPROP_NAMSTR(0x0B197E8F85F4DA21LL, NAMSTR(s_sys_ss90291821, "previous"), 8, previous);
-      break;
-    case 7:
-      HASH_REALPROP_NAMSTR(0x3CCB986B2CF0A747LL, NAMSTR(s_sys_ss94c9ce77, "trace"), 5, trace);
-      break;
-    case 9:
-      HASH_REALPROP_NAMSTR(0x58C72230857ACDB9LL, NAMSTR(s_sys_ssab7a1dec, "code"), 4, code);
-      break;
-    case 10:
-      HASH_REALPROP_NAMSTR(0x04AB35CACF8C8C9ALL, NAMSTR(s_sys_ssddf8728c, "line"), 4, line);
-      break;
-    case 11:
-      HASH_REALPROP_NAMSTR(0x0247CDBB94C9D47BLL, NAMSTR(s_sys_ss155366df, "message"), 7, message);
-      break;
-    case 15:
-      HASH_REALPROP_NAMSTR(0x7863294A8F33D14FLL, NAMSTR(s_sys_ss8ce7db5b, "file"), 4, file);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Exception
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Exception
-Variant * c_Exception::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Exception
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Exception
 Variant c_Exception::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Exception
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(Exception)
-bool c_Exception::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 0:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_Exception::s_instanceof_table[] = {
+  {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
+};
+const int c_Exception::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_Exception::cloneImpl() {
   ObjectData *obj = coo_Exception();
   c_Exception::cloneSet(obj);
@@ -1242,12 +975,12 @@ const ObjectStaticCallbacks cw_Exception = {
   c_Exception::os_getInit,
   c_Exception::os_get,
   c_Exception::os_lval,
-  c_Exception::os_invoke,
   c_Exception::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Exception,
   c_Exception::s_call_info_table,c_Exception::s_call_info_index,
+  c_Exception::s_instanceof_table,c_Exception::s_instanceof_index,
   &c_Exception::s_class_name,
-  &c_Exception::os_prop_table,0
+  &c_Exception::os_prop_table,0,0
 };
 void c_Exception::init() {
   m_message = NAMSTR(s_sys_ss00000000, "");
@@ -1497,49 +1230,20 @@ Variant &c_ErrorException::os_lval(CStrRef s) {
   return c_Exception::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ErrorException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_ErrorException
-Variant * c_ErrorException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_ErrorException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ErrorException
-Variant * c_ErrorException::o_realPropPublic(CStrRef s, int flags) const {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_REALPROP_NAMSTR(0x4FDAA620FA5F15F9LL, NAMSTR(s_sys_ssb84c8cfa, "severity"), 8, severity);
-      break;
-    default:
-      break;
-  }
-  return c_Exception::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ErrorException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ErrorException
-Variant * c_ErrorException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ErrorException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ErrorException
 Variant c_ErrorException::os_constant(const char *s) {
   return c_Exception::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ErrorException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ErrorException)
-bool c_ErrorException::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 0:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      break;
-    case 3:
-      HASH_INSTANCEOF(0x69EDCA1CC29CFE0BLL, NAMSTR(s_sys_ssac0b0f60, "ErrorException"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_ErrorException::s_instanceof_table[] = {
+  {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
+  {0x69EDCA1CC29CFE0BLL,1,"ErrorException",&cw_ErrorException},
+};
+const int c_ErrorException::s_instanceof_index[] = {
+  3,
+  0,-1,-1,1,
+};
 ObjectData *c_ErrorException::cloneImpl() {
   ObjectData *obj = coo_ErrorException();
   c_ErrorException::cloneSet(obj);
@@ -1672,12 +1376,12 @@ const ObjectStaticCallbacks cw_ErrorException = {
   c_ErrorException::os_getInit,
   c_ErrorException::os_get,
   c_ErrorException::os_lval,
-  c_ErrorException::os_invoke,
   c_ErrorException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ErrorException,
   c_ErrorException::s_call_info_table,c_ErrorException::s_call_info_index,
+  c_ErrorException::s_instanceof_table,c_ErrorException::s_instanceof_index,
   &c_ErrorException::s_class_name,
-  &c_ErrorException::os_prop_table,&cw_Exception
+  &c_ErrorException::os_prop_table,0,&cw_Exception
 };
 /* SRC: classes/exception.php line 288 */
 void c_ErrorException::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
@@ -1725,41 +1429,20 @@ Variant &c_DOMException::os_lval(CStrRef s) {
   return c_Exception::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMException
-Variant * c_DOMException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMException
-Variant * c_DOMException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_Exception::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMException
-Variant * c_DOMException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMException
 Variant c_DOMException::os_constant(const char *s) {
   return c_Exception::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMException)
-bool c_DOMException::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 0:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      break;
-    case 2:
-      HASH_INSTANCEOF(0x6A5B99D5B1A4566ALL, NAMSTR(s_sys_ss4b58691e, "DOMException"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_DOMException::s_instanceof_table[] = {
+  {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
+  {0x6A5B99D5B1A4566ALL,1,"DOMException",&cw_DOMException},
+};
+const int c_DOMException::s_instanceof_index[] = {
+  3,
+  0,-1,1,-1,
+};
 ObjectData *c_DOMException::cloneImpl() {
   ObjectData *obj = coo_DOMException();
   c_DOMException::cloneSet(obj);
@@ -1828,12 +1511,12 @@ const ObjectStaticCallbacks cw_DOMException = {
   c_DOMException::os_getInit,
   c_DOMException::os_get,
   c_DOMException::os_lval,
-  c_DOMException::os_invoke,
   c_DOMException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMException,
   c_DOMException::s_call_info_table,c_DOMException::s_call_info_index,
+  c_DOMException::s_instanceof_table,c_DOMException::s_instanceof_index,
   &c_DOMException::s_class_name,
-  &c_Exception::os_prop_table,&cw_Exception
+  &c_Exception::os_prop_table,0,&cw_Exception
 };
 /* SRC: classes/exception.php line 312 */
 void c_DOMException::t___construct(Variant v_message, Variant v_code) {
@@ -1859,44 +1542,22 @@ Variant &c_BadFunctionCallException::os_lval(CStrRef s) {
   return c_LogicException::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_BadFunctionCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_BadFunctionCallException
-Variant * c_BadFunctionCallException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_BadFunctionCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_BadFunctionCallException
-Variant * c_BadFunctionCallException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_LogicException::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_BadFunctionCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_BadFunctionCallException
-Variant * c_BadFunctionCallException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_BadFunctionCallException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_BadFunctionCallException
 Variant c_BadFunctionCallException::os_constant(const char *s) {
   return c_LogicException::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_BadFunctionCallException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(BadFunctionCallException)
-bool c_BadFunctionCallException::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 3:
-      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ssa37fe34e, "LogicException"));
-      break;
-    case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      break;
-    case 6:
-      HASH_INSTANCEOF(0x66282FC8E4EF4E46LL, NAMSTR(s_sys_ss57956ee3, "BadFunctionCallException"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_BadFunctionCallException::s_instanceof_table[] = {
+  {0x4860DC2F9B0E6D4BLL,1,"LogicException",&cw_LogicException},
+  {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
+  {0x66282FC8E4EF4E46LL,1,"BadFunctionCallException",&cw_BadFunctionCallException},
+};
+const int c_BadFunctionCallException::s_instanceof_index[] = {
+  7,
+  -1,-1,-1,0,1,-1,2,-1,
+
+};
 ObjectData *c_BadFunctionCallException::cloneImpl() {
   ObjectData *obj = coo_BadFunctionCallException();
   c_BadFunctionCallException::cloneSet(obj);
@@ -1910,12 +1571,12 @@ const ObjectStaticCallbacks cw_BadFunctionCallException = {
   c_BadFunctionCallException::os_getInit,
   c_BadFunctionCallException::os_get,
   c_BadFunctionCallException::os_lval,
-  c_BadFunctionCallException::os_invoke,
   c_BadFunctionCallException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_BadFunctionCallException,
   c_BadFunctionCallException::s_call_info_table,c_BadFunctionCallException::s_call_info_index,
+  c_BadFunctionCallException::s_instanceof_table,c_BadFunctionCallException::s_instanceof_index,
   &c_BadFunctionCallException::s_class_name,
-  &c_Exception::os_prop_table,&cw_LogicException
+  &c_Exception::os_prop_table,0,&cw_LogicException
 };
 /* SRC: classes/exception.php line 219 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LengthException
@@ -1933,42 +1594,22 @@ Variant &c_LengthException::os_lval(CStrRef s) {
   return c_LogicException::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_LengthException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_LengthException
-Variant * c_LengthException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_LengthException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_LengthException
-Variant * c_LengthException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_LogicException::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_LengthException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LengthException
-Variant * c_LengthException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LengthException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_LengthException
 Variant c_LengthException::os_constant(const char *s) {
   return c_LogicException::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_LengthException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(LengthException)
-bool c_LengthException::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 3:
-      HASH_INSTANCEOF(0x3CAE91CFA2AAD16BLL, NAMSTR(s_sys_ssadd5fee2, "LengthException"));
-      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ssa37fe34e, "LogicException"));
-      break;
-    case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_LengthException::s_instanceof_table[] = {
+  {0x3CAE91CFA2AAD16BLL,0,"LengthException",&cw_LengthException},
+  {0x4860DC2F9B0E6D4BLL,1,"LogicException",&cw_LogicException},
+  {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
+};
+const int c_LengthException::s_instanceof_index[] = {
+  7,
+  -1,-1,-1,0,2,-1,-1,-1,
+
+};
 ObjectData *c_LengthException::cloneImpl() {
   ObjectData *obj = coo_LengthException();
   c_LengthException::cloneSet(obj);
@@ -1982,12 +1623,12 @@ const ObjectStaticCallbacks cw_LengthException = {
   c_LengthException::os_getInit,
   c_LengthException::os_get,
   c_LengthException::os_lval,
-  c_LengthException::os_invoke,
   c_LengthException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_LengthException,
   c_LengthException::s_call_info_table,c_LengthException::s_call_info_index,
+  c_LengthException::s_instanceof_table,c_LengthException::s_instanceof_index,
   &c_LengthException::s_class_name,
-  &c_Exception::os_prop_table,&cw_LogicException
+  &c_Exception::os_prop_table,0,&cw_LogicException
 };
 /* SRC: classes/exception.php line 202 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DomainException
@@ -2005,42 +1646,22 @@ Variant &c_DomainException::os_lval(CStrRef s) {
   return c_LogicException::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DomainException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DomainException
-Variant * c_DomainException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DomainException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DomainException
-Variant * c_DomainException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_LogicException::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DomainException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DomainException
-Variant * c_DomainException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DomainException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DomainException
 Variant c_DomainException::os_constant(const char *s) {
   return c_LogicException::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DomainException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DomainException)
-bool c_DomainException::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 3:
-      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ssa37fe34e, "LogicException"));
-      break;
-    case 4:
-      HASH_INSTANCEOF(0x70D4A29DE6A7BA84LL, NAMSTR(s_sys_ssb65737a4, "DomainException"));
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_DomainException::s_instanceof_table[] = {
+  {0x4860DC2F9B0E6D4BLL,1,"LogicException",&cw_LogicException},
+  {0x70D4A29DE6A7BA84LL,0,"DomainException",&cw_DomainException},
+  {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
+};
+const int c_DomainException::s_instanceof_index[] = {
+  7,
+  -1,-1,-1,0,1,-1,-1,-1,
+
+};
 ObjectData *c_DomainException::cloneImpl() {
   ObjectData *obj = coo_DomainException();
   c_DomainException::cloneSet(obj);
@@ -2054,12 +1675,12 @@ const ObjectStaticCallbacks cw_DomainException = {
   c_DomainException::os_getInit,
   c_DomainException::os_get,
   c_DomainException::os_lval,
-  c_DomainException::os_invoke,
   c_DomainException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DomainException,
   c_DomainException::s_call_info_table,c_DomainException::s_call_info_index,
+  c_DomainException::s_instanceof_table,c_DomainException::s_instanceof_index,
   &c_DomainException::s_class_name,
-  &c_Exception::os_prop_table,&cw_LogicException
+  &c_Exception::os_prop_table,0,&cw_LogicException
 };
 ObjectData *coo_PDOException() {
   return NEWOBJ(c_PDOException)();
@@ -2115,24 +1736,30 @@ ObjectData *coo_DomainException() {
 
 // Class tables
 static const ClassPropTableEntry cpt_table_entries[] = {
-  { 128, 10,GET_PROPERTY_OFFSET(c_ErrorException, m_severity),&NAMSTR(s_sys_ssb84c8cfa, "severity") },
+  {0x4FDAA620FA5F15F9LL,0,0,130,10,GET_PROPERTY_OFFSET(c_ErrorException, m_severity),&NAMSTR(s_sys_ssb84c8cfa, "severity") },
 
-  { 128, 10,GET_PROPERTY_OFFSET(c_Exception, m_message),&NAMSTR(s_sys_ss155366df, "message") },
-  { 128, 10,GET_PROPERTY_OFFSET(c_Exception, m_code),&NAMSTR(s_sys_ssab7a1dec, "code") },
-  { 128, 10,GET_PROPERTY_OFFSET(c_Exception, m_previous),&NAMSTR(s_sys_ss90291821, "previous") },
-  { 128, 10,GET_PROPERTY_OFFSET(c_Exception, m_file),&NAMSTR(s_sys_ss8ce7db5b, "file") },
-  { 128, 10,GET_PROPERTY_OFFSET(c_Exception, m_line),&NAMSTR(s_sys_ssddf8728c, "line") },
-  { 128, 10,GET_PROPERTY_OFFSET(c_Exception, m_trace),&NAMSTR(s_sys_ss94c9ce77, "trace") },
+  {0x0B197E8F85F4DA21LL,5,0,130,10,GET_PROPERTY_OFFSET(c_Exception, m_previous),&NAMSTR(s_sys_ss90291821, "previous") },
+  {0x3CCB986B2CF0A747LL,0,0,130,10,GET_PROPERTY_OFFSET(c_Exception, m_trace),&NAMSTR(s_sys_ss94c9ce77, "trace") },
+  {0x58C72230857ACDB9LL,-2,0,130,10,GET_PROPERTY_OFFSET(c_Exception, m_code),&NAMSTR(s_sys_ssab7a1dec, "code") },
+  {0x04AB35CACF8C8C9ALL,-2,0,130,10,GET_PROPERTY_OFFSET(c_Exception, m_line),&NAMSTR(s_sys_ssddf8728c, "line") },
+  {0x0247CDBB94C9D47BLL,-2,0,130,10,GET_PROPERTY_OFFSET(c_Exception, m_message),&NAMSTR(s_sys_ss155366df, "message") },
+  {0x7863294A8F33D14FLL,-2,0,130,10,GET_PROPERTY_OFFSET(c_Exception, m_file),&NAMSTR(s_sys_ss8ce7db5b, "file") },
 
 };
 static const ClassPropTableEntry *cpt_private_entries[] = {
-  0,
+  0
+};
+static const int cpt_hash_entries[] = {
+  -1,0,-1,-1,-1,-1,-1,-1,
+  -1,0,-1,-1,-1,-1,-1,1,-1,2,3,4,-1,-1,-1,5,
 };
 const ClassPropTable c_ErrorException::os_prop_table = {
-  1,0,&c_Exception::os_prop_table,cpt_table_entries+0,cpt_private_entries+0
+  7,0,cpt_hash_entries+0,
+  &c_Exception::os_prop_table,cpt_table_entries+0,cpt_private_entries+0
 };
 const ClassPropTable c_Exception::os_prop_table = {
-  6,0,0,cpt_table_entries+1,cpt_private_entries+0
+  15,4,cpt_hash_entries+8,
+  0,cpt_table_entries+1,cpt_private_entries+0
 };
 
 ///////////////////////////////////////////////////////////////////////////////

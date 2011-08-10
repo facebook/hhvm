@@ -89,27 +89,20 @@ Variant &c_DOMDocumentFragment::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMDocumentFragment
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMDocumentFragment
-Variant * c_DOMDocumentFragment::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMDocumentFragment
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMDocumentFragment
-Variant * c_DOMDocumentFragment::o_realPropPublic(CStrRef s, int flags) const {
-  return c_DOMNode::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMDocumentFragment
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMDocumentFragment
-Variant * c_DOMDocumentFragment::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMDocumentFragment
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocumentFragment
 Variant c_DOMDocumentFragment::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocumentFragment
 IMPLEMENT_CLASS(DOMDocumentFragment)
+const InstanceOfInfo c_DOMDocumentFragment::s_instanceof_table[] = {
+  {0x7AD161197633B87DLL,1,"DOMDocumentFragment",&cw_DOMDocumentFragment},
+  {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
+};
+const int c_DOMDocumentFragment::s_instanceof_index[] = {
+  3,
+  -1,0,1,-1,
+};
 ObjectData *c_DOMDocumentFragment::cloneImpl() {
   ObjectData *obj = coo_DOMDocumentFragment();
   c_DOMDocumentFragment::cloneSet(obj);
@@ -209,12 +202,12 @@ const ObjectStaticCallbacks cw_DOMDocumentFragment = {
   c_DOMDocumentFragment::os_getInit,
   c_DOMDocumentFragment::os_get,
   c_DOMDocumentFragment::os_lval,
-  c_DOMDocumentFragment::os_invoke,
   c_DOMDocumentFragment::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMDocumentFragment,
   c_DOMDocumentFragment::s_call_info_table,c_DOMDocumentFragment::s_call_info_index,
+  c_DOMDocumentFragment::s_instanceof_table,c_DOMDocumentFragment::s_instanceof_index,
   &c_DOMDocumentFragment::s_class_name,
-  0,&cw_DOMNode
+  0,0,&cw_DOMNode
 };
 ObjectData *coo_DOMText() {
   return NEWOBJ(c_DOMText)();
@@ -234,27 +227,22 @@ Variant &c_DOMText::os_lval(CStrRef s) {
   return c_DOMCharacterData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMText
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMText
-Variant * c_DOMText::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMText
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMText
-Variant * c_DOMText::o_realPropPublic(CStrRef s, int flags) const {
-  return c_DOMCharacterData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMText
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMText
-Variant * c_DOMText::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMText
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMText
 Variant c_DOMText::os_constant(const char *s) {
   return c_DOMCharacterData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMText
 IMPLEMENT_CLASS(DOMText)
+const InstanceOfInfo c_DOMText::s_instanceof_table[] = {
+  {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
+  {0x02239AA5D64B1453LL,1,"DOMCharacterData",&cw_DOMCharacterData},
+  {0x164F490DAC49174DLL,1,"DOMText",&cw_DOMText},
+};
+const int c_DOMText::s_instanceof_index[] = {
+  7,
+  -1,-1,0,1,-1,2,-1,-1,
+
+};
 ObjectData *c_DOMText::cloneImpl() {
   ObjectData *obj = coo_DOMText();
   c_DOMText::cloneSet(obj);
@@ -468,12 +456,12 @@ const ObjectStaticCallbacks cw_DOMText = {
   c_DOMText::os_getInit,
   c_DOMText::os_get,
   c_DOMText::os_lval,
-  c_DOMText::os_invoke,
   c_DOMText::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMText,
   c_DOMText::s_call_info_table,c_DOMText::s_call_info_index,
+  c_DOMText::s_instanceof_table,c_DOMText::s_instanceof_index,
   &c_DOMText::s_class_name,
-  0,&cw_DOMCharacterData
+  0,0,&cw_DOMCharacterData
 };
 ObjectData *coo_DebuggerClient() {
   return NEWOBJ(c_DebuggerClient)();
@@ -493,21 +481,6 @@ Variant &c_DebuggerClient::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DebuggerClient
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DebuggerClient
-Variant * c_DebuggerClient::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DebuggerClient
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DebuggerClient
-Variant * c_DebuggerClient::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DebuggerClient
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DebuggerClient
-Variant * c_DebuggerClient::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DebuggerClient
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DebuggerClient
 Variant c_DebuggerClient::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -543,6 +516,13 @@ Variant c_DebuggerClient::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DebuggerClient
 IMPLEMENT_CLASS(DebuggerClient)
+const InstanceOfInfo c_DebuggerClient::s_instanceof_table[] = {
+  {0x7D1235273F521A63LL,1,"DebuggerClient",&cw_DebuggerClient},
+};
+const int c_DebuggerClient::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
 ObjectData *c_DebuggerClient::cloneImpl() {
   ObjectData *obj = coo_DebuggerClient();
   c_DebuggerClient::cloneSet(obj);
@@ -1340,12 +1320,12 @@ const ObjectStaticCallbacks cw_DebuggerClient = {
   c_DebuggerClient::os_getInit,
   c_DebuggerClient::os_get,
   c_DebuggerClient::os_lval,
-  c_DebuggerClient::os_invoke,
   c_DebuggerClient::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DebuggerClient,
   c_DebuggerClient::s_call_info_table,c_DebuggerClient::s_call_info_index,
+  c_DebuggerClient::s_instanceof_table,c_DebuggerClient::s_instanceof_index,
   &c_DebuggerClient::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_EncodingDetector() {
   return NEWOBJ(c_EncodingDetector)();
@@ -1365,27 +1345,19 @@ Variant &c_EncodingDetector::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_EncodingDetector
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_EncodingDetector
-Variant * c_EncodingDetector::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_EncodingDetector
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_EncodingDetector
-Variant * c_EncodingDetector::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_EncodingDetector
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_EncodingDetector
-Variant * c_EncodingDetector::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_EncodingDetector
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_EncodingDetector
 Variant c_EncodingDetector::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_EncodingDetector
 IMPLEMENT_CLASS(EncodingDetector)
+const InstanceOfInfo c_EncodingDetector::s_instanceof_table[] = {
+  {0x22500D8A3618ED87LL,1,"EncodingDetector",&cw_EncodingDetector},
+};
+const int c_EncodingDetector::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
 ObjectData *c_EncodingDetector::cloneImpl() {
   ObjectData *obj = coo_EncodingDetector();
   c_EncodingDetector::cloneSet(obj);
@@ -1549,12 +1521,12 @@ const ObjectStaticCallbacks cw_EncodingDetector = {
   c_EncodingDetector::os_getInit,
   c_EncodingDetector::os_get,
   c_EncodingDetector::os_lval,
-  c_EncodingDetector::os_invoke,
   c_EncodingDetector::os_constant,
   (ObjectData*(*)(ObjectData*))coo_EncodingDetector,
   c_EncodingDetector::s_call_info_table,c_EncodingDetector::s_call_info_index,
+  c_EncodingDetector::s_instanceof_table,c_EncodingDetector::s_instanceof_index,
   &c_EncodingDetector::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_DOMCDATASection() {
   return NEWOBJ(c_DOMCDATASection)();
@@ -1574,27 +1546,23 @@ Variant &c_DOMCDATASection::os_lval(CStrRef s) {
   return c_DOMText::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMCDATASection
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMCDATASection
-Variant * c_DOMCDATASection::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMCDATASection
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMCDATASection
-Variant * c_DOMCDATASection::o_realPropPublic(CStrRef s, int flags) const {
-  return c_DOMText::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMCDATASection
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMCDATASection
-Variant * c_DOMCDATASection::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMCDATASection
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMCDATASection
 Variant c_DOMCDATASection::os_constant(const char *s) {
   return c_DOMText::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMCDATASection
 IMPLEMENT_CLASS(DOMCDATASection)
+const InstanceOfInfo c_DOMCDATASection::s_instanceof_table[] = {
+  {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
+  {0x02239AA5D64B1453LL,1,"DOMCharacterData",&cw_DOMCharacterData},
+  {0x6FFDF8DF15CABE94LL,1,"DOMCDATASection",&cw_DOMCDATASection},
+  {0x164F490DAC49174DLL,1,"DOMText",&cw_DOMText},
+};
+const int c_DOMCDATASection::s_instanceof_index[] = {
+  7,
+  -1,-1,0,1,2,3,-1,-1,
+
+};
 ObjectData *c_DOMCDATASection::cloneImpl() {
   ObjectData *obj = coo_DOMCDATASection();
   c_DOMCDATASection::cloneSet(obj);
@@ -1679,12 +1647,12 @@ const ObjectStaticCallbacks cw_DOMCDATASection = {
   c_DOMCDATASection::os_getInit,
   c_DOMCDATASection::os_get,
   c_DOMCDATASection::os_lval,
-  c_DOMCDATASection::os_invoke,
   c_DOMCDATASection::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMCDATASection,
   c_DOMCDATASection::s_call_info_table,c_DOMCDATASection::s_call_info_index,
+  c_DOMCDATASection::s_instanceof_table,c_DOMCDATASection::s_instanceof_index,
   &c_DOMCDATASection::s_class_name,
-  0,&cw_DOMText
+  0,0,&cw_DOMText
 };
 ObjectData *coo_Locale() {
   return NEWOBJ(c_Locale)();
@@ -1704,21 +1672,6 @@ Variant &c_Locale::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Locale
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_Locale
-Variant * c_Locale::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_Locale
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Locale
-Variant * c_Locale::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Locale
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Locale
-Variant * c_Locale::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Locale
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Locale
 Variant c_Locale::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -1734,6 +1687,13 @@ Variant c_Locale::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Locale
 IMPLEMENT_CLASS(Locale)
+const InstanceOfInfo c_Locale::s_instanceof_table[] = {
+  {0x67E31D42F2DFE4AALL,1,"Locale",&cw_Locale},
+};
+const int c_Locale::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_Locale::cloneImpl() {
   ObjectData *obj = coo_Locale();
   c_Locale::cloneSet(obj);
@@ -1807,12 +1767,12 @@ const ObjectStaticCallbacks cw_Locale = {
   c_Locale::os_getInit,
   c_Locale::os_get,
   c_Locale::os_lval,
-  c_Locale::os_invoke,
   c_Locale::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Locale,
   c_Locale::s_call_info_table,c_Locale::s_call_info_index,
+  c_Locale::s_instanceof_table,c_Locale::s_instanceof_index,
   &c_Locale::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_Closure() {
   return NEWOBJ(c_Closure)();
@@ -1832,27 +1792,19 @@ Variant &c_Closure::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Closure
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_Closure
-Variant * c_Closure::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_Closure
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Closure
-Variant * c_Closure::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Closure
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Closure
-Variant * c_Closure::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Closure
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Closure
 Variant c_Closure::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Closure
 IMPLEMENT_CLASS(Closure)
+const InstanceOfInfo c_Closure::s_instanceof_table[] = {
+  {0x3280F0C292E92A6CLL,1,"Closure",&cw_Closure},
+};
+const int c_Closure::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_Closure::cloneImpl() {
   ObjectData *obj = coo_Closure();
   c_Closure::cloneSet(obj);
@@ -1971,12 +1923,12 @@ const ObjectStaticCallbacks cw_Closure = {
   c_Closure::os_getInit,
   c_Closure::os_get,
   c_Closure::os_lval,
-  c_Closure::os_invoke,
   c_Closure::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Closure,
   c_Closure::s_call_info_table,c_Closure::s_call_info_index,
+  c_Closure::s_instanceof_table,c_Closure::s_instanceof_index,
   &c_Closure::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_DOMDocumentType() {
   return NEWOBJ(c_DOMDocumentType)();
@@ -1996,27 +1948,20 @@ Variant &c_DOMDocumentType::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMDocumentType
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMDocumentType
-Variant * c_DOMDocumentType::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMDocumentType
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMDocumentType
-Variant * c_DOMDocumentType::o_realPropPublic(CStrRef s, int flags) const {
-  return c_DOMNode::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMDocumentType
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMDocumentType
-Variant * c_DOMDocumentType::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMDocumentType
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocumentType
 Variant c_DOMDocumentType::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocumentType
 IMPLEMENT_CLASS(DOMDocumentType)
+const InstanceOfInfo c_DOMDocumentType::s_instanceof_table[] = {
+  {0x70EBB2CC1FBF9761LL,1,"DOMDocumentType",&cw_DOMDocumentType},
+  {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
+};
+const int c_DOMDocumentType::s_instanceof_index[] = {
+  3,
+  -1,0,1,-1,
+};
 ObjectData *c_DOMDocumentType::cloneImpl() {
   ObjectData *obj = coo_DOMDocumentType();
   c_DOMDocumentType::cloneSet(obj);
@@ -2169,12 +2114,12 @@ const ObjectStaticCallbacks cw_DOMDocumentType = {
   c_DOMDocumentType::os_getInit,
   c_DOMDocumentType::os_get,
   c_DOMDocumentType::os_lval,
-  c_DOMDocumentType::os_invoke,
   c_DOMDocumentType::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMDocumentType,
   c_DOMDocumentType::s_call_info_table,c_DOMDocumentType::s_call_info_index,
+  c_DOMDocumentType::s_instanceof_table,c_DOMDocumentType::s_instanceof_index,
   &c_DOMDocumentType::s_class_name,
-  0,&cw_DOMNode
+  0,0,&cw_DOMNode
 };
 ObjectData *coo_GenericContinuation() {
   return NEWOBJ(c_GenericContinuation)();
@@ -2194,39 +2139,23 @@ Variant &c_GenericContinuation::os_lval(CStrRef s) {
   return c_Continuation::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_GenericContinuation
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_GenericContinuation
-Variant * c_GenericContinuation::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 1:
-      HASH_GUARD_STRING(0x05DE30099B58533DLL, GenericContinuation) { return o_realPropPrivate(prop, flags); }
-      break;
-    case 2:
-      HASH_GUARD_STRING(0x61DD21ABF790E9E2LL, Continuation) { return c_Continuation::o_realPropPrivate(prop, flags); }
-      break;
-    default:
-      break;
-  }
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_GenericContinuation
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_GenericContinuation
-Variant * c_GenericContinuation::o_realPropPublic(CStrRef s, int flags) const {
-  return c_Continuation::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_GenericContinuation
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_GenericContinuation
-Variant * c_GenericContinuation::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_GenericContinuation
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_GenericContinuation
 Variant c_GenericContinuation::os_constant(const char *s) {
   return c_Continuation::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_GenericContinuation
 IMPLEMENT_CLASS(GenericContinuation)
+const InstanceOfInfo c_GenericContinuation::s_instanceof_table[] = {
+  {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
+  {0x61DD21ABF790E9E2LL,1,"Continuation",&cw_Continuation},
+  {0x05DE30099B58533DLL,1,"GenericContinuation",&cw_GenericContinuation},
+  {0x0636A5F84AF9D29ELL,1,"Iterator",(const ObjectStaticCallbacks*)2},
+};
+const int c_GenericContinuation::s_instanceof_index[] = {
+  7,
+  -1,0,1,-1,-1,2,3,-1,
+
+};
 ObjectData *c_GenericContinuation::cloneImpl() {
   ObjectData *obj = coo_GenericContinuation();
   c_GenericContinuation::cloneSet(obj);
@@ -2389,12 +2318,12 @@ const ObjectStaticCallbacks cw_GenericContinuation = {
   c_GenericContinuation::os_getInit,
   c_GenericContinuation::os_get,
   c_GenericContinuation::os_lval,
-  c_GenericContinuation::os_invoke,
   c_GenericContinuation::os_constant,
   (ObjectData*(*)(ObjectData*))coo_GenericContinuation,
   c_GenericContinuation::s_call_info_table,c_GenericContinuation::s_call_info_index,
+  c_GenericContinuation::s_instanceof_table,c_GenericContinuation::s_instanceof_index,
   &c_GenericContinuation::s_class_name,
-  &c_GenericContinuation::os_prop_table,&cw_Continuation
+  &c_GenericContinuation::os_prop_table,0,&cw_Continuation
 };
 ObjectData *coo_SQLite3Stmt() {
   return NEWOBJ(c_SQLite3Stmt)();
@@ -2414,27 +2343,19 @@ Variant &c_SQLite3Stmt::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SQLite3Stmt
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SQLite3Stmt
-Variant * c_SQLite3Stmt::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_SQLite3Stmt
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SQLite3Stmt
-Variant * c_SQLite3Stmt::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SQLite3Stmt
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SQLite3Stmt
-Variant * c_SQLite3Stmt::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SQLite3Stmt
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3Stmt
 Variant c_SQLite3Stmt::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3Stmt
 IMPLEMENT_CLASS(SQLite3Stmt)
+const InstanceOfInfo c_SQLite3Stmt::s_instanceof_table[] = {
+  {0x52E5CC58B841AED2LL,1,"SQLite3Stmt",&cw_SQLite3Stmt},
+};
+const int c_SQLite3Stmt::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_SQLite3Stmt::cloneImpl() {
   ObjectData *obj = coo_SQLite3Stmt();
   c_SQLite3Stmt::cloneSet(obj);
@@ -2684,12 +2605,12 @@ const ObjectStaticCallbacks cw_SQLite3Stmt = {
   c_SQLite3Stmt::os_getInit,
   c_SQLite3Stmt::os_get,
   c_SQLite3Stmt::os_lval,
-  c_SQLite3Stmt::os_invoke,
   c_SQLite3Stmt::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SQLite3Stmt,
   c_SQLite3Stmt::s_call_info_table,c_SQLite3Stmt::s_call_info_index,
+  c_SQLite3Stmt::s_instanceof_table,c_SQLite3Stmt::s_instanceof_index,
   &c_SQLite3Stmt::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_DOMNodeList() {
   return NEWOBJ(c_DOMNodeList)();
@@ -2709,27 +2630,22 @@ Variant &c_DOMNodeList::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNodeList
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMNodeList
-Variant * c_DOMNodeList::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMNodeList
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMNodeList
-Variant * c_DOMNodeList::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMNodeList
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNodeList
-Variant * c_DOMNodeList::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNodeList
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNodeList
 Variant c_DOMNodeList::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNodeList
 IMPLEMENT_CLASS(DOMNodeList)
+const InstanceOfInfo c_DOMNodeList::s_instanceof_table[] = {
+  {0x6DD772FA3B20B8B1LL,0,"DOMNodeList",&cw_DOMNodeList},
+  {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
+  {0x5C9BC112C0363017LL,1,"IteratorAggregate",(const ObjectStaticCallbacks*)2},
+};
+const int c_DOMNodeList::s_instanceof_index[] = {
+  7,
+  -1,0,-1,-1,-1,-1,-1,2,
+
+};
 ObjectData *c_DOMNodeList::cloneImpl() {
   ObjectData *obj = coo_DOMNodeList();
   c_DOMNodeList::cloneSet(obj);
@@ -2926,12 +2842,12 @@ const ObjectStaticCallbacks cw_DOMNodeList = {
   c_DOMNodeList::os_getInit,
   c_DOMNodeList::os_get,
   c_DOMNodeList::os_lval,
-  c_DOMNodeList::os_invoke,
   c_DOMNodeList::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMNodeList,
   c_DOMNodeList::s_call_info_table,c_DOMNodeList::s_call_info_index,
+  c_DOMNodeList::s_instanceof_table,c_DOMNodeList::s_instanceof_index,
   &c_DOMNodeList::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_Normalizer() {
   return NEWOBJ(c_Normalizer)();
@@ -2951,21 +2867,6 @@ Variant &c_Normalizer::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Normalizer
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_Normalizer
-Variant * c_Normalizer::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_Normalizer
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Normalizer
-Variant * c_Normalizer::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Normalizer
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Normalizer
-Variant * c_Normalizer::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Normalizer
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Normalizer
 Variant c_Normalizer::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -2998,6 +2899,13 @@ Variant c_Normalizer::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Normalizer
 IMPLEMENT_CLASS(Normalizer)
+const InstanceOfInfo c_Normalizer::s_instanceof_table[] = {
+  {0x52EA111229F87A50LL,1,"Normalizer",&cw_Normalizer},
+};
+const int c_Normalizer::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_Normalizer::cloneImpl() {
   ObjectData *obj = coo_Normalizer();
   c_Normalizer::cloneSet(obj);
@@ -3114,12 +3022,12 @@ const ObjectStaticCallbacks cw_Normalizer = {
   c_Normalizer::os_getInit,
   c_Normalizer::os_get,
   c_Normalizer::os_lval,
-  c_Normalizer::os_invoke,
   c_Normalizer::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Normalizer,
   c_Normalizer::s_call_info_table,c_Normalizer::s_call_info_index,
+  c_Normalizer::s_instanceof_table,c_Normalizer::s_instanceof_index,
   &c_Normalizer::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_DOMCharacterData() {
   return NEWOBJ(c_DOMCharacterData)();
@@ -3139,27 +3047,20 @@ Variant &c_DOMCharacterData::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMCharacterData
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMCharacterData
-Variant * c_DOMCharacterData::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMCharacterData
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMCharacterData
-Variant * c_DOMCharacterData::o_realPropPublic(CStrRef s, int flags) const {
-  return c_DOMNode::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMCharacterData
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMCharacterData
-Variant * c_DOMCharacterData::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMCharacterData
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMCharacterData
 Variant c_DOMCharacterData::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMCharacterData
 IMPLEMENT_CLASS(DOMCharacterData)
+const InstanceOfInfo c_DOMCharacterData::s_instanceof_table[] = {
+  {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
+  {0x02239AA5D64B1453LL,1,"DOMCharacterData",&cw_DOMCharacterData},
+};
+const int c_DOMCharacterData::s_instanceof_index[] = {
+  3,
+  -1,-1,0,1,
+};
 ObjectData *c_DOMCharacterData::cloneImpl() {
   ObjectData *obj = coo_DOMCharacterData();
   c_DOMCharacterData::cloneSet(obj);
@@ -3449,12 +3350,12 @@ const ObjectStaticCallbacks cw_DOMCharacterData = {
   c_DOMCharacterData::os_getInit,
   c_DOMCharacterData::os_get,
   c_DOMCharacterData::os_lval,
-  c_DOMCharacterData::os_invoke,
   c_DOMCharacterData::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMCharacterData,
   c_DOMCharacterData::s_call_info_table,c_DOMCharacterData::s_call_info_index,
+  c_DOMCharacterData::s_instanceof_table,c_DOMCharacterData::s_instanceof_index,
   &c_DOMCharacterData::s_class_name,
-  0,&cw_DOMNode
+  0,0,&cw_DOMNode
 };
 ObjectData *coo_DOMEntityReference() {
   return NEWOBJ(c_DOMEntityReference)();
@@ -3474,27 +3375,20 @@ Variant &c_DOMEntityReference::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMEntityReference
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMEntityReference
-Variant * c_DOMEntityReference::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMEntityReference
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMEntityReference
-Variant * c_DOMEntityReference::o_realPropPublic(CStrRef s, int flags) const {
-  return c_DOMNode::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMEntityReference
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMEntityReference
-Variant * c_DOMEntityReference::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMEntityReference
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMEntityReference
 Variant c_DOMEntityReference::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMEntityReference
 IMPLEMENT_CLASS(DOMEntityReference)
+const InstanceOfInfo c_DOMEntityReference::s_instanceof_table[] = {
+  {0x5CBA5B52C68B501ALL,0,"DOMEntityReference",&cw_DOMEntityReference},
+  {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
+};
+const int c_DOMEntityReference::s_instanceof_index[] = {
+  3,
+  -1,-1,0,-1,
+};
 ObjectData *c_DOMEntityReference::cloneImpl() {
   ObjectData *obj = coo_DOMEntityReference();
   c_DOMEntityReference::cloneSet(obj);
@@ -3579,12 +3473,12 @@ const ObjectStaticCallbacks cw_DOMEntityReference = {
   c_DOMEntityReference::os_getInit,
   c_DOMEntityReference::os_get,
   c_DOMEntityReference::os_lval,
-  c_DOMEntityReference::os_invoke,
   c_DOMEntityReference::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMEntityReference,
   c_DOMEntityReference::s_call_info_table,c_DOMEntityReference::s_call_info_index,
+  c_DOMEntityReference::s_instanceof_table,c_DOMEntityReference::s_instanceof_index,
   &c_DOMEntityReference::s_class_name,
-  0,&cw_DOMNode
+  0,0,&cw_DOMNode
 };
 ObjectData *coo_SimpleXMLElementIterator() {
   return NEWOBJ(c_SimpleXMLElementIterator)();
@@ -3604,27 +3498,22 @@ Variant &c_SimpleXMLElementIterator::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SimpleXMLElementIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SimpleXMLElementIterator
-Variant * c_SimpleXMLElementIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_SimpleXMLElementIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SimpleXMLElementIterator
-Variant * c_SimpleXMLElementIterator::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SimpleXMLElementIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SimpleXMLElementIterator
-Variant * c_SimpleXMLElementIterator::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SimpleXMLElementIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SimpleXMLElementIterator
 Variant c_SimpleXMLElementIterator::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SimpleXMLElementIterator
 IMPLEMENT_CLASS(SimpleXMLElementIterator)
+const InstanceOfInfo c_SimpleXMLElementIterator::s_instanceof_table[] = {
+  {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
+  {0x7E66D362EAB5BF2BLL,1,"SimpleXMLElementIterator",&cw_SimpleXMLElementIterator},
+  {0x0636A5F84AF9D29ELL,1,"Iterator",(const ObjectStaticCallbacks*)2},
+};
+const int c_SimpleXMLElementIterator::s_instanceof_index[] = {
+  7,
+  -1,0,-1,1,-1,-1,2,-1,
+
+};
 ObjectData *c_SimpleXMLElementIterator::cloneImpl() {
   ObjectData *obj = coo_SimpleXMLElementIterator();
   c_SimpleXMLElementIterator::cloneSet(obj);
@@ -3795,12 +3684,12 @@ const ObjectStaticCallbacks cw_SimpleXMLElementIterator = {
   c_SimpleXMLElementIterator::os_getInit,
   c_SimpleXMLElementIterator::os_get,
   c_SimpleXMLElementIterator::os_lval,
-  c_SimpleXMLElementIterator::os_invoke,
   c_SimpleXMLElementIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SimpleXMLElementIterator,
   c_SimpleXMLElementIterator::s_call_info_table,c_SimpleXMLElementIterator::s_call_info_index,
+  c_SimpleXMLElementIterator::s_instanceof_table,c_SimpleXMLElementIterator::s_instanceof_index,
   &c_SimpleXMLElementIterator::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_GeneratorClosure() {
   return NEWOBJ(c_GeneratorClosure)();
@@ -3820,27 +3709,20 @@ Variant &c_GeneratorClosure::os_lval(CStrRef s) {
   return c_Closure::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_GeneratorClosure
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_GeneratorClosure
-Variant * c_GeneratorClosure::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_GeneratorClosure
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_GeneratorClosure
-Variant * c_GeneratorClosure::o_realPropPublic(CStrRef s, int flags) const {
-  return c_Closure::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_GeneratorClosure
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_GeneratorClosure
-Variant * c_GeneratorClosure::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_GeneratorClosure
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_GeneratorClosure
 Variant c_GeneratorClosure::os_constant(const char *s) {
   return c_Closure::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_GeneratorClosure
 IMPLEMENT_CLASS(GeneratorClosure)
+const InstanceOfInfo c_GeneratorClosure::s_instanceof_table[] = {
+  {0x3280F0C292E92A6CLL,1,"Closure",&cw_Closure},
+  {0x3955263C51FB4A51LL,1,"GeneratorClosure",&cw_GeneratorClosure},
+};
+const int c_GeneratorClosure::s_instanceof_index[] = {
+  3,
+  0,1,-1,-1,
+};
 ObjectData *c_GeneratorClosure::cloneImpl() {
   ObjectData *obj = coo_GeneratorClosure();
   c_GeneratorClosure::cloneSet(obj);
@@ -3914,12 +3796,12 @@ const ObjectStaticCallbacks cw_GeneratorClosure = {
   c_GeneratorClosure::os_getInit,
   c_GeneratorClosure::os_get,
   c_GeneratorClosure::os_lval,
-  c_GeneratorClosure::os_invoke,
   c_GeneratorClosure::os_constant,
   (ObjectData*(*)(ObjectData*))coo_GeneratorClosure,
   c_GeneratorClosure::s_call_info_table,c_GeneratorClosure::s_call_info_index,
+  c_GeneratorClosure::s_instanceof_table,c_GeneratorClosure::s_instanceof_index,
   &c_GeneratorClosure::s_class_name,
-  0,&cw_Closure
+  0,0,&cw_Closure
 };
 ObjectData *coo_DateTimeZone() {
   return NEWOBJ(c_DateTimeZone)();
@@ -3939,21 +3821,6 @@ Variant &c_DateTimeZone::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DateTimeZone
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DateTimeZone
-Variant * c_DateTimeZone::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DateTimeZone
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DateTimeZone
-Variant * c_DateTimeZone::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DateTimeZone
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DateTimeZone
-Variant * c_DateTimeZone::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DateTimeZone
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DateTimeZone
 Variant c_DateTimeZone::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -4003,6 +3870,13 @@ Variant c_DateTimeZone::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DateTimeZone
 IMPLEMENT_CLASS(DateTimeZone)
+const InstanceOfInfo c_DateTimeZone::s_instanceof_table[] = {
+  {0x24DE53FD7D3E8383LL,1,"DateTimeZone",&cw_DateTimeZone},
+};
+const int c_DateTimeZone::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
 ObjectData *c_DateTimeZone::cloneImpl() {
   ObjectData *obj = coo_DateTimeZone();
   c_DateTimeZone::cloneSet(obj);
@@ -4174,12 +4048,12 @@ const ObjectStaticCallbacks cw_DateTimeZone = {
   c_DateTimeZone::os_getInit,
   c_DateTimeZone::os_get,
   c_DateTimeZone::os_lval,
-  c_DateTimeZone::os_invoke,
   c_DateTimeZone::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DateTimeZone,
   c_DateTimeZone::s_call_info_table,c_DateTimeZone::s_call_info_index,
+  c_DateTimeZone::s_instanceof_table,c_DateTimeZone::s_instanceof_index,
   &c_DateTimeZone::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_DOMNodeIterator() {
   return NEWOBJ(c_DOMNodeIterator)();
@@ -4199,27 +4073,22 @@ Variant &c_DOMNodeIterator::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNodeIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMNodeIterator
-Variant * c_DOMNodeIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMNodeIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMNodeIterator
-Variant * c_DOMNodeIterator::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMNodeIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNodeIterator
-Variant * c_DOMNodeIterator::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNodeIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNodeIterator
 Variant c_DOMNodeIterator::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNodeIterator
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMNodeIterator)
+const InstanceOfInfo c_DOMNodeIterator::s_instanceof_table[] = {
+  {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
+  {0x0636A5F84AF9D29ELL,1,"Iterator",(const ObjectStaticCallbacks*)2},
+  {0x7FF7A8442616EF37LL,1,"DOMNodeIterator",&cw_DOMNodeIterator},
+};
+const int c_DOMNodeIterator::s_instanceof_index[] = {
+  7,
+  -1,0,-1,-1,-1,-1,1,2,
+
+};
 ObjectData *c_DOMNodeIterator::cloneImpl() {
   ObjectData *obj = coo_DOMNodeIterator();
   c_DOMNodeIterator::cloneSet(obj);
@@ -4390,12 +4259,12 @@ const ObjectStaticCallbacks cw_DOMNodeIterator = {
   c_DOMNodeIterator::os_getInit,
   c_DOMNodeIterator::os_get,
   c_DOMNodeIterator::os_lval,
-  c_DOMNodeIterator::os_invoke,
   c_DOMNodeIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMNodeIterator,
   c_DOMNodeIterator::s_call_info_table,c_DOMNodeIterator::s_call_info_index,
+  c_DOMNodeIterator::s_instanceof_table,c_DOMNodeIterator::s_instanceof_index,
   &c_DOMNodeIterator::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_DOMImplementation() {
   return NEWOBJ(c_DOMImplementation)();
@@ -4415,27 +4284,19 @@ Variant &c_DOMImplementation::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMImplementation
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMImplementation
-Variant * c_DOMImplementation::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMImplementation
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMImplementation
-Variant * c_DOMImplementation::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMImplementation
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMImplementation
-Variant * c_DOMImplementation::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMImplementation
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMImplementation
 Variant c_DOMImplementation::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMImplementation
 IMPLEMENT_CLASS(DOMImplementation)
+const InstanceOfInfo c_DOMImplementation::s_instanceof_table[] = {
+  {0x74419B70A46387FDLL,1,"DOMImplementation",&cw_DOMImplementation},
+};
+const int c_DOMImplementation::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
 ObjectData *c_DOMImplementation::cloneImpl() {
   ObjectData *obj = coo_DOMImplementation();
   c_DOMImplementation::cloneSet(obj);
@@ -4608,12 +4469,12 @@ const ObjectStaticCallbacks cw_DOMImplementation = {
   c_DOMImplementation::os_getInit,
   c_DOMImplementation::os_get,
   c_DOMImplementation::os_lval,
-  c_DOMImplementation::os_invoke,
   c_DOMImplementation::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMImplementation,
   c_DOMImplementation::s_call_info_table,c_DOMImplementation::s_call_info_index,
+  c_DOMImplementation::s_instanceof_table,c_DOMImplementation::s_instanceof_index,
   &c_DOMImplementation::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_SoapHeader() {
   return NEWOBJ(c_SoapHeader)();
@@ -4633,27 +4494,19 @@ Variant &c_SoapHeader::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapHeader
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapHeader
-Variant * c_SoapHeader::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_SoapHeader
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SoapHeader
-Variant * c_SoapHeader::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SoapHeader
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapHeader
-Variant * c_SoapHeader::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapHeader
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapHeader
 Variant c_SoapHeader::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapHeader
 IMPLEMENT_CLASS(SoapHeader)
+const InstanceOfInfo c_SoapHeader::s_instanceof_table[] = {
+  {0x308D1D59986A3D4ELL,1,"SoapHeader",&cw_SoapHeader},
+};
+const int c_SoapHeader::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_SoapHeader::cloneImpl() {
   ObjectData *obj = coo_SoapHeader();
   c_SoapHeader::cloneSet(obj);
@@ -4768,12 +4621,12 @@ const ObjectStaticCallbacks cw_SoapHeader = {
   c_SoapHeader::os_getInit,
   c_SoapHeader::os_get,
   c_SoapHeader::os_lval,
-  c_SoapHeader::os_invoke,
   c_SoapHeader::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SoapHeader,
   c_SoapHeader::s_call_info_table,c_SoapHeader::s_call_info_index,
+  c_SoapHeader::s_instanceof_table,c_SoapHeader::s_instanceof_index,
   &c_SoapHeader::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_DOMNotation() {
   return NEWOBJ(c_DOMNotation)();
@@ -4793,27 +4646,20 @@ Variant &c_DOMNotation::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNotation
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMNotation
-Variant * c_DOMNotation::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMNotation
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMNotation
-Variant * c_DOMNotation::o_realPropPublic(CStrRef s, int flags) const {
-  return c_DOMNode::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMNotation
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNotation
-Variant * c_DOMNotation::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNotation
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNotation
 Variant c_DOMNotation::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNotation
 IMPLEMENT_CLASS(DOMNotation)
+const InstanceOfInfo c_DOMNotation::s_instanceof_table[] = {
+  {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
+  {0x4365BE9E5A85E60BLL,1,"DOMNotation",&cw_DOMNotation},
+};
+const int c_DOMNotation::s_instanceof_index[] = {
+  3,
+  -1,-1,0,1,
+};
 ObjectData *c_DOMNotation::cloneImpl() {
   ObjectData *obj = coo_DOMNotation();
   c_DOMNotation::cloneSet(obj);
@@ -4966,12 +4812,12 @@ const ObjectStaticCallbacks cw_DOMNotation = {
   c_DOMNotation::os_getInit,
   c_DOMNotation::os_get,
   c_DOMNotation::os_lval,
-  c_DOMNotation::os_invoke,
   c_DOMNotation::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMNotation,
   c_DOMNotation::s_call_info_table,c_DOMNotation::s_call_info_index,
+  c_DOMNotation::s_instanceof_table,c_DOMNotation::s_instanceof_index,
   &c_DOMNotation::s_class_name,
-  0,&cw_DOMNode
+  0,0,&cw_DOMNode
 };
 ObjectData *coo_DebuggerProxy() {
   return NEWOBJ(c_DebuggerProxy)();
@@ -4991,27 +4837,19 @@ Variant &c_DebuggerProxy::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DebuggerProxy
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DebuggerProxy
-Variant * c_DebuggerProxy::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DebuggerProxy
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DebuggerProxy
-Variant * c_DebuggerProxy::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DebuggerProxy
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DebuggerProxy
-Variant * c_DebuggerProxy::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DebuggerProxy
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DebuggerProxy
 Variant c_DebuggerProxy::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DebuggerProxy
 IMPLEMENT_CLASS(DebuggerProxy)
+const InstanceOfInfo c_DebuggerProxy::s_instanceof_table[] = {
+  {0x78B42582709BAF12LL,1,"DebuggerProxy",&cw_DebuggerProxy},
+};
+const int c_DebuggerProxy::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_DebuggerProxy::cloneImpl() {
   ObjectData *obj = coo_DebuggerProxy();
   c_DebuggerProxy::cloneSet(obj);
@@ -5130,12 +4968,12 @@ const ObjectStaticCallbacks cw_DebuggerProxy = {
   c_DebuggerProxy::os_getInit,
   c_DebuggerProxy::os_get,
   c_DebuggerProxy::os_lval,
-  c_DebuggerProxy::os_invoke,
   c_DebuggerProxy::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DebuggerProxy,
   c_DebuggerProxy::s_call_info_table,c_DebuggerProxy::s_call_info_index,
+  c_DebuggerProxy::s_instanceof_table,c_DebuggerProxy::s_instanceof_index,
   &c_DebuggerProxy::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_Memcached() {
   return NEWOBJ(c_Memcached)();
@@ -5155,21 +4993,6 @@ Variant &c_Memcached::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Memcached
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_Memcached
-Variant * c_Memcached::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_Memcached
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Memcached
-Variant * c_Memcached::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Memcached
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Memcached
-Variant * c_Memcached::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Memcached
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Memcached
 Variant c_Memcached::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -5326,6 +5149,13 @@ Variant c_Memcached::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Memcached
 IMPLEMENT_CLASS(Memcached)
+const InstanceOfInfo c_Memcached::s_instanceof_table[] = {
+  {0x72A49A22C192034ALL,1,"Memcached",&cw_Memcached},
+};
+const int c_Memcached::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_Memcached::cloneImpl() {
   ObjectData *obj = coo_Memcached();
   c_Memcached::cloneSet(obj);
@@ -6483,12 +6313,12 @@ const ObjectStaticCallbacks cw_Memcached = {
   c_Memcached::os_getInit,
   c_Memcached::os_get,
   c_Memcached::os_lval,
-  c_Memcached::os_invoke,
   c_Memcached::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Memcached,
   c_Memcached::s_call_info_table,c_Memcached::s_call_info_index,
+  c_Memcached::s_instanceof_table,c_Memcached::s_instanceof_index,
   &c_Memcached::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_XMLReader() {
   return NEWOBJ(c_XMLReader)();
@@ -6508,21 +6338,6 @@ Variant &c_XMLReader::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_XMLReader
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_XMLReader
-Variant * c_XMLReader::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_XMLReader
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_XMLReader
-Variant * c_XMLReader::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_XMLReader
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_XMLReader
-Variant * c_XMLReader::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_XMLReader
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_XMLReader
 Variant c_XMLReader::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -6592,6 +6407,13 @@ Variant c_XMLReader::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_XMLReader
 IMPLEMENT_CLASS(XMLReader)
+const InstanceOfInfo c_XMLReader::s_instanceof_table[] = {
+  {0x1C85D092180A6325LL,1,"XMLReader",&cw_XMLReader},
+};
+const int c_XMLReader::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
 ObjectData *c_XMLReader::cloneImpl() {
   ObjectData *obj = coo_XMLReader();
   c_XMLReader::cloneSet(obj);
@@ -7287,12 +7109,12 @@ const ObjectStaticCallbacks cw_XMLReader = {
   c_XMLReader::os_getInit,
   c_XMLReader::os_get,
   c_XMLReader::os_lval,
-  c_XMLReader::os_invoke,
   c_XMLReader::os_constant,
   (ObjectData*(*)(ObjectData*))coo_XMLReader,
   c_XMLReader::s_call_info_table,c_XMLReader::s_call_info_index,
+  c_XMLReader::s_instanceof_table,c_XMLReader::s_instanceof_index,
   &c_XMLReader::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_DOMComment() {
   return NEWOBJ(c_DOMComment)();
@@ -7312,27 +7134,22 @@ Variant &c_DOMComment::os_lval(CStrRef s) {
   return c_DOMCharacterData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMComment
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMComment
-Variant * c_DOMComment::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMComment
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMComment
-Variant * c_DOMComment::o_realPropPublic(CStrRef s, int flags) const {
-  return c_DOMCharacterData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMComment
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMComment
-Variant * c_DOMComment::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMComment
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMComment
 Variant c_DOMComment::os_constant(const char *s) {
   return c_DOMCharacterData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMComment
 IMPLEMENT_CLASS(DOMComment)
+const InstanceOfInfo c_DOMComment::s_instanceof_table[] = {
+  {0x7E07B9C27FE59D68LL,1,"DOMComment",&cw_DOMComment},
+  {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
+  {0x02239AA5D64B1453LL,1,"DOMCharacterData",&cw_DOMCharacterData},
+};
+const int c_DOMComment::s_instanceof_index[] = {
+  7,
+  0,-1,1,2,-1,-1,-1,-1,
+
+};
 ObjectData *c_DOMComment::cloneImpl() {
   ObjectData *obj = coo_DOMComment();
   c_DOMComment::cloneSet(obj);
@@ -7423,12 +7240,12 @@ const ObjectStaticCallbacks cw_DOMComment = {
   c_DOMComment::os_getInit,
   c_DOMComment::os_get,
   c_DOMComment::os_lval,
-  c_DOMComment::os_invoke,
   c_DOMComment::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMComment,
   c_DOMComment::s_call_info_table,c_DOMComment::s_call_info_index,
+  c_DOMComment::s_instanceof_table,c_DOMComment::s_instanceof_index,
   &c_DOMComment::s_class_name,
-  0,&cw_DOMCharacterData
+  0,0,&cw_DOMCharacterData
 };
 ObjectData *coo_SQLite3() {
   return NEWOBJ(c_SQLite3)();
@@ -7448,27 +7265,19 @@ Variant &c_SQLite3::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SQLite3
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SQLite3
-Variant * c_SQLite3::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_SQLite3
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SQLite3
-Variant * c_SQLite3::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SQLite3
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SQLite3
-Variant * c_SQLite3::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SQLite3
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3
 Variant c_SQLite3::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3
 IMPLEMENT_CLASS(SQLite3)
+const InstanceOfInfo c_SQLite3::s_instanceof_table[] = {
+  {0x1D35C3EFD00E11A9LL,1,"SQLite3",&cw_SQLite3},
+};
+const int c_SQLite3::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
 ObjectData *c_SQLite3::cloneImpl() {
   ObjectData *obj = coo_SQLite3();
   c_SQLite3::cloneSet(obj);
@@ -7948,12 +7757,12 @@ const ObjectStaticCallbacks cw_SQLite3 = {
   c_SQLite3::os_getInit,
   c_SQLite3::os_get,
   c_SQLite3::os_lval,
-  c_SQLite3::os_invoke,
   c_SQLite3::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SQLite3,
   c_SQLite3::s_call_info_table,c_SQLite3::s_call_info_index,
+  c_SQLite3::s_instanceof_table,c_SQLite3::s_instanceof_index,
   &c_SQLite3::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_DOMAttr() {
   return NEWOBJ(c_DOMAttr)();
@@ -7973,27 +7782,20 @@ Variant &c_DOMAttr::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMAttr
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMAttr
-Variant * c_DOMAttr::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMAttr
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMAttr
-Variant * c_DOMAttr::o_realPropPublic(CStrRef s, int flags) const {
-  return c_DOMNode::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMAttr
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMAttr
-Variant * c_DOMAttr::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMAttr
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMAttr
 Variant c_DOMAttr::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMAttr
 IMPLEMENT_CLASS(DOMAttr)
+const InstanceOfInfo c_DOMAttr::s_instanceof_table[] = {
+  {0x297174231D4912F4LL,1,"DOMAttr",&cw_DOMAttr},
+  {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
+};
+const int c_DOMAttr::s_instanceof_index[] = {
+  3,
+  0,-1,1,-1,
+};
 ObjectData *c_DOMAttr::cloneImpl() {
   ObjectData *obj = coo_DOMAttr();
   c_DOMAttr::cloneSet(obj);
@@ -8185,12 +7987,12 @@ const ObjectStaticCallbacks cw_DOMAttr = {
   c_DOMAttr::os_getInit,
   c_DOMAttr::os_get,
   c_DOMAttr::os_lval,
-  c_DOMAttr::os_invoke,
   c_DOMAttr::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMAttr,
   c_DOMAttr::s_call_info_table,c_DOMAttr::s_call_info_index,
+  c_DOMAttr::s_instanceof_table,c_DOMAttr::s_instanceof_index,
   &c_DOMAttr::s_class_name,
-  0,&cw_DOMNode
+  0,0,&cw_DOMNode
 };
 ObjectData *coo_SoapVar() {
   return NEWOBJ(c_SoapVar)();
@@ -8210,27 +8012,19 @@ Variant &c_SoapVar::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapVar
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapVar
-Variant * c_SoapVar::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_SoapVar
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SoapVar
-Variant * c_SoapVar::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SoapVar
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapVar
-Variant * c_SoapVar::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapVar
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapVar
 Variant c_SoapVar::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapVar
 IMPLEMENT_CLASS(SoapVar)
+const InstanceOfInfo c_SoapVar::s_instanceof_table[] = {
+  {0x7909270014376235LL,1,"SoapVar",&cw_SoapVar},
+};
+const int c_SoapVar::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
 ObjectData *c_SoapVar::cloneImpl() {
   ObjectData *obj = coo_SoapVar();
   c_SoapVar::cloneSet(obj);
@@ -8354,12 +8148,12 @@ const ObjectStaticCallbacks cw_SoapVar = {
   c_SoapVar::os_getInit,
   c_SoapVar::os_get,
   c_SoapVar::os_lval,
-  c_SoapVar::os_invoke,
   c_SoapVar::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SoapVar,
   c_SoapVar::s_call_info_table,c_SoapVar::s_call_info_index,
+  c_SoapVar::s_instanceof_table,c_SoapVar::s_instanceof_index,
   &c_SoapVar::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_DOMNamedNodeMap() {
   return NEWOBJ(c_DOMNamedNodeMap)();
@@ -8379,27 +8173,22 @@ Variant &c_DOMNamedNodeMap::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNamedNodeMap
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMNamedNodeMap
-Variant * c_DOMNamedNodeMap::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMNamedNodeMap
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMNamedNodeMap
-Variant * c_DOMNamedNodeMap::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMNamedNodeMap
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNamedNodeMap
-Variant * c_DOMNamedNodeMap::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNamedNodeMap
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNamedNodeMap
 Variant c_DOMNamedNodeMap::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNamedNodeMap
 IMPLEMENT_CLASS(DOMNamedNodeMap)
+const InstanceOfInfo c_DOMNamedNodeMap::s_instanceof_table[] = {
+  {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
+  {0x196F76C9C527B946LL,1,"DOMNamedNodeMap",&cw_DOMNamedNodeMap},
+  {0x5C9BC112C0363017LL,1,"IteratorAggregate",(const ObjectStaticCallbacks*)2},
+};
+const int c_DOMNamedNodeMap::s_instanceof_index[] = {
+  7,
+  -1,0,-1,-1,-1,-1,1,2,
+
+};
 ObjectData *c_DOMNamedNodeMap::cloneImpl() {
   ObjectData *obj = coo_DOMNamedNodeMap();
   c_DOMNamedNodeMap::cloneSet(obj);
@@ -8650,12 +8439,12 @@ const ObjectStaticCallbacks cw_DOMNamedNodeMap = {
   c_DOMNamedNodeMap::os_getInit,
   c_DOMNamedNodeMap::os_get,
   c_DOMNamedNodeMap::os_lval,
-  c_DOMNamedNodeMap::os_invoke,
   c_DOMNamedNodeMap::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMNamedNodeMap,
   c_DOMNamedNodeMap::s_call_info_table,c_DOMNamedNodeMap::s_call_info_index,
+  c_DOMNamedNodeMap::s_instanceof_table,c_DOMNamedNodeMap::s_instanceof_index,
   &c_DOMNamedNodeMap::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_SQLite3Result() {
   return NEWOBJ(c_SQLite3Result)();
@@ -8675,27 +8464,19 @@ Variant &c_SQLite3Result::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SQLite3Result
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SQLite3Result
-Variant * c_SQLite3Result::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_SQLite3Result
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SQLite3Result
-Variant * c_SQLite3Result::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SQLite3Result
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SQLite3Result
-Variant * c_SQLite3Result::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SQLite3Result
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3Result
 Variant c_SQLite3Result::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3Result
 IMPLEMENT_CLASS(SQLite3Result)
+const InstanceOfInfo c_SQLite3Result::s_instanceof_table[] = {
+  {0x2E899D2A2572EF7DLL,1,"SQLite3Result",&cw_SQLite3Result},
+};
+const int c_SQLite3Result::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
 ObjectData *c_SQLite3Result::cloneImpl() {
   ObjectData *obj = coo_SQLite3Result();
   c_SQLite3Result::cloneSet(obj);
@@ -8905,12 +8686,12 @@ const ObjectStaticCallbacks cw_SQLite3Result = {
   c_SQLite3Result::os_getInit,
   c_SQLite3Result::os_get,
   c_SQLite3Result::os_lval,
-  c_SQLite3Result::os_invoke,
   c_SQLite3Result::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SQLite3Result,
   c_SQLite3Result::s_call_info_table,c_SQLite3Result::s_call_info_index,
+  c_SQLite3Result::s_instanceof_table,c_SQLite3Result::s_instanceof_index,
   &c_SQLite3Result::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_SimpleXMLElement() {
   return NEWOBJ(c_SimpleXMLElement)();
@@ -8930,27 +8711,25 @@ Variant &c_SimpleXMLElement::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SimpleXMLElement
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SimpleXMLElement
-Variant * c_SimpleXMLElement::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_SimpleXMLElement
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SimpleXMLElement
-Variant * c_SimpleXMLElement::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SimpleXMLElement
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SimpleXMLElement
-Variant * c_SimpleXMLElement::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SimpleXMLElement
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SimpleXMLElement
 Variant c_SimpleXMLElement::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SimpleXMLElement
 IMPLEMENT_CLASS(SimpleXMLElement)
+const InstanceOfInfo c_SimpleXMLElement::s_instanceof_table[] = {
+  {0x66679538C5E6F0A1LL,0,"Traversable",(const ObjectStaticCallbacks*)2},
+  {0x795F86375EE263D1LL,1,"Countable",(const ObjectStaticCallbacks*)2},
+  {0x6A76B9AABB7CC713LL,1,"SimpleXMLElement",&cw_SimpleXMLElement},
+  {0x5C9BC112C0363017LL,1,"IteratorAggregate",(const ObjectStaticCallbacks*)2},
+  {0x3BDD11EABFCD6F0BLL,1,"ArrayAccess",(const ObjectStaticCallbacks*)2},
+};
+const int c_SimpleXMLElement::s_instanceof_index[] = {
+  15,
+  -1,0,-1,2,-1,-1,-1,3,
+  -1,-1,-1,4,-1,-1,-1,-1,
+
+};
 ObjectData *c_SimpleXMLElement::cloneImpl() {
   ObjectData *obj = coo_SimpleXMLElement();
   c_SimpleXMLElement::cloneSet(obj);
@@ -9620,12 +9399,12 @@ const ObjectStaticCallbacks cw_SimpleXMLElement = {
   c_SimpleXMLElement::os_getInit,
   c_SimpleXMLElement::os_get,
   c_SimpleXMLElement::os_lval,
-  c_SimpleXMLElement::os_invoke,
   c_SimpleXMLElement::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SimpleXMLElement,
   c_SimpleXMLElement::s_call_info_table,c_SimpleXMLElement::s_call_info_index,
+  c_SimpleXMLElement::s_instanceof_table,c_SimpleXMLElement::s_instanceof_index,
   &c_SimpleXMLElement::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_Memcache() {
   return NEWOBJ(c_Memcache)();
@@ -9645,27 +9424,19 @@ Variant &c_Memcache::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Memcache
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_Memcache
-Variant * c_Memcache::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_Memcache
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Memcache
-Variant * c_Memcache::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Memcache
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Memcache
-Variant * c_Memcache::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Memcache
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Memcache
 Variant c_Memcache::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Memcache
 IMPLEMENT_CLASS(Memcache)
+const InstanceOfInfo c_Memcache::s_instanceof_table[] = {
+  {0x3C122DF8859C72D0LL,1,"Memcache",&cw_Memcache},
+};
+const int c_Memcache::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_Memcache::cloneImpl() {
   ObjectData *obj = coo_Memcache();
   c_Memcache::cloneSet(obj);
@@ -10357,12 +10128,12 @@ const ObjectStaticCallbacks cw_Memcache = {
   c_Memcache::os_getInit,
   c_Memcache::os_get,
   c_Memcache::os_lval,
-  c_Memcache::os_invoke,
   c_Memcache::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Memcache,
   c_Memcache::s_call_info_table,c_Memcache::s_call_info_index,
+  c_Memcache::s_instanceof_table,c_Memcache::s_instanceof_index,
   &c_Memcache::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_DOMProcessingInstruction() {
   return NEWOBJ(c_DOMProcessingInstruction)();
@@ -10382,27 +10153,20 @@ Variant &c_DOMProcessingInstruction::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMProcessingInstruction
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMProcessingInstruction
-Variant * c_DOMProcessingInstruction::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMProcessingInstruction
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMProcessingInstruction
-Variant * c_DOMProcessingInstruction::o_realPropPublic(CStrRef s, int flags) const {
-  return c_DOMNode::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMProcessingInstruction
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMProcessingInstruction
-Variant * c_DOMProcessingInstruction::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMProcessingInstruction
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMProcessingInstruction
 Variant c_DOMProcessingInstruction::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMProcessingInstruction
 IMPLEMENT_CLASS(DOMProcessingInstruction)
+const InstanceOfInfo c_DOMProcessingInstruction::s_instanceof_table[] = {
+  {0x59B3EFD1CD987F80LL,1,"DOMProcessingInstruction",&cw_DOMProcessingInstruction},
+  {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
+};
+const int c_DOMProcessingInstruction::s_instanceof_index[] = {
+  3,
+  0,-1,1,-1,
+};
 ObjectData *c_DOMProcessingInstruction::cloneImpl() {
   ObjectData *obj = coo_DOMProcessingInstruction();
   c_DOMProcessingInstruction::cloneSet(obj);
@@ -10575,12 +10339,12 @@ const ObjectStaticCallbacks cw_DOMProcessingInstruction = {
   c_DOMProcessingInstruction::os_getInit,
   c_DOMProcessingInstruction::os_get,
   c_DOMProcessingInstruction::os_lval,
-  c_DOMProcessingInstruction::os_invoke,
   c_DOMProcessingInstruction::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMProcessingInstruction,
   c_DOMProcessingInstruction::s_call_info_table,c_DOMProcessingInstruction::s_call_info_index,
+  c_DOMProcessingInstruction::s_instanceof_table,c_DOMProcessingInstruction::s_instanceof_index,
   &c_DOMProcessingInstruction::s_class_name,
-  0,&cw_DOMNode
+  0,0,&cw_DOMNode
 };
 ObjectData *coo_EncodingMatch() {
   return NEWOBJ(c_EncodingMatch)();
@@ -10600,27 +10364,19 @@ Variant &c_EncodingMatch::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_EncodingMatch
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_EncodingMatch
-Variant * c_EncodingMatch::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_EncodingMatch
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_EncodingMatch
-Variant * c_EncodingMatch::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_EncodingMatch
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_EncodingMatch
-Variant * c_EncodingMatch::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_EncodingMatch
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_EncodingMatch
 Variant c_EncodingMatch::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_EncodingMatch
 IMPLEMENT_CLASS(EncodingMatch)
+const InstanceOfInfo c_EncodingMatch::s_instanceof_table[] = {
+  {0x483F5149CA964744LL,1,"EncodingMatch",&cw_EncodingMatch},
+};
+const int c_EncodingMatch::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_EncodingMatch::cloneImpl() {
   ObjectData *obj = coo_EncodingMatch();
   c_EncodingMatch::cloneSet(obj);
@@ -10791,12 +10547,12 @@ const ObjectStaticCallbacks cw_EncodingMatch = {
   c_EncodingMatch::os_getInit,
   c_EncodingMatch::os_get,
   c_EncodingMatch::os_lval,
-  c_EncodingMatch::os_invoke,
   c_EncodingMatch::os_constant,
   (ObjectData*(*)(ObjectData*))coo_EncodingMatch,
   c_EncodingMatch::s_call_info_table,c_EncodingMatch::s_call_info_index,
+  c_EncodingMatch::s_instanceof_table,c_EncodingMatch::s_instanceof_index,
   &c_EncodingMatch::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_PDOStatement() {
   return NEWOBJ(c_PDOStatement)();
@@ -10816,27 +10572,22 @@ Variant &c_PDOStatement::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDOStatement
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PDOStatement
-Variant * c_PDOStatement::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PDOStatement
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_PDOStatement
-Variant * c_PDOStatement::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_PDOStatement
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDOStatement
-Variant * c_PDOStatement::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDOStatement
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOStatement
 Variant c_PDOStatement::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOStatement
 IMPLEMENT_CLASS(PDOStatement)
+const InstanceOfInfo c_PDOStatement::s_instanceof_table[] = {
+  {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
+  {0x4253D8488B734244LL,1,"PDOStatement",&cw_PDOStatement},
+  {0x0636A5F84AF9D29ELL,1,"Iterator",(const ObjectStaticCallbacks*)2},
+};
+const int c_PDOStatement::s_instanceof_index[] = {
+  7,
+  -1,0,-1,-1,1,-1,2,-1,
+
+};
 ObjectData *c_PDOStatement::cloneImpl() {
   ObjectData *obj = coo_PDOStatement();
   c_PDOStatement::cloneSet(obj);
@@ -11559,12 +11310,12 @@ const ObjectStaticCallbacks cw_PDOStatement = {
   c_PDOStatement::os_getInit,
   c_PDOStatement::os_get,
   c_PDOStatement::os_lval,
-  c_PDOStatement::os_invoke,
   c_PDOStatement::os_constant,
   (ObjectData*(*)(ObjectData*))coo_PDOStatement,
   c_PDOStatement::s_call_info_table,c_PDOStatement::s_call_info_index,
+  c_PDOStatement::s_instanceof_table,c_PDOStatement::s_instanceof_index,
   &c_PDOStatement::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_SoapClient() {
   return NEWOBJ(c_SoapClient)();
@@ -11584,27 +11335,19 @@ Variant &c_SoapClient::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapClient
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapClient
-Variant * c_SoapClient::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_SoapClient
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SoapClient
-Variant * c_SoapClient::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SoapClient
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapClient
-Variant * c_SoapClient::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapClient
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapClient
 Variant c_SoapClient::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapClient
 IMPLEMENT_CLASS(SoapClient)
+const InstanceOfInfo c_SoapClient::s_instanceof_table[] = {
+  {0x7A52EBE538182BDALL,1,"SoapClient",&cw_SoapClient},
+};
+const int c_SoapClient::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_SoapClient::cloneImpl() {
   ObjectData *obj = coo_SoapClient();
   c_SoapClient::cloneSet(obj);
@@ -12004,12 +11747,12 @@ const ObjectStaticCallbacks cw_SoapClient = {
   c_SoapClient::os_getInit,
   c_SoapClient::os_get,
   c_SoapClient::os_lval,
-  c_SoapClient::os_invoke,
   c_SoapClient::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SoapClient,
   c_SoapClient::s_call_info_table,c_SoapClient::s_call_info_index,
+  c_SoapClient::s_instanceof_table,c_SoapClient::s_instanceof_index,
   &c_SoapClient::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_SoapParam() {
   return NEWOBJ(c_SoapParam)();
@@ -12029,27 +11772,19 @@ Variant &c_SoapParam::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapParam
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapParam
-Variant * c_SoapParam::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_SoapParam
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SoapParam
-Variant * c_SoapParam::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SoapParam
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapParam
-Variant * c_SoapParam::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapParam
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapParam
 Variant c_SoapParam::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapParam
 IMPLEMENT_CLASS(SoapParam)
+const InstanceOfInfo c_SoapParam::s_instanceof_table[] = {
+  {0x17A40D895C55D968LL,1,"SoapParam",&cw_SoapParam},
+};
+const int c_SoapParam::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_SoapParam::cloneImpl() {
   ObjectData *obj = coo_SoapParam();
   c_SoapParam::cloneSet(obj);
@@ -12137,12 +11872,12 @@ const ObjectStaticCallbacks cw_SoapParam = {
   c_SoapParam::os_getInit,
   c_SoapParam::os_get,
   c_SoapParam::os_lval,
-  c_SoapParam::os_invoke,
   c_SoapParam::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SoapParam,
   c_SoapParam::s_call_info_table,c_SoapParam::s_call_info_index,
+  c_SoapParam::s_instanceof_table,c_SoapParam::s_instanceof_index,
   &c_SoapParam::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_DateTime() {
   return NEWOBJ(c_DateTime)();
@@ -12162,21 +11897,6 @@ Variant &c_DateTime::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DateTime
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DateTime
-Variant * c_DateTime::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DateTime
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DateTime
-Variant * c_DateTime::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DateTime
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DateTime
-Variant * c_DateTime::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DateTime
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DateTime
 Variant c_DateTime::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -12215,6 +11935,13 @@ Variant c_DateTime::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DateTime
 IMPLEMENT_CLASS(DateTime)
+const InstanceOfInfo c_DateTime::s_instanceof_table[] = {
+  {0x3DB8FB455A602A1ELL,1,"DateTime",&cw_DateTime},
+};
+const int c_DateTime::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_DateTime::cloneImpl() {
   ObjectData *obj = coo_DateTime();
   c_DateTime::cloneSet(obj);
@@ -12522,12 +12249,12 @@ const ObjectStaticCallbacks cw_DateTime = {
   c_DateTime::os_getInit,
   c_DateTime::os_get,
   c_DateTime::os_lval,
-  c_DateTime::os_invoke,
   c_DateTime::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DateTime,
   c_DateTime::s_call_info_table,c_DateTime::s_call_info_index,
+  c_DateTime::s_instanceof_table,c_DateTime::s_instanceof_index,
   &c_DateTime::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_Collator() {
   return NEWOBJ(c_Collator)();
@@ -12547,21 +12274,6 @@ Variant &c_Collator::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Collator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_Collator
-Variant * c_Collator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_Collator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Collator
-Variant * c_Collator::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Collator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Collator
-Variant * c_Collator::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Collator
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Collator
 Variant c_Collator::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -12633,6 +12345,13 @@ Variant c_Collator::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Collator
 IMPLEMENT_CLASS(Collator)
+const InstanceOfInfo c_Collator::s_instanceof_table[] = {
+  {0x4C6991D3CF5CA03DLL,1,"Collator",&cw_Collator},
+};
+const int c_Collator::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
 ObjectData *c_Collator::cloneImpl() {
   ObjectData *obj = coo_Collator();
   c_Collator::cloneSet(obj);
@@ -13012,12 +12731,12 @@ const ObjectStaticCallbacks cw_Collator = {
   c_Collator::os_getInit,
   c_Collator::os_get,
   c_Collator::os_lval,
-  c_Collator::os_invoke,
   c_Collator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Collator,
   c_Collator::s_call_info_table,c_Collator::s_call_info_index,
+  c_Collator::s_instanceof_table,c_Collator::s_instanceof_index,
   &c_Collator::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_PDO() {
   return NEWOBJ(c_PDO)();
@@ -13037,21 +12756,6 @@ Variant &c_PDO::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDO
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PDO
-Variant * c_PDO::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PDO
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_PDO
-Variant * c_PDO::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_PDO
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDO
-Variant * c_PDO::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDO
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_PDO
 Variant c_PDO::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -13290,6 +12994,13 @@ Variant c_PDO::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_PDO
 IMPLEMENT_CLASS(PDO)
+const InstanceOfInfo c_PDO::s_instanceof_table[] = {
+  {0x0A34015F67C804ADLL,1,"PDO",&cw_PDO},
+};
+const int c_PDO::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
 ObjectData *c_PDO::cloneImpl() {
   ObjectData *obj = coo_PDO();
   c_PDO::cloneSet(obj);
@@ -13740,12 +13451,12 @@ const ObjectStaticCallbacks cw_PDO = {
   c_PDO::os_getInit,
   c_PDO::os_get,
   c_PDO::os_lval,
-  c_PDO::os_invoke,
   c_PDO::os_constant,
   (ObjectData*(*)(ObjectData*))coo_PDO,
   c_PDO::s_call_info_table,c_PDO::s_call_info_index,
+  c_PDO::s_instanceof_table,c_PDO::s_instanceof_index,
   &c_PDO::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_ImageSprite() {
   return NEWOBJ(c_ImageSprite)();
@@ -13765,27 +13476,19 @@ Variant &c_ImageSprite::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ImageSprite
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_ImageSprite
-Variant * c_ImageSprite::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_ImageSprite
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ImageSprite
-Variant * c_ImageSprite::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ImageSprite
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ImageSprite
-Variant * c_ImageSprite::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ImageSprite
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ImageSprite
 Variant c_ImageSprite::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ImageSprite
 IMPLEMENT_CLASS(ImageSprite)
+const InstanceOfInfo c_ImageSprite::s_instanceof_table[] = {
+  {0x4DA860E5647C3908LL,1,"ImageSprite",&cw_ImageSprite},
+};
+const int c_ImageSprite::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_ImageSprite::cloneImpl() {
   ObjectData *obj = coo_ImageSprite();
   c_ImageSprite::cloneSet(obj);
@@ -14147,12 +13850,12 @@ const ObjectStaticCallbacks cw_ImageSprite = {
   c_ImageSprite::os_getInit,
   c_ImageSprite::os_get,
   c_ImageSprite::os_lval,
-  c_ImageSprite::os_invoke,
   c_ImageSprite::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ImageSprite,
   c_ImageSprite::s_call_info_table,c_ImageSprite::s_call_info_index,
+  c_ImageSprite::s_instanceof_table,c_ImageSprite::s_instanceof_index,
   &c_ImageSprite::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_Continuation() {
   return NEWOBJ(c_Continuation)();
@@ -14172,36 +13875,22 @@ Variant &c_Continuation::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Continuation
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_Continuation
-Variant * c_Continuation::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 0:
-      HASH_GUARD_STRING(0x61DD21ABF790E9E2LL, Continuation) { return o_realPropPrivate(prop, flags); }
-      break;
-    default:
-      break;
-  }
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_Continuation
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Continuation
-Variant * c_Continuation::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Continuation
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Continuation
-Variant * c_Continuation::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Continuation
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Continuation
 Variant c_Continuation::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Continuation
 IMPLEMENT_CLASS(Continuation)
+const InstanceOfInfo c_Continuation::s_instanceof_table[] = {
+  {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
+  {0x61DD21ABF790E9E2LL,1,"Continuation",&cw_Continuation},
+  {0x0636A5F84AF9D29ELL,1,"Iterator",(const ObjectStaticCallbacks*)2},
+};
+const int c_Continuation::s_instanceof_index[] = {
+  7,
+  -1,0,1,-1,-1,-1,2,-1,
+
+};
 ObjectData *c_Continuation::cloneImpl() {
   ObjectData *obj = coo_Continuation();
   c_Continuation::cloneSet(obj);
@@ -14680,12 +14369,12 @@ const ObjectStaticCallbacks cw_Continuation = {
   c_Continuation::os_getInit,
   c_Continuation::os_get,
   c_Continuation::os_lval,
-  c_Continuation::os_invoke,
   c_Continuation::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Continuation,
   c_Continuation::s_call_info_table,c_Continuation::s_call_info_index,
+  c_Continuation::s_instanceof_table,c_Continuation::s_instanceof_index,
   &c_Continuation::s_class_name,
-  &c_Continuation::os_prop_table,0
+  &c_Continuation::os_prop_table,0,0
 };
 ObjectData *coo_DOMEntity() {
   return NEWOBJ(c_DOMEntity)();
@@ -14705,27 +14394,20 @@ Variant &c_DOMEntity::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMEntity
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMEntity
-Variant * c_DOMEntity::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMEntity
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMEntity
-Variant * c_DOMEntity::o_realPropPublic(CStrRef s, int flags) const {
-  return c_DOMNode::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMEntity
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMEntity
-Variant * c_DOMEntity::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMEntity
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMEntity
 Variant c_DOMEntity::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMEntity
 IMPLEMENT_CLASS(DOMEntity)
+const InstanceOfInfo c_DOMEntity::s_instanceof_table[] = {
+  {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
+  {0x624835B2D74B86FFLL,1,"DOMEntity",&cw_DOMEntity},
+};
+const int c_DOMEntity::s_instanceof_index[] = {
+  3,
+  -1,-1,0,1,
+};
 ObjectData *c_DOMEntity::cloneImpl() {
   ObjectData *obj = coo_DOMEntity();
   c_DOMEntity::cloneSet(obj);
@@ -14878,12 +14560,12 @@ const ObjectStaticCallbacks cw_DOMEntity = {
   c_DOMEntity::os_getInit,
   c_DOMEntity::os_get,
   c_DOMEntity::os_lval,
-  c_DOMEntity::os_invoke,
   c_DOMEntity::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMEntity,
   c_DOMEntity::s_call_info_table,c_DOMEntity::s_call_info_index,
+  c_DOMEntity::s_instanceof_table,c_DOMEntity::s_instanceof_index,
   &c_DOMEntity::s_class_name,
-  0,&cw_DOMNode
+  0,0,&cw_DOMNode
 };
 ObjectData *coo_XMLWriter() {
   return NEWOBJ(c_XMLWriter)();
@@ -14903,27 +14585,19 @@ Variant &c_XMLWriter::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_XMLWriter
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_XMLWriter
-Variant * c_XMLWriter::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_XMLWriter
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_XMLWriter
-Variant * c_XMLWriter::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_XMLWriter
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_XMLWriter
-Variant * c_XMLWriter::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_XMLWriter
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_XMLWriter
 Variant c_XMLWriter::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_XMLWriter
 IMPLEMENT_CLASS(XMLWriter)
+const InstanceOfInfo c_XMLWriter::s_instanceof_table[] = {
+  {0x2FF1EF6EBB3DA065LL,1,"XMLWriter",&cw_XMLWriter},
+};
+const int c_XMLWriter::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
 ObjectData *c_XMLWriter::cloneImpl() {
   ObjectData *obj = coo_XMLWriter();
   c_XMLWriter::cloneSet(obj);
@@ -16067,12 +15741,12 @@ const ObjectStaticCallbacks cw_XMLWriter = {
   c_XMLWriter::os_getInit,
   c_XMLWriter::os_get,
   c_XMLWriter::os_lval,
-  c_XMLWriter::os_invoke,
   c_XMLWriter::os_constant,
   (ObjectData*(*)(ObjectData*))coo_XMLWriter,
   c_XMLWriter::s_call_info_table,c_XMLWriter::s_call_info_index,
+  c_XMLWriter::s_instanceof_table,c_XMLWriter::s_instanceof_index,
   &c_XMLWriter::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_DOMXPath() {
   return NEWOBJ(c_DOMXPath)();
@@ -16092,27 +15766,19 @@ Variant &c_DOMXPath::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMXPath
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMXPath
-Variant * c_DOMXPath::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMXPath
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMXPath
-Variant * c_DOMXPath::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMXPath
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMXPath
-Variant * c_DOMXPath::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMXPath
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMXPath
 Variant c_DOMXPath::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMXPath
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMXPath)
+const InstanceOfInfo c_DOMXPath::s_instanceof_table[] = {
+  {0x7D46DB2E09C6DBA8LL,1,"DOMXPath",&cw_DOMXPath},
+};
+const int c_DOMXPath::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_DOMXPath::cloneImpl() {
   ObjectData *obj = coo_DOMXPath();
   c_DOMXPath::cloneSet(obj);
@@ -16390,12 +16056,12 @@ const ObjectStaticCallbacks cw_DOMXPath = {
   c_DOMXPath::os_getInit,
   c_DOMXPath::os_get,
   c_DOMXPath::os_lval,
-  c_DOMXPath::os_invoke,
   c_DOMXPath::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMXPath,
   c_DOMXPath::s_call_info_table,c_DOMXPath::s_call_info_index,
+  c_DOMXPath::s_instanceof_table,c_DOMXPath::s_instanceof_index,
   &c_DOMXPath::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_SoapServer() {
   return NEWOBJ(c_SoapServer)();
@@ -16415,27 +16081,19 @@ Variant &c_SoapServer::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapServer
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapServer
-Variant * c_SoapServer::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_SoapServer
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SoapServer
-Variant * c_SoapServer::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SoapServer
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapServer
-Variant * c_SoapServer::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapServer
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapServer
 Variant c_SoapServer::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapServer
 IMPLEMENT_CLASS(SoapServer)
+const InstanceOfInfo c_SoapServer::s_instanceof_table[] = {
+  {0x49FC1A1F7B878C3ELL,1,"SoapServer",&cw_SoapServer},
+};
+const int c_SoapServer::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_SoapServer::cloneImpl() {
   ObjectData *obj = coo_SoapServer();
   c_SoapServer::cloneSet(obj);
@@ -16750,12 +16408,12 @@ const ObjectStaticCallbacks cw_SoapServer = {
   c_SoapServer::os_getInit,
   c_SoapServer::os_get,
   c_SoapServer::os_lval,
-  c_SoapServer::os_invoke,
   c_SoapServer::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SoapServer,
   c_SoapServer::s_call_info_table,c_SoapServer::s_call_info_index,
+  c_SoapServer::s_instanceof_table,c_SoapServer::s_instanceof_index,
   &c_SoapServer::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_DOMNode() {
   return NEWOBJ(c_DOMNode)();
@@ -16775,27 +16433,19 @@ Variant &c_DOMNode::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNode
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMNode
-Variant * c_DOMNode::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMNode
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMNode
-Variant * c_DOMNode::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMNode
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNode
-Variant * c_DOMNode::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNode
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNode
 Variant c_DOMNode::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNode
 IMPLEMENT_CLASS(DOMNode)
+const InstanceOfInfo c_DOMNode::s_instanceof_table[] = {
+  {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
+};
+const int c_DOMNode::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_DOMNode::cloneImpl() {
   ObjectData *obj = coo_DOMNode();
   c_DOMNode::cloneSet(obj);
@@ -17389,12 +17039,12 @@ const ObjectStaticCallbacks cw_DOMNode = {
   c_DOMNode::os_getInit,
   c_DOMNode::os_get,
   c_DOMNode::os_lval,
-  c_DOMNode::os_invoke,
   c_DOMNode::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMNode,
   c_DOMNode::s_call_info_table,c_DOMNode::s_call_info_index,
+  c_DOMNode::s_instanceof_table,c_DOMNode::s_instanceof_index,
   &c_DOMNode::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_SpoofChecker() {
   return NEWOBJ(c_SpoofChecker)();
@@ -17414,21 +17064,6 @@ Variant &c_SpoofChecker::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SpoofChecker
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SpoofChecker
-Variant * c_SpoofChecker::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_SpoofChecker
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SpoofChecker
-Variant * c_SpoofChecker::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SpoofChecker
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SpoofChecker
-Variant * c_SpoofChecker::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SpoofChecker
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SpoofChecker
 Variant c_SpoofChecker::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -17461,6 +17096,13 @@ Variant c_SpoofChecker::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SpoofChecker
 IMPLEMENT_CLASS(SpoofChecker)
+const InstanceOfInfo c_SpoofChecker::s_instanceof_table[] = {
+  {0x648FB595C359F411LL,1,"SpoofChecker",&cw_SpoofChecker},
+};
+const int c_SpoofChecker::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
 ObjectData *c_SpoofChecker::cloneImpl() {
   ObjectData *obj = coo_SpoofChecker();
   c_SpoofChecker::cloneSet(obj);
@@ -17648,12 +17290,12 @@ const ObjectStaticCallbacks cw_SpoofChecker = {
   c_SpoofChecker::os_getInit,
   c_SpoofChecker::os_get,
   c_SpoofChecker::os_lval,
-  c_SpoofChecker::os_invoke,
   c_SpoofChecker::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SpoofChecker,
   c_SpoofChecker::s_call_info_table,c_SpoofChecker::s_call_info_index,
+  c_SpoofChecker::s_instanceof_table,c_SpoofChecker::s_instanceof_index,
   &c_SpoofChecker::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_DOMDocument() {
   return NEWOBJ(c_DOMDocument)();
@@ -17673,27 +17315,20 @@ Variant &c_DOMDocument::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMDocument
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMDocument
-Variant * c_DOMDocument::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMDocument
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMDocument
-Variant * c_DOMDocument::o_realPropPublic(CStrRef s, int flags) const {
-  return c_DOMNode::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMDocument
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMDocument
-Variant * c_DOMDocument::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMDocument
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocument
 Variant c_DOMDocument::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocument
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMDocument)
+const InstanceOfInfo c_DOMDocument::s_instanceof_table[] = {
+  {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
+  {0x2E650138BA043AAFLL,1,"DOMDocument",&cw_DOMDocument},
+};
+const int c_DOMDocument::s_instanceof_index[] = {
+  3,
+  -1,-1,0,1,
+};
 ObjectData *c_DOMDocument::cloneImpl() {
   ObjectData *obj = coo_DOMDocument();
   c_DOMDocument::cloneSet(obj);
@@ -18656,12 +18291,12 @@ const ObjectStaticCallbacks cw_DOMDocument = {
   c_DOMDocument::os_getInit,
   c_DOMDocument::os_get,
   c_DOMDocument::os_lval,
-  c_DOMDocument::os_invoke,
   c_DOMDocument::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMDocument,
   c_DOMDocument::s_call_info_table,c_DOMDocument::s_call_info_index,
+  c_DOMDocument::s_instanceof_table,c_DOMDocument::s_instanceof_index,
   &c_DOMDocument::s_class_name,
-  0,&cw_DOMNode
+  0,0,&cw_DOMNode
 };
 ObjectData *coo_LibXMLError() {
   return NEWOBJ(c_LibXMLError)();
@@ -18681,27 +18316,19 @@ Variant &c_LibXMLError::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_LibXMLError
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_LibXMLError
-Variant * c_LibXMLError::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_LibXMLError
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_LibXMLError
-Variant * c_LibXMLError::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_LibXMLError
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LibXMLError
-Variant * c_LibXMLError::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LibXMLError
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_LibXMLError
 Variant c_LibXMLError::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_LibXMLError
 IMPLEMENT_CLASS(LibXMLError)
+const InstanceOfInfo c_LibXMLError::s_instanceof_table[] = {
+  {0x253AC17234FC8CCBLL,1,"LibXMLError",&cw_LibXMLError},
+};
+const int c_LibXMLError::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
 ObjectData *c_LibXMLError::cloneImpl() {
   ObjectData *obj = coo_LibXMLError();
   c_LibXMLError::cloneSet(obj);
@@ -18775,12 +18402,12 @@ const ObjectStaticCallbacks cw_LibXMLError = {
   c_LibXMLError::os_getInit,
   c_LibXMLError::os_get,
   c_LibXMLError::os_lval,
-  c_LibXMLError::os_invoke,
   c_LibXMLError::os_constant,
   (ObjectData*(*)(ObjectData*))coo_LibXMLError,
   c_LibXMLError::s_call_info_table,c_LibXMLError::s_call_info_index,
+  c_LibXMLError::s_instanceof_table,c_LibXMLError::s_instanceof_index,
   &c_LibXMLError::s_class_name,
-  0,0
+  0,0,0
 };
 ObjectData *coo_DOMElement() {
   return NEWOBJ(c_DOMElement)();
@@ -18800,27 +18427,20 @@ Variant &c_DOMElement::os_lval(CStrRef s) {
   return c_DOMNode::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMElement
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMElement
-Variant * c_DOMElement::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_DOMElement
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMElement
-Variant * c_DOMElement::o_realPropPublic(CStrRef s, int flags) const {
-  return c_DOMNode::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DOMElement
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMElement
-Variant * c_DOMElement::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMElement
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMElement
 Variant c_DOMElement::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMElement
 IMPLEMENT_CLASS(DOMElement)
+const InstanceOfInfo c_DOMElement::s_instanceof_table[] = {
+  {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
+  {0x40B3C44077F5DDC3LL,1,"DOMElement",&cw_DOMElement},
+};
+const int c_DOMElement::s_instanceof_index[] = {
+  3,
+  -1,-1,0,1,
+};
 ObjectData *c_DOMElement::cloneImpl() {
   ObjectData *obj = coo_DOMElement();
   c_DOMElement::cloneSet(obj);
@@ -19482,12 +19102,12 @@ const ObjectStaticCallbacks cw_DOMElement = {
   c_DOMElement::os_getInit,
   c_DOMElement::os_get,
   c_DOMElement::os_lval,
-  c_DOMElement::os_invoke,
   c_DOMElement::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMElement,
   c_DOMElement::s_call_info_table,c_DOMElement::s_call_info_index,
+  c_DOMElement::s_instanceof_table,c_DOMElement::s_instanceof_index,
   &c_DOMElement::s_class_name,
-  0,&cw_DOMNode
+  0,0,&cw_DOMNode
 };
 struct hashNodeCTD {
   int64 hash;
@@ -19701,40 +19321,46 @@ Variant get_builtin_class_constant(CStrRef s, const char *constant, bool fatal /
 
 // Class tables
 static const ClassPropTableEntry cpt_table_entries[] = {
-  { 256, 9,GET_PROPERTY_OFFSET(c_Continuation, m_obj),&NAMSTR(s_sys_ssc9ae0c06, "\000Continuation\000obj") },
-  { 256, 8,GET_PROPERTY_OFFSET(c_Continuation, m_args),&NAMSTR(s_sys_ss9621feb5, "\000Continuation\000args") },
-  { 256, 4,GET_PROPERTY_OFFSET(c_Continuation, m_label),&NAMSTR(s_sys_ss40877955, "\000Continuation\000label") },
-  { 256, 4,GET_PROPERTY_OFFSET(c_Continuation, m_index),&NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index") },
-  { 256, 10,GET_PROPERTY_OFFSET(c_Continuation, m_value),&NAMSTR(s_sys_ss4e65aff3, "\000Continuation\000value") },
-  { 256, 10,GET_PROPERTY_OFFSET(c_Continuation, m_received),&NAMSTR(s_sys_ss19136311, "\000Continuation\000received") },
-  { 256, 7,GET_PROPERTY_OFFSET(c_Continuation, m_origFuncName),&NAMSTR(s_sys_ss0a6d9bb5, "\000Continuation\000origFuncName") },
-  { 256, 7,GET_PROPERTY_OFFSET(c_Continuation, m_called_class),&NAMSTR(s_sys_ss07090831, "\000Continuation\000called_class") },
-  { 256, 2,GET_PROPERTY_OFFSET(c_Continuation, m_done),&NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done") },
-  { 256, 2,GET_PROPERTY_OFFSET(c_Continuation, m_running),&NAMSTR(s_sys_ssde0dbfb2, "\000Continuation\000running") },
+  {0x3BA4EC7C8E83E5E0LL,5,14,258,4,GET_PROPERTY_OFFSET(c_Continuation, m_label),&NAMSTR(s_sys_ss40877955, "\000Continuation\000label") },
+  {0x6512738E63A43B01LL,6,14,258,10,GET_PROPERTY_OFFSET(c_Continuation, m_received),&NAMSTR(s_sys_ss19136311, "\000Continuation\000received") },
+  {0x245E74B9CC12BFC3LL,2,14,258,9,GET_PROPERTY_OFFSET(c_Continuation, m_obj),&NAMSTR(s_sys_ssc9ae0c06, "\000Continuation\000obj") },
+  {0x5B300BEBB6379169LL,3,14,258,2,GET_PROPERTY_OFFSET(c_Continuation, m_done),&NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done") },
+  {0x7A24AFD8ADE43B8ELL,-4,14,256,8,GET_PROPERTY_OFFSET(c_Continuation, m_args),&NAMSTR(s_sys_ss9621feb5, "\000Continuation\000args") },
+  {0x4B27521443880CAELL,3,14,258,4,GET_PROPERTY_OFFSET(c_Continuation, m_index),&NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index") },
+  {0x3640AC1AE9A5E090LL,0,14,258,2,GET_PROPERTY_OFFSET(c_Continuation, m_running),&NAMSTR(s_sys_ssde0dbfb2, "\000Continuation\000running") },
+  {0x03DAE8B0C0AC9D75LL,2,14,258,7,GET_PROPERTY_OFFSET(c_Continuation, m_origFuncName),&NAMSTR(s_sys_ss0a6d9bb5, "\000Continuation\000origFuncName") },
+  {0x021A52B45A788597LL,-7,14,258,10,GET_PROPERTY_OFFSET(c_Continuation, m_value),&NAMSTR(s_sys_ss4e65aff3, "\000Continuation\000value") },
+  {0x32E4F2861D2D28FDLL,-6,14,258,7,GET_PROPERTY_OFFSET(c_Continuation, m_called_class),&NAMSTR(s_sys_ss07090831, "\000Continuation\000called_class") },
 
-  { 256, 8,GET_PROPERTY_OFFSET(c_GenericContinuation, m_vars),&NAMSTR(s_sys_ss020cf65e, "\000GenericContinuation\000vars") },
+  {0x44CC7F6BF50518ECLL,0,21,258,8,GET_PROPERTY_OFFSET(c_GenericContinuation, m_vars),&NAMSTR(s_sys_ss020cf65e, "\000GenericContinuation\000vars") },
 
 };
 static const ClassPropTableEntry *cpt_private_entries[] = {
-  cpt_table_entries+0,
-  cpt_table_entries+1,
   cpt_table_entries+2,
-  cpt_table_entries+3,
   cpt_table_entries+4,
+  cpt_table_entries+0,
   cpt_table_entries+5,
-  cpt_table_entries+6,
-  cpt_table_entries+7,
   cpt_table_entries+8,
+  cpt_table_entries+1,
+  cpt_table_entries+7,
   cpt_table_entries+9,
+  cpt_table_entries+3,
+  cpt_table_entries+6,
   0,
   cpt_table_entries+10,
   0,
 };
+static const int cpt_hash_entries[] = {
+  0,1,-1,2,-1,-1,-1,-1,-1,3,-1,-1,-1,-1,4,-1,6,-1,-1,-1,-1,7,-1,8,-1,-1,-1,-1,-1,9,-1,-1,
+  -1,-1,-1,-1,0,-1,-1,-1,
+};
 const ClassPropTable c_Continuation::os_prop_table = {
-  10,10,0,cpt_table_entries+0,cpt_private_entries+0
+  31,2,cpt_hash_entries+0,
+  0,cpt_table_entries+0,cpt_private_entries+0
 };
 const ClassPropTable c_GenericContinuation::os_prop_table = {
-  1,1,&c_Continuation::os_prop_table,cpt_table_entries+10,cpt_private_entries+11
+  7,0,cpt_hash_entries+32,
+  &c_Continuation::os_prop_table,cpt_table_entries+10,cpt_private_entries+11
 };
 
 ///////////////////////////////////////////////////////////////////////////////

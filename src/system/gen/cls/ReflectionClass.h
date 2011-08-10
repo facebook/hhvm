@@ -35,7 +35,6 @@ class c_ReflectionClass : public ExtObjectData {
   Variant m_info;
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(ReflectionClass, ReflectionClass)
 
   // DECLARE_STATIC_PROP_OPS
@@ -44,16 +43,6 @@ class c_ReflectionClass : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionClass 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionClass 1
   static Variant os_constant(const char *s);
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  virtual Variant *o_realProp(CStrRef s, int flags,
-                              CStrRef context = null_string) const;
-  Variant *o_realPropPrivate(CStrRef s, int flags) const;
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
 
   // DECLARE_COMMON_INVOKE
   static const MethodCallInfoTable s_call_info_table[];

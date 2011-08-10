@@ -3267,10 +3267,9 @@ void AnalysisResult::outputCPPRedeclaredClassImpl(CodeGenerator &cg) {
                 "    c_ObjectData::os_getInit,\n"
                 "    c_ObjectData::os_get,\n"
                 "    c_ObjectData::os_lval,\n"
-                "    c_ObjectData::os_invoke,\n"
                 "    c_ObjectData::os_constant,\n"
                 "    coo_ObjectData,\n"
-                "    0,0,&s_%s,0,0\n"
+                "    0,0,0,0,&s_%s,0,0,0\n"
                 "  },\n"
                 "  -1\n"
                 "};\n",

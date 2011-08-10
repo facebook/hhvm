@@ -35,7 +35,6 @@ class c_DirectoryIterator : public c_SplFileInfo {
   // Properties
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(DirectoryIterator, DirectoryIterator)
 
   // DECLARE_STATIC_PROP_OPS
@@ -44,16 +43,6 @@ class c_DirectoryIterator : public c_SplFileInfo {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_DirectoryIterator 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DirectoryIterator 1
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_DirectoryIterator 1
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  virtual Variant *o_realProp(CStrRef s, int flags,
-                              CStrRef context = null_string) const;
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DirectoryIterator 1
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DirectoryIterator 1
 
   // DECLARE_COMMON_INVOKE
   static const MethodCallInfoTable s_call_info_table[];

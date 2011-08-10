@@ -248,17 +248,7 @@ public:
    * Collect parent class names.
    */
   void getAllParents(AnalysisResultConstPtr ar,
-                     std::vector<std::string> &names) {
-    if (m_stmt) {
-      if (isInterface()) {
-        boost::dynamic_pointer_cast<InterfaceStatement>
-          (m_stmt)->getAllParents(ar, names);
-      } else {
-        boost::dynamic_pointer_cast<ClassStatement>
-          (m_stmt)->getAllParents(ar, names);
-      }
-    }
-  }
+                     std::vector<std::string> &names);
 
   std::vector<std::string> &getBases() { return m_bases;}
 
@@ -456,8 +446,23 @@ public:
   bool canSkipCreateMethod() const;
   bool checkHasPropTable();
 
-  typedef std::map<std::string,
-                   std::pair<ClassScopePtr, std::vector<const Symbol *> > >
+  struct IndexedSym {
+    IndexedSym(int i, int p, const Symbol *s) :
+        origIndex(i), privIndex(p), sym(s) {}
+
+    int                 origIndex;
+    int                 privIndex;
+    const Symbol        *sym;
+  };
+
+  struct ClassPropTableInfo {
+    ClassScopeRawPtr            cls;
+    std::vector<int>            actualIndex;
+    std::vector<int>            privateIndex;
+    std::map<int, std::vector<IndexedSym> > syms;
+  };
+
+  typedef std::map<std::string, ClassPropTableInfo>
     ClassPropTableMap;
 protected:
   void findJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar,

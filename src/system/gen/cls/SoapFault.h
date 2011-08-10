@@ -40,7 +40,6 @@ class c_SoapFault : public c_Exception {
   Variant m_headerfault;
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(SoapFault, SoapFault)
 
   // DECLARE_STATIC_PROP_OPS
@@ -49,15 +48,6 @@ class c_SoapFault : public c_Exception {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_SoapFault 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapFault 1
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapFault 1
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_SoapFault 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapFault 1
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
 
   // DECLARE_COMMON_INVOKE
   static const MethodCallInfoTable s_call_info_table[];

@@ -43,8 +43,6 @@ extern const int64 k_SQLITE3_OPEN_CREATE;
 FORWARD_DECLARE_CLASS_BUILTIN(SQLite3);
 class c_SQLite3 : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(SQLite3)
-  END_CLASS_MAP(SQLite3)
   DECLARE_CLASS(SQLite3, SQLite3, ObjectData)
 
   // need to implement
@@ -91,7 +89,7 @@ class c_SQLite3 : public ExtObjectData {
   public: c_SQLite3 *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
   public: void validate() const;
   public: sqlite3 *m_raw_db;
@@ -111,8 +109,6 @@ class c_SQLite3 : public ExtObjectData {
 FORWARD_DECLARE_CLASS_BUILTIN(SQLite3Stmt);
 class c_SQLite3Stmt : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(SQLite3Stmt)
-  END_CLASS_MAP(SQLite3Stmt)
   DECLARE_CLASS(SQLite3Stmt, SQLite3Stmt, ObjectData)
 
   // need to implement
@@ -141,7 +137,7 @@ class c_SQLite3Stmt : public ExtObjectData {
   public: c_SQLite3Stmt *create(Object dbobject, String statement);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
   public: void validate() const;
   public: p_SQLite3 m_db;
@@ -161,8 +157,6 @@ class c_SQLite3Stmt : public ExtObjectData {
 FORWARD_DECLARE_CLASS_BUILTIN(SQLite3Result);
 class c_SQLite3Result : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(SQLite3Result)
-  END_CLASS_MAP(SQLite3Result)
   DECLARE_CLASS(SQLite3Result, SQLite3Result, ObjectData)
 
   // need to implement
@@ -189,7 +183,7 @@ class c_SQLite3Result : public ExtObjectData {
   public: c_SQLite3Result *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
   public: void validate() const;
   public: p_SQLite3Stmt m_stmt;

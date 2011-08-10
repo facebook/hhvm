@@ -34,7 +34,6 @@ class c_FilterIterator : public c_IteratorIterator {
   Variant m_it;
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(FilterIterator, FilterIterator)
 
   // DECLARE_STATIC_PROP_OPS
@@ -43,16 +42,6 @@ class c_FilterIterator : public c_IteratorIterator {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_FilterIterator 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_FilterIterator 1
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_FilterIterator 1
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  virtual Variant *o_realProp(CStrRef s, int flags,
-                              CStrRef context = null_string) const;
-  Variant *o_realPropPrivate(CStrRef s, int flags) const;
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_FilterIterator 1
 
   // DECLARE_COMMON_INVOKE
   static const MethodCallInfoTable s_call_info_table[];

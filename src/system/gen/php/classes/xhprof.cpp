@@ -45,38 +45,19 @@ Variant &c_XhprofFrame::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_XhprofFrame
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_XhprofFrame
-Variant * c_XhprofFrame::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_XhprofFrame
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_XhprofFrame
-Variant * c_XhprofFrame::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_XhprofFrame
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_XhprofFrame
-Variant * c_XhprofFrame::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_XhprofFrame
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_XhprofFrame
 Variant c_XhprofFrame::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_XhprofFrame
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(XhprofFrame)
-bool c_XhprofFrame::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_INSTANCEOF(0x3D290BF933ED12FDLL, NAMSTR(s_sys_ssd44d37cf, "XhprofFrame"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_XhprofFrame::s_instanceof_table[] = {
+  {0x3D290BF933ED12FDLL,1,"XhprofFrame",&cw_XhprofFrame},
+};
+const int c_XhprofFrame::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
 ObjectData *c_XhprofFrame::cloneImpl() {
   ObjectData *obj = coo_XhprofFrame();
   c_XhprofFrame::cloneSet(obj);
@@ -161,12 +142,12 @@ const ObjectStaticCallbacks cw_XhprofFrame = {
   c_XhprofFrame::os_getInit,
   c_XhprofFrame::os_get,
   c_XhprofFrame::os_lval,
-  c_XhprofFrame::os_invoke,
   c_XhprofFrame::os_constant,
   (ObjectData*(*)(ObjectData*))coo_XhprofFrame,
   c_XhprofFrame::s_call_info_table,c_XhprofFrame::s_call_info_index,
+  c_XhprofFrame::s_instanceof_table,c_XhprofFrame::s_instanceof_index,
   &c_XhprofFrame::s_class_name,
-  0,0
+  0,0,0
 };
 /* SRC: classes/xhprof.php line 7 */
 void c_XhprofFrame::t___construct(Variant v_name) {

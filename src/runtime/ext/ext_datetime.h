@@ -42,8 +42,6 @@ extern const StaticString q_DateTime_W3C;
 FORWARD_DECLARE_CLASS_BUILTIN(DateTime);
 class c_DateTime : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(DateTime)
-  END_CLASS_MAP(DateTime)
   DECLARE_CLASS(DateTime, DateTime, ObjectData)
 
   // need to implement
@@ -76,7 +74,7 @@ class c_DateTime : public ExtObjectData {
                              Object timezone = null_object);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
   // Helper for DateTime -> c_DateTime conversion
   public: static Object wrap(SmartObject<DateTime> dt) {
@@ -121,8 +119,6 @@ extern const int64 q_DateTimeZone_PER_COUNTRY;
 FORWARD_DECLARE_CLASS_BUILTIN(DateTimeZone);
 class c_DateTimeZone : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(DateTimeZone)
-  END_CLASS_MAP(DateTimeZone)
   DECLARE_CLASS(DateTimeZone, DateTimeZone, ObjectData)
 
   // need to implement
@@ -153,7 +149,7 @@ class c_DateTimeZone : public ExtObjectData {
   public: c_DateTimeZone *create(String timezone);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
   // Helper for TimeZone -> c_DateTimeZone conversion
   public: static Object wrap(SmartObject<TimeZone> tz) {

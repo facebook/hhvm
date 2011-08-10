@@ -25,10 +25,6 @@ namespace HPHP {
 // 1. Static Strings
 extern StaticString s_sys_ssef33be8d;
 extern StaticString s_sys_ss78cb1b27;
-extern StaticString s_sys_ss5b753b53;
-extern StaticString s_sys_ssc64ebfff;
-extern StaticString s_sys_ss0ec14ee2;
-extern StaticString s_sys_ss22bfe43e;
 extern StaticString s_sys_ss8e95cc19;
 extern StaticString s_sys_ss3382a209;
 extern StaticString s_sys_ss0d54babb;

@@ -39,9 +39,6 @@ class DynamicObjectData : public ObjectData {
   // properties
   virtual Array o_toArray() const;
   virtual Array o_getDynamicProperties() const;
-  virtual Variant *o_realProp(CStrRef prop, int flags,
-                              CStrRef context = null_string) const;
-  virtual Variant *o_realPropPublic(CStrRef prop, int flags) const;
   virtual void o_getArray(Array &props, bool pubOnly = false) const;
   virtual void o_setArray(CArrRef props);
 

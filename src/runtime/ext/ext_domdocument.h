@@ -104,8 +104,6 @@ Variant f_dom_xpath_register_php_functions(CVarRef obj, CVarRef funcs = null);
 FORWARD_DECLARE_CLASS_BUILTIN(DOMNode);
 class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet> {
  public:
-  BEGIN_CLASS_MAP(DOMNode)
-  END_CLASS_MAP(DOMNode)
   DECLARE_CLASS(DOMNode, DOMNode, ObjectData)
 
   // need to implement
@@ -160,7 +158,7 @@ class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSe
   public: c_DOMNode *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 public:
   virtual ObjectData *clone();
@@ -175,9 +173,6 @@ public:
 FORWARD_DECLARE_CLASS_BUILTIN(DOMAttr);
 class c_DOMAttr : public c_DOMNode {
  public:
-  BEGIN_CLASS_MAP(DOMAttr)
-  RECURSIVE_PARENT_CLASS(DOMNode)
-  END_CLASS_MAP(DOMAttr)
   DECLARE_CLASS(DOMAttr, DOMAttr, DOMNode)
 
   // need to implement
@@ -200,7 +195,7 @@ class c_DOMAttr : public c_DOMNode {
   public: c_DOMAttr *create(String name, String value = null_string);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 
@@ -210,9 +205,6 @@ class c_DOMAttr : public c_DOMNode {
 FORWARD_DECLARE_CLASS_BUILTIN(DOMCharacterData);
 class c_DOMCharacterData : public c_DOMNode {
  public:
-  BEGIN_CLASS_MAP(DOMCharacterData)
-  RECURSIVE_PARENT_CLASS(DOMNode)
-  END_CLASS_MAP(DOMCharacterData)
   DECLARE_CLASS(DOMCharacterData, DOMCharacterData, DOMNode)
 
   // need to implement
@@ -243,7 +235,7 @@ class c_DOMCharacterData : public c_DOMNode {
   public: c_DOMCharacterData *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 
@@ -253,9 +245,6 @@ class c_DOMCharacterData : public c_DOMNode {
 FORWARD_DECLARE_CLASS_BUILTIN(DOMComment);
 class c_DOMComment : public c_DOMCharacterData {
  public:
-  BEGIN_CLASS_MAP(DOMComment)
-  RECURSIVE_PARENT_CLASS(DOMCharacterData)
-  END_CLASS_MAP(DOMComment)
   DECLARE_CLASS(DOMComment, DOMComment, DOMCharacterData)
 
   // need to implement
@@ -270,7 +259,7 @@ class c_DOMComment : public c_DOMCharacterData {
   public: c_DOMComment *create(String value = null_string);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 
@@ -280,9 +269,6 @@ class c_DOMComment : public c_DOMCharacterData {
 FORWARD_DECLARE_CLASS_BUILTIN(DOMText);
 class c_DOMText : public c_DOMCharacterData {
  public:
-  BEGIN_CLASS_MAP(DOMText)
-  RECURSIVE_PARENT_CLASS(DOMCharacterData)
-  END_CLASS_MAP(DOMText)
   DECLARE_CLASS(DOMText, DOMText, DOMCharacterData)
 
   // need to implement
@@ -307,7 +293,7 @@ class c_DOMText : public c_DOMCharacterData {
   public: c_DOMText *create(String value = null_string);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 
@@ -317,9 +303,6 @@ class c_DOMText : public c_DOMCharacterData {
 FORWARD_DECLARE_CLASS_BUILTIN(DOMCDATASection);
 class c_DOMCDATASection : public c_DOMText {
  public:
-  BEGIN_CLASS_MAP(DOMCDATASection)
-  RECURSIVE_PARENT_CLASS(DOMText)
-  END_CLASS_MAP(DOMCDATASection)
   DECLARE_CLASS(DOMCDATASection, DOMCDATASection, DOMText)
 
   // need to implement
@@ -334,7 +317,7 @@ class c_DOMCDATASection : public c_DOMText {
   public: c_DOMCDATASection *create(String value);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 
@@ -344,9 +327,6 @@ class c_DOMCDATASection : public c_DOMText {
 FORWARD_DECLARE_CLASS_BUILTIN(DOMDocument);
 class c_DOMDocument : public c_DOMNode, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(DOMDocument)
-  RECURSIVE_PARENT_CLASS(DOMNode)
-  END_CLASS_MAP(DOMDocument)
   DECLARE_CLASS(DOMDocument, DOMDocument, DOMNode)
 
   // need to implement
@@ -427,7 +407,7 @@ class c_DOMDocument : public c_DOMNode, public Sweepable {
   public: c_DOMDocument *create(String version = null_string, String encoding = null_string);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 public:
   virtual p_DOMDocument doc() { return this;}
@@ -449,9 +429,6 @@ public:
 FORWARD_DECLARE_CLASS_BUILTIN(DOMDocumentFragment);
 class c_DOMDocumentFragment : public c_DOMNode {
  public:
-  BEGIN_CLASS_MAP(DOMDocumentFragment)
-  RECURSIVE_PARENT_CLASS(DOMNode)
-  END_CLASS_MAP(DOMDocumentFragment)
   DECLARE_CLASS(DOMDocumentFragment, DOMDocumentFragment, DOMNode)
 
   // need to implement
@@ -468,7 +445,7 @@ class c_DOMDocumentFragment : public c_DOMNode {
   public: c_DOMDocumentFragment *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 
@@ -478,9 +455,6 @@ class c_DOMDocumentFragment : public c_DOMNode {
 FORWARD_DECLARE_CLASS_BUILTIN(DOMDocumentType);
 class c_DOMDocumentType : public c_DOMNode {
  public:
-  BEGIN_CLASS_MAP(DOMDocumentType)
-  RECURSIVE_PARENT_CLASS(DOMNode)
-  END_CLASS_MAP(DOMDocumentType)
   DECLARE_CLASS(DOMDocumentType, DOMDocumentType, DOMNode)
 
   // need to implement
@@ -501,7 +475,7 @@ class c_DOMDocumentType : public c_DOMNode {
   public: c_DOMDocumentType *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 
@@ -511,9 +485,6 @@ class c_DOMDocumentType : public c_DOMNode {
 FORWARD_DECLARE_CLASS_BUILTIN(DOMElement);
 class c_DOMElement : public c_DOMNode {
  public:
-  BEGIN_CLASS_MAP(DOMElement)
-  RECURSIVE_PARENT_CLASS(DOMNode)
-  END_CLASS_MAP(DOMElement)
   DECLARE_CLASS(DOMElement, DOMElement, DOMNode)
 
   // need to implement
@@ -570,7 +541,7 @@ class c_DOMElement : public c_DOMNode {
   public: c_DOMElement *create(String name, String value = null_string, String namespaceuri = null_string);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 
@@ -580,9 +551,6 @@ class c_DOMElement : public c_DOMNode {
 FORWARD_DECLARE_CLASS_BUILTIN(DOMEntity);
 class c_DOMEntity : public c_DOMNode {
  public:
-  BEGIN_CLASS_MAP(DOMEntity)
-  RECURSIVE_PARENT_CLASS(DOMNode)
-  END_CLASS_MAP(DOMEntity)
   DECLARE_CLASS(DOMEntity, DOMEntity, DOMNode)
 
   // need to implement
@@ -603,7 +571,7 @@ class c_DOMEntity : public c_DOMNode {
   public: c_DOMEntity *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 
@@ -613,9 +581,6 @@ class c_DOMEntity : public c_DOMNode {
 FORWARD_DECLARE_CLASS_BUILTIN(DOMEntityReference);
 class c_DOMEntityReference : public c_DOMNode {
  public:
-  BEGIN_CLASS_MAP(DOMEntityReference)
-  RECURSIVE_PARENT_CLASS(DOMNode)
-  END_CLASS_MAP(DOMEntityReference)
   DECLARE_CLASS(DOMEntityReference, DOMEntityReference, DOMNode)
 
   // need to implement
@@ -630,7 +595,7 @@ class c_DOMEntityReference : public c_DOMNode {
   public: c_DOMEntityReference *create(String name);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 
@@ -640,9 +605,6 @@ class c_DOMEntityReference : public c_DOMNode {
 FORWARD_DECLARE_CLASS_BUILTIN(DOMNotation);
 class c_DOMNotation : public c_DOMNode {
  public:
-  BEGIN_CLASS_MAP(DOMNotation)
-  RECURSIVE_PARENT_CLASS(DOMNode)
-  END_CLASS_MAP(DOMNotation)
   DECLARE_CLASS(DOMNotation, DOMNotation, DOMNode)
 
   // need to implement
@@ -663,7 +625,7 @@ class c_DOMNotation : public c_DOMNode {
   public: c_DOMNotation *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 
@@ -673,9 +635,6 @@ class c_DOMNotation : public c_DOMNode {
 FORWARD_DECLARE_CLASS_BUILTIN(DOMProcessingInstruction);
 class c_DOMProcessingInstruction : public c_DOMNode {
  public:
-  BEGIN_CLASS_MAP(DOMProcessingInstruction)
-  RECURSIVE_PARENT_CLASS(DOMNode)
-  END_CLASS_MAP(DOMProcessingInstruction)
   DECLARE_CLASS(DOMProcessingInstruction, DOMProcessingInstruction, DOMNode)
 
   // need to implement
@@ -696,7 +655,7 @@ class c_DOMProcessingInstruction : public c_DOMNode {
   public: c_DOMProcessingInstruction *create(String name, String value = null_string);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 
@@ -706,9 +665,6 @@ class c_DOMProcessingInstruction : public c_DOMNode {
 FORWARD_DECLARE_CLASS_BUILTIN(DOMNodeIterator);
 class c_DOMNodeIterator : public ExtObjectData, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(DOMNodeIterator)
-  PARENT_CLASS(Iterator)
-  END_CLASS_MAP(DOMNodeIterator)
   DECLARE_CLASS(DOMNodeIterator, DOMNodeIterator, ObjectData)
 
   // need to implement
@@ -733,7 +689,7 @@ class c_DOMNodeIterator : public ExtObjectData, public Sweepable {
   public: c_DOMNodeIterator *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 public:
   void reset_iterator(dom_iterable *objmap);
@@ -750,9 +706,6 @@ public:
 FORWARD_DECLARE_CLASS_BUILTIN(DOMNamedNodeMap);
 class c_DOMNamedNodeMap : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>, public dom_iterable {
  public:
-  BEGIN_CLASS_MAP(DOMNamedNodeMap)
-  PARENT_CLASS(IteratorAggregate)
-  END_CLASS_MAP(DOMNamedNodeMap)
   DECLARE_CLASS(DOMNamedNodeMap, DOMNamedNodeMap, ObjectData)
 
   // need to implement
@@ -781,7 +734,7 @@ class c_DOMNamedNodeMap : public ExtObjectDataFlags<ObjectData::UseGet|ObjectDat
   public: c_DOMNamedNodeMap *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 
@@ -791,9 +744,6 @@ class c_DOMNamedNodeMap : public ExtObjectDataFlags<ObjectData::UseGet|ObjectDat
 FORWARD_DECLARE_CLASS_BUILTIN(DOMNodeList);
 class c_DOMNodeList : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>, public dom_iterable {
  public:
-  BEGIN_CLASS_MAP(DOMNodeList)
-  PARENT_CLASS(IteratorAggregate)
-  END_CLASS_MAP(DOMNodeList)
   DECLARE_CLASS(DOMNodeList, DOMNodeList, ObjectData)
 
   // need to implement
@@ -818,7 +768,7 @@ class c_DOMNodeList : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::U
   public: c_DOMNodeList *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 
@@ -828,8 +778,6 @@ class c_DOMNodeList : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::U
 FORWARD_DECLARE_CLASS_BUILTIN(DOMImplementation);
 class c_DOMImplementation : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(DOMImplementation)
-  END_CLASS_MAP(DOMImplementation)
   DECLARE_CLASS(DOMImplementation, DOMImplementation, ObjectData)
 
   // need to implement
@@ -850,7 +798,7 @@ class c_DOMImplementation : public ExtObjectData {
   public: c_DOMImplementation *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
 };
 
@@ -860,8 +808,6 @@ class c_DOMImplementation : public ExtObjectData {
 FORWARD_DECLARE_CLASS_BUILTIN(DOMXPath);
 class c_DOMXPath : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(DOMXPath)
-  END_CLASS_MAP(DOMXPath)
   DECLARE_CLASS(DOMXPath, DOMXPath, ObjectData)
 
   // need to implement
@@ -890,7 +836,7 @@ class c_DOMXPath : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseS
   public: c_DOMXPath *create(Variant doc);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
  public:
   xmlNodePtr m_node;

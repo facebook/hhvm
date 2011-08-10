@@ -37,7 +37,6 @@ class c_ArrayIterator : public ExtObjectData {
   Variant m_flags;
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(ArrayIterator, ArrayIterator)
 
   // DECLARE_STATIC_PROP_OPS
@@ -46,15 +45,6 @@ class c_ArrayIterator : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_ArrayIterator 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ArrayIterator 1
   static Variant os_constant(const char *s);
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_ArrayIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ArrayIterator 1
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
 
   // DECLARE_COMMON_INVOKE
   static const MethodCallInfoTable s_call_info_table[];

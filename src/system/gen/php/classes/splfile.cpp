@@ -50,30 +50,6 @@ Variant &c_SplFileObject::os_lval(CStrRef s) {
   return c_SplFileInfo::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplFileObject
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SplFileObject
-Variant * c_SplFileObject::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x71089C29FE923FA7LL, SplFileInfo) { return c_SplFileInfo::o_realPropPrivate(prop, flags); }
-      break;
-    default:
-      break;
-  }
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_SplFileObject
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplFileObject
-Variant * c_SplFileObject::o_realPropPublic(CStrRef s, int flags) const {
-  return c_SplFileInfo::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplFileObject
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplFileObject
-Variant * c_SplFileObject::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplFileObject
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SplFileObject
 Variant c_SplFileObject::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -97,30 +73,20 @@ Variant c_SplFileObject::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SplFileObject
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(SplFileObject)
-bool c_SplFileObject::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 15) {
-    case 1:
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss22bfe43e, "Traversable"));
-      break;
-    case 2:
-      HASH_INSTANCEOF(0x297ECCC7A259EDD2LL, NAMSTR(s_sys_ss5d909898, "SplFileObject"));
-      break;
-    case 3:
-      HASH_INSTANCEOF(0x191964700AF036D3LL, NAMSTR(s_sys_ss49963173, "RecursiveIterator"));
-      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ssc1c38583, "SeekableIterator"));
-      break;
-    case 7:
-      HASH_INSTANCEOF(0x71089C29FE923FA7LL, NAMSTR(s_sys_ss914a58e9, "SplFileInfo"));
-      break;
-    case 14:
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ssc64ebfff, "Iterator"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_SplFileObject::s_instanceof_table[] = {
+  {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
+  {0x297ECCC7A259EDD2LL,1,"SplFileObject",&cw_SplFileObject},
+  {0x191964700AF036D3LL,0,"RecursiveIterator",(const ObjectStaticCallbacks*)2},
+  {0x60C47E7FE145DC43LL,1,"SeekableIterator",(const ObjectStaticCallbacks*)2},
+  {0x71089C29FE923FA7LL,1,"SplFileInfo",&cw_SplFileInfo},
+  {0x0636A5F84AF9D29ELL,1,"Iterator",(const ObjectStaticCallbacks*)2},
+};
+const int c_SplFileObject::s_instanceof_index[] = {
+  15,
+  -1,0,1,2,-1,-1,-1,4,
+  -1,-1,-1,-1,-1,-1,5,-1,
+
+};
 ObjectData *c_SplFileObject::cloneImpl() {
   ObjectData *obj = coo_SplFileObject();
   c_SplFileObject::cloneSet(obj);
@@ -856,12 +822,12 @@ const ObjectStaticCallbacks cw_SplFileObject = {
   c_SplFileObject::os_getInit,
   c_SplFileObject::os_get,
   c_SplFileObject::os_lval,
-  c_SplFileObject::os_invoke,
   c_SplFileObject::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SplFileObject,
   c_SplFileObject::s_call_info_table,c_SplFileObject::s_call_info_index,
+  c_SplFileObject::s_instanceof_table,c_SplFileObject::s_instanceof_index,
   &c_SplFileObject::s_class_name,
-  &c_SplFileInfo::os_prop_table,&cw_SplFileInfo
+  &c_SplFileInfo::os_prop_table,0,&cw_SplFileInfo
 };
 /* SRC: classes/splfile.php line 392 */
 void c_SplFileObject::t___construct(Variant v_filename, Variant v_open_mode //  = NAMSTR(s_sys_ss0d42ecf6, "r")
@@ -1086,55 +1052,19 @@ Variant &c_SplFileInfo::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplFileInfo
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SplFileInfo
-Variant * c_SplFileInfo::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x71089C29FE923FA7LL, SplFileInfo) { return o_realPropPrivate(prop, flags); }
-      break;
-    default:
-      break;
-  }
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_SplFileInfo
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplFileInfo
-Variant * c_SplFileInfo::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplFileInfo
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplFileInfo
-Variant * c_SplFileInfo::o_realPropPrivate(CStrRef s, int flags) const {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_REALPROP_NAMSTR(0x26C16E62FD792BB7LL, NAMSTR(s_sys_ss7f14ba70, "rsrc"), 4, rsrc);
-      break;
-    default:
-      break;
-  }
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplFileInfo
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SplFileInfo
 Variant c_SplFileInfo::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SplFileInfo
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(SplFileInfo)
-bool c_SplFileInfo::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_INSTANCEOF(0x71089C29FE923FA7LL, NAMSTR(s_sys_ss914a58e9, "SplFileInfo"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_SplFileInfo::s_instanceof_table[] = {
+  {0x71089C29FE923FA7LL,1,"SplFileInfo",&cw_SplFileInfo},
+};
+const int c_SplFileInfo::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
 ObjectData *c_SplFileInfo::cloneImpl() {
   ObjectData *obj = coo_SplFileInfo();
   c_SplFileInfo::cloneSet(obj);
@@ -1778,12 +1708,12 @@ const ObjectStaticCallbacks cw_SplFileInfo = {
   c_SplFileInfo::os_getInit,
   c_SplFileInfo::os_get,
   c_SplFileInfo::os_lval,
-  c_SplFileInfo::os_invoke,
   c_SplFileInfo::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SplFileInfo,
   c_SplFileInfo::s_call_info_table,c_SplFileInfo::s_call_info_index,
+  c_SplFileInfo::s_instanceof_table,c_SplFileInfo::s_instanceof_index,
   &c_SplFileInfo::s_class_name,
-  &c_SplFileInfo::os_prop_table,0
+  &c_SplFileInfo::os_prop_table,0,0
 };
 /* SRC: classes/splfile.php line 14 */
 void c_SplFileInfo::t___construct(Variant v_file_name) {
@@ -1972,15 +1902,19 @@ ObjectData *coo_SplFileInfo() {
 
 // Class tables
 static const ClassPropTableEntry cpt_table_entries[] = {
-  { 256, 10,GET_PROPERTY_OFFSET(c_SplFileInfo, m_rsrc),&NAMSTR(s_sys_ss25b53cd5, "\000SplFileInfo\000rsrc") },
+  {0x26C16E62FD792BB7LL,0,13,258,10,GET_PROPERTY_OFFSET(c_SplFileInfo, m_rsrc),&NAMSTR(s_sys_ss25b53cd5, "\000SplFileInfo\000rsrc") },
 
 };
 static const ClassPropTableEntry *cpt_private_entries[] = {
   cpt_table_entries+0,
   0,
 };
+static const int cpt_hash_entries[] = {
+  -1,-1,-1,-1,-1,-1,-1,0,
+};
 const ClassPropTable c_SplFileInfo::os_prop_table = {
-  1,1,0,cpt_table_entries+0,cpt_private_entries+0
+  7,0,cpt_hash_entries+0,
+  0,cpt_table_entries+0,cpt_private_entries+0
 };
 
 ///////////////////////////////////////////////////////////////////////////////

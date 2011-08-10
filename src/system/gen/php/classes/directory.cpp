@@ -59,49 +59,19 @@ Variant &c_Directory::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_Directory
-Variant * c_Directory::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Directory
-Variant * c_Directory::o_realPropPublic(CStrRef s, int flags) const {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 0:
-      HASH_REALPROP_NAMSTR(0x1429F792A6880074LL, NAMSTR(s_sys_ssf362b3c4, "path"), 4, path);
-      break;
-    case 2:
-      HASH_REALPROP_NAMSTR(0x5C4CA333F4541532LL, NAMSTR(s_sys_ss46eeef5c, "handle"), 6, handle);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Directory
-Variant * c_Directory::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Directory
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Directory
 Variant c_Directory::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Directory
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(Directory)
-bool c_Directory::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_INSTANCEOF(0x34C95AF311506C8FLL, NAMSTR(s_sys_ss55fe8ad6, "Directory"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_Directory::s_instanceof_table[] = {
+  {0x34C95AF311506C8FLL,1,"Directory",&cw_Directory},
+};
+const int c_Directory::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
 ObjectData *c_Directory::cloneImpl() {
   ObjectData *obj = coo_Directory();
   c_Directory::cloneSet(obj);
@@ -227,12 +197,12 @@ const ObjectStaticCallbacks cw_Directory = {
   c_Directory::os_getInit,
   c_Directory::os_get,
   c_Directory::os_lval,
-  c_Directory::os_invoke,
   c_Directory::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Directory,
   c_Directory::s_call_info_table,c_Directory::s_call_info_index,
+  c_Directory::s_instanceof_table,c_Directory::s_instanceof_index,
   &c_Directory::s_class_name,
-  &c_Directory::os_prop_table,0
+  &c_Directory::os_prop_table,0,0
 };
 /* SRC: classes/directory.php line 7 */
 void c_Directory::t___construct(Variant v_path) {
@@ -270,15 +240,19 @@ ObjectData *coo_Directory() {
 
 // Class tables
 static const ClassPropTableEntry cpt_table_entries[] = {
-  { 64, 10,GET_PROPERTY_OFFSET(c_Directory, m_path),&NAMSTR(s_sys_ssf362b3c4, "path") },
-  { 64, 10,GET_PROPERTY_OFFSET(c_Directory, m_handle),&NAMSTR(s_sys_ss46eeef5c, "handle") },
+  {0x5C4CA333F4541532LL,0,0,66,10,GET_PROPERTY_OFFSET(c_Directory, m_handle),&NAMSTR(s_sys_ss46eeef5c, "handle") },
+  {0x1429F792A6880074LL,-1,0,66,10,GET_PROPERTY_OFFSET(c_Directory, m_path),&NAMSTR(s_sys_ssf362b3c4, "path") },
 
 };
 static const ClassPropTableEntry *cpt_private_entries[] = {
-  0,
+  0
+};
+static const int cpt_hash_entries[] = {
+  -1,-1,0,-1,1,-1,-1,-1,
 };
 const ClassPropTable c_Directory::os_prop_table = {
-  2,0,0,cpt_table_entries+0,cpt_private_entries+0
+  7,1,cpt_hash_entries+0,
+  0,cpt_table_entries+0,cpt_private_entries+0
 };
 
 ///////////////////////////////////////////////////////////////////////////////

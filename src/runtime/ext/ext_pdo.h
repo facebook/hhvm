@@ -114,8 +114,6 @@ extern const int64 q_PDO_MYSQL_ATTR_IGNORE_SPACE;
 FORWARD_DECLARE_CLASS_BUILTIN(PDO);
 class c_PDO : public ExtObjectData, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(PDO)
-  END_CLASS_MAP(PDO)
   DECLARE_CLASS(PDO, PDO, ObjectData)
 
   // need to implement
@@ -163,7 +161,7 @@ class c_PDO : public ExtObjectData, public Sweepable {
   public: c_PDO *create(String dsn, String username = null_string, String password = null_string, Array options = null_array);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
   public: sp_PDOConnection m_dbh;
 };
@@ -174,9 +172,6 @@ class c_PDO : public ExtObjectData, public Sweepable {
 FORWARD_DECLARE_CLASS_BUILTIN(PDOStatement);
 class c_PDOStatement : public ExtObjectData, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(PDOStatement)
-  PARENT_CLASS(Iterator)
-  END_CLASS_MAP(PDOStatement)
   DECLARE_CLASS(PDOStatement, PDOStatement, ObjectData)
 
   // need to implement
@@ -243,7 +238,7 @@ class c_PDOStatement : public ExtObjectData, public Sweepable {
   public: c_PDOStatement *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
   public: sp_PDOStatement m_stmt;
   public: Variant m_row;

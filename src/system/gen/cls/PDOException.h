@@ -33,7 +33,6 @@ class c_PDOException : public c_Exception {
   // Properties
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(PDOException, PDOException)
 
   // DECLARE_STATIC_PROP_OPS
@@ -42,15 +41,6 @@ class c_PDOException : public c_Exception {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_PDOException 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDOException 1
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOException 1
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PDOException 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDOException 1
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_PDOException 1
 
   // DECLARE_COMMON_INVOKE
   static const MethodCallInfoTable s_call_info_table[];

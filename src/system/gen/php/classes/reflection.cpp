@@ -57,46 +57,19 @@ Variant &c_ReflectionFunctionAbstract::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionFunctionAbstract
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionFunctionAbstract
-Variant * c_ReflectionFunctionAbstract::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_ReflectionFunctionAbstract
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionFunctionAbstract
-Variant * c_ReflectionFunctionAbstract::o_realPropPublic(CStrRef s, int flags) const {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_REALPROP_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"), 4, info);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionFunctionAbstract
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionFunctionAbstract
-Variant * c_ReflectionFunctionAbstract::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionFunctionAbstract
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionFunctionAbstract
 Variant c_ReflectionFunctionAbstract::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionFunctionAbstract
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionFunctionAbstract)
-bool c_ReflectionFunctionAbstract::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 0:
-      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ss5b2a52c1, "ReflectionFunctionAbstract"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_ReflectionFunctionAbstract::s_instanceof_table[] = {
+  {0x33BD46E935281082LL,1,"ReflectionFunctionAbstract",&cw_ReflectionFunctionAbstract},
+};
+const int c_ReflectionFunctionAbstract::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
 ObjectData *c_ReflectionFunctionAbstract::cloneImpl() {
   ObjectData *obj = coo_ReflectionFunctionAbstract();
   c_ReflectionFunctionAbstract::cloneSet(obj);
@@ -369,12 +342,12 @@ const ObjectStaticCallbacks cw_ReflectionFunctionAbstract = {
   c_ReflectionFunctionAbstract::os_getInit,
   c_ReflectionFunctionAbstract::os_get,
   c_ReflectionFunctionAbstract::os_lval,
-  c_ReflectionFunctionAbstract::os_invoke,
   c_ReflectionFunctionAbstract::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionFunctionAbstract,
   c_ReflectionFunctionAbstract::s_call_info_table,c_ReflectionFunctionAbstract::s_call_info_index,
+  c_ReflectionFunctionAbstract::s_instanceof_table,c_ReflectionFunctionAbstract::s_instanceof_index,
   &c_ReflectionFunctionAbstract::s_class_name,
-  &c_ReflectionFunctionAbstract::os_prop_table,0
+  &c_ReflectionFunctionAbstract::os_prop_table,0,0
 };
 /* SRC: classes/reflection.php line 261 */
 Variant c_ReflectionFunctionAbstract::t_getname() {
@@ -535,51 +508,22 @@ Variant &c_ReflectionObject::os_lval(CStrRef s) {
   return c_ReflectionClass::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionObject
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionObject
-Variant * c_ReflectionObject::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x35A44A5E6AE2E71DLL, ReflectionClass) { return c_ReflectionClass::o_realPropPrivate(prop, flags); }
-      break;
-    default:
-      break;
-  }
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_ReflectionObject
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionObject
-Variant * c_ReflectionObject::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ReflectionClass::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionObject
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionObject
-Variant * c_ReflectionObject::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionObject
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionObject
 Variant c_ReflectionObject::os_constant(const char *s) {
   return c_ReflectionClass::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionObject
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionObject)
-bool c_ReflectionObject::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 2:
-      HASH_INSTANCEOF(0x41A9F7D81254DD7ALL, NAMSTR(s_sys_ssb5a1e6bc, "ReflectionObject"));
-      break;
-    case 5:
-      HASH_INSTANCEOF(0x35A44A5E6AE2E71DLL, NAMSTR(s_sys_ssfc63c2bb, "ReflectionClass"));
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0d7533cf, "Reflector"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_ReflectionObject::s_instanceof_table[] = {
+  {0x41A9F7D81254DD7ALL,1,"ReflectionObject",&cw_ReflectionObject},
+  {0x35A44A5E6AE2E71DLL,0,"ReflectionClass",&cw_ReflectionClass},
+  {0x62F7F85447C0A605LL,1,"Reflector",(const ObjectStaticCallbacks*)2},
+};
+const int c_ReflectionObject::s_instanceof_index[] = {
+  7,
+  -1,-1,0,-1,-1,1,-1,-1,
+
+};
 ObjectData *c_ReflectionObject::cloneImpl() {
   ObjectData *obj = coo_ReflectionObject();
   c_ReflectionObject::cloneSet(obj);
@@ -619,12 +563,12 @@ const ObjectStaticCallbacks cw_ReflectionObject = {
   c_ReflectionObject::os_getInit,
   c_ReflectionObject::os_get,
   c_ReflectionObject::os_lval,
-  c_ReflectionObject::os_invoke,
   c_ReflectionObject::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionObject,
   c_ReflectionObject::s_call_info_table,c_ReflectionObject::s_call_info_index,
+  c_ReflectionObject::s_instanceof_table,c_ReflectionObject::s_instanceof_index,
   &c_ReflectionObject::s_class_name,
-  &c_ReflectionClass::os_prop_table,&cw_ReflectionClass
+  &c_ReflectionClass::os_prop_table,0,&cw_ReflectionClass
 };
 /* SRC: classes/reflection.php line 1298 */
 Variant c_ReflectionObject::t_export(Variant v_obj, CVarRef v_ret) {
@@ -662,39 +606,20 @@ Variant &c_ReflectionException::os_lval(CStrRef s) {
   return c_Exception::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionException
-Variant * c_ReflectionException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_ReflectionException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionException
-Variant * c_ReflectionException::o_realPropPublic(CStrRef s, int flags) const {
-  return c_Exception::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionException
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionException
-Variant * c_ReflectionException::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionException
 Variant c_ReflectionException::os_constant(const char *s) {
   return c_Exception::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionException)
-bool c_ReflectionException::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 0:
-      HASH_INSTANCEOF(0x672AD818DDE95538LL, NAMSTR(s_sys_ss1da57557, "ReflectionException"));
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_ReflectionException::s_instanceof_table[] = {
+  {0x672AD818DDE95538LL,0,"ReflectionException",&cw_ReflectionException},
+  {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
+};
+const int c_ReflectionException::s_instanceof_index[] = {
+  3,
+  0,-1,-1,-1,
+};
 ObjectData *c_ReflectionException::cloneImpl() {
   ObjectData *obj = coo_ReflectionException();
   c_ReflectionException::cloneSet(obj);
@@ -708,12 +633,12 @@ const ObjectStaticCallbacks cw_ReflectionException = {
   c_ReflectionException::os_getInit,
   c_ReflectionException::os_get,
   c_ReflectionException::os_lval,
-  c_ReflectionException::os_invoke,
   c_ReflectionException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionException,
   c_ReflectionException::s_call_info_table,c_ReflectionException::s_call_info_index,
+  c_ReflectionException::s_instanceof_table,c_ReflectionException::s_instanceof_index,
   &c_ReflectionException::s_class_name,
-  &c_Exception::os_prop_table,&cw_Exception
+  &c_Exception::os_prop_table,0,&cw_Exception
 };
 /* SRC: classes/reflection.php line 538 */
 const int64 q_ReflectionClass_IS_IMPLICIT_ABSTRACT = 16LL;
@@ -748,46 +673,6 @@ Variant &c_ReflectionClass::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionClass
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionClass
-Variant * c_ReflectionClass::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x35A44A5E6AE2E71DLL, ReflectionClass) { return o_realPropPrivate(prop, flags); }
-      break;
-    default:
-      break;
-  }
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_ReflectionClass
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionClass
-Variant * c_ReflectionClass::o_realPropPublic(CStrRef s, int flags) const {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 0:
-      HASH_REALPROP_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ssdc3cbddc, "name"), 4, name);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionClass
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionClass
-Variant * c_ReflectionClass::o_realPropPrivate(CStrRef s, int flags) const {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_REALPROP_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"), 4, info);
-      break;
-    default:
-      break;
-  }
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionClass
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionClass
 Variant c_ReflectionClass::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -806,18 +691,14 @@ Variant c_ReflectionClass::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionClass
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionClass)
-bool c_ReflectionClass::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 1:
-      HASH_INSTANCEOF(0x35A44A5E6AE2E71DLL, NAMSTR(s_sys_ssfc63c2bb, "ReflectionClass"));
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0d7533cf, "Reflector"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_ReflectionClass::s_instanceof_table[] = {
+  {0x35A44A5E6AE2E71DLL,0,"ReflectionClass",&cw_ReflectionClass},
+  {0x62F7F85447C0A605LL,1,"Reflector",(const ObjectStaticCallbacks*)2},
+};
+const int c_ReflectionClass::s_instanceof_index[] = {
+  3,
+  -1,0,-1,-1,
+};
 ObjectData *c_ReflectionClass::cloneImpl() {
   ObjectData *obj = coo_ReflectionClass();
   c_ReflectionClass::cloneSet(obj);
@@ -1794,12 +1675,12 @@ const ObjectStaticCallbacks cw_ReflectionClass = {
   c_ReflectionClass::os_getInit,
   c_ReflectionClass::os_get,
   c_ReflectionClass::os_lval,
-  c_ReflectionClass::os_invoke,
   c_ReflectionClass::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionClass,
   c_ReflectionClass::s_call_info_table,c_ReflectionClass::s_call_info_index,
+  c_ReflectionClass::s_instanceof_table,c_ReflectionClass::s_instanceof_index,
   &c_ReflectionClass::s_class_name,
-  &c_ReflectionClass::os_prop_table,0
+  &c_ReflectionClass::os_prop_table,0,0
 };
 /* SRC: classes/reflection.php line 546 */
 void c_ReflectionClass::t___construct(Variant v_name) {
@@ -2731,61 +2612,20 @@ Variant &c_ReflectionExtension::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionExtension
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionExtension
-Variant * c_ReflectionExtension::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x0B61E0BFCFA06573LL, ReflectionExtension) { return o_realPropPrivate(prop, flags); }
-      break;
-    default:
-      break;
-  }
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_ReflectionExtension
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionExtension
-Variant * c_ReflectionExtension::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionExtension
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionExtension
-Variant * c_ReflectionExtension::o_realPropPrivate(CStrRef s, int flags) const {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 2:
-      HASH_REALPROP_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ssdc3cbddc, "name"), 4, name);
-      break;
-    case 3:
-      HASH_REALPROP_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"), 4, info);
-      break;
-    default:
-      break;
-  }
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionExtension
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionExtension
 Variant c_ReflectionExtension::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionExtension
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionExtension)
-bool c_ReflectionExtension::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 1:
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0d7533cf, "Reflector"));
-      break;
-    case 3:
-      HASH_INSTANCEOF(0x0B61E0BFCFA06573LL, NAMSTR(s_sys_ssff10260d, "ReflectionExtension"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_ReflectionExtension::s_instanceof_table[] = {
+  {0x62F7F85447C0A605LL,1,"Reflector",(const ObjectStaticCallbacks*)2},
+  {0x0B61E0BFCFA06573LL,1,"ReflectionExtension",&cw_ReflectionExtension},
+};
+const int c_ReflectionExtension::s_instanceof_index[] = {
+  3,
+  -1,0,-1,1,
+};
 ObjectData *c_ReflectionExtension::cloneImpl() {
   ObjectData *obj = coo_ReflectionExtension();
   c_ReflectionExtension::cloneSet(obj);
@@ -3047,12 +2887,12 @@ const ObjectStaticCallbacks cw_ReflectionExtension = {
   c_ReflectionExtension::os_getInit,
   c_ReflectionExtension::os_get,
   c_ReflectionExtension::os_lval,
-  c_ReflectionExtension::os_invoke,
   c_ReflectionExtension::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionExtension,
   c_ReflectionExtension::s_call_info_table,c_ReflectionExtension::s_call_info_index,
+  c_ReflectionExtension::s_instanceof_table,c_ReflectionExtension::s_instanceof_index,
   &c_ReflectionExtension::s_class_name,
-  &c_ReflectionExtension::os_prop_table,0
+  &c_ReflectionExtension::os_prop_table,0,0
 };
 /* SRC: classes/reflection.php line 1837 */
 void c_ReflectionExtension::t___construct(Variant v_name) {
@@ -3198,32 +3038,6 @@ Variant &c_ReflectionMethod::os_lval(CStrRef s) {
   return c_ReflectionFunctionAbstract::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionMethod
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionMethod
-Variant * c_ReflectionMethod::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_ReflectionMethod
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionMethod
-Variant * c_ReflectionMethod::o_realPropPublic(CStrRef s, int flags) const {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 0:
-      HASH_REALPROP_NAMSTR(0x2E3A246D1F74C210LL, NAMSTR(s_sys_ssc82dbd12, "class"), 5, class);
-      break;
-    case 2:
-      HASH_REALPROP_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ssdc3cbddc, "name"), 4, name);
-      break;
-    default:
-      break;
-  }
-  return c_ReflectionFunctionAbstract::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionMethod
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionMethod
-Variant * c_ReflectionMethod::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionMethod
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionMethod
 Variant c_ReflectionMethod::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -3251,23 +3065,16 @@ Variant c_ReflectionMethod::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionMethod
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionMethod)
-bool c_ReflectionMethod::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 0:
-      HASH_INSTANCEOF(0x43BBC8F6F28E44B0LL, NAMSTR(s_sys_ss8f4d0eb2, "ReflectionMethod"));
-      break;
-    case 2:
-      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ss5b2a52c1, "ReflectionFunctionAbstract"));
-      break;
-    case 5:
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0d7533cf, "Reflector"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_ReflectionMethod::s_instanceof_table[] = {
+  {0x43BBC8F6F28E44B0LL,1,"ReflectionMethod",&cw_ReflectionMethod},
+  {0x33BD46E935281082LL,1,"ReflectionFunctionAbstract",&cw_ReflectionFunctionAbstract},
+  {0x62F7F85447C0A605LL,1,"Reflector",(const ObjectStaticCallbacks*)2},
+};
+const int c_ReflectionMethod::s_instanceof_index[] = {
+  7,
+  0,-1,1,-1,-1,2,-1,-1,
+
+};
 ObjectData *c_ReflectionMethod::cloneImpl() {
   ObjectData *obj = coo_ReflectionMethod();
   c_ReflectionMethod::cloneSet(obj);
@@ -3657,12 +3464,12 @@ const ObjectStaticCallbacks cw_ReflectionMethod = {
   c_ReflectionMethod::os_getInit,
   c_ReflectionMethod::os_get,
   c_ReflectionMethod::os_lval,
-  c_ReflectionMethod::os_invoke,
   c_ReflectionMethod::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionMethod,
   c_ReflectionMethod::s_call_info_table,c_ReflectionMethod::s_call_info_index,
+  c_ReflectionMethod::s_instanceof_table,c_ReflectionMethod::s_instanceof_index,
   &c_ReflectionMethod::s_class_name,
-  &c_ReflectionMethod::os_prop_table,&cw_ReflectionFunctionAbstract
+  &c_ReflectionMethod::os_prop_table,0,&cw_ReflectionFunctionAbstract
 };
 /* SRC: classes/reflection.php line 1583 */
 void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMSTR(s_sys_ss00000000, "")
@@ -3961,35 +3768,6 @@ Variant &c_ReflectionProperty::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionProperty
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionProperty
-Variant * c_ReflectionProperty::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_ReflectionProperty
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionProperty
-Variant * c_ReflectionProperty::o_realPropPublic(CStrRef s, int flags) const {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 0:
-      HASH_REALPROP_NAMSTR(0x2E3A246D1F74C210LL, NAMSTR(s_sys_ssc82dbd12, "class"), 5, class);
-      break;
-    case 2:
-      HASH_REALPROP_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ssdc3cbddc, "name"), 4, name);
-      break;
-    case 7:
-      HASH_REALPROP_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"), 4, info);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionProperty
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionProperty
-Variant * c_ReflectionProperty::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionProperty
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionProperty
 Variant c_ReflectionProperty::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -4013,20 +3791,14 @@ Variant c_ReflectionProperty::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionProperty
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionProperty)
-bool c_ReflectionProperty::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 0:
-      HASH_INSTANCEOF(0x75AA2571BDB659E4LL, NAMSTR(s_sys_ssec8fccc4, "ReflectionProperty"));
-      break;
-    case 1:
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0d7533cf, "Reflector"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_ReflectionProperty::s_instanceof_table[] = {
+  {0x75AA2571BDB659E4LL,1,"ReflectionProperty",&cw_ReflectionProperty},
+  {0x62F7F85447C0A605LL,1,"Reflector",(const ObjectStaticCallbacks*)2},
+};
+const int c_ReflectionProperty::s_instanceof_index[] = {
+  3,
+  0,1,-1,-1,
+};
 ObjectData *c_ReflectionProperty::cloneImpl() {
   ObjectData *obj = coo_ReflectionProperty();
   c_ReflectionProperty::cloneSet(obj);
@@ -4392,12 +4164,12 @@ const ObjectStaticCallbacks cw_ReflectionProperty = {
   c_ReflectionProperty::os_getInit,
   c_ReflectionProperty::os_get,
   c_ReflectionProperty::os_lval,
-  c_ReflectionProperty::os_invoke,
   c_ReflectionProperty::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionProperty,
   c_ReflectionProperty::s_call_info_table,c_ReflectionProperty::s_call_info_index,
+  c_ReflectionProperty::s_instanceof_table,c_ReflectionProperty::s_instanceof_index,
   &c_ReflectionProperty::s_class_name,
-  &c_ReflectionProperty::os_prop_table,0
+  &c_ReflectionProperty::os_prop_table,0,0
 };
 /* SRC: classes/reflection.php line 1329 */
 void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
@@ -4655,21 +4427,6 @@ Variant &c_ReflectionFunction::os_lval(CStrRef s) {
   return c_ReflectionFunctionAbstract::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionFunction
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionFunction
-Variant * c_ReflectionFunction::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_ReflectionFunction
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionFunction
-Variant * c_ReflectionFunction::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ReflectionFunctionAbstract::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionFunction
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionFunction
-Variant * c_ReflectionFunction::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionFunction
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionFunction
 Variant c_ReflectionFunction::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -4684,23 +4441,16 @@ Variant c_ReflectionFunction::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionFunction
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionFunction)
-bool c_ReflectionFunction::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 1:
-      HASH_INSTANCEOF(0x21EF70351574EC09LL, NAMSTR(s_sys_ss99f908fe, "ReflectionFunction"));
-      break;
-    case 2:
-      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ss5b2a52c1, "ReflectionFunctionAbstract"));
-      break;
-    case 5:
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0d7533cf, "Reflector"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_ReflectionFunction::s_instanceof_table[] = {
+  {0x21EF70351574EC09LL,1,"ReflectionFunction",&cw_ReflectionFunction},
+  {0x33BD46E935281082LL,1,"ReflectionFunctionAbstract",&cw_ReflectionFunctionAbstract},
+  {0x62F7F85447C0A605LL,1,"Reflector",(const ObjectStaticCallbacks*)2},
+};
+const int c_ReflectionFunction::s_instanceof_index[] = {
+  7,
+  -1,0,1,-1,-1,2,-1,-1,
+
+};
 ObjectData *c_ReflectionFunction::cloneImpl() {
   ObjectData *obj = coo_ReflectionFunction();
   c_ReflectionFunction::cloneSet(obj);
@@ -4856,12 +4606,12 @@ const ObjectStaticCallbacks cw_ReflectionFunction = {
   c_ReflectionFunction::os_getInit,
   c_ReflectionFunction::os_get,
   c_ReflectionFunction::os_lval,
-  c_ReflectionFunction::os_invoke,
   c_ReflectionFunction::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionFunction,
   c_ReflectionFunction::s_call_info_table,c_ReflectionFunction::s_call_info_index,
+  c_ReflectionFunction::s_instanceof_table,c_ReflectionFunction::s_instanceof_index,
   &c_ReflectionFunction::s_class_name,
-  &c_ReflectionFunctionAbstract::os_prop_table,&cw_ReflectionFunctionAbstract
+  &c_ReflectionFunctionAbstract::os_prop_table,0,&cw_ReflectionFunctionAbstract
 };
 /* SRC: classes/reflection.php line 465 */
 void c_ReflectionFunction::t___construct(Variant v_name) {
@@ -4960,49 +4710,20 @@ Variant &c_ReflectionParameter::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionParameter
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionParameter
-Variant * c_ReflectionParameter::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  return o_realPropPublic(prop, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_ReflectionParameter
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionParameter
-Variant * c_ReflectionParameter::o_realPropPublic(CStrRef s, int flags) const {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_REALPROP_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"), 4, info);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionParameter
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionParameter
-Variant * c_ReflectionParameter::o_realPropPrivate(CStrRef s, int flags) const {
-  return o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionParameter
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionParameter
 Variant c_ReflectionParameter::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionParameter
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionParameter)
-bool c_ReflectionParameter::o_instanceof(CStrRef s) const {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 1:
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0d7533cf, "Reflector"));
-      break;
-    case 3:
-      HASH_INSTANCEOF(0x2E7081C468A05993LL, NAMSTR(s_sys_sscd5dc41e, "ReflectionParameter"));
-      break;
-    default:
-      break;
-  }
-  return false;
-}
+const InstanceOfInfo c_ReflectionParameter::s_instanceof_table[] = {
+  {0x62F7F85447C0A605LL,1,"Reflector",(const ObjectStaticCallbacks*)2},
+  {0x2E7081C468A05993LL,1,"ReflectionParameter",&cw_ReflectionParameter},
+};
+const int c_ReflectionParameter::s_instanceof_index[] = {
+  3,
+  -1,0,-1,1,
+};
 ObjectData *c_ReflectionParameter::cloneImpl() {
   ObjectData *obj = coo_ReflectionParameter();
   c_ReflectionParameter::cloneSet(obj);
@@ -5306,12 +5027,12 @@ const ObjectStaticCallbacks cw_ReflectionParameter = {
   c_ReflectionParameter::os_getInit,
   c_ReflectionParameter::os_get,
   c_ReflectionParameter::os_lval,
-  c_ReflectionParameter::os_invoke,
   c_ReflectionParameter::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionParameter,
   c_ReflectionParameter::s_call_info_table,c_ReflectionParameter::s_call_info_index,
+  c_ReflectionParameter::s_instanceof_table,c_ReflectionParameter::s_instanceof_index,
   &c_ReflectionParameter::s_class_name,
-  &c_ReflectionParameter::os_prop_table,0
+  &c_ReflectionParameter::os_prop_table,0,0
 };
 /* SRC: classes/reflection.php line 49 */
 void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
@@ -5516,22 +5237,22 @@ ObjectData *coo_ReflectionParameter() {
 
 // Class tables
 static const ClassPropTableEntry cpt_table_entries[] = {
-  { 64, 10,GET_PROPERTY_OFFSET(c_ReflectionClass, m_name),&NAMSTR(s_sys_ssdc3cbddc, "name") },
-  { 256, 10,GET_PROPERTY_OFFSET(c_ReflectionClass, m_info),&NAMSTR(s_sys_ss84e1d89d, "\000ReflectionClass\000info") },
+  {0x5655B4FF77E35232LL,1,0,66,10,GET_PROPERTY_OFFSET(c_ReflectionClass, m_name),&NAMSTR(s_sys_ssdc3cbddc, "name") },
+  {0x0F2EF58F157D479FLL,0,17,258,10,GET_PROPERTY_OFFSET(c_ReflectionClass, m_info),&NAMSTR(s_sys_ss84e1d89d, "\000ReflectionClass\000info") },
 
-  { 256, 10,GET_PROPERTY_OFFSET(c_ReflectionExtension, m_name),&NAMSTR(s_sys_ss8bbc8ede, "\000ReflectionExtension\000name") },
-  { 256, 10,GET_PROPERTY_OFFSET(c_ReflectionExtension, m_info),&NAMSTR(s_sys_ss5596f6c8, "\000ReflectionExtension\000info") },
+  {0x5655B4FF77E35232LL,1,21,258,10,GET_PROPERTY_OFFSET(c_ReflectionExtension, m_name),&NAMSTR(s_sys_ss8bbc8ede, "\000ReflectionExtension\000name") },
+  {0x0F2EF58F157D479FLL,0,21,258,10,GET_PROPERTY_OFFSET(c_ReflectionExtension, m_info),&NAMSTR(s_sys_ss5596f6c8, "\000ReflectionExtension\000info") },
 
-  { 128, 10,GET_PROPERTY_OFFSET(c_ReflectionFunctionAbstract, m_info),&NAMSTR(s_sys_ss33988b3e, "info") },
+  {0x0F2EF58F157D479FLL,0,0,130,10,GET_PROPERTY_OFFSET(c_ReflectionFunctionAbstract, m_info),&NAMSTR(s_sys_ss33988b3e, "info") },
 
-  { 64, 10,GET_PROPERTY_OFFSET(c_ReflectionMethod, m_name),&NAMSTR(s_sys_ssdc3cbddc, "name") },
-  { 64, 10,GET_PROPERTY_OFFSET(c_ReflectionMethod, m_class),&NAMSTR(s_sys_ssc82dbd12, "class") },
+  {0x2E3A246D1F74C210LL,0,0,66,10,GET_PROPERTY_OFFSET(c_ReflectionMethod, m_class),&NAMSTR(s_sys_ssc82dbd12, "class") },
+  {0x5655B4FF77E35232LL,-1,0,66,10,GET_PROPERTY_OFFSET(c_ReflectionMethod, m_name),&NAMSTR(s_sys_ssdc3cbddc, "name") },
 
-  { 64, 10,GET_PROPERTY_OFFSET(c_ReflectionParameter, m_info),&NAMSTR(s_sys_ss33988b3e, "info") },
+  {0x0F2EF58F157D479FLL,0,0,66,10,GET_PROPERTY_OFFSET(c_ReflectionParameter, m_info),&NAMSTR(s_sys_ss33988b3e, "info") },
 
-  { 64, 10,GET_PROPERTY_OFFSET(c_ReflectionProperty, m_info),&NAMSTR(s_sys_ss33988b3e, "info") },
-  { 64, 10,GET_PROPERTY_OFFSET(c_ReflectionProperty, m_name),&NAMSTR(s_sys_ssdc3cbddc, "name") },
-  { 64, 10,GET_PROPERTY_OFFSET(c_ReflectionProperty, m_class),&NAMSTR(s_sys_ssc82dbd12, "class") },
+  {0x2E3A246D1F74C210LL,0,0,66,10,GET_PROPERTY_OFFSET(c_ReflectionProperty, m_class),&NAMSTR(s_sys_ssc82dbd12, "class") },
+  {0x5655B4FF77E35232LL,-1,0,66,10,GET_PROPERTY_OFFSET(c_ReflectionProperty, m_name),&NAMSTR(s_sys_ssdc3cbddc, "name") },
+  {0x0F2EF58F157D479FLL,-1,0,66,10,GET_PROPERTY_OFFSET(c_ReflectionProperty, m_info),&NAMSTR(s_sys_ss33988b3e, "info") },
 
 };
 static const ClassPropTableEntry *cpt_private_entries[] = {
@@ -5541,23 +5262,37 @@ static const ClassPropTableEntry *cpt_private_entries[] = {
   cpt_table_entries+3,
   0,
 };
+static const int cpt_hash_entries[] = {
+  -1,-1,0,-1,-1,-1,-1,1,
+  -1,-1,0,-1,-1,-1,-1,1,
+  -1,-1,-1,-1,-1,-1,-1,0,
+  0,-1,1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,0,
+  0,-1,1,-1,-1,-1,-1,2,
+};
 const ClassPropTable c_ReflectionClass::os_prop_table = {
-  2,1,0,cpt_table_entries+0,cpt_private_entries+0
+  7,0,cpt_hash_entries+0,
+  0,cpt_table_entries+0,cpt_private_entries+0
 };
 const ClassPropTable c_ReflectionExtension::os_prop_table = {
-  2,2,0,cpt_table_entries+2,cpt_private_entries+2
+  7,0,cpt_hash_entries+8,
+  0,cpt_table_entries+2,cpt_private_entries+2
 };
 const ClassPropTable c_ReflectionFunctionAbstract::os_prop_table = {
-  1,0,0,cpt_table_entries+4,cpt_private_entries+4
+  7,0,cpt_hash_entries+16,
+  0,cpt_table_entries+4,cpt_private_entries+4
 };
 const ClassPropTable c_ReflectionMethod::os_prop_table = {
-  2,0,&c_ReflectionFunctionAbstract::os_prop_table,cpt_table_entries+5,cpt_private_entries+4
+  7,1,cpt_hash_entries+24,
+  &c_ReflectionFunctionAbstract::os_prop_table,cpt_table_entries+5,cpt_private_entries+4
 };
 const ClassPropTable c_ReflectionParameter::os_prop_table = {
-  1,0,0,cpt_table_entries+7,cpt_private_entries+4
+  7,0,cpt_hash_entries+32,
+  0,cpt_table_entries+7,cpt_private_entries+4
 };
 const ClassPropTable c_ReflectionProperty::os_prop_table = {
-  3,0,0,cpt_table_entries+8,cpt_private_entries+4
+  7,2,cpt_hash_entries+40,
+  0,cpt_table_entries+8,cpt_private_entries+4
 };
 
 ///////////////////////////////////////////////////////////////////////////////

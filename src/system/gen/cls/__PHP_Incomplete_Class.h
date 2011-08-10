@@ -32,7 +32,6 @@ class c___PHP_Incomplete_Class : public ExtObjectData {
   // Properties
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(__PHP_Incomplete_Class, __PHP_Incomplete_Class)
 
   // DECLARE_STATIC_PROP_OPS
@@ -41,15 +40,6 @@ class c___PHP_Incomplete_Class : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET___PHP_Incomplete_Class 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL___PHP_Incomplete_Class 1
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT___PHP_Incomplete_Class 1
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp___PHP_Incomplete_Class 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE___PHP_Incomplete_Class 1
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC___PHP_Incomplete_Class 1
 
   // DECLARE_COMMON_INVOKE
   static const int s_call_info_table = 0;

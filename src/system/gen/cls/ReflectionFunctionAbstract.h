@@ -33,7 +33,6 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   Variant m_info;
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(ReflectionFunctionAbstract, ReflectionFunctionAbstract)
 
   // DECLARE_STATIC_PROP_OPS
@@ -42,15 +41,6 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionFunctionAbstract 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionFunctionAbstract 1
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionFunctionAbstract 1
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_ReflectionFunctionAbstract 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionFunctionAbstract 1
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
 
   // DECLARE_COMMON_INVOKE
   static const MethodCallInfoTable s_call_info_table[];

@@ -34,8 +34,6 @@ namespace HPHP {
 FORWARD_DECLARE_CLASS_BUILTIN(ImageSprite);
 class c_ImageSprite : public ExtObjectData, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(ImageSprite)
-  END_CLASS_MAP(ImageSprite)
   DECLARE_CLASS(ImageSprite, ImageSprite, ObjectData)
 
   // need to implement
@@ -70,7 +68,7 @@ class c_ImageSprite : public ExtObjectData, public Sweepable {
   public: c_ImageSprite *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
  private:
   void map();

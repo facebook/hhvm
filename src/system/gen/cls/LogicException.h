@@ -33,7 +33,6 @@ class c_LogicException : public c_Exception {
   // Properties
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(LogicException, LogicException)
 
   // DECLARE_STATIC_PROP_OPS
@@ -42,15 +41,6 @@ class c_LogicException : public c_Exception {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_LogicException 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_LogicException 1
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_LogicException 1
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_LogicException 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LogicException 1
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_LogicException 1
 
   // DECLARE_COMMON_INVOKE
   static const int s_call_info_table = 0;

@@ -33,7 +33,6 @@ class c_MutableArrayIterator : public c_ArrayIterator {
   // Properties
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(MutableArrayIterator, MutableArrayIterator)
 
   // DECLARE_STATIC_PROP_OPS
@@ -42,15 +41,6 @@ class c_MutableArrayIterator : public c_ArrayIterator {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_MutableArrayIterator 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_MutableArrayIterator 1
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_MutableArrayIterator 1
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_MutableArrayIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_MutableArrayIterator 1
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_MutableArrayIterator 1
 
   // DECLARE_COMMON_INVOKE
   static const MethodCallInfoTable s_call_info_table[];

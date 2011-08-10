@@ -34,7 +34,6 @@ class c_IteratorIterator : public ExtObjectData {
   Variant m_iterator;
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(IteratorIterator, IteratorIterator)
 
   // DECLARE_STATIC_PROP_OPS
@@ -43,16 +42,6 @@ class c_IteratorIterator : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_IteratorIterator 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_IteratorIterator 1
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_IteratorIterator 1
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  virtual Variant *o_realProp(CStrRef s, int flags,
-                              CStrRef context = null_string) const;
-  Variant *o_realPropPrivate(CStrRef s, int flags) const;
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_IteratorIterator 1
 
   // DECLARE_COMMON_INVOKE
   static const MethodCallInfoTable s_call_info_table[];

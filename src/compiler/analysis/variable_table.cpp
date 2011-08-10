@@ -1826,9 +1826,6 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
   }
 
   cg.addClass(m_blockScope.getName(), getClassScope());
-  outputCPPPropertyOp(cg, ar, cls, parent, "realProp", ", int flags", ", flags",
-                      "Variant *", true, JumpRealProp, false, dynamicObject,
-                      JumpTableClassRealProp);
 }
 
 bool VariableTable::outputCPPPrivateSelector(CodeGenerator &cg,
@@ -1863,66 +1860,6 @@ bool VariableTable::outputCPPPrivateSelector(CodeGenerator &cg,
   return true;
 }
 
-void VariableTable::outputCPPPropertyOp
-(CodeGenerator &cg, AnalysisResultPtr ar,
- const char *cls, const char *parent, const char *op, const char *argsDec,
- const char *args, const char *ret, bool cnst, JumpTableType type,
- bool varOnly,  ClassScope::Derivation dynamicObject, JumpTableName jtname) {
-
-  cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_%s_%s", op, cls);
-  cg_indentBegin("%s %s%s::%s%s(CStrRef prop%s, CStrRef context)%s {\n",
-      ret, Option::ClassPrefix,
-      cls, Option::ObjectPrefix, op, argsDec, cnst ? " const" : "");
-  if (!outputCPPPrivateSelector(cg, ar, op, args)) {
-    m_emptyJumpTables.insert(jtname);
-  }
-  if (!dynamicObject) {
-    cg_printf("return %s%sPublic(prop%s);\n",
-              Option::ObjectPrefix, op, args);
-  } else {
-    cg_printf("return DynamicObjectData::%s%s(prop%s, context);\n",
-              Option::ObjectPrefix, op, args);
-  }
-  cg_indentEnd("}\n");
-  cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_%s_%s", op, cls);
-
-  if (!dynamicObject) {
-    cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_%s_PUBLIC_%s", op, cls);
-    cg_indentBegin("%s %s%s::%s%sPublic(CStrRef s%s)%s {\n",
-                   ret, Option::ClassPrefix, cls,
-                   Option::ObjectPrefix, op, argsDec, cnst ? " const" : "");
-    if (!outputCPPJumpTable(cg, ar, Option::PropertyPrefix, true, varOnly,
-                            NonStatic, type)) {
-      // offset 1 based on enum order
-      m_emptyJumpTables.insert((JumpTableName)(jtname + 1));
-    }
-    cg_printf("return %s%s::%s%sPublic(s%s);\n",
-              Option::ClassPrefix, parent, Option::ObjectPrefix, op, args);
-    cg_indentEnd("}\n");
-    cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_%s_PUBLIC_%s", op, cls);
-  }
-
-  cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_%s_PRIVATE_%s", op, cls);
-  cg_indentBegin("%s %s%s::%s%sPrivate(CStrRef s%s)%s {\n",
-                 ret, Option::ClassPrefix, cls, Option::ObjectPrefix, op,
-                 argsDec, cnst ? " const" : "");
-  if (!outputCPPJumpTable(cg, ar, Option::PropertyPrefix, true, varOnly,
-                          NonStatic, type, Private)) {
-    // offset 2 based on enum order
-    m_emptyJumpTables.insert((JumpTableName)(jtname + 2));
-  }
-  if (!dynamicObject) {
-    // Fall back to public
-    cg_printf("return %s%sPublic(s%s);\n",
-              Option::ObjectPrefix, op, args);
-  } else {
-    cg_printf("return DynamicObjectData::%s%s(s%s, empty_string);\n",
-              Option::ObjectPrefix, op, args);
-  }
-  cg_indentEnd("}\n");
-  cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_%s_PRIVATE_%s", op, cls);
-}
-
 bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       const char *prefix, bool defineHash, bool variantOnly,
       StaticSelection staticVar, JumpTableType type /* = JumpReturn */,
@@ -1950,10 +1887,6 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       hasStatic |= stat;
       if (type == JumpIndex) varIdx[name.c_str()] = strings.size();
       strings.push_back(name.c_str());
-      if (type == JumpRealProp &&
-          !Type::SameType(sym->getFinalType(), Type::Variant)) {
-        needsGlobals = true;
-      }
     }
   }
   if (strings.empty()) return false;
@@ -1970,7 +1903,7 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
     }
   }
 
-  bool useString = (type == JumpRealProp) || (type == JumpSet) ||
+  bool useString = (type == JumpSet) ||
                    (type == JumpReturnString) ||
                    (type == JumpInitializedString) || (type == JumpReturnInit);
 
@@ -1993,16 +1926,6 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       varName = string("g->") + varName;
     }
     switch (type) {
-    case VariableTable::JumpRealProp:
-      cg_printf("HASH_REALPROP_%sNAMSTR(0x%016llXLL, ",
-                Type::SameType(getFinalType(name), Type::Variant) ?
-                  "" : "TYPED_",
-                hash_string(name));
-      cg_printString(name, ar, getBlockScope());
-      cg_printf(", %d, %s);\n",
-                strlen(name),
-                CodeGenerator::FormatLabel(name).c_str());
-      break;
     case VariableTable::JumpReturn:
       cg_printf("HASH_RETURN(0x%016llXLL, %s,\n",
                 hash_string(name), varName.c_str());

@@ -88,8 +88,6 @@ extern const int q_Memcached_RES_PAYLOAD_FAILURE;
 FORWARD_DECLARE_CLASS_BUILTIN(Memcached);
 class c_Memcached : public ExtObjectData, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(Memcached)
-  END_CLASS_MAP(Memcached)
   DECLARE_CLASS(Memcached, Memcached, ObjectData)
 
   // need to implement
@@ -178,7 +176,7 @@ class c_Memcached : public ExtObjectData, public Sweepable {
   public: c_Memcached *create(String persistent_id = null_string);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
  private:
   class Impl {

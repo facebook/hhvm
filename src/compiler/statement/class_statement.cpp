@@ -243,7 +243,8 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   if (variables->hasAllJumpTables() && constants->hasJumpTable() &&
       classScope->hasAllJumpTables()) {
     cg_printf("DECLARE_CLASS%s(%s, %s, %s)\n",
-              sweep, clsName, originalName, parent);
+              sweep, clsName,
+              CodeGenerator::EscapeLabel(originalName).c_str(), parent);
     return;
   }
 
@@ -277,31 +278,6 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
     cg_printf("static Variant os_constant(const char *s);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_CONSTANT_%s 1\n", clsName);
-  }
-
-  cg.printSection("DECLARE_INSTANCE_PROP_OPS");
-  cg_printf("public:\n");
-
-  if (variables->hasJumpTable(VariableTable::JumpTableClassRealProp)) {
-    cg_printf("virtual Variant *o_realProp(CStrRef s, int flags,\n");
-    cg_printf("                            CStrRef context = null_string) "
-              "const;\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_realProp_%s 1\n", clsName);
-  }
-  if (variables->hasNonStaticPrivate()) {
-    cg_printf("Variant *o_realPropPrivate(CStrRef s, int flags) const;\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_%s 1\n", clsName);
-  }
-
-  cg.printSection("DECLARE_INSTANCE_PUBLIC_PROP_OPS");
-  cg_printf("public:\n");
-  if (variables->hasJumpTable(VariableTable::JumpTableClassRealPropPublic)) {
-    cg_printf("virtual Variant *o_realPropPublic(CStrRef s, "
-              "int flags) const;\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_%s 1\n", clsName);
   }
 
   cg.printSection("DECLARE_COMMON_INVOKE");
@@ -456,9 +432,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
 
       cg.printSection("Class Map");
-      if (Option::GenerateCPPMacros) {
-        cg_printf("virtual bool o_instanceof(CStrRef s) const;\n");
-      }
 
       bool hasEmitCppCtor = false;
       bool needsCppCtor = classScope->needsCppCtor();

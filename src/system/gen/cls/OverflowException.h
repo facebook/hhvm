@@ -33,7 +33,6 @@ class c_OverflowException : public c_RuntimeException {
   // Properties
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(OverflowException, OverflowException)
 
   // DECLARE_STATIC_PROP_OPS
@@ -42,15 +41,6 @@ class c_OverflowException : public c_RuntimeException {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_OverflowException 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_OverflowException 1
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_OverflowException 1
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_OverflowException 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OverflowException 1
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_OverflowException 1
 
   // DECLARE_COMMON_INVOKE
   static const int s_call_info_table = 0;

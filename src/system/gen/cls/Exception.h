@@ -38,7 +38,6 @@ class c_Exception : public ExtObjectData {
   Variant m_trace;
 
   // Class Map
-  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON_NO_SWEEP(Exception, Exception)
 
   // DECLARE_STATIC_PROP_OPS
@@ -47,15 +46,6 @@ class c_Exception : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_Exception 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Exception 1
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_Exception 1
-
-  // DECLARE_INSTANCE_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_realProp_Exception 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Exception 1
-
-  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
-  public:
-  virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
 
   // DECLARE_COMMON_INVOKE
   static const MethodCallInfoTable s_call_info_table[];

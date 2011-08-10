@@ -52,8 +52,6 @@ bool f_memcache_add_server(CObjRef memcache, CStrRef host, int port = 11211, boo
 FORWARD_DECLARE_CLASS_BUILTIN(Memcache);
 class c_Memcache : public ExtObjectData, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(Memcache)
-  END_CLASS_MAP(Memcache)
   DECLARE_CLASS(Memcache, Memcache, ObjectData)
 
   // need to implement
@@ -106,7 +104,7 @@ class c_Memcache : public ExtObjectData, public Sweepable {
   public: c_Memcache *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
  private:
   memcached_st m_memcache;

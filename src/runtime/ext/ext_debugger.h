@@ -36,8 +36,6 @@ void f_hphpd_break(bool condition = true);
 FORWARD_DECLARE_CLASS_BUILTIN(DebuggerProxy);
 class c_DebuggerProxy : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(DebuggerProxy)
-  END_CLASS_MAP(DebuggerProxy)
   DECLARE_CLASS(DebuggerProxy, DebuggerProxy, ObjectData)
 
   // need to implement
@@ -56,7 +54,7 @@ class c_DebuggerProxy : public ExtObjectData {
   public: c_DebuggerProxy *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
  public:
   Eval::DebuggerProxy *m_proxy;
@@ -78,8 +76,6 @@ extern const int64 q_DebuggerClient_AUTO_COMPLETE_CODE;
 FORWARD_DECLARE_CLASS_BUILTIN(DebuggerClient);
 class c_DebuggerClient : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(DebuggerClient)
-  END_CLASS_MAP(DebuggerClient)
   DECLARE_CLASS(DebuggerClient, DebuggerClient, ObjectData)
 
   // need to implement
@@ -150,7 +146,7 @@ class c_DebuggerClient : public ExtObjectData {
   public: c_DebuggerClient *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
-  
+
 
  public:
   Eval::DebuggerClient *m_client;

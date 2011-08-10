@@ -313,6 +313,9 @@ bool TestServer::TestResponseHeader() {
   VSRES("<?php header('Location: new/url');",
         "302");
 
+  VSRES("<?php header(\"Test-Header: x\ry\"); echo 'done';",
+        "done");
+
   return true;
 }
 

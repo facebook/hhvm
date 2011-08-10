@@ -202,7 +202,7 @@ void LibEventTransport::addHeaderImpl(const char *name, const char *value) {
 
   int ret = evhttp_add_header(m_request->output_headers, name, value);
   if (ret < 0) {
-    throw InvalidHeaderException(name, value);
+    Logger::Error("failed to add header '%s: %s'", name, value);
   }
 }
 
@@ -226,7 +226,8 @@ void LibEventTransport::addRequestHeaderImpl(const char *name,
 
   int ret = evhttp_add_header(m_request->input_headers, name, value);
   if (ret < 0) {
-    throw InvalidHeaderException(name, value);
+    Logger::Error("failed to add header '%s: %s'", name, value);
+    return;
   }
   m_requestHeaders[name].push_back(value);
 }

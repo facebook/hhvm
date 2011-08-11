@@ -1420,13 +1420,13 @@ String c_Exception::t_gettraceasstring() {
           }
           {
             StringBuffer tmp0_buf;
-            tmp0_buf.append("#", 1);
-            tmp0_buf.append(toString(v_i));
-            tmp0_buf.append(" ", 1);
-            tmp0_buf.append(toString((isset(v_frame, NAMSTR(s_sys_ss8ce7db5b, "file"), true) ? ((Variant)(v_frame.rvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), AccessFlags::Error_Key))) : ((Variant)(NAMSTR(s_sys_ss00000000, ""))))));
-            tmp0_buf.append("(", 1);
-            tmp0_buf.append(toString((isset(v_frame, NAMSTR(s_sys_ssddf8728c, "line"), true) ? ((Variant)(v_frame.rvalAt(NAMSTR(s_sys_ssddf8728c, "line"), AccessFlags::Error_Key))) : ((Variant)(NAMSTR(s_sys_ss00000000, ""))))));
-            tmp0_buf.append("): ", 3);
+            tmp0_buf.appendWithTaint("#", 1);
+            tmp0_buf.appendWithTaint(toString(v_i));
+            tmp0_buf.appendWithTaint(" ", 1);
+            tmp0_buf.appendWithTaint(toString((isset(v_frame, NAMSTR(s_sys_ss8ce7db5b, "file"), true) ? ((Variant)(v_frame.rvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), AccessFlags::Error_Key))) : ((Variant)(NAMSTR(s_sys_ss00000000, ""))))));
+            tmp0_buf.appendWithTaint("(", 1);
+            tmp0_buf.appendWithTaint(toString((isset(v_frame, NAMSTR(s_sys_ssddf8728c, "line"), true) ? ((Variant)(v_frame.rvalAt(NAMSTR(s_sys_ssddf8728c, "line"), AccessFlags::Error_Key))) : ((Variant)(NAMSTR(s_sys_ss00000000, ""))))));
+            tmp0_buf.appendWithTaint("): ", 3);
             Variant tmp1;
             if (isset(v_frame, NAMSTR(s_sys_ssc82dbd12, "class"), true)) {
               const String &tmp2((toString(v_frame.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
@@ -1435,16 +1435,16 @@ String c_Exception::t_gettraceasstring() {
             } else {
               tmp1 = (NAMSTR(s_sys_ss00000000, ""));
             }
-            tmp0_buf.append(toString(tmp1));
-            tmp0_buf.append(toString(v_frame.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key)));
-            tmp0_buf.append("()\n", 3);
-            CStrRef tmp0(tmp0_buf.detach());
-            tmp_sbuf_v_s.add(tmp0);
+            tmp0_buf.appendWithTaint(toString(tmp1));
+            tmp0_buf.appendWithTaint(toString(v_frame.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key)));
+            tmp0_buf.appendWithTaint("()\n", 3);
+            CStrRef tmp0(tmp0_buf.detachWithTaint());
+            tmp_sbuf_v_s.addWithTaint(tmp0);
           }
           v_i++;
         }
       }
-      concat_assign(v_s, tmp_sbuf_v_s.detach());
+      concat_assign(v_s, tmp_sbuf_v_s.detachWithTaint());
     }
   }
   concat_assign(v_s, concat3(NAMSTR(s_sys_ss8dc355aa, "#"), toString(v_i), NAMSTR(s_sys_ssfab32402, " {main}")));
@@ -1456,17 +1456,17 @@ String c_Exception::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::__toString);
   {
     StringBuffer tmp0_buf;
-    tmp0_buf.append("exception '", 11);
-    tmp0_buf.append(toString(x_get_class(VarNR(GET_THIS_TYPED(Exception)))));
-    tmp0_buf.append("' with message '", 16);
-    tmp0_buf.append(toString(t_getmessage()));
-    tmp0_buf.append("' in ", 5);
-    tmp0_buf.append(toString(t_getfile()));
-    tmp0_buf.append(":", 1);
-    tmp0_buf.append(toString(t_getline()));
-    tmp0_buf.append("\nStack trace:\n", 14);
-    tmp0_buf.append(t_gettraceasstring());
-    CStrRef tmp0(tmp0_buf.detach());
+    tmp0_buf.appendWithTaint("exception '", 11);
+    tmp0_buf.appendWithTaint(toString(x_get_class(VarNR(GET_THIS_TYPED(Exception)))));
+    tmp0_buf.appendWithTaint("' with message '", 16);
+    tmp0_buf.appendWithTaint(toString(t_getmessage()));
+    tmp0_buf.appendWithTaint("' in ", 5);
+    tmp0_buf.appendWithTaint(toString(t_getfile()));
+    tmp0_buf.appendWithTaint(":", 1);
+    tmp0_buf.appendWithTaint(toString(t_getline()));
+    tmp0_buf.appendWithTaint("\nStack trace:\n", 14);
+    tmp0_buf.appendWithTaint(t_gettraceasstring());
+    CStrRef tmp0(tmp0_buf.detachWithTaint());
     return tmp0;
   }
 }

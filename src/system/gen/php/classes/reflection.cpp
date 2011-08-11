@@ -2652,7 +2652,7 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
       {
         {
           p_ReflectionException tmp0 = coo_ReflectionException();
-          throw_exception(((c_ReflectionException*)tmp0.get()->create(toString(v_cls) + NAMSTR(s_sys_ssda497f2a, " is not an Interface")), tmp0));
+          throw_exception(((c_ReflectionException*)tmp0.get()->create(concat(toString(v_cls), NAMSTR(s_sys_ssda497f2a, " is not an Interface"))), tmp0));
         }
       }
     }

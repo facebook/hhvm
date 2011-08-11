@@ -623,7 +623,11 @@ public:
   }
 };
 
-Mutex DescriptorItem::s_mutex;
+/**
+ * This mutex must be non-reentrant so when the child process tries to unlock
+ * it after a fork(), the call to pthread_mutex_unlock() will succeed.
+ */
+Mutex DescriptorItem::s_mutex(false);
 
 static bool pre_proc_open(CArrRef descriptorspec,
                           vector<DescriptorItem> &items) {

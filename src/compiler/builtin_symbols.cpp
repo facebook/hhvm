@@ -106,6 +106,7 @@ const char *BuiltinSymbols::SystemClasses[] = {
   "xhprof",
   "directoryiterator",
   "soapfault",
+  "fbmysqllexer",
   NULL
 };
 

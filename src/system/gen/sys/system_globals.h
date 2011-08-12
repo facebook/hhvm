@@ -23,6 +23,7 @@
 #include <php/classes/directory.h>
 #include <php/classes/directoryiterator.h>
 #include <php/classes/exception.h>
+#include <php/classes/fbmysqllexer.h>
 #include <php/classes/iterator.h>
 #include <php/classes/reflection.h>
 #include <php/classes/soapfault.h>

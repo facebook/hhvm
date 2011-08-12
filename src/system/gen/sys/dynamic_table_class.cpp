@@ -41,6 +41,7 @@ extern const ObjectStaticCallbacks cw_SplFileInfo;
 extern const ObjectStaticCallbacks cw_ArrayIterator;
 extern const ObjectStaticCallbacks cw_IteratorIterator;
 extern const ObjectStaticCallbacks cw_AppendIterator;
+extern const ObjectStaticCallbacks cw_FB_MySQLLexer;
 extern const ObjectStaticCallbacks cw_OutOfBoundsException;
 extern const ObjectStaticCallbacks cw_LogicException;
 extern const ObjectStaticCallbacks cw_RangeException;
@@ -19189,6 +19190,7 @@ static const hashNodeCTD ctdBuckets[] = {
   {0xAE650138BA043AAFLL,"DOMDocument",(int64)&cw_DOMDocument,&coo_DOMDocument},
   {0xC3BBC8F6F28E44B0LL,"ReflectionMethod",(int64)&cw_ReflectionMethod,&coo_ReflectionMethod},
   {0xEDD772FA3B20B8B1LL,"DOMNodeList",(int64)&cw_DOMNodeList,&coo_DOMNodeList},
+  {0xA86D5ADE799762BALL,"FB_MySQLLexer",(int64)&cw_FB_MySQLLexer,&coo_FB_MySQLLexer},
   {0xDD8785ACD19F77BDLL,"PDOException",(int64)&cw_PDOException,&coo_PDOException},
   {0xC0B3C44077F5DDC3LL,"DOMElement",(int64)&cw_DOMElement,&coo_DOMElement},
   {0xAE363D51549781C8LL,"AppendIterator",(int64)&cw_AppendIterator,&coo_AppendIterator},
@@ -19234,15 +19236,15 @@ static const int ctdMapTable[] = {
   -1,-1,-1,-1,-1,-1,-1,65,
   66,67,68,-1,-1,69,-1,70,
   71,72,-1,-1,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,73,-1,-1,
-  -1,-1,-1,74,-1,-1,-1,-1,
-  75,-1,-1,76,-1,-1,-1,-1,
-  77,-1,78,-1,80,-1,-1,-1,
-  81,82,83,-1,84,-1,-1,-1,
-  -1,-1,85,-1,86,-1,-1,-1,
+  -1,-1,73,-1,-1,74,-1,-1,
+  -1,-1,-1,75,-1,-1,-1,-1,
+  76,-1,-1,77,-1,-1,-1,-1,
+  78,-1,79,-1,81,-1,-1,-1,
+  82,83,84,-1,85,-1,-1,-1,
+  -1,-1,86,-1,87,-1,-1,-1,
   -1,-1,-1,-1,-1,-1,-1,-1,
-  -1,-1,-1,-1,87,-1,-1,88,
-  -1,-1,-1,-1,89,90,-1,92,
+  -1,-1,-1,-1,88,-1,-1,89,
+  -1,-1,-1,-1,90,91,-1,93,
 
 };
 

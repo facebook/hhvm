@@ -2313,7 +2313,11 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         }
         break;
       }
-
+      case Expression::KindOfClosureExpression:
+        // currently disable inlining for scopes with closure
+        // expressions. TODO: revisit this later
+        m_inlineAsExpr = false;
+        break;
       case Expression::KindOfUnaryOpExpression:
         if (Option::EnableEval > Option::NoEval && spc(UnaryOpExpression, e)->
             getOp() == T_EVAL) {

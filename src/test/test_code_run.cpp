@@ -17920,6 +17920,18 @@ bool TestCodeRun::TestInlining() {
        "  foo($a)->bar = 1;"
        "}");
 
+  MVCR("<?php\n"
+       "/* Compile only: verify no c++ compilation errors */"
+       "function f($x) {\n"
+       "  return function () use ($x) {\n"
+       "    return $x;\n"
+       "  };\n"
+       "}\n"
+       "function g($x) {\n"
+       "  $c = f($x);\n"
+       "  return $c();\n"
+       "}\n");
+
   {
     WithOpt w(Option::EnableHipHopSyntax);
     MVCRO("<?php\n"

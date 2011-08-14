@@ -18,6 +18,7 @@
 
 #include <runtime/base/types.h>
 #include <runtime/base/array/array_data.h>
+#include <runtime/base/array/zend_array.h>
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/complex_types.h>
 
@@ -94,9 +95,9 @@ public:
   virtual bool idxExists(ssize_t idx) const { assert(false); }
 
   virtual CVarRef get(int64   k, bool error = false) const;
-  virtual CVarRef get(litstr  k, bool error = false) const { assert(false); }
-  virtual CVarRef get(CStrRef k, bool error = false) const { assert(false); }
-  virtual CVarRef get(CVarRef k, bool error = false) const { assert(false); }
+  virtual CVarRef get(litstr  k, bool error = false) const;
+  virtual CVarRef get(CStrRef k, bool error = false) const;
+  virtual CVarRef get(CVarRef k, bool error = false) const;
 
   virtual void load(CVarRef k, Variant &v) const { assert(false); }
 
@@ -106,26 +107,26 @@ public:
   virtual ssize_t getIndex(CVarRef k) const { assert(false); }
 
   virtual ArrayData *lval(int64   k, Variant *&ret, bool copy,
-                          bool checkExist = false) { assert(false); }
+                          bool checkExist = false);
   virtual ArrayData *lval(litstr  k, Variant *&ret, bool copy,
-                          bool checkExist = false) { assert(false); }
+                          bool checkExist = false);
   virtual ArrayData *lval(CStrRef k, Variant *&ret, bool copy,
-                          bool checkExist = false) { assert(false); }
+                          bool checkExist = false);
   virtual ArrayData *lval(CVarRef k, Variant *&ret, bool copy,
-                          bool checkExist = false) { assert(false); }
+                          bool checkExist = false);
   virtual ArrayData *lvalPtr(CStrRef k, Variant *&ret, bool copy,
-                             bool create) { assert(false); }
+                             bool create);
   virtual ArrayData *lvalPtr(int64   k, Variant *&ret, bool copy,
-                             bool create) { assert(false); }
+                             bool create);
 
-  virtual ArrayData *lvalNew(Variant *&ret, bool copy) { assert(false); }
+  virtual ArrayData *lvalNew(Variant *&ret, bool copy);
 
-  virtual ArrayData *set(int64   k, CVarRef v, bool copy) { assert(false); }
-  virtual ArrayData *set(CStrRef k, CVarRef v, bool copy) { assert(false); }
-  virtual ArrayData *set(CVarRef k, CVarRef v, bool copy) { assert(false); }
-  virtual ArrayData *setRef(int64   k, CVarRef v, bool copy) { assert(false); }
-  virtual ArrayData *setRef(CStrRef k, CVarRef v, bool copy) { assert(false); }
-  virtual ArrayData *setRef(CVarRef k, CVarRef v, bool copy) { assert(false); }
+  virtual ArrayData *set(int64   k, CVarRef v, bool copy);
+  virtual ArrayData *set(CStrRef k, CVarRef v, bool copy);
+  virtual ArrayData *set(CVarRef k, CVarRef v, bool copy);
+  virtual ArrayData *setRef(int64   k, CVarRef v, bool copy);
+  virtual ArrayData *setRef(CStrRef k, CVarRef v, bool copy);
+  virtual ArrayData *setRef(CVarRef k, CVarRef v, bool copy);
 
   virtual ArrayData *add(int64   k, CVarRef v, bool copy) { assert(false); }
   virtual ArrayData *add(CStrRef k, CVarRef v, bool copy) { assert(false); }
@@ -140,20 +141,18 @@ public:
     assert(false);
   }
 
-  virtual ArrayData *remove(int64   k, bool copy) { assert(false); }
-  virtual ArrayData *remove(CStrRef k, bool copy) { assert(false); }
-  virtual ArrayData *remove(CVarRef k, bool copy) { assert(false); }
+  virtual ArrayData *remove(int64   k, bool copy);
+  virtual ArrayData *remove(CStrRef k, bool copy);
+  virtual ArrayData *remove(CVarRef k, bool copy);
 
   virtual ArrayData *copy() const { assert(false); }
-  virtual ArrayData *append(CVarRef v, bool copy) { assert(false); }
-  virtual ArrayData *appendRef(CVarRef v, bool copy) { assert(false); }
-  virtual ArrayData *appendWithRef(CVarRef v, bool copy) { assert(false); }
-  virtual ArrayData *append(const ArrayData *elems, ArrayOp op, bool copy) {
-    assert(false);
-  }
+  virtual ArrayData *append(CVarRef v, bool copy);
+  virtual ArrayData *appendRef(CVarRef v, bool copy);
+  virtual ArrayData *appendWithRef(CVarRef v, bool copy);
+  virtual ArrayData *append(const ArrayData *elems, ArrayOp op, bool copy);
   virtual ArrayData *pop(Variant &value) { assert(false); }
   virtual ArrayData *dequeue(Variant &value) { assert(false); }
-  virtual ArrayData *prepend(CVarRef v, bool copy) { assert(false); }
+  virtual ArrayData *prepend(CVarRef v, bool copy);
   virtual void renumber() { assert(false); }
   virtual void onSetStatic() { assert(false); }
 
@@ -171,6 +170,7 @@ public:
 private:
   int             m_nNumOfElements;
   int             m_start;
+  ArrayData *escalateToZendArray() const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1745,7 +1745,17 @@ bool TestCodeRun::TestArray() {
        "  foo($data);"
        "}"
        "test();");
-
+  MVCR("<?php "
+       "class A {"
+       "  public function __call($method, $args) {"
+       "    var_dump($args['1']);"
+       "    var_dump($args['hi']);"
+       "    $args = $args + array(2 => 0, 3 => true, 4 => true); "
+       "    var_dump($args);"
+       "  }"
+       "}"
+       "$obj = new A;"
+       "$obj->foo(1, 2, 3);");
   return true;
 }
 

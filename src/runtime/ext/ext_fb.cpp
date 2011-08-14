@@ -900,11 +900,23 @@ bool f_fb_get_taint(CStrRef str, int taint) {
 }
 
 Array f_fb_get_taint_warning_counts() {
+#ifdef TAINTED
   return TaintWarning::GetCounts();
+#else
+  Array counts;
+  counts.set(TAINT_BIT_HTML, 0);
+  counts.set(TAINT_BIT_MUTATED, 0);
+  counts.set(TAINT_BIT_SQL, 0);
+  counts.set(TAINT_BIT_SHELL, 0);
+  counts.set(TAINT_BIT_ALL, 0);
+  return counts;
+#endif
 }
 
 void f_fb_enable_html_taint_trace() {
+#ifdef TAINTED
   TaintTracer::EnableHtml();
+#endif
 }
 
 bool f_fb_output_compression(bool new_value) {

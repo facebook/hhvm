@@ -28,6 +28,7 @@ DECLARE_AST_PTR(TempExpression);
 class TempExpression : public Expression {
 public:
   TempExpression(ExpressionPtr exp, int index = 0);
+  virtual Expression *optimize(VariableEnvironment &env);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 

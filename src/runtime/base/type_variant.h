@@ -1084,6 +1084,7 @@ class Variant {
   int64 getNumData() const { return m_data.num; }
   bool isStatic() const { return _count == (1 << 30); }
   void setStatic() const;
+  void setEvalScalar() const;
 
   /**
    * Based on the order in complex_types.h, TypedValue is defined before.

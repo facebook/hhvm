@@ -328,6 +328,8 @@ public:
   static bool EnableAspTags;
   static bool EnableXHP;
   static bool EnableObjDestructCall;
+  static bool EnableEvalOptimization;
+  static int  EvalScalarValueExprLimit;
   static bool CheckSymLink;
   static bool NativeXHP;
   static int ScannerType;

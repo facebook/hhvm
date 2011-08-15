@@ -26,6 +26,11 @@ InstanceOfExpression::InstanceOfExpression(EXPRESSION_ARGS, ExpressionPtr obj,
   : Expression(KindOfInstanceOfExpression, EXPRESSION_PASS),
    m_obj(obj), m_name(name) {}
 
+Expression *InstanceOfExpression::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_obj);
+  return NULL;
+}
+
 Variant InstanceOfExpression::eval(VariableEnvironment &env) const {
   Variant obj(m_obj->eval(env));
   String sname(m_name->get());

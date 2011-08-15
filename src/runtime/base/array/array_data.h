@@ -252,6 +252,7 @@ class ArrayData : public Countable {
    * Make a copy of myself.
    */
   virtual ArrayData *copy() const = 0;
+  virtual ArrayData *nonSmartCopy() const;
 
   /**
    * Append a value to the array. If "copy" is true, make a copy first
@@ -300,6 +301,8 @@ class ArrayData : public Countable {
    */
   virtual void onSetStatic() { ASSERT(false);}
 
+  virtual void onSetEvalScalar() { ASSERT(false);}
+
   /**
    * Serialize this array. We could have made this virtual function to ask
    * sub-classes to implement it specifically, but since this is not a critical
@@ -327,6 +330,7 @@ class ArrayData : public Countable {
     return const_cast<ArrayData *>(this);
   }
 
+  static ArrayData *GetScalarArray(ArrayData *arr);
  protected:
   ssize_t m_pos;
   PointerList<FullPos> m_strongIterators;

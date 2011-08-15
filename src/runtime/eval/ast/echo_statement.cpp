@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/echo_statement.h>
 #include <runtime/eval/ast/expression.h>
+#include <runtime/eval/ast/echo_statement.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
 using namespace std;
@@ -27,6 +27,12 @@ namespace Eval {
 EchoStatement::EchoStatement(STATEMENT_ARGS,
                              const std::vector<ExpressionPtr> &args)
   : Statement(STATEMENT_PASS), m_args(args) {}
+
+void EchoStatement::optimize(VariableEnvironment &env) {
+  for (unsigned int i = 0; i < m_args.size(); i++) {
+    Eval::optimize(env, m_args[i]);
+  }
+}
 
 void EchoStatement::eval(VariableEnvironment &env) const {
   if (env.isGotoing()) return;

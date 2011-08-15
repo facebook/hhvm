@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/do_while_statement.h>
 #include <runtime/eval/ast/expression.h>
+#include <runtime/eval/ast/do_while_statement.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
 namespace HPHP {
@@ -25,6 +25,11 @@ namespace Eval {
 DoWhileStatement::DoWhileStatement(STATEMENT_ARGS, StatementPtr body,
                                    ExpressionPtr cond)
   : Statement(STATEMENT_PASS), m_cond(cond), m_body(body) {}
+
+void DoWhileStatement::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_cond);
+  if (m_body) m_body->optimize(env);
+}
 
 void DoWhileStatement::eval(VariableEnvironment &env) const {
   if (env.isGotoing() && env.isLimitedGoto()) return;

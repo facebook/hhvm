@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/switch_statement.h>
 #include <runtime/eval/ast/expression.h>
+#include <runtime/eval/ast/switch_statement.h>
 #include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/eval/ast/variable_expression.h>
 
@@ -33,6 +33,11 @@ bool CaseStatement::match(VariableEnvironment &env, CVarRef value) const {
   ASSERT(m_match);
   Variant match(m_match->eval(env));
   return equal(match, value);
+}
+
+void CaseStatement::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_match);
+  if (m_body) m_body->optimize(env); 
 }
 
 void CaseStatement::eval(VariableEnvironment &env) const {
@@ -59,6 +64,13 @@ SwitchStatement::SwitchStatement(STATEMENT_ARGS, ExpressionPtr source,
                 const std::vector<CaseStatementPtr> &cases)
   : Statement(STATEMENT_PASS), m_source(source), m_cases(cases) {
   m_simpleVar = m_source->isKindOf(Expression::KindOfVariableExpression);
+}
+
+void SwitchStatement::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_source);
+  for (unsigned int i = 0; i < m_cases.size(); i++) {
+    m_cases[i]->optimize(env);
+  }
 }
 
 void SwitchStatement::eval(VariableEnvironment &env) const {

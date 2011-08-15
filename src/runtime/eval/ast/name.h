@@ -64,7 +64,6 @@ public:
   virtual bool getSuperGlobal(SuperGlobal &sg);
   virtual bool isSp() const;
   virtual void dump(std::ostream &out) const;
-  static StringData *GetStaticName(const std::string &name);
 private:
   StringData *m_name;
   bool m_isSp;

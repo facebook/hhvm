@@ -27,6 +27,11 @@ AssignmentRefExpression::AssignmentRefExpression(EXPRESSION_ARGS,
   : Expression(KindOfAssignmentRefExpression, EXPRESSION_PASS),
   m_lhs(lhs), m_rhs(rhs) {}
 
+Expression *AssignmentRefExpression::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_rhs);
+  return NULL;
+}
+
 Variant AssignmentRefExpression::eval(VariableEnvironment &env) const {
   return m_lhs->setRef(env, m_rhs->refval(env));
 }

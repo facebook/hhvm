@@ -53,6 +53,13 @@ bool Expression::isRefParam() const {
   return false;
 }
 
+void optimize(VariableEnvironment &env, ExpressionPtr &exp) {
+  if (!exp) return; 
+  if (ExpressionPtr optExp = exp->optimize(env)) {
+    exp = optExp;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

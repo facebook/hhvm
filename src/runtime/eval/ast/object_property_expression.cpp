@@ -32,6 +32,11 @@ ObjectPropertyExpression::ObjectPropertyExpression(EXPRESSION_ARGS,
   m_reverseOrder = m_obj->isKindOf(Expression::KindOfVariableExpression);
 }
 
+Expression *ObjectPropertyExpression::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_obj);
+  return NULL;
+}
+
 Variant ObjectPropertyExpression::eval(VariableEnvironment &env) const {
   String name;
   Variant obj;

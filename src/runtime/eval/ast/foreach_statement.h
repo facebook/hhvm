@@ -31,6 +31,7 @@ class ForEachStatement : public Statement {
 public:
   ForEachStatement(STATEMENT_ARGS, ExpressionPtr source, LvalExpressionPtr key,
                   LvalExpressionPtr value, StatementPtr body);
+  virtual void optimize(VariableEnvironment &env);
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:

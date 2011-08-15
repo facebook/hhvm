@@ -325,6 +325,8 @@ bool RuntimeOption::EnableShortTags = true;
 bool RuntimeOption::EnableAspTags = false;
 bool RuntimeOption::EnableXHP = true;
 bool RuntimeOption::EnableObjDestructCall = false;
+bool RuntimeOption::EnableEvalOptimization = true;
+int RuntimeOption::EvalScalarValueExprLimit = 64;
 bool RuntimeOption::CheckSymLink = false;
 bool RuntimeOption::NativeXHP = true;
 int RuntimeOption::ScannerType = 0;
@@ -1016,6 +1018,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
 
     EnableXHP = eval["EnableXHP"].getBool(true);
     EnableObjDestructCall = eval["EnableObjDestructCall"].getBool(false);
+    EnableEvalOptimization = eval["EnableEvalOptimization"].getBool(true);
+    EvalScalarValueExprLimit = eval["EvalScalarValueExprLimit"].getInt32(64);
     CheckSymLink = eval["CheckSymLink"].getBool(false);
     NativeXHP = eval["NativeXHP"].getBool(true);
     if (EnableXHP && !NativeXHP) ScannerType |= Scanner::PreprocessXHP;

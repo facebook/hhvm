@@ -58,6 +58,7 @@ class ListAssignmentExpression : public Expression {
 public:
   ListAssignmentExpression(EXPRESSION_ARGS, ListElementPtr lhs,
                            ExpressionPtr rhs);
+  virtual Expression *optimize(VariableEnvironment &env);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
   Expression *getArray() const { return m_rhs.get(); }

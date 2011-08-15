@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/break_statement.h>
 #include <runtime/eval/ast/expression.h>
+#include <runtime/eval/ast/break_statement.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
 namespace HPHP {
@@ -25,6 +25,10 @@ namespace Eval {
 BreakStatement::BreakStatement(STATEMENT_ARGS, ExpressionPtr level,
                                bool isBreak)
   : Statement(STATEMENT_PASS), m_level(level), m_isBreak(isBreak) {}
+
+void BreakStatement::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_level);
+}
 
 void BreakStatement::eval(VariableEnvironment &env) const {
   if (env.isGotoing()) return;

@@ -28,6 +28,7 @@ DECLARE_AST_PTR(IssetExpression);
 class IssetExpression : public Expression {
 public:
   IssetExpression(EXPRESSION_ARGS, const std::vector<ExpressionPtr> &exps);
+  virtual Expression *optimize(VariableEnvironment &env);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:

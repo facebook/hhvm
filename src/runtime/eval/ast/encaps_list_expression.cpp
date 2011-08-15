@@ -27,6 +27,13 @@ EncapsListExpression::EncapsListExpression(EXPRESSION_ARGS,
   : Expression(KindOfEncapsListExpression, EXPRESSION_PASS),
   m_encaps(encaps), m_shell(shell) {}
 
+Expression *EncapsListExpression::optimize(VariableEnvironment &env) {
+  for (unsigned int i = 0; i < m_encaps.size(); i++) {
+    Eval::optimize(env, m_encaps[i]);
+  }
+  return NULL;
+}
+
 Variant EncapsListExpression::eval(VariableEnvironment &env) const {
   String result = "";
   for (std::vector<ExpressionPtr>::const_iterator it = m_encaps.begin();

@@ -69,6 +69,12 @@ Variant FunctionCallExpression::refval(VariableEnvironment &env,
   return strongBind(eval(env));
 }
 
+Expression *FunctionCallExpression::optimize(VariableEnvironment &env) {
+  for (unsigned int i = 0; i < m_params.size(); i++) {
+    Eval::optimize(env, m_params[i]);
+  }
+  return NULL;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

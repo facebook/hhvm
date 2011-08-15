@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/ast/class_statement.h>
 #include <runtime/eval/ast/method_statement.h>
-#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/runtime/eval_object_data.h>
 #include <runtime/eval/ast/statement_list_statement.h>
 #include <runtime/eval/runtime/eval_state.h>
@@ -35,7 +35,7 @@ using namespace std;
 
 ClassVariable::ClassVariable(CONSTRUCT_ARGS, const string &name, int modifiers,
     ExpressionPtr value, const string &doc, ClassStatement *cls)
-  : Construct(CONSTRUCT_PASS), m_name(StringName::GetStaticName(name)),
+  : Construct(CONSTRUCT_PASS), m_name(StringData::GetStaticString(name)),
     m_modifiers(modifiers), m_value(value), m_docComment(doc), m_cls(cls) {
 }
 
@@ -102,8 +102,8 @@ void ClassVariable::eval(VariableEnvironment &env, Variant &res) const {
 
 ClassStatement::ClassStatement(STATEMENT_ARGS, const string &name,
                                const string &parent, const string &doc)
-  : Statement(STATEMENT_PASS), m_name(StringName::GetStaticName(name)),
-    m_modifiers(0), m_parent(StringName::GetStaticName(parent)),
+  : Statement(STATEMENT_PASS), m_name(StringData::GetStaticString(name)),
+    m_modifiers(0), m_parent(StringData::GetStaticString(parent)),
     m_docComment(doc),
     m_marker(new ClassStatementMarker(STATEMENT_PASS, this)),
     m_delayDeclaration(false) { }
@@ -191,6 +191,12 @@ void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
   it = m_methods.find("__construct");
   if (it != m_methods.end()) {
     ce.getConstructor() = it->second.get();
+  }
+}
+
+void ClassStatement::optimize(VariableEnvironment &env) {
+  for (unsigned int i = 0; i < m_methodsVec.size(); i++) {
+    m_methodsVec[i]->optimize(env);
   }
 }
 
@@ -321,7 +327,7 @@ void ClassStatement::initializeStatics(LVariableTable &statics) const {
 
 void ClassStatement::addBases(const std::vector<String> &bases) {
   for (unsigned i = 0; i < bases.size(); i++) {
-    m_bases.push_back(StringName::GetStaticName(bases[i].data()));
+    m_bases.push_back(StringData::GetStaticString(bases[i].get()));
   }
 }
 
@@ -377,7 +383,7 @@ void ClassStatement::addConstant(const string &name, ExpressionPtr v) {
   if (v->isKindOf(Expression::KindOfArrayExpression)) {
     raise_error("Arrays are not allowed in class constants");
   }
-  m_constantNames.push_back(StringName::GetStaticName(name));
+  m_constantNames.push_back(StringData::GetStaticString(name));
   m_constants[m_constantNames.back()] = v;
 }
 

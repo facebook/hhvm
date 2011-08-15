@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/ast/function_statement.h>
 #include <runtime/eval/runtime/variable_environment.h>
-#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/ast/statement_list_statement.h>
 #include <runtime/eval/runtime/eval_state.h>
 #include <runtime/eval/ast/static_statement.h>
@@ -108,6 +108,10 @@ Parameter::Parameter(CONSTRUCT_ARGS, const string &type,
       }
     }
   }
+}
+
+void Parameter::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_defVal);
 }
 
 void Parameter::bind(VariableEnvironment &env, CVarRef val,
@@ -220,7 +224,7 @@ FunctionStatement::FunctionStatement(STATEMENT_ARGS, const string &name,
                                      const string &doc)
   : Statement(STATEMENT_PASS),
     m_invalid(0), m_maybeIntercepted(-1), m_yieldCount(0),
-    m_name(StringName::GetStaticName(name)), m_closure(NULL),
+    m_name(StringData::GetStaticString(name)), m_closure(NULL),
     m_docComment(doc),
     m_callInfo((void*)Invoker, (void*)InvokerFewArgs, 0, 0, 0),
     m_closureCallInfo((void*)FSInvoker, (void*)FSInvokerFewArgs, 0, 0, 0) {
@@ -286,7 +290,7 @@ String FunctionStatement::fullName() const {
 }
 
 void FunctionStatement::changeName(const std::string &name) {
-  m_name = StringName::GetStaticName(name);
+  m_name = StringData::GetStaticString(name);
 }
 
 const CallInfo *FunctionStatement::getCallInfo() const {
@@ -312,6 +316,13 @@ FunctionStatement::computeInjectionName() const {
     injectionName = string(m_name->data());
   }
   return injectionName;
+}
+
+void FunctionStatement::optimize(VariableEnvironment &env) {
+  for (unsigned int i = 0; i < m_params.size(); i++) {
+    m_params[i]->optimize(env);
+  }
+  if (m_body) m_body->optimize(env);
 }
 
 void FunctionStatement::eval(VariableEnvironment &env) const {

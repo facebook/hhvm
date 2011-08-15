@@ -29,6 +29,7 @@ DECLARE_AST_PTR(Expression);
 class BreakStatement : public Statement {
 public:
   BreakStatement(STATEMENT_ARGS, ExpressionPtr level, bool isBreak);
+  virtual void optimize(VariableEnvironment &env);
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:

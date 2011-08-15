@@ -17,6 +17,7 @@
 #include <runtime/eval/ast/array_expression.h>
 #include <runtime/eval/ast/lval_expression.h>
 #include <runtime/eval/runtime/variable_environment.h>
+#include <runtime/eval/ast/scalar_value_expression.h>
 
 namespace HPHP {
 namespace Eval {
@@ -43,6 +44,11 @@ Variant ArrayPairVal::val(VariableEnvironment &env) const {
   return m_val->eval(env);
 }
 
+void ArrayPairVal::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_key);
+  Eval::optimize(env, m_val);
+}
+
 void ArrayPairVal::set(VariableEnvironment &env, Array &arr) const {
   if (m_key) {
     arr.set(key(env), val(env));
@@ -65,6 +71,10 @@ ArrayPairRef::ArrayPairRef(CONSTRUCT_ARGS, ExpressionPtr key,
 ArrayPairRef::ArrayPairRef(CONSTRUCT_ARGS, LvalExpressionPtr val) :
   ArrayPair(CONSTRUCT_PASS), m_val(val) {}
 
+
+void ArrayPairRef::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_key);
+}
 
 Variant &ArrayPairRef::val(VariableEnvironment &env) const {
   return m_val->lval(env);
@@ -99,6 +109,33 @@ Variant ArrayExpression::eval(VariableEnvironment &env) const {
     (*it)->set(env, arr);
   }
   return arr;
+}
+
+Expression *ArrayExpression::optimize(VariableEnvironment &env) {
+  for (unsigned int i = 0; i < m_elems.size(); i++) {
+    m_elems[i]->optimize(env);
+  }
+  Variant v;
+  if (evalScalar(env, v)) {
+    return new ScalarValueExpression(v, loc());
+  }
+  return NULL;
+}
+
+bool ArrayExpression::evalScalar(VariableEnvironment &env, Variant &r)
+  const {
+  Array arr(Array::Create());
+  for (std::vector<ArrayPairPtr>::const_iterator it = m_elems.begin();
+       it != m_elems.end(); ++it) {
+    Variant v;
+    if (!(*it)->evalScalar(env, v)) {
+      r = null;
+      return false;
+    }
+    (*it)->set(env, arr);
+  }
+  r = arr;
+  return true;
 }
 
 bool ArrayExpression::evalStaticScalar(VariableEnvironment &env, Variant &r)

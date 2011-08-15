@@ -13,8 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
+#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/ast/scalar_expression.h>
+#include <runtime/eval/ast/scalar_value_expression.h>
 #include <runtime/eval/runtime/file_repository.h>
 #include <runtime/eval/ast/name.h>
 #include <util/parser/hphp.tab.hpp>
@@ -28,7 +29,7 @@ using namespace std;
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, int type,
                                    const string &value, int subtype /* = 0 */)
     : Expression(KindOfScalarExpression, EXPRESSION_PASS),
-      m_value(StringName::GetStaticName(value)),
+      m_value(StringData::GetStaticString(value)),
       m_type(type), m_subtype(subtype), m_binary(false) {
   switch (type) {
   case T_NUM_STRING: {
@@ -72,18 +73,34 @@ ScalarExpression::ScalarExpression(EXPRESSION_ARGS, bool b)
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, const string &s)
     : Expression(KindOfScalarExpression, EXPRESSION_PASS),
-      m_value(StringName::GetStaticName(s)),
+      m_value(StringData::GetStaticString(s)),
       m_type(0), m_subtype(0), m_kind(SString) {}
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, const char *s)
     : Expression(KindOfScalarExpression, EXPRESSION_PASS),
-      m_value(StringName::GetStaticName(s)),
+      m_value(StringData::GetStaticString(s)),
       m_type(0), m_subtype(0), m_kind(SString) {}
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, CStrRef s)
     : Expression(KindOfScalarExpression, EXPRESSION_PASS),
-      m_value(StringName::GetStaticName(s.data())),
+      m_value(StringData::GetStaticString(s.get())),
       m_type(0), m_subtype(0), m_kind(SString) {}
+
+Expression *ScalarExpression::optimize(VariableEnvironment &env) {
+  Variant v;
+  if (evalScalar(env, v)) {
+    return new ScalarValueExpression(v, loc());
+  }
+  return NULL;
+}
+
+bool ScalarExpression::evalScalar(VariableEnvironment &env, Variant &r) const {
+  if (m_kind == SString && m_subtype == T_FILE) {
+    return false;
+  }
+  r = getValue();
+  return true;
+}
 
 Variant ScalarExpression::eval(VariableEnvironment &env) const {
   return getValue();

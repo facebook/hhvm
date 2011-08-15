@@ -14,7 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/ast/unary_op_expression.h>
+#include <runtime/eval/ast/scalar_value_expression.h>
 #include <util/parser/hphp.tab.hpp>
 #include <runtime/ext/ext_misc.h>
 #include <runtime/eval/eval.h>
@@ -28,6 +30,15 @@ UnaryOpExpression::UnaryOpExpression(EXPRESSION_ARGS, ExpressionPtr exp,
                                      int op, bool front)
   : Expression(KindOfUnaryOpExpression, EXPRESSION_PASS),
   m_exp(exp), m_op(op), m_front(front) {}
+
+Expression *UnaryOpExpression::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_exp);
+  Variant v;
+  if (evalScalar(env, v)) {
+    return new ScalarValueExpression(v, loc());
+  }
+  return NULL;
+}
 
 Variant UnaryOpExpression::eval(VariableEnvironment &env) const {
   if (m_op == T_ISSET || m_op == T_EMPTY) {
@@ -65,20 +76,42 @@ Variant UnaryOpExpression::eval(VariableEnvironment &env) const {
   }
 }
 
+bool UnaryOpExpression::evalScalar(VariableEnvironment &env, Variant &r) 
+  const {
+  if (!m_exp) return false;
+  Variant v;
+  if (!m_exp->evalScalar(env, v)) return false;
+  switch (m_op) {
+  case '+':           r = +v;          return true;
+  case '-':           r = negate(v);   return true;
+  case '!':           r = !v;          return true;
+  case '~':           r = ~v;          return true;
+  case T_INT_CAST:    r = toInt64(v);  return true;
+  case T_DOUBLE_CAST: r = toDouble(v); return true;
+  case T_STRING_CAST: r = toString(v); return true;
+  case T_ARRAY_CAST:  r = toArray(v);  return true;
+  case T_BOOL_CAST:   r = toBoolean(v);return true;
+  default:
+    r = null;
+    break;
+  }
+  return false;
+}
+
 bool UnaryOpExpression::evalStaticScalar(VariableEnvironment &env, Variant &r)
   const {
   ASSERT(m_exp);
-  Variant exp;
-  if (!m_exp->evalStaticScalar(env, exp)) return false;
+  Variant v;
+  if (!m_exp->evalStaticScalar(env, v)) return false;
   switch (m_op) {
-  case '+':           r = +exp;
-  case '-':           r = negate(exp);
+  case '+':           r = +v;        return true;
+  case '-':           r = negate(v); return true;
   default:
     ASSERT(false);
     r = null;
-    return false;
+    break;
   }
-  return true;
+  return false;
 }
 
 Variant UnaryOpExpression::refval(VariableEnvironment &env,

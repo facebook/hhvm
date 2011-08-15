@@ -29,6 +29,7 @@ class EncapsListExpression : public Expression {
 public:
   EncapsListExpression(EXPRESSION_ARGS, std::vector<ExpressionPtr> encaps,
                        bool shell);
+  virtual Expression *optimize(VariableEnvironment &env);
   Variant eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 protected:

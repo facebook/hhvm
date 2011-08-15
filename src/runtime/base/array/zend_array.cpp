@@ -22,6 +22,7 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/runtime_error.h>
+#include <runtime/base/externals.h>
 #include <util/hash.h>
 #include <util/lock.h>
 
@@ -1229,12 +1230,13 @@ ArrayData *ZendArray::copy() const {
   return copyImpl();
 }
 
-HOT_FUNC
-ZendArray *ZendArray::copyImpl() const {
-  ZendArray *target = NEW(ZendArray)(m_nNumOfElements);
+inline ALWAYS_INLINE ZendArray *ZendArray::copyImplHelper(bool sma) const {
+  ZendArray *target = LIKELY(sma) ? NEW(ZendArray)(m_nNumOfElements)
+                                  : new ZendArray(m_nNumOfElements);
   Bucket *last = NULL;
   for (Bucket *p = m_pListHead; p; p = p->pListNext) {
-    Bucket *np = NEW(Bucket)(Variant::noInit);
+    Bucket *np = LIKELY(sma) ? NEW(Bucket)(Variant::noInit)
+                             : new Bucket(Variant::noInit);
     np->data.constructWithRefHelper(p->data, this);
     np->h = p->h;
     if (p->key) {
@@ -1276,6 +1278,16 @@ ZendArray *ZendArray::copyImpl() const {
     }
   }
   return target;
+}
+
+ArrayData *ZendArray::nonSmartCopy() const {
+  assert(has_eval_support);
+  return copyImplHelper(false);
+}
+
+HOT_FUNC
+ZendArray *ZendArray::copyImpl() const {
+  return copyImplHelper(true);
 }
 
 HOT_FUNC
@@ -1467,6 +1479,20 @@ void ZendArray::onSetStatic() {
       p->key->setStatic();
     }
     p->data.setStatic();
+  }
+}
+
+void ZendArray::onSetEvalScalar() {
+  for (Bucket *p = m_pListHead; p; p = p->pListNext) {
+    StringData *key = p->key;
+    if (key && !key->isStatic()) {
+      StringData *skey= StringData::GetStaticString(key);
+      if (key && key->decRefCount() == 0) {
+        DELETE(StringData)(key);
+      }
+      p->key = skey;
+    }
+    p->data.setEvalScalar();
   }
 }
 

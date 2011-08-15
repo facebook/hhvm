@@ -29,6 +29,7 @@ DECLARE_AST_PTR(Name);
 class InstanceOfExpression : public Expression {
 public:
   InstanceOfExpression(EXPRESSION_ARGS, ExpressionPtr obj, NamePtr name);
+  virtual Expression *optimize(VariableEnvironment &env);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:

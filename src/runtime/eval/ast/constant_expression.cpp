@@ -15,6 +15,7 @@
 */
 
 #include <runtime/eval/ast/constant_expression.h>
+#include <runtime/eval/ast/scalar_value_expression.h>
 #include <runtime/base/externals.h>
 #include <runtime/ext/ext_misc.h>
 #include <runtime/eval/runtime/eval_state.h>
@@ -28,11 +29,18 @@ using namespace std;
 ConstantExpression::ConstantExpression(EXPRESSION_ARGS,
                                        const string &constant)
   : Expression(KindOfConstantExpression, EXPRESSION_PASS),
-  m_constant(StringName::GetStaticName(constant)) {
+  m_constant(StringData::GetStaticString(constant)) {
   m_type = check_constant(m_constant);
   if (m_type == StaticBuiltinConstant) {
     m_value = get_builtin_constant(m_constant);
   }
+}
+
+Expression *ConstantExpression::optimize(VariableEnvironment &env) {
+  if (m_type == StaticBuiltinConstant) {
+    return new ScalarValueExpression(m_value, loc());
+  }
+  return NULL;
 }
 
 Variant ConstantExpression::eval(VariableEnvironment &env) const {

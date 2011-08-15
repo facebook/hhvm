@@ -93,6 +93,7 @@ public:
     return m_parent->empty() && m_bases.empty();
   }
 
+  virtual void optimize(VariableEnvironment &env);
   // Eval is called at declaration, not invocation
   virtual void eval(VariableEnvironment &env) const;
   void evalImpl(VariableEnvironment &env) const;

@@ -20,6 +20,7 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/execution_context.h>
 #include <runtime/base/thread_init_fini.h>
+#include <runtime/eval/ast/expression.h>
 #include <runtime/base/runtime_option.h>
 #include <util/shared_memory_allocator.h>
 #include <system/gen/sys/system_globals.h>

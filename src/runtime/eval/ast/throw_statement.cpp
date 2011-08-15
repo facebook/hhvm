@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/throw_statement.h>
 #include <runtime/eval/ast/expression.h>
+#include <runtime/eval/ast/throw_statement.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
 namespace HPHP {
@@ -24,6 +24,10 @@ namespace Eval {
 
 ThrowStatement::ThrowStatement(STATEMENT_ARGS, ExpressionPtr value)
   : Statement(STATEMENT_PASS), m_value(value) {}
+
+void ThrowStatement::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_value);
+}
 
 void ThrowStatement::eval(VariableEnvironment &env) const {
   if (env.isGotoing()) return;

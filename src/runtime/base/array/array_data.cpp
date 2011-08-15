@@ -24,11 +24,31 @@
 #include <runtime/base/array/zend_array.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/macros.h>
+#include <util/exception.h>
+#include <tbb/concurrent_hash_map.h>
 
 using namespace std;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+typedef tbb::concurrent_hash_map<std::string, ArrayData *,
+                                 stringHashCompare> ArrayDataMap;
+static ArrayDataMap s_arrayDataMap;
+
+ArrayData *ArrayData::GetScalarArray(ArrayData *arr) {
+  String s = f_serialize(arr);
+  string key(s.data(), s.size());
+  ArrayDataMap::accessor acc;
+  if (s_arrayDataMap.insert(acc, key)) {
+    ArrayData *ad = arr->nonSmartCopy();
+    ad->setStatic();
+    ad->onSetEvalScalar();
+    acc->second = ad;
+  }
+  return acc->second;
+}
+
 // constructors/destructors
 
 ArrayData *ArrayData::Create() {
@@ -67,6 +87,10 @@ ArrayData::~ArrayData() {
   if (!m_strongIterators.empty()) {
     freeStrongIterators();
   }
+}
+
+ArrayData *ArrayData::nonSmartCopy() const {
+  throw FatalErrorException("nonSmartCopy not implemented.");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -116,6 +116,7 @@ public:
   virtual ArrayData *remove(CVarRef k, bool copy);
 
   virtual ArrayData *copy() const;
+  virtual ArrayData *nonSmartCopy() const;
   virtual ArrayData *append(CVarRef v, bool copy);
   virtual ArrayData *appendRef(CVarRef v, bool copy);
   virtual ArrayData *appendWithRef(CVarRef v, bool copy);
@@ -125,6 +126,7 @@ public:
   virtual ArrayData *prepend(CVarRef v, bool copy);
   virtual void renumber();
   virtual void onSetStatic();
+  virtual void onSetEvalScalar();
 
   virtual void getFullPos(FullPos &fp);
   virtual bool setFullPos(const FullPos &fp);
@@ -220,6 +222,7 @@ private:
 
   void erase(Bucket ** prev, bool updateNext = false);
   ZendArray *copyImpl() const;
+  ZendArray *copyImplHelper(bool sma) const;
 
   void resize();
   void rehash();

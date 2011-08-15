@@ -130,6 +130,7 @@ public:
   virtual ArrayData *remove(CVarRef k, bool copy);
 
   virtual ArrayData *copy() const { assert(false); }
+  virtual ArrayData *nonSmartCopy() const { assert(false); }
   virtual ArrayData *append(CVarRef v, bool copy);
   virtual ArrayData *appendRef(CVarRef v, bool copy);
   virtual ArrayData *appendWithRef(CVarRef v, bool copy);
@@ -139,6 +140,7 @@ public:
   virtual ArrayData *prepend(CVarRef v, bool copy);
   virtual void renumber() { assert(false); }
   virtual void onSetStatic() { assert(false); }
+  virtual void onSetEvalScalar() { assert(false); }
 
   virtual void getFullPos(FullPos &fp) { assert(false); } 
   virtual bool setFullPos(const FullPos &fp) { assert(false); }

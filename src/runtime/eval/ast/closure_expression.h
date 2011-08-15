@@ -31,6 +31,7 @@ class ClosureExpression : public Expression {
 public:
   ClosureExpression(EXPRESSION_ARGS, FunctionStatementPtr func,
                     const std::vector<ParameterPtr> &vars);
+  virtual Expression *optimize(VariableEnvironment &env);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
   const std::vector<ParameterPtr> &getVars() const { return m_vars;}

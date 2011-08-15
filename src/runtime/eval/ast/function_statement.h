@@ -61,7 +61,7 @@ public:
   std::string name() const;
   String getName() const;
   bool getSuperGlobal(SuperGlobal &sg);
-
+  void optimize(VariableEnvironment &env);
 private:
   std::string m_type;
   NamePtr m_name;
@@ -88,6 +88,7 @@ public:
             StatementListStatementPtr body, bool has_call_to_get_args);
   String name() const { return m_name; }
   void changeName(const std::string &name);
+  virtual void optimize(VariableEnvironment &env);
   // Eval is called at declaration, not invocation
   virtual void eval(VariableEnvironment &env) const;
   Variant invoke(CArrRef params) const;
@@ -123,7 +124,7 @@ public:
   bool ignoredOverride() const { return m_invalid > 0; }
 
   void setName(const std::string &name) {
-    m_name = StringName::GetStaticName(name);
+    m_name = StringData::GetStaticString(name);
   }
 
   void setOrigGeneratorFunc(FunctionStatementPtr stmt) {

@@ -28,7 +28,9 @@ DECLARE_AST_PTR(UnaryOpExpression);
 class UnaryOpExpression : public Expression {
 public:
   UnaryOpExpression(EXPRESSION_ARGS, ExpressionPtr exp, int op, bool front);
+  virtual Expression *optimize(VariableEnvironment &env);
   virtual Variant eval(VariableEnvironment &env) const;
+  virtual bool evalScalar(VariableEnvironment &env, Variant &r) const;
   virtual bool evalStaticScalar(VariableEnvironment &env, Variant &r) const;
   virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
   virtual void dump(std::ostream &out) const;

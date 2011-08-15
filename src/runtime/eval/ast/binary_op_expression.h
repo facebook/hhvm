@@ -29,6 +29,8 @@ class BinaryOpExpression : public Expression {
 public:
   BinaryOpExpression(EXPRESSION_ARGS, ExpressionPtr exp1, int op,
                      ExpressionPtr exp2);
+  virtual Expression *optimize(VariableEnvironment &env);
+  virtual bool evalScalar(VariableEnvironment &env, Variant &r) const;
   virtual Variant eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:

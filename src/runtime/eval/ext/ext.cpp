@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/ext/ext.h>
 #include <runtime/eval/base/function.h>
 #include <runtime/eval/runtime/eval_state.h>

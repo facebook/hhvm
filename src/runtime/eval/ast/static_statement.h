@@ -32,6 +32,7 @@ class StaticVariable : public Construct {
 public:
   StaticVariable(CONSTRUCT_ARGS, const std::string &name, ExpressionPtr val);
   void set(VariableEnvironment &env) const;
+  void optimize(VariableEnvironment &env);
   virtual void dump(std::ostream &out) const;
   const NamePtr &name();
   const ExpressionPtr &val() { return m_val; }
@@ -43,6 +44,7 @@ private:
 class StaticStatement : public Statement {
 public:
   StaticStatement(STATEMENT_ARGS, const std::vector<StaticVariablePtr> &vars);
+  virtual void optimize(VariableEnvironment &env);
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
   const std::vector<StaticVariablePtr> &vars() const { return m_vars; }

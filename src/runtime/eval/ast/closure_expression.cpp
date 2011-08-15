@@ -45,6 +45,11 @@ ClosureExpression::ClosureExpression(EXPRESSION_ARGS,
   reverse(m_vars.begin(), m_vars.end());
 }
 
+Expression *ClosureExpression::optimize(VariableEnvironment &env) {
+  m_func->optimize(env);
+  return NULL;
+}
+
 Variant ClosureExpression::eval(VariableEnvironment &env) const {
   m_func->eval(env);
   Array vars;

@@ -46,16 +46,19 @@ public:
   virtual ~Construct() {}
   void release();
   void incRefCount() {
-    ++_count;
+    if (!isStatic()) ++_count;
   }
   int decRefCount() {
     ASSERT(_count > 0);
-    return --_count;
+    return !isStatic() ? --_count : _count;
   }
   int getCount() const {
     return _count;
   }
-
+  void setStatic() {
+    _count = (1 << 30);
+  }
+  bool isStatic() const { return _count == (1 << 30); }
   template <class T>
   T *cast() {
     return dynamic_cast<T*>(this);

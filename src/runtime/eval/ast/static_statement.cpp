@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/static_statement.h>
 #include <runtime/eval/ast/expression.h>
+#include <runtime/eval/ast/static_statement.h>
 #include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/eval/ast/name.h>
 
@@ -42,6 +42,10 @@ void StaticVariable::dump(std::ostream &out) const {
   }
 }
 
+void StaticVariable::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_val);
+}
+
 const NamePtr &StaticVariable::name() {
   return m_name;
 }
@@ -50,6 +54,12 @@ StaticStatement::StaticStatement(STATEMENT_ARGS,
                                  const std::vector<StaticVariablePtr> &vars)
   : Statement(STATEMENT_PASS), m_vars(vars) {}
 
+
+void StaticStatement::optimize(VariableEnvironment &env) {
+  for (unsigned int i = 0; i < m_vars.size(); i++) {
+    m_vars[i]->optimize(env);
+  }
+}
 
 void StaticStatement::eval(VariableEnvironment &env) const {
   if (env.isGotoing()) return;

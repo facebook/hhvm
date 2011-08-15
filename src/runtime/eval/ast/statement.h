@@ -33,6 +33,7 @@ class ByteCodeProgram;
 class Statement : public Construct {
 public:
   Statement(STATEMENT_ARGS) : Construct(CONSTRUCT_PASS) {};
+  virtual void optimize(VariableEnvironment &env) {}
   virtual void eval(VariableEnvironment &env) const = 0;
   virtual void byteCode(ByteCodeProgram &code) const;
 };

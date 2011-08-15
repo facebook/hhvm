@@ -30,6 +30,7 @@ class AssignmentRefExpression : public Expression {
 public:
   AssignmentRefExpression(EXPRESSION_ARGS, LvalExpressionPtr lhs,
                           ExpressionPtr rhs);
+  virtual Expression *optimize(VariableEnvironment &env);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
   virtual void dump(std::ostream &out) const;

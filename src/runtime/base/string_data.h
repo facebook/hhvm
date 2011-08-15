@@ -216,6 +216,9 @@ class StringData {
   void dump() const;
   std::string toCPPString() const;
 
+  static StringData *GetStaticString(const std::string &str);
+  static StringData *GetStaticString(const StringData *str);
+
   /**
    * The order of the data members is significant. The _count field must
    * be exactly FAST_REFCOUNT_OFFSET bytes from the beginning of the object.

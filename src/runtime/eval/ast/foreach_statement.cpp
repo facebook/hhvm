@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
+#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/ast/foreach_statement.h>
 #include <runtime/eval/ast/lval_expression.h>
 #include <runtime/eval/ast/temp_expression_list.h>
@@ -28,6 +28,11 @@ ForEachStatement::ForEachStatement(STATEMENT_ARGS, ExpressionPtr source,
                                    LvalExpressionPtr value, StatementPtr body)
   :  Statement(STATEMENT_PASS), m_source(source), m_key(key), m_value(value),
      m_body(body) {}
+
+void ForEachStatement::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_source);
+  if (m_body) m_body->optimize(env);
+}
 
 void ForEachStatement::eval(VariableEnvironment &env) const {
   if (env.isGotoing()) return;

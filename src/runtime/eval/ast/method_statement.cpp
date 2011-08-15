@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
+#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/ast/method_statement.h>
 #include <runtime/eval/ast/statement_list_statement.h>
 #include <runtime/eval/runtime/variable_environment.h>
@@ -31,7 +31,7 @@ MethodStatement::MethodStatement(STATEMENT_ARGS, const string &name,
                                  const string &doc)
   : FunctionStatement(STATEMENT_PASS, name, doc), m_class(cls),
     m_modifiers(modifiers),
-    m_fullName(StringName::GetStaticName(
+    m_fullName(StringData::GetStaticString(
                string(cls->name().c_str()) + "::" + name)) {
   if ((m_modifiers & (ClassStatement::Public | ClassStatement::Protected |
                       ClassStatement::Private)) == 0) {

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/while_statement.h>
 #include <runtime/eval/ast/expression.h>
+#include <runtime/eval/ast/while_statement.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
 namespace HPHP {
@@ -25,6 +25,11 @@ namespace Eval {
 WhileStatement::WhileStatement(STATEMENT_ARGS, ExpressionPtr cond,
                                StatementPtr body)
   : Statement(STATEMENT_PASS), m_cond(cond), m_body(body) {}
+
+void WhileStatement::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_cond);
+  if (m_body) m_body->optimize(env);
+}
 
 void WhileStatement::eval(VariableEnvironment &env) const {
   DECLARE_THREAD_INFO;

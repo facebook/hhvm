@@ -34,6 +34,8 @@ public:
   ScalarExpression(EXPRESSION_ARGS, CStrRef s);
   ScalarExpression(EXPRESSION_ARGS, int type, const std::string &val,
                    int subtype = 0);
+  virtual bool evalScalar(VariableEnvironment &env, Variant &r) const;
+  virtual Expression *optimize(VariableEnvironment &env);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual bool evalStaticScalar(VariableEnvironment &env, Variant &r) const {
     r = eval(env);

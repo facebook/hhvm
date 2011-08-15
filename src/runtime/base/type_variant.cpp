@@ -3560,6 +3560,43 @@ void Variant::setStatic() const {
   }
 }
 
+void Variant::setEvalScalar() const {
+  switch (m_type) {
+  case KindOfString: {
+    StringData *pstr = m_data.pstr;
+    if (!pstr->isStatic()) {
+      StringData *sd = StringData::GetStaticString(pstr);
+      ASSERT(sd != pstr);
+      if (pstr && pstr->decRefCount() == 0) {
+        DELETE(StringData)(pstr);
+      }
+      m_data.pstr = sd;
+      m_type = KindOfStaticString;
+    }
+    break;
+  }
+  case KindOfArray: {
+    ArrayData *parr = m_data.parr;
+    if (!parr->isStatic()) {
+      ArrayData *ad = ArrayData::GetScalarArray(parr);
+      if (parr && parr->decRefCount() == 0) {
+        parr->release();
+      }
+      m_data.parr = ad;
+    }
+    break;
+  }
+  case KindOfVariant:
+    ASSERT(false);
+    break;
+  case KindOfObject:
+    ASSERT(false); // object shouldn't be in a scalar array
+    break;
+  default:
+    break;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
 

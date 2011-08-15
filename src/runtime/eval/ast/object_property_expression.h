@@ -29,6 +29,7 @@ DECLARE_AST_PTR(Name);
 class ObjectPropertyExpression : public LvalExpression {
 public:
   ObjectPropertyExpression(EXPRESSION_ARGS, ExpressionPtr obj, NamePtr name);
+  virtual Expression *optimize(VariableEnvironment &env);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual Variant evalExist(VariableEnvironment &env) const;
   virtual Variant &lval(VariableEnvironment &env) const;

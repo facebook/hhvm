@@ -448,7 +448,7 @@ void Parser::onSimpleVariable(Token &out, Token &var) {
     }
   }
   int idx = -1;
-  String svar = StringName::GetStaticName(var.text());
+  String svar = StringData::GetStaticString(var.text());
   if (haveFunc()) {
     idx = peekFunc()->declareVariable(svar);
   } else {

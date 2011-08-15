@@ -27,12 +27,32 @@
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
+#include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {
 
 IMPLEMENT_SMART_ALLOCATION(StringData, SmartAllocatorImpl::NeedRestoreOnce);
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
+
+typedef tbb::concurrent_hash_map<std::string, StringData *,
+                                 stringHashCompare> StringDataMap;
+static StringDataMap s_stringDataMap;
+
+StringData *StringData::GetStaticString(const std::string &stringData) {
+  StringDataMap::accessor acc;
+  if (s_stringDataMap.insert(acc, stringData)) {
+    StringData *sd =
+      new StringData(stringData.data(), stringData.size(), CopyString);
+    sd->setStatic();
+    acc->second = sd;
+  }
+  return acc->second;
+}
+
+StringData *StringData::GetStaticString(const StringData *sd) {
+  return GetStaticString(std::string(sd->data(), sd->size()));
+}
 
 StringData::StringData(const char *data,
                        StringDataMode mode /* = AttachLiteral */)

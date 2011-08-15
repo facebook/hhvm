@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/strong_foreach_statement.h>
 #include <runtime/eval/ast/expression.h>
+#include <runtime/eval/ast/strong_foreach_statement.h>
 #include <runtime/eval/ast/lval_expression.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
@@ -30,6 +30,11 @@ StrongForEachStatement(STATEMENT_ARGS, ExpressionPtr source,
   Statement(STATEMENT_PASS), m_source(source), m_key(key), m_value(value),
   m_body(body)
 {}
+
+void StrongForEachStatement::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_source);
+  if (m_body) m_body->optimize(env);
+}
 
 void StrongForEachStatement::eval(VariableEnvironment &env) const {
   if (env.isGotoing()) return;

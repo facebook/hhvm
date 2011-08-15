@@ -26,6 +26,13 @@ IssetExpression::IssetExpression(EXPRESSION_ARGS,
                                  const std::vector<ExpressionPtr> &exps)
   : Expression(KindOfIssetExpression, EXPRESSION_PASS), m_exps(exps) {}
 
+Expression *IssetExpression::optimize(VariableEnvironment &env) {
+  for (unsigned int i = 0; i < m_exps.size(); i++) {
+    Eval::optimize(env, m_exps[i]);
+  }
+  return NULL;
+}
+
 Variant IssetExpression::eval(VariableEnvironment &env) const {
   for (vector<ExpressionPtr>::const_iterator it = m_exps.begin();
        it != m_exps.end(); ++it) {

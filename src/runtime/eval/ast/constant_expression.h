@@ -28,6 +28,7 @@ DECLARE_AST_PTR(ConstantExpression);
 class ConstantExpression : public Expression {
 public:
   ConstantExpression(EXPRESSION_ARGS, const std::string &constant);
+  virtual Expression *optimize(VariableEnvironment &env);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual bool evalStaticScalar(VariableEnvironment &env, Variant &r) const;
   virtual void dump(std::ostream &out) const;

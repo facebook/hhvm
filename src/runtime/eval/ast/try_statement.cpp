@@ -49,9 +49,20 @@ void CatchBlock::dump(std::ostream &out) const {
   out << "}";
 }
 
+void CatchBlock::optimize(VariableEnvironment &env) {
+  if (m_body) m_body->optimize(env);
+}
+
 TryStatement::TryStatement(STATEMENT_ARGS, StatementPtr body,
                            const std::vector<CatchBlockPtr> &catches)
   : Statement(STATEMENT_PASS), m_catches(catches), m_body(body) {}
+
+void TryStatement::optimize(VariableEnvironment &env) {
+  for (unsigned int i = 0; i < m_catches.size(); i++) {
+    m_catches[i]->optimize(env);
+  }
+  if (m_body) m_body->optimize(env);
+}
 
 void TryStatement::eval(VariableEnvironment &env) const {
   //if (env.isGotoing()) return;

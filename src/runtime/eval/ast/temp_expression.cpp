@@ -27,6 +27,11 @@ TempExpression::TempExpression(ExpressionPtr exp, int index /* = 0 */)
     : Expression(KindOfTempExpression, exp->loc()),
   m_exp(exp), m_index(index) {}
 
+Expression *TempExpression::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_exp);
+  return NULL;
+}
+
 Variant TempExpression::eval(VariableEnvironment &env) const {
   if (m_exp->isKindOf(Expression::KindOfVariableExpression)) {
     return m_exp->eval(env);

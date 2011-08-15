@@ -15,6 +15,7 @@
 */
 
 #include <sys/stat.h>
+#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/runtime/file_repository.h>
 #include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/eval/ast/statement.h>
@@ -24,6 +25,7 @@
 #include <util/process.h>
 #include <runtime/eval/runtime/eval_state.h>
 #include <runtime/base/server/source_root_info.h>
+#include <runtime/eval/ast/scalar_value_expression.h>
 
 using namespace std;
 
@@ -270,9 +272,19 @@ PhpFile *FileRepository::readFile(const string &name,
       }
     }
   }
+  if (RuntimeOption::EnableEvalOptimization) {
+    ScalarValueExpression::initScalarValues();
+  }
   StatementPtr stmt =
     Parser::ParseString(strHelper, name.c_str(), sts, variableIndices);
+  if (stmt && RuntimeOption::EnableEvalOptimization) {
+    DummyVariableEnvironment env;
+    stmt->optimize(env);
+  }
   if (stmt) {
+    if (RuntimeOption::EnableEvalOptimization) {
+      ScalarValueExpression::registerScalarValues();
+    } 
     created = true;
     PhpFile *p = new PhpFile(stmt, sts, variableIndices,
                              name, srcRoot, relPath, md5);

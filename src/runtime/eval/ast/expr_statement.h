@@ -29,6 +29,7 @@ DECLARE_AST_PTR(Expression);
 class ExprStatement : public Statement {
 public:
   ExprStatement(STATEMENT_ARGS, ExpressionPtr exp);
+  virtual void optimize(VariableEnvironment &env);
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:

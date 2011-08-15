@@ -30,6 +30,7 @@ class AssignmentOpExpression : public Expression {
 public:
   AssignmentOpExpression(EXPRESSION_ARGS, int op, LvalExpressionPtr lhs,
                          ExpressionPtr rhs);
+  virtual Expression *optimize(VariableEnvironment &env);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
   LvalExpressionPtr getLhs() const { return m_lhs; }

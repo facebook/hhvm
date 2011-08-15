@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/if_statement.h>
 #include <runtime/eval/ast/expression.h>
+#include <runtime/eval/ast/if_statement.h>
 #include <runtime/eval/ast/lval_expression.h>
 #include <runtime/eval/ast/assignment_op_expression.h>
 #include <runtime/eval/ast/assignment_ref_expression.h>
@@ -38,6 +38,11 @@ bool IfBranch::proc(VariableEnvironment &env) const {
   return false;
 }
 
+void IfBranch::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_cond);
+  if (m_body) m_body->optimize(env);
+}
+
 Variant IfBranch::evalCond(VariableEnvironment &env) const {
   return m_cond->eval(env);
 }
@@ -54,6 +59,13 @@ IfStatement::IfStatement(STATEMENT_ARGS,
                          const vector<IfBranchPtr> &branches,
                          StatementPtr els)
   : Statement(STATEMENT_PASS), m_branches(branches), m_else(els) {}
+
+void IfStatement::optimize(VariableEnvironment &env) {
+  for (unsigned int i = 0; i < m_branches.size(); i++) {
+    m_branches[i]->optimize(env);
+  }
+  if (m_else) m_else->optimize(env);
+}
 
 void IfStatement::eval(VariableEnvironment &env) const {
   if (env.isGotoing()) {

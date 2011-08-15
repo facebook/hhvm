@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/expr_statement.h>
 #include <runtime/eval/ast/expression.h>
+#include <runtime/eval/ast/expr_statement.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
 namespace HPHP {
@@ -24,6 +24,10 @@ namespace Eval {
 
 ExprStatement::ExprStatement(STATEMENT_ARGS, ExpressionPtr exp)
   : Statement(STATEMENT_PASS), m_exp(exp) {}
+
+void ExprStatement::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_exp);
+}
 
 void ExprStatement::eval(VariableEnvironment &env) const {
   if (env.isGotoing()) return;

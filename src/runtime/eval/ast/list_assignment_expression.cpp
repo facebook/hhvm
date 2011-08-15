@@ -122,6 +122,11 @@ ListAssignmentExpression::ListAssignmentExpression(EXPRESSION_ARGS,
   m_abnormal = IsAbnormal(rhs);
 }
 
+Expression *ListAssignmentExpression::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_rhs);
+  return NULL;
+}
+
 Variant ListAssignmentExpression::eval(VariableEnvironment &env) const {
   const VariableExpression *v = m_rhs->cast<VariableExpression>();
   if (v) {

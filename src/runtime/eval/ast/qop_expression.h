@@ -29,6 +29,7 @@ class QOpExpression : public Expression {
 public:
   QOpExpression(EXPRESSION_ARGS, ExpressionPtr cond, ExpressionPtr t,
                 ExpressionPtr f);
+  virtual Expression *optimize(VariableEnvironment &env);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:

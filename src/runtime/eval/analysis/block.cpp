@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/analysis/block.h>
 #include <runtime/eval/ast/static_statement.h>
-#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/ast/name.h>
 
 namespace HPHP {
@@ -43,16 +43,16 @@ static String s_http_response_header;
 
 static bool loaded = false;
 void VariableIndex::SetupSuperGlobals() {
-  s_GLOBALS = StringName::GetStaticName("GLOBALS");
-  s__SERVER = StringName::GetStaticName("_SERVER");
-  s__GET = StringName::GetStaticName("_GET");
-  s__POST = StringName::GetStaticName("_POST");
-  s__FILES = StringName::GetStaticName("_FILES");
-  s__COOKIE = StringName::GetStaticName("_COOKIE");
-  s__SESSION = StringName::GetStaticName("_SESSION");
-  s__REQUEST = StringName::GetStaticName("_REQUEST");
-  s__ENV = StringName::GetStaticName("_ENV");
-  s_http_response_header = StringName::GetStaticName("http_response_header");
+  s_GLOBALS = StringData::GetStaticString("GLOBALS");
+  s__SERVER = StringData::GetStaticString("_SERVER");
+  s__GET = StringData::GetStaticString("_GET");
+  s__POST = StringData::GetStaticString("_POST");
+  s__FILES = StringData::GetStaticString("_FILES");
+  s__COOKIE = StringData::GetStaticString("_COOKIE");
+  s__SESSION = StringData::GetStaticString("_SESSION");
+  s__REQUEST = StringData::GetStaticString("_REQUEST");
+  s__ENV = StringData::GetStaticString("_ENV");
+  s_http_response_header = StringData::GetStaticString("http_response_header");
   loaded = true;
 }
 

@@ -29,6 +29,12 @@ StatementListStatement(STATEMENT_ARGS, const std::vector<StatementPtr> &stmts)
 StatementListStatement::StatementListStatement(STATEMENT_ARGS)
   : Statement(STATEMENT_PASS) {}
 
+void StatementListStatement::optimize(VariableEnvironment &env) {
+  for (unsigned int i = 0; i < m_stmts.size(); i++) {
+    m_stmts[i]->optimize(env);
+  }
+}
+
 void StatementListStatement::eval(VariableEnvironment &env) const {
   // if m_exp hasn't set the line yet, set it, otherwise, we can skip
   if (loc()->line1 != ThreadInfo::s_threadInfo->m_top->getLine()) {

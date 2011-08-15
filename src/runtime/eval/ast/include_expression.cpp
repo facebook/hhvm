@@ -36,6 +36,11 @@ IncludeExpression::IncludeExpression(EXPRESSION_ARGS, bool include, bool once,
   }
 }
 
+Expression *IncludeExpression::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_file);
+  return NULL;
+}
+
 Variant IncludeExpression::eval(VariableEnvironment &env) const {
   String file(m_file->eval(env).toString());
   Variant ret;

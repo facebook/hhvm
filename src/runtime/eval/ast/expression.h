@@ -23,9 +23,7 @@ namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_AST_PTR(Name);
-DECLARE_AST_PTR(Expression);
-DECLARE_AST_PTR(LvalExpression);
+class LvalExpression;
 class ByteCodeProgram;
 
 #define EXPRESSION_ARGS CONSTRUCT_ARGS
@@ -53,6 +51,7 @@ public:
     KindOfQOpExpression,
     KindOfRefParamExpression,
     KindOfScalarExpression,
+    KindOfScalarValueExpression,
     KindOfStaticMemberExpression,
     KindOfTempExpression,
     KindOfTempExpressionList,
@@ -68,17 +67,78 @@ public:
   bool isKindOf(KindOf kindOf) { return m_kindOf == kindOf; }
   virtual ~Expression() {}
   virtual Variant eval(VariableEnvironment &env) const = 0;
+  virtual bool evalScalar(VariableEnvironment &env, Variant &r) const {
+    return false;
+  }
   virtual bool evalStaticScalar(VariableEnvironment &env, Variant &r) const {
     throw FatalErrorException("evalStaticScalar not implemented.");
+  }
+  virtual Expression *optimize(VariableEnvironment &env) {
+    return NULL;
   }
   virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
   virtual bool exist(VariableEnvironment &env, int op) const;
   virtual Variant evalExist(VariableEnvironment &env) const;
   virtual const LvalExpression *toLval() const;
   virtual bool isRefParam() const;
+  KindOf getKindOf() const { return m_kindOf; }
 protected:
   KindOf m_kindOf;
 };
+
+extern void register_for_scalar_value_expression(void *astPtr, bool insert);
+
+template <>
+class AstPtr<Expression> : public SmartPtr<Expression> {
+public:
+  AstPtr() : SmartPtr<Expression>() {}
+  template<class Y>
+  AstPtr(Y v) : SmartPtr<Expression>(v) {
+    if (v && v->getKindOf() == Expression::KindOfScalarValueExpression) {
+      register_for_scalar_value_expression(this, true);
+    }
+  }
+  AstPtr(const AstPtr &src) : SmartPtr<Expression>(src) {
+    if (m_px && m_px->getKindOf() == Expression::KindOfScalarValueExpression) {
+      register_for_scalar_value_expression(this, true);
+    }
+  }
+  ~AstPtr() {
+    if (m_px && m_px->getKindOf() == Expression::KindOfScalarValueExpression) {
+      register_for_scalar_value_expression(this, false);
+    }
+  }
+
+  operator bool() const { return this->m_px; }
+
+  template<class Y>
+  void check(Y px) {
+    if (m_px && m_px->getKindOf() == Expression::KindOfScalarValueExpression) {
+      register_for_scalar_value_expression(this, false);
+    }
+    if (px && px->getKindOf() == Expression::KindOfScalarValueExpression) {
+      register_for_scalar_value_expression(this, true);
+    }
+  }
+  template<class Y>
+  AstPtr &operator=(Y px) {
+    SmartPtr<Expression>::operator=(px);
+    check(px);
+    return *this;
+  }
+  AstPtr &operator=(const AstPtr &src) {
+    SmartPtr<Expression>::operator=(src.m_px);
+    check(src.m_px);
+    return *this;
+  }
+
+};
+
+DECLARE_AST_PTR(Name);
+DECLARE_AST_PTR(Expression);
+DECLARE_AST_PTR(LvalExpression);
+
+void optimize(VariableEnvironment &env, ExpressionPtr &exp);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

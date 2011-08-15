@@ -14,50 +14,44 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EVAL_TRY_STATEMENT_H__
-#define __EVAL_TRY_STATEMENT_H__
+#ifndef __EVAL_AST_SCALAR_VALUE_EXPRESSION_H__
+#define __EVAL_AST_SCALAR_VALUE_EXPRESSION_H__
 
-#include <runtime/eval/ast/statement.h>
+#include <runtime/eval/ast/expression.h>
 
 namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_AST_PTR(CatchBlock);
-DECLARE_AST_PTR(TryStatement);
+DECLARE_AST_PTR(ScalarValueExpression);
 
-class CatchBlock : public Construct {
+class ScalarValueExpression : public Expression {
 public:
-  CatchBlock(CONSTRUCT_ARGS, const std::string &ename, const std::string &vname,
-             StatementPtr body);
-  void optimize(VariableEnvironment &env);
-  bool proc(CObjRef exn, VariableEnvironment &env) const;
-  bool match(CObjRef exn) const;
-  const StatementPtr &body() const { return m_body; }
-  const std::string &vname() const { return m_vname; }
-  SuperGlobal sg() const { return m_sg; }
+  ScalarValueExpression(CVarRef value, const Location* loc);
+  ~ScalarValueExpression();
+  virtual bool evalScalar(VariableEnvironment &env, Variant &r) const {
+    r = m_value;
+    return true;
+  }
+  virtual Variant eval(VariableEnvironment &env) const { return m_value; }
   virtual void dump(std::ostream &out) const;
+  static void initScalarValues();
+  static void registerScalarValues();
+  static ScalarValueExpression *GetScalarValueExpression(
+    ScalarValueExpression *exp);
+  static void InsertExpressionPtr(ExpressionPtr *astPtr);
+  static void RemoveExpressionPtr(ExpressionPtr *astPtr);
 private:
-  std::string m_ename;
-  std::string m_vname;
-  SuperGlobal m_sg;
-  StatementPtr m_body;
-};
-
-class TryStatement : public Statement {
-public:
-  TryStatement(STATEMENT_ARGS, StatementPtr body,
-               const std::vector<CatchBlockPtr> &catches);
-  virtual void optimize(VariableEnvironment &env);
-  virtual void eval(VariableEnvironment &env) const;
-  virtual void dump(std::ostream &out) const;
-private:
-  std::vector<CatchBlockPtr> m_catches;
-  StatementPtr m_body;
+  typedef std::set<ScalarValueExpression *> ScalarValueExpressionSet;
+  static DECLARE_THREAD_LOCAL(ScalarValueExpressionSet,
+                              s_scalarValueExpressions);
+  typedef std::set<ExpressionPtr *> ScalarValueExpressionRefSet;
+  static DECLARE_THREAD_LOCAL(ScalarValueExpressionRefSet, s_refs);
+  Variant m_value;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
 
-#endif /* __EVAL_TRY_STATEMENT_H__ */
+#endif /* __EVAL_AST_SCALAR_VALUE_EXPRESSION_H__ */

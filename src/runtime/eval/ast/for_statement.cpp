@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/for_statement.h>
 #include <runtime/eval/ast/expression.h>
+#include <runtime/eval/ast/for_statement.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
 namespace HPHP {
@@ -43,6 +43,19 @@ static Variant evalVector(const std::vector<ExpressionPtr> &v,
 
 #define EVAL_LOOP_EXPR(v, env) \
   (LIKELY(v.size() == 1) ? v[0]->eval(env) : evalVector(v, env))
+
+void ForStatement::optimize(VariableEnvironment &env) {
+  for (unsigned int i = 0; i < m_init.size(); i++) {
+    Eval::optimize(env, m_init[i]);
+  }
+  for (unsigned int i = 0; i < m_cond.size(); i++) {
+    Eval::optimize(env, m_cond[i]);
+  }
+  for (unsigned int i = 0; i < m_next.size(); i++) {
+    Eval::optimize(env, m_next[i]);
+  }
+  if (m_body) m_body->optimize(env);
+}
 
 void ForStatement::eval(VariableEnvironment &env) const {
   DECLARE_THREAD_INFO;

@@ -13,8 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
+#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/ast/binary_op_expression.h>
+#include <runtime/eval/ast/scalar_value_expression.h>
 #include <runtime/eval/ast/variable_expression.h>
 #include <util/parser/hphp.tab.hpp>
 
@@ -29,6 +30,16 @@ BinaryOpExpression::BinaryOpExpression(EXPRESSION_ARGS, ExpressionPtr exp1,
   m_reverseOrder = m_exp1->isKindOf(Expression::KindOfVariableExpression);
 }
 
+Expression *BinaryOpExpression::optimize(VariableEnvironment &env) {
+  Variant v;
+  Eval::optimize(env, m_exp1);
+  Eval::optimize(env, m_exp2);
+  if (evalScalar(env, v)) {
+    return new ScalarValueExpression(v, loc());
+  }
+  return NULL;
+}
+
 Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
   switch (m_op) {
   case T_LOGICAL_OR:
@@ -41,18 +52,17 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     {
       Variant v1, v2;
       if (m_reverseOrder) {
-        v2 = m_exp2->eval(env);
-        v1 = m_exp1->eval(env);
+        new(&v2) Variant(m_exp2->eval(env));
+        new(&v1) Variant(m_exp1->eval(env));
       } else {
-        v1 = m_exp1->eval(env);
-        v2 = m_exp2->eval(env);
+        new(&v1) Variant(m_exp1->eval(env));
+        new(&v2) Variant(m_exp2->eval(env));
       }
       Variant::TypedValueAccessor acc1 = v1.getTypedAccessor();
       Variant::TypedValueAccessor acc2 = v2.getTypedAccessor();
       DataType t1 = Variant::GetAccessorType(acc1);
       DataType t2 = Variant::GetAccessorType(acc2);
-      ASSERT(t1 != KindOfUninit && t2 != KindOfUninit &&
-             t1 != KindOfVariant && t2 != KindOfVariant);
+      ASSERT(t1 != KindOfVariant && t2 != KindOfVariant);
       bool sameType = (t1 == t2) ||
         (t1 == KindOfInt64 && t2 == KindOfInt32 ||
          t1 == KindOfInt32 && t2 == KindOfInt64 ||
@@ -284,6 +294,29 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
       }
     }
   }
+}
+
+bool BinaryOpExpression::evalScalar(
+  VariableEnvironment &env, Variant &r) const {
+  Variant v1;
+  Variant v2;
+  if (!m_exp1->evalScalar(env, v1) || !m_exp2->evalScalar(env, v2)) {
+    r = null;
+    return false;
+  }
+  bool isScalar = true;
+  if (m_op == '/' || m_op == '%') {
+    if ((v1.isArray() || v2.isArray()) ||
+        (v2.isDouble() && v2.toDouble() == 0.0) ||
+        (v2.isIntVal() && v2.toInt64() == 0.0)) {
+      isScalar = false;
+    } else {
+      r = m_op == '/' ? divide(v1, v2) : modulo(v1, v2);
+    }
+  } else {
+    r = eval(env);
+  }
+  return isScalar;
 }
 
 void BinaryOpExpression::dump(std::ostream &out) const {

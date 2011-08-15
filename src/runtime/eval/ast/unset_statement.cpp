@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/ast/unset_statement.h>
 #include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/eval/ast/lval_expression.h>

@@ -35,6 +35,12 @@ ArrayElementExpression::ArrayElementExpression(EXPRESSION_ARGS,
                    m_arr->isKindOf(Expression::KindOfVariableExpression);
 }
 
+Expression *ArrayElementExpression::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_arr);
+  Eval::optimize(env, m_idx);
+  return NULL;
+}
+
 Variant ArrayElementExpression::eval(VariableEnvironment &env) const {
   if (!m_idx) {
     SET_LINE;

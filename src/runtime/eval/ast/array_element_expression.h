@@ -30,6 +30,7 @@ class ArrayElementExpression : public LvalExpression {
 public:
   ArrayElementExpression(EXPRESSION_ARGS, ExpressionPtr arr,
                          ExpressionPtr idx);
+  virtual Expression *optimize(VariableEnvironment &env);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual Variant evalExist(VariableEnvironment &env) const;
   virtual Variant &lval(VariableEnvironment &env) const;

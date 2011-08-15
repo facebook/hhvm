@@ -1721,12 +1721,12 @@ Variant call_user_func_few_args(CVarRef function, int count, ...) {
   ASSERT(count <= CALL_USER_FUNC_FEW_ARGS_COUNT);
   va_list ap;
   va_start(ap, count);
-  const Variant *a0 = (count > 0) ? va_arg(ap, const Variant *) : NULL;
-  const Variant *a1 = (count > 1) ? va_arg(ap, const Variant *) : NULL;
-  const Variant *a2 = (count > 2) ? va_arg(ap, const Variant *) : NULL;
-  const Variant *a3 = (count > 3) ? va_arg(ap, const Variant *) : NULL;
-  const Variant *a4 = (count > 4) ? va_arg(ap, const Variant *) : NULL;
-  const Variant *a5 = (count > 5) ? va_arg(ap, const Variant *) : NULL;
+  CVarRef a0 = (count > 0) ? *va_arg(ap, const Variant *) : null_variant;
+  CVarRef a1 = (count > 1) ? *va_arg(ap, const Variant *) : null_variant;
+  CVarRef a2 = (count > 2) ? *va_arg(ap, const Variant *) : null_variant;
+  CVarRef a3 = (count > 3) ? *va_arg(ap, const Variant *) : null_variant;
+  CVarRef a4 = (count > 4) ? *va_arg(ap, const Variant *) : null_variant;
+  CVarRef a5 = (count > 5) ? *va_arg(ap, const Variant *) : null_variant;
   va_end(ap);
   if (function.is(KindOfArray)) {
     Variant classname;
@@ -1742,25 +1742,8 @@ Variant call_user_func_few_args(CVarRef function, int count, ...) {
       mcp.noFatal();
       mcp.dynamicNamedCall(sclass, method, -1);
       if (LIKELY(mcp.ci != NULL)) {
-        switch (count) {
-        case 0:
-          return (mcp.ci->getMeth0Args())(mcp, 0);
-        case 1:
-          return (mcp.ci->getMeth1Args())(mcp, 1, *a0);
-        case 2:
-          return (mcp.ci->getMeth2Args())(mcp, 2, *a0, *a1);
-        case 3:
-          return (mcp.ci->getMeth3Args())(mcp, 3, *a0, *a1, *a2);
-        case 4:
-          return (mcp.ci->getMeth4Args())(mcp, 4, *a0, *a1, *a2, *a3);
-        case 5:
-          return (mcp.ci->getMeth5Args())(mcp, 5, *a0, *a1, *a2, *a3, *a4);
-        case 6:
-          return (mcp.ci->getMeth6Args())(mcp, 6, *a0, *a1, *a2, *a3, *a4, *a5);
-        default:
-          ASSERT(false);
-          return null;
-        }
+        return (mcp.ci->getMethFewArgs())(mcp, count,
+          a0, a1, a2, a3, a4, a5);
       } else {
         o_invoke_failed(sclass.data(), method.data(), false);
         return null;
@@ -1768,33 +1751,15 @@ Variant call_user_func_few_args(CVarRef function, int count, ...) {
     }
     return call_user_func_array_helper(
       kind, classname, methodname, cls, method, sclass, obj,
-      Array(ArrayInit::CreateParams(count, a0, a1, a2, a3, a4, a5)));
+      Array(ArrayInit::CreateParams(count, &a0, &a1, &a2, &a3, &a4, &a5)));
   }
   const CallInfo *ci;
   void *extra;
   if (!has_eval_support && get_call_info(ci, extra, function)) {
-    switch (count) {
-    case 0:
-      return (ci->getFunc0Args())(extra, 0);
-    case 1:
-      return (ci->getFunc1Args())(extra, 1, *a0);
-    case 2:
-      return (ci->getFunc2Args())(extra, 2, *a0, *a1);
-    case 3:
-      return (ci->getFunc3Args())(extra, 3, *a0, *a1, *a2);
-    case 4:
-      return (ci->getFunc4Args())(extra, 4, *a0, *a1, *a2, *a3);
-    case 5:
-      return (ci->getFunc5Args())(extra, 5, *a0, *a1, *a2, *a3, *a4);
-    case 6:
-      return (ci->getFunc6Args())(extra, 6, *a0, *a1, *a2, *a3, *a4, *a5);
-    default:
-      ASSERT(false);
-      return null;
-    }
+    return (ci->getFuncFewArgs())(extra, count, a0, a1, a2, a3, a4, a5);
   }
   return f_call_user_func(count, function,
-    Array(ArrayInit::CreateParams(count, a0, a1, a2, a3, a4, a5)));
+    Array(ArrayInit::CreateParams(count, &a0, &a1, &a2, &a3, &a4, &a5)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

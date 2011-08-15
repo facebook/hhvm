@@ -81,7 +81,6 @@ void TaintObserver::RegisterMutated(TaintData& td, const char *s) {
   td.setTaint(set_mask | (~clear_mask & t));
   if (TaintTracer::IsEnabledHtml()) {
     td.setTaintTrace(tc->m_current_taint.getTaintTrace());
-    ASSERT(td.getTaintTrace()->getCount() > 1);
   }
 }
 

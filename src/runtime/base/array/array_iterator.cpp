@@ -126,6 +126,7 @@ MutableArrayIter::MutableArrayIter(const Variant *var, Variant *key,
   ASSERT(m_var);
   ArrayData *data = getData();
   if (data) {
+    ASSERT(data->getCount() <= 1);
     data->reset();
     data->newFullPos(m_fp);
     ASSERT(m_fp.container == data);
@@ -136,6 +137,7 @@ MutableArrayIter::MutableArrayIter(ArrayData *data, Variant *key,
                                    Variant &val)
   : m_var(NULL), m_data(data), m_key(key), m_val(val), m_fp() {
   if (data) {
+    ASSERT(data->getCount() <= 1);
     // protect the data which may be owned by a C++ temp
     data->incRefCount();
     data->reset();

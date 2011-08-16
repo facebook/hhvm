@@ -457,6 +457,9 @@ MutableArrayIter ObjectData::begin(Variant *key, Variant &val,
   Array properties = obj->o_toIterArray(context, true);
   properties.escalate(true);
   ArrayData *arr = properties.getArrayData();
+  if (arr->getCount() > 1) {
+    properties = arr = arr->copy();
+  }
   return MutableArrayIter(arr, key, val);
 }
 

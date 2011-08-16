@@ -51,31 +51,26 @@ inline Variant x_fb_unserialize(CVarRef thing, VRefParam success, VRefParam errc
 
 inline bool x_fb_intercept(CStrRef name, CVarRef handler, CVarRef data = null_variant) {
   FUNCTION_INJECTION_BUILTIN(fb_intercept);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_fb_intercept(name, handler, data);
 }
 
 inline Variant x_fb_stubout_intercept_handler(CStrRef name, CVarRef obj, CArrRef params, CVarRef data, VRefParam done) {
   FUNCTION_INJECTION_BUILTIN(fb_stubout_intercept_handler);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_fb_stubout_intercept_handler(name, obj, params, data, done);
 }
 
 inline Variant x_fb_rpc_intercept_handler(CStrRef name, CVarRef obj, CArrRef params, CVarRef data, VRefParam done) {
   FUNCTION_INJECTION_BUILTIN(fb_rpc_intercept_handler);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_fb_rpc_intercept_handler(name, obj, params, data, done);
 }
 
 inline void x_fb_renamed_functions(CArrRef names) {
   FUNCTION_INJECTION_BUILTIN(fb_renamed_functions);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_fb_renamed_functions(names);
 }
 
 inline bool x_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
   FUNCTION_INJECTION_BUILTIN(fb_rename_function);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_fb_rename_function(orig_func_name, new_func_name);
 }
 
@@ -102,95 +97,79 @@ inline Array x_fb_call_user_func_array_safe(CVarRef function, CArrRef params) {
 
 inline Variant x_fb_get_code_coverage(bool flush) {
   FUNCTION_INJECTION_BUILTIN(fb_get_code_coverage);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_fb_get_code_coverage(flush);
 }
 
 inline void x_xhprof_enable(int flags = 0, CArrRef args = null_array) {
   FUNCTION_INJECTION_BUILTIN(xhprof_enable);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_xhprof_enable(flags, args);
 }
 
 inline Variant x_xhprof_disable() {
   FUNCTION_INJECTION_BUILTIN(xhprof_disable);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_xhprof_disable();
 }
 
 inline void x_xhprof_network_enable() {
   FUNCTION_INJECTION_BUILTIN(xhprof_network_enable);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_xhprof_network_enable();
 }
 
 inline Variant x_xhprof_network_disable() {
   FUNCTION_INJECTION_BUILTIN(xhprof_network_disable);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_xhprof_network_disable();
 }
 
 inline void x_xhprof_frame_begin(CStrRef name) {
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_xhprof_frame_begin(name);
 }
 
 inline void x_xhprof_frame_end() {
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_xhprof_frame_end();
 }
 
 inline Variant x_xhprof_run_trace(CStrRef packedTrace, int flags) {
   FUNCTION_INJECTION_BUILTIN(xhprof_run_trace);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_xhprof_run_trace(packedTrace, flags);
 }
 
 inline void x_xhprof_sample_enable() {
   FUNCTION_INJECTION_BUILTIN(xhprof_sample_enable);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_xhprof_sample_enable();
 }
 
 inline Variant x_xhprof_sample_disable() {
   FUNCTION_INJECTION_BUILTIN(xhprof_sample_disable);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_xhprof_sample_disable();
 }
 
 inline void x_fb_load_local_databases(CArrRef servers) {
   FUNCTION_INJECTION_BUILTIN(fb_load_local_databases);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_fb_load_local_databases(servers);
 }
 
 inline Array x_fb_parallel_query(CArrRef sql_map, int max_thread = 50, bool combine_result = true, bool retry_query_on_fail = true, int connect_timeout = -1, int read_timeout = -1, bool timeout_in_ms = false) {
   FUNCTION_INJECTION_BUILTIN(fb_parallel_query);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_fb_parallel_query(sql_map, max_thread, combine_result, retry_query_on_fail, connect_timeout, read_timeout, timeout_in_ms);
 }
 
 inline Array x_fb_crossall_query(CStrRef sql, int max_thread = 50, bool retry_query_on_fail = true, int connect_timeout = -1, int read_timeout = -1, bool timeout_in_ms = false) {
   FUNCTION_INJECTION_BUILTIN(fb_crossall_query);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_fb_crossall_query(sql, max_thread, retry_query_on_fail, connect_timeout, read_timeout, timeout_in_ms);
 }
 
 inline void x_fb_set_taint(VRefParam str, int taint) {
   FUNCTION_INJECTION_BUILTIN(fb_set_taint);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_fb_set_taint(str, taint);
 }
 
 inline void x_fb_unset_taint(VRefParam str, int taint) {
   FUNCTION_INJECTION_BUILTIN(fb_unset_taint);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_fb_unset_taint(str, taint);
 }
 
 inline bool x_fb_get_taint(CStrRef str, int taint) {
   FUNCTION_INJECTION_BUILTIN(fb_get_taint);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_fb_get_taint(str, taint);
 }
 
@@ -206,25 +185,21 @@ inline void x_fb_enable_html_taint_trace() {
 
 inline Variant x_fb_const_fetch(CVarRef key) {
   FUNCTION_INJECTION_BUILTIN(fb_const_fetch);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_fb_const_fetch(key);
 }
 
 inline bool x_fb_output_compression(bool new_value) {
   FUNCTION_INJECTION_BUILTIN(fb_output_compression);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_fb_output_compression(new_value);
 }
 
 inline void x_fb_set_exit_callback(CVarRef function) {
   FUNCTION_INJECTION_BUILTIN(fb_set_exit_callback);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_fb_set_exit_callback(function);
 }
 
 inline Array x_fb_get_flush_stat() {
   FUNCTION_INJECTION_BUILTIN(fb_get_flush_stat);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_fb_get_flush_stat();
 }
 

@@ -60,10 +60,7 @@ DefineFunction(
       'type'   => VariantMap,
       'desc'   => "Returns an multidimensional array containing a list of all defined functions, both built-in (internal) and user-defined. The internal functions will be accessible via \$arr[\"internal\"], and the user defined ones using \$arr[\"user\"] (see example below).",
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -82,10 +79,7 @@ DefineFunction(
         'desc'   => "The function name, as a string.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -117,10 +111,7 @@ DefineFunction(
         'desc'   => "Receives the \"callable name\". In the example below it is \"someClass::someMethod\". Note, however, that despite the implication that someClass::SomeMethod() is a callable static method, this is not the case.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -421,10 +412,7 @@ DefineFunction(
       'type'   => String,
       'desc'   => "Returns the class name. Returns FALSE if called from outside a class.",
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -448,6 +436,7 @@ DefineFunction(
         'desc'   => "The function code.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -466,10 +455,7 @@ DefineFunction(
         'desc'   => "The argument offset. Function arguments are counted starting from zero.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -481,10 +467,7 @@ DefineFunction(
       'type'   => VariantVec,
       'desc'   => "Returns an array in which each element is a copy of the corresponding member of the current user-defined function's argument list.",
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -496,10 +479,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns the number of arguments passed into the current user-defined function.",
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -517,10 +497,7 @@ DefineFunction(
         'desc'   => "The callback to register.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -539,10 +516,7 @@ DefineFunction(
         'desc'   => "The shutdown function to register.\n\nThe shutdown functions are called as the part of the request so that it's possible to send the output from them. There is currently no way to process the data with output buffering functions in the shutdown function.\n\nShutdown functions are called after closing all opened output buffers thus, for example, its output will not be compressed if zlib.output_compression is enabled.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -560,10 +534,7 @@ DefineFunction(
         'desc'   => "The callback to register.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -581,10 +552,7 @@ DefineFunction(
         'desc'   => "The function name as a string, or an array consisting of an object and a method.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -602,10 +570,7 @@ DefineFunction(
         'desc'   => "The function name, as a string.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 

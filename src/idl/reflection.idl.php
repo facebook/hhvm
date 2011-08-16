@@ -63,6 +63,7 @@ DefineFunction(
         'type'   => String,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -79,6 +80,7 @@ DefineFunction(
         'type'   => Variant,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -95,6 +97,7 @@ DefineFunction(
         'type'   => String,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -115,6 +118,7 @@ DefineFunction(
         'type'   => VariantVec,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -143,6 +147,7 @@ DefineFunction(
         'type'   => VariantVec,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -163,6 +168,7 @@ DefineFunction(
         'type'   => String,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -183,6 +189,7 @@ DefineFunction(
         'type'   => VariantVec,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -207,6 +214,7 @@ DefineFunction(
         'type'   => String,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -235,6 +243,7 @@ DefineFunction(
         'type'   => Variant,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -255,6 +264,7 @@ DefineFunction(
         'type'   => String,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -279,6 +289,7 @@ DefineFunction(
         'type'   => Variant,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -295,6 +306,7 @@ DefineFunction(
         'type'   => String,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 

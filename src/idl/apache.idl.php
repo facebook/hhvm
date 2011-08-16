@@ -71,6 +71,7 @@ DefineFunction(
         'desc'   => "The value of the note.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -82,6 +83,10 @@ DefineFunction(
       'type'   => StringVec,
       'desc'   => "An associative array of all the HTTP headers in the current request, or FALSE on failure.",
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -92,6 +97,10 @@ DefineFunction(
     'return' => array(
       'type'   => StringVec,
       'desc'   => "An array of all Apache response headers on success or FALSE on failure.",
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -122,6 +131,7 @@ DefineFunction(
         'desc'   => "Whether to set the top-level variable available to all Apache layers.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -132,6 +142,10 @@ DefineFunction(
     'return' => array(
       'type'   => StringVec,
       'desc'   => "An associative array of all the HTTP headers in the current request, or FALSE on failure.",
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -151,6 +165,7 @@ DefineFunction(
         'desc'   => "The file that the virtual command will be performed on.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -160,6 +175,7 @@ DefineFunction(
     'return' => array(
       'type'   => Variant,
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -169,6 +185,7 @@ DefineFunction(
     'return' => array(
       'type'   => Variant,
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -178,6 +195,7 @@ DefineFunction(
     'return' => array(
       'type'   => Variant,
     ),
+    'taint_observer' => false,
   ));
 
 

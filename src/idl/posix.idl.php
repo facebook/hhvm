@@ -71,6 +71,7 @@ DefineFunction(
         'desc'   => "A mask consisting of one or more of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK and POSIX_X_OK.\n\nPOSIX_R_OK, POSIX_W_OK and POSIX_X_OK request checking whether the file exists and has read, write and execute permissions, respectively. POSIX_F_OK just requests checking for the existence of the file.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -82,6 +83,7 @@ DefineFunction(
       'type'   => String,
       'desc'   => "Upon successful completion, returns string of the pathname to the current controlling terminal. Otherwise FALSE is returned and errno is set, which can be checked with posix_get_last_error().",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -93,6 +95,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns the errno (error number) set by the last posix function that failed. If no errors exist, 0 is returned.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -104,6 +107,7 @@ DefineFunction(
       'type'   => String,
       'desc'   => "Returns a string of the absolute pathname on success. On error, returns FALSE and sets errno which can be checked with posix_get_last_error().",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -115,6 +119,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns an integer of the effective group ID.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -126,6 +131,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns the user id, as an integer",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -137,6 +143,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns the real group id, as an integer.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -155,6 +162,7 @@ DefineFunction(
         'desc'   => "The group id.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -172,6 +180,7 @@ DefineFunction(
         'type'   => String,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -183,6 +192,7 @@ DefineFunction(
       'type'   => Variant,
       'desc'   => "Returns an array of integers containing the numeric group ids of the group set of the current process.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -194,6 +204,7 @@ DefineFunction(
       'type'   => Variant,
       'desc'   => "Returns the login name of the user, as a string.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -212,6 +223,7 @@ DefineFunction(
         'desc'   => "The process id.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -223,6 +235,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns the identifier, as an integer.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -234,6 +247,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns the identifier, as an integer.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -245,6 +259,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns the identifier, as an integer.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -263,6 +278,7 @@ DefineFunction(
         'desc'   => "An alphanumeric username.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -281,6 +297,7 @@ DefineFunction(
         'desc'   => "The user identifier.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -292,6 +309,7 @@ DefineFunction(
       'type'   => Variant,
       'desc'   => "Returns an associative array of elements for each limit that is defined. Each limit has a soft and a hard limit. List of possible limits returned Limit name Limit description core The maximum size of the core file. When 0, not core files are created. When core files are larger than this size, they will be truncated at this size. totalmem The maximum size of the memory of the process, in bytes. virtualmem The maximum size of the virtual memory for the process, in bytes. data The maximum size of the data segment for the process, in bytes. stack The maximum size of the process stack, in bytes. rss The maximum number of virtual pages resident in RAM maxproc The maximum number of processes that can be created for the real user ID of the calling process. memlock The maximum number of bytes of memory that may be locked into RAM. cpu The amount of time the process is allowed to use the CPU. filesize The maximum size of the data segment for the process, in bytes. openfiles One more than the maximum number of open file descriptors.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -310,6 +328,7 @@ DefineFunction(
         'desc'   => "The process identifier. If set to 0, the current process is assumed. If an invalid pid is specified, then FALSE is returned and an error is set which can be checked with posix_get_last_error().",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -321,6 +340,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns the user id, as an integer",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -344,6 +364,7 @@ DefineFunction(
         'desc'   => "Typically the group number from the password file.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -362,6 +383,7 @@ DefineFunction(
         'desc'   => "The file descriptor.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -385,6 +407,7 @@ DefineFunction(
         'desc'   => "One of the PCNTL signals constants.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -408,6 +431,7 @@ DefineFunction(
         'desc'   => "The second parameter mode has to be given in octal notation (e.g. 0644). The permission of the newly created FIFO also depends on the setting of the current umask(). The permissions of the created file are (mode & ~umask).",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -443,6 +467,7 @@ DefineFunction(
         'desc'   => "The minor device kernel identifier.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -461,6 +486,7 @@ DefineFunction(
         'desc'   => "The group id.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -479,6 +505,7 @@ DefineFunction(
         'desc'   => "The user id.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -497,6 +524,7 @@ DefineFunction(
         'desc'   => "The group id.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -520,6 +548,7 @@ DefineFunction(
         'desc'   => "The process group id.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -531,6 +560,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns the session id, or -1 on errors.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -549,6 +579,7 @@ DefineFunction(
         'desc'   => "The user id.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -567,6 +598,7 @@ DefineFunction(
         'desc'   => "A POSIX error number, returned by posix_get_last_error(). If set to 0, then the string \"Success\" is returned.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -578,6 +610,7 @@ DefineFunction(
       'type'   => Variant,
       'desc'   => "Returns a hash of strings with information about the current process CPU usage. The indices of the hash are: ticks - the number of clock ticks that have elapsed since reboot. utime - user time used by the current process. stime - system time used by the current process. cutime - user time used by current process and children. cstime - system time used by current process and children.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -596,6 +629,7 @@ DefineFunction(
         'desc'   => "The file descriptor.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -607,6 +641,7 @@ DefineFunction(
       'type'   => Variant,
       'desc'   => "Returns a hash of strings with information about the system. The indices of the hash are sysname - operating system name (e.g. Linux) nodename - system name (e.g. valiant) release - operating system release (e.g. 2.2.10) version - operating system version (e.g. #4 Tue Jul 20 17:01:36 MEST 1999) machine - system architecture (e.g. i586) domainname - DNS domainname (e.g. example.com)\n\ndomainname is a GNU extension and not part of POSIX.1, so this field is only available on GNU systems or when using the GNU libc.",
     ),
+    'taint_observer' => false,
   ));
 
 

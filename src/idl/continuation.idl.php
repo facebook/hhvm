@@ -74,6 +74,7 @@ DefineFunction(
         'value'  => 'null_array',
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -96,6 +97,7 @@ DefineFunction(
         'type'   => Variant,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -110,6 +112,7 @@ DefineFunction(
         'type'   => Object,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 ///////////////////////////////////////////////////////////////////////////////

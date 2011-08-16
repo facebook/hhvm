@@ -82,6 +82,7 @@ DefineFunction(
         'type'   => Boolean,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -105,6 +106,7 @@ DefineFunction(
         'type'   => Boolean,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(

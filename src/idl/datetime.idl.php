@@ -75,6 +75,7 @@ DefineFunction(
         'desc'   => "The year is between 1 and 32767 inclusive.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -96,6 +97,7 @@ DefineFunction(
         'value'  => "null_object",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -123,6 +125,7 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -134,6 +137,7 @@ DefineFunction(
       'type'   => String,
       'desc'   => "Returns a string.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -152,6 +156,7 @@ DefineFunction(
         'desc'   => "The timezone identifier, like UTC or Europe/Lisbon. The list of valid identifiers is available in the List of Supported Timezones.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -171,6 +176,7 @@ DefineFunction(
         'type'   => String,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -199,6 +205,7 @@ DefineFunction(
         'value'  => "1",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -218,6 +225,7 @@ DefineFunction(
         'type'   => String,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -233,6 +241,7 @@ DefineFunction(
         'type'   => Object,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -250,6 +259,7 @@ DefineFunction(
         'desc'   => "Date in format accepted by strtotime().",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -277,6 +287,7 @@ DefineFunction(
         'desc'   => "Longitude in degrees.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -325,6 +336,7 @@ DefineFunction(
         'desc'   => "Specified in hours.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -373,6 +385,7 @@ DefineFunction(
         'desc'   => "Specified in hours.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -401,6 +414,7 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -416,6 +430,7 @@ DefineFunction(
         'type'   => Object,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -435,6 +450,7 @@ DefineFunction(
         'type'   => Object,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -457,6 +473,10 @@ DefineFunction(
         'value'  => "TimeStamp::Current()",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -475,6 +495,7 @@ DefineFunction(
         'desc'   => "The optional timestamp parameter is an integer Unix timestamp that defaults to the current local time if a timestamp is not given. In other words, it defaults to the value of time().",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -494,6 +515,7 @@ DefineFunction(
         'desc'   => "When set to TRUE, a float instead of an array is returned.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -517,6 +539,10 @@ DefineFunction(
         'value'  => "TimeStamp::Current()",
         'desc'   => "The optional timestamp parameter is an integer Unix timestamp that defaults to the current local time if a timestamp is not given. In other words, it defaults to the value of time().",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -567,6 +593,7 @@ DefineFunction(
         'desc'   => "The year",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -590,6 +617,10 @@ DefineFunction(
         'value'  => "TimeStamp::Current()",
         'desc'   => "The optional timestamp parameter is an integer Unix timestamp that defaults to the current local time if a timestamp is not given. In other words, it defaults to the value of time().",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -615,6 +646,7 @@ DefineFunction(
         'desc'   => "The optional timestamp parameter is an integer Unix timestamp that defaults to the current local time if a timestamp is not given. In other words, it defaults to the value of time().",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -639,6 +671,7 @@ DefineFunction(
         'desc'   => "If set to FALSE or not supplied then the array is returned as a regular, numerically indexed array. If the argument is set to TRUE then localtime() returns an associative array containing all the different elements of the structure returned by the C function call to localtime. The names of the different keys of the associative array are as follows:\n\n\"tm_sec\" - seconds \"tm_min\" - minutes \"tm_hour\" - hour \"tm_mday\" - day of the month Months are from 0 (Jan) to 11 (Dec) and days of the week are from 0 (Sun) to 6 (Sat). \"tm_mon\" - month of the year, starting with 0 for January \"tm_year\" - Years since 1900 \"tm_wday\" - Day of the week \"tm_yday\" - Day of the year \"tm_isdst\" - Is daylight savings time in effect",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -657,6 +690,7 @@ DefineFunction(
         'desc'   => "When called without the optional argument, this function returns the string \"msec sec\" where sec is the current time measured in the number of seconds since the Unix Epoch (0:00:00 January 1, 1970 GMT), and msec is the microseconds part. Both portions of the string are returned in units of seconds.\n\nIf the optional get_as_float is set to TRUE then a float (in seconds) is returned.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -706,6 +740,7 @@ DefineFunction(
         'desc'   => "The number of the year, may be a two or four digit value, with values between 0-69 mapping to 2000-2069 and 70-100 to 1970-2000. On systems where time_t is a 32bit signed integer, as most common today, the valid range for year is somewhere between 1901 and 2038. However, before PHP 5.1.0 this range was limited from 1970 to 2038 on some systems (e.g. Windows).",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -727,6 +762,10 @@ DefineFunction(
         'type'   => Int64,
         'value'  => "TimeStamp::Current()",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -751,6 +790,10 @@ DefineFunction(
         'desc'   => "The format used in date (e.g. the same as used in strftime()). Note that some of the format options available to strftime() may not have any effect within strptime(); the exact subset that are supported will vary based on the operating system and C library in use.\n\nFor more information about the format options, read the strftime() page.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -774,6 +817,7 @@ DefineFunction(
         'desc'   => "The timestamp which is used as a base for the calculation of relative dates.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -784,6 +828,7 @@ DefineFunction(
     'return' => array(
       'type'   => Int32,
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -793,6 +838,7 @@ DefineFunction(
     'return' => array(
       'type'   => StringVec,
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -802,6 +848,7 @@ DefineFunction(
     'return' => array(
       'type'   => StringVec,
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -831,6 +878,7 @@ DefineFunction(
         'desc'   => "Daylight saving time indicator. Defaults to -1, which means that whether the time zone has daylight saving or not is not taken into consideration when searching. If this is set to 1, then the gmtOffset is assumed to be an offset with daylight saving in effect; if 0, then gmtOffset is assumed to be an offset without daylight saving in effect. If abbr doesn't exist then the time zone is searched solely by the gmtOffset and isdst.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -846,6 +894,7 @@ DefineFunction(
         'type'   => Object,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -865,6 +914,7 @@ DefineFunction(
         'type'   => Object,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -880,6 +930,7 @@ DefineFunction(
         'type'   => String,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -895,6 +946,7 @@ DefineFunction(
         'type'   => Object,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 

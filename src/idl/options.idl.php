@@ -73,6 +73,7 @@ DefineFunction(
         'desc'   => "An optional new value for the option.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -91,6 +92,7 @@ DefineFunction(
         'desc'   => "The assertion.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -109,6 +111,7 @@ DefineFunction(
         'desc'   => "This parameter is only the filename of the extension to load which also depends on your platform. For example, the sockets extension (if compiled as a shared module, not the default!) would be called sockets.so on Unix platforms whereas it is called php_sockets.dll on the Windows platform.\n\nThe directory where the extension is loaded from depends on your platform:\n\nWindows - If not explicitly set in the php.ini, the extension is loaded from C:\\php4\\extensions\\ (PHP4) or C:\\php5\\ (PHP5) by default.\n\nUnix - If not explicitly set in the php.ini, the default extension directory depends on whether PHP has been built with --enable-debug or not whether PHP has been built with (experimental) ZTS (Zend Thread Safety) support or not the current internal ZEND_MODULE_API_NO (Zend internal module API number, which is basically the date on which a major module API change happened, e.g. 20010901) Taking into account the above, the directory then defaults to <install-dir>/lib/php/extensions/ <debug-or-not>-<zts-or-not>-ZEND_MODULE_API_NO, e.g. /usr/local/php/lib/php/extensions/debug-non-zts-20010901 or /usr/local/php/lib/php/extensions/no-debug-zts-20010901.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -127,6 +130,7 @@ DefineFunction(
         'desc'   => "The extension name.\n\nYou can see the names of various extensions by using phpinfo() or if you're using the CGI or CLI version of PHP you can use the -m switch to list all available extensions: \$ php -m [PHP Modules] xml tokenizer standard sockets session posix pcre overload mysql mbstring ctype [Zend Modules]",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -146,6 +150,7 @@ DefineFunction(
         'desc'   => "Only return Zend extensions, if not then regular extensions, like mysqli are listed. Defaults to FALSE (return regular extensions).",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -164,6 +169,7 @@ DefineFunction(
         'desc'   => "The module name.\n\nThis parameter must be in lowercase.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -182,6 +188,7 @@ DefineFunction(
         'desc'   => "The configuration option name.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -192,6 +199,7 @@ DefineFunction(
       'type'   => String,
       'desc'   => "Returns the username as a string.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -210,6 +218,7 @@ DefineFunction(
         'desc'   => "Causing this function to return a multi-dimensional array with categories in the keys of the first dimension and constants and their values in the second dimension.\n\n\n\nThe above example will output something similar to: Array ( [Core] => Array ( [E_ERROR] => 1 [E_WARNING] => 2 [E_PARSE] => 4 [E_NOTICE] => 8 [E_CORE_ERROR] => 16 [E_CORE_WARNING] => 32 [E_COMPILE_ERROR] => 64 [E_COMPILE_WARNING] => 128 [E_USER_ERROR] => 256 [E_USER_WARNING] => 512 [E_USER_NOTICE] => 1024 [E_ALL] => 2047 [TRUE] => 1 ) [pcre] => Array ( [PREG_PATTERN_ORDER] => 1 [PREG_SET_ORDER] => 2 [PREG_OFFSET_CAPTURE] => 256 [PREG_SPLIT_NO_EMPTY] => 1 [PREG_SPLIT_DELIM_CAPTURE] => 2 [PREG_SPLIT_OFFSET_CAPTURE] => 4 [PREG_GREP_INVERT] => 1 ) [user] => Array ( [MY_CONSTANT] => 1 ) )",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -220,6 +229,7 @@ DefineFunction(
       'type'   => String,
       'desc'   => "Returns the path, as a string.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -230,6 +240,7 @@ DefineFunction(
       'type'   => null,
       'desc'   => "No value is returned.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -248,6 +259,7 @@ DefineFunction(
         'desc'   => "The new value for the include_path",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -259,6 +271,7 @@ DefineFunction(
       'type'   => StringVec,
       'desc'   => "Returns an array of the names of all files.\n\nThe script originally called is considered an \"included file,\" so it will be listed together with the files referenced by include() and family.\n\nFiles that are included or required multiple times only show up once in the returned array.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -270,6 +283,7 @@ DefineFunction(
       'type'   => VariantVec,
       'desc'   => "The inclued data.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -281,6 +295,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns 0 if magic_quotes_gpc is off, 1 otherwise.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -291,6 +306,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns 0 if magic_quotes_runtime is off, 1 otherwise.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -300,6 +316,7 @@ DefineFunction(
     'return' => array(
       'type'   => StringVec,
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -318,6 +335,7 @@ DefineFunction(
         'desc'   => "The variable name.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -329,6 +347,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns the time of the last modification of the current page. The value returned is a Unix timestamp, suitable for feeding to date(). Returns FALSE on error.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -339,6 +358,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns the group ID of the current script, or FALSE on error.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -350,6 +370,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns the current script's inode as an integer, or FALSE on error.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -361,6 +382,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns the current PHP process ID, or FALSE on error.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -371,6 +393,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns the user ID of the current script, or FALSE on error.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -395,6 +418,7 @@ DefineFunction(
         'desc'   => "An array of options. Each element in this array will be used as option strings and matched against options passed to the script starting with two hyphens (--). For example, an longopts element \"opt\" recognizes an option --opt. Prior to PHP5.3.0 this parameter was only available on few systems",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -414,6 +438,7 @@ DefineFunction(
         'desc'   => "If who is 1, getrusage will be called with RUSAGE_CHILDREN.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -442,6 +467,7 @@ DefineFunction(
         'desc'   => "Return value in nano-seconds.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -470,6 +496,7 @@ DefineFunction(
         'desc'   => "Return value in nano-seconds.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -498,6 +525,7 @@ DefineFunction(
         'desc'   => "Value to set in nano-seconds.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -509,6 +537,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Number of CPUs.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -520,6 +549,7 @@ DefineFunction(
       'type'   => String,
       'desc'   => "Model name of CPU.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -539,6 +569,7 @@ DefineFunction(
         'type'   => String,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -558,6 +589,7 @@ DefineFunction(
         'desc'   => "An optional extension name. If set, the function return only options specific for that extension.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -576,6 +608,7 @@ DefineFunction(
         'desc'   => "The configuration option name.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -594,6 +627,7 @@ DefineFunction(
         'desc'   => "The configuration option name.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -617,6 +651,7 @@ DefineFunction(
         'desc'   => "The new value for the option.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -636,6 +671,7 @@ DefineFunction(
         'desc'   => "Set this to TRUE to get the real size of memory allocated from system. If not set or FALSE only the memory used by emalloc() is reported.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -655,6 +691,7 @@ DefineFunction(
         'desc'   => "Set this to TRUE to get the real size of memory allocated from system. If not set or FALSE only the memory used by emalloc() is reported.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -666,6 +703,7 @@ DefineFunction(
       'type'   => String,
       'desc'   => "Returns a comma-separated string of .ini files on success. Each comma is followed by a newline. If the directive --with-config-file-scan-dir wasn't set, FALSE is returned. If it was set and the directory was empty, an empty string is returned. If a file is unrecognizable, the file will still make it into the returned string but a PHP error will also result. This PHP error will be seen both at compile time and while using php_ini_scanned_files().",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -677,6 +715,7 @@ DefineFunction(
       'type'   => String,
       'desc'   => "Returns PHPE9568F34-D428-11d2-A769-00AA001ACF42.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -687,6 +726,7 @@ DefineFunction(
       'type'   => String,
       'desc'   => "Returns the interface type, as a lowercase string.\n\nAlthough not exhaustive, the possible return values include aolserver, apache, apache2filter, apache2handler, caudium, cgi (until PHP 5.3), cgi-fcgi, cli, continuity, embed, isapi, litespeed, milter, nsapi, phttpd, pi3web, roxen, thttpd, tux, and webjames.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -706,6 +746,7 @@ DefineFunction(
         'desc'   => "mode is a single character that defines what information is returned: 'a': This is the default. Contains all modes in the sequence \"s n r v m\". 's': Operating system name. eg. FreeBSD. 'n': Host name. eg. localhost.example.com. 'r': Release name. eg. 5.1.2-RELEASE. 'v': Version information. Varies a lot between operating systems. 'm': Machine type. eg. i386.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -725,6 +766,7 @@ DefineFunction(
         'desc'   => "To generate a custom credits page, you may want to use the flag parameter.\n\nPre-defined phpcredits() flags name description CREDITS_ALL All the credits, equivalent to using: CREDITS_DOCS + CREDITS_GENERAL + CREDITS_GROUP + CREDITS_MODULES + CREDITS_FULLPAGE. It generates a complete stand-alone HTML page with the appropriate tags. CREDITS_DOCS The credits for the documentation team CREDITS_FULLPAGE Usually used in combination with the other flags. Indicates that a complete stand-alone HTML page needs to be printed including the information indicated by the other flags. CREDITS_GENERAL General credits: Language design and concept, PHP authors and SAPI module. CREDITS_GROUP A list of the core developers CREDITS_MODULES A list of the extension modules for PHP, and their authors CREDITS_SAPI A list of the server API modules for PHP, and their authors",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -744,6 +786,7 @@ DefineFunction(
         'desc'   => "The output may be customized by passing one or more of the following constants bitwise values summed together in the optional what parameter. One can also combine the respective constants or bitwise values together with the or operator.\n\nphpinfo() options Name (constant) Value Description INFO_GENERAL 1 The configuration line, php.ini location, build date, Web Server, System and more. INFO_CREDITS 2 PHP Credits. See also phpcredits(). INFO_CONFIGURATION 4 Current Local and Master values for PHP directives. See also ini_get(). INFO_MODULES 8 Loaded modules and their respective settings. See also get_loaded_extensions(). INFO_ENVIRONMENT 16 Environment Variable information that's also available in \$_ENV. INFO_VARIABLES 32 Shows all predefined variables from EGPCS (Environment, GET, POST, Cookie, Server). INFO_LICENSE 64 PHP License information. See also the » license FAQ. INFO_ALL -1 Shows all of the above.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -763,6 +806,7 @@ DefineFunction(
         'desc'   => "An optional extension name.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -781,6 +825,7 @@ DefineFunction(
         'desc'   => "The setting, like \"FOO=BAR\"",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -799,6 +844,7 @@ DefineFunction(
         'desc'   => "FALSE for off, TRUE for on.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -817,6 +863,7 @@ DefineFunction(
         'desc'   => "The maximum execution time, in seconds. If set to zero, no time limit is imposed.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -828,6 +875,7 @@ DefineFunction(
       'type'   => String,
       'desc'   => "Returns the path of the temporary directory.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -857,6 +905,7 @@ DefineFunction(
         'desc'   => "If you specify the third optional operator argument, you can test for a particular relationship. The possible operators are: <, lt, <=, le, >, gt, >=, ge, ==, =, eq, !=, <>, ne respectively.\n\nThis parameter is case-sensitive, so values should be lowercase.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -868,6 +917,7 @@ DefineFunction(
       'type'   => String,
       'desc'   => "Returns PHPE9568F35-D428-11d2-A769-00AA001ACF42.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -879,6 +929,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns the thread id as an integer.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -890,6 +941,7 @@ DefineFunction(
       'type'   => String,
       'desc'   => "Returns the Zend Engine version number, as a string.",
     ),
+    'taint_observer' => false,
   ));
 
 

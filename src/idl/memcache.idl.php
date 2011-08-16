@@ -82,6 +82,7 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -117,6 +118,7 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -156,6 +158,7 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -195,6 +198,7 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -234,6 +238,7 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -294,6 +299,7 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -322,6 +328,7 @@ DefineFunction(
         'value'  => "1",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -350,6 +357,7 @@ DefineFunction(
         'value'  => "1",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -367,6 +375,7 @@ DefineFunction(
         'type'   => Object,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -385,6 +394,7 @@ DefineFunction(
         'desc'   => "Turns debug output on if equals to TRUE. Turns debug output off if equals to FALSE.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -400,6 +410,7 @@ DefineFunction(
         'type'   => Object,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -422,6 +433,7 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -441,6 +453,7 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -465,6 +478,7 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -489,6 +503,7 @@ DefineFunction(
         'value'  => "0.2",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -519,6 +534,7 @@ DefineFunction(
         'value'  => "100",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -549,6 +565,7 @@ DefineFunction(
         'value'  => "100",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -593,6 +610,7 @@ DefineFunction(
         'value'  => "null_variant",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -652,6 +670,7 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 

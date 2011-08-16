@@ -607,8 +607,6 @@ function generateFuncProfileHeader($func, $f) {
         $func['taint_observer']['set_mask'],
         $func['taint_observer']['clear_mask']);
     }
-  } else {
-    fprintf($f, "  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);\n");
   }
 
   fprintf($f, "  ");

@@ -27,97 +27,81 @@ namespace HPHP {
 
 inline bool x_dangling_server_proxy_old_request() {
   FUNCTION_INJECTION_BUILTIN(dangling_server_proxy_old_request);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_dangling_server_proxy_old_request();
 }
 
 inline bool x_dangling_server_proxy_new_request(CStrRef host) {
   FUNCTION_INJECTION_BUILTIN(dangling_server_proxy_new_request);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_dangling_server_proxy_new_request(host);
 }
 
 inline bool x_pagelet_server_is_enabled() {
   FUNCTION_INJECTION_BUILTIN(pagelet_server_is_enabled);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_pagelet_server_is_enabled();
 }
 
 inline Object x_pagelet_server_task_start(CStrRef url, CArrRef headers = null_array, CStrRef post_data = null_string, CArrRef files = null_array) {
   FUNCTION_INJECTION_BUILTIN(pagelet_server_task_start);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_pagelet_server_task_start(url, headers, post_data, files);
 }
 
 inline int64 x_pagelet_server_task_status(CObjRef task) {
   FUNCTION_INJECTION_BUILTIN(pagelet_server_task_status);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_pagelet_server_task_status(task);
 }
 
 inline String x_pagelet_server_task_result(CObjRef task, VRefParam headers, VRefParam code) {
   FUNCTION_INJECTION_BUILTIN(pagelet_server_task_result);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_pagelet_server_task_result(task, headers, code);
 }
 
 inline void x_pagelet_server_flush() {
   FUNCTION_INJECTION_BUILTIN(pagelet_server_flush);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_pagelet_server_flush();
 }
 
 inline bool x_xbox_send_message(CStrRef msg, VRefParam ret, int64 timeout_ms, CStrRef host = "localhost") {
   FUNCTION_INJECTION_BUILTIN(xbox_send_message);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_xbox_send_message(msg, ret, timeout_ms, host);
 }
 
 inline bool x_xbox_post_message(CStrRef msg, CStrRef host = "localhost") {
   FUNCTION_INJECTION_BUILTIN(xbox_post_message);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_xbox_post_message(msg, host);
 }
 
 inline Object x_xbox_task_start(CStrRef message) {
   FUNCTION_INJECTION_BUILTIN(xbox_task_start);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_xbox_task_start(message);
 }
 
 inline bool x_xbox_task_status(CObjRef task) {
   FUNCTION_INJECTION_BUILTIN(xbox_task_status);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_xbox_task_status(task);
 }
 
 inline int64 x_xbox_task_result(CObjRef task, int64 timeout_ms, VRefParam ret) {
   FUNCTION_INJECTION_BUILTIN(xbox_task_result);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_xbox_task_result(task, timeout_ms, ret);
 }
 
 inline int x_xbox_get_thread_timeout() {
   FUNCTION_INJECTION_BUILTIN(xbox_get_thread_timeout);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_xbox_get_thread_timeout();
 }
 
 inline void x_xbox_set_thread_timeout(int timeout) {
   FUNCTION_INJECTION_BUILTIN(xbox_set_thread_timeout);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_xbox_set_thread_timeout(timeout);
 }
 
 inline void x_xbox_schedule_thread_reset() {
   FUNCTION_INJECTION_BUILTIN(xbox_schedule_thread_reset);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_xbox_schedule_thread_reset();
 }
 
 inline int x_xbox_get_thread_time() {
   FUNCTION_INJECTION_BUILTIN(xbox_get_thread_time);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_xbox_get_thread_time();
 }
 

@@ -1627,6 +1627,7 @@ Variant f_iconv_mime_decode_headers(CStrRef encoded_headers,
   const char *encoded_str = encoded_headers.data();
   int encoded_str_len = encoded_headers.size();
   while (encoded_str_len > 0) {
+    TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
     StringBuffer decoded_header;
 
     const char *header_name = NULL;

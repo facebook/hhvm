@@ -71,6 +71,10 @@ DefineFunction(
         'type'   => Boolean,
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 
@@ -86,6 +90,8 @@ DefineFunction(
         'type' => String,
       ),
     ),
+    // NB: TaintObserver declared in f_icu_tokenize to avoid tainting _B_, _E_
+    'taint_observer' => false,
   ));
 
 ///////////////////////////////////////////////////////////////////////////////

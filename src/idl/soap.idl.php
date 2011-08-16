@@ -67,6 +67,7 @@ DefineFunction(
         'desc'   => "Set to TRUE to send error details to clients.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -85,6 +86,7 @@ DefineFunction(
         'desc'   => "The object to test.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -97,6 +99,7 @@ DefineFunction(
       'desc'   => "This will return the active soap version.",
     ),
     'args'   => array(),
+    'taint_observer' => false,
   ));
 
 

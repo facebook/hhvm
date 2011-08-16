@@ -65,6 +65,7 @@ DefineFunction(
         'desc'   => "The variable being evaluated.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -83,6 +84,7 @@ DefineFunction(
         'desc'   => "The variable being evaluated.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -98,6 +100,7 @@ DefineFunction(
         'type'   => Any,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -113,6 +116,7 @@ DefineFunction(
         'type'   => Any,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -128,6 +132,7 @@ DefineFunction(
         'type'   => Any,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -146,6 +151,7 @@ DefineFunction(
         'desc'   => "The variable being evaluated.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -164,6 +170,7 @@ DefineFunction(
         'desc'   => "The variable being evaluated.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -179,6 +186,7 @@ DefineFunction(
         'type'   => Any,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -197,6 +205,7 @@ DefineFunction(
         'desc'   => "The variable being evaluated.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -215,6 +224,7 @@ DefineFunction(
         'desc'   => "The variable being evaluated.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -233,6 +243,7 @@ DefineFunction(
         'desc'   => "The variable being evaluated.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -251,6 +262,7 @@ DefineFunction(
         'desc'   => "The variable being evaluated.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -269,6 +281,7 @@ DefineFunction(
         'desc'   => "The variable being evaluated.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -287,6 +300,7 @@ DefineFunction(
         'desc'   => "The variable being evaluated.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -305,6 +319,7 @@ DefineFunction(
         'desc'   => "The variable being type checked.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -323,6 +338,7 @@ DefineFunction(
         'desc'   => "The evaluated resource handle.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -347,6 +363,7 @@ DefineFunction(
         'desc'   => "The base for the conversion",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -362,6 +379,7 @@ DefineFunction(
         'type'   => Any,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -380,6 +398,7 @@ DefineFunction(
         'desc'   => "May be any scalar type. floatval() should not be used on objects, as doing so will emit an E_NOTICE level error and return 1.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -397,6 +416,7 @@ DefineFunction(
         'desc'   => "The variable that is being converted to a string.\n\nvar may be any scalar type or an object that implements the __toString method. You cannot use strval() on arrays or on objects that do not implement the __toString method.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -420,6 +440,7 @@ DefineFunction(
         'desc'   => "Possibles values of type are: \"boolean\" (or, since PHP 4.2.0, \"bool\") \"integer\" (or, since PHP 4.2.0, \"int\") \"float\" (only possible since PHP 4.2.0, for older versions use the deprecated variant \"double\") \"string\" \"array\" \"object\" \"null\" (since PHP 4.2.0)",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -444,6 +465,10 @@ DefineFunction(
         'desc'   => "If you would like to capture the output of print_r(), use the return parameter. When this parameter is set to TRUE, print_r() will return the information rather than print it.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -467,6 +492,10 @@ DefineFunction(
         'desc'   => "If used and set to TRUE, var_export() will return the variable representation instead of outputing it.\n\nThis function uses internal output buffering with this parameter so it can not be used inside an ob_start() callback function.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -483,6 +512,10 @@ DefineFunction(
         'type'   => Any,
         'desc'   => "The variable you want to export.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -502,6 +535,10 @@ DefineFunction(
         'desc'   => "The variable being evaluated.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -520,6 +557,10 @@ DefineFunction(
         'desc'   => "The value to be serialized. serialize() handles all types, except the resource-type. You can even serialize() arrays that contain references to itself. Circular references inside the array/object you are serializing will also be stored. Any other reference will be lost.\n\nWhen serializing objects, PHP will attempt to call the member function __sleep prior to serialization. This is to allow the object to do any last minute clean-up, etc. prior to being serialized. Likewise, when the object is restored using unserialize() the __wakeup member function is called.\n\nObject's private members have the class name prepended to the member name; protected members have a '*' prepended to the member name. These prepended values have null bytes on either side.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -537,6 +578,10 @@ DefineFunction(
         'desc'   => "The serialized string.\n\nIf the variable being unserialized is an object, after successfully reconstructing the object PHP will automatically attempt to call the __wakeup() member function (if it exists).\n\nunserialize_callback_func directive\n\nIt's possible to set a callback-function which will be called, if an undefined class should be instantiated during unserializing. (to prevent getting an incomplete object \"__PHP_Incomplete_Class\".) Use your php.ini, ini_set() or .htaccess to define 'unserialize_callback_func'. Everytime an undefined class should be instantiated, it'll be called. To disable this feature just empty this setting.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -548,6 +593,7 @@ DefineFunction(
       'type'   => VariantMap,
       'desc'   => "A multidimensional array with all the variables.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -572,6 +618,7 @@ DefineFunction(
         'desc'   => "Variable name prefix, prepended before all variable's name imported into the global scope. So if you have a GET value named \"userid\", and provide a prefix \"pref_\", then you'll get a global variable named \$pref_userid.\n\nAlthough the prefix parameter is optional, you will get an E_NOTICE level error if you specify no prefix, or specify an empty string as a prefix. This is a possible security hazard. Notice level errors are not displayed using the default error reporting level.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -602,6 +649,7 @@ DefineFunction(
         'desc'   => "If there is a collision, don't overwrite the existing variable.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 

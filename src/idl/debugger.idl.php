@@ -71,6 +71,7 @@ DefineFunction(
         'desc'   => "The debugger command class that has its implementation.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -82,6 +83,7 @@ DefineFunction(
       'type'   => StringMap,
       'desc'   => "A map of commands and their PHP classes.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -100,6 +102,7 @@ DefineFunction(
         'desc'   => "If true, break, otherwise, continue.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 

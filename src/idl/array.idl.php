@@ -197,14 +197,8 @@ DefineFunction(
         'desc'   => "Either CASE_UPPER or CASE_LOWER (default)",
       ),
     ),
-    // This function ought not to taint the values in addition to tainting the
-    // keys, but it's not so important that it needs to be done right now.
-/*
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
-*/
+    // NB: A MUTATing TaintObserver is declared in ArrayUtil::ChangeKeyCase
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -234,10 +228,7 @@ DefineFunction(
         'desc'   => "When set to TRUE keys will be preserved. Default is FALSE which will reindex the chunk numerically",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -261,10 +252,7 @@ DefineFunction(
         'desc'   => "Array of values to be used",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -283,10 +271,7 @@ DefineFunction(
         'desc'   => "The array of values to count",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -310,10 +295,7 @@ DefineFunction(
         'desc'   => "Value to use for filling",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -342,10 +324,7 @@ DefineFunction(
         'desc'   => "Value to use for filling",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -370,10 +349,7 @@ DefineFunction(
         'desc'   => "The callback function to use\n\nIf no callback is supplied, all entries of input equal to FALSE (see converting to boolean) will be removed.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -392,10 +368,7 @@ DefineFunction(
         'desc'   => "An array of key/value pairs to be flipped.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -419,10 +392,7 @@ DefineFunction(
         'desc'   => "An array with keys to check.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -442,10 +412,7 @@ DefineFunction(
         'type'   => Variant,
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -476,10 +443,7 @@ DefineFunction(
         'desc'   => "Determines if strict comparison (===) should be used during the search.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -503,10 +467,7 @@ DefineFunction(
         'desc'   => "An array to run through the callback function.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -525,10 +486,7 @@ DefineFunction(
         'desc'   => "Initial array to merge.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -547,10 +505,7 @@ DefineFunction(
         'desc'   => "Initial array to merge.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -569,10 +524,7 @@ DefineFunction(
         'desc'   => "The array in which elements are replaced.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -591,10 +543,7 @@ DefineFunction(
         'desc'   => "The array in which elements are replaced.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -613,10 +562,7 @@ DefineFunction(
         'desc'   => "An array being sorted.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -645,10 +591,7 @@ DefineFunction(
         'desc'   => "Value to pad if input is less than pad_size.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -667,10 +610,7 @@ DefineFunction(
         'desc'   => "The array to get the value from.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -689,10 +629,7 @@ DefineFunction(
         'desc'   => "The array.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -716,10 +653,7 @@ DefineFunction(
         'desc'   => "The pushed value.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -744,10 +678,7 @@ DefineFunction(
         'desc'   => "Specifies how many entries you want to pick. Trying to pick more elements than there are in the array will result in an E_WARNING level error.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -777,10 +708,7 @@ DefineFunction(
         'desc'   => "If the optional initial is available, it will be used at the beginning of the process, or as a final result in case the array is empty.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -805,10 +733,7 @@ DefineFunction(
         'desc'   => "If set to TRUE keys are preserved.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -838,10 +763,7 @@ DefineFunction(
         'desc'   => "If the third parameter strict is set to TRUE then the array_search() function will search for identical elements in the haystack. This means it will also check the types of the needle in the haystack, and objects must be the same instance.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -860,10 +782,7 @@ DefineFunction(
         'desc'   => "The input array.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -899,10 +818,7 @@ DefineFunction(
         'desc'   => "Note that array_slice() will reorder and reset the array indices by default. You can change this behaviour by setting preserve_keys to TRUE.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -938,10 +854,7 @@ DefineFunction(
         'desc'   => "If replacement array is specified, then the removed elements are replaced with elements from this array.\n\nIf offset and length are such that nothing is removed, then the elements from the replacement array are inserted in the place specified by the offset. Note that keys in replacement array are not preserved.\n\nIf replacement is just one element it is not necessary to put array() around it, unless the element is an array itself, an object or NULL.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -960,10 +873,7 @@ DefineFunction(
         'desc'   => "The input array.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -988,10 +898,7 @@ DefineFunction(
         'desc'   => "The optional second parameter sort_flags may be used to modify the sorting behavior using these values:\n\nSorting type flags: SORT_REGULAR - compare items normally (don't change types) SORT_NUMERIC - compare items numerically SORT_STRING - compare items as strings SORT_LOCALE_STRING - compare items as strings, based on the current locale.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1015,10 +922,7 @@ DefineFunction(
         'desc'   => "The prepended variable.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1037,10 +941,7 @@ DefineFunction(
         'desc'   => "The array.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1070,10 +971,7 @@ DefineFunction(
         'desc'   => "If the optional userdata parameter is supplied, it will be passed as the third parameter to the callback funcname.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1102,10 +1000,7 @@ DefineFunction(
         'desc'   => "If the optional userdata parameter is supplied, it will be passed as the third parameter to the callback funcname.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1124,10 +1019,7 @@ DefineFunction(
         'desc'   => "compact() takes a variable number of parameters. Each parameter can be either a string containing the name of the variable, or an array of variable names. The array can contain other arrays of variable names inside it; compact() handles it recursively.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1146,10 +1038,7 @@ DefineFunction(
         'desc'   => "The array.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1174,10 +1063,7 @@ DefineFunction(
         'desc'   => "If the optional mode parameter is set to COUNT_RECURSIVE (or 1), count() will recursively count the array. This is particularly useful for counting all the elements of a multidimensional array. count() does not detect infinite recursion.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1198,10 +1084,7 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1220,10 +1103,7 @@ DefineFunction(
         'desc'   => "The input array.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1242,10 +1122,7 @@ DefineFunction(
         'desc'   => "The array.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1264,10 +1141,7 @@ DefineFunction(
         'desc'   => "The array.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1286,10 +1160,7 @@ DefineFunction(
         'desc'   => "The array being affected.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1305,10 +1176,7 @@ DefineFunction(
         'type'   => Variant | Reference,
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1327,10 +1195,7 @@ DefineFunction(
         'desc'   => "The input array.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1349,10 +1214,7 @@ DefineFunction(
         'desc'   => "The input array.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1371,10 +1233,7 @@ DefineFunction(
         'desc'   => "The array. This array is passed by reference because it is modified by the function. This means you must pass it a real variable and not a function returning an array because only actual variables may be passed by reference.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1393,10 +1252,7 @@ DefineFunction(
         'desc'   => "The array.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1415,10 +1271,7 @@ DefineFunction(
         'desc'   => "The array or object to iterate on.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1437,10 +1290,7 @@ DefineFunction(
         'desc'   => "The array or object to iterate on.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1470,10 +1320,7 @@ DefineFunction(
         'desc'   => "If the third parameter strict is set to TRUE then the in_array() function will also check the types of the needle in the haystack.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1503,10 +1350,7 @@ DefineFunction(
         'desc'   => "If a step value is given, it will be used as the increment between elements in the sequence. step should be given as a positive number. If not specified, step will default to 1.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1530,10 +1374,7 @@ DefineFunction(
         'desc'   => "An array to compare against",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1562,10 +1403,7 @@ DefineFunction(
         'desc'   => "The callback comparison function.\n\nThe user supplied callback function is used for comparison. It must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1589,10 +1427,7 @@ DefineFunction(
         'desc'   => "An array to compare against",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1621,10 +1456,7 @@ DefineFunction(
         'desc'   => "More arrays to compare against",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1653,10 +1485,7 @@ DefineFunction(
         'desc'   => "The callback comparison function.\n\nThe user supplied callback function is used for comparison. It must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1690,10 +1519,7 @@ DefineFunction(
         'desc'   => "The comparison of keys (indices) is done also by the callback function key_compare_func. This behaviour is unlike what array_udiff_assoc() does, since the latter compares the indices by using an internal function.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1717,10 +1543,7 @@ DefineFunction(
         'desc'   => "An array to compare against",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1749,10 +1572,7 @@ DefineFunction(
         'desc'   => "More arrays to compare against",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1776,10 +1596,7 @@ DefineFunction(
         'desc'   => "An array to compare values against.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1808,10 +1625,7 @@ DefineFunction(
         'desc'   => "The callback comparison function.\n\nThe user supplied callback function is used for comparison. It must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1834,10 +1648,7 @@ DefineFunction(
         'desc'   => "An array to compare values against.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1866,10 +1677,7 @@ DefineFunction(
         'desc'   => "Variable list of array arguments to compare values against.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1898,10 +1706,7 @@ DefineFunction(
         'desc'   => "For comparison is used the user supplied callback function. It must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1935,10 +1740,7 @@ DefineFunction(
         'desc'   => "Key comparison callback function.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1962,10 +1764,7 @@ DefineFunction(
         'desc'   => "An array to compare keys against.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1994,10 +1793,7 @@ DefineFunction(
         'desc'   => "Variable list of array arguments to compare keys against.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2027,10 +1823,7 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2060,10 +1853,7 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2093,10 +1883,7 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2126,10 +1913,7 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2154,10 +1938,7 @@ DefineFunction(
         'desc'   => "You may modify the behavior of the sort using the optional parameter sort_flags, for details see sort().",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2182,10 +1963,7 @@ DefineFunction(
         'desc'   => "You may modify the behavior of the sort using the optional parameter sort_flags, for details see sort().",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2209,10 +1987,7 @@ DefineFunction(
         'desc'   => "The comparison function must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2236,10 +2011,7 @@ DefineFunction(
         'desc'   => "See usort() and uksort() for examples of user-defined comparison functions.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2263,10 +2035,7 @@ DefineFunction(
         'desc'   => "The callback comparison function.\n\nFunction cmp_function should accept two parameters which will be filled by pairs of array keys. The comparison function must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2285,10 +2054,7 @@ DefineFunction(
         'desc'   => "The input array.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2307,10 +2073,7 @@ DefineFunction(
         'desc'   => "The input array.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2320,6 +2083,7 @@ DefineFunction(
     'return' => array(
       'type'   => String,
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2335,6 +2099,7 @@ DefineFunction(
         'type'   => String,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2354,6 +2119,7 @@ DefineFunction(
         'type'   => Int64,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2369,6 +2135,7 @@ DefineFunction(
         'type'   => Int64,
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2378,6 +2145,7 @@ DefineFunction(
     'return' => array(
       'type'   => Variant,
     ),
+    'taint_observer' => false,
   ));
 
 

@@ -57,6 +57,7 @@ DefineFunction(
       'type'   => Double,
       'desc'   => "The value of pi as float.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -75,6 +76,7 @@ DefineFunction(
         'desc'   => "An array containing the values.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -93,6 +95,7 @@ DefineFunction(
         'desc'   => "An array containing the values.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -111,6 +114,7 @@ DefineFunction(
         'desc'   => "The numeric value to process",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -129,6 +133,7 @@ DefineFunction(
         'desc'   => "The value to check",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -147,6 +152,7 @@ DefineFunction(
         'desc'   => "The value to check",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -165,6 +171,7 @@ DefineFunction(
         'desc'   => "The value to check",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -182,6 +189,7 @@ DefineFunction(
         'desc'   => "The value to round",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -199,6 +207,7 @@ DefineFunction(
         'desc'   => "The numeric value to round",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -223,6 +232,7 @@ DefineFunction(
         'desc'   => "The optional number of decimal digits to round to.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -241,6 +251,7 @@ DefineFunction(
         'desc'   => "Angular value in degrees",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -259,6 +270,7 @@ DefineFunction(
         'desc'   => "A radian value",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -276,6 +288,10 @@ DefineFunction(
         'type'   => Int64,
         'desc'   => "Decimal value to convert Range of inputs on 32-bit machines positive number negative number return value 0   0 1   1 2   10 ... normal progression ... 2147483646   1111111111111111111111111111110 2147483647 (largest signed integer)   1111111111111111111111111111111 (31 1's) 2147483648 -2147483648 10000000000000000000000000000000 ... normal progression ... 4294967294 -2 11111111111111111111111111111110 4294967295 (largest unsigned integer) -1 11111111111111111111111111111111 (32 1's) Range of inputs on 64-bit machines positive number negative number return value 0   0 1   1 2   10 ... normal progression ... 9223372036854775806   111111111111111111111111111111111111111111111111111111111111110 9223372036854775807 (largest signed integer)   111111111111111111111111111111111111111111111111111111111111111 (63 1's)   -9223372036854775808 1000000000000000000000000000000000000000000000000000000000000000 ... normal progression ...   -2 1111111111111111111111111111111111111111111111111111111111111110   -1 1111111111111111111111111111111111111111111111111111111111111111 (64 1's)",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -295,6 +311,10 @@ DefineFunction(
         'desc'   => "Decimal value to convert",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -312,6 +332,10 @@ DefineFunction(
         'type'   => Int64,
         'desc'   => "Decimal value to convert",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -331,6 +355,7 @@ DefineFunction(
         'desc'   => "The binary string to convert",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -349,6 +374,7 @@ DefineFunction(
         'desc'   => "The hexadecimal string to convert",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -367,6 +393,7 @@ DefineFunction(
         'desc'   => "The octal string to convert",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -395,6 +422,10 @@ DefineFunction(
         'desc'   => "The base to convert number to",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -418,6 +449,7 @@ DefineFunction(
         'desc'   => "The exponent",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -436,6 +468,7 @@ DefineFunction(
         'desc'   => "The argument to process",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -454,6 +487,7 @@ DefineFunction(
         'desc'   => "The argument to process",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -472,6 +506,7 @@ DefineFunction(
         'desc'   => "The argument to process",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -490,6 +525,7 @@ DefineFunction(
         'desc'   => "The argument to process",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -514,6 +550,7 @@ DefineFunction(
         'desc'   => "The optional logarithmic base to use (defaults to 'e' and so to the natural logarithm).",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -532,6 +569,7 @@ DefineFunction(
         'desc'   => "An angle in radians",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -550,6 +588,7 @@ DefineFunction(
         'desc'   => "The argument to process",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -568,6 +607,7 @@ DefineFunction(
         'desc'   => "A value in radians",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -586,6 +626,7 @@ DefineFunction(
         'desc'   => "The argument to process",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -604,6 +645,7 @@ DefineFunction(
         'desc'   => "The argument to process in radians",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -622,6 +664,7 @@ DefineFunction(
         'desc'   => "The argument to process",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -640,6 +683,7 @@ DefineFunction(
         'desc'   => "The argument to process",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -658,6 +702,7 @@ DefineFunction(
         'desc'   => "The value to process",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -676,6 +721,7 @@ DefineFunction(
         'desc'   => "The argument to process",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -694,6 +740,7 @@ DefineFunction(
         'desc'   => "The argument to process",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -712,6 +759,7 @@ DefineFunction(
         'desc'   => "The argument to process",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -730,6 +778,7 @@ DefineFunction(
         'desc'   => "The argument to process",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -752,6 +801,7 @@ DefineFunction(
         'desc'   => "Divisor parameter",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -775,6 +825,7 @@ DefineFunction(
         'desc'   => "Length of second side",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -798,6 +849,7 @@ DefineFunction(
         'desc'   => "The divisor",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -816,6 +868,7 @@ DefineFunction(
         'desc'   => "The argument to process",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -826,6 +879,7 @@ DefineFunction(
       'type'   => Int64,
       'desc'   => "The largest possible random value returned by rand()",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -845,6 +899,7 @@ DefineFunction(
         'desc'   => "Optional seed value",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -869,6 +924,7 @@ DefineFunction(
         'desc'   => "The highest value to return (default: getrandmax())",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -879,6 +935,7 @@ DefineFunction(
       'type'   => Int64,
       'desc'   => "Returns the maximum random value returned by mt_rand()",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -898,6 +955,7 @@ DefineFunction(
         'desc'   => "An optional seed value",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -922,6 +980,7 @@ DefineFunction(
         'desc'   => "Optional highest value to be returned (default: mt_getrandmax())",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -933,6 +992,7 @@ DefineFunction(
       'type'   => Double,
       'desc'   => "A pseudo random float value in the range of (0, 1)",
     ),
+    'taint_observer' => false,
   ));
 
 

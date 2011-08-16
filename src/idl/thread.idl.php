@@ -58,6 +58,7 @@ DefineFunction(
       'type'   => Boolean,
       'desc'   => "TRUE if the current thread is a service thread, FALSE otherwise."
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -68,6 +69,7 @@ DefineFunction(
     'return' => array(
       'type'   => null,
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -86,6 +88,7 @@ DefineFunction(
         'desc'   => "How many seconds to wait for system to tell us.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -97,6 +100,7 @@ DefineFunction(
       'type'   => Boolean,
       'desc'   => "TRUE if warmed up already, FALSE otherwise.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -107,6 +111,7 @@ DefineFunction(
     'return' => array(
       'type'   => null,
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -118,6 +123,7 @@ DefineFunction(
       'type'   => Int64,
       'desc'   => "The pthread_self() return.",
     ),
+    'taint_observer' => false,
   ));
 
 

@@ -196,6 +196,7 @@ class TestCodeRun : public TestBase {
   bool TestHint();
 #ifdef TAINTED
   bool TestTaint();
+  bool TestTaintExt();
 #endif
 
   // debugging purpose

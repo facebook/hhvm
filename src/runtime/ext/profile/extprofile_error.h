@@ -27,91 +27,76 @@ namespace HPHP {
 
 inline Array x_debug_backtrace(bool provide_object = true) {
   FUNCTION_INJECTION_BUILTIN(debug_backtrace);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_debug_backtrace(provide_object);
 }
 
 inline void x_debug_print_backtrace() {
   FUNCTION_INJECTION_BUILTIN(debug_print_backtrace);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_debug_print_backtrace();
 }
 
 inline Array x_error_get_last() {
   FUNCTION_INJECTION_BUILTIN(error_get_last);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_error_get_last();
 }
 
 inline bool x_error_log(CStrRef message, int message_type = 0, CStrRef destination = null_string, CStrRef extra_headers = null_string) {
   FUNCTION_INJECTION_BUILTIN(error_log);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_error_log(message, message_type, destination, extra_headers);
 }
 
 inline int x_error_reporting(CVarRef level = null) {
   FUNCTION_INJECTION_BUILTIN(error_reporting);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_error_reporting(level);
 }
 
 inline bool x_restore_error_handler() {
   FUNCTION_INJECTION_BUILTIN(restore_error_handler);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_restore_error_handler();
 }
 
 inline bool x_restore_exception_handler() {
   FUNCTION_INJECTION_BUILTIN(restore_exception_handler);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_restore_exception_handler();
 }
 
 inline Variant x_set_error_handler(CVarRef error_handler, int error_types = k_E_ALL) {
   FUNCTION_INJECTION_BUILTIN(set_error_handler);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_set_error_handler(error_handler, error_types);
 }
 
 inline String x_set_exception_handler(CVarRef exception_handler) {
   FUNCTION_INJECTION_BUILTIN(set_exception_handler);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_set_exception_handler(exception_handler);
 }
 
 inline void x_hphp_set_error_page(CStrRef page) {
   FUNCTION_INJECTION_BUILTIN(hphp_set_error_page);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_hphp_set_error_page(page);
 }
 
 inline void x_hphp_throw_fatal_error(CStrRef error_msg) {
   FUNCTION_INJECTION_BUILTIN(hphp_throw_fatal_error);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_hphp_throw_fatal_error(error_msg);
 }
 
 inline void x_hphp_clear_unflushed() {
   FUNCTION_INJECTION_BUILTIN(hphp_clear_unflushed);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_hphp_clear_unflushed();
 }
 
 inline Array x_hphp_debug_caller_info() {
   FUNCTION_INJECTION_BUILTIN(hphp_debug_caller_info);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_hphp_debug_caller_info();
 }
 
 inline bool x_trigger_error(CStrRef error_msg, int error_type = k_E_USER_NOTICE) {
   FUNCTION_INJECTION_BUILTIN(trigger_error);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_trigger_error(error_msg, error_type);
 }
 
 inline bool x_user_error(CStrRef error_msg, int error_type = k_E_USER_NOTICE) {
   FUNCTION_INJECTION_BUILTIN(user_error);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_user_error(error_msg, error_type);
 }
 

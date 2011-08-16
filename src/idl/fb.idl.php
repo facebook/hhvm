@@ -182,6 +182,10 @@ DefineFunction(
         'desc'   => "What to serialize. Note that objects are not supported.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -211,6 +215,10 @@ DefineFunction(
         'desc'   => "One of those FB_UNSERIALIZE_ constants to describe what the decoding error was, if it failed.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -228,6 +236,10 @@ DefineFunction(
         'type'   => Variant,
         'desc'   => "What to serialize. Note that objects are not supported.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -258,6 +270,10 @@ DefineFunction(
         'desc'   => "One of those FB_UNSERIALIZE_ constants to describe what the decoding error was, if it failed.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -287,6 +303,7 @@ DefineFunction(
         'desc'   => "Extra data to pass to the handler when intercepting",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -325,6 +342,7 @@ DefineFunction(
         'desc'   => "Will always set to TRUE.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -363,6 +381,7 @@ DefineFunction(
         'desc'   => "Will always set to TRUE.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -380,6 +399,7 @@ DefineFunction(
         'desc'   => "The functions that can be renamed.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -403,6 +423,7 @@ DefineFunction(
         'desc'   => "What is the new name.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -420,6 +441,10 @@ DefineFunction(
         'type'   => Variant | Reference,
         'desc'   => "What string to sanitize.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -508,6 +533,7 @@ DefineFunction(
         'desc'   => "Whether to clear data after this function call.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -532,6 +558,7 @@ DefineFunction(
         'desc'   => "Extra argument to reserve for future use.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -543,6 +570,7 @@ DefineFunction(
       'type'   => Variant,
       'desc'   => "Profile result.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -553,6 +581,7 @@ DefineFunction(
     'return' => array(
       'type'   => null,
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -564,6 +593,7 @@ DefineFunction(
       'type'   => Variant,
       'desc'   => "Profile result.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -581,6 +611,7 @@ DefineFunction(
         'desc'   => "The \"virtual\" function's name.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -591,6 +622,7 @@ DefineFunction(
     'return' => array(
       'type'   => null,
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -614,6 +646,7 @@ DefineFunction(
         'desc'   => "One of those XHPROF_FLAGS_ constant to specify what to profile.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -624,6 +657,7 @@ DefineFunction(
     'return' => array(
       'type'   => null,
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -634,6 +668,7 @@ DefineFunction(
     'return' => array(
       'type'   => Variant,
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -651,6 +686,7 @@ DefineFunction(
         'desc'   => "The map to load. The format is array(\$id1 => array('ip' => {ip address}, 'db' => {database name}, 'port' => {port number}, 'username' => {user name for login}, 'password' => {password for login}), \$id2 => ...), where \$id1 and \$ids2 are arbitrary 32-bit integers that fb_crossall_query() can use to refer to the physical databases.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -705,6 +741,7 @@ DefineFunction(
         'desc'   => "Whether connect_timeout or read_timeout are in seconds or milli-seconds.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -753,6 +790,7 @@ DefineFunction(
         'desc'   => "Whether connect_timeout or read_timeout are in seconds or milli-seconds.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -775,10 +813,7 @@ DefineFunction(
         'desc'   => "The bit to flag.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -801,10 +836,7 @@ DefineFunction(
         'desc'   => "The bit to clear.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -828,10 +860,7 @@ DefineFunction(
         'desc'   => "The bit to check against.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -873,6 +902,7 @@ DefineFunction(
         'desc'   => "The key for locating the value.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 
@@ -892,6 +922,7 @@ DefineFunction(
         'desc'   => "The new value for the compression state.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -909,6 +940,7 @@ DefineFunction(
         'desc'   => "The callback to invoke. An exception object will be passed to the function",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -922,6 +954,7 @@ DefineFunction(
     ),
     'args'   => array(
     ),
+    'taint_observer' => false,
   ));
 
 

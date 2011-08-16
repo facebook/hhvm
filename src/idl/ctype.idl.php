@@ -65,6 +65,7 @@ DefineFunction(
         'desc'   => "The tested string.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -83,6 +84,7 @@ DefineFunction(
         'desc'   => "The tested string.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -101,6 +103,7 @@ DefineFunction(
         'desc'   => "The tested string.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -119,6 +122,7 @@ DefineFunction(
         'desc'   => "The tested string.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -137,6 +141,7 @@ DefineFunction(
         'desc'   => "The tested string.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -155,6 +160,7 @@ DefineFunction(
         'desc'   => "The tested string.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -173,6 +179,7 @@ DefineFunction(
         'desc'   => "The tested string.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -191,6 +198,7 @@ DefineFunction(
         'desc'   => "The tested string.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -209,6 +217,7 @@ DefineFunction(
         'desc'   => "The tested string.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -227,6 +236,7 @@ DefineFunction(
         'desc'   => "The tested string.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -245,6 +255,7 @@ DefineFunction(
         'desc'   => "The tested string.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 

@@ -76,6 +76,10 @@ DefineFunction(
         'desc'   => "You can control the behaviour of iconv_mime_encode() by specifying an associative array that contains configuration items to the optional third parameter preferences. The items supported by iconv_mime_encode() are listed below. Note that item names are treated case-sensitive. Configuration items supported by iconv_mime_encode() Item Type Description Default value Example scheme string Specifies the method to encode a field value by. The value of this item may be either \"B\" or \"Q\", where \"B\" stands for base64 encoding scheme and \"Q\" stands for quoted-printable encoding scheme. B B input-charset string Specifies the character set in which the first parameter field_name and the second parameter field_value are presented. If not given, iconv_mime_encode() assumes those parameters are presented to it in the iconv.internal_encoding ini setting. iconv.internal_encoding ISO-8859-1 output-charset string Specifies the character set to use to compose the MIME header. If not given, the same value as input-charset will be used. iconv.internal_encoding UTF-8 line-length integer Specifies the maximum length of the header lines. The resulting header is \"folded\" to a set of multiple lines in case the resulting header field would be longer than the value of this parameter, according to » RFC2822 - Internet Message Format. If not given, the length will be limited to 76 characters. 76 996 line-break-chars string Specifies the sequence of characters to append to each line as an end-of-line sign when \"folding\" is performed on a long header field. If not given, this defaults to \"\\r\\n\" (CR LF). Note that this parameter is always treated as an ASCII string regardless of the value of input-charset. \\r\\n \\n",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -105,6 +109,10 @@ DefineFunction(
         'value'  => "null_string",
         'desc'   => "The optional charset parameter specifies the character set to represent the result by. If omitted, iconv.internal_encoding will be used.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -136,6 +144,8 @@ DefineFunction(
         'desc'   => "The optional charset parameter specifies the character set to represent the result by. If omitted, iconv.internal_encoding will be used.",
       ),
     ),
+    // NB: TaintObserver declared in f_iconv_mime_decode_headers
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -155,6 +165,7 @@ DefineFunction(
         'desc'   => "The value of the optional type can be: all input_encoding output_encoding internal_encoding",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -178,6 +189,7 @@ DefineFunction(
         'desc'   => "The character set.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -206,6 +218,10 @@ DefineFunction(
         'desc'   => "The string to be converted.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -230,6 +246,7 @@ DefineFunction(
         'desc'   => "If charset parameter is omitted, str is assumed to be encoded in iconv.internal_encoding.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -265,6 +282,7 @@ DefineFunction(
         'desc'   => "If charset parameter is omitted, string are assumed to be encoded in iconv.internal_encoding.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -294,6 +312,7 @@ DefineFunction(
         'desc'   => "If charset parameter is omitted, string are assumed to be encoded in iconv.internal_encoding.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -329,6 +348,10 @@ DefineFunction(
         'desc'   => "If charset parameter is omitted, string are assumed to be encoded in iconv.internal_encoding.\n\nNote that offset and length parameters are always deemed to represent offsets that are calculated on the basis of the character set determined by charset, whilst the counterpart substr() always takes these for byte offsets.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -349,6 +372,10 @@ DefineFunction(
         'name'   => "status",
         'type'   => Int32,
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 

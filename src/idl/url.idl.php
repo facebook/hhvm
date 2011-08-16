@@ -71,6 +71,10 @@ DefineFunction(
         'desc'   => "Returns FALSE if input contains character from outside the base64 alphabet.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -88,6 +92,10 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The data to encode.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -113,6 +121,10 @@ DefineFunction(
         'desc'   => "If the optional format parameter is set to non-zero, get_headers() parses the response and sets the array's keys.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -136,6 +148,10 @@ DefineFunction(
         'value'  => "false",
         'desc'   => "Setting use_include_path to TRUE will result in PHP trying to open the file along the standard include path as per the include_path directive. This is used for local files, not URLs.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -167,6 +183,10 @@ DefineFunction(
         'desc'   => "arg_separator.output is used to separate arguments, unless this parameter is specified, and is then used.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -191,6 +211,10 @@ DefineFunction(
         'desc'   => "Specify one of PHP_URL_SCHEME, PHP_URL_HOST, PHP_URL_PORT, PHP_URL_USER, PHP_URL_PASS, PHP_URL_PATH, PHP_URL_QUERY or PHP_URL_FRAGMENT to retrieve just a specific URL component as a string.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -208,6 +232,10 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The URL to be decoded.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -227,6 +255,10 @@ DefineFunction(
         'desc'   => "The URL to be encoded.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -245,6 +277,10 @@ DefineFunction(
         'desc'   => "The string to be decoded.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -262,6 +298,10 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The string to be encoded.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 

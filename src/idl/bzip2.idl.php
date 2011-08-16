@@ -65,6 +65,7 @@ DefineFunction(
         'desc'   => "The file pointer. It must be valid and must point to a file successfully opened by bzopen().",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -88,6 +89,7 @@ DefineFunction(
         'desc'   => "Similar to the fopen() function, only 'r' (read) and 'w' (write) are supported. Everything else will cause bzopen to return FALSE.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -111,6 +113,10 @@ DefineFunction(
         'value'  => "1024",
         'desc'   => "If not specified, bzread() will read 1024 (uncompressed) bytes at a time.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL_NO_TRACE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -141,6 +147,7 @@ DefineFunction(
         'desc'   => "If supplied, writing will stop after length (uncompressed) bytes have been written or the end of data is reached, whichever comes first.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -159,6 +166,7 @@ DefineFunction(
         'desc'   => "The file pointer. It must be valid and must point to a file successfully opened by bzopen().",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -177,6 +185,7 @@ DefineFunction(
         'desc'   => "The file pointer. It must be valid and must point to a file successfully opened by bzopen().",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -195,6 +204,7 @@ DefineFunction(
         'desc'   => "The file pointer. It must be valid and must point to a file successfully opened by bzopen().",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -213,6 +223,7 @@ DefineFunction(
         'desc'   => "The file pointer. It must be valid and must point to a file successfully opened by bzopen().",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -243,6 +254,10 @@ DefineFunction(
         'desc'   => "Controls how the compression phase behaves when presented with worst case, highly repetitive, input data. The value can be between 0 and 250 with 0 being a special case.\n\nRegardless of the workfactor, the generated output is the same.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -266,6 +281,10 @@ DefineFunction(
         'value'  => "0",
         'desc'   => "If TRUE, an alternative decompression algorithm will be used which uses less memory (the maximum memory requirement drops to around 2300K) but works at roughly half the speed.\n\nSee the » bzip2 documentation for more information about this feature.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 

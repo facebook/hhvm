@@ -213,13 +213,14 @@ void normalizeToken(struct Token& token) {
  *
  */
 Array f_icu_tokenize(CStrRef text) {
-  Array ret;
-  std::vector<Token> tokens;
-  tokenizeString(tokens, HPHP::kMaster, UnicodeString::fromUTF8(text.data()));
-
   // Boundary markers that indicate the beginning and end of a token stream.
   const String BEGIN_MARKER("_B_");
   const String END_MARKER("_E_");
+
+  Array ret;
+  std::vector<Token> tokens;
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  tokenizeString(tokens, HPHP::kMaster, UnicodeString::fromUTF8(text.data()));
 
   int i = 0;
   ret.set(i++, BEGIN_MARKER);

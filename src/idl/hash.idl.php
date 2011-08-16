@@ -75,6 +75,10 @@ DefineFunction(
         'desc'   => "When set to TRUE, outputs raw binary data. FALSE outputs lowercase hexits.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -85,6 +89,7 @@ DefineFunction(
       'type'   => StringVec,
       'desc'   => "Returns a numerically indexed array containing the list of supported hashing algorithms.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -114,6 +119,7 @@ DefineFunction(
         'desc'   => "When HASH_HMAC is specified for options, a shared secret key to be used with the HMAC hashing method must be supplied in this parameter.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -142,6 +148,10 @@ DefineFunction(
         'desc'   => "When set to TRUE, outputs raw binary data. FALSE outputs lowercase hexits.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -164,6 +174,10 @@ DefineFunction(
         'value'  => "false",
         'desc'   => "When set to TRUE, outputs raw binary data. FALSE outputs lowercase hexits.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -198,6 +212,10 @@ DefineFunction(
         'desc'   => "When set to TRUE, outputs raw binary data. FALSE outputs lowercase hexits.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -231,6 +249,10 @@ DefineFunction(
         'desc'   => "When set to TRUE, outputs raw binary data. FALSE outputs lowercase hexits.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -259,6 +281,7 @@ DefineFunction(
         'desc'   => "Stream context as returned by stream_context_create().",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -287,6 +310,7 @@ DefineFunction(
         'desc'   => "Maximum number of characters to copy from handle into the hashing context.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -309,6 +333,7 @@ DefineFunction(
         'desc'   => "Message to be included in the hash digest.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 
@@ -337,6 +362,7 @@ DefineFunction(
         'desc'   => "The number of buckets",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -349,6 +375,7 @@ DefineFunction(
     ),
     'args'   => array(
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -376,6 +403,7 @@ DefineFunction(
         'desc'   => "The seed to use for hashing",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 ///////////////////////////////////////////////////////////////////////////////

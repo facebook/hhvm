@@ -135,7 +135,7 @@ inline String x_rtrim(CStrRef str, CStrRef charlist = k_HPHP_TRIM_CHARLIST) {
 
 inline String x_chop(CStrRef str, CStrRef charlist = k_HPHP_TRIM_CHARLIST) {
   FUNCTION_INJECTION_BUILTIN(chop);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_chop(str, charlist);
 }
 
@@ -153,7 +153,7 @@ inline String x_implode(CVarRef arg1, CVarRef arg2 = null_variant) {
 
 inline String x_join(CVarRef glue, CVarRef pieces = null_variant) {
   FUNCTION_INJECTION_BUILTIN(join);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_join(glue, pieces);
 }
 
@@ -177,19 +177,16 @@ inline Variant x_strtok(CStrRef str, CVarRef token = null_variant) {
 
 inline Variant x_str_replace(CVarRef search, CVarRef replace, CVarRef subject, VRefParam count = null) {
   FUNCTION_INJECTION_BUILTIN(str_replace);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_str_replace(search, replace, subject, count);
 }
 
 inline Variant x_str_ireplace(CVarRef search, CVarRef replace, CVarRef subject, VRefParam count = null) {
   FUNCTION_INJECTION_BUILTIN(str_ireplace);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_str_ireplace(search, replace, subject, count);
 }
 
 inline Variant x_substr_replace(CVarRef str, CVarRef replacement, CVarRef start, CVarRef length = 0x7FFFFFFF) {
   FUNCTION_INJECTION_BUILTIN(substr_replace);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_substr_replace(str, replacement, start, length);
 }
 
@@ -201,7 +198,7 @@ inline Variant x_substr(CStrRef str, int start, int length = 0x7FFFFFFF) {
 
 inline String x_str_pad(CStrRef input, int pad_length, CStrRef pad_string = " ", int pad_type = k_STR_PAD_RIGHT) {
   FUNCTION_INJECTION_BUILTIN(str_pad);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_str_pad(input, pad_length, pad_string, pad_type);
 }
 
@@ -273,7 +270,6 @@ inline String x_str_rot13(CStrRef str) {
 
 inline int64 x_crc32(CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(crc32);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_crc32(str);
 }
 
@@ -285,7 +281,7 @@ inline String x_crypt(CStrRef str, CStrRef salt = "") {
 
 inline String x_md5(CStrRef str, bool raw_output = false) {
   FUNCTION_INJECTION_BUILTIN(md5);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_HTML);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_md5(str, raw_output);
 }
 
@@ -309,7 +305,6 @@ inline String x_convert_cyr_string(CStrRef str, CStrRef from, CStrRef to) {
 
 inline Array x_get_html_translation_table(int table = 0, int quote_style = k_ENT_COMPAT) {
   FUNCTION_INJECTION_BUILTIN(get_html_translation_table);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_get_html_translation_table(table, quote_style);
 }
 
@@ -327,19 +322,16 @@ inline String x_hebrevc(CStrRef hebrew_text, int max_chars_per_line = 0) {
 
 inline Variant x_setlocale(int _argc, int category, CVarRef locale, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(setlocale);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_setlocale(_argc, category, locale, _argv);
 }
 
 inline Array x_localeconv() {
   FUNCTION_INJECTION_BUILTIN(localeconv);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_localeconv();
 }
 
 inline String x_nl_langinfo(int item) {
   FUNCTION_INJECTION_BUILTIN(nl_langinfo);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_nl_langinfo(item);
 }
 
@@ -381,7 +373,6 @@ inline String x_chr(int64 ascii) {
 
 inline int64 x_ord(CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(ord);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_ord(str);
 }
 
@@ -399,49 +390,41 @@ inline String x_number_format(double number, int decimals = 0, CStrRef dec_point
 
 inline int x_strcmp(CStrRef str1, CStrRef str2) {
   FUNCTION_INJECTION_BUILTIN(strcmp);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_strcmp(str1, str2);
 }
 
 inline int x_strncmp(CStrRef str1, CStrRef str2, int len) {
   FUNCTION_INJECTION_BUILTIN(strncmp);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_strncmp(str1, str2, len);
 }
 
 inline int x_strnatcmp(CStrRef str1, CStrRef str2) {
   FUNCTION_INJECTION_BUILTIN(strnatcmp);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_strnatcmp(str1, str2);
 }
 
 inline int x_strcasecmp(CStrRef str1, CStrRef str2) {
   FUNCTION_INJECTION_BUILTIN(strcasecmp);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_strcasecmp(str1, str2);
 }
 
 inline int x_strncasecmp(CStrRef str1, CStrRef str2, int len) {
   FUNCTION_INJECTION_BUILTIN(strncasecmp);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_strncasecmp(str1, str2, len);
 }
 
 inline int x_strnatcasecmp(CStrRef str1, CStrRef str2) {
   FUNCTION_INJECTION_BUILTIN(strnatcasecmp);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_strnatcasecmp(str1, str2);
 }
 
 inline int x_strcoll(CStrRef str1, CStrRef str2) {
   FUNCTION_INJECTION_BUILTIN(strcoll);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_strcoll(str1, str2);
 }
 
 inline Variant x_substr_compare(CStrRef main_str, CStrRef str, int offset, int length = 0, bool case_insensitivity = false) {
   FUNCTION_INJECTION_BUILTIN(substr_compare);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_substr_compare(main_str, str, offset, length, case_insensitivity);
 }
 
@@ -477,73 +460,61 @@ inline Variant x_strpbrk(CStrRef haystack, CStrRef char_list) {
 
 inline Variant x_strpos(CStrRef haystack, CVarRef needle, int offset = 0) {
   FUNCTION_INJECTION_BUILTIN(strpos);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_strpos(haystack, needle, offset);
 }
 
 inline Variant x_stripos(CStrRef haystack, CVarRef needle, int offset = 0) {
   FUNCTION_INJECTION_BUILTIN(stripos);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_stripos(haystack, needle, offset);
 }
 
 inline Variant x_strrpos(CStrRef haystack, CVarRef needle, int offset = 0) {
   FUNCTION_INJECTION_BUILTIN(strrpos);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_strrpos(haystack, needle, offset);
 }
 
 inline Variant x_strripos(CStrRef haystack, CVarRef needle, int offset = 0) {
   FUNCTION_INJECTION_BUILTIN(strripos);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_strripos(haystack, needle, offset);
 }
 
 inline Variant x_substr_count(CStrRef haystack, CStrRef needle, int offset = 0, int length = 0x7FFFFFFF) {
   FUNCTION_INJECTION_BUILTIN(substr_count);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_substr_count(haystack, needle, offset, length);
 }
 
 inline Variant x_strspn(CStrRef str1, CStrRef str2, int start = 0, int length = 0x7FFFFFFF) {
   FUNCTION_INJECTION_BUILTIN(strspn);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_strspn(str1, str2, start, length);
 }
 
 inline Variant x_strcspn(CStrRef str1, CStrRef str2, int start = 0, int length = 0x7FFFFFFF) {
   FUNCTION_INJECTION_BUILTIN(strcspn);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_strcspn(str1, str2, start, length);
 }
 
 inline int x_strlen(CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(strlen);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_strlen(str);
 }
 
 inline Variant x_count_chars(CStrRef str, int64 mode = 0) {
   FUNCTION_INJECTION_BUILTIN(count_chars);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_count_chars(str, mode);
 }
 
 inline Variant x_str_word_count(CStrRef str, int64 format = 0, CStrRef charlist = "") {
   FUNCTION_INJECTION_BUILTIN(str_word_count);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_str_word_count(str, format, charlist);
 }
 
 inline int x_levenshtein(CStrRef str1, CStrRef str2, int cost_ins = 1, int cost_rep = 1, int cost_del = 1) {
   FUNCTION_INJECTION_BUILTIN(levenshtein);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_levenshtein(str1, str2, cost_ins, cost_rep, cost_del);
 }
 
 inline int x_similar_text(CStrRef first, CStrRef second, VRefParam percent = null) {
   FUNCTION_INJECTION_BUILTIN(similar_text);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_similar_text(first, second, percent);
 }
 
@@ -561,7 +532,6 @@ inline Variant x_metaphone(CStrRef str, int phones = 0) {
 
 inline void x_parse_str(CStrRef str, VRefParam arr = null) {
   FUNCTION_INJECTION_BUILTIN(parse_str);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_parse_str(str, arr);
 }
 

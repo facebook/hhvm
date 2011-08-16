@@ -76,6 +76,7 @@ DefineFunction(
         'desc'   => "If set to PREG_GREP_INVERT, this function returns the elements of the input array that do not match the given pattern.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -117,6 +118,7 @@ DefineFunction(
         'desc'   => "Normally, the search starts from the beginning of the subject string. The optional parameter offset can be used to specify the alternate place from which to start the search (in bytes).\n\nUsing offset is not equivalent to passing substr(\$subject, \$offset) to preg_match() in place of the subject string, because pattern can contain assertions such as ^, \$ or (?<=x). Compare:\n\nArray ( )\n\nwhile this example\n\n\n\nwill produce Array ( [0] => Array ( [0] => def [1] => 0 ) )",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -157,6 +159,7 @@ DefineFunction(
         'desc'   => "Orders results so that \$matches[0] is an array of first set of matches, \$matches[1] is an array of second set of matches, and so on.\n\n<b>example: </b>, example: <div align=\"left\">this is a test</div>, this is a test",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -196,6 +199,10 @@ DefineFunction(
         'value'  => "null",
         'desc'   => "If specified, this variable will be filled with the number of replacements done.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -237,6 +244,10 @@ DefineFunction(
         'desc'   => "If specified, this variable will be filled with the number of replacements done.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -272,6 +283,10 @@ DefineFunction(
         'desc'   => "flags can be any combination of the following flags (combined with the | bitwise operator): PREG_SPLIT_NO_EMPTY If this flag is set, only non-empty pieces will be returned by preg_split().",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -296,6 +311,10 @@ DefineFunction(
         'desc'   => "If the optional delimiter is specified, it will also be escaped. This is useful for escaping the delimiter that is required by the PCRE functions. The / is the most commonly used delimiter.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -307,6 +326,7 @@ DefineFunction(
       'type'   => Int32,
       'desc'   => "Returns one of the following constants (explained on their own page): PREG_NO_ERROR PREG_INTERNAL_ERROR PREG_BACKTRACK_LIMIT_ERROR (see also pcre.backtrack_limit) PREG_RECURSION_LIMIT_ERROR (see also pcre.recursion_limit) PREG_BAD_UTF8_ERROR PREG_BAD_UTF8_OFFSET_ERROR (since PHP 5.3.0)",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -333,6 +353,10 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The input string.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -362,6 +386,10 @@ DefineFunction(
         'desc'   => "The input string.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -390,6 +418,7 @@ DefineFunction(
         'desc'   => "If matches are found for parenthesized substrings of pattern and the function is called with the third argument regs, the matches will be stored in the elements of the array regs.\n\n\$regs[1] will contain the substring which starts at the first left parenthesis; \$regs[2] will contain the substring starting at the second, and so on. \$regs[0] will contain a copy of the complete string matched.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -419,6 +448,7 @@ DefineFunction(
         'desc'   => "If matches are found for parenthesized substrings of pattern and the function is called with the third argument regs, the matches will be stored in the elements of the array regs.\n\n\$regs[1] will contain the substring which starts at the first left parenthesis; \$regs[2] will contain the substring starting at the second, and so on. \$regs[0] will contain a copy of the complete string matched.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -447,6 +477,10 @@ DefineFunction(
         'value'  => "-1",
         'desc'   => "If limit is set, the returned array will contain a maximum of limit elements with the last element containing the whole rest of string.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -477,6 +511,10 @@ DefineFunction(
         'desc'   => "If limit is set, the returned array will contain a maximum of limit elements with the last element containing the whole rest of string.",
       ),
     ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
   ));
 
 DefineFunction(
@@ -494,6 +532,10 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The input string.",
       ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 

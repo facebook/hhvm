@@ -476,6 +476,7 @@ Array ArrayUtil::EnsureIntKeys(CArrRef input) {
 Variant ArrayUtil::ChangeKeyCase(CArrRef input, bool lower) {
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
+    TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
     Variant key(iter.first());
     if (key.isString()) {
       if (lower) {

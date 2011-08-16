@@ -27,19 +27,16 @@ namespace HPHP {
 
 inline p_Continuation x_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CStrRef origFuncName, CArrRef args = null_array) {
   FUNCTION_INJECTION_BUILTIN(hphp_create_continuation);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_hphp_create_continuation(clsname, funcname, origFuncName, args);
 }
 
 inline void x_hphp_pack_continuation(CObjRef continuation, int64 label, CVarRef value) {
   FUNCTION_INJECTION_BUILTIN(hphp_pack_continuation);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_hphp_pack_continuation(continuation, label, value);
 }
 
 inline void x_hphp_unpack_continuation(CObjRef continuation) {
   FUNCTION_INJECTION_BUILTIN(hphp_unpack_continuation);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   f_hphp_unpack_continuation(continuation);
 }
 

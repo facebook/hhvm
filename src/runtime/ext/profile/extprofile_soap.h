@@ -27,19 +27,16 @@ namespace HPHP {
 
 inline bool x_use_soap_error_handler(bool handler = true) {
   FUNCTION_INJECTION_BUILTIN(use_soap_error_handler);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_use_soap_error_handler(handler);
 }
 
 inline bool x_is_soap_fault(CVarRef fault) {
   FUNCTION_INJECTION_BUILTIN(is_soap_fault);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_is_soap_fault(fault);
 }
 
 inline int64 x__soap_active_version() {
   FUNCTION_INJECTION_BUILTIN(_soap_active_version);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f__soap_active_version();
 }
 

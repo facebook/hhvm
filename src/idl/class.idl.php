@@ -58,6 +58,7 @@ DefineFunction(
       'type'   => VariantMap,
       'desc'   => "Returns an array of the names of the declared classes in the current script.\n\nNote that depending on what extensions you have compiled or loaded into PHP, additional classes could be present. This means that you will not be able to define your own classes using these names. There is a list of predefined classes in the Predefined Classes section of the appendices.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -69,6 +70,7 @@ DefineFunction(
       'type'   => VariantMap,
       'desc'   => "Returns an array of the names of the declared interfaces in the current script.",
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -93,6 +95,7 @@ DefineFunction(
         'desc'   => "Whether or not to call __autoload by default.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -117,6 +120,7 @@ DefineFunction(
         'desc'   => "Whether to call __autoload or not by default.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -135,6 +139,7 @@ DefineFunction(
         'desc'   => "The class name or an object instance",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -153,6 +158,7 @@ DefineFunction(
         'desc'   => "The class name",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -171,6 +177,7 @@ DefineFunction(
         'desc'   => "The class name",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -190,6 +197,7 @@ DefineFunction(
         'desc'   => "The tested object. This parameter may be omitted when inside a class.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -209,6 +217,7 @@ DefineFunction(
         'desc'   => "The tested object or class name",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -232,6 +241,7 @@ DefineFunction(
         'desc'   => "The class name",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -255,6 +265,7 @@ DefineFunction(
         'desc'   => "The class name",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -278,6 +289,7 @@ DefineFunction(
         'desc'   => "The method name",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -301,6 +313,7 @@ DefineFunction(
         'desc'   => "The name of the property",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -319,6 +332,7 @@ DefineFunction(
         'desc'   => "An object instance.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -345,6 +359,7 @@ DefineFunction(
         'desc'   => "An array of parameters.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -366,6 +381,7 @@ DefineFunction(
         'desc'   => "The object that method_name is being called on.",
       ),
     ),
+    'taint_observer' => false,
   ));
 
 

@@ -19,8 +19,8 @@
 #define __GENERATED_cls_ErrorException_fw_h7eaf38ae__
 
 #include <runtime/base/hphp_system.h>
-#include <sys/literal_strings_remap.h>
-#include <sys/scalar_arrays_remap.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

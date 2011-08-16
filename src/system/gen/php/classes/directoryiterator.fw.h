@@ -19,7 +19,7 @@
 #define __GENERATED_php_classes_directoryiterator_fw_hb5192131__
 
 #include <runtime/base/hphp_system.h>
-#include <sys/literal_strings_remap.h>
-#include <sys/scalar_arrays_remap.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 #endif // __GENERATED_php_classes_directoryiterator_fw_hb5192131__

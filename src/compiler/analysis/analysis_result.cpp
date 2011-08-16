@@ -1320,7 +1320,11 @@ void AnalysisResult::outputCPPNamedScalarArrays(const std::string &file) {
 
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
-  cg_printInclude("<sys/scalar_arrays_remap.h>");
+  if (Option::SystemGen) {
+    cg_printInclude("<system/gen/sys/scalar_arrays_remap.h>");
+  } else {
+    cg_printInclude("<sys/scalar_arrays_remap.h>");
+  }
   if (Option::UseScalarVariant && !Option::SystemGen) {
     cg_printInclude("<sys/scalar_integers_remap.h>");
   }
@@ -4812,7 +4816,11 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
   cg.headerBegin(filename);
   if (!genStatic) {
     cg_printInclude("<runtime/base/hphp.h>");
-    cg_printInclude("<sys/literal_strings_remap.h>");
+    if (Option::SystemGen) {
+      cg_printInclude("<system/gen/sys/literal_strings_remap.h>");
+    } else {
+      cg_printInclude("<sys/literal_strings_remap.h>");
+    }
     cg_printf("\n");
   }
   int nstrings = 0;
@@ -4878,7 +4886,11 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
         f.open(filename.c_str());
         cg_printf("\n");
         cg_printInclude("<runtime/base/complex_types.h>");
-        cg_printInclude("<sys/literal_strings_remap.h>");
+        if (Option::SystemGen) {
+          cg_printInclude("<system/gen/sys/literal_strings_remap.h>");
+        } else {
+          cg_printInclude("<sys/literal_strings_remap.h>");
+        }
         cg_printf("\n");
         cg.namespaceBegin();
       }

@@ -19,8 +19,8 @@
 #define __GENERATED_cls_RecursiveDirectoryIterator_fw_he35a991a__
 
 #include <runtime/base/hphp_system.h>
-#include <sys/literal_strings_remap.h>
-#include <sys/scalar_arrays_remap.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

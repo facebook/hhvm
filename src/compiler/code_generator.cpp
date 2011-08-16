@@ -296,9 +296,9 @@ void CodeGenerator::printBasicIncludes() {
     }
   } else if (getOutput() == CodeGenerator::SystemCPP) {
     printInclude("<runtime/base/hphp_system.h>");
-    printInclude(string(Option::SystemFilePrefix) +
+    printInclude(string("system/gen/") + Option::SystemFilePrefix +
                  "literal_strings_remap.h");
-    printInclude(string(Option::SystemFilePrefix) +
+    printInclude(string("system/gen/") + Option::SystemFilePrefix +
                  "scalar_arrays_remap.h");
   }
 }

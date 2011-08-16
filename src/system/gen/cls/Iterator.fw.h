@@ -19,7 +19,7 @@
 #define __GENERATED_cls_Iterator_fw_h671e9f35__
 
 #include <runtime/base/hphp_system.h>
-#include <sys/literal_strings_remap.h>
-#include <sys/scalar_arrays_remap.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 #endif // __GENERATED_cls_Iterator_fw_h671e9f35__

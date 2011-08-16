@@ -19,7 +19,7 @@
 #define __GENERATED_cls_ArrayAccess_fw_h8534c488__
 
 #include <runtime/base/hphp_system.h>
-#include <sys/literal_strings_remap.h>
-#include <sys/scalar_arrays_remap.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 #endif // __GENERATED_cls_ArrayAccess_fw_h8534c488__

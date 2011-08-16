@@ -20,7 +20,7 @@
 #define __GENERATED_gen_sys_literal_strings_h82dd9d4e__
 
 #include <runtime/base/hphp.h>
-#include <sys/literal_strings_remap.h>
+#include <system/gen/sys/literal_strings_remap.h>
 
 namespace hphp_impl_starter {}
 

@@ -29,6 +29,8 @@ class TestExtThrift : public TestCppExt {
 
   bool test_thrift_protocol_write_binary();
   bool test_thrift_protocol_read_binary();
+  bool test_thrift_protocol_write_compact();
+  bool test_thrift_protocol_read_compact();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -13486,6 +13486,29 @@ Variant ifa_dom_node_is_default_namespace(void *extra, int count, INVOKE_FEW_ARG
   CVarRef arg1(a1);
   return (x_dom_node_is_default_namespace(arg0, arg1));
 }
+Variant i_thrift_protocol_write_compact(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 5)) return throw_wrong_arguments("thrift_protocol_write_compact", count, 5, 5, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (x_thrift_protocol_write_compact(arg0, arg1, arg2, arg3, arg4), null);
+  }
+}
+Variant ifa_thrift_protocol_write_compact(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 5)) return throw_wrong_arguments("thrift_protocol_write_compact", count, 5, 5, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  CVarRef arg2(a2);
+  CVarRef arg3(a3);
+  CVarRef arg4(a4);
+  return (x_thrift_protocol_write_compact(arg0, arg1, arg2, arg3, arg4), null);
+}
 Variant i_curl_init(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count > 1)) return throw_toomany_arguments("curl_init", 1, 1);
@@ -19932,6 +19955,23 @@ Variant ifa_drawgetexceptionstring(void *extra, int count, INVOKE_FEW_ARGS_IMPL_
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("drawgetexceptionstring", count, 1, 1, 1);
   CVarRef arg0(a0);
   return (x_drawgetexceptionstring(arg0));
+}
+Variant i_thrift_protocol_read_compact(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("thrift_protocol_read_compact", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (x_thrift_protocol_read_compact(arg0, arg1));
+  }
+}
+Variant ifa_thrift_protocol_read_compact(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("thrift_protocol_read_compact", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  return (x_thrift_protocol_read_compact(arg0, arg1));
 }
 Variant i_hash_algos(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
@@ -38617,6 +38657,7 @@ CallInfo ci_intl_is_failure((void*)&i_intl_is_failure, (void*)&ifa_intl_is_failu
 CallInfo ci_inet_ntop((void*)&i_inet_ntop, (void*)&ifa_inet_ntop, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickreadimage((void*)&i_magickreadimage, (void*)&ifa_magickreadimage, 2, 0, 0x0000000000000000LL);
 CallInfo ci_dom_node_is_default_namespace((void*)&i_dom_node_is_default_namespace, (void*)&ifa_dom_node_is_default_namespace, 2, 0, 0x0000000000000000LL);
+CallInfo ci_thrift_protocol_write_compact((void*)&i_thrift_protocol_write_compact, (void*)&ifa_thrift_protocol_write_compact, 5, 0, 0x0000000000000000LL);
 CallInfo ci_curl_init((void*)&i_curl_init, (void*)&ifa_curl_init, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mcrypt_cfb((void*)&i_mcrypt_cfb, (void*)&ifa_mcrypt_cfb, 5, 0, 0x0000000000000000LL);
 CallInfo ci_dom_document_create_document_fragment((void*)&i_dom_document_create_document_fragment, (void*)&ifa_dom_document_create_document_fragment, 1, 0, 0x0000000000000000LL);
@@ -38971,6 +39012,7 @@ CallInfo ci_gzpassthru((void*)&i_gzpassthru, (void*)&ifa_gzpassthru, 1, 0, 0x000
 CallInfo ci_stream_bucket_make_writeable((void*)&i_stream_bucket_make_writeable, (void*)&ifa_stream_bucket_make_writeable, 1, 0, 0x0000000000000000LL);
 CallInfo ci_posix_setegid((void*)&i_posix_setegid, (void*)&ifa_posix_setegid, 1, 0, 0x0000000000000000LL);
 CallInfo ci_drawgetexceptionstring((void*)&i_drawgetexceptionstring, (void*)&ifa_drawgetexceptionstring, 1, 0, 0x0000000000000000LL);
+CallInfo ci_thrift_protocol_read_compact((void*)&i_thrift_protocol_read_compact, (void*)&ifa_thrift_protocol_read_compact, 2, 0, 0x0000000000000000LL);
 CallInfo ci_hash_algos((void*)&i_hash_algos, (void*)&ifa_hash_algos, 0, 0, 0x0000000000000000LL);
 CallInfo ci_drawsetstrokeantialias((void*)&i_drawsetstrokeantialias, (void*)&ifa_drawsetstrokeantialias, 2, 0, 0x0000000000000000LL);
 CallInfo ci_destroypixelwand((void*)&i_destroypixelwand, (void*)&ifa_destroypixelwand, 1, 0, 0x0000000000000000LL);
@@ -46210,6 +46252,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 4069:
+      HASH_GUARD(0x43BA2CB702E68FE5LL, thrift_protocol_read_compact) {
+        ci = &ci_thrift_protocol_read_compact;
+        return true;
+      }
+      break;
     case 4071:
       HASH_GUARD(0x217067889854CFE7LL, xmlwriter_start_dtd) {
         ci = &ci_xmlwriter_start_dtd;
@@ -48857,6 +48905,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 5813:
       HASH_GUARD(0x798B4197212456B5LL, bcpowmod) {
         ci = &ci_bcpowmod;
+        return true;
+      }
+      HASH_GUARD(0x3B81B5A6BE3ED6B5LL, thrift_protocol_write_compact) {
+        ci = &ci_thrift_protocol_write_compact;
         return true;
       }
       HASH_GUARD(0x7E773A36449576B5LL, imagecharup) {

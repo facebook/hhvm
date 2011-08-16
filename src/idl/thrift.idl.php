@@ -107,6 +107,55 @@ DefineFunction(
     ),
   ));
 
+DefineFunction(
+  array(
+    'name'   => "thrift_protocol_write_compact",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => null,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "transportobj",
+        'type'   => Object,
+      ),
+      array(
+        'name'   => "method_name",
+        'type'   => String,
+      ),
+      array(
+        'name'   => "msgtype",
+        'type'   => Int64,
+      ),
+      array(
+        'name'   => "request_struct",
+        'type'   => Object,
+      ),
+      array(
+        'name'   => "seqid",
+        'type'   => Int32,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "thrift_protocol_read_compact",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "transportobj",
+        'type'   => Object,
+      ),
+      array(
+        'name'   => "obj_typename",
+        'type'   => String,
+      ),
+    ),
+  ));
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes

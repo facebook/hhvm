@@ -17,6 +17,7 @@
 #include <test/test_ext_thrift.h>
 #include <runtime/ext/ext_thrift.h>
 
+IMPLEMENT_SEP_EXTENSION_TEST(Thrift);
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtThrift::RunTests(const std::string &which) {
@@ -24,6 +25,8 @@ bool TestExtThrift::RunTests(const std::string &which) {
 
   RUN_TEST(test_thrift_protocol_write_binary);
   RUN_TEST(test_thrift_protocol_read_binary);
+  RUN_TEST(test_thrift_protocol_write_compact);
+  RUN_TEST(test_thrift_protocol_read_compact);
 
   return ret;
 }
@@ -31,11 +34,17 @@ bool TestExtThrift::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtThrift::test_thrift_protocol_write_binary() {
-  //VCB("<?php ");
-  return true;
+  return Count(true);
 }
 
 bool TestExtThrift::test_thrift_protocol_read_binary() {
-  //VCB("<?php ");
-  return true;
+  return Count(true);
+}
+
+bool TestExtThrift::test_thrift_protocol_write_compact() {
+  return Count(true);
+}
+
+bool TestExtThrift::test_thrift_protocol_read_compact() {
+  return Count(true);
 }

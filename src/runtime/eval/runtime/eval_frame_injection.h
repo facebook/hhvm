@@ -75,7 +75,7 @@ public:
   ParserFrameInjection(const char *func, const char *fileName);
   String getFileName() { return m_file; }
 private:
-  const char *m_file;
+  std::string m_file;
 };
 
 #define SET_LINE_EXPR \

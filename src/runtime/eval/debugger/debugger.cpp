@@ -260,11 +260,20 @@ DebuggerProxyPtr Debugger::findProxy(const std::string &id) {
 
 void Debugger::switchSandbox(DebuggerProxyPtr proxy,
                              const std::string &newId) {
-  WriteLock lock(m_mutex);
+  {
+    DebuggerProxyPtr dpp;
+    {
+      WriteLock lock(m_mutex);
 
-  string oldId = proxy->getSandboxId();
-  m_proxies[oldId].reset();
-  m_proxies[newId] = proxy;
+      string oldId = proxy->getSandboxId();
+      m_proxies[oldId].reset();
+      // Briefly retain a reference to m_proxies[newId] (if it exists) in order
+      // to avoid calling a DebuggerProxy destructor (which can sleep) while
+      // holding m_mutex.
+      dpp = m_proxies[newId];
+      m_proxies[newId] = proxy;
+    }
+  }
 
   // makes sure proxy's sandbox info is complete with path, etc..
   if (m_sandboxes.find(newId) != m_sandboxes.end()) {

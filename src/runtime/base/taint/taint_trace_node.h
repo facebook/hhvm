@@ -87,8 +87,6 @@ public:
   const TaintTraceNodePtr& getChild() const { return m_child; }
   const TaintTraceDataPtr& getLeaf() const { return m_leaf; }
 
-  void setRefCount(int n) { _count = n; }
-
   // SmartAllocator methods
   DECLARE_SMART_ALLOCATION_NOCALLBACKS(TaintTraceNode);
   void dump() const { }

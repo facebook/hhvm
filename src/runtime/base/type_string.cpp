@@ -800,8 +800,8 @@ AtomicString::AtomicString(const std::string &s) {
 
 AtomicString::AtomicString(StringData *str) {
   if (str) {
+    TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
     if (str->isRefCounted()) {
-      TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
       str = new StringData(str->data(), str->size(), CopyString);
     }
     AtomicSmartPtr<StringData>::operator=(str);
@@ -810,6 +810,7 @@ AtomicString::AtomicString(StringData *str) {
 }
 
 AtomicString &AtomicString::operator=(const AtomicString &s) {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   AtomicSmartPtr<StringData>::operator=(s);
   if (m_px) m_px->preCompute();
   return *this;

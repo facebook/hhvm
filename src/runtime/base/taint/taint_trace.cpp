@@ -29,22 +29,6 @@ IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(TaintTraceData);
 IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(TaintTraceNode);
 
 /*
- * TaintTraceNodePtr methods
- */
-TaintTraceNodePtr& TaintTraceNodePtr::operator=(const TaintTraceDataPtr& data) {
-  if (m_px && m_px->decRefCount() == 0) {
-    m_px->release();
-  }
-  if (data.get()) {
-    m_px = NEW(TaintTraceNode)(NULL, data);
-    m_px->setRefCount(1);
-  } else {
-    m_px = NULL;
-  }
-  return *this;
-}
-
-/*
  * TaintTraceDataPtr methods
  */
 TaintTraceDataPtr::TaintTraceDataPtr() { }
@@ -138,6 +122,9 @@ std::string TaintTracer::ExtractTrace(const TaintTraceNodePtr& root) {
   }
 
   for (i = 0, it = frameset.begin(); it != frameset.end(); ++i, ++it) {
+    if (i > 0) {
+      ss << "\n";
+    }
     ss << "trace{" << i << "}:\n";
     ss << *it;
   }

@@ -25,7 +25,8 @@ void TaintData::setTaintTrace(TaintTraceNodePtr trace) {
   ASSERT(!TAINT_ISSET_ORIG(m_taint_bits));
 
   // Check if the new trace is just the old trace under a dummy node.
-  bool is_retrace = trace.get() && !trace->getNext().get() &&
+  bool is_retrace = m_taint_trace.get() &&
+                    trace.get() && !trace->getNext().get() &&
                     m_taint_trace.get() == trace->getChild().get();
 
   if (trace.get() && !is_retrace) {
@@ -36,7 +37,7 @@ void TaintData::setTaintTrace(TaintTraceNodePtr trace) {
 void TaintData::setTaintTrace(TaintTraceDataPtr data) {
   ASSERT(!m_taint_trace.get());
   if (data.get()) {
-    m_taint_trace = data;
+    m_taint_trace = NEW(TaintTraceNode)(NULL, data);
   }
 }
 

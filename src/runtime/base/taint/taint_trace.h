@@ -90,7 +90,7 @@ private:
  */
 class TaintTracer {
 public:
-  static String Trace(String str, bool copy=false);
+  static String Trace(String str, bool copy=true, bool truncate=false);
 
   static TaintTraceDataPtr CreateTrace();
   static std::string ExtractTrace(const TaintTraceNodePtr& root);

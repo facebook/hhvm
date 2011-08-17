@@ -55,9 +55,9 @@ void TaintObserver::RegisterMutated(TaintData& td, const char *s) {
   taint_t set_mask = tc->m_set_mask;
   taint_t clear_mask = tc->m_clear_mask;
 
-  // Trace the passed string if we're in an explicitly HTML-unsafe function.
-  if ((set_mask & TAINT_BIT_HTML) && s) {
-    td.attachTaintTrace(NEW(TaintTraceData)(TaintTracer::Trace(s, true)));
+  // Trace the passed string if we're asked to inside some extension function.
+  if ((set_mask & TAINT_BIT_TRACE_HTML) && s) {
+    td.attachTaintTrace(NEW(TaintTraceData)(TaintTracer::Trace(s, true, true)));
   }
 
   if (TaintTracer::IsEnabledHtml()) {

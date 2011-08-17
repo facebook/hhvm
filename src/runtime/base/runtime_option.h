@@ -336,6 +336,7 @@ public:
 
 #ifdef TAINTED
   static bool EnableTaintWarnings;
+  static int TaintTraceMaxStrlen;
 #endif
 
   static bool EnableStrict;

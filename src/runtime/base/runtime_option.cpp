@@ -334,6 +334,7 @@ bool RuntimeOption::SandboxCheckMd5 = false;
 
 #ifdef TAINTED
 bool RuntimeOption::EnableTaintWarnings = false;
+int RuntimeOption::TaintTraceMaxStrlen = 127;
 #endif
 
 bool RuntimeOption::EnableStrict = false;
@@ -1027,6 +1028,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
 
 #ifdef TAINTED
     EnableTaintWarnings = eval["EnableTaintWarnings"].getBool();
+    TaintTraceMaxStrlen = eval["TaintTraceMaxStrlen"].getInt32(127);
 #endif
 
     EnableStrict = eval["EnableStrict"].getBool();

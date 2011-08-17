@@ -17,6 +17,7 @@
 #ifdef TAINTED
 
 #include <runtime/base/frame_injection.h>
+#include <runtime/base/runtime_option.h>
 #include <runtime/base/util/extended_logger.h>
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/taint/taint_observer.h>
@@ -44,11 +45,13 @@ TaintTraceDataPtr::TaintTraceDataPtr(const TaintTraceDataPtr& ttd)
 /*
  * TaintTracer methods
  */
-String TaintTracer::Trace(String str, bool copy) {
+String TaintTracer::Trace(String str, bool copy, bool truncate) {
   ASSERT(!TaintObserver::IsActive());
 
   if (copy && !s_requestdata->find(str)) {
-    String str_copy(str.c_str(), CopyString);
+    int len = (truncate && RuntimeOption::TaintTraceMaxStrlen < str.size()) ?
+      RuntimeOption::TaintTraceMaxStrlen : str.size();
+    String str_copy(str.c_str(), len, CopyString);
     return s_requestdata->insert(str_copy);
   } else {
     return s_requestdata->insert(str);
@@ -61,10 +64,10 @@ String TaintTracer::TraceFrameAsString(Array frame, int i) {
 
 Array TaintTracer::TraceFrameAsArray(Array frame) {
   if (frame.exists("function")) {
-    frame.set("function", Trace(frame["function"].toString(), true));
+    frame.set("function", Trace(frame["function"].toString()));
   }
   if (frame.exists("class")) {
-    frame.set("class", Trace(frame["class"].toString(), true));
+    frame.set("class", Trace(frame["class"].toString()));
   }
   if (frame.exists("type")) {
     frame.set("type", Trace(frame["type"].toString()));

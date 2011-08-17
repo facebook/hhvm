@@ -143,7 +143,7 @@ public:
     // calls malloc(), so that later smart allocations that adjust m_stats.usage
     // don't double-count memory.  Thus musage in the example code may well
     // substantially exceed m_stats.usage.
-    if (s_stats_enabled) {
+    if (s_statsEnabled) {
       int64 delta = int64(*m_allocated) - int64(*m_deallocated);
       m_stats.usage += delta - m_delta;
       m_delta = delta;
@@ -169,7 +169,7 @@ public:
       // that we do not use an atomic operation here means that we could get a
       // stale read, but in practice that poses no problems for how we are
       // using the value.
-      if (s_stats_enabled && *m_cactive > m_cactiveLimit) {
+      if (s_statsEnabled && *m_cactive > m_cactiveLimit) {
         refreshStatsHelperStop();
       }
 #endif
@@ -187,7 +187,7 @@ public:
     ~MaskAlloc() {
 #ifdef USE_JEMALLOC
       // exclude mallocs and frees since construction
-      if (s_stats_enabled) {
+      if (s_statsEnabled) {
         m_mm->m_delta = int64(*m_mm->m_allocated) - int64(*m_mm->m_deallocated);
       }
 #endif
@@ -219,7 +219,8 @@ private:
   bool m_stopped; // Set to true if m_cactive exceeded limit.
 
 public:
-  static bool s_stats_enabled;
+  static bool s_statsEnabled;
+  static size_t s_cactiveLimitCeiling;
 #endif
 };
 

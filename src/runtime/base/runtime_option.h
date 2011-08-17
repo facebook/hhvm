@@ -96,7 +96,7 @@ public:
   static int PageletServerThreadDropCacheTimeoutSeconds;
   static int FiberCount;
   static int RequestTimeoutSeconds;
-  static size_t ServerMemoryMaxActive;
+  static size_t ServerMemoryHeadRoom;
   static int64 RequestMemoryMaxBytes;
   static int64 ImageMemoryMaxBytes;
   static int ResponseQueueCount;

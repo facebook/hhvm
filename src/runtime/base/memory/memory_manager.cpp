@@ -28,18 +28,20 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/http_server.h>
 #include <util/alloc.h>
+#include <util/process.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef USE_JEMALLOC
-bool MemoryManager::s_stats_enabled = false;
+bool MemoryManager::s_statsEnabled = false;
+size_t MemoryManager::s_cactiveLimitCeiling = 0;
 
 static size_t threadAllocatedpMib[2];
 static size_t threadDeallocatedpMib[2];
 static size_t statsCactiveMib[2];
-static pthread_once_t mibOnce = PTHREAD_ONCE_INIT;
-static void mibInit() {
+static pthread_once_t threadStatsOnce = PTHREAD_ONCE_INIT;
+static void threadStatsInit() {
   if (!mallctlnametomib) return;
   size_t miblen = sizeof(threadAllocatedpMib) / sizeof(size_t);
   if (mallctlnametomib("thread.allocatedp", threadAllocatedpMib, &miblen)) {
@@ -53,13 +55,34 @@ static void mibInit() {
   if (mallctlnametomib("stats.cactive", statsCactiveMib, &miblen)) {
     return;
   }
-  MemoryManager::s_stats_enabled = true;
+  MemoryManager::s_statsEnabled = true;
+
+  // In threadStats() we wish to solve for cactiveLimit in:
+  //
+  //   footprint + cactiveLimit + headRoom == MemTotal
+  //
+  // However, headRoom comes from RuntimeOption::ServerMemoryHeadRoom, which
+  // isn't initialized until after the code here runs.  Therefore, compute
+  // s_cactiveLimitCeiling here in order to amortize the cost of introspecting
+  // footprint and MemTotal.
+  //
+  //   cactiveLimit == (MemTotal - footprint) - headRoom
+  //
+  //   cactiveLimit == s_cactiveLimitCeiling - headRoom
+  // where
+  //   s_cactiveLimitCeiling == MemTotal - footprint
+  size_t footprint = Process::GetCodeFootprint(Process::GetProcessId());
+  size_t pageSize = size_t(sysconf(_SC_PAGESIZE));
+  size_t MemTotal = size_t(sysconf(_SC_PHYS_PAGES)) * pageSize;
+  if (MemTotal > footprint) {
+    MemoryManager::s_cactiveLimitCeiling = MemTotal - footprint;
+  }
 }
 
-static inline void thread_stats(uint64*& allocated, uint64*& deallocated,
-                                size_t*& cactive) {
-  pthread_once(&mibOnce, mibInit);
-  if (!MemoryManager::s_stats_enabled) return;
+static inline void threadStats(uint64*& allocated, uint64*& deallocated,
+                               size_t*& cactive, size_t& cactiveLimit) {
+  pthread_once(&threadStatsOnce, threadStatsInit);
+  if (!MemoryManager::s_statsEnabled) return;
 
   size_t len = sizeof(allocated);
   if (mallctlbymib(threadAllocatedpMib,
@@ -81,6 +104,15 @@ static inline void thread_stats(uint64*& allocated, uint64*& deallocated,
                    &cactive, &len, NULL, 0)) {
     assert(false);
   }
+
+  size_t headRoom = RuntimeOption::ServerMemoryHeadRoom;
+  // Compute cactiveLimit based on s_cactiveLimitCeiling, as computed in
+  // threadStatsInit().
+  if (headRoom != 0 && headRoom < MemoryManager::s_cactiveLimitCeiling) {
+    cactiveLimit = MemoryManager::s_cactiveLimitCeiling - headRoom;
+  } else {
+    cactiveLimit = SIZE_MAX;
+  }
 }
 #endif
 
@@ -95,8 +127,7 @@ MemoryManager::MemoryManager() : m_enabled(false), m_checkpoint(false) {
     m_enabled = true;
   }
 #ifdef USE_JEMALLOC
-  thread_stats(m_allocated, m_deallocated, m_cactive);
-  m_cactiveLimit = RuntimeOption::ServerMemoryMaxActive;
+  threadStats(m_allocated, m_deallocated, m_cactive, m_cactiveLimit);
 #endif
   resetStats();
   m_stats.maxBytes = 0;
@@ -108,7 +139,7 @@ void MemoryManager::resetStats() {
   m_stats.peakUsage = 0;
   m_stats.peakAlloc = 0;
 #ifdef USE_JEMALLOC
-  if (s_stats_enabled) {
+  if (s_statsEnabled) {
     m_delta = int64(*m_allocated) - int64(*m_deallocated);
   }
 #endif

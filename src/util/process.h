@@ -129,6 +129,11 @@ public:
   static std::string GetCPUModel();
 
   /**
+   * Get binary code footprint in bytes.
+   */
+  static size_t GetCodeFootprint(pid_t pid);
+
+  /**
    * Get current working directory.
    */
   static std::string GetCurrentDirectory();

@@ -1028,12 +1028,12 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       }
     }
   }
-  if (!func || func->isRedeclaring()) {
+  if (!func || func->isRedeclaring() || func->isAbstract()) {
     if (m_funcScope) {
       m_funcScope.reset();
       Construct::recomputeEffects();
     }
-    if (func) {
+    if (func && func->isRedeclaring()) {
       m_redeclared = true;
       getScope()->getVariables()->
         setAttribute(VariableTable::NeedGlobalPointer);

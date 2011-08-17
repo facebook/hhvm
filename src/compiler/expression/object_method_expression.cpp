@@ -280,18 +280,23 @@ void ObjectMethodExpression::outputCPPObject(CodeGenerator &cg,
     TypePtr thisActType (m_object->getActualType());
     bool close = false;
     if (thisImplType) {
+      ASSERT(thisActType);
       ASSERT(!Type::SameType(thisActType, thisImplType));
-      // This happens in this case:
-      // if ($this instanceof Y) {
-      //   ... $this->meth() ...
-      // }
-      ClassScopePtr cls(thisActType->getClass(ar, getScope()));
-      ASSERT(cls && !cls->derivedByDynamic()); // since we don't do type
-                                               // assertions for these
-      cg_printf("static_cast<%s%s*>(",
-                Option::ClassPrefix,
-                cls->getId().c_str());
-      close = true;
+      ClassScopePtr implCls(thisImplType->getClass(ar, getScope()));
+      if (implCls &&
+          !implCls->derivesFrom(ar, thisActType->getName(), true, false)) {
+        // This happens in this case:
+        // if ($this instanceof Y) {
+        //   ... $this->meth() ...
+        // }
+        ClassScopePtr cls(thisActType->getClass(ar, getScope()));
+        ASSERT(cls && !cls->derivedByDynamic()); // since we don't do type
+                                                 // assertions for these
+        cg_printf("static_cast<%s%s*>(",
+                  Option::ClassPrefix,
+                  cls->getId().c_str());
+        close = true;
+      }
     }
     if (getFunctionScope()->isStatic()) {
       if (close) {

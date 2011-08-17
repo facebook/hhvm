@@ -257,13 +257,14 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
       if (!parent) {
         parent = cls;
       }
+      m_symOwner = parent;
       assert(m_propSym->isPresent());
       m_propSymValid =
         (!m_propSym->isPrivate() || getOriginalClass() == parent) &&
         !m_propSym->isStatic();
 
       if (m_propSymValid) {
-        parent->addUse(getScope(), BlockScope::UseKindNonStaticRef);
+        m_symOwner->addUse(getScope(), BlockScope::UseKindNonStaticRef);
       }
     }
   }
@@ -271,7 +272,8 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   TypePtr ret;
   if (m_propSymValid && (!cls->derivesFromRedeclaring() ||
                          m_propSym->isPrivate())) {
-    ret = cls->checkProperty(m_propSym, type, coerce, ar);
+    assert(m_symOwner);
+    ret = m_symOwner->checkProperty(m_propSym, type, coerce, ar);
     assert(m_object->getType()->isSpecificObject());
     m_valid = true;
     return ret;
@@ -414,18 +416,23 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
     TypePtr thisActType (m_object->getActualType());
     bool close = false;
     if (m_valid && thisImplType) {
+      ASSERT(thisActType);
       ASSERT(!Type::SameType(thisActType, thisImplType));
-      // This happens in this case:
-      // if ($this instanceof Y) {
-      //   ... $this->prop ...
-      // }
-      ClassScopePtr cls(thisActType->getClass(ar, getScope()));
-      ASSERT(cls && !cls->derivedByDynamic()); // since we don't do type
-                                               // assertions for these
-      cg_printf("static_cast<%s%s*>(",
-                Option::ClassPrefix,
-                cls->getId().c_str());
-      close = true;
+      ClassScopePtr implCls(thisImplType->getClass(ar, getScope()));
+      if (implCls &&
+          !implCls->derivesFrom(ar, thisActType->getName(), true, false)) {
+        // This happens in this case:
+        // if ($this instanceof Y) {
+        //   ... $this->prop ...
+        // }
+        ClassScopePtr cls(thisActType->getClass(ar, getScope()));
+        ASSERT(cls && !cls->derivedByDynamic()); // since we don't do type
+                                                 // assertions for these
+        cg_printf("static_cast<%s%s*>(",
+                  Option::ClassPrefix,
+                  cls->getId().c_str());
+        close = true;
+      }
     }
     if (m_valid) {
       if (!m_object->getOriginalClass()) {

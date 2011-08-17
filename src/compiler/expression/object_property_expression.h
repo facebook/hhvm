@@ -64,6 +64,7 @@ private:
 
   Symbol *m_propSym;
   ClassScopeRawPtr m_objectClass;
+  ClassScopeRawPtr m_symOwner;
 
   // for avoiding code generate toObject(Variant)
   bool directVariantProxy(AnalysisResultPtr ar);

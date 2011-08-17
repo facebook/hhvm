@@ -456,7 +456,7 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
     ParameterExpressionPtr param
       (dynamic_pointer_cast<ParameterExpression>((*plist)[i]));
     ExpressionPtr arg = i < nAct ? (*m_params)[i] :
-      param->defaultValue()->clone();
+      Clone(param->defaultValue(), getScope());
     SimpleVariablePtr var
       (new SimpleVariable(getScope(),
                           (i < nAct ? arg.get() : this)->getLocation(),

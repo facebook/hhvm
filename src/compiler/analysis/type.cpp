@@ -750,28 +750,26 @@ TypePtr Type::InferredObject(AnalysisResultConstPtr ar,
   ASSERT(type1->m_kindOf == KindOfObject);
   ASSERT(type2->m_kindOf == KindOfObject);
 
-  std::string resultName = "";
+  TypePtr resultType = Type::Object;
   // if they're the same, or we don't know one's name, then use
   // the other
   if (type1->m_name == type2->m_name || type1->m_name.empty()) {
-    resultName = type2->m_name;
+    resultType = type2;
   } else if (type2->m_name.empty()) {
-    resultName = type1->m_name;
+    resultType = type1;
   } else {
     // take the subclass
     ClassScopePtr cls1 = ar->findClass(type1->m_name);
     ClassScopePtr cls2 = ar->findClass(type2->m_name);
     if (cls1 && !cls1->isRedeclaring()
         && cls1->derivesFrom(ar, type2->m_name, true, false)) {
-      resultName = type1->m_name;
+      resultType = type1;
     } else if (cls2 && !cls2->isRedeclaring()
                && cls2->derivesFrom(ar, type1->m_name, true, false)) {
-      resultName = type2->m_name;
+      resultType = type2;
     }
   }
-  return resultName.empty() ?
-    Type::Object :
-    Type::CreateObjectType(resultName);
+  return resultType;
 }
 
 /* We have inferred type1 and type2 as the actual types for the same

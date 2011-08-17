@@ -1302,9 +1302,11 @@ void DebuggerClient::parseCommand(const char *line) {
       case '\'':
         if (token.empty() && quote == 0) {
           quote = ch;
+          token += ch;
           break;
         }
         if (quote == ch && (p[1] == ' ' || p[1] == 0)) {
+          token += ch;
           addToken(token);
           quote = 0;
           break;

@@ -102,7 +102,8 @@ public:
   void saveParseTree(Token &tree);
   void onName(Token &out, Token &name, NameKind kind);
   void onVariable(Token &out, Token *exprs, Token &var, Token *value,
-                  bool constant = false);
+                  bool constant = false,
+                  const std::string &docComment = "");
   void onStaticVariable(Token &out, Token *exprs, Token &var, Token *value);
   void onClassVariableModifer(Token &mod) {}
   void onClassVariableStart(Token &out, Token *modifiers, Token &decl,

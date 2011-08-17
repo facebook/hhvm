@@ -158,6 +158,8 @@ public:
   void analyzeProgramFinal();
   void analyzePerfectVirtuals();
   void dump();
+
+  void docJson(const std::string &filename);
   void visitFiles(void (*cb)(AnalysisResultPtr, StatementPtr, void*),
                   void *data);
 

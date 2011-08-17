@@ -29,7 +29,8 @@ DECLARE_BOOST_TYPES(ConstantExpression);
 class ConstantExpression : public Expression {
 public:
   ConstantExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                     const std::string &name);
+                     const std::string &name,
+                     const std::string &docComment = "");
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
@@ -45,6 +46,9 @@ public:
   virtual bool canonCompare(ExpressionPtr e) const;
 
   const std::string &getName() const { return m_name;}
+  const std::string &getDocComment() const {
+    return m_docComment;
+  }
   bool isBoolean() const;
   bool isNull() const;
   bool getBooleanValue() const;
@@ -57,6 +61,7 @@ private:
 
   Symbol *resolveNS(AnalysisResultConstPtr ar);
   std::string m_name;
+  std::string m_docComment;
   bool m_valid;
   bool m_dynamic;
   bool m_visited;

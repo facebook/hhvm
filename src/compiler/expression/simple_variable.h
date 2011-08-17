@@ -27,7 +27,9 @@ DECLARE_BOOST_TYPES(SimpleVariable);
 
 class SimpleVariable : public Expression {
 public:
-  SimpleVariable(EXPRESSION_CONSTRUCTOR_PARAMETERS, const std::string &name);
+  SimpleVariable(EXPRESSION_CONSTRUCTOR_PARAMETERS,
+                 const std::string &name,
+                 const std::string &docComment = "");
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   virtual int getLocalEffects() const;
@@ -41,6 +43,9 @@ public:
 
   virtual bool canonCompare(ExpressionPtr e) const;
   const std::string &getName() const { return m_name;}
+  const std::string &getDocComment() const {
+    return m_docComment;
+  }
   Symbol *getSymbol() const { return m_sym; }
 
   bool couldBeAliased() const;
@@ -63,6 +68,7 @@ private:
   std::string getNamePrefix() const;
 
   std::string m_name;
+  std::string m_docComment;
 
   TypePtr m_superGlobalType;
   Symbol *m_sym;

@@ -786,6 +786,24 @@ std::string FunctionScope::getId() const {
     boost::lexical_cast<std::string>(m_redeclaring);
 }
 
+std::string FunctionScope::getDocName() const {
+  string name = getOriginalName();
+  if (m_redeclaring < 0) {
+    return name;
+  }
+  return name + Option::IdPrefix +
+    boost::lexical_cast<std::string>(m_redeclaring);
+}
+
+std::string FunctionScope::getDocFullName() const {
+  FunctionScope *self = const_cast<FunctionScope*>(this);
+  const string &docName = getDocName();
+  if (ClassScopeRawPtr cls = self->getContainingClass()) {
+    return cls->getDocName() + string("::") + docName;
+  }
+  return docName;
+}
+
 std::string FunctionScope::getInjectionId() const {
   string injectionName = CodeGenerator::FormatLabel(getOriginalName());
   MethodStatementPtr stmt =
@@ -1590,8 +1608,8 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
   }
 }
 
-void FunctionScope::serialize(JSON::OutputStream &out) const {
-  JSON::MapStream ms(out);
+void FunctionScope::serialize(JSON::CodeError::OutputStream &out) const {
+  JSON::CodeError::MapStream ms(out);
   int vis = 0;
   if (isPublic()) vis = ClassScope::Public;
   else if (isProtected()) vis = ClassScope::Protected;
@@ -1616,6 +1634,69 @@ void FunctionScope::serialize(JSON::OutputStream &out) const {
     .add("visibility", vis)
     .add("argIsRef", m_refs)
     .done();
+}
+
+void FunctionScope::serialize(JSON::DocTarget::OutputStream &out) const {
+  JSON::DocTarget::MapStream ms(out);
+
+  ms.add("name", getDocName());
+  ms.add("line", getStmt() ? getStmt()->getLocation()->line0 : 0);
+  ms.add("docs", m_docComment);
+
+  int mods = 0;
+  if (isPublic())    mods |= ClassInfo::IsPublic;
+  if (isProtected()) mods |= ClassInfo::IsProtected;
+  if (isPrivate())   mods |= ClassInfo::IsPrivate;
+  if (isStatic())    mods |= ClassInfo::IsStatic;
+  if (isFinal())     mods |= ClassInfo::IsFinal;
+  if (isAbstract())  mods |= ClassInfo::IsAbstract;
+  ms.add("modifiers", mods);
+
+  ms.add("refreturn", isRefReturn());
+  ms.add("return",    getReturnType());
+
+  vector<SymParamWrapper> paramSymbols;
+  for (int i = 0; i < m_maxParam; i++) {
+    const string &name = getParamName(i);
+    const Symbol *sym = getVariables()->getSymbol(name);
+    ASSERT(sym && sym->isParameter());
+    paramSymbols.push_back(SymParamWrapper(sym));
+  }
+  ms.add("parameters", paramSymbols);
+
+  // scopes that call this scope (callers)
+  vector<string> callers;
+  const BlockScopeRawPtrFlagsPtrVec &deps = getDeps();
+  for (BlockScopeRawPtrFlagsPtrVec::const_iterator it = deps.begin();
+       it != deps.end(); ++it) {
+    const BlockScopeRawPtrFlagsPtrPair &p(*it);
+    if ((*p.second & BlockScope::UseKindCaller) &&
+        p.first->is(BlockScope::FunctionScope)) {
+      FunctionScopeRawPtr f(
+          static_pointer_cast<FunctionScope>(p.first));
+      callers.push_back(f->getDocFullName());
+    }
+  }
+  ms.add("callers", callers);
+
+  // scopes that this scope calls (callees)
+  // TODO(stephentu): this list only contains *user* functions,
+  // we should also include builtins
+  vector<string> callees;
+  const BlockScopeRawPtrFlagsVec &users = getOrderedUsers();
+  for (BlockScopeRawPtrFlagsVec::const_iterator uit = users.begin();
+       uit != users.end(); ++uit) {
+    BlockScopeRawPtrFlagsVec::value_type pf = *uit;
+    if ((pf->second & BlockScope::UseKindCaller) &&
+        pf->first->is(BlockScope::FunctionScope)) {
+      FunctionScopeRawPtr f(
+          static_pointer_cast<FunctionScope>(pf->first));
+      callees.push_back(f->getDocFullName());
+    }
+  }
+  ms.add("callees", callees);
+
+  ms.done();
 }
 
 void FunctionScope::outputCPPCreateDecl(CodeGenerator &cg,

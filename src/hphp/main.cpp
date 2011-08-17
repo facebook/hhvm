@@ -96,6 +96,7 @@ struct ProgramOptions {
   string javaRoot;
   bool generateFFI;
   bool dump;
+  string docjson;
   bool coredump;
   bool nofork;
   bool fl_annotate;
@@ -323,6 +324,9 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     ("dump",
      value<bool>(&po.dump)->default_value(false),
      "dump the program graph")
+    ("docjson",
+     value<string>(&po.docjson)->default_value(""),
+     "Filename to generate a JSON file for PHP docs")
     ("coredump",
      value<bool>(&po.coredump)->default_value(false),
      "turn on coredump")
@@ -488,6 +492,18 @@ cout << "Compiler: " << COMPILER_ID << "\n";
     if (po.format.empty()) po.format = "cluster";
   }
 
+  if (!po.docjson.empty()) {
+    if (po.target != "cpp" &&
+        po.target != "run" &&
+        po.target != "analyze") {
+      Logger::Error(
+        "Cannot generate doc JSON file unless target is "
+        "'cpp', 'run', or 'analyze'");
+    } else {
+      Option::DocJson = po.docjson;
+    }
+  }
+
   // we always do pre/post opt no matter the opt level
   Option::PreOptimization = true;
   Option::PostOptimization = true;
@@ -642,6 +658,11 @@ int process(const ProgramOptions &po) {
     ar->dump();
   }
 
+  if (!Option::DocJson.empty()) {
+    Timer timer(Timer::WallTime, "Saving doc JSON file");
+    ar->docJson(Option::DocJson);
+  }
+
   // saving stats
   if (po.target == "analyze" || po.genStats || !po.dbStats.empty()) {
     int seconds = timer.getMicroSeconds() / 1000000;
@@ -659,12 +680,12 @@ int process(const ProgramOptions &po) {
         Logger::Error("%s", e.what());
       }
     } else {
-      Compiler::SaveErrors((po.outputDir + "/CodeError.js").c_str());
+      Compiler::SaveErrors(ar, (po.outputDir + "/CodeError.js").c_str());
       package.saveStatsToFile((po.outputDir + "/Stats.js").c_str(), seconds);
     }
   } else if (Compiler::HasError()) {
     Logger::Info("saving code errors...");
-    Compiler::SaveErrors((po.outputDir + "/CodeError.js").c_str());
+    Compiler::SaveErrors(ar, (po.outputDir + "/CodeError.js").c_str());
   }
 
   if (!po.filecache.empty()) {
@@ -896,7 +917,7 @@ int runTargetCheck(const ProgramOptions &po, AnalysisResultPtr ar,
 
   // check error
   if (Compiler::HasError() && !po.force) {
-    Compiler::DumpErrors();
+    Compiler::DumpErrors(ar);
     return 1;
   }
 

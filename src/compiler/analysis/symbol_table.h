@@ -175,6 +175,12 @@ public:
     m_flags.m_hasClassInit = true;
     m_initVal = initVal;
   }
+
+  // we avoid implementing ISerialize for Symbols, since we don't
+  // want Symbols to need a vtable. Instead, we use the
+  // wrappers below
+  void serializeParam(JSON::DocTarget::OutputStream &out) const;
+  void serializeClassVar(JSON::DocTarget::OutputStream &out) const;
 private:
   std::string  m_name;
   unsigned int m_hash;
@@ -236,11 +242,35 @@ private:
                           TypePtr &curType, TypePtr type);
 };
 
+class SymParamWrapper : public JSON::DocTarget::ISerializable {
+public:
+  SymParamWrapper(const Symbol* sym) : m_sym(sym) {
+    ASSERT(sym);
+  }
+  virtual void serialize(JSON::DocTarget::OutputStream &out) const {
+    m_sym->serializeParam(out);
+  }
+private:
+  const Symbol *m_sym;
+};
+
+class SymClassVarWrapper : public JSON::DocTarget::ISerializable {
+public:
+  SymClassVarWrapper(const Symbol* sym) : m_sym(sym) {
+    ASSERT(sym);
+  }
+  virtual void serialize(JSON::DocTarget::OutputStream &out) const {
+    m_sym->serializeClassVar(out);
+  }
+private:
+  const Symbol *m_sym;
+};
+
 /**
  * Base class of VariableTable and ConstantTable.
  */
 class SymbolTable : public boost::enable_shared_from_this<SymbolTable>,
-                    public JSON::ISerializable {
+                    public JSON::CodeError::ISerializable {
 public:
   static Mutex AllSymbolTablesMutex;
   static SymbolTablePtrList AllSymbolTables; // for stats purpose
@@ -287,9 +317,9 @@ public:
   }
 
   /**
-   * Implements JSON::ISerializable.
+   * Implements JSON::CodeError::ISerializable.
    */
-  virtual void serialize(JSON::OutputStream &out) const;
+  virtual void serialize(JSON::CodeError::OutputStream &out) const;
 
   /**
    * Find a symbol's inferred type.

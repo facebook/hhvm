@@ -19,152 +19,191 @@
 
 #include "base.h"
 
-namespace HPHP { namespace JSON {
+namespace HPHP {
+  DECLARE_BOOST_TYPES(AnalysisResult);
+namespace JSON {
 ///////////////////////////////////////////////////////////////////////////////
 
-class OutputStream;
-class MapStream;
+template <typename T> class _OutputStream;
+template <typename T> class _MapStream;
+template <typename T> class _ListStream;
+template <typename T> class _ISerializable;
+
+#define DEFINE_JSON_OUTPUT_TYPE(type) \
+  struct type { \
+    typedef _OutputStream<type>  OutputStream; \
+    typedef _MapStream<type>     MapStream; \
+    typedef _ListStream<type>    ListStream; \
+    typedef _ISerializable<type> ISerializable; \
+  }
+
+DEFINE_JSON_OUTPUT_TYPE(CodeError);
+DEFINE_JSON_OUTPUT_TYPE(DocTarget);
 
 std::string Escape(const char *s);
 
-class ISerializable {
+template <typename T>
+class _ISerializable {
 public:
-  virtual ~ISerializable() {}
+  virtual ~_ISerializable() {}
 
   /**
    * Generate JSON output of this data structure.
    */
-  virtual void serialize(OutputStream &out) const = 0;
+  virtual void serialize(_OutputStream<T> &out) const = 0;
 };
 
-class Name : public ISerializable {
+class Name {
 public:
-  Name(const char *name);
-  Name(const std::string &name);
-
-  // implement ISerializable
-  virtual void serialize(OutputStream &out) const;
-
+  Name(const char *name) {
+    ASSERT(name && *name);
+    m_name = name;
+  }
+  Name(const std::string &name) {
+    ASSERT(!name.empty());
+    m_name = name;
+  }
+  const std::string &getName() const { return m_name; }
 private:
   std::string m_name;
 };
 
-class OutputStream {
+struct _Null {};
+static _Null Null;
+
+template <typename Type>
+class _OutputStream {
 public:
-  OutputStream(std::ostream &out) : m_out(out) {}
+  _OutputStream(std::ostream &out,
+                AnalysisResultPtr ar) : m_out(out), m_ar(ar) {}
 
-  OutputStream &operator<< (int v);
-  OutputStream &operator<< (const char *v);
-  OutputStream &operator<< (const std::string &v);
-  OutputStream &operator<< (const Name &v);
-  OutputStream &operator<< (const ISerializable &v);
+  _OutputStream &operator<< (unsigned int v) { m_out << v; return *this; }
+
+  _OutputStream &operator<< (int v) { m_out << v; return *this; }
+
+  _OutputStream &operator<< (bool v) {
+    m_out << (v ? "true" : "false");
+    return *this;
+  }
+
+  _OutputStream &operator<< (const char *v) {
+    m_out << "\"" << Escape(v) << "\"";
+    return *this;
+  }
+
+  _OutputStream &operator<< (const std::string &v) {
+    m_out << "\"" << Escape(v.c_str()) << "\"";
+    return *this;
+  }
+
+  _OutputStream &operator<< (const Name &n) {
+    m_out << "\"" << n.getName() << "\":";
+    return *this;
+  }
+
+  _OutputStream &operator<< (const _Null &n) {
+    m_out << "null";
+    return *this;
+  }
+
+  _OutputStream &operator<< (const _ISerializable<Type> &v) {
+    v.serialize(*this);
+    return *this;
+  }
 
   template<typename T>
-    OutputStream &operator<< (const boost::shared_ptr<T> &v);
+  _OutputStream &operator<< (const boost::shared_ptr<T> &v) {
+    if (v) {
+      *this << *v;
+    } else {
+      *this << Null;
+    }
+    return *this;
+  }
 
   template<typename T>
-    OutputStream &operator<< (const std::vector<T> &v);
+  _OutputStream &operator<< (const std::vector<T> &v) {
+    m_out << "[";
+    for (unsigned int i = 0; i < v.size(); i++) {
+      if (i > 0) m_out << ',';
+      *this << v[i];
+    }
+    m_out << "]";
+    return *this;
+  }
+
   template<typename T>
-    OutputStream &operator<< (const std::set<T> &v);
+  _OutputStream &operator<< (const std::set<T> &v) {
+    m_out << "[";
+    bool first = true;
+    BOOST_FOREACH(T el, v) {
+      if (first) {
+        first = false;
+      } else {
+        m_out << ',';
+      }
+      *this << el;
+    }
+    m_out << "]";
+    return *this;
+  }
+
+  // TODO: std::map and __gnu_cxx::hash_map should share
+  // the same function...
+
   template<typename K, typename T, typename C>
-    OutputStream &operator<< (const std::map<K, T, C> &v);
+  _OutputStream &operator<< (const std::map<K, T, C> &v) {
+    m_out << "{";
+    for (typename std::map<K, T, C>::const_iterator iter = v.begin();
+         iter != v.end(); ++iter) {
+      if (iter != v.begin()) m_out << ',';
+      *this << Name(iter->first);
+      *this << iter->second;
+    }
+    m_out << "}\n";
+    return *this;
+  }
 
   template<typename K, typename T, typename C>
-    OutputStream &operator<< (const __gnu_cxx::hash_map<K, T, C> &v);
+  _OutputStream &operator<<
+    (const __gnu_cxx::hash_map<K, T, C> &v) {
+    m_out << "{";
+    for (typename __gnu_cxx::hash_map<K, T, C>::const_iterator
+           iter = v.begin(); iter != v.end(); ++iter) {
+      if (iter != v.begin()) m_out << ',';
+      *this << Name(iter->first);
+      *this << iter->second;
+    }
+    m_out << "}\n";
+    return *this;
+  }
+
+  AnalysisResultPtr analysisResult() const { return m_ar; }
 
 private:
-  std::ostream &m_out;
+  std::ostream      &m_out;
+  AnalysisResultPtr  m_ar;
+
   std::ostream &raw() { return m_out;}
-  friend class Name;
-  friend class MapStream;
-  friend class ListStream;
+
+  friend class _MapStream<Type>;
+  friend class _ListStream<Type>;
 };
 
-template<typename T>
-  OutputStream &OutputStream::operator<< (const boost::shared_ptr<T> &v) {
-  if (v) {
-    *this << *v;
-  } else {
-    m_out << "null";
-  }
-  return *this;
-}
-
-template<typename T>
-  OutputStream &OutputStream::operator<< (const std::vector<T> &v) {
-  m_out << "[";
-  for (unsigned int i = 0; i < v.size(); i++) {
-    if (i > 0) m_out << ',';
-    *this << v[i];
-  }
-  m_out << "]";
-  return *this;
-}
-
-template<typename T>
-  OutputStream &OutputStream::operator<< (const std::set<T> &v) {
-  m_out << "[";
-  bool first = true;
-  BOOST_FOREACH(T el, v) {
-    if (first) {
-      first = false;
-    } else {
-      m_out << ',';
-    }
-    *this << el;
-  }
-  m_out << "]";
-  return *this;
-}
-
-template<typename K, typename T, typename C>
-  OutputStream &OutputStream::operator<< (const std::map<K, T, C> &v) {
-  m_out << "{";
-  for (typename std::map<K, T, C>::const_iterator iter = v.begin();
-       iter != v.end(); ++iter) {
-    if (iter != v.begin()) m_out << ',';
-    *this << Name(iter->first);
-    *this << iter->second;
-  }
-  m_out << "}\n";
-  return *this;
-}
-
-template<typename K, typename T, typename C>
-  OutputStream &OutputStream::operator<<
-  (const __gnu_cxx::hash_map<K, T, C> &v) {
-  m_out << "{";
-  for (typename __gnu_cxx::hash_map<K, T, C>::const_iterator
-         iter = v.begin(); iter != v.end(); ++iter) {
-    if (iter != v.begin()) m_out << ',';
-    *this << Name(iter->first);
-    *this << iter->second;
-  }
-  m_out << "}\n";
-  return *this;
-}
-
-class MapStream {
+template <typename Type>
+class _MapStream {
 public:
-  MapStream(OutputStream &jout)
+  _MapStream(_OutputStream<Type> &jout)
     : m_out(jout.raw()), m_jout(jout), m_first(true) {}
-  /*
-  MapStream &add(const std::string &n, int v);
-  MapStream &add(const std::string &n, const char *v);
-  MapStream &add(const std::string &n, const std::string &v);
-  MapStream &add(const std::string &n, const ISerializable &v);
-
-  template<typename K, typename T, typename C>
-    MapStream &add(const std::string &n, const std::map<K, T, C> &v);
 
   template<typename T>
-    MapStream &add(const std::string &n, const std::vector<T> &v);
-  */
+  _MapStream &add(const std::string &n, T v) {
+    init(n);
+    m_jout << v;
+    return *this;
+  }
 
-  template<typename T>
-    MapStream &add(const std::string &n, T v);
-
-  MapStream &add(const std::string &n) {
+  _MapStream &add(const std::string &n) {
     init(n);
     return *this;
   }
@@ -177,9 +216,9 @@ public:
   }
 
 private:
-  std::ostream &m_out;
-  OutputStream &m_jout;
-  bool m_first;
+  std::ostream        &m_out;
+  _OutputStream<Type> &m_jout;
+  bool                m_first;
 
   void init(const std::string &n) {
     if (m_first) {
@@ -192,16 +231,10 @@ private:
   }
 };
 
-template<typename T>
-  MapStream &MapStream::add(const std::string &n, T v) {
-  init(n);
-  m_jout << v;
-  return *this;
-}
-
-class ListStream {
+template <typename Type>
+class _ListStream {
 public:
-  ListStream(OutputStream &jout)
+  _ListStream(_OutputStream<Type> &jout)
     : m_out(jout.raw()), m_jout(jout), m_first(true) {}
 
   void next() {
@@ -214,7 +247,7 @@ public:
   }
 
   template<typename T>
-    ListStream &operator<< (T &v) {
+  _ListStream &operator<< (T &v) {
     next();
     m_jout << v;
     return *this;
@@ -228,9 +261,9 @@ public:
   }
 
 private:
-  std::ostream &m_out;
-  OutputStream &m_jout;
-  bool m_first;
+  std::ostream        &m_out;
+  _OutputStream<Type> &m_jout;
+  bool                m_first;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

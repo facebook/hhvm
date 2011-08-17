@@ -68,7 +68,7 @@ public:
  * Base class of Expression and Statement.
  */
 class Construct : public boost::enable_shared_from_this<Construct>,
-                  public JSON::ISerializable {
+                  public JSON::CodeError::ISerializable {
 protected:
   Construct(BlockScopePtr scope, LocationPtr loc);
 public:
@@ -225,9 +225,9 @@ public:
   virtual void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) = 0;
 
   /**
-   * Implements JSON::ISerializable.
+   * Implements JSON::CodeError::ISerializable.
    */
-  virtual void serialize(JSON::OutputStream &out) const;
+  virtual void serialize(JSON::CodeError::OutputStream &out) const;
 
   /**
    * Get canonicalized PHP source code for this construct.

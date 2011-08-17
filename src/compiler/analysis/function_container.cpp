@@ -62,6 +62,20 @@ void FunctionContainer::countReturnTypes(std::map<std::string, int> &counts) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
+void
+FunctionContainer::getFunctionsFlattened(FunctionScopePtrVec &funcs,
+                                         bool excludePseudoMains /* = false */)
+const {
+  for (StringToFunctionScopePtrVecMap::const_iterator it = m_functions.begin();
+       it != m_functions.end(); ++it) {
+    BOOST_FOREACH(FunctionScopePtr func, it->second) {
+      if (!excludePseudoMains || !func->inPseudoMain()) {
+        funcs.push_back(func);
+      }
+    }
+  }
+}
+
 void FunctionContainer::outputCPPJumpTableDecl(CodeGenerator &cg,
                                                AnalysisResultPtr ar) {
   for (StringToFunctionScopePtrVecMap::const_iterator iter =

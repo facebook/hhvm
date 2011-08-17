@@ -18,6 +18,7 @@
 #define __PARAMETER_EXPRESSION_H__
 
 #include <compiler/expression/expression.h>
+#include <util/json.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

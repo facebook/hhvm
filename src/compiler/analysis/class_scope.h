@@ -39,7 +39,8 @@ class Symbol;
  * inferred types and analyzed results here, so not to pollute syntax trees.
  */
 class ClassScope : public BlockScope, public FunctionContainer,
-                   public JSON::ISerializable {
+                   public JSON::CodeError::ISerializable,
+                   public JSON::DocTarget::ISerializable {
 
 public:
   enum KindOf {
@@ -111,7 +112,7 @@ public:
     return getAttribute(ClassNameConstructor);
   }
   const std::string &getOriginalName() const;
-
+  std::string getDocName() const;
 
   virtual std::string getId() const;
 
@@ -260,6 +261,10 @@ public:
   void getAllParents(AnalysisResultConstPtr ar,
                      std::vector<std::string> &names);
 
+  void getInterfaces(AnalysisResultConstPtr ar,
+                     std::vector<std::string> &names,
+                     bool recursive = true) const;
+
   std::vector<std::string> &getBases() { return m_bases;}
 
   ClassScopePtr getParentScope(AnalysisResultConstPtr ar) const;
@@ -328,7 +333,8 @@ public:
   /**
    * Serialize the iface, not everything.
    */
-  void serialize(JSON::OutputStream &out) const;
+  void serialize(JSON::CodeError::OutputStream &out) const;
+  void serialize(JSON::DocTarget::OutputStream &out) const;
 
   static void outputCPPClassVarInitImpl(
     CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,

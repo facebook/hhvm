@@ -329,8 +329,8 @@ bool Package::parseImpl(const char *fileName) {
 void Package::saveStatsToFile(const char *filename, int totalSeconds) const {
   ofstream f(filename);
   if (f) {
-    JSON::OutputStream o(f);
-    JSON::MapStream ms(o);
+    JSON::CodeError::OutputStream o(f, m_ar);
+    JSON::CodeError::MapStream ms(o);
 
     ms.add("FileCount", getFileCount())
       .add("LineCount", getLineCount())
@@ -354,7 +354,7 @@ void Package::saveStatsToFile(const char *filename, int totalSeconds) const {
     o << counts;
 
     ms.add("VariableTableFunctions");
-    JSON::ListStream ls(o);
+    JSON::CodeError::ListStream ls(o);
     BOOST_FOREACH(const std::string &f, m_ar->m_variableTableFunctions) {
       ls << f;
     }
@@ -371,7 +371,7 @@ int Package::saveStatsToDB(ServerDataPtr server, int totalSeconds,
   SymbolTable::CountTypes(counts);
   m_ar->countReturnTypes(counts);
   ostringstream sout;
-  JSON::OutputStream o(sout);
+  JSON::CodeError::OutputStream o(sout, m_ar);
   o << counts;
 
   DBConn conn;

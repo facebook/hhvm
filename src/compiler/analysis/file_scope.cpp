@@ -247,6 +247,32 @@ string FileScope::outputFilebase() const {
   return Option::MangleFilename(out, false);
 }
 
+void FileScope::getClassesFlattened(ClassScopePtrVec &classes) const {
+  for (StringToClassScopePtrVecMap::const_iterator it = m_classes.begin();
+       it != m_classes.end(); ++it) {
+    BOOST_FOREACH(ClassScopePtr cls, it->second) {
+      classes.push_back(cls);
+    }
+  }
+}
+
+void FileScope::serialize(JSON::DocTarget::OutputStream &out) const {
+  JSON::DocTarget::MapStream ms(out);
+  ms.add("name", getName());
+
+  ClassScopePtrVec classes;
+  getClassesFlattened(classes);
+  ms.add("classes", classes);
+
+  FunctionScopePtrVec funcs;
+  getFunctionsFlattened(funcs, true); // excluding pseudo-mains for now
+  ms.add("functions", funcs);
+
+  // TODO(stephentu): constants
+
+  ms.done();
+}
+
 void FileScope::outputCPPHelper(CodeGenerator &cg, AnalysisResultPtr ar,
                                 bool classes /* = true */) {
   if (classes) {

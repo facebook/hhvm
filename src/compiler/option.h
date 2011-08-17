@@ -367,6 +367,7 @@ public:
   static bool ControlFlow;
   static bool VariableCoalescing;
   static bool DumpAst;
+  static std::string DocJson; // filename to dump doc JSON to
   static bool PregenerateCPP;
   static bool GenerateFFIStaticBinding;
 

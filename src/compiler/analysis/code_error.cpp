@@ -30,7 +30,7 @@ namespace HPHP { namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(ErrorInfo);
-class ErrorInfo : public JSON::ISerializable {
+class ErrorInfo : public JSON::CodeError::ISerializable {
 public:
   ErrorType m_error;
   ConstructPtr m_construct1;
@@ -38,28 +38,29 @@ public:
   std::string m_data;
 
   /**
-   * Implements JSON::ISerializable.
+   * Implements JSON::CodeError::ISerializable.
    */
-  virtual void serialize(JSON::OutputStream &out) const;
+  virtual void serialize(JSON::CodeError::OutputStream &out) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class CodeErrors : public JSON::ISerializable {
+class CodeErrors : public JSON::CodeError::ISerializable {
 public:
   CodeErrors();
   void clear();
 
   /**
-   * Implements JSON::ISerializable.
+   * Implements JSON::CodeError::ISerializable.
    */
-  virtual void serialize(JSON::OutputStream &out) const;
+  virtual void serialize(JSON::CodeError::OutputStream &out) const;
 
   void record(ErrorInfoPtr errorInfo);
   bool exists(ErrorType type) const;
   bool exists() const;
 
-  void saveToFile(const char *filename, bool varWrapper) const;
+  void saveToFile(AnalysisResultPtr ar,
+                  const char *filename, bool varWrapper) const;
 
 private:
   static std::vector<const char *> ErrorTexts;
@@ -113,8 +114,8 @@ bool CodeErrors::exists() const {
   return false;
 }
 
-void ErrorInfo::serialize(JSON::OutputStream &out) const {
-  JSON::MapStream ms(out);
+void ErrorInfo::serialize(JSON::CodeError::OutputStream &out) const {
+  JSON::CodeError::MapStream ms(out);
   if (m_construct1) {
     ms.add("c1", m_construct1);
   }
@@ -127,7 +128,7 @@ void ErrorInfo::serialize(JSON::OutputStream &out) const {
   ms.done();
 }
 
-void CodeErrors::serialize(JSON::OutputStream &out) const {
+void CodeErrors::serialize(JSON::CodeError::OutputStream &out) const {
   vector<const char *> errorTexts = getErrorTexts();
 
   unsigned int total = 0;
@@ -135,17 +136,17 @@ void CodeErrors::serialize(JSON::OutputStream &out) const {
     total += m_errors[i].size();
   }
 
-  JSON::ListStream ls(out);
+  JSON::CodeError::ListStream ls(out);
   ls << total;
   ls.next();
 
-  JSON::MapStream ms(out);
+  JSON::CodeError::MapStream ms(out);
   for (unsigned int i = 0; i < m_errors.size(); i++) {
     const ErrorInfoMap &errorMap = m_errors[i];
     if (errorMap.empty()) continue;
 
     ms.add(errorTexts[i]);
-    JSON::ListStream ls2(out);
+    JSON::CodeError::ListStream ls2(out);
 
     for (ErrorInfoMap::const_iterator iter = errorMap.begin();
          iter != errorMap.end(); ++iter) {
@@ -159,10 +160,12 @@ void CodeErrors::serialize(JSON::OutputStream &out) const {
   ls.done();
 }
 
-void CodeErrors::saveToFile(const char *filename, bool varWrapper) const {
+void CodeErrors::saveToFile(AnalysisResultPtr ar,
+                            const char *filename,
+                            bool varWrapper) const {
   ofstream f(filename);
   if (f) {
-    JSON::OutputStream o(f);
+    JSON::CodeError::OutputStream o(f, ar);
     if (varWrapper) f << "var CodeErrors = ";
     serialize(o);
     if (varWrapper) f << ";\n\n";
@@ -201,16 +204,18 @@ void Error(ErrorType error, ConstructPtr construct, const std::string &data) {
   s_code_errors.record(errorInfo);
 }
 
-void SaveErrors(JSON::OutputStream &out) {
+void SaveErrors(JSON::CodeError::OutputStream &out) {
   s_code_errors.serialize(out);
 }
 
-void SaveErrors(const char *filename, bool varWrapper /* = false */) {
-  s_code_errors.saveToFile(filename, varWrapper);
+void SaveErrors(AnalysisResultPtr ar,
+                const char *filename,
+                bool varWrapper /* = false */) {
+  s_code_errors.saveToFile(ar, filename, varWrapper);
 }
 
-void DumpErrors() {
-  JSON::OutputStream o(cerr);
+void DumpErrors(AnalysisResultPtr ar) {
+  JSON::CodeError::OutputStream o(cerr, ar);
   s_code_errors.serialize(o);
 }
 

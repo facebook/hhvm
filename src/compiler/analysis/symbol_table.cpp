@@ -21,9 +21,12 @@
 #include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/function_scope.h>
 
+#include <compiler/expression/constant_expression.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/parameter_expression.h>
+#include <compiler/expression/simple_variable.h>
 
+#include <runtime/base/class_info.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/variable_serializer.h>
 
@@ -245,6 +248,108 @@ bool Symbol::checkDefined() {
   return true;
 }
 
+static inline
+std::string ExtractInitializer(AnalysisResultPtr ar, ExpressionPtr e) {
+  switch (e->getKindOf()) {
+  case Expression::KindOfParameterExpression:
+    {
+      ParameterExpressionPtr p(
+        static_pointer_cast<ParameterExpression>(e));
+      if (!p->defaultValue()) return "";
+      return p->defaultValue()->getText(false, false, ar);
+    }
+  default:
+    // TODO(stephentu): this doesn't allow us to tell the difference between
+    // something like:
+    //   class X { public $x;        } versus
+    //   class X { public $x = null; }
+    // we'll just end up treating both cases like the latter
+    return e->getText(false, false, ar);
+  }
+  return "";
+}
+
+void Symbol::serializeParam(JSON::DocTarget::OutputStream &out) const {
+  ASSERT(isParameter());
+
+  JSON::DocTarget::MapStream ms(out);
+  ms.add("name",       m_name);
+  ms.add("type",       getFinalType());
+  ms.add("referenced", isReferenced());
+
+  ms.add("initializer");
+  if (m_value) {
+    ExpressionPtr valueExp(
+      dynamic_pointer_cast<Expression>(m_value));
+    ASSERT(valueExp);
+    const string &init = ExtractInitializer(out.analysisResult(), valueExp);
+    if (!init.empty()) out << init;
+    else               out << JSON::Null;
+  } else {
+    out << JSON::Null;
+  }
+
+  ms.done();
+}
+
+static inline std::string ExtractDocComment(ExpressionPtr e) {
+  if (!e) return "";
+  switch (e->getKindOf()) {
+  case Expression::KindOfAssignmentExpression:
+    return ExtractDocComment(e->getNthExpr(0));
+  case Expression::KindOfSimpleVariable:
+    {
+      SimpleVariablePtr sv(
+        static_pointer_cast<SimpleVariable>(e));
+      return sv->getDocComment();
+    }
+  case Expression::KindOfConstantExpression:
+    {
+      ConstantExpressionPtr ce(
+        static_pointer_cast<ConstantExpression>(e));
+      return ce->getDocComment();
+    }
+  default: return "";
+  }
+  return "";
+}
+
+void Symbol::serializeClassVar(JSON::DocTarget::OutputStream &out) const {
+  ASSERT(!isParameter());
+
+  JSON::DocTarget::MapStream ms(out);
+  ms.add("name", m_name);
+  ms.add("line", m_declaration ? m_declaration->getLocation()->line0 : 0);
+
+  int mods = 0;
+  if (isPublic())    mods |= ClassInfo::IsPublic;
+  if (isProtected()) mods |= ClassInfo::IsProtected;
+  if (isPrivate())   mods |= ClassInfo::IsPrivate;
+  if (isStatic())    mods |= ClassInfo::IsStatic;
+  ms.add("modifiers", mods);
+
+  ms.add("type", getFinalType());
+
+  ms.add("initializer");
+  if (m_initVal) {
+    ExpressionPtr initExp(
+      dynamic_pointer_cast<Expression>(m_initVal));
+    ASSERT(initExp);
+    const string &init = ExtractInitializer(out.analysisResult(), initExp);
+    if (!init.empty()) out << init;
+    else               out << JSON::Null;
+  } else {
+    out << JSON::Null;
+  }
+
+  const string &docs = ExtractDocComment(
+      m_declaration ?
+        dynamic_pointer_cast<Expression>(m_declaration) : ExpressionPtr());
+  ms.add("docs", docs);
+
+  ms.done();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
@@ -457,7 +562,7 @@ void SymbolTable::getCoerced(StringToTypePtrMap &coerced) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void SymbolTable::serialize(JSON::OutputStream &out) const {
+void SymbolTable::serialize(JSON::CodeError::OutputStream &out) const {
   vector<string> symbols;
   StringToTypePtrMap coerced;
   getSymbols(symbols);

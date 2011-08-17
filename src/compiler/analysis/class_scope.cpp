@@ -96,6 +96,16 @@ const std::string &ClassScope::getOriginalName() const {
   return m_originalName;
 }
 
+// like getId(), but without the label formatting
+std::string ClassScope::getDocName() const {
+  string name = getOriginalName();
+  if (m_redeclaring < 0) {
+    return name;
+  }
+  return name + Option::IdPrefix +
+    boost::lexical_cast<std::string>(m_redeclaring);
+}
+
 std::string ClassScope::getId() const {
   string name = CodeGenerator::FormatLabel(getOriginalName());
   if (m_redeclaring < 0) {
@@ -646,13 +656,42 @@ void ClassScope::getAllParents(AnalysisResultConstPtr ar,
   }
 }
 
+void ClassScope::getInterfaces(AnalysisResultConstPtr ar,
+                               std::vector<std::string> &names,
+                               bool recursive /* = true */) const {
+  ClassScope *self = const_cast<ClassScope*>(this);
+  if (recursive && !m_parent.empty()) {
+    ClassScopePtr cls(ar->findClass(m_parent));
+    if (cls && cls->isRedeclaring()) {
+      cls = self->findExactClass(Util::toLower(m_parent));
+    }
+    if (cls) cls->getInterfaces(ar, names, true);
+  }
+  if (!m_bases.empty()) {
+    vector<string>::const_iterator begin =
+      m_parent.empty() ? m_bases.begin() : m_bases.begin() + 1;
+    for (vector<string>::const_iterator it = begin;
+         it != m_bases.end(); ++it) {
+      ClassScopePtr cls(ar->findClass(*it));
+      if (cls && cls->isRedeclaring()) {
+        cls = self->findExactClass(Util::toLower(*it));
+      }
+      if (cls) names.push_back(cls->getDocName());
+      else     names.push_back(*it);
+      if (cls && recursive) {
+        cls->getInterfaces(ar, names, true);
+      }
+    }
+  }
+}
+
 ClassScopePtr ClassScope::getParentScope(AnalysisResultConstPtr ar) const {
   if (m_parent.empty()) return ClassScopePtr();
   return ar->findClass(m_parent);
 }
 
-void ClassScope::serialize(JSON::OutputStream &out) const {
-  JSON::MapStream ms(out);
+void ClassScope::serialize(JSON::CodeError::OutputStream &out) const {
+  JSON::CodeError::MapStream ms(out);
   map<string, int> propMap;
   set<string> names;
   m_variables->getNames(names);
@@ -678,9 +717,9 @@ void ClassScope::serialize(JSON::OutputStream &out) const {
 
   ms.add("consts");
 
-  JSON::MapStream cs(out);
+  JSON::CodeError::MapStream cs(out);
   BOOST_FOREACH(string cname, cnames) {
-    TypePtr type =  m_constants->getType(cname);
+    TypePtr type = m_constants->getType(cname);
     if (!type) {
       cs.add(cname, -1);
     } else if (type->isSpecificObject()) {
@@ -690,6 +729,83 @@ void ClassScope::serialize(JSON::OutputStream &out) const {
     }
   }
   cs.done();
+  ms.done();
+}
+
+static inline string GetDocName(AnalysisResultPtr ar,
+                                BlockScopeRawPtr scope,
+                                const string &name) {
+  ClassScopePtr c(ar->findClass(name));
+  if (c && c->isRedeclaring()) {
+    ClassScopePtr exact(scope->findExactClass(Util::toLower(name)));
+    return exact ?
+      exact->getDocName() :
+      c->getOriginalName(); // if we can't tell which redec class,
+                            // then don't use the redec name
+  }
+  // TODO: pick a better way of signaling unknown?
+  return c ? c->getDocName() : "UnknownClass";
+}
+
+class GetDocNameFunctor {
+public:
+  GetDocNameFunctor(AnalysisResultPtr ar, BlockScopeRawPtr scope) :
+    m_ar(ar), m_scope(scope) {}
+  inline string operator()(const string &name) const {
+    return GetDocName(m_ar, m_scope, name);
+  }
+private:
+  AnalysisResultPtr m_ar;
+  BlockScopeRawPtr  m_scope;
+};
+
+void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
+  // TODO(stephentu): fix this hack
+  ClassScopeRawPtr self(const_cast<ClassScope*>(this));
+
+  JSON::DocTarget::MapStream ms(out);
+
+  ms.add("name", getDocName());
+  ms.add("line", getStmt() ? getStmt()->getLocation()->line0 : 0);
+  ms.add("docs", m_docComment);
+
+  ms.add("parent");
+  if (m_parent.empty()) {
+    out << JSON::Null;
+  } else {
+    out << GetDocName(out.analysisResult(), self, m_parent);
+  }
+
+  vector<string> ifaces;
+  getInterfaces(out.analysisResult(), ifaces, true);
+  vector<string> origIfaces;
+  origIfaces.resize(ifaces.size());
+  transform(ifaces.begin(), ifaces.end(), origIfaces.begin(),
+            GetDocNameFunctor(out.analysisResult(), self));
+  ms.add("interfaces", origIfaces);
+
+  int mods = 0;
+  // TODO: you should really only get one of these, we should assert this
+  if (m_kindOf == KindOfAbstractClass) mods |= ClassInfo::IsAbstract;
+  if (m_kindOf == KindOfFinalClass)    mods |= ClassInfo::IsFinal;
+  if (m_kindOf == KindOfInterface)     mods |= ClassInfo::IsInterface;
+  ms.add("modifiers", mods);
+
+  FunctionScopePtrVec funcs;
+  getFunctionsFlattened(funcs);
+  ms.add("methods", funcs);
+
+  vector<Symbol*> rawSymbols;
+  getVariables()->getSymbols(rawSymbols, true);
+  vector<SymClassVarWrapper> wrappedSymbols;
+  for (vector<Symbol*>::iterator it = rawSymbols.begin();
+       it != rawSymbols.end(); ++it) {
+    wrappedSymbols.push_back(SymClassVarWrapper(*it));
+  }
+  ms.add("properties", wrappedSymbols);
+
+  // TODO: constants
+
   ms.done();
 }
 

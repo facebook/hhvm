@@ -779,6 +779,31 @@ void AnalysisResult::dump() {
   fflush(0);
 }
 
+void AnalysisResult::docJson(const string &filename) {
+  ofstream f(filename.c_str());
+  if (f.fail()) {
+    Logger::Error("Could not open file for writing doc JSON: %s",
+                  filename.c_str());
+    return;
+  }
+  JSON::DocTarget::OutputStream out(f, shared_from_this());
+  JSON::DocTarget::MapStream ms(out);
+
+  ms.add("userland", m_fileScopes);
+
+  ClassScopePtrVec systemClasses;
+  systemClasses.reserve(m_systemClasses.size());
+  for (StringToClassScopePtrMap::iterator it = m_systemClasses.begin();
+       it != m_systemClasses.end(); ++it) {
+    systemClasses.push_back(it->second);
+  }
+  // just generate system classes for now
+  ms.add("system", systemClasses);
+
+  ms.done();
+  f.close();
+}
+
 void AnalysisResult::visitFiles(void (*cb)(AnalysisResultPtr,
                                            StatementPtr, void*), void *data) {
   AnalysisResultPtr ar = shared_from_this();

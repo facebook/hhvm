@@ -143,8 +143,8 @@ std::string Construct::getText(bool useCache /* = false */,
   return text;
 }
 
-void Construct::serialize(JSON::OutputStream &out) const {
-  JSON::ListStream ls(out);
+void Construct::serialize(JSON::CodeError::OutputStream &out) const {
+  JSON::CodeError::ListStream ls(out);
   ls << m_loc->file << m_loc->line0 << m_loc->char0 <<
                        m_loc->line1 << m_loc->char1;
   ls.done();

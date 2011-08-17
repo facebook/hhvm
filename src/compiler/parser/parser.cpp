@@ -236,16 +236,17 @@ void Parser::onStaticVariable(Token &out, Token *exprs, Token &var,
 
 void Parser::onClassVariable(Token &out, Token *exprs, Token &var,
                              Token *value) {
-  onVariable(out, exprs, var, value);
+  onVariable(out, exprs, var, value, false, m_scanner.detachDocComment());
 }
 
 void Parser::onClassConstant(Token &out, Token *exprs, Token &var,
                              Token &value) {
-  onVariable(out, exprs, var, &value, true);
+  onVariable(out, exprs, var, &value, true, m_scanner.detachDocComment());
 }
 
 void Parser::onVariable(Token &out, Token *exprs, Token &var, Token *value,
-                        bool constant /* = false */) {
+                        bool constant /* = false */,
+                        const std::string &docComment /* = "" */) {
   ExpressionPtr expList;
   if (exprs) {
     expList = exprs->exp;
@@ -254,9 +255,9 @@ void Parser::onVariable(Token &out, Token *exprs, Token &var, Token *value,
   }
   ExpressionPtr exp;
   if (constant) {
-    exp = NEW_EXP(ConstantExpression, var->text());
+    exp = NEW_EXP(ConstantExpression, var->text(), docComment);
   } else {
-    exp = NEW_EXP(SimpleVariable, var->text());
+    exp = NEW_EXP(SimpleVariable, var->text(), docComment);
   }
   if (value) {
     exp = NEW_EXP(AssignmentExpression, exp, value->exp, false);

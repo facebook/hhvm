@@ -22,6 +22,7 @@
 #include <compiler/analysis/code_error.h>
 #include <compiler/code_generator.h>
 #include <boost/graph/adjacency_list.hpp>
+#include <util/json.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,7 +39,9 @@ DECLARE_BOOST_TYPES(FunctionScope);
  * AnalysisResult objects to grab statements, functions and classes from
  * FileScope objects to form execution paths.
  */
-class FileScope : public BlockScope, public FunctionContainer {
+class FileScope : public BlockScope,
+                  public FunctionContainer,
+                  public JSON::DocTarget::ISerializable {
 public:
   enum Attribute {
     ContainsDynamicVariable   = 0x001,
@@ -72,6 +75,7 @@ public:
   const StringToClassScopePtrVecMap &getClasses() const {
     return m_classes;
   }
+  void getClassesFlattened(ClassScopePtrVec &classes) const;
   ClassScopePtr getClass(const char *name);
 
   virtual int getFunctionCount() const;
@@ -83,6 +87,7 @@ public:
   int getGlobalAttribute() const;
   int popAttribute();
 
+  void serialize(JSON::DocTarget::OutputStream &out) const;
 
   /**
    * Whether this file has top level non-declaration statements that

@@ -23,6 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(Construct);
 
 namespace Compiler {
@@ -58,13 +59,15 @@ void Error(ErrorType error, ConstructPtr construct, const std::string &data);
 /**
  * Save JavaScript output to specified file.
  */
-void SaveErrors(JSON::OutputStream &out);
-void SaveErrors(const char *filename, bool varWrapper = false);
+void SaveErrors(JSON::CodeError::OutputStream &out);
+void SaveErrors(AnalysisResultPtr ar,
+                const char *filename,
+                bool varWrapper = false);
 
 /**
  * Write errors to stderr.
  */
-void DumpErrors(); // stderr
+void DumpErrors(AnalysisResultPtr ar); // stderr
 
 /**
  * Whether specified type of error is present. Written for unit test.

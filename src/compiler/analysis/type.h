@@ -38,7 +38,8 @@ DECLARE_BOOST_TYPES(Type);
 DECLARE_BOOST_TYPES(BlockScope);
 DECLARE_BOOST_TYPES(ClassScope);
 
-class Type : public JSON::ISerializable {
+class Type : public JSON::CodeError::ISerializable,
+             public JSON::DocTarget::ISerializable {
   friend int ::process(const ProgramOptions&);
   friend class ::TestCodeRun;
 public:
@@ -258,9 +259,14 @@ public:
   static void Dump(ExpressionPtr exp);
 
   /**
-   * Implements JSON::ISerializable.
+   * Implements JSON::CodeError::ISerializable.
    */
-  virtual void serialize(JSON::OutputStream &out) const;
+  virtual void serialize(JSON::CodeError::OutputStream &out) const;
+
+  /**
+   * Implements JSON::DocTarget::ISerializable.
+   */
+  virtual void serialize(JSON::DocTarget::OutputStream &out) const;
 
   /**
    * For stats reporting.

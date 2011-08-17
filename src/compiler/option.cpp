@@ -225,6 +225,7 @@ bool Option::ControlFlow = true;
 bool Option::VariableCoalescing = false;
 bool Option::ArrayAccessIdempotent = false;
 bool Option::DumpAst = false;
+std::string Option::DocJson;
 
 bool Option::AllDynamic = true;
 bool Option::AllVolatile = false;

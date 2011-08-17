@@ -720,8 +720,41 @@ void Type::Dump(ExpressionPtr exp) {
   Dump(exp->getActualType(), "Actual: %s\n");
 }
 
-void Type::serialize(JSON::OutputStream &out) const {
+void Type::serialize(JSON::CodeError::OutputStream &out) const {
   out << toString();
+}
+
+void Type::serialize(JSON::DocTarget::OutputStream &out) const {
+  string s("any");
+  switch (m_kindOf) {
+  case KindOfBoolean:     s = "boolean"; break;
+  case KindOfInt32:
+  case KindOfInt64:       s = "integer"; break;
+  case KindOfDouble:      s = "double"; break;
+  case KindOfString:      s = "string"; break;
+  case KindOfArray:       s = "array"; break;
+  case KindOfVariant:
+  case KindOfSome:
+  case KindOfAny:         s = "any"; break;
+  case KindOfObject:
+  {
+    if (m_name.empty()) s = "object";
+    else {
+      ClassScopePtr c(getClass(out.analysisResult(), BlockScopeRawPtr()));
+      if (c) {
+        s = c->getOriginalName();
+      } else {
+        s = "object";
+      }
+    }
+    break;
+  }
+  case KindOfNumeric:     s = "numeric"; break;
+  case KindOfPrimitive:   s = "primitive"; break;
+  case KindOfPlusOperand: s = "any"; break;
+  case KindOfSequence:    s = "sequence"; break;
+  }
+  out << s;
 }
 
 void Type::count(std::map<std::string, int> &counts) {

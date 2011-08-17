@@ -53,7 +53,7 @@ bool TestCodeError::Verify(Compiler::ErrorType type, const char *src,
     ostringstream code;
     ar->outputAllCPP(CodeGenerator::ClusterCPP, 0, NULL);
     ostringstream error;
-    JSON::OutputStream out(error);
+    JSON::CodeError::OutputStream out(error, ar);
     Compiler::SaveErrors(out);
     printf("%s:%d: parsing %s\ncode error missing\n%s\n", file, line, src,
            error.str().c_str());

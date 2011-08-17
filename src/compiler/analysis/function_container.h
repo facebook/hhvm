@@ -57,6 +57,8 @@ public:
   const StringToFunctionScopePtrVecMap &getFunctions() const {
     return m_functions;
   }
+  void getFunctionsFlattened(FunctionScopePtrVec &funcs,
+                             bool excludePseudoMains = false) const;
   void outputCPPCodeInfoTable(
     CodeGenerator &cg, AnalysisResultPtr ar, bool support,
     const StringToFunctionScopePtrVecMap *functions = NULL);

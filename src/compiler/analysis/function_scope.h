@@ -55,7 +55,8 @@ typedef std::vector< ParameterExpressionPtrIdxPair >
  * inferred types and analyzed results here, so not to pollute syntax trees.
  */
 class FunctionScope : public BlockScope,
-                      public JSON::ISerializable {
+                      public JSON::CodeError::ISerializable,
+                      public JSON::DocTarget::ISerializable {
 public:
   /**
    * User defined functions.
@@ -165,6 +166,9 @@ public:
    * Get original name of the function, without case being lowered.
    */
   const std::string &getOriginalName() const;
+
+  std::string getDocName() const;
+  std::string getDocFullName() const;
 
   /**
    * If class method, returns class::name, otherwise just name.
@@ -387,7 +391,9 @@ public:
   /**
    * Serialize the iface, not everything.
    */
-  void serialize(JSON::OutputStream &out) const;
+  void serialize(JSON::CodeError::OutputStream &out) const;
+  void serialize(JSON::DocTarget::OutputStream &out) const;
+
   bool inPseudoMain() {
     return m_pseudoMain;
   }

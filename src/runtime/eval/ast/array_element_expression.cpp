@@ -125,7 +125,7 @@ bool ArrayElementExpression::weakLval(VariableEnvironment &env,
   if (!ok || !arr->is(KindOfArray)) {
     return false;
   }
-  Array &a(arr->asArrRef());
+  Array &a(arr->toArrRef());
   SET_LINE;
   if (a.exists(idx)) {
     v = &a.lvalAt(idx);

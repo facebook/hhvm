@@ -7097,6 +7097,14 @@ bool TestCodeRun::TestUnset() {
        "}\n"
        "$myvar = 10;f($myvar, 30);var_dump($myvar);");
 
+  MVCR("<?php\n"
+       "$a = array(0, 1);\n"
+       "$b = array(0, 1);\n"
+       "$a[0] =& $b;\n"
+       "$c =& $a;\n"
+       "unset($a[0][0]);\n"
+       "var_dump($a);\n");
+
   return true;
 }
 

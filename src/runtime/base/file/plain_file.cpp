@@ -210,6 +210,7 @@ BuiltinFile::~BuiltinFile() {
 }
 
 bool BuiltinFile::close() {
+  ::fclose(m_stream);
   m_closed = true;
   m_stream = NULL;
   m_fd = -1;

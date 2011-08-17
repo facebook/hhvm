@@ -162,6 +162,14 @@ public:
                           TypePtr type1, TypePtr type2);
 
   /**
+   * When two object types have been inferred for an expression, what type
+   * should it be?
+   */
+  static TypePtr InferredObject(AnalysisResultConstPtr ar,
+                                TypePtr type1,
+                                TypePtr type2);
+
+  /**
    * Whether or not two types are the same.
    */
   static bool SameType(TypePtr type1, TypePtr type2);
@@ -179,9 +187,6 @@ public:
    */
   static std::string GetFastCastMethod(
       TypePtr dst, bool allowRef, bool forConst);
-
-  static TypePtr GetStrongerObjectType(AnalysisResultConstPtr ar,
-                                       TypePtr type1, TypePtr type2);
 
 private:
   Type(KindOf kindOf, const std::string &name);
@@ -263,10 +268,6 @@ public:
   void count(std::map<std::string, int> &counts);
 
 private:
-  static TypePtr InferredObject(AnalysisResultConstPtr ar,
-                                TypePtr type1,
-                                TypePtr type2);
-
   /**
    * Must not be invoked concurrently
    */

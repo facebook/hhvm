@@ -809,27 +809,3 @@ TypePtr Type::Inferred(AnalysisResultConstPtr ar,
   }
   return resultKind ? GetType(resultKind) : TypePtr();
 }
-
-TypePtr Type::GetStrongerObjectType(AnalysisResultConstPtr ar,
-                                    TypePtr type1, TypePtr type2) {
-  if (!type1 || !type2) return TypePtr();
-  if (!type1->is(Type::KindOfObject) ||
-      !type2->is(Type::KindOfObject)) {
-    return TypePtr();
-  }
-  if ((!type1->m_name.empty() && type2->m_name.empty()) ||
-      (type1->m_name.empty() && !type2->m_name.empty())) {
-    return type1->m_name.empty() ? type2 : type1;
-  }
-  // if one is a subclass of another, return the subclass
-  ClassScopePtr cls1 = ar->findClass(type1->m_name);
-  ClassScopePtr cls2 = ar->findClass(type2->m_name);
-  if (cls1 && !cls1->isRedeclaring()
-      && cls1->derivesFrom(ar, type2->m_name, true, false)) {
-    return type1;
-  } else if (cls2 && !cls2->isRedeclaring()
-             && cls2->derivesFrom(ar, type1->m_name, true, false)) {
-    return type2;
-  }
-  return Type::Object;
-}

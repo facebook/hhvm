@@ -391,7 +391,7 @@ TypePtr ExprDict::reduceToSingleAssertion(const TypePtrIdxPairVec &types)
       if (ret->is(Type::KindOfObject) &&
           it->first->is(Type::KindOfObject)) {
         // reconcile
-        ret = Type::GetStrongerObjectType(
+        ret = Type::InferredObject(
             m_am.getAnalysisResult(), ret, it->first);
       } else {
         return TypePtr();

@@ -198,6 +198,18 @@ bool SimpleVariable::checkUnused() const {
     getScope()->getVariables()->checkUnused(m_sym);
 }
 
+static inline TypePtr GetAssertedInType(AnalysisResultPtr ar,
+                                        TypePtr assertedType,
+                                        TypePtr ret) {
+  ASSERT(assertedType);
+  if (!ret) return assertedType;
+  TypePtr res = Type::Inferred(ar, assertedType, ret);
+  // if the asserted type and the symbol table type are compatible, then use
+  // the result of Inferred() (which is at least as strict as assertedType).
+  // otherwise, go with the asserted type
+  return res ? res : assertedType;
+}
+
 TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                       bool coerce) {
   TypePtr ret;
@@ -258,8 +270,10 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
   }
 
-	// if m_assertedType is set, then this is a type assertion node
-  TypePtr actual = propagateTypes(ar, m_assertedType ? m_assertedType : ret);
+  // if m_assertedType is set, then this is a type assertion node
+  TypePtr inType = m_assertedType ?
+    GetAssertedInType(ar, m_assertedType, ret) : ret;
+  TypePtr actual = propagateTypes(ar, inType);
   setTypes(ar, actual, type);
   if (Type::SameType(actual, ret)) {
     m_implementedType.reset();

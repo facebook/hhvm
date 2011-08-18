@@ -3209,6 +3209,20 @@ void AnalysisResult::outputCPPHashTableGetConstant(
     "  return NULL;\n"
     "}\n";
 
+  const char text3[] =
+    "ConstantType check_constant(CStrRef name) {\n"
+    "  const char *s = name.data();\n"
+    "  const hashNodeCon *p = findCon(s, name->hash());\n"
+    "  if (!p) return NoneBuiltinConstant;\n"
+    "  if (p->off > 0) return DynamicBuiltinConstant;\n"
+    "  if (strcmp(s, \"STDIN\") == 0 ||\n"
+    "      strcmp(s, \"STDOUT\") == 0 ||\n"
+    "      strcmp(s, \"STDERR\") == 0) {\n"
+    "    return StdioBuiltinConstant;\n"
+    "  }\n"
+    "  return StaticBuiltinConstant;\n"
+    "}\n";
+
   int tableSize = Util::roundUpToPowerOfTwo(constMap.size() * 2);
   cg_printf(text1,
             Type::KindOfBoolean,
@@ -3277,6 +3291,7 @@ void AnalysisResult::outputCPPHashTableGetConstant(
     }
   }
   cg_printf(text2, tableSize - 1, tableSize - 1);
+  if (system) cg_printf(text3);
 }
 
 void AnalysisResult::outputCPPDynamicConstantTable(

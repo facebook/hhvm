@@ -74,6 +74,13 @@ extern Variant get_builtin_class_var_init(CStrRef s, const char *var);
  */
 extern Variant get_constant(CStrRef name, bool error = true);
 extern Variant get_builtin_constant(CStrRef name, bool error = true);
+enum ConstantType {
+  StaticBuiltinConstant = 0,
+  StdioBuiltinConstant,
+  DynamicBuiltinConstant,
+  NoneBuiltinConstant,
+};
+extern ConstantType check_constant(CStrRef name);
 
 /**
  * Getting a class constant

@@ -15,6 +15,7 @@
 */
 
 #include <runtime/base/complex_types.h>
+#include <runtime/base/externals.h>
 
 using namespace std;
 
@@ -59,6 +60,7 @@ Variant invoke_file(CStrRef path, bool once /* = false */,
 
 Variant get_constant(CStrRef name, bool error) { return name;}
 Variant get_builtin_constant(CStrRef name, bool error) { return name;}
+ConstantType check_constant(CStrRef name) { return NoneBuiltinConstant;}
 Variant get_class_constant(CStrRef s, const char *prop,
                            bool fatal /* = true */) {
   return null;

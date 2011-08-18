@@ -31,9 +31,11 @@ public:
   virtual Variant eval(VariableEnvironment &env) const;
   virtual bool evalStaticScalar(VariableEnvironment &env, Variant &r) const;
   virtual void dump(std::ostream &out) const;
-  const std::string &getName() const { return m_constant; }
+  StringData *getName() const { return m_constant; }
 private:
-  std::string m_constant;
+  StringData *m_constant;
+  ConstantType m_type;
+  Variant m_value; // for StaticBuiltinConstant
 };
 
 ///////////////////////////////////////////////////////////////////////////////

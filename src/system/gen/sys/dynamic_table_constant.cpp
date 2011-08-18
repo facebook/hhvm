@@ -4226,6 +4226,18 @@ findCon(const char *name, int64 hash) {
   }
   return NULL;
 }
+ConstantType check_constant(CStrRef name) {
+  const char *s = name.data();
+  const hashNodeCon *p = findCon(s, name->hash());
+  if (!p) return NoneBuiltinConstant;
+  if (p->off > 0) return DynamicBuiltinConstant;
+  if (strcmp(s, "STDIN") == 0 ||
+      strcmp(s, "STDOUT") == 0 ||
+      strcmp(s, "STDERR") == 0) {
+    return StdioBuiltinConstant;
+  }
+  return StaticBuiltinConstant;
+}
 Variant get_builtin_constant(CStrRef name, bool error) {
   DECLARE_SYSTEM_GLOBALS(g);
   const char* s = name.data();

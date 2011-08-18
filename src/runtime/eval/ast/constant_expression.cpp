@@ -18,6 +18,7 @@
 #include <runtime/base/externals.h>
 #include <runtime/ext/ext_misc.h>
 #include <runtime/eval/runtime/eval_state.h>
+#include <runtime/eval/ast/name.h>
 
 namespace HPHP {
 namespace Eval {
@@ -27,18 +28,38 @@ using namespace std;
 ConstantExpression::ConstantExpression(EXPRESSION_ARGS,
                                        const string &constant)
   : Expression(KindOfConstantExpression, EXPRESSION_PASS),
-  m_constant(constant) {}
+  m_constant(StringName::GetStaticName(constant)) {
+  m_type = check_constant(m_constant);
+  if (m_type == StaticBuiltinConstant) {
+    m_value = get_builtin_constant(m_constant);
+  }
+}
 
 Variant ConstantExpression::eval(VariableEnvironment &env) const {
-  if (m_constant[0] == '\\') {
-    Variant ret;
-    if (RequestEvalState::findConstant(m_constant.c_str() + 1, ret)) {
-      return ret;
-    }
-    int pos = m_constant.rfind('\\');
-    return get_constant(m_constant.c_str() + pos + 1);
+  switch (m_type) {
+  case StaticBuiltinConstant:
+    return m_value;
+  case StdioBuiltinConstant:
+  case DynamicBuiltinConstant:
+    return get_builtin_constant(m_constant);
+  case NoneBuiltinConstant:
+    break;
+  default:
+    assert(false);
+    break;
   }
-  return get_constant(m_constant);
+  const char *s = m_constant->data();
+  if (LIKELY(s[0] != '\\')) {
+    return RequestEvalState::findUserConstant(m_constant);
+  }
+  Variant ret;
+  if (RequestEvalState::findConstant(s + 1, ret)) {
+    return ret;
+  }
+  const char *r = s + m_constant->size() - 1;
+  while (*r != '\\') r--;
+  ASSERT(*r == '\\');
+  return get_constant(r + 1);
 }
 
 bool ConstantExpression::evalStaticScalar(VariableEnvironment &env,
@@ -51,7 +72,7 @@ bool ConstantExpression::evalStaticScalar(VariableEnvironment &env,
 }
 
 void ConstantExpression::dump(std::ostream &out) const {
-  out << m_constant;
+  out << m_constant->data();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

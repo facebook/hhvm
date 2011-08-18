@@ -335,6 +335,17 @@ bool RequestEvalState::findConstant(CStrRef name, Variant &ret) {
   return false;
 }
 
+Variant RequestEvalState::findUserConstant(
+  CStrRef name, bool error /* = true */) {
+  RequestEvalState *self = s_res.get();
+  if (self->m_constants.exists(name)) {
+    return self->m_constants.rvalAt(name);
+  }
+  const char *s = name.c_str();
+  if (error) raise_notice("Use of undefined constant %s - assumed '%s'", s, s);
+  return name;
+}
+
 bool RequestEvalState::includeFile(Variant &res, CStrRef path, bool once,
                                    LVariableTable* variables,
                                    const char *currentDir) {

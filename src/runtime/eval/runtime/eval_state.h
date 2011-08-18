@@ -151,6 +151,7 @@ public:
   static const FunctionStatement *findUserFunction(CStrRef name);
   static const Function *findFunction(CStrRef name);
   static bool findConstant(CStrRef name, Variant &ret);
+  static Variant findUserConstant(CStrRef name, bool error = true);
   static bool includeFile(Variant &res, CStrRef path, bool once,
                           LVariableTable* variables,
                           const char *currentDir);

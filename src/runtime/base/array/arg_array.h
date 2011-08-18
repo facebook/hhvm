@@ -69,23 +69,7 @@ public:
   }
   virtual bool isVectorData() const { assert(false); }
 
-  // virtual ssize_t iter_begin() const;
-  // virtual ssize_t iter_end() const;
-  // virtual ssize_t iter_advance(ssize_t prev) const { assert(false); }
-  // virtual ssize_t iter_rewind(ssize_t prev) const { assert(false); }
-
-  virtual Variant reset() { assert(false); }
-  virtual Variant prev() { assert(false); }
-  virtual Variant current() const { assert(false); }
-  virtual Variant next() { assert(false); }
-  virtual Variant end() { assert(false); }
-  virtual Variant key() const { assert(false); }
-  virtual Variant value(ssize_t &pos) const { assert(false); }
   virtual Variant each() { assert(false); }
-
-  virtual bool isHead() const { assert(false); }
-  virtual bool isTail() const { assert(false); }
-  virtual bool isInvalid() const { assert(false); }
 
   virtual bool exists(int64   k) const { assert(false); }
   virtual bool exists(litstr  k) const { assert(false); } 

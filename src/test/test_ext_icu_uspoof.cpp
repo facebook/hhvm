@@ -110,14 +110,14 @@ bool TestExtIcu_uspoof::test_SpoofChecker_issuesfound() {
   Variant ret;
 
   VS(checker->t_issuspicious("NAPKIN PEZ", ref(ret)), true);
-  VS(ret.getInt64(), q_SpoofChecker_WHOLE_SCRIPT_CONFUSABLE);
+  VS(ret.getInt64(), q_SpoofChecker$$WHOLE_SCRIPT_CONFUSABLE);
 
   VS(checker->t_issuspicious("f\u0430\u0441\u0435b\u043e\u043ek", ref(ret)),
      true);
-  VS(ret.getInt64(), q_SpoofChecker_MIXED_SCRIPT_CONFUSABLE);
+  VS(ret.getInt64(), q_SpoofChecker$$MIXED_SCRIPT_CONFUSABLE);
 
   VS(checker->t_areconfusable("hello, world", "he11o, wor1d", ref(ret)), true);
-  VS(ret.getInt64(), q_SpoofChecker_SINGLE_SCRIPT_CONFUSABLE);
+  VS(ret.getInt64(), q_SpoofChecker$$SINGLE_SCRIPT_CONFUSABLE);
 
   return Count(true);
 }
@@ -133,9 +133,9 @@ bool TestExtIcu_uspoof::test_SpoofChecker_setchecks() {
     // Go to lower-case only mode (assumes all strings have been
     // case-folded).
     checker->t_setchecks(
-      q_SpoofChecker_MIXED_SCRIPT_CONFUSABLE |
-      q_SpoofChecker_WHOLE_SCRIPT_CONFUSABLE |
-      q_SpoofChecker_SINGLE_SCRIPT_CONFUSABLE
+      q_SpoofChecker$$MIXED_SCRIPT_CONFUSABLE |
+      q_SpoofChecker$$WHOLE_SCRIPT_CONFUSABLE |
+      q_SpoofChecker$$SINGLE_SCRIPT_CONFUSABLE
     );
     VS(checker->t_areconfusable("HELLO", "H\u0415LLO"), false);
     VS(checker->t_areconfusable("hello", "h\u0435llo"), true);
@@ -146,7 +146,7 @@ bool TestExtIcu_uspoof::test_SpoofChecker_setchecks() {
     VS(checker->t_issuspicious("True fact: \u5fcd\u8005 are mammals"), false);
 
     // Only allow characters of a single script.
-    checker->t_setchecks(q_SpoofChecker_SINGLE_SCRIPT);
+    checker->t_setchecks(q_SpoofChecker$$SINGLE_SCRIPT);
     VS(checker->t_issuspicious("True fact: \u5fcd\u8005 are mammals"), true);
   }
 

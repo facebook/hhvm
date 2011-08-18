@@ -46,20 +46,7 @@ class c_FB_MySQLLexer : public ExtObjectData {
   Variant m_stackPtr;
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(FB_MySQLLexer, FB_MySQLLexer)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  static Variant os_getInit(CStrRef s);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_FB_MySQLLexer 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_FB_MySQLLexer 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_FB_MySQLLexer 1
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(FB_MySQLLexer, FB_MySQLLexer, ObjectData)
   static const ClassPropTable os_prop_table;
   void init();
   public: void t___construct(Variant v_string = NAMSTR(s_sys_ss00000000, ""), Variant v_lookahead = 0LL);

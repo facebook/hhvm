@@ -24,7 +24,13 @@ namespace HPHP {
 
 // 1. Static Strings
 extern StaticString s_sys_ssfb6412d4;
+extern StaticString s_sys_ssbd51e7f6;
+extern StaticString s_sys_ss45121e5f;
+extern StaticString s_sys_ss277c8e85;
 extern StaticString s_sys_ssdd233bb0;
+extern StaticString s_sys_ss11ed8f50;
+extern StaticString s_sys_ssb118fcf1;
+extern StaticString s_sys_ss52157d84;
 extern StaticString s_sys_ssf0ea8ac1;
 extern StaticString s_sys_ssa1b87da7;
 extern StaticString s_sys_ss6974a1cc;
@@ -43,7 +49,11 @@ extern StaticString s_sys_ss9943cbf4;
 // 2. Static Arrays
 
 // 3. Static Variants
+extern const VarNR &s_sys_svif01bca90;
 extern const VarNR &s_sys_svi86af027e;
+extern const VarNR &s_sys_svif2a1fb10;
+extern const VarNR &s_sys_svi6af020b2;
+extern const VarNR &s_sys_svi71a5b5e7;
 
 
 

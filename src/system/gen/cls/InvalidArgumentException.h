@@ -37,10 +37,6 @@ class c_InvalidArgumentException : public c_LogicException {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_InvalidArgumentException 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_InvalidArgumentException 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_InvalidArgumentException 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_InvalidArgumentException 1
 
   // DECLARE_COMMON_INVOKE
   static const int s_call_info_table = 0;

@@ -3702,19 +3702,15 @@ void AnalysisResult::outputCPPRedeclaredClassImpl(CodeGenerator &cg) {
       cg_printf("static StaticString s_%s = \"%s\";\n", lab, str);
       cg_printf("static const RedeclaredObjectStaticCallbacks %s%s = {\n"
                 "  {\n"
-                "    c_ObjectData::os_getInit,\n"
-                "    c_ObjectData::os_get,\n"
-                "    c_ObjectData::os_lval,\n"
-                "    c_ObjectData::os_constant,\n"
                 "    coo_ObjectData,\n"
                 "    0,0,0,0,&s_%s,0,0,0\n"
                 "  },\n"
                 "  -1\n"
                 "};\n",
-                Option::ClassWrapperFunctionNullPrefix, lab, lab);
+                Option::ClassStaticsCallbackNullPrefix, lab, lab);
       cg_printf("%s%s = &%s%s;\n",
                 Option::ClassStaticsCallbackPrefix, lab,
-                Option::ClassWrapperFunctionNullPrefix, lab);
+                Option::ClassStaticsCallbackNullPrefix, lab);
     }
   }
 }
@@ -4650,6 +4646,31 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
   AnalysisResultPtr ar = shared_from_this();
 
   if (!Option::GenerateCPPMetaInfo) return;
+
+  for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
+       iter != m_classDecs.end(); ++iter) {
+    BOOST_FOREACH(ClassScopePtr cls, iter->second) {
+      ConstantTablePtr constants = cls->getConstants();
+      const std::vector<Symbol*> &constVec =
+        constants->getSymbols();
+      if (!constVec.size()) continue;
+      int i;
+      for (i = constVec.size(); i--; ) {
+        const Symbol *sym = constVec[i];
+        ConstructPtr v = sym->getValue();
+        if (!v) continue;
+        ExpressionPtr e = static_pointer_cast<Expression>(v);
+        if (e->is(Expression::KindOfScalarExpression)) continue;
+        if (!e->isScalar()) break;
+      }
+      if (i >= 0) {
+        cg_printf("extern const %sObjectStaticCallbacks %s%s;\n",
+                  cls->isRedeclaring() ? "Redeclared" : "",
+                  Option::ClassStaticsCallbackPrefix, cls->getId().c_str());
+      }
+    }
+  }
+
   cg_indentBegin("const char *g_class_map[] = {\n");
 
   // system functions

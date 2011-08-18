@@ -37,10 +37,6 @@ class c_RangeException : public c_RuntimeException {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RangeException 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_RangeException 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RangeException 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_RangeException 1
 
   // DECLARE_COMMON_INVOKE
   static const int s_call_info_table = 0;

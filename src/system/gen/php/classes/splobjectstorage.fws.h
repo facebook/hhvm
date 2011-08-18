@@ -30,20 +30,20 @@ extern StaticString s_sys_ss3382a209;
 extern StaticString s_sys_ss0d54babb;
 extern StaticString s_sys_ssb3a5c1b3;
 extern StaticString s_sys_ss4e3b07b3;
-extern StaticString s_sys_ssc0ff3081;
 extern StaticString s_sys_ss12e90587;
 extern StaticString s_sys_ss50652d33;
 extern StaticString s_sys_ss941ca25f;
-extern StaticString s_sys_ss64fc2cb1;
 extern StaticString s_sys_ss9943cbf4;
 
 // 2. Static Arrays
 extern StaticArray s_sys_sa00000000;
 
 // 3. Static Variants
+extern const VarNR &s_sys_svif01bca90;
 
 
 
+extern VarNR s_sys_sva00000000;
 
 
 ///////////////////////////////////////////////////////////////////////////////

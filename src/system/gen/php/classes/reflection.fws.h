@@ -34,6 +34,15 @@ extern StaticString s_sys_ss92306c9b;
 extern StaticString s_sys_ssa78ef7eb;
 extern StaticString s_sys_ssd816f860;
 extern StaticString s_sys_ss985d885e;
+extern StaticString s_sys_sse302a373;
+extern StaticString s_sys_ss2e7b0ef6;
+extern StaticString s_sys_ssa19b529e;
+extern StaticString s_sys_ss4a58ad66;
+extern StaticString s_sys_ss3be2773a;
+extern StaticString s_sys_sscb04c741;
+extern StaticString s_sys_ssc272dc9e;
+extern StaticString s_sys_ss69c1ef03;
+extern StaticString s_sys_ss3ee05120;
 extern StaticString s_sys_ssdc6e02c2;
 extern StaticString s_sys_ss4ad0c110;
 extern StaticString s_sys_ss9795dfc8;
@@ -159,7 +168,17 @@ extern StaticString s_sys_ss7cd91db4;
 extern StaticArray s_sys_sa00000000;
 
 // 3. Static Variants
+extern const VarNR &s_sys_svib794f8ce;
+extern const VarNR &s_sys_svi90d5f98c;
+extern const VarNR &s_sys_svi5e544a31;
+extern const VarNR &s_sys_svi86af027e;
+extern const VarNR &s_sys_svif2a1fb10;
+extern const VarNR &s_sys_svi1abc09e0;
+extern const VarNR &s_sys_svi6af020b2;
+extern const VarNR &s_sys_svid5e04164;
+extern const VarNR &s_sys_svi543f7d14;
 extern const VarNR &s_sys_svi5830e7c6;
+extern const VarNR &s_sys_svibf7d1df5;
 
 
 extern VarNR s_sys_svs00000000;

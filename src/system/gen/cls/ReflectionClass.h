@@ -35,20 +35,7 @@ class c_ReflectionClass : public ExtObjectData {
   Variant m_info;
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(ReflectionClass, ReflectionClass)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  static Variant os_getInit(CStrRef s);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionClass 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionClass 1
-  static Variant os_constant(const char *s);
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(ReflectionClass, ReflectionClass, ObjectData)
   static const ClassPropTable os_prop_table;
   c_ReflectionClass() : m_name(Variant::nullInit), m_info(Variant::nullInit) {}
   public: void t___construct(Variant v_name);
@@ -140,9 +127,9 @@ class c_ReflectionClass : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(isinternal);
 };
 ObjectData *coo_ReflectionClass() NEVER_INLINE;
-extern const int64 q_ReflectionClass_IS_IMPLICIT_ABSTRACT;
-extern const int64 q_ReflectionClass_IS_EXPLICIT_ABSTRACT;
-extern const int64 q_ReflectionClass_IS_FINAL;
+extern const int64 q_ReflectionClass$$IS_IMPLICIT_ABSTRACT;
+extern const int64 q_ReflectionClass$$IS_EXPLICIT_ABSTRACT;
+extern const int64 q_ReflectionClass$$IS_FINAL;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

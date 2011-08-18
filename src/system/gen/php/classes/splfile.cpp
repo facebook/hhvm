@@ -31,47 +31,10 @@ namespace HPHP {
 extern CallInfo ci_;
 /* preface finishes */
 /* SRC: classes/splfile.php line 384 */
-const int64 q_SplFileObject_DROP_NEW_LINE = 1LL;
-const int64 q_SplFileObject_READ_AHEAD = 2LL;
-const int64 q_SplFileObject_SKIP_EMPTY = 6LL;
-const int64 q_SplFileObject_READ_CSV = 8LL;
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SplFileObject
-Variant c_SplFileObject::os_getInit(CStrRef s) {
-  return c_SplFileInfo::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SplFileObject
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_SplFileObject
-Variant c_SplFileObject::os_get(CStrRef s) {
-  return c_SplFileInfo::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_SplFileObject
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplFileObject
-Variant &c_SplFileObject::os_lval(CStrRef s) {
-  return c_SplFileInfo::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplFileObject
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SplFileObject
-Variant c_SplFileObject::os_constant(const char *s) {
-  int64 hash = hash_string(s);
-  switch (hash & 7) {
-    case 2:
-      HASH_RETURN(0x54B2A676B563E232LL, q_SplFileObject_SKIP_EMPTY, "SKIP_EMPTY");
-      break;
-    case 3:
-      HASH_RETURN(0x23519E830A6DEC13LL, q_SplFileObject_READ_CSV, "READ_CSV");
-      break;
-    case 4:
-      HASH_RETURN(0x05ABC27224BDAC64LL, q_SplFileObject_DROP_NEW_LINE, "DROP_NEW_LINE");
-      break;
-    case 6:
-      HASH_RETURN(0x6ABD9DCA7D94431ELL, q_SplFileObject_READ_AHEAD, "READ_AHEAD");
-      break;
-    default:
-      break;
-  }
-  return c_SplFileInfo::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SplFileObject
+const int64 q_SplFileObject$$DROP_NEW_LINE = 1LL;
+const int64 q_SplFileObject$$READ_AHEAD = 2LL;
+const int64 q_SplFileObject$$SKIP_EMPTY = 6LL;
+const int64 q_SplFileObject$$READ_CSV = 8LL;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(SplFileObject)
 const InstanceOfInfo c_SplFileObject::s_instanceof_table[] = {
   {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
@@ -819,15 +782,11 @@ void c_SplFileObject::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_SplFileObject = {
-  c_SplFileObject::os_getInit,
-  c_SplFileObject::os_get,
-  c_SplFileObject::os_lval,
-  c_SplFileObject::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SplFileObject,
   c_SplFileObject::s_call_info_table,c_SplFileObject::s_call_info_index,
   c_SplFileObject::s_instanceof_table,c_SplFileObject::s_instanceof_index,
   &c_SplFileObject::s_class_name,
-  &c_SplFileInfo::os_prop_table,0,&cw_SplFileInfo
+  &c_SplFileObject::os_prop_table,0,&cw_SplFileInfo
 };
 /* SRC: classes/splfile.php line 392 */
 void c_SplFileObject::t___construct(Variant v_filename, Variant v_open_mode //  = NAMSTR(s_sys_ss0d42ecf6, "r")
@@ -1027,36 +986,6 @@ bool c_SplFileObject::t_valid() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splfile.php line 11 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SplFileInfo
-Variant c_SplFileInfo::os_getInit(CStrRef s) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_RETURN_NAMSTR(0x26C16E62FD792BB7LL, NAMSTR(s_sys_ss7f14ba70, "rsrc"),
-                         null, 4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SplFileInfo
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_SplFileInfo
-Variant c_SplFileInfo::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_SplFileInfo
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplFileInfo
-Variant &c_SplFileInfo::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplFileInfo
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SplFileInfo
-Variant c_SplFileInfo::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SplFileInfo
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(SplFileInfo)
 const InstanceOfInfo c_SplFileInfo::s_instanceof_table[] = {
   {0x71089C29FE923FA7LL,1,"SplFileInfo",&cw_SplFileInfo},
@@ -1705,10 +1634,6 @@ void c_SplFileInfo::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_SplFileInfo = {
-  c_SplFileInfo::os_getInit,
-  c_SplFileInfo::os_get,
-  c_SplFileInfo::os_lval,
-  c_SplFileInfo::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SplFileInfo,
   c_SplFileInfo::s_call_info_table,c_SplFileInfo::s_call_info_index,
   c_SplFileInfo::s_instanceof_table,c_SplFileInfo::s_instanceof_index,
@@ -1901,20 +1826,43 @@ ObjectData *coo_SplFileInfo() {
 }
 
 // Class tables
+static const int64 cpt_static_inits[] = {
+  (int64)&null_variant,
+  (int64)&NAMVAR(s_sys_svi4d7e8e12, 6LL),
+  (int64)&NAMVAR(s_sys_svic3578135, 8LL),
+  (int64)&NAMVAR(s_sys_svib794f8ce, 1LL),
+  (int64)&NAMVAR(s_sys_svi90d5f98c, 2LL),
+};
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x26C16E62FD792BB7LL,0,13,258,10,GET_PROPERTY_OFFSET(c_SplFileInfo, m_rsrc),&NAMSTR(s_sys_ss25b53cd5, "\000SplFileInfo\000rsrc") },
+  {0x26C16E62FD792BB7LL,0,0,13,65,10,GET_PROPERTY_OFFSET(c_SplFileInfo, m_rsrc),&NAMSTR(s_sys_ss25b53cd5, "\000SplFileInfo\000rsrc") },
+
+  {0x54B2A676B563E232LL,1,1,0,100,4,0,&NAMSTR(s_sys_ssb563e232, "SKIP_EMPTY") },
+  {0x23519E830A6DEC13LL,0,2,0,100,4,0,&NAMSTR(s_sys_ss0a6dec13, "READ_CSV") },
+  {0x05ABC27224BDAC64LL,1,3,0,100,4,0,&NAMSTR(s_sys_ss24bdac64, "DROP_NEW_LINE") },
+  {0x6ABD9DCA7D94431ELL,-3,4,0,100,4,0,&NAMSTR(s_sys_ss7d94431e, "READ_AHEAD") },
 
 };
-static const ClassPropTableEntry *cpt_private_entries[] = {
-  cpt_table_entries+0,
-  0,
-};
 static const int cpt_hash_entries[] = {
+  // SplFileInfo hash
   -1,-1,-1,-1,-1,-1,-1,0,
+  // SplFileInfo lists
+  0,-1,
+  -1,
+  -1,
+  // SplFileObject hash
+  -1,3,-1,2,1,0,-1,-1,
+  // SplFileObject lists
+  -1,
+  -1,
+  -1,
 };
 const ClassPropTable c_SplFileInfo::os_prop_table = {
-  7,0,cpt_hash_entries+0,
-  0,cpt_table_entries+0,cpt_private_entries+0
+  7,0,-1,-1,-1,-1,10,0,
+  cpt_hash_entries+0,0,cpt_table_entries+0,cpt_static_inits
+};
+const ClassPropTable c_SplFileObject::os_prop_table = {
+  -1,-1,-1,-1,7,2,1,0,
+  cpt_hash_entries+20,&c_SplFileInfo::os_prop_table,cpt_table_entries+1,cpt_static_inits
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -92,21 +92,10 @@ public:
                                AnalysisResultPtr ar);
 
   /**
-   * Only used by redeclared classes
-   */
-  void outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
-                          bool needsGlobals, bool ret);
-
-  /**
    * Generate all class constants in class info map.
    */
   void outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar,
                          bool last = true);
-
-  /**
-   * Whether or not we need to generate a jump table.
-   */
-  bool hasJumpTable() const { return !m_emptyJumpTable;}
 
   bool isRecursivelyDeclared(AnalysisResultConstPtr ar,
                              const std::string &name) const;
@@ -117,7 +106,6 @@ public:
                                    ClassScopePtr &defClass) const;
 
 private:
-  bool m_emptyJumpTable;
   bool m_hasDynamic;
 
   ClassScopePtr findParent(AnalysisResultConstPtr ar,

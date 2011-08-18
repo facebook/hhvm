@@ -36,20 +36,7 @@ class c_ReflectionProperty : public ExtObjectData {
   Variant m_class;
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(ReflectionProperty, ReflectionProperty)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  static Variant os_getInit(CStrRef s);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionProperty 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionProperty 1
-  static Variant os_constant(const char *s);
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(ReflectionProperty, ReflectionProperty, ObjectData)
   static const ClassPropTable os_prop_table;
   c_ReflectionProperty() : m_info(Variant::nullInit), m_name(Variant::nullInit), m_class(Variant::nullInit) {}
   public: void t___construct(Variant v_cls, Variant v_name);
@@ -87,10 +74,10 @@ class c_ReflectionProperty : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(getname);
 };
 ObjectData *coo_ReflectionProperty() NEVER_INLINE;
-extern const int64 q_ReflectionProperty_IS_STATIC;
-extern const int64 q_ReflectionProperty_IS_PUBLIC;
-extern const int64 q_ReflectionProperty_IS_PROTECTED;
-extern const int64 q_ReflectionProperty_IS_PRIVATE;
+extern const int64 q_ReflectionProperty$$IS_STATIC;
+extern const int64 q_ReflectionProperty$$IS_PUBLIC;
+extern const int64 q_ReflectionProperty$$IS_PROTECTED;
+extern const int64 q_ReflectionProperty$$IS_PRIVATE;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

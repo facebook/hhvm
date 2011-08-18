@@ -170,7 +170,7 @@ bool TestExtIntl::test_Locale() {
 bool TestExtIntl::test_Normalizer() {
   VERIFY(c_Normalizer::ti_isnormalized(NULL, "\xC3\x85"));
   VERIFY(!c_Normalizer::ti_isnormalized(NULL, "A\xCC\x8A"));
-  VS(c_Normalizer::ti_normalize(NULL, "A\xCC\x8A", q_Normalizer_FORM_C),
+  VS(c_Normalizer::ti_normalize(NULL, "A\xCC\x8A", q_Normalizer$$FORM_C),
      "\xC3\x85");
   return Count(true);
 }

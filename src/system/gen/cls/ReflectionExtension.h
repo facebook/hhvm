@@ -35,20 +35,7 @@ class c_ReflectionExtension : public ExtObjectData {
   Variant m_info;
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(ReflectionExtension, ReflectionExtension)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  static Variant os_getInit(CStrRef s);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionExtension 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionExtension 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionExtension 1
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(ReflectionExtension, ReflectionExtension, ObjectData)
   static const ClassPropTable os_prop_table;
   c_ReflectionExtension() : m_name(Variant::nullInit), m_info(Variant::nullInit) {}
   public: void t___construct(Variant v_name);

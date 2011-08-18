@@ -49,7 +49,7 @@ inline bool x_intl_is_failure(int64 error_code) {
   return f_intl_is_failure(error_code);
 }
 
-inline Variant x_collator_asort(CVarRef obj, VRefParam arr, int64 sort_flag = q_Collator_SORT_REGULAR) {
+inline Variant x_collator_asort(CVarRef obj, VRefParam arr, int64 sort_flag = q_Collator$$SORT_REGULAR) {
   FUNCTION_INJECTION_BUILTIN(collator_asort);
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_collator_asort(obj, arr, sort_flag);
@@ -115,7 +115,7 @@ inline Variant x_collator_sort_with_sort_keys(CVarRef obj, VRefParam arr) {
   return f_collator_sort_with_sort_keys(obj, arr);
 }
 
-inline Variant x_collator_sort(CVarRef obj, VRefParam arr, int64 sort_flag = q_Collator_SORT_REGULAR) {
+inline Variant x_collator_sort(CVarRef obj, VRefParam arr, int64 sort_flag = q_Collator$$SORT_REGULAR) {
   FUNCTION_INJECTION_BUILTIN(collator_sort);
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_collator_sort(obj, arr, sort_flag);

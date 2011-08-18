@@ -35,20 +35,7 @@ class c_DirectoryIterator : public c_SplFileInfo {
   // Properties
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(DirectoryIterator, DirectoryIterator)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DirectoryIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_DirectoryIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DirectoryIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_DirectoryIterator 1
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(DirectoryIterator, DirectoryIterator, SplFileInfo)
   public: void t___construct(Variant v_path);
   public: c_DirectoryIterator *create(CVarRef v_path);
   public: void dynConstruct(CArrRef params);

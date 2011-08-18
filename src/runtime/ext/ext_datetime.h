@@ -27,17 +27,17 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class DateTime
 
-extern const StaticString q_DateTime_ATOM;
-extern const StaticString q_DateTime_COOKIE;
-extern const StaticString q_DateTime_ISO8601;
-extern const StaticString q_DateTime_RFC822;
-extern const StaticString q_DateTime_RFC850;
-extern const StaticString q_DateTime_RFC1036;
-extern const StaticString q_DateTime_RFC1123;
-extern const StaticString q_DateTime_RFC2822;
-extern const StaticString q_DateTime_RFC3339;
-extern const StaticString q_DateTime_RSS;
-extern const StaticString q_DateTime_W3C;
+extern const StaticString q_DateTime$$ATOM;
+extern const StaticString q_DateTime$$COOKIE;
+extern const StaticString q_DateTime$$ISO8601;
+extern const StaticString q_DateTime$$RFC822;
+extern const StaticString q_DateTime$$RFC850;
+extern const StaticString q_DateTime$$RFC1036;
+extern const StaticString q_DateTime$$RFC1123;
+extern const StaticString q_DateTime$$RFC2822;
+extern const StaticString q_DateTime$$RFC3339;
+extern const StaticString q_DateTime$$RSS;
+extern const StaticString q_DateTime$$W3C;
 
 FORWARD_DECLARE_CLASS_BUILTIN(DateTime);
 class c_DateTime : public ExtObjectData {
@@ -74,6 +74,7 @@ class c_DateTime : public ExtObjectData {
                              Object timezone = null_object);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
+  static const ClassPropTable os_prop_table;
 
 
   // Helper for DateTime -> c_DateTime conversion
@@ -101,20 +102,20 @@ class c_DateTime : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class DateTimeZone
 
-extern const int64 q_DateTimeZone_AFRICA;
-extern const int64 q_DateTimeZone_AMERICA;
-extern const int64 q_DateTimeZone_ANTARCTICA;
-extern const int64 q_DateTimeZone_ARCTIC;
-extern const int64 q_DateTimeZone_ASIA;
-extern const int64 q_DateTimeZone_ATLANTIC;
-extern const int64 q_DateTimeZone_AUSTRALIA;
-extern const int64 q_DateTimeZone_EUROPE;
-extern const int64 q_DateTimeZone_INDIAN;
-extern const int64 q_DateTimeZone_PACIFIC;
-extern const int64 q_DateTimeZone_UTC;
-extern const int64 q_DateTimeZone_ALL;
-extern const int64 q_DateTimeZone_ALL_WITH_BC;
-extern const int64 q_DateTimeZone_PER_COUNTRY;
+extern const int64 q_DateTimeZone$$AFRICA;
+extern const int64 q_DateTimeZone$$AMERICA;
+extern const int64 q_DateTimeZone$$ANTARCTICA;
+extern const int64 q_DateTimeZone$$ARCTIC;
+extern const int64 q_DateTimeZone$$ASIA;
+extern const int64 q_DateTimeZone$$ATLANTIC;
+extern const int64 q_DateTimeZone$$AUSTRALIA;
+extern const int64 q_DateTimeZone$$EUROPE;
+extern const int64 q_DateTimeZone$$INDIAN;
+extern const int64 q_DateTimeZone$$PACIFIC;
+extern const int64 q_DateTimeZone$$UTC;
+extern const int64 q_DateTimeZone$$ALL;
+extern const int64 q_DateTimeZone$$ALL_WITH_BC;
+extern const int64 q_DateTimeZone$$PER_COUNTRY;
 
 FORWARD_DECLARE_CLASS_BUILTIN(DateTimeZone);
 class c_DateTimeZone : public ExtObjectData {
@@ -149,6 +150,7 @@ class c_DateTimeZone : public ExtObjectData {
   public: c_DateTimeZone *create(String timezone);
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
+  static const ClassPropTable os_prop_table;
 
 
   // Helper for TimeZone -> c_DateTimeZone conversion

@@ -45,124 +45,124 @@ IMPLEMENT_THREAD_LOCAL(c_Memcached::ImplMap, c_Memcached::s_persistentMap);
 #define MEMC_COMPRESS_THRESHOLD 100
 
 // Class options
-const int q_Memcached_OPT_COMPRESSION = -1001;
-const int q_Memcached_OPT_PREFIX_KEY  = -1002;
-const int q_Memcached_OPT_SERIALIZER  = -1003;
+const int q_Memcached$$OPT_COMPRESSION = -1001;
+const int q_Memcached$$OPT_PREFIX_KEY  = -1002;
+const int q_Memcached$$OPT_SERIALIZER  = -1003;
 
 // Indicate whether igbinary serializer is available
-const bool q_Memcached_HAVE_IGBINARY = false;
+const bool q_Memcached$$HAVE_IGBINARY = false;
 
 // Indicate whether json serializer is available
-const bool q_Memcached_HAVE_JSON = true;
+const bool q_Memcached$$HAVE_JSON = true;
 
 // libmemcached behavior options
-const int q_Memcached_OPT_HASH
+const int q_Memcached$$OPT_HASH
           = MEMCACHED_BEHAVIOR_HASH;
-const int q_Memcached_HASH_DEFAULT
+const int q_Memcached$$HASH_DEFAULT
           = MEMCACHED_HASH_DEFAULT;
-const int q_Memcached_HASH_MD5
+const int q_Memcached$$HASH_MD5
           = MEMCACHED_HASH_MD5;
-const int q_Memcached_HASH_CRC
+const int q_Memcached$$HASH_CRC
           = MEMCACHED_HASH_CRC;
-const int q_Memcached_HASH_FNV1_64
+const int q_Memcached$$HASH_FNV1_64
           = MEMCACHED_HASH_FNV1_64;
-const int q_Memcached_HASH_FNV1A_64
+const int q_Memcached$$HASH_FNV1A_64
           = MEMCACHED_HASH_FNV1A_64;
-const int q_Memcached_HASH_FNV1_32
+const int q_Memcached$$HASH_FNV1_32
           = MEMCACHED_HASH_FNV1_32;
-const int q_Memcached_HASH_FNV1A_32
+const int q_Memcached$$HASH_FNV1A_32
           = MEMCACHED_HASH_FNV1A_32;
-const int q_Memcached_HASH_HSIEH
+const int q_Memcached$$HASH_HSIEH
           = MEMCACHED_HASH_HSIEH;
-const int q_Memcached_HASH_MURMUR
+const int q_Memcached$$HASH_MURMUR
           = MEMCACHED_HASH_MURMUR;
-const int q_Memcached_OPT_DISTRIBUTION
+const int q_Memcached$$OPT_DISTRIBUTION
           = MEMCACHED_BEHAVIOR_DISTRIBUTION;
-const int q_Memcached_DISTRIBUTION_MODULA
+const int q_Memcached$$DISTRIBUTION_MODULA
           = MEMCACHED_DISTRIBUTION_MODULA;
-const int q_Memcached_DISTRIBUTION_CONSISTENT
+const int q_Memcached$$DISTRIBUTION_CONSISTENT
           = MEMCACHED_DISTRIBUTION_CONSISTENT;
-const int q_Memcached_OPT_LIBKETAMA_COMPATIBLE
+const int q_Memcached$$OPT_LIBKETAMA_COMPATIBLE
           = MEMCACHED_BEHAVIOR_KETAMA_WEIGHTED;
-const int q_Memcached_OPT_BUFFER_WRITES
+const int q_Memcached$$OPT_BUFFER_WRITES
           = MEMCACHED_BEHAVIOR_BUFFER_REQUESTS;
-const int q_Memcached_OPT_BINARY_PROTOCOL
+const int q_Memcached$$OPT_BINARY_PROTOCOL
           = MEMCACHED_BEHAVIOR_BINARY_PROTOCOL;
-const int q_Memcached_OPT_NO_BLOCK
+const int q_Memcached$$OPT_NO_BLOCK
           = MEMCACHED_BEHAVIOR_NO_BLOCK;
-const int q_Memcached_OPT_TCP_NODELAY
+const int q_Memcached$$OPT_TCP_NODELAY
           = MEMCACHED_BEHAVIOR_TCP_NODELAY;
-const int q_Memcached_OPT_SOCKET_SEND_SIZE
+const int q_Memcached$$OPT_SOCKET_SEND_SIZE
           = MEMCACHED_BEHAVIOR_SOCKET_SEND_SIZE;
-const int q_Memcached_OPT_SOCKET_RECV_SIZE
+const int q_Memcached$$OPT_SOCKET_RECV_SIZE
           = MEMCACHED_BEHAVIOR_SOCKET_RECV_SIZE;
-const int q_Memcached_OPT_CONNECT_TIMEOUT
+const int q_Memcached$$OPT_CONNECT_TIMEOUT
           = MEMCACHED_BEHAVIOR_CONNECT_TIMEOUT;
-const int q_Memcached_OPT_RETRY_TIMEOUT
+const int q_Memcached$$OPT_RETRY_TIMEOUT
           = MEMCACHED_BEHAVIOR_RETRY_TIMEOUT;
-const int q_Memcached_OPT_SEND_TIMEOUT
+const int q_Memcached$$OPT_SEND_TIMEOUT
           = MEMCACHED_BEHAVIOR_SND_TIMEOUT;
-const int q_Memcached_OPT_RECV_TIMEOUT
+const int q_Memcached$$OPT_RECV_TIMEOUT
           = MEMCACHED_BEHAVIOR_RCV_TIMEOUT;
-const int q_Memcached_OPT_POLL_TIMEOUT
+const int q_Memcached$$OPT_POLL_TIMEOUT
           = MEMCACHED_BEHAVIOR_POLL_TIMEOUT;
-const int q_Memcached_OPT_CACHE_LOOKUPS
+const int q_Memcached$$OPT_CACHE_LOOKUPS
           = MEMCACHED_BEHAVIOR_CACHE_LOOKUPS;
-const int q_Memcached_OPT_SERVER_FAILURE_LIMIT
+const int q_Memcached$$OPT_SERVER_FAILURE_LIMIT
           = MEMCACHED_BEHAVIOR_SERVER_FAILURE_LIMIT;
 
 // libmemcached result codes
-const int q_Memcached_RES_SUCCESS
+const int q_Memcached$$RES_SUCCESS
           = MEMCACHED_SUCCESS;
-const int q_Memcached_RES_FAILURE
+const int q_Memcached$$RES_FAILURE
           = MEMCACHED_FAILURE;
-const int q_Memcached_RES_HOST_LOOKUP_FAILURE
+const int q_Memcached$$RES_HOST_LOOKUP_FAILURE
           = MEMCACHED_HOST_LOOKUP_FAILURE;
-const int q_Memcached_RES_UNKNOWN_READ_FAILURE
+const int q_Memcached$$RES_UNKNOWN_READ_FAILURE
           = MEMCACHED_UNKNOWN_READ_FAILURE;
-const int q_Memcached_RES_PROTOCOL_ERROR
+const int q_Memcached$$RES_PROTOCOL_ERROR
           = MEMCACHED_PROTOCOL_ERROR;
-const int q_Memcached_RES_CLIENT_ERROR
+const int q_Memcached$$RES_CLIENT_ERROR
           = MEMCACHED_CLIENT_ERROR;
-const int q_Memcached_RES_SERVER_ERROR
+const int q_Memcached$$RES_SERVER_ERROR
           = MEMCACHED_SERVER_ERROR;
-const int q_Memcached_RES_WRITE_FAILURE
+const int q_Memcached$$RES_WRITE_FAILURE
           = MEMCACHED_WRITE_FAILURE;
-const int q_Memcached_RES_DATA_EXISTS
+const int q_Memcached$$RES_DATA_EXISTS
           = MEMCACHED_DATA_EXISTS;
-const int q_Memcached_RES_NOTSTORED
+const int q_Memcached$$RES_NOTSTORED
           = MEMCACHED_NOTSTORED;
-const int q_Memcached_RES_NOTFOUND
+const int q_Memcached$$RES_NOTFOUND
           = MEMCACHED_NOTFOUND;
-const int q_Memcached_RES_PARTIAL_READ
+const int q_Memcached$$RES_PARTIAL_READ
           = MEMCACHED_PARTIAL_READ;
-const int q_Memcached_RES_SOME_ERRORS
+const int q_Memcached$$RES_SOME_ERRORS
           = MEMCACHED_SOME_ERRORS;
-const int q_Memcached_RES_NO_SERVERS
+const int q_Memcached$$RES_NO_SERVERS
           = MEMCACHED_NO_SERVERS;
-const int q_Memcached_RES_END
+const int q_Memcached$$RES_END
           = MEMCACHED_END;
-const int q_Memcached_RES_ERRNO
+const int q_Memcached$$RES_ERRNO
           = MEMCACHED_ERRNO;
-const int q_Memcached_RES_BUFFERED
+const int q_Memcached$$RES_BUFFERED
           = MEMCACHED_BUFFERED;
-const int q_Memcached_RES_TIMEOUT
+const int q_Memcached$$RES_TIMEOUT
           = MEMCACHED_TIMEOUT;
-const int q_Memcached_RES_BAD_KEY_PROVIDED
+const int q_Memcached$$RES_BAD_KEY_PROVIDED
           = MEMCACHED_BAD_KEY_PROVIDED;
-const int q_Memcached_RES_CONNECTION_SOCKET_CREATE_FAILURE
+const int q_Memcached$$RES_CONNECTION_SOCKET_CREATE_FAILURE
           = MEMCACHED_CONNECTION_SOCKET_CREATE_FAILURE;
 
 // Our result codes
-const int q_Memcached_RES_PAYLOAD_FAILURE = -1001;
+const int q_Memcached$$RES_PAYLOAD_FAILURE = -1001;
 
 // Serializer types
-const int q_Memcached_SERIALIZER_PHP      = 1;
-const int q_Memcached_SERIALIZER_IGBINARY = 2;
-const int q_Memcached_SERIALIZER_JSON     = 3;
+const int q_Memcached$$SERIALIZER_PHP      = 1;
+const int q_Memcached$$SERIALIZER_IGBINARY = 2;
+const int q_Memcached$$SERIALIZER_JSON     = 3;
 
 // Flags
-const int q_Memcached_GET_PRESERVE_ORDER = 1;
+const int q_Memcached$$GET_PRESERVE_ORDER = 1;
 
 
 namespace {
@@ -184,8 +184,8 @@ c_Memcached::~c_Memcached() { }
 
 c_Memcached::Impl::Impl() :
     compression(true),
-    serializer(q_Memcached_SERIALIZER_PHP),
-    rescode(q_Memcached_RES_SUCCESS) {
+    serializer(q_Memcached$$SERIALIZER_PHP),
+    rescode(q_Memcached$$RES_SUCCESS) {
   memcached_create(&memcached);
 }
 
@@ -221,9 +221,9 @@ Variant c_Memcached::t_getbykey(CStrRef server_key, CStrRef key,
                                 VRefParam cas_token /*= null_variant*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getbykey);
   TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
-  m_impl->rescode = q_Memcached_RES_SUCCESS;
+  m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (key.empty()) {
-    m_impl->rescode = q_Memcached_RES_BAD_KEY_PROVIDED;
+    m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
     return false;
   }
 
@@ -252,7 +252,7 @@ Variant c_Memcached::t_getbykey(CStrRef server_key, CStrRef key,
   }
 
   if (!toObject(returnValue, result.value)) {
-    m_impl->rescode = q_Memcached_RES_PAYLOAD_FAILURE;
+    m_impl->rescode = q_Memcached$$RES_PAYLOAD_FAILURE;
     return false;
   }
   if (cas_token.isReferenced()) {
@@ -274,9 +274,9 @@ Variant c_Memcached::t_getmultibykey(CStrRef server_key, CArrRef keys,
                                      int flags /*= 0*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getmultibykey);
   TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
-  m_impl->rescode = q_Memcached_RES_SUCCESS;
+  m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
-  bool preserveOrder = flags & q_Memcached_GET_PRESERVE_ORDER;
+  bool preserveOrder = flags & q_Memcached$$GET_PRESERVE_ORDER;
   Array returnValue;
   if (!getMultiImpl(server_key, keys, cas_tokens.isReferenced(),
                     preserveOrder ? &returnValue : NULL)) {
@@ -289,7 +289,7 @@ Variant c_Memcached::t_getmultibykey(CStrRef server_key, CArrRef keys,
   while (memcached_fetch_result(&m_impl->memcached, &result.value, &status)) {
     Variant value;
     if (!toObject(value, result.value)) {
-      m_impl->rescode = q_Memcached_RES_PAYLOAD_FAILURE;
+      m_impl->rescode = q_Memcached$$RES_PAYLOAD_FAILURE;
       return false;
     }
     const char *key  = memcached_result_key_value(&result.value);
@@ -317,7 +317,7 @@ bool c_Memcached::t_getdelayedbykey(CStrRef server_key, CArrRef keys,
     bool with_cas /*= false*/, CVarRef value_cb /*= null_variant*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getdelayedbykey);
   TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
-  m_impl->rescode = q_Memcached_RES_SUCCESS;
+  m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
   if (!getMultiImpl(server_key, keys, with_cas, NULL)) return false;
   if (value_cb.isNull()) return true;
@@ -327,15 +327,15 @@ bool c_Memcached::t_getdelayedbykey(CStrRef server_key, CArrRef keys,
     f_call_user_func_array(value_cb, CREATE_VECTOR2(Variant(this), item));
   }
 
-  if (m_impl->rescode != q_Memcached_RES_END) return false;
-  m_impl->rescode = q_Memcached_RES_SUCCESS;
+  if (m_impl->rescode != q_Memcached$$RES_END) return false;
+  m_impl->rescode = q_Memcached$$RES_SUCCESS;
   return true;
 }
 
 Variant c_Memcached::t_fetch() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::fetch);
   TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
-  m_impl->rescode = q_Memcached_RES_SUCCESS;
+  m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
   MemcachedResultWrapper result(&m_impl->memcached); Array item;
   if (!fetchImpl(result.value, item)) return false;
@@ -346,7 +346,7 @@ Variant c_Memcached::t_fetch() {
 Variant c_Memcached::t_fetchall() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::fetchall);
   TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
-  m_impl->rescode = q_Memcached_RES_SUCCESS;
+  m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
   Array returnValue;
   MemcachedResultWrapper result(&m_impl->memcached); Array item;
@@ -354,7 +354,7 @@ Variant c_Memcached::t_fetchall() {
     returnValue.append(item);
   }
 
-  if (m_impl->rescode != q_Memcached_RES_END) return false;
+  if (m_impl->rescode != q_Memcached$$RES_END) return false;
   return returnValue;
 }
 
@@ -374,7 +374,7 @@ bool c_Memcached::getMultiImpl(CStrRef server_key, CArrRef keys,
     if (returnValue) returnValue->set(String(key), null_variant, true);
   }
   if (keysCopy.size() == 0) {
-    m_impl->rescode = q_Memcached_RES_BAD_KEY_PROVIDED;
+    m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
     return false;
   }
 
@@ -396,7 +396,7 @@ bool c_Memcached::fetchImpl(memcached_result_st &result, Array &item) {
 
   Variant value;
   if (!toObject(value, result)) {
-    m_impl->rescode = q_Memcached_RES_PAYLOAD_FAILURE;
+    m_impl->rescode = q_Memcached$$RES_PAYLOAD_FAILURE;
     return false;
   }
 
@@ -429,7 +429,7 @@ bool c_Memcached::t_setmulti(CArrRef items, int expiration /*= 0*/) {
 bool c_Memcached::t_setmultibykey(CStrRef server_key, CArrRef items,
                                   int expiration /*= 0*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::setmultibykey);
-  m_impl->rescode = q_Memcached_RES_SUCCESS;
+  m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
   for (ArrayIter iter(items); iter; ++iter) {
     Variant key = iter.first();
@@ -499,9 +499,9 @@ bool c_Memcached::t_replacebykey(CStrRef server_key, CStrRef key,
 bool c_Memcached::setOperationImpl(SetOperation op, CStrRef server_key,
                                    CStrRef key, CVarRef value,
                                    int expiration) {
-  m_impl->rescode = q_Memcached_RES_SUCCESS;
+  m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (key.empty()) {
-    m_impl->rescode = q_Memcached_RES_BAD_KEY_PROVIDED;
+    m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
     return false;
   }
 
@@ -523,9 +523,9 @@ bool c_Memcached::t_cas(double cas_token, CStrRef key, CVarRef value,
 bool c_Memcached::t_casbykey(double cas_token, CStrRef server_key, CStrRef key,
                              CVarRef value, int expiration /*= 0*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::casbykey);
-  m_impl->rescode = q_Memcached_RES_SUCCESS;
+  m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (key.empty()) {
-    m_impl->rescode = q_Memcached_RES_BAD_KEY_PROVIDED;
+    m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
     return false;
   }
 
@@ -546,9 +546,9 @@ bool c_Memcached::t_delete(CStrRef key, int time /*= 0*/) {
 bool c_Memcached::t_deletebykey(CStrRef server_key, CStrRef key,
                                 int time /*= 0*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::deletebykey);
-  m_impl->rescode = q_Memcached_RES_SUCCESS;
+  m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (key.empty()) {
-    m_impl->rescode = q_Memcached_RES_BAD_KEY_PROVIDED;
+    m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
     return false;
   }
 
@@ -570,9 +570,9 @@ Variant c_Memcached::t_decrement(CStrRef key, int64 offset /*= 1*/) {
 
 Variant c_Memcached::incDecOperationImpl(IncDecOperation op, CStrRef key,
                                          int64 offset) {
-  m_impl->rescode = q_Memcached_RES_SUCCESS;
+  m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (key.empty()) {
-    m_impl->rescode = q_Memcached_RES_BAD_KEY_PROVIDED;
+    m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
     return false;
   }
   if (offset < 0) {
@@ -590,7 +590,7 @@ Variant c_Memcached::incDecOperationImpl(IncDecOperation op, CStrRef key,
 
 bool c_Memcached::t_addserver(CStrRef host, int port, int weight /*= 0*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::addserver);
-  m_impl->rescode = q_Memcached_RES_SUCCESS;
+  m_impl->rescode = q_Memcached$$RES_SUCCESS;
   return handleError(memcached_server_add_with_weight(&m_impl->memcached,
       host.c_str(), port, weight));
 }
@@ -654,9 +654,9 @@ Array c_Memcached::t_getserverlist() {
 
 Variant c_Memcached::t_getserverbykey(CStrRef server_key) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getserverbykey);
-  m_impl->rescode = q_Memcached_RES_SUCCESS;
+  m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (server_key.empty()) {
-    m_impl->rescode = q_Memcached_RES_BAD_KEY_PROVIDED;
+    m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
     return false;
   }
 
@@ -770,10 +770,10 @@ bool c_Memcached::t_flush(int delay /*= 0*/) {
 Variant c_Memcached::t_getoption(int option) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getoption);
   switch (option) {
-  case q_Memcached_OPT_COMPRESSION:
+  case q_Memcached$$OPT_COMPRESSION:
     return m_impl->compression;
 
-  case q_Memcached_OPT_PREFIX_KEY:
+  case q_Memcached$$OPT_PREFIX_KEY:
     {
       memcached_return retval;
       char *result = (char*) memcached_callback_get(&m_impl->memcached,
@@ -782,7 +782,7 @@ Variant c_Memcached::t_getoption(int option) {
       else return empty_string;
     }
 
-  case q_Memcached_OPT_SERIALIZER:
+  case q_Memcached$$OPT_SERIALIZER:
     return m_impl->serializer;
 
   case MEMCACHED_BEHAVIOR_SOCKET_SEND_SIZE:
@@ -803,11 +803,11 @@ Variant c_Memcached::t_getoption(int option) {
 bool c_Memcached::t_setoption(int option, CVarRef value) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::setoption);
   switch (option) {
-  case q_Memcached_OPT_COMPRESSION:
+  case q_Memcached$$OPT_COMPRESSION:
     m_impl->compression = value.toBoolean();
     break;
 
-  case q_Memcached_OPT_PREFIX_KEY:
+  case q_Memcached$$OPT_PREFIX_KEY:
     {
       String sValue = value.toString();
       char *key = const_cast<char*>(sValue.empty() ? NULL : sValue.c_str());
@@ -841,16 +841,16 @@ bool c_Memcached::t_setoption(int option, CVarRef value) {
       break;
     }
 
-  case q_Memcached_OPT_SERIALIZER:
+  case q_Memcached$$OPT_SERIALIZER:
     {
       int iValue = value.toInt32(10);
       switch (iValue) {
-      case q_Memcached_SERIALIZER_PHP:
-      case q_Memcached_SERIALIZER_JSON:
+      case q_Memcached$$SERIALIZER_PHP:
+      case q_Memcached$$SERIALIZER_JSON:
         m_impl->serializer = iValue;
         break;
       default:
-        m_impl->serializer = q_Memcached_SERIALIZER_PHP;
+        m_impl->serializer = q_Memcached$$SERIALIZER_PHP;
         raise_warning("invalid serializer provided");
         return false;
       }
@@ -879,7 +879,7 @@ int c_Memcached::t_getresultcode() {
 
 String c_Memcached::t_getresultmessage() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getresultmessage);
-  if (m_impl->rescode == q_Memcached_RES_PAYLOAD_FAILURE) {
+  if (m_impl->rescode == q_Memcached$$RES_PAYLOAD_FAILURE) {
     return "PAYLOAD FAILURE";
   } else {
     return memcached_strerror(&m_impl->memcached,
@@ -916,7 +916,7 @@ void c_Memcached::toPayload(CVarRef value, vector<char> &payload,
     else assert(false);
   } else {
     switch (m_impl->serializer) {
-    case q_Memcached_SERIALIZER_JSON:
+    case q_Memcached$$SERIALIZER_JSON:
       encoded = f_json_encode(value);
       flags = MEMC_VAL_IS_JSON;
       break;

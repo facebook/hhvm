@@ -34,7 +34,7 @@ using namespace boost;
 ///////////////////////////////////////////////////////////////////////////////
 
 ConstantTable::ConstantTable(BlockScope &blockScope)
-    : SymbolTable(blockScope, true), m_emptyJumpTable(false),
+    : SymbolTable(blockScope, true),
       m_hasDynamic(false) {
 }
 
@@ -255,7 +255,7 @@ void ConstantTable::getCPPDynamicDecl(CodeGenerator &cg,
   if (scope) {
     prefix = Option::ClassConstantPrefix;
     classId = scope->getId();
-    fmt = "_";
+    fmt = Option::IdPrefix.c_str();
   }
 
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
@@ -335,8 +335,9 @@ bool ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       cg_printf(" %s%s", Option::ConstantPrefix,
                 CodeGenerator::FormatLabel(name).c_str());
     } else {
-      cg_printf(" %s%s_%s", Option::ClassConstantPrefix,
+      cg_printf(" %s%s%s%s", Option::ClassConstantPrefix,
                 cls->getId().c_str(),
+                Option::IdPrefix.c_str(),
                 CodeGenerator::FormatLabel(name).c_str());
     }
   } else {
@@ -344,8 +345,9 @@ bool ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       cg_printf(" %s%s", Option::ConstantPrefix,
                 CodeGenerator::FormatLabel(name).c_str());
     } else {
-      cg_printf(" %s%s_%s", Option::ClassConstantPrefix,
+      cg_printf(" %s%s%s%s", Option::ClassConstantPrefix,
                 cls->getId().c_str(),
+                Option::IdPrefix.c_str(),
                 CodeGenerator::FormatLabel(name).c_str());
     }
     cg_printf(isString ? "(" : " = ");
@@ -384,58 +386,13 @@ bool ConstantTable::outputSingleConstant(CodeGenerator &cg,
   return sym && outputCPP(cg, ar, sym);
 }
 
-void ConstantTable::outputCPPJumpTable(CodeGenerator &cg,
-                                       AnalysisResultPtr ar,
-                                       bool needsGlobals,
-                                       bool ret) {
-  bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  vector<const char *> strings;
-  if (!m_symbolVec.empty()) {
-    strings.reserve(m_symbolVec.size());
-    BOOST_FOREACH(Symbol *sym, m_symbolVec) {
-      // Extension defined constants have no value but we are sure they exist
-      if (!system && !sym->getValue()) continue;
-      strings.push_back(sym->getName().c_str());
-    }
-  }
-
-  m_emptyJumpTable = strings.empty();
-  if (!m_emptyJumpTable) {
-    if (m_hasDynamic) {
-      if (needsGlobals) {
-        cg.printDeclareGlobals();
-      }
-      ClassScopePtr cls = getClassScope();
-      if (cls && cls->needLazyStaticInitializer()) {
-        cg_printf("lazy_initializer(g);\n");
-      }
-    }
-    for (JumpTable jt(cg, strings, false, false, false); jt.ready();
-         jt.next()) {
-      const char *name = jt.key();
-      string varName = string(Option::ClassConstantPrefix) +
-        getScopePtr()->getId() + "_" + CodeGenerator::FormatLabel(name);
-      if (isDynamic(name)) {
-        varName = string("g->") + varName;
-      }
-      cg_printf("HASH_RETURN(0x%016llXLL, %s, \"%s\");\n",
-                hash_string(name), varName.c_str(),
-                CodeGenerator::EscapeLabel(name).c_str());
-    }
-  }
-  if (ret) {
-    // TODO this is wrong
-    cg_printf("return s;\n");
-  }
-}
-
 void ConstantTable::outputCPPConstantSymbol(CodeGenerator &cg,
                                             AnalysisResultPtr ar,
                                             Symbol *sym) {
-  bool cls = getClassScope();
+  ClassScopeRawPtr cls = getClassScope();
   if (sym->valueSet() &&
-      (!sym->isDynamic() || cls)  &&
-      !ar->isConstantRedeclared(sym->getName())) {
+      (cls || (!sym->isDynamic()  &&
+               !ar->isConstantRedeclared(sym->getName())))) {
     ExpressionPtr value = dynamic_pointer_cast<Expression>(sym->getValue());
     Variant v;
     if (value && value->getScalarValue(v)) {
@@ -444,6 +401,10 @@ void ConstantTable::outputCPPConstantSymbol(CodeGenerator &cg,
       cg_printf("\"%s\", (const char *)%d, \"%s\",\n",
                 CodeGenerator::EscapeLabel(sym->getName()).c_str(),
                 len, output.c_str());
+    } else if (cls) {
+      cg_printf("\"%s\", (const char *)&%s%s, NULL,\n",
+                CodeGenerator::EscapeLabel(sym->getName()).c_str(),
+                Option::ClassStaticsCallbackPrefix, cls->getId().c_str());
     } else {
       cg_printf("\"%s\", (const char *)0, NULL,\n",
                 CodeGenerator::EscapeLabel(sym->getName()).c_str());

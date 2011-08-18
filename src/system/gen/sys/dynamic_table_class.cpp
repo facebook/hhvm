@@ -75,26 +75,6 @@ extern const ObjectStaticCallbacks cw_ReflectionParameter;
 ObjectData *coo_DOMDocumentFragment() {
   return NEWOBJ(c_DOMDocumentFragment)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMDocumentFragment
-Variant c_DOMDocumentFragment::os_getInit(CStrRef s) {
-  return c_DOMNode::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMDocumentFragment
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMDocumentFragment
-Variant c_DOMDocumentFragment::os_get(CStrRef s) {
-  return c_DOMNode::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMDocumentFragment
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMDocumentFragment
-Variant &c_DOMDocumentFragment::os_lval(CStrRef s) {
-  return c_DOMNode::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMDocumentFragment
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocumentFragment
-Variant c_DOMDocumentFragment::os_constant(const char *s) {
-  return c_DOMNode::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocumentFragment
 IMPLEMENT_CLASS(DOMDocumentFragment)
 const InstanceOfInfo c_DOMDocumentFragment::s_instanceof_table[] = {
   {0x7AD161197633B87DLL,1,"DOMDocumentFragment",&cw_DOMDocumentFragment},
@@ -200,10 +180,6 @@ void c_DOMDocumentFragment::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMDocumentFragment = {
-  c_DOMDocumentFragment::os_getInit,
-  c_DOMDocumentFragment::os_get,
-  c_DOMDocumentFragment::os_lval,
-  c_DOMDocumentFragment::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMDocumentFragment,
   c_DOMDocumentFragment::s_call_info_table,c_DOMDocumentFragment::s_call_info_index,
   c_DOMDocumentFragment::s_instanceof_table,c_DOMDocumentFragment::s_instanceof_index,
@@ -213,26 +189,6 @@ const ObjectStaticCallbacks cw_DOMDocumentFragment = {
 ObjectData *coo_DOMText() {
   return NEWOBJ(c_DOMText)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMText
-Variant c_DOMText::os_getInit(CStrRef s) {
-  return c_DOMCharacterData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMText
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMText
-Variant c_DOMText::os_get(CStrRef s) {
-  return c_DOMCharacterData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMText
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMText
-Variant &c_DOMText::os_lval(CStrRef s) {
-  return c_DOMCharacterData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMText
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMText
-Variant c_DOMText::os_constant(const char *s) {
-  return c_DOMCharacterData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMText
 IMPLEMENT_CLASS(DOMText)
 const InstanceOfInfo c_DOMText::s_instanceof_table[] = {
   {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
@@ -454,10 +410,6 @@ void c_DOMText::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMText = {
-  c_DOMText::os_getInit,
-  c_DOMText::os_get,
-  c_DOMText::os_lval,
-  c_DOMText::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMText,
   c_DOMText::s_call_info_table,c_DOMText::s_call_info_index,
   c_DOMText::s_instanceof_table,c_DOMText::s_instanceof_index,
@@ -467,55 +419,6 @@ const ObjectStaticCallbacks cw_DOMText = {
 ObjectData *coo_DebuggerClient() {
   return NEWOBJ(c_DebuggerClient)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DebuggerClient
-Variant c_DebuggerClient::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DebuggerClient
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DebuggerClient
-Variant c_DebuggerClient::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DebuggerClient
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DebuggerClient
-Variant &c_DebuggerClient::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DebuggerClient
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DebuggerClient
-Variant c_DebuggerClient::os_constant(const char *s) {
-  int64 hash = hash_string(s);
-  switch (hash & 31) {
-    case 2:
-      HASH_RETURN(0x2038737F45604DE2LL, q_DebuggerClient_AUTO_COMPLETE_VARIABLES, "AUTO_COMPLETE_VARIABLES");
-      break;
-    case 7:
-      HASH_RETURN(0x1B352E31B034F827LL, q_DebuggerClient_AUTO_COMPLETE_FILENAMES, "AUTO_COMPLETE_FILENAMES");
-      HASH_RETURN(0x0F17BB5BEC004CA7LL, q_DebuggerClient_AUTO_COMPLETE_CLASSES, "AUTO_COMPLETE_CLASSES");
-      break;
-    case 9:
-      HASH_RETURN(0x6A811D407DC24A29LL, q_DebuggerClient_AUTO_COMPLETE_CLASS_CONSTANTS, "AUTO_COMPLETE_CLASS_CONSTANTS");
-      break;
-    case 11:
-      HASH_RETURN(0x1858E5511222BC8BLL, q_DebuggerClient_AUTO_COMPLETE_CLASS_PROPERTIES, "AUTO_COMPLETE_CLASS_PROPERTIES");
-      HASH_RETURN(0x1DE12226E1E87B6BLL, q_DebuggerClient_AUTO_COMPLETE_CODE, "AUTO_COMPLETE_CODE");
-      break;
-    case 15:
-      HASH_RETURN(0x2C29DCF63AAC70EFLL, q_DebuggerClient_AUTO_COMPLETE_CLASS_METHODS, "AUTO_COMPLETE_CLASS_METHODS");
-      HASH_RETURN(0x76A6B174D3E2108FLL, q_DebuggerClient_AUTO_COMPLETE_KEYWORDS, "AUTO_COMPLETE_KEYWORDS");
-      break;
-    case 19:
-      HASH_RETURN(0x78221A7B002235D3LL, q_DebuggerClient_AUTO_COMPLETE_CONSTANTS, "AUTO_COMPLETE_CONSTANTS");
-      break;
-    case 31:
-      HASH_RETURN(0x7CAE318E6EF6449FLL, q_DebuggerClient_AUTO_COMPLETE_FUNCTIONS, "AUTO_COMPLETE_FUNCTIONS");
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DebuggerClient
 IMPLEMENT_CLASS(DebuggerClient)
 const InstanceOfInfo c_DebuggerClient::s_instanceof_table[] = {
   {0x7D1235273F521A63LL,1,"DebuggerClient",&cw_DebuggerClient},
@@ -1318,39 +1221,15 @@ void c_DebuggerClient::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DebuggerClient = {
-  c_DebuggerClient::os_getInit,
-  c_DebuggerClient::os_get,
-  c_DebuggerClient::os_lval,
-  c_DebuggerClient::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DebuggerClient,
   c_DebuggerClient::s_call_info_table,c_DebuggerClient::s_call_info_index,
   c_DebuggerClient::s_instanceof_table,c_DebuggerClient::s_instanceof_index,
   &c_DebuggerClient::s_class_name,
-  0,0,0
+  &c_DebuggerClient::os_prop_table,0,0
 };
 ObjectData *coo_EncodingDetector() {
   return NEWOBJ(c_EncodingDetector)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_EncodingDetector
-Variant c_EncodingDetector::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_EncodingDetector
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_EncodingDetector
-Variant c_EncodingDetector::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_EncodingDetector
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_EncodingDetector
-Variant &c_EncodingDetector::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_EncodingDetector
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_EncodingDetector
-Variant c_EncodingDetector::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_EncodingDetector
 IMPLEMENT_CLASS(EncodingDetector)
 const InstanceOfInfo c_EncodingDetector::s_instanceof_table[] = {
   {0x22500D8A3618ED87LL,1,"EncodingDetector",&cw_EncodingDetector},
@@ -1519,10 +1398,6 @@ void c_EncodingDetector::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_EncodingDetector = {
-  c_EncodingDetector::os_getInit,
-  c_EncodingDetector::os_get,
-  c_EncodingDetector::os_lval,
-  c_EncodingDetector::os_constant,
   (ObjectData*(*)(ObjectData*))coo_EncodingDetector,
   c_EncodingDetector::s_call_info_table,c_EncodingDetector::s_call_info_index,
   c_EncodingDetector::s_instanceof_table,c_EncodingDetector::s_instanceof_index,
@@ -1532,26 +1407,6 @@ const ObjectStaticCallbacks cw_EncodingDetector = {
 ObjectData *coo_DOMCDATASection() {
   return NEWOBJ(c_DOMCDATASection)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMCDATASection
-Variant c_DOMCDATASection::os_getInit(CStrRef s) {
-  return c_DOMText::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMCDATASection
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMCDATASection
-Variant c_DOMCDATASection::os_get(CStrRef s) {
-  return c_DOMText::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMCDATASection
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMCDATASection
-Variant &c_DOMCDATASection::os_lval(CStrRef s) {
-  return c_DOMText::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMCDATASection
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMCDATASection
-Variant c_DOMCDATASection::os_constant(const char *s) {
-  return c_DOMText::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMCDATASection
 IMPLEMENT_CLASS(DOMCDATASection)
 const InstanceOfInfo c_DOMCDATASection::s_instanceof_table[] = {
   {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
@@ -1645,10 +1500,6 @@ void c_DOMCDATASection::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMCDATASection = {
-  c_DOMCDATASection::os_getInit,
-  c_DOMCDATASection::os_get,
-  c_DOMCDATASection::os_lval,
-  c_DOMCDATASection::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMCDATASection,
   c_DOMCDATASection::s_call_info_table,c_DOMCDATASection::s_call_info_index,
   c_DOMCDATASection::s_instanceof_table,c_DOMCDATASection::s_instanceof_index,
@@ -1658,35 +1509,6 @@ const ObjectStaticCallbacks cw_DOMCDATASection = {
 ObjectData *coo_Locale() {
   return NEWOBJ(c_Locale)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Locale
-Variant c_Locale::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Locale
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_Locale
-Variant c_Locale::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_Locale
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Locale
-Variant &c_Locale::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Locale
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Locale
-Variant c_Locale::os_constant(const char *s) {
-  int64 hash = hash_string(s);
-  switch (hash & 3) {
-    case 1:
-      HASH_RETURN(0x78695696B47AF8CDLL, q_Locale_ACTUAL_LOCALE, "ACTUAL_LOCALE");
-      HASH_RETURN(0x35B10383BBF3BAE1LL, q_Locale_VALID_LOCALE, "VALID_LOCALE");
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Locale
 IMPLEMENT_CLASS(Locale)
 const InstanceOfInfo c_Locale::s_instanceof_table[] = {
   {0x67E31D42F2DFE4AALL,1,"Locale",&cw_Locale},
@@ -1765,39 +1587,15 @@ void c_Locale::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_Locale = {
-  c_Locale::os_getInit,
-  c_Locale::os_get,
-  c_Locale::os_lval,
-  c_Locale::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Locale,
   c_Locale::s_call_info_table,c_Locale::s_call_info_index,
   c_Locale::s_instanceof_table,c_Locale::s_instanceof_index,
   &c_Locale::s_class_name,
-  0,0,0
+  &c_Locale::os_prop_table,0,0
 };
 ObjectData *coo_Closure() {
   return NEWOBJ(c_Closure)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Closure
-Variant c_Closure::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Closure
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_Closure
-Variant c_Closure::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_Closure
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Closure
-Variant &c_Closure::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Closure
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Closure
-Variant c_Closure::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Closure
 IMPLEMENT_CLASS(Closure)
 const InstanceOfInfo c_Closure::s_instanceof_table[] = {
   {0x3280F0C292E92A6CLL,1,"Closure",&cw_Closure},
@@ -1921,10 +1719,6 @@ void c_Closure::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_Closure = {
-  c_Closure::os_getInit,
-  c_Closure::os_get,
-  c_Closure::os_lval,
-  c_Closure::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Closure,
   c_Closure::s_call_info_table,c_Closure::s_call_info_index,
   c_Closure::s_instanceof_table,c_Closure::s_instanceof_index,
@@ -1934,26 +1728,6 @@ const ObjectStaticCallbacks cw_Closure = {
 ObjectData *coo_DOMDocumentType() {
   return NEWOBJ(c_DOMDocumentType)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMDocumentType
-Variant c_DOMDocumentType::os_getInit(CStrRef s) {
-  return c_DOMNode::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMDocumentType
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMDocumentType
-Variant c_DOMDocumentType::os_get(CStrRef s) {
-  return c_DOMNode::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMDocumentType
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMDocumentType
-Variant &c_DOMDocumentType::os_lval(CStrRef s) {
-  return c_DOMNode::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMDocumentType
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocumentType
-Variant c_DOMDocumentType::os_constant(const char *s) {
-  return c_DOMNode::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocumentType
 IMPLEMENT_CLASS(DOMDocumentType)
 const InstanceOfInfo c_DOMDocumentType::s_instanceof_table[] = {
   {0x70EBB2CC1FBF9761LL,1,"DOMDocumentType",&cw_DOMDocumentType},
@@ -2112,10 +1886,6 @@ void c_DOMDocumentType::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMDocumentType = {
-  c_DOMDocumentType::os_getInit,
-  c_DOMDocumentType::os_get,
-  c_DOMDocumentType::os_lval,
-  c_DOMDocumentType::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMDocumentType,
   c_DOMDocumentType::s_call_info_table,c_DOMDocumentType::s_call_info_index,
   c_DOMDocumentType::s_instanceof_table,c_DOMDocumentType::s_instanceof_index,
@@ -2125,26 +1895,6 @@ const ObjectStaticCallbacks cw_DOMDocumentType = {
 ObjectData *coo_GenericContinuation() {
   return NEWOBJ(c_GenericContinuation)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_GenericContinuation
-Variant c_GenericContinuation::os_getInit(CStrRef s) {
-  return c_Continuation::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_GenericContinuation
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_GenericContinuation
-Variant c_GenericContinuation::os_get(CStrRef s) {
-  return c_Continuation::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_GenericContinuation
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_GenericContinuation
-Variant &c_GenericContinuation::os_lval(CStrRef s) {
-  return c_Continuation::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_GenericContinuation
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_GenericContinuation
-Variant c_GenericContinuation::os_constant(const char *s) {
-  return c_Continuation::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_GenericContinuation
 IMPLEMENT_CLASS(GenericContinuation)
 const InstanceOfInfo c_GenericContinuation::s_instanceof_table[] = {
   {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
@@ -2316,10 +2066,6 @@ void c_GenericContinuation::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_GenericContinuation = {
-  c_GenericContinuation::os_getInit,
-  c_GenericContinuation::os_get,
-  c_GenericContinuation::os_lval,
-  c_GenericContinuation::os_constant,
   (ObjectData*(*)(ObjectData*))coo_GenericContinuation,
   c_GenericContinuation::s_call_info_table,c_GenericContinuation::s_call_info_index,
   c_GenericContinuation::s_instanceof_table,c_GenericContinuation::s_instanceof_index,
@@ -2329,26 +2075,6 @@ const ObjectStaticCallbacks cw_GenericContinuation = {
 ObjectData *coo_SQLite3Stmt() {
   return NEWOBJ(c_SQLite3Stmt)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SQLite3Stmt
-Variant c_SQLite3Stmt::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SQLite3Stmt
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_SQLite3Stmt
-Variant c_SQLite3Stmt::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_SQLite3Stmt
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SQLite3Stmt
-Variant &c_SQLite3Stmt::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SQLite3Stmt
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3Stmt
-Variant c_SQLite3Stmt::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3Stmt
 IMPLEMENT_CLASS(SQLite3Stmt)
 const InstanceOfInfo c_SQLite3Stmt::s_instanceof_table[] = {
   {0x52E5CC58B841AED2LL,1,"SQLite3Stmt",&cw_SQLite3Stmt},
@@ -2603,10 +2329,6 @@ void c_SQLite3Stmt::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_SQLite3Stmt = {
-  c_SQLite3Stmt::os_getInit,
-  c_SQLite3Stmt::os_get,
-  c_SQLite3Stmt::os_lval,
-  c_SQLite3Stmt::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SQLite3Stmt,
   c_SQLite3Stmt::s_call_info_table,c_SQLite3Stmt::s_call_info_index,
   c_SQLite3Stmt::s_instanceof_table,c_SQLite3Stmt::s_instanceof_index,
@@ -2616,26 +2338,6 @@ const ObjectStaticCallbacks cw_SQLite3Stmt = {
 ObjectData *coo_DOMNodeList() {
   return NEWOBJ(c_DOMNodeList)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMNodeList
-Variant c_DOMNodeList::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMNodeList
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMNodeList
-Variant c_DOMNodeList::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMNodeList
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNodeList
-Variant &c_DOMNodeList::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNodeList
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNodeList
-Variant c_DOMNodeList::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNodeList
 IMPLEMENT_CLASS(DOMNodeList)
 const InstanceOfInfo c_DOMNodeList::s_instanceof_table[] = {
   {0x6DD772FA3B20B8B1LL,0,"DOMNodeList",&cw_DOMNodeList},
@@ -2840,10 +2542,6 @@ void c_DOMNodeList::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMNodeList = {
-  c_DOMNodeList::os_getInit,
-  c_DOMNodeList::os_get,
-  c_DOMNodeList::os_lval,
-  c_DOMNodeList::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMNodeList,
   c_DOMNodeList::s_call_info_table,c_DOMNodeList::s_call_info_index,
   c_DOMNodeList::s_instanceof_table,c_DOMNodeList::s_instanceof_index,
@@ -2853,52 +2551,6 @@ const ObjectStaticCallbacks cw_DOMNodeList = {
 ObjectData *coo_Normalizer() {
   return NEWOBJ(c_Normalizer)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Normalizer
-Variant c_Normalizer::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Normalizer
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_Normalizer
-Variant c_Normalizer::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_Normalizer
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Normalizer
-Variant &c_Normalizer::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Normalizer
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Normalizer
-Variant c_Normalizer::os_constant(const char *s) {
-  int64 hash = hash_string(s);
-  switch (hash & 31) {
-    case 1:
-      HASH_RETURN(0x2C9DA0E379A28381LL, q_Normalizer_FORM_KD, "FORM_KD");
-      HASH_RETURN(0x1C369D0E14B76C41LL, q_Normalizer_FORM_KC, "FORM_KC");
-      HASH_RETURN(0x3E3AA0A97BD09921LL, q_Normalizer_NFKC, "NFKC");
-      break;
-    case 2:
-      HASH_RETURN(0x07512AA38ADD1AE2LL, q_Normalizer_FORM_D, "FORM_D");
-      break;
-    case 6:
-      HASH_RETURN(0x51422F059BEFCD86LL, q_Normalizer_NFC, "NFC");
-      break;
-    case 15:
-      HASH_RETURN(0x58B301790FA834EFLL, q_Normalizer_NFD, "NFD");
-      HASH_RETURN(0x3CF19F2D23C185CFLL, q_Normalizer_NFKD, "NFKD");
-      break;
-    case 19:
-      HASH_RETURN(0x2EFDCA1922BFB273LL, q_Normalizer_NONE, "NONE");
-      break;
-    case 31:
-      HASH_RETURN(0x3BE3511FDA9A9E7FLL, q_Normalizer_FORM_C, "FORM_C");
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Normalizer
 IMPLEMENT_CLASS(Normalizer)
 const InstanceOfInfo c_Normalizer::s_instanceof_table[] = {
   {0x52EA111229F87A50LL,1,"Normalizer",&cw_Normalizer},
@@ -3020,39 +2672,15 @@ void c_Normalizer::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_Normalizer = {
-  c_Normalizer::os_getInit,
-  c_Normalizer::os_get,
-  c_Normalizer::os_lval,
-  c_Normalizer::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Normalizer,
   c_Normalizer::s_call_info_table,c_Normalizer::s_call_info_index,
   c_Normalizer::s_instanceof_table,c_Normalizer::s_instanceof_index,
   &c_Normalizer::s_class_name,
-  0,0,0
+  &c_Normalizer::os_prop_table,0,0
 };
 ObjectData *coo_DOMCharacterData() {
   return NEWOBJ(c_DOMCharacterData)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMCharacterData
-Variant c_DOMCharacterData::os_getInit(CStrRef s) {
-  return c_DOMNode::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMCharacterData
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMCharacterData
-Variant c_DOMCharacterData::os_get(CStrRef s) {
-  return c_DOMNode::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMCharacterData
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMCharacterData
-Variant &c_DOMCharacterData::os_lval(CStrRef s) {
-  return c_DOMNode::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMCharacterData
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMCharacterData
-Variant c_DOMCharacterData::os_constant(const char *s) {
-  return c_DOMNode::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMCharacterData
 IMPLEMENT_CLASS(DOMCharacterData)
 const InstanceOfInfo c_DOMCharacterData::s_instanceof_table[] = {
   {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
@@ -3348,10 +2976,6 @@ void c_DOMCharacterData::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMCharacterData = {
-  c_DOMCharacterData::os_getInit,
-  c_DOMCharacterData::os_get,
-  c_DOMCharacterData::os_lval,
-  c_DOMCharacterData::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMCharacterData,
   c_DOMCharacterData::s_call_info_table,c_DOMCharacterData::s_call_info_index,
   c_DOMCharacterData::s_instanceof_table,c_DOMCharacterData::s_instanceof_index,
@@ -3361,26 +2985,6 @@ const ObjectStaticCallbacks cw_DOMCharacterData = {
 ObjectData *coo_DOMEntityReference() {
   return NEWOBJ(c_DOMEntityReference)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMEntityReference
-Variant c_DOMEntityReference::os_getInit(CStrRef s) {
-  return c_DOMNode::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMEntityReference
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMEntityReference
-Variant c_DOMEntityReference::os_get(CStrRef s) {
-  return c_DOMNode::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMEntityReference
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMEntityReference
-Variant &c_DOMEntityReference::os_lval(CStrRef s) {
-  return c_DOMNode::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMEntityReference
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMEntityReference
-Variant c_DOMEntityReference::os_constant(const char *s) {
-  return c_DOMNode::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMEntityReference
 IMPLEMENT_CLASS(DOMEntityReference)
 const InstanceOfInfo c_DOMEntityReference::s_instanceof_table[] = {
   {0x5CBA5B52C68B501ALL,0,"DOMEntityReference",&cw_DOMEntityReference},
@@ -3471,10 +3075,6 @@ void c_DOMEntityReference::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMEntityReference = {
-  c_DOMEntityReference::os_getInit,
-  c_DOMEntityReference::os_get,
-  c_DOMEntityReference::os_lval,
-  c_DOMEntityReference::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMEntityReference,
   c_DOMEntityReference::s_call_info_table,c_DOMEntityReference::s_call_info_index,
   c_DOMEntityReference::s_instanceof_table,c_DOMEntityReference::s_instanceof_index,
@@ -3484,26 +3084,6 @@ const ObjectStaticCallbacks cw_DOMEntityReference = {
 ObjectData *coo_SimpleXMLElementIterator() {
   return NEWOBJ(c_SimpleXMLElementIterator)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SimpleXMLElementIterator
-Variant c_SimpleXMLElementIterator::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SimpleXMLElementIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_SimpleXMLElementIterator
-Variant c_SimpleXMLElementIterator::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_SimpleXMLElementIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SimpleXMLElementIterator
-Variant &c_SimpleXMLElementIterator::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SimpleXMLElementIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SimpleXMLElementIterator
-Variant c_SimpleXMLElementIterator::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SimpleXMLElementIterator
 IMPLEMENT_CLASS(SimpleXMLElementIterator)
 const InstanceOfInfo c_SimpleXMLElementIterator::s_instanceof_table[] = {
   {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
@@ -3682,10 +3262,6 @@ void c_SimpleXMLElementIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_SimpleXMLElementIterator = {
-  c_SimpleXMLElementIterator::os_getInit,
-  c_SimpleXMLElementIterator::os_get,
-  c_SimpleXMLElementIterator::os_lval,
-  c_SimpleXMLElementIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SimpleXMLElementIterator,
   c_SimpleXMLElementIterator::s_call_info_table,c_SimpleXMLElementIterator::s_call_info_index,
   c_SimpleXMLElementIterator::s_instanceof_table,c_SimpleXMLElementIterator::s_instanceof_index,
@@ -3695,26 +3271,6 @@ const ObjectStaticCallbacks cw_SimpleXMLElementIterator = {
 ObjectData *coo_GeneratorClosure() {
   return NEWOBJ(c_GeneratorClosure)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_GeneratorClosure
-Variant c_GeneratorClosure::os_getInit(CStrRef s) {
-  return c_Closure::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_GeneratorClosure
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_GeneratorClosure
-Variant c_GeneratorClosure::os_get(CStrRef s) {
-  return c_Closure::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_GeneratorClosure
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_GeneratorClosure
-Variant &c_GeneratorClosure::os_lval(CStrRef s) {
-  return c_Closure::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_GeneratorClosure
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_GeneratorClosure
-Variant c_GeneratorClosure::os_constant(const char *s) {
-  return c_Closure::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_GeneratorClosure
 IMPLEMENT_CLASS(GeneratorClosure)
 const InstanceOfInfo c_GeneratorClosure::s_instanceof_table[] = {
   {0x3280F0C292E92A6CLL,1,"Closure",&cw_Closure},
@@ -3794,10 +3350,6 @@ void c_GeneratorClosure::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_GeneratorClosure = {
-  c_GeneratorClosure::os_getInit,
-  c_GeneratorClosure::os_get,
-  c_GeneratorClosure::os_lval,
-  c_GeneratorClosure::os_constant,
   (ObjectData*(*)(ObjectData*))coo_GeneratorClosure,
   c_GeneratorClosure::s_call_info_table,c_GeneratorClosure::s_call_info_index,
   c_GeneratorClosure::s_instanceof_table,c_GeneratorClosure::s_instanceof_index,
@@ -3807,69 +3359,6 @@ const ObjectStaticCallbacks cw_GeneratorClosure = {
 ObjectData *coo_DateTimeZone() {
   return NEWOBJ(c_DateTimeZone)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DateTimeZone
-Variant c_DateTimeZone::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DateTimeZone
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DateTimeZone
-Variant c_DateTimeZone::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DateTimeZone
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DateTimeZone
-Variant &c_DateTimeZone::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DateTimeZone
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DateTimeZone
-Variant c_DateTimeZone::os_constant(const char *s) {
-  int64 hash = hash_string(s);
-  switch (hash & 31) {
-    case 2:
-      HASH_RETURN(0x5213CDB166554802LL, q_DateTimeZone_AFRICA, "AFRICA");
-      break;
-    case 10:
-      HASH_RETURN(0x1F67AB7044E3CA2ALL, q_DateTimeZone_EUROPE, "EUROPE");
-      break;
-    case 12:
-      HASH_RETURN(0x76F99914EEA96ECCLL, q_DateTimeZone_ARCTIC, "ARCTIC");
-      break;
-    case 13:
-      HASH_RETURN(0x338F44565E0C038DLL, q_DateTimeZone_AMERICA, "AMERICA");
-      break;
-    case 15:
-      HASH_RETURN(0x22CAA6990573E5EFLL, q_DateTimeZone_PACIFIC, "PACIFIC");
-      break;
-    case 19:
-      HASH_RETURN(0x7879534F49C301F3LL, q_DateTimeZone_PER_COUNTRY, "PER_COUNTRY");
-      break;
-    case 20:
-      HASH_RETURN(0x6FB9D84AA364CA14LL, q_DateTimeZone_UTC, "UTC");
-      break;
-    case 23:
-      HASH_RETURN(0x5A01AACAA61E0FF7LL, q_DateTimeZone_ASIA, "ASIA");
-      HASH_RETURN(0x3E74CAEDAD25E137LL, q_DateTimeZone_INDIAN, "INDIAN");
-      break;
-    case 24:
-      HASH_RETURN(0x0C4F30470A9EEBF8LL, q_DateTimeZone_ALL, "ALL");
-      break;
-    case 25:
-      HASH_RETURN(0x2BEDCED53E63BC79LL, q_DateTimeZone_ATLANTIC, "ATLANTIC");
-      break;
-    case 30:
-      HASH_RETURN(0x3C168ED86522549ELL, q_DateTimeZone_AUSTRALIA, "AUSTRALIA");
-      HASH_RETURN(0x690180C3BA732B5ELL, q_DateTimeZone_ALL_WITH_BC, "ALL_WITH_BC");
-      break;
-    case 31:
-      HASH_RETURN(0x6B29DE65F46EAFDFLL, q_DateTimeZone_ANTARCTICA, "ANTARCTICA");
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DateTimeZone
 IMPLEMENT_CLASS(DateTimeZone)
 const InstanceOfInfo c_DateTimeZone::s_instanceof_table[] = {
   {0x24DE53FD7D3E8383LL,1,"DateTimeZone",&cw_DateTimeZone},
@@ -4046,39 +3535,15 @@ void c_DateTimeZone::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DateTimeZone = {
-  c_DateTimeZone::os_getInit,
-  c_DateTimeZone::os_get,
-  c_DateTimeZone::os_lval,
-  c_DateTimeZone::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DateTimeZone,
   c_DateTimeZone::s_call_info_table,c_DateTimeZone::s_call_info_index,
   c_DateTimeZone::s_instanceof_table,c_DateTimeZone::s_instanceof_index,
   &c_DateTimeZone::s_class_name,
-  0,0,0
+  &c_DateTimeZone::os_prop_table,0,0
 };
 ObjectData *coo_DOMNodeIterator() {
   return NEWOBJ(c_DOMNodeIterator)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMNodeIterator
-Variant c_DOMNodeIterator::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMNodeIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMNodeIterator
-Variant c_DOMNodeIterator::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMNodeIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNodeIterator
-Variant &c_DOMNodeIterator::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNodeIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNodeIterator
-Variant c_DOMNodeIterator::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNodeIterator
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMNodeIterator)
 const InstanceOfInfo c_DOMNodeIterator::s_instanceof_table[] = {
   {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
@@ -4257,10 +3722,6 @@ void c_DOMNodeIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMNodeIterator = {
-  c_DOMNodeIterator::os_getInit,
-  c_DOMNodeIterator::os_get,
-  c_DOMNodeIterator::os_lval,
-  c_DOMNodeIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMNodeIterator,
   c_DOMNodeIterator::s_call_info_table,c_DOMNodeIterator::s_call_info_index,
   c_DOMNodeIterator::s_instanceof_table,c_DOMNodeIterator::s_instanceof_index,
@@ -4270,26 +3731,6 @@ const ObjectStaticCallbacks cw_DOMNodeIterator = {
 ObjectData *coo_DOMImplementation() {
   return NEWOBJ(c_DOMImplementation)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMImplementation
-Variant c_DOMImplementation::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMImplementation
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMImplementation
-Variant c_DOMImplementation::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMImplementation
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMImplementation
-Variant &c_DOMImplementation::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMImplementation
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMImplementation
-Variant c_DOMImplementation::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMImplementation
 IMPLEMENT_CLASS(DOMImplementation)
 const InstanceOfInfo c_DOMImplementation::s_instanceof_table[] = {
   {0x74419B70A46387FDLL,1,"DOMImplementation",&cw_DOMImplementation},
@@ -4467,10 +3908,6 @@ void c_DOMImplementation::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMImplementation = {
-  c_DOMImplementation::os_getInit,
-  c_DOMImplementation::os_get,
-  c_DOMImplementation::os_lval,
-  c_DOMImplementation::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMImplementation,
   c_DOMImplementation::s_call_info_table,c_DOMImplementation::s_call_info_index,
   c_DOMImplementation::s_instanceof_table,c_DOMImplementation::s_instanceof_index,
@@ -4480,26 +3917,6 @@ const ObjectStaticCallbacks cw_DOMImplementation = {
 ObjectData *coo_SoapHeader() {
   return NEWOBJ(c_SoapHeader)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapHeader
-Variant c_SoapHeader::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapHeader
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_SoapHeader
-Variant c_SoapHeader::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_SoapHeader
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapHeader
-Variant &c_SoapHeader::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapHeader
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapHeader
-Variant c_SoapHeader::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapHeader
 IMPLEMENT_CLASS(SoapHeader)
 const InstanceOfInfo c_SoapHeader::s_instanceof_table[] = {
   {0x308D1D59986A3D4ELL,1,"SoapHeader",&cw_SoapHeader},
@@ -4619,10 +4036,6 @@ void c_SoapHeader::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_SoapHeader = {
-  c_SoapHeader::os_getInit,
-  c_SoapHeader::os_get,
-  c_SoapHeader::os_lval,
-  c_SoapHeader::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SoapHeader,
   c_SoapHeader::s_call_info_table,c_SoapHeader::s_call_info_index,
   c_SoapHeader::s_instanceof_table,c_SoapHeader::s_instanceof_index,
@@ -4632,26 +4045,6 @@ const ObjectStaticCallbacks cw_SoapHeader = {
 ObjectData *coo_DOMNotation() {
   return NEWOBJ(c_DOMNotation)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMNotation
-Variant c_DOMNotation::os_getInit(CStrRef s) {
-  return c_DOMNode::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMNotation
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMNotation
-Variant c_DOMNotation::os_get(CStrRef s) {
-  return c_DOMNode::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMNotation
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNotation
-Variant &c_DOMNotation::os_lval(CStrRef s) {
-  return c_DOMNode::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNotation
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNotation
-Variant c_DOMNotation::os_constant(const char *s) {
-  return c_DOMNode::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNotation
 IMPLEMENT_CLASS(DOMNotation)
 const InstanceOfInfo c_DOMNotation::s_instanceof_table[] = {
   {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
@@ -4810,10 +4203,6 @@ void c_DOMNotation::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMNotation = {
-  c_DOMNotation::os_getInit,
-  c_DOMNotation::os_get,
-  c_DOMNotation::os_lval,
-  c_DOMNotation::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMNotation,
   c_DOMNotation::s_call_info_table,c_DOMNotation::s_call_info_index,
   c_DOMNotation::s_instanceof_table,c_DOMNotation::s_instanceof_index,
@@ -4823,26 +4212,6 @@ const ObjectStaticCallbacks cw_DOMNotation = {
 ObjectData *coo_DebuggerProxy() {
   return NEWOBJ(c_DebuggerProxy)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DebuggerProxy
-Variant c_DebuggerProxy::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DebuggerProxy
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DebuggerProxy
-Variant c_DebuggerProxy::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DebuggerProxy
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DebuggerProxy
-Variant &c_DebuggerProxy::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DebuggerProxy
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DebuggerProxy
-Variant c_DebuggerProxy::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DebuggerProxy
 IMPLEMENT_CLASS(DebuggerProxy)
 const InstanceOfInfo c_DebuggerProxy::s_instanceof_table[] = {
   {0x78B42582709BAF12LL,1,"DebuggerProxy",&cw_DebuggerProxy},
@@ -4966,10 +4335,6 @@ void c_DebuggerProxy::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DebuggerProxy = {
-  c_DebuggerProxy::os_getInit,
-  c_DebuggerProxy::os_get,
-  c_DebuggerProxy::os_lval,
-  c_DebuggerProxy::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DebuggerProxy,
   c_DebuggerProxy::s_call_info_table,c_DebuggerProxy::s_call_info_index,
   c_DebuggerProxy::s_instanceof_table,c_DebuggerProxy::s_instanceof_index,
@@ -4979,176 +4344,6 @@ const ObjectStaticCallbacks cw_DebuggerProxy = {
 ObjectData *coo_Memcached() {
   return NEWOBJ(c_Memcached)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Memcached
-Variant c_Memcached::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Memcached
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_Memcached
-Variant c_Memcached::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_Memcached
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Memcached
-Variant &c_Memcached::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Memcached
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Memcached
-Variant c_Memcached::os_constant(const char *s) {
-  int64 hash = hash_string(s);
-  switch (hash & 127) {
-    case 3:
-      HASH_RETURN(0x2CCABB2638D29583LL, q_Memcached_RES_ERRNO, "RES_ERRNO");
-      break;
-    case 5:
-      HASH_RETURN(0x6AF4D4CD7B6B9E85LL, q_Memcached_OPT_TCP_NODELAY, "OPT_TCP_NODELAY");
-      break;
-    case 7:
-      HASH_RETURN(0x1FBB5AC58A77E707LL, q_Memcached_RES_BUFFERED, "RES_BUFFERED");
-      break;
-    case 10:
-      HASH_RETURN(0x261AB88649B2E58ALL, q_Memcached_OPT_SERVER_FAILURE_LIMIT, "OPT_SERVER_FAILURE_LIMIT");
-      HASH_RETURN(0x2072FB05B0D6540ALL, q_Memcached_RES_NO_SERVERS, "RES_NO_SERVERS");
-      break;
-    case 13:
-      HASH_RETURN(0x5EC3EFCB1563B68DLL, q_Memcached_OPT_LIBKETAMA_COMPATIBLE, "OPT_LIBKETAMA_COMPATIBLE");
-      HASH_RETURN(0x0C53D08ECD9ACC0DLL, q_Memcached_RES_SUCCESS, "RES_SUCCESS");
-      break;
-    case 22:
-      HASH_RETURN(0x7071566611A71D96LL, q_Memcached_OPT_PREFIX_KEY, "OPT_PREFIX_KEY");
-      HASH_RETURN(0x425EDC08E649F716LL, q_Memcached_OPT_HASH, "OPT_HASH");
-      break;
-    case 24:
-      HASH_RETURN(0x64B6C925C7A41498LL, q_Memcached_DISTRIBUTION_CONSISTENT, "DISTRIBUTION_CONSISTENT");
-      break;
-    case 28:
-      HASH_RETURN(0x200711C7E62DFB1CLL, q_Memcached_HASH_HSIEH, "HASH_HSIEH");
-      HASH_RETURN(0x6B8DE2AA09E1749CLL, q_Memcached_OPT_BINARY_PROTOCOL, "OPT_BINARY_PROTOCOL");
-      HASH_RETURN(0x47FC6D6596D2411CLL, q_Memcached_RES_UNKNOWN_READ_FAILURE, "RES_UNKNOWN_READ_FAILURE");
-      break;
-    case 29:
-      HASH_RETURN(0x6364909F8AA5869DLL, q_Memcached_RES_NOTFOUND, "RES_NOTFOUND");
-      break;
-    case 34:
-      HASH_RETURN(0x56E8EF0A2966E7A2LL, q_Memcached_RES_PROTOCOL_ERROR, "RES_PROTOCOL_ERROR");
-      HASH_RETURN(0x4A25210D326D0922LL, q_Memcached_RES_CLIENT_ERROR, "RES_CLIENT_ERROR");
-      break;
-    case 35:
-      HASH_RETURN(0x2B230612FB5D80A3LL, q_Memcached_RES_SERVER_ERROR, "RES_SERVER_ERROR");
-      break;
-    case 37:
-      HASH_RETURN(0x49D8D4184B78B3A5LL, q_Memcached_HASH_FNV1A_64, "HASH_FNV1A_64");
-      break;
-    case 47:
-      HASH_RETURN(0x6808EBB81DDE422FLL, q_Memcached_OPT_CACHE_LOOKUPS, "OPT_CACHE_LOOKUPS");
-      break;
-    case 50:
-      HASH_RETURN(0x3A7E842A627341B2LL, q_Memcached_HASH_FNV1_64, "HASH_FNV1_64");
-      break;
-    case 52:
-      HASH_RETURN(0x56895500D1F05334LL, q_Memcached_OPT_SEND_TIMEOUT, "OPT_SEND_TIMEOUT");
-      break;
-    case 67:
-      HASH_RETURN(0x6BC90BF53C6E7CC3LL, q_Memcached_RES_TIMEOUT, "RES_TIMEOUT");
-      HASH_RETURN(0x4155BF3DCFA655C3LL, q_Memcached_RES_BAD_KEY_PROVIDED, "RES_BAD_KEY_PROVIDED");
-      break;
-    case 68:
-      HASH_RETURN(0x490A114712BBA544LL, q_Memcached_RES_SOME_ERRORS, "RES_SOME_ERRORS");
-      break;
-    case 70:
-      HASH_RETURN(0x68724938D592E4C6LL, q_Memcached_OPT_SOCKET_SEND_SIZE, "OPT_SOCKET_SEND_SIZE");
-      break;
-    case 71:
-      HASH_RETURN(0x073E4D38138A7DC7LL, q_Memcached_OPT_COMPRESSION, "OPT_COMPRESSION");
-      break;
-    case 72:
-      HASH_RETURN(0x7B91B2E2CC4DE648LL, q_Memcached_SERIALIZER_PHP, "SERIALIZER_PHP");
-      break;
-    case 75:
-      HASH_RETURN(0x138CD297B9FD244BLL, q_Memcached_OPT_RETRY_TIMEOUT, "OPT_RETRY_TIMEOUT");
-      break;
-    case 78:
-      HASH_RETURN(0x74824687F4C8D7CELL, q_Memcached_HAVE_JSON, "HAVE_JSON");
-      break;
-    case 80:
-      HASH_RETURN(0x7AC058297870C1D0LL, q_Memcached_SERIALIZER_JSON, "SERIALIZER_JSON");
-      break;
-    case 81:
-      HASH_RETURN(0x2B4E411F0C7596D1LL, q_Memcached_SERIALIZER_IGBINARY, "SERIALIZER_IGBINARY");
-      HASH_RETURN(0x1E8ABFABE00D2651LL, q_Memcached_OPT_NO_BLOCK, "OPT_NO_BLOCK");
-      break;
-    case 84:
-      HASH_RETURN(0x49856B6165627AD4LL, q_Memcached_DISTRIBUTION_MODULA, "DISTRIBUTION_MODULA");
-      break;
-    case 85:
-      HASH_RETURN(0x02FAAD1AB87BA2D5LL, q_Memcached_HASH_CRC, "HASH_CRC");
-      HASH_RETURN(0x1045EAC17F112855LL, q_Memcached_RES_WRITE_FAILURE, "RES_WRITE_FAILURE");
-      break;
-    case 87:
-      HASH_RETURN(0x3A3731492FB1B557LL, q_Memcached_HASH_FNV1_32, "HASH_FNV1_32");
-      HASH_RETURN(0x345B7B934684B3D7LL, q_Memcached_OPT_SOCKET_RECV_SIZE, "OPT_SOCKET_RECV_SIZE");
-      break;
-    case 88:
-      HASH_RETURN(0x296424A39A9F1AD8LL, q_Memcached_OPT_POLL_TIMEOUT, "OPT_POLL_TIMEOUT");
-      break;
-    case 91:
-      HASH_RETURN(0x3DD14F50C65BCDDBLL, q_Memcached_OPT_DISTRIBUTION, "OPT_DISTRIBUTION");
-      HASH_RETURN(0x0224412EA957C9DBLL, q_Memcached_RES_CONNECTION_SOCKET_CREATE_FAILURE, "RES_CONNECTION_SOCKET_CREATE_FAILURE");
-      break;
-    case 94:
-      HASH_RETURN(0x6460D48B93209DDELL, q_Memcached_OPT_RECV_TIMEOUT, "OPT_RECV_TIMEOUT");
-      break;
-    case 97:
-      HASH_RETURN(0x68D025242664C361LL, q_Memcached_GET_PRESERVE_ORDER, "GET_PRESERVE_ORDER");
-      break;
-    case 100:
-      HASH_RETURN(0x53A1149CE01E8C64LL, q_Memcached_HASH_DEFAULT, "HASH_DEFAULT");
-      break;
-    case 107:
-      HASH_RETURN(0x76B0604A2B4408EBLL, q_Memcached_OPT_BUFFER_WRITES, "OPT_BUFFER_WRITES");
-      break;
-    case 108:
-      HASH_RETURN(0x3C4C4E1BC9DFDCECLL, q_Memcached_HASH_FNV1A_32, "HASH_FNV1A_32");
-      HASH_RETURN(0x4197FC89C9F88DECLL, q_Memcached_RES_HOST_LOOKUP_FAILURE, "RES_HOST_LOOKUP_FAILURE");
-      break;
-    case 109:
-      HASH_RETURN(0x56C85759C5701DEDLL, q_Memcached_RES_DATA_EXISTS, "RES_DATA_EXISTS");
-      break;
-    case 110:
-      HASH_RETURN(0x153143A96D687E6ELL, q_Memcached_RES_NOTSTORED, "RES_NOTSTORED");
-      break;
-    case 112:
-      HASH_RETURN(0x2BB4CFA54A5085F0LL, q_Memcached_HASH_MD5, "HASH_MD5");
-      break;
-    case 113:
-      HASH_RETURN(0x74109B06DAD2F9F1LL, q_Memcached_RES_END, "RES_END");
-      break;
-    case 116:
-      HASH_RETURN(0x73ABA23A4A0C5D74LL, q_Memcached_OPT_SERIALIZER, "OPT_SERIALIZER");
-      break;
-    case 120:
-      HASH_RETURN(0x460A66958F0524F8LL, q_Memcached_RES_FAILURE, "RES_FAILURE");
-      break;
-    case 121:
-      HASH_RETURN(0x1C014F2A2E707EF9LL, q_Memcached_HAVE_IGBINARY, "HAVE_IGBINARY");
-      break;
-    case 123:
-      HASH_RETURN(0x0443DA24DAD42EFBLL, q_Memcached_OPT_CONNECT_TIMEOUT, "OPT_CONNECT_TIMEOUT");
-      HASH_RETURN(0x35B252ECC21E5F7BLL, q_Memcached_RES_PARTIAL_READ, "RES_PARTIAL_READ");
-      break;
-    case 126:
-      HASH_RETURN(0x7A68C36A2F5D27FELL, q_Memcached_HASH_MURMUR, "HASH_MURMUR");
-      break;
-    case 127:
-      HASH_RETURN(0x6948F797B210F37FLL, q_Memcached_RES_PAYLOAD_FAILURE, "RES_PAYLOAD_FAILURE");
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Memcached
 IMPLEMENT_CLASS(Memcached)
 const InstanceOfInfo c_Memcached::s_instanceof_table[] = {
   {0x72A49A22C192034ALL,1,"Memcached",&cw_Memcached},
@@ -6311,102 +5506,15 @@ void c_Memcached::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_Memcached = {
-  c_Memcached::os_getInit,
-  c_Memcached::os_get,
-  c_Memcached::os_lval,
-  c_Memcached::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Memcached,
   c_Memcached::s_call_info_table,c_Memcached::s_call_info_index,
   c_Memcached::s_instanceof_table,c_Memcached::s_instanceof_index,
   &c_Memcached::s_class_name,
-  0,0,0
+  &c_Memcached::os_prop_table,0,0
 };
 ObjectData *coo_XMLReader() {
   return NEWOBJ(c_XMLReader)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_XMLReader
-Variant c_XMLReader::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_XMLReader
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_XMLReader
-Variant c_XMLReader::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_XMLReader
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_XMLReader
-Variant &c_XMLReader::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_XMLReader
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_XMLReader
-Variant c_XMLReader::os_constant(const char *s) {
-  int64 hash = hash_string(s);
-  switch (hash & 63) {
-    case 1:
-      HASH_RETURN(0x13B3121CBF212DC1LL, q_XMLReader_DOC_FRAGMENT, "DOC_FRAGMENT");
-      break;
-    case 9:
-      HASH_RETURN(0x6071F0A4D7F152C9LL, q_XMLReader_NOTATION, "NOTATION");
-      break;
-    case 13:
-      HASH_RETURN(0x16AD79F9AF3ECC0DLL, q_XMLReader_COMMENT, "COMMENT");
-      break;
-    case 15:
-      HASH_RETURN(0x5BB72110C0F94F8FLL, q_XMLReader_ELEMENT, "ELEMENT");
-      HASH_RETURN(0x4431B68F8476210FLL, q_XMLReader_SUBST_ENTITIES, "SUBST_ENTITIES");
-      break;
-    case 20:
-      HASH_RETURN(0x66710CEFCACCEAD4LL, q_XMLReader_DEFAULTATTRS, "DEFAULTATTRS");
-      break;
-    case 22:
-      HASH_RETURN(0x0A70D397C0570F56LL, q_XMLReader_CDATA, "CDATA");
-      break;
-    case 24:
-      HASH_RETURN(0x69070452A320C4D8LL, q_XMLReader_LOADDTD, "LOADDTD");
-      break;
-    case 29:
-      HASH_RETURN(0x4D26D167066BB11DLL, q_XMLReader_TEXT, "TEXT");
-      HASH_RETURN(0x507641F239996F9DLL, q_XMLReader_WHITESPACE, "WHITESPACE");
-      break;
-    case 31:
-      HASH_RETURN(0x7EB865DC91D7AC1FLL, q_XMLReader_DOC_TYPE, "DOC_TYPE");
-      break;
-    case 37:
-      HASH_RETURN(0x4A21896B12C338E5LL, q_XMLReader_SIGNIFICANT_WHITESPACE, "SIGNIFICANT_WHITESPACE");
-      break;
-    case 44:
-      HASH_RETURN(0x18CF3E4A60E4AAACLL, q_XMLReader_PI, "PI");
-      break;
-    case 45:
-      HASH_RETURN(0x5C1091C88F8EB6EDLL, q_XMLReader_DOC, "DOC");
-      break;
-    case 47:
-      HASH_RETURN(0x18FB7BF5786BF72FLL, q_XMLReader_ENTITY, "ENTITY");
-      break;
-    case 48:
-      HASH_RETURN(0x3EBBF7FE181568B0LL, q_XMLReader_END_ELEMENT, "END_ELEMENT");
-      HASH_RETURN(0x2907A7E1425D0970LL, q_XMLReader_XML_DECLARATION, "XML_DECLARATION");
-      break;
-    case 51:
-      HASH_RETURN(0x2EFDCA1922BFB273LL, q_XMLReader_NONE, "NONE");
-      HASH_RETURN(0x66785D8330DBC573LL, q_XMLReader_END_ENTITY, "END_ENTITY");
-      break;
-    case 53:
-      HASH_RETURN(0x21A6FB97A47EB4F5LL, q_XMLReader_ATTRIBUTE, "ATTRIBUTE");
-      break;
-    case 55:
-      HASH_RETURN(0x1CA408E02262F737LL, q_XMLReader_VALIDATE, "VALIDATE");
-      break;
-    case 60:
-      HASH_RETURN(0x631C49B1B9F742FCLL, q_XMLReader_ENTITY_REF, "ENTITY_REF");
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_XMLReader
 IMPLEMENT_CLASS(XMLReader)
 const InstanceOfInfo c_XMLReader::s_instanceof_table[] = {
   {0x1C85D092180A6325LL,1,"XMLReader",&cw_XMLReader},
@@ -7107,39 +6215,15 @@ void c_XMLReader::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_XMLReader = {
-  c_XMLReader::os_getInit,
-  c_XMLReader::os_get,
-  c_XMLReader::os_lval,
-  c_XMLReader::os_constant,
   (ObjectData*(*)(ObjectData*))coo_XMLReader,
   c_XMLReader::s_call_info_table,c_XMLReader::s_call_info_index,
   c_XMLReader::s_instanceof_table,c_XMLReader::s_instanceof_index,
   &c_XMLReader::s_class_name,
-  0,0,0
+  &c_XMLReader::os_prop_table,0,0
 };
 ObjectData *coo_DOMComment() {
   return NEWOBJ(c_DOMComment)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMComment
-Variant c_DOMComment::os_getInit(CStrRef s) {
-  return c_DOMCharacterData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMComment
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMComment
-Variant c_DOMComment::os_get(CStrRef s) {
-  return c_DOMCharacterData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMComment
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMComment
-Variant &c_DOMComment::os_lval(CStrRef s) {
-  return c_DOMCharacterData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMComment
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMComment
-Variant c_DOMComment::os_constant(const char *s) {
-  return c_DOMCharacterData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMComment
 IMPLEMENT_CLASS(DOMComment)
 const InstanceOfInfo c_DOMComment::s_instanceof_table[] = {
   {0x7E07B9C27FE59D68LL,1,"DOMComment",&cw_DOMComment},
@@ -7238,10 +6322,6 @@ void c_DOMComment::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMComment = {
-  c_DOMComment::os_getInit,
-  c_DOMComment::os_get,
-  c_DOMComment::os_lval,
-  c_DOMComment::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMComment,
   c_DOMComment::s_call_info_table,c_DOMComment::s_call_info_index,
   c_DOMComment::s_instanceof_table,c_DOMComment::s_instanceof_index,
@@ -7251,26 +6331,6 @@ const ObjectStaticCallbacks cw_DOMComment = {
 ObjectData *coo_SQLite3() {
   return NEWOBJ(c_SQLite3)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SQLite3
-Variant c_SQLite3::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SQLite3
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_SQLite3
-Variant c_SQLite3::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_SQLite3
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SQLite3
-Variant &c_SQLite3::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SQLite3
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3
-Variant c_SQLite3::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3
 IMPLEMENT_CLASS(SQLite3)
 const InstanceOfInfo c_SQLite3::s_instanceof_table[] = {
   {0x1D35C3EFD00E11A9LL,1,"SQLite3",&cw_SQLite3},
@@ -7755,10 +6815,6 @@ void c_SQLite3::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_SQLite3 = {
-  c_SQLite3::os_getInit,
-  c_SQLite3::os_get,
-  c_SQLite3::os_lval,
-  c_SQLite3::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SQLite3,
   c_SQLite3::s_call_info_table,c_SQLite3::s_call_info_index,
   c_SQLite3::s_instanceof_table,c_SQLite3::s_instanceof_index,
@@ -7768,26 +6824,6 @@ const ObjectStaticCallbacks cw_SQLite3 = {
 ObjectData *coo_DOMAttr() {
   return NEWOBJ(c_DOMAttr)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMAttr
-Variant c_DOMAttr::os_getInit(CStrRef s) {
-  return c_DOMNode::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMAttr
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMAttr
-Variant c_DOMAttr::os_get(CStrRef s) {
-  return c_DOMNode::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMAttr
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMAttr
-Variant &c_DOMAttr::os_lval(CStrRef s) {
-  return c_DOMNode::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMAttr
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMAttr
-Variant c_DOMAttr::os_constant(const char *s) {
-  return c_DOMNode::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMAttr
 IMPLEMENT_CLASS(DOMAttr)
 const InstanceOfInfo c_DOMAttr::s_instanceof_table[] = {
   {0x297174231D4912F4LL,1,"DOMAttr",&cw_DOMAttr},
@@ -7985,10 +7021,6 @@ void c_DOMAttr::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMAttr = {
-  c_DOMAttr::os_getInit,
-  c_DOMAttr::os_get,
-  c_DOMAttr::os_lval,
-  c_DOMAttr::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMAttr,
   c_DOMAttr::s_call_info_table,c_DOMAttr::s_call_info_index,
   c_DOMAttr::s_instanceof_table,c_DOMAttr::s_instanceof_index,
@@ -7998,26 +7030,6 @@ const ObjectStaticCallbacks cw_DOMAttr = {
 ObjectData *coo_SoapVar() {
   return NEWOBJ(c_SoapVar)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapVar
-Variant c_SoapVar::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapVar
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_SoapVar
-Variant c_SoapVar::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_SoapVar
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapVar
-Variant &c_SoapVar::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapVar
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapVar
-Variant c_SoapVar::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapVar
 IMPLEMENT_CLASS(SoapVar)
 const InstanceOfInfo c_SoapVar::s_instanceof_table[] = {
   {0x7909270014376235LL,1,"SoapVar",&cw_SoapVar},
@@ -8146,10 +7158,6 @@ void c_SoapVar::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_SoapVar = {
-  c_SoapVar::os_getInit,
-  c_SoapVar::os_get,
-  c_SoapVar::os_lval,
-  c_SoapVar::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SoapVar,
   c_SoapVar::s_call_info_table,c_SoapVar::s_call_info_index,
   c_SoapVar::s_instanceof_table,c_SoapVar::s_instanceof_index,
@@ -8159,26 +7167,6 @@ const ObjectStaticCallbacks cw_SoapVar = {
 ObjectData *coo_DOMNamedNodeMap() {
   return NEWOBJ(c_DOMNamedNodeMap)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMNamedNodeMap
-Variant c_DOMNamedNodeMap::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMNamedNodeMap
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMNamedNodeMap
-Variant c_DOMNamedNodeMap::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMNamedNodeMap
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNamedNodeMap
-Variant &c_DOMNamedNodeMap::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNamedNodeMap
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNamedNodeMap
-Variant c_DOMNamedNodeMap::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNamedNodeMap
 IMPLEMENT_CLASS(DOMNamedNodeMap)
 const InstanceOfInfo c_DOMNamedNodeMap::s_instanceof_table[] = {
   {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
@@ -8437,10 +7425,6 @@ void c_DOMNamedNodeMap::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMNamedNodeMap = {
-  c_DOMNamedNodeMap::os_getInit,
-  c_DOMNamedNodeMap::os_get,
-  c_DOMNamedNodeMap::os_lval,
-  c_DOMNamedNodeMap::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMNamedNodeMap,
   c_DOMNamedNodeMap::s_call_info_table,c_DOMNamedNodeMap::s_call_info_index,
   c_DOMNamedNodeMap::s_instanceof_table,c_DOMNamedNodeMap::s_instanceof_index,
@@ -8450,26 +7434,6 @@ const ObjectStaticCallbacks cw_DOMNamedNodeMap = {
 ObjectData *coo_SQLite3Result() {
   return NEWOBJ(c_SQLite3Result)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SQLite3Result
-Variant c_SQLite3Result::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SQLite3Result
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_SQLite3Result
-Variant c_SQLite3Result::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_SQLite3Result
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SQLite3Result
-Variant &c_SQLite3Result::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SQLite3Result
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3Result
-Variant c_SQLite3Result::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3Result
 IMPLEMENT_CLASS(SQLite3Result)
 const InstanceOfInfo c_SQLite3Result::s_instanceof_table[] = {
   {0x2E899D2A2572EF7DLL,1,"SQLite3Result",&cw_SQLite3Result},
@@ -8684,10 +7648,6 @@ void c_SQLite3Result::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_SQLite3Result = {
-  c_SQLite3Result::os_getInit,
-  c_SQLite3Result::os_get,
-  c_SQLite3Result::os_lval,
-  c_SQLite3Result::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SQLite3Result,
   c_SQLite3Result::s_call_info_table,c_SQLite3Result::s_call_info_index,
   c_SQLite3Result::s_instanceof_table,c_SQLite3Result::s_instanceof_index,
@@ -8697,26 +7657,6 @@ const ObjectStaticCallbacks cw_SQLite3Result = {
 ObjectData *coo_SimpleXMLElement() {
   return NEWOBJ(c_SimpleXMLElement)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SimpleXMLElement
-Variant c_SimpleXMLElement::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SimpleXMLElement
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_SimpleXMLElement
-Variant c_SimpleXMLElement::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_SimpleXMLElement
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SimpleXMLElement
-Variant &c_SimpleXMLElement::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SimpleXMLElement
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SimpleXMLElement
-Variant c_SimpleXMLElement::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SimpleXMLElement
 IMPLEMENT_CLASS(SimpleXMLElement)
 const InstanceOfInfo c_SimpleXMLElement::s_instanceof_table[] = {
   {0x66679538C5E6F0A1LL,0,"Traversable",(const ObjectStaticCallbacks*)2},
@@ -9397,10 +8337,6 @@ void c_SimpleXMLElement::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_SimpleXMLElement = {
-  c_SimpleXMLElement::os_getInit,
-  c_SimpleXMLElement::os_get,
-  c_SimpleXMLElement::os_lval,
-  c_SimpleXMLElement::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SimpleXMLElement,
   c_SimpleXMLElement::s_call_info_table,c_SimpleXMLElement::s_call_info_index,
   c_SimpleXMLElement::s_instanceof_table,c_SimpleXMLElement::s_instanceof_index,
@@ -9410,26 +8346,6 @@ const ObjectStaticCallbacks cw_SimpleXMLElement = {
 ObjectData *coo_Memcache() {
   return NEWOBJ(c_Memcache)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Memcache
-Variant c_Memcache::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Memcache
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_Memcache
-Variant c_Memcache::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_Memcache
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Memcache
-Variant &c_Memcache::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Memcache
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Memcache
-Variant c_Memcache::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Memcache
 IMPLEMENT_CLASS(Memcache)
 const InstanceOfInfo c_Memcache::s_instanceof_table[] = {
   {0x3C122DF8859C72D0LL,1,"Memcache",&cw_Memcache},
@@ -10126,10 +9042,6 @@ void c_Memcache::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_Memcache = {
-  c_Memcache::os_getInit,
-  c_Memcache::os_get,
-  c_Memcache::os_lval,
-  c_Memcache::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Memcache,
   c_Memcache::s_call_info_table,c_Memcache::s_call_info_index,
   c_Memcache::s_instanceof_table,c_Memcache::s_instanceof_index,
@@ -10139,26 +9051,6 @@ const ObjectStaticCallbacks cw_Memcache = {
 ObjectData *coo_DOMProcessingInstruction() {
   return NEWOBJ(c_DOMProcessingInstruction)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMProcessingInstruction
-Variant c_DOMProcessingInstruction::os_getInit(CStrRef s) {
-  return c_DOMNode::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMProcessingInstruction
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMProcessingInstruction
-Variant c_DOMProcessingInstruction::os_get(CStrRef s) {
-  return c_DOMNode::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMProcessingInstruction
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMProcessingInstruction
-Variant &c_DOMProcessingInstruction::os_lval(CStrRef s) {
-  return c_DOMNode::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMProcessingInstruction
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMProcessingInstruction
-Variant c_DOMProcessingInstruction::os_constant(const char *s) {
-  return c_DOMNode::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMProcessingInstruction
 IMPLEMENT_CLASS(DOMProcessingInstruction)
 const InstanceOfInfo c_DOMProcessingInstruction::s_instanceof_table[] = {
   {0x59B3EFD1CD987F80LL,1,"DOMProcessingInstruction",&cw_DOMProcessingInstruction},
@@ -10337,10 +9229,6 @@ void c_DOMProcessingInstruction::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMProcessingInstruction = {
-  c_DOMProcessingInstruction::os_getInit,
-  c_DOMProcessingInstruction::os_get,
-  c_DOMProcessingInstruction::os_lval,
-  c_DOMProcessingInstruction::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMProcessingInstruction,
   c_DOMProcessingInstruction::s_call_info_table,c_DOMProcessingInstruction::s_call_info_index,
   c_DOMProcessingInstruction::s_instanceof_table,c_DOMProcessingInstruction::s_instanceof_index,
@@ -10350,26 +9238,6 @@ const ObjectStaticCallbacks cw_DOMProcessingInstruction = {
 ObjectData *coo_EncodingMatch() {
   return NEWOBJ(c_EncodingMatch)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_EncodingMatch
-Variant c_EncodingMatch::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_EncodingMatch
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_EncodingMatch
-Variant c_EncodingMatch::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_EncodingMatch
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_EncodingMatch
-Variant &c_EncodingMatch::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_EncodingMatch
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_EncodingMatch
-Variant c_EncodingMatch::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_EncodingMatch
 IMPLEMENT_CLASS(EncodingMatch)
 const InstanceOfInfo c_EncodingMatch::s_instanceof_table[] = {
   {0x483F5149CA964744LL,1,"EncodingMatch",&cw_EncodingMatch},
@@ -10545,10 +9413,6 @@ void c_EncodingMatch::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_EncodingMatch = {
-  c_EncodingMatch::os_getInit,
-  c_EncodingMatch::os_get,
-  c_EncodingMatch::os_lval,
-  c_EncodingMatch::os_constant,
   (ObjectData*(*)(ObjectData*))coo_EncodingMatch,
   c_EncodingMatch::s_call_info_table,c_EncodingMatch::s_call_info_index,
   c_EncodingMatch::s_instanceof_table,c_EncodingMatch::s_instanceof_index,
@@ -10558,26 +9422,6 @@ const ObjectStaticCallbacks cw_EncodingMatch = {
 ObjectData *coo_PDOStatement() {
   return NEWOBJ(c_PDOStatement)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_PDOStatement
-Variant c_PDOStatement::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_PDOStatement
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_PDOStatement
-Variant c_PDOStatement::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_PDOStatement
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDOStatement
-Variant &c_PDOStatement::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDOStatement
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOStatement
-Variant c_PDOStatement::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOStatement
 IMPLEMENT_CLASS(PDOStatement)
 const InstanceOfInfo c_PDOStatement::s_instanceof_table[] = {
   {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
@@ -11308,10 +10152,6 @@ void c_PDOStatement::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_PDOStatement = {
-  c_PDOStatement::os_getInit,
-  c_PDOStatement::os_get,
-  c_PDOStatement::os_lval,
-  c_PDOStatement::os_constant,
   (ObjectData*(*)(ObjectData*))coo_PDOStatement,
   c_PDOStatement::s_call_info_table,c_PDOStatement::s_call_info_index,
   c_PDOStatement::s_instanceof_table,c_PDOStatement::s_instanceof_index,
@@ -11321,26 +10161,6 @@ const ObjectStaticCallbacks cw_PDOStatement = {
 ObjectData *coo_SoapClient() {
   return NEWOBJ(c_SoapClient)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapClient
-Variant c_SoapClient::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapClient
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_SoapClient
-Variant c_SoapClient::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_SoapClient
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapClient
-Variant &c_SoapClient::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapClient
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapClient
-Variant c_SoapClient::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapClient
 IMPLEMENT_CLASS(SoapClient)
 const InstanceOfInfo c_SoapClient::s_instanceof_table[] = {
   {0x7A52EBE538182BDALL,1,"SoapClient",&cw_SoapClient},
@@ -11745,10 +10565,6 @@ void c_SoapClient::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_SoapClient = {
-  c_SoapClient::os_getInit,
-  c_SoapClient::os_get,
-  c_SoapClient::os_lval,
-  c_SoapClient::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SoapClient,
   c_SoapClient::s_call_info_table,c_SoapClient::s_call_info_index,
   c_SoapClient::s_instanceof_table,c_SoapClient::s_instanceof_index,
@@ -11758,26 +10574,6 @@ const ObjectStaticCallbacks cw_SoapClient = {
 ObjectData *coo_SoapParam() {
   return NEWOBJ(c_SoapParam)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapParam
-Variant c_SoapParam::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapParam
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_SoapParam
-Variant c_SoapParam::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_SoapParam
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapParam
-Variant &c_SoapParam::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapParam
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapParam
-Variant c_SoapParam::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapParam
 IMPLEMENT_CLASS(SoapParam)
 const InstanceOfInfo c_SoapParam::s_instanceof_table[] = {
   {0x17A40D895C55D968LL,1,"SoapParam",&cw_SoapParam},
@@ -11870,10 +10666,6 @@ void c_SoapParam::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_SoapParam = {
-  c_SoapParam::os_getInit,
-  c_SoapParam::os_get,
-  c_SoapParam::os_lval,
-  c_SoapParam::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SoapParam,
   c_SoapParam::s_call_info_table,c_SoapParam::s_call_info_index,
   c_SoapParam::s_instanceof_table,c_SoapParam::s_instanceof_index,
@@ -11883,58 +10675,6 @@ const ObjectStaticCallbacks cw_SoapParam = {
 ObjectData *coo_DateTime() {
   return NEWOBJ(c_DateTime)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DateTime
-Variant c_DateTime::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DateTime
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DateTime
-Variant c_DateTime::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DateTime
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DateTime
-Variant &c_DateTime::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DateTime
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DateTime
-Variant c_DateTime::os_constant(const char *s) {
-  int64 hash = hash_string(s);
-  switch (hash & 31) {
-    case 4:
-      HASH_RETURN(0x65F665B8975D4C44LL, q_DateTime_RSS, "RSS");
-      break;
-    case 5:
-      HASH_RETURN(0x4C70260A54584B05LL, q_DateTime_ATOM, "ATOM");
-      break;
-    case 9:
-      HASH_RETURN(0x0D93F5DDBEAD7BC9LL, q_DateTime_ISO8601, "ISO8601");
-      break;
-    case 10:
-      HASH_RETURN(0x2E8A54E476F8FF8ALL, q_DateTime_RFC850, "RFC850");
-      break;
-    case 12:
-      HASH_RETURN(0x2183317DB64F7D2CLL, q_DateTime_COOKIE, "COOKIE");
-      HASH_RETURN(0x51E9E1D29858652CLL, q_DateTime_RFC1036, "RFC1036");
-      HASH_RETURN(0x2035891FE861602CLL, q_DateTime_RFC3339, "RFC3339");
-      break;
-    case 23:
-      HASH_RETURN(0x1CC8F0E77D83F017LL, q_DateTime_RFC2822, "RFC2822");
-      break;
-    case 27:
-      HASH_RETURN(0x64B53064426F891BLL, q_DateTime_RFC822, "RFC822");
-      HASH_RETURN(0x0D99FD60C002B3DBLL, q_DateTime_W3C, "W3C");
-      break;
-    case 30:
-      HASH_RETURN(0x325DE23E7968F7FELL, q_DateTime_RFC1123, "RFC1123");
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DateTime
 IMPLEMENT_CLASS(DateTime)
 const InstanceOfInfo c_DateTime::s_instanceof_table[] = {
   {0x3DB8FB455A602A1ELL,1,"DateTime",&cw_DateTime},
@@ -12247,104 +10987,15 @@ void c_DateTime::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DateTime = {
-  c_DateTime::os_getInit,
-  c_DateTime::os_get,
-  c_DateTime::os_lval,
-  c_DateTime::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DateTime,
   c_DateTime::s_call_info_table,c_DateTime::s_call_info_index,
   c_DateTime::s_instanceof_table,c_DateTime::s_instanceof_index,
   &c_DateTime::s_class_name,
-  0,0,0
+  &c_DateTime::os_prop_table,0,0
 };
 ObjectData *coo_Collator() {
   return NEWOBJ(c_Collator)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Collator
-Variant c_Collator::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Collator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_Collator
-Variant c_Collator::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_Collator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Collator
-Variant &c_Collator::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Collator
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Collator
-Variant c_Collator::os_constant(const char *s) {
-  int64 hash = hash_string(s);
-  switch (hash & 63) {
-    case 3:
-      HASH_RETURN(0x44D1DA387595A403LL, q_Collator_SORT_REGULAR, "SORT_REGULAR");
-      HASH_RETURN(0x243ECA9F2933DFC3LL, q_Collator_ON, "ON");
-      break;
-    case 4:
-      HASH_RETURN(0x2FC0EE2E1B088E44LL, q_Collator_NUMERIC_COLLATION, "NUMERIC_COLLATION");
-      break;
-    case 7:
-      HASH_RETURN(0x11D151DDDD2A4107LL, q_Collator_HIRAGANA_QUATERNARY_MODE, "HIRAGANA_QUATERNARY_MODE");
-      break;
-    case 12:
-      HASH_RETURN(0x12C49411F55E648CLL, q_Collator_QUATERNARY, "QUATERNARY");
-      break;
-    case 20:
-      HASH_RETURN(0x6A7AD33CDF49E8D4LL, q_Collator_SORT_NUMERIC, "SORT_NUMERIC");
-      HASH_RETURN(0x342F3FCC372ABD54LL, q_Collator_NON_IGNORABLE, "NON_IGNORABLE");
-      break;
-    case 21:
-      HASH_RETURN(0x43A7AE36C693E955LL, q_Collator_DEFAULT_VALUE, "DEFAULT_VALUE");
-      break;
-    case 24:
-      HASH_RETURN(0x6DED35804EDAD218LL, q_Collator_CASE_LEVEL, "CASE_LEVEL");
-      HASH_RETURN(0x0AE48A6C6BE5D798LL, q_Collator_LOWER_FIRST, "LOWER_FIRST");
-      break;
-    case 27:
-      HASH_RETURN(0x2C6A6D2A478AF4DBLL, q_Collator_UPPER_FIRST, "UPPER_FIRST");
-      break;
-    case 29:
-      HASH_RETURN(0x58342E71EC59E4DDLL, q_Collator_IDENTICAL, "IDENTICAL");
-      break;
-    case 32:
-      HASH_RETURN(0x092DDC88428C3A20LL, q_Collator_PRIMARY, "PRIMARY");
-      break;
-    case 33:
-      HASH_RETURN(0x713FE3D58B4C7661LL, q_Collator_FRENCH_COLLATION, "FRENCH_COLLATION");
-      HASH_RETURN(0x25FE54F210EC5FE1LL, q_Collator_SECONDARY, "SECONDARY");
-      HASH_RETURN(0x6E252898020550A1LL, q_Collator_TERTIARY, "TERTIARY");
-      break;
-    case 35:
-      HASH_RETURN(0x2C984380FDBF8563LL, q_Collator_STRENGTH, "STRENGTH");
-      break;
-    case 39:
-      HASH_RETURN(0x7306AAA31A7C8BE7LL, q_Collator_DEFAULT_STRENGTH, "DEFAULT_STRENGTH");
-      break;
-    case 45:
-      HASH_RETURN(0x304F6E12C5B7486DLL, q_Collator_CASE_FIRST, "CASE_FIRST");
-      break;
-    case 52:
-      HASH_RETURN(0x395D56BB0A8525F4LL, q_Collator_NORMALIZATION_MODE, "NORMALIZATION_MODE");
-      break;
-    case 53:
-      HASH_RETURN(0x595FDD99C9EFE835LL, q_Collator_ALTERNATE_HANDLING, "ALTERNATE_HANDLING");
-      break;
-    case 60:
-      HASH_RETURN(0x334AAA38C97C62FCLL, q_Collator_SORT_STRING, "SORT_STRING");
-      HASH_RETURN(0x0039CBFC3620143CLL, q_Collator_SHIFTED, "SHIFTED");
-      break;
-    case 61:
-      HASH_RETURN(0x136402C9E51A75FDLL, q_Collator_OFF, "OFF");
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Collator
 IMPLEMENT_CLASS(Collator)
 const InstanceOfInfo c_Collator::s_instanceof_table[] = {
   {0x4C6991D3CF5CA03DLL,1,"Collator",&cw_Collator},
@@ -12729,271 +11380,15 @@ void c_Collator::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_Collator = {
-  c_Collator::os_getInit,
-  c_Collator::os_get,
-  c_Collator::os_lval,
-  c_Collator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Collator,
   c_Collator::s_call_info_table,c_Collator::s_call_info_index,
   c_Collator::s_instanceof_table,c_Collator::s_instanceof_index,
   &c_Collator::s_class_name,
-  0,0,0
+  &c_Collator::os_prop_table,0,0
 };
 ObjectData *coo_PDO() {
   return NEWOBJ(c_PDO)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_PDO
-Variant c_PDO::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_PDO
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_PDO
-Variant c_PDO::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_PDO
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDO
-Variant &c_PDO::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDO
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_PDO
-Variant c_PDO::os_constant(const char *s) {
-  int64 hash = hash_string(s);
-  switch (hash & 255) {
-    case 0:
-      HASH_RETURN(0x1800ED92A8884D00LL, q_PDO_ATTR_CASE, "ATTR_CASE");
-      break;
-    case 2:
-      HASH_RETURN(0x07BAFBAE5A431902LL, q_PDO_ATTR_STATEMENT_CLASS, "ATTR_STATEMENT_CLASS");
-      break;
-    case 4:
-      HASH_RETURN(0x0229D662F91D9C04LL, q_PDO_ERRMODE_EXCEPTION, "ERRMODE_EXCEPTION");
-      break;
-    case 8:
-      HASH_RETURN(0x3BE7A02FD980AA08LL, q_PDO_CASE_NATURAL, "CASE_NATURAL");
-      break;
-    case 13:
-      HASH_RETURN(0x099B533427CCC20DLL, q_PDO_FETCH_OBJ, "FETCH_OBJ");
-      break;
-    case 17:
-      HASH_RETURN(0x5FAD218776C6E511LL, q_PDO_FETCH_INTO, "FETCH_INTO");
-      break;
-    case 25:
-      HASH_RETURN(0x78CB81320C710019LL, q_PDO_FETCH_BOUND, "FETCH_BOUND");
-      break;
-    case 27:
-      HASH_RETURN(0x3158D52C3627FE1BLL, q_PDO_MYSQL_ATTR_INIT_COMMAND, "MYSQL_ATTR_INIT_COMMAND");
-      break;
-    case 28:
-      HASH_RETURN(0x03CF598D3CCCD01CLL, q_PDO_ATTR_CLIENT_VERSION, "ATTR_CLIENT_VERSION");
-      break;
-    case 29:
-      HASH_RETURN(0x2BE16C4111A7B41DLL, q_PDO_ATTR_FETCH_CATALOG_NAMES, "ATTR_FETCH_CATALOG_NAMES");
-      break;
-    case 30:
-      HASH_RETURN(0x2A5BA04D0218F11ELL, q_PDO_CASE_LOWER, "CASE_LOWER");
-      break;
-    case 35:
-      HASH_RETURN(0x16B15CF4B0DD7E23LL, q_PDO_FETCH_GROUP, "FETCH_GROUP");
-      break;
-    case 37:
-      HASH_RETURN(0x37F650C462FB6A25LL, q_PDO_CASE_UPPER, "CASE_UPPER");
-      break;
-    case 42:
-      HASH_RETURN(0x262D9BE84029992ALL, q_PDO_PARAM_EVT_FETCH_POST, "PARAM_EVT_FETCH_POST");
-      break;
-    case 51:
-      HASH_RETURN(0x15D2BCCED7726933LL, q_PDO_ATTR_TIMEOUT, "ATTR_TIMEOUT");
-      break;
-    case 59:
-      HASH_RETURN(0x01B17428BEE0243BLL, q_PDO_PARAM_EVT_EXEC_PRE, "PARAM_EVT_EXEC_PRE");
-      break;
-    case 60:
-      HASH_RETURN(0x2739A1D49673D43CLL, q_PDO_ATTR_ERRMODE, "ATTR_ERRMODE");
-      HASH_RETURN(0x6AC5C285F4DD863CLL, q_PDO_ATTR_DEFAULT_FETCH_MODE, "ATTR_DEFAULT_FETCH_MODE");
-      break;
-    case 61:
-      HASH_RETURN(0x3E11051E4101D73DLL, q_PDO_ATTR_EMULATE_PREPARES, "ATTR_EMULATE_PREPARES");
-      break;
-    case 68:
-      HASH_RETURN(0x2189354E22363544LL, q_PDO_ATTR_PREFETCH, "ATTR_PREFETCH");
-      break;
-    case 72:
-      HASH_RETURN(0x428D5CA64BB99E48LL, q_PDO_FETCH_UNIQUE, "FETCH_UNIQUE");
-      break;
-    case 78:
-      HASH_RETURN(0x39B4E90F36E93B4ELL, q_PDO_MYSQL_ATTR_READ_DEFAULT_GROUP, "MYSQL_ATTR_READ_DEFAULT_GROUP");
-      break;
-    case 82:
-      HASH_RETURN(0x58A833E2336C6152LL, q_PDO_ATTR_SERVER_INFO, "ATTR_SERVER_INFO");
-      break;
-    case 86:
-      HASH_RETURN(0x57B75F4773C81556LL, q_PDO_PARAM_EVT_NORMALIZE, "PARAM_EVT_NORMALIZE");
-      break;
-    case 91:
-      HASH_RETURN(0x5495020CF262F15BLL, q_PDO_ATTR_CONNECTION_STATUS, "ATTR_CONNECTION_STATUS");
-      HASH_RETURN(0x37888F551D85275BLL, q_PDO_ATTR_ORACLE_NULLS, "ATTR_ORACLE_NULLS");
-      break;
-    case 97:
-      HASH_RETURN(0x416A0550A8F12E61LL, q_PDO_MYSQL_ATTR_FOUND_ROWS, "MYSQL_ATTR_FOUND_ROWS");
-      break;
-    case 101:
-      HASH_RETURN(0x15A3522970275465LL, q_PDO_FETCH_ORI_NEXT, "FETCH_ORI_NEXT");
-      break;
-    case 104:
-      HASH_RETURN(0x162EAA2134F1C068LL, q_PDO_ATTR_FETCH_TABLE_NAMES, "ATTR_FETCH_TABLE_NAMES");
-      break;
-    case 111:
-      HASH_RETURN(0x350E9275757FD66FLL, q_PDO_FETCH_ORI_REL, "FETCH_ORI_REL");
-      break;
-    case 112:
-      HASH_RETURN(0x6870D9DE66F43D70LL, q_PDO_FETCH_ASSOC, "FETCH_ASSOC");
-      break;
-    case 113:
-      HASH_RETURN(0x713C8339790FC071LL, q_PDO_ATTR_CURSOR_NAME, "ATTR_CURSOR_NAME");
-      break;
-    case 116:
-      HASH_RETURN(0x1FB97A35B6711374LL, q_PDO_ATTR_MAX_COLUMN_LEN, "ATTR_MAX_COLUMN_LEN");
-      break;
-    case 117:
-      HASH_RETURN(0x0E51487F9370EE75LL, q_PDO_ATTR_AUTOCOMMIT, "ATTR_AUTOCOMMIT");
-      break;
-    case 121:
-      HASH_RETURN(0x630122BA9EC73379LL, q_PDO_PARAM_NULL, "PARAM_NULL");
-      HASH_RETURN(0x05B00276031D7D79LL, q_PDO_PARAM_EVT_ALLOC, "PARAM_EVT_ALLOC");
-      break;
-    case 125:
-      HASH_RETURN(0x500C039681520C7DLL, q_PDO_PARAM_BOOL, "PARAM_BOOL");
-      break;
-    case 126:
-      HASH_RETURN(0x5CF4F38A0D7D087ELL, q_PDO_NULL_NATURAL, "NULL_NATURAL");
-      break;
-    case 131:
-      HASH_RETURN(0x3F414F2735132983LL, q_PDO_PARAM_INT, "PARAM_INT");
-      break;
-    case 132:
-      HASH_RETURN(0x2011B5A528057784LL, q_PDO_FETCH_NUM, "FETCH_NUM");
-      break;
-    case 133:
-      HASH_RETURN(0x5451E44C627DD885LL, q_PDO_FETCH_ORI_PRIOR, "FETCH_ORI_PRIOR");
-      break;
-    case 134:
-      HASH_RETURN(0x1B8BA5EEAABCB786LL, q_PDO_PARAM_EVT_EXEC_POST, "PARAM_EVT_EXEC_POST");
-      HASH_RETURN(0x1B51C692B91D7486LL, q_PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, "MYSQL_ATTR_USE_BUFFERED_QUERY");
-      break;
-    case 136:
-      HASH_RETURN(0x7E64209D5A925F88LL, q_PDO_PARAM_STR, "PARAM_STR");
-      break;
-    case 138:
-      HASH_RETURN(0x45AB9806DE21EA8ALL, q_PDO_ATTR_CURSOR, "ATTR_CURSOR");
-      break;
-    case 141:
-      HASH_RETURN(0x0EDB017494A81E8DLL, q_PDO_ATTR_DRIVER_NAME, "ATTR_DRIVER_NAME");
-      break;
-    case 142:
-      HASH_RETURN(0x126B3038F3355A8ELL, q_PDO_FETCH_USE_DEFAULT, "FETCH_USE_DEFAULT");
-      break;
-    case 143:
-      HASH_RETURN(0x1F200B094608BE8FLL, q_PDO_ATTR_SERVER_VERSION, "ATTR_SERVER_VERSION");
-      HASH_RETURN(0x1175C5F56147488FLL, q_PDO_MYSQL_ATTR_DIRECT_QUERY, "MYSQL_ATTR_DIRECT_QUERY");
-      break;
-    case 150:
-      HASH_RETURN(0x25BE9238386C2796LL, q_PDO_FETCH_PROPS_LATE, "FETCH_PROPS_LATE");
-      break;
-    case 153:
-      HASH_RETURN(0x657BEA5F741C4999LL, q_PDO_FETCH_COLUMN, "FETCH_COLUMN");
-      HASH_RETURN(0x18B801DE8D8C9099LL, q_PDO_FETCH_CLASSTYPE, "FETCH_CLASSTYPE");
-      break;
-    case 156:
-      HASH_RETURN(0x1EC178DF86F4FD9CLL, q_PDO_FETCH_SERIALIZE, "FETCH_SERIALIZE");
-      break;
-    case 160:
-      HASH_RETURN(0x052245CE02FBF4A0LL, q_PDO_MYSQL_ATTR_LOCAL_INFILE, "MYSQL_ATTR_LOCAL_INFILE");
-      break;
-    case 162:
-      HASH_RETURN(0x28D5B850B76FEEA2LL, q_PDO_FETCH_BOTH, "FETCH_BOTH");
-      HASH_RETURN(0x0D0BCCC6768A88A2LL, q_PDO_FETCH_KEY_PAIR, "FETCH_KEY_PAIR");
-      break;
-    case 164:
-      HASH_RETURN(0x6851B7545234FCA4LL, q_PDO_PARAM_EVT_FETCH_PRE, "PARAM_EVT_FETCH_PRE");
-      break;
-    case 168:
-      HASH_RETURN(0x167DD614E842FAA8LL, q_PDO_CURSOR_FWDONLY, "CURSOR_FWDONLY");
-      break;
-    case 169:
-      HASH_RETURN(0x6AEB66DE7A454FA9LL, q_PDO_FETCH_ORI_FIRST, "FETCH_ORI_FIRST");
-      break;
-    case 170:
-      HASH_RETURN(0x392400A66B305EAALL, q_PDO_CURSOR_SCROLL, "CURSOR_SCROLL");
-      break;
-    case 171:
-      HASH_RETURN(0x2F6AE87AF5701AABLL, q_PDO_FETCH_ORI_LAST, "FETCH_ORI_LAST");
-      break;
-    case 180:
-      HASH_RETURN(0x56D59339A0F5D8B4LL, q_PDO_ATTR_PERSISTENT, "ATTR_PERSISTENT");
-      break;
-    case 184:
-      HASH_RETURN(0x08657D6005DD08B8LL, q_PDO_NULL_EMPTY_STRING, "NULL_EMPTY_STRING");
-      break;
-    case 197:
-      HASH_RETURN(0x60CE39F6493319C5LL, q_PDO_ATTR_STRINGIFY_FETCHES, "ATTR_STRINGIFY_FETCHES");
-      break;
-    case 198:
-      HASH_RETURN(0x61BD1667BB46C9C6LL, q_PDO_MYSQL_ATTR_READ_DEFAULT_FILE, "MYSQL_ATTR_READ_DEFAULT_FILE");
-      break;
-    case 200:
-      HASH_RETURN(0x30D00303975C98C8LL, q_PDO_FETCH_FUNC, "FETCH_FUNC");
-      HASH_RETURN(0x47D4494BE4FA26C8LL, q_PDO_FETCH_ORI_ABS, "FETCH_ORI_ABS");
-      break;
-    case 202:
-      HASH_RETURN(0x29B68A596E0615CALL, q_PDO_NULL_TO_STRING, "NULL_TO_STRING");
-      break;
-    case 203:
-      HASH_RETURN(0x73FAA1AA068D19CBLL, q_PDO_MYSQL_ATTR_MAX_BUFFER_SIZE, "MYSQL_ATTR_MAX_BUFFER_SIZE");
-      break;
-    case 208:
-      HASH_RETURN(0x439351C7C64634D0LL, q_PDO_FETCH_CLASS, "FETCH_CLASS");
-      break;
-    case 209:
-      HASH_RETURN(0x5C75BB222F23C4D1LL, q_PDO_FETCH_LAZY, "FETCH_LAZY");
-      break;
-    case 211:
-      HASH_RETURN(0x57F9152D7EC3A5D3LL, q_PDO_MYSQL_ATTR_COMPRESS, "MYSQL_ATTR_COMPRESS");
-      break;
-    case 220:
-      HASH_RETURN(0x4D1DDF7F772C54DCLL, q_PDO_ERRMODE_WARNING, "ERRMODE_WARNING");
-      break;
-    case 235:
-      HASH_RETURN(0x2E4175EAAB1F75EBLL, q_PDO_ERRMODE_SILENT, "ERRMODE_SILENT");
-      break;
-    case 245:
-      HASH_RETURN(0x16017F3F58821EF5LL, q_PDO_ERR_NONE, "ERR_NONE");
-      break;
-    case 246:
-      HASH_RETURN(0x674F9B0D2030C3F6LL, q_PDO_PARAM_LOB, "PARAM_LOB");
-      break;
-    case 247:
-      HASH_RETURN(0x16EC9F213D7F57F7LL, q_PDO_FETCH_NAMED, "FETCH_NAMED");
-      break;
-    case 248:
-      HASH_RETURN(0x6C0021FD5D20A1F8LL, q_PDO_PARAM_INPUT_OUTPUT, "PARAM_INPUT_OUTPUT");
-      break;
-    case 251:
-      HASH_RETURN(0x13EC16B8F7B7B1FBLL, q_PDO_MYSQL_ATTR_IGNORE_SPACE, "MYSQL_ATTR_IGNORE_SPACE");
-      break;
-    case 253:
-      HASH_RETURN(0x51938FCA0AE827FDLL, q_PDO_PARAM_STMT, "PARAM_STMT");
-      break;
-    case 254:
-      HASH_RETURN(0x56335EC3392D8EFELL, q_PDO_PARAM_EVT_FREE, "PARAM_EVT_FREE");
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_PDO
 IMPLEMENT_CLASS(PDO)
 const InstanceOfInfo c_PDO::s_instanceof_table[] = {
   {0x0A34015F67C804ADLL,1,"PDO",&cw_PDO},
@@ -13449,39 +11844,15 @@ void c_PDO::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_PDO = {
-  c_PDO::os_getInit,
-  c_PDO::os_get,
-  c_PDO::os_lval,
-  c_PDO::os_constant,
   (ObjectData*(*)(ObjectData*))coo_PDO,
   c_PDO::s_call_info_table,c_PDO::s_call_info_index,
   c_PDO::s_instanceof_table,c_PDO::s_instanceof_index,
   &c_PDO::s_class_name,
-  0,0,0
+  &c_PDO::os_prop_table,0,0
 };
 ObjectData *coo_ImageSprite() {
   return NEWOBJ(c_ImageSprite)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ImageSprite
-Variant c_ImageSprite::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ImageSprite
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_ImageSprite
-Variant c_ImageSprite::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_ImageSprite
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ImageSprite
-Variant &c_ImageSprite::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ImageSprite
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ImageSprite
-Variant c_ImageSprite::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ImageSprite
 IMPLEMENT_CLASS(ImageSprite)
 const InstanceOfInfo c_ImageSprite::s_instanceof_table[] = {
   {0x4DA860E5647C3908LL,1,"ImageSprite",&cw_ImageSprite},
@@ -13848,10 +12219,6 @@ void c_ImageSprite::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_ImageSprite = {
-  c_ImageSprite::os_getInit,
-  c_ImageSprite::os_get,
-  c_ImageSprite::os_lval,
-  c_ImageSprite::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ImageSprite,
   c_ImageSprite::s_call_info_table,c_ImageSprite::s_call_info_index,
   c_ImageSprite::s_instanceof_table,c_ImageSprite::s_instanceof_index,
@@ -13861,26 +12228,6 @@ const ObjectStaticCallbacks cw_ImageSprite = {
 ObjectData *coo_Continuation() {
   return NEWOBJ(c_Continuation)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Continuation
-Variant c_Continuation::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Continuation
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_Continuation
-Variant c_Continuation::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_Continuation
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Continuation
-Variant &c_Continuation::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Continuation
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Continuation
-Variant c_Continuation::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Continuation
 IMPLEMENT_CLASS(Continuation)
 const InstanceOfInfo c_Continuation::s_instanceof_table[] = {
   {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
@@ -14367,10 +12714,6 @@ void c_Continuation::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_Continuation = {
-  c_Continuation::os_getInit,
-  c_Continuation::os_get,
-  c_Continuation::os_lval,
-  c_Continuation::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Continuation,
   c_Continuation::s_call_info_table,c_Continuation::s_call_info_index,
   c_Continuation::s_instanceof_table,c_Continuation::s_instanceof_index,
@@ -14380,26 +12723,6 @@ const ObjectStaticCallbacks cw_Continuation = {
 ObjectData *coo_DOMEntity() {
   return NEWOBJ(c_DOMEntity)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMEntity
-Variant c_DOMEntity::os_getInit(CStrRef s) {
-  return c_DOMNode::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMEntity
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMEntity
-Variant c_DOMEntity::os_get(CStrRef s) {
-  return c_DOMNode::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMEntity
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMEntity
-Variant &c_DOMEntity::os_lval(CStrRef s) {
-  return c_DOMNode::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMEntity
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMEntity
-Variant c_DOMEntity::os_constant(const char *s) {
-  return c_DOMNode::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMEntity
 IMPLEMENT_CLASS(DOMEntity)
 const InstanceOfInfo c_DOMEntity::s_instanceof_table[] = {
   {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
@@ -14558,10 +12881,6 @@ void c_DOMEntity::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMEntity = {
-  c_DOMEntity::os_getInit,
-  c_DOMEntity::os_get,
-  c_DOMEntity::os_lval,
-  c_DOMEntity::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMEntity,
   c_DOMEntity::s_call_info_table,c_DOMEntity::s_call_info_index,
   c_DOMEntity::s_instanceof_table,c_DOMEntity::s_instanceof_index,
@@ -14571,26 +12890,6 @@ const ObjectStaticCallbacks cw_DOMEntity = {
 ObjectData *coo_XMLWriter() {
   return NEWOBJ(c_XMLWriter)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_XMLWriter
-Variant c_XMLWriter::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_XMLWriter
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_XMLWriter
-Variant c_XMLWriter::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_XMLWriter
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_XMLWriter
-Variant &c_XMLWriter::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_XMLWriter
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_XMLWriter
-Variant c_XMLWriter::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_XMLWriter
 IMPLEMENT_CLASS(XMLWriter)
 const InstanceOfInfo c_XMLWriter::s_instanceof_table[] = {
   {0x2FF1EF6EBB3DA065LL,1,"XMLWriter",&cw_XMLWriter},
@@ -15739,10 +14038,6 @@ void c_XMLWriter::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_XMLWriter = {
-  c_XMLWriter::os_getInit,
-  c_XMLWriter::os_get,
-  c_XMLWriter::os_lval,
-  c_XMLWriter::os_constant,
   (ObjectData*(*)(ObjectData*))coo_XMLWriter,
   c_XMLWriter::s_call_info_table,c_XMLWriter::s_call_info_index,
   c_XMLWriter::s_instanceof_table,c_XMLWriter::s_instanceof_index,
@@ -15752,26 +14047,6 @@ const ObjectStaticCallbacks cw_XMLWriter = {
 ObjectData *coo_DOMXPath() {
   return NEWOBJ(c_DOMXPath)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMXPath
-Variant c_DOMXPath::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMXPath
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMXPath
-Variant c_DOMXPath::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMXPath
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMXPath
-Variant &c_DOMXPath::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMXPath
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMXPath
-Variant c_DOMXPath::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMXPath
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMXPath)
 const InstanceOfInfo c_DOMXPath::s_instanceof_table[] = {
   {0x7D46DB2E09C6DBA8LL,1,"DOMXPath",&cw_DOMXPath},
@@ -16054,10 +14329,6 @@ void c_DOMXPath::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMXPath = {
-  c_DOMXPath::os_getInit,
-  c_DOMXPath::os_get,
-  c_DOMXPath::os_lval,
-  c_DOMXPath::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMXPath,
   c_DOMXPath::s_call_info_table,c_DOMXPath::s_call_info_index,
   c_DOMXPath::s_instanceof_table,c_DOMXPath::s_instanceof_index,
@@ -16067,26 +14338,6 @@ const ObjectStaticCallbacks cw_DOMXPath = {
 ObjectData *coo_SoapServer() {
   return NEWOBJ(c_SoapServer)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapServer
-Variant c_SoapServer::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SoapServer
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_SoapServer
-Variant c_SoapServer::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_SoapServer
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapServer
-Variant &c_SoapServer::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapServer
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapServer
-Variant c_SoapServer::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapServer
 IMPLEMENT_CLASS(SoapServer)
 const InstanceOfInfo c_SoapServer::s_instanceof_table[] = {
   {0x49FC1A1F7B878C3ELL,1,"SoapServer",&cw_SoapServer},
@@ -16406,10 +14657,6 @@ void c_SoapServer::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_SoapServer = {
-  c_SoapServer::os_getInit,
-  c_SoapServer::os_get,
-  c_SoapServer::os_lval,
-  c_SoapServer::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SoapServer,
   c_SoapServer::s_call_info_table,c_SoapServer::s_call_info_index,
   c_SoapServer::s_instanceof_table,c_SoapServer::s_instanceof_index,
@@ -16419,26 +14666,6 @@ const ObjectStaticCallbacks cw_SoapServer = {
 ObjectData *coo_DOMNode() {
   return NEWOBJ(c_DOMNode)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMNode
-Variant c_DOMNode::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMNode
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMNode
-Variant c_DOMNode::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMNode
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNode
-Variant &c_DOMNode::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNode
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNode
-Variant c_DOMNode::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNode
 IMPLEMENT_CLASS(DOMNode)
 const InstanceOfInfo c_DOMNode::s_instanceof_table[] = {
   {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
@@ -17037,10 +15264,6 @@ void c_DOMNode::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMNode = {
-  c_DOMNode::os_getInit,
-  c_DOMNode::os_get,
-  c_DOMNode::os_lval,
-  c_DOMNode::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMNode,
   c_DOMNode::s_call_info_table,c_DOMNode::s_call_info_index,
   c_DOMNode::s_instanceof_table,c_DOMNode::s_instanceof_index,
@@ -17050,52 +15273,6 @@ const ObjectStaticCallbacks cw_DOMNode = {
 ObjectData *coo_SpoofChecker() {
   return NEWOBJ(c_SpoofChecker)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SpoofChecker
-Variant c_SpoofChecker::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SpoofChecker
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_SpoofChecker
-Variant c_SpoofChecker::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_SpoofChecker
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SpoofChecker
-Variant &c_SpoofChecker::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SpoofChecker
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SpoofChecker
-Variant c_SpoofChecker::os_constant(const char *s) {
-  int64 hash = hash_string(s);
-  switch (hash & 15) {
-    case 1:
-      HASH_RETURN(0x76DAF4F4BD608481LL, q_SpoofChecker_SINGLE_SCRIPT_CONFUSABLE, "SINGLE_SCRIPT_CONFUSABLE");
-      break;
-    case 2:
-      HASH_RETURN(0x330C21B4435FDA12LL, q_SpoofChecker_WHOLE_SCRIPT_CONFUSABLE, "WHOLE_SCRIPT_CONFUSABLE");
-      break;
-    case 5:
-      HASH_RETURN(0x33D91DB93B53D955LL, q_SpoofChecker_CHAR_LIMIT, "CHAR_LIMIT");
-      break;
-    case 6:
-      HASH_RETURN(0x727F3BA1A7798546LL, q_SpoofChecker_INVISIBLE, "INVISIBLE");
-      break;
-    case 10:
-      HASH_RETURN(0x7244AE82909D364ALL, q_SpoofChecker_SINGLE_SCRIPT, "SINGLE_SCRIPT");
-      break;
-    case 12:
-      HASH_RETURN(0x5A4E3956DA2E533CLL, q_SpoofChecker_ANY_CASE, "ANY_CASE");
-      break;
-    case 15:
-      HASH_RETURN(0x3189877F80D9ABBFLL, q_SpoofChecker_MIXED_SCRIPT_CONFUSABLE, "MIXED_SCRIPT_CONFUSABLE");
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SpoofChecker
 IMPLEMENT_CLASS(SpoofChecker)
 const InstanceOfInfo c_SpoofChecker::s_instanceof_table[] = {
   {0x648FB595C359F411LL,1,"SpoofChecker",&cw_SpoofChecker},
@@ -17288,39 +15465,15 @@ void c_SpoofChecker::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_SpoofChecker = {
-  c_SpoofChecker::os_getInit,
-  c_SpoofChecker::os_get,
-  c_SpoofChecker::os_lval,
-  c_SpoofChecker::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SpoofChecker,
   c_SpoofChecker::s_call_info_table,c_SpoofChecker::s_call_info_index,
   c_SpoofChecker::s_instanceof_table,c_SpoofChecker::s_instanceof_index,
   &c_SpoofChecker::s_class_name,
-  0,0,0
+  &c_SpoofChecker::os_prop_table,0,0
 };
 ObjectData *coo_DOMDocument() {
   return NEWOBJ(c_DOMDocument)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMDocument
-Variant c_DOMDocument::os_getInit(CStrRef s) {
-  return c_DOMNode::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMDocument
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMDocument
-Variant c_DOMDocument::os_get(CStrRef s) {
-  return c_DOMNode::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMDocument
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMDocument
-Variant &c_DOMDocument::os_lval(CStrRef s) {
-  return c_DOMNode::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMDocument
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocument
-Variant c_DOMDocument::os_constant(const char *s) {
-  return c_DOMNode::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocument
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMDocument)
 const InstanceOfInfo c_DOMDocument::s_instanceof_table[] = {
   {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
@@ -18289,10 +16442,6 @@ void c_DOMDocument::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMDocument = {
-  c_DOMDocument::os_getInit,
-  c_DOMDocument::os_get,
-  c_DOMDocument::os_lval,
-  c_DOMDocument::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMDocument,
   c_DOMDocument::s_call_info_table,c_DOMDocument::s_call_info_index,
   c_DOMDocument::s_instanceof_table,c_DOMDocument::s_instanceof_index,
@@ -18302,26 +16451,6 @@ const ObjectStaticCallbacks cw_DOMDocument = {
 ObjectData *coo_LibXMLError() {
   return NEWOBJ(c_LibXMLError)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LibXMLError
-Variant c_LibXMLError::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LibXMLError
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_LibXMLError
-Variant c_LibXMLError::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_LibXMLError
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_LibXMLError
-Variant &c_LibXMLError::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_LibXMLError
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_LibXMLError
-Variant c_LibXMLError::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_LibXMLError
 IMPLEMENT_CLASS(LibXMLError)
 const InstanceOfInfo c_LibXMLError::s_instanceof_table[] = {
   {0x253AC17234FC8CCBLL,1,"LibXMLError",&cw_LibXMLError},
@@ -18400,10 +16529,6 @@ void c_LibXMLError::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_LibXMLError = {
-  c_LibXMLError::os_getInit,
-  c_LibXMLError::os_get,
-  c_LibXMLError::os_lval,
-  c_LibXMLError::os_constant,
   (ObjectData*(*)(ObjectData*))coo_LibXMLError,
   c_LibXMLError::s_call_info_table,c_LibXMLError::s_call_info_index,
   c_LibXMLError::s_instanceof_table,c_LibXMLError::s_instanceof_index,
@@ -18413,26 +16538,6 @@ const ObjectStaticCallbacks cw_LibXMLError = {
 ObjectData *coo_DOMElement() {
   return NEWOBJ(c_DOMElement)();
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMElement
-Variant c_DOMElement::os_getInit(CStrRef s) {
-  return c_DOMNode::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMElement
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMElement
-Variant c_DOMElement::os_get(CStrRef s) {
-  return c_DOMNode::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMElement
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMElement
-Variant &c_DOMElement::os_lval(CStrRef s) {
-  return c_DOMNode::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMElement
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMElement
-Variant c_DOMElement::os_constant(const char *s) {
-  return c_DOMNode::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMElement
 IMPLEMENT_CLASS(DOMElement)
 const InstanceOfInfo c_DOMElement::s_instanceof_table[] = {
   {0x70747A09B3523662LL,1,"DOMNode",&cw_DOMNode},
@@ -19100,10 +17205,6 @@ void c_DOMElement::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMElement = {
-  c_DOMElement::os_getInit,
-  c_DOMElement::os_get,
-  c_DOMElement::os_lval,
-  c_DOMElement::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMElement,
   c_DOMElement::s_call_info_table,c_DOMElement::s_call_info_index,
   c_DOMElement::s_instanceof_table,c_DOMElement::s_instanceof_index,
@@ -19322,47 +17423,866 @@ Variant get_builtin_class_constant(CStrRef s, const char *constant, bool fatal /
 }
 
 // Class tables
-static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x3BA4EC7C8E83E5E0LL,5,14,258,4,GET_PROPERTY_OFFSET(c_Continuation, m_label),&NAMSTR(s_sys_ss40877955, "\000Continuation\000label") },
-  {0x6512738E63A43B01LL,6,14,258,10,GET_PROPERTY_OFFSET(c_Continuation, m_received),&NAMSTR(s_sys_ss19136311, "\000Continuation\000received") },
-  {0x245E74B9CC12BFC3LL,2,14,258,9,GET_PROPERTY_OFFSET(c_Continuation, m_obj),&NAMSTR(s_sys_ssc9ae0c06, "\000Continuation\000obj") },
-  {0x5B300BEBB6379169LL,3,14,258,2,GET_PROPERTY_OFFSET(c_Continuation, m_done),&NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done") },
-  {0x7A24AFD8ADE43B8ELL,-4,14,256,8,GET_PROPERTY_OFFSET(c_Continuation, m_args),&NAMSTR(s_sys_ss9621feb5, "\000Continuation\000args") },
-  {0x4B27521443880CAELL,3,14,258,4,GET_PROPERTY_OFFSET(c_Continuation, m_index),&NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index") },
-  {0x3640AC1AE9A5E090LL,0,14,258,2,GET_PROPERTY_OFFSET(c_Continuation, m_running),&NAMSTR(s_sys_ssde0dbfb2, "\000Continuation\000running") },
-  {0x03DAE8B0C0AC9D75LL,2,14,258,7,GET_PROPERTY_OFFSET(c_Continuation, m_origFuncName),&NAMSTR(s_sys_ss0a6d9bb5, "\000Continuation\000origFuncName") },
-  {0x021A52B45A788597LL,-7,14,258,10,GET_PROPERTY_OFFSET(c_Continuation, m_value),&NAMSTR(s_sys_ss4e65aff3, "\000Continuation\000value") },
-  {0x32E4F2861D2D28FDLL,-6,14,258,7,GET_PROPERTY_OFFSET(c_Continuation, m_called_class),&NAMSTR(s_sys_ss07090831, "\000Continuation\000called_class") },
-
-  {0x44CC7F6BF50518ECLL,0,21,258,8,GET_PROPERTY_OFFSET(c_GenericContinuation, m_vars),&NAMSTR(s_sys_ss020cf65e, "\000GenericContinuation\000vars") },
-
+static const int64 cpt_static_inits[] = {
+  (int64)&q_Collator$$SORT_REGULAR,
+  0x0000000000000047,
+  (int64)&q_Collator$$ON,
+  0x0000000200000047,
+  (int64)&q_Collator$$NUMERIC_COLLATION,
+  0x0000000400000047,
+  (int64)&q_Collator$$HIRAGANA_QUATERNARY_MODE,
+  0x0000000600000047,
+  (int64)&q_Collator$$QUATERNARY,
+  0x0000000800000047,
+  (int64)&q_Collator$$SORT_NUMERIC,
+  0x0000000a00000047,
+  (int64)&q_Collator$$NON_IGNORABLE,
+  0x0000000c00000047,
+  (int64)&q_Collator$$DEFAULT_VALUE,
+  0x0000000e00000047,
+  (int64)&q_Collator$$CASE_LEVEL,
+  0x0000001000000047,
+  (int64)&q_Collator$$LOWER_FIRST,
+  0x0000001200000047,
+  (int64)&q_Collator$$UPPER_FIRST,
+  0x0000001400000047,
+  (int64)&q_Collator$$IDENTICAL,
+  0x0000001600000047,
+  (int64)&q_Collator$$PRIMARY,
+  0x0000001800000047,
+  (int64)&q_Collator$$FRENCH_COLLATION,
+  0x0000001a00000047,
+  (int64)&q_Collator$$SECONDARY,
+  0x0000001c00000047,
+  (int64)&q_Collator$$TERTIARY,
+  0x0000001e00000047,
+  (int64)&q_Collator$$STRENGTH,
+  0x0000002000000047,
+  (int64)&q_Collator$$DEFAULT_STRENGTH,
+  0x0000002200000047,
+  (int64)&q_Collator$$CASE_FIRST,
+  0x0000002400000047,
+  (int64)&q_Collator$$NORMALIZATION_MODE,
+  0x0000002600000047,
+  (int64)&q_Collator$$ALTERNATE_HANDLING,
+  0x0000002800000047,
+  (int64)&q_Collator$$SORT_STRING,
+  0x0000002a00000047,
+  (int64)&q_Collator$$SHIFTED,
+  0x0000002c00000047,
+  (int64)&q_Collator$$OFF,
+  0x0000002e00000047,
+  (int64)&null_variant,
+  (int64)&q_DateTime$$RSS,
+  0x0000003100000077,
+  (int64)&q_DateTime$$ATOM,
+  0x0000003300000077,
+  (int64)&q_DateTime$$ISO8601,
+  0x0000003500000077,
+  (int64)&q_DateTime$$RFC850,
+  0x0000003700000077,
+  (int64)&q_DateTime$$COOKIE,
+  0x0000003900000077,
+  (int64)&q_DateTime$$RFC1036,
+  0x0000003b00000077,
+  (int64)&q_DateTime$$RFC3339,
+  0x0000003d00000077,
+  (int64)&q_DateTime$$RFC2822,
+  0x0000003f00000077,
+  (int64)&q_DateTime$$RFC822,
+  0x0000004100000077,
+  (int64)&q_DateTime$$W3C,
+  0x0000004300000077,
+  (int64)&q_DateTime$$RFC1123,
+  0x0000004500000077,
+  (int64)&q_DateTimeZone$$AFRICA,
+  0x0000004700000047,
+  (int64)&q_DateTimeZone$$EUROPE,
+  0x0000004900000047,
+  (int64)&q_DateTimeZone$$ARCTIC,
+  0x0000004b00000047,
+  (int64)&q_DateTimeZone$$AMERICA,
+  0x0000004d00000047,
+  (int64)&q_DateTimeZone$$PACIFIC,
+  0x0000004f00000047,
+  (int64)&q_DateTimeZone$$PER_COUNTRY,
+  0x0000005100000047,
+  (int64)&q_DateTimeZone$$UTC,
+  0x0000005300000047,
+  (int64)&q_DateTimeZone$$ASIA,
+  0x0000005500000047,
+  (int64)&q_DateTimeZone$$INDIAN,
+  0x0000005700000047,
+  (int64)&q_DateTimeZone$$ALL,
+  0x0000005900000047,
+  (int64)&q_DateTimeZone$$ATLANTIC,
+  0x0000005b00000047,
+  (int64)&q_DateTimeZone$$AUSTRALIA,
+  0x0000005d00000047,
+  (int64)&q_DateTimeZone$$ALL_WITH_BC,
+  0x0000005f00000047,
+  (int64)&q_DateTimeZone$$ANTARCTICA,
+  0x0000006100000047,
+  (int64)&q_DebuggerClient$$AUTO_COMPLETE_VARIABLES,
+  0x0000006300000047,
+  (int64)&q_DebuggerClient$$AUTO_COMPLETE_FILENAMES,
+  0x0000006500000047,
+  (int64)&q_DebuggerClient$$AUTO_COMPLETE_CLASSES,
+  0x0000006700000047,
+  (int64)&q_DebuggerClient$$AUTO_COMPLETE_CLASS_CONSTANTS,
+  0x0000006900000047,
+  (int64)&q_DebuggerClient$$AUTO_COMPLETE_CLASS_PROPERTIES,
+  0x0000006b00000047,
+  (int64)&q_DebuggerClient$$AUTO_COMPLETE_CODE,
+  0x0000006d00000047,
+  (int64)&q_DebuggerClient$$AUTO_COMPLETE_CLASS_METHODS,
+  0x0000006f00000047,
+  (int64)&q_DebuggerClient$$AUTO_COMPLETE_KEYWORDS,
+  0x0000007100000047,
+  (int64)&q_DebuggerClient$$AUTO_COMPLETE_CONSTANTS,
+  0x0000007300000047,
+  (int64)&q_DebuggerClient$$AUTO_COMPLETE_FUNCTIONS,
+  0x0000007500000047,
+  (int64)&q_Locale$$VALID_LOCALE,
+  0x0000007700000047,
+  (int64)&q_Locale$$ACTUAL_LOCALE,
+  0x0000007900000047,
+  (int64)&q_Memcached$$RES_ERRNO,
+  0x0000007b00000037,
+  (int64)&q_Memcached$$OPT_TCP_NODELAY,
+  0x0000007d00000037,
+  (int64)&q_Memcached$$RES_BUFFERED,
+  0x0000007f00000037,
+  (int64)&q_Memcached$$OPT_SERVER_FAILURE_LIMIT,
+  0x0000008100000037,
+  (int64)&q_Memcached$$RES_NO_SERVERS,
+  0x0000008300000037,
+  (int64)&q_Memcached$$OPT_LIBKETAMA_COMPATIBLE,
+  0x0000008500000037,
+  (int64)&q_Memcached$$RES_SUCCESS,
+  0x0000008700000037,
+  (int64)&q_Memcached$$OPT_PREFIX_KEY,
+  0x0000008900000037,
+  (int64)&q_Memcached$$OPT_HASH,
+  0x0000008b00000037,
+  (int64)&q_Memcached$$DISTRIBUTION_CONSISTENT,
+  0x0000008d00000037,
+  (int64)&q_Memcached$$HASH_HSIEH,
+  0x0000008f00000037,
+  (int64)&q_Memcached$$OPT_BINARY_PROTOCOL,
+  0x0000009100000037,
+  (int64)&q_Memcached$$RES_UNKNOWN_READ_FAILURE,
+  0x0000009300000037,
+  (int64)&q_Memcached$$RES_NOTFOUND,
+  0x0000009500000037,
+  (int64)&q_Memcached$$RES_PROTOCOL_ERROR,
+  0x0000009700000037,
+  (int64)&q_Memcached$$RES_CLIENT_ERROR,
+  0x0000009900000037,
+  (int64)&q_Memcached$$RES_SERVER_ERROR,
+  0x0000009b00000037,
+  (int64)&q_Memcached$$HASH_FNV1A_64,
+  0x0000009d00000037,
+  (int64)&q_Memcached$$OPT_CACHE_LOOKUPS,
+  0x0000009f00000037,
+  (int64)&q_Memcached$$HASH_FNV1_64,
+  0x000000a100000037,
+  (int64)&q_Memcached$$OPT_SEND_TIMEOUT,
+  0x000000a300000037,
+  (int64)&q_Memcached$$RES_TIMEOUT,
+  0x000000a500000037,
+  (int64)&q_Memcached$$RES_BAD_KEY_PROVIDED,
+  0x000000a700000037,
+  (int64)&q_Memcached$$RES_SOME_ERRORS,
+  0x000000a900000037,
+  (int64)&q_Memcached$$OPT_SOCKET_SEND_SIZE,
+  0x000000ab00000037,
+  (int64)&q_Memcached$$OPT_COMPRESSION,
+  0x000000ad00000037,
+  (int64)&q_Memcached$$SERIALIZER_PHP,
+  0x000000af00000037,
+  (int64)&q_Memcached$$OPT_RETRY_TIMEOUT,
+  0x000000b100000037,
+  (int64)&q_Memcached$$HAVE_JSON,
+  0x000000b300000027,
+  (int64)&q_Memcached$$SERIALIZER_JSON,
+  0x000000b500000037,
+  (int64)&q_Memcached$$SERIALIZER_IGBINARY,
+  0x000000b700000037,
+  (int64)&q_Memcached$$OPT_NO_BLOCK,
+  0x000000b900000037,
+  (int64)&q_Memcached$$DISTRIBUTION_MODULA,
+  0x000000bb00000037,
+  (int64)&q_Memcached$$HASH_CRC,
+  0x000000bd00000037,
+  (int64)&q_Memcached$$RES_WRITE_FAILURE,
+  0x000000bf00000037,
+  (int64)&q_Memcached$$HASH_FNV1_32,
+  0x000000c100000037,
+  (int64)&q_Memcached$$OPT_SOCKET_RECV_SIZE,
+  0x000000c300000037,
+  (int64)&q_Memcached$$OPT_POLL_TIMEOUT,
+  0x000000c500000037,
+  (int64)&q_Memcached$$OPT_DISTRIBUTION,
+  0x000000c700000037,
+  (int64)&q_Memcached$$RES_CONNECTION_SOCKET_CREATE_FAILURE,
+  0x000000c900000037,
+  (int64)&q_Memcached$$OPT_RECV_TIMEOUT,
+  0x000000cb00000037,
+  (int64)&q_Memcached$$GET_PRESERVE_ORDER,
+  0x000000cd00000037,
+  (int64)&q_Memcached$$HASH_DEFAULT,
+  0x000000cf00000037,
+  (int64)&q_Memcached$$OPT_BUFFER_WRITES,
+  0x000000d100000037,
+  (int64)&q_Memcached$$HASH_FNV1A_32,
+  0x000000d300000037,
+  (int64)&q_Memcached$$RES_HOST_LOOKUP_FAILURE,
+  0x000000d500000037,
+  (int64)&q_Memcached$$RES_DATA_EXISTS,
+  0x000000d700000037,
+  (int64)&q_Memcached$$RES_NOTSTORED,
+  0x000000d900000037,
+  (int64)&q_Memcached$$HASH_MD5,
+  0x000000db00000037,
+  (int64)&q_Memcached$$RES_END,
+  0x000000dd00000037,
+  (int64)&q_Memcached$$OPT_SERIALIZER,
+  0x000000df00000037,
+  (int64)&q_Memcached$$RES_FAILURE,
+  0x000000e100000037,
+  (int64)&q_Memcached$$HAVE_IGBINARY,
+  0x000000e300000027,
+  (int64)&q_Memcached$$OPT_CONNECT_TIMEOUT,
+  0x000000e500000037,
+  (int64)&q_Memcached$$RES_PARTIAL_READ,
+  0x000000e700000037,
+  (int64)&q_Memcached$$HASH_MURMUR,
+  0x000000e900000037,
+  (int64)&q_Memcached$$RES_PAYLOAD_FAILURE,
+  0x000000eb00000037,
+  (int64)&q_Normalizer$$FORM_KD,
+  0x000000ed00000047,
+  (int64)&q_Normalizer$$FORM_KC,
+  0x000000ef00000047,
+  (int64)&q_Normalizer$$NFKC,
+  0x000000f100000047,
+  (int64)&q_Normalizer$$FORM_D,
+  0x000000f300000047,
+  (int64)&q_Normalizer$$NFC,
+  0x000000f500000047,
+  (int64)&q_Normalizer$$NFD,
+  0x000000f700000047,
+  (int64)&q_Normalizer$$NFKD,
+  0x000000f900000047,
+  (int64)&q_Normalizer$$NONE,
+  0x000000fb00000047,
+  (int64)&q_Normalizer$$FORM_C,
+  0x000000fd00000047,
+  (int64)&q_PDO$$ATTR_CASE,
+  0x000000ff00000047,
+  (int64)&q_PDO$$ATTR_STATEMENT_CLASS,
+  0x0000010100000047,
+  (int64)&q_PDO$$ERRMODE_EXCEPTION,
+  0x0000010300000047,
+  (int64)&q_PDO$$CASE_NATURAL,
+  0x0000010500000047,
+  (int64)&q_PDO$$FETCH_OBJ,
+  0x0000010700000047,
+  (int64)&q_PDO$$FETCH_INTO,
+  0x0000010900000047,
+  (int64)&q_PDO$$FETCH_BOUND,
+  0x0000010b00000047,
+  (int64)&q_PDO$$MYSQL_ATTR_INIT_COMMAND,
+  0x0000010d00000047,
+  (int64)&q_PDO$$ATTR_CLIENT_VERSION,
+  0x0000010f00000047,
+  (int64)&q_PDO$$ATTR_FETCH_CATALOG_NAMES,
+  0x0000011100000047,
+  (int64)&q_PDO$$CASE_LOWER,
+  0x0000011300000047,
+  (int64)&q_PDO$$FETCH_GROUP,
+  0x0000011500000047,
+  (int64)&q_PDO$$CASE_UPPER,
+  0x0000011700000047,
+  (int64)&q_PDO$$PARAM_EVT_FETCH_POST,
+  0x0000011900000047,
+  (int64)&q_PDO$$ATTR_TIMEOUT,
+  0x0000011b00000047,
+  (int64)&q_PDO$$PARAM_EVT_EXEC_PRE,
+  0x0000011d00000047,
+  (int64)&q_PDO$$ATTR_ERRMODE,
+  0x0000011f00000047,
+  (int64)&q_PDO$$ATTR_DEFAULT_FETCH_MODE,
+  0x0000012100000047,
+  (int64)&q_PDO$$ATTR_EMULATE_PREPARES,
+  0x0000012300000047,
+  (int64)&q_PDO$$ATTR_PREFETCH,
+  0x0000012500000047,
+  (int64)&q_PDO$$FETCH_UNIQUE,
+  0x0000012700000047,
+  (int64)&q_PDO$$MYSQL_ATTR_READ_DEFAULT_GROUP,
+  0x0000012900000047,
+  (int64)&q_PDO$$ATTR_SERVER_INFO,
+  0x0000012b00000047,
+  (int64)&q_PDO$$PARAM_EVT_NORMALIZE,
+  0x0000012d00000047,
+  (int64)&q_PDO$$ATTR_CONNECTION_STATUS,
+  0x0000012f00000047,
+  (int64)&q_PDO$$ATTR_ORACLE_NULLS,
+  0x0000013100000047,
+  (int64)&q_PDO$$MYSQL_ATTR_FOUND_ROWS,
+  0x0000013300000047,
+  (int64)&q_PDO$$FETCH_ORI_NEXT,
+  0x0000013500000047,
+  (int64)&q_PDO$$ATTR_FETCH_TABLE_NAMES,
+  0x0000013700000047,
+  (int64)&q_PDO$$FETCH_ORI_REL,
+  0x0000013900000047,
+  (int64)&q_PDO$$FETCH_ASSOC,
+  0x0000013b00000047,
+  (int64)&q_PDO$$ATTR_CURSOR_NAME,
+  0x0000013d00000047,
+  (int64)&q_PDO$$ATTR_MAX_COLUMN_LEN,
+  0x0000013f00000047,
+  (int64)&q_PDO$$ATTR_AUTOCOMMIT,
+  0x0000014100000047,
+  (int64)&q_PDO$$PARAM_NULL,
+  0x0000014300000047,
+  (int64)&q_PDO$$PARAM_EVT_ALLOC,
+  0x0000014500000047,
+  (int64)&q_PDO$$PARAM_BOOL,
+  0x0000014700000047,
+  (int64)&q_PDO$$NULL_NATURAL,
+  0x0000014900000047,
+  (int64)&q_PDO$$PARAM_INT,
+  0x0000014b00000047,
+  (int64)&q_PDO$$FETCH_NUM,
+  0x0000014d00000047,
+  (int64)&q_PDO$$FETCH_ORI_PRIOR,
+  0x0000014f00000047,
+  (int64)&q_PDO$$PARAM_EVT_EXEC_POST,
+  0x0000015100000047,
+  (int64)&q_PDO$$MYSQL_ATTR_USE_BUFFERED_QUERY,
+  0x0000015300000047,
+  (int64)&q_PDO$$PARAM_STR,
+  0x0000015500000047,
+  (int64)&q_PDO$$ATTR_CURSOR,
+  0x0000015700000047,
+  (int64)&q_PDO$$ATTR_DRIVER_NAME,
+  0x0000015900000047,
+  (int64)&q_PDO$$FETCH_USE_DEFAULT,
+  0x0000015b00000047,
+  (int64)&q_PDO$$ATTR_SERVER_VERSION,
+  0x0000015d00000047,
+  (int64)&q_PDO$$MYSQL_ATTR_DIRECT_QUERY,
+  0x0000015f00000047,
+  (int64)&q_PDO$$FETCH_PROPS_LATE,
+  0x0000016100000047,
+  (int64)&q_PDO$$FETCH_COLUMN,
+  0x0000016300000047,
+  (int64)&q_PDO$$FETCH_CLASSTYPE,
+  0x0000016500000047,
+  (int64)&q_PDO$$FETCH_SERIALIZE,
+  0x0000016700000047,
+  (int64)&q_PDO$$MYSQL_ATTR_LOCAL_INFILE,
+  0x0000016900000047,
+  (int64)&q_PDO$$FETCH_BOTH,
+  0x0000016b00000047,
+  (int64)&q_PDO$$FETCH_KEY_PAIR,
+  0x0000016d00000047,
+  (int64)&q_PDO$$PARAM_EVT_FETCH_PRE,
+  0x0000016f00000047,
+  (int64)&q_PDO$$CURSOR_FWDONLY,
+  0x0000017100000047,
+  (int64)&q_PDO$$FETCH_ORI_FIRST,
+  0x0000017300000047,
+  (int64)&q_PDO$$CURSOR_SCROLL,
+  0x0000017500000047,
+  (int64)&q_PDO$$FETCH_ORI_LAST,
+  0x0000017700000047,
+  (int64)&q_PDO$$ATTR_PERSISTENT,
+  0x0000017900000047,
+  (int64)&q_PDO$$NULL_EMPTY_STRING,
+  0x0000017b00000047,
+  (int64)&q_PDO$$ATTR_STRINGIFY_FETCHES,
+  0x0000017d00000047,
+  (int64)&q_PDO$$MYSQL_ATTR_READ_DEFAULT_FILE,
+  0x0000017f00000047,
+  (int64)&q_PDO$$FETCH_FUNC,
+  0x0000018100000047,
+  (int64)&q_PDO$$FETCH_ORI_ABS,
+  0x0000018300000047,
+  (int64)&q_PDO$$NULL_TO_STRING,
+  0x0000018500000047,
+  (int64)&q_PDO$$MYSQL_ATTR_MAX_BUFFER_SIZE,
+  0x0000018700000047,
+  (int64)&q_PDO$$FETCH_CLASS,
+  0x0000018900000047,
+  (int64)&q_PDO$$FETCH_LAZY,
+  0x0000018b00000047,
+  (int64)&q_PDO$$MYSQL_ATTR_COMPRESS,
+  0x0000018d00000047,
+  (int64)&q_PDO$$ERRMODE_WARNING,
+  0x0000018f00000047,
+  (int64)&q_PDO$$ERRMODE_SILENT,
+  0x0000019100000047,
+  (int64)&q_PDO$$ERR_NONE,
+  0x0000019300000077,
+  (int64)&q_PDO$$PARAM_LOB,
+  0x0000019500000047,
+  (int64)&q_PDO$$FETCH_NAMED,
+  0x0000019700000047,
+  (int64)&q_PDO$$PARAM_INPUT_OUTPUT,
+  0x0000019900000047,
+  (int64)&q_PDO$$MYSQL_ATTR_IGNORE_SPACE,
+  0x0000019b00000047,
+  (int64)&q_PDO$$PARAM_STMT,
+  0x0000019d00000047,
+  (int64)&q_PDO$$PARAM_EVT_FREE,
+  0x0000019f00000047,
+  (int64)&q_SpoofChecker$$SINGLE_SCRIPT_CONFUSABLE,
+  0x000001a100000037,
+  (int64)&q_SpoofChecker$$WHOLE_SCRIPT_CONFUSABLE,
+  0x000001a300000037,
+  (int64)&q_SpoofChecker$$CHAR_LIMIT,
+  0x000001a500000037,
+  (int64)&q_SpoofChecker$$INVISIBLE,
+  0x000001a700000037,
+  (int64)&q_SpoofChecker$$SINGLE_SCRIPT,
+  0x000001a900000037,
+  (int64)&q_SpoofChecker$$ANY_CASE,
+  0x000001ab00000037,
+  (int64)&q_SpoofChecker$$MIXED_SCRIPT_CONFUSABLE,
+  0x000001ad00000037,
+  (int64)&q_XMLReader$$DOC_FRAGMENT,
+  0x000001af00000047,
+  (int64)&q_XMLReader$$NOTATION,
+  0x000001b100000047,
+  (int64)&q_XMLReader$$COMMENT,
+  0x000001b300000047,
+  (int64)&q_XMLReader$$ELEMENT,
+  0x000001b500000047,
+  (int64)&q_XMLReader$$SUBST_ENTITIES,
+  0x000001b700000047,
+  (int64)&q_XMLReader$$DEFAULTATTRS,
+  0x000001b900000047,
+  (int64)&q_XMLReader$$CDATA,
+  0x000001bb00000047,
+  (int64)&q_XMLReader$$LOADDTD,
+  0x000001bd00000047,
+  (int64)&q_XMLReader$$TEXT,
+  0x000001bf00000047,
+  (int64)&q_XMLReader$$WHITESPACE,
+  0x000001c100000047,
+  (int64)&q_XMLReader$$DOC_TYPE,
+  0x000001c300000047,
+  (int64)&q_XMLReader$$SIGNIFICANT_WHITESPACE,
+  0x000001c500000047,
+  (int64)&q_XMLReader$$PI,
+  0x000001c700000047,
+  (int64)&q_XMLReader$$DOC,
+  0x000001c900000047,
+  (int64)&q_XMLReader$$ENTITY,
+  0x000001cb00000047,
+  (int64)&q_XMLReader$$END_ELEMENT,
+  0x000001cd00000047,
+  (int64)&q_XMLReader$$XML_DECLARATION,
+  0x000001cf00000047,
+  (int64)&q_XMLReader$$NONE,
+  0x000001d100000047,
+  (int64)&q_XMLReader$$END_ENTITY,
+  0x000001d300000047,
+  (int64)&q_XMLReader$$ATTRIBUTE,
+  0x000001d500000047,
+  (int64)&q_XMLReader$$VALIDATE,
+  0x000001d700000047,
+  (int64)&q_XMLReader$$ENTITY_REF,
+  0x000001d900000047,
 };
-static const ClassPropTableEntry *cpt_private_entries[] = {
-  cpt_table_entries+2,
-  cpt_table_entries+4,
-  cpt_table_entries+0,
-  cpt_table_entries+5,
-  cpt_table_entries+8,
-  cpt_table_entries+1,
-  cpt_table_entries+7,
-  cpt_table_entries+9,
-  cpt_table_entries+3,
-  cpt_table_entries+6,
-  0,
-  cpt_table_entries+10,
-  0,
+static const ClassPropTableEntry cpt_table_entries[] = {
+  {0x44D1DA387595A403LL,5,1,0,36,4,0,&NAMSTR(s_sys_ss7595a403, "SORT_REGULAR") },
+  {0x243ECA9F2933DFC3LL,21,3,0,100,4,0,&NAMSTR(s_sys_ss2933dfc3, "ON") },
+  {0x2FC0EE2E1B088E44LL,5,5,0,100,4,0,&NAMSTR(s_sys_ss1b088e44, "NUMERIC_COLLATION") },
+  {0x11D151DDDD2A4107LL,-1,7,0,100,4,0,&NAMSTR(s_sys_ssdd2a4107, "HIRAGANA_QUATERNARY_MODE") },
+  {0x12C49411F55E648CLL,7,9,0,100,4,0,&NAMSTR(s_sys_ssf55e648c, "QUATERNARY") },
+  {0x6A7AD33CDF49E8D4LL,16,11,0,36,4,0,&NAMSTR(s_sys_ssdf49e8d4, "SORT_NUMERIC") },
+  {0x342F3FCC372ABD54LL,3,13,0,100,4,0,&NAMSTR(s_sys_ss372abd54, "NON_IGNORABLE") },
+  {0x43A7AE36C693E955LL,5,15,0,100,4,0,&NAMSTR(s_sys_ssc693e955, "DEFAULT_VALUE") },
+  {0x6DED35804EDAD218LL,11,17,0,36,4,0,&NAMSTR(s_sys_ss4edad218, "CASE_LEVEL") },
+  {0x0AE48A6C6BE5D798LL,1,19,0,100,4,0,&NAMSTR(s_sys_ss6be5d798, "LOWER_FIRST") },
+  {0x2C6A6D2A478AF4DBLL,0,21,0,100,4,0,&NAMSTR(s_sys_ss478af4db, "UPPER_FIRST") },
+  {0x58342E71EC59E4DDLL,12,23,0,100,4,0,&NAMSTR(s_sys_ssec59e4dd, "IDENTICAL") },
+  {0x092DDC88428C3A20LL,2,25,0,100,4,0,&NAMSTR(s_sys_ss428c3a20, "PRIMARY") },
+  {0x713FE3D58B4C7661LL,7,27,0,36,4,0,&NAMSTR(s_sys_ss8b4c7661, "FRENCH_COLLATION") },
+  {0x25FE54F210EC5FE1LL,1,29,0,36,4,0,&NAMSTR(s_sys_ss10ec5fe1, "SECONDARY") },
+  {0x6E252898020550A1LL,2,31,0,100,4,0,&NAMSTR(s_sys_ss020550a1, "TERTIARY") },
+  {0x2C984380FDBF8563LL,-13,33,0,100,4,0,&NAMSTR(s_sys_ssfdbf8563, "STRENGTH") },
+  {0x7306AAA31A7C8BE7LL,-13,35,0,100,4,0,&NAMSTR(s_sys_ss1a7c8be7, "DEFAULT_STRENGTH") },
+  {0x304F6E12C5B7486DLL,-10,37,0,100,4,0,&NAMSTR(s_sys_ssc5b7486d, "CASE_FIRST") },
+  {0x395D56BB0A8525F4LL,-3,39,0,100,4,0,&NAMSTR(s_sys_ss0a8525f4, "NORMALIZATION_MODE") },
+  {0x595FDD99C9EFE835LL,-2,41,0,100,4,0,&NAMSTR(s_sys_ssc9efe835, "ALTERNATE_HANDLING") },
+  {0x334AAA38C97C62FCLL,-8,43,0,36,4,0,&NAMSTR(s_sys_ssc97c62fc, "SORT_STRING") },
+  {0x0039CBFC3620143CLL,-16,45,0,100,4,0,&NAMSTR(s_sys_ss3620143c, "SHIFTED") },
+  {0x136402C9E51A75FDLL,-22,47,0,100,4,0,&NAMSTR(s_sys_sse51a75fd, "OFF") },
+
+  {0x3BA4EC7C8E83E5E0LL,5,48,14,65,4,GET_PROPERTY_OFFSET(c_Continuation, m_label),&NAMSTR(s_sys_ss40877955, "\000Continuation\000label") },
+  {0x6512738E63A43B01LL,6,48,14,65,10,GET_PROPERTY_OFFSET(c_Continuation, m_received),&NAMSTR(s_sys_ss19136311, "\000Continuation\000received") },
+  {0x245E74B9CC12BFC3LL,2,48,14,65,9,GET_PROPERTY_OFFSET(c_Continuation, m_obj),&NAMSTR(s_sys_ssc9ae0c06, "\000Continuation\000obj") },
+  {0x5B300BEBB6379169LL,3,48,14,65,2,GET_PROPERTY_OFFSET(c_Continuation, m_done),&NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done") },
+  {0x7A24AFD8ADE43B8ELL,-4,48,14,1,8,GET_PROPERTY_OFFSET(c_Continuation, m_args),&NAMSTR(s_sys_ss9621feb5, "\000Continuation\000args") },
+  {0x4B27521443880CAELL,3,48,14,65,4,GET_PROPERTY_OFFSET(c_Continuation, m_index),&NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index") },
+  {0x3640AC1AE9A5E090LL,0,48,14,65,2,GET_PROPERTY_OFFSET(c_Continuation, m_running),&NAMSTR(s_sys_ssde0dbfb2, "\000Continuation\000running") },
+  {0x03DAE8B0C0AC9D75LL,2,48,14,65,7,GET_PROPERTY_OFFSET(c_Continuation, m_origFuncName),&NAMSTR(s_sys_ss0a6d9bb5, "\000Continuation\000origFuncName") },
+  {0x021A52B45A788597LL,-7,48,14,65,10,GET_PROPERTY_OFFSET(c_Continuation, m_value),&NAMSTR(s_sys_ss4e65aff3, "\000Continuation\000value") },
+  {0x32E4F2861D2D28FDLL,-6,48,14,65,7,GET_PROPERTY_OFFSET(c_Continuation, m_called_class),&NAMSTR(s_sys_ss07090831, "\000Continuation\000called_class") },
+
+  {0x65F665B8975D4C44LL,9,50,0,100,7,0,&NAMSTR(s_sys_ss975d4c44, "RSS") },
+  {0x4C70260A54584B05LL,3,52,0,100,7,0,&NAMSTR(s_sys_ss54584b05, "ATOM") },
+  {0x0D93F5DDBEAD7BC9LL,6,54,0,100,7,0,&NAMSTR(s_sys_ssba38037b, "ISO8601") },
+  {0x2E8A54E476F8FF8ALL,2,56,0,100,7,0,&NAMSTR(s_sys_ss0ec93dd2, "RFC850") },
+  {0x2183317DB64F7D2CLL,-2,58,0,36,7,0,&NAMSTR(s_sys_ssb64f7d2c, "COOKIE") },
+  {0x51E9E1D29858652CLL,5,60,0,36,7,0,&NAMSTR(s_sys_ss188aaf11, "RFC1036") },
+  {0x2035891FE861602CLL,-6,62,0,100,7,0,&NAMSTR(s_sys_ss27a57f90, "RFC3339") },
+  {0x1CC8F0E77D83F017LL,-1,64,0,100,7,0,&NAMSTR(s_sys_ssd5edae9f, "RFC2822") },
+  {0x64B53064426F891BLL,-5,66,0,36,7,0,&NAMSTR(s_sys_ssf1ebb708, "RFC822") },
+  {0x0D99FD60C002B3DBLL,0,68,0,100,7,0,&NAMSTR(s_sys_ss1577acb0, "W3C") },
+  {0x325DE23E7968F7FELL,-3,70,0,100,7,0,&NAMSTR(s_sys_ssb5b92826, "RFC1123") },
+
+  {0x5213CDB166554802LL,3,72,0,100,4,0,&NAMSTR(s_sys_ss66554802, "AFRICA") },
+  {0x1F67AB7044E3CA2ALL,7,74,0,100,4,0,&NAMSTR(s_sys_ss44e3ca2a, "EUROPE") },
+  {0x76F99914EEA96ECCLL,5,76,0,100,4,0,&NAMSTR(s_sys_sseea96ecc, "ARCTIC") },
+  {0x338F44565E0C038DLL,10,78,0,100,4,0,&NAMSTR(s_sys_ss5e0c038d, "AMERICA") },
+  {0x22CAA6990573E5EFLL,2,80,0,100,4,0,&NAMSTR(s_sys_ss0573e5ef, "PACIFIC") },
+  {0x7879534F49C301F3LL,0,82,0,100,4,0,&NAMSTR(s_sys_ss49c301f3, "PER_COUNTRY") },
+  {0x6FB9D84AA364CA14LL,3,84,0,100,4,0,&NAMSTR(s_sys_ssa364ca14, "UTC") },
+  {0x5A01AACAA61E0FF7LL,3,86,0,36,4,0,&NAMSTR(s_sys_ssa61e0ff7, "ASIA") },
+  {0x3E74CAEDAD25E137LL,-4,88,0,100,4,0,&NAMSTR(s_sys_ssad25e137, "INDIAN") },
+  {0x0C4F30470A9EEBF8LL,3,90,0,100,4,0,&NAMSTR(s_sys_ss0a9eebf8, "ALL") },
+  {0x2BEDCED53E63BC79LL,1,92,0,100,4,0,&NAMSTR(s_sys_ss3e63bc79, "ATLANTIC") },
+  {0x3C168ED86522549ELL,-10,94,0,36,4,0,&NAMSTR(s_sys_ss6522549e, "AUSTRALIA") },
+  {0x690180C3BA732B5ELL,-7,96,0,100,4,0,&NAMSTR(s_sys_ssba732b5e, "ALL_WITH_BC") },
+  {0x6B29DE65F46EAFDFLL,-11,98,0,100,4,0,&NAMSTR(s_sys_ssf46eafdf, "ANTARCTICA") },
+
+  {0x2038737F45604DE2LL,8,100,0,100,4,0,&NAMSTR(s_sys_ss45604de2, "AUTO_COMPLETE_VARIABLES") },
+  {0x1B352E31B034F827LL,-1,102,0,36,4,0,&NAMSTR(s_sys_ssb034f827, "AUTO_COMPLETE_FILENAMES") },
+  {0x0F17BB5BEC004CA7LL,7,104,0,100,4,0,&NAMSTR(s_sys_ssec004ca7, "AUTO_COMPLETE_CLASSES") },
+  {0x6A811D407DC24A29LL,4,106,0,100,4,0,&NAMSTR(s_sys_ss7dc24a29, "AUTO_COMPLETE_CLASS_CONSTANTS") },
+  {0x1858E5511222BC8BLL,-1,108,0,36,4,0,&NAMSTR(s_sys_ss1222bc8b, "AUTO_COMPLETE_CLASS_PROPERTIES") },
+  {0x1DE12226E1E87B6BLL,0,110,0,100,4,0,&NAMSTR(s_sys_sse1e87b6b, "AUTO_COMPLETE_CODE") },
+  {0x2C29DCF63AAC70EFLL,-2,112,0,36,4,0,&NAMSTR(s_sys_ss3aac70ef, "AUTO_COMPLETE_CLASS_METHODS") },
+  {0x76A6B174D3E2108FLL,-2,114,0,100,4,0,&NAMSTR(s_sys_ssd3e2108f, "AUTO_COMPLETE_KEYWORDS") },
+  {0x78221A7B002235D3LL,-6,116,0,100,4,0,&NAMSTR(s_sys_ss002235d3, "AUTO_COMPLETE_CONSTANTS") },
+  {0x7CAE318E6EF6449FLL,-3,118,0,100,4,0,&NAMSTR(s_sys_ss6ef6449f, "AUTO_COMPLETE_FUNCTIONS") },
+
+  {0x44CC7F6BF50518ECLL,0,48,21,65,8,GET_PROPERTY_OFFSET(c_GenericContinuation, m_vars),&NAMSTR(s_sys_ss020cf65e, "\000GenericContinuation\000vars") },
+
+  {0x35B10383BBF3BAE1LL,0,120,0,100,4,0,&NAMSTR(s_sys_ssbbf3bae1, "VALID_LOCALE") },
+  {0x78695696B47AF8CDLL,-1,122,0,100,4,0,&NAMSTR(s_sys_ssb47af8cd, "ACTUAL_LOCALE") },
+
+  {0x2CCABB2638D29583LL,2,124,0,100,3,0,&NAMSTR(s_sys_ss38d29583, "RES_ERRNO") },
+  {0x6AF4D4CD7B6B9E85LL,23,126,0,100,3,0,&NAMSTR(s_sys_ss7b6b9e85, "OPT_TCP_NODELAY") },
+  {0x1FBB5AC58A77E707LL,19,128,0,100,3,0,&NAMSTR(s_sys_ss8a77e707, "RES_BUFFERED") },
+  {0x261AB88649B2E58ALL,49,130,0,36,3,0,&NAMSTR(s_sys_ss49b2e58a, "OPT_SERVER_FAILURE_LIMIT") },
+  {0x2072FB05B0D6540ALL,45,132,0,100,3,0,&NAMSTR(s_sys_ssb0d6540a, "RES_NO_SERVERS") },
+  {0x5EC3EFCB1563B68DLL,38,134,0,36,3,0,&NAMSTR(s_sys_ss1563b68d, "OPT_LIBKETAMA_COMPATIBLE") },
+  {0x0C53D08ECD9ACC0DLL,45,136,0,100,3,0,&NAMSTR(s_sys_sscd9acc0d, "RES_SUCCESS") },
+  {0x7071566611A71D96LL,1,138,0,36,3,0,&NAMSTR(s_sys_ss11a71d96, "OPT_PREFIX_KEY") },
+  {0x425EDC08E649F716LL,34,140,0,100,3,0,&NAMSTR(s_sys_sse649f716, "OPT_HASH") },
+  {0x64B6C925C7A41498LL,-4,142,0,100,3,0,&NAMSTR(s_sys_ssc7a41498, "DISTRIBUTION_CONSISTENT") },
+  {0x200711C7E62DFB1CLL,45,144,0,36,3,0,&NAMSTR(s_sys_sse62dfb1c, "HASH_HSIEH") },
+  {0x6B8DE2AA09E1749CLL,20,146,0,36,3,0,&NAMSTR(s_sys_ss09e1749c, "OPT_BINARY_PROTOCOL") },
+  {0x47FC6D6596D2411CLL,2,148,0,100,3,0,&NAMSTR(s_sys_ss96d2411c, "RES_UNKNOWN_READ_FAILURE") },
+  {0x6364909F8AA5869DLL,41,150,0,100,3,0,&NAMSTR(s_sys_ss8aa5869d, "RES_NOTFOUND") },
+  {0x56E8EF0A2966E7A2LL,1,152,0,36,3,0,&NAMSTR(s_sys_ss2966e7a2, "RES_PROTOCOL_ERROR") },
+  {0x4A25210D326D0922LL,1,154,0,100,3,0,&NAMSTR(s_sys_ss326d0922, "RES_CLIENT_ERROR") },
+  {0x2B230612FB5D80A3LL,18,156,0,100,3,0,&NAMSTR(s_sys_ssfb5d80a3, "RES_SERVER_ERROR") },
+  {0x49D8D4184B78B3A5LL,18,158,0,100,3,0,&NAMSTR(s_sys_ssbe91a4e3, "HASH_FNV1A_64") },
+  {0x6808EBB81DDE422FLL,-15,160,0,100,3,0,&NAMSTR(s_sys_ss1dde422f, "OPT_CACHE_LOOKUPS") },
+  {0x3A7E842A627341B2LL,-2,162,0,100,3,0,&NAMSTR(s_sys_ss5769d4fd, "HASH_FNV1_64") },
+  {0x56895500D1F05334LL,20,164,0,100,3,0,&NAMSTR(s_sys_ssd1f05334, "OPT_SEND_TIMEOUT") },
+  {0x6BC90BF53C6E7CC3LL,1,166,0,36,3,0,&NAMSTR(s_sys_ss3c6e7cc3, "RES_TIMEOUT") },
+  {0x4155BF3DCFA655C3LL,17,168,0,100,3,0,&NAMSTR(s_sys_sscfa655c3, "RES_BAD_KEY_PROVIDED") },
+  {0x490A114712BBA544LL,-19,170,0,100,3,0,&NAMSTR(s_sys_ss12bba544, "RES_SOME_ERRORS") },
+  {0x68724938D592E4C6LL,12,172,0,100,3,0,&NAMSTR(s_sys_ssd592e4c6, "OPT_SOCKET_SEND_SIZE") },
+  {0x073E4D38138A7DC7LL,25,174,0,100,3,0,&NAMSTR(s_sys_ss138a7dc7, "OPT_COMPRESSION") },
+  {0x7B91B2E2CC4DE648LL,4,176,0,100,3,0,&NAMSTR(s_sys_sscc4de648, "SERIALIZER_PHP") },
+  {0x138CD297B9FD244BLL,-7,178,0,100,3,0,&NAMSTR(s_sys_ssb9fd244b, "OPT_RETRY_TIMEOUT") },
+  {0x74824687F4C8D7CELL,13,180,0,100,2,0,&NAMSTR(s_sys_ssf4c8d7ce, "HAVE_JSON") },
+  {0x7AC058297870C1D0LL,-22,182,0,100,3,0,&NAMSTR(s_sys_ss7870c1d0, "SERIALIZER_JSON") },
+  {0x2B4E411F0C7596D1LL,-1,184,0,36,3,0,&NAMSTR(s_sys_ss0c7596d1, "SERIALIZER_IGBINARY") },
+  {0x1E8ABFABE00D2651LL,-30,186,0,100,3,0,&NAMSTR(s_sys_sse00d2651, "OPT_NO_BLOCK") },
+  {0x49856B6165627AD4LL,-23,188,0,100,3,0,&NAMSTR(s_sys_ss65627ad4, "DISTRIBUTION_MODULA") },
+  {0x02FAAD1AB87BA2D5LL,-14,190,0,36,3,0,&NAMSTR(s_sys_ssb87ba2d5, "HASH_CRC") },
+  {0x1045EAC17F112855LL,12,192,0,100,3,0,&NAMSTR(s_sys_ss7f112855, "RES_WRITE_FAILURE") },
+  {0x3A3731492FB1B557LL,9,194,0,36,3,0,&NAMSTR(s_sys_ss2bfdc708, "HASH_FNV1_32") },
+  {0x345B7B934684B3D7LL,17,196,0,100,3,0,&NAMSTR(s_sys_ss4684b3d7, "OPT_SOCKET_RECV_SIZE") },
+  {0x296424A39A9F1AD8LL,-19,198,0,100,3,0,&NAMSTR(s_sys_ss9a9f1ad8, "OPT_POLL_TIMEOUT") },
+  {0x3DD14F50C65BCDDBLL,-6,200,0,36,3,0,&NAMSTR(s_sys_ssc65bcddb, "OPT_DISTRIBUTION") },
+  {0x0224412EA957C9DBLL,17,202,0,100,3,0,&NAMSTR(s_sys_ssa957c9db, "RES_CONNECTION_SOCKET_CREATE_FAILURE") },
+  {0x6460D48B93209DDELL,-3,204,0,100,3,0,&NAMSTR(s_sys_ss93209dde, "OPT_RECV_TIMEOUT") },
+  {0x68D025242664C361LL,-35,206,0,100,3,0,&NAMSTR(s_sys_ss2664c361, "GET_PRESERVE_ORDER") },
+  {0x53A1149CE01E8C64LL,6,208,0,100,3,0,&NAMSTR(s_sys_sse01e8c64, "HASH_DEFAULT") },
+  {0x76B0604A2B4408EBLL,-32,210,0,100,3,0,&NAMSTR(s_sys_ss2b4408eb, "OPT_BUFFER_WRITES") },
+  {0x3C4C4E1BC9DFDCECLL,-34,212,0,36,3,0,&NAMSTR(s_sys_ss08c5e518, "HASH_FNV1A_32") },
+  {0x4197FC89C9F88DECLL,-33,214,0,100,3,0,&NAMSTR(s_sys_ssc9f88dec, "RES_HOST_LOOKUP_FAILURE") },
+  {0x56C85759C5701DEDLL,1,216,0,100,3,0,&NAMSTR(s_sys_ssc5701ded, "RES_DATA_EXISTS") },
+  {0x153143A96D687E6ELL,-34,218,0,100,3,0,&NAMSTR(s_sys_ss6d687e6e, "RES_NOTSTORED") },
+  {0x2BB4CFA54A5085F0LL,-15,220,0,100,3,0,&NAMSTR(s_sys_ssfe91db32, "HASH_MD5") },
+  {0x74109B06DAD2F9F1LL,-49,222,0,100,3,0,&NAMSTR(s_sys_ssdad2f9f1, "RES_END") },
+  {0x73ABA23A4A0C5D74LL,-24,224,0,100,3,0,&NAMSTR(s_sys_ss4a0c5d74, "OPT_SERIALIZER") },
+  {0x460A66958F0524F8LL,-6,226,0,100,3,0,&NAMSTR(s_sys_ss8f0524f8, "RES_FAILURE") },
+  {0x1C014F2A2E707EF9LL,-24,228,0,100,2,0,&NAMSTR(s_sys_ss2e707ef9, "HAVE_IGBINARY") },
+  {0x0443DA24DAD42EFBLL,-26,230,0,36,3,0,&NAMSTR(s_sys_ssdad42efb, "OPT_CONNECT_TIMEOUT") },
+  {0x35B252ECC21E5F7BLL,-31,232,0,100,3,0,&NAMSTR(s_sys_ssc21e5f7b, "RES_PARTIAL_READ") },
+  {0x7A68C36A2F5D27FELL,-17,234,0,100,3,0,&NAMSTR(s_sys_ss2f5d27fe, "HASH_MURMUR") },
+  {0x6948F797B210F37FLL,0,236,0,100,3,0,&NAMSTR(s_sys_ssb210f37f, "RES_PAYLOAD_FAILURE") },
+
+  {0x2C9DA0E379A28381LL,6,238,0,36,4,0,&NAMSTR(s_sys_ss79a28381, "FORM_KD") },
+  {0x1C369D0E14B76C41LL,1,240,0,36,4,0,&NAMSTR(s_sys_ss14b76c41, "FORM_KC") },
+  {0x3E3AA0A97BD09921LL,0,242,0,100,4,0,&NAMSTR(s_sys_ss7bd09921, "NFKC") },
+  {0x07512AA38ADD1AE2LL,2,244,0,100,4,0,&NAMSTR(s_sys_ss8add1ae2, "FORM_D") },
+  {0x51422F059BEFCD86LL,-3,246,0,100,4,0,&NAMSTR(s_sys_ss9befcd86, "NFC") },
+  {0x58B301790FA834EFLL,-5,248,0,36,4,0,&NAMSTR(s_sys_ss0fa834ef, "NFD") },
+  {0x3CF19F2D23C185CFLL,2,250,0,100,4,0,&NAMSTR(s_sys_ss23c185cf, "NFKD") },
+  {0x2EFDCA1922BFB273LL,-4,252,0,100,4,0,&NAMSTR(s_sys_ss22bfb273, "NONE") },
+  {0x3BE3511FDA9A9E7FLL,-4,254,0,100,4,0,&NAMSTR(s_sys_ssda9a9e7f, "FORM_C") },
+
+  {0x1800ED92A8884D00LL,31,256,0,100,4,0,&NAMSTR(s_sys_ssa8884d00, "ATTR_CASE") },
+  {0x07BAFBAE5A431902LL,27,258,0,100,4,0,&NAMSTR(s_sys_ss5a431902, "ATTR_STATEMENT_CLASS") },
+  {0x0229D662F91D9C04LL,1,260,0,100,4,0,&NAMSTR(s_sys_ssf91d9c04, "ERRMODE_EXCEPTION") },
+  {0x3BE7A02FD980AA08LL,7,262,0,100,4,0,&NAMSTR(s_sys_ssd980aa08, "CASE_NATURAL") },
+  {0x099B533427CCC20DLL,2,264,0,100,4,0,&NAMSTR(s_sys_ss27ccc20d, "FETCH_OBJ") },
+  {0x5FAD218776C6E511LL,60,266,0,100,4,0,&NAMSTR(s_sys_ss76c6e511, "FETCH_INTO") },
+  {0x78CB81320C710019LL,44,268,0,100,4,0,&NAMSTR(s_sys_ss0c710019, "FETCH_BOUND") },
+  {0x3158D52C3627FE1BLL,57,270,0,100,4,0,&NAMSTR(s_sys_ss3627fe1b, "MYSQL_ATTR_INIT_COMMAND") },
+  {0x03CF598D3CCCD01CLL,14,272,0,100,4,0,&NAMSTR(s_sys_ss3cccd01c, "ATTR_CLIENT_VERSION") },
+  {0x2BE16C4111A7B41DLL,36,274,0,100,4,0,&NAMSTR(s_sys_ss11a7b41d, "ATTR_FETCH_CATALOG_NAMES") },
+  {0x2A5BA04D0218F11ELL,2,276,0,100,4,0,&NAMSTR(s_sys_ss0218f11e, "CASE_LOWER") },
+  {0x16B15CF4B0DD7E23LL,9,278,0,100,4,0,&NAMSTR(s_sys_ssb0dd7e23, "FETCH_GROUP") },
+  {0x37F650C462FB6A25LL,25,280,0,100,4,0,&NAMSTR(s_sys_ss62fb6a25, "CASE_UPPER") },
+  {0x262D9BE84029992ALL,10,282,0,100,4,0,&NAMSTR(s_sys_ss4029992a, "PARAM_EVT_FETCH_POST") },
+  {0x15D2BCCED7726933LL,2,284,0,100,4,0,&NAMSTR(s_sys_ssd7726933, "ATTR_TIMEOUT") },
+  {0x01B17428BEE0243BLL,26,286,0,100,4,0,&NAMSTR(s_sys_ssbee0243b, "PARAM_EVT_EXEC_PRE") },
+  {0x2739A1D49673D43CLL,31,288,0,36,4,0,&NAMSTR(s_sys_ss9673d43c, "ATTR_ERRMODE") },
+  {0x6AC5C285F4DD863CLL,56,290,0,100,4,0,&NAMSTR(s_sys_ssf4dd863c, "ATTR_DEFAULT_FETCH_MODE") },
+  {0x3E11051E4101D73DLL,-1,292,0,100,4,0,&NAMSTR(s_sys_ss4101d73d, "ATTR_EMULATE_PREPARES") },
+  {0x2189354E22363544LL,-5,294,0,100,4,0,&NAMSTR(s_sys_ss22363544, "ATTR_PREFETCH") },
+  {0x428D5CA64BB99E48LL,35,296,0,100,4,0,&NAMSTR(s_sys_ss4bb99e48, "FETCH_UNIQUE") },
+  {0x39B4E90F36E93B4ELL,50,298,0,100,4,0,&NAMSTR(s_sys_ss36e93b4e, "MYSQL_ATTR_READ_DEFAULT_GROUP") },
+  {0x58A833E2336C6152LL,2,300,0,100,4,0,&NAMSTR(s_sys_ss336c6152, "ATTR_SERVER_INFO") },
+  {0x57B75F4773C81556LL,23,302,0,100,4,0,&NAMSTR(s_sys_ss73c81556, "PARAM_EVT_NORMALIZE") },
+  {0x5495020CF262F15BLL,-24,304,0,36,4,0,&NAMSTR(s_sys_ssf262f15b, "ATTR_CONNECTION_STATUS") },
+  {0x37888F551D85275BLL,36,306,0,100,4,0,&NAMSTR(s_sys_ss1d85275b, "ATTR_ORACLE_NULLS") },
+  {0x416A0550A8F12E61LL,52,308,0,100,4,0,&NAMSTR(s_sys_ssa8f12e61, "MYSQL_ATTR_FOUND_ROWS") },
+  {0x15A3522970275465LL,13,310,0,100,4,0,&NAMSTR(s_sys_ss70275465, "FETCH_ORI_NEXT") },
+  {0x162EAA2134F1C068LL,-19,312,0,100,4,0,&NAMSTR(s_sys_ss34f1c068, "ATTR_FETCH_TABLE_NAMES") },
+  {0x350E9275757FD66FLL,28,314,0,100,4,0,&NAMSTR(s_sys_ss757fd66f, "FETCH_ORI_REL") },
+  {0x6870D9DE66F43D70LL,9,316,0,100,4,0,&NAMSTR(s_sys_ss66f43d70, "FETCH_ASSOC") },
+  {0x713C8339790FC071LL,13,318,0,100,4,0,&NAMSTR(s_sys_ss790fc071, "ATTR_CURSOR_NAME") },
+  {0x1FB97A35B6711374LL,-14,320,0,100,4,0,&NAMSTR(s_sys_ssb6711374, "ATTR_MAX_COLUMN_LEN") },
+  {0x0E51487F9370EE75LL,-14,322,0,100,4,0,&NAMSTR(s_sys_ss9370ee75, "ATTR_AUTOCOMMIT") },
+  {0x630122BA9EC73379LL,4,324,0,36,4,0,&NAMSTR(s_sys_ss9ec73379, "PARAM_NULL") },
+  {0x05B00276031D7D79LL,45,326,0,100,4,0,&NAMSTR(s_sys_ss031d7d79, "PARAM_EVT_ALLOC") },
+  {0x500C039681520C7DLL,-2,328,0,100,4,0,&NAMSTR(s_sys_ss81520c7d, "PARAM_BOOL") },
+  {0x5CF4F38A0D7D087ELL,25,330,0,100,4,0,&NAMSTR(s_sys_ss0d7d087e, "NULL_NATURAL") },
+  {0x3F414F2735132983LL,5,332,0,100,4,0,&NAMSTR(s_sys_ss35132983, "PARAM_INT") },
+  {0x2011B5A528057784LL,15,334,0,100,4,0,&NAMSTR(s_sys_ss28057784, "FETCH_NUM") },
+  {0x5451E44C627DD885LL,18,336,0,100,4,0,&NAMSTR(s_sys_ss627dd885, "FETCH_ORI_PRIOR") },
+  {0x1B8BA5EEAABCB786LL,15,338,0,36,4,0,&NAMSTR(s_sys_ssaabcb786, "PARAM_EVT_EXEC_POST") },
+  {0x1B51C692B91D7486LL,11,340,0,100,4,0,&NAMSTR(s_sys_ssb91d7486, "MYSQL_ATTR_USE_BUFFERED_QUERY") },
+  {0x7E64209D5A925F88LL,32,342,0,100,4,0,&NAMSTR(s_sys_ss5a925f88, "PARAM_STR") },
+  {0x45AB9806DE21EA8ALL,-19,344,0,100,4,0,&NAMSTR(s_sys_ssde21ea8a, "ATTR_CURSOR") },
+  {0x0EDB017494A81E8DLL,18,346,0,100,4,0,&NAMSTR(s_sys_ss94a81e8d, "ATTR_DRIVER_NAME") },
+  {0x126B3038F3355A8ELL,24,348,0,100,4,0,&NAMSTR(s_sys_ssf3355a8e, "FETCH_USE_DEFAULT") },
+  {0x1F200B094608BE8FLL,-39,350,0,36,4,0,&NAMSTR(s_sys_ss4608be8f, "ATTR_SERVER_VERSION") },
+  {0x1175C5F56147488FLL,-22,352,0,100,4,0,&NAMSTR(s_sys_ss6147488f, "MYSQL_ATTR_DIRECT_QUERY") },
+  {0x25BE9238386C2796LL,27,354,0,100,4,0,&NAMSTR(s_sys_ss386c2796, "FETCH_PROPS_LATE") },
+  {0x657BEA5F741C4999LL,19,356,0,36,4,0,&NAMSTR(s_sys_ss741c4999, "FETCH_COLUMN") },
+  {0x18B801DE8D8C9099LL,1,358,0,100,4,0,&NAMSTR(s_sys_ss8d8c9099, "FETCH_CLASSTYPE") },
+  {0x1EC178DF86F4FD9CLL,-3,360,0,100,4,0,&NAMSTR(s_sys_ss86f4fd9c, "FETCH_SERIALIZE") },
+  {0x052245CE02FBF4A0LL,15,362,0,100,4,0,&NAMSTR(s_sys_ss02fbf4a0, "MYSQL_ATTR_LOCAL_INFILE") },
+  {0x28D5B850B76FEEA2LL,-50,364,0,36,4,0,&NAMSTR(s_sys_ssb76feea2, "FETCH_BOTH") },
+  {0x0D0BCCC6768A88A2LL,-4,366,0,100,4,0,&NAMSTR(s_sys_ss768a88a2, "FETCH_KEY_PAIR") },
+  {0x6851B7545234FCA4LL,-43,368,0,100,4,0,&NAMSTR(s_sys_ss5234fca4, "PARAM_EVT_FETCH_PRE") },
+  {0x167DD614E842FAA8LL,2,370,0,100,4,0,&NAMSTR(s_sys_sse842faa8, "CURSOR_FWDONLY") },
+  {0x6AEB66DE7A454FA9LL,2,372,0,100,4,0,&NAMSTR(s_sys_ss7a454fa9, "FETCH_ORI_FIRST") },
+  {0x392400A66B305EAALL,-17,374,0,100,4,0,&NAMSTR(s_sys_ss6b305eaa, "CURSOR_SCROLL") },
+  {0x2F6AE87AF5701AABLL,6,376,0,100,4,0,&NAMSTR(s_sys_ssf5701aab, "FETCH_ORI_LAST") },
+  {0x56D59339A0F5D8B4LL,-60,378,0,100,4,0,&NAMSTR(s_sys_ssa0f5d8b4, "ATTR_PERSISTENT") },
+  {0x08657D6005DD08B8LL,5,380,0,100,4,0,&NAMSTR(s_sys_ss05dd08b8, "NULL_EMPTY_STRING") },
+  {0x60CE39F6493319C5LL,-31,382,0,100,4,0,&NAMSTR(s_sys_ss493319c5, "ATTR_STRINGIFY_FETCHES") },
+  {0x61BD1667BB46C9C6LL,-43,384,0,100,4,0,&NAMSTR(s_sys_ssbb46c9c6, "MYSQL_ATTR_READ_DEFAULT_FILE") },
+  {0x30D00303975C98C8LL,-54,386,0,36,4,0,&NAMSTR(s_sys_ss975c98c8, "FETCH_FUNC") },
+  {0x47D4494BE4FA26C8LL,-37,388,0,100,4,0,&NAMSTR(s_sys_sse4fa26c8, "FETCH_ORI_ABS") },
+  {0x29B68A596E0615CALL,7,390,0,100,4,0,&NAMSTR(s_sys_ss6e0615ca, "NULL_TO_STRING") },
+  {0x73FAA1AA068D19CBLL,-61,392,0,100,4,0,&NAMSTR(s_sys_ss068d19cb, "MYSQL_ATTR_MAX_BUFFER_SIZE") },
+  {0x439351C7C64634D0LL,-64,394,0,100,4,0,&NAMSTR(s_sys_ssc64634d0, "FETCH_CLASS") },
+  {0x5C75BB222F23C4D1LL,-40,396,0,100,4,0,&NAMSTR(s_sys_ss2f23c4d1, "FETCH_LAZY") },
+  {0x57F9152D7EC3A5D3LL,-23,398,0,100,4,0,&NAMSTR(s_sys_ss7ec3a5d3, "MYSQL_ATTR_COMPRESS") },
+  {0x4D1DDF7F772C54DCLL,-70,400,0,100,4,0,&NAMSTR(s_sys_ss772c54dc, "ERRMODE_WARNING") },
+  {0x2E4175EAAB1F75EBLL,-1,402,0,100,4,0,&NAMSTR(s_sys_ssab1f75eb, "ERRMODE_SILENT") },
+  {0x16017F3F58821EF5LL,-47,404,0,100,7,0,&NAMSTR(s_sys_ss58821ef5, "ERR_NONE") },
+  {0x674F9B0D2030C3F6LL,4,406,0,100,4,0,&NAMSTR(s_sys_ss2030c3f6, "PARAM_LOB") },
+  {0x16EC9F213D7F57F7LL,-43,408,0,100,4,0,&NAMSTR(s_sys_ss3d7f57f7, "FETCH_NAMED") },
+  {0x6C0021FD5D20A1F8LL,-42,410,0,100,4,0,&NAMSTR(s_sys_ss5d20a1f8, "PARAM_INPUT_OUTPUT") },
+  {0x13EC16B8F7B7B1FBLL,0,412,0,100,4,0,&NAMSTR(s_sys_ssf7b7b1fb, "MYSQL_ATTR_IGNORE_SPACE") },
+  {0x51938FCA0AE827FDLL,-2,414,0,100,4,0,&NAMSTR(s_sys_ss0ae827fd, "PARAM_STMT") },
+  {0x56335EC3392D8EFELL,-65,416,0,100,4,0,&NAMSTR(s_sys_ss392d8efe, "PARAM_EVT_FREE") },
+
+  {0x76DAF4F4BD608481LL,6,418,0,100,3,0,&NAMSTR(s_sys_ssbd608481, "SINGLE_SCRIPT_CONFUSABLE") },
+  {0x330C21B4435FDA12LL,4,420,0,100,3,0,&NAMSTR(s_sys_ss435fda12, "WHOLE_SCRIPT_CONFUSABLE") },
+  {0x33D91DB93B53D955LL,0,422,0,100,3,0,&NAMSTR(s_sys_ss3b53d955, "CHAR_LIMIT") },
+  {0x727F3BA1A7798546LL,-1,424,0,100,3,0,&NAMSTR(s_sys_ssa7798546, "INVISIBLE") },
+  {0x7244AE82909D364ALL,-1,426,0,100,3,0,&NAMSTR(s_sys_ss909d364a, "SINGLE_SCRIPT") },
+  {0x5A4E3956DA2E533CLL,-1,428,0,100,3,0,&NAMSTR(s_sys_ssda2e533c, "ANY_CASE") },
+  {0x3189877F80D9ABBFLL,-5,430,0,100,3,0,&NAMSTR(s_sys_ss80d9abbf, "MIXED_SCRIPT_CONFUSABLE") },
+
+  {0x13B3121CBF212DC1LL,1,432,0,100,4,0,&NAMSTR(s_sys_ssbf212dc1, "DOC_FRAGMENT") },
+  {0x6071F0A4D7F152C9LL,8,434,0,100,4,0,&NAMSTR(s_sys_ssd7f152c9, "NOTATION") },
+  {0x16AD79F9AF3ECC0DLL,11,436,0,100,4,0,&NAMSTR(s_sys_ssaf3ecc0d, "COMMENT") },
+  {0x5BB72110C0F94F8FLL,16,438,0,36,4,0,&NAMSTR(s_sys_ssc0f94f8f, "ELEMENT") },
+  {0x4431B68F8476210FLL,0,440,0,100,4,0,&NAMSTR(s_sys_ss8476210f, "SUBST_ENTITIES") },
+  {0x66710CEFCACCEAD4LL,15,442,0,100,4,0,&NAMSTR(s_sys_sscaccead4, "DEFAULTATTRS") },
+  {0x0A70D397C0570F56LL,15,444,0,100,4,0,&NAMSTR(s_sys_ssc0570f56, "CDATA") },
+  {0x69070452A320C4D8LL,-2,446,0,100,4,0,&NAMSTR(s_sys_ssa320c4d8, "LOADDTD") },
+  {0x4D26D167066BB11DLL,-2,448,0,36,4,0,&NAMSTR(s_sys_ss066bb11d, "TEXT") },
+  {0x507641F239996F9DLL,2,450,0,100,4,0,&NAMSTR(s_sys_ss39996f9d, "WHITESPACE") },
+  {0x7EB865DC91D7AC1FLL,-10,452,0,100,4,0,&NAMSTR(s_sys_ss91d7ac1f, "DOC_TYPE") },
+  {0x4A21896B12C338E5LL,4,454,0,100,4,0,&NAMSTR(s_sys_ss12c338e5, "SIGNIFICANT_WHITESPACE") },
+  {0x18CF3E4A60E4AAACLL,-10,456,0,100,4,0,&NAMSTR(s_sys_ss60e4aaac, "PI") },
+  {0x5C1091C88F8EB6EDLL,-3,458,0,100,4,0,&NAMSTR(s_sys_ss8f8eb6ed, "DOC") },
+  {0x18FB7BF5786BF72FLL,-2,460,0,100,4,0,&NAMSTR(s_sys_ss786bf72f, "ENTITY") },
+  {0x3EBBF7FE181568B0LL,3,462,0,36,4,0,&NAMSTR(s_sys_ss181568b0, "END_ELEMENT") },
+  {0x2907A7E1425D0970LL,-9,464,0,100,4,0,&NAMSTR(s_sys_ss425d0970, "XML_DECLARATION") },
+  {0x2EFDCA1922BFB273LL,-14,466,0,36,4,0,&NAMSTR(s_sys_ss22bfb273, "NONE") },
+  {0x66785D8330DBC573LL,-2,468,0,100,4,0,&NAMSTR(s_sys_ss30dbc573, "END_ENTITY") },
+  {0x21A6FB97A47EB4F5LL,-11,470,0,100,4,0,&NAMSTR(s_sys_ssa47eb4f5, "ATTRIBUTE") },
+  {0x1CA408E02262F737LL,-16,472,0,100,4,0,&NAMSTR(s_sys_ss2262f737, "VALIDATE") },
+  {0x631C49B1B9F742FCLL,-7,474,0,100,4,0,&NAMSTR(s_sys_ssb9f742fc, "ENTITY_REF") },
+
 };
 static const int cpt_hash_entries[] = {
+  // Collator hash
+  -1,-1,23,21,-1,-1,-1,-1,-1,-1,20,19,-1,-1,-1,-1,-1,-1,18,-1,-1,-1,-1,-1,17,-1,-1,-1,16,-1,13,12,-1,-1,11,-1,10,-1,-1,8,-1,-1,7,5,-1,-1,-1,-1,-1,-1,-1,4,-1,-1,-1,-1,3,-1,-1,2,0,-1,-1,-1,
+  // Collator lists
+  -1,
+  -1,
+  -1,
+  // Continuation hash
   0,1,-1,2,-1,-1,-1,-1,-1,3,-1,-1,-1,-1,4,-1,6,-1,-1,-1,-1,7,-1,8,-1,-1,-1,-1,-1,9,-1,-1,
+  // Continuation lists
+  2,4,0,5,8,1,7,9,3,6,-1,
+  -1,
+  -1,
+  // DateTime hash
+  -1,10,-1,-1,8,-1,-1,-1,7,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,4,-1,3,2,-1,-1,-1,1,0,-1,-1,-1,-1,
+  // DateTime lists
+  -1,
+  -1,
+  -1,
+  // DateTimeZone hash
+  13,11,-1,-1,-1,-1,10,9,7,-1,-1,6,5,-1,-1,-1,4,-1,3,2,-1,1,-1,-1,-1,-1,-1,-1,-1,0,-1,-1,
+  // DateTimeZone lists
+  -1,
+  -1,
+  -1,
+  // DebuggerClient hash
+  9,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,-1,-1,-1,6,-1,-1,-1,4,-1,3,-1,1,-1,-1,-1,-1,0,-1,-1,
+  // DebuggerClient lists
+  -1,
+  -1,
+  -1,
+  // GenericContinuation hash
   -1,-1,-1,-1,0,-1,-1,-1,
+  // GenericContinuation lists
+  0,-1,
+  -1,
+  -1,
+  // Locale hash
+  -1,-1,1,-1,-1,-1,0,-1,
+  // Locale lists
+  -1,
+  -1,
+  -1,
+  // Memcached hash
+  56,55,-1,-1,53,-1,52,51,-1,-1,-1,50,-1,-1,49,48,-1,47,46,44,43,-1,-1,-1,-1,-1,-1,42,-1,-1,41,-1,-1,40,-1,-1,38,-1,-1,37,35,-1,33,32,-1,-1,30,29,-1,28,-1,-1,27,-1,-1,26,25,24,-1,23,21,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,20,-1,19,-1,-1,18,-1,-1,-1,-1,-1,-1,-1,-1,-1,17,-1,16,14,-1,-1,-1,-1,13,10,-1,-1,-1,9,-1,7,-1,-1,-1,-1,-1,-1,-1,-1,5,-1,-1,3,-1,-1,2,-1,1,-1,0,-1,-1,-1,
+  // Memcached lists
+  -1,
+  -1,
+  -1,
+  // Normalizer hash
+  8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,7,-1,-1,-1,5,-1,-1,-1,-1,-1,-1,-1,-1,4,-1,-1,-1,3,0,-1,
+  // Normalizer lists
+  -1,
+  -1,
+  -1,
+  // PDO hash
+  -1,80,79,-1,78,-1,-1,77,76,75,74,-1,-1,-1,-1,-1,-1,-1,-1,-1,73,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,72,-1,-1,-1,-1,-1,-1,-1,-1,71,-1,70,69,-1,-1,-1,-1,68,67,-1,65,-1,64,63,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,62,-1,-1,-1,61,-1,-1,-1,-1,-1,-1,-1,-1,60,59,58,57,-1,-1,-1,56,-1,54,-1,53,-1,-1,-1,52,-1,-1,50,-1,-1,49,-1,-1,-1,-1,-1,-1,47,46,45,-1,-1,44,-1,43,-1,41,40,39,38,-1,-1,-1,-1,37,36,-1,-1,-1,34,-1,-1,-1,33,32,-1,-1,31,30,29,-1,-1,-1,-1,-1,-1,28,-1,-1,27,-1,-1,-1,26,-1,-1,-1,-1,-1,24,-1,-1,-1,-1,23,-1,-1,-1,22,-1,-1,-1,21,-1,-1,-1,-1,-1,20,-1,-1,-1,19,-1,-1,-1,-1,-1,-1,18,16,15,-1,-1,-1,-1,-1,-1,-1,14,-1,-1,-1,-1,-1,-1,-1,-1,13,-1,-1,-1,-1,12,-1,11,-1,-1,-1,-1,10,9,8,7,-1,6,-1,-1,-1,-1,-1,-1,-1,5,-1,-1,-1,4,-1,-1,-1,-1,3,-1,-1,-1,2,-1,1,-1,0,
+  // PDO lists
+  -1,
+  -1,
+  -1,
+  // SpoofChecker hash
+  6,-1,-1,5,-1,4,-1,-1,-1,3,2,-1,-1,1,0,-1,
+  // SpoofChecker lists
+  -1,
+  -1,
+  -1,
+  // XMLReader hash
+  -1,-1,-1,21,-1,-1,-1,-1,20,-1,19,-1,17,-1,-1,15,14,-1,13,12,-1,-1,-1,-1,-1,-1,11,-1,-1,-1,-1,-1,10,-1,8,-1,-1,-1,-1,7,-1,6,-1,5,-1,-1,-1,-1,3,-1,2,-1,-1,-1,1,-1,-1,-1,-1,-1,-1,-1,0,-1,
+  // XMLReader lists
+  -1,
+  -1,
+  -1,
+};
+const ClassPropTable c_Collator::os_prop_table = {
+  -1,-1,-1,-1,63,0,1,0,
+  cpt_hash_entries+64,0,cpt_table_entries+0,cpt_static_inits
 };
 const ClassPropTable c_Continuation::os_prop_table = {
-  31,2,cpt_hash_entries+0,
-  0,cpt_table_entries+0,cpt_private_entries+0
+  31,2,-1,-1,-1,-1,43,0,
+  cpt_hash_entries+67,0,cpt_table_entries+24,cpt_static_inits
+};
+const ClassPropTable c_DateTime::os_prop_table = {
+  -1,-1,-1,-1,31,1,1,0,
+  cpt_hash_entries+144,0,cpt_table_entries+34,cpt_static_inits
+};
+const ClassPropTable c_DateTimeZone::os_prop_table = {
+  -1,-1,-1,-1,31,0,1,0,
+  cpt_hash_entries+179,0,cpt_table_entries+45,cpt_static_inits
+};
+const ClassPropTable c_DebuggerClient::os_prop_table = {
+  -1,-1,-1,-1,31,1,1,0,
+  cpt_hash_entries+214,0,cpt_table_entries+59,cpt_static_inits
 };
 const ClassPropTable c_GenericContinuation::os_prop_table = {
-  7,0,cpt_hash_entries+32,
-  &c_Continuation::os_prop_table,cpt_table_entries+10,cpt_private_entries+11
+  7,0,-1,-1,-1,-1,10,0,
+  cpt_hash_entries+217,&c_Continuation::os_prop_table,cpt_table_entries+69,cpt_static_inits
+};
+const ClassPropTable c_Locale::os_prop_table = {
+  -1,-1,-1,-1,7,1,1,0,
+  cpt_hash_entries+237,0,cpt_table_entries+70,cpt_static_inits
+};
+const ClassPropTable c_Memcached::os_prop_table = {
+  -1,-1,-1,-1,127,25,1,0,
+  cpt_hash_entries+368,0,cpt_table_entries+72,cpt_static_inits
+};
+const ClassPropTable c_Normalizer::os_prop_table = {
+  -1,-1,-1,-1,31,7,1,0,
+  cpt_hash_entries+403,0,cpt_table_entries+129,cpt_static_inits
+};
+const ClassPropTable c_PDO::os_prop_table = {
+  -1,-1,-1,-1,255,36,1,0,
+  cpt_hash_entries+662,0,cpt_table_entries+138,cpt_static_inits
+};
+const ClassPropTable c_SpoofChecker::os_prop_table = {
+  -1,-1,-1,-1,15,0,1,0,
+  cpt_hash_entries+681,0,cpt_table_entries+219,cpt_static_inits
+};
+const ClassPropTable c_XMLReader::os_prop_table = {
+  -1,-1,-1,-1,63,17,1,0,
+  cpt_hash_entries+748,0,cpt_table_entries+226,cpt_static_inits
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -33,20 +33,7 @@ class c_ReflectionObject : public c_ReflectionClass {
   // Properties
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(ReflectionObject, ReflectionObject)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionObject 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionObject 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionObject 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionObject 1
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(ReflectionObject, ReflectionObject, ReflectionClass)
   public: static Variant t_export(Variant v_obj, CVarRef v_ret);
   DECLARE_METHOD_INVOKE_HELPERS(export);
 };

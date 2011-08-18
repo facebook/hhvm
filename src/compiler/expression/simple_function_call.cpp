@@ -1451,7 +1451,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         cg_printf(");\n");
         cg_printf("mcp%d.obj = mcp%d.rootObj;\n", m_ciTemp, m_ciTemp);
         cg_printf("%s%s.%sget_call_info(mcp%d",
-                  Option::ClassWrapperFunctionPrefix, className.c_str(),
+                  Option::ClassStaticsCallbackPrefix, className.c_str(),
                   Option::ObjectStaticPrefix,
                   m_ciTemp);
       } else {
@@ -1461,7 +1461,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         cg_printString(escapedName, ar, shared_from_this());
         cg_printf(");\n");
         cg_printf("%s%s.%sget_call_info(mcp%d",
-                  Option::ClassWrapperFunctionPrefix, className.c_str(),
+                  Option::ClassStaticsCallbackPrefix, className.c_str(),
                   Option::ObjectStaticPrefix,
                   m_ciTemp);
       }

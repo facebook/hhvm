@@ -244,7 +244,7 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_printf("const CallInfo *&cit%d = mcp%d.ci;\n", m_ciTemp, m_ciTemp);
     if (m_classScope) {
       cg_printf("%s%s.%sget_call_info(mcp%d",
-                Option::ClassWrapperFunctionPrefix,
+                Option::ClassStaticsCallbackPrefix,
                 m_classScope->getId().c_str(),
                 Option::ObjectStaticPrefix, m_ciTemp);
     } else if (isRedeclared()) {

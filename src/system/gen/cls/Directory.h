@@ -34,20 +34,7 @@ class c_Directory : public ExtObjectData {
   Variant m_handle;
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(Directory, Directory)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  static Variant os_getInit(CStrRef s);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_Directory 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Directory 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_Directory 1
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(Directory, Directory, ObjectData)
   static const ClassPropTable os_prop_table;
   c_Directory() : m_path(Variant::nullInit), m_handle(Variant::nullInit) {}
   public: void t___construct(Variant v_path);

@@ -240,7 +240,7 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
     classScope->isUserClass() && !classScope->isSepExtension() ?
     "_NO_SWEEP" : "";
 
-  if (variables->hasAllJumpTables() && constants->hasJumpTable() &&
+  if (variables->hasAllJumpTables() &&
       classScope->hasAllJumpTables()) {
     cg_printf("DECLARE_CLASS%s(%s, %s, %s)\n",
               sweep, clsName,
@@ -258,26 +258,6 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   cg_printf("public:\n");
   if (classScope->needStaticInitializer()) {
     cg_printf("static void os_static_initializer();\n");
-  }
-  if (variables->hasJumpTable(VariableTable::JumpTableClassStaticGetInit)) {
-    cg_printf("static Variant os_getInit(CStrRef s);\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_%s 1\n", clsName);
-  }
-  if (variables->hasJumpTable(VariableTable::JumpTableClassStaticGet)) {
-    cg_printf("static Variant os_get(CStrRef s);\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_STATIC_GET_%s 1\n", clsName);
-  }
-  if (variables->hasJumpTable(VariableTable::JumpTableClassStaticLval)) {
-    cg_printf("static Variant &os_lval(CStrRef s);\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_%s 1\n", clsName);
-  }
-  if (constants->hasJumpTable()) {
-    cg_printf("static Variant os_constant(const char *s);\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_CONSTANT_%s 1\n", clsName);
   }
 
   cg.printSection("DECLARE_COMMON_INVOKE");
@@ -338,7 +318,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf("g->%s%s = &%s%s;\n",
                   Option::ClassStaticsCallbackPrefix,
                   name.c_str(),
-                  Option::ClassWrapperFunctionPrefix,
+                  Option::ClassStaticsCallbackPrefix,
                   classScope->getId().c_str());
       }
       cg_printf("g->CDEC(%s) = true;\n", name.c_str());
@@ -557,11 +537,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf("void init();\n");
       }
 
-      if (classScope->needLazyStaticInitializer()) {
-        cg_printf("static GlobalVariables *lazy_initializer"
-                  "(GlobalVariables *g);\n");
-      }
-
       if (!classScope->getAttribute(ClassScope::HasConstructor)) {
         FunctionScopePtr func = classScope->findFunction(ar, "__construct",
                                                          false);
@@ -667,7 +642,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                   clsName);
         cg_indentEnd("}\n");
       }
-      if (classScope->needLazyStaticInitializer()) {
+      if (0 && classScope->needLazyStaticInitializer()) {
         cg_indentBegin("GlobalVariables *%s%s::lazy_initializer("
                        "GlobalVariables *g) {\n", Option::ClassPrefix, clsName);
         cg_indentBegin("if (!g->%s%s) {\n",

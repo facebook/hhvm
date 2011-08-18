@@ -22,32 +22,32 @@ IMPLEMENT_DEFAULT_EXTENSION(date);
 ///////////////////////////////////////////////////////////////////////////////
 // constants
 
-const StaticString q_DateTime_ATOM(LITSTR_INIT("Y-m-d\\TH:i:sP"));
-const StaticString q_DateTime_COOKIE(LITSTR_INIT("l, d-M-y H:i:s T"));
-const StaticString q_DateTime_ISO8601(LITSTR_INIT("Y-m-d\\TH:i:sO"));
-const StaticString q_DateTime_RFC822(LITSTR_INIT("D, d M y H:i:s O"));
-const StaticString q_DateTime_RFC850(LITSTR_INIT("l, d-M-y H:i:s T"));
-const StaticString q_DateTime_RFC1036(LITSTR_INIT("D, d M y H:i:s O"));
-const StaticString q_DateTime_RFC1123(LITSTR_INIT("D, d M Y H:i:s O"));
-const StaticString q_DateTime_RFC2822(LITSTR_INIT("D, d M Y H:i:s O"));
-const StaticString q_DateTime_RFC3339(LITSTR_INIT("Y-m-d\\TH:i:sP"));
-const StaticString q_DateTime_RSS(LITSTR_INIT("D, d M Y H:i:s O"));
-const StaticString q_DateTime_W3C(LITSTR_INIT("Y-m-d\\TH:i:sP"));
+const StaticString q_DateTime$$ATOM(LITSTR_INIT("Y-m-d\\TH:i:sP"));
+const StaticString q_DateTime$$COOKIE(LITSTR_INIT("l, d-M-y H:i:s T"));
+const StaticString q_DateTime$$ISO8601(LITSTR_INIT("Y-m-d\\TH:i:sO"));
+const StaticString q_DateTime$$RFC822(LITSTR_INIT("D, d M y H:i:s O"));
+const StaticString q_DateTime$$RFC850(LITSTR_INIT("l, d-M-y H:i:s T"));
+const StaticString q_DateTime$$RFC1036(LITSTR_INIT("D, d M y H:i:s O"));
+const StaticString q_DateTime$$RFC1123(LITSTR_INIT("D, d M Y H:i:s O"));
+const StaticString q_DateTime$$RFC2822(LITSTR_INIT("D, d M Y H:i:s O"));
+const StaticString q_DateTime$$RFC3339(LITSTR_INIT("Y-m-d\\TH:i:sP"));
+const StaticString q_DateTime$$RSS(LITSTR_INIT("D, d M Y H:i:s O"));
+const StaticString q_DateTime$$W3C(LITSTR_INIT("Y-m-d\\TH:i:sP"));
 
-const int64 q_DateTimeZone_AFRICA = 1;
-const int64 q_DateTimeZone_AMERICA = 2;
-const int64 q_DateTimeZone_ANTARCTICA = 4;
-const int64 q_DateTimeZone_ARCTIC = 8;
-const int64 q_DateTimeZone_ASIA = 16;
-const int64 q_DateTimeZone_ATLANTIC = 32;
-const int64 q_DateTimeZone_AUSTRALIA = 64;
-const int64 q_DateTimeZone_EUROPE = 128;
-const int64 q_DateTimeZone_INDIAN = 256;
-const int64 q_DateTimeZone_PACIFIC = 512;
-const int64 q_DateTimeZone_UTC = 1024;
-const int64 q_DateTimeZone_ALL = 2047;
-const int64 q_DateTimeZone_ALL_WITH_BC = 4095;
-const int64 q_DateTimeZone_PER_COUNTRY = 4096;
+const int64 q_DateTimeZone$$AFRICA = 1;
+const int64 q_DateTimeZone$$AMERICA = 2;
+const int64 q_DateTimeZone$$ANTARCTICA = 4;
+const int64 q_DateTimeZone$$ARCTIC = 8;
+const int64 q_DateTimeZone$$ASIA = 16;
+const int64 q_DateTimeZone$$ATLANTIC = 32;
+const int64 q_DateTimeZone$$AUSTRALIA = 64;
+const int64 q_DateTimeZone$$EUROPE = 128;
+const int64 q_DateTimeZone$$INDIAN = 256;
+const int64 q_DateTimeZone$$PACIFIC = 512;
+const int64 q_DateTimeZone$$UTC = 1024;
+const int64 q_DateTimeZone$$ALL = 2047;
+const int64 q_DateTimeZone$$ALL_WITH_BC = 4095;
+const int64 q_DateTimeZone$$PER_COUNTRY = 4096;
 
 ///////////////////////////////////////////////////////////////////////////////
 // methods

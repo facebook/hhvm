@@ -388,6 +388,8 @@ struct InstanceOfInfo {
   const ObjectStaticCallbacks *cb;
 };
 
+class GlobalVariables;
+
 // Callback structure for functions related to static methods
 struct ObjectStaticCallbacks {
   Object create(CArrRef params, bool init = true,
@@ -396,6 +398,10 @@ struct ObjectStaticCallbacks {
   inline bool os_get_call_info(MethodCallPackage &info, int64 hash = -1) const {
     return GetCallInfo(this, info, hash);
   }
+  Variant os_getInit(CStrRef s) const;
+  Variant os_get(CStrRef s) const;
+  Variant &os_lval(CStrRef s) const;
+  Variant os_constant(const char *s) const;
   static bool GetCallInfo(const ObjectStaticCallbacks *osc,
                           MethodCallPackage &mcp, int64 hash);
   static bool GetCallInfoEx(const char *cls,
@@ -403,10 +409,9 @@ struct ObjectStaticCallbacks {
                             MethodCallPackage &mcp, int64 hash);
 
   operator const ObjectStaticCallbacks*() const { return this; }
-  Variant (*os_getInit)(CStrRef s);
-  Variant (*os_get)(CStrRef s);
-  Variant &(*os_lval)(CStrRef s);
-  Variant (*os_constant)(const char *s);
+  const ObjectStaticCallbacks* operator->() const { return this; }
+  GlobalVariables *lazy_initializer(GlobalVariables *g) const;
+
   ObjectData *(*createOnlyNoInit)(ObjectData* root);
 
   const MethodCallInfoTable   *mcit;
@@ -435,6 +440,7 @@ struct RedeclaredObjectStaticCallbacks {
   Object create(CArrRef params, bool init = true,
                 ObjectData* root = NULL) const;
   Object createOnly(ObjectData *root = NULL) const;
+  const RedeclaredObjectStaticCallbacks* operator->() const { return this; }
 };
 
 typedef const RedeclaredObjectStaticCallbacks

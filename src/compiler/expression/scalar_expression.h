@@ -74,6 +74,9 @@ public:
   bool getString(const std::string *&s) const;
   bool getInt(int64 &i) const;
   bool getDouble(double &d) const;
+  static void OutputCPPString(const std::string &str, CodeGenerator &cg,
+                              AnalysisResultPtr ar, BlockScopeRawPtr scope,
+                              bool constant);
 private:
   int m_type;
   std::string m_serializedValue;
@@ -83,8 +86,6 @@ private:
   std::string m_translated;
   bool m_quoted;
   std::string m_comment; // for inlined constant name
-  void outputCPPString(const std::string &str, CodeGenerator &cg,
-                       AnalysisResultPtr ar, bool constant);
   void outputCPPNamedInteger(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPNamedDouble(CodeGenerator &cg, AnalysisResultPtr ar);
 };

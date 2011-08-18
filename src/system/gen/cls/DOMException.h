@@ -33,20 +33,7 @@ class c_DOMException : public c_Exception {
   // Properties
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(DOMException, DOMException)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMException 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMException 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMException 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMException 1
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(DOMException, DOMException, Exception)
   public: void t___construct(Variant v_message, Variant v_code);
   public: c_DOMException *create(CVarRef v_message, CVarRef v_code);
   public: void dynConstruct(CArrRef params);

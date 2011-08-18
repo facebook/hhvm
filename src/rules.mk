@@ -192,7 +192,7 @@ LD = $(CXX)
 CPPFLAGS += -MMD
 
 # allowing "and", "or" to be re-defined
-CXXFLAGS += -fno-operator-names
+CXXFLAGS += -fno-operator-names -ffunction-sections
 
 # Include frame pointers to make it easier to generate callgraphs in oprofile
 CPPFLAGS += -fno-omit-frame-pointer $(if $(USE_ICC),,-momit-leaf-frame-pointer)

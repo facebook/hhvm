@@ -36,10 +36,6 @@ class c_stdClass : public ExtObjectData {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_stdClass 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_stdClass 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_stdClass 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_stdClass 1
 
   // DECLARE_COMMON_INVOKE
   static const int s_call_info_table = 0;

@@ -30,86 +30,6 @@ namespace HPHP {
 extern CallInfo ci_;
 /* preface finishes */
 /* SRC: classes/fbmysqllexer.php line 40 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_FB_MySQLLexer
-Variant c_FB_MySQLLexer::os_getInit(CStrRef s) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 31) {
-    case 0:
-      HASH_RETURN_NAMSTR(0x248E65D880040DC0LL, NAMSTR(s_sys_ssb35c39ca, "symbols"),
-                         s_sys_sa00000000, 7);
-      HASH_RETURN_NAMSTR(0x13EBDD7E6C565160LL, NAMSTR(s_sys_ss1ee01d21, "tokStart"),
-                         0LL, 8);
-      break;
-    case 1:
-      HASH_RETURN_NAMSTR(0x01005D7EBD85DE21LL, NAMSTR(s_sys_ssb8d0aa49, "skipText"),
-                         NAMSTR(s_sys_ss00000000, ""), 8);
-      break;
-    case 3:
-      HASH_RETURN_NAMSTR(0x61CF13C309782043LL, NAMSTR(s_sys_ss44d65cff, "tokenStack"),
-                         s_sys_sa00000000, 10);
-      break;
-    case 4:
-      HASH_RETURN_NAMSTR(0x318650FB7A090D24LL, NAMSTR(s_sys_ss6c97e639, "stringLen"),
-                         0LL, 9);
-      break;
-    case 7:
-      HASH_RETURN_NAMSTR(0x7FEE9661F51EE4C7LL, NAMSTR(s_sys_ss2dcf782a, "tokLen"),
-                         0LL, 6);
-      break;
-    case 8:
-      HASH_RETURN_NAMSTR(0x178F0505D6C37A48LL, NAMSTR(s_sys_ss55febcf5, "tokText"),
-                         NAMSTR(s_sys_ss00000000, ""), 7);
-      break;
-    case 9:
-      HASH_RETURN_NAMSTR(0x15B369BE0D0C8149LL, NAMSTR(s_sys_ss69ad4382, "string"),
-                         NAMSTR(s_sys_ss00000000, ""), 6);
-      break;
-    case 14:
-      HASH_RETURN_NAMSTR(0x0BC6CA8DD32C6CCELL, NAMSTR(s_sys_ssadd58f33, "tokAbsStart"),
-                         0LL, 11);
-      break;
-    case 16:
-      HASH_RETURN_NAMSTR(0x6E634F0BAFC45E90LL, NAMSTR(s_sys_ss28d27535, "tokPtr"),
-                         0LL, 6);
-      break;
-    case 18:
-      HASH_RETURN_NAMSTR(0x19F6B86C2F758F12LL, NAMSTR(s_sys_ss8d52a69c, "lineBegin"),
-                         0LL, 9);
-      break;
-    case 20:
-      HASH_RETURN_NAMSTR(0x261E0580F7E6D414LL, NAMSTR(s_sys_ssf44f6ae2, "lineNo"),
-                         0LL, 6);
-      break;
-    case 25:
-      HASH_RETURN_NAMSTR(0x3254D99EAA8F8659LL, NAMSTR(s_sys_ssfa697dda, "lookahead"),
-                         0LL, 9);
-      break;
-    case 30:
-      HASH_RETURN_NAMSTR(0x36111B1F5D9ACBDELL, NAMSTR(s_sys_ss8b06f0b2, "stackPtr"),
-                         0LL, 8);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_FB_MySQLLexer
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_FB_MySQLLexer
-Variant c_FB_MySQLLexer::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_FB_MySQLLexer
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_FB_MySQLLexer
-Variant &c_FB_MySQLLexer::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_FB_MySQLLexer
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_FB_MySQLLexer
-Variant c_FB_MySQLLexer::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_FB_MySQLLexer
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(FB_MySQLLexer)
 const InstanceOfInfo c_FB_MySQLLexer::s_instanceof_table[] = {
   {0x286D5ADE799762BALL,1,"FB_MySQLLexer",&cw_FB_MySQLLexer},
@@ -373,10 +293,6 @@ void c_FB_MySQLLexer::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_FB_MySQLLexer = {
-  c_FB_MySQLLexer::os_getInit,
-  c_FB_MySQLLexer::os_get,
-  c_FB_MySQLLexer::os_lval,
-  c_FB_MySQLLexer::os_constant,
   (ObjectData*(*)(ObjectData*))coo_FB_MySQLLexer,
   c_FB_MySQLLexer::s_call_info_table,c_FB_MySQLLexer::s_call_info_index,
   c_FB_MySQLLexer::s_instanceof_table,c_FB_MySQLLexer::s_instanceof_index,
@@ -1253,32 +1169,39 @@ ObjectData *coo_FB_MySQLLexer() {
 }
 
 // Class tables
+static const int64 cpt_static_inits[] = {
+  (int64)&s_sys_sva00000000,
+  (int64)&NAMVAR(s_sys_svif01bca90, 0LL),
+  (int64)&NAMVAR(s_sys_svs00000000, ""),
+};
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x248E65D880040DC0LL,9,0,64,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_symbols),&NAMSTR(s_sys_ssb35c39ca, "symbols") },
-  {0x13EBDD7E6C565160LL,4,0,66,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokStart),&NAMSTR(s_sys_ss1ee01d21, "tokStart") },
-  {0x01005D7EBD85DE21LL,10,0,66,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_skipText),&NAMSTR(s_sys_ssb8d0aa49, "skipText") },
-  {0x61CF13C309782043LL,10,0,66,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokenStack),&NAMSTR(s_sys_ss44d65cff, "tokenStack") },
-  {0x318650FB7A090D24LL,4,0,66,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_stringLen),&NAMSTR(s_sys_ss6c97e639, "stringLen") },
-  {0x7FEE9661F51EE4C7LL,1,0,66,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokLen),&NAMSTR(s_sys_ss2dcf782a, "tokLen") },
-  {0x178F0505D6C37A48LL,5,0,66,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokText),&NAMSTR(s_sys_ss55febcf5, "tokText") },
-  {0x15B369BE0D0C8149LL,-3,0,66,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_string),&NAMSTR(s_sys_ss69ad4382, "string") },
-  {0x0BC6CA8DD32C6CCELL,-6,0,66,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokAbsStart),&NAMSTR(s_sys_ssadd58f33, "tokAbsStart") },
-  {0x6E634F0BAFC45E90LL,-8,0,66,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokPtr),&NAMSTR(s_sys_ss28d27535, "tokPtr") },
-  {0x19F6B86C2F758F12LL,-3,0,66,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lineBegin),&NAMSTR(s_sys_ss8d52a69c, "lineBegin") },
-  {0x261E0580F7E6D414LL,-1,0,66,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lineNo),&NAMSTR(s_sys_ssf44f6ae2, "lineNo") },
-  {0x3254D99EAA8F8659LL,-9,0,66,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lookahead),&NAMSTR(s_sys_ssfa697dda, "lookahead") },
-  {0x36111B1F5D9ACBDELL,0,0,66,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_stackPtr),&NAMSTR(s_sys_ss8b06f0b2, "stackPtr") },
+  {0x248E65D880040DC0LL,9,0,0,4,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_symbols),&NAMSTR(s_sys_ssb35c39ca, "symbols") },
+  {0x13EBDD7E6C565160LL,4,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokStart),&NAMSTR(s_sys_ss1ee01d21, "tokStart") },
+  {0x01005D7EBD85DE21LL,10,2,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_skipText),&NAMSTR(s_sys_ssb8d0aa49, "skipText") },
+  {0x61CF13C309782043LL,10,0,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokenStack),&NAMSTR(s_sys_ss44d65cff, "tokenStack") },
+  {0x318650FB7A090D24LL,4,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_stringLen),&NAMSTR(s_sys_ss6c97e639, "stringLen") },
+  {0x7FEE9661F51EE4C7LL,1,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokLen),&NAMSTR(s_sys_ss2dcf782a, "tokLen") },
+  {0x178F0505D6C37A48LL,5,2,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokText),&NAMSTR(s_sys_ss55febcf5, "tokText") },
+  {0x15B369BE0D0C8149LL,-3,2,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_string),&NAMSTR(s_sys_ss69ad4382, "string") },
+  {0x0BC6CA8DD32C6CCELL,-6,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokAbsStart),&NAMSTR(s_sys_ssadd58f33, "tokAbsStart") },
+  {0x6E634F0BAFC45E90LL,-8,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokPtr),&NAMSTR(s_sys_ss28d27535, "tokPtr") },
+  {0x19F6B86C2F758F12LL,-3,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lineBegin),&NAMSTR(s_sys_ss8d52a69c, "lineBegin") },
+  {0x261E0580F7E6D414LL,-1,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lineNo),&NAMSTR(s_sys_ssf44f6ae2, "lineNo") },
+  {0x3254D99EAA8F8659LL,-9,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lookahead),&NAMSTR(s_sys_ssfa697dda, "lookahead") },
+  {0x36111B1F5D9ACBDELL,0,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_stackPtr),&NAMSTR(s_sys_ss8b06f0b2, "stackPtr") },
 
 };
-static const ClassPropTableEntry *cpt_private_entries[] = {
-  0
-};
 static const int cpt_hash_entries[] = {
+  // FB_MySQLLexer hash
   0,2,-1,3,4,-1,-1,5,6,7,-1,-1,-1,-1,8,-1,9,-1,10,-1,11,-1,-1,-1,-1,12,-1,-1,-1,-1,13,-1,
+  // FB_MySQLLexer lists
+  -1,
+  -1,
+  -1,
 };
 const ClassPropTable c_FB_MySQLLexer::os_prop_table = {
-  31,0,cpt_hash_entries+0,
-  0,cpt_table_entries+0,cpt_private_entries+0
+  31,0,-1,-1,-1,-1,33,0,
+  cpt_hash_entries+0,0,cpt_table_entries+0,cpt_static_inits
 };
 
 ///////////////////////////////////////////////////////////////////////////////

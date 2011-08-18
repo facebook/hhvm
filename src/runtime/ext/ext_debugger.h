@@ -59,16 +59,16 @@ class c_DebuggerProxy : public ExtObjectData {
  public:
   Eval::DebuggerProxy *m_proxy;
 };
-extern const int64 q_DebuggerClient_AUTO_COMPLETE_FILENAMES;
-extern const int64 q_DebuggerClient_AUTO_COMPLETE_VARIABLES;
-extern const int64 q_DebuggerClient_AUTO_COMPLETE_CONSTANTS;
-extern const int64 q_DebuggerClient_AUTO_COMPLETE_CLASSES;
-extern const int64 q_DebuggerClient_AUTO_COMPLETE_FUNCTIONS;
-extern const int64 q_DebuggerClient_AUTO_COMPLETE_CLASS_METHODS;
-extern const int64 q_DebuggerClient_AUTO_COMPLETE_CLASS_PROPERTIES;
-extern const int64 q_DebuggerClient_AUTO_COMPLETE_CLASS_CONSTANTS;
-extern const int64 q_DebuggerClient_AUTO_COMPLETE_KEYWORDS;
-extern const int64 q_DebuggerClient_AUTO_COMPLETE_CODE;
+extern const int64 q_DebuggerClient$$AUTO_COMPLETE_FILENAMES;
+extern const int64 q_DebuggerClient$$AUTO_COMPLETE_VARIABLES;
+extern const int64 q_DebuggerClient$$AUTO_COMPLETE_CONSTANTS;
+extern const int64 q_DebuggerClient$$AUTO_COMPLETE_CLASSES;
+extern const int64 q_DebuggerClient$$AUTO_COMPLETE_FUNCTIONS;
+extern const int64 q_DebuggerClient$$AUTO_COMPLETE_CLASS_METHODS;
+extern const int64 q_DebuggerClient$$AUTO_COMPLETE_CLASS_PROPERTIES;
+extern const int64 q_DebuggerClient$$AUTO_COMPLETE_CLASS_CONSTANTS;
+extern const int64 q_DebuggerClient$$AUTO_COMPLETE_KEYWORDS;
+extern const int64 q_DebuggerClient$$AUTO_COMPLETE_CODE;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DebuggerClient
@@ -146,6 +146,7 @@ class c_DebuggerClient : public ExtObjectData {
   public: c_DebuggerClient *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
+  static const ClassPropTable os_prop_table;
 
 
  public:

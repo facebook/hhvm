@@ -424,8 +424,8 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
     ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
     string clsId = m_resolvedClass->getId();
     if (m_resolvedClass->needLazyStaticInitializer()) {
-      cg_printf("%s%s::lazy_initializer(g)->%s%s%s%s",
-                Option::ClassPrefix, clsId.c_str(),
+      cg_printf("%s%s->lazy_initializer(g)->%s%s%s%s",
+                Option::ClassStaticsCallbackPrefix, clsId.c_str(),
                 Option::StaticPropertyPrefix, clsId.c_str(),
                 Option::IdPrefix.c_str(),
                 CodeGenerator::FormatLabel(var->getString()).c_str());
@@ -436,25 +436,19 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
     }
   } else {
     if (m_context & (LValue | RefValue | UnsetContext)) {
-      if (isRedeclared()) {
-        cg_printf("g->%s%s->%slval(", Option::ClassStaticsCallbackPrefix,
-                  CodeGenerator::FormatLabel(m_className).c_str(),
-                  Option::ObjectStaticPrefix);
-      } else {
-        cg_printf("%s%s::%slval(", Option::ClassPrefix,
-                  m_resolvedClass->getId().c_str(),
-                  Option::ObjectStaticPrefix);
-      }
+      if (isRedeclared()) cg_printf("g->");
+      cg_printf("%s%s->%slval(", Option::ClassStaticsCallbackPrefix,
+                isRedeclared() ?
+                CodeGenerator::FormatLabel(m_className).c_str() :
+                m_resolvedClass->getId().c_str(),
+                Option::ObjectStaticPrefix);
     } else {
-      if (isRedeclared()) {
-        cg_printf("g->%s%s->%sget(", Option::ClassStaticsCallbackPrefix,
-                  CodeGenerator::FormatLabel(m_className).c_str(),
-                  Option::ObjectStaticPrefix);
-      } else {
-        cg_printf("%s%s::%sget(", Option::ClassPrefix,
-                  m_resolvedClass->getId().c_str(),
-                  Option::ObjectStaticPrefix);
-      }
+      if (isRedeclared()) cg_printf("g->");
+      cg_printf("%s%s->%sget(", Option::ClassStaticsCallbackPrefix,
+                isRedeclared() ?
+                CodeGenerator::FormatLabel(m_className).c_str() :
+                m_resolvedClass->getId().c_str(),
+                Option::ObjectStaticPrefix);
     }
     m_exp->outputCPP(cg, ar);
     cg_printf(")");

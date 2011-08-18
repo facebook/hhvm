@@ -30,26 +30,6 @@ namespace HPHP {
 extern CallInfo ci_;
 /* preface finishes */
 /* SRC: classes/xhprof.php line 6 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_XhprofFrame
-Variant c_XhprofFrame::os_getInit(CStrRef s) {
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_XhprofFrame
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_XhprofFrame
-Variant c_XhprofFrame::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_XhprofFrame
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_XhprofFrame
-Variant &c_XhprofFrame::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_XhprofFrame
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_XhprofFrame
-Variant c_XhprofFrame::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_XhprofFrame
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(XhprofFrame)
 const InstanceOfInfo c_XhprofFrame::s_instanceof_table[] = {
   {0x3D290BF933ED12FDLL,1,"XhprofFrame",&cw_XhprofFrame},
@@ -139,10 +119,6 @@ void c_XhprofFrame::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_XhprofFrame = {
-  c_XhprofFrame::os_getInit,
-  c_XhprofFrame::os_get,
-  c_XhprofFrame::os_lval,
-  c_XhprofFrame::os_constant,
   (ObjectData*(*)(ObjectData*))coo_XhprofFrame,
   c_XhprofFrame::s_call_info_table,c_XhprofFrame::s_call_info_index,
   c_XhprofFrame::s_instanceof_table,c_XhprofFrame::s_instanceof_index,

@@ -953,6 +953,7 @@ Array f_fb_get_flush_stat() {
 
 static Array const_data;
 
+KEEP_SECTION
 Variant f_fb_const_fetch(CVarRef key) {
   String k = key.toString();
   Variant *ret = const_data.lvalPtr(k, false, false);
@@ -964,6 +965,7 @@ void const_load_set(CStrRef key, CVarRef value) {
   const_data.set(key, value, true);
 }
 
+KEEP_SECTION
 void const_load() {
   // after all loading
   const_load_set("zend_array_size", const_data.size());

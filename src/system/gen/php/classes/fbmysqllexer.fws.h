@@ -90,6 +90,7 @@ extern const VarNR &s_sys_svif01bca90;
 
 extern VarNR s_sys_svs00000000;
 
+extern VarNR s_sys_sva00000000;
 
 
 ///////////////////////////////////////////////////////////////////////////////

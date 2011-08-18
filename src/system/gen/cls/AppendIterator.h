@@ -34,20 +34,7 @@ class c_AppendIterator : public ExtObjectData {
   Variant m_iterators;
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(AppendIterator, AppendIterator)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  static Variant os_getInit(CStrRef s);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_AppendIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_AppendIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_AppendIterator 1
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(AppendIterator, AppendIterator, ObjectData)
   static const ClassPropTable os_prop_table;
   c_AppendIterator(ObjectData* r = NULL) : m_iterators(Variant::nullInit) {
     setAttribute(HasCall);

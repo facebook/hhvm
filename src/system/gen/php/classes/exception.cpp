@@ -30,26 +30,6 @@ namespace HPHP {
 extern CallInfo ci_;
 /* preface finishes */
 /* SRC: classes/exception.php line 317 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_PDOException
-Variant c_PDOException::os_getInit(CStrRef s) {
-  return c_Exception::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_PDOException
-Variant c_PDOException::os_get(CStrRef s) {
-  return c_Exception::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDOException
-Variant &c_PDOException::os_lval(CStrRef s) {
-  return c_Exception::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOException
-Variant c_PDOException::os_constant(const char *s) {
-  return c_Exception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(PDOException)
 const InstanceOfInfo c_PDOException::s_instanceof_table[] = {
   {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
@@ -110,10 +90,6 @@ void c_PDOException::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_PDOException = {
-  c_PDOException::os_getInit,
-  c_PDOException::os_get,
-  c_PDOException::os_lval,
-  c_PDOException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_PDOException,
   c_PDOException::s_call_info_table,c_PDOException::s_call_info_index,
   c_PDOException::s_instanceof_table,c_PDOException::s_instanceof_index,
@@ -127,26 +103,6 @@ void c_PDOException::t___construct() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 277 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_UnexpectedValueException
-Variant c_UnexpectedValueException::os_getInit(CStrRef s) {
-  return c_RuntimeException::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_UnexpectedValueException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_UnexpectedValueException
-Variant c_UnexpectedValueException::os_get(CStrRef s) {
-  return c_RuntimeException::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_UnexpectedValueException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_UnexpectedValueException
-Variant &c_UnexpectedValueException::os_lval(CStrRef s) {
-  return c_RuntimeException::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_UnexpectedValueException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_UnexpectedValueException
-Variant c_UnexpectedValueException::os_constant(const char *s) {
-  return c_RuntimeException::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_UnexpectedValueException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(UnexpectedValueException)
 const InstanceOfInfo c_UnexpectedValueException::s_instanceof_table[] = {
   {0x5AA2EE582E0D3849LL,1,"UnexpectedValueException",&cw_UnexpectedValueException},
@@ -168,10 +124,6 @@ void c_UnexpectedValueException::cloneSet(ObjectData *cl) {
   c_RuntimeException::cloneSet(clone);
 }
 const ObjectStaticCallbacks cw_UnexpectedValueException = {
-  c_UnexpectedValueException::os_getInit,
-  c_UnexpectedValueException::os_get,
-  c_UnexpectedValueException::os_lval,
-  c_UnexpectedValueException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_UnexpectedValueException,
   c_UnexpectedValueException::s_call_info_table,c_UnexpectedValueException::s_call_info_index,
   c_UnexpectedValueException::s_instanceof_table,c_UnexpectedValueException::s_instanceof_index,
@@ -179,26 +131,6 @@ const ObjectStaticCallbacks cw_UnexpectedValueException = {
   &c_Exception::os_prop_table,0,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 251 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OverflowException
-Variant c_OverflowException::os_getInit(CStrRef s) {
-  return c_RuntimeException::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OverflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_OverflowException
-Variant c_OverflowException::os_get(CStrRef s) {
-  return c_RuntimeException::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_OverflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_OverflowException
-Variant &c_OverflowException::os_lval(CStrRef s) {
-  return c_RuntimeException::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_OverflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_OverflowException
-Variant c_OverflowException::os_constant(const char *s) {
-  return c_RuntimeException::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_OverflowException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(OverflowException)
 const InstanceOfInfo c_OverflowException::s_instanceof_table[] = {
   {0x0E4CCE95F6A727D9LL,1,"OverflowException",&cw_OverflowException},
@@ -220,10 +152,6 @@ void c_OverflowException::cloneSet(ObjectData *cl) {
   c_RuntimeException::cloneSet(clone);
 }
 const ObjectStaticCallbacks cw_OverflowException = {
-  c_OverflowException::os_getInit,
-  c_OverflowException::os_get,
-  c_OverflowException::os_lval,
-  c_OverflowException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_OverflowException,
   c_OverflowException::s_call_info_table,c_OverflowException::s_call_info_index,
   c_OverflowException::s_instanceof_table,c_OverflowException::s_instanceof_index,
@@ -231,26 +159,6 @@ const ObjectStaticCallbacks cw_OverflowException = {
   &c_Exception::os_prop_table,0,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 243 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfBoundsException
-Variant c_OutOfBoundsException::os_getInit(CStrRef s) {
-  return c_RuntimeException::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfBoundsException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_OutOfBoundsException
-Variant c_OutOfBoundsException::os_get(CStrRef s) {
-  return c_RuntimeException::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_OutOfBoundsException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_OutOfBoundsException
-Variant &c_OutOfBoundsException::os_lval(CStrRef s) {
-  return c_RuntimeException::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_OutOfBoundsException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_OutOfBoundsException
-Variant c_OutOfBoundsException::os_constant(const char *s) {
-  return c_RuntimeException::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_OutOfBoundsException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(OutOfBoundsException)
 const InstanceOfInfo c_OutOfBoundsException::s_instanceof_table[] = {
   {0x227C70ED5B143841LL,1,"OutOfBoundsException",&cw_OutOfBoundsException},
@@ -272,10 +180,6 @@ void c_OutOfBoundsException::cloneSet(ObjectData *cl) {
   c_RuntimeException::cloneSet(clone);
 }
 const ObjectStaticCallbacks cw_OutOfBoundsException = {
-  c_OutOfBoundsException::os_getInit,
-  c_OutOfBoundsException::os_get,
-  c_OutOfBoundsException::os_lval,
-  c_OutOfBoundsException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_OutOfBoundsException,
   c_OutOfBoundsException::s_call_info_table,c_OutOfBoundsException::s_call_info_index,
   c_OutOfBoundsException::s_instanceof_table,c_OutOfBoundsException::s_instanceof_index,
@@ -283,26 +187,6 @@ const ObjectStaticCallbacks cw_OutOfBoundsException = {
   &c_Exception::os_prop_table,0,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 173 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LogicException
-Variant c_LogicException::os_getInit(CStrRef s) {
-  return c_Exception::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LogicException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_LogicException
-Variant c_LogicException::os_get(CStrRef s) {
-  return c_Exception::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_LogicException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_LogicException
-Variant &c_LogicException::os_lval(CStrRef s) {
-  return c_Exception::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_LogicException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_LogicException
-Variant c_LogicException::os_constant(const char *s) {
-  return c_Exception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_LogicException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(LogicException)
 const InstanceOfInfo c_LogicException::s_instanceof_table[] = {
   {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
@@ -322,10 +206,6 @@ void c_LogicException::cloneSet(ObjectData *cl) {
   c_Exception::cloneSet(clone);
 }
 const ObjectStaticCallbacks cw_LogicException = {
-  c_LogicException::os_getInit,
-  c_LogicException::os_get,
-  c_LogicException::os_lval,
-  c_LogicException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_LogicException,
   c_LogicException::s_call_info_table,c_LogicException::s_call_info_index,
   c_LogicException::s_instanceof_table,c_LogicException::s_instanceof_index,
@@ -333,26 +213,6 @@ const ObjectStaticCallbacks cw_LogicException = {
   &c_Exception::os_prop_table,0,&cw_Exception
 };
 /* SRC: classes/exception.php line 259 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RangeException
-Variant c_RangeException::os_getInit(CStrRef s) {
-  return c_RuntimeException::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_RangeException
-Variant c_RangeException::os_get(CStrRef s) {
-  return c_RuntimeException::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_RangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RangeException
-Variant &c_RangeException::os_lval(CStrRef s) {
-  return c_RuntimeException::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_RangeException
-Variant c_RangeException::os_constant(const char *s) {
-  return c_RuntimeException::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_RangeException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(RangeException)
 const InstanceOfInfo c_RangeException::s_instanceof_table[] = {
   {0x6AF83706F76A9D53LL,1,"RangeException",&cw_RangeException},
@@ -374,10 +234,6 @@ void c_RangeException::cloneSet(ObjectData *cl) {
   c_RuntimeException::cloneSet(clone);
 }
 const ObjectStaticCallbacks cw_RangeException = {
-  c_RangeException::os_getInit,
-  c_RangeException::os_get,
-  c_RangeException::os_lval,
-  c_RangeException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_RangeException,
   c_RangeException::s_call_info_table,c_RangeException::s_call_info_index,
   c_RangeException::s_instanceof_table,c_RangeException::s_instanceof_index,
@@ -385,26 +241,6 @@ const ObjectStaticCallbacks cw_RangeException = {
   &c_Exception::os_prop_table,0,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 211 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_InvalidArgumentException
-Variant c_InvalidArgumentException::os_getInit(CStrRef s) {
-  return c_LogicException::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_InvalidArgumentException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_InvalidArgumentException
-Variant c_InvalidArgumentException::os_get(CStrRef s) {
-  return c_LogicException::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_InvalidArgumentException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_InvalidArgumentException
-Variant &c_InvalidArgumentException::os_lval(CStrRef s) {
-  return c_LogicException::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_InvalidArgumentException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_InvalidArgumentException
-Variant c_InvalidArgumentException::os_constant(const char *s) {
-  return c_LogicException::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_InvalidArgumentException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(InvalidArgumentException)
 const InstanceOfInfo c_InvalidArgumentException::s_instanceof_table[] = {
   {0x4860DC2F9B0E6D4BLL,1,"LogicException",&cw_LogicException},
@@ -426,10 +262,6 @@ void c_InvalidArgumentException::cloneSet(ObjectData *cl) {
   c_LogicException::cloneSet(clone);
 }
 const ObjectStaticCallbacks cw_InvalidArgumentException = {
-  c_InvalidArgumentException::os_getInit,
-  c_InvalidArgumentException::os_get,
-  c_InvalidArgumentException::os_lval,
-  c_InvalidArgumentException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_InvalidArgumentException,
   c_InvalidArgumentException::s_call_info_table,c_InvalidArgumentException::s_call_info_index,
   c_InvalidArgumentException::s_instanceof_table,c_InvalidArgumentException::s_instanceof_index,
@@ -437,26 +269,6 @@ const ObjectStaticCallbacks cw_InvalidArgumentException = {
   &c_Exception::os_prop_table,0,&cw_LogicException
 };
 /* SRC: classes/exception.php line 268 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_UnderflowException
-Variant c_UnderflowException::os_getInit(CStrRef s) {
-  return c_RuntimeException::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_UnderflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_UnderflowException
-Variant c_UnderflowException::os_get(CStrRef s) {
-  return c_RuntimeException::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_UnderflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_UnderflowException
-Variant &c_UnderflowException::os_lval(CStrRef s) {
-  return c_RuntimeException::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_UnderflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_UnderflowException
-Variant c_UnderflowException::os_constant(const char *s) {
-  return c_RuntimeException::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_UnderflowException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(UnderflowException)
 const InstanceOfInfo c_UnderflowException::s_instanceof_table[] = {
   {0x5E623FEAF7B068D4LL,0,"UnderflowException",&cw_UnderflowException},
@@ -478,10 +290,6 @@ void c_UnderflowException::cloneSet(ObjectData *cl) {
   c_RuntimeException::cloneSet(clone);
 }
 const ObjectStaticCallbacks cw_UnderflowException = {
-  c_UnderflowException::os_getInit,
-  c_UnderflowException::os_get,
-  c_UnderflowException::os_lval,
-  c_UnderflowException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_UnderflowException,
   c_UnderflowException::s_call_info_table,c_UnderflowException::s_call_info_index,
   c_UnderflowException::s_instanceof_table,c_UnderflowException::s_instanceof_index,
@@ -489,26 +297,6 @@ const ObjectStaticCallbacks cw_UnderflowException = {
   &c_Exception::os_prop_table,0,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 227 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfRangeException
-Variant c_OutOfRangeException::os_getInit(CStrRef s) {
-  return c_LogicException::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfRangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_OutOfRangeException
-Variant c_OutOfRangeException::os_get(CStrRef s) {
-  return c_LogicException::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_OutOfRangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_OutOfRangeException
-Variant &c_OutOfRangeException::os_lval(CStrRef s) {
-  return c_LogicException::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_OutOfRangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_OutOfRangeException
-Variant c_OutOfRangeException::os_constant(const char *s) {
-  return c_LogicException::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_OutOfRangeException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(OutOfRangeException)
 const InstanceOfInfo c_OutOfRangeException::s_instanceof_table[] = {
   {0x4860DC2F9B0E6D4BLL,1,"LogicException",&cw_LogicException},
@@ -530,10 +318,6 @@ void c_OutOfRangeException::cloneSet(ObjectData *cl) {
   c_LogicException::cloneSet(clone);
 }
 const ObjectStaticCallbacks cw_OutOfRangeException = {
-  c_OutOfRangeException::os_getInit,
-  c_OutOfRangeException::os_get,
-  c_OutOfRangeException::os_lval,
-  c_OutOfRangeException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_OutOfRangeException,
   c_OutOfRangeException::s_call_info_table,c_OutOfRangeException::s_call_info_index,
   c_OutOfRangeException::s_instanceof_table,c_OutOfRangeException::s_instanceof_index,
@@ -541,26 +325,6 @@ const ObjectStaticCallbacks cw_OutOfRangeException = {
   &c_Exception::os_prop_table,0,&cw_LogicException
 };
 /* SRC: classes/exception.php line 193 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_BadMethodCallException
-Variant c_BadMethodCallException::os_getInit(CStrRef s) {
-  return c_BadFunctionCallException::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_BadMethodCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_BadMethodCallException
-Variant c_BadMethodCallException::os_get(CStrRef s) {
-  return c_BadFunctionCallException::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_BadMethodCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_BadMethodCallException
-Variant &c_BadMethodCallException::os_lval(CStrRef s) {
-  return c_BadFunctionCallException::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_BadMethodCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_BadMethodCallException
-Variant c_BadMethodCallException::os_constant(const char *s) {
-  return c_BadFunctionCallException::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_BadMethodCallException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(BadMethodCallException)
 const InstanceOfInfo c_BadMethodCallException::s_instanceof_table[] = {
   {0x06335FF83CDEA590LL,1,"BadMethodCallException",&cw_BadMethodCallException},
@@ -583,10 +347,6 @@ void c_BadMethodCallException::cloneSet(ObjectData *cl) {
   c_BadFunctionCallException::cloneSet(clone);
 }
 const ObjectStaticCallbacks cw_BadMethodCallException = {
-  c_BadMethodCallException::os_getInit,
-  c_BadMethodCallException::os_get,
-  c_BadMethodCallException::os_lval,
-  c_BadMethodCallException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_BadMethodCallException,
   c_BadMethodCallException::s_call_info_table,c_BadMethodCallException::s_call_info_index,
   c_BadMethodCallException::s_instanceof_table,c_BadMethodCallException::s_instanceof_index,
@@ -594,26 +354,6 @@ const ObjectStaticCallbacks cw_BadMethodCallException = {
   &c_Exception::os_prop_table,0,&cw_BadFunctionCallException
 };
 /* SRC: classes/exception.php line 235 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RuntimeException
-Variant c_RuntimeException::os_getInit(CStrRef s) {
-  return c_Exception::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RuntimeException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_RuntimeException
-Variant c_RuntimeException::os_get(CStrRef s) {
-  return c_Exception::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_RuntimeException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RuntimeException
-Variant &c_RuntimeException::os_lval(CStrRef s) {
-  return c_Exception::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RuntimeException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_RuntimeException
-Variant c_RuntimeException::os_constant(const char *s) {
-  return c_Exception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_RuntimeException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(RuntimeException)
 const InstanceOfInfo c_RuntimeException::s_instanceof_table[] = {
   {0x1078CB3118A8B3DCLL,0,"RuntimeException",&cw_RuntimeException},
@@ -633,10 +373,6 @@ void c_RuntimeException::cloneSet(ObjectData *cl) {
   c_Exception::cloneSet(clone);
 }
 const ObjectStaticCallbacks cw_RuntimeException = {
-  c_RuntimeException::os_getInit,
-  c_RuntimeException::os_get,
-  c_RuntimeException::os_lval,
-  c_RuntimeException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_RuntimeException,
   c_RuntimeException::s_call_info_table,c_RuntimeException::s_call_info_index,
   c_RuntimeException::s_instanceof_table,c_RuntimeException::s_instanceof_index,
@@ -644,56 +380,6 @@ const ObjectStaticCallbacks cw_RuntimeException = {
   &c_Exception::os_prop_table,0,&cw_Exception
 };
 /* SRC: classes/exception.php line 10 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Exception
-Variant c_Exception::os_getInit(CStrRef s) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 15) {
-    case 1:
-      HASH_RETURN_NAMSTR(0x0B197E8F85F4DA21LL, NAMSTR(s_sys_ss90291821, "previous"),
-                         null, 8);
-      break;
-    case 7:
-      HASH_RETURN_NAMSTR(0x3CCB986B2CF0A747LL, NAMSTR(s_sys_ss94c9ce77, "trace"),
-                         null, 5);
-      break;
-    case 9:
-      HASH_RETURN_NAMSTR(0x58C72230857ACDB9LL, NAMSTR(s_sys_ssab7a1dec, "code"),
-                         0LL, 4);
-      break;
-    case 10:
-      HASH_RETURN_NAMSTR(0x04AB35CACF8C8C9ALL, NAMSTR(s_sys_ssddf8728c, "line"),
-                         null, 4);
-      break;
-    case 11:
-      HASH_RETURN_NAMSTR(0x0247CDBB94C9D47BLL, NAMSTR(s_sys_ss155366df, "message"),
-                         NAMSTR(s_sys_ss00000000, ""), 7);
-      break;
-    case 15:
-      HASH_RETURN_NAMSTR(0x7863294A8F33D14FLL, NAMSTR(s_sys_ss8ce7db5b, "file"),
-                         null, 4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Exception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_Exception
-Variant c_Exception::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_Exception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Exception
-Variant &c_Exception::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Exception
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Exception
-Variant c_Exception::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Exception
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(Exception)
 const InstanceOfInfo c_Exception::s_instanceof_table[] = {
   {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
@@ -972,10 +658,6 @@ void c_Exception::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_Exception = {
-  c_Exception::os_getInit,
-  c_Exception::os_get,
-  c_Exception::os_lval,
-  c_Exception::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Exception,
   c_Exception::s_call_info_table,c_Exception::s_call_info_index,
   c_Exception::s_instanceof_table,c_Exception::s_instanceof_index,
@@ -1205,36 +887,6 @@ String c_Exception::t___tostring() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 286 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ErrorException
-Variant c_ErrorException::os_getInit(CStrRef s) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_RETURN_NAMSTR(0x4FDAA620FA5F15F9LL, NAMSTR(s_sys_ssb84c8cfa, "severity"),
-                         null, 8);
-      break;
-    default:
-      break;
-  }
-  return c_Exception::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ErrorException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_ErrorException
-Variant c_ErrorException::os_get(CStrRef s) {
-  return c_Exception::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_ErrorException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ErrorException
-Variant &c_ErrorException::os_lval(CStrRef s) {
-  return c_Exception::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ErrorException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ErrorException
-Variant c_ErrorException::os_constant(const char *s) {
-  return c_Exception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ErrorException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ErrorException)
 const InstanceOfInfo c_ErrorException::s_instanceof_table[] = {
   {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
@@ -1373,10 +1025,6 @@ void c_ErrorException::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_ErrorException = {
-  c_ErrorException::os_getInit,
-  c_ErrorException::os_get,
-  c_ErrorException::os_lval,
-  c_ErrorException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ErrorException,
   c_ErrorException::s_call_info_table,c_ErrorException::s_call_info_index,
   c_ErrorException::s_instanceof_table,c_ErrorException::s_instanceof_index,
@@ -1414,26 +1062,6 @@ Variant c_ErrorException::t_getseverity() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 311 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMException
-Variant c_DOMException::os_getInit(CStrRef s) {
-  return c_Exception::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMException
-Variant c_DOMException::os_get(CStrRef s) {
-  return c_Exception::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMException
-Variant &c_DOMException::os_lval(CStrRef s) {
-  return c_Exception::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMException
-Variant c_DOMException::os_constant(const char *s) {
-  return c_Exception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMException)
 const InstanceOfInfo c_DOMException::s_instanceof_table[] = {
   {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
@@ -1508,10 +1136,6 @@ void c_DOMException::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_DOMException = {
-  c_DOMException::os_getInit,
-  c_DOMException::os_get,
-  c_DOMException::os_lval,
-  c_DOMException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DOMException,
   c_DOMException::s_call_info_table,c_DOMException::s_call_info_index,
   c_DOMException::s_instanceof_table,c_DOMException::s_instanceof_index,
@@ -1527,26 +1151,6 @@ void c_DOMException::t___construct(Variant v_message, Variant v_code) {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 183 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_BadFunctionCallException
-Variant c_BadFunctionCallException::os_getInit(CStrRef s) {
-  return c_LogicException::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_BadFunctionCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_BadFunctionCallException
-Variant c_BadFunctionCallException::os_get(CStrRef s) {
-  return c_LogicException::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_BadFunctionCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_BadFunctionCallException
-Variant &c_BadFunctionCallException::os_lval(CStrRef s) {
-  return c_LogicException::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_BadFunctionCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_BadFunctionCallException
-Variant c_BadFunctionCallException::os_constant(const char *s) {
-  return c_LogicException::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_BadFunctionCallException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(BadFunctionCallException)
 const InstanceOfInfo c_BadFunctionCallException::s_instanceof_table[] = {
   {0x4860DC2F9B0E6D4BLL,1,"LogicException",&cw_LogicException},
@@ -1568,10 +1172,6 @@ void c_BadFunctionCallException::cloneSet(ObjectData *cl) {
   c_LogicException::cloneSet(clone);
 }
 const ObjectStaticCallbacks cw_BadFunctionCallException = {
-  c_BadFunctionCallException::os_getInit,
-  c_BadFunctionCallException::os_get,
-  c_BadFunctionCallException::os_lval,
-  c_BadFunctionCallException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_BadFunctionCallException,
   c_BadFunctionCallException::s_call_info_table,c_BadFunctionCallException::s_call_info_index,
   c_BadFunctionCallException::s_instanceof_table,c_BadFunctionCallException::s_instanceof_index,
@@ -1579,26 +1179,6 @@ const ObjectStaticCallbacks cw_BadFunctionCallException = {
   &c_Exception::os_prop_table,0,&cw_LogicException
 };
 /* SRC: classes/exception.php line 219 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LengthException
-Variant c_LengthException::os_getInit(CStrRef s) {
-  return c_LogicException::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LengthException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_LengthException
-Variant c_LengthException::os_get(CStrRef s) {
-  return c_LogicException::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_LengthException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_LengthException
-Variant &c_LengthException::os_lval(CStrRef s) {
-  return c_LogicException::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_LengthException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_LengthException
-Variant c_LengthException::os_constant(const char *s) {
-  return c_LogicException::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_LengthException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(LengthException)
 const InstanceOfInfo c_LengthException::s_instanceof_table[] = {
   {0x3CAE91CFA2AAD16BLL,0,"LengthException",&cw_LengthException},
@@ -1620,10 +1200,6 @@ void c_LengthException::cloneSet(ObjectData *cl) {
   c_LogicException::cloneSet(clone);
 }
 const ObjectStaticCallbacks cw_LengthException = {
-  c_LengthException::os_getInit,
-  c_LengthException::os_get,
-  c_LengthException::os_lval,
-  c_LengthException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_LengthException,
   c_LengthException::s_call_info_table,c_LengthException::s_call_info_index,
   c_LengthException::s_instanceof_table,c_LengthException::s_instanceof_index,
@@ -1631,26 +1207,6 @@ const ObjectStaticCallbacks cw_LengthException = {
   &c_Exception::os_prop_table,0,&cw_LogicException
 };
 /* SRC: classes/exception.php line 202 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DomainException
-Variant c_DomainException::os_getInit(CStrRef s) {
-  return c_LogicException::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DomainException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DomainException
-Variant c_DomainException::os_get(CStrRef s) {
-  return c_LogicException::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DomainException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DomainException
-Variant &c_DomainException::os_lval(CStrRef s) {
-  return c_LogicException::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DomainException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DomainException
-Variant c_DomainException::os_constant(const char *s) {
-  return c_LogicException::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DomainException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DomainException)
 const InstanceOfInfo c_DomainException::s_instanceof_table[] = {
   {0x4860DC2F9B0E6D4BLL,1,"LogicException",&cw_LogicException},
@@ -1672,10 +1228,6 @@ void c_DomainException::cloneSet(ObjectData *cl) {
   c_LogicException::cloneSet(clone);
 }
 const ObjectStaticCallbacks cw_DomainException = {
-  c_DomainException::os_getInit,
-  c_DomainException::os_get,
-  c_DomainException::os_lval,
-  c_DomainException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_DomainException,
   c_DomainException::s_call_info_table,c_DomainException::s_call_info_index,
   c_DomainException::s_instanceof_table,c_DomainException::s_instanceof_index,
@@ -1735,31 +1287,43 @@ ObjectData *coo_DomainException() {
 }
 
 // Class tables
-static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x4FDAA620FA5F15F9LL,0,0,130,10,GET_PROPERTY_OFFSET(c_ErrorException, m_severity),&NAMSTR(s_sys_ssb84c8cfa, "severity") },
-
-  {0x0B197E8F85F4DA21LL,5,0,130,10,GET_PROPERTY_OFFSET(c_Exception, m_previous),&NAMSTR(s_sys_ss90291821, "previous") },
-  {0x3CCB986B2CF0A747LL,0,0,130,10,GET_PROPERTY_OFFSET(c_Exception, m_trace),&NAMSTR(s_sys_ss94c9ce77, "trace") },
-  {0x58C72230857ACDB9LL,-2,0,130,10,GET_PROPERTY_OFFSET(c_Exception, m_code),&NAMSTR(s_sys_ssab7a1dec, "code") },
-  {0x04AB35CACF8C8C9ALL,-2,0,130,10,GET_PROPERTY_OFFSET(c_Exception, m_line),&NAMSTR(s_sys_ssddf8728c, "line") },
-  {0x0247CDBB94C9D47BLL,-2,0,130,10,GET_PROPERTY_OFFSET(c_Exception, m_message),&NAMSTR(s_sys_ss155366df, "message") },
-  {0x7863294A8F33D14FLL,-2,0,130,10,GET_PROPERTY_OFFSET(c_Exception, m_file),&NAMSTR(s_sys_ss8ce7db5b, "file") },
-
+static const int64 cpt_static_inits[] = {
+  (int64)&null_variant,
+  (int64)&NAMVAR(s_sys_svif01bca90, 0LL),
+  (int64)&NAMVAR(s_sys_svs00000000, ""),
 };
-static const ClassPropTableEntry *cpt_private_entries[] = {
-  0
+static const ClassPropTableEntry cpt_table_entries[] = {
+  {0x4FDAA620FA5F15F9LL,0,0,0,66,10,GET_PROPERTY_OFFSET(c_ErrorException, m_severity),&NAMSTR(s_sys_ssb84c8cfa, "severity") },
+
+  {0x0B197E8F85F4DA21LL,5,0,0,66,10,GET_PROPERTY_OFFSET(c_Exception, m_previous),&NAMSTR(s_sys_ss90291821, "previous") },
+  {0x3CCB986B2CF0A747LL,0,0,0,66,10,GET_PROPERTY_OFFSET(c_Exception, m_trace),&NAMSTR(s_sys_ss94c9ce77, "trace") },
+  {0x58C72230857ACDB9LL,-2,1,0,66,10,GET_PROPERTY_OFFSET(c_Exception, m_code),&NAMSTR(s_sys_ssab7a1dec, "code") },
+  {0x04AB35CACF8C8C9ALL,-2,0,0,66,10,GET_PROPERTY_OFFSET(c_Exception, m_line),&NAMSTR(s_sys_ssddf8728c, "line") },
+  {0x0247CDBB94C9D47BLL,-2,2,0,66,10,GET_PROPERTY_OFFSET(c_Exception, m_message),&NAMSTR(s_sys_ss155366df, "message") },
+  {0x7863294A8F33D14FLL,-2,0,0,66,10,GET_PROPERTY_OFFSET(c_Exception, m_file),&NAMSTR(s_sys_ss8ce7db5b, "file") },
+
 };
 static const int cpt_hash_entries[] = {
+  // ErrorException hash
   -1,0,-1,-1,-1,-1,-1,-1,
+  // ErrorException lists
+  -1,
+  -1,
+  -1,
+  // Exception hash
   -1,0,-1,-1,-1,-1,-1,1,-1,2,3,4,-1,-1,-1,5,
+  // Exception lists
+  -1,
+  -1,
+  -1,
 };
 const ClassPropTable c_ErrorException::os_prop_table = {
-  7,0,cpt_hash_entries+0,
-  &c_Exception::os_prop_table,cpt_table_entries+0,cpt_private_entries+0
+  7,0,-1,-1,-1,-1,9,0,
+  cpt_hash_entries+0,&c_Exception::os_prop_table,cpt_table_entries+0,cpt_static_inits
 };
 const ClassPropTable c_Exception::os_prop_table = {
-  15,4,cpt_hash_entries+8,
-  0,cpt_table_entries+1,cpt_private_entries+0
+  15,4,-1,-1,-1,-1,17,0,
+  cpt_hash_entries+11,0,cpt_table_entries+1,cpt_static_inits
 };
 
 ///////////////////////////////////////////////////////////////////////////////

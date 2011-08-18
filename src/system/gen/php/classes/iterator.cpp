@@ -32,53 +32,8 @@ namespace HPHP {
 extern CallInfo ci_;
 /* preface finishes */
 /* SRC: classes/iterator.php line 329 */
-const int64 q_ArrayIterator_STD_PROP_LIST = 1LL;
-const int64 q_ArrayIterator_ARRAY_AS_PROPS = 2LL;
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ArrayIterator
-Variant c_ArrayIterator::os_getInit(CStrRef s) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 1:
-      HASH_RETURN_NAMSTR(0x7D2126D089B92EA5LL, NAMSTR(s_sys_ss7cb08d68, "arr"),
-                         null, 3);
-      break;
-    case 3:
-      HASH_RETURN_NAMSTR(0x7401482B86AFCBFBLL, NAMSTR(s_sys_ss28fae70d, "flags"),
-                         null, 5);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ArrayIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_ArrayIterator
-Variant c_ArrayIterator::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_ArrayIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ArrayIterator
-Variant &c_ArrayIterator::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ArrayIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ArrayIterator
-Variant c_ArrayIterator::os_constant(const char *s) {
-  int64 hash = hash_string(s);
-  switch (hash & 3) {
-    case 0:
-      HASH_RETURN(0x7DE206EA225FC80CLL, q_ArrayIterator_STD_PROP_LIST, "STD_PROP_LIST");
-      break;
-    case 3:
-      HASH_RETURN(0x3C29F8CAC8DB5B17LL, q_ArrayIterator_ARRAY_AS_PROPS, "ARRAY_AS_PROPS");
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ArrayIterator
+const int64 q_ArrayIterator$$STD_PROP_LIST = 1LL;
+const int64 q_ArrayIterator$$ARRAY_AS_PROPS = 2LL;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ArrayIterator)
 const InstanceOfInfo c_ArrayIterator::s_instanceof_table[] = {
   {0x795F86375EE263D1LL,0,"Countable",(const ObjectStaticCallbacks*)2},
@@ -631,10 +586,6 @@ void c_ArrayIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_ArrayIterator = {
-  c_ArrayIterator::os_getInit,
-  c_ArrayIterator::os_get,
-  c_ArrayIterator::os_lval,
-  c_ArrayIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ArrayIterator,
   c_ArrayIterator::s_call_info_table,c_ArrayIterator::s_call_info_index,
   c_ArrayIterator::s_instanceof_table,c_ArrayIterator::s_instanceof_index,
@@ -817,36 +768,6 @@ bool c_ArrayIterator::t_valid() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 796 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_AppendIterator
-Variant c_AppendIterator::os_getInit(CStrRef s) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_RETURN_NAMSTR(0x60EA38C41F14FF71LL, NAMSTR(s_sys_ssd4af8244, "iterators"),
-                         null, 9);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_AppendIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_AppendIterator
-Variant c_AppendIterator::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_AppendIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_AppendIterator
-Variant &c_AppendIterator::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_AppendIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_AppendIterator
-Variant c_AppendIterator::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_AppendIterator
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(AppendIterator)
 const InstanceOfInfo c_AppendIterator::s_instanceof_table[] = {
   {0x2E363D51549781C8LL,1,"AppendIterator",&cw_AppendIterator},
@@ -1086,10 +1007,6 @@ void c_AppendIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_AppendIterator = {
-  c_AppendIterator::os_getInit,
-  c_AppendIterator::os_get,
-  c_AppendIterator::os_lval,
-  c_AppendIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_AppendIterator,
   c_AppendIterator::s_call_info_table,c_AppendIterator::s_call_info_index,
   c_AppendIterator::s_instanceof_table,c_AppendIterator::s_instanceof_index,
@@ -1366,36 +1283,6 @@ Variant c_AppendIterator::t___call(Variant v_func, Variant v_params) {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 657 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_IteratorIterator
-Variant c_IteratorIterator::os_getInit(CStrRef s) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 0:
-      HASH_RETURN_NAMSTR(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"),
-                         null, 8);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_IteratorIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_IteratorIterator
-Variant c_IteratorIterator::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_IteratorIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_IteratorIterator
-Variant &c_IteratorIterator::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_IteratorIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_IteratorIterator
-Variant c_IteratorIterator::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_IteratorIterator
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(IteratorIterator)
 const InstanceOfInfo c_IteratorIterator::s_instanceof_table[] = {
   {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
@@ -1620,10 +1507,6 @@ void c_IteratorIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_IteratorIterator = {
-  c_IteratorIterator::os_getInit,
-  c_IteratorIterator::os_get,
-  c_IteratorIterator::os_lval,
-  c_IteratorIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_IteratorIterator,
   c_IteratorIterator::s_call_info_table,c_IteratorIterator::s_call_info_index,
   c_IteratorIterator::s_instanceof_table,c_IteratorIterator::s_instanceof_index,
@@ -1736,55 +1619,10 @@ Variant c_IteratorIterator::t___call(Variant v_func, Variant v_params) {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 228 */
-const int64 q_RecursiveIteratorIterator_LEAVES_ONLY = 0LL;
-const int64 q_RecursiveIteratorIterator_SELF_FIRST = 1LL;
-const int64 q_RecursiveIteratorIterator_CHILD_FIRST = 2LL;
-const int64 q_RecursiveIteratorIterator_CATCH_GET_CHILD = 16LL;
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RecursiveIteratorIterator
-Variant c_RecursiveIteratorIterator::os_getInit(CStrRef s) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_RETURN_NAMSTR(0x26C16E62FD792BB7LL, NAMSTR(s_sys_ss7f14ba70, "rsrc"),
-                         null, 4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RecursiveIteratorIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_RecursiveIteratorIterator
-Variant c_RecursiveIteratorIterator::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_RecursiveIteratorIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RecursiveIteratorIterator
-Variant &c_RecursiveIteratorIterator::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RecursiveIteratorIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_RecursiveIteratorIterator
-Variant c_RecursiveIteratorIterator::os_constant(const char *s) {
-  int64 hash = hash_string(s);
-  switch (hash & 7) {
-    case 1:
-      HASH_RETURN(0x618BE0B31B5C1FD1LL, q_RecursiveIteratorIterator_CHILD_FIRST, "CHILD_FIRST");
-      break;
-    case 4:
-      HASH_RETURN(0x181DAA5BC4B24F6CLL, q_RecursiveIteratorIterator_LEAVES_ONLY, "LEAVES_ONLY");
-      HASH_RETURN(0x7F32D13555655AA4LL, q_RecursiveIteratorIterator_CATCH_GET_CHILD, "CATCH_GET_CHILD");
-      break;
-    case 5:
-      HASH_RETURN(0x0822A034E83D2285LL, q_RecursiveIteratorIterator_SELF_FIRST, "SELF_FIRST");
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_RecursiveIteratorIterator
+const int64 q_RecursiveIteratorIterator$$LEAVES_ONLY = 0LL;
+const int64 q_RecursiveIteratorIterator$$SELF_FIRST = 1LL;
+const int64 q_RecursiveIteratorIterator$$CHILD_FIRST = 2LL;
+const int64 q_RecursiveIteratorIterator$$CATCH_GET_CHILD = 16LL;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(RecursiveIteratorIterator)
 const InstanceOfInfo c_RecursiveIteratorIterator::s_instanceof_table[] = {
   {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
@@ -1996,10 +1834,6 @@ void c_RecursiveIteratorIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_RecursiveIteratorIterator = {
-  c_RecursiveIteratorIterator::os_getInit,
-  c_RecursiveIteratorIterator::os_get,
-  c_RecursiveIteratorIterator::os_lval,
-  c_RecursiveIteratorIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_RecursiveIteratorIterator,
   c_RecursiveIteratorIterator::s_call_info_table,c_RecursiveIteratorIterator::s_call_info_index,
   c_RecursiveIteratorIterator::s_instanceof_table,c_RecursiveIteratorIterator::s_instanceof_index,
@@ -2053,26 +1887,6 @@ bool c_RecursiveIteratorIterator::t_valid() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 644 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_MutableArrayIterator
-Variant c_MutableArrayIterator::os_getInit(CStrRef s) {
-  return c_ArrayIterator::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_MutableArrayIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_MutableArrayIterator
-Variant c_MutableArrayIterator::os_get(CStrRef s) {
-  return c_ArrayIterator::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_MutableArrayIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_MutableArrayIterator
-Variant &c_MutableArrayIterator::os_lval(CStrRef s) {
-  return c_ArrayIterator::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_MutableArrayIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_MutableArrayIterator
-Variant c_MutableArrayIterator::os_constant(const char *s) {
-  return c_ArrayIterator::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_MutableArrayIterator
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(MutableArrayIterator)
 const InstanceOfInfo c_MutableArrayIterator::s_instanceof_table[] = {
   {0x795F86375EE263D1LL,0,"Countable",(const ObjectStaticCallbacks*)2},
@@ -2182,10 +1996,6 @@ void c_MutableArrayIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_MutableArrayIterator = {
-  c_MutableArrayIterator::os_getInit,
-  c_MutableArrayIterator::os_get,
-  c_MutableArrayIterator::os_lval,
-  c_MutableArrayIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_MutableArrayIterator,
   c_MutableArrayIterator::s_call_info_table,c_MutableArrayIterator::s_call_info_index,
   c_MutableArrayIterator::s_instanceof_table,c_MutableArrayIterator::s_instanceof_index,
@@ -2211,36 +2021,6 @@ Variant c_MutableArrayIterator::t_currentref() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 711 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_FilterIterator
-Variant c_FilterIterator::os_getInit(CStrRef s) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_RETURN_NAMSTR(0x7794684C8B506749LL, NAMSTR(s_sys_ss6b9db86e, "it"),
-                         null, 2);
-      break;
-    default:
-      break;
-  }
-  return c_IteratorIterator::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_FilterIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_FilterIterator
-Variant c_FilterIterator::os_get(CStrRef s) {
-  return c_IteratorIterator::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_FilterIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_FilterIterator
-Variant &c_FilterIterator::os_lval(CStrRef s) {
-  return c_IteratorIterator::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_FilterIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_FilterIterator
-Variant c_FilterIterator::os_constant(const char *s) {
-  return c_IteratorIterator::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_FilterIterator
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(FilterIterator)
 const InstanceOfInfo c_FilterIterator::s_instanceof_table[] = {
   {0x7A394042E7488231LL,0,"FilterIterator",&cw_FilterIterator},
@@ -2507,10 +2287,6 @@ void c_FilterIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_FilterIterator = {
-  c_FilterIterator::os_getInit,
-  c_FilterIterator::os_get,
-  c_FilterIterator::os_lval,
-  c_FilterIterator::os_constant,
   (ObjectData*(*)(ObjectData*))coo_FilterIterator,
   c_FilterIterator::s_call_info_table,c_FilterIterator::s_call_info_index,
   c_FilterIterator::s_instanceof_table,c_FilterIterator::s_instanceof_index,
@@ -2671,55 +2447,87 @@ ObjectData *coo_FilterIterator() {
 }
 
 // Class tables
-static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x60EA38C41F14FF71LL,0,16,258,10,GET_PROPERTY_OFFSET(c_AppendIterator, m_iterators),&NAMSTR(s_sys_ssb3fce46e, "\000AppendIterator\000iterators") },
-
-  {0x7401482B86AFCBFBLL,0,0,130,10,GET_PROPERTY_OFFSET(c_ArrayIterator, m_flags),&NAMSTR(s_sys_ss28fae70d, "flags") },
-  {0x7D2126D089B92EA5LL,-1,0,130,10,GET_PROPERTY_OFFSET(c_ArrayIterator, m_arr),&NAMSTR(s_sys_ss7cb08d68, "arr") },
-
-  {0x7794684C8B506749LL,0,16,258,10,GET_PROPERTY_OFFSET(c_FilterIterator, m_it),&NAMSTR(s_sys_ssc4be4990, "\000FilterIterator\000it") },
-
-  {0x0636A5F84AF9D29ELL,0,18,258,10,GET_PROPERTY_OFFSET(c_IteratorIterator, m_iterator),&NAMSTR(s_sys_ss8c1ec20c, "\000IteratorIterator\000iterator") },
-
-  {0x26C16E62FD792BB7LL,0,27,258,10,GET_PROPERTY_OFFSET(c_RecursiveIteratorIterator, m_rsrc),&NAMSTR(s_sys_ss246080da, "\000RecursiveIteratorIterator\000rsrc") },
-
+static const int64 cpt_static_inits[] = {
+  (int64)&null_variant,
+  (int64)&NAMVAR(s_sys_svib794f8ce, 1LL),
+  (int64)&NAMVAR(s_sys_svi90d5f98c, 2LL),
+  (int64)&NAMVAR(s_sys_svif01bca90, 0LL),
+  (int64)&NAMVAR(s_sys_svi86af027e, 16LL),
 };
-static const ClassPropTableEntry *cpt_private_entries[] = {
-  cpt_table_entries+0,
-  0,
-  cpt_table_entries+3,
-  0,
-  cpt_table_entries+4,
-  0,
-  cpt_table_entries+5,
-  0,
+static const ClassPropTableEntry cpt_table_entries[] = {
+  {0x60EA38C41F14FF71LL,0,0,16,65,10,GET_PROPERTY_OFFSET(c_AppendIterator, m_iterators),&NAMSTR(s_sys_ssb3fce46e, "\000AppendIterator\000iterators") },
+
+  {0x7DE206EA225FC80CLL,1,1,0,100,4,0,&NAMSTR(s_sys_ss225fc80c, "STD_PROP_LIST") },
+  {0x3C29F8CAC8DB5B17LL,0,2,0,100,4,0,&NAMSTR(s_sys_ssc8db5b17, "ARRAY_AS_PROPS") },
+
+  {0x7401482B86AFCBFBLL,0,0,0,66,10,GET_PROPERTY_OFFSET(c_ArrayIterator, m_flags),&NAMSTR(s_sys_ss28fae70d, "flags") },
+  {0x7D2126D089B92EA5LL,-1,0,0,66,10,GET_PROPERTY_OFFSET(c_ArrayIterator, m_arr),&NAMSTR(s_sys_ss7cb08d68, "arr") },
+
+  {0x7794684C8B506749LL,0,0,16,65,10,GET_PROPERTY_OFFSET(c_FilterIterator, m_it),&NAMSTR(s_sys_ssc4be4990, "\000FilterIterator\000it") },
+
+  {0x0636A5F84AF9D29ELL,0,0,18,65,10,GET_PROPERTY_OFFSET(c_IteratorIterator, m_iterator),&NAMSTR(s_sys_ss8c1ec20c, "\000IteratorIterator\000iterator") },
+
+  {0x618BE0B31B5C1FD1LL,2,2,0,100,4,0,&NAMSTR(s_sys_ss1b5c1fd1, "CHILD_FIRST") },
+  {0x181DAA5BC4B24F6CLL,2,3,0,36,4,0,&NAMSTR(s_sys_ssc4b24f6c, "LEAVES_ONLY") },
+  {0x7F32D13555655AA4LL,0,4,0,100,4,0,&NAMSTR(s_sys_ss55655aa4, "CATCH_GET_CHILD") },
+  {0x0822A034E83D2285LL,-3,1,0,100,4,0,&NAMSTR(s_sys_sse83d2285, "SELF_FIRST") },
+
+  {0x26C16E62FD792BB7LL,0,0,27,65,10,GET_PROPERTY_OFFSET(c_RecursiveIteratorIterator, m_rsrc),&NAMSTR(s_sys_ss246080da, "\000RecursiveIteratorIterator\000rsrc") },
+
 };
 static const int cpt_hash_entries[] = {
+  // AppendIterator hash
   -1,0,-1,-1,-1,-1,-1,-1,
-  -1,-1,-1,0,-1,1,-1,-1,
+  // AppendIterator lists
+  0,-1,
+  -1,
+  -1,
+  // ArrayIterator hash
+  1,-1,-1,0,-1,-1,-1,-1,
+  -1,-1,-1,2,-1,3,-1,-1,
+  // ArrayIterator lists
+  -1,
+  -1,
+  -1,
+  // FilterIterator hash
   -1,0,-1,-1,-1,-1,-1,-1,
+  // FilterIterator lists
+  0,-1,
+  -1,
+  -1,
+  // IteratorIterator hash
   -1,-1,-1,-1,-1,-1,0,-1,
-  -1,-1,-1,-1,-1,-1,-1,0,
+  // IteratorIterator lists
+  0,-1,
+  -1,
+  -1,
+  // RecursiveIteratorIterator hash
+  -1,-1,3,1,-1,-1,0,-1,
+  -1,-1,-1,-1,-1,-1,-1,4,
+  // RecursiveIteratorIterator lists
+  4,-1,
+  -1,
+  -1,
 };
 const ClassPropTable c_AppendIterator::os_prop_table = {
-  7,0,cpt_hash_entries+0,
-  0,cpt_table_entries+0,cpt_private_entries+0
+  7,0,-1,-1,-1,-1,10,0,
+  cpt_hash_entries+0,0,cpt_table_entries+0,cpt_static_inits
 };
 const ClassPropTable c_ArrayIterator::os_prop_table = {
-  7,1,cpt_hash_entries+8,
-  0,cpt_table_entries+1,cpt_private_entries+7
+  7,3,-1,-1,7,0,9,0,
+  cpt_hash_entries+20,0,cpt_table_entries+1,cpt_static_inits
 };
 const ClassPropTable c_FilterIterator::os_prop_table = {
-  7,0,cpt_hash_entries+16,
-  &c_IteratorIterator::os_prop_table,cpt_table_entries+3,cpt_private_entries+2
+  7,0,-1,-1,-1,-1,10,0,
+  cpt_hash_entries+31,&c_IteratorIterator::os_prop_table,cpt_table_entries+5,cpt_static_inits
 };
 const ClassPropTable c_IteratorIterator::os_prop_table = {
-  7,0,cpt_hash_entries+24,
-  0,cpt_table_entries+4,cpt_private_entries+4
+  7,0,-1,-1,-1,-1,10,0,
+  cpt_hash_entries+43,0,cpt_table_entries+6,cpt_static_inits
 };
 const ClassPropTable c_RecursiveIteratorIterator::os_prop_table = {
-  7,0,cpt_hash_entries+32,
-  0,cpt_table_entries+5,cpt_private_entries+6
+  7,4,-1,-1,7,1,10,0,
+  cpt_hash_entries+63,0,cpt_table_entries+7,cpt_static_inits
 };
 
 ///////////////////////////////////////////////////////////////////////////////

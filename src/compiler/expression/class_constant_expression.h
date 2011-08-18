@@ -41,6 +41,11 @@ public:
   virtual bool containsDynamicConstant(AnalysisResultPtr ar) const;
 
   const std::string &getConName() const { return m_varName; }
+  const std::string &getActualClassName() const;
+
+  bool isValid() const { return m_valid; }
+  bool isDynamic() const;
+  bool hasClass() const { return m_defScope != 0; }
 private:
   std::string m_varName;
   BlockScope *m_defScope;

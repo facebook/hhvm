@@ -1752,78 +1752,6 @@ void VariableTable::outputCPPPropertyClone(CodeGenerator &cg,
   }
 }
 
-void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
-    AnalysisResultPtr ar, const char *parent, const char *parentName,
-    ClassScope::Derivation dynamicObject) {
-  string clsStr = m_blockScope.getId();
-  const char *cls = clsStr.c_str();
-
-  const char *cprefix = Option::ClassPrefix;
-  const char *op = "::";
-  const char *gl = "";
-  if (dynamicObject == ClassScope::DirectFromRedeclared) {
-    cprefix = Option::ClassStaticsCallbackPrefix;
-    op = "->";
-    gl = "g->";
-    parent = parentName;
-  }
-  // Statics
-  bool gdec = false;
-  cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_%s", cls);
-  cg_indentBegin("Variant %s%s::%sgetInit(CStrRef s) {\n",
-                 Option::ClassPrefix, cls, Option::ObjectStaticPrefix);
-  if (!outputCPPJumpTable(cg, ar, NULL, true, false, EitherStatic,
-                          JumpReturnInit, EitherPrivate, &gdec)) {
-    m_emptyJumpTables.insert(JumpTableClassStaticGetInit);
-  }
-  if (!gdec && dynamicObject == ClassScope::DirectFromRedeclared) {
-    cg.printDeclareGlobals();
-  }
-  cg_printf("return %s%s%s%s%sgetInit(s);\n", gl, cprefix,
-            parent, op, Option::ObjectStaticPrefix);
-  cg_indentEnd("}\n");
-  cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_%s", cls);
-
-  cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_STATIC_GET_%s", cls);
-  cg_indentBegin("Variant %s%s::%sget(CStrRef s) {\n",
-                 Option::ClassPrefix, cls, Option::ObjectStaticPrefix);
-  if (!outputCPPJumpTable(cg, ar, Option::StaticPropertyPrefix, true, false,
-                          Static, JumpReturnString, NonPrivate, &gdec)) {
-    m_emptyJumpTables.insert(JumpTableClassStaticGet);
-  }
-  if (!gdec && dynamicObject == ClassScope::DirectFromRedeclared) {
-    cg.printDeclareGlobals();
-  }
-  cg_printf("return %s%s%s%s%sget(s);\n", gl, cprefix,
-            parent, op, Option::ObjectStaticPrefix);
-  cg_indentEnd("}\n");
-  cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_STATIC_GET_%s", cls);
-
-  cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_%s", cls);
-  cg_indentBegin("Variant &%s%s::%slval(CStrRef s) {\n",
-                 Option::ClassPrefix, cls, Option::ObjectStaticPrefix);
-  if (!outputCPPJumpTable(cg, ar, Option::StaticPropertyPrefix, true, true,
-                          Static, JumpReturnString, NonPrivate, &gdec)) {
-    m_emptyJumpTables.insert(JumpTableClassStaticLval);
-  }
-  if (!gdec && dynamicObject == ClassScope::DirectFromRedeclared) {
-    cg.printDeclareGlobals();
-  }
-  cg_printf("return %s%s%s%s%slval(s);\n", gl, cprefix,
-            parent, op, Option::ObjectStaticPrefix);
-  cg_indentEnd("}\n");
-  cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_%s", cls);
-
-  if (dynamicObject == ClassScope::DirectFromRedeclared) {
-    parent = "DynamicObjectData";
-    cprefix = Option::ClassPrefix;
-    op = "::";
-    gl = "";
-  }
-
-  cg.addClass(m_blockScope.getName(), getClassScope());
-}
-
 bool VariableTable::outputCPPPrivateSelector(CodeGenerator &cg,
                                              AnalysisResultPtr ar,
                                              const char *op, const char *args) {
@@ -1895,6 +1823,7 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
   if (hasStatic) {
     ClassScopePtr cls = getClassScope();
     if (cls && cls->needLazyStaticInitializer()) {
+      assert(false);
       cg_printf("lazy_initializer(g);\n");
     }
   }

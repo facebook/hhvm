@@ -36,10 +36,6 @@ class c___PHP_Incomplete_Class : public ExtObjectData {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT___PHP_Incomplete_Class 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET___PHP_Incomplete_Class 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL___PHP_Incomplete_Class 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT___PHP_Incomplete_Class 1
 
   // DECLARE_COMMON_INVOKE
   static const int s_call_info_table = 0;

@@ -408,16 +408,17 @@ std::string ScalarExpression::getCPPLiteralString(bool *binary /* = NULL */) {
   return output;
 }
 
-void ScalarExpression::outputCPPString(const string &str,
-  CodeGenerator &cg, AnalysisResultPtr ar, bool constant) {
+void ScalarExpression::OutputCPPString(
+  const string &str, CodeGenerator &cg, AnalysisResultPtr ar,
+  BlockScopeRawPtr scope, bool constant) {
   if (!cg.hasScalarVariant() || !Option::UseScalarVariant) {
-    cg_printString(str, ar, shared_from_this(), constant);
+    cg_printString(str, ar, scope, constant);
     return;
   }
 
   bool isBinary = false;
   string escaped = CodeGenerator::EscapeLabel(str, &isBinary);
-  string fullName = cg.printNamedString(str, escaped, ar, getScope(), false);
+  string fullName = cg.printNamedString(str, escaped, ar, scope, false);
   ASSERT(!fullName.empty());
   string prefix(Option::ScalarPrefix);
   if (Option::SystemGen) prefix += Option::SysPrefix;
@@ -443,7 +444,7 @@ void ScalarExpression::outputCPPString(CodeGenerator &cg,
       bool constant =
         (cg.getContext() == CodeGenerator::CppConstantsDecl) ||
         (cg.getContext() == CodeGenerator::CppClassConstantsImpl);
-      outputCPPString(output, cg, ar, constant);
+      OutputCPPString(output, cg, ar, getScope(), constant);
     } else {
       assert(false);
       cg_printf("%s", m_value.c_str());
@@ -454,14 +455,14 @@ void ScalarExpression::outputCPPString(CodeGenerator &cg,
   case T_NS_C:
   case T_METHOD_C:
   case T_FUNC_C:
-    outputCPPString(m_translated, cg, ar, false);
+    OutputCPPString(m_translated, cg, ar, getScope(), false);
     break;
   case T_NUM_STRING: {
     bool constant =
       (cg.getContext() == CodeGenerator::CppConstantsDecl) ||
       (cg.getContext() == CodeGenerator::CppClassConstantsImpl);
     assert(!constant);
-    outputCPPString(m_value, cg, ar, false);
+    OutputCPPString(m_value, cg, ar, getScope(), false);
     break;
   }
   default:

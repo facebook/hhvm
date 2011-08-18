@@ -77,6 +77,13 @@ void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
+const string &ClassConstantExpression::getActualClassName() const {
+  if (m_defScope) {
+    return static_cast<ClassScope*>(m_defScope)->getOriginalName();
+  }
+  return m_className;
+}
+
 ConstructPtr ClassConstantExpression::getNthKid(int n) const {
   switch (n) {
     case 0:
@@ -228,6 +235,11 @@ void ClassConstantExpression::outputPHP(CodeGenerator &cg,
   cg_printf("::%s", m_varName.c_str());
 }
 
+bool ClassConstantExpression::isDynamic() const {
+  if (!m_valid) return true;
+  return m_defScope->getConstants()->isDynamic(m_varName);
+}
+
 void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
                                             AnalysisResultPtr ar) {
   if (m_class) {
@@ -257,8 +269,9 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
       cls->outputVolatileCheckBegin(cg, ar, getScope(), m_origClassName);
     }
     if (cls->getConstants()->isDynamic(m_varName)) {
-      cg_printf("%s%s::lazy_initializer(%s)->", Option::ClassPrefix,
-                cls->getId().c_str(), cg.getGlobals(ar));
+      cg_printf("%s%s->lazy_initializer(%s)->",
+                Option::ClassStaticsCallbackPrefix, cls->getId().c_str(),
+                cg.getGlobals(ar));
       if (cg.isFileOrClassHeader()) {
         if (getClassScope()) {
           getClassScope()->addUsedClassFullHeader(trueClassName);
@@ -273,8 +286,9 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
         getFileScope()->addUsedClassConstHeader(trueClassName, m_varName);
       }
     }
-    cg_printf("%s%s_%s", Option::ClassConstantPrefix, cls->getId().c_str(),
-              m_varName.c_str());
+    cg_printf("%s%s%s%s",
+              Option::ClassConstantPrefix, cls->getId().c_str(),
+              Option::IdPrefix.c_str(), m_varName.c_str());
     if (outsideClass) {
       cls->outputVolatileCheckEnd(cg);
     }
@@ -290,8 +304,9 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
       ClassScope::OutputVolatileCheckEnd(cg);
     }
   } else if (m_defScope) { // !m_valid && m_defScope -> derives from redeclaring
-    cg_printf("%s%s::os_constant(\"%s\")", Option::ClassPrefix,
-              m_defScope->getId().c_str(), m_varName.c_str());
+    cg_printf("%s%s->os_constant(\"%s\")",
+              Option::ClassStaticsCallbackPrefix, m_defScope->getId().c_str(),
+              m_varName.c_str());
   } else {
     cg_printf("throw_fatal(\"unknown class constant %s::%s\")",
               CodeGenerator::EscapeLabel(m_className).c_str(),

@@ -36,20 +36,8 @@ class c_SplFileObject : public c_SplFileInfo {
   // Properties
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(SplFileObject, SplFileObject)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SplFileObject 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_SplFileObject 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplFileObject 1
-  static Variant os_constant(const char *s);
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(SplFileObject, SplFileObject, SplFileInfo)
+  static const ClassPropTable os_prop_table;
   public: void t___construct(Variant v_filename, Variant v_open_mode = NAMSTR(s_sys_ss0d42ecf6, "r"), Variant v_use_include_path = false, Variant v_context = null);
   public: c_SplFileObject *create(CVarRef v_filename, CVarRef v_open_mode = NAMVAR(s_sys_svs0d42ecf6, "r"), CVarRef v_use_include_path = false_varNR, CVarRef v_context = null_variant);
   public: void dynConstruct(CArrRef params);
@@ -113,10 +101,10 @@ class c_SplFileObject : public c_SplFileInfo {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 ObjectData *coo_SplFileObject() NEVER_INLINE;
-extern const int64 q_SplFileObject_DROP_NEW_LINE;
-extern const int64 q_SplFileObject_READ_AHEAD;
-extern const int64 q_SplFileObject_SKIP_EMPTY;
-extern const int64 q_SplFileObject_READ_CSV;
+extern const int64 q_SplFileObject$$DROP_NEW_LINE;
+extern const int64 q_SplFileObject$$READ_AHEAD;
+extern const int64 q_SplFileObject$$SKIP_EMPTY;
+extern const int64 q_SplFileObject$$READ_CSV;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

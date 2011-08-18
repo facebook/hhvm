@@ -34,20 +34,8 @@ class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   // Properties
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(RecursiveDirectoryIterator, RecursiveDirectoryIterator)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RecursiveDirectoryIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_RecursiveDirectoryIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RecursiveDirectoryIterator 1
-  static Variant os_constant(const char *s);
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(RecursiveDirectoryIterator, RecursiveDirectoryIterator, DirectoryIterator)
+  static const ClassPropTable os_prop_table;
   public: void t___construct(Variant v_path, Variant v_flags = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */);
   public: c_RecursiveDirectoryIterator *create(CVarRef v_path, CVarRef v_flags = NAMVAR(s_sys_svi86af027e, 16LL) /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */);
   public: void dynConstruct(CArrRef params);
@@ -77,12 +65,12 @@ class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 ObjectData *coo_RecursiveDirectoryIterator() NEVER_INLINE;
-extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_SELF;
-extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_FILEINFO;
-extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_PATHNAME;
-extern const int64 q_RecursiveDirectoryIterator_KEY_AS_PATHNAME;
-extern const int64 q_RecursiveDirectoryIterator_KEY_AS_FILENAME;
-extern const int64 q_RecursiveDirectoryIterator_NEW_CURRENT_AND_KEY;
+extern const int64 q_RecursiveDirectoryIterator$$CURRENT_AS_SELF;
+extern const int64 q_RecursiveDirectoryIterator$$CURRENT_AS_FILEINFO;
+extern const int64 q_RecursiveDirectoryIterator$$CURRENT_AS_PATHNAME;
+extern const int64 q_RecursiveDirectoryIterator$$KEY_AS_PATHNAME;
+extern const int64 q_RecursiveDirectoryIterator$$KEY_AS_FILENAME;
+extern const int64 q_RecursiveDirectoryIterator$$NEW_CURRENT_AND_KEY;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

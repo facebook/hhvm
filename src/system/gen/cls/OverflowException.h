@@ -37,10 +37,6 @@ class c_OverflowException : public c_RuntimeException {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OverflowException 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_OverflowException 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_OverflowException 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_OverflowException 1
 
   // DECLARE_COMMON_INVOKE
   static const int s_call_info_table = 0;

@@ -30,40 +30,6 @@ namespace HPHP {
 extern CallInfo ci_;
 /* preface finishes */
 /* SRC: classes/directory.php line 3 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Directory
-Variant c_Directory::os_getInit(CStrRef s) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 0:
-      HASH_RETURN_NAMSTR(0x1429F792A6880074LL, NAMSTR(s_sys_ssf362b3c4, "path"),
-                         null, 4);
-      break;
-    case 2:
-      HASH_RETURN_NAMSTR(0x5C4CA333F4541532LL, NAMSTR(s_sys_ss46eeef5c, "handle"),
-                         null, 6);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_Directory
-Variant c_Directory::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Directory
-Variant &c_Directory::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Directory
-Variant c_Directory::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Directory
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(Directory)
 const InstanceOfInfo c_Directory::s_instanceof_table[] = {
   {0x34C95AF311506C8FLL,1,"Directory",&cw_Directory},
@@ -194,10 +160,6 @@ void c_Directory::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_Directory = {
-  c_Directory::os_getInit,
-  c_Directory::os_get,
-  c_Directory::os_lval,
-  c_Directory::os_constant,
   (ObjectData*(*)(ObjectData*))coo_Directory,
   c_Directory::s_call_info_table,c_Directory::s_call_info_index,
   c_Directory::s_instanceof_table,c_Directory::s_instanceof_index,
@@ -239,20 +201,25 @@ ObjectData *coo_Directory() {
 }
 
 // Class tables
+static const int64 cpt_static_inits[] = {
+  (int64)&null_variant,
+};
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x5C4CA333F4541532LL,0,0,66,10,GET_PROPERTY_OFFSET(c_Directory, m_handle),&NAMSTR(s_sys_ss46eeef5c, "handle") },
-  {0x1429F792A6880074LL,-1,0,66,10,GET_PROPERTY_OFFSET(c_Directory, m_path),&NAMSTR(s_sys_ssf362b3c4, "path") },
+  {0x5C4CA333F4541532LL,0,0,0,68,10,GET_PROPERTY_OFFSET(c_Directory, m_handle),&NAMSTR(s_sys_ss46eeef5c, "handle") },
+  {0x1429F792A6880074LL,-1,0,0,68,10,GET_PROPERTY_OFFSET(c_Directory, m_path),&NAMSTR(s_sys_ssf362b3c4, "path") },
 
 };
-static const ClassPropTableEntry *cpt_private_entries[] = {
-  0
-};
 static const int cpt_hash_entries[] = {
+  // Directory hash
   -1,-1,0,-1,1,-1,-1,-1,
+  // Directory lists
+  -1,
+  -1,
+  -1,
 };
 const ClassPropTable c_Directory::os_prop_table = {
-  7,1,cpt_hash_entries+0,
-  0,cpt_table_entries+0,cpt_private_entries+0
+  7,1,-1,-1,-1,-1,9,0,
+  cpt_hash_entries+0,0,cpt_table_entries+0,cpt_static_inits
 };
 
 ///////////////////////////////////////////////////////////////////////////////

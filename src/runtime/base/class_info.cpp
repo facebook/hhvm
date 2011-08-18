@@ -759,10 +759,11 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
   while (*p) {
     ConstantInfo *constant = new ConstantInfo();
     constant->name = makeStaticString(*p++);
-    constant->valueLen = (int64)(*p++);
+    const char *len_or_cw = *p++;
     constant->valueText = *p++;
 
     if (constant->valueText) {
+      constant->valueLen = (int64)len_or_cw;
       VariableUnserializer vu(constant->valueText,
                               constant->valueLen,
                               VariableUnserializer::Serialize);
@@ -771,14 +772,14 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
       } catch (Exception &e) {
         ASSERT(false);
       }
-    } else if (!m_name.empty()) {
-      if (!(m_attribute & IsVolatile) && !(m_attribute & IsLazyInit)) {
-        const ObjectStaticCallbacks *cwo = get_object_static_callbacks(m_name);
-        if (cwo) {
-          constant->callbacks = cwo;
-        } else {
-          ASSERT(false);
-        }
+    } else {
+      constant->valueLen = 0;
+      if (!m_name.empty()) {
+        const ObjectStaticCallbacks *cwo =
+          (const ObjectStaticCallbacks*)len_or_cw;
+
+        ASSERT(cwo);
+        constant->callbacks = cwo;
       }
     }
 
@@ -849,7 +850,7 @@ void ClassInfo::GetArray(const ObjectData *obj, const ClassPropTable *ct,
   while (ct) {
     const ClassPropTableEntry *p = ct->m_entries;
     int off = ct->m_offset;
-    do {
+    if (off >= 0) do {
       p += off;
       if (!pubOnly || p->isPublic()) {
         if (p->isOverride()) {
@@ -867,60 +868,11 @@ void ClassInfo::GetArray(const ObjectData *obj, const ClassPropTable *ct,
           }
           continue;
         }
+        Variant v = p->getVariant(addr);
         if (p->isPrivate()) {
-          switch (p->type) {
-          case KindOfBoolean:
-            props.add(*p->keyName, *(bool*)addr, true);
-            break;
-          case KindOfInt32:
-            props.add(*p->keyName, *(int*)addr, true);
-            break;
-          case KindOfInt64:
-            props.add(*p->keyName, *(int64*)addr, true);
-            break;
-          case KindOfDouble:
-            props.add(*p->keyName, *(double*)addr, true);
-            break;
-          case KindOfString:
-            props.add(*p->keyName, *(String*)addr, true);
-            break;
-          case KindOfArray:
-            props.add(*p->keyName, *(Array*)addr, true);
-            break;
-          case KindOfObject:
-            props.add(*p->keyName, *(Object*)addr, true);
-            break;
-          default:
-            ASSERT(false);
-            break;
-          }
+          props.add(*p->keyName, v, true);
         } else {
-          switch (p->type) {
-          case KindOfBoolean:
-            props.set(*p->keyName, *(bool*)addr, true);
-            break;
-          case KindOfInt32:
-            props.set(*p->keyName, *(int*)addr, true);
-            break;
-          case KindOfInt64:
-            props.set(*p->keyName, *(int64*)addr, true);
-            break;
-          case KindOfDouble:
-            props.set(*p->keyName, *(double*)addr, true);
-            break;
-          case KindOfString:
-            props.set(*p->keyName, *(String*)addr, true);
-            break;
-          case KindOfArray:
-            props.set(*p->keyName, *(Array*)addr, true);
-            break;
-          case KindOfObject:
-            props.set(*p->keyName, *(Object*)addr, true);
-            break;
-          default:
-            ASSERT(false);
-            break;
-          }
+          props.set(*p->keyName, v, true);
         }
       }
     } while ((off = p->next) != 0);
@@ -940,8 +892,8 @@ void ClassInfo::GetArray(const ObjectData *obj, const ClassPropTable *ct,
 void ClassInfo::SetArray(ObjectData *obj, const ClassPropTable *ct,
                          CArrRef props) {
   while (ct) {
-    for (const ClassPropTableEntry **pp = ct->m_pentries; *pp; pp++) {
-      const ClassPropTableEntry *p = *pp;
+    for (const int *ppi = ct->privates(); *ppi >= 0; ppi++) {
+      const ClassPropTableEntry *p = ct->m_entries + *ppi;
       ASSERT(p->isPrivate());
       const char *addr = ((const char *)obj) + p->offset;
       if (LIKELY(p->type == KindOfVariant)) {
@@ -964,8 +916,7 @@ void ClassInfo::SetArray(ObjectData *obj, const ClassPropTable *ct,
     }
     ct = ct->m_parent;
     if (!ct) {
-      ObjectData *parent =
-        (const_cast<ObjectData *>(obj))->getRedeclaredParent();
+      ObjectData *parent = obj->getRedeclaredParent();
       if (parent) {
         ASSERT(parent != obj);
         obj = parent;

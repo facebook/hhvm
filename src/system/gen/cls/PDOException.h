@@ -33,20 +33,7 @@ class c_PDOException : public c_Exception {
   // Properties
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(PDOException, PDOException)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_PDOException 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_PDOException 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDOException 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOException 1
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(PDOException, PDOException, Exception)
   public: void t___construct();
   public: c_PDOException *create();
   public: void dynConstruct(CArrRef params);

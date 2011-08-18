@@ -37,10 +37,6 @@ class c_DomainException : public c_LogicException {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DomainException 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_DomainException 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DomainException 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_DomainException 1
 
   // DECLARE_COMMON_INVOKE
   static const int s_call_info_table = 0;

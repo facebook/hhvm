@@ -32,36 +32,6 @@ namespace HPHP {
 extern CallInfo ci_;
 /* preface finishes */
 /* SRC: classes/reflection.php line 248 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionFunctionAbstract
-Variant c_ReflectionFunctionAbstract::os_getInit(CStrRef s) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"),
-                         null, 4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionFunctionAbstract
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionFunctionAbstract
-Variant c_ReflectionFunctionAbstract::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionFunctionAbstract
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionFunctionAbstract
-Variant &c_ReflectionFunctionAbstract::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionFunctionAbstract
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionFunctionAbstract
-Variant c_ReflectionFunctionAbstract::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionFunctionAbstract
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionFunctionAbstract)
 const InstanceOfInfo c_ReflectionFunctionAbstract::s_instanceof_table[] = {
   {0x33BD46E935281082LL,1,"ReflectionFunctionAbstract",&cw_ReflectionFunctionAbstract},
@@ -339,10 +309,6 @@ const int c_ReflectionFunctionAbstract::s_call_info_index[] = {
 
 };
 const ObjectStaticCallbacks cw_ReflectionFunctionAbstract = {
-  c_ReflectionFunctionAbstract::os_getInit,
-  c_ReflectionFunctionAbstract::os_get,
-  c_ReflectionFunctionAbstract::os_lval,
-  c_ReflectionFunctionAbstract::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionFunctionAbstract,
   c_ReflectionFunctionAbstract::s_call_info_table,c_ReflectionFunctionAbstract::s_call_info_index,
   c_ReflectionFunctionAbstract::s_instanceof_table,c_ReflectionFunctionAbstract::s_instanceof_index,
@@ -493,26 +459,6 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1281 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionObject
-Variant c_ReflectionObject::os_getInit(CStrRef s) {
-  return c_ReflectionClass::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionObject
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionObject
-Variant c_ReflectionObject::os_get(CStrRef s) {
-  return c_ReflectionClass::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionObject
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionObject
-Variant &c_ReflectionObject::os_lval(CStrRef s) {
-  return c_ReflectionClass::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionObject
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionObject
-Variant c_ReflectionObject::os_constant(const char *s) {
-  return c_ReflectionClass::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionObject
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionObject)
 const InstanceOfInfo c_ReflectionObject::s_instanceof_table[] = {
   {0x41A9F7D81254DD7ALL,1,"ReflectionObject",&cw_ReflectionObject},
@@ -560,10 +506,6 @@ const int c_ReflectionObject::s_call_info_index[] = {
   0,-1,
 };
 const ObjectStaticCallbacks cw_ReflectionObject = {
-  c_ReflectionObject::os_getInit,
-  c_ReflectionObject::os_get,
-  c_ReflectionObject::os_lval,
-  c_ReflectionObject::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionObject,
   c_ReflectionObject::s_call_info_table,c_ReflectionObject::s_call_info_index,
   c_ReflectionObject::s_instanceof_table,c_ReflectionObject::s_instanceof_index,
@@ -591,26 +533,6 @@ Variant c_ReflectionObject::t_export(Variant v_obj, CVarRef v_ret) {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 27 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionException
-Variant c_ReflectionException::os_getInit(CStrRef s) {
-  return c_Exception::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionException
-Variant c_ReflectionException::os_get(CStrRef s) {
-  return c_Exception::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionException
-Variant &c_ReflectionException::os_lval(CStrRef s) {
-  return c_Exception::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionException
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionException
-Variant c_ReflectionException::os_constant(const char *s) {
-  return c_Exception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionException
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionException)
 const InstanceOfInfo c_ReflectionException::s_instanceof_table[] = {
   {0x672AD818DDE95538LL,0,"ReflectionException",&cw_ReflectionException},
@@ -630,10 +552,6 @@ void c_ReflectionException::cloneSet(ObjectData *cl) {
   c_Exception::cloneSet(clone);
 }
 const ObjectStaticCallbacks cw_ReflectionException = {
-  c_ReflectionException::os_getInit,
-  c_ReflectionException::os_get,
-  c_ReflectionException::os_lval,
-  c_ReflectionException::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionException,
   c_ReflectionException::s_call_info_table,c_ReflectionException::s_call_info_index,
   c_ReflectionException::s_instanceof_table,c_ReflectionException::s_instanceof_index,
@@ -641,55 +559,9 @@ const ObjectStaticCallbacks cw_ReflectionException = {
   &c_Exception::os_prop_table,0,&cw_Exception
 };
 /* SRC: classes/reflection.php line 538 */
-const int64 q_ReflectionClass_IS_IMPLICIT_ABSTRACT = 16LL;
-const int64 q_ReflectionClass_IS_EXPLICIT_ABSTRACT = 32LL;
-const int64 q_ReflectionClass_IS_FINAL = 64LL;
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionClass
-Variant c_ReflectionClass::os_getInit(CStrRef s) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 2:
-      HASH_RETURN_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ssdc3cbddc, "name"),
-                         null, 4);
-      break;
-    case 3:
-      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"),
-                         null, 4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionClass
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionClass
-Variant c_ReflectionClass::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionClass
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionClass
-Variant &c_ReflectionClass::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionClass
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionClass
-Variant c_ReflectionClass::os_constant(const char *s) {
-  int64 hash = hash_string(s);
-  switch (hash & 7) {
-    case 2:
-      HASH_RETURN(0x042E299D3BE2773ALL, q_ReflectionClass_IS_IMPLICIT_ABSTRACT, "IS_IMPLICIT_ABSTRACT");
-      break;
-    case 6:
-      HASH_RETURN(0x468EF528A19B529ELL, q_ReflectionClass_IS_EXPLICIT_ABSTRACT, "IS_EXPLICIT_ABSTRACT");
-      HASH_RETURN(0x47AAFAC74A58AD66LL, q_ReflectionClass_IS_FINAL, "IS_FINAL");
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionClass
+const int64 q_ReflectionClass$$IS_IMPLICIT_ABSTRACT = 16LL;
+const int64 q_ReflectionClass$$IS_EXPLICIT_ABSTRACT = 32LL;
+const int64 q_ReflectionClass$$IS_FINAL = 64LL;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionClass)
 const InstanceOfInfo c_ReflectionClass::s_instanceof_table[] = {
   {0x35A44A5E6AE2E71DLL,0,"ReflectionClass",&cw_ReflectionClass},
@@ -1672,10 +1544,6 @@ void c_ReflectionClass::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_ReflectionClass = {
-  c_ReflectionClass::os_getInit,
-  c_ReflectionClass::os_get,
-  c_ReflectionClass::os_lval,
-  c_ReflectionClass::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionClass,
   c_ReflectionClass::s_call_info_table,c_ReflectionClass::s_call_info_index,
   c_ReflectionClass::s_instanceof_table,c_ReflectionClass::s_instanceof_index,
@@ -2583,40 +2451,6 @@ Variant c_ReflectionClass::t_getextensionname() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1833 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionExtension
-Variant c_ReflectionExtension::os_getInit(CStrRef s) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 2:
-      HASH_RETURN_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ssdc3cbddc, "name"),
-                         null, 4);
-      break;
-    case 3:
-      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"),
-                         null, 4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionExtension
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionExtension
-Variant c_ReflectionExtension::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionExtension
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionExtension
-Variant &c_ReflectionExtension::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionExtension
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionExtension
-Variant c_ReflectionExtension::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionExtension
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionExtension)
 const InstanceOfInfo c_ReflectionExtension::s_instanceof_table[] = {
   {0x62F7F85447C0A605LL,1,"Reflector",(const ObjectStaticCallbacks*)2},
@@ -2884,10 +2718,6 @@ void c_ReflectionExtension::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_ReflectionExtension = {
-  c_ReflectionExtension::os_getInit,
-  c_ReflectionExtension::os_get,
-  c_ReflectionExtension::os_lval,
-  c_ReflectionExtension::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionExtension,
   c_ReflectionExtension::s_call_info_table,c_ReflectionExtension::s_call_info_index,
   c_ReflectionExtension::s_instanceof_table,c_ReflectionExtension::s_instanceof_index,
@@ -3003,67 +2833,12 @@ Variant c_ReflectionExtension::t_info() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1571 */
-const int64 q_ReflectionMethod_IS_STATIC = 1LL;
-const int64 q_ReflectionMethod_IS_PUBLIC = 256LL;
-const int64 q_ReflectionMethod_IS_PROTECTED = 512LL;
-const int64 q_ReflectionMethod_IS_PRIVATE = 1024LL;
-const int64 q_ReflectionMethod_IS_ABSTRACT = 2LL;
-const int64 q_ReflectionMethod_IS_FINAL = 4LL;
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionMethod
-Variant c_ReflectionMethod::os_getInit(CStrRef s) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 0:
-      HASH_RETURN_NAMSTR(0x2E3A246D1F74C210LL, NAMSTR(s_sys_ssc82dbd12, "class"),
-                         null, 5);
-      break;
-    case 2:
-      HASH_RETURN_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ssdc3cbddc, "name"),
-                         null, 4);
-      break;
-    default:
-      break;
-  }
-  return c_ReflectionFunctionAbstract::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionMethod
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionMethod
-Variant c_ReflectionMethod::os_get(CStrRef s) {
-  return c_ReflectionFunctionAbstract::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionMethod
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionMethod
-Variant &c_ReflectionMethod::os_lval(CStrRef s) {
-  return c_ReflectionFunctionAbstract::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionMethod
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionMethod
-Variant c_ReflectionMethod::os_constant(const char *s) {
-  int64 hash = hash_string(s);
-  switch (hash & 15) {
-    case 0:
-      HASH_RETURN(0x7DA78A433EE05120LL, q_ReflectionMethod_IS_STATIC, "IS_STATIC");
-      break;
-    case 1:
-      HASH_RETURN(0x163BE642CB04C741LL, q_ReflectionMethod_IS_PRIVATE, "IS_PRIVATE");
-      break;
-    case 3:
-      HASH_RETURN(0x3784532769C1EF03LL, q_ReflectionMethod_IS_PUBLIC, "IS_PUBLIC");
-      HASH_RETURN(0x6572B785E302A373LL, q_ReflectionMethod_IS_ABSTRACT, "IS_ABSTRACT");
-      break;
-    case 6:
-      HASH_RETURN(0x47AAFAC74A58AD66LL, q_ReflectionMethod_IS_FINAL, "IS_FINAL");
-      break;
-    case 14:
-      HASH_RETURN(0x10A614A8C272DC9ELL, q_ReflectionMethod_IS_PROTECTED, "IS_PROTECTED");
-      break;
-    default:
-      break;
-  }
-  return c_ReflectionFunctionAbstract::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionMethod
+const int64 q_ReflectionMethod$$IS_STATIC = 1LL;
+const int64 q_ReflectionMethod$$IS_PUBLIC = 256LL;
+const int64 q_ReflectionMethod$$IS_PROTECTED = 512LL;
+const int64 q_ReflectionMethod$$IS_PRIVATE = 1024LL;
+const int64 q_ReflectionMethod$$IS_ABSTRACT = 2LL;
+const int64 q_ReflectionMethod$$IS_FINAL = 4LL;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionMethod)
 const InstanceOfInfo c_ReflectionMethod::s_instanceof_table[] = {
   {0x43BBC8F6F28E44B0LL,1,"ReflectionMethod",&cw_ReflectionMethod},
@@ -3461,10 +3236,6 @@ void c_ReflectionMethod::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_ReflectionMethod = {
-  c_ReflectionMethod::os_getInit,
-  c_ReflectionMethod::os_get,
-  c_ReflectionMethod::os_lval,
-  c_ReflectionMethod::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionMethod,
   c_ReflectionMethod::s_call_info_table,c_ReflectionMethod::s_call_info_index,
   c_ReflectionMethod::s_instanceof_table,c_ReflectionMethod::s_instanceof_index,
@@ -3731,65 +3502,10 @@ Variant c_ReflectionMethod::t_getdeclaringclass() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1319 */
-const int64 q_ReflectionProperty_IS_STATIC = 1LL;
-const int64 q_ReflectionProperty_IS_PUBLIC = 256LL;
-const int64 q_ReflectionProperty_IS_PROTECTED = 512LL;
-const int64 q_ReflectionProperty_IS_PRIVATE = 1024LL;
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionProperty
-Variant c_ReflectionProperty::os_getInit(CStrRef s) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 0:
-      HASH_RETURN_NAMSTR(0x2E3A246D1F74C210LL, NAMSTR(s_sys_ssc82dbd12, "class"),
-                         null, 5);
-      break;
-    case 2:
-      HASH_RETURN_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ssdc3cbddc, "name"),
-                         null, 4);
-      break;
-    case 7:
-      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"),
-                         null, 4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionProperty
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionProperty
-Variant c_ReflectionProperty::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionProperty
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionProperty
-Variant &c_ReflectionProperty::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionProperty
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionProperty
-Variant c_ReflectionProperty::os_constant(const char *s) {
-  int64 hash = hash_string(s);
-  switch (hash & 7) {
-    case 0:
-      HASH_RETURN(0x7DA78A433EE05120LL, q_ReflectionProperty_IS_STATIC, "IS_STATIC");
-      break;
-    case 1:
-      HASH_RETURN(0x163BE642CB04C741LL, q_ReflectionProperty_IS_PRIVATE, "IS_PRIVATE");
-      break;
-    case 3:
-      HASH_RETURN(0x3784532769C1EF03LL, q_ReflectionProperty_IS_PUBLIC, "IS_PUBLIC");
-      break;
-    case 6:
-      HASH_RETURN(0x10A614A8C272DC9ELL, q_ReflectionProperty_IS_PROTECTED, "IS_PROTECTED");
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionProperty
+const int64 q_ReflectionProperty$$IS_STATIC = 1LL;
+const int64 q_ReflectionProperty$$IS_PUBLIC = 256LL;
+const int64 q_ReflectionProperty$$IS_PROTECTED = 512LL;
+const int64 q_ReflectionProperty$$IS_PRIVATE = 1024LL;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionProperty)
 const InstanceOfInfo c_ReflectionProperty::s_instanceof_table[] = {
   {0x75AA2571BDB659E4LL,1,"ReflectionProperty",&cw_ReflectionProperty},
@@ -4161,10 +3877,6 @@ void c_ReflectionProperty::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_ReflectionProperty = {
-  c_ReflectionProperty::os_getInit,
-  c_ReflectionProperty::os_get,
-  c_ReflectionProperty::os_lval,
-  c_ReflectionProperty::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionProperty,
   c_ReflectionProperty::s_call_info_table,c_ReflectionProperty::s_call_info_index,
   c_ReflectionProperty::s_instanceof_table,c_ReflectionProperty::s_instanceof_index,
@@ -4411,35 +4123,7 @@ Variant c_ReflectionProperty::t_getdoccomment() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 461 */
-const int64 q_ReflectionFunction_IS_DEPRECATED = 262144LL;
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionFunction
-Variant c_ReflectionFunction::os_getInit(CStrRef s) {
-  return c_ReflectionFunctionAbstract::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionFunction
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionFunction
-Variant c_ReflectionFunction::os_get(CStrRef s) {
-  return c_ReflectionFunctionAbstract::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionFunction
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionFunction
-Variant &c_ReflectionFunction::os_lval(CStrRef s) {
-  return c_ReflectionFunctionAbstract::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionFunction
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionFunction
-Variant c_ReflectionFunction::os_constant(const char *s) {
-  int64 hash = hash_string(s);
-  switch (hash & 1) {
-    case 0:
-      HASH_RETURN(0x25C5A7C72E7B0EF6LL, q_ReflectionFunction_IS_DEPRECATED, "IS_DEPRECATED");
-      break;
-    default:
-      break;
-  }
-  return c_ReflectionFunctionAbstract::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionFunction
+const int64 q_ReflectionFunction$$IS_DEPRECATED = 262144LL;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionFunction)
 const InstanceOfInfo c_ReflectionFunction::s_instanceof_table[] = {
   {0x21EF70351574EC09LL,1,"ReflectionFunction",&cw_ReflectionFunction},
@@ -4603,15 +4287,11 @@ void c_ReflectionFunction::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_ReflectionFunction = {
-  c_ReflectionFunction::os_getInit,
-  c_ReflectionFunction::os_get,
-  c_ReflectionFunction::os_lval,
-  c_ReflectionFunction::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionFunction,
   c_ReflectionFunction::s_call_info_table,c_ReflectionFunction::s_call_info_index,
   c_ReflectionFunction::s_instanceof_table,c_ReflectionFunction::s_instanceof_index,
   &c_ReflectionFunction::s_class_name,
-  &c_ReflectionFunctionAbstract::os_prop_table,0,&cw_ReflectionFunctionAbstract
+  &c_ReflectionFunction::os_prop_table,0,&cw_ReflectionFunctionAbstract
 };
 /* SRC: classes/reflection.php line 465 */
 void c_ReflectionFunction::t___construct(Variant v_name) {
@@ -4685,36 +4365,6 @@ Variant c_ReflectionFunction::t_invokeargs(CVarRef v_args) {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 46 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionParameter
-Variant c_ReflectionParameter::os_getInit(CStrRef s) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"),
-                         null, 4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionParameter
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionParameter
-Variant c_ReflectionParameter::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionParameter
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionParameter
-Variant &c_ReflectionParameter::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionParameter
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionParameter
-Variant c_ReflectionParameter::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionParameter
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionParameter)
 const InstanceOfInfo c_ReflectionParameter::s_instanceof_table[] = {
   {0x62F7F85447C0A605LL,1,"Reflector",(const ObjectStaticCallbacks*)2},
@@ -5024,10 +4674,6 @@ void c_ReflectionParameter::getConstructor(MethodCallPackage &mcp) {
   mcp.obj = this;
 }
 const ObjectStaticCallbacks cw_ReflectionParameter = {
-  c_ReflectionParameter::os_getInit,
-  c_ReflectionParameter::os_get,
-  c_ReflectionParameter::os_lval,
-  c_ReflectionParameter::os_constant,
   (ObjectData*(*)(ObjectData*))coo_ReflectionParameter,
   c_ReflectionParameter::s_call_info_table,c_ReflectionParameter::s_call_info_index,
   c_ReflectionParameter::s_instanceof_table,c_ReflectionParameter::s_instanceof_index,
@@ -5236,63 +4882,130 @@ ObjectData *coo_ReflectionParameter() {
 }
 
 // Class tables
-static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x5655B4FF77E35232LL,1,0,66,10,GET_PROPERTY_OFFSET(c_ReflectionClass, m_name),&NAMSTR(s_sys_ssdc3cbddc, "name") },
-  {0x0F2EF58F157D479FLL,0,17,258,10,GET_PROPERTY_OFFSET(c_ReflectionClass, m_info),&NAMSTR(s_sys_ss84e1d89d, "\000ReflectionClass\000info") },
-
-  {0x5655B4FF77E35232LL,1,21,258,10,GET_PROPERTY_OFFSET(c_ReflectionExtension, m_name),&NAMSTR(s_sys_ss8bbc8ede, "\000ReflectionExtension\000name") },
-  {0x0F2EF58F157D479FLL,0,21,258,10,GET_PROPERTY_OFFSET(c_ReflectionExtension, m_info),&NAMSTR(s_sys_ss5596f6c8, "\000ReflectionExtension\000info") },
-
-  {0x0F2EF58F157D479FLL,0,0,130,10,GET_PROPERTY_OFFSET(c_ReflectionFunctionAbstract, m_info),&NAMSTR(s_sys_ss33988b3e, "info") },
-
-  {0x2E3A246D1F74C210LL,0,0,66,10,GET_PROPERTY_OFFSET(c_ReflectionMethod, m_class),&NAMSTR(s_sys_ssc82dbd12, "class") },
-  {0x5655B4FF77E35232LL,-1,0,66,10,GET_PROPERTY_OFFSET(c_ReflectionMethod, m_name),&NAMSTR(s_sys_ssdc3cbddc, "name") },
-
-  {0x0F2EF58F157D479FLL,0,0,66,10,GET_PROPERTY_OFFSET(c_ReflectionParameter, m_info),&NAMSTR(s_sys_ss33988b3e, "info") },
-
-  {0x2E3A246D1F74C210LL,0,0,66,10,GET_PROPERTY_OFFSET(c_ReflectionProperty, m_class),&NAMSTR(s_sys_ssc82dbd12, "class") },
-  {0x5655B4FF77E35232LL,-1,0,66,10,GET_PROPERTY_OFFSET(c_ReflectionProperty, m_name),&NAMSTR(s_sys_ssdc3cbddc, "name") },
-  {0x0F2EF58F157D479FLL,-1,0,66,10,GET_PROPERTY_OFFSET(c_ReflectionProperty, m_info),&NAMSTR(s_sys_ss33988b3e, "info") },
-
+static const int64 cpt_static_inits[] = {
+  (int64)&NAMVAR(s_sys_svi86af027e, 16LL),
+  (int64)&NAMVAR(s_sys_svif2a1fb10, 32LL),
+  (int64)&NAMVAR(s_sys_svi1abc09e0, 64LL),
+  (int64)&null_variant,
+  (int64)&NAMVAR(s_sys_svibf7d1df5, 262144LL),
+  (int64)&NAMVAR(s_sys_svib794f8ce, 1LL),
+  (int64)&NAMVAR(s_sys_svi543f7d14, 1024LL),
+  (int64)&NAMVAR(s_sys_svi6af020b2, 256LL),
+  (int64)&NAMVAR(s_sys_svi90d5f98c, 2LL),
+  (int64)&NAMVAR(s_sys_svi5e544a31, 4LL),
+  (int64)&NAMVAR(s_sys_svid5e04164, 512LL),
 };
-static const ClassPropTableEntry *cpt_private_entries[] = {
-  cpt_table_entries+1,
-  0,
-  cpt_table_entries+2,
-  cpt_table_entries+3,
-  0,
+static const ClassPropTableEntry cpt_table_entries[] = {
+  {0x042E299D3BE2773ALL,1,0,0,100,4,0,&NAMSTR(s_sys_ss3be2773a, "IS_IMPLICIT_ABSTRACT") },
+  {0x468EF528A19B529ELL,1,1,0,36,4,0,&NAMSTR(s_sys_ssa19b529e, "IS_EXPLICIT_ABSTRACT") },
+  {0x47AAFAC74A58AD66LL,0,2,0,100,4,0,&NAMSTR(s_sys_ss4a58ad66, "IS_FINAL") },
+
+  {0x5655B4FF77E35232LL,1,3,0,68,10,GET_PROPERTY_OFFSET(c_ReflectionClass, m_name),&NAMSTR(s_sys_ssdc3cbddc, "name") },
+  {0x0F2EF58F157D479FLL,0,3,17,65,10,GET_PROPERTY_OFFSET(c_ReflectionClass, m_info),&NAMSTR(s_sys_ss84e1d89d, "\000ReflectionClass\000info") },
+
+  {0x5655B4FF77E35232LL,1,3,21,65,10,GET_PROPERTY_OFFSET(c_ReflectionExtension, m_name),&NAMSTR(s_sys_ss8bbc8ede, "\000ReflectionExtension\000name") },
+  {0x0F2EF58F157D479FLL,0,3,21,65,10,GET_PROPERTY_OFFSET(c_ReflectionExtension, m_info),&NAMSTR(s_sys_ss5596f6c8, "\000ReflectionExtension\000info") },
+
+  {0x25C5A7C72E7B0EF6LL,0,4,0,100,4,0,&NAMSTR(s_sys_ss2e7b0ef6, "IS_DEPRECATED") },
+
+  {0x0F2EF58F157D479FLL,0,3,0,66,10,GET_PROPERTY_OFFSET(c_ReflectionFunctionAbstract, m_info),&NAMSTR(s_sys_ss33988b3e, "info") },
+
+  {0x7DA78A433EE05120LL,2,5,0,100,4,0,&NAMSTR(s_sys_ss3ee05120, "IS_STATIC") },
+  {0x163BE642CB04C741LL,2,6,0,100,4,0,&NAMSTR(s_sys_sscb04c741, "IS_PRIVATE") },
+  {0x3784532769C1EF03LL,3,7,0,36,4,0,&NAMSTR(s_sys_ss69c1ef03, "IS_PUBLIC") },
+  {0x6572B785E302A373LL,1,8,0,100,4,0,&NAMSTR(s_sys_sse302a373, "IS_ABSTRACT") },
+  {0x47AAFAC74A58AD66LL,0,9,0,100,4,0,&NAMSTR(s_sys_ss4a58ad66, "IS_FINAL") },
+  {0x10A614A8C272DC9ELL,-4,10,0,100,4,0,&NAMSTR(s_sys_ssc272dc9e, "IS_PROTECTED") },
+
+  {0x2E3A246D1F74C210LL,0,3,0,68,10,GET_PROPERTY_OFFSET(c_ReflectionMethod, m_class),&NAMSTR(s_sys_ssc82dbd12, "class") },
+  {0x5655B4FF77E35232LL,-1,3,0,68,10,GET_PROPERTY_OFFSET(c_ReflectionMethod, m_name),&NAMSTR(s_sys_ssdc3cbddc, "name") },
+
+  {0x0F2EF58F157D479FLL,0,3,0,68,10,GET_PROPERTY_OFFSET(c_ReflectionParameter, m_info),&NAMSTR(s_sys_ss33988b3e, "info") },
+
+  {0x7DA78A433EE05120LL,2,5,0,100,4,0,&NAMSTR(s_sys_ss3ee05120, "IS_STATIC") },
+  {0x163BE642CB04C741LL,0,6,0,100,4,0,&NAMSTR(s_sys_sscb04c741, "IS_PRIVATE") },
+  {0x3784532769C1EF03LL,1,7,0,100,4,0,&NAMSTR(s_sys_ss69c1ef03, "IS_PUBLIC") },
+  {0x10A614A8C272DC9ELL,-2,10,0,100,4,0,&NAMSTR(s_sys_ssc272dc9e, "IS_PROTECTED") },
+
+  {0x2E3A246D1F74C210LL,0,3,0,68,10,GET_PROPERTY_OFFSET(c_ReflectionProperty, m_class),&NAMSTR(s_sys_ssc82dbd12, "class") },
+  {0x5655B4FF77E35232LL,-1,3,0,68,10,GET_PROPERTY_OFFSET(c_ReflectionProperty, m_name),&NAMSTR(s_sys_ssdc3cbddc, "name") },
+  {0x0F2EF58F157D479FLL,-1,3,0,68,10,GET_PROPERTY_OFFSET(c_ReflectionProperty, m_info),&NAMSTR(s_sys_ss33988b3e, "info") },
+
 };
 static const int cpt_hash_entries[] = {
+  // ReflectionClass hash
+  -1,1,-1,-1,-1,0,-1,-1,
+  -1,-1,3,-1,-1,-1,-1,4,
+  // ReflectionClass lists
+  4,-1,
+  -1,
+  -1,
+  // ReflectionExtension hash
   -1,-1,0,-1,-1,-1,-1,1,
-  -1,-1,0,-1,-1,-1,-1,1,
+  // ReflectionExtension lists
+  0,1,-1,
+  -1,
+  -1,
+  // ReflectionFunction hash
+  -1,0,-1,-1,-1,-1,-1,-1,
+  // ReflectionFunction lists
+  -1,
+  -1,
+  -1,
+  // ReflectionFunctionAbstract hash
   -1,-1,-1,-1,-1,-1,-1,0,
-  0,-1,1,-1,-1,-1,-1,-1,
+  // ReflectionFunctionAbstract lists
+  -1,
+  -1,
+  -1,
+  // ReflectionMethod hash
+  -1,5,-1,-1,-1,-1,-1,-1,-1,4,-1,-1,2,-1,1,0,
+  6,-1,7,-1,-1,-1,-1,-1,
+  // ReflectionMethod lists
+  -1,
+  -1,
+  -1,
+  // ReflectionParameter hash
   -1,-1,-1,-1,-1,-1,-1,0,
-  0,-1,1,-1,-1,-1,-1,2,
+  // ReflectionParameter lists
+  -1,
+  -1,
+  -1,
+  // ReflectionProperty hash
+  -1,3,-1,-1,2,-1,1,0,
+  4,-1,5,-1,-1,-1,-1,6,
+  // ReflectionProperty lists
+  -1,
+  -1,
+  -1,
 };
 const ClassPropTable c_ReflectionClass::os_prop_table = {
-  7,0,cpt_hash_entries+0,
-  0,cpt_table_entries+0,cpt_private_entries+0
+  7,3,-1,-1,7,0,10,0,
+  cpt_hash_entries+8,0,cpt_table_entries+0,cpt_static_inits
 };
 const ClassPropTable c_ReflectionExtension::os_prop_table = {
-  7,0,cpt_hash_entries+8,
-  0,cpt_table_entries+2,cpt_private_entries+2
+  7,0,-1,-1,-1,-1,11,0,
+  cpt_hash_entries+20,0,cpt_table_entries+5,cpt_static_inits
+};
+const ClassPropTable c_ReflectionFunction::os_prop_table = {
+  -1,-1,-1,-1,7,0,1,0,
+  cpt_hash_entries+41,&c_ReflectionFunctionAbstract::os_prop_table,cpt_table_entries+7,cpt_static_inits
 };
 const ClassPropTable c_ReflectionFunctionAbstract::os_prop_table = {
-  7,0,cpt_hash_entries+16,
-  0,cpt_table_entries+4,cpt_private_entries+4
+  7,0,-1,-1,-1,-1,9,0,
+  cpt_hash_entries+44,0,cpt_table_entries+8,cpt_static_inits
 };
 const ClassPropTable c_ReflectionMethod::os_prop_table = {
-  7,1,cpt_hash_entries+24,
-  &c_ReflectionFunctionAbstract::os_prop_table,cpt_table_entries+5,cpt_private_entries+4
+  7,7,-1,-1,15,0,9,0,
+  cpt_hash_entries+71,&c_ReflectionFunctionAbstract::os_prop_table,cpt_table_entries+9,cpt_static_inits
 };
 const ClassPropTable c_ReflectionParameter::os_prop_table = {
-  7,0,cpt_hash_entries+32,
-  0,cpt_table_entries+7,cpt_private_entries+4
+  7,0,-1,-1,-1,-1,9,0,
+  cpt_hash_entries+82,0,cpt_table_entries+17,cpt_static_inits
 };
 const ClassPropTable c_ReflectionProperty::os_prop_table = {
-  7,2,cpt_hash_entries+40,
-  0,cpt_table_entries+8,cpt_private_entries+4
+  7,6,-1,-1,7,0,9,0,
+  cpt_hash_entries+101,0,cpt_table_entries+18,cpt_static_inits
 };
 
 ///////////////////////////////////////////////////////////////////////////////

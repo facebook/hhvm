@@ -31,40 +31,6 @@ namespace HPHP {
 extern CallInfo ci_;
 /* preface finishes */
 /* SRC: classes/splobjectstorage.php line 12 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SplObjectStorage
-Variant c_SplObjectStorage::os_getInit(CStrRef s) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 2:
-      HASH_RETURN_NAMSTR(0x4B27521443880CAELL, NAMSTR(s_sys_ssc0ff3081, "index"),
-                         0LL, 5);
-      break;
-    case 3:
-      HASH_RETURN_NAMSTR(0x17AC96477E2B6DC3LL, NAMSTR(s_sys_ss64fc2cb1, "storage"),
-                         s_sys_sa00000000, 7);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::os_getInit(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SplObjectStorage
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_SplObjectStorage
-Variant c_SplObjectStorage::os_get(CStrRef s) {
-  return c_ObjectData::os_get(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_SplObjectStorage
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplObjectStorage
-Variant &c_SplObjectStorage::os_lval(CStrRef s) {
-  return c_ObjectData::os_lval(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplObjectStorage
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SplObjectStorage
-Variant c_SplObjectStorage::os_constant(const char *s) {
-  return c_ObjectData::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SplObjectStorage
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(SplObjectStorage)
 const InstanceOfInfo c_SplObjectStorage::s_instanceof_table[] = {
   {0x795F86375EE263D1LL,0,"Countable",(const ObjectStaticCallbacks*)2},
@@ -289,10 +255,6 @@ const int c_SplObjectStorage::s_call_info_index[] = {
 
 };
 const ObjectStaticCallbacks cw_SplObjectStorage = {
-  c_SplObjectStorage::os_getInit,
-  c_SplObjectStorage::os_get,
-  c_SplObjectStorage::os_lval,
-  c_SplObjectStorage::os_constant,
   (ObjectData*(*)(ObjectData*))coo_SplObjectStorage,
   c_SplObjectStorage::s_call_info_table,c_SplObjectStorage::s_call_info_index,
   c_SplObjectStorage::s_instanceof_table,c_SplObjectStorage::s_instanceof_index,
@@ -430,22 +392,26 @@ ObjectData *coo_SplObjectStorage() {
 }
 
 // Class tables
+static const int64 cpt_static_inits[] = {
+  (int64)&s_sys_sva00000000,
+  (int64)&NAMVAR(s_sys_svif01bca90, 0LL),
+};
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x17AC96477E2B6DC3LL,1,18,258,10,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_storage),&NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage") },
-  {0x4B27521443880CAELL,0,18,258,4,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_index),&NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index") },
+  {0x17AC96477E2B6DC3LL,1,0,18,65,10,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_storage),&NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage") },
+  {0x4B27521443880CAELL,0,1,18,65,4,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_index),&NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index") },
 
 };
-static const ClassPropTableEntry *cpt_private_entries[] = {
-  cpt_table_entries+0,
-  cpt_table_entries+1,
-  0,
-};
 static const int cpt_hash_entries[] = {
+  // SplObjectStorage hash
   -1,-1,-1,0,-1,-1,1,-1,
+  // SplObjectStorage lists
+  0,1,-1,
+  -1,
+  -1,
 };
 const ClassPropTable c_SplObjectStorage::os_prop_table = {
-  7,0,cpt_hash_entries+0,
-  0,cpt_table_entries+0,cpt_private_entries+0
+  7,0,-1,-1,-1,-1,11,0,
+  cpt_hash_entries+0,0,cpt_table_entries+0,cpt_static_inits
 };
 
 ///////////////////////////////////////////////////////////////////////////////

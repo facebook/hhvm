@@ -33,20 +33,7 @@ class c_MutableArrayIterator : public c_ArrayIterator {
   // Properties
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(MutableArrayIterator, MutableArrayIterator)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_MutableArrayIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_MutableArrayIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_MutableArrayIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_MutableArrayIterator 1
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(MutableArrayIterator, MutableArrayIterator, ArrayIterator)
   public: void t___construct(VRefParam rv_array, Variant v_flags = 0LL);
   public: c_MutableArrayIterator *create(VRefParam v_array, CVarRef v_flags = NAMVAR(s_sys_svif01bca90, 0LL));
   public: void dynConstruct(CArrRef params);

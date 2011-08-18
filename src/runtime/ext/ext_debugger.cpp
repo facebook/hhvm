@@ -24,25 +24,25 @@ namespace HPHP {
 
 using namespace Eval;
 
-const int64 q_DebuggerClient_AUTO_COMPLETE_FILENAMES =
+const int64 q_DebuggerClient$$AUTO_COMPLETE_FILENAMES =
   DebuggerClient::AutoCompleteFileNames;
-const int64 q_DebuggerClient_AUTO_COMPLETE_VARIABLES =
+const int64 q_DebuggerClient$$AUTO_COMPLETE_VARIABLES =
   DebuggerClient::AutoCompleteVariables;
-const int64 q_DebuggerClient_AUTO_COMPLETE_CONSTANTS =
+const int64 q_DebuggerClient$$AUTO_COMPLETE_CONSTANTS =
   DebuggerClient::AutoCompleteConstants;
-const int64 q_DebuggerClient_AUTO_COMPLETE_CLASSES   =
+const int64 q_DebuggerClient$$AUTO_COMPLETE_CLASSES   =
   DebuggerClient::AutoCompleteClasses;
-const int64 q_DebuggerClient_AUTO_COMPLETE_FUNCTIONS =
+const int64 q_DebuggerClient$$AUTO_COMPLETE_FUNCTIONS =
   DebuggerClient::AutoCompleteFunctions;
-const int64 q_DebuggerClient_AUTO_COMPLETE_CLASS_METHODS =
+const int64 q_DebuggerClient$$AUTO_COMPLETE_CLASS_METHODS =
   DebuggerClient::AutoCompleteClassMethods;
-const int64 q_DebuggerClient_AUTO_COMPLETE_CLASS_PROPERTIES =
+const int64 q_DebuggerClient$$AUTO_COMPLETE_CLASS_PROPERTIES =
   DebuggerClient::AutoCompleteClassProperties;
-const int64 q_DebuggerClient_AUTO_COMPLETE_CLASS_CONSTANTS =
+const int64 q_DebuggerClient$$AUTO_COMPLETE_CLASS_CONSTANTS =
   DebuggerClient::AutoCompleteClassConstants;
-const int64 q_DebuggerClient_AUTO_COMPLETE_KEYWORDS =
+const int64 q_DebuggerClient$$AUTO_COMPLETE_KEYWORDS =
   DebuggerClient::AutoCompleteKeyword;
-const int64 q_DebuggerClient_AUTO_COMPLETE_CODE =
+const int64 q_DebuggerClient$$AUTO_COMPLETE_CODE =
   DebuggerClient::AutoCompleteCode;
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -34,20 +34,7 @@ class c_ErrorException : public c_Exception {
   Variant m_severity;
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(ErrorException, ErrorException)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  static Variant os_getInit(CStrRef s);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_ErrorException 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ErrorException 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_ErrorException 1
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(ErrorException, ErrorException, Exception)
   static const ClassPropTable os_prop_table;
   c_ErrorException() : m_severity(Variant::nullInit) {}
   public: void t___construct(Variant v_message = NAMSTR(s_sys_ss00000000, ""), Variant v_code = 0LL, Variant v_severity = 0LL, Variant v_filename = null, Variant v_lineno = null);

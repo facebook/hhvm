@@ -32,13 +32,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const int q_SpoofChecker_SINGLE_SCRIPT_CONFUSABLE;
-extern const int q_SpoofChecker_MIXED_SCRIPT_CONFUSABLE;
-extern const int q_SpoofChecker_WHOLE_SCRIPT_CONFUSABLE;
-extern const int q_SpoofChecker_ANY_CASE;
-extern const int q_SpoofChecker_SINGLE_SCRIPT;
-extern const int q_SpoofChecker_INVISIBLE;
-extern const int q_SpoofChecker_CHAR_LIMIT;
+extern const int q_SpoofChecker$$SINGLE_SCRIPT_CONFUSABLE;
+extern const int q_SpoofChecker$$MIXED_SCRIPT_CONFUSABLE;
+extern const int q_SpoofChecker$$WHOLE_SCRIPT_CONFUSABLE;
+extern const int q_SpoofChecker$$ANY_CASE;
+extern const int q_SpoofChecker$$SINGLE_SCRIPT;
+extern const int q_SpoofChecker$$INVISIBLE;
+extern const int q_SpoofChecker$$CHAR_LIMIT;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class SpoofChecker
@@ -68,6 +68,7 @@ class c_SpoofChecker : public ExtObjectData {
   public: c_SpoofChecker *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
+  static const ClassPropTable os_prop_table;
 
 
   private: USpoofChecker *m_spoof_checker;

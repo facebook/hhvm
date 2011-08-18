@@ -50,14 +50,14 @@ bool TestExtMemcached::RunTests(const std::string &which) {
 
 bool TestExtMemcached::test_Memcached_construct_persistent() {
   p_Memcached memc1(p_Memcached(NEWOBJ(c_Memcached))->create("test"));
-  memc1->t_setoption(q_Memcached_OPT_PREFIX_KEY, "php");
-  VS(memc1->t_getoption(q_Memcached_OPT_PREFIX_KEY), "php");
+  memc1->t_setoption(q_Memcached$$OPT_PREFIX_KEY, "php");
+  VS(memc1->t_getoption(q_Memcached$$OPT_PREFIX_KEY), "php");
 
   p_Memcached memc2(p_Memcached(NEWOBJ(c_Memcached))->create("test"));
-  VS(memc2->t_getoption(q_Memcached_OPT_PREFIX_KEY), "php");
+  VS(memc2->t_getoption(q_Memcached$$OPT_PREFIX_KEY), "php");
 
   p_Memcached memc3(p_Memcached(NEWOBJ(c_Memcached))->create());
-  VS(memc3->t_getoption(q_Memcached_OPT_PREFIX_KEY), "");
+  VS(memc3->t_getoption(q_Memcached$$OPT_PREFIX_KEY), "");
 
   return Count(true);
 }

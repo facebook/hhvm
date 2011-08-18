@@ -271,6 +271,254 @@ Object RedeclaredObjectStaticCallbacks::createOnly(ObjectData *root) const {
   return oscb.createOnly(root);
 }
 
+static Variant GetInitVal(const ClassPropTable *cpt,
+                          const ClassPropTableEntry *prop) {
+  int64 id = cpt->m_static_inits[prop->init_offset];
+  if (LIKELY(!(id & 7))) {
+    return *(Variant*)id;
+  }
+  switch (id & 7) {
+    case 1: {
+      int off = id >> 32;
+      CStrRef s = cpt->getInitS((id>>4) & 0xfffffff);
+      if (off) {
+        char *addr = (char*)get_global_variables() + off;
+        return getDynamicConstant(*(Variant*)addr, s);
+      } else {
+        return getUndefinedConstant(s);
+      }
+    }
+    case 2: {
+      const ObjectStaticCallbacks *osc =
+        (const ObjectStaticCallbacks *)cpt->getInitP((id >> 4) & 0xfffffff);
+      const char *addr =
+        (const char *)osc->lazy_initializer(get_global_variables()) +
+        (id >> 32);
+      return *(Variant*)addr;
+    }
+    case 3: {
+      char *addr = (char*)get_global_variables() + (id & 0x7ffffff8);
+      ObjectStaticCallbacks *osc = *(ObjectStaticCallbacks**)addr;
+      return osc->os_constant(cpt->getInitS(id>>32).c_str());
+    }
+    case 4: {
+      ObjectStaticCallbacks *osc =
+        (ObjectStaticCallbacks*)cpt->getInitP((id & 0x7fffffff)>>4);
+      return osc->os_constant(cpt->getInitS(id>>32).c_str());
+    }
+    case 5:
+      throw FatalErrorException(0, "unknown class constant %s::%s",
+                                cpt->getInitS((id & 0x7fffffff)>>4).c_str(),
+                                cpt->getInitS(id>>32).c_str());
+
+    case 6: {
+      void *func = cpt->getInitP((id >> 4) & 0x7ffffff);
+      if (id >> 32) {
+        return ((CVarRef (*)())func)();
+      } else {
+        return ((Variant (*)())func)();
+      }
+    }
+
+    case 7:
+      return ClassPropTableEntry::GetVariant((id >> 4) & 15,
+                                             cpt->getInitP(id >> 32));
+  }
+  throw FatalErrorException("Failed to get init val");
+}
+
+static void LazyInitializer(const ClassPropTable *cpt, const char *globals) {
+  const char *addr = globals + cpt->m_lazy_init_offset;
+  if (!*(bool*)addr) {
+    *(bool*)addr = true;
+    int i = 0;
+    for (const int *p = cpt->lazy_inits(); ; *p++) {
+      if (*p < 0) {
+        if (i++) break;
+        continue;
+      }
+      const ClassPropTableEntry *ce = cpt->m_entries + *p;
+      CVarRef init = GetInitVal(cpt, ce);
+      addr = globals + ce->offset;
+      if (LIKELY(ce->type == KindOfVariant)) {
+        *(Variant*)addr = init;
+      } else {
+        switch (ce->type) {
+          case KindOfBoolean: *(bool*)addr = init;   break;
+          case KindOfInt32:   *(int*)addr = init;    break;
+          case KindOfInt64:   *(int64*)addr = init;  break;
+          case KindOfDouble:  *(double*)addr = init; break;
+          case KindOfString:  *(String*)addr = init; break;
+          case KindOfArray:   *(Array*)addr = init;  break;
+          case KindOfObject:  *(Object*)addr = init; break;
+          default:            ASSERT(false);          break;
+        }
+      }
+    }
+  }
+}
+
+inline ALWAYS_INLINE
+const ClassPropTableEntry *PropertyFinder(
+  const ClassPropTable **resTable,
+  CStrRef propName, int64 hash, int flagsMask, int flagsVal,
+  const ObjectStaticCallbacks *osc) {
+  const char *globals = 0;
+  do {
+    if (const ClassPropTable *cpt = osc->cpt) {
+      if (cpt->m_lazy_init_offset) {
+        if (LIKELY(!globals)) {
+          globals = (char*)get_global_variables();
+        }
+        LazyInitializer(cpt, globals);
+      }
+      do {
+        if ((!(flagsMask & ClassPropTableEntry::Static) ||
+             (flagsVal & ClassPropTableEntry::Static)) &&
+            (!(flagsMask & ClassPropTableEntry::Constant) ||
+             !(flagsVal & ClassPropTableEntry::Constant))) {
+          if (cpt->m_static_size_mask >= 0) {
+            const int *ix = cpt->m_hash_entries;
+            int h = hash & cpt->m_static_size_mask;
+            int o = ix[-h-1];
+            if (o >= 0) {
+              const ClassPropTableEntry *prop = cpt->m_entries + o;
+              do {
+                if ((prop->flags & flagsMask) == flagsVal &&
+                    hash == prop->hash &&
+                    LIKELY(!strcmp(prop->keyName->data() + prop->prop_offset,
+                                   propName->data()))) {
+                  if (resTable) *resTable = cpt;
+                  return prop;
+                }
+              } while (!prop++->isLast());
+            }
+          }
+        }
+        if ((!(flagsMask & ClassPropTableEntry::Static) ||
+             !(flagsVal & ClassPropTableEntry::Static)) &&
+            (!(flagsMask & ClassPropTableEntry::Constant) ||
+             !(flagsVal & ClassPropTableEntry::Constant))) {
+          if (cpt->m_size_mask >= 0) {
+            const int *ix = cpt->m_hash_entries;
+            int h = hash & cpt->m_size_mask;
+            int o = ix[h];
+            if (o >= 0) {
+              const ClassPropTableEntry *prop = cpt->m_entries + o;
+              do {
+                if ((prop->flags & flagsMask) == flagsVal &&
+                    hash == prop->hash &&
+                    LIKELY(!strcmp(prop->keyName->data() + prop->prop_offset,
+                                   propName->data()))) {
+                  if (resTable) *resTable = cpt;
+                  return prop;
+                }
+              } while (!prop++->isLast());
+            }
+          }
+        }
+        if (!(flagsMask & ClassPropTableEntry::Constant) ||
+            (flagsVal & ClassPropTableEntry::Constant)) {
+          if (cpt->m_const_size_mask >= 0) {
+            const int *ix = cpt->m_hash_entries;
+            int h = hash & cpt->m_const_size_mask;
+            int o = ix[-cpt->m_static_size_mask-h-2];
+            if (o >= 0) {
+              const ClassPropTableEntry *prop = cpt->m_entries + o;
+              do {
+                if ((prop->flags & flagsMask) == flagsVal &&
+                    hash == prop->hash &&
+                    LIKELY(!strcmp(prop->keyName->data() + prop->prop_offset,
+                                   propName->data()))) {
+                  if (resTable) *resTable = cpt;
+                  return prop;
+                }
+              } while (!prop++->isLast());
+            }
+          }
+        }
+        cpt = cpt->m_parent;
+      } while (cpt);
+    }
+    if (LIKELY(!osc->redeclaredParent)) break;
+    if (LIKELY(!globals)) {
+      globals = (char*)get_global_variables();
+    }
+    osc = *(ObjectStaticCallbacks**)(globals + osc->redeclaredParent);
+  } while (osc);
+
+  return 0;
+}
+
+Variant ObjectStaticCallbacks::os_getInit(CStrRef s) const {
+  const ClassPropTable *cpt;
+  const ClassPropTableEntry *prop = PropertyFinder(&cpt, s, s->hash(),
+                                                   0, 0, this);
+  if (UNLIKELY(!prop)) {
+    throw FatalErrorException(0, "unknown property %s", s.c_str());
+  }
+  return GetInitVal(cpt, prop);
+}
+
+Variant ObjectStaticCallbacks::os_get(CStrRef s) const {
+  const ClassPropTable *cpt;
+  const ClassPropTableEntry *prop = PropertyFinder(
+    &cpt, s, s->hash(),
+    ClassPropTableEntry::Static|ClassPropTableEntry::Private,
+    ClassPropTableEntry::Static, this);
+
+  if (UNLIKELY(!prop)) {
+    throw FatalErrorException(0, "unknown static property %s", s.c_str());
+  }
+
+  GlobalVariables *g = get_global_variables();
+  char *addr = (char*)g + prop->offset;
+  if (LIKELY(prop->type == KindOfVariant)) {
+    return *(Variant*)addr;
+  }
+
+  return prop->getVariant(addr);
+}
+
+Variant &ObjectStaticCallbacks::os_lval(CStrRef s) const {
+  const ClassPropTable *cpt;
+  const ClassPropTableEntry *prop = PropertyFinder(
+    &cpt, s, s->hash(),
+    ClassPropTableEntry::Static|ClassPropTableEntry::Private,
+    ClassPropTableEntry::Static, this);
+
+  if (LIKELY(prop != 0) && LIKELY(prop->type == KindOfVariant)) {
+    GlobalVariables *g = get_global_variables();
+    char *addr = (char*)g + prop->offset;
+    return *(Variant*)addr;
+  }
+
+  throw FatalErrorException(0, "unknown static property %s", s.c_str());
+}
+
+Variant ObjectStaticCallbacks::os_constant(const char *s) const {
+  const ClassPropTable *cpt;
+  const ClassPropTableEntry *prop = PropertyFinder(
+    &cpt, s, hash_string_i(s),
+    ClassPropTableEntry::Constant,
+    ClassPropTableEntry::Constant, this);
+
+  if (UNLIKELY(!prop)) {
+    throw FatalErrorException(0, "unknown class constant %s::%s",
+                              (*cls)->data(), s);
+  }
+
+  return GetInitVal(cpt, prop);
+}
+
+GlobalVariables *ObjectStaticCallbacks::lazy_initializer(
+  GlobalVariables *g) const {
+  ASSERT(cpt);
+  ASSERT(cpt->m_lazy_init_offset);
+  LazyInitializer(cpt, (const char*)g);
+  return g;
+}
+
 Object ObjectStaticCallbacks::create(CArrRef params, bool init /* = true */,
                             ObjectData* root /* = NULL */) const {
   Object o(createOnlyNoInit(root));
@@ -470,52 +718,30 @@ Variant *ObjectData::RealPropPublicHelper(
   do {
     if (const ClassPropTable *cpt = osc->cpt) {
       do {
-        const int *ix = cpt->m_hash_entries;
-        int h = hash & cpt->m_size_mask;
-        int o = ix[h];
-        if (o >= 0) {
-          const ClassPropTableEntry *prop = cpt->m_entries + o;
-          do {
-            if (!(prop->flags & ClassInfo::IsPrivate) &&
-                hash == prop->hash &&
-                LIKELY(!strcmp(prop->keyName->data(),
-                               propName->data()))) {
-              const char *addr = ((const char *)obj) + prop->offset;
-              if (LIKELY(prop->type == KindOfVariant)) {
-                return (Variant*)addr;
+        if (cpt->m_size_mask >= 0) {
+          const int *ix = cpt->m_hash_entries;
+          int h = hash & cpt->m_size_mask;
+          int o = ix[h];
+          if (o >= 0) {
+            const ClassPropTableEntry *prop = cpt->m_entries + o;
+            do {
+              if (!prop->isPrivate() &&
+                  !prop->isOverride() &&
+                  hash == prop->hash &&
+                  LIKELY(!strcmp(prop->keyName->data(),
+                                 propName->data()))) {
+                const char *addr = ((const char *)obj) + prop->offset;
+                if (LIKELY(prop->type == KindOfVariant)) {
+                  return (Variant*)addr;
+                }
+                if (flags & (RealPropCreate|RealPropWrite)) break;
+                if (LIKELY(!globals)) globals = (char*)get_global_variables();
+                Variant *res = &((Globals*)globals)->__realPropProxy;
+                *res = prop->getVariant(addr);
+                return res;
               }
-              if (flags & (RealPropCreate|RealPropWrite)) break;
-              if (LIKELY(!globals)) globals = (char*)get_global_variables();
-              Variant *res = &((Globals*)globals)->__realPropProxy;
-              switch (prop->type) {
-                case KindOfBoolean:
-                  *res = *(bool*)addr;
-                  break;
-                case KindOfInt32:
-                  *res = *(int*)addr;
-                  break;
-                case KindOfInt64:
-                  *res = *(int64*)addr;
-                  break;
-                case KindOfDouble:
-                  *res = *(double*)addr;
-                  break;
-                case KindOfString:
-                  *res = *(String*)addr;
-                  break;
-                case KindOfArray:
-                  *res = *(Array*)addr;
-                  break;
-                case KindOfObject:
-                  *res = *(Object*)addr;
-                  break;
-                default:
-                  ASSERT(false);
-                  break;
-              }
-              return res;
-            }
-          } while (!(prop++->flags & ClassInfo::IsRedeclared));
+            } while (!prop++->isLast());
+          }
         }
         cpt = cpt->m_parent;
       } while (cpt);
@@ -594,14 +820,14 @@ Variant *ObjectData::o_realProp(CStrRef propName, int flags,
 
     found_private_class:
     const ClassPropTable *cpt = osc->cpt;
-    if (cpt && *cpt->m_pentries) {
+    if (cpt && *cpt->privates() >= 0) {
       const int *ix = cpt->m_hash_entries;
       int h = hash & cpt->m_size_mask;
       int o = ix[h];
       if (o >= 0) {
         const ClassPropTableEntry *prop = cpt->m_entries + o;
         do {
-          if (prop->flags & ClassInfo::IsPrivate &&
+          if (prop->isPrivate() &&
               hash == prop->hash &&
               LIKELY(!strcmp(prop->keyName->data() + prop->prop_offset,
                              propName->data()))) {
@@ -612,35 +838,10 @@ Variant *ObjectData::o_realProp(CStrRef propName, int flags,
             if (flags & (RealPropCreate|RealPropWrite)) break;
             if (LIKELY(!globals)) globals = (char*)get_global_variables();
             Variant *res = &((Globals*)globals)->__realPropProxy;
-            switch (prop->type) {
-              case KindOfBoolean:
-                *res = *(bool*)addr;
-                break;
-              case KindOfInt32:
-                *res = *(int*)addr;
-                break;
-              case KindOfInt64:
-                *res = *(int64*)addr;
-                break;
-              case KindOfDouble:
-                *res = *(double*)addr;
-                break;
-              case KindOfString:
-                *res = *(String*)addr;
-                break;
-              case KindOfArray:
-                *res = *(Array*)addr;
-                break;
-              case KindOfObject:
-                *res = *(Object*)addr;
-                break;
-              default:
-                ASSERT(false);
-                break;
-            }
+            *res = prop->getVariant(addr);
             return res;
           }
-        } while (!(prop++->flags & ClassInfo::IsRedeclared));
+        } while (!prop++->isLast());
       }
     }
   }

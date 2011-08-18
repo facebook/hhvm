@@ -33,28 +33,28 @@ typedef unsigned char *(*xmlreader_read_one_char_t)(xmlTextReaderPtr reader, con
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const int64 q_XMLReader_NONE;
-extern const int64 q_XMLReader_ELEMENT;
-extern const int64 q_XMLReader_ATTRIBUTE;
-extern const int64 q_XMLReader_TEXT;
-extern const int64 q_XMLReader_CDATA;
-extern const int64 q_XMLReader_ENTITY_REF;
-extern const int64 q_XMLReader_ENTITY;
-extern const int64 q_XMLReader_PI;
-extern const int64 q_XMLReader_COMMENT;
-extern const int64 q_XMLReader_DOC;
-extern const int64 q_XMLReader_DOC_TYPE;
-extern const int64 q_XMLReader_DOC_FRAGMENT;
-extern const int64 q_XMLReader_NOTATION;
-extern const int64 q_XMLReader_WHITESPACE;
-extern const int64 q_XMLReader_SIGNIFICANT_WHITESPACE;
-extern const int64 q_XMLReader_END_ELEMENT;
-extern const int64 q_XMLReader_END_ENTITY;
-extern const int64 q_XMLReader_XML_DECLARATION;
-extern const int64 q_XMLReader_LOADDTD;
-extern const int64 q_XMLReader_DEFAULTATTRS;
-extern const int64 q_XMLReader_VALIDATE;
-extern const int64 q_XMLReader_SUBST_ENTITIES;
+extern const int64 q_XMLReader$$NONE;
+extern const int64 q_XMLReader$$ELEMENT;
+extern const int64 q_XMLReader$$ATTRIBUTE;
+extern const int64 q_XMLReader$$TEXT;
+extern const int64 q_XMLReader$$CDATA;
+extern const int64 q_XMLReader$$ENTITY_REF;
+extern const int64 q_XMLReader$$ENTITY;
+extern const int64 q_XMLReader$$PI;
+extern const int64 q_XMLReader$$COMMENT;
+extern const int64 q_XMLReader$$DOC;
+extern const int64 q_XMLReader$$DOC_TYPE;
+extern const int64 q_XMLReader$$DOC_FRAGMENT;
+extern const int64 q_XMLReader$$NOTATION;
+extern const int64 q_XMLReader$$WHITESPACE;
+extern const int64 q_XMLReader$$SIGNIFICANT_WHITESPACE;
+extern const int64 q_XMLReader$$END_ELEMENT;
+extern const int64 q_XMLReader$$END_ENTITY;
+extern const int64 q_XMLReader$$XML_DECLARATION;
+extern const int64 q_XMLReader$$LOADDTD;
+extern const int64 q_XMLReader$$DEFAULTATTRS;
+extern const int64 q_XMLReader$$VALIDATE;
+extern const int64 q_XMLReader$$SUBST_ENTITIES;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class XMLReader
@@ -128,6 +128,7 @@ class c_XMLReader : public ExtObjectDataFlags<ObjectData::UseGet>, public Sweepa
   public: c_XMLReader *create();
   public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
+  static const ClassPropTable os_prop_table;
 
 
   private: String read_string_func(xmlreader_read_char_t internal_function);

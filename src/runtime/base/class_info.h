@@ -434,27 +434,92 @@ public:
 };
 
 struct ClassPropTableEntry {
+  enum {
+    Private = 1,
+    Protected = 2,
+    Public = 4,
+    Static = 8,
+    Override = 16,
+    Constant = 32,
+    Last = 64,
+  };
+
   int64         hash;
   int           next;
-  int           prop_offset;
-  short         flags;
-  short         type;
+  int           init_offset;
+  uint16        prop_offset;
+  uint8         flags;
+  uint8         type;
   int           offset;
   StaticString *keyName;
-  bool isPublic() const { return flags & ClassInfo::IsPublic; }
-  bool isPrivate() const { return flags & ClassInfo::IsPrivate; }
-  bool isOverride() const { return flags & ClassInfo::IsOverride; }
-  const ClassPropTableEntry *nextByOrder() const { return this + 1; }
+  bool isPublic() const { return flags & Public; }
+  bool isPrivate() const { return flags & Private; }
+  bool isOverride() const { return flags & Override; }
+  bool isStatic() const { return flags & Static; }
+  bool isConstant() const { return flags & Constant; }
+  bool isLast() const { return flags & Last; }
+
+  static Variant GetVariant(int type, const void *addr) {
+    switch (type) {
+      case KindOfBoolean:
+        return *(bool*)addr;
+      case KindOfInt32:
+        return *(int*)addr;
+      case KindOfInt64:
+        return *(int64*)addr;
+      case KindOfDouble:
+        return *(double*)addr;
+      case KindOfString:
+        return *(String*)addr;
+      case KindOfArray:
+        return *(Array*)addr;
+      case KindOfObject:
+        return *(Object*)addr;
+      default:
+        ASSERT(false);
+        return null;
+    }
+  }
+
+  Variant getVariant(const void *addr) const {
+    return GetVariant(type, addr);
+  }
 };
 
 class ClassPropTable {
 public:
   int m_size_mask;
   int m_offset;
+  int m_static_size_mask;
+  int m_static_offset;
+  int m_const_size_mask;
+  int m_const_offset;
+
+  int m_lazy_inits_list;
+  int m_lazy_init_offset;
+
   const int *m_hash_entries;
   const ClassPropTable *m_parent;
   const ClassPropTableEntry *m_entries;
-  const ClassPropTableEntry **m_pentries;
+  const int64 *m_static_inits;
+
+  CVarRef getInitV(int id) const {
+    return *(Variant*)m_static_inits[id];
+  }
+  CStrRef getInitS(int id) const {
+    return getInitV(id).asCStrRef();
+  }
+  void *getInitP(int id) const {
+    return (void*)m_static_inits[id];
+  }
+
+  const int *privates() const {
+    return m_hash_entries + m_size_mask + 1;
+  }
+
+  const int *lazy_inits() const {
+    return m_hash_entries + m_lazy_inits_list;
+  }
 };
 
 #define GET_PROPERTY_OFFSET(c, n) \

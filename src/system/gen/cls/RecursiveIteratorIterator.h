@@ -35,20 +35,7 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   Variant m_rsrc;
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(RecursiveIteratorIterator, RecursiveIteratorIterator)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  static Variant os_getInit(CStrRef s);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_RecursiveIteratorIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RecursiveIteratorIterator 1
-  static Variant os_constant(const char *s);
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(RecursiveIteratorIterator, RecursiveIteratorIterator, ObjectData)
   static const ClassPropTable os_prop_table;
   c_RecursiveIteratorIterator() : m_rsrc(Variant::nullInit) {}
   public: void t___construct(Variant v_iterator, Variant v_mode = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */, Variant v_flags = 0LL);
@@ -70,10 +57,10 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 ObjectData *coo_RecursiveIteratorIterator() NEVER_INLINE;
-extern const int64 q_RecursiveIteratorIterator_LEAVES_ONLY;
-extern const int64 q_RecursiveIteratorIterator_SELF_FIRST;
-extern const int64 q_RecursiveIteratorIterator_CHILD_FIRST;
-extern const int64 q_RecursiveIteratorIterator_CATCH_GET_CHILD;
+extern const int64 q_RecursiveIteratorIterator$$LEAVES_ONLY;
+extern const int64 q_RecursiveIteratorIterator$$SELF_FIRST;
+extern const int64 q_RecursiveIteratorIterator$$CHILD_FIRST;
+extern const int64 q_RecursiveIteratorIterator$$CATCH_GET_CHILD;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

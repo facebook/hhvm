@@ -98,10 +98,6 @@ namespace HPHP {
 #define DECLARE_STATIC_PROP_OPS                                         \
   public:                                                               \
   static void os_static_initializer();                                  \
-  static Variant os_getInit(CStrRef s);                                 \
-  static Variant os_get(CStrRef s);                                     \
-  static Variant &os_lval(CStrRef s);                                   \
-  static Variant os_constant(const char *s);                            \
   static const MethodCallInfoTable s_call_info_table[];                 \
   static const int s_call_info_index[];                                 \
 

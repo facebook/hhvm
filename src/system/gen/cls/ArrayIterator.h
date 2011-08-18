@@ -37,20 +37,7 @@ class c_ArrayIterator : public ExtObjectData {
   Variant m_flags;
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(ArrayIterator, ArrayIterator)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  static Variant os_getInit(CStrRef s);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_ArrayIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ArrayIterator 1
-  static Variant os_constant(const char *s);
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(ArrayIterator, ArrayIterator, ObjectData)
   static const ClassPropTable os_prop_table;
   c_ArrayIterator() : m_arr(Variant::nullInit), m_flags(Variant::nullInit) {}
   public: void t___construct(Variant v_array, Variant v_flags = 0LL);
@@ -103,8 +90,8 @@ class c_ArrayIterator : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(offsetset);
 };
 ObjectData *coo_ArrayIterator() NEVER_INLINE;
-extern const int64 q_ArrayIterator_STD_PROP_LIST;
-extern const int64 q_ArrayIterator_ARRAY_AS_PROPS;
+extern const int64 q_ArrayIterator$$STD_PROP_LIST;
+extern const int64 q_ArrayIterator$$ARRAY_AS_PROPS;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

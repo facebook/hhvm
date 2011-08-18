@@ -37,10 +37,6 @@ class c_RuntimeException : public c_Exception {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RuntimeException 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_RuntimeException 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RuntimeException 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_RuntimeException 1
 
   // DECLARE_COMMON_INVOKE
   static const int s_call_info_table = 0;

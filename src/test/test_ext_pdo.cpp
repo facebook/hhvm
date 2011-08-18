@@ -77,14 +77,14 @@ bool TestExtPdo::test_pdo_mysql() {
 
     p_PDO dbh((NEWOBJ(c_PDO)())->
               create(source.c_str(), TEST_USERNAME, TEST_PASSWORD,
-                     CREATE_MAP1(q_PDO_ATTR_PERSISTENT, false)));
+                     CREATE_MAP1(q_PDO$$ATTR_PERSISTENT, false)));
     Variant vstmt = dbh->t_prepare("select * from test");
     c_PDOStatement *stmt = vstmt.toObject().getTyped<c_PDOStatement>();
     VERIFY(stmt->t_execute());
 
-    Variant rs = stmt->t_fetch(q_PDO_FETCH_ASSOC);
+    Variant rs = stmt->t_fetch(q_PDO$$FETCH_ASSOC);
     VS(rs, CREATE_MAP2("id", "1", "name", "test"));
-    rs = stmt->t_fetch(q_PDO_FETCH_ASSOC);
+    rs = stmt->t_fetch(q_PDO$$FETCH_ASSOC);
     VS(rs, CREATE_MAP2("id", "2", "name", "test2"));
 
   } catch (Object &e) {
@@ -101,14 +101,14 @@ bool TestExtPdo::test_pdo_sqlite() {
 
     p_PDO dbh((NEWOBJ(c_PDO)())->
               create(source.c_str(), TEST_USERNAME, TEST_PASSWORD,
-                     CREATE_MAP1(q_PDO_ATTR_PERSISTENT, false)));
+                     CREATE_MAP1(q_PDO$$ATTR_PERSISTENT, false)));
     Variant vstmt = dbh->t_prepare("select * from foo");
     c_PDOStatement *stmt = vstmt.toObject().getTyped<c_PDOStatement>();
     VERIFY(stmt->t_execute());
 
-    Variant rs = stmt->t_fetch(q_PDO_FETCH_ASSOC);
+    Variant rs = stmt->t_fetch(q_PDO$$FETCH_ASSOC);
     VS(rs, CREATE_MAP1("bar", "ABC"));
-    rs = stmt->t_fetch(q_PDO_FETCH_ASSOC);
+    rs = stmt->t_fetch(q_PDO$$FETCH_ASSOC);
     VS(rs, CREATE_MAP1("bar", "DEF"));
 
   } catch (Object &e) {
@@ -120,7 +120,7 @@ bool TestExtPdo::test_pdo_sqlite() {
 
     p_PDO dbh((NEWOBJ(c_PDO)())->
               create(source.c_str(), TEST_USERNAME, TEST_PASSWORD,
-                     CREATE_MAP1(q_PDO_ATTR_PERSISTENT, false)));
+                     CREATE_MAP1(q_PDO$$ATTR_PERSISTENT, false)));
     Variant vstmt = dbh->t_query("select * from foo");
     ArrayIter iter = vstmt.begin();
     VERIFY(!iter.end());
@@ -141,7 +141,7 @@ bool TestExtPdo::test_pdo_sqlite() {
     string source = "sqlite:/tmp/foo.db";
     p_PDO dbh((NEWOBJ(c_PDO)())->
                create(source.c_str(), TEST_USERNAME, TEST_PASSWORD,
-                      CREATE_MAP1(q_PDO_ATTR_PERSISTENT, false)));
+                      CREATE_MAP1(q_PDO$$ATTR_PERSISTENT, false)));
     dbh->t_query("CREATE TABLE IF NOT EXISTS foobar (id INT)");
     dbh->t_query("INSERT INTO foobar (id) VALUES (1)");
     Variant res = dbh->t_query("SELECT id FROM foobar LIMIT 1");

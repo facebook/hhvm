@@ -33,6 +33,7 @@ namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(apc);
 ///////////////////////////////////////////////////////////////////////////////
 
+KEEP_SECTION
 bool f_apc_store(CStrRef key, CVarRef var, int64 ttl /* = 0 */,
                  int64 cache_id /* = 0 */) {
   if (!RuntimeOption::EnableApc) return false;
@@ -335,6 +336,7 @@ static int count_items(const char **p, int step) {
   return count;
 }
 
+KEEP_SECTION
 void const_load_impl(struct cache_info *info,
                      const char **int_keys, int64 *int_values,
                      const char **char_keys, char *char_values,
@@ -430,6 +432,7 @@ void const_load_impl(struct cache_info *info,
   }
 }
 
+KEEP_SECTION
 void apc_load_impl(struct cache_info *info,
                    const char **int_keys, int64 *int_values,
                    const char **char_keys, char *char_values,
@@ -554,6 +557,7 @@ void apc_load_impl(struct cache_info *info,
 ///////////////////////////////////////////////////////////////////////////////
 // Constant and APC priming with compressed data
 
+KEEP_SECTION
 void const_load_impl_compressed
     (struct cache_info *info,
      int *int_lens, const char *int_keys, int64 *int_values,
@@ -691,6 +695,7 @@ void const_load_impl_compressed
   }
 }
 
+KEEP_SECTION
 void apc_load_impl_compressed
     (struct cache_info *info,
      int *int_lens, const char *int_keys, int64 *int_values,
@@ -859,6 +864,7 @@ void apc_load_impl_compressed
 
 // =============================   Temporary   ==============================
 
+KEEP_SECTION
 void const_load_impl(const char **int_keys, int64 *int_values,
                      const char **char_keys, char *char_values,
                      const char **strings, const char **objects,
@@ -952,6 +958,7 @@ void const_load_impl(const char **int_keys, int64 *int_values,
   }
 }
 
+KEEP_SECTION
 void apc_load_impl(const char **int_keys, int64 *int_values,
                    const char **char_keys, char *char_values,
                    const char **strings, const char **objects,
@@ -1069,6 +1076,7 @@ void apc_load_impl(const char **int_keys, int64 *int_values,
   }
 }
 
+KEEP_SECTION
 void const_load_impl_compressed
     (int *int_lens, const char *int_keys, int64 *int_values,
      int *char_lens, const char *char_keys, char *char_values,
@@ -1204,6 +1212,7 @@ void const_load_impl_compressed
   }
 }
 
+KEEP_SECTION
 void apc_load_impl_compressed
     (int *int_lens, const char *int_keys, int64 *int_values,
      int *char_lens, const char *char_keys, char *char_values,

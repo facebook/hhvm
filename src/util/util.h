@@ -35,6 +35,20 @@ namespace HPHP { namespace Util {
 #define LIKELY(pred)   __builtin_expect((pred), true)
 #define UNLIKELY(pred) __builtin_expect((pred), false)
 #define HOT_FUNC       __attribute__ ((section (".text.hot.builtin")))
+
+/*
+ * we need to keep some unreferenced functions from being removed by
+ * the linker. There is no compile time mechanism for doing this, but
+ * by putting them in the same section as some other, referenced function
+ * in the same file, we can keep them around.
+ *
+ * So this macro should be used to mark at least one function that is
+ * referenced, and other functions that are not referenced in the same
+ * file
+ */
+#define KEEP_SECTION \
+  __attribute__((section(".text.keep")))
+
 /**
  * Split a string into a list of tokens by character delimiter.
  */

@@ -34,20 +34,8 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   // Properties
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(ReflectionFunction, ReflectionFunction)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionFunction 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_ReflectionFunction 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionFunction 1
-  static Variant os_constant(const char *s);
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(ReflectionFunction, ReflectionFunction, ReflectionFunctionAbstract)
+  static const ClassPropTable os_prop_table;
   public: void t___construct(Variant v_name);
   public: c_ReflectionFunction *create(CVarRef v_name);
   public: void dynConstruct(CArrRef params);
@@ -63,7 +51,7 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   DECLARE_METHOD_INVOKE_HELPERS(invoke);
 };
 ObjectData *coo_ReflectionFunction() NEVER_INLINE;
-extern const int64 q_ReflectionFunction_IS_DEPRECATED;
+extern const int64 q_ReflectionFunction$$IS_DEPRECATED;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

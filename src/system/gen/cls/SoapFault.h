@@ -40,20 +40,7 @@ class c_SoapFault : public c_Exception {
   Variant m_headerfault;
 
   // Class Map
-  DECLARE_CLASS_COMMON_NO_SWEEP(SoapFault, SoapFault)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-  static Variant os_getInit(CStrRef s);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_SoapFault 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapFault 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapFault 1
-
-  // DECLARE_COMMON_INVOKE
-  static const MethodCallInfoTable s_call_info_table[];
-  static const int s_call_info_index[];
-
-  public:
+  DECLARE_CLASS_NO_SWEEP(SoapFault, SoapFault, Exception)
   static const ClassPropTable os_prop_table;
   c_SoapFault() : m_faultcode(Variant::nullInit), m_faultcodens(Variant::nullInit), m_faultstring(Variant::nullInit), m_faultactor(Variant::nullInit), m_detail(Variant::nullInit), m__name(Variant::nullInit), m_headerfault(Variant::nullInit) {}
   public: void t___construct(Variant v_code, Variant v_message, Variant v_actor = null, Variant v_detail = null, Variant v_name = null, Variant v_header = null);

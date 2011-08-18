@@ -473,9 +473,9 @@ public:
 
   struct ClassPropTableInfo {
     ClassScopeRawPtr            cls;
-    std::vector<int>            actualIndex;
-    std::vector<int>            privateIndex;
-    std::map<int, std::vector<IndexedSym> > syms;
+    std::vector<int>            actualIndex[3];
+    std::vector<int>            privateIndex[3];
+    std::map<int, std::vector<IndexedSym> > syms[3];
   };
 
   typedef std::map<std::string, ClassPropTableInfo>

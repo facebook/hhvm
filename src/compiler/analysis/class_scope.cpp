@@ -18,20 +18,25 @@
 #include <boost/tuple/tuple.hpp>
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/code_error.h>
-#include <compiler/construct.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/option.h>
-#include <compiler/statement/interface_statement.h>
-#include <util/util.h>
 #include <compiler/analysis/constant_table.h>
 #include <compiler/analysis/file_scope.h>
-#include <runtime/base/class_info.h>
+#include <compiler/analysis/function_scope.h>
+#include <compiler/analysis/variable_table.h>
+#include <compiler/construct.h>
+#include <compiler/expression/class_constant_expression.h>
+#include <compiler/expression/constant_expression.h>
+#include <compiler/expression/scalar_expression.h>
+#include <compiler/expression/unary_op_expression.h>
+#include <compiler/option.h>
 #include <compiler/parser/parser.h>
+#include <compiler/statement/interface_statement.h>
 #include <compiler/statement/method_statement.h>
+#include <compiler/statement/statement_list.h>
+#include <runtime/base/builtin_functions.h>
+#include <runtime/base/class_info.h>
 #include <runtime/base/zend/zend_string.h>
+#include <util/util.h>
 
 using namespace HPHP;
 using namespace std;
@@ -945,7 +950,7 @@ void ClassScope::outputCPPHashTableClassVarInit
       string clsFmt = CodeGenerator::FormatLabel(clsName);
       cg_printf("%s(int64)&%s%s,&%s%s",
                 cls->isVolatile() ? "1+" : "",
-                Option::ClassWrapperFunctionPrefix,
+                Option::ClassStaticsCallbackPrefix,
                 clsFmt.c_str(),
                 Option::CreateObjectOnlyPrefix,
                 clsFmt.c_str());
@@ -1238,76 +1243,117 @@ void ClassScope::outputCPPGetClassConstantImpl
 }
 
 static int propTableSize(int entries) {
+  if (!entries) return 0;
   int size = Util::roundUpToPowerOfTwo(entries * 2);
   return size < 8 ? 8 : size;
 }
 
 static bool buildClassPropTableMap(
-  CodeGenerator &cg,
+  CodeGenerator &cg, AnalysisResultPtr ar,
   const StringToClassScopePtrVecMap &classScopes,
   ClassScope::ClassPropTableMap &tables) {
   typedef ClassScope::IndexedSym IndexedSym;
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  int totalEntries = 0;
+  bool ret = false;
   for (StringToClassScopePtrVecMap::const_iterator iter = classScopes.begin();
        iter != classScopes.end(); ++iter) {
     const ClassScopePtrVec &classes = iter->second;
     if (system) ASSERT(classes.size() == 1);
     for (unsigned int i = 0; i < classes.size(); i++) {
       ClassScopePtr cls = classes[i];
+      vector<const Symbol *> entries[3];
+
       const std::vector<Symbol*> &symbolVec =
         cls->getVariables()->getSymbols();
-      ClassScope::Derivation dynamicObject = cls->derivesFromRedeclaring();
-      vector<const Symbol *> entries;
       for (unsigned j = 0; j < symbolVec.size(); j++) {
         const Symbol *sym = symbolVec[j];
-        if (sym->isStatic() || (dynamicObject && !sym->isPrivate())) continue;
-        entries.push_back(sym);
+        if (sym->isStatic()) {
+          if (sym->isOverride()) continue;
+        }
+        entries[sym->isStatic()].push_back(sym);
       }
-      if (!entries.size()) continue;
+      const std::vector<Symbol*> &constVec =
+        cls->getConstants()->getSymbols();
+      for (unsigned j = 0; j < constVec.size(); j++) {
+        const Symbol *sym = constVec[j];
+        if (!system && !sym->getValue()) continue;
+        entries[2].push_back(sym);
+      }
+
+      if (!entries[0].size() && !entries[1].size() && !entries[2].size()) {
+        continue;
+      }
+      ret = true;
+
       ClassScope::ClassPropTableInfo &info = tables[cls->getId()];
       info.cls = cls;
-      int tableSize = propTableSize(entries.size());
 
-      unsigned p = 0;
-      for (unsigned j = 0; j < entries.size(); j++) {
-        const Symbol *sym = entries[j];
-        int hash = hash_string_i(sym->getName().c_str(),
-                                 sym->getName().size()) & (tableSize - 1);
-        int pix = -1;
-        if (sym->isPrivate()) {
-          pix = p++;
+      for (int s = 0; s < 3; s++) {
+        int tableSize = propTableSize(entries[s].size());
+
+        unsigned p = 0;
+        for (unsigned j = 0; j < entries[s].size(); j++) {
+          const Symbol *sym = entries[s][j];
+          int hash = hash_string_i(sym->getName().c_str(),
+                                   sym->getName().size()) & (tableSize - 1);
+          int pix = -1;
+          switch (s) {
+            case 0:
+              if (sym->isPrivate()) {
+                pix = p++;
+              }
+              break;
+            case 1:
+              if (static_pointer_cast<Expression>(sym->getClassInitVal())->
+                  containsDynamicConstant(ar)) {
+                pix = p++;
+              }
+              break;
+            case 2:
+              if (sym->isDynamic()) {
+                pix = p++;
+              }
+              break;
+          }
+          info.syms[s][hash].push_back(IndexedSym(j, pix, sym));
         }
-        info.syms[hash].push_back(IndexedSym(j, pix, sym));
-      }
-      info.actualIndex.resize(entries.size() + 1, -1);
-      info.privateIndex.resize(p);
-      int newIndex = 0;
-      for (map<int, vector<IndexedSym> >::iterator it = info.syms.begin(),
-             end = info.syms.end(); it != end; ++it) {
-        const vector<IndexedSym> &v = it->second;
-        for (int k = 0, s = v.size(); k < s; k++, newIndex++) {
-          const IndexedSym &is = v[k];
-          info.actualIndex[is.origIndex] = newIndex;
-          if (is.privIndex >= 0) info.privateIndex[is.privIndex] = newIndex;
+        info.actualIndex[s].resize(entries[s].size() + 1, -1);
+        info.privateIndex[s].resize(p);
+        int newIndex = 0;
+        for (map<int, vector<IndexedSym> >::iterator it = info.syms[s].begin(),
+               end = info.syms[s].end(); it != end; ++it) {
+          const vector<IndexedSym> &v = it->second;
+          for (int k = 0, sz = v.size(); k < sz; k++, newIndex++) {
+            const IndexedSym &is = v[k];
+            info.actualIndex[s][is.origIndex] = newIndex;
+            if (is.privIndex >= 0) {
+              info.privateIndex[s][is.privIndex] = newIndex;
+            }
+          }
         }
       }
-      totalEntries += entries.size();
     }
   }
-  return totalEntries > 0;
+  return ret;
 }
 
 bool ClassScope::checkHasPropTable() {
   VariableTablePtr variables = getVariables();
-  bool nsp = variables->hasNonStaticPrivate();
-  if (nsp || derivesFromRedeclaring()) return nsp;
+  if (variables->hasPrivate()) return true;
 
   const std::vector<Symbol*> &symbolVec = variables->getSymbols();
-
-  for (unsigned int j = 0; j < symbolVec.size(); j++) {
+  for (unsigned j = 0; j < symbolVec.size(); j++) {
     const Symbol *sym = symbolVec[j];
-    if (!sym->isStatic()) return true;
+    if (!sym->isStatic() || !sym->isOverride()) return true;
+  }
+
+  ConstantTablePtr constants = getConstants();
+  const std::vector<Symbol*> &constVec =
+    constants->getSymbols();
+  if (!constVec.size()) return false;
+  for (int i = 0, sz = constVec.size(); i < sz; i++) {
+    const Symbol *sym = constVec[i];
+    if (getAttribute(ClassScope::System) || sym->getValue()) return true;
   }
 
   return false;
@@ -1323,6 +1369,80 @@ ClassScopePtr ClassScope::getNextParentWithProp(AnalysisResultPtr ar) {
   return parentCls;
 }
 
+enum {
+  ConstValid = 1,
+  ConstDynamic = 2,
+  ConstRedeclared = 4,
+  ConstDerivesFromRedeclared = 8,
+  ConstMagicIO = 16,
+  ConstNeedsName = 32,
+  ConstNeedsClass = 64,
+  ConstNeedsSysCon = 128,
+  ConstNonScalarValue = 256
+};
+
+static string findScalar(ExpressionPtr val,
+                         string &name, string &cls, int *flags = 0) {
+  if (flags) *flags = 0;
+  if (!val) {
+    return "N;";
+  }
+  Variant v;
+  if (val->getScalarValue(v)) {
+    return f_serialize(v).c_str();
+  }
+  if (val->is(Expression::KindOfConstantExpression)) {
+    ConstantExpressionPtr con = static_pointer_cast<ConstantExpression>(val);
+    name = con->getName();
+    if (flags) {
+      if (con->isValid()) {
+        *flags |= ConstValid;
+        if (con->isDynamic()) {
+          *flags |= ConstDynamic | ConstNeedsName;
+        }
+        if (name == "STDIN" || name == "STDOUT" || name == "STDERR") {
+          *flags |= ConstMagicIO;
+        }
+      } else {
+        *flags |= ConstNeedsName;
+      }
+    }
+    cls = "";
+  } else if (val->is(Expression::KindOfClassConstantExpression)) {
+    ClassConstantExpressionPtr con =
+      static_pointer_cast<ClassConstantExpression>(val);
+    name = con->getConName();
+    cls = con->getActualClassName();
+    if (flags) {
+      if (con->isValid()) {
+        *flags |= ConstValid;
+        if (con->isDynamic()) *flags |= ConstDynamic;
+      } else if (con->isRedeclared()) {
+        *flags |= ConstRedeclared | ConstNeedsName;
+      } else if (con->hasClass()) {
+        *flags |= ConstDerivesFromRedeclared | ConstNeedsName;
+      } else {
+        *flags |= ConstNeedsName | ConstNeedsClass;
+      }
+    }
+  } else {
+    if (flags) *flags |= ConstNonScalarValue;
+    return val->getText(false, true);
+  }
+
+  return cls + "::" + name;
+}
+
+static ExpressionPtr getSymInit(const Symbol *sym) {
+  ConstructPtr c;
+  if (sym->isConstant()) {
+    c = sym->getValue();
+  } else {
+    c = sym->getClassInitVal();
+  }
+  return static_pointer_cast<Expression>(c);
+}
+
 void ClassScope::outputCPPGetClassPropTableImpl(
   CodeGenerator &cg, AnalysisResultPtr ar,
   const StringToClassScopePtrVecMap &classScopes,
@@ -1330,79 +1450,358 @@ void ClassScope::outputCPPGetClassPropTableImpl(
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
 
   ClassPropTableMap tables;
-  if (!buildClassPropTableMap(cg, classScopes, tables)) return;
+  if (!buildClassPropTableMap(cg, ar, classScopes, tables)) return;
 
   cg.printSection("Class tables");
-  cg_indentBegin("static const ClassPropTableEntry %stable_entries[] = {\n",
-                 Option::ClassPropTablePrefix);
+
+  int s; // 1 => static
+
+  int index = 0;
+  std::map<string,int> svarIndex;
+  std::map<string,ExpressionRawPtr> nonScalarArrays;
+
+  if (!Option::UseScalarVariant) {
+    cg_indentBegin("static Variant %sstatic_init_vals[] = {\n",
+                   Option::ClassPropTablePrefix);
+  }
 
   for (ClassPropTableMap::const_iterator iter = tables.begin();
        iter != tables.end(); iter++) {
     const ClassPropTableInfo &info = iter->second;
-    assert(info.syms.size());
-    ClassScopePtr cls = info.cls;
-    for (map<int, vector<IndexedSym> >::const_iterator it = info.syms.begin(),
-           end = info.syms.end(); it != end; ++it) {
-      const vector<IndexedSym> &v = it->second;
-      for (int k = 0, s = v.size(); k < s; k++) {
-        const Symbol *sym = v[k].sym;
-        int cur = info.actualIndex[v[k].origIndex];
-        int next = info.actualIndex[v[k].origIndex + 1];
-        if (next < 0) next = cur;
-
-        string prop(sym->getName());
-        int flags = 0;
-        if (sym->isPublic())    flags |= ClassInfo::IsPublic;
-        if (sym->isProtected()) flags |= ClassInfo::IsProtected;
-        if (sym->isPrivate()) {
-          ASSERT(!sym->isOverride());
-          flags |= ClassInfo::IsPrivate;
-          prop = '\0' + cls->getOriginalName() + '\0' + prop;
+    for (s = 3; s--; ) {
+      if (!info.syms[s].size()) continue;
+      for (map<int, vector<IndexedSym> >::const_iterator
+             it = info.syms[s].begin(), end = info.syms[s].end();
+           it != end; ++it) {
+        const vector<IndexedSym> &v = it->second;
+        for (int k = 0, sz = v.size(); k < sz; k++) {
+          const Symbol *sym = v[k].sym;
+          ExpressionPtr val = getSymInit(sym);
+          int flags = 0;
+          string name,cls,id;
+          if (!val) continue;
+          id = findScalar(val, name, cls, &flags);
+          if (flags & ConstNonScalarValue) {
+            nonScalarArrays[id] = val;
+            continue;
+          }
+          if (Option::UseScalarVariant) {
+            continue;
+          }
+          if (name.empty()) {
+            int *p = &svarIndex[id];
+            if (!*p) {
+              val->outputCPP(cg, ar);
+              cg_printf(",\n");
+              *p = ++index;
+            }
+          }
+          if (flags & ConstNeedsName) {
+            int *p = &svarIndex[f_serialize(name).c_str()];
+            if (!*p) {
+              *p = ++index;
+              ScalarExpression::OutputCPPString(name, cg, ar,
+                                                info.cls, true);
+            }
+          }
+          if (flags & ConstNeedsClass) {
+            int *p = &svarIndex[f_serialize(cls).c_str()];
+            if (!*p) {
+              *p = ++index;
+              ScalarExpression::OutputCPPString(cls, cg, ar,
+                                                info.cls, true);
+            }
+          }
         }
-        ASSERT(!sym->isStatic());
-        if (sym->isOverride()) {
-          ASSERT(!system);
-          flags |= ClassInfo::IsOverride;
-        }
-        if (k == s - 1) flags |= ClassInfo::IsRedeclared;
-        cg_printf("{0x%016llXLL,%d,%d,%d,%d,",
-                  hash_string_i(sym->getName().c_str(), sym->getName().size()),
-                  next - cur, prop.size() - sym->getName().size(),
-                  flags, sym->getFinalType()->getDataType());
-        cg_printf("GET_PROPERTY_OFFSET(%s%s, %s%s),",
-                  Option::ClassPrefix, cls->getId().c_str(),
-                  Option::PropertyPrefix, sym->getName().c_str());
-        cg_printf("&");
-        cg_printString(prop, ar, cls);
-        cg_printf(" },\n");
       }
     }
-    cg_printf("\n");
+  }
+
+  if (!Option::UseScalarVariant) {
+    cg_indentEnd("};\n");
+  }
+
+  index = 0;
+  std::map<string,int> siIndex;
+
+  for (std::map<string,ExpressionRawPtr>::iterator
+         it = nonScalarArrays.begin(), end = nonScalarArrays.end();
+       it != end; ++it) {
+    siIndex[it->first] = index += 2;
+
+    cg_indentBegin("static Variant %snon_scalar_constant_%d() {\n",
+                   Option::ClassPropTablePrefix, index);
+    cg.printDeclareGlobals();
+    cg_printf("return ");
+    it->second->outputCPP(cg, ar);
+    cg_printf(";\n");
+    cg_indentEnd("}\n");
+  }
+
+  nonScalarArrays.clear();
+
+  cg_indentBegin("static const int64 %sstatic_inits[] = {\n",
+                 Option::ClassPropTablePrefix);
+
+  for (int i = 0; i < index; i += 2) {
+    cg_printf("(int64)%snon_scalar_constant_%d, 0x%07x6,\n",
+              Option::ClassPropTablePrefix, i+2, i);
+  }
+
+  for (ClassPropTableMap::const_iterator iter = tables.begin();
+       iter != tables.end(); iter++) {
+    const ClassPropTableInfo &info = iter->second;
+    for (s = 3; s--; ) {
+      if (!info.syms[s].size()) continue;
+      for (map<int, vector<IndexedSym> >::const_iterator
+             it = info.syms[s].begin(), end = info.syms[s].end();
+           it != end; ++it) {
+        const vector<IndexedSym> &v = it->second;
+        for (int k = 0, sz = v.size(); k < sz; k++) {
+          const Symbol *sym = v[k].sym;
+          ExpressionPtr val = getSymInit(sym);
+          string name, cls, id;
+          int flags = 0;
+          int type = 0;
+          if (!val) {
+            if (sym->isConstant()) {
+              name = sym->getName();
+              cls = info.cls->getId();
+              id = cls + "::" + name;
+              flags = ConstValid|ConstNeedsSysCon;
+              type = sym->getFinalType()->getDataType();
+            } else {
+              id = "N;";
+            }
+          } else {
+            id = findScalar(val, name, cls, &flags);
+            if (flags & ConstNonScalarValue) continue;
+            if (id == "N;") {
+              val.reset();
+            } else if (flags & ConstValid &&
+                       !(flags & (ConstDynamic|ConstMagicIO))) {
+              flags |= ConstNeedsSysCon;
+              type = val->getActualType()->getDataType();
+            }
+          }
+          int *p;
+          int name_ix = -1, cls_ix = -1;
+          if ((flags & ConstNeedsSysCon) && type != KindOfVariant) {
+            string n = cls + "$$" + name;
+            p = &siIndex[n];
+            if (!*p) {
+              if (cls.size()) {
+              cg_printf("(int64)&%s%s%s%s,\n",
+                        Option::ClassConstantPrefix,
+                        CodeGenerator::FormatLabel(cls).c_str(),
+                        Option::IdPrefix.c_str(),
+                        CodeGenerator::FormatLabel(name).c_str());
+              } else {
+                cg_printf("(int64)&%s%s,\n",
+                          Option::ConstantPrefix,
+                          CodeGenerator::FormatLabel(name).c_str());
+              }
+              *p = ++index;
+            }
+            name_ix = *p - 1;
+          }
+          if (flags & ConstNeedsName) {
+            string n = f_serialize(name).c_str();
+            p = &siIndex[n];
+            if (!*p) {
+              cg_printf("(int64)&");
+              if (Option::UseScalarVariant) {
+                cg.setScalarVariant();
+                ScalarExpression::OutputCPPString(name, cg, ar,
+                                                  info.cls, true);
+                cg.clearScalarVariant();
+              } else {
+                cg_printf("%sstatic_init_vals[%d]",
+                          Option::ClassPropTablePrefix,
+                          svarIndex[n] - 1);
+              }
+              cg_printf(",\n");
+              *p = ++index;
+            }
+            name_ix = *p - 1;
+          }
+          if (flags & ConstNeedsClass) {
+            string n = f_serialize(cls).c_str();
+            p = &siIndex[n];
+            if (!*p) {
+              cg_printf("(int64)&");
+              if (Option::UseScalarVariant) {
+                cg.setScalarVariant();
+                ScalarExpression::OutputCPPString(cls, cg, ar,
+                                                  info.cls, true);
+                cg.clearScalarVariant();
+              } else {
+                cg_printf("%sstatic_init_vals[%d]",
+                          Option::ClassPropTablePrefix,
+                          svarIndex[n] - 1);
+              }
+              cg_printf(",\n");
+              *p = ++index;
+            }
+            cls_ix = *p - 1;
+          } else if (cls.size() &&
+                     flags & (ConstDerivesFromRedeclared|ConstDynamic)) {
+            string n = Option::ClassStaticsCallbackPrefix +
+              CodeGenerator::FormatLabel(cls);
+            p = &siIndex[n];
+            if (!*p) {
+              cg_printf("(int64)&%s,\n", n.c_str());
+              *p = ++index;
+            }
+            cls_ix = *p - 1;
+          }
+
+          p = &siIndex[id];
+          if (!*p) {
+            if ((flags & ConstNeedsSysCon) && type != KindOfVariant) {
+              cg_printf("0x%08x%07x7", name_ix, type);
+            } else if (!val) {
+              cg_printf("(int64)&null_variant");
+            } else if (name.empty()) {
+              cg_printf("(int64)&");
+              if (Option::UseScalarVariant) {
+                cg.setScalarVariant();
+                val->outputCPP(cg, ar);
+                cg.clearScalarVariant();
+              } else {
+                cg_printf("%sstatic_init_vals[%d]",
+                          Option::ClassPropTablePrefix, svarIndex[id] - 1);
+              }
+            } else if (flags & ConstMagicIO) {
+              cg_printf("(int64)&BuiltinFiles::Get%s, 0x1%07x6",
+                        name.c_str(), index++);
+            } else if (flags & ConstValid && !(flags & ConstDynamic)) {
+              if (Type::IsMappedToVariant(val->getActualType())) {
+                cg_printf("(int64)&");
+                val->outputCPP(cg, ar);
+              } else {
+                cg_printf("(int64)&%sstatic_init_vals[%d]",
+                          Option::ClassPropTablePrefix, svarIndex[id] - 1);
+              }
+            } else if (cls.empty()) {
+              if (flags & ConstDynamic) {
+                cg_printf("(int64(offsetof(%s,%s%s))<<32)+",
+                          system ? "SystemGlobals" : "GlobalVariables",
+                          Option::ConstantPrefix,
+                          CodeGenerator::FormatLabel(name).c_str());
+              }
+              cg_printf("0x%x1LL", name_ix);
+            } else if (flags & ConstRedeclared) {
+              cg_printf("offsetof(%s,%s%s)+0x%x00000003",
+                        system ? "SystemGlobals" : "GlobalVariables",
+                        Option::ClassStaticsCallbackPrefix,
+                        CodeGenerator::FormatLabel(cls).c_str(),
+                        name_ix);
+            } else if (flags & ConstDynamic) {
+              cg_printf("(int64(offsetof(%s,%s%s%s%s)<<32))+0x%x2",
+                        system ? "SystemGlobals" : "GlobalVariables",
+                        Option::ClassConstantPrefix,
+                        CodeGenerator::FormatLabel(cls).c_str(),
+                        Option::IdPrefix.c_str(),
+                        CodeGenerator::FormatLabel(name).c_str(),
+                        cls_ix);
+            } else {
+              cg_printf("0x%x%07x%dLL", name_ix, cls_ix,
+                        flags & ConstDerivesFromRedeclared ? 4 : 5);
+            }
+            *p = ++index;
+            cg_printf(",\n");
+          }
+        }
+      }
+    }
   }
   cg_indentEnd("};\n");
-  int curIndex = 0;
-  int privateEntries = 0;
-  cg_indentBegin("static const ClassPropTableEntry *%sprivate_entries[] = {\n",
+
+  cg_indentBegin("static const ClassPropTableEntry %stable_entries[] = {\n",
                  Option::ClassPropTablePrefix);
   for (ClassPropTableMap::const_iterator iter = tables.begin();
        iter != tables.end(); iter++) {
     const ClassPropTableInfo &info = iter->second;
-    unsigned psize = info.privateIndex.size();
-    for (unsigned i = 0; i < psize; i++) {
-      cg_printf("%stable_entries+%d,\n",
-                Option::ClassPropTablePrefix,
-                curIndex + info.privateIndex[i]);
-    }
-    curIndex += info.actualIndex.size() - 1;
+    for (s = 3; s--; ) {
+      if (!info.syms[s].size()) continue;
+      ClassScopePtr cls = info.cls;
+      for (map<int, vector<IndexedSym> >::const_iterator
+             it = info.syms[s].begin(), end = info.syms[s].end();
+           it != end; ++it) {
+        const vector<IndexedSym> &v = it->second;
+        for (int k = 0, sz = v.size(); k < sz; k++) {
+          const Symbol *sym = v[k].sym;
+          int cur = info.actualIndex[s][v[k].origIndex];
+          int next = info.actualIndex[s][v[k].origIndex + 1];
+          if (next < 0) next = cur;
 
-    if (psize) {
-      privateEntries += psize + 1;
-      cg_printf("0,\n");
+          string prop(sym->getName());
+          int flags = 0;
+          if (sym->isPublic())    flags |= ClassPropTableEntry::Public;
+          if (sym->isProtected()) flags |= ClassPropTableEntry::Protected;
+          if (sym->isStatic())    flags |= ClassPropTableEntry::Static;
+          if (sym->isConstant())  flags |= ClassPropTableEntry::Constant;
+          if (sym->isPrivate()) {
+            ASSERT(!sym->isOverride());
+            flags |= ClassPropTableEntry::Private;
+            if (!sym->isStatic()) {
+              prop = '\0' + cls->getOriginalName() + '\0' + prop;
+            }
+          }
+          if (sym->isOverride() ||
+              (!sym->isStatic() && cls->derivesFromRedeclaring())) {
+            ASSERT(!system);
+            flags |= ClassPropTableEntry::Override;
+          }
+          if (k == sz - 1) flags |= ClassPropTableEntry::Last;
+          int off;
+          {
+            ExpressionPtr val = getSymInit(sym);
+            if (!val && sym->isConstant()) {
+              off = siIndex[info.cls->getId() + "::" + sym->getName()] - 1;
+            } else {
+              string name;
+              string cls;
+              string id = findScalar(val, name, cls);
+              off = siIndex[id] - 1;
+            }
+            assert(off >= 0);
+          }
+          cg_printf("{0x%016llXLL,%d,%d,%d,%d,%d,",
+                    hash_string(sym->getName().c_str(),
+                                sym->getName().size()),
+                    next - cur, off,
+                    s ? 0 : prop.size() - sym->getName().size(),
+                    flags, sym->getFinalType()->getDataType());
+          if (s) {
+            if (s == 2 && !sym->isDynamic()) {
+              cg_printf("0,");
+            } else {
+              cg_printf("offsetof(%s,%s%s%s%s),",
+                        system ? "SystemGlobals" : "GlobalVariables",
+                        s == 2 ?
+                        Option::Option::ClassConstantPrefix :
+                        Option::Option::StaticPropertyPrefix,
+                        cls->getId().c_str(),
+                        Option::IdPrefix.c_str(), sym->getName().c_str());
+            }
+          } else {
+            if (flags & ClassPropTableEntry::Override) {
+              cg_printf("0,");
+            } else {
+              cg_printf("GET_PROPERTY_OFFSET(%s%s, %s%s),",
+                        Option::ClassPrefix, cls->getId().c_str(),
+                        Option::PropertyPrefix, sym->getName().c_str());
+            }
+          }
+          cg_printf("&");
+          cg_printString(prop, ar, cls);
+          cg_printf(" },\n");
+        }
+      }
+      cg_printf("\n");
     }
-  }
-  if (!privateEntries) {
-    cg_printf("0\n");
-    privateEntries++;
   }
   cg_indentEnd("};\n");
 
@@ -1412,47 +1811,94 @@ void ClassScope::outputCPPGetClassPropTableImpl(
   for (ClassPropTableMap::const_iterator iter = tables.begin();
        iter != tables.end(); iter++) {
     const ClassPropTableInfo &info = iter->second;
-    assert(info.syms.size());
-    int n = 0, m = 0;
-    for (map<int, vector<IndexedSym> >::const_iterator it = info.syms.begin(),
-           end = info.syms.end(); it != end; ++it) {
-      while (n < it->first) {
-        cg_printf("-1,");
+
+    cg_printf("// %s hash\n", info.cls->getId().c_str());
+
+    int m = 0;
+    int off[3];
+    for (s = 3; s--; ) {
+      off[s] = m;
+      if (!info.syms[s].size()) continue;
+      int n = 0;
+      vector<int> offsets;
+      for (map<int, vector<IndexedSym> >::const_iterator
+             it = info.syms[s].begin(), end = info.syms[s].end();
+           it != end; ++it) {
+        while (n < it->first) {
+          offsets.push_back(-1);
+          n++;
+        }
+        offsets.push_back(m);
+        n++;
+        m += it->second.size();
+      }
+      int sz = propTableSize(info.actualIndex[s].size() - 1);
+      assert(n <= sz);
+      while (n < sz) {
+        offsets.push_back(-1);
         n++;
       }
-      cg_printf("%d,", m);
-      n++;
-      m += it->second.size();
+      if (s) {
+        while (n--) {
+          cg_printf("%d,", offsets[n]);
+        }
+      } else {
+        for (n = 0; n < sz; n++) {
+          cg_printf("%d,", offsets[n]);
+        }
+      }
+      cg_printf("\n");
     }
-    int sz = propTableSize(info.actualIndex.size() - 1);
-    assert(n <= sz);
-    while (n < sz) {
-      cg_printf("-1,");
-      n++;
-    }
-    cg_printf("\n");
-  }
 
+    cg_printf("// %s lists\n", info.cls->getId().c_str());
+    for (s = 0; s < 3; s++) {
+      for (unsigned i = 0, psize=info.privateIndex[s].size(); i < psize; i++) {
+        cg_printf("%d,", off[s] + info.privateIndex[s][i]);
+      }
+      cg_printf("-1,\n");
+    }
+  }
   cg_indentEnd("};\n");
 
-  curIndex = 0;
   int curOffset = 0;
-  int privateOffset = 0;
   int hashOffset = 0;
   for (ClassPropTableMap::const_iterator iter = tables.begin();
        iter != tables.end(); iter++) {
     const ClassPropTableInfo &info = iter->second;
-    ASSERT(info.syms.size() > 0);
 
-    int pCount = info.privateIndex.size();
     cg_indentBegin("const ClassPropTable %s%s::%sprop_table = {\n",
                    Option::ClassPrefix, iter->first.c_str(),
                    Option::ObjectStaticPrefix);
-    int tableSize = propTableSize(info.actualIndex.size() - 1);
-    cg_printf("%d,%d,", tableSize - 1, info.actualIndex[0]);
-    cg_printf("%shash_entries+%d,\n",
+    int tableSizeN = propTableSize(info.actualIndex[0].size() - 1);
+    int tableSizeS = propTableSize(info.actualIndex[1].size() - 1);
+    int tableSizeC = propTableSize(info.actualIndex[2].size() - 1);
+    cg_printf("%d,%d,%d,%d,%d,%d,%d,",
+              tableSizeN - 1,
+              tableSizeN ?
+              info.actualIndex[2].size() + info.actualIndex[1].size() +
+              info.actualIndex[0][0] - 2 : -1,
+              tableSizeS - 1,
+              tableSizeS ? info.actualIndex[2].size() +
+              info.actualIndex[1][0] - 1 : -1,
+              tableSizeC - 1,
+              tableSizeC ? info.actualIndex[2][0] : -1,
+              tableSizeN + info.privateIndex[0].size() + 1);
+    if (info.cls->needLazyStaticInitializer()) {
+      cg_printf("offsetof(%s,%s%s),",
+                system ? "SystemGlobals" : "GlobalVariables",
+                Option::ClassStaticInitializerFlagPrefix,
+                info.cls->getId().c_str());
+    } else {
+      cg_printf("0,\n");
+    }
+
+    hashOffset += tableSizeS + tableSizeC;
+    cg_printf("%shash_entries+%d,",
               Option::ClassPropTablePrefix, hashOffset);
-    hashOffset += tableSize;
+    hashOffset += tableSizeN + 3 +
+      info.privateIndex[0].size() +
+      info.privateIndex[1].size() +
+      info.privateIndex[2].size();
     ClassScopePtr parentCls = info.cls->getNextParentWithProp(ar);
     if (parentCls) {
       cg_printf("&%s%s::%sprop_table,",
@@ -1463,13 +1909,15 @@ void ClassScope::outputCPPGetClassPropTableImpl(
     }
     cg_printf("%stable_entries+%d,",
               Option::ClassPropTablePrefix, curOffset);
-    cg_printf("%sprivate_entries+%d\n",
-              Option::ClassPropTablePrefix,
-              pCount ? privateOffset : privateEntries - 1);
+    if (siIndex.size()) {
+      cg_printf("%sstatic_inits\n", Option::ClassPropTablePrefix);
+    } else {
+      cg_printf("0\n");
+    }
     cg_indentEnd("};\n");
 
-    curOffset += info.actualIndex.size() - 1;
-    privateOffset += pCount + (pCount > 0);
+    curOffset += info.actualIndex[0].size() + info.actualIndex[1].size() +
+      info.actualIndex[2].size() - 3;
   }
 }
 
@@ -1705,7 +2153,6 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
                                              AnalysisResultPtr ar) {
   string clsNameStr = getId();
   const char *clsName = clsNameStr.c_str();
-  bool dynamicObject = derivesFromRedeclaring() == DirectFromRedeclared;
   string parent = "ObjectData";
   string parentName = "ObjectData";
   if (!getParent().empty()) {
@@ -1718,33 +2165,9 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     }
   }
 
+  cg.addClass(getName(), getContainingClass());
+
   if (Option::GenerateCPPMacros) {
-    // Constant Lookup Table
-    getVariables()->outputCPPPropertyTable(cg, ar, parent.c_str(),
-                                           parentName.c_str(),
-                                           derivesFromRedeclaring());
-
-    // If parent is redeclared, you have to go to their class statics object.
-    if (dynamicObject) {
-      cg_indentBegin("Variant %s%s::%sconstant(const char *s) {\n",
-                     Option::ClassPrefix, clsName, Option::ObjectStaticPrefix);
-      cg.printDeclareGlobals();
-      getConstants()->outputCPPJumpTable(cg, ar, !dynamicObject, false);
-      cg_printf("return %s->%s%s->%sconstant(s);\n", cg.getGlobals(ar),
-                Option::ClassStaticsCallbackPrefix, parentName.c_str(),
-                Option::ObjectStaticPrefix);
-      cg_indentEnd("}\n");
-    } else {
-      cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_CONSTANT_%s", clsName);
-      cg_indentBegin("Variant %s%s::%sconstant(const char *s) {\n",
-                     Option::ClassPrefix, clsName, Option::ObjectStaticPrefix);
-      getConstants()->outputCPPJumpTable(cg, ar, !dynamicObject, false);
-      cg_printf("return %s%s::%sconstant(s);\n", Option::ClassPrefix,
-                parent.c_str(), Option::ObjectStaticPrefix);
-      cg_indentEnd("}\n");
-      cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_CONSTANT_%s", clsName);
-    }
-
     if ((isUserClass() && !isSepExtension()) ||
         m_attributeClassInfo & ClassInfo::NoDefaultSweep) {
       cg_printf("IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(%s)\n", clsName);
@@ -1798,7 +2221,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
           cg_printf("(const ObjectStaticCallbacks*)2},\n");
         } else {
           cg_printf("&%s%s%s},\n",
-                    Option::ClassWrapperFunctionPrefix,
+                    Option::ClassStaticsCallbackPrefix,
                     cls->getId().c_str(),
                     cls->isRedeclaring() ? ".oscb" : "");
         }
@@ -1962,7 +2385,7 @@ void ClassScope::outputCPPGlobalTableWrappersDecl(CodeGenerator &cg,
   string id = getId();
   cg_printf("extern const %sObjectStaticCallbacks %s%s;\n",
             isRedeclaring() ? "Redeclared" : "",
-            Option::ClassWrapperFunctionPrefix, id.c_str());
+            Option::ClassStaticsCallbackPrefix, id.c_str());
 }
 
 string ClassScope::getClassPropTableId(AnalysisResultPtr ar) {
@@ -1983,19 +2406,10 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
   string prop = getClassPropTableId(ar);
   cg_indentBegin("const %sObjectStaticCallbacks %s%s = {\n",
                  isRedeclaring() ? "Redeclared" : "",
-                 Option::ClassWrapperFunctionPrefix, id.c_str());
+                 Option::ClassStaticsCallbackPrefix, id.c_str());
   if (isRedeclaring()) {
     cg_indentBegin("{\n");
   }
-  // This order must match the one in object_data.h
-  cg_printf("%s%s::%sgetInit,\n", Option::ClassPrefix, id.c_str(),
-            Option::ObjectStaticPrefix);
-  cg_printf("%s%s::%sget,\n", Option::ClassPrefix, id.c_str(),
-            Option::ObjectStaticPrefix);
-  cg_printf("%s%s::%slval,\n", Option::ClassPrefix, id.c_str(),
-            Option::ObjectStaticPrefix);
-  cg_printf("%s%s::%sconstant,\n", Option::ClassPrefix, id.c_str(),
-            Option::ObjectStaticPrefix);
   cg_printf("(ObjectData*(*)(ObjectData*))%s%s,\n",
             Option::CreateObjectOnlyPrefix, id.c_str());
   cg_printf("%s%s::s_call_info_table,%s%s::s_call_info_index,\n",
@@ -2031,7 +2445,7 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
   if (derivesFromRedeclaring() != DirectFromRedeclared &&
       (par = getParentScope(ar))) {
     cg_printf("&%s%s\n",
-              Option::ClassWrapperFunctionPrefix, par->getId().c_str());
+              Option::ClassStaticsCallbackPrefix, par->getId().c_str());
   } else {
     cg_printf("0\n");
   }

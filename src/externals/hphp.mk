@@ -15,7 +15,9 @@ ifndef NO_GOLD
 LD_CMD += -B$(EXT_DIR)/binutils/
 endif
 
-EXTERNAL_CPPFLAGS=
+# Use this to signify that this externals tree is compatible
+# with system libs.
+EXTERNAL_CPPFLAGS=-DEXTERNALS_NATIVE
 
 ifdef MAC_OS_X
 

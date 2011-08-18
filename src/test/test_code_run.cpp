@@ -16574,6 +16574,13 @@ bool TestCodeRun::TestExtImage() {
       "var_dump(image_type_to_mime_type(IMAGETYPE_WBMP));"
       "var_dump(image_type_to_mime_type(IMAGETYPE_XBM));"
       "var_dump(image_type_to_mime_type(IMAGETYPE_ICO));");
+// The system libpng is a different version than what may be
+// available in other externals trees (and can therefore produce
+// different images).  Since a local version of PHP (which uses
+// system libs) will be used to generate a comparison point,
+// only run this test if HPHP is built against a native externals
+// tree.  This also applies to the gated libjpeg test below.
+#ifdef EXTERNALS_NATIVE
   MVCR("<?php "
       "function foo($text, $fsize) {"
       ""
@@ -16618,6 +16625,7 @@ bool TestCodeRun::TestExtImage() {
       "$text = 'foobar@yahoo.com';"
       "$fsize = '9.8';"
       "foo($text, $fsize);");
+#endif
   MVCR("<?php "
       "for ($i = 0; $i < 100000; $i++) {"
       "  $str =  exif_tagname($i);"
@@ -16634,6 +16642,7 @@ bool TestCodeRun::TestExtImage() {
       "} else {"
       "  echo 'No thumbnail available';"
       "}");
+#ifdef EXTERNALS_NATIVE
   MVCR("<?php "
       "$filename = 'test/images/simpletext.jpg';"
       "$degrees = 90;"
@@ -16641,6 +16650,7 @@ bool TestCodeRun::TestExtImage() {
       "$source = imagecreatefromjpeg($filename);"
       "$rotate = imagerotate($source, $degrees, 0);"
       "imagejpeg($rotate);");
+#endif
   MVCR("<?php "
       "$exif = exif_read_data('test/images/246x247.png');"
       "print_r($exif);"

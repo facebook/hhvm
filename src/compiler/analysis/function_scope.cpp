@@ -152,7 +152,8 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_closureGenerator(false), m_noLSB(false), m_nextLSB(false),
       m_hasTry(false), m_hasGoto(false),
       m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0) {
-  m_dynamic = Option::IsDynamicFunction(method, m_name);
+  m_dynamic = Option::IsDynamicFunction(method, m_name) ||
+    Option::EnableEval == Option::FullEval || Option::AllDynamic;
   m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
     Option::DynamicInvokeFunctions.end();
 }

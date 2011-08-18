@@ -1578,10 +1578,10 @@ public:
 template<>
 void AnalysisResult::preWaitCallback<Post>(
     bool first, const BlockScopeRawPtrQueue &scopes, void *opaque) {
-  ASSERT(opaque);
-  JobQueueDispatcher<FinalWorker::JobType, FinalWorker> *dispatcher
-    = (JobQueueDispatcher<FinalWorker::JobType, FinalWorker> *) opaque;
+  ASSERT(!Option::ControlFlow || opaque != NULL);
   if (first && Option::ControlFlow) {
+    JobQueueDispatcher<FinalWorker::JobType, FinalWorker> *dispatcher
+      = (JobQueueDispatcher<FinalWorker::JobType, FinalWorker> *) opaque;
     for (BlockScopeRawPtrQueue::const_iterator it = scopes.begin(),
            end = scopes.end(); it != end; ++it) {
       BlockScopeRawPtr scope = *it;

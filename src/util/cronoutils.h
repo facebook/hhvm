@@ -173,14 +173,14 @@ extern char  *periods[];
 extern int  period_seconds[];
 
 
-/* Usage message and DEBUG macro.
+/* Usage message and CRONO_DEBUG macro.
  */
 
-#ifdef DEBUG
-#undef DEBUG
+#ifdef CRONO_DEBUG
+#undef CRONO_DEBUG
 #endif
 
-#define DEBUG(msg_n_args)  \
+#define CRONO_DEBUG(msg_n_args)  \
 do { if (debug_file) print_debug_msg  msg_n_args; } while (0)
 
 #endif

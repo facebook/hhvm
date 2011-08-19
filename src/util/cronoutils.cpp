@@ -157,7 +157,7 @@ create_subdirs(char *filename)
     char	dirname[PATH_MAX];
     char	*p;
 
-    DEBUG(("Creating missing components of \"%s\"\n", filename));
+    CRONO_DEBUG(("Creating missing components of \"%s\"\n", filename));
     for (p = filename; (p = strchr(p, '/')); p++)
     {
 	if (p == filename)
@@ -171,12 +171,12 @@ create_subdirs(char *filename)
 #ifndef CHECK_ALL_PREFIX_DIRS
 	if (strncmp(dirname, lastpath, strlen(dirname)) == 0)
 	{
-	    DEBUG(("Initial prefix \"%s\" known to exist\n", dirname));
+	    CRONO_DEBUG(("Initial prefix \"%s\" known to exist\n", dirname));
 	    continue;
 	}
 #endif
 
-	DEBUG(("Testing directory \"%s\"\n", dirname));
+	CRONO_DEBUG(("Testing directory \"%s\"\n", dirname));
 	if (stat(dirname, &stat_buf) < 0)
 	{
 	    if (errno != ENOENT)
@@ -186,7 +186,7 @@ create_subdirs(char *filename)
 	    }
 	    else
 	    {
-		DEBUG(("Directory \"%s\" does not exist -- creating\n", dirname));
+		CRONO_DEBUG(("Directory \"%s\" does not exist -- creating\n", dirname));
 		if ((mkdir(dirname, DIR_MODE) < 0) && (errno != EEXIST))
 #ifndef _WIN32
 		{
@@ -256,7 +256,7 @@ determine_periodicity(char *spec)
     PERIODICITY	periodicity = ONCE_ONLY;
     char 	ch;
 
-    DEBUG(("Determining periodicity of \"%s\"\n", spec));
+    CRONO_DEBUG(("Determining periodicity of \"%s\"\n", spec));
     while ((ch = *spec++) != 0)
     {
 	if (ch == '%')
@@ -270,7 +270,7 @@ determine_periodicity(char *spec)
 	    case 'Y':		/* four digit year */
 		if (periodicity > YEARLY)
 		{
-		    DEBUG(("%%%c -> yearly\n", ch));
+		    CRONO_DEBUG(("%%%c -> yearly\n", ch));
 		    periodicity = YEARLY;
 		}
 		break;
@@ -282,7 +282,7 @@ determine_periodicity(char *spec)
 				   leading zero) */
 		if (periodicity > MONTHLY)
 		{
-		    DEBUG(("%%%c -> monthly\n", ch));
+		    CRONO_DEBUG(("%%%c -> monthly\n", ch));
 		    periodicity = MONTHLY;
 		}
   	        break;
@@ -291,7 +291,7 @@ determine_periodicity(char *spec)
 	    case 'W':		/* week number (weeks start on Monday) */
 	        if (periodicity > WEEKLY)
 		{
-		    DEBUG(("%%%c -> weeky\n", ch));
+		    CRONO_DEBUG(("%%%c -> weeky\n", ch));
 		    periodicity = WEEKLY;
 		    weeks_start_on_mondays = (ch == 'W');
 		}
@@ -307,7 +307,7 @@ determine_periodicity(char *spec)
 	    case 'x':		/* full date spec */
 	        if (periodicity > DAILY)
 		{
-		    DEBUG(("%%%c -> daily\n", ch));
+		    CRONO_DEBUG(("%%%c -> daily\n", ch));
 		    periodicity = DAILY;
 		}
   	        break;
@@ -317,7 +317,7 @@ determine_periodicity(char *spec)
 	    case 'p':		/* AM/PM indicator */
 	        if (periodicity > HOURLY)
 		{
-		    DEBUG(("%%%c -> hourly\n", ch));
+		    CRONO_DEBUG(("%%%c -> hourly\n", ch));
 		    periodicity = HOURLY;
 		}
 		break;
@@ -325,7 +325,7 @@ determine_periodicity(char *spec)
 	    case 'M':		/* minute */
 	        if (periodicity > PER_MINUTE)
 		{
-		    DEBUG(("%%%c -> per minute\n", ch));
+		    CRONO_DEBUG(("%%%c -> per minute\n", ch));
 		    periodicity = PER_MINUTE;
 		}
 		break;
@@ -336,11 +336,11 @@ determine_periodicity(char *spec)
 	    case 'T':		/* full time spec */
 	    case 'r':		/* full time spec (non-standard) */
 	    case 'R':		/* full time spec (non-standard) */
-		DEBUG(("%%%c -> per second", ch));
+		CRONO_DEBUG(("%%%c -> per second", ch));
 		periodicity = PER_SECOND;
 
 	    default:		/* ignore anything else */
-		DEBUG(("ignoring %%%c\n", ch));
+		CRONO_DEBUG(("ignoring %%%c\n", ch));
 	        break;
 	    }
 	}
@@ -577,7 +577,7 @@ start_of_this_period(time_t start_time, PERIODICITY periodicity, int period_mult
 		adjust = -adjust;
 	    }
 
-	    DEBUG(("Adjust for dst: %02d/%02d/%04d %02d:%02d:%02d -- %c%0d:%02d:%02d\n",
+	    CRONO_DEBUG(("Adjust for dst: %02d/%02d/%04d %02d:%02d:%02d -- %c%0d:%02d:%02d\n",
 		   tm_initial.tm_mday, tm_initial.tm_mon+1, tm_initial.tm_year+1900,
 		   tm_initial.tm_hour, tm_initial.tm_min,   tm_initial.tm_sec, sign,
 		   adjust / SECS_PER_HOUR, (adjust / 60) % 60, adjust % SECS_PER_HOUR));

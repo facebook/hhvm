@@ -55,7 +55,7 @@ static FILE *new_log_file(const char *fileTemplate, const char *linkname,
   *pnext_period = start_of_next_period(start_of_period, periodicity,
                                        period_multiple) + period_delay;
 
-  DEBUG(("%s (%d): using log file \"%s\" from %s (%d) until %s (%d) "
+  CRONO_DEBUG(("%s (%d): using log file \"%s\" from %s (%d) until %s (%d) "
         "(for %d secs)\n",
         timestamp(time_now), time_now, pfilename,
         timestamp(start_of_period), start_of_period,

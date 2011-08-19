@@ -20320,14 +20320,36 @@ bool TestCodeRun::TestHint() {
 }
 
 #ifdef TAINTED
+
+// We reconstruct our strings to ensure they aren't ever treated as
+// literals by hphp.
+#define INIT_TEST_TAINT_STRINGS                               \
+  "$tmp = \"heLlO\\nwoRld\\ntoto\\ntiti\\ntata\";\n"          \
+  "$good1 = '';\n"                                            \
+  "for ($i = 0; $i < strlen($tmp); $i++) {\n"                 \
+  "  $good1 .= $tmp[$i];\n"                                   \
+  "}\n"                                                       \
+  "$tmp = 'world';\n"                                         \
+  "$good2 = '';\n"                                            \
+  "for ($i = 0; $i < strlen($tmp); $i++) {\n"                 \
+  "  $good2 .= $tmp[$i];\n"                                   \
+  "}\n"                                                       \
+  "$tmp = \"eViL\\nsTring\\nare\\tfun\\narent\\tthey?\";\n"   \
+  "$bad1 = '';\n"                                             \
+  "for ($i = 0; $i < strlen($tmp); $i++) {\n"                 \
+  "  $bad1 .= $tmp[$i];\n"                                    \
+  "}\n"                                                       \
+  "$tmp = 'blurf';\n"                                         \
+  "$bad2 = '';\n"                                             \
+  "for ($i = 0; $i < strlen($tmp); $i++) {\n"                 \
+  "  $bad2 .= $tmp[$i];\n"                                    \
+  "}\n"                                                       \
+  "unset($tmp);\n"                                            \
+  "fb_set_taint($bad1, TAINT_ALL);\n"                         \
+  "fb_set_taint($bad2, TAINT_ALL);\n"
+
 bool TestCodeRun::TestTaint() {
   WithOpt w(Option::EnableHipHopSyntax);
-
-  // NB: We reconstruct our starting strings in a loop since hphpc implements
-  // copy-on-write (at least with literals), so tainting any string assigned
-  // to our literal would taint them all (including the literal itself). In
-  // practice, since we only taint new StringData objects, this quirk is
-  // harmless (and is secure, since it would only generate false positives).
 
   // Literals and assignments
   MVCRO("<?php\n"
@@ -20339,6 +20361,81 @@ bool TestCodeRun::TestTaint() {
         "bool(false)\n"
         "bool(false)\n"
         "bool(false)\n");
+
+  // Copy-on-taint and taint independence
+  MVCRO("<?php\n"
+        "$a = 'foostr';\n"
+        "$b = 'foostr';\n"
+        "$c = $b;\n"
+        "var_dump(fb_get_taint('foostr', TAINT_ALL));\n"
+        "var_dump(fb_get_taint($a, TAINT_ALL));\n"
+        "var_dump(fb_get_taint($b, TAINT_ALL));\n"
+        "var_dump(fb_get_taint($c, TAINT_ALL));\n"
+        "fb_set_taint($a, TAINT_ALL);\n"
+        "var_dump(fb_get_taint('foostr', TAINT_ALL));\n"
+        "var_dump(fb_get_taint($a, TAINT_ALL));\n"
+        "var_dump(fb_get_taint($b, TAINT_ALL));\n"
+        "var_dump(fb_get_taint($c, TAINT_ALL));\n"
+        "fb_set_taint($b, TAINT_ALL);\n"
+        "var_dump(fb_get_taint('foostr', TAINT_ALL));\n"
+        "var_dump(fb_get_taint($a, TAINT_ALL));\n"
+        "var_dump(fb_get_taint($b, TAINT_ALL));\n"
+        "var_dump(fb_get_taint($c, TAINT_ALL));\n"
+        "fb_unset_taint($a, TAINT_ALL);\n"
+        "var_dump(fb_get_taint('foostr', TAINT_ALL));\n"
+        "var_dump(fb_get_taint($a, TAINT_ALL));\n"
+        "var_dump(fb_get_taint($b, TAINT_ALL));\n"
+        "var_dump(fb_get_taint($c, TAINT_ALL));\n"
+        "fb_set_taint($c, TAINT_ALL);\n"
+        "fb_unset_taint($b, TAINT_ALL);\n"
+        "var_dump(fb_get_taint('foostr', TAINT_ALL));\n"
+        "var_dump(fb_get_taint($a, TAINT_ALL));\n"
+        "var_dump(fb_get_taint($b, TAINT_ALL));\n"
+        "var_dump(fb_get_taint($c, TAINT_ALL));\n"
+        "if ($a === $c) {\n"
+        "  $a = $b;\n"
+        "}\n"
+        "var_dump(fb_get_taint($a, TAINT_ALL));\n"
+        "$c = 'barstr';\n"
+        "var_dump(fb_get_taint($c, TAINT_ALL));\n"
+        "$a = 'foostr';\n"
+        "fb_set_taint($a, TAINT_HTML);\n"
+        "$b = $a;\n"
+        "fb_set_taint($b, TAINT_MUTATED);\n"
+        "var_dump(fb_get_taint('foostr', TAINT_HTML));\n"
+        "var_dump(fb_get_taint($a, TAINT_HTML));\n"
+        "var_dump(fb_get_taint($b, TAINT_HTML));\n"
+        "var_dump(fb_get_taint('foostr', TAINT_MUTATED));\n"
+        "var_dump(fb_get_taint($a, TAINT_MUTATED));\n"
+        "var_dump(fb_get_taint($b, TAINT_MUTATED));\n",
+        "bool(false)\n"
+        "bool(false)\n"
+        "bool(false)\n"
+        "bool(false)\n"
+        "bool(false)\n"
+        "bool(true)\n"
+        "bool(false)\n"
+        "bool(false)\n"
+        "bool(false)\n"
+        "bool(true)\n"
+        "bool(true)\n"
+        "bool(false)\n"
+        "bool(false)\n"
+        "bool(false)\n"
+        "bool(true)\n"
+        "bool(false)\n"
+        "bool(false)\n"
+        "bool(false)\n"
+        "bool(false)\n"
+        "bool(true)\n"
+        "bool(false)\n"
+        "bool(false)\n"
+        "bool(false)\n"
+        "bool(true)\n"
+        "bool(true)\n"
+        "bool(false)\n"
+        "bool(false)\n"
+        "bool(true)\n");
 
   // Clean concatenations
   MVCRO("<?php\n"
@@ -20376,29 +20473,7 @@ bool TestCodeRun::TestTaint() {
 
   // Taint propagation in concatenations
   MVCRO("<?php\n"
-        "$tmp = \"heLlO\\nwoRld\\ntoto\\ntiti\\ntata\";\n"
-        "$good1 = '';\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $good1 .= $tmp[$i];\n"
-        "}\n"
-        "$tmp = 'world';\n"
-        "$good2 = '';\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $good2 .= $tmp[$i];\n"
-        "}\n"
-        "$tmp = \"eViL\\nsTring\\nare\\tfun\\narent\\tthey?\";\n"
-        "$bad1 = '';\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $bad1 .= $tmp[$i];\n"
-        "}\n"
-        "$tmp = 'blurf';\n"
-        "$bad2 = '';\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $bad2 .= $tmp[$i];\n"
-        "}\n"
-        "unset($tmp);\n"
-        "fb_set_taint($bad1, TAINT_ALL);\n"
-        "fb_set_taint($bad2, TAINT_ALL);\n"
+        INIT_TEST_TAINT_STRINGS
         "$a = $good1 . $good2;\n"
         "var_dump(fb_get_taint($a, TAINT_ALL));\n"
         "$a = $good1 . $bad1;\n"
@@ -20607,75 +20682,6 @@ bool TestCodeRun::TestTaint() {
         "bool(true)\n"
         "bool(true)\n");
 
-  // Taint independence
-  MVCRO("<?php\n"
-        "$tmp = 'foostr';\n"
-        "$a = '';\n"
-        "$b = '';\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $a .= $tmp[$i];\n"
-        "}\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $b .= $tmp[$i];\n"
-        "}\n"
-        "$c = $b;\n"
-        "unset($tmp);\n"
-        "var_dump(fb_get_taint('foostr', TAINT_ALL));\n"
-        "var_dump(fb_get_taint($a, TAINT_ALL));\n"
-        "var_dump(fb_get_taint($b, TAINT_ALL));\n"
-        "var_dump(fb_get_taint($c, TAINT_ALL));\n"
-        "fb_set_taint($a, TAINT_ALL);\n"
-        "var_dump(fb_get_taint('foostr', TAINT_ALL));\n"
-        "var_dump(fb_get_taint($a, TAINT_ALL));\n"
-        "var_dump(fb_get_taint($b, TAINT_ALL));\n"
-        "var_dump(fb_get_taint($c, TAINT_ALL));\n"
-        "fb_set_taint($b, TAINT_ALL);\n"
-        "var_dump(fb_get_taint('foostr', TAINT_ALL));\n"
-        "var_dump(fb_get_taint($a, TAINT_ALL));\n"
-        "var_dump(fb_get_taint($b, TAINT_ALL));\n"
-        "var_dump(fb_get_taint($c, TAINT_ALL));\n"
-        "fb_unset_taint($c, TAINT_ALL);\n"
-        "var_dump(fb_get_taint('foostr', TAINT_ALL));\n"
-        "var_dump(fb_get_taint($a, TAINT_ALL));\n"
-        "var_dump(fb_get_taint($b, TAINT_ALL));\n"
-        "var_dump(fb_get_taint($c, TAINT_ALL));\n"
-        "$b .= $a;\n"
-        "var_dump(fb_get_taint('foostr', TAINT_ALL));\n"
-        "var_dump(fb_get_taint($a, TAINT_ALL));\n"
-        "var_dump(fb_get_taint($b, TAINT_ALL));\n"
-        "var_dump(fb_get_taint($c, TAINT_ALL));\n"
-        "if ($a === $c) {\n"
-        "  $b = 'foostr';\n"
-        "}\n"
-        "var_dump(fb_get_taint($b, TAINT_ALL));\n"
-        "$b = &$c;\n"
-        "var_dump(fb_get_taint($b, TAINT_ALL));\n"
-        "$c .= $a;\n"
-        "var_dump(fb_get_taint($b, TAINT_ALL));\n",
-        "bool(false)\n"
-        "bool(false)\n"
-        "bool(false)\n"
-        "bool(false)\n"
-        "bool(false)\n"
-        "bool(true)\n"
-        "bool(false)\n"
-        "bool(false)\n"
-        "bool(false)\n"
-        "bool(true)\n"
-        "bool(true)\n"
-        "bool(true)\n"
-        "bool(false)\n"
-        "bool(true)\n"
-        "bool(false)\n"
-        "bool(false)\n"
-        "bool(false)\n"
-        "bool(true)\n"
-        "bool(true)\n"
-        "bool(false)\n"
-        "bool(false)\n"
-        "bool(false)\n"
-        "bool(true)\n");
-
   // Functions and classes
   MVCRO("<?php\n"
         "$tmp = 'foostr';\n"
@@ -20723,34 +20729,13 @@ bool TestCodeRun::TestTaint() {
 
   // Arrays
   MVCRO("<?php\n"
-        "$tmp = \"heLlO\\nwoRld\\ntoto\\ntiti\\ntata\";\n"
-        "$good1 = '';\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $good1 .= $tmp[$i];\n"
-        "}\n"
-        "$tmp = 'world';\n"
-        "$good2 = '';\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $good2 .= $tmp[$i];\n"
-        "}\n"
+        INIT_TEST_TAINT_STRINGS
         "$tmp = 'toto';\n"
         "$good3 = '';\n"
         "for ($i = 0; $i < strlen($tmp); $i++) {\n"
         "  $good3 .= $tmp[$i];\n"
         "}\n"
-        "$tmp = \"eViL\\nsTring\\nare\\tfun\\narent\\tthey?\";\n"
-        "$bad1 = '';\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $bad1 .= $tmp[$i];\n"
-        "}\n"
-        "$tmp = \"some\\nthing\\ntoto\\nbad!\";\n"
-        "$bad2 = '';\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $bad2 .= $tmp[$i];\n"
-        "}\n"
         "unset($tmp);\n"
-        "fb_set_taint($bad1, TAINT_ALL);\n"
-        "fb_set_taint($bad2, TAINT_ALL);\n"
         "$arrg = array($good1);\n"
         "$arrb = array($bad1);\n"
         "var_dump(fb_get_taint($arrg[0], TAINT_ALL));\n"
@@ -20856,18 +20841,23 @@ bool TestCodeRun::TestTaint() {
 
   // Tokens
   MVCRO("<?php\n"
-        "$tmp = 'foostr';\n"
+        "$tmp = 'goodname';\n"
+        "$goodtok = '';\n"
+        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
+        "  $goodtok .= $tmp[$i];\n"
+        "}\n"
+        "$tmp = 'badname';\n"
         "$badtok = '';\n"
         "for ($i = 0; $i < strlen($tmp); $i++) {\n"
         "  $badtok .= $tmp[$i];\n"
         "}\n"
         "unset($tmp);\n"
-        "$$badtok = 'bleeblooblah';\n"
-        "$vars = array_keys(get_defined_vars(), 'bleeblooblah');\n"
-        "var_dump(fb_get_taint($vars[0], TAINT_ALL));\n"
         "fb_set_taint($badtok, TAINT_ALL);\n"
-        "$$badtok = 'bleeblooblah';\n"
-        "$vars = array_keys(get_defined_vars(), 'bleeblooblah');\n"
+        "$$goodtok = 'goodval';\n"
+        "$vars = array_keys(get_defined_vars(), 'goodval');\n"
+        "var_dump(fb_get_taint($vars[0], TAINT_ALL));\n"
+        "$$badtok = 'badval';\n"
+        "$vars = array_keys(get_defined_vars(), 'badval');\n"
         "var_dump(fb_get_taint($vars[0], TAINT_ALL));\n"
         "function foostr() {\n"
         "  var_dump(fb_get_taint(__FUNCTION__, TAINT_ALL));\n"
@@ -20999,29 +20989,7 @@ bool TestCodeRun::TestTaint() {
 
   // call_user_func*()
   MVCRO("<?php\n"
-        "$tmp = \"heLlO\\nwoRld\\ntoto\\ntiti\\ntata\";\n"
-        "$good1 = '';\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $good1 .= $tmp[$i];\n"
-        "}\n"
-        "$tmp = 'world';\n"
-        "$good2 = '';\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $good2 .= $tmp[$i];\n"
-        "}\n"
-        "$tmp = \"eViL\\nsTring\\nare\\tfun\\narent\\tthey?\";\n"
-        "$bad1 = '';\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $bad1 .= $tmp[$i];\n"
-        "}\n"
-        "$tmp = \"some\\nthing\\ntoto\\nbad!\";\n"
-        "$bad2 = '';\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $bad2 .= $tmp[$i];\n"
-        "}\n"
-        "unset($tmp);\n"
-        "fb_set_taint($bad1, TAINT_ALL);\n"
-        "fb_set_taint($bad2, TAINT_ALL);\n"
+        INIT_TEST_TAINT_STRINGS
         // Ensure that falling into the callback doesn't drop taint.
         "function callback_check_propagation($a, $b) {\n"
         "  var_dump(fb_get_taint($a, TAINT_ALL));\n"
@@ -21074,29 +21042,7 @@ bool TestCodeRun::TestTaint() {
 
   // Output buffers
   MVCRO("<?php\n"
-        "$tmp = \"heLlO\\nwoRld\\ntoto\\ntiti\\ntata\";\n"
-        "$good1 = '';\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $good1 .= $tmp[$i];\n"
-        "}\n"
-        "$tmp = 'world';\n"
-        "$good2 = '';\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $good2 .= $tmp[$i];\n"
-        "}\n"
-        "$tmp = \"eViL\\nsTring\\nare\\tfun\\narent\\tthey?\";\n"
-        "$bad1 = '';\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $bad1 .= $tmp[$i];\n"
-        "}\n"
-        "$tmp = \"some\\nthing\\ntoto\\nbad!\";\n"
-        "$bad2 = '';\n"
-        "for ($i = 0; $i < strlen($tmp); $i++) {\n"
-        "  $bad2 .= $tmp[$i];\n"
-        "}\n"
-        "unset($tmp);\n"
-        "fb_set_taint($bad1, TAINT_ALL);\n"
-        "fb_set_taint($bad2, TAINT_ALL);\n"
+        INIT_TEST_TAINT_STRINGS
         // ob_start
         "ob_start();\n"
         "ob_start();\n"

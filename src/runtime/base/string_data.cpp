@@ -207,12 +207,12 @@ StringData *StringData::copy(bool sharedMemory /* = false */) const {
     // Even if it's literal, it might come from hphpi's class info
     // which will be freed at the end of the request, and so must be
     // copied.
-    return new StringData(m_data, size(), CopyString);
+    return new StringData(data(), size(), CopyString);
   } else {
     if (isLiteral()) {
-      return NEW(StringData)(m_data, size(), AttachLiteral);
+      return NEW(StringData)(data(), size(), AttachLiteral);
     }
-    return NEW(StringData)(m_data, size(), CopyString);
+    return NEW(StringData)(data(), size(), CopyString);
   }
 }
 

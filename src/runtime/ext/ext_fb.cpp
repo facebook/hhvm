@@ -867,25 +867,36 @@ Variant f_fb_get_code_coverage(bool flush) {
 void f_fb_set_taint(VRefParam str, int taint) {
 #ifdef TAINTED
   if (!str.isString()) {
-    // str can be KindOfNull, in which case we can just return
     return;
   }
 
-  StringData *string_data = str.getStringData();
-  ASSERT(string_data);
-  string_data->getTaintDataRef().setTaint(taint);
+  StringData *sd = str.getStringData();
+  ASSERT(sd);
+  if (sd->getCount() > 1) {
+    // Pass taint to our copy.
+    TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+    str = NEW(StringData)(sd->data(), sd->size(), CopyString);
+  }
+
+  str.getStringData()->getTaintDataRef().setTaint(taint);
 #endif
 }
 
 void f_fb_unset_taint(VRefParam str, int taint) {
 #ifdef TAINTED
   if (!str.isString()) {
-    // str can be KindOfNull, in which case we can just return
     return;
   }
-  StringData *string_data = str.getStringData();
-  ASSERT(string_data);
-  string_data->getTaintDataRef().unsetTaint(taint);
+
+  StringData *sd = str.getStringData();
+  ASSERT(sd);
+  if (sd->getCount() > 1) {
+    // Pass taint to our copy.
+    TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+    str = NEW(StringData)(sd->data(), sd->size(), CopyString);
+  }
+
+  str.getStringData()->getTaintDataRef().unsetTaint(taint);
 #endif
 }
 

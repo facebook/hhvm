@@ -293,6 +293,7 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef val, int64 ttl,
   const char *kcp = strdup(key.data());
   bool present;
   time_t expiry;
+  bool overwritePrime = false;
   {
     Map::accessor acc;
     present = !m_vars.insert(acc, kcp);
@@ -300,6 +301,8 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef val, int64 ttl,
     if (present) {
       free((void *)kcp);
       if (overwrite || sval->expired()) {
+        // if ApcTTLLimit is set, then only primed keys can have expiry == 0
+        overwritePrime = (sval->expiry == 0);
         if (statsDetail) {
           SharedStoreStats::onDelete(key.get(), sval->var, true);
         }
@@ -318,6 +321,12 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef val, int64 ttl,
         int32 size = var->getSpaceUsage();
         SharedStoreStats::addDirect(key.size(), size);
         sval->size = size;
+      }
+    }
+    if (RuntimeOption::ApcTTLLimit > 0 && !overwritePrime) {
+      // Enforce a ttl limit on non-primed keys
+      if (ttl == 0 || ttl > RuntimeOption::ApcTTLLimit) {
+        ttl = RuntimeOption::ApcTTLLimit;
       }
     }
     sval->set(var, ttl);

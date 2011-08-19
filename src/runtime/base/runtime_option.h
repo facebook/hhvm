@@ -304,6 +304,7 @@ public:
   static bool ApcExpireOnSets;
   static int ApcPurgeFrequency;
   static bool ApcAllowObj;
+  static int ApcTTLLimit;
 
   static bool EnableDnsCache;
   static int DnsCacheTTL;

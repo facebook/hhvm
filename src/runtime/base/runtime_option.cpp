@@ -305,6 +305,7 @@ int RuntimeOption::ApcKeyFrequencyUpdatePeriod = 1000;
 bool RuntimeOption::ApcExpireOnSets = false;
 int RuntimeOption::ApcPurgeFrequency = 4096;
 bool RuntimeOption::ApcAllowObj = false;
+int RuntimeOption::ApcTTLLimit = -1;
 
 bool RuntimeOption::EnableDnsCache = false;
 int RuntimeOption::DnsCacheTTL = 10 * 60; // 10 minutes
@@ -752,6 +753,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     ApcPurgeFrequency = apc["PurgeFrequency"].getInt32(4096);
 
     ApcAllowObj = apc["AllowObject"].getBool();
+    ApcTTLLimit = apc["TTLLimit"].getInt32(-1);
 
     ApcKeyMaturityThreshold = apc["KeyMaturityThreshold"].getInt32(20);
     ApcMaximumCapacity = apc["MaximumCapacity"].getInt64(0);

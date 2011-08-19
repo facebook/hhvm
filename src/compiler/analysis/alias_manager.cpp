@@ -1869,19 +1869,16 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
   ret = FallThrough;
   if (!s || s->isVisited()) return StatementPtr();
 
+  // Dont handle nested functions
+  // they will be dealt with by another
+  // top level call to optimize
+  if (FunctionWalker::SkipRecurse(s)) return StatementPtr();
+
   Statement::KindOf stype = s->getKindOf();
   int start = 0;
   int nkid = s->getKidCount();
 
   switch (stype) {
-  case Statement::KindOfFunctionStatement:
-  case Statement::KindOfMethodStatement:
-  case Statement::KindOfClassStatement:
-  case Statement::KindOfInterfaceStatement:
-    // Dont handle nested functions
-    // they will be dealt with by another
-    // top level call to optimize
-    return StatementPtr();
   case Statement::KindOfStaticStatement:
     clear();
     ret = Converge;
@@ -1997,6 +1994,9 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
       start = nkid;
       break;
     }
+
+  default:
+    assert(false);
   }
 
   for (int i = start; i < nkid; i++) {
@@ -3540,13 +3540,8 @@ void AliasManager::finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m) {
 
 void AliasManager::invalidateChainRoots(StatementPtr s) {
   if (!s) return;
+  if (FunctionWalker::SkipRecurse(s)) return;
   switch (s->getKindOf()) {
-  case Statement::KindOfFunctionStatement:
-  case Statement::KindOfMethodStatement:
-  case Statement::KindOfClassStatement:
-  case Statement::KindOfInterfaceStatement:
-    // don't recurse into these definitions
-    return;
   case Statement::KindOfStatementList:
     {
       StatementListPtr slist(spc(StatementList, s));
@@ -3751,18 +3746,14 @@ void AliasManager::stringOptsRecur(ExpressionPtr e, bool ok) {
 void AliasManager::stringOptsRecur(StatementPtr s) {
   if (!s) return;
 
+  // Dont handle nested functions
+  // they will be dealt with by another
+  // top level call
+  if (FunctionWalker::SkipRecurse(s)) return;
+
   bool pop = false;
   Statement::KindOf stype = s->getKindOf();
   switch (stype) {
-  case Statement::KindOfFunctionStatement:
-  case Statement::KindOfMethodStatement:
-  case Statement::KindOfClassStatement:
-  case Statement::KindOfInterfaceStatement:
-    // Dont handle nested functions
-    // they will be dealt with by another
-    // top level call
-    return;
-
   case Statement::KindOfSwitchStatement:
     if (m_loopInfo.size()) {
       pushStringScope(s);

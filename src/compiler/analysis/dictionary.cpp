@@ -41,15 +41,7 @@ void Dictionary::build(StatementPtr stmt) {
   for (int i = 0, n = stmt->getKidCount(); i < n; i++) {
     if (ConstructPtr kid = stmt->getNthKid(i)) {
       if (StatementPtr s = boost::dynamic_pointer_cast<Statement>(kid)) {
-        switch (s->getKindOf()) {
-          case Statement::KindOfFunctionStatement:
-          case Statement::KindOfMethodStatement:
-          case Statement::KindOfClassStatement:
-          case Statement::KindOfInterfaceStatement:
-            continue;
-          default:
-            break;
-        }
+        if (FunctionWalker::SkipRecurse(s)) continue;
         build(s);
       } else {
         ExpressionPtr e = boost::dynamic_pointer_cast<Expression>(kid);

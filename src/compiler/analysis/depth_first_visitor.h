@@ -17,10 +17,12 @@
 #ifndef __DEPTH_FIRST_VISITOR_H__
 #define __DEPTH_FIRST_VISITOR_H__
 
+#include <compiler/analysis/analysis_result.h>
+#include <compiler/analysis/ast_walker.h>
 #include <compiler/analysis/block_scope.h>
+
 #include <compiler/expression/expression.h>
 #include <compiler/statement/statement.h>
-#include <compiler/analysis/analysis_result.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,15 +70,7 @@ public:
     for (int i = 0, n = stmt->getKidCount(); i < n; i++) {
       if (ConstructPtr kid = stmt->getNthKid(i)) {
         if (StatementPtr s = boost::dynamic_pointer_cast<Statement>(kid)) {
-          switch (s->getKindOf()) {
-            case Statement::KindOfFunctionStatement:
-            case Statement::KindOfMethodStatement:
-            case Statement::KindOfClassStatement:
-            case Statement::KindOfInterfaceStatement:
-              continue;
-            default:
-              break;
-          }
+          if (FunctionWalker::SkipRecurse(s)) continue;
           if (scope) scope->incLoopNestedLevel();
           if (StatementPtr rep = visitStmtRecur(s)) {
             stmt->setNthKid(i, rep);

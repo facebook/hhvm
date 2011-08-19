@@ -15,6 +15,7 @@
 */
 
 #include <compiler/statement/statement.h>
+#include <compiler/analysis/ast_walker.h>
 #include <compiler/analysis/function_scope.h>
 
 using namespace HPHP;
@@ -47,13 +48,8 @@ void Statement::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 bool Statement::hasReachableLabel() const {
+  if (FunctionWalker::SkipRecurse(this)) return false;
   switch (getKindOf()) {
-    case KindOfMethodStatement:
-    case KindOfFunctionStatement:
-    case KindOfClassStatement:
-    case KindOfInterfaceStatement:
-      // dont recur into declarations
-      return false;
     case KindOfForStatement:
     case KindOfForEachStatement:
     case KindOfWhileStatement:

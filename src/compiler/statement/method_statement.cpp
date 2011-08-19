@@ -34,6 +34,7 @@
 #include <compiler/expression/assignment_expression.h>
 #include <compiler/expression/simple_variable.h>
 
+#include <compiler/analysis/ast_walker.h>
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/file_scope.h>
@@ -315,13 +316,8 @@ public:
   }
 
   void findTryingGotosRecur(StatementPtr s) {
+    if (FunctionWalker::SkipRecurse(s)) return;
     switch (s->getKindOf()) {
-      case Statement::KindOfMethodStatement:
-      case Statement::KindOfFunctionStatement:
-      case Statement::KindOfClassStatement:
-      case Statement::KindOfInterfaceStatement:
-        // dont recur into declarations
-        return;
       case Statement::KindOfLabelStatement:
         if (trys.size()) {
           LabelStatementRawPtr label_stmt(
@@ -384,15 +380,7 @@ public:
   }
 
   StatementPtr fixTryingGotosRecur(StatementPtr s) {
-    switch (s->getKindOf()) {
-      case Statement::KindOfMethodStatement:
-      case Statement::KindOfFunctionStatement:
-      case Statement::KindOfClassStatement:
-      case Statement::KindOfInterfaceStatement:
-        // dont recur into declarations
-        return StatementPtr();
-      default: break;
-    }
+    if (FunctionWalker::SkipRecurse(s)) return StatementPtr();
 
     for (int i = s->getKidCount(); i--; ) {
       StatementPtr child(s->getNthStmt(i));

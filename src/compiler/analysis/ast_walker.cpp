@@ -22,18 +22,33 @@ using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool FunctionWalker::SkipRecurse(ConstructPtr cp) {
+  StatementPtr s(
+    boost::dynamic_pointer_cast<Statement>(cp));
+  return SkipRecurse(s);
+}
+bool FunctionWalker::SkipRecurse(ConstructConstPtr cp) {
+  StatementConstPtr s(
+    boost::dynamic_pointer_cast<const Statement>(cp));
+  return SkipRecurse(s);
+}
 bool FunctionWalker::SkipRecurse(ConstructRawPtr cp) {
-  if (StatementRawPtr s = dynamic_pointer_cast<Statement>(cp)) {
-    Statement::KindOf stype = s->getKindOf();
-    switch (stype) {
-      case Statement::KindOfFunctionStatement:
-      case Statement::KindOfMethodStatement:
-      case Statement::KindOfClassStatement:
-      case Statement::KindOfInterfaceStatement:
-        return true;
-      default:
-        break;
-    }
+  StatementRawPtr s(
+    boost::dynamic_pointer_cast<Statement>(cp));
+  return SkipRecurse(s);
+}
+
+bool FunctionWalker::SkipRecurse(const Statement* stmt) {
+  if (!stmt) return false;
+  Statement::KindOf stype = stmt->getKindOf();
+  switch (stype) {
+    case Statement::KindOfFunctionStatement:
+    case Statement::KindOfMethodStatement:
+    case Statement::KindOfClassStatement:
+    case Statement::KindOfInterfaceStatement:
+      return true;
+    default:
+      break;
   }
   return false;
 }

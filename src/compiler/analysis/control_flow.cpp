@@ -233,15 +233,9 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
   if (ret == WalkContinue) {
     if (m_pass == 1) {
       if (StatementPtr s = dynamic_pointer_cast<Statement>(cp)) {
+        if (FunctionWalker::SkipRecurse(s)) assert(false);
         Statement::KindOf stype = s->getKindOf();
         switch (stype) {
-          case Statement::KindOfFunctionStatement:
-          case Statement::KindOfMethodStatement:
-          case Statement::KindOfClassStatement:
-          case Statement::KindOfInterfaceStatement:
-            assert(false);
-            break;
-
           case Statement::KindOfStaticStatement:
             addEdge(s, BeforeConstruct, s, AfterConstruct);
             break;
@@ -454,6 +448,9 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
 
           case Statement::KindOfEchoStatement:
             break;
+
+          default:
+            assert(false);
         }
       } else {
         ExpressionPtr e(dynamic_pointer_cast<Expression>(cp));

@@ -45,17 +45,7 @@ void Construct::resetScope(BlockScopeRawPtr scope) {
   setBlockScope(scope);
   for (int i = 0, n = getKidCount(); i < n; i++) {
     if (ConstructPtr kid = getNthKid(i)) {
-      if (StatementPtr s = boost::dynamic_pointer_cast<Statement>(kid)) {
-        switch (s->getKindOf()) {
-          case Statement::KindOfClassStatement:
-          case Statement::KindOfInterfaceStatement:
-          case Statement::KindOfMethodStatement:
-          case Statement::KindOfFunctionStatement:
-            continue;
-          default:
-            break;
-        }
-      }
+      if (FunctionWalker::SkipRecurse(kid)) continue;
       kid->resetScope(scope);
     }
   }
@@ -71,17 +61,7 @@ int Construct::getChildrenEffects() const {
   for (int i = getKidCount(); i--; ) {
     ConstructPtr child = getNthKid(i);
     if (child) {
-      if (StatementPtr s = boost::dynamic_pointer_cast<Statement>(child)) {
-        switch (s->getKindOf()) {
-          case Statement::KindOfMethodStatement:
-          case Statement::KindOfFunctionStatement:
-          case Statement::KindOfClassStatement:
-          case Statement::KindOfInterfaceStatement:
-            continue;
-          default:
-            break;
-        }
-      }
+      if (FunctionWalker::SkipRecurse(child)) continue;
       childrenEffects |= child->getContainedEffects();
       if ((childrenEffects & UnknownEffect) == UnknownEffect) {
         break;

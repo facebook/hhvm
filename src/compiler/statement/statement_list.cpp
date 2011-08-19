@@ -145,6 +145,7 @@ void StatementList::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
 
+    // TODO(stephentu): Also include method statement here?
     bool scopeStmt = stmt->is(Statement::KindOfFunctionStatement) ||
       stmt->is(Statement::KindOfClassStatement) ||
       stmt->is(Statement::KindOfInterfaceStatement);

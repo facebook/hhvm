@@ -22,8 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-//DECLARE_BOOST_TYPES(Type);
-
 class RefDict : public Dictionary {
 public:
   RefDict(AliasManager &am) : Dictionary(am), first_pass(true) {}
@@ -54,7 +52,7 @@ private:
 
 class RefDictWalker : public ControlFlowGraphWalker {
 public:
-  RefDictWalker(ControlFlowGraph *g) : 
+  RefDictWalker(ControlFlowGraph *g) :
     ControlFlowGraphWalker(g), first_pass(true) {}
   void walk() { ControlFlowGraphWalker::walk(*this); }
   int after(ConstructRawPtr cp);

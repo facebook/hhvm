@@ -23,7 +23,7 @@ endif
 -include sep_extensions.mk
 
 CPPFLAGS += -I. $(SEP_EXTENSION_INCLUDE_PATHS)
-TAINTFLAGS := $(if $(shell $(HPHP_HOME)/src/hphp/hphp --taint-status), -DTAINTED)
+TAINTFLAGS := $(if $(shell $(HPHP) --taint-status), -DTAINTED)
 CPPFLAGS += $(TAINTFLAGS)
 LIBS = $(SEP_EXTENSION_LIBS) $(HPHP_LIB)/libhphp_runtime.a $(ALL_LIBS)
 

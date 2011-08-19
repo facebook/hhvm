@@ -2981,6 +2981,32 @@ Variant ifa_hphp_splfileobject_ftruncate(void *extra, int count, INVOKE_FEW_ARGS
   CVarRef arg1(a1);
   return (x_hphp_splfileobject_ftruncate(arg0, arg1));
 }
+Variant i_fb_curl_multi_fdset(void *extra, CArrRef params) {
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 4 || count > 5)) return throw_wrong_arguments("fb_curl_multi_fdset", count, 4, 5, 1);
+  const_cast<Array&>(params).escalate(true);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    VRefParam arg1(vref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    VRefParam arg2(vref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    VRefParam arg3(vref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 4) return (x_fb_curl_multi_fdset(arg0, arg1, arg2, arg3));
+    VRefParam arg4(vref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (x_fb_curl_multi_fdset(arg0, arg1, arg2, arg3, arg4));
+  }
+}
+Variant ifa_fb_curl_multi_fdset(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count < 4 || count > 5)) return throw_wrong_arguments("fb_curl_multi_fdset", count, 4, 5, 1);
+  CVarRef arg0(a0);
+  VRefParam arg1(vref(a1));
+  VRefParam arg2(vref(a2));
+  VRefParam arg3(vref(a3));
+  if (count <= 4) return (x_fb_curl_multi_fdset(arg0, arg1, arg2, arg3));
+  VRefParam arg4(vref(a4));
+  return (x_fb_curl_multi_fdset(arg0, arg1, arg2, arg3, arg4));
+}
 Variant i_key(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("key", count, 1, 1, 1);
@@ -37997,6 +38023,7 @@ CallInfo ci_ldap_connect((void*)&i_ldap_connect, (void*)&ifa_ldap_connect, 2, 0,
 CallInfo ci_shuffle((void*)&i_shuffle, (void*)&ifa_shuffle, 1, 0, 0x0000000000000001LL);
 CallInfo ci_mcrypt_module_get_algo_block_size((void*)&i_mcrypt_module_get_algo_block_size, (void*)&ifa_mcrypt_module_get_algo_block_size, 2, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileobject_ftruncate((void*)&i_hphp_splfileobject_ftruncate, (void*)&ifa_hphp_splfileobject_ftruncate, 2, 0, 0x0000000000000000LL);
+CallInfo ci_fb_curl_multi_fdset((void*)&i_fb_curl_multi_fdset, (void*)&ifa_fb_curl_multi_fdset, 5, 0, 0x000000000000001ELL);
 CallInfo ci_key((void*)&i_key, (void*)&ifa_key, 1, 0, 0x0000000000000001LL);
 CallInfo ci_xmlwriter_start_dtd_entity((void*)&i_xmlwriter_start_dtd_entity, (void*)&ifa_xmlwriter_start_dtd_entity, 3, 0, 0x0000000000000000LL);
 CallInfo ci_readfile((void*)&i_readfile, (void*)&ifa_readfile, 3, 0, 0x0000000000000000LL);
@@ -40546,6 +40573,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 472:
       HASH_GUARD(0x60E9E392663921D8LL, readlink) {
         ci = &ci_readlink;
+        return true;
+      }
+      break;
+    case 475:
+      HASH_GUARD(0x7FF16269AB7181DBLL, fb_curl_multi_fdset) {
+        ci = &ci_fb_curl_multi_fdset;
         return true;
       }
       break;

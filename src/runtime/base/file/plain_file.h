@@ -72,6 +72,7 @@ protected:
 class BuiltinFile : public PlainFile {
 public:
   BuiltinFile(FILE *stream) : PlainFile(stream, true) {}
+  BuiltinFile(int fd) : PlainFile(fd, true) {}
   virtual ~BuiltinFile();
   virtual bool close();
 };

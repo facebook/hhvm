@@ -381,6 +381,45 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "fb_curl_multi_fdset",
+    'desc'   => "extracts file descriptor information from a multi handle.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Returns 0 on success, or one of the CURLM_XXX errors code.",
+    ),
+    'args'   => array(
+      array(
+        'name' => "mh",
+        'type' => Resource,
+        'desc' => "A cURL multi handle returned by curl_multi_init().",
+      ),
+      array(
+        'name' => "read_fd_set",
+        'type' => Variant | Reference,
+        'desc' => "read set",
+      ),
+      array(
+        'name' => "write_fd_set",
+        'type' => Variant | Reference,
+        'desc' => "write set",
+      ),
+      array(
+        'name' => "exc_fd_set",
+        'type' => Variant | Reference,
+        'desc' => "exception set",
+      ),
+      array(
+        'name' => "max_fd",
+        'type' => Variant | Reference,
+        'value' => "null_object",
+        'desc' => "If no file descriptors are set, max_fd will contain -1. Otherwise it will contain the higher descriptor number.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "curl_multi_getcontent",
     'desc'   => "If CURLOPT_RETURNTRANSFER is an option that is set for a specific handle, then this function will return the content of that cURL handle in the form of a string.",
     'flags'  =>  HasDocComment,

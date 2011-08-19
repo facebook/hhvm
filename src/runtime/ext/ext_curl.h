@@ -44,6 +44,7 @@ Variant f_curl_multi_add_handle(CObjRef mh, CObjRef ch);
 Variant f_curl_multi_remove_handle(CObjRef mh, CObjRef ch);
 Variant f_curl_multi_exec(CObjRef mh, VRefParam still_running);
 Variant f_curl_multi_select(CObjRef mh, double timeout = 1.0);
+Variant f_fb_curl_multi_fdset(CObjRef mh, VRefParam read_fd_set, VRefParam write_fd_set, VRefParam exc_fd_set, VRefParam max_fd = null_object);
 Variant f_curl_multi_getcontent(CObjRef ch);
 Variant f_curl_multi_info_read(CObjRef mh, VRefParam msgs_in_queue = null);
 Variant f_curl_multi_close(CObjRef mh);

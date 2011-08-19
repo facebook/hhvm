@@ -1038,6 +1038,42 @@ Variant f_curl_multi_getcontent(CObjRef ch) {
   return curl->getContents();
 }
 
+Array f_curl_convert_fd_to_stream(fd_set *fd, int max_fd) {
+  Array ret = Array::Create();
+  for (int i=0; i<=max_fd; i++) {
+    if (FD_ISSET(i, fd)) {
+      BuiltinFile *file = NEWOBJ(BuiltinFile)(i);
+      ret.append(file);
+    }
+  }
+  return ret;
+}
+
+Variant f_fb_curl_multi_fdset(CObjRef mh,
+                              VRefParam read_fd_set,
+                              VRefParam write_fd_set,
+                              VRefParam exc_fd_set,
+                              VRefParam max_fd /* = null_object */) {
+  CHECK_MULTI_RESOURCE(curlm);
+
+  fd_set read_set;
+  fd_set write_set;
+  fd_set exc_set;
+  int max = 0;
+
+  FD_ZERO(&read_set);
+  FD_ZERO(&write_set);
+  FD_ZERO(&exc_set);
+
+  int r = curl_multi_fdset(curlm->get(), &read_set, &write_set, &exc_set, &max);
+  read_fd_set = f_curl_convert_fd_to_stream(&read_set, max);
+  write_fd_set = f_curl_convert_fd_to_stream(&write_set, max);
+  exc_fd_set = f_curl_convert_fd_to_stream(&exc_set, max);
+  max_fd = max;
+
+  return r;
+}
+
 Variant f_curl_multi_info_read(CObjRef mh,
                                VRefParam msgs_in_queue /* = null */) {
   CHECK_MULTI_RESOURCE(curlm);

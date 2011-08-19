@@ -470,16 +470,16 @@ public:
                          new GotoStatement(
                            c->getScope(), c->getLocation(), lab)));
             StatementListPtr newBody(new StatementList(
-                                       body->getScope(), body->getLocation()));
+                                       c->getScope(), c->getLocation()));
             newBody->addElement(StatementPtr(
                                   new LabelStatement(
-                                    body->getScope(), body->getLocation(),
+                                    c->getScope(), c->getLocation(),
                                     lab)));
-            newBody->addElement(body);
+            if (body) newBody->addElement(body);
             if (i + 1 < n) {
               newBody->addElement(
                 StatementPtr(new GotoStatement(
-                               body->getScope(), body->getLocation(),
+                               c->getScope(), c->getLocation(),
                                afterLab)));
             }
             sl->addElement(newBody);

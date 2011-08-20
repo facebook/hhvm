@@ -72,7 +72,6 @@ class c_DateTime : public ExtObjectData {
   // implemented by HPHP
   public: c_DateTime *create(String time = "now",
                              Object timezone = null_object);
-  public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
   static const ClassPropTable os_prop_table;
 
@@ -148,7 +147,6 @@ class c_DateTimeZone : public ExtObjectData {
 
   // implemented by HPHP
   public: c_DateTimeZone *create(String timezone);
-  public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
   static const ClassPropTable os_prop_table;
 

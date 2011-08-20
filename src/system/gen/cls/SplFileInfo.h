@@ -38,7 +38,6 @@ class c_SplFileInfo : public ExtObjectData {
   c_SplFileInfo() : m_rsrc(Variant::nullInit) {}
   public: void t___construct(Variant v_file_name);
   public: c_SplFileInfo *create(CVarRef v_file_name);
-  public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: String t_getpath();
   public: String t_getfilename();

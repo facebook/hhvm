@@ -1529,16 +1529,7 @@ c_ReflectionClass *c_ReflectionClass::create(CVarRef v_name) {
   t___construct(v_name);
   return this;
 }
-void c_ReflectionClass::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    (t___construct(arg0));
-  }
-}
+
 void c_ReflectionClass::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionClass::ci___construct;
   mcp.obj = this;
@@ -2703,16 +2694,7 @@ c_ReflectionExtension *c_ReflectionExtension::create(CVarRef v_name) {
   t___construct(v_name);
   return this;
 }
-void c_ReflectionExtension::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    (t___construct(arg0));
-  }
-}
+
 void c_ReflectionExtension::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionExtension::ci___construct;
   mcp.obj = this;
@@ -3216,21 +3198,7 @@ c_ReflectionMethod *c_ReflectionMethod::create(CVarRef v_cls, CVarRef v_name // 
   t___construct(v_cls, v_name);
   return this;
 }
-void c_ReflectionMethod::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("ReflectionMethod::__construct", count, 1, 2, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
-  } while (false);
-}
+
 void c_ReflectionMethod::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionMethod::ci___construct;
   mcp.obj = this;
@@ -3861,17 +3829,7 @@ c_ReflectionProperty *c_ReflectionProperty::create(CVarRef v_cls, CVarRef v_name
   t___construct(v_cls, v_name);
   return this;
 }
-void c_ReflectionProperty::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 2)) throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
-  }
-}
+
 void c_ReflectionProperty::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionProperty::ci___construct;
   mcp.obj = this;
@@ -4272,16 +4230,7 @@ c_ReflectionFunction *c_ReflectionFunction::create(CVarRef v_name) {
   t___construct(v_name);
   return this;
 }
-void c_ReflectionFunction::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    (t___construct(arg0));
-  }
-}
+
 void c_ReflectionFunction::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionFunction::ci___construct;
   mcp.obj = this;
@@ -4658,17 +4607,7 @@ c_ReflectionParameter *c_ReflectionParameter::create(CVarRef v_func, CVarRef v_p
   t___construct(v_func, v_param);
   return this;
 }
-void c_ReflectionParameter::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 2)) throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
-  }
-}
+
 void c_ReflectionParameter::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ReflectionParameter::ci___construct;
   mcp.obj = this;

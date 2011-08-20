@@ -59,7 +59,6 @@ class c_EncodingDetector : public ExtObjectData {
 
   // implemented by HPHP
   public: c_EncodingDetector *create();
-  public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
 
 
@@ -94,7 +93,6 @@ class c_EncodingMatch : public ExtObjectData {
 
   // implemented by HPHP
   public: c_EncodingMatch *create();
-  public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
 
 

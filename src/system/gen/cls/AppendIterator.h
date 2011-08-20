@@ -42,7 +42,6 @@ class c_AppendIterator : public ExtObjectData {
   Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   public: void t___construct();
   public: c_AppendIterator *create();
-  public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: void t_append(CVarRef v_it);
   public: Variant t_getinneriterator();

@@ -48,7 +48,6 @@ class c_Closure : public ExtObjectData {
 
   // implemented by HPHP
   public: c_Closure *create();
-  public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
 public:
   /**
@@ -98,7 +97,6 @@ class c_GeneratorClosure : public c_Closure {
 
   // implemented by HPHP
   public: c_GeneratorClosure *create();
-  public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
 public:
   /**

@@ -60,7 +60,6 @@ ObjectData::~ObjectData() {
   }
 }
 
-void ObjectData::dynConstruct(CArrRef params) {}
 
 static CallInfo s_ObjectData_null_constructor(
     (void*)ObjectData::NullConstructor,
@@ -68,10 +67,6 @@ static CallInfo s_ObjectData_null_constructor(
 void ObjectData::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &s_ObjectData_null_constructor;
   mcp.obj = this;
-}
-
-void ObjectData:: dynConstructUnchecked(CArrRef params) {
-  return dynConstruct(params);
 }
 
 void ObjectData::release() {

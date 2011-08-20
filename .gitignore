@@ -5,6 +5,7 @@
 
 /src/compiler/analysis/code_error.inc
 /src/compiler/analysis/dependency.inc
+/src/runtime/base/memory/smart_allocator.inc_gen
 
 /src/test/test
 /src/test/test_fast.inc

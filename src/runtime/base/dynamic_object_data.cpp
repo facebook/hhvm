@@ -43,12 +43,6 @@ void DynamicObjectData::init() {
   }
 }
 
-void DynamicObjectData::dynConstruct(CArrRef params) {
-  if (!parent.isNull()) {
-    parent->dynConstruct(params);
-  }
-}
-
 void DynamicObjectData::getConstructor(MethodCallPackage &mcp) {
   if (!parent.isNull()) {
     parent->getConstructor(mcp);

@@ -42,7 +42,6 @@ class c_IteratorIterator : public ExtObjectData {
   Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   public: void t___construct(Variant v_iterator);
   public: c_IteratorIterator *create(CVarRef v_iterator);
-  public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: Variant t_getinneriterator();
   public: Variant t_valid();

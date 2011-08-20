@@ -568,7 +568,7 @@ static Object pdo_stmt_instantiate(sp_PDOConnection dbh, CStrRef clsname,
                          "constructor arguments must be passed as an array");
     return Object();
   }
-  return create_object(name, Array(), false);
+  return create_object_only(name);
 }
 
 static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
@@ -578,7 +578,9 @@ static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
     const char *constructor = cls->getConstructor();
     if (constructor) {
       object->set("queryString", stmt->query_string);
-      object->dynConstructUnchecked(ctor_args);
+      MethodCallPackage mcp;
+      object->getConstructor(mcp);
+      mcp.ci->getMeth()(mcp, ctor_args);
     }
   }
 }

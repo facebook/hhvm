@@ -1715,7 +1715,6 @@ void FunctionScope::outputCPPCreateDecl(CodeGenerator &cg,
                       ->getParams(), true);
   cg.setContext(context);
   cg_printf(");\n");
-  cg_printf("public: void dynConstruct(CArrRef params);\n");
   if (isDynamic()) {
     cg_printf("public: void getConstructor(MethodCallPackage &mcp);\n");
   }
@@ -1746,13 +1745,6 @@ void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
   cg.setContext(context);
   cg_printf(");\n");
   cg_printf("return this;\n");
-  cg_indentEnd("}\n");
-  cg_indentBegin("void %s%s::dynConstruct(CArrRef params) {\n",
-                 Option::ClassPrefix, clsName);
-  OutputCPPDynamicInvokeCount(cg);
-  outputCPPDynamicInvoke(cg, ar, Option::MethodPrefix,
-                         CodeGenerator::FormatLabel(consName).c_str(),
-                         true, false, false, NULL, true);
   cg_indentEnd("}\n");
   if (isDynamic() || isSepExtension()) {
     cg_indentBegin("void %s%s::getConstructor(MethodCallPackage &mcp) {\n",

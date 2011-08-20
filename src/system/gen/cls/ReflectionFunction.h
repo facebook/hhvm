@@ -38,7 +38,6 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   static const ClassPropTable os_prop_table;
   public: void t___construct(Variant v_name);
   public: c_ReflectionFunction *create(CVarRef v_name);
-  public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: String t___tostring();
   public: static Variant t_export(CVarRef v_name, CVarRef v_ret);

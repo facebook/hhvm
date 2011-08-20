@@ -170,11 +170,6 @@ c_DOMDocumentFragment *c_DOMDocumentFragment::create() {
   t___construct();
   return this;
 }
-void c_DOMDocumentFragment::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
 void c_DOMDocumentFragment::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMDocumentFragment::ci___construct;
   mcp.obj = this;
@@ -390,20 +385,6 @@ c_DOMText *c_DOMText::create(String a0) {
   init();
   t___construct(a0);
   return this;
-}
-void c_DOMText::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 1)) throw_toomany_arguments("__construct", 1, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    if (count <= 0) {
-      (t___construct());
-      break;
-    }
-    CVarRef arg0((ad->getValue(pos)));
-    (t___construct(arg0));
-  } while (false);
 }
 void c_DOMText::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMText::ci___construct;
@@ -1211,11 +1192,6 @@ c_DebuggerClient *c_DebuggerClient::create() {
   t___construct();
   return this;
 }
-void c_DebuggerClient::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
 void c_DebuggerClient::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DebuggerClient::ci___construct;
   mcp.obj = this;
@@ -1388,11 +1364,6 @@ c_EncodingDetector *c_EncodingDetector::create() {
   t___construct();
   return this;
 }
-void c_EncodingDetector::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
 void c_EncodingDetector::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_EncodingDetector::ci___construct;
   mcp.obj = this;
@@ -1485,16 +1456,6 @@ c_DOMCDATASection *c_DOMCDATASection::create(String a0) {
   t___construct(a0);
   return this;
 }
-void c_DOMCDATASection::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("__construct", count, 1, 1, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    (t___construct(arg0));
-  }
-}
 void c_DOMCDATASection::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMCDATASection::ci___construct;
   mcp.obj = this;
@@ -1576,11 +1537,6 @@ c_Locale *c_Locale::create() {
   init();
   t___construct();
   return this;
-}
-void c_Locale::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
 }
 void c_Locale::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Locale::ci___construct;
@@ -1708,11 +1664,6 @@ c_Closure *c_Closure::create() {
   init();
   t___construct();
   return this;
-}
-void c_Closure::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
 }
 void c_Closure::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Closure::ci___construct;
@@ -1876,11 +1827,6 @@ c_DOMDocumentType *c_DOMDocumentType::create() {
   t___construct();
   return this;
 }
-void c_DOMDocumentType::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
 void c_DOMDocumentType::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMDocumentType::ci___construct;
   mcp.obj = this;
@@ -2036,30 +1982,6 @@ c_GenericContinuation *c_GenericContinuation::create(int64 a0, int64 a1, bool a2
   init();
   t___construct(a0, a1, a2, a3, a4, a5, a6);
   return this;
-}
-void c_GenericContinuation::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 5 || count > 7)) throw_wrong_arguments("__construct", count, 5, 7, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 5) {
-      (t___construct(arg0, arg1, arg2, arg3, arg4));
-      break;
-    }
-    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 6) {
-      (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
-      break;
-    }
-    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
-  } while (false);
 }
 void c_GenericContinuation::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_GenericContinuation::ci___construct;
@@ -2313,17 +2235,6 @@ c_SQLite3Stmt *c_SQLite3Stmt::create(Object a0, String a1) {
   t___construct(a0, a1);
   return this;
 }
-void c_SQLite3Stmt::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 2)) throw_wrong_arguments("__construct", count, 2, 2, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
-  }
-}
 void c_SQLite3Stmt::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SQLite3Stmt::ci___construct;
   mcp.obj = this;
@@ -2532,11 +2443,6 @@ c_DOMNodeList *c_DOMNodeList::create() {
   t___construct();
   return this;
 }
-void c_DOMNodeList::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
 void c_DOMNodeList::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMNodeList::ci___construct;
   mcp.obj = this;
@@ -2661,11 +2567,6 @@ c_Normalizer *c_Normalizer::create() {
   init();
   t___construct();
   return this;
-}
-void c_Normalizer::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
 }
 void c_Normalizer::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Normalizer::ci___construct;
@@ -2966,11 +2867,6 @@ c_DOMCharacterData *c_DOMCharacterData::create() {
   t___construct();
   return this;
 }
-void c_DOMCharacterData::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
 void c_DOMCharacterData::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMCharacterData::ci___construct;
   mcp.obj = this;
@@ -3059,16 +2955,6 @@ c_DOMEntityReference *c_DOMEntityReference::create(String a0) {
   init();
   t___construct(a0);
   return this;
-}
-void c_DOMEntityReference::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("__construct", count, 1, 1, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    (t___construct(arg0));
-  }
 }
 void c_DOMEntityReference::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMEntityReference::ci___construct;
@@ -3252,11 +3138,6 @@ c_SimpleXMLElementIterator *c_SimpleXMLElementIterator::create() {
   t___construct();
   return this;
 }
-void c_SimpleXMLElementIterator::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
 void c_SimpleXMLElementIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SimpleXMLElementIterator::ci___construct;
   mcp.obj = this;
@@ -3339,11 +3220,6 @@ c_GeneratorClosure *c_GeneratorClosure::create() {
   init();
   t___construct();
   return this;
-}
-void c_GeneratorClosure::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
 }
 void c_GeneratorClosure::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_GeneratorClosure::ci___construct;
@@ -3519,16 +3395,6 @@ c_DateTimeZone *c_DateTimeZone::create(String a0) {
   init();
   t___construct(a0);
   return this;
-}
-void c_DateTimeZone::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("__construct", count, 1, 1, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    (t___construct(arg0));
-  }
 }
 void c_DateTimeZone::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DateTimeZone::ci___construct;
@@ -3712,11 +3578,6 @@ c_DOMNodeIterator *c_DOMNodeIterator::create() {
   t___construct();
   return this;
 }
-void c_DOMNodeIterator::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
 void c_DOMNodeIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMNodeIterator::ci___construct;
   mcp.obj = this;
@@ -3898,11 +3759,6 @@ c_DOMImplementation *c_DOMImplementation::create() {
   t___construct();
   return this;
 }
-void c_DOMImplementation::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
 void c_DOMImplementation::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMImplementation::ci___construct;
   mcp.obj = this;
@@ -4004,32 +3860,6 @@ c_SoapHeader *c_SoapHeader::create(String a0, String a1, Variant a2, bool a3, Va
   init();
   t___construct(a0, a1, a2, a3, a4);
   return this;
-}
-void c_SoapHeader::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 2 || count > 5)) throw_wrong_arguments("__construct", count, 2, 5, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 2) {
-      (t___construct(arg0, arg1));
-      break;
-    }
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 3) {
-      (t___construct(arg0, arg1, arg2));
-      break;
-    }
-    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 4) {
-      (t___construct(arg0, arg1, arg2, arg3));
-      break;
-    }
-    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1, arg2, arg3, arg4));
-  } while (false);
 }
 void c_SoapHeader::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapHeader::ci___construct;
@@ -4193,11 +4023,6 @@ c_DOMNotation *c_DOMNotation::create() {
   t___construct();
   return this;
 }
-void c_DOMNotation::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
 void c_DOMNotation::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMNotation::ci___construct;
   mcp.obj = this;
@@ -4324,11 +4149,6 @@ c_DebuggerProxy *c_DebuggerProxy::create() {
   init();
   t___construct();
   return this;
-}
-void c_DebuggerProxy::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
 }
 void c_DebuggerProxy::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DebuggerProxy::ci___construct;
@@ -5487,20 +5307,6 @@ c_Memcached *c_Memcached::create(String a0) {
   t___construct(a0);
   return this;
 }
-void c_Memcached::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 1)) throw_toomany_arguments("__construct", 1, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    if (count <= 0) {
-      (t___construct());
-      break;
-    }
-    CVarRef arg0((ad->getValue(pos)));
-    (t___construct(arg0));
-  } while (false);
-}
 void c_Memcached::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Memcached::ci___construct;
   mcp.obj = this;
@@ -6205,11 +6011,6 @@ c_XMLReader *c_XMLReader::create() {
   t___construct();
   return this;
 }
-void c_XMLReader::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
 void c_XMLReader::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_XMLReader::ci___construct;
   mcp.obj = this;
@@ -6302,20 +6103,6 @@ c_DOMComment *c_DOMComment::create(String a0) {
   init();
   t___construct(a0);
   return this;
-}
-void c_DOMComment::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 1)) throw_toomany_arguments("__construct", 1, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    if (count <= 0) {
-      (t___construct());
-      break;
-    }
-    CVarRef arg0((ad->getValue(pos)));
-    (t___construct(arg0));
-  } while (false);
 }
 void c_DOMComment::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMComment::ci___construct;
@@ -6805,11 +6592,6 @@ c_SQLite3 *c_SQLite3::create() {
   t___construct();
   return this;
 }
-void c_SQLite3::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
 void c_SQLite3::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SQLite3::ci___construct;
   mcp.obj = this;
@@ -7001,21 +6783,6 @@ c_DOMAttr *c_DOMAttr::create(String a0, String a1) {
   t___construct(a0, a1);
   return this;
 }
-void c_DOMAttr::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("__construct", count, 1, 2, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
-  } while (false);
-}
 void c_DOMAttr::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMAttr::ci___construct;
   mcp.obj = this;
@@ -7121,37 +6888,6 @@ c_SoapVar *c_SoapVar::create(Variant a0, Variant a1, String a2, String a3, Strin
   init();
   t___construct(a0, a1, a2, a3, a4, a5);
   return this;
-}
-void c_SoapVar::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 2 || count > 6)) throw_wrong_arguments("__construct", count, 2, 6, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 2) {
-      (t___construct(arg0, arg1));
-      break;
-    }
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 3) {
-      (t___construct(arg0, arg1, arg2));
-      break;
-    }
-    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 4) {
-      (t___construct(arg0, arg1, arg2, arg3));
-      break;
-    }
-    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 5) {
-      (t___construct(arg0, arg1, arg2, arg3, arg4));
-      break;
-    }
-    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
-  } while (false);
 }
 void c_SoapVar::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapVar::ci___construct;
@@ -7415,11 +7151,6 @@ c_DOMNamedNodeMap *c_DOMNamedNodeMap::create() {
   t___construct();
   return this;
 }
-void c_DOMNamedNodeMap::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
 void c_DOMNamedNodeMap::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMNamedNodeMap::ci___construct;
   mcp.obj = this;
@@ -7637,11 +7368,6 @@ c_SQLite3Result *c_SQLite3Result::create() {
   init();
   t___construct();
   return this;
-}
-void c_SQLite3Result::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
 }
 void c_SQLite3Result::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SQLite3Result::ci___construct;
@@ -8301,36 +8027,6 @@ c_SimpleXMLElement *c_SimpleXMLElement::create(String a0, int64 a1, bool a2, Str
   init();
   t___construct(a0, a1, a2, a3, a4);
   return this;
-}
-void c_SimpleXMLElement::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 5)) throw_wrong_arguments("__construct", count, 1, 5, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 2) {
-      (t___construct(arg0, arg1));
-      break;
-    }
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 3) {
-      (t___construct(arg0, arg1, arg2));
-      break;
-    }
-    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 4) {
-      (t___construct(arg0, arg1, arg2, arg3));
-      break;
-    }
-    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1, arg2, arg3, arg4));
-  } while (false);
 }
 void c_SimpleXMLElement::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SimpleXMLElement::ci___construct;
@@ -9032,11 +8728,6 @@ c_Memcache *c_Memcache::create() {
   t___construct();
   return this;
 }
-void c_Memcache::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
 void c_Memcache::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Memcache::ci___construct;
   mcp.obj = this;
@@ -9208,21 +8899,6 @@ c_DOMProcessingInstruction *c_DOMProcessingInstruction::create(String a0, String
   init();
   t___construct(a0, a1);
   return this;
-}
-void c_DOMProcessingInstruction::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("__construct", count, 1, 2, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
-  } while (false);
 }
 void c_DOMProcessingInstruction::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMProcessingInstruction::ci___construct;
@@ -9402,11 +9078,6 @@ c_EncodingMatch *c_EncodingMatch::create() {
   init();
   t___construct();
   return this;
-}
-void c_EncodingMatch::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
 }
 void c_EncodingMatch::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_EncodingMatch::ci___construct;
@@ -10142,11 +9813,6 @@ c_PDOStatement *c_PDOStatement::create() {
   t___construct();
   return this;
 }
-void c_PDOStatement::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
 void c_PDOStatement::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_PDOStatement::ci___construct;
   mcp.obj = this;
@@ -10545,21 +10211,6 @@ c_SoapClient *c_SoapClient::create(Variant a0, Array a1) {
   t___construct(a0, a1);
   return this;
 }
-void c_SoapClient::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("__construct", count, 1, 2, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
-  } while (false);
-}
 void c_SoapClient::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapClient::ci___construct;
   mcp.obj = this;
@@ -10649,17 +10300,6 @@ c_SoapParam *c_SoapParam::create(Variant a0, String a1) {
   init();
   t___construct(a0, a1);
   return this;
-}
-void c_SoapParam::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 2)) throw_wrong_arguments("__construct", count, 2, 2, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
-  }
 }
 void c_SoapParam::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapParam::ci___construct;
@@ -10962,25 +10602,6 @@ c_DateTime *c_DateTime::create(String a0, Object a1) {
   init();
   t___construct(a0, a1);
   return this;
-}
-void c_DateTime::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 2)) throw_toomany_arguments("__construct", 2, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    if (count <= 0) {
-      (t___construct());
-      break;
-    }
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
-  } while (false);
 }
 void c_DateTime::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DateTime::ci___construct;
@@ -11364,16 +10985,6 @@ c_Collator *c_Collator::create(String a0) {
   init();
   t___construct(a0);
   return this;
-}
-void c_Collator::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("__construct", count, 1, 1, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    (t___construct(arg0));
-  }
 }
 void c_Collator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Collator::ci___construct;
@@ -11814,31 +11425,6 @@ c_PDO *c_PDO::create(String a0, String a1, String a2, Array a3) {
   t___construct(a0, a1, a2, a3);
   return this;
 }
-void c_PDO::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 4)) throw_wrong_arguments("__construct", count, 1, 4, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 2) {
-      (t___construct(arg0, arg1));
-      break;
-    }
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 3) {
-      (t___construct(arg0, arg1, arg2));
-      break;
-    }
-    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1, arg2, arg3));
-  } while (false);
-}
 void c_PDO::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_PDO::ci___construct;
   mcp.obj = this;
@@ -12208,11 +11794,6 @@ c_ImageSprite *c_ImageSprite::create() {
   init();
   t___construct();
   return this;
-}
-void c_ImageSprite::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
 }
 void c_ImageSprite::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ImageSprite::ci___construct;
@@ -12686,29 +12267,6 @@ c_Continuation *c_Continuation::create(int64 a0, int64 a1, bool a2, String a3, V
   t___construct(a0, a1, a2, a3, a4, a5);
   return this;
 }
-void c_Continuation::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 4 || count > 6)) throw_wrong_arguments("__construct", count, 4, 6, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 4) {
-      (t___construct(arg0, arg1, arg2, arg3));
-      break;
-    }
-    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 5) {
-      (t___construct(arg0, arg1, arg2, arg3, arg4));
-      break;
-    }
-    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
-  } while (false);
-}
 void c_Continuation::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Continuation::ci___construct;
   mcp.obj = this;
@@ -12870,11 +12428,6 @@ c_DOMEntity *c_DOMEntity::create() {
   init();
   t___construct();
   return this;
-}
-void c_DOMEntity::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
 }
 void c_DOMEntity::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMEntity::ci___construct;
@@ -14028,11 +13581,6 @@ c_XMLWriter *c_XMLWriter::create() {
   t___construct();
   return this;
 }
-void c_XMLWriter::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
 void c_XMLWriter::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_XMLWriter::ci___construct;
   mcp.obj = this;
@@ -14313,16 +13861,6 @@ c_DOMXPath *c_DOMXPath::create(Variant a0) {
   init();
   t___construct(a0);
   return this;
-}
-void c_DOMXPath::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("__construct", count, 1, 1, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    (t___construct(arg0));
-  }
 }
 void c_DOMXPath::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMXPath::ci___construct;
@@ -14636,21 +14174,6 @@ c_SoapServer *c_SoapServer::create(Variant a0, Array a1) {
   init();
   t___construct(a0, a1);
   return this;
-}
-void c_SoapServer::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("__construct", count, 1, 2, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
-  } while (false);
 }
 void c_SoapServer::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapServer::ci___construct;
@@ -15254,11 +14777,6 @@ c_DOMNode *c_DOMNode::create() {
   t___construct();
   return this;
 }
-void c_DOMNode::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
-}
 void c_DOMNode::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMNode::ci___construct;
   mcp.obj = this;
@@ -15454,11 +14972,6 @@ c_SpoofChecker *c_SpoofChecker::create() {
   init();
   t___construct();
   return this;
-}
-void c_SpoofChecker::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
 }
 void c_SpoofChecker::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SpoofChecker::ci___construct;
@@ -16418,25 +15931,6 @@ c_DOMDocument *c_DOMDocument::create(String a0, String a1) {
   t___construct(a0, a1);
   return this;
 }
-void c_DOMDocument::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 2)) throw_toomany_arguments("__construct", 2, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    if (count <= 0) {
-      (t___construct());
-      break;
-    }
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
-  } while (false);
-}
 void c_DOMDocument::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMDocument::ci___construct;
   mcp.obj = this;
@@ -16518,11 +16012,6 @@ c_LibXMLError *c_LibXMLError::create() {
   init();
   t___construct();
   return this;
-}
-void c_LibXMLError::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("__construct", 0, 2);
-  (t___construct());
 }
 void c_LibXMLError::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_LibXMLError::ci___construct;
@@ -17179,26 +16668,6 @@ c_DOMElement *c_DOMElement::create(String a0, String a1, String a2) {
   init();
   t___construct(a0, a1, a2);
   return this;
-}
-void c_DOMElement::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 3)) throw_wrong_arguments("__construct", count, 1, 3, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 2) {
-      (t___construct(arg0, arg1));
-      break;
-    }
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1, arg2));
-  } while (false);
 }
 void c_DOMElement::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMElement::ci___construct;

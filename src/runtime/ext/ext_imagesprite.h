@@ -66,7 +66,6 @@ class c_ImageSprite : public ExtObjectData, public Sweepable {
 
   // implemented by HPHP
   public: c_ImageSprite *create();
-  public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
 
 

@@ -66,7 +66,6 @@ class c_SpoofChecker : public ExtObjectData {
 
   // implemented by HPHP
   public: c_SpoofChecker *create();
-  public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
   static const ClassPropTable os_prop_table;
 

@@ -145,16 +145,7 @@ c_Directory *c_Directory::create(CVarRef v_path) {
   t___construct(v_path);
   return this;
 }
-void c_Directory::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    (t___construct(arg0));
-  }
-}
+
 void c_Directory::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Directory::ci___construct;
   mcp.obj = this;

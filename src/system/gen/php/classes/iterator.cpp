@@ -566,21 +566,6 @@ c_ArrayIterator *c_ArrayIterator::create(CVarRef v_array, CVarRef v_flags //  = 
   t___construct(v_array, v_flags);
   return this;
 }
-void c_ArrayIterator::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("ArrayIterator::__construct", count, 1, 2, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
-  } while (false);
-}
 void c_ArrayIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ArrayIterator::ci___construct;
   mcp.obj = this;
@@ -997,11 +982,7 @@ c_AppendIterator *c_AppendIterator::create() {
   t___construct();
   return this;
 }
-void c_AppendIterator::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("AppendIterator::__construct", 0, 2);
-  (t___construct());
-}
+
 void c_AppendIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_AppendIterator::ci___construct;
   mcp.obj = this;
@@ -1491,17 +1472,7 @@ c_IteratorIterator *c_IteratorIterator::create(CVarRef v_iterator) {
   t___construct(v_iterator);
   return this;
 }
-void c_IteratorIterator::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1)) throw_missing_typed_argument("IteratorIterator::__construct", "traversable", 1);
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("IteratorIterator::__construct", count, 1, 1, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    (t___construct(arg0));
-  }
-}
+
 void c_IteratorIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_IteratorIterator::ci___construct;
   mcp.obj = this;
@@ -1809,26 +1780,7 @@ c_RecursiveIteratorIterator *c_RecursiveIteratorIterator::create(CVarRef v_itera
   t___construct(v_iterator, v_mode, v_flags);
   return this;
 }
-void c_RecursiveIteratorIterator::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 3)) throw_wrong_arguments("RecursiveIteratorIterator::__construct", count, 1, 3, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 2) {
-      (t___construct(arg0, arg1));
-      break;
-    }
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1, arg2));
-  } while (false);
-}
+
 void c_RecursiveIteratorIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_RecursiveIteratorIterator::ci___construct;
   mcp.obj = this;
@@ -1975,22 +1927,7 @@ c_MutableArrayIterator *c_MutableArrayIterator::create(VRefParam v_array, CVarRe
   t___construct(v_array, v_flags);
   return this;
 }
-void c_MutableArrayIterator::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("MutableArrayIterator::__construct", count, 1, 2, 2);
-  const_cast<Array&>(params).escalate(true);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    VRefParam arg0(vref(ad->getValueRef(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
-  } while (false);
-}
+
 void c_MutableArrayIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_MutableArrayIterator::ci___construct;
   mcp.obj = this;
@@ -2271,17 +2208,7 @@ c_FilterIterator *c_FilterIterator::create(CVarRef v_it) {
   t___construct(v_it);
   return this;
 }
-void c_FilterIterator::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1)) throw_missing_typed_argument("FilterIterator::__construct", "iterator", 1);
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("FilterIterator::__construct", count, 1, 1, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    (t___construct(arg0));
-  }
-}
+
 void c_FilterIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_FilterIterator::ci___construct;
   mcp.obj = this;

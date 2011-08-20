@@ -126,7 +126,6 @@ class c_XMLReader : public ExtObjectDataFlags<ObjectData::UseGet>, public Sweepa
 
   // implemented by HPHP
   public: c_XMLReader *create();
-  public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
   static const ClassPropTable os_prop_table;
 

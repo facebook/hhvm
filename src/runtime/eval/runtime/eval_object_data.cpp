@@ -52,24 +52,6 @@ void EvalObjectData::init() {
   DynamicObjectData::init();
 }
 
-void EvalObjectData::dynConstruct(CArrRef params) {
-  const MethodStatement *ms = m_cls.getConstructor();
-  if (ms) {
-    ms->invokeInstance(Object(root), params);
-  } else {
-    DynamicObjectData::dynConstruct(params);
-  }
-}
-
-void EvalObjectData::dynConstructUnchecked(CArrRef params) {
-  const MethodStatement *ms = m_cls.getConstructor();
-  if (ms) {
-    ms->invokeInstance(Object(root), params, false);
-  } else {
-    DynamicObjectData::dynConstruct(params);
-  }
-}
-
 void EvalObjectData::getConstructor(MethodCallPackage &mcp) {
   const MethodStatement *ms = m_cls.getConstructor();
   if (ms) {

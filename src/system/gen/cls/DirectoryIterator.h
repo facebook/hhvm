@@ -38,7 +38,6 @@ class c_DirectoryIterator : public c_SplFileInfo {
   DECLARE_CLASS_NO_SWEEP(DirectoryIterator, DirectoryIterator, SplFileInfo)
   public: void t___construct(Variant v_path);
   public: c_DirectoryIterator *create(CVarRef v_path);
-  public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: Variant t_current();
   public: Variant t_key();

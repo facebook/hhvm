@@ -29,7 +29,6 @@ class DynamicObjectData : public ObjectData {
   DynamicObjectData(const char* pname, ObjectData *r = NULL);
 
   virtual void init();
-  virtual void dynConstruct(CArrRef params);
   virtual void getConstructor(MethodCallPackage &mcp);
 
   virtual void destruct();

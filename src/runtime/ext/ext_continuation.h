@@ -94,7 +94,6 @@ class c_Continuation : public ExtObjectData {
   public: void setCalledClass(CStrRef cls) { m_called_class = cls; }
   // implemented by HPHP
   public: c_Continuation *create(int64 func, int64 extra, bool isMethod, String origFuncName, Variant obj = null, Array args = null_array);
-  public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: static const ClassPropTable os_prop_table;
 protected:
@@ -130,7 +129,6 @@ class c_GenericContinuation : public c_Continuation {
 
   // implemented by HPHP
   public: c_GenericContinuation *create(int64 func, int64 extra, bool isMethod, String origFuncName, Array vars, Variant obj = null, Array args = null_array);
-  public: void dynConstruct(CArrRef Params);
   public: void getConstructor(MethodCallPackage &mcp);
 public:
   LVariableTable m_statics;

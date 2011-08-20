@@ -752,31 +752,7 @@ c_SplFileObject *c_SplFileObject::create(CVarRef v_filename, CVarRef v_open_mode
   t___construct(v_filename, v_open_mode, v_use_include_path, v_context);
   return this;
 }
-void c_SplFileObject::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 4)) throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 2) {
-      (t___construct(arg0, arg1));
-      break;
-    }
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 3) {
-      (t___construct(arg0, arg1, arg2));
-      break;
-    }
-    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1, arg2, arg3));
-  } while (false);
-}
+
 void c_SplFileObject::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SplFileObject::ci___construct;
   mcp.obj = this;
@@ -1619,16 +1595,7 @@ c_SplFileInfo *c_SplFileInfo::create(CVarRef v_file_name) {
   t___construct(v_file_name);
   return this;
 }
-void c_SplFileInfo::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    (t___construct(arg0));
-  }
-}
+
 void c_SplFileInfo::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SplFileInfo::ci___construct;
   mcp.obj = this;

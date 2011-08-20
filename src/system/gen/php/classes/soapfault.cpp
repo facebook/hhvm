@@ -135,37 +135,7 @@ c_SoapFault *c_SoapFault::create(CVarRef v_code, CVarRef v_message, CVarRef v_ac
   t___construct(v_code, v_message, v_actor, v_detail, v_name, v_header);
   return this;
 }
-void c_SoapFault::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 2 || count > 6)) throw_wrong_arguments("SoapFault::__construct", count, 2, 6, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 2) {
-      (t___construct(arg0, arg1));
-      break;
-    }
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 3) {
-      (t___construct(arg0, arg1, arg2));
-      break;
-    }
-    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 4) {
-      (t___construct(arg0, arg1, arg2, arg3));
-      break;
-    }
-    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 5) {
-      (t___construct(arg0, arg1, arg2, arg3, arg4));
-      break;
-    }
-    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
-  } while (false);
-}
+
 void c_SoapFault::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_SoapFault::ci___construct;
   mcp.obj = this;

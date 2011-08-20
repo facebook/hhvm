@@ -326,21 +326,7 @@ c_RecursiveDirectoryIterator *c_RecursiveDirectoryIterator::create(CVarRef v_pat
   t___construct(v_path, v_flags);
   return this;
 }
-void c_RecursiveDirectoryIterator::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 2)) throw_wrong_arguments("RecursiveDirectoryIterator::__construct", count, 1, 2, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
-  } while (false);
-}
+
 void c_RecursiveDirectoryIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_RecursiveDirectoryIterator::ci___construct;
   mcp.obj = this;
@@ -665,16 +651,7 @@ c_DirectoryIterator *c_DirectoryIterator::create(CVarRef v_path) {
   t___construct(v_path);
   return this;
 }
-void c_DirectoryIterator::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("DirectoryIterator::__construct", count, 1, 1, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    (t___construct(arg0));
-  }
-}
+
 void c_DirectoryIterator::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DirectoryIterator::ci___construct;
   mcp.obj = this;

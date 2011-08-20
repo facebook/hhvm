@@ -33,8 +33,6 @@ class EvalObjectData : public DynamicObjectData {
 public:
   EvalObjectData(ClassEvalState &cls, const char* pname,
                  ObjectData *r = NULL);
-  void dynConstruct(CArrRef params);
-  virtual void dynConstructUnchecked(CArrRef params);
   virtual void getConstructor(MethodCallPackage &mcp);
   virtual void init();
   virtual void destruct();

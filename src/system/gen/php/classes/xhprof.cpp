@@ -104,16 +104,7 @@ c_XhprofFrame *c_XhprofFrame::create(CVarRef v_name) {
   t___construct(v_name);
   return this;
 }
-void c_XhprofFrame::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) throw_wrong_arguments("XhprofFrame::__construct", count, 1, 1, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    (t___construct(arg0));
-  }
-}
+
 void c_XhprofFrame::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_XhprofFrame::ci___construct;
   mcp.obj = this;

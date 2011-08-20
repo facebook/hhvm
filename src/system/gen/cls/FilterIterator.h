@@ -42,7 +42,6 @@ class c_FilterIterator : public c_IteratorIterator {
   Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   public: void t___construct(Variant v_it);
   public: c_FilterIterator *create(CVarRef v_it);
-  public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: void t_rewind();
   // public: virtual void t_accept() = 0;

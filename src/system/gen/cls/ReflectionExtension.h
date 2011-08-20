@@ -40,7 +40,6 @@ class c_ReflectionExtension : public ExtObjectData {
   c_ReflectionExtension() : m_name(Variant::nullInit), m_info(Variant::nullInit) {}
   public: void t___construct(Variant v_name);
   public: c_ReflectionExtension *create(CVarRef v_name);
-  public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: String t___tostring();
   public: static Variant t_export(CVarRef v_name, CVarRef v_ret);

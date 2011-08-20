@@ -80,11 +80,7 @@ c_PDOException *c_PDOException::create() {
   t___construct();
   return this;
 }
-void c_PDOException::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) throw_toomany_arguments("PDOException::__construct", 0, 2);
-  (t___construct());
-}
+
 void c_PDOException::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_PDOException::ci___construct;
   mcp.obj = this;
@@ -629,30 +625,7 @@ c_Exception *c_Exception::create(CVarRef v_message //  = NAMVAR(s_sys_svs0000000
   t___construct(v_message, v_code, v_previous);
   return this;
 }
-void c_Exception::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 3)) throw_toomany_arguments("Exception::__construct", 3, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    if (count <= 0) {
-      (t___construct());
-      break;
-    }
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 2) {
-      (t___construct(arg0, arg1));
-      break;
-    }
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1, arg2));
-  } while (false);
-}
+
 void c_Exception::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_Exception::ci___construct;
   mcp.obj = this;
@@ -986,40 +959,7 @@ c_ErrorException *c_ErrorException::create(CVarRef v_message //  = NAMVAR(s_sys_
   t___construct(v_message, v_code, v_severity, v_filename, v_lineno);
   return this;
 }
-void c_ErrorException::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 5)) throw_toomany_arguments("ErrorException::__construct", 5, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    if (count <= 0) {
-      (t___construct());
-      break;
-    }
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 2) {
-      (t___construct(arg0, arg1));
-      break;
-    }
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 3) {
-      (t___construct(arg0, arg1, arg2));
-      break;
-    }
-    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 4) {
-      (t___construct(arg0, arg1, arg2, arg3));
-      break;
-    }
-    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1, arg2, arg3, arg4));
-  } while (false);
-}
+
 void c_ErrorException::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_ErrorException::ci___construct;
   mcp.obj = this;
@@ -1120,17 +1060,7 @@ c_DOMException *c_DOMException::create(CVarRef v_message, CVarRef v_code) {
   t___construct(v_message, v_code);
   return this;
 }
-void c_DOMException::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 2)) throw_wrong_arguments("DOMException::__construct", count, 2, 2, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
-  }
-}
+
 void c_DOMException::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_DOMException::ci___construct;
   mcp.obj = this;

@@ -39,7 +39,6 @@ class c_Directory : public ExtObjectData {
   c_Directory() : m_path(Variant::nullInit), m_handle(Variant::nullInit) {}
   public: void t___construct(Variant v_path);
   public: c_Directory *create(CVarRef v_path);
-  public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: Variant t_read();
   public: void t_rewind();

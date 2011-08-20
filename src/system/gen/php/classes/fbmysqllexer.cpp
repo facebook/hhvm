@@ -269,25 +269,7 @@ c_FB_MySQLLexer *c_FB_MySQLLexer::create(CVarRef v_string //  = NAMVAR(s_sys_svs
   t___construct(v_string, v_lookahead);
   return this;
 }
-void c_FB_MySQLLexer::dynConstruct(CArrRef params) {
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 2)) throw_toomany_arguments("FB_MySQLLexer::__construct", 2, 2);
-  do {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    if (count <= 0) {
-      (t___construct());
-      break;
-    }
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) {
-      (t___construct(arg0));
-      break;
-    }
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
-  } while (false);
-}
+
 void c_FB_MySQLLexer::getConstructor(MethodCallPackage &mcp) {
   mcp.ci = &c_FB_MySQLLexer::ci___construct;
   mcp.obj = this;

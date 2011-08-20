@@ -42,7 +42,6 @@ class c_ArrayIterator : public ExtObjectData {
   c_ArrayIterator() : m_arr(Variant::nullInit), m_flags(Variant::nullInit) {}
   public: void t___construct(Variant v_array, Variant v_flags = 0LL);
   public: c_ArrayIterator *create(CVarRef v_array, CVarRef v_flags = NAMVAR(s_sys_svif01bca90, 0LL));
-  public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: void t_append(CVarRef v_value);
   public: void t_asort();

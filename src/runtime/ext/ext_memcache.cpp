@@ -426,7 +426,7 @@ bool c_Memcache::t_setcompressthreshold(int threshold,
   return true;
 }
 
-Array static memcache_build_stats(const memcached_st *ptr,
+Array static memcache_build_stats(memcached_st *ptr,
                                 memcached_stat_st *memc_stat,
                                 memcached_return_t *ret) {
   char **curr_key;

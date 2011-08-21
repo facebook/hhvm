@@ -35,6 +35,10 @@ public:
   template<class Y>
   AstPtr(Y v) : SmartPtr<T>(v) {}
 
+  T *operator->() const {
+    return this->m_px;
+  }
+
   operator bool() const { return this->m_px; }
 
   template<class Y>

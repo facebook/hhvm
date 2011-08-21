@@ -63,6 +63,10 @@ class Array : public SmartPtr<ArrayData> {
   Array() {}
   ~Array();
 
+  ArrayData *operator->() const {
+    return m_px;
+  }
+
   /**
    * Constructors. Those that take "arr" or "var" are copy constructors, taking
    * array value from the parameter, and they are NOT constructing an array

@@ -48,6 +48,10 @@ public:
   String() {}
   ~String();
 
+  StringData *operator->() const {
+    return m_px;
+  }
+
   /**
    * Constructors
    */

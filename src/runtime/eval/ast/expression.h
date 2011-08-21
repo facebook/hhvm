@@ -108,6 +108,9 @@ public:
       register_for_scalar_value_expression(this, false);
     }
   }
+  Expression *operator->() const {
+    return this->m_px;
+  }
 
   operator bool() const { return this->m_px; }
 

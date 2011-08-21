@@ -30,7 +30,7 @@ AssocList::~AssocList() {
   if (m_head == NULL) return;
   // randomize destruction of variables, so as to make
   // order-dependent coding problems apparent
-  int start = rand() % m_count;
+  int start = (((int64)(this)) >> 4) % m_count;
   ASSERT(0 <= start && start < m_count);
   VarAssocPair *vp;
   int i = 0;

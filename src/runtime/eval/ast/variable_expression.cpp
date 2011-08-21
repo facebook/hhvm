@@ -28,6 +28,11 @@ VariableExpression::VariableExpression(EXPRESSION_ARGS, NamePtr name,
   : LvalExpression(KindOfVariableExpression, EXPRESSION_PASS),
   m_name(name), m_idx(idx) {}
 
+bool VariableExpression::isSuperGlobal() const {
+  SuperGlobal sg;
+  return m_name->getSuperGlobal(sg);
+}
+
 Variant &VariableExpression::getRefHelper(
   VariableEnvironment &env) const {
   CStrRef s = m_name->get(env);

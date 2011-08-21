@@ -116,7 +116,7 @@ VariableDecExpression::VariableDecExpression(VariableExpressionPtr var,
   : Expression(KindOfDecVariableExpression, loc), m_var(var) {}
 
 Variant IncVariableExpression::eval(VariableEnvironment &env) const {
-  Variant &lhs = m_var->getRef(env);
+  Variant &lhs = VariableExpression::GetVariableByRef(env, m_var.get());
   Variant::TypedValueAccessor acc = lhs.getTypedAccessor();
   DataType t = Variant::GetAccessorType(acc);
   if (t == HPHP::KindOfInt64) {
@@ -128,7 +128,7 @@ Variant IncVariableExpression::eval(VariableEnvironment &env) const {
 }
 
 Variant VariableIncExpression::eval(VariableEnvironment &env) const {
-  Variant &lhs = m_var->getRef(env);
+  Variant &lhs = VariableExpression::GetVariableByRef(env, m_var.get());
   Variant::TypedValueAccessor acc = lhs.getTypedAccessor();
   DataType t = Variant::GetAccessorType(acc);
   if (t == HPHP::KindOfInt64) {
@@ -140,7 +140,7 @@ Variant VariableIncExpression::eval(VariableEnvironment &env) const {
 }
 
 Variant DecVariableExpression::eval(VariableEnvironment &env) const {
-  Variant &lhs = m_var->getRef(env);
+  Variant &lhs = VariableExpression::GetVariableByRef(env, m_var.get());
   Variant::TypedValueAccessor acc = lhs.getTypedAccessor();
   DataType t = Variant::GetAccessorType(acc);
   if (t == HPHP::KindOfInt64) {
@@ -152,7 +152,7 @@ Variant DecVariableExpression::eval(VariableEnvironment &env) const {
 }
 
 Variant VariableDecExpression::eval(VariableEnvironment &env) const {
-  Variant &lhs = m_var->getRef(env);
+  Variant &lhs = VariableExpression::GetVariableByRef(env, m_var.get());
   Variant::TypedValueAccessor acc = lhs.getTypedAccessor();
   DataType t = Variant::GetAccessorType(acc);
   if (t == HPHP::KindOfInt64) {

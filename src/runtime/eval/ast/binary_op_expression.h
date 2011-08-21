@@ -34,10 +34,23 @@ public:
   virtual Variant eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:
+  enum OperandKindOf {
+    VVN,
+    VSN,
+    VDN,
+    SVN,
+    SSN,
+    SDN,
+    DVN,
+    DSN,
+    DDN,
+    VDR,
+  };
+  void setOperandKindOf();
   ExpressionPtr m_exp1;
   ExpressionPtr m_exp2;
   int m_op;
-  bool m_reverseOrder;
+  OperandKindOf m_operandKindOf;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -38,7 +38,7 @@ Expression *AssignmentOpExpression::optimize(VariableEnvironment &env) {
 Variant AssignmentOpExpression::eval(VariableEnvironment &env) const {
   Variant rhs(m_rhs->eval(env));
   if (m_lhs->isKindOf(Expression::KindOfVariableExpression)) {
-    Variant &lhs = static_cast<VariableExpression*>(m_lhs.get())->getRef(env);
+    Variant &lhs = VariableExpression::GetVariableByRef(env, m_lhs.get());
     if (m_op == '=') return lhs.assignVal(rhs);
     Variant::TypedValueAccessor lhsAcc = lhs.getTypedAccessor();
     DataType lhsType = Variant::GetAccessorType(lhsAcc);

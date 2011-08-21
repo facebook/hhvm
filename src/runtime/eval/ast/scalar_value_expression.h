@@ -35,6 +35,10 @@ public:
   }
   virtual Variant eval(VariableEnvironment &env) const { return m_value; }
   virtual void dump(std::ostream &out) const;
+  inline static Variant &GetScalarValueByRef(Expression *exp) {
+    ASSERT(exp->isKindOf(KindOfScalarValueExpression));
+    return static_cast<ScalarValueExpression *>(exp)->m_value;
+  }
   static void initScalarValues();
   static void registerScalarValues();
   static ScalarValueExpression *GetScalarValueExpression(

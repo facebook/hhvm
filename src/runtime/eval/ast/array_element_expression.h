@@ -46,9 +46,20 @@ public:
   ExpressionPtr getIdx() const { return m_idx; }
   virtual void dump(std::ostream &out) const;
 private:
+  enum ArrayElementKindOf {
+    VZN,
+    VVN,
+    VSN,
+    DZN,
+    DVN,
+    DSN,
+    DDN,
+    VDR,
+  };
+  void setArrayElementKindOf();
   ExpressionPtr m_arr;
   ExpressionPtr m_idx;
-  bool m_reverseOrder;
+  ArrayElementKindOf m_arrayElementKindOf;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

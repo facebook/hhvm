@@ -31,14 +31,11 @@ ConstantExpression::ConstantExpression(EXPRESSION_ARGS,
   : Expression(KindOfConstantExpression, EXPRESSION_PASS),
   m_constant(StringData::GetStaticString(constant)) {
   m_type = check_constant(m_constant);
-  if (m_type == StaticBuiltinConstant) {
-    m_value = get_builtin_constant(m_constant);
-  }
 }
 
 Expression *ConstantExpression::optimize(VariableEnvironment &env) {
   if (m_type == StaticBuiltinConstant) {
-    return new ScalarValueExpression(m_value, loc());
+    return new ScalarValueExpression(get_builtin_constant(m_constant), loc());
   }
   return NULL;
 }
@@ -46,7 +43,6 @@ Expression *ConstantExpression::optimize(VariableEnvironment &env) {
 Variant ConstantExpression::eval(VariableEnvironment &env) const {
   switch (m_type) {
   case StaticBuiltinConstant:
-    return m_value;
   case StdioBuiltinConstant:
   case DynamicBuiltinConstant:
     return get_builtin_constant(m_constant);

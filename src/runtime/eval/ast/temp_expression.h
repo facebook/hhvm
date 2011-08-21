@@ -45,6 +45,7 @@ public:
    *                      [TempExpr3, TempExpr4]) <--- adjust to 3 and 4
    */
   void adjustIndex(int index0) { m_index += index0;}
+  Expression *getExp() const { return m_exp.get(); }
 
 private:
   ExpressionPtr m_exp;

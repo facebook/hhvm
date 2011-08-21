@@ -29,7 +29,8 @@ namespace Eval {
 UnaryOpExpression::UnaryOpExpression(EXPRESSION_ARGS, ExpressionPtr exp,
                                      int op, bool front)
   : Expression(KindOfUnaryOpExpression, EXPRESSION_PASS),
-  m_exp(exp), m_op(op), m_front(front) {}
+  m_exp(exp), m_op(op), m_front(front) {
+}
 
 Expression *UnaryOpExpression::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_exp);

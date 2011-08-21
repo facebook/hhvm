@@ -86,6 +86,7 @@ public:
   virtual const LvalExpression *toLval() const;
   virtual bool isRefParam() const;
   KindOf getKindOf() const { return m_kindOf; }
+
 protected:
   KindOf m_kindOf;
 };

@@ -41,16 +41,27 @@ public:
   NamePtr getName() const;
   virtual void dump(std::ostream &out) const;
   static bool CheckCompatibleAssignment(CVarRef left, CVarRef right);
-  Variant &getRef(VariableEnvironment &env) const {
-    Variant *var = NULL;
-    if (m_idx != -1 && (var = env.getIdx(m_idx))) return *var;
-    return getRefHelper(env);
+  bool isSuperGlobal() const;
+  inline static Variant &GetVariableByRefCheck(VariableEnvironment &env,
+                                               Expression *exp) {
+    ASSERT(exp->isKindOf(KindOfVariableExpression));
+    return static_cast<VariableExpression *>(exp)->getRefCheck(env);
+  }
+  inline static Variant &GetVariableByRef(
+    VariableEnvironment &env, Expression *exp) {
+    ASSERT(exp->isKindOf(KindOfVariableExpression));
+    return static_cast<VariableExpression *>(exp)->getRef(env);
   }
 private:
   NamePtr m_name;
   int m_idx;
   void raiseUndefined(VariableEnvironment &env) const;
   Variant &getRefHelper(VariableEnvironment &env) const;
+  Variant &getRef(VariableEnvironment &env) const {
+    Variant *var = NULL;
+    if (m_idx != -1 && (var = env.getIdx(m_idx))) return *var;
+    return getRefHelper(env);
+  }
   Variant &getRefCheck(VariableEnvironment &env) const {
     Variant &var = getRef(env);
     /* note that 'if (!env.exists(str, name->hash()))' does not work

@@ -108,6 +108,14 @@ Variant TempExpressionList::refval(VariableEnvironment &env,
   return m_last->refval(env, strict);
 }
 
+Expression *TempExpressionList::optimize(VariableEnvironment &env) {
+  for (unsigned int i = 0; i < m_offsets.size(); i++) {
+    Eval::optimize(env, m_offsets[i]);
+  }
+  Eval::optimize(env, m_last);
+  return NULL;
+}
+
 bool TempExpressionList::exist(VariableEnvironment &env, int op) const {
   TempExpressionHelper helper(this, env);
   return m_last->exist(env, op);

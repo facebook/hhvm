@@ -36,7 +36,6 @@ public:
 private:
   StringData *m_constant;
   ConstantType m_type;
-  Variant m_value; // for StaticBuiltinConstant
 };
 
 ///////////////////////////////////////////////////////////////////////////////

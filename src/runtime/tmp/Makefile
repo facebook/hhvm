@@ -1,13 +1,11 @@
-PROJECT_NAME=run
 PROJECT_ROOT=$(HPHP_HOME)
 
 override OUTDIR_BY_TYPE=
 override OUTPUT_ROOT=
 
-CXX_SOURCES := run.cpp
-
 include $(PROJECT_ROOT)/src/rules.mk
-TARGETS = $(APP_TARGET)
+MONO_TARGETS = run
+TARGETS = $(MONO_TARGETS)
 
 LDFLAGS += -ldl
 TEST_DIRS = $(wildcard Test*)
@@ -19,12 +17,12 @@ all : $(TEST_DIRS) $(TARGETS) run.sh
 $(TEST_DIRS):
 	@$(MAKE) -C $@
 
-run.sh : $(HPHP_HOME)/src/rules.mk
+run.sh : $(PROJECT_ROOT)/src/rules.mk
 	@$(MAKE) -f script.mk
 	@chmod +x $@
 
 TMP = $(TEST_DIRS) \
-      run run.sh
+      $(MONO_TARGETS) run.sh
 
 clobber : clean
 

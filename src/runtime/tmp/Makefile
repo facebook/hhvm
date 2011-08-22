@@ -1,15 +1,15 @@
 PROJECT_NAME=run
 PROJECT_ROOT=$(HPHP_HOME)
 
+override OUTDIR_BY_TYPE=
+override OUTPUT_ROOT=
+
 CXX_SOURCES := run.cpp
 
 include $(PROJECT_ROOT)/src/rules.mk
 TARGETS = $(APP_TARGET)
 
 LDFLAGS += -ldl
-override OUTDIR_BY_TYPE=
-override OUTPUT_ROOT=
-
 TEST_DIRS = $(wildcard Test*)
 
 .PHONY : all

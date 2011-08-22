@@ -8996,6 +8996,11 @@ bool TestCodeRun::TestCompilation() {
        "bar($x[3][4], $y);"
        "var_dump($x);");
 
+  MVCR("<?php "
+       "function test($a) {"
+       "  print \"hello $a world!\" and die;"
+       "}");
+
   return true;
 }
 

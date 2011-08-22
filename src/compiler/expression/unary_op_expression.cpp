@@ -689,7 +689,7 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         e->outputCPP(cg, ar);
         cg_printf(");\n");
       }
-      m_cppTemp = "1";
+      m_cppTemp = "id(1)";
       return true;
     }
   }

@@ -41,7 +41,6 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   c_ReflectionMethod() : m_name(Variant::nullInit), m_class(Variant::nullInit) {}
   public: void t___construct(Variant v_cls, Variant v_name = NAMSTR(s_sys_ss00000000, ""));
   public: c_ReflectionMethod *create(CVarRef v_cls, CVarRef v_name = NAMVAR(s_sys_svs00000000, ""));
-  public: void getConstructor(MethodCallPackage &mcp);
   public: String t___tostring();
   public: static Variant t_export(Variant v_cls, CVarRef v_name, CVarRef v_ret);
   public: Variant t_invoke(int num_args, CVarRef v_obj, Array args = Array());

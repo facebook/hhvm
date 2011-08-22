@@ -48,7 +48,6 @@ class c_Closure : public ExtObjectData {
 
   // implemented by HPHP
   public: c_Closure *create();
-  public: void getConstructor(MethodCallPackage &mcp);
 public:
   /**
    * Explicitly provide a t___invokeCallInfoHelper to
@@ -97,7 +96,6 @@ class c_GeneratorClosure : public c_Closure {
 
   // implemented by HPHP
   public: c_GeneratorClosure *create();
-  public: void getConstructor(MethodCallPackage &mcp);
 public:
   /**
    * This is the constructor which is called internally-

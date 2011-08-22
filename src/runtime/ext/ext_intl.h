@@ -118,7 +118,6 @@ class c_Collator : public ExtObjectData, public Sweepable {
 
   // implemented by HPHP
   public: c_Collator *create(String locale);
-  public: void getConstructor(MethodCallPackage &mcp);
   static const ClassPropTable os_prop_table;
 
  private:
@@ -147,7 +146,6 @@ class c_Locale : public ExtObjectData {
 
   // implemented by HPHP
   public: c_Locale *create();
-  public: void getConstructor(MethodCallPackage &mcp);
   static const ClassPropTable os_prop_table;
 
 
@@ -190,7 +188,6 @@ class c_Normalizer : public ExtObjectData, public Sweepable {
 
   // implemented by HPHP
   public: c_Normalizer *create();
-  public: void getConstructor(MethodCallPackage &mcp);
   static const ClassPropTable os_prop_table;
 
 

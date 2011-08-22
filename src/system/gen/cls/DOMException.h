@@ -36,7 +36,6 @@ class c_DOMException : public c_Exception {
   DECLARE_CLASS_NO_SWEEP(DOMException, DOMException, Exception)
   public: void t___construct(Variant v_message, Variant v_code);
   public: c_DOMException *create(CVarRef v_message, CVarRef v_code);
-  public: void getConstructor(MethodCallPackage &mcp);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
 };
 ObjectData *coo_DOMException() NEVER_INLINE;

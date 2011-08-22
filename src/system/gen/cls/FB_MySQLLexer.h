@@ -51,7 +51,6 @@ class c_FB_MySQLLexer : public ExtObjectData {
   void init();
   public: void t___construct(Variant v_string = NAMSTR(s_sys_ss00000000, ""), Variant v_lookahead = 0LL);
   public: c_FB_MySQLLexer *create(CVarRef v_string = NAMVAR(s_sys_svs00000000, ""), CVarRef v_lookahead = NAMVAR(s_sys_svif01bca90, 0LL));
-  public: void getConstructor(MethodCallPackage &mcp);
   public: Variant t_get();
   public: void t_unget();
   public: Variant t_skip();

@@ -104,17 +104,12 @@ c_XhprofFrame *c_XhprofFrame::create(CVarRef v_name) {
   t___construct(v_name);
   return this;
 }
-
-void c_XhprofFrame::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_XhprofFrame::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_XhprofFrame = {
   (ObjectData*(*)(ObjectData*))coo_XhprofFrame,
   c_XhprofFrame::s_call_info_table,c_XhprofFrame::s_call_info_index,
   c_XhprofFrame::s_instanceof_table,c_XhprofFrame::s_instanceof_index,
   &c_XhprofFrame::s_class_name,
-  0,0,0
+  0,&c_XhprofFrame::ci___construct,0,0
 };
 /* SRC: classes/xhprof.php line 7 */
 void c_XhprofFrame::t___construct(Variant v_name) {

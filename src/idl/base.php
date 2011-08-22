@@ -770,7 +770,6 @@ function generatePreImplemented($method, $class, $f) {
     fprintf($f, "  public: c_%s *create", $class['name']);
     generateFuncArgsCPPHeader($method, $f, true);
     fprintf($f, ";\n");
-    fprintf($f, "  public: void getConstructor(MethodCallPackage &mcp);\n");
   }
 }
 

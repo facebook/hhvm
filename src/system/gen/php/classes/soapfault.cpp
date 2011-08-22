@@ -135,17 +135,12 @@ c_SoapFault *c_SoapFault::create(CVarRef v_code, CVarRef v_message, CVarRef v_ac
   t___construct(v_code, v_message, v_actor, v_detail, v_name, v_header);
   return this;
 }
-
-void c_SoapFault::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_SoapFault::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_SoapFault = {
   (ObjectData*(*)(ObjectData*))coo_SoapFault,
   c_SoapFault::s_call_info_table,c_SoapFault::s_call_info_index,
   c_SoapFault::s_instanceof_table,c_SoapFault::s_instanceof_index,
   &c_SoapFault::s_class_name,
-  &c_SoapFault::os_prop_table,0,&cw_Exception
+  &c_SoapFault::os_prop_table,&c_SoapFault::ci___construct,0,&cw_Exception
 };
 /* SRC: classes/soapfault.php line 12 */
 void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_actor //  = null

@@ -566,16 +566,12 @@ c_ArrayIterator *c_ArrayIterator::create(CVarRef v_array, CVarRef v_flags //  = 
   t___construct(v_array, v_flags);
   return this;
 }
-void c_ArrayIterator::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_ArrayIterator::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_ArrayIterator = {
   (ObjectData*(*)(ObjectData*))coo_ArrayIterator,
   c_ArrayIterator::s_call_info_table,c_ArrayIterator::s_call_info_index,
   c_ArrayIterator::s_instanceof_table,c_ArrayIterator::s_instanceof_index,
   &c_ArrayIterator::s_class_name,
-  &c_ArrayIterator::os_prop_table,0,0
+  &c_ArrayIterator::os_prop_table,&c_ArrayIterator::ci___construct,0,0
 };
 /* SRC: classes/iterator.php line 336 */
 void c_ArrayIterator::t___construct(Variant v_array, Variant v_flags //  = 0LL
@@ -982,17 +978,12 @@ c_AppendIterator *c_AppendIterator::create() {
   t___construct();
   return this;
 }
-
-void c_AppendIterator::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_AppendIterator::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_AppendIterator = {
   (ObjectData*(*)(ObjectData*))coo_AppendIterator,
   c_AppendIterator::s_call_info_table,c_AppendIterator::s_call_info_index,
   c_AppendIterator::s_instanceof_table,c_AppendIterator::s_instanceof_index,
   &c_AppendIterator::s_class_name,
-  &c_AppendIterator::os_prop_table,0,0
+  &c_AppendIterator::os_prop_table,&c_AppendIterator::ci___construct,0,0
 };
 /* SRC: classes/iterator.php line 799 */
 void c_AppendIterator::t___construct() {
@@ -1472,17 +1463,12 @@ c_IteratorIterator *c_IteratorIterator::create(CVarRef v_iterator) {
   t___construct(v_iterator);
   return this;
 }
-
-void c_IteratorIterator::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_IteratorIterator::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_IteratorIterator = {
   (ObjectData*(*)(ObjectData*))coo_IteratorIterator,
   c_IteratorIterator::s_call_info_table,c_IteratorIterator::s_call_info_index,
   c_IteratorIterator::s_instanceof_table,c_IteratorIterator::s_instanceof_index,
   &c_IteratorIterator::s_class_name,
-  &c_IteratorIterator::os_prop_table,0,0
+  &c_IteratorIterator::os_prop_table,&c_IteratorIterator::ci___construct,0,0
 };
 /* SRC: classes/iterator.php line 660 */
 void c_IteratorIterator::t___construct(Variant v_iterator) {
@@ -1780,17 +1766,12 @@ c_RecursiveIteratorIterator *c_RecursiveIteratorIterator::create(CVarRef v_itera
   t___construct(v_iterator, v_mode, v_flags);
   return this;
 }
-
-void c_RecursiveIteratorIterator::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_RecursiveIteratorIterator::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_RecursiveIteratorIterator = {
   (ObjectData*(*)(ObjectData*))coo_RecursiveIteratorIterator,
   c_RecursiveIteratorIterator::s_call_info_table,c_RecursiveIteratorIterator::s_call_info_index,
   c_RecursiveIteratorIterator::s_instanceof_table,c_RecursiveIteratorIterator::s_instanceof_index,
   &c_RecursiveIteratorIterator::s_class_name,
-  &c_RecursiveIteratorIterator::os_prop_table,0,0
+  &c_RecursiveIteratorIterator::os_prop_table,&c_RecursiveIteratorIterator::ci___construct,0,0
 };
 /* SRC: classes/iterator.php line 237 */
 void c_RecursiveIteratorIterator::t___construct(Variant v_iterator, Variant v_mode //  = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */
@@ -1927,17 +1908,12 @@ c_MutableArrayIterator *c_MutableArrayIterator::create(VRefParam v_array, CVarRe
   t___construct(v_array, v_flags);
   return this;
 }
-
-void c_MutableArrayIterator::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_MutableArrayIterator::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_MutableArrayIterator = {
   (ObjectData*(*)(ObjectData*))coo_MutableArrayIterator,
   c_MutableArrayIterator::s_call_info_table,c_MutableArrayIterator::s_call_info_index,
   c_MutableArrayIterator::s_instanceof_table,c_MutableArrayIterator::s_instanceof_index,
   &c_MutableArrayIterator::s_class_name,
-  &c_ArrayIterator::os_prop_table,0,&cw_ArrayIterator
+  &c_ArrayIterator::os_prop_table,&c_MutableArrayIterator::ci___construct,0,&cw_ArrayIterator
 };
 /* SRC: classes/iterator.php line 645 */
 void c_MutableArrayIterator::t___construct(VRefParam rv_array, Variant v_flags //  = 0LL
@@ -2208,17 +2184,12 @@ c_FilterIterator *c_FilterIterator::create(CVarRef v_it) {
   t___construct(v_it);
   return this;
 }
-
-void c_FilterIterator::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_FilterIterator::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_FilterIterator = {
   (ObjectData*(*)(ObjectData*))coo_FilterIterator,
   c_FilterIterator::s_call_info_table,c_FilterIterator::s_call_info_index,
   c_FilterIterator::s_instanceof_table,c_FilterIterator::s_instanceof_index,
   &c_FilterIterator::s_class_name,
-  &c_FilterIterator::os_prop_table,0,&cw_IteratorIterator
+  &c_FilterIterator::os_prop_table,&c_FilterIterator::ci___construct,0,&cw_IteratorIterator
 };
 /* SRC: classes/iterator.php line 714 */
 void c_FilterIterator::t___construct(Variant v_it) {

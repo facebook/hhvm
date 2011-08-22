@@ -410,6 +410,7 @@ struct ObjectStaticCallbacks {
   const int                   *instanceof_index;
   const StaticString          *cls;
   const ClassPropTable        *cpt;
+  const CallInfo              *constructor;
   int64                       redeclaredParent;
   const ObjectStaticCallbacks *parent;
 };

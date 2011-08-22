@@ -64,9 +64,32 @@ ObjectData::~ObjectData() {
 static CallInfo s_ObjectData_null_constructor(
     (void*)ObjectData::NullConstructor,
     (void*)ObjectData::NullConstructorFewArgs, 0, CallInfo::Method, 0);
-void ObjectData::getConstructor(MethodCallPackage &mcp) {
+
+static inline ALWAYS_INLINE void GetConstructorHelper(ObjectData *obj,
+                                                      MethodCallPackage &mcp) {
+  const ObjectStaticCallbacks *osc = obj->o_get_callbacks();
+  if (LIKELY(osc != 0)) {
+    do {
+      if (LIKELY(osc->constructor != 0)) {
+        mcp.ci = osc->constructor;
+        mcp.obj = obj;
+        return;
+      }
+      if (LIKELY(!osc->redeclaredParent)) break;
+      osc = *(ObjectStaticCallbacks**)((char*)get_global_variables() +
+                                       osc->redeclaredParent);
+      obj = static_cast<DynamicObjectData*>(obj)->getRedeclaredParent();
+    } while (osc);
+  } else if (ObjectData *parent = obj->getRedeclaredParent()) {
+    parent->getConstructor(mcp);
+    return;
+  }
   mcp.ci = &s_ObjectData_null_constructor;
-  mcp.obj = this;
+  mcp.obj = obj;
+}
+
+void ObjectData::getConstructor(MethodCallPackage &mcp) {
+  GetConstructorHelper(this, mcp);
 }
 
 void ObjectData::release() {

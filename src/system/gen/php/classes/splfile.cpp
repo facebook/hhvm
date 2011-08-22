@@ -752,17 +752,12 @@ c_SplFileObject *c_SplFileObject::create(CVarRef v_filename, CVarRef v_open_mode
   t___construct(v_filename, v_open_mode, v_use_include_path, v_context);
   return this;
 }
-
-void c_SplFileObject::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_SplFileObject::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_SplFileObject = {
   (ObjectData*(*)(ObjectData*))coo_SplFileObject,
   c_SplFileObject::s_call_info_table,c_SplFileObject::s_call_info_index,
   c_SplFileObject::s_instanceof_table,c_SplFileObject::s_instanceof_index,
   &c_SplFileObject::s_class_name,
-  &c_SplFileObject::os_prop_table,0,&cw_SplFileInfo
+  &c_SplFileObject::os_prop_table,&c_SplFileObject::ci___construct,0,&cw_SplFileInfo
 };
 /* SRC: classes/splfile.php line 392 */
 void c_SplFileObject::t___construct(Variant v_filename, Variant v_open_mode //  = NAMSTR(s_sys_ss0d42ecf6, "r")
@@ -1595,17 +1590,12 @@ c_SplFileInfo *c_SplFileInfo::create(CVarRef v_file_name) {
   t___construct(v_file_name);
   return this;
 }
-
-void c_SplFileInfo::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_SplFileInfo::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_SplFileInfo = {
   (ObjectData*(*)(ObjectData*))coo_SplFileInfo,
   c_SplFileInfo::s_call_info_table,c_SplFileInfo::s_call_info_index,
   c_SplFileInfo::s_instanceof_table,c_SplFileInfo::s_instanceof_index,
   &c_SplFileInfo::s_class_name,
-  &c_SplFileInfo::os_prop_table,0,0
+  &c_SplFileInfo::os_prop_table,&c_SplFileInfo::ci___construct,0,0
 };
 /* SRC: classes/splfile.php line 14 */
 void c_SplFileInfo::t___construct(Variant v_file_name) {

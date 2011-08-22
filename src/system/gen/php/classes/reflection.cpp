@@ -313,7 +313,7 @@ const ObjectStaticCallbacks cw_ReflectionFunctionAbstract = {
   c_ReflectionFunctionAbstract::s_call_info_table,c_ReflectionFunctionAbstract::s_call_info_index,
   c_ReflectionFunctionAbstract::s_instanceof_table,c_ReflectionFunctionAbstract::s_instanceof_index,
   &c_ReflectionFunctionAbstract::s_class_name,
-  &c_ReflectionFunctionAbstract::os_prop_table,0,0
+  &c_ReflectionFunctionAbstract::os_prop_table,0,0,0
 };
 /* SRC: classes/reflection.php line 261 */
 Variant c_ReflectionFunctionAbstract::t_getname() {
@@ -510,7 +510,7 @@ const ObjectStaticCallbacks cw_ReflectionObject = {
   c_ReflectionObject::s_call_info_table,c_ReflectionObject::s_call_info_index,
   c_ReflectionObject::s_instanceof_table,c_ReflectionObject::s_instanceof_index,
   &c_ReflectionObject::s_class_name,
-  &c_ReflectionClass::os_prop_table,0,&cw_ReflectionClass
+  &c_ReflectionClass::os_prop_table,&c_ReflectionClass::ci___construct,0,&cw_ReflectionClass
 };
 /* SRC: classes/reflection.php line 1298 */
 Variant c_ReflectionObject::t_export(Variant v_obj, CVarRef v_ret) {
@@ -556,7 +556,7 @@ const ObjectStaticCallbacks cw_ReflectionException = {
   c_ReflectionException::s_call_info_table,c_ReflectionException::s_call_info_index,
   c_ReflectionException::s_instanceof_table,c_ReflectionException::s_instanceof_index,
   &c_ReflectionException::s_class_name,
-  &c_Exception::os_prop_table,0,&cw_Exception
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_Exception
 };
 /* SRC: classes/reflection.php line 538 */
 const int64 q_ReflectionClass$$IS_IMPLICIT_ABSTRACT = 16LL;
@@ -1529,17 +1529,12 @@ c_ReflectionClass *c_ReflectionClass::create(CVarRef v_name) {
   t___construct(v_name);
   return this;
 }
-
-void c_ReflectionClass::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_ReflectionClass::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_ReflectionClass = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionClass,
   c_ReflectionClass::s_call_info_table,c_ReflectionClass::s_call_info_index,
   c_ReflectionClass::s_instanceof_table,c_ReflectionClass::s_instanceof_index,
   &c_ReflectionClass::s_class_name,
-  &c_ReflectionClass::os_prop_table,0,0
+  &c_ReflectionClass::os_prop_table,&c_ReflectionClass::ci___construct,0,0
 };
 /* SRC: classes/reflection.php line 546 */
 void c_ReflectionClass::t___construct(Variant v_name) {
@@ -2694,17 +2689,12 @@ c_ReflectionExtension *c_ReflectionExtension::create(CVarRef v_name) {
   t___construct(v_name);
   return this;
 }
-
-void c_ReflectionExtension::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_ReflectionExtension::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_ReflectionExtension = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionExtension,
   c_ReflectionExtension::s_call_info_table,c_ReflectionExtension::s_call_info_index,
   c_ReflectionExtension::s_instanceof_table,c_ReflectionExtension::s_instanceof_index,
   &c_ReflectionExtension::s_class_name,
-  &c_ReflectionExtension::os_prop_table,0,0
+  &c_ReflectionExtension::os_prop_table,&c_ReflectionExtension::ci___construct,0,0
 };
 /* SRC: classes/reflection.php line 1837 */
 void c_ReflectionExtension::t___construct(Variant v_name) {
@@ -3198,17 +3188,12 @@ c_ReflectionMethod *c_ReflectionMethod::create(CVarRef v_cls, CVarRef v_name // 
   t___construct(v_cls, v_name);
   return this;
 }
-
-void c_ReflectionMethod::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_ReflectionMethod::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_ReflectionMethod = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionMethod,
   c_ReflectionMethod::s_call_info_table,c_ReflectionMethod::s_call_info_index,
   c_ReflectionMethod::s_instanceof_table,c_ReflectionMethod::s_instanceof_index,
   &c_ReflectionMethod::s_class_name,
-  &c_ReflectionMethod::os_prop_table,0,&cw_ReflectionFunctionAbstract
+  &c_ReflectionMethod::os_prop_table,&c_ReflectionMethod::ci___construct,0,&cw_ReflectionFunctionAbstract
 };
 /* SRC: classes/reflection.php line 1583 */
 void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMSTR(s_sys_ss00000000, "")
@@ -3829,17 +3814,12 @@ c_ReflectionProperty *c_ReflectionProperty::create(CVarRef v_cls, CVarRef v_name
   t___construct(v_cls, v_name);
   return this;
 }
-
-void c_ReflectionProperty::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_ReflectionProperty::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_ReflectionProperty = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionProperty,
   c_ReflectionProperty::s_call_info_table,c_ReflectionProperty::s_call_info_index,
   c_ReflectionProperty::s_instanceof_table,c_ReflectionProperty::s_instanceof_index,
   &c_ReflectionProperty::s_class_name,
-  &c_ReflectionProperty::os_prop_table,0,0
+  &c_ReflectionProperty::os_prop_table,&c_ReflectionProperty::ci___construct,0,0
 };
 /* SRC: classes/reflection.php line 1329 */
 void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
@@ -4230,17 +4210,12 @@ c_ReflectionFunction *c_ReflectionFunction::create(CVarRef v_name) {
   t___construct(v_name);
   return this;
 }
-
-void c_ReflectionFunction::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_ReflectionFunction::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_ReflectionFunction = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionFunction,
   c_ReflectionFunction::s_call_info_table,c_ReflectionFunction::s_call_info_index,
   c_ReflectionFunction::s_instanceof_table,c_ReflectionFunction::s_instanceof_index,
   &c_ReflectionFunction::s_class_name,
-  &c_ReflectionFunction::os_prop_table,0,&cw_ReflectionFunctionAbstract
+  &c_ReflectionFunction::os_prop_table,&c_ReflectionFunction::ci___construct,0,&cw_ReflectionFunctionAbstract
 };
 /* SRC: classes/reflection.php line 465 */
 void c_ReflectionFunction::t___construct(Variant v_name) {
@@ -4607,17 +4582,12 @@ c_ReflectionParameter *c_ReflectionParameter::create(CVarRef v_func, CVarRef v_p
   t___construct(v_func, v_param);
   return this;
 }
-
-void c_ReflectionParameter::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_ReflectionParameter::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_ReflectionParameter = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionParameter,
   c_ReflectionParameter::s_call_info_table,c_ReflectionParameter::s_call_info_index,
   c_ReflectionParameter::s_instanceof_table,c_ReflectionParameter::s_instanceof_index,
   &c_ReflectionParameter::s_class_name,
-  &c_ReflectionParameter::os_prop_table,0,0
+  &c_ReflectionParameter::os_prop_table,&c_ReflectionParameter::ci___construct,0,0
 };
 /* SRC: classes/reflection.php line 49 */
 void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {

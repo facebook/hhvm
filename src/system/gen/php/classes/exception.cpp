@@ -80,17 +80,12 @@ c_PDOException *c_PDOException::create() {
   t___construct();
   return this;
 }
-
-void c_PDOException::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_PDOException::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_PDOException = {
   (ObjectData*(*)(ObjectData*))coo_PDOException,
   c_PDOException::s_call_info_table,c_PDOException::s_call_info_index,
   c_PDOException::s_instanceof_table,c_PDOException::s_instanceof_index,
   &c_PDOException::s_class_name,
-  &c_Exception::os_prop_table,0,&cw_Exception
+  &c_Exception::os_prop_table,&c_PDOException::ci___construct,0,&cw_Exception
 };
 /* SRC: classes/exception.php line 318 */
 void c_PDOException::t___construct() {
@@ -124,7 +119,7 @@ const ObjectStaticCallbacks cw_UnexpectedValueException = {
   c_UnexpectedValueException::s_call_info_table,c_UnexpectedValueException::s_call_info_index,
   c_UnexpectedValueException::s_instanceof_table,c_UnexpectedValueException::s_instanceof_index,
   &c_UnexpectedValueException::s_class_name,
-  &c_Exception::os_prop_table,0,&cw_RuntimeException
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 251 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(OverflowException)
@@ -152,7 +147,7 @@ const ObjectStaticCallbacks cw_OverflowException = {
   c_OverflowException::s_call_info_table,c_OverflowException::s_call_info_index,
   c_OverflowException::s_instanceof_table,c_OverflowException::s_instanceof_index,
   &c_OverflowException::s_class_name,
-  &c_Exception::os_prop_table,0,&cw_RuntimeException
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 243 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(OutOfBoundsException)
@@ -180,7 +175,7 @@ const ObjectStaticCallbacks cw_OutOfBoundsException = {
   c_OutOfBoundsException::s_call_info_table,c_OutOfBoundsException::s_call_info_index,
   c_OutOfBoundsException::s_instanceof_table,c_OutOfBoundsException::s_instanceof_index,
   &c_OutOfBoundsException::s_class_name,
-  &c_Exception::os_prop_table,0,&cw_RuntimeException
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 173 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(LogicException)
@@ -206,7 +201,7 @@ const ObjectStaticCallbacks cw_LogicException = {
   c_LogicException::s_call_info_table,c_LogicException::s_call_info_index,
   c_LogicException::s_instanceof_table,c_LogicException::s_instanceof_index,
   &c_LogicException::s_class_name,
-  &c_Exception::os_prop_table,0,&cw_Exception
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_Exception
 };
 /* SRC: classes/exception.php line 259 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(RangeException)
@@ -234,7 +229,7 @@ const ObjectStaticCallbacks cw_RangeException = {
   c_RangeException::s_call_info_table,c_RangeException::s_call_info_index,
   c_RangeException::s_instanceof_table,c_RangeException::s_instanceof_index,
   &c_RangeException::s_class_name,
-  &c_Exception::os_prop_table,0,&cw_RuntimeException
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 211 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(InvalidArgumentException)
@@ -262,7 +257,7 @@ const ObjectStaticCallbacks cw_InvalidArgumentException = {
   c_InvalidArgumentException::s_call_info_table,c_InvalidArgumentException::s_call_info_index,
   c_InvalidArgumentException::s_instanceof_table,c_InvalidArgumentException::s_instanceof_index,
   &c_InvalidArgumentException::s_class_name,
-  &c_Exception::os_prop_table,0,&cw_LogicException
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_LogicException
 };
 /* SRC: classes/exception.php line 268 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(UnderflowException)
@@ -290,7 +285,7 @@ const ObjectStaticCallbacks cw_UnderflowException = {
   c_UnderflowException::s_call_info_table,c_UnderflowException::s_call_info_index,
   c_UnderflowException::s_instanceof_table,c_UnderflowException::s_instanceof_index,
   &c_UnderflowException::s_class_name,
-  &c_Exception::os_prop_table,0,&cw_RuntimeException
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_RuntimeException
 };
 /* SRC: classes/exception.php line 227 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(OutOfRangeException)
@@ -318,7 +313,7 @@ const ObjectStaticCallbacks cw_OutOfRangeException = {
   c_OutOfRangeException::s_call_info_table,c_OutOfRangeException::s_call_info_index,
   c_OutOfRangeException::s_instanceof_table,c_OutOfRangeException::s_instanceof_index,
   &c_OutOfRangeException::s_class_name,
-  &c_Exception::os_prop_table,0,&cw_LogicException
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_LogicException
 };
 /* SRC: classes/exception.php line 193 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(BadMethodCallException)
@@ -347,7 +342,7 @@ const ObjectStaticCallbacks cw_BadMethodCallException = {
   c_BadMethodCallException::s_call_info_table,c_BadMethodCallException::s_call_info_index,
   c_BadMethodCallException::s_instanceof_table,c_BadMethodCallException::s_instanceof_index,
   &c_BadMethodCallException::s_class_name,
-  &c_Exception::os_prop_table,0,&cw_BadFunctionCallException
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_BadFunctionCallException
 };
 /* SRC: classes/exception.php line 235 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(RuntimeException)
@@ -373,7 +368,7 @@ const ObjectStaticCallbacks cw_RuntimeException = {
   c_RuntimeException::s_call_info_table,c_RuntimeException::s_call_info_index,
   c_RuntimeException::s_instanceof_table,c_RuntimeException::s_instanceof_index,
   &c_RuntimeException::s_class_name,
-  &c_Exception::os_prop_table,0,&cw_Exception
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_Exception
 };
 /* SRC: classes/exception.php line 10 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(Exception)
@@ -625,17 +620,12 @@ c_Exception *c_Exception::create(CVarRef v_message //  = NAMVAR(s_sys_svs0000000
   t___construct(v_message, v_code, v_previous);
   return this;
 }
-
-void c_Exception::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_Exception::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_Exception = {
   (ObjectData*(*)(ObjectData*))coo_Exception,
   c_Exception::s_call_info_table,c_Exception::s_call_info_index,
   c_Exception::s_instanceof_table,c_Exception::s_instanceof_index,
   &c_Exception::s_class_name,
-  &c_Exception::os_prop_table,0,0
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,0
 };
 void c_Exception::init() {
   m_message = NAMSTR(s_sys_ss00000000, "");
@@ -959,17 +949,12 @@ c_ErrorException *c_ErrorException::create(CVarRef v_message //  = NAMVAR(s_sys_
   t___construct(v_message, v_code, v_severity, v_filename, v_lineno);
   return this;
 }
-
-void c_ErrorException::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_ErrorException::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_ErrorException = {
   (ObjectData*(*)(ObjectData*))coo_ErrorException,
   c_ErrorException::s_call_info_table,c_ErrorException::s_call_info_index,
   c_ErrorException::s_instanceof_table,c_ErrorException::s_instanceof_index,
   &c_ErrorException::s_class_name,
-  &c_ErrorException::os_prop_table,0,&cw_Exception
+  &c_ErrorException::os_prop_table,&c_ErrorException::ci___construct,0,&cw_Exception
 };
 /* SRC: classes/exception.php line 288 */
 void c_ErrorException::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
@@ -1060,17 +1045,12 @@ c_DOMException *c_DOMException::create(CVarRef v_message, CVarRef v_code) {
   t___construct(v_message, v_code);
   return this;
 }
-
-void c_DOMException::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_DOMException::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_DOMException = {
   (ObjectData*(*)(ObjectData*))coo_DOMException,
   c_DOMException::s_call_info_table,c_DOMException::s_call_info_index,
   c_DOMException::s_instanceof_table,c_DOMException::s_instanceof_index,
   &c_DOMException::s_class_name,
-  &c_Exception::os_prop_table,0,&cw_Exception
+  &c_Exception::os_prop_table,&c_DOMException::ci___construct,0,&cw_Exception
 };
 /* SRC: classes/exception.php line 312 */
 void c_DOMException::t___construct(Variant v_message, Variant v_code) {
@@ -1106,7 +1086,7 @@ const ObjectStaticCallbacks cw_BadFunctionCallException = {
   c_BadFunctionCallException::s_call_info_table,c_BadFunctionCallException::s_call_info_index,
   c_BadFunctionCallException::s_instanceof_table,c_BadFunctionCallException::s_instanceof_index,
   &c_BadFunctionCallException::s_class_name,
-  &c_Exception::os_prop_table,0,&cw_LogicException
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_LogicException
 };
 /* SRC: classes/exception.php line 219 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(LengthException)
@@ -1134,7 +1114,7 @@ const ObjectStaticCallbacks cw_LengthException = {
   c_LengthException::s_call_info_table,c_LengthException::s_call_info_index,
   c_LengthException::s_instanceof_table,c_LengthException::s_instanceof_index,
   &c_LengthException::s_class_name,
-  &c_Exception::os_prop_table,0,&cw_LogicException
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_LogicException
 };
 /* SRC: classes/exception.php line 202 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DomainException)
@@ -1162,7 +1142,7 @@ const ObjectStaticCallbacks cw_DomainException = {
   c_DomainException::s_call_info_table,c_DomainException::s_call_info_index,
   c_DomainException::s_instanceof_table,c_DomainException::s_instanceof_index,
   &c_DomainException::s_class_name,
-  &c_Exception::os_prop_table,0,&cw_LogicException
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_LogicException
 };
 ObjectData *coo_PDOException() {
   return NEWOBJ(c_PDOException)();

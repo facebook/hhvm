@@ -159,7 +159,6 @@ class c_PDO : public ExtObjectData, public Sweepable {
 
   // implemented by HPHP
   public: c_PDO *create(String dsn, String username = null_string, String password = null_string, Array options = null_array);
-  public: void getConstructor(MethodCallPackage &mcp);
   static const ClassPropTable os_prop_table;
 
 
@@ -236,7 +235,6 @@ class c_PDOStatement : public ExtObjectData, public Sweepable {
 
   // implemented by HPHP
   public: c_PDOStatement *create();
-  public: void getConstructor(MethodCallPackage &mcp);
 
 
   public: sp_PDOStatement m_stmt;

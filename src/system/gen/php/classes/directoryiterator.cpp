@@ -326,17 +326,12 @@ c_RecursiveDirectoryIterator *c_RecursiveDirectoryIterator::create(CVarRef v_pat
   t___construct(v_path, v_flags);
   return this;
 }
-
-void c_RecursiveDirectoryIterator::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_RecursiveDirectoryIterator::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_RecursiveDirectoryIterator = {
   (ObjectData*(*)(ObjectData*))coo_RecursiveDirectoryIterator,
   c_RecursiveDirectoryIterator::s_call_info_table,c_RecursiveDirectoryIterator::s_call_info_index,
   c_RecursiveDirectoryIterator::s_instanceof_table,c_RecursiveDirectoryIterator::s_instanceof_index,
   &c_RecursiveDirectoryIterator::s_class_name,
-  &c_RecursiveDirectoryIterator::os_prop_table,0,&cw_DirectoryIterator
+  &c_RecursiveDirectoryIterator::os_prop_table,&c_RecursiveDirectoryIterator::ci___construct,0,&cw_DirectoryIterator
 };
 /* SRC: classes/directoryiterator.php line 132 */
 void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags //  = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */
@@ -651,17 +646,12 @@ c_DirectoryIterator *c_DirectoryIterator::create(CVarRef v_path) {
   t___construct(v_path);
   return this;
 }
-
-void c_DirectoryIterator::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_DirectoryIterator::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_DirectoryIterator = {
   (ObjectData*(*)(ObjectData*))coo_DirectoryIterator,
   c_DirectoryIterator::s_call_info_table,c_DirectoryIterator::s_call_info_index,
   c_DirectoryIterator::s_instanceof_table,c_DirectoryIterator::s_instanceof_index,
   &c_DirectoryIterator::s_class_name,
-  &c_SplFileInfo::os_prop_table,0,&cw_SplFileInfo
+  &c_SplFileInfo::os_prop_table,&c_DirectoryIterator::ci___construct,0,&cw_SplFileInfo
 };
 /* SRC: classes/directoryiterator.php line 14 */
 void c_DirectoryIterator::t___construct(Variant v_path) {

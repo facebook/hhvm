@@ -97,7 +97,6 @@ class c_SimpleXMLElement :
 
   // implemented by HPHP
   public: c_SimpleXMLElement *create(String data, int64 options = 0, bool data_is_url = false, String ns = "", bool is_prefix = false);
-  public: void getConstructor(MethodCallPackage &mcp);
 
 
  public:
@@ -137,7 +136,6 @@ class c_LibXMLError : public ExtObjectData {
 
   // implemented by HPHP
   public: c_LibXMLError *create();
-  public: void getConstructor(MethodCallPackage &mcp);
 
 
 };
@@ -170,7 +168,6 @@ class c_SimpleXMLElementIterator : public ExtObjectData, public Sweepable {
 
   // implemented by HPHP
   public: c_SimpleXMLElementIterator *create();
-  public: void getConstructor(MethodCallPackage &mcp);
 
 
 public:

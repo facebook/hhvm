@@ -41,7 +41,6 @@ class c_ReflectionProperty : public ExtObjectData {
   c_ReflectionProperty() : m_info(Variant::nullInit), m_name(Variant::nullInit), m_class(Variant::nullInit) {}
   public: void t___construct(Variant v_cls, Variant v_name);
   public: c_ReflectionProperty *create(CVarRef v_cls, CVarRef v_name);
-  public: void getConstructor(MethodCallPackage &mcp);
   public: String t___tostring();
   public: static Variant t_export(Variant v_cls, CVarRef v_name, CVarRef v_ret);
   public: Variant t_getname();

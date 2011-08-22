@@ -2427,6 +2427,16 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
               Option::ObjectStaticPrefix);
   }
 
+  FunctionScopeRawPtr fs = findConstructor(ar, true);
+  if (fs && !fs->isAbstract()) {
+    cg_printf("&%s%s::%s%s,",
+              Option::ClassPrefix, fs->getContainingClass()->getId().c_str(),
+              Option::CallInfoPrefix,
+              CodeGenerator::FormatLabel(fs->getName()).c_str());
+  } else {
+    cg_printf("0,");
+  }
+
   ClassScopeRawPtr par;
   if (derivesFromRedeclaring() != FromNormal) {
     par = ClassScopeRawPtr(this);

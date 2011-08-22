@@ -59,7 +59,6 @@ class c_EncodingDetector : public ExtObjectData {
 
   // implemented by HPHP
   public: c_EncodingDetector *create();
-  public: void getConstructor(MethodCallPackage &mcp);
 
 
   private: UCharsetDetector *m_encoding_detector;
@@ -93,7 +92,6 @@ class c_EncodingMatch : public ExtObjectData {
 
   // implemented by HPHP
   public: c_EncodingMatch *create();
-  public: void getConstructor(MethodCallPackage &mcp);
 
 
   public: const UCharsetMatch *m_encoding_match;

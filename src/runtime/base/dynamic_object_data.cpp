@@ -43,14 +43,6 @@ void DynamicObjectData::init() {
   }
 }
 
-void DynamicObjectData::getConstructor(MethodCallPackage &mcp) {
-  if (!parent.isNull()) {
-    parent->getConstructor(mcp);
-  } else {
-    ObjectData::getConstructor(mcp);
-  }
-}
-
 void DynamicObjectData::destruct() {
   if (!parent.isNull()) {
     if (inCtorDtor()) {

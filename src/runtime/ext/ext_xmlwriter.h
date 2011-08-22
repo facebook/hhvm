@@ -173,7 +173,6 @@ class c_XMLWriter : public ExtObjectData, public Sweepable {
 
   // implemented by HPHP
   public: c_XMLWriter *create();
-  public: void getConstructor(MethodCallPackage &mcp);
 
 
  public:

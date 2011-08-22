@@ -174,7 +174,6 @@ class c_Memcached : public ExtObjectData, public Sweepable {
 
   // implemented by HPHP
   public: c_Memcached *create(String persistent_id = null_string);
-  public: void getConstructor(MethodCallPackage &mcp);
   static const ClassPropTable os_prop_table;
 
 

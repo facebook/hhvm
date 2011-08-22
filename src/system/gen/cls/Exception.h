@@ -45,7 +45,6 @@ class c_Exception : public ExtObjectData {
   public: void t___init__();
   public: void t___construct(Variant v_message = NAMSTR(s_sys_ss00000000, ""), Variant v_code = 0LL, Variant v_previous = null);
   public: c_Exception *create(CVarRef v_message = NAMVAR(s_sys_svs00000000, ""), CVarRef v_code = NAMVAR(s_sys_svif01bca90, 0LL), CVarRef v_previous = null_variant);
-  public: void getConstructor(MethodCallPackage &mcp);
   public: Variant t_getmessage();
   public: Variant t_getprevious();
   public: Variant t_getcode();

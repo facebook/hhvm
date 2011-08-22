@@ -1715,9 +1715,6 @@ void FunctionScope::outputCPPCreateDecl(CodeGenerator &cg,
                       ->getParams(), true);
   cg.setContext(context);
   cg_printf(");\n");
-  if (isDynamic()) {
-    cg_printf("public: void getConstructor(MethodCallPackage &mcp);\n");
-  }
 }
 
 void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
@@ -1746,15 +1743,6 @@ void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
   cg_printf(");\n");
   cg_printf("return this;\n");
   cg_indentEnd("}\n");
-  if (isDynamic() || isSepExtension()) {
-    cg_indentBegin("void %s%s::getConstructor(MethodCallPackage &mcp) {\n",
-                   Option::ClassPrefix, clsName);
-    cg_printf("mcp.ci = &%s%s::%s%s;\n", Option::ClassPrefix, clsName,
-              Option::CallInfoPrefix,
-              CodeGenerator::FormatLabel(consName).c_str());
-    cg_printf("mcp.obj = this;\n");
-    cg_indentEnd("}\n");
-  }
 }
 
 void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {

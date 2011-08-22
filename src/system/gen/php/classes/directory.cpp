@@ -145,17 +145,12 @@ c_Directory *c_Directory::create(CVarRef v_path) {
   t___construct(v_path);
   return this;
 }
-
-void c_Directory::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_Directory::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_Directory = {
   (ObjectData*(*)(ObjectData*))coo_Directory,
   c_Directory::s_call_info_table,c_Directory::s_call_info_index,
   c_Directory::s_instanceof_table,c_Directory::s_instanceof_index,
   &c_Directory::s_class_name,
-  &c_Directory::os_prop_table,0,0
+  &c_Directory::os_prop_table,&c_Directory::ci___construct,0,0
 };
 /* SRC: classes/directory.php line 7 */
 void c_Directory::t___construct(Variant v_path) {

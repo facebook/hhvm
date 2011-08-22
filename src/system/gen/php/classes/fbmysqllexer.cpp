@@ -269,17 +269,12 @@ c_FB_MySQLLexer *c_FB_MySQLLexer::create(CVarRef v_string //  = NAMVAR(s_sys_svs
   t___construct(v_string, v_lookahead);
   return this;
 }
-
-void c_FB_MySQLLexer::getConstructor(MethodCallPackage &mcp) {
-  mcp.ci = &c_FB_MySQLLexer::ci___construct;
-  mcp.obj = this;
-}
 const ObjectStaticCallbacks cw_FB_MySQLLexer = {
   (ObjectData*(*)(ObjectData*))coo_FB_MySQLLexer,
   c_FB_MySQLLexer::s_call_info_table,c_FB_MySQLLexer::s_call_info_index,
   c_FB_MySQLLexer::s_instanceof_table,c_FB_MySQLLexer::s_instanceof_index,
   &c_FB_MySQLLexer::s_class_name,
-  &c_FB_MySQLLexer::os_prop_table,0,0
+  &c_FB_MySQLLexer::os_prop_table,&c_FB_MySQLLexer::ci___construct,0,0
 };
 void c_FB_MySQLLexer::init() {
   m_symbols = s_sys_sa00000000;

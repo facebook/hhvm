@@ -35,7 +35,6 @@ class c_XhprofFrame : public ExtObjectData {
   DECLARE_CLASS_NO_SWEEP(XhprofFrame, XhprofFrame, ObjectData)
   public: void t___construct(Variant v_name);
   public: c_XhprofFrame *create(CVarRef v_name);
-  public: void getConstructor(MethodCallPackage &mcp);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);

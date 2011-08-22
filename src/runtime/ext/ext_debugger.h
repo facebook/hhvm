@@ -52,7 +52,6 @@ class c_DebuggerProxy : public ExtObjectData {
 
   // implemented by HPHP
   public: c_DebuggerProxy *create();
-  public: void getConstructor(MethodCallPackage &mcp);
 
 
  public:
@@ -143,7 +142,6 @@ class c_DebuggerClient : public ExtObjectData {
 
   // implemented by HPHP
   public: c_DebuggerClient *create();
-  public: void getConstructor(MethodCallPackage &mcp);
   static const ClassPropTable os_prop_table;
 
 

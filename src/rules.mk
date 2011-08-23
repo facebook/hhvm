@@ -360,7 +360,10 @@ ifdef NO_TLS
 CPPFLAGS += -DNO_TLS
 endif
 
-ifdef TAINTED
+ifndef TAINTED
+TAINTED := $(shell test -f $(HPHP_LIB)/tainted_build && echo 1)
+endif
+ifneq ($(TAINTED),)
 CPPFLAGS += -DTAINTED
 endif
 

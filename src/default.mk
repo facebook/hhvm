@@ -27,6 +27,7 @@ clobber:
 	$(V)find $(OUT_DIR) -name "*.[od]" | xargs $(RM)
 	$(V)find . -name "*~" | xargs $(RM)
 	$(V)rm -f runtime/base/memory/smart_allocator.inc_gen
+	$(V)rm -f $(HPHP_LIB)/tainted_build
 
 .PHONY: clean
 clean: clobber

@@ -42,9 +42,18 @@ TARGETS = $(PROGRAMS) $(STATIC_LIB)
 
 all: $(TARGETS)
 
+ifneq ($(TAINTED),)
+TAINT_CMD = touch $(HPHP_LIB)/tainted_build
+else
+TAINT_CMD = rm -f $(HPHP_LIB)/tainted_build
+endif
+
+tainted_build:
+	$(V)$(TAINT_CMD)
+
 $(PROGRAMS) : $(STATIC_LIB)
 hphp-setup: compiler-setup
-hphp: compiler
+hphp: compiler tainted_build
 hphpi: hphp | test-obj
 test-setup: compiler-setup
 test: compiler shared-lib-target

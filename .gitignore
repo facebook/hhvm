@@ -2,6 +2,7 @@
 /bin*-g
 /bin*-O
 /bin/*.so
+/bin/tainted_build
 
 /src/compiler/analysis/code_error.inc
 /src/compiler/analysis/dependency.inc

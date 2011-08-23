@@ -59,7 +59,8 @@ bool TestExtProcess::RunTests(const std::string &which) {
   RUN_TEST(test_escapeshellcmd);
 
   LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
-                           RuntimeOption::LightProcessCount);
+                           RuntimeOption::LightProcessCount,
+                           std::vector<int>());
   RUN_TEST(test_pcntl_alarm);
   //RUN_TEST(test_pcntl_exec); // this has to run manually
   RUN_TEST(test_pcntl_fork);

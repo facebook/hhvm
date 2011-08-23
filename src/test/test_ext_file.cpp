@@ -123,7 +123,8 @@ bool TestExtFile::RunTests(const std::string &which) {
   RUN_TEST(test_closedir);
 
   LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
-                           RuntimeOption::LightProcessCount);
+                           RuntimeOption::LightProcessCount,
+                           std::vector<int>());
   RUN_TEST(test_popen);
   RUN_TEST(test_pclose);
   LightProcess::Close();

@@ -284,12 +284,14 @@ static boost::scoped_array<LightProcess> g_procs;
 static int g_procsCount = 0;
 
 LightProcess::LightProcess()
-: m_shadowProcess(0), m_fin(NULL), m_fout(NULL), m_afdt_fd(-1) { }
+: m_shadowProcess(0), m_fin(NULL), m_fout(NULL), m_afdt_fd(-1),
+  m_afdt_lfd(-1) { }
 
 LightProcess::~LightProcess() {
 }
 
-void LightProcess::Initialize(const std::string &prefix, int count) {
+void LightProcess::Initialize(const std::string &prefix, int count,
+                              const vector<int> &inherited_fds) {
   if (prefix.empty() || count <= 0) {
     return;
   }
@@ -303,7 +305,7 @@ void LightProcess::Initialize(const std::string &prefix, int count) {
   g_procsCount = count;
 
   for (int i = 0; i < count; i++) {
-    if (!g_procs[i].initShadow(prefix, i)) {
+    if (!g_procs[i].initShadow(prefix, i, inherited_fds)) {
       for (int j = 0; j < i; j++) {
         g_procs[j].closeShadow();
       }
@@ -314,7 +316,8 @@ void LightProcess::Initialize(const std::string &prefix, int count) {
   }
 }
 
-bool LightProcess::initShadow(const std::string &prefix, int id) {
+bool LightProcess::initShadow(const std::string &prefix, int id,
+                              const vector<int> &inherited_fds) {
   Lock lock(m_procMutex);
 
   ostringstream os;
@@ -325,8 +328,8 @@ bool LightProcess::initShadow(const std::string &prefix, int id) {
   remove(m_afdtFilename.c_str());
 
   afdt_error_t err;
-  int lfd = afdt_listen(m_afdtFilename.c_str(), &err);
-  if (lfd < 0) {
+  m_afdt_lfd = afdt_listen(m_afdtFilename.c_str(), &err);
+  if (m_afdt_lfd < 0) {
     Logger::Warning("Unable to afdt_listen");
     return false;
   }
@@ -357,10 +360,13 @@ bool LightProcess::initShadow(const std::string &prefix, int id) {
     p1.close();
     p2.close();
 
-    // don't hold on to previous light processes' pipes
+    // don't hold on to previous light processes' pipes, inherited
+    // fds, or the afdt listening socket
     for (int i = 0; i < id; i++) {
       g_procs[i].closeFiles();
     }
+    close_fds(inherited_fds);
+    ::close(m_afdt_lfd);
 
     runShadow(fd1, fd2);
   } else if (child < 0) {
@@ -376,7 +382,7 @@ bool LightProcess::initShadow(const std::string &prefix, int id) {
 
     sockaddr addr;
     socklen_t addrlen;
-    m_afdt_fd = accept(lfd, &addr, &addrlen);
+    m_afdt_fd = accept(m_afdt_lfd, &addr, &addrlen);
     if (m_afdt_fd < 0) {
       Logger::Warning("Unable to establish afdt connection");
       closeShadow();
@@ -417,6 +423,8 @@ void LightProcess::closeShadow() {
 void LightProcess::closeFiles() {
   fclose(m_fin);
   fclose(m_fout);
+  ::close(m_afdt_fd);
+  ::close(m_afdt_lfd);
 }
 
 bool LightProcess::Available() {

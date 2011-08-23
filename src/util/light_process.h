@@ -33,7 +33,8 @@ public:
 
   static void Close();
   static bool Available();
-  static void Initialize(const std::string &prefix, int count);
+  static void Initialize(const std::string &prefix, int count,
+                         const std::vector<int> &inherited_fds);
   static void ChangeUser(const std::string &username);
 
   static FILE *popen(const char *cmd, const char *type,
@@ -66,7 +67,8 @@ public:
 private:
   static int GetId();
 
-  bool initShadow(const std::string &prefix, int id);
+  bool initShadow(const std::string &prefix, int id,
+                  const std::vector<int> &inherited_fds);
   void runShadow(int fdin, int fdout);
   void closeShadow();
 
@@ -87,6 +89,7 @@ private:
   Mutex m_procMutex;
   std::string m_afdtFilename;
   int m_afdt_fd;
+  int m_afdt_lfd;
   std::map<int64, int64> m_popenMap;
 };
 

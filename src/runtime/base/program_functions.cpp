@@ -781,15 +781,18 @@ static int execute_program_impl(int argc, char **argv) {
     Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
   }
 
+  vector<int> inherited_fds;
   RuntimeOption::BuildId = po.buildId;
   if (po.port != -1) {
     RuntimeOption::ServerPort = po.port;
   }
   if (po.portfd != -1) {
     RuntimeOption::ServerPortFd = po.portfd;
+    inherited_fds.push_back(po.portfd);
   }
   if (po.sslportfd != -1) {
     RuntimeOption::SSLPortFd = po.sslportfd;
+    inherited_fds.push_back(po.sslportfd);
   }
   if (po.admin_port != -1) {
     RuntimeOption::AdminServerPort = po.admin_port;
@@ -812,7 +815,8 @@ static int execute_program_impl(int argc, char **argv) {
   // Defer the initialization of light processes until the log file handle
   // is created, so that light processes can log to the right place.
   LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
-                           RuntimeOption::LightProcessCount);
+                           RuntimeOption::LightProcessCount,
+                           inherited_fds);
 
   if (po.mode == "d") po.mode = "debug";
   if (po.mode == "s") po.mode = "server";

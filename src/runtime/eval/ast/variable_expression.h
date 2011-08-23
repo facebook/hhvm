@@ -19,6 +19,7 @@
 
 #include <runtime/eval/ast/name.h>
 #include <runtime/eval/ast/lval_expression.h>
+#include <runtime/eval/runtime/variable_environment.h>
 
 namespace HPHP {
 namespace Eval {
@@ -43,8 +44,20 @@ public:
 private:
   NamePtr m_name;
   int m_idx;
-  Variant &getRef(VariableEnvironment &env) const;
-  Variant &getRefCheck(VariableEnvironment &env) const;
+  void raiseUndefined(VariableEnvironment &env) const;
+  Variant &getRefHelper(VariableEnvironment &env) const;
+  Variant &getRef(VariableEnvironment &env) const {
+    Variant *var = NULL;
+    if (m_idx != -1 && (var = env.getIdx(m_idx))) return *var;
+    return getRefHelper(env);
+  }
+  Variant &getRefCheck(VariableEnvironment &env) const {
+    Variant &var = getRef(env);
+    /* note that 'if (!env.exists(str, name->hash()))' does not work
+     * as undefined local variables are still in the (function) environment */
+    if (!var.isInitialized()) raiseUndefined(env);
+    return var;
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

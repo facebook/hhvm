@@ -42,7 +42,7 @@ public:
   virtual void flagStatic(CStrRef name, int64 hash = -1) = 0;
   virtual void flagGlobal(CStrRef name, int64 hash = -1);
   virtual void unset(CStrRef name, int64 hash = -1);
-  virtual Variant *getIdx(int idx);
+  Variant *getIdx(int idx) { return m_byIdx[idx]; }
   virtual void setIdx(int idx, Variant *v);
   Variant &currentObject() { return m_currentObject; }
   virtual const char* currentClass() const;
@@ -118,8 +118,7 @@ protected:
   std::string m_label;
   bool m_limitedGoto;
   Variant m_ret;
-
-  std::list<std::vector<Variant> > m_tempStack;
+  std::vector<Variant*> m_byIdx;
 };
 
 /**
@@ -145,7 +144,6 @@ public:
   FuncScopeVariableEnvironment(const FunctionStatement *func);
   ~FuncScopeVariableEnvironment();
   virtual void flagStatic(CStrRef name, int64 hash = -1);
-  virtual Variant *getIdx(int idx);
   virtual void setIdx(int idx, Variant *v);
   virtual bool refReturn() const;
   virtual Array getParams() const;
@@ -159,7 +157,6 @@ private:
   Array m_statics;
   const FunctionStatement *m_func;
   LVariableTable *m_staticEnv;
-  std::vector<Variant*> m_byIdx;
   AssocList m_alist;
   int m_argc;
   uint m_argStart;
@@ -184,7 +181,6 @@ public:
                             CArrRef params = Array(),
                             CObjRef current_object = Object());
   virtual void flagStatic(CStrRef name, int64 hash = -1);
-  virtual Variant *getIdx(int idx);
   virtual void setIdx(int idx, Variant *v);
   virtual bool exists(CStrRef s) const;
   virtual Variant &getImpl(CStrRef s);
@@ -193,7 +189,6 @@ public:
   virtual Array getDefinedVariables() const;
 private:
   LVariableTable *m_ext;
-  std::vector<Variant*> m_byIdx;
   const Block &m_block;
   Variant m_global;
   Array m_params;

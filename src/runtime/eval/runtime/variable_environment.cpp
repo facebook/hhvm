@@ -111,11 +111,6 @@ String VariableEnvironment::currentContext() const {
   return m_currentClass ? m_currentClass : "";
 }
 
-Variant *VariableEnvironment::getIdx(int idx) {
-  ASSERT(false);
-  throw FatalErrorException("getIdx not supported in this env");
-}
-
 void VariableEnvironment::setIdx(int idx, Variant *v) {
   ASSERT(false);
   throw FatalErrorException("setIdx not supported in this env");
@@ -231,10 +226,6 @@ void FuncScopeVariableEnvironment::flagStatic(CStrRef name, int64 hash) {
   getVar(name, SgNormal).assignRef(m_staticEnv->getVar(name, SgNormal));
 }
 
-Variant *FuncScopeVariableEnvironment::getIdx(int idx) {
-  return m_byIdx[idx];
-}
-
 void FuncScopeVariableEnvironment::setIdx(int idx, Variant *v) {
   ASSERT(false);
   throw FatalErrorException("setIdx not supported in this env");
@@ -313,10 +304,6 @@ void NestedVariableEnvironment::flagStatic(CStrRef name, int64 hash) {
   // Behavior is to set the variable to init
   // .. and do some other stupid stuff that I'm not going to try
   getVar(name, SgNormal) = m_block.getStaticValue(*this, name);
-}
-
-Variant *NestedVariableEnvironment::getIdx(int idx) {
-  return m_byIdx[idx];
 }
 
 void NestedVariableEnvironment::setIdx(int idx, Variant *v) {

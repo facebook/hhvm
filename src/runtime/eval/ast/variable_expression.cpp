@@ -15,7 +15,6 @@
 */
 #include <runtime/eval/ast/expression.h>
 #include <runtime/eval/ast/variable_expression.h>
-#include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/eval/ast/name.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/eval/strict_mode.h>
@@ -29,29 +28,21 @@ VariableExpression::VariableExpression(EXPRESSION_ARGS, NamePtr name,
   : LvalExpression(KindOfVariableExpression, EXPRESSION_PASS),
   m_name(name), m_idx(idx) {}
 
-inline Variant &VariableExpression::getRef(VariableEnvironment &env) const {
-  Variant *var = NULL;
-  if (m_idx == -1 || !(var = env.getIdx(m_idx))) {
-    CStrRef s = m_name->get(env);
-    SuperGlobal sg;
-    if (!m_name->getSuperGlobal(sg)) {
-      sg = VariableIndex::isSuperGlobal(s);
-    }
-    var =  &env.getVar(s, sg);
-    if (m_idx != -1) env.setIdx(m_idx, var);
+Variant &VariableExpression::getRefHelper(
+  VariableEnvironment &env) const {
+  CStrRef s = m_name->get(env);
+  SuperGlobal sg;
+  if (!m_name->getSuperGlobal(sg)) {
+    sg = VariableIndex::isSuperGlobal(s);
   }
+  Variant *var =  &env.getVar(s, sg);
+  if (m_idx != -1) env.setIdx(m_idx, var);
   return *var;
 }
 
-Variant &VariableExpression::getRefCheck(VariableEnvironment &env) const {
-  Variant &var = getRef(env);
-  /* note that 'if (!env.exists(str, name->hash()))' does not work
-   * as undefined local variables are still in the (function) environment */
-  if (!var.isInitialized()) {
-    SET_LINE;
-    raise_notice("Undefined variable: %s", m_name->get(env).c_str());
-  }
-  return var;
+void VariableExpression::raiseUndefined(VariableEnvironment &env) const {
+  SET_LINE_VOID;
+  raise_notice("Undefined variable: %s", m_name->get(env).c_str());
 }
 
 Variant VariableExpression::eval(VariableEnvironment &env) const {

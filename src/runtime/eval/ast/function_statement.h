@@ -152,6 +152,7 @@ protected:
   mutable char m_maybeIntercepted;
   int m_yieldCount;
   StringData *m_name;
+  std::string m_injectionName;
   std::vector<ParameterPtr> m_params;
 
   StatementListStatementPtr m_body;

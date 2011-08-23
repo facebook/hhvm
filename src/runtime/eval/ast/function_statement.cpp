@@ -283,6 +283,8 @@ void FunctionStatement::init(void *parser, bool ref,
       param->setIdx(declareVariable(name));
     }
   }
+
+  m_injectionName = computeInjectionName();
 }
 
 String FunctionStatement::fullName() const {
@@ -341,8 +343,8 @@ Variant FunctionStatement::invoke(CArrRef params) const {
     return invokeClosure(params);
   }
   FuncScopeVariableEnvironment env(this);
-  std::string injectionName = computeInjectionName();
-  EvalFrameInjection fi(empty_string, injectionName.c_str(), env, loc()->file);
+  EvalFrameInjection fi(empty_string, m_injectionName.c_str(), env,
+                        loc()->file);
   if (m_ref) {
     return strongBind(invokeImpl(env, params));
   }
@@ -444,8 +446,8 @@ Variant FunctionStatement::directInvoke(VariableEnvironment &env,
   DECLARE_THREAD_INFO_NOINIT
   FuncScopeVariableEnvironment fenv(this);
   directBind(env, caller, fenv);
-  std::string injectionName = computeInjectionName();
-  EvalFrameInjection fi(empty_string, injectionName.c_str(), fenv, loc()->file);
+  EvalFrameInjection fi(empty_string, m_injectionName.c_str(), fenv,
+                        loc()->file);
   if (m_ref) {
     return strongBind(evalBody(fenv));
   } else {

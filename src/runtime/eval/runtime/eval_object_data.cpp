@@ -75,7 +75,6 @@ void EvalObjectData::destruct() {
     }
   }
   decRefCount();
-  DynamicObjectData::destruct();
   if (root == this) {
     if (LIKELY(getCount() == 0)) {
       RequestEvalState::deregisterObject(this);

@@ -37,20 +37,24 @@ DynamicObjectData::DynamicObjectData(const char* pname,
   }
 }
 
-void DynamicObjectData::init() {
+DynamicObjectData::~DynamicObjectData() {
+  /*
+   * we cant allow the normal SmartPtr destructor
+   * to take care of this, since that would call
+   * release, which would call destruct. But
+   * destruct has already been called by the time
+   * we get here
+   */
   if (!parent.isNull()) {
-    parent->init();
+    ObjectData *p = parent.detach();
+    ASSERT(!p->getCount());
+    delete p;
   }
 }
 
-void DynamicObjectData::destruct() {
+void DynamicObjectData::init() {
   if (!parent.isNull()) {
-    if (inCtorDtor()) {
-      parent->setInDtor();
-    }
-    this->incRefCount();
-    parent.reset();
-    this->decRefCount();
+    parent->init();
   }
 }
 

@@ -27,10 +27,10 @@ namespace HPHP {
 class DynamicObjectData : public ObjectData {
  public:
   DynamicObjectData(const char* pname, ObjectData *r = NULL);
+  ~DynamicObjectData();
 
   virtual void init();
 
-  virtual void destruct();
   virtual void setRoot(ObjectData *r);
   virtual ObjectData *getRoot();
 

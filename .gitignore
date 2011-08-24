@@ -19,6 +19,7 @@
 /src/runtime/tmp/Test*
 /src/runtime/tmp/run
 /src/runtime/tmp/run.sh
+/src/runtime/tmp/libtest.so
 
 /src/hphpi/gen
 /src/hphpi/hphpi

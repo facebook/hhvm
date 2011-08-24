@@ -79,6 +79,7 @@ private:
     std::string pattern;
     std::string to;
     bool qsa;      // whether to append original query string
+    bool encode_backrefs;
     int redirect;  // redirect status code (301 or 302) or 0 for no redirect
     std::vector<RewriteCond> rewriteConds;
   };

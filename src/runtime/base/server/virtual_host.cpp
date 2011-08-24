@@ -20,6 +20,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/comparisons.h>
 #include <runtime/base/timeout_thread.h>
+#include <runtime/base/string_util.h>
 #include <util/util.h>
 
 using namespace std;
@@ -141,6 +142,7 @@ void VirtualHost::init(Hdf vh) {
     rule.to = hdf["to"].getString("");
     rule.qsa = hdf["qsa"].getBool(false);
     rule.redirect = hdf["redirect"].getInt16(0);
+    rule.encode_backrefs = hdf["encode_backrefs"].getBool(false);
 
     if (rule.pattern.empty() || rule.to.empty()) {
       throw InvalidArgumentException("rewrite rule", "(empty pattern or to)");
@@ -228,6 +230,17 @@ bool VirtualHost::match(const string &host) const {
   return true;
 }
 
+static int get_backref(const char **s) {
+  ASSERT('0' <= **s && **s <= '9');
+  int val = **s - '0';
+  *s += 1;
+  if ('0' <= **s && **s <= '9') {
+    val = val * 10 + **s - '0';
+    *s += 1;
+  }
+  return val;
+}
+
 bool VirtualHost::rewriteURL(CStrRef host, String &url, bool &qsa,
                              int &redirect) const {
   String normalized = url;
@@ -255,11 +268,49 @@ bool VirtualHost::rewriteURL(CStrRef host, String &url, bool &qsa,
       }
     }
     if (!passed) continue;
-    Variant ret;
-    int count = preg_replace(ret, rule.pattern.c_str(), rule.to.c_str(),
-                             normalized, 1);
-    if (!same(ret, false) && count > 0) {
-      url = ret.toString();
+    Variant matches;
+    int count = preg_match(rule.pattern.c_str(), normalized, matches);
+    if (count > 0) {
+      const char *s = rule.to.c_str();
+      StringBuffer ret;
+      while (*s) {
+        int backref = -1;
+        if (*s == '\\') {
+          if ('0' <= s[1] && s[1] <= '9') {
+            s++;
+            backref = get_backref(&s);
+          } else if (s[1] == '\\') {
+            s++;
+          }
+        } else if (*s == '$') {
+          if (s[1] == '{') {
+            const char *t = s+2;
+            if ('0' <= *t && *t <= '9') {
+              backref = get_backref(&t);
+              if (*t != '}') {
+                backref = -1;
+              } else {
+                s = t+1;
+              }
+            }
+          } else if ('0' <= s[1] && s[1] <= '9') {
+            s++;
+            backref = get_backref(&s);
+          }
+        }
+        if (backref >= 0) {
+          String br = matches[backref].toString();
+          if (rule.encode_backrefs) {
+            br = StringUtil::UrlEncode(br);
+          }
+          ret.append(br);
+        } else {
+          ret.append(s, 1);
+          s++;
+        }
+      }
+
+      url = ret.detach();
       qsa = rule.qsa;
       redirect = rule.redirect;
       return true;

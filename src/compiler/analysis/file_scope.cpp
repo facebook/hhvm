@@ -143,6 +143,9 @@ ExpressionPtr FileScope::getEffectiveImpl(AnalysisResultConstPtr ar) const {
 }
 
 bool FileScope::canUseDummyPseudoMain(AnalysisResultConstPtr ar) const {
+  if (!m_pseudoMain) {
+    return false;
+  }
   ASSERT(!m_pseudoMain->isVolatile());
   if (!Option::GenerateDummyPseudoMain ||
       Option::KeepStatementsWithNoEffect) {

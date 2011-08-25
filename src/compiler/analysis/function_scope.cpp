@@ -102,7 +102,7 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
     m_variables->setAttribute(VariableTable::ContainsGetDefinedVars);
   }
 
-  if (m_stmt && Option::AllVolatile) {
+  if (m_stmt && Option::AllVolatile && !m_pseudoMain) {
     m_volatile = true;
   }
 

@@ -37,9 +37,9 @@ Expression *AssignmentOpExpression::optimize(VariableEnvironment &env) {
 
 Variant AssignmentOpExpression::eval(VariableEnvironment &env) const {
   Variant rhs(m_rhs->eval(env));
-  if (m_op == '=') return m_lhs->set(env, rhs);
   if (m_lhs->isKindOf(Expression::KindOfVariableExpression)) {
-    Variant &lhs = m_lhs->lval(env);
+    Variant &lhs = static_cast<VariableExpression*>(m_lhs.get())->getRef(env);
+    if (m_op == '=') return lhs.assignVal(rhs);
     Variant::TypedValueAccessor lhsAcc = lhs.getTypedAccessor();
     DataType lhsType = Variant::GetAccessorType(lhsAcc);
     Variant::TypedValueAccessor rhsAcc = rhs.getTypedAccessor();
@@ -68,7 +68,7 @@ Variant AssignmentOpExpression::eval(VariableEnvironment &env) const {
     }
     return m_lhs->LvalExpression::setOpVariant(lhs, m_op, rhs);
   }
-  return m_lhs->setOp(env, m_op, rhs);
+  return (m_op == '=') ? m_lhs->set(env, rhs) : m_lhs->setOp(env, m_op, rhs);
 }
 
 void AssignmentOpExpression::dump(std::ostream &out) const {

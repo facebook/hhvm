@@ -153,10 +153,6 @@ public:
   void setVolatile();
   bool isVolatile() { return m_volatile;}
 
-  /* For code generation of os_static_initializer */
-  void setNeedStaticInitializer() { m_needStaticInitializer = true;}
-  bool needStaticInitializer() { return m_needStaticInitializer;}
-
   bool needLazyStaticInitializer();
 
   Derivation derivesFromRedeclaring() const {
@@ -358,7 +354,6 @@ public:
   (CodeGenerator &cg, AnalysisResultPtr ar,
    const StringToClassScopePtrVecMap &classScopes,
    bool extension = false);
-  void outputCPPStaticInitializerDecl(CodeGenerator &cg);
   bool isInterface() const { return m_kindOf == KindOfInterface; }
   bool isFinal() const { return m_kindOf == KindOfFinalClass; }
   bool isAbstract() const { return m_kindOf == KindOfAbstractClass; }
@@ -494,7 +489,6 @@ private:
   bool m_dynamic;
   int m_redeclaring; // multiple definition of the same class
   bool m_volatile; // for class_exists
-  bool m_needStaticInitializer; // for os_static_initializer
   Derivation m_derivesFromRedeclaring;
   bool m_derivedByDynamic;
   std::set<std::string> m_missingMethods;

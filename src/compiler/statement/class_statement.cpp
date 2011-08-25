@@ -256,9 +256,6 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
 
   cg.printSection("DECLARE_STATIC_PROP_OPS");
   cg_printf("public:\n");
-  if (classScope->needStaticInitializer()) {
-    cg_printf("static void os_static_initializer();\n");
-  }
 
   cg.printSection("DECLARE_COMMON_INVOKE");
   if (classScope->hasJumpTable(ClassScope::JumpTableCallInfo)) {
@@ -629,32 +626,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_indentEnd("}\n");
       }
 
-      if (classScope->needStaticInitializer()) {
-        cg_indentBegin("void %s%s::os_static_initializer() {\n",
-                       Option::ClassPrefix, clsName);
-        cg.printDeclareGlobals();
-        cg.setContext(CodeGenerator::CppStaticInitializer);
-        if (m_stmt) m_stmt->outputCPP(cg, ar);
-        cg_indentEnd("}\n");
-        cg_indentBegin("void %s%s() {\n",
-                       Option::ClassStaticInitializerPrefix, clsName);
-        cg_printf("%s%s::os_static_initializer();\n",  Option::ClassPrefix,
-                  clsName);
-        cg_indentEnd("}\n");
-      }
-      if (0 && classScope->needLazyStaticInitializer()) {
-        cg_indentBegin("GlobalVariables *%s%s::lazy_initializer("
-                       "GlobalVariables *g) {\n", Option::ClassPrefix, clsName);
-        cg_indentBegin("if (!g->%s%s) {\n",
-                       Option::ClassStaticInitializerFlagPrefix, clsName);
-        cg_printf("g->%s%s = true;\n", Option::ClassStaticInitializerFlagPrefix,
-                  clsName);
-        cg.setContext(CodeGenerator::CppLazyStaticInitializer);
-        if (m_stmt) m_stmt->outputCPP(cg, ar);
-        cg_indentEnd("}\n");
-        cg_printf("return g;\n");
-        cg_indentEnd("}\n");
-      }
       cg.setContext(CodeGenerator::CppImplementation);
       if (m_stmt) m_stmt->outputCPP(cg, ar);
     }

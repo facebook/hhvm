@@ -20,6 +20,78 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+Globals::StaticInits *Globals::s_next_inits = 0;
+
+void Globals::initialize() {
+  StaticInits *s = s_next_inits;
+  while (s) {
+    const ClassPropTable *cpt = s->table;
+    const int *e = s->entries;
+    int n = *e++;
+    while (n--) {
+      const ClassPropTableEntry *p = cpt->m_entries + *e++;
+      char *addr = (char*)this + p->offset;
+      if (LIKELY(p->isFastInit())) {
+        CVarRef v = cpt->getInitV(p->init_offset);
+        switch (p->type) {
+          case KindOfBoolean:
+            *(bool*)addr = v.asBooleanVal();
+            break;
+          case KindOfInt32:
+            *(int*)addr = v.asInt64Val();
+            break;
+          case KindOfInt64:
+            *(int64*)addr = v.asInt64Val();
+            break;
+          case KindOfDouble:
+            *(double*)addr = v.asDoubleVal();
+            break;
+          case KindOfString:
+            *(String*)addr = v.asCStrRef();
+            break;
+          case KindOfArray:
+            *(Array*)addr = v.asCArrRef();
+            break;
+          case KindOfVariant:
+            *(Variant*)addr = v;
+            break;
+          default:
+            ASSERT(false);
+        }
+        continue;
+      }
+      CVarRef v = cpt->getInitVal(p);
+      if (LIKELY(p->type == KindOfVariant)) {
+        *(Variant*)addr = v;
+      } else {
+        switch (p->type) {
+          case KindOfBoolean:
+            *(bool*)addr = v;
+            break;
+          case KindOfInt32:
+            *(int*)addr = v;
+            break;
+          case KindOfInt64:
+            *(int64*)addr = v;
+            break;
+          case KindOfDouble:
+            *(double*)addr = v;
+            break;
+          case KindOfString:
+            *(String*)addr = v;
+            break;
+          case KindOfArray:
+            *(Array*)addr = v;
+            break;
+          default:
+            ASSERT(false);
+        }
+      }
+    }
+    s = s->next;
+  }
+}
+
 CVarRef Globals::declareConstant(CStrRef name, Variant &constant,
                                  CVarRef value) {
   if (!value.isAllowedAsConstantValue()) {

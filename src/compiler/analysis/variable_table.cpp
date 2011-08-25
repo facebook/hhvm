@@ -834,6 +834,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     cg_printf("class SystemGlobals : public Globals {\n");
     cg_indentBegin("public:\n");
     cg_printf("SystemGlobals();\n");
+    cg_printf("void initialize();\n");
   } else {
     cg_printf("class GlobalVariables : public SystemGlobals {\n");
     cg_printf("DECLARE_SMART_ALLOCATION_NOCALLBACKS(GlobalVariables);\n");
@@ -841,7 +842,6 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     cg_printf("GlobalVariables();\n");
     cg_printf("~GlobalVariables();\n");
   }
-  cg_printf("static void initialize();\n");
 
   cg_printf("\n");
 
@@ -849,6 +849,8 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   Type2SymbolSetMap type2names;
   SymbolSet &variants = type2names["Variant"];
   SymbolSet &bools = type2names["bool"];
+
+  type2names["int"], type2names["int64"], type2names["double"];
 
   // Global Variables
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
@@ -1053,42 +1055,12 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
 
   const char *prefix = system ? "stgv_" : "tgv_";
   cg_printf("memset(&%sbool, 0, sizeof(%sbool));\n", prefix, prefix);
+  cg_printf("memset(&%sint, 0, sizeof(%sint));\n", prefix, prefix);
+  cg_printf("memset(&%sint64, 0, sizeof(%sint64));\n", prefix, prefix);
+  cg_printf("memset(&%sdouble, 0, sizeof(%sdouble));\n", prefix, prefix);
+
   cg_printf("memset(&%sCallInfoPtr, 0, sizeof(%sCallInfoPtr));\n",
             prefix, prefix);
-
-  cg.printSection("Primitive Function/Method Static Variables");
-  for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
-       m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
-    StaticGlobalInfoPtr sgi = iter->second;
-    if (sgi->func) {
-      TypePtr varType = sgi->sym->getFinalType();
-      if (varType->isPrimitive()) {
-        const string &id = iter->first;
-        const char *initializer = varType->getCPPInitializer();
-        ASSERT(initializer);
-        cg_printf("%s%s = %s;\n",
-                  Option::StaticVariablePrefix, id.c_str(), initializer);
-      }
-    }
-  }
-
-  cg.printSection("Primitive Class Static Variables");
-  for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
-       m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
-    StaticGlobalInfoPtr sgi = iter->second;
-    // id can change if we discover it is redeclared
-    if (!sgi->func && !sgi->sym->isOverride()) {
-      TypePtr varType = sgi->sym->getFinalType();
-      if (varType->isPrimitive()) {
-        const string &id = StaticGlobalInfo::GetId(sgi->cls, sgi->func,
-                                                   sgi->sym->getName());
-        const char *initializer = varType->getCPPInitializer();
-        ASSERT(initializer);
-        cg_printf("%s%s = %s;\n",
-                  Option::StaticPropertyPrefix, id.c_str(), initializer);
-      }
-    }
-  }
 
   cg.printSection("Redeclared Classes");
   ar->outputCPPRedeclaredClassImpl(cg);
@@ -1099,27 +1071,10 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
   // generating top level statements in system PHP files
   if (system) {
     cg_indentBegin("void SystemGlobals::initialize() {\n");
+    cg_printf("Globals::initialize();\n");
     ar->outputCPPSystemImplementations(cg);
-  } else {
-    cg_indentBegin("void GlobalVariables::initialize() {\n");
-    cg_printf("SystemGlobals::initialize();\n");
+    cg_indentEnd("}\n");
   }
-
-  set<string> staticInitializers;
-  for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
-         m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
-    StaticGlobalInfoPtr sgi = iter->second;
-    if (!sgi->func && !sgi->sym->isOverride() &&
-        sgi->cls->needStaticInitializer()) {
-      staticInitializers.insert(sgi->cls->getId());
-    }
-  }
-  for (set<string>::const_iterator iter = staticInitializers.begin();
-       iter != staticInitializers.end(); iter++) {
-    cg_printf("%s%s();\n",
-              Option::ClassStaticInitializerPrefix, iter->c_str());
-  }
-  cg_indentEnd("}\n");
 
   if (!system) {
     cg_printf("\n");
@@ -1166,9 +1121,9 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
       "}\n"
       "#endif /* USE_GCC_FAST_TLS */\n"
       "void init_global_variables() {\n"
-      "  ThreadInfo::s_threadInfo->m_globals =\n"
-      "    get_global_variables_check();\n"
-      "  GlobalVariables::initialize();\n"
+      "  GlobalVariables *g = get_global_variables_check();\n"
+      "  ThreadInfo::s_threadInfo->m_globals = g;\n"
+      "  g->initialize();\n"
       "}\n");
     cg_printf("LVariableTable *get_variable_table() "
               "{ return (LVariableTable*)get_global_variables();}\n");
@@ -1795,7 +1750,6 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
   hphp_const_char_map<ssize_t> varIdx;
   strings.reserve(m_symbolVec.size());
   bool hasStatic = false;
-  bool needsGlobals = type == JumpReturnInit;
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     const Symbol *sym = m_symbolVec[i];
     const string &name = sym->getName();
@@ -1815,22 +1769,14 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
   }
   if (strings.empty()) return false;
 
-  if (hasStatic || needsGlobals) {
+  if (hasStatic) {
     cg.printDeclareGlobals();
     if (declaredGlobals) *declaredGlobals = true;
   }
 
-  if (hasStatic) {
-    ClassScopePtr cls = getClassScope();
-    if (cls && cls->needLazyStaticInitializer()) {
-      assert(false);
-      cg_printf("lazy_initializer(g);\n");
-    }
-  }
-
   bool useString = (type == JumpSet) ||
                    (type == JumpReturnString) ||
-                   (type == JumpInitializedString) || (type == JumpReturnInit);
+                   (type == JumpInitializedString);
 
   for (JumpTable jt(cg, strings, false, !defineHash, useString); jt.ready();
        jt.next()) {
@@ -1851,69 +1797,53 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       varName = string("g->") + varName;
     }
     switch (type) {
-    case VariableTable::JumpReturn:
-      cg_printf("HASH_RETURN(0x%016llXLL, %s,\n",
-                hash_string(name), varName.c_str());
-      cg_printf("            \"%s\");\n",
-                CodeGenerator::EscapeLabel(name).c_str());
-      break;
-    case VariableTable::JumpSet:
-      cg_printf("HASH_SET_STRING(0x%016llXLL, %s,\n",
-                hash_string(name), varName.c_str());
-      cg_printf("                \"%s\", %d);\n",
-                CodeGenerator::EscapeLabel(name).c_str(), strlen(name));
-      break;
-    case VariableTable::JumpInitialized:
-      cg_printf("HASH_INITIALIZED(0x%016llXLL, %s,\n",
-                hash_string(name), varName.c_str());
-      cg_printf("                 \"%s\");\n",
-                CodeGenerator::EscapeLabel(name).c_str());
-      break;
-    case VariableTable::JumpInitializedString: {
-      int index = -1;
-      int stringId = cg.checkLiteralString(name, index, ar, getBlockScope());
-      assert(index >= 0);
-      string lisnam = ar->getLiteralStringName(stringId, index);
-      cg_printf("HASH_INITIALIZED_NAMSTR(0x%016llXLL, %s, %s,\n",
-                hash_string(name), lisnam.c_str(), varName.c_str());
-      cg_printf("                   %d);\n", strlen(name));
-      break;
-    }
-    case VariableTable::JumpIndex:
-      {
+      case VariableTable::JumpReturn:
+        cg_printf("HASH_RETURN(0x%016llXLL, %s,\n",
+                  hash_string(name), varName.c_str());
+        cg_printf("            \"%s\");\n",
+                  CodeGenerator::EscapeLabel(name).c_str());
+        break;
+      case VariableTable::JumpSet:
+        cg_printf("HASH_SET_STRING(0x%016llXLL, %s,\n",
+                  hash_string(name), varName.c_str());
+        cg_printf("                \"%s\", %d);\n",
+                  CodeGenerator::EscapeLabel(name).c_str(), strlen(name));
+        break;
+      case VariableTable::JumpInitialized:
+        cg_printf("HASH_INITIALIZED(0x%016llXLL, %s,\n",
+                  hash_string(name), varName.c_str());
+        cg_printf("                 \"%s\");\n",
+                  CodeGenerator::EscapeLabel(name).c_str());
+        break;
+      case VariableTable::JumpInitializedString: {
+        int index = -1;
+        int stringId = cg.checkLiteralString(name, index, ar, getBlockScope());
+        assert(index >= 0);
+        string lisnam = ar->getLiteralStringName(stringId, index);
+        cg_printf("HASH_INITIALIZED_NAMSTR(0x%016llXLL, %s, %s,\n",
+                  hash_string(name), lisnam.c_str(), varName.c_str());
+        cg_printf("                   %d);\n", strlen(name));
+        break;
+      }
+      case VariableTable::JumpIndex: {
         hphp_const_char_map<ssize_t>::const_iterator it = varIdx.find(name);
         ASSERT(it != varIdx.end());
         ssize_t idx = it->second;
         cg_printf("HASH_INDEX(0x%016llXLL, \"%s\", %d);\n",
                   hash_string(name),
                   CodeGenerator::EscapeLabel(name).c_str(), idx);
+        break;
       }
-      break;
-    case VariableTable::JumpReturnString: {
-      int index = -1;
-      int stringId = cg.checkLiteralString(name, index, ar, getBlockScope());
-      assert(index >= 0);
-      string lisnam = ar->getLiteralStringName(stringId, index);
-      cg_printf("HASH_RETURN_NAMSTR(0x%016llXLL, %s, %s,\n",
-                hash_string(name), lisnam.c_str(), varName.c_str());
-      cg_printf("                   %d);\n", strlen(name));
-      break;
-    }
-    case VariableTable::JumpReturnInit:
-      ExpressionPtr value =
-        dynamic_pointer_cast<Expression>(getClassInitVal(name));
-      if (value) {
-        cg_printf("HASH_RETURN_NAMSTR(0x%016llXLL, ", hash_string(name));
-        cg_printString(name, ar, getBlockScope());
-        cg_printf(",\n");
-        cg_printf("                   ");
-        CodeGenerator::Context oldContext = cg.getContext();
-        cg.setContext(CodeGenerator::CppStaticInitializer);
-        value->outputCPP(cg, ar);
-        cg.setContext(oldContext);
-        cg_printf(", %d);\n", strlen(name));
+      case VariableTable::JumpReturnString: {
+        int index = -1;
+        int stringId = cg.checkLiteralString(name, index, ar, getBlockScope());
+        assert(index >= 0);
+        string lisnam = ar->getLiteralStringName(stringId, index);
+        cg_printf("HASH_RETURN_NAMSTR(0x%016llXLL, %s, %s,\n",
+                  hash_string(name), lisnam.c_str(), varName.c_str());
+        cg_printf("                   %d);\n", strlen(name));
+        break;
       }
-      break;
     }
   }
 

@@ -44,7 +44,7 @@ namespace HPHP {
 class SystemGlobals : public Globals {
 public:
   SystemGlobals();
-  static void initialize();
+  void initialize();
 
   CallInfo* stgv_CallInfoPtr[1];
   RedeclaredObjectStaticCallbacksConst* stgv_RedeclaredObjectStaticCallbacksConstPtr[1];
@@ -64,6 +64,9 @@ public:
   #define k_SID stgv_Variant[12]
   bool stgv_bool[1];
   #define run_pm_php$globals$symbols_php stgv_bool[0]
+  double stgv_double[1];
+  int stgv_int[1];
+  int64 stgv_int64[1];
 };
 
 // Scalar Arrays

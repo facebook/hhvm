@@ -62,8 +62,6 @@ public:
     CppPseudoMain,              // pseudo mains
     CppConstructor,             // we are generating class constructor
     CppInitializer,             // we are generating class initializer
-    CppStaticInitializer,       // we are genearting static initializer
-    CppLazyStaticInitializer,   // lazy initializer for dynamic statics
     CppClassConstantsDecl,
     CppClassConstantsImpl,
     CppConstantsDecl,           // we are generating constant declarations

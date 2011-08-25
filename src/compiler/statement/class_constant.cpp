@@ -134,10 +134,8 @@ void ClassConstant::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void ClassConstant::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  bool lazyInit = cg.getContext() == CodeGenerator::CppLazyStaticInitializer;
   if (cg.getContext() != CodeGenerator::CppClassConstantsDecl &&
-      cg.getContext() != CodeGenerator::CppClassConstantsImpl &&
-      !lazyInit) {
+      cg.getContext() != CodeGenerator::CppClassConstantsImpl) {
     return;
   }
 
@@ -149,7 +147,7 @@ void ClassConstant::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       dynamic_pointer_cast<ConstantExpression>(exp->getVariable());
     TypePtr type = scope->getConstants()->getFinalType(var->getName());
     ExpressionPtr value = exp->getValue();
-    if (!scope->getConstants()->isDynamic(var->getName()) == lazyInit) {
+    if (scope->getConstants()->isDynamic(var->getName())) {
         continue;
     }
     switch (cg.getContext()) {
@@ -189,15 +187,6 @@ void ClassConstant::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       value->outputCPPEnd(cg, ar);
       break;
     }
-    case CodeGenerator::CppLazyStaticInitializer:
-      value->outputCPPBegin(cg, ar);
-      cg_printf("g->%s%s%s%s = ",
-                Option::ClassConstantPrefix, scope->getId().c_str(),
-                Option::IdPrefix.c_str(), var->getName().c_str());
-      value->outputCPP(cg, ar);
-      cg_printf(";\n");
-      value->outputCPPEnd(cg, ar);
-      break;
     default:
       ASSERT(false);
     }

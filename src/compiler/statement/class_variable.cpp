@@ -176,10 +176,6 @@ void ClassVariable::inferTypes(AnalysisResultPtr ar) {
 
   if (m_modifiers->isStatic()) {
     ClassScopePtr scope = getClassScope();
-    if (m_declaration->getCount()) {
-      // can probably go in analyzeProgram
-      scope->setNeedStaticInitializer();
-    }
     for (int i = 0; i < m_declaration->getCount(); i++) {
       ExpressionPtr exp = (*m_declaration)[i];
       if (exp->is(Expression::KindOfAssignmentExpression)) {
@@ -285,10 +281,6 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   case CodeGenerator::CppInitializer:
     if (m_modifiers->isStatic()) return;
     break;
-  case CodeGenerator::CppStaticInitializer:
-  case CodeGenerator::CppLazyStaticInitializer:
-    if (!m_modifiers->isStatic()) return;
-    break;
   default:
     return;
   }
@@ -386,43 +378,6 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           }
         }
       }
-      break;
-    case CodeGenerator::CppStaticInitializer:
-      if (isAssign) {
-        if (value->containsDynamicConstant(ar)) continue;
-        if (sym->isOverride()) continue;
-        if (isValueNull) {
-          cg_printf("setNull(g->%s%s%s%s)",
-                    Option::StaticPropertyPrefix, scope->getId().c_str(),
-                    Option::IdPrefix.c_str(), var->getName().c_str());
-        } else {
-          cg_printf("g->%s%s%s%s = ",
-                    Option::StaticPropertyPrefix, scope->getId().c_str(),
-                    Option::IdPrefix.c_str(), var->getName().c_str());
-          value->outputCPP(cg, ar);
-        }
-      } else {
-        const char *initializer = type->getCPPInitializer();
-        if (initializer) {
-          cg_printf("g->%s%s%s%s = %s",
-                    Option::StaticPropertyPrefix, scope->getId().c_str(),
-                    Option::IdPrefix.c_str(), var->getName().c_str(),
-                    initializer);
-        }
-      }
-      cg_printf(";\n");
-      break;
-    case CodeGenerator::CppLazyStaticInitializer:
-      if (!isAssign) continue;
-      if (!value->containsDynamicConstant(ar)) continue;
-      if (sym->isOverride()) continue;
-      value->outputCPPBegin(cg, ar);
-      cg_printf("g->%s%s%s%s = ",
-                Option::StaticPropertyPrefix, scope->getId().c_str(),
-                Option::IdPrefix.c_str(), var->getName().c_str());
-      value->outputCPP(cg, ar);
-      cg_printf(";\n");
-      value->outputCPPEnd(cg, ar);
       break;
     default:
       break;

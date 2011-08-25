@@ -534,7 +534,6 @@ private:
                                    const char *prefix = "g->",
                                    const char *name_prefix = "");
 
-  void outputCPPClassStaticInitializerDecls(CodeGenerator &cg);
   void outputCPPClassIncludes(CodeGenerator &cg);
   void outputCPPExtClassImpl(CodeGenerator &cg);
   void outputCPPDynamicTablesHeader(CodeGenerator &cg,

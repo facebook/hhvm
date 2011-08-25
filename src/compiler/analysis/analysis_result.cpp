@@ -4014,15 +4014,6 @@ void AnalysisResult::getCPPFileRunDecls(CodeGenerator &cg,
   }
 }
 
-void AnalysisResult::outputCPPClassStaticInitializerDecls(CodeGenerator &cg) {
-  for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
-       iter != m_classDecs.end(); ++iter) {
-    BOOST_FOREACH(ClassScopePtr cls, iter->second) {
-      cls->outputCPPStaticInitializerDecl(cg);
-    }
-  }
-}
-
 void AnalysisResult::getCPPClassStaticInitializerFlags
 (CodeGenerator &cg, Type2SymbolSetMap &type2names) {
   SymbolSet &symbols = type2names["bool"];
@@ -4627,8 +4618,6 @@ void AnalysisResult::outputCPPMain() {
   cg.printImplStarter();
   cg_printf("using namespace std;\n");
   cg.namespaceBegin();
-  outputCPPClassStaticInitializerDecls(cg);
-  cg_printf("\n");
   outputCPPGlobalImplementations(cg);
   cg.namespaceEnd();
 

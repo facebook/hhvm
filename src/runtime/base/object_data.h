@@ -172,14 +172,8 @@ class ObjectData : public CountableNF {
   virtual const Eval::MethodStatement* getMethodStatement(const char* name)
       const;
 
-  static Variant os_getInit(CStrRef s);
-  // static methods and properties
-  static Variant os_get(CStrRef s);
-  static Variant &os_lval(CStrRef s);
-
   static Variant os_invoke(CStrRef c, CStrRef s,
                            CArrRef params, int64 hash, bool fatal = true);
-  static Variant os_constant(const char *s);
 
   // properties
   virtual Array o_toArray() const;

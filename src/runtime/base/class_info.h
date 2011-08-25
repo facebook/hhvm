@@ -442,6 +442,7 @@ struct ClassPropTableEntry {
     Override = 16,
     Constant = 32,
     Last = 64,
+    FastInit = 128
   };
 
   int64         hash;
@@ -458,6 +459,7 @@ struct ClassPropTableEntry {
   bool isStatic() const { return flags & Static; }
   bool isConstant() const { return flags & Constant; }
   bool isLast() const { return flags & Last; }
+  bool isFastInit() const { return flags & FastInit; }
 
   static Variant GetVariant(int type, const void *addr) {
     switch (type) {
@@ -503,6 +505,7 @@ public:
   const ClassPropTableEntry *m_entries;
   const int64 *m_static_inits;
 
+  Variant getInitVal(const ClassPropTableEntry *prop) const;
   CVarRef getInitV(int id) const {
     return *(Variant*)m_static_inits[id];
   }

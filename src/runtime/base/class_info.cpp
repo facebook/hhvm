@@ -845,6 +845,61 @@ ClassInfo::MethodInfo::~MethodInfo() {
   }
 }
 
+Variant ClassPropTable::getInitVal(const ClassPropTableEntry *prop) const {
+  int64 id = m_static_inits[prop->init_offset];
+  if (LIKELY(!(id & 7))) {
+    return *(Variant*)id;
+  }
+  switch (id & 7) {
+    case 1: {
+      int off = id >> 32;
+      CStrRef s = getInitS((id>>4) & 0xfffffff);
+      if (off) {
+        char *addr = (char*)get_global_variables() + off;
+        return getDynamicConstant(*(Variant*)addr, s);
+      } else {
+        return getUndefinedConstant(s);
+      }
+    }
+    case 2: {
+      const ObjectStaticCallbacks *osc =
+        (const ObjectStaticCallbacks *)getInitP((id >> 4) & 0xfffffff);
+      const char *addr =
+        (const char *)osc->lazy_initializer(get_global_variables()) +
+        (id >> 32);
+      return *(Variant*)addr;
+    }
+    case 3: {
+      char *addr = (char*)get_global_variables() + (id & 0x7ffffff8);
+      ObjectStaticCallbacks *osc = *(ObjectStaticCallbacks**)addr;
+      return osc->os_constant(getInitS(id>>32).c_str());
+    }
+    case 4: {
+      ObjectStaticCallbacks *osc =
+        (ObjectStaticCallbacks*)getInitP((id & 0x7fffffff)>>4);
+      return osc->os_constant(getInitS(id>>32).c_str());
+    }
+    case 5:
+      throw FatalErrorException(0, "unknown class constant %s::%s",
+                                getInitS((id & 0x7fffffff)>>4).c_str(),
+                                getInitS(id>>32).c_str());
+
+    case 6: {
+      void *func = getInitP((id >> 4) & 0x7ffffff);
+      if (id >> 32) {
+        return ((CVarRef (*)())func)();
+      } else {
+        return ((Variant (*)())func)();
+      }
+    }
+
+    case 7:
+      return ClassPropTableEntry::GetVariant((id >> 4) & 15,
+                                             getInitP(id >> 32));
+  }
+  throw FatalErrorException("Failed to get init val");
+}
+
 void ClassInfo::GetArray(const ObjectData *obj, const ClassPropTable *ct,
                          Array &props, bool pubOnly) {
   while (ct) {

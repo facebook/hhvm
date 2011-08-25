@@ -111,7 +111,6 @@ const char *Option::ClassPrefix = "c_";
 const char *Option::ClassStaticsCallbackPrefix = "cw_";
 const char *Option::ClassStaticsCallbackNullPrefix = "cwn_";
 const char *Option::ClassStaticsIdGetterPrefix = "csig_";
-const char *Option::ClassStaticInitializerPrefix = "csi_";
 const char *Option::ClassStaticInitializerFlagPrefix = "csf_";
 const char *Option::ObjectPrefix = "o_";
 const char *Option::ObjectStaticPrefix = "os_";
@@ -322,7 +321,6 @@ void Option::Load(Hdf &config) {
     READ_CG_OPTION(ClassStaticsCallbackPrefix);
     READ_CG_OPTION(ClassStaticsCallbackNullPrefix);
     READ_CG_OPTION(ClassStaticsIdGetterPrefix);
-    READ_CG_OPTION(ClassStaticInitializerPrefix);
     READ_CG_OPTION(ClassStaticInitializerFlagPrefix);
     READ_CG_OPTION(ObjectPrefix);
     READ_CG_OPTION(ObjectStaticPrefix);

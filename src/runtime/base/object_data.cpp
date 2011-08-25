@@ -289,62 +289,6 @@ Object RedeclaredObjectStaticCallbacks::createOnly(ObjectData *root) const {
   return oscb.createOnly(root);
 }
 
-static Variant GetInitVal(const ClassPropTable *cpt,
-                          const ClassPropTableEntry *prop) {
-  int64 id = cpt->m_static_inits[prop->init_offset];
-  if (LIKELY(!(id & 7))) {
-    return *(Variant*)id;
-  }
-  switch (id & 7) {
-    case 1: {
-      int off = id >> 32;
-      CStrRef s = cpt->getInitS((id>>4) & 0xfffffff);
-      if (off) {
-        char *addr = (char*)get_global_variables() + off;
-        return getDynamicConstant(*(Variant*)addr, s);
-      } else {
-        return getUndefinedConstant(s);
-      }
-    }
-    case 2: {
-      const ObjectStaticCallbacks *osc =
-        (const ObjectStaticCallbacks *)cpt->getInitP((id >> 4) & 0xfffffff);
-      const char *addr =
-        (const char *)osc->lazy_initializer(get_global_variables()) +
-        (id >> 32);
-      return *(Variant*)addr;
-    }
-    case 3: {
-      char *addr = (char*)get_global_variables() + (id & 0x7ffffff8);
-      ObjectStaticCallbacks *osc = *(ObjectStaticCallbacks**)addr;
-      return osc->os_constant(cpt->getInitS(id>>32).c_str());
-    }
-    case 4: {
-      ObjectStaticCallbacks *osc =
-        (ObjectStaticCallbacks*)cpt->getInitP((id & 0x7fffffff)>>4);
-      return osc->os_constant(cpt->getInitS(id>>32).c_str());
-    }
-    case 5:
-      throw FatalErrorException(0, "unknown class constant %s::%s",
-                                cpt->getInitS((id & 0x7fffffff)>>4).c_str(),
-                                cpt->getInitS(id>>32).c_str());
-
-    case 6: {
-      void *func = cpt->getInitP((id >> 4) & 0x7ffffff);
-      if (id >> 32) {
-        return ((CVarRef (*)())func)();
-      } else {
-        return ((Variant (*)())func)();
-      }
-    }
-
-    case 7:
-      return ClassPropTableEntry::GetVariant((id >> 4) & 15,
-                                             cpt->getInitP(id >> 32));
-  }
-  throw FatalErrorException("Failed to get init val");
-}
-
 static void LazyInitializer(const ClassPropTable *cpt, const char *globals) {
   const char *addr = globals + cpt->m_lazy_init_offset;
   if (!*(bool*)addr) {
@@ -356,7 +300,7 @@ static void LazyInitializer(const ClassPropTable *cpt, const char *globals) {
         continue;
       }
       const ClassPropTableEntry *ce = cpt->m_entries + *p;
-      CVarRef init = GetInitVal(cpt, ce);
+      CVarRef init = cpt->getInitVal(ce);
       addr = globals + ce->offset;
       if (LIKELY(ce->type == KindOfVariant)) {
         *(Variant*)addr = init;
@@ -470,12 +414,13 @@ const ClassPropTableEntry *PropertyFinder(
 
 Variant ObjectStaticCallbacks::os_getInit(CStrRef s) const {
   const ClassPropTable *cpt;
-  const ClassPropTableEntry *prop = PropertyFinder(&cpt, s, s->hash(),
-                                                   0, 0, this);
+  const ClassPropTableEntry *prop = PropertyFinder(
+    &cpt, s, s->hash(),
+    ClassPropTableEntry::Constant, 0, this);
   if (UNLIKELY(!prop)) {
     throw FatalErrorException(0, "unknown property %s", s.c_str());
   }
-  return GetInitVal(cpt, prop);
+  return cpt->getInitVal(prop);
 }
 
 Variant ObjectStaticCallbacks::os_get(CStrRef s) const {
@@ -526,7 +471,7 @@ Variant ObjectStaticCallbacks::os_constant(const char *s) const {
                               (*cls)->data(), s);
   }
 
-  return GetInitVal(cpt, prop);
+  return cpt->getInitVal(prop);
 }
 
 GlobalVariables *ObjectStaticCallbacks::lazy_initializer(
@@ -652,18 +597,6 @@ bool ObjectStaticCallbacks::GetCallInfoEx(const char *cls,
   return GetCallInfoHelper(true, cls, osc, mcp, hash);
 }
 
-Variant ObjectData::os_getInit(CStrRef s) {
-  throw FatalErrorException(0, "unknown property %s", s.c_str());
-}
-
-Variant ObjectData::os_get(CStrRef s) {
-  throw FatalErrorException(0, "unknown static property %s", s.c_str());
-}
-
-Variant &ObjectData::os_lval(CStrRef s) {
-  throw FatalErrorException(0, "unknown static property %s", s.c_str());
-}
-
 Variant ObjectData::os_invoke(CStrRef c, CStrRef s,
                               CArrRef params, int64 hash,
                               bool fatal /* = true */) {
@@ -673,12 +606,6 @@ Variant ObjectData::os_invoke(CStrRef c, CStrRef s,
     obj->setDummy();
   }
   return obj->o_invoke_ex(c, s, params, fatal);
-}
-
-Variant ObjectData::os_constant(const char *s) {
-  ostringstream msg;
-  msg << "unknown class constant " << s;
-  throw FatalErrorException(msg.str().c_str());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

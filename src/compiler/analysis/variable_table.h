@@ -64,8 +64,7 @@ public:
     JumpInitialized,
     JumpInitializedString,
     JumpIndex,
-    JumpReturnString,
-    JumpReturnInit
+    JumpReturnString
   };
 
   enum JumpTableName {

@@ -52,6 +52,7 @@ namespace HPHP {
 class Globals : public LVariableTable {
 public:
   Globals() : FVF(__autoload)(false) {}
+  void initialize();
   CVarRef declareConstant(CStrRef name, Variant &constant, CVarRef value);
   void declareFunction(const char *name);
   void declareFunctionLit(CStrRef name);
@@ -94,6 +95,15 @@ public:
   Variant __realPropProxy;
   bool FVF(__autoload);
 
+  static struct StaticInits {
+    StaticInits(const ClassPropTable *t, const int *e) : table(t), entries(e) {
+      next = Globals::s_next_inits;
+      Globals::s_next_inits = this;
+    }
+    StaticInits          *next;
+    const ClassPropTable *table;
+    const int            *entries;
+  }                      *s_next_inits;
 private:
   Array m_dynamicConstants;  // declared constants
   Array m_volatileFunctions; // declared functions

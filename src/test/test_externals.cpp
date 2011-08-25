@@ -309,8 +309,9 @@ LVariableTable *get_variable_table() { return g_variables.get(); }
 Globals *get_globals() { return g_variables.get(); }
 SystemGlobals *get_system_globals() { return g_variables.get(); }
 void init_global_variables() {
-  ThreadInfo::s_threadInfo->m_globals = get_global_variables();
-  GlobalVariables::initialize();
+  GlobalVariables *g = get_global_variables();
+  ThreadInfo::s_threadInfo->m_globals = g;
+  g->initialize();
 }
 void free_global_variables() { g_variables.destroy();}
 void init_literal_varstrings() {}

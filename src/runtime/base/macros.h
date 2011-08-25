@@ -97,7 +97,6 @@ namespace HPHP {
 
 #define DECLARE_STATIC_PROP_OPS                                         \
   public:                                                               \
-  static void os_static_initializer();                                  \
   static const MethodCallInfoTable s_call_info_table[];                 \
   static const int s_call_info_index[];                                 \
 

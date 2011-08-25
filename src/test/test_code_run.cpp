@@ -1751,6 +1751,7 @@ bool TestCodeRun::TestArray() {
        "class A {"
        "  public function __call($method, $args) {"
        "    foreach ($args as $a) { var_dump($a); }"
+       "    var_dump(array_pop($args));"
        "    if (isset($args[1])) { var_dump($args[1]); }"
        "    reset($args);"
        "    if (key($args) === 0) {"

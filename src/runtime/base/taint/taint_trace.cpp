@@ -118,6 +118,8 @@ std::string TaintTracer::ExtractTrace(const TaintTraceNodePtr& root) {
   ss << "source strings fragments:\n";
   if (sourceset.empty()) {
     ss << "    (none)\n";
+    ss << "NB: Source strings are not kept for file reads and are dropped";
+    ss << "when passed into the APC.\n";
   }
   for (i = 0, it = sourceset.begin(); it != sourceset.end(); ++i, ++it) {
     ss << "    #" << i << " ";

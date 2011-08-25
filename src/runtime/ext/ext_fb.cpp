@@ -926,7 +926,7 @@ Array f_fb_get_taint_warning_counts() {
 
 void f_fb_enable_html_taint_trace() {
 #ifdef TAINTED
-  TaintTracer::EnableHtml();
+  TaintTracer::SwitchHtml(true);
 #endif
 }
 

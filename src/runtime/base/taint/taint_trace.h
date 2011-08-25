@@ -70,7 +70,11 @@ public:
   }
 
   bool isEnabledHtml() { return m_enabled_html; }
-  void enableHtml() { m_enabled_html = true; }
+  bool switchHtml(bool state) {
+    bool old = m_enabled_html;
+    m_enabled_html = state;
+    return old;
+  }
 
   const String insert(String str) {
     return *(m_stringset.insert(str).first);
@@ -96,7 +100,9 @@ public:
   static std::string ExtractTrace(const TaintTraceNodePtr& root);
 
   static bool IsEnabledHtml() { return s_requestdata->isEnabledHtml(); }
-  static void EnableHtml() { s_requestdata->enableHtml(); }
+  static bool SwitchHtml(bool state) {
+    return s_requestdata->switchHtml(state);
+  }
 
 private:
   static String TraceFrameAsString(Array frame, int i);
@@ -106,6 +112,22 @@ private:
       hphp_string_set& sourceset, hphp_string_set& frameset);
 
   DECLARE_STATIC_REQUEST_LOCAL(TaintTracerRequestData, s_requestdata);
+};
+
+/*
+ * Stack-scoped guard for HTML trace.
+ */
+class TaintTracerHtmlSwitchGuard {
+public:
+  TaintTracerHtmlSwitchGuard(bool state) {
+    old = TaintTracer::SwitchHtml(state);
+  }
+  ~TaintTracerHtmlSwitchGuard() {
+    TaintTracer::SwitchHtml(old);
+  }
+
+private:
+  bool old;
 };
 
 }

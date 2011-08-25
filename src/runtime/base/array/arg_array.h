@@ -56,7 +56,7 @@ public:
   virtual ssize_t size() const { return m_nNumOfElements; }
 
   virtual Variant getKey(ssize_t pos) const {
-    assert(pos >= 0 && pos < size());
+    ASSERT(pos >= 0 && pos < size());
     return pos;
   }
   virtual Variant getValue(ssize_t pos) const {
@@ -67,16 +67,14 @@ public:
     ArgStack &stack = *s_stack;
     return (stack.m_stack + m_start + pos)->m_val;
   }
-  virtual bool isVectorData() const { assert(false); }
+  virtual bool exists(int64   k) const;
+  virtual bool exists(litstr  k) const;
+  virtual bool exists(CStrRef k) const;
+  virtual bool exists(CVarRef k) const;
 
-  virtual Variant each() { assert(false); }
-
-  virtual bool exists(int64   k) const { assert(false); }
-  virtual bool exists(litstr  k) const { assert(false); } 
-  virtual bool exists(CStrRef k) const { assert(false); }
-  virtual bool exists(CVarRef k) const { assert(false); }
-
-  virtual bool idxExists(ssize_t idx) const { assert(false); }
+  virtual bool idxExists(ssize_t idx) const {
+    return idx >= 0 && idx < size();
+  }
 
   virtual CVarRef get(int64   k, bool error = false) const;
   virtual CVarRef get(litstr  k, bool error = false) const;
@@ -85,10 +83,10 @@ public:
 
   virtual void load(CVarRef k, Variant &v) const { assert(false); }
 
-  virtual ssize_t getIndex(int64 k) const { assert(false); }
-  virtual ssize_t getIndex(litstr k) const { assert(false); }
-  virtual ssize_t getIndex(CStrRef k) const { assert(false); }
-  virtual ssize_t getIndex(CVarRef k) const { assert(false); }
+  virtual ssize_t getIndex(int64 k) const;
+  virtual ssize_t getIndex(litstr k) const;
+  virtual ssize_t getIndex(CStrRef k) const;
+  virtual ssize_t getIndex(CVarRef k) const;
 
   virtual ArrayData *lval(int64   k, Variant *&ret, bool copy,
                           bool checkExist = false);
@@ -129,16 +127,13 @@ public:
   virtual ArrayData *remove(CStrRef k, bool copy);
   virtual ArrayData *remove(CVarRef k, bool copy);
 
-  virtual ArrayData *copy() const { assert(false); }
+  virtual ArrayData *copy() const;
   virtual ArrayData *nonSmartCopy() const { assert(false); }
   virtual ArrayData *append(CVarRef v, bool copy);
   virtual ArrayData *appendRef(CVarRef v, bool copy);
   virtual ArrayData *appendWithRef(CVarRef v, bool copy);
   virtual ArrayData *append(const ArrayData *elems, ArrayOp op, bool copy);
-  virtual ArrayData *pop(Variant &value) { assert(false); }
-  virtual ArrayData *dequeue(Variant &value) { assert(false); }
   virtual ArrayData *prepend(CVarRef v, bool copy);
-  virtual void renumber() { assert(false); }
   virtual void onSetStatic() { assert(false); }
   virtual void onSetEvalScalar() { assert(false); }
 

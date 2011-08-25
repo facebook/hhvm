@@ -44,6 +44,24 @@ void ArgArray::ArgStack::checkSize(int size) {
   m_stack = args;
 }
 
+bool ArgArray::exists(int64 k) const {
+  return (k >= 0 && k < size());
+}
+
+bool ArgArray::exists(litstr k) const {
+  return false;
+}
+
+bool ArgArray::exists(CStrRef k) const {
+  return false;
+}
+
+bool ArgArray::exists(CVarRef k) const {
+  if (!k.isNumeric()) return false;
+  int64 intKey = k.toInt64();
+  return (intKey >= 0 && intKey < size());
+}
+
 CVarRef ArgArray::get(int64   k, bool error /* = false */) const {
   if (k >= 0 && k < size()) {
     ArgStack &stack = *s_stack;
@@ -77,6 +95,24 @@ CVarRef ArgArray::get(CVarRef k, bool error /* = false */) const {
     raise_notice("Undefined index: %s", k.toString().data());
   }
   return null_variant;
+}
+
+ssize_t ArgArray::getIndex(int64 k) const {
+  if (k >= 0 && k < size()) return k;
+  return ArrayData::invalid_index;
+}
+
+ssize_t ArgArray::getIndex(litstr k) const {
+  return ArrayData::invalid_index;
+}
+
+ssize_t ArgArray::getIndex(CStrRef k) const {
+  return ArrayData::invalid_index;
+}
+
+ssize_t ArgArray::getIndex(CVarRef k) const {
+  if (k.isNumeric()) return getIndex(k.toInt64());
+  return ArrayData::invalid_index;
 }
 
 ArgArray::~ArgArray() {
@@ -198,6 +234,10 @@ ArrayData *ArgArray::setRef(CVarRef k, CVarRef v, bool copy) {
     return setRef(k.toInt64(), v, copy);
   }
   return setRef(k.toString(), v, copy);
+}
+
+ArrayData *ArgArray::copy() const {
+  return escalateToZendArray();
 }
 
 ArrayData *ArgArray::append(CVarRef v, bool copy) {

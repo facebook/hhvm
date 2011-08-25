@@ -39,7 +39,7 @@ void TaintObserver::RegisterAccessed(const TaintData& td) {
 
   // Absorb the taint and any trace data.
   tc->m_current_taint.setTaint(td.getTaint());
-  if (TaintTracer::IsEnabledHtml()) {
+  if (TaintTracer::IsTraceEnabled(TAINT_BIT_TRACE_HTML)) {
     tc->m_current_taint.attachTaintTrace(td.getTaintTrace());
   }
 }
@@ -60,7 +60,7 @@ void TaintObserver::RegisterMutated(TaintData& td, const char *s) {
     td.attachTaintTrace(NEW(TaintTraceData)(TaintTracer::Trace(s, true, true)));
   }
 
-  if (TaintTracer::IsEnabledHtml()) {
+  if (TaintTracer::IsTraceEnabled(TAINT_BIT_TRACE_HTML)) {
     ASSERT(!(TAINT_ISSET_HTML_NO_TRACE(set_mask) &&
              TAINT_ISSET_HTML_NO_TRACE(clear_mask)));
 
@@ -79,7 +79,7 @@ void TaintObserver::RegisterMutated(TaintData& td, const char *s) {
 
   // Propagate the taint and any trace data.
   td.setTaint(set_mask | (~clear_mask & t));
-  if (TaintTracer::IsEnabledHtml()) {
+  if (TaintTracer::IsTraceEnabled(TAINT_BIT_TRACE_HTML)) {
     td.setTaintTrace(tc->m_current_taint.getTaintTrace());
   }
 }

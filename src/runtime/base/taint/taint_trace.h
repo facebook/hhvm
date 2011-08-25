@@ -62,19 +62,20 @@ private:
 class TaintTracerRequestData : public RequestEventHandler {
 public:
   virtual void requestInit() {
-    m_enabled_html = false;
+    m_trace_states = TAINT_BIT_NONE;
   }
   virtual void requestShutdown() {
-    m_enabled_html = false;
+    m_trace_states = TAINT_BIT_NONE;
     m_stringset.clear();
   }
 
-  bool isEnabledHtml() { return m_enabled_html; }
-  bool switchHtml(bool state) {
-    bool old = m_enabled_html;
-    m_enabled_html = state;
+  bool isTraceEnabled(taint_t trace) { return m_trace_states & trace; }
+  taint_t switchTrace(taint_t trace, bool state) {
+    taint_t old = m_trace_states;
+    m_trace_states = (m_trace_states & ~trace) | (trace & ((~state) + 1));
     return old;
   }
+  void restoreTrace(taint_t trace) { m_trace_states = trace; }
 
   const String insert(String str) {
     return *(m_stringset.insert(str).first);
@@ -84,7 +85,7 @@ public:
   }
 
 private:
-  bool m_enabled_html;
+  taint_t m_trace_states;
   StringSet m_stringset;
 };
 
@@ -99,9 +100,14 @@ public:
   static TaintTraceDataPtr CreateTrace();
   static std::string ExtractTrace(const TaintTraceNodePtr& root);
 
-  static bool IsEnabledHtml() { return s_requestdata->isEnabledHtml(); }
-  static bool SwitchHtml(bool state) {
-    return s_requestdata->switchHtml(state);
+  static bool IsTraceEnabled(taint_t trace) {
+    return s_requestdata->isTraceEnabled(trace);
+  }
+  static taint_t SwitchTrace(taint_t trace, bool state) {
+    return s_requestdata->switchTrace(trace, state);
+  }
+  static void RestoreTrace(taint_t trace) {
+    s_requestdata->restoreTrace(trace);
   }
 
 private:
@@ -117,17 +123,21 @@ private:
 /*
  * Stack-scoped guard for HTML trace.
  */
-class TaintTracerHtmlSwitchGuard {
+class TaintTracerSwitchGuard {
 public:
-  TaintTracerHtmlSwitchGuard(bool state) {
-    old = TaintTracer::SwitchHtml(state);
+  TaintTracerSwitchGuard(taint_t trace, bool state) {
+    m_old = TaintTracer::SwitchTrace(trace, state);
   }
-  ~TaintTracerHtmlSwitchGuard() {
-    TaintTracer::SwitchHtml(old);
+  ~TaintTracerSwitchGuard() {
+    TaintTracer::RestoreTrace(m_old);
   }
 
 private:
-  bool old;
+  taint_t m_old;
+
+  void *operator new(long unsigned int size);
+  TaintTracerSwitchGuard(const TaintTracerSwitchGuard&);
+  TaintTracerSwitchGuard &operator=(const TaintTracerSwitchGuard&);
 };
 
 }

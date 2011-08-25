@@ -26,6 +26,7 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/variable_serializer.h>
 #include <util/alloc.h>
+#include <runtime/base/taint/taint_data.h>
 #include <runtime/base/taint/taint_trace.h>
 
 using namespace std;
@@ -45,7 +46,7 @@ bool f_apc_store(CStrRef key, CVarRef var, int64 ttl /* = 0 */,
   }
 
 #ifdef TAINTED
-  TaintTracerHtmlSwitchGuard guard(false);
+  TaintTracerSwitchGuard guard(TAINT_BIT_TRACE_ALL, false);
 #endif
   return s_apc_store[cache_id].store(key, var, ttl);
 }
@@ -60,7 +61,7 @@ bool f_apc_add(CStrRef key, CVarRef var, int64 ttl /* = 0 */,
   }
 
 #ifdef TAINTED
-  TaintTracerHtmlSwitchGuard guard(false);
+  TaintTracerSwitchGuard guard(TAINT_BIT_TRACE_ALL, false);
 #endif
   return s_apc_store[cache_id].store(key, var, ttl, false);
 }
@@ -75,7 +76,7 @@ Variant f_apc_fetch(CVarRef key, VRefParam success /* = null */,
   }
 
 #ifdef TAINTED
-  TaintTracerHtmlSwitchGuard guard(false);
+  TaintTracerSwitchGuard guard(TAINT_BIT_TRACE_ALL, false);
 #endif
   Variant v;
 

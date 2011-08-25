@@ -33,6 +33,7 @@
 #define TAINT_BIT_TRACE_HTML    (0x10)
 #define TAINT_BIT_ALL           (0x1f)
 #define TAINT_BIT_TRACE_SELF    (0x20)
+#define TAINT_BIT_TRACE_ALL     (0x30)
 
 #define TAINT_BITS_RESERVED    (0xe0000000)
 #define TAINT_GET_TAINT(bits)  ((bits) & (~TAINT_BITS_RESERVED))

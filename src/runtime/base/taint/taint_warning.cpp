@@ -37,7 +37,7 @@ void TaintWarning::WarnIfTainted(CStrRef s, const taint_t bit) {
   switch (bit) {
     case TAINT_BIT_HTML:
       buf += "HTML-unsafe (tainted)";
-      if (TaintTracer::IsEnabledHtml()) {
+      if (TaintTracer::IsTraceEnabled(TAINT_BIT_TRACE_HTML)) {
         force_warning = true;
         aux = TaintTracer::ExtractTrace(td.getTaintTrace());
       }

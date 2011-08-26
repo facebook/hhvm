@@ -34,6 +34,8 @@ void CmdFlowControl::recvImpl(DebuggerThriftBuffer &thrift) {
 bool CmdFlowControl::onClient(DebuggerClient *client) {
   if (DebuggerCommand::onClient(client)) return true;
 
+  client->moveToFrame(0, false);
+
   if (client->argCount() > 1) {
     return help(client);
   }

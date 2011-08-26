@@ -1027,6 +1027,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     StrictLevel = eval["StrictLevel"].getInt32(1); // StrictBasic
     StrictFatal = eval["StrictFatal"].getBool();
     RecordCodeCoverage = eval["RecordCodeCoverage"].getBool();
+    if (RecordCodeCoverage) CheckSymLink = true;
     CodeCoverageOutputFile = eval["CodeCoverageOutputFile"].getString();
     {
       Hdf debugger = eval["Debugger"];

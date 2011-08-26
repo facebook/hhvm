@@ -44,7 +44,9 @@ bool f_apc_store(CStrRef key, CVarRef var, int64 ttl /* = 0 */,
     return false;
   }
 
+#ifdef TAINTED
   TaintTracerHtmlSwitchGuard guard(false);
+#endif
   return s_apc_store[cache_id].store(key, var, ttl);
 }
 
@@ -57,7 +59,9 @@ bool f_apc_add(CStrRef key, CVarRef var, int64 ttl /* = 0 */,
     return false;
   }
 
+#ifdef TAINTED
   TaintTracerHtmlSwitchGuard guard(false);
+#endif
   return s_apc_store[cache_id].store(key, var, ttl, false);
 }
 
@@ -70,7 +74,9 @@ Variant f_apc_fetch(CVarRef key, VRefParam success /* = null */,
     return false;
   }
 
+#ifdef TAINTED
   TaintTracerHtmlSwitchGuard guard(false);
+#endif
   Variant v;
 
   if (key.is(KindOfArray)) {

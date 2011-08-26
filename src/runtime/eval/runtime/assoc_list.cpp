@@ -59,21 +59,29 @@ Variant &AssocList::get(CStrRef name) {
 
 Variant *AssocList::getPtr(CStrRef name) {
   for (VarAssocPair *vp = m_list; vp; vp = vp->m_next) {
-    if (name.same(vp->name())) {
-      return &vp->var();
-    }
+    StringData *s1 = name.get();
+    StringData *s2 = vp->name().get();
+    ASSERT(s1 && s2);
+    if (s1 == s2) return &vp->var();
+    // static strings are unique
+    if (LIKELY(s1->isStatic() && s2->isStatic())) continue;
+    if (s1->same(s2)) return &vp->var();
   }
   return NULL;
 }
 
 bool AssocList::exists(CStrRef name, bool checkInit /* = false */) const {
-  for (VarAssocPair *vp = m_list; vp; vp = vp->m_next) {
-    if (name.same(vp->name())) {
-      if (checkInit && !vp->var().isInitialized()) return false;
-      return true;
-    }
+  VarAssocPair *vp;
+  for (vp = m_list; vp; vp = vp->m_next) {
+    StringData *s1 = name.get();
+    StringData *s2 = vp->name().get();
+    ASSERT(s1 && s2);
+    if (s1 == s2) break;
+    // static strings are unique
+    if (LIKELY(s1->isStatic() && s2->isStatic())) continue;
+    if (s1->same(s2)) break;
   }
-  return false;
+  return (vp && (!checkInit || vp->var().isInitialized()));
 }
 
 Array AssocList::toArray() const {

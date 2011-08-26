@@ -27,6 +27,8 @@
 
 namespace HPHP {
 
+extern bool has_eval_support;
+
 const String null_string = String();
 const StaticString empty_string("");
 
@@ -695,6 +697,10 @@ void String::dump() const {
 
 StaticString::StaticString(litstr s) : m_data(s) {
   String::operator=(&m_data);
+  if (has_eval_support) {
+    m_px = StringData::GetStaticString(m_px);
+    return;
+  }
   m_px->setStatic();
   if (!checkStatic()) {
     s_stringSet->insert(m_px);
@@ -704,6 +710,10 @@ StaticString::StaticString(litstr s) : m_data(s) {
 StaticString::StaticString(litstr s, int length)
   : m_data(s, length, AttachLiteral) {
   String::operator=(&m_data);
+  if (has_eval_support) {
+    m_px = StringData::GetStaticString(m_px);
+    return;
+  }
   m_px->setStatic();
   if (!checkStatic()) {
     s_stringSet->insert(m_px);
@@ -713,6 +723,10 @@ StaticString::StaticString(litstr s, int length)
 StaticString::StaticString(std::string s)
   : m_data(s.c_str(), s.size(), CopyString) {
   String::operator=(&m_data);
+  if (has_eval_support) {
+    m_px = StringData::GetStaticString(m_px);
+    return;
+  }
   m_px->setStatic();
   if (!checkStatic()) {
     s_stringSet->insert(m_px);
@@ -722,6 +736,10 @@ StaticString::StaticString(std::string s)
 StaticString::StaticString(const StaticString &str)
   : m_data(str.m_data.data(), str.m_data.size(), AttachLiteral) {
   String::operator=(&m_data);
+  if (has_eval_support) {
+    m_px = StringData::GetStaticString(m_px);
+    return;
+  }
   m_px->setStatic();
   if (!checkStatic()) {
     s_stringSet->insert(m_px);
@@ -742,6 +760,10 @@ void StaticString::init(litstr s, int length) {
   ASSERT(!m_px);
   String::operator=(&m_data);
   m_px->setStatic();
+  if (has_eval_support) {
+    m_px = StringData::GetStaticString(m_px);
+    return;
+  }
   if (!checkStatic()) {
     s_stringSet->insert(m_px);
   }
@@ -755,6 +777,9 @@ StringDataSet &StaticString::TheStaticStringSet() {
 }
 
 void StaticString::FinishInit() {
+  if (has_eval_support) {
+    ASSERT(s_stringSet->size() == 0);
+  }
   // release the memory
   StringDataSet empty;
   s_stringSet->swap(empty);

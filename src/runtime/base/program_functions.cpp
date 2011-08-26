@@ -999,7 +999,6 @@ extern "C" void hphp_fatal_error(const char *s) {
 void hphp_process_init() {
   Variant::RuntimeCheck();
   init_thread_locals();
-  if (has_eval_support) Eval::VariableIndex::SetupSuperGlobals();
   ClassInfo::Load();
   Process::InitProcessStatics();
   init_static_variables();

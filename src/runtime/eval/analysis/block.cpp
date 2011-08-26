@@ -30,34 +30,18 @@ void VariableIndex::set(CStrRef name, int idx) {
 }
 
 
-static String s_GLOBALS;
-static String s__SERVER;
-static String s__GET;
-static String s__POST;
-static String s__FILES;
-static String s__COOKIE;
-static String s__SESSION;
-static String s__REQUEST;
-static String s__ENV;
-static String s_http_response_header;
-
-static bool loaded = false;
-void VariableIndex::SetupSuperGlobals() {
-  s_GLOBALS = StringData::GetStaticString("GLOBALS");
-  s__SERVER = StringData::GetStaticString("_SERVER");
-  s__GET = StringData::GetStaticString("_GET");
-  s__POST = StringData::GetStaticString("_POST");
-  s__FILES = StringData::GetStaticString("_FILES");
-  s__COOKIE = StringData::GetStaticString("_COOKIE");
-  s__SESSION = StringData::GetStaticString("_SESSION");
-  s__REQUEST = StringData::GetStaticString("_REQUEST");
-  s__ENV = StringData::GetStaticString("_ENV");
-  s_http_response_header = StringData::GetStaticString("http_response_header");
-  loaded = true;
-}
+static StaticString s_GLOBALS("GLOBALS");
+static StaticString s__SERVER("_SERVER");
+static StaticString s__GET("_GET");
+static StaticString s__POST("_POST");
+static StaticString s__FILES("_FILES");
+static StaticString s__COOKIE("_COOKIE");
+static StaticString s__SESSION("_SESSION");
+static StaticString s__REQUEST("_REQUEST");
+static StaticString s__ENV("_ENV");
+static StaticString s_http_response_header("http_response_header");
 
 SuperGlobal VariableIndex::isSuperGlobal(CStrRef name) {
-  ASSERT(loaded);
   if (name == s_GLOBALS) {
     return SgGlobals;
   } else if (name.data()[0] == '_') {

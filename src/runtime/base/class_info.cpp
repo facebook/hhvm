@@ -665,7 +665,9 @@ static String makeStaticString(const char *s) {
   String str(s);
   if (!str.checkStatic()) {
     str->setStatic();
-    StaticString::TheStaticStringSet().insert(str.get());
+    if (!has_eval_support) {
+      StaticString::TheStaticStringSet().insert(str.get());
+    }
   }
   return str;
 }

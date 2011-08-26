@@ -32,7 +32,6 @@ public:
   void set(CStrRef name, int idx);
   int idx() const { return m_idx; }
   SuperGlobal superGlobal() const { return m_sg; }
-  static void SetupSuperGlobals();
   static SuperGlobal isSuperGlobal(CStrRef name);
 private:
   int m_idx;

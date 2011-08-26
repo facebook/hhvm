@@ -37,11 +37,12 @@ IMPLEMENT_SMART_ALLOCATION(StringData, SmartAllocatorImpl::NeedRestoreOnce);
 
 typedef tbb::concurrent_hash_map<std::string, StringData *,
                                  stringHashCompare> StringDataMap;
-static StringDataMap s_stringDataMap;
+static StringDataMap *s_stringDataMap;
 
 StringData *StringData::GetStaticString(const std::string &stringData) {
   StringDataMap::accessor acc;
-  if (s_stringDataMap.insert(acc, stringData)) {
+  if (!s_stringDataMap) s_stringDataMap = new StringDataMap();
+  if (s_stringDataMap->insert(acc, stringData)) {
     StringData *sd =
       new StringData(stringData.data(), stringData.size(), CopyString);
     sd->setStatic();

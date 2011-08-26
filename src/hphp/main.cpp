@@ -350,6 +350,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
 #ifdef COMPILER_ID
     ("compiler-id", "display the git hash for the compiler id")
 #endif
+    ("taint-status", "check if the compiler was built with taint enabled")
     ;
 
   positional_options_description p;
@@ -398,6 +399,13 @@ cout << "Compiler: " << COMPILER_ID << "\n";
     return 1;
   }
 #endif
+
+  if (vm.count("taint-status")) {
+#ifdef TAINTED
+    cout << TAINTED << "\n";
+#endif
+    return 1;
+  }
 
   // log level
   if (po.logLevel != -1) {

@@ -648,6 +648,7 @@ static int execute_program_impl(int argc, char **argv) {
 #ifdef COMPILER_ID
     ("compiler-id", "display the git hash for the compiler id")
 #endif
+    ("taint-status", "check if the compiler was built with taint enabled")
     ("mode,m", value<string>(&po.mode)->default_value("run"),
      "run | debug (d) | server (s) | daemon | replay | translate (t)")
     ("config,c", value<string>(&po.config),
@@ -747,6 +748,13 @@ static int execute_program_impl(int argc, char **argv) {
     return 0;
   }
 #endif
+
+  if (vm.count("taint-status")) {
+#ifdef TAINTED
+    cout << TAINTED << "\n";
+#endif
+    return 0;
+  }
 
   if (!po.show.empty()) {
     PlainFile f;

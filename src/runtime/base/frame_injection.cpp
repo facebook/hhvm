@@ -169,9 +169,9 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
   // This is used by onError with extended exceptions
   if (withSelf && t) {
     String filename = t->getFileName();
-    // If the top frame is not an extension function,
-    // add it to the trace
-    if (filename != "") {
+    // If the top frame is not an extension function, and has actually been
+    // entered (i.e. has a real line number) add it to the trace
+    if (filename != "" && t->m_line != 0) {
       Array frame = Array::Create();
       frame.set(s_file, filename, true);
       frame.set(s_line, t->m_line, true);

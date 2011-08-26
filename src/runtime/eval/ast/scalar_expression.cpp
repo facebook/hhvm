@@ -113,9 +113,9 @@ Variant ScalarExpression::getValue() const {
   case SBool:
     return (bool)m_num.num;
   case SString:
-    if (m_subtype == T_FILE) {
+    if (m_subtype == T_FILE && RuntimeOption::SandboxCheckMd5) {
       return FileRepository::translateFileName
-               (string(m_value->data(), m_value->size()));
+        (string(m_value->data(), m_value->size()));
     }
     return m_value;
   case SInt:

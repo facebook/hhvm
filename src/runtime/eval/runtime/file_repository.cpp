@@ -207,7 +207,7 @@ PhpFile *FileRepository::checkoutFile(const string &rname,
 }
 
 String FileRepository::translateFileName(const string &file) {
-  if (!RuntimeOption::SandboxCheckMd5) return file;
+  ASSERT(RuntimeOption::SandboxCheckMd5);
   hphp_hash_map<string, PhpFileWrapper*, string_hash>::const_iterator iter =
     s_files.find(file);
   if (iter == s_files.end()) return file;

@@ -25,6 +25,7 @@ namespace Eval {
 
 String EvalFrameInjection::getFileNameEval() {
   ASSERT(m_file);
+  if (!RuntimeOption::SandboxCheckMd5) return m_file;
   std::string file(m_file);
   if (m_flags & PseudoMain) {
     if (m_name[0] == '_') return m_name;

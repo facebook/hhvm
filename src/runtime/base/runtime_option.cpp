@@ -1054,7 +1054,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     SandboxDirectoriesRoot = sandbox["DirectoriesRoot"].getString();
     SandboxLogsRoot = sandbox["LogsRoot"].getString();
     SandboxCheckMd5 = sandbox["CheckMd5"].getBool(false);
-    if (!SandboxMode) SandboxCheckMd5 = false;
+    if (!SandboxMode || RecordCodeCoverage) SandboxCheckMd5 = false;
     sandbox["ServerVariables"].get(SandboxServerVariables);
   }
   {

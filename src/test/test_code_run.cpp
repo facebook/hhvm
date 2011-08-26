@@ -9028,6 +9028,16 @@ bool TestCodeRun::TestCompilation() {
        "  print \"hello $a world!\" and die;"
        "}");
 
+  MVCR("<?php "
+       "if(0){class y{}}else{class y{}}"
+       "abstract class x extends y {"
+       "  private static $nextSerial = 1;"
+       "  private $serial = 0;"
+       "  public function __construct() {"
+       "    $this->serial = self::$nextSerial++;"
+       "  }"
+       "}");
+
   return true;
 }
 

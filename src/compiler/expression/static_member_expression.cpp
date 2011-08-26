@@ -253,6 +253,12 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
             GET_LOCK(clsr);
             clsr->checkProperty(getScope(), sym, type, coerce, ar);
           }
+          if (modified) {
+            // concurrent modifications here are OK because:
+            // 1) you never clear the bit (you only set it to true)
+            // 2) the value isn't read in type inference
+            sym->setIndirectAltered();
+          }
           found = true;
         }
       }
@@ -272,6 +278,12 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
         sym->setIndirectAltered();
       }
     } else {
+      GET_LOCK(m_resolvedClass);
+      m_resolvedClass->getVariables()->
+        forceVariant(ar, name,
+                     m_resolvedClass == getOriginalClass() ?
+                     VariableTable::AnyStaticVars :
+                     VariableTable::NonPrivateStaticVars);
       tp = Type::Variant;
     }
     if (!found && getScope()->isFirstPass()) {

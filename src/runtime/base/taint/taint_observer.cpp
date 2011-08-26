@@ -60,21 +60,15 @@ void TaintObserver::RegisterMutated(TaintData& td, const char *s) {
     td.attachTaintTrace(NEW(TaintTraceData)(TaintTracer::Trace(s, true, true)));
   }
 
-  if (TaintTracer::IsTraceEnabled(TAINT_BIT_TRACE_HTML)) {
-    ASSERT(!(TAINT_ISSET_HTML_NO_TRACE(set_mask) &&
-             TAINT_ISSET_HTML_NO_TRACE(clear_mask)));
+  bool do_trace = (t & TAINT_BIT_HTML) &&
+                  (t & TAINT_BIT_TRACE_HTML) &&
+                  (tc->m_current_taint.getRawTaint() & TAINT_FLAG_HTML_CLEAN);
 
-    // Propagate TRACE, kill TRACE, or perform tracing as desired.
-    if (TAINT_ISSET_HTML_NO_TRACE(set_mask)) {
-      set_mask = TAINT_GET_TAINT(set_mask);
-    } else if (TAINT_ISSET_HTML_NO_TRACE(clear_mask)) {
-      t &= ~TAINT_BIT_TRACE_HTML;
-    } else if ((t & TAINT_BIT_HTML) && (t & TAINT_BIT_TRACE_HTML) &&
-               TAINT_ISSET_HTML_CLEAN(tc->m_current_taint.getRawTaint())) {
-      t &= ~TAINT_BIT_TRACE_HTML;
-      TaintTraceDataPtr ttd = TaintTracer::CreateTrace();
-      tc->m_current_taint.attachTaintTrace(ttd);
-    }
+  // Perform HTML trace as desired.
+  if (TaintTracer::IsTraceEnabled(TAINT_BIT_TRACE_HTML) && do_trace) {
+    t &= ~TAINT_BIT_TRACE_HTML;
+    TaintTraceDataPtr ttd = TaintTracer::CreateTrace();
+    tc->m_current_taint.attachTaintTrace(ttd);
   }
 
   // Propagate the taint and any trace data.

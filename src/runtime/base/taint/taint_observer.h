@@ -30,30 +30,7 @@
  * in the stack. You can therefore not make calls such as new TaintObserver().
  *
  * While adding convenience, the TaintObserver system has some downsides,
- * which boil down to two main gotchas:
- *
- * (1) SCOPE.  Since TaintObservers form a stack, they are inherently
- * sensitive to scope. By default, no TaintObserver is declared, so in the
- * general case, even if strings are tainted, their taints will not propagate
- * to other strings (but will maintain state). Meanwhile, TaintObservers never
- * leave scope unless replaced or until their resident frame is destroyed.
- * Thus, stray TaintObservers in places that are anomalous w.r.t. scope, such
- * as the call_user_func*() family, can wreak havoc.
- *
- * This issue of scoping also means that there is no single bottlenecked
- * location where we can handle taint semantics. Any callflow relevant to
- * taint ultimately drops into a String constructor, which unquestioningly
- * accepts the taint of whichever TaintObserver is in scope. Hence, though
- * this system lets us do less specialized casework, the individual placement
- * of TaintObserver declarations still demands attention.
- *
- * (2) LOCALNESS.  TaintObservers are rather coarse-grained because of their
- * very local understanding of taint; the only events they recognize are
- * access and creation, and hence they cannot ever make a semantic distinction
- * between strings whose taints matter and strings whose taints don't. This,
- * however, will at worst generate some false positives or demand manual labor
- * for certain taint tasks which require more global knowledge, like HTML
- * taint tracing.
+ * which are explained further in the README.
  */
 
 // This flag is marked in the taints of $_GET, $_POST, and relevant $_COOKIE
@@ -62,24 +39,12 @@
 #define TAINT_FLAG_ORIG         (0x80000000)
 #define TAINT_ISSET_ORIG(bits)  ((bits) & TAINT_FLAG_ORIG)
 
-// This flag turns off tracing in the scope of a TaintObserver; it is only
-// meant to be used in a TaintObserver's m_set_mask and m_clear_mask fields.
-// Normally, trace data is generated when an HTML-tainted, TRACE-tainted
-// string encounters an HTML-untainted string, and the TRACE bit is not
-// propagated. When this flag is set in set_mask, we PROPAGATE any TRACE bits
-// instead of tracing. When this flag is set in clear_mask, we IGNORE all
-// TRACE bits and do not propagate. If it is set in both, something is
-// horribly, horribly wrong.
-#define TAINT_FLAG_HTML_NO_TRACE         (0x40000000)
-#define TAINT_ISSET_HTML_NO_TRACE(bits)  ((bits) & TAINT_FLAG_HTML_NO_TRACE)
-
 // This flag is set in a TaintObserver's m_current_taint when it encounters
 // an HTML-untainted string. It allows us to determine when an HTML-tainted
-// string first makes concact with a clean string. If both this flag and the
+// string first makes contact with a clean string. If both this flag and the
 // HTML bit itself are set at the time of String creation (i.e., mutation),
 // then we capture trace data.
-#define TAINT_FLAG_HTML_CLEAN         (0x20000000)
-#define TAINT_ISSET_HTML_CLEAN(bits)  ((bits) & TAINT_FLAG_HTML_CLEAN)
+#define TAINT_FLAG_HTML_CLEAN   (0x40000000)
 
 namespace HPHP {
 

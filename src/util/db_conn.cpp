@@ -115,9 +115,11 @@ void DBConn::AddLocalDB(int dbId, const char *ip, const char *db,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DBConn::DBConn()
+DBConn::DBConn(int maxRetryOpenOnFail, int maxRetryQueryOnFail)
   : m_conn(NULL), m_connectTimeout(DefaultConnectTimeout),
-    m_readTimeout(DefaultReadTimeout) {
+    m_readTimeout(DefaultReadTimeout),
+    m_maxRetryOpenOnFail(maxRetryOpenOnFail),
+    m_maxRetryQueryOnFail(maxRetryQueryOnFail) {
 }
 
 DBConn::~DBConn() {
@@ -196,8 +198,11 @@ int DBConn::execute(const char *sql, DBDataSet *ds /* = NULL */,
     bool failure;
     if ((failure = mysql_query(m_conn, sql))) {
       if (retryQueryOnFail) {
-        open(m_server, m_connectTimeout, m_readTimeout);
-        failure = mysql_query(m_conn, sql);
+        for (int count = 0; count < m_maxRetryOpenOnFail; count++) {
+          open(m_server, m_connectTimeout, m_readTimeout);
+          failure = mysql_query(m_conn, sql);
+          if (!failure) break;
+        }
       }
       if (failure) {
         int code = mysql_errno(m_conn);
@@ -233,7 +238,9 @@ int DBConn::getLastInsertId() {
 int DBConn::parallelExecute(const char *sql, DBDataSet &ds,
                             ErrorInfoMap &errors, int maxThread,
                             bool retryQueryOnFail, int connectTimeout,
-                            int readTimeout) {
+                            int readTimeout,
+                            int maxRetryOpenOnFail,
+                            int maxRetryQueryOnFail) {
   ASSERT(sql && *sql);
 
   if (s_localDatabases.empty()) {
@@ -249,7 +256,9 @@ int DBConn::parallelExecute(const char *sql, DBDataSet &ds,
     jobs.push_back(QueryJobPtr(new QueryJob(iter->second, ssql, iter->first,
                                             mutex, ds,
                                             retryQueryOnFail, connectTimeout,
-                                            readTimeout)));
+                                            readTimeout,
+                                            maxRetryOpenOnFail,
+                                            maxRetryQueryOnFail)));
   }
   return parallelExecute(jobs, errors, maxThread);
 }
@@ -257,7 +266,9 @@ int DBConn::parallelExecute(const char *sql, DBDataSet &ds,
 int DBConn::parallelExecute(const ServerQueryVec &sqls, DBDataSet &ds,
                             ErrorInfoMap &errors, int maxThread,
                             bool retryQueryOnFail, int connectTimeout,
-                            int readTimeout) {
+                            int readTimeout,
+                            int maxRetryOpenOnFail,
+                            int maxRetryQueryOnFail) {
   if (sqls.empty()) {
     return 0;
   }
@@ -270,7 +281,8 @@ int DBConn::parallelExecute(const ServerQueryVec &sqls, DBDataSet &ds,
 
     QueryJobPtr job(new QueryJob(query.first, query.second, i, mutex, ds,
                                  retryQueryOnFail, connectTimeout,
-                                 readTimeout));
+                                 readTimeout,
+                                 maxRetryOpenOnFail, maxRetryQueryOnFail));
     jobs.push_back(job);
   }
   return parallelExecute(jobs, errors, maxThread);
@@ -279,7 +291,9 @@ int DBConn::parallelExecute(const ServerQueryVec &sqls, DBDataSet &ds,
 int DBConn::parallelExecute(const ServerQueryVec &sqls, DBDataSetPtrVec &dss,
                             ErrorInfoMap &errors, int maxThread,
                             bool retryQueryOnFail, int connectTimeout,
-                            int readTimeout) {
+                            int readTimeout,
+                            int maxRetryOpenOnFail,
+                            int maxRetryQueryOnFail) {
   ASSERT(sqls.size() == dss.size());
 
   if (sqls.empty()) {
@@ -294,7 +308,8 @@ int DBConn::parallelExecute(const ServerQueryVec &sqls, DBDataSetPtrVec &dss,
 
     QueryJobPtr job(new QueryJob(query.first, query.second, i, mutex,
                                  *dss[i], retryQueryOnFail, connectTimeout,
-                                 readTimeout));
+                                 readTimeout,
+                                 maxRetryOpenOnFail, maxRetryQueryOnFail));
     jobs.push_back(job);
   }
   return parallelExecute(jobs, errors, maxThread);
@@ -332,7 +347,19 @@ void DBConn::QueryWorker::doJob(QueryJobPtr job) {
 
   try {
     DBConn conn;
-    conn.open(job->m_server, job->m_connectTimeout, job->m_readTimeout);
+    int count = 0;
+  retry:
+    try {
+      count++;
+      conn.open(job->m_server, job->m_connectTimeout, job->m_readTimeout);
+    } catch (DatabaseException &e) {
+      if (job->m_retryQueryOnFail &&
+          count <= job->m_maxRetryQueryOnFail) {
+        goto retry; 
+      } else {
+        throw;
+      }
+    }
 
     if (job->m_dsResult) {
       DBDataSet ds;

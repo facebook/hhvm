@@ -224,6 +224,8 @@ int RuntimeOption::MySQLReadTimeout = 1000;
 int RuntimeOption::MySQLWaitTimeout = -1;
 int RuntimeOption::MySQLSlowQueryThreshold = 1000; // ms
 bool RuntimeOption::MySQLKillOnTimeout = false;
+int RuntimeOption::MySQLMaxRetryOpenOnFail = 1;
+int RuntimeOption::MySQLMaxRetryQueryOnFail = 1;
 
 int RuntimeOption::HttpDefaultTimeout = 30;
 int RuntimeOption::HttpSlowQueryThreshold = 5000; // ms
@@ -897,6 +899,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     MySQLWaitTimeout = mysql["WaitTimeout"].getInt32(-1);
     MySQLSlowQueryThreshold = mysql["SlowQueryThreshold"].getInt32(1000);
     MySQLKillOnTimeout = mysql["KillOnTimeout"].getBool();
+    MySQLMaxRetryOpenOnFail = mysql["MaxRetryOpenOnFail"].getInt32(1);
+    MySQLMaxRetryQueryOnFail = mysql["MaxRetryQueryOnFail"].getInt32(1);
   }
   {
     Hdf http = config["Http"];

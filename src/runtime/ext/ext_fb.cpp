@@ -535,8 +535,10 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
     DBDataSet ds;
     DBConn::ErrorInfoMap errors;
     int affected = DBConn::parallelExecute(queries, ds, errors, max_thread,
-                                           retry_query_on_fail,
-                                           connect_timeout, read_timeout);
+                     retry_query_on_fail,
+                     connect_timeout, read_timeout,
+                     RuntimeOption::MySQLMaxRetryOpenOnFail,
+                     RuntimeOption::MySQLMaxRetryQueryOnFail);
     output_dataset(ret, affected, ds, errors);
   } else {
     DBDataSetPtrVec dss(queries.size());
@@ -546,8 +548,10 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
 
     DBConn::ErrorInfoMap errors;
     int affected = DBConn::parallelExecute(queries, dss, errors, max_thread,
-                                           retry_query_on_fail,
-                                           connect_timeout, read_timeout);
+                     retry_query_on_fail,
+                     connect_timeout, read_timeout,
+                     RuntimeOption::MySQLMaxRetryOpenOnFail,
+                     RuntimeOption::MySQLMaxRetryQueryOnFail);
     for (unsigned int i = 0; i < dss.size(); i++) {
       Array dsRet;
       output_dataset(dsRet, affected, *dss[i], errors);
@@ -589,8 +593,10 @@ Array f_fb_crossall_query(CStrRef sql, int max_thread /* = 50 */,
   DBDataSet ds;
   DBConn::ErrorInfoMap errors;
   int affected = DBConn::parallelExecute(ssql.c_str(), ds, errors, max_thread,
-                                         retry_query_on_fail,
-                                         connect_timeout, read_timeout);
+                     retry_query_on_fail,
+                     connect_timeout, read_timeout,
+                     RuntimeOption::MySQLMaxRetryOpenOnFail,
+                     RuntimeOption::MySQLMaxRetryQueryOnFail);
   output_dataset(ret, affected, ds, errors);
   return ret;
 }

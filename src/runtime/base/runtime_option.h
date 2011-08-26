@@ -219,6 +219,8 @@ public:
   static int  MySQLWaitTimeout;
   static int  MySQLSlowQueryThreshold;
   static bool MySQLKillOnTimeout;
+  static int  MySQLMaxRetryOpenOnFail;
+  static int  MySQLMaxRetryQueryOnFail;
 
   static int  HttpDefaultTimeout;
   static int  HttpSlowQueryThreshold;

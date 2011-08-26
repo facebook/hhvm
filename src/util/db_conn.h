@@ -96,7 +96,7 @@ class DBConn {
   static unsigned int DefaultReadTimeout;
 
  public:
-  DBConn();
+  DBConn(int maxRetryOpenOnFail = 0, int maxRetryQueryOnFail = 1);
   ~DBConn();
 
   /**
@@ -135,15 +135,19 @@ class DBConn {
   static int parallelExecute
     (const char *sql, DBDataSet &ds,
      ErrorInfoMap &errors, int maxThread, bool retryQueryOnFail = true,
-     int connectTimeout = -1, int readTimeout = -1);
+     int connectTimeout = -1, int readTimeout = -1,
+     int maxRetryOpenOnFail = 1, int maxRetryQueryOnFail = 1
+     );
   static int parallelExecute
     (const ServerQueryVec &sqls, DBDataSet &ds,
      ErrorInfoMap &errors, int maxThread, bool retryQueryOnFail = true,
-     int connectTimeout = -1, int readTimeout = -1);
+     int connectTimeout = -1, int readTimeout = -1,
+     int maxRetryOpenOnFail = 1, int maxRetryQueryOnFail = 1);
   static int parallelExecute
     (const ServerQueryVec &sqls, DBDataSetPtrVec &dss,
      ErrorInfoMap &errors, int maxThread, bool retryQueryOnFail = true,
-     int connectTimeout = -1, int readTimeout = -1);
+     int connectTimeout = -1, int readTimeout = -1,
+     int maxRetryOpenOnFail = 1, int maxRetryQueryOnFail = 1);
 
   /**
    * Put a connection back to pool.
@@ -174,17 +178,21 @@ class DBConn {
   ServerDataPtr m_server;
   unsigned int m_connectTimeout;
   unsigned int m_readTimeout;
-
+  int m_maxRetryOpenOnFail;
+  int m_maxRetryQueryOnFail;
   DECLARE_BOOST_TYPES(QueryJob);
   class QueryJob {
   public:
     QueryJob(ServerDataPtr server, const std::string sql, int index,
              Mutex &mutex, DBDataSet &dsResult, bool retryQueryOnFail,
-             unsigned int readTimeout, unsigned int connectTimeout)
+             unsigned int readTimeout, unsigned int connectTimeout,
+             int maxRetryOpenOnFail, int maxRetryQueryOnFail)
       : m_server(server), m_sql(sql), m_index(index),
         m_affected(0), m_dsMutex(&mutex), m_dsResult(&dsResult),
         m_retryQueryOnFail(retryQueryOnFail), m_connectTimeout(connectTimeout),
-        m_readTimeout(readTimeout) {}
+        m_readTimeout(readTimeout),
+        m_maxRetryOpenOnFail(maxRetryOpenOnFail),
+        m_maxRetryQueryOnFail(maxRetryQueryOnFail) {}
 
     ServerDataPtr m_server;
     std::string m_sql;
@@ -196,6 +204,8 @@ class DBConn {
     bool m_retryQueryOnFail;
     int m_connectTimeout;
     int m_readTimeout;
+    int m_maxRetryOpenOnFail;
+    int m_maxRetryQueryOnFail;
   };
 
   class QueryWorker {

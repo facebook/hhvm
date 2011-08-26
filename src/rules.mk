@@ -278,6 +278,11 @@ OPT += -fno-gcse
 endif
 
 endif
+
+ifndef NO_GOLD
+LDFLAGS += -Wl,--icf=all,--gc-sections
+endif
+
 endif
 
 ifdef ALWAYS_ASSERT
@@ -367,11 +372,11 @@ ifneq ($(TAINTED),)
 CPPFLAGS += -DTAINTED
 endif
 
-ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL 
+ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
 CPPFLAGS += -DHPHP_INSTRUMENT_PROCESS_PARALLEL
 endif
 
-ifdef HPHP_INSTRUMENT_TYPE_INF 
+ifdef HPHP_INSTRUMENT_TYPE_INF
 CPPFLAGS += -DHPHP_INSTRUMENT_TYPE_INF
 endif
 
@@ -411,7 +416,7 @@ AR_CMD = $(TIMECMD) $(AR) -crs
 LD_CMD = $(TIMECMD) $(LINKER)
 
 ifndef NO_GOLD
-LDFLAGS += -Xlinker --export-dynamic -Xlinker --no-warn-search-mismatch -Wl,--build-id,--icf=all,--gc-sections
+LDFLAGS += -Xlinker --export-dynamic -Xlinker --no-warn-search-mismatch -Wl,--build-id
 else
 LDFLAGS += -rdynamic
 endif

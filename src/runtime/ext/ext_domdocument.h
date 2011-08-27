@@ -102,7 +102,7 @@ Variant f_dom_xpath_register_php_functions(CVarRef obj, CVarRef funcs = null);
 // class DOMNode
 
 FORWARD_DECLARE_CLASS_BUILTIN(DOMNode);
-class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet> {
+class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|ObjectData::UseIsset> {
  public:
   DECLARE_CLASS(DOMNode, DOMNode, ObjectData)
 
@@ -674,7 +674,7 @@ public:
 // class DOMNamedNodeMap
 
 FORWARD_DECLARE_CLASS_BUILTIN(DOMNamedNodeMap);
-class c_DOMNamedNodeMap : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>, public dom_iterable {
+class c_DOMNamedNodeMap : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|ObjectData::UseIsset>, public dom_iterable {
  public:
   DECLARE_CLASS(DOMNamedNodeMap, DOMNamedNodeMap, ObjectData)
 
@@ -710,7 +710,7 @@ class c_DOMNamedNodeMap : public ExtObjectDataFlags<ObjectData::UseGet|ObjectDat
 // class DOMNodeList
 
 FORWARD_DECLARE_CLASS_BUILTIN(DOMNodeList);
-class c_DOMNodeList : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>, public dom_iterable {
+class c_DOMNodeList : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|ObjectData::UseIsset>, public dom_iterable {
  public:
   DECLARE_CLASS(DOMNodeList, DOMNodeList, ObjectData)
 
@@ -770,7 +770,7 @@ class c_DOMImplementation : public ExtObjectData {
 // class DOMXPath
 
 FORWARD_DECLARE_CLASS_BUILTIN(DOMXPath);
-class c_DOMXPath : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>, public Sweepable {
+class c_DOMXPath : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|ObjectData::UseIsset>, public Sweepable {
  public:
   DECLARE_CLASS(DOMXPath, DOMXPath, ObjectData)
 

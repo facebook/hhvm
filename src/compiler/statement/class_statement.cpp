@@ -494,12 +494,16 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           ClassScope::HasUnknownPropGetter);
         bool hasSet = classScope->getAttribute(
           ClassScope::HasUnknownPropSetter);
+        bool hasIsset = classScope->getAttribute(
+          ClassScope::HasUnknownPropTester);
+        bool hasUnset = classScope->getAttribute(
+          ClassScope::HasPropUnsetter);
         bool hasCall = classScope->getAttribute(
           ClassScope::HasUnknownMethodHandler);
         bool hasCallStatic = classScope->getAttribute(
           ClassScope::HasUnknownStaticMethodHandler);
 
-        if (dyn || idyn || redec || hasGet || hasSet ||
+        if (dyn || idyn || redec || hasGet || hasSet || hasIsset || hasUnset ||
             hasCall || hasCallStatic) {
           if (redec && classScope->derivedByDynamic()) {
             if (!dyn && !idyn) {
@@ -562,10 +566,13 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           }
 
           cg_indentBegin(" {%s",
-                         hasGet || hasSet || hasCall || hasCallStatic ?
+                         hasGet || hasSet || hasIsset || hasUnset ||
+                         hasCall || hasCallStatic ?
                          "\n" : "");
           if (hasGet) cg_printf("setAttribute(UseGet);\n");
           if (hasSet) cg_printf("setAttribute(UseSet);\n");
+          if (hasIsset) cg_printf("setAttribute(UseIsset);\n");
+          if (hasUnset) cg_printf("setAttribute(UseUnset);\n");
           if (hasCall) cg_printf("setAttribute(HasCall);\n");
           if (hasCallStatic) cg_printf("setAttribute(HasCallStatic);\n");
           cg_indentEnd("}\n");

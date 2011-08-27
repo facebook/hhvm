@@ -66,10 +66,11 @@ class ObjectData : public CountableNF {
     HasSleep      = 4,    // __sleep()
     UseSet        = 8,    // __set()
     UseGet        = 16,   // __get()
-    UseUnset      = 32,   // __unset()
-    HasLval       = 64,   // defines ___lval
-    HasCall       = 128,  // defines __call
-    HasCallStatic = 256,  // defines __callStatic
+    UseIsset      = 32,   // __isset()
+    UseUnset      = 64,   // __unset()
+    HasLval       = 128,  // defines ___lval
+    HasCall       = 256,  // defines __call
+    HasCallStatic = 512,  // defines __callStatic
   };
   enum {
     RealPropCreate = 1,   // Property should be created if it doesnt exist

@@ -37,6 +37,8 @@ EvalObjectData::EvalObjectData(ClassEvalState &cls, const char* pname,
   }
   if (getMethodStatement("__get")) setAttribute(UseGet);
   if (getMethodStatement("__set")) setAttribute(UseSet);
+  if (getMethodStatement("__isset")) setAttribute(UseIsset);
+  if (getMethodStatement("__unset")) setAttribute(UseUnset);
 
   // an object can never live longer than its class
   m_class_name = m_cls.getClass()->name();

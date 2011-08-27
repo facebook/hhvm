@@ -41,6 +41,7 @@ FORWARD_DECLARE_CLASS_BUILTIN(SimpleXMLElement);
 class c_SimpleXMLElement :
       public ExtObjectDataFlags<ObjectData::UseGet|
                                 ObjectData::UseSet|
+                                ObjectData::UseIsset|
                                 ObjectData::UseUnset> {
  public:
   DECLARE_CLASS(SimpleXMLElement, SimpleXMLElement, ObjectData)

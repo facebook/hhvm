@@ -5776,7 +5776,9 @@ bool TestCodeRun::TestObjectMagicMethod() {
       "}"
       "$obj = new MemberTest;"
       "$obj->a = 1;"
-      "echo $obj->a;");
+      "var_dump($obj->a);"
+      "var_dump(isset($obj->a));"
+      "unset($obj->a);");
   MVCR("<?php "
       "class foo"
       "{"

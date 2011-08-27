@@ -1442,7 +1442,11 @@ bool ObjectData::o_isset(CStrRef prop, CStrRef context) {
       return !t->isNull();
     }
   }
-  return t___isset(prop);
+  if (getAttribute(UseIsset)) {
+    AttributeClearer a(UseIsset, this);
+    return t___isset(prop);
+  }
+  return false;
 }
 
 bool ObjectData::o_empty(CStrRef prop, CStrRef context) {
@@ -1451,8 +1455,17 @@ bool ObjectData::o_empty(CStrRef prop, CStrRef context) {
       return empty(*t);
     }
   }
-  return !t___isset(prop) || !getAttribute(UseGet) ||
-    (AttributeClearer(UseGet, this),empty(t___get(prop)));
+  if (getAttribute(UseIsset)) {
+    {
+      AttributeClearer a(UseIsset, this);
+      if (!t___isset(prop) || !getAttribute(UseGet)) {
+        return true;
+      }
+    }
+    AttributeClearer a(UseGet, this);
+    return empty(t___get(prop));
+  }
+  return true;
 }
 
 void ObjectData::o_unset(CStrRef prop, CStrRef context) {

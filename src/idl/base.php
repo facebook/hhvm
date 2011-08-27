@@ -83,10 +83,10 @@ $REFNAMES = array('String'      => 'CStrRef',
 
 $MAGIC_METHODS = array('__get' => 'ObjectData::UseGet',
                        '__set' => 'ObjectData::UseSet',
-                       '__call' => 'ObjectData::HasCall',
-                       '__callStatic' => 'ObjectData::HasCallStatic',
+                       '__isset' => 'ObjectData::UseIsset',
                        '__unset' => 'ObjectData::UseUnset',
-                       '__isset' => 0);
+                       '__call' => 'ObjectData::HasCall',
+                       '__callStatic' => 'ObjectData::HasCallStatic');
 
 function get_idl_name($type, $null = '') {
   global $TYPENAMES;

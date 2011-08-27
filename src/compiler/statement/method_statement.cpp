@@ -223,6 +223,10 @@ void MethodStatement::setSpecialMethod(ClassScopePtr classScope) {
     classScope->setAttribute(ClassScope::HasUnknownPropGetter);
   } else if (m_name == "__set") {
     classScope->setAttribute(ClassScope::HasUnknownPropSetter);
+  } else if (m_name == "__isset") {
+    classScope->setAttribute(ClassScope::HasUnknownPropTester);
+  } else if (m_name == "__unset") {
+    classScope->setAttribute(ClassScope::HasPropUnsetter);
   } else if (m_name == "__call") {
     classScope->setAttribute(ClassScope::HasUnknownMethodHandler);
   } else if (m_name == "__callstatic") {

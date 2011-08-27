@@ -192,6 +192,7 @@ void StringData::append(const char *s, int len) {
     m_len &= ~IsMask;
     releaseData();
     m_data = NULL;
+    m_len = 0;
     throw FatalErrorException(0, "String length exceeded 2^29 - 1: %d", len);
   }
 

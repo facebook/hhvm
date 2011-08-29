@@ -49,8 +49,9 @@ public:
   void setIdx(int idx) { m_idx = idx;}
 
   bool isRef() const { return m_ref; }
-  void bind(VariableEnvironment &env, CVarRef val, bool ref = false) const;
-  void bindDefault(VariableEnvironment &env) const;
+  void bind(FuncScopeVariableEnvironment &fenv,
+            CVarRef val, bool ref = false) const;
+  void bindDefault(FuncScopeVariableEnvironment &fenv) const;
   virtual void dump(std::ostream &out) const;
   void getInfo(ClassInfo::ParameterInfo &info, VariableEnvironment &env) const;
   bool isOptional() const;
@@ -77,6 +78,7 @@ private:
   bool checkTypeHint(DataType hint, DataType type) const;
   void error(Parser *parser, const char *fmt, ...) const;
   void reportTypeHintError(Parser *parser, const std::string &hintType) const;
+  Variant *getParam(FuncScopeVariableEnvironment &fenv) const;
 };
 
 class FunctionStatement : public Statement, public Block, public Function {

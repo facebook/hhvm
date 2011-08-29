@@ -36,6 +36,11 @@ class UnlimitedGotoException {};
 
 class VariableEnvironment : public LVariableTable {
 public:
+  enum KindOf {
+    KindOfFuncScopeVariableEnvironment,
+    KindOfNestedVariableEnvironment,
+    KindOfDummyVariableEnvironment,
+  };
   VariableEnvironment();
   void setCurrentObject(CObjRef co);
   void setCurrentClass(const char* cls);
@@ -43,6 +48,7 @@ public:
   virtual void flagGlobal(CStrRef name, int64 hash = -1);
   virtual void unset(CStrRef name, int64 hash = -1);
   Variant *getIdx(int idx) { return m_byIdx[idx]; }
+  bool isKindOf(KindOf kindOf) { return m_kindOf == kindOf; }
   virtual void setIdx(int idx, Variant *v);
   Variant &currentObject() { return m_currentObject; }
   virtual const char* currentClass() const;
@@ -119,6 +125,7 @@ protected:
   bool m_limitedGoto;
   Variant m_ret;
   std::vector<Variant*> m_byIdx;
+  KindOf m_kindOf;
 };
 
 /**
@@ -153,8 +160,9 @@ public:
   void incArgc() { m_argc++; }
   virtual Array getDefinedVariables() const;
   virtual ObjectData *getContinuation() const;
+  AssocList &getAssocList() { return m_alist; }
 private:
-  Array m_statics;
+
   const FunctionStatement *m_func;
   LVariableTable *m_staticEnv;
   AssocList m_alist;

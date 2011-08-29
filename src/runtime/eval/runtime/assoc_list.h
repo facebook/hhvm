@@ -39,13 +39,14 @@ class AssocList {
 public:
   AssocList();
   ~AssocList();
-  Variant &prepend(CStrRef name);
+  Variant &append(CStrRef name);
   Variant &get(CStrRef name);
   Variant *getPtr(CStrRef name);
   bool exists(CStrRef name, bool checkInit = false) const;
   Array toArray() const;
 private:
-  VarAssocPair *m_list;
+  VarAssocPair *m_head;
+  VarAssocPair *m_tail;
   int m_count;
 };
 

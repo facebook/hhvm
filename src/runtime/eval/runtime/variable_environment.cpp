@@ -140,8 +140,9 @@ void VariableEnvironment::releaseTempVariables(int size, int oldPrevSize) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DummyVariableEnvironment::DummyVariableEnvironment()
-{}
+DummyVariableEnvironment::DummyVariableEnvironment() {
+  m_kindOf = KindOfDummyVariableEnvironment;
+}
 
 void DummyVariableEnvironment::flagStatic(CStrRef name, int64 hash) {
   ASSERT(false);
@@ -168,36 +169,12 @@ Array DummyVariableEnvironment::getParams() const {
   ASSERT(false);
   return Array();
 }
-FuncScopeVariableEnvironment::
-FuncScopeVariableEnvironment(const FunctionStatement *func)
+FuncScopeVariableEnvironment::FuncScopeVariableEnvironment(
+  const FunctionStatement *func)
   : m_func(func), m_staticEnv(NULL), m_argc(0),
     m_argStart(RequestEvalState::argStack().pos()) {
-
-  const Block::VariableIndices &vi = func->varIndices();
-  const vector<StringData*> &vars = func->variables();
-  m_byIdx.resize(vi.size());
-  Globals *g = NULL;
-  for (int i = vars.size() - 1; i >= 0; i--) {
-    String name(vars[i]);
-    Block::VariableIndices::const_iterator it = vi.find(name);
-    ASSERT(it != vi.end());
-    if (it == vi.end()) continue;
-
-    const VariableIndex &v = it->second;
-    if (v.superGlobal() != SgNormal &&
-        v.superGlobal() != SgGlobals) {
-      if (!g) g = get_globals();
-      // This is safe because superglobals are real members of the globals
-      // and do not live in an array
-      m_byIdx[v.idx()] = &g->get(name);
-    } else {
-      Variant &val = m_alist.prepend(name);
-      m_byIdx[v.idx()] = &val;
-      if (v.superGlobal() == SgGlobals) {
-        val = get_global_array_wrapper();
-      }
-    }
-  }
+  m_kindOf = KindOfFuncScopeVariableEnvironment;
+  m_byIdx.resize(func->varIndices().size(), NULL);
 }
 
 FuncScopeVariableEnvironment::~FuncScopeVariableEnvironment() {
@@ -233,8 +210,8 @@ void FuncScopeVariableEnvironment::flagStatic(CStrRef name, int64 hash) {
 }
 
 void FuncScopeVariableEnvironment::setIdx(int idx, Variant *v) {
-  ASSERT(false);
-  throw FatalErrorException("setIdx not supported in this env");
+  ASSERT(m_byIdx[idx] == NULL);
+  m_byIdx[idx] = v;
 }
 
 bool FuncScopeVariableEnvironment::refReturn() const {
@@ -246,9 +223,10 @@ Array FuncScopeVariableEnvironment::getParams() const {
 }
 
 bool FuncScopeVariableEnvironment::exists(CStrRef name) const {
+  // this is very in-frequently called, so a linear scan is acceptable
   return m_alist.exists(name, true);
-  //return LVariableTable::exists(name, hash);
 }
+
 Variant &FuncScopeVariableEnvironment::getImpl(CStrRef s) {
   SuperGlobal sg = VariableIndex::isSuperGlobal(s);
   return getVar(s, sg);
@@ -257,11 +235,18 @@ Variant &FuncScopeVariableEnvironment::getImpl(CStrRef s) {
 Variant &FuncScopeVariableEnvironment::getVar(CStrRef s, SuperGlobal sg) {
   if (sg == SgNormal) {
     Variant *v = m_alist.getPtr(s);
-    if (!v) v = &m_alist.prepend(s);
-    return *v; 
+    if (!v) {
+      v = &m_alist.append(s);
+      const Block::VariableIndices &variableIndices = m_func->varIndices();
+      Block::VariableIndices::const_iterator it = variableIndices.find(s);
+      if (it != variableIndices.end()) {
+        setIdx(it->second.idx(), v);
+      }
+    }
+    return *v;
   }
   if (sg == SgGlobals) {
-    Variant &v = m_alist.prepend(s);
+    Variant &v = m_alist.append(s);
     v = get_global_array_wrapper();
     return v;
   }
@@ -302,7 +287,8 @@ NestedVariableEnvironment::NestedVariableEnvironment
 (LVariableTable *ext, const Block &blk, CArrRef params /* = Array() */,
  CObjRef current_object /* = Object() */)
   : m_ext(ext), m_block(blk), m_params(params) {
-  m_byIdx.resize(m_block.varIndices().size());
+  m_kindOf = KindOfNestedVariableEnvironment;
+  m_byIdx.resize(m_block.varIndices().size(), NULL);
   if (!current_object.isNull()) setCurrentObject(current_object);
 }
 
@@ -345,4 +331,3 @@ Array NestedVariableEnvironment::getDefinedVariables() const {
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
-

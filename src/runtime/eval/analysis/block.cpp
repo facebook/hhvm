@@ -94,7 +94,6 @@ int Block::declareVariable(CStrRef var) {
   if (it == m_variableIndices.end()) {
     int i = m_variableIndices.size();
     m_variableIndices[var].set(var, i);
-    m_variables.push_back(var.get());
     return i;
   }
   return it->second.idx();

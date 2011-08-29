@@ -35,6 +35,17 @@ Variant &VariableExpression::getRefHelper(
   if (!m_name->getSuperGlobal(sg)) {
     sg = VariableIndex::isSuperGlobal(s);
   }
+  if (m_idx != -1 && sg == SgNormal &&
+      env.isKindOf(VariableEnvironment::KindOfFuncScopeVariableEnvironment)) {
+    FuncScopeVariableEnvironment *fenv =
+      static_cast<FuncScopeVariableEnvironment *>(&env);
+    ASSERT(fenv->getIdx(m_idx) == NULL);
+    AssocList &alist = fenv->getAssocList();
+    ASSERT(!alist.getPtr(s));
+    Variant *var = &alist.append(s);
+    fenv->setIdx(m_idx, var);
+    return *var;
+  }
   Variant *var =  &env.getVar(s, sg);
   if (m_idx != -1) env.setIdx(m_idx, var);
   return *var;

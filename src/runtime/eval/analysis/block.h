@@ -40,7 +40,7 @@ private:
 
 class Block {
 public:
-  // Varname -> idx
+  // map(varname -> idx)
   typedef StringMap<VariableIndex> VariableIndices;
 
   Block();
@@ -51,11 +51,9 @@ public:
   Variant getStaticValue(VariableEnvironment &env, CStrRef name) const;
   int declareVariable(CStrRef var);
   const VariableIndices &varIndices() const;
-  const std::vector<StringData *> &variables() const { return m_variables;}
 protected:
   StringMap<ExpressionPtr> m_staticStmts;
   VariableIndices m_variableIndices;
-  std::vector<StringData *> m_variables; // in declaration order
 };
 
 ///////////////////////////////////////////////////////////////////////////////

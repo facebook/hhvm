@@ -114,7 +114,17 @@ void Parameter::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_defVal);
 }
 
-void Parameter::bind(VariableEnvironment &env, CVarRef val,
+Variant *Parameter::getParam(FuncScopeVariableEnvironment &fenv) const {
+  ASSERT(fenv.getIdx(m_idx) == NULL);
+  CStrRef s = m_name->get(fenv);
+  AssocList &alist = fenv.getAssocList();
+  ASSERT(!alist.getPtr(s));
+  Variant *v = &alist.append(s);
+  fenv.setIdx(m_idx, v);
+  return v;
+}
+
+void Parameter::bind(FuncScopeVariableEnvironment &fenv, CVarRef val,
                      bool ref /* = false */) const {
   if (m_kind != KindOfNull) {
     DataType otype = val.getType();
@@ -130,17 +140,17 @@ void Parameter::bind(VariableEnvironment &env, CVarRef val,
                                      m_type.c_str(), val);
     }
   }
-  Variant *v = env.getIdx(m_idx);
+  Variant *vp = getParam(fenv);
   if (ref) {
-    v->assignRef(val);
+    vp->assignRef(val);
   } else {
-    v->assignVal(val);
+    vp->assignVal(val);
   }
 }
 
-void Parameter::bindDefault(VariableEnvironment &env) const {
+void Parameter::bindDefault(FuncScopeVariableEnvironment &fenv) const {
   if (m_defVal) {
-    Variant v = m_defVal->eval(env);
+    Variant v = m_defVal->eval(fenv);
     if (hasTypeHint() && !m_correct) {
       DataType dtype = v.getType();
       ASSERT(dtype != KindOfUninit);
@@ -148,7 +158,8 @@ void Parameter::bindDefault(VariableEnvironment &env) const {
         reportTypeHintError(NULL, m_type);
       }
     }
-    env.getIdx(m_idx)->assignVal(v);
+    Variant *vp = getParam(fenv);
+    vp->assignVal(v);
   }
 }
 

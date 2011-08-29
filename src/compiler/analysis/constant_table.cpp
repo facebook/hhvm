@@ -144,33 +144,6 @@ const {
   return ConstructPtr();
 }
 
-TypePtr ConstantTable::checkBases(BlockScopeRawPtr context,
-                                  const std::string &name, TypePtr type,
-                                  bool coerce, AnalysisResultConstPtr ar,
-                                  ConstructPtr construct,
-                                  const std::vector<std::string> &bases,
-                                  BlockScope *&defScope) {
-  TypePtr actualType;
-  defScope = NULL;
-  ClassScopePtr parent = findParent(ar, name);
-  if (parent) {
-    actualType = parent->checkConst(context, name, type,
-                                    coerce, ar, construct,
-                                    parent->getBases(), defScope);
-    if (defScope) return actualType;
-  }
-  for (int i = bases.size() - 1; i >= (parent ? 1 : 0); i--) {
-    const string &base = bases[i];
-    ClassScopePtr super = ar->findClass(base);
-    if (!super || super->isRedeclaring()) continue;
-    actualType = super->checkConst(context, name, type,
-                                   coerce, ar, construct,
-                                   super->getBases(), defScope);
-    if (defScope) return actualType;
-  }
-  return actualType;
-}
-
 TypePtr ConstantTable::check(BlockScopeRawPtr context,
                              const std::string &name, TypePtr type,
                              bool coerce, AnalysisResultConstPtr ar,
@@ -187,9 +160,14 @@ TypePtr ConstantTable::check(BlockScopeRawPtr context,
     Symbol *sym = getSymbol(name);
     if (!sym) {
       if (ar->getPhase() != AnalysisResult::AnalyzeInclude) {
-        actualType = checkBases(context, name, type, coerce,
-                                ar, construct, bases, defScope);
-        if (defScope) return actualType;
+        if (isClassScope) {
+          ClassScopeRawPtr parent = findBase(ar, name, bases);
+          if (parent) {
+            actualType = parent->getConstants()->check(
+              context, name, type, coerce, ar, construct, bases, defScope);
+            if (defScope) return actualType;
+          }
+        }
         Compiler::Error(Compiler::UseUndeclaredConstant, construct);
         actualType = isClassScope ? Type::Variant : Type::String;
       }
@@ -228,6 +206,20 @@ ClassScopePtr ConstantTable::findParent(AnalysisResultConstPtr ar,
     }
   }
   return ClassScopePtr();
+}
+
+ClassScopeRawPtr ConstantTable::findBase(
+  AnalysisResultConstPtr ar, const std::string &name,
+  const std::vector<std::string> &bases) const {
+  for (int i = bases.size(); i--; ) {
+    ClassScopeRawPtr p = ar->findClass(bases[i]);
+    if (!p || p->isRedeclaring()) continue;
+    if (p->hasConst(name)) return p;
+    ConstantTablePtr constants = p->getConstants();
+    p = constants->findBase(ar, name, p->getBases());
+    if (p) return p;
+  }
+  return ClassScopeRawPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

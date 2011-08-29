@@ -110,17 +110,13 @@ private:
 
   ClassScopePtr findParent(AnalysisResultConstPtr ar,
                            const std::string &name) const;
+  ClassScopeRawPtr findBase(AnalysisResultConstPtr ar,
+                            const std::string &name,
+                            const std::vector<std::string> &bases) const;
   bool outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                  const Symbol *sym) const;
   void outputCPPConstantSymbol(CodeGenerator &cg, AnalysisResultPtr ar,
                                Symbol *sym);
-
-  TypePtr checkBases(BlockScopeRawPtr context,
-                     const std::string &name, TypePtr type,
-                     bool coerce, AnalysisResultConstPtr ar,
-                     ConstructPtr construct,
-                     const std::vector<std::string> &bases,
-                     BlockScope *&defScope);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

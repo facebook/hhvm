@@ -1615,7 +1615,6 @@ void DebuggerClient::addWatch(const char *fmt, const std::string &php) {
 
 void DebuggerClient::setStackTrace(CArrRef stacktrace) {
   m_stacktrace = stacktrace;
-  m_frame = 0;
 }
 
 void DebuggerClient::moveToFrame(int index, bool display /* = true */) {

@@ -237,6 +237,7 @@ public:
   void setStackTrace(CArrRef stacktrace);
   void moveToFrame(int index, bool display = true);
   void printFrame(int index, CArrRef frame);
+  void setFrame(int frame) { m_frame = frame; }
   int getFrame() const { return m_frame;}
 
   /**

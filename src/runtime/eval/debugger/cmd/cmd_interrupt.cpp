@@ -221,6 +221,10 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
         CmdBreak().update(client);
       }
       if (!found) {
+        if (m_interrupt == HardBreakPoint) {
+          // for HardBreakPoint, default the frame to the caller
+          client->setFrame(1);
+        }
         client->info("Break %s", m_bpi->site().c_str());
         client->shortCode(m_bpi);
       }

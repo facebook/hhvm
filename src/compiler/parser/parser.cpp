@@ -166,6 +166,10 @@ Parser::Parser(Scanner &scanner, const char *fileName,
   m_prependingStatements.push_back(vector<StatementPtr>());
 }
 
+void Parser::failed() {
+  m_file->cleanupForError();
+}
+
 void Parser::error(const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);

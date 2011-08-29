@@ -102,9 +102,9 @@ public:
    * are the only functions a parser calls upon analysis results.
    */
   FunctionScopePtr setTree(AnalysisResultConstPtr ar, StatementListPtr tree);
-  bool addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope);
+  void cleanupForError();
 
-  void addDeclare(std::string d) { m_declares.push_back(d); }
+  bool addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope);
 
   void addUsedLiteralString(std::string s) {
     m_usedLiteralStrings.insert(s);
@@ -255,8 +255,6 @@ private:
   ClassScopePtrVec m_ignoredClasses;
   FunctionScopeRawPtr m_pseudoMain;
 
-  std::vector<std::string> m_declares;
-
   vertex_descriptor m_vertex;
 
   std::set<std::string> m_usedFuncsInline;
@@ -281,13 +279,6 @@ private:
   std::string m_pseudoMainName;
   std::set<std::string> m_pseudoMainVariables;
   bool m_hasNonPrivateInclude;
-
-  struct lambda {
-    std::string rt;
-    std::string name;
-    std::string args;
-    std::string body;
-  };
 
   FunctionScopePtr createPseudoMain(AnalysisResultConstPtr ar);
   void setFileLevel(StatementListPtr stmt);

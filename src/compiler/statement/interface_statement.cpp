@@ -79,13 +79,12 @@ void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
   vector<string> bases;
   if (m_base) m_base->getStrings(bases);
 
-  FileScopePtr fs = dynamic_pointer_cast<FileScope>(scope);
   StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
   ClassScopePtr classScope
     (new ClassScope(ClassScope::KindOfInterface, m_name, "", bases,
                     m_docComment, stmt));
   setBlockScope(classScope);
-  fs->addClass(ar, classScope);
+  scope->addClass(ar, classScope);
 
   if (m_stmt) {
     for (int i = 0; i < m_stmt->getCount(); i++) {

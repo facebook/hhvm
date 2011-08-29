@@ -95,6 +95,7 @@ public:
   virtual bool enableXHP();
   IMPLEMENT_XHP_ATTRIBUTES;
 
+  void failed();
   // result
   StatementListPtr getTree() const { return m_tree;}
 

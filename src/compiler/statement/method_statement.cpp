@@ -224,7 +224,7 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
     for (int i = 0; i < m_params->getCount(); i++) {
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
-      param->parseHandler(ar, fs, classScope);
+      param->parseHandler(classScope);
     }
   }
   FunctionScope::RecordFunctionInfo(m_name, fs);

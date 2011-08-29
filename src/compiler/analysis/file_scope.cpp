@@ -70,6 +70,13 @@ FunctionScopePtr FileScope::setTree(AnalysisResultConstPtr ar,
   return createPseudoMain(ar);
 }
 
+void FileScope::cleanupForError() {
+  StringToFunctionScopePtrVecMap().swap(m_functions);
+  StringToClassScopePtrVecMap().swap(m_classes);
+  ClassScopePtrVec().swap(m_ignoredClasses);
+  m_pseudoMain.reset();
+}
+
 bool FileScope::addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope) {
   if (ar->declareClass(classScope)) {
     m_classes[classScope->getName()].push_back(classScope);

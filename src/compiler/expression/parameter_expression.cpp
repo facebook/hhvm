@@ -54,10 +54,8 @@ ExpressionPtr ParameterExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ParameterExpression::parseHandler(AnalysisResultConstPtr ar,
-                                       FunctionScopePtr func,
-                                       ClassScopePtr cls) {
-  if (cls && !m_type.empty()) {
+void ParameterExpression::parseHandler(ClassScopePtr cls) {
+  if (!m_type.empty()) {
     if (m_type == "self") {
       m_type = cls->getName();
     } else if (m_type == "parent") {
@@ -66,7 +64,6 @@ void ParameterExpression::parseHandler(AnalysisResultConstPtr ar,
       }
     }
   }
-  func->getVariables()->addParam(m_name, TypePtr(), ar, ExpressionPtr());
 }
 
 void ParameterExpression::defaultToNull(AnalysisResultPtr ar) {

@@ -60,13 +60,6 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   // as a function may be declared inside a class's method, yet this function
   // is a global function, not a class method.
   FunctionScopePtr fs = onInitialParse(ar, scope);
-  if (m_params) {
-    for (int i = 0; i < m_params->getCount(); i++) {
-      ParameterExpressionPtr param =
-        dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
-      param->parseHandler(ar, fs, ClassScopePtr());
-    }
-  }
   FunctionScope::RecordFunctionInfo(m_name, fs);
   if (!scope->addFunction(ar, fs)) {
     m_ignored = true;

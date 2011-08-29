@@ -243,7 +243,6 @@ Variant f_forward_static_call_array(CVarRef function, CArrRef params) {
 }
 
 Variant f_forward_static_call(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
-#ifdef ENABLE_LATE_STATIC_BINDING
   CStrRef cls = FrameInjection::GetClassName();
   if (cls.empty()) {
     raise_error("Cannot call forward_static_call() "
@@ -253,18 +252,11 @@ Variant f_forward_static_call(int _argc, CVarRef function, CArrRef _argv /* = nu
   FrameInjection::StaticClassNameHelper h(ThreadInfo::s_threadInfo.getNoCheck(),
                                           cls);
   return f_call_user_func_array(function, _argv, true);
-#else
-  throw NotSupportedException(__func__, "ENABLE_LATE_STATIC_BINDING is off");
-#endif
 }
 
 String f_get_called_class() {
-#ifdef ENABLE_LATE_STATIC_BINDING
   return FrameInjection::GetStaticClassName(
     ThreadInfo::s_threadInfo.getNoCheck());
-#else
-  throw NotSupportedException(__func__, "ENABLE_LATE_STATIC_BINDING is off");
-#endif
 }
 
 String f_create_function(CStrRef args, CStrRef code) {

@@ -49,7 +49,6 @@ public:
   static Eval::VariableEnvironment *GetVariableEnvironment(bool skip = false);
   static int GetLine(bool skip = false);
 
-#ifdef ENABLE_LATE_STATIC_BINDING
   // what does "static::" resolve to?
   static CStrRef GetStaticClassName(ThreadInfo *info);
   static const String *SetStaticClassName(ThreadInfo *info, CStrRef cls) {
@@ -67,7 +66,6 @@ public:
     FrameInjection *t = info->m_top;
     if (t) t->m_staticClass = NULL;
   }
-#endif /* ENABLE_LATE_STATIC_BINDING */
 
   static bool IsGlobalScope();
   static bool IsGlobalScope(FrameInjection *frame);
@@ -91,9 +89,7 @@ protected:
   // constructors and destructor are supposed to be inlined by subclasses
   FrameInjection(const char *name, int fs)
     : m_name(name),
-#ifdef ENABLE_LATE_STATIC_BINDING
       m_staticClass(NULL),
-#endif
       m_line(0), m_flags(fs) {
     m_info = ThreadInfo::s_threadInfo.getNoCheck();
     initCommon();
@@ -140,10 +136,8 @@ public:
   bool isObjectMethodFrame() const { return m_flags & ObjectMethod; }
   bool isPseudoMainFrame() const { return m_flags & PseudoMain; }
 
-#ifdef ENABLE_LATE_STATIC_BINDING
   void setStaticClassName(CStrRef cls) { m_staticClass = &cls; }
   void resetStaticClassName() { m_staticClass = NULL; }
-#endif /* ENABLE_LATE_STATIC_BINDING */
 
   /**
    * Complex accessors. EvalFrameInjection overwrites these.
@@ -152,7 +146,6 @@ public:
   Array getArgs();
 
 public:
-#ifdef ENABLE_LATE_STATIC_BINDING
   class StaticClassNameHelper {
   public:
     StaticClassNameHelper(ThreadInfo *info, CStrRef cls) : m_info(info) {
@@ -164,16 +157,13 @@ public:
   private:
     ThreadInfo *m_info;
   };
-#endif /* ENABLE_LATE_STATIC_BINDING */
 
 protected:
   ThreadInfo     *m_info;
   FrameInjection *m_prev;
   const char     *m_name;
 
-#ifdef ENABLE_LATE_STATIC_BINDING
   const String   *m_staticClass;
-#endif /* ENABLE_LATE_STATIC_BINDING */
 
   int m_line;
   int m_flags;

@@ -123,9 +123,7 @@ static CallUserFuncKind getClassMethodInfo(
       return CallUserFuncObjStatic;
     }
     obj = classname.getObjectData();
-#ifdef ENABLE_LATE_STATIC_BINDING
     sclass = bound ? FrameInjection::GetClassName(skip) : obj->o_getClassName();
-#endif
     return CallUserFuncObj;
   }
   if (!classname.isString()) {
@@ -142,11 +140,9 @@ static CallUserFuncKind getClassMethodInfo(
   if (obj && obj->o_instanceof(sclass)) {
     return CallUserFuncWithinCls;
   }
-#ifdef ENABLE_LATE_STATIC_BINDING
   if (!bound) {
     return CallUserFuncUnbound;
   }
-#endif /* ENABLE_LATE_STATIC_BINDING */
   return CallUserFuncCommon;
 }
 
@@ -164,10 +160,8 @@ Variant call_user_func_array_helper(int kind,
   case CallUserFuncObjStatic:
     return classname.getObjectData()->o_invoke_ex(cls, method, params, false);
   case CallUserFuncObj: {
-#ifdef ENABLE_LATE_STATIC_BINDING
     FrameInjection::StaticClassNameHelper scn(
       ThreadInfo::s_threadInfo.getNoCheck(), sclass);
-#endif
     return obj->o_invoke(method, params, -1, false);
   }
   case CallUserFuncWithinCls:
@@ -205,13 +199,11 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
     String sfunction = function.toString();
     int c = sfunction.find("::");
     if (c != 0 && c != String::npos && c + 2 < sfunction.size()) {
-#ifdef ENABLE_LATE_STATIC_BINDING
       if (!bound) {
         return invoke_static_method_bind(sfunction.substr(0, c),
                                          sfunction.substr(c + 2), params,
                                          false);
       }
-#endif /* ENABLE_LATE_STATIC_BINDING */
       return invoke_static_method(sfunction.substr(0, c),
                                   sfunction.substr(c + 2), params,
                                   false);
@@ -253,14 +245,12 @@ bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp,
       } else if (classname->same(s_parent.get())) {
         classname = FrameInjection::GetParentClassName(true);
       } else {
-#ifdef ENABLE_LATE_STATIC_BINDING
         if (classname->same(s_static.get())) {
           ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
           classname = FrameInjection::GetStaticClassName(ti);
         } else {
           doBind = true;
         }
-#endif
       }
       mcp.dynamicNamedCall(classname, methodname);
       if (mcp.ci) return true;
@@ -319,14 +309,12 @@ bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp,
       } else if (sclass->same(s_parent.get())) {
         sclass = FrameInjection::GetParentClassName(true);
       } else {
-#ifdef ENABLE_LATE_STATIC_BINDING
         if (sclass->same(s_static.get())) {
           ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
           sclass = FrameInjection::GetStaticClassName(ti);
         } else {
           doBind = true;
         }
-#endif
       }
       ObjectData *obj = FrameInjection::GetThis(true);
       if (obj && obj->o_instanceof(sclass)) {
@@ -1597,7 +1585,6 @@ Variant &get_static_property_lval(CStrRef s, const char *prop) {
   return Variant::lvalBlackHole();
 }
 
-#ifdef ENABLE_LATE_STATIC_BINDING
 Variant invoke_static_method_bind(CStrRef s, CStrRef method,
                                   CArrRef params, bool fatal /* = true */) {
   ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
@@ -1614,7 +1601,6 @@ Variant invoke_static_method_bind(CStrRef s, CStrRef method,
   }
   return strongBind(ret);
 }
-#endif /* ENABLE_LATE_STATIC_BINDING */
 
 void MethodCallPackage::methodCall(ObjectData *self, CStrRef method,
                                    int64 prehash /* = -1 */) {
@@ -1698,22 +1684,15 @@ String MethodCallPackage::getClassName() {
   }
 }
 void MethodCallPackage::lateStaticBind(ThreadInfo *ti) {
-#ifdef ENABLE_LATE_STATIC_BINDING
   rootCls = FrameInjection::GetStaticClassName(ti).get();
   get_call_info_static_method(*this);
-#else
-  m_fatal = true;
-  fail();
-#endif
 }
 
 HOT_FUNC
 const CallInfo *MethodCallPackage::bindClass(FrameInjection &fi) {
-#ifdef ENABLE_LATE_STATIC_BINDING
   if (ci->m_flags & CallInfo::StaticMethod) {
     fi.setStaticClassName(obj->getRoot()->o_getClassName());
   }
-#endif
   return ci;
 }
 

@@ -123,12 +123,10 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
     return null;
   }
   if (doBind) {
-#ifdef ENABLE_LATE_STATIC_BINDING
     // If 'doBind' is true, we need to set the late bound class before
     // calling the user callback
     FrameInjection::StaticClassNameHelper scn(
       ThreadInfo::s_threadInfo.getNoCheck(), classname);
-#endif
     return ArrayUtil::Filter(arr_input, filter_func, &mcp);
   } else {
     return ArrayUtil::Filter(arr_input, filter_func, &mcp);
@@ -203,12 +201,10 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
     return ArrayUtil::Map(inputs, map_func, NULL);
   }
   if (doBind) {
-#ifdef ENABLE_LATE_STATIC_BINDING
     // If 'doBind' is true, we need to set the late bound class before
     // calling the user callback
     FrameInjection::StaticClassNameHelper scn(
       ThreadInfo::s_threadInfo.getNoCheck(), classname);
-#endif
     return ArrayUtil::Map(inputs, map_func, &mcp);
   } else {
     return ArrayUtil::Map(inputs, map_func, &mcp);
@@ -421,12 +417,10 @@ Variant f_array_reduce(CVarRef input, CVarRef callback,
     return null;
   }
   if (doBind) {
-#ifdef ENABLE_LATE_STATIC_BINDING
     // If 'doBind' is true, we need to set the late bound class before
     // calling the user callback
     FrameInjection::StaticClassNameHelper scn(
       ThreadInfo::s_threadInfo.getNoCheck(), classname);
-#endif
     return ArrayUtil::Reduce(arr_input, reduce_func, &mcp, initial);
   } else {
     return ArrayUtil::Reduce(arr_input, reduce_func, &mcp, initial);
@@ -558,12 +552,10 @@ bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
   }
   PointerSet seen;
   if (doBind) {
-#ifdef ENABLE_LATE_STATIC_BINDING
     // If 'doBind' is true, we need to set the late bound class before
     // calling the user callback
     FrameInjection::StaticClassNameHelper scn(
       ThreadInfo::s_threadInfo.getNoCheck(), classname);
-#endif
     ArrayUtil::Walk(input, walk_func, &mcp, true, &seen, userdata);
   } else {
     ArrayUtil::Walk(input, walk_func, &mcp, true, &seen, userdata);
@@ -583,12 +575,10 @@ bool f_array_walk(VRefParam input, CVarRef funcname,
     return null;
   }
   if (doBind) {
-#ifdef ENABLE_LATE_STATIC_BINDING
     // If 'doBind' is true, we need to set the late bound class before
     // calling the user callback
     FrameInjection::StaticClassNameHelper scn(
       ThreadInfo::s_threadInfo.getNoCheck(), classname);
-#endif
     ArrayUtil::Walk(input, walk_func, &mcp, false, NULL, userdata);
   } else {
     ArrayUtil::Walk(input, walk_func, &mcp, false, NULL, userdata);

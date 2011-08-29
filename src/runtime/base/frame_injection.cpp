@@ -287,7 +287,6 @@ int FrameInjection::GetLine(bool skip /* = false */) {
   return -1;
 }
 
-#ifdef ENABLE_LATE_STATIC_BINDING
 CStrRef FrameInjection::GetStaticClassName(ThreadInfo *info) {
   ASSERT(info);
   for (FrameInjection *t = info->m_top; t; t = t->m_prev) {
@@ -305,7 +304,6 @@ CStrRef FrameInjection::GetStaticClassName(ThreadInfo *info) {
   }
   return empty_string;
 }
-#endif /* ENABLE_LATE_STATIC_BINDING */
 
 bool FrameInjection::IsGlobalScope() {
   return IsGlobalScope(ThreadInfo::s_threadInfo->m_top);

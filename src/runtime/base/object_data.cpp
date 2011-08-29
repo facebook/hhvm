@@ -198,11 +198,9 @@ const Eval::MethodStatement* ObjectData::getConstructorStatement() const {
   return NULL;
 }
 
-#ifdef ENABLE_LATE_STATIC_BINDING
 void ObjectData::bindThis(ThreadInfo *info) {
   FrameInjection::SetStaticClassName(info, getRoot()->o_getClassName());
 }
-#endif
 
 void ObjectData::setDummy() {
   int *pmax = os_max_id.getNoCheck();

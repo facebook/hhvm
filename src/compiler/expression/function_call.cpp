@@ -595,25 +595,19 @@ bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   cg.wrapExpressionBegin();
   if (m_classScope) {
     string className = m_classScope->getId();
-#ifdef ENABLE_LATE_STATIC_BINDING
     cg_printf("fi.setStaticClassName(%s%s::s_class_name);\n",
               Option::ClassPrefix, className.c_str());
-#endif
   } else {
     m_clsNameTemp = cg.createNewLocalId(shared_from_this());
     cg_printf("CStrRef clsName%d(", m_clsNameTemp);
     cg_printString(m_origClassName, ar, shared_from_this());
     cg_printf(");\n");
-#ifdef ENABLE_LATE_STATIC_BINDING
     cg_printf("fi.setStaticClassName(clsName%d);\n", m_clsNameTemp);
-#endif
   }
   m_noStatic = true;
   preOutputStash(cg, ar, FixOrder);
   m_noStatic = false;
-#ifdef ENABLE_LATE_STATIC_BINDING
   cg_printf("fi.resetStaticClassName();\n");
-#endif
 
   if (!(state & FixOrder)) {
     cg_printf("id(%s);\n", cppTemp().c_str());

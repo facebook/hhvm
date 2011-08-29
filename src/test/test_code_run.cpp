@@ -512,7 +512,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
 
   // PHP 5.3 features
   RUN_TEST(TestVariableClassName);
-  RUN_TEST(TestLateStaticBinding); // requires ENABLE_LATE_STATIC_BINDING
+  RUN_TEST(TestLateStaticBinding);
   RUN_TEST(TestCallStatic);
   RUN_TEST(TestNowDoc);
   RUN_TEST(TestTernaryShortcut);

@@ -438,8 +438,6 @@ do { \
 #define INTERCEPT_INJECTION(func, args, rr)
 #endif
 
-#ifdef ENABLE_LATE_STATIC_BINDING
-
 #define STATIC_CLASS_NAME_CALL(s, exp)                                 \
   (FrameInjection::StaticClassNameHelper(fi.getThreadInfo(), s), exp)
 #define STATIC_CLASS_INVOKE_CALL(s, exp)                               \
@@ -447,15 +445,6 @@ do { \
 
 #define BIND_CLASS_DOT  bindClass(fi.getThreadInfo()).
 #define BIND_CLASS_ARROW(T) bindClass<c_##T>(fi.getThreadInfo())->
-
-#else
-
-#define STATIC_CLASS_NAME_CALL(s, exp) exp
-#define STATIC_CLASS_INVOKE_CALL(s, exp) exp
-#define BIND_CLASS_DOT
-#define BIND_CLASS_ARROW(T)
-
-#endif
 
 // for collecting function/method parameter type information at runtime
 #define RTTI_INJECTION(v, id)                   \

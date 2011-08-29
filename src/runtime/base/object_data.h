@@ -133,14 +133,12 @@ class ObjectData : public CountableNF {
   virtual int64  o_toInt64() const;
   virtual double o_toDouble()  const { return o_toInt64();}
 
-#ifdef ENABLE_LATE_STATIC_BINDING
   template<typename T>
   T *bindClass(ThreadInfo *info) {
     bindThis(info);
     return static_cast<T*>(this);
   }
   void bindThis(ThreadInfo *info);
-#endif
 
   void setDummy();
   static Variant ifa_dummy(MethodCallPackage &mcp, int count,

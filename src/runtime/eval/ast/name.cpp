@@ -49,11 +49,9 @@ NamePtr Name::fromExp(CONSTRUCT_ARGS, ExpressionPtr e) {
 NamePtr Name::fromStaticClassExp(CONSTRUCT_ARGS, ExpressionPtr e) {
   return NamePtr(new StaticClassExprName(CONSTRUCT_PASS, e));
 }
-#ifdef ENABLE_LATE_STATIC_BINDING
 NamePtr Name::LateStatic(CONSTRUCT_ARGS) {
   return NamePtr(new LateStaticName(CONSTRUCT_PASS));
 }
-#endif
 
 StringName::StringName(CONSTRUCT_ARGS, const string &name,
                        bool isSp /* = false */)
@@ -123,7 +121,6 @@ String StaticClassExprName::get(VariableEnvironment &env) const {
   return get_static_class_name(m_name->eval(env));
 }
 
-#ifdef ENABLE_LATE_STATIC_BINDING
 LateStaticName::LateStaticName(CONSTRUCT_ARGS) : Name(CONSTRUCT_PASS) {}
 
 String LateStaticName::get(VariableEnvironment &env) const {
@@ -134,7 +131,6 @@ String LateStaticName::get(VariableEnvironment &env) const {
 void LateStaticName::dump(std::ostream &out) const {
   out << "static";
 }
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 }

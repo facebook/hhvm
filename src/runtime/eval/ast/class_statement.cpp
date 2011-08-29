@@ -141,6 +141,8 @@ void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
       int mods = mit->second.second;
       const MethodStatement *mmit = mit->second.first;
       if (mods & Final) {
+        const Location *loc = (*it).get()->loc();
+        set_line(loc->line0, loc->char0, loc->line1, loc->char1);
         throw FatalErrorException(0,
                                   "Cannot override final method %s::%s()",
                                   mmit->getClass()->name().c_str(),
@@ -153,6 +155,8 @@ void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
         } else if (mods & Private) {
           al = "private";
         }
+        const Location *loc = (*it).get()->loc();
+        set_line(loc->line0, loc->char0, loc->line1, loc->char1);
         throw FatalErrorException(0,
                                   "Access level to %s must be %s or weaker "
                                   "(as in class %s)",

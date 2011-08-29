@@ -53,10 +53,17 @@ const MethodStatement *ClassEvalState::getMethod(const char *m) {
   return it->second.first;
 }
 
+inline void ClassEvalState::semanticCheck() {
+  if (!m_doneSemanticCheck) {
+    m_class->loadMethodTable(*this);
+    m_class->semanticCheck(NULL);
+    m_doneSemanticCheck = true;
+  }
+}
+
 void ClassEvalState::initializeInstance() {
   if (!m_initializedInstance) {
     semanticCheck();
-    m_class->loadMethodTable(*this);
     m_initializedInstance = true;
   }
 }
@@ -69,12 +76,6 @@ void ClassEvalState::initializeStatics() {
   }
 }
 
-void ClassEvalState::semanticCheck() {
-  if (!m_doneSemanticCheck) {
-    m_class->semanticCheck(NULL);
-    m_doneSemanticCheck = true;
-  }
-}
 void ClassEvalState::fiberInit(ClassEvalState &oces,
                                FiberReferenceMap &refMap) {
   m_class = oces.m_class;

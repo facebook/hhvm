@@ -16,8 +16,8 @@ SIZE_SORTED_SOURCES := $(shell ls -S $(filter-out %.no.cpp, $(RECURSIVE_SOURCES)
 CXX_SOURCES := $(SIZE_SORTED_SOURCES)
 
 ifdef RANDOMIZE_CXX_SOURCES
-CXX_SOURCES := $(shell perl -MList::Util=shuffle
-	-ne'$$,=" "; print shuffle split/ /' $(CXX_SOURCES))
+CXX_SOURCES := $(shell perl -MList::Util=shuffle \
+ -e'print join " ",shuffle @ARGV' $(CXX_SOURCES))
 endif
 
 -include sep_extensions.mk

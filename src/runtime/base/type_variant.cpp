@@ -3544,6 +3544,7 @@ void Variant::setStatic() const {
   if (has_eval_support) return setEvalScalar();
   switch (m_type) {
   case KindOfString:
+    m_data.pstr->setStatic();
     break;
   case KindOfArray:
     m_data.parr->setStatic();

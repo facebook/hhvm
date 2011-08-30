@@ -127,6 +127,9 @@ bool ClassScope::NeedStaticArray(ClassScopePtr cls, FunctionScopePtr func) {
 
 void ClassScope::derivedMagicMethods(ClassScopePtr super) {
   super->setAttribute(NotFinal);
+  if (derivedByDynamic()) {
+    super->m_derivedByDynamic = true;
+  }
   if (m_attribute & (HasUnknownPropGetter|MayHaveUnknownPropGetter)) {
     super->setAttribute(MayHaveUnknownPropGetter);
   }
@@ -242,16 +245,20 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
   // add all functions this class has
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
          m_functions.begin(); iter != m_functions.end(); ++iter) {
-    if (!collectPrivate && iter->second.back()->isPrivate()) continue;
+    const FunctionScopePtr &fs = iter->second.back();
+    if (!collectPrivate && fs->isPrivate()) continue;
 
-    StringToFunctionScopePtrMap::const_iterator iterFuncs =
-      funcs.find(iter->first);
-    if (iterFuncs == funcs.end()) {
-      funcs[iter->first] = iter->second.back();
+    FunctionScopePtr &func = funcs[iter->first];
+    if (!func) {
+      func = fs;
     } else {
-      iterFuncs->second->setVirtual();
-      iter->second.back()->setVirtual();
-      iter->second.back()->setHasOverride();
+      func->setVirtual();
+      fs->setVirtual();
+      fs->setHasOverride();
+      if (fs->isFinal()) {
+        Compiler::Error(Compiler::InvalidOverride,
+                        fs->getStmt(), func->getStmt());
+      }
     }
   }
 
@@ -263,20 +270,15 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
     }
   }
 
+  int n = forInvoke ? m_parent.empty() ? 0 : 1 : m_bases.size();
   // walk up
-  for (int i = m_bases.size() - 1; i >= 0; i--) {
+  for (int i = 0; i < n; i++) {
     const string &base = m_bases[i];
-    if (forInvoke && base != m_parent) {
-      continue;
-    }
     ClassScopePtr super = ar->findClass(base);
     if (super) {
-      if (derivedByDynamic()) {
-        super->m_derivedByDynamic = true;
-      }
       if (super->isRedeclaring()) {
+        if (forInvoke) continue;
         if (base == m_parent) {
-          if (forInvoke) continue;
           const ClassScopePtrVec &classes = ar->findRedeclaredClasses(m_parent);
           StringToFunctionScopePtrMap pristine(funcs);
           BOOST_FOREACH(ClassScopePtr cls, classes) {

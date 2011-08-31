@@ -154,7 +154,7 @@ void FunctionCall::markRefParams(FunctionScopePtr func,
         sym->setCallTimeRef();
       }
     }
-  } else if (!m_name.empty()) {
+  } else if (Option::WholeProgram && !m_name.empty()) {
     FunctionScope::FunctionInfoPtr info =
       FunctionScope::GetFunctionInfo(m_name);
     if (info) {

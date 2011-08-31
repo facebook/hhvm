@@ -212,7 +212,6 @@ int Option::InvokeFewArgsCount = 6;
 bool Option::InvokeWithSpecificArgs = true;
 bool Option::FlattenInvoke = true;
 int Option::InlineFunctionThreshold = -1;
-bool Option::ControlEvalOrder = true;
 bool Option::UseVirtualDispatch = false;
 bool Option::EliminateDeadCode = true;
 bool Option::CopyProp = false;
@@ -223,6 +222,7 @@ bool Option::ControlFlow = true;
 bool Option::VariableCoalescing = false;
 bool Option::ArrayAccessIdempotent = false;
 bool Option::DumpAst = false;
+bool Option::WholeProgram = true;
 std::string Option::DocJson;
 
 bool Option::AllDynamic = true;
@@ -432,6 +432,7 @@ void Option::Load(Hdf &config) {
   VariableCoalescing       = config["VariableCoalescing"].getBool(false);
   ArrayAccessIdempotent    = config["ArrayAccessIdempotent"].getBool(false);
   DumpAst                  = config["DumpAst"].getBool(false);
+  WholeProgram             = config["WholeProgram"].getBool(true);
   PregenerateCPP           = config["PregenerateCPP"].getBool(false);
   GenerateFFIStaticBinding = config["GenerateFFIStaticBinding"].getBool(true);
 

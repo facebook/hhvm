@@ -1057,12 +1057,12 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         setAttribute(VariableTable::NeedGlobalPointer);
     }
     if (m_params) {
-      if (func) {
+      if (func && func->isRedeclaring()) {
         FunctionScope::FunctionInfoPtr info =
           FunctionScope::GetFunctionInfo(m_name);
         assert(info);
         for (int i = m_params->getCount(); i--; ) {
-          if (info->isRefParam(i)) {
+          if (!Option::WholeProgram || info->isRefParam(i)) {
             m_params->markParam(i, canInvokeFewArgs());
           }
         }

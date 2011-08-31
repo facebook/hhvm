@@ -345,7 +345,6 @@ public:
   static bool InvokeWithSpecificArgs;
   static bool FlattenInvoke;
   static int InlineFunctionThreshold;
-  static bool ControlEvalOrder;
   static bool UseVirtualDispatch;
   static bool EliminateDeadCode;
   static bool CopyProp;
@@ -365,6 +364,7 @@ public:
   static bool ControlFlow;
   static bool VariableCoalescing;
   static bool DumpAst;
+  static bool WholeProgram;
   static std::string DocJson; // filename to dump doc JSON to
   static bool PregenerateCPP;
   static bool GenerateFFIStaticBinding;

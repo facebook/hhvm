@@ -12287,6 +12287,14 @@ Variant ifa_fnmatch(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 Variant i_fnmatch(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_fnmatch);
 }
+Variant ifa_xbox_process_call_message(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("xbox_process_call_message", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (x_xbox_process_call_message(arg0));
+}
+Variant i_xbox_process_call_message(void *extra, CArrRef params) {
+  return invoke_func_few_handler(extra, params, &ifa_xbox_process_call_message);
+}
 Variant ifa_forward_static_call_array(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("forward_static_call_array", count, 2, 2, 1);
   CVarRef arg0(a0);
@@ -22578,6 +22586,7 @@ CallInfo ci_rename_function((void*)&i_rename_function, (void*)&ifa_rename_functi
 CallInfo ci_apd_set_pprof_trace((void*)&i_apd_set_pprof_trace, (void*)&ifa_apd_set_pprof_trace, 2, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_public_encrypt((void*)&i_openssl_public_encrypt, (void*)&ifa_openssl_public_encrypt, 4, 0, 0x0000000000000002LL);
 CallInfo ci_fnmatch((void*)&i_fnmatch, (void*)&ifa_fnmatch, 3, 0, 0x0000000000000000LL);
+CallInfo ci_xbox_process_call_message((void*)&i_xbox_process_call_message, (void*)&ifa_xbox_process_call_message, 1, 0, 0x0000000000000000LL);
 CallInfo ci_forward_static_call_array((void*)&i_forward_static_call_array, (void*)&ifa_forward_static_call_array, 2, 0, 0x0000000000000000LL);
 CallInfo ci_xmlwriter_write_dtd_element((void*)&i_xmlwriter_write_dtd_element, (void*)&ifa_xmlwriter_write_dtd_element, 3, 0, 0x0000000000000000LL);
 CallInfo ci_intval((void*)&i_intval, (void*)&ifa_intval, 2, 0, 0x0000000000000000LL);
@@ -31777,6 +31786,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x56B908FC91C834D8LL, magickflopimage) {
         ci = &ci_magickflopimage;
+        return true;
+      }
+      break;
+    case 5338:
+      HASH_GUARD(0x1E6E2E538A0754DALL, xbox_process_call_message) {
+        ci = &ci_xbox_process_call_message;
         return true;
       }
       break;

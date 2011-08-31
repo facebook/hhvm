@@ -284,6 +284,7 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
     Logger::Error("%s", errorMsg.c_str());
     error = true;
   } catch (const Exception &e) {
+    errorMsg = "";
     if (where == HandlerException) {
       errorMsg = "Exception handler threw an exception: ";
     }
@@ -302,6 +303,7 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
       Logger::Error("%s", errorMsg.c_str());
     }
   } catch (const Object &e) {
+    errorMsg = "";
     if (where == HandlerException) {
       errorMsg = "Exception handler threw an object exception: ";
     }
@@ -1265,6 +1267,7 @@ void hphp_session_exit() {
 
 void hphp_process_exit() {
   FiberAsyncFunc::Stop();
+  XboxServer::Stop();
   Eval::Debugger::Stop();
   Extension::ShutdownModules();
   LightProcess::Close();

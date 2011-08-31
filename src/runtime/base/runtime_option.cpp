@@ -154,7 +154,7 @@ VirtualHostPtrVec RuntimeOption::VirtualHosts;
 IpBlockMapPtr RuntimeOption::IpBlocks;
 SatelliteServerInfoPtrVec RuntimeOption::SatelliteServerInfos;
 
-int RuntimeOption::XboxServerThreadCount = 0;
+int RuntimeOption::XboxServerThreadCount = 10;
 int RuntimeOption::XboxServerMaxQueueLength = INT_MAX;
 int RuntimeOption::XboxServerPort = 0;
 int RuntimeOption::XboxDefaultLocalTimeoutMilliSeconds = 500;
@@ -165,7 +165,7 @@ std::string RuntimeOption::XboxServerInfoWarmupDoc;
 std::string RuntimeOption::XboxServerInfoReqInitFunc;
 std::string RuntimeOption::XboxServerInfoReqInitDoc;
 bool RuntimeOption::XboxServerInfoAlwaysReset = false;
-bool RuntimeOption::XboxServerLogInfo = true;
+bool RuntimeOption::XboxServerLogInfo = false;
 std::string RuntimeOption::XboxProcessMessageFunc = "xbox_process_message";
 std::string RuntimeOption::XboxPassword;
 std::set<std::string> RuntimeOption::XboxPasswords;
@@ -842,7 +842,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
   }
   {
     Hdf xbox = config["Xbox"];
-    XboxServerThreadCount = xbox["ServerInfo.ThreadCount"].getInt32(0);
+    XboxServerThreadCount = xbox["ServerInfo.ThreadCount"].getInt32(10);
     XboxServerMaxQueueLength =
       xbox["ServerInfo.MaxQueueLength"].getInt32(INT_MAX);
     if (XboxServerMaxQueueLength < 0) XboxServerMaxQueueLength = INT_MAX;
@@ -857,7 +857,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     XboxServerInfoReqInitFunc = xbox["ServerInfo.RequestInitFunction"].get("");
     XboxServerInfoReqInitDoc = xbox["ServerInfo.RequestInitDocument"].get("");
     XboxServerInfoAlwaysReset = xbox["ServerInfo.AlwaysReset"].getBool(false);
-    XboxServerLogInfo = xbox["ServerInfo.LogInfo"].getBool(true);
+    XboxServerLogInfo = xbox["ServerInfo.LogInfo"].getBool(false);
     XboxProcessMessageFunc =
       xbox["ProcessMessageFunc"].get("xbox_process_message");
   }

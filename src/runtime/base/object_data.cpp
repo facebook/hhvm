@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/object_data.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
@@ -51,9 +50,6 @@ static StaticString s_serialize("serialize");
 ///////////////////////////////////////////////////////////////////////////////
 // constructor/destructor
 ObjectData::~ObjectData() {
-  if (o_properties) {
-    o_properties->release();
-  }
   int &pmax = *os_max_id;
   if (o_id && o_id == pmax) {
     --pmax;
@@ -699,12 +695,9 @@ Variant *ObjectData::RealPropPublicHelper(
 
   if (propName.size() > 0 &&
       !(flags & RealPropNoDynamic) &&
-      (obj->o_properties ||
-       ((flags & RealPropCreate) &&
-        (obj->o_properties = NEW(Array)(), true)))) {
-    return obj->o_properties->lvalPtr(propName,
-                                      flags & RealPropWrite,
-                                      flags & RealPropCreate);
+      (obj->o_properties.get() || (flags & RealPropCreate))) {
+    return const_cast<ObjectData*>(obj)->o_properties.lvalPtr(
+      propName, flags & RealPropWrite, flags & RealPropCreate);
   }
 
   return NULL;
@@ -805,12 +798,9 @@ Variant *ObjectData::o_realPropHook(CStrRef propName, int flags,
                                     CStrRef context /* = null_string */) const {
   if (propName.size() > 0 &&
       !(flags & RealPropNoDynamic) &&
-      (o_properties ||
-       ((flags & RealPropCreate) &&
-        (o_properties = NEW(Array)(), true)))) {
-    return o_properties->lvalPtr(propName,
-                                      flags & RealPropWrite,
-                                      flags & RealPropCreate);
+      (o_properties.get() || (flags & RealPropCreate))) {
+    return const_cast<ObjectData*>(this)->o_properties.lvalPtr(
+      propName, flags & RealPropWrite, flags & RealPropCreate);
   }
   return NULL;
 }
@@ -985,8 +975,8 @@ void ObjectData::o_setArray(CArrRef properties) {
 }
 
 void ObjectData::o_getArray(Array &props, bool pubOnly /* = false */) const {
-  if (o_properties && !o_properties->empty()) {
-    for (ArrayIter it(*o_properties); !it.end(); it.next()) {
+  if (!o_properties.empty()) {
+    for (ArrayIter it(o_properties); !it.end(); it.next()) {
       Variant key = it.first();
       CVarRef value = it.secondRef();
       props.addLval(key, true).setWithRef(value);
@@ -1006,7 +996,7 @@ Variant ObjectData::o_argval(bool byRef, CStrRef s,
 Object ObjectData::FromArray(ArrayData *properties) {
   ObjectData *ret = SystemLib::AllocStdClassObject();
   if (!properties->empty()) {
-    ret->o_properties = NEW(Array)(properties);
+    ret->o_properties = properties;
   }
   return ret;
 }
@@ -1179,8 +1169,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
 }
 
 Array ObjectData::o_getDynamicProperties() const {
-  if (o_properties) return *o_properties;
-  return Array();
+  return o_properties;
 }
 
 Variant ObjectData::o_invoke(CStrRef s, CArrRef params, int64 hash /* = -1 */,
@@ -1410,9 +1399,7 @@ ObjectData *ObjectData::clone() {
 }
 
 void ObjectData::cloneDynamic(ObjectData *orig) {
-  if (orig->o_properties) {
-    o_properties = NEW(Array)(*orig->o_properties);
-  }
+  o_properties = orig->o_properties;
 }
 
 ObjectData *ObjectData::getRoot() { return this; }
@@ -1476,8 +1463,8 @@ void ObjectData::o_unset(CStrRef prop, CStrRef context) {
     if (Variant *t = o_realProp(prop,
                                 RealPropWrite|RealPropNoDynamic, context)) {
       unset(*t);
-    } else if (o_properties && o_properties->exists(prop, true)) {
-      o_properties->weakRemove(prop, true);
+    } else if (o_properties.exists(prop, true)) {
+      o_properties.weakRemove(prop, true);
     }
   }
 }
@@ -1511,12 +1498,7 @@ Variant *ObjectData::___lval(Variant v_name) {
   return NULL;
 }
 Variant &ObjectData::___offsetget_lval(Variant v_name) {
-  if (!o_properties) {
-    // this is needed, since a lval() is actually going to create a null
-    // element in properties array
-    o_properties = NEW(Array)();
-  }
-  return o_properties->lvalAt(v_name, AccessFlags::Key);
+  return o_properties.lvalAt(v_name, AccessFlags::Key);
 }
 bool ObjectData::t___isset(Variant v_name) {
   return false;

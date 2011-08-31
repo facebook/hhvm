@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/dynamic_object_data.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/dynamic_object_data.h>
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/externals.h>
 #include <runtime/base/builtin_functions.h>

@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/base/complex_types.h>
 #include <runtime/eval/runtime/eval_object_data.h>
 #include <runtime/eval/ast/method_statement.h>
 #include <runtime/eval/ast/class_statement.h>

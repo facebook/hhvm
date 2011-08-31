@@ -17,7 +17,7 @@
 #ifndef __HPHP_RESOURCE_DATA_H__
 #define __HPHP_RESOURCE_DATA_H__
 
-#include <runtime/base/object_data.h>
+#include <runtime/base/complex_types.h>
 #include <runtime/base/memory/sweepable.h>
 
 namespace HPHP {

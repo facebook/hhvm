@@ -79,8 +79,7 @@ class ObjectData : public CountableNF {
     RealPropUnchecked = 8,// Dont check property accessibility
   };
 
-  ObjectData(bool isResource = false)
-    : o_properties(NULL), o_attribute(0) {
+  ObjectData(bool isResource = false) : o_attribute(0) {
     if (!isResource) {
       o_id = ++(*os_max_id);
     }
@@ -320,7 +319,7 @@ public:
                                        const ObjectStaticCallbacks *osc);
  protected:
   int o_id;                      // a numeric identifier of this object
-  mutable Array *o_properties;   // dynamic properties
+  Array         o_properties;    // dynamic properties
   void          cloneDynamic(ObjectData *orig);
  private:
   mutable int16  o_attribute;    // vairous flags

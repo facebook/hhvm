@@ -47,9 +47,11 @@ void init_thread_locals(void *arg /* = NULL */) {
   ThreadInfo::s_threadInfo.getCheck();
   g_context.getCheck();
   icu_get_checks();
-  Eval::VariableEnvironment::InitTempStack();
   s_hasRenamedFunction.getCheck();
-  ArgArray::s_stack.getCheck();
+  if (has_eval_support) {
+    Eval::VariableEnvironment::InitTempStack();
+    ArgArray::s_stack.getCheck();
+  }
 }
 
 void finish_thread_locals(void *arg /* = NULL */) {

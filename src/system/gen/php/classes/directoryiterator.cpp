@@ -55,15 +55,6 @@ const int c_RecursiveDirectoryIterator::s_instanceof_index[] = {
   4,-1,-1,-1,-1,-1,5,-1,
 
 };
-ObjectData *c_RecursiveDirectoryIterator::cloneImpl() {
-  ObjectData *obj = coo_RecursiveDirectoryIterator();
-  c_RecursiveDirectoryIterator::cloneSet(obj);
-  return obj;
-}
-void c_RecursiveDirectoryIterator::cloneSet(ObjectData *cl) {
-  c_RecursiveDirectoryIterator *clone = static_cast<c_RecursiveDirectoryIterator*>(cl);
-  c_DirectoryIterator::cloneSet(clone);
-}
 CallInfo c_RecursiveDirectoryIterator::ci_next((void*)&c_RecursiveDirectoryIterator::i_next, (void*)&c_RecursiveDirectoryIterator::ifa_next, 0, 4, 0x0000000000000000LL);
 CallInfo c_RecursiveDirectoryIterator::ci_key((void*)&c_RecursiveDirectoryIterator::i_key, (void*)&c_RecursiveDirectoryIterator::ifa_key, 0, 4, 0x0000000000000000LL);
 CallInfo c_RecursiveDirectoryIterator::ci_valid((void*)&c_RecursiveDirectoryIterator::i_valid, (void*)&c_RecursiveDirectoryIterator::ifa_valid, 0, 4, 0x0000000000000000LL);
@@ -437,15 +428,6 @@ const int c_DirectoryIterator::s_instanceof_index[] = {
   -1,-1,-1,-1,-1,-1,3,-1,
 
 };
-ObjectData *c_DirectoryIterator::cloneImpl() {
-  ObjectData *obj = coo_DirectoryIterator();
-  c_DirectoryIterator::cloneSet(obj);
-  return obj;
-}
-void c_DirectoryIterator::cloneSet(ObjectData *cl) {
-  c_DirectoryIterator *clone = static_cast<c_DirectoryIterator*>(cl);
-  c_SplFileInfo::cloneSet(clone);
-}
 CallInfo c_DirectoryIterator::ci_next((void*)&c_DirectoryIterator::i_next, (void*)&c_DirectoryIterator::ifa_next, 0, 4, 0x0000000000000000LL);
 CallInfo c_DirectoryIterator::ci_key((void*)&c_DirectoryIterator::i_key, (void*)&c_DirectoryIterator::ifa_key, 0, 4, 0x0000000000000000LL);
 CallInfo c_DirectoryIterator::ci_valid((void*)&c_DirectoryIterator::i_valid, (void*)&c_DirectoryIterator::ifa_valid, 0, 4, 0x0000000000000000LL);

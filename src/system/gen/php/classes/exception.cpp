@@ -39,15 +39,6 @@ const int c_PDOException::s_instanceof_index[] = {
   3,
   0,1,-1,-1,
 };
-ObjectData *c_PDOException::cloneImpl() {
-  ObjectData *obj = coo_PDOException();
-  c_PDOException::cloneSet(obj);
-  return obj;
-}
-void c_PDOException::cloneSet(ObjectData *cl) {
-  c_PDOException *clone = static_cast<c_PDOException*>(cl);
-  c_Exception::cloneSet(clone);
-}
 CallInfo c_PDOException::ci___construct((void*)&c_PDOException::i___construct, (void*)&c_PDOException::ifa___construct, 0, 4, 0x0000000000000000LL);
 Variant c_PDOException::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -105,15 +96,6 @@ const int c_UnexpectedValueException::s_instanceof_index[] = {
   -1,0,-1,-1,1,-1,-1,-1,
 
 };
-ObjectData *c_UnexpectedValueException::cloneImpl() {
-  ObjectData *obj = coo_UnexpectedValueException();
-  c_UnexpectedValueException::cloneSet(obj);
-  return obj;
-}
-void c_UnexpectedValueException::cloneSet(ObjectData *cl) {
-  c_UnexpectedValueException *clone = static_cast<c_UnexpectedValueException*>(cl);
-  c_RuntimeException::cloneSet(clone);
-}
 const ObjectStaticCallbacks cw_UnexpectedValueException = {
   (ObjectData*(*)(ObjectData*))coo_UnexpectedValueException,
   c_UnexpectedValueException::s_call_info_table,c_UnexpectedValueException::s_call_info_index,
@@ -133,15 +115,6 @@ const int c_OverflowException::s_instanceof_index[] = {
   -1,0,-1,-1,1,-1,-1,-1,
 
 };
-ObjectData *c_OverflowException::cloneImpl() {
-  ObjectData *obj = coo_OverflowException();
-  c_OverflowException::cloneSet(obj);
-  return obj;
-}
-void c_OverflowException::cloneSet(ObjectData *cl) {
-  c_OverflowException *clone = static_cast<c_OverflowException*>(cl);
-  c_RuntimeException::cloneSet(clone);
-}
 const ObjectStaticCallbacks cw_OverflowException = {
   (ObjectData*(*)(ObjectData*))coo_OverflowException,
   c_OverflowException::s_call_info_table,c_OverflowException::s_call_info_index,
@@ -161,15 +134,6 @@ const int c_OutOfBoundsException::s_instanceof_index[] = {
   -1,0,-1,-1,1,-1,-1,-1,
 
 };
-ObjectData *c_OutOfBoundsException::cloneImpl() {
-  ObjectData *obj = coo_OutOfBoundsException();
-  c_OutOfBoundsException::cloneSet(obj);
-  return obj;
-}
-void c_OutOfBoundsException::cloneSet(ObjectData *cl) {
-  c_OutOfBoundsException *clone = static_cast<c_OutOfBoundsException*>(cl);
-  c_RuntimeException::cloneSet(clone);
-}
 const ObjectStaticCallbacks cw_OutOfBoundsException = {
   (ObjectData*(*)(ObjectData*))coo_OutOfBoundsException,
   c_OutOfBoundsException::s_call_info_table,c_OutOfBoundsException::s_call_info_index,
@@ -187,15 +151,6 @@ const int c_LogicException::s_instanceof_index[] = {
   3,
   0,-1,-1,1,
 };
-ObjectData *c_LogicException::cloneImpl() {
-  ObjectData *obj = coo_LogicException();
-  c_LogicException::cloneSet(obj);
-  return obj;
-}
-void c_LogicException::cloneSet(ObjectData *cl) {
-  c_LogicException *clone = static_cast<c_LogicException*>(cl);
-  c_Exception::cloneSet(clone);
-}
 const ObjectStaticCallbacks cw_LogicException = {
   (ObjectData*(*)(ObjectData*))coo_LogicException,
   c_LogicException::s_call_info_table,c_LogicException::s_call_info_index,
@@ -215,15 +170,6 @@ const int c_RangeException::s_instanceof_index[] = {
   -1,-1,-1,0,1,-1,-1,-1,
 
 };
-ObjectData *c_RangeException::cloneImpl() {
-  ObjectData *obj = coo_RangeException();
-  c_RangeException::cloneSet(obj);
-  return obj;
-}
-void c_RangeException::cloneSet(ObjectData *cl) {
-  c_RangeException *clone = static_cast<c_RangeException*>(cl);
-  c_RuntimeException::cloneSet(clone);
-}
 const ObjectStaticCallbacks cw_RangeException = {
   (ObjectData*(*)(ObjectData*))coo_RangeException,
   c_RangeException::s_call_info_table,c_RangeException::s_call_info_index,
@@ -243,15 +189,6 @@ const int c_InvalidArgumentException::s_instanceof_index[] = {
   -1,-1,-1,0,1,2,-1,-1,
 
 };
-ObjectData *c_InvalidArgumentException::cloneImpl() {
-  ObjectData *obj = coo_InvalidArgumentException();
-  c_InvalidArgumentException::cloneSet(obj);
-  return obj;
-}
-void c_InvalidArgumentException::cloneSet(ObjectData *cl) {
-  c_InvalidArgumentException *clone = static_cast<c_InvalidArgumentException*>(cl);
-  c_LogicException::cloneSet(clone);
-}
 const ObjectStaticCallbacks cw_InvalidArgumentException = {
   (ObjectData*(*)(ObjectData*))coo_InvalidArgumentException,
   c_InvalidArgumentException::s_call_info_table,c_InvalidArgumentException::s_call_info_index,
@@ -271,15 +208,6 @@ const int c_UnderflowException::s_instanceof_index[] = {
   -1,-1,-1,-1,0,-1,-1,-1,
 
 };
-ObjectData *c_UnderflowException::cloneImpl() {
-  ObjectData *obj = coo_UnderflowException();
-  c_UnderflowException::cloneSet(obj);
-  return obj;
-}
-void c_UnderflowException::cloneSet(ObjectData *cl) {
-  c_UnderflowException *clone = static_cast<c_UnderflowException*>(cl);
-  c_RuntimeException::cloneSet(clone);
-}
 const ObjectStaticCallbacks cw_UnderflowException = {
   (ObjectData*(*)(ObjectData*))coo_UnderflowException,
   c_UnderflowException::s_call_info_table,c_UnderflowException::s_call_info_index,
@@ -299,15 +227,6 @@ const int c_OutOfRangeException::s_instanceof_index[] = {
   -1,-1,-1,0,1,-1,-1,-1,
 
 };
-ObjectData *c_OutOfRangeException::cloneImpl() {
-  ObjectData *obj = coo_OutOfRangeException();
-  c_OutOfRangeException::cloneSet(obj);
-  return obj;
-}
-void c_OutOfRangeException::cloneSet(ObjectData *cl) {
-  c_OutOfRangeException *clone = static_cast<c_OutOfRangeException*>(cl);
-  c_LogicException::cloneSet(clone);
-}
 const ObjectStaticCallbacks cw_OutOfRangeException = {
   (ObjectData*(*)(ObjectData*))coo_OutOfRangeException,
   c_OutOfRangeException::s_call_info_table,c_OutOfRangeException::s_call_info_index,
@@ -328,15 +247,6 @@ const int c_BadMethodCallException::s_instanceof_index[] = {
   0,-1,-1,1,2,-1,3,-1,
 
 };
-ObjectData *c_BadMethodCallException::cloneImpl() {
-  ObjectData *obj = coo_BadMethodCallException();
-  c_BadMethodCallException::cloneSet(obj);
-  return obj;
-}
-void c_BadMethodCallException::cloneSet(ObjectData *cl) {
-  c_BadMethodCallException *clone = static_cast<c_BadMethodCallException*>(cl);
-  c_BadFunctionCallException::cloneSet(clone);
-}
 const ObjectStaticCallbacks cw_BadMethodCallException = {
   (ObjectData*(*)(ObjectData*))coo_BadMethodCallException,
   c_BadMethodCallException::s_call_info_table,c_BadMethodCallException::s_call_info_index,
@@ -354,15 +264,6 @@ const int c_RuntimeException::s_instanceof_index[] = {
   3,
   0,-1,-1,-1,
 };
-ObjectData *c_RuntimeException::cloneImpl() {
-  ObjectData *obj = coo_RuntimeException();
-  c_RuntimeException::cloneSet(obj);
-  return obj;
-}
-void c_RuntimeException::cloneSet(ObjectData *cl) {
-  c_RuntimeException *clone = static_cast<c_RuntimeException*>(cl);
-  c_Exception::cloneSet(clone);
-}
 const ObjectStaticCallbacks cw_RuntimeException = {
   (ObjectData*(*)(ObjectData*))coo_RuntimeException,
   c_RuntimeException::s_call_info_table,c_RuntimeException::s_call_info_index,
@@ -379,21 +280,6 @@ const int c_Exception::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_Exception::cloneImpl() {
-  ObjectData *obj = coo_Exception();
-  c_Exception::cloneSet(obj);
-  return obj;
-}
-void c_Exception::cloneSet(ObjectData *cl) {
-  c_Exception *clone = static_cast<c_Exception*>(cl);
-  ObjectData::cloneSet(clone);
-  clone->m_message.setWithRef(m_message);
-  clone->m_code.setWithRef(m_code);
-  clone->m_previous.setWithRef(m_previous);
-  clone->m_file.setWithRef(m_file);
-  clone->m_line.setWithRef(m_line);
-  clone->m_trace.setWithRef(m_trace);
-}
 CallInfo c_Exception::ci_getmessage((void*)&c_Exception::i_getmessage, (void*)&c_Exception::ifa_getmessage, 0, 4, 0x0000000000000000LL);
 CallInfo c_Exception::ci___tostring((void*)&c_Exception::i___tostring, (void*)&c_Exception::ifa___tostring, 0, 4, 0x0000000000000000LL);
 CallInfo c_Exception::ci___construct((void*)&c_Exception::i___construct, (void*)&c_Exception::ifa___construct, 3, 4, 0x0000000000000000LL);
@@ -859,16 +745,6 @@ const int c_ErrorException::s_instanceof_index[] = {
   3,
   0,-1,-1,1,
 };
-ObjectData *c_ErrorException::cloneImpl() {
-  ObjectData *obj = coo_ErrorException();
-  c_ErrorException::cloneSet(obj);
-  return obj;
-}
-void c_ErrorException::cloneSet(ObjectData *cl) {
-  c_ErrorException *clone = static_cast<c_ErrorException*>(cl);
-  c_Exception::cloneSet(clone);
-  clone->m_severity.setWithRef(m_severity);
-}
 CallInfo c_ErrorException::ci___construct((void*)&c_ErrorException::i___construct, (void*)&c_ErrorException::ifa___construct, 5, 4, 0x0000000000000000LL);
 CallInfo c_ErrorException::ci_getseverity((void*)&c_ErrorException::i_getseverity, (void*)&c_ErrorException::ifa_getseverity, 0, 4, 0x0000000000000000LL);
 Variant c_ErrorException::i___construct(MethodCallPackage &mcp, CArrRef params) {
@@ -996,15 +872,6 @@ const int c_DOMException::s_instanceof_index[] = {
   3,
   0,-1,1,-1,
 };
-ObjectData *c_DOMException::cloneImpl() {
-  ObjectData *obj = coo_DOMException();
-  c_DOMException::cloneSet(obj);
-  return obj;
-}
-void c_DOMException::cloneSet(ObjectData *cl) {
-  c_DOMException *clone = static_cast<c_DOMException*>(cl);
-  c_Exception::cloneSet(clone);
-}
 CallInfo c_DOMException::ci___construct((void*)&c_DOMException::i___construct, (void*)&c_DOMException::ifa___construct, 2, 4, 0x0000000000000000LL);
 Variant c_DOMException::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -1072,15 +939,6 @@ const int c_BadFunctionCallException::s_instanceof_index[] = {
   -1,-1,-1,0,1,-1,2,-1,
 
 };
-ObjectData *c_BadFunctionCallException::cloneImpl() {
-  ObjectData *obj = coo_BadFunctionCallException();
-  c_BadFunctionCallException::cloneSet(obj);
-  return obj;
-}
-void c_BadFunctionCallException::cloneSet(ObjectData *cl) {
-  c_BadFunctionCallException *clone = static_cast<c_BadFunctionCallException*>(cl);
-  c_LogicException::cloneSet(clone);
-}
 const ObjectStaticCallbacks cw_BadFunctionCallException = {
   (ObjectData*(*)(ObjectData*))coo_BadFunctionCallException,
   c_BadFunctionCallException::s_call_info_table,c_BadFunctionCallException::s_call_info_index,
@@ -1100,15 +958,6 @@ const int c_LengthException::s_instanceof_index[] = {
   -1,-1,-1,0,2,-1,-1,-1,
 
 };
-ObjectData *c_LengthException::cloneImpl() {
-  ObjectData *obj = coo_LengthException();
-  c_LengthException::cloneSet(obj);
-  return obj;
-}
-void c_LengthException::cloneSet(ObjectData *cl) {
-  c_LengthException *clone = static_cast<c_LengthException*>(cl);
-  c_LogicException::cloneSet(clone);
-}
 const ObjectStaticCallbacks cw_LengthException = {
   (ObjectData*(*)(ObjectData*))coo_LengthException,
   c_LengthException::s_call_info_table,c_LengthException::s_call_info_index,
@@ -1128,15 +977,6 @@ const int c_DomainException::s_instanceof_index[] = {
   -1,-1,-1,0,1,-1,-1,-1,
 
 };
-ObjectData *c_DomainException::cloneImpl() {
-  ObjectData *obj = coo_DomainException();
-  c_DomainException::cloneSet(obj);
-  return obj;
-}
-void c_DomainException::cloneSet(ObjectData *cl) {
-  c_DomainException *clone = static_cast<c_DomainException*>(cl);
-  c_LogicException::cloneSet(clone);
-}
 const ObjectStaticCallbacks cw_DomainException = {
   (ObjectData*(*)(ObjectData*))coo_DomainException,
   c_DomainException::s_call_info_table,c_DomainException::s_call_info_index,

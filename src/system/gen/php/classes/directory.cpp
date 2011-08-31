@@ -38,17 +38,6 @@ const int c_Directory::s_instanceof_index[] = {
   1,
   -1,0,
 };
-ObjectData *c_Directory::cloneImpl() {
-  ObjectData *obj = coo_Directory();
-  c_Directory::cloneSet(obj);
-  return obj;
-}
-void c_Directory::cloneSet(ObjectData *cl) {
-  c_Directory *clone = static_cast<c_Directory*>(cl);
-  ObjectData::cloneSet(clone);
-  clone->m_path.setWithRef(m_path);
-  clone->m_handle.setWithRef(m_handle);
-}
 CallInfo c_Directory::ci___construct((void*)&c_Directory::i___construct, (void*)&c_Directory::ifa___construct, 1, 4, 0x0000000000000000LL);
 CallInfo c_Directory::ci_close((void*)&c_Directory::i_close, (void*)&c_Directory::ifa_close, 0, 4, 0x0000000000000000LL);
 CallInfo c_Directory::ci_read((void*)&c_Directory::i_read, (void*)&c_Directory::ifa_read, 0, 4, 0x0000000000000000LL);

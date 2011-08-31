@@ -68,13 +68,6 @@ ObjectData *DynamicObjectData::getRoot() {
   return root;
 }
 
-void DynamicObjectData::cloneSet(ObjectData *clone) {
-  if (!parent.isNull()) {
-    parent->cloneSet(static_cast<DynamicObjectData*>(clone)->parent.get());
-  }
-  ObjectData::cloneSet(clone);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // instance methods and properties
 

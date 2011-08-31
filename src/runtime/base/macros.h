@@ -102,9 +102,6 @@ namespace HPHP {
 
 #define DECLARE_CLASS_COMMON_NO_SWEEP(cls, originalName) \
   DECLARE_OBJECT_ALLOCATION_NO_SWEEP(c_##cls)                           \
-  protected:                                                            \
-  ObjectData *cloneImpl();                                              \
-  void cloneSet(ObjectData *cl);                                        \
   public:                                                               \
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \
@@ -115,9 +112,6 @@ namespace HPHP {
 
 #define DECLARE_CLASS_COMMON(cls, originalName) \
   DECLARE_OBJECT_ALLOCATION(c_##cls)                                    \
-  protected:                                                            \
-  ObjectData *cloneImpl();                                              \
-  void cloneSet(ObjectData *cl);                                        \
   public:                                                               \
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \

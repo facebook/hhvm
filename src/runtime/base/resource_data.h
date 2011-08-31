@@ -67,9 +67,6 @@ public:
   virtual Object fiberMarshal(FiberReferenceMap &refMap) const;
   virtual Object fiberUnmarshal(FiberReferenceMap &refMap) const;
 
-protected:
-  virtual ObjectData* cloneImpl();
-
 private:
   bool m_static;
 };

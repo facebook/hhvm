@@ -122,7 +122,7 @@ Variant c_DateTime::t___destruct() {
 }
 
 ObjectData *c_DateTime::clone() {
-  ObjectData *obj = cloneImpl();
+  ObjectData *obj = ObjectData::clone();
   c_DateTime *dt = static_cast<c_DateTime*>(obj);
   dt->m_dt = m_dt->cloneDateTime();
   return obj;
@@ -176,7 +176,7 @@ Variant c_DateTimeZone::t___destruct() {
 }
 
 ObjectData *c_DateTimeZone::clone() {
-  ObjectData *obj = cloneImpl();
+  ObjectData *obj = ObjectData::clone();
   c_DateTimeZone *dtz = static_cast<c_DateTimeZone*>(obj);
   dtz->m_tz = m_tz->cloneTimeZone();
   return obj;

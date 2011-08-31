@@ -1693,29 +1693,6 @@ void VariableTable::outputCPPPropertyDecl(CodeGenerator &cg,
   }
 }
 
-void VariableTable::outputCPPPropertyClone(CodeGenerator &cg,
-                                           AnalysisResultPtr ar,
-                                           bool dynamicObject /* = false */) {
-
-  for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
-    const Symbol *sym = m_symbolVec[i];
-    const string &name = sym->getName();
-    string formatted = CodeGenerator::FormatLabel(name);
-    if (sym->isStatic() || sym->isOverride()) continue;
-    if (sym->getFinalType()->is(Type::KindOfVariant)) {
-      if (!dynamicObject || isPrivate(name)) {
-        cg_printf("clone->%s%s.setWithRef(%s%s);\n",
-                  Option::PropertyPrefix, formatted.c_str(),
-                  Option::PropertyPrefix, formatted.c_str());
-      }
-    } else {
-      cg_printf("clone->%s%s = %s%s;\n",
-                Option::PropertyPrefix, formatted.c_str(),
-                Option::PropertyPrefix, formatted.c_str());
-    }
-  }
-}
-
 bool VariableTable::outputCPPPrivateSelector(CodeGenerator &cg,
                                              AnalysisResultPtr ar,
                                              const char *op, const char *args) {

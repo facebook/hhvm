@@ -38,15 +38,6 @@ const int c_XhprofFrame::s_instanceof_index[] = {
   1,
   -1,0,
 };
-ObjectData *c_XhprofFrame::cloneImpl() {
-  ObjectData *obj = coo_XhprofFrame();
-  c_XhprofFrame::cloneSet(obj);
-  return obj;
-}
-void c_XhprofFrame::cloneSet(ObjectData *cl) {
-  c_XhprofFrame *clone = static_cast<c_XhprofFrame*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_XhprofFrame::ci___destruct((void*)&c_XhprofFrame::i___destruct, (void*)&c_XhprofFrame::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_XhprofFrame::ci___construct((void*)&c_XhprofFrame::i___construct, (void*)&c_XhprofFrame::ifa___construct, 1, 4, 0x0000000000000000LL);
 Variant c_XhprofFrame::i___destruct(MethodCallPackage &mcp, CArrRef params) {

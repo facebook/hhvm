@@ -40,16 +40,6 @@ const int c_ReflectionFunctionAbstract::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_ReflectionFunctionAbstract::cloneImpl() {
-  ObjectData *obj = coo_ReflectionFunctionAbstract();
-  c_ReflectionFunctionAbstract::cloneSet(obj);
-  return obj;
-}
-void c_ReflectionFunctionAbstract::cloneSet(ObjectData *cl) {
-  c_ReflectionFunctionAbstract *clone = static_cast<c_ReflectionFunctionAbstract*>(cl);
-  ObjectData::cloneSet(clone);
-  clone->m_info.setWithRef(m_info);
-}
 CallInfo c_ReflectionFunctionAbstract::ci_getnumberofrequiredparameters((void*)&c_ReflectionFunctionAbstract::i_getnumberofrequiredparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getnumberofrequiredparameters, 0, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionFunctionAbstract::ci_isuserdefined((void*)&c_ReflectionFunctionAbstract::i_isuserdefined, (void*)&c_ReflectionFunctionAbstract::ifa_isuserdefined, 0, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionFunctionAbstract::ci_getnumberofparameters((void*)&c_ReflectionFunctionAbstract::i_getnumberofparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getnumberofparameters, 0, 4, 0x0000000000000000LL);
@@ -470,15 +460,6 @@ const int c_ReflectionObject::s_instanceof_index[] = {
   -1,-1,0,-1,-1,1,-1,-1,
 
 };
-ObjectData *c_ReflectionObject::cloneImpl() {
-  ObjectData *obj = coo_ReflectionObject();
-  c_ReflectionObject::cloneSet(obj);
-  return obj;
-}
-void c_ReflectionObject::cloneSet(ObjectData *cl) {
-  c_ReflectionObject *clone = static_cast<c_ReflectionObject*>(cl);
-  c_ReflectionClass::cloneSet(clone);
-}
 CallInfo c_ReflectionObject::ci_export((void*)&c_ReflectionObject::i_export, (void*)&c_ReflectionObject::ifa_export, 2, 12, 0x0000000000000000LL);
 Variant c_ReflectionObject::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
@@ -542,15 +523,6 @@ const int c_ReflectionException::s_instanceof_index[] = {
   3,
   0,-1,-1,-1,
 };
-ObjectData *c_ReflectionException::cloneImpl() {
-  ObjectData *obj = coo_ReflectionException();
-  c_ReflectionException::cloneSet(obj);
-  return obj;
-}
-void c_ReflectionException::cloneSet(ObjectData *cl) {
-  c_ReflectionException *clone = static_cast<c_ReflectionException*>(cl);
-  c_Exception::cloneSet(clone);
-}
 const ObjectStaticCallbacks cw_ReflectionException = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionException,
   c_ReflectionException::s_call_info_table,c_ReflectionException::s_call_info_index,
@@ -571,17 +543,6 @@ const int c_ReflectionClass::s_instanceof_index[] = {
   3,
   -1,0,-1,-1,
 };
-ObjectData *c_ReflectionClass::cloneImpl() {
-  ObjectData *obj = coo_ReflectionClass();
-  c_ReflectionClass::cloneSet(obj);
-  return obj;
-}
-void c_ReflectionClass::cloneSet(ObjectData *cl) {
-  c_ReflectionClass *clone = static_cast<c_ReflectionClass*>(cl);
-  ObjectData::cloneSet(clone);
-  clone->m_name.setWithRef(m_name);
-  clone->m_info.setWithRef(m_info);
-}
 CallInfo c_ReflectionClass::ci_getmethods((void*)&c_ReflectionClass::i_getmethods, (void*)&c_ReflectionClass::ifa_getmethods, 1, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionClass::ci_isiterateable((void*)&c_ReflectionClass::i_isiterateable, (void*)&c_ReflectionClass::ifa_isiterateable, 0, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionClass::ci_gettraitnames((void*)&c_ReflectionClass::i_gettraitnames, (void*)&c_ReflectionClass::ifa_gettraitnames, 0, 4, 0x0000000000000000LL);
@@ -2638,17 +2599,6 @@ const int c_ReflectionExtension::s_instanceof_index[] = {
   3,
   -1,0,-1,1,
 };
-ObjectData *c_ReflectionExtension::cloneImpl() {
-  ObjectData *obj = coo_ReflectionExtension();
-  c_ReflectionExtension::cloneSet(obj);
-  return obj;
-}
-void c_ReflectionExtension::cloneSet(ObjectData *cl) {
-  c_ReflectionExtension *clone = static_cast<c_ReflectionExtension*>(cl);
-  ObjectData::cloneSet(clone);
-  clone->m_name.setWithRef(m_name);
-  clone->m_info.setWithRef(m_info);
-}
 CallInfo c_ReflectionExtension::ci___tostring((void*)&c_ReflectionExtension::i___tostring, (void*)&c_ReflectionExtension::ifa___tostring, 0, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionExtension::ci___construct((void*)&c_ReflectionExtension::i___construct, (void*)&c_ReflectionExtension::ifa___construct, 1, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionExtension::ci_getfunctions((void*)&c_ReflectionExtension::i_getfunctions, (void*)&c_ReflectionExtension::ifa_getfunctions, 0, 4, 0x0000000000000000LL);
@@ -3014,17 +2964,6 @@ const int c_ReflectionMethod::s_instanceof_index[] = {
   0,-1,1,-1,-1,2,-1,-1,
 
 };
-ObjectData *c_ReflectionMethod::cloneImpl() {
-  ObjectData *obj = coo_ReflectionMethod();
-  c_ReflectionMethod::cloneSet(obj);
-  return obj;
-}
-void c_ReflectionMethod::cloneSet(ObjectData *cl) {
-  c_ReflectionMethod *clone = static_cast<c_ReflectionMethod*>(cl);
-  c_ReflectionFunctionAbstract::cloneSet(clone);
-  clone->m_name.setWithRef(m_name);
-  clone->m_class.setWithRef(m_class);
-}
 CallInfo c_ReflectionMethod::ci_isprivate((void*)&c_ReflectionMethod::i_isprivate, (void*)&c_ReflectionMethod::ifa_isprivate, 0, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionMethod::ci___tostring((void*)&c_ReflectionMethod::i___tostring, (void*)&c_ReflectionMethod::ifa___tostring, 0, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionMethod::ci_isprotected((void*)&c_ReflectionMethod::i_isprotected, (void*)&c_ReflectionMethod::ifa_isprotected, 0, 4, 0x0000000000000000LL);
@@ -3660,18 +3599,6 @@ const int c_ReflectionProperty::s_instanceof_index[] = {
   3,
   0,1,-1,-1,
 };
-ObjectData *c_ReflectionProperty::cloneImpl() {
-  ObjectData *obj = coo_ReflectionProperty();
-  c_ReflectionProperty::cloneSet(obj);
-  return obj;
-}
-void c_ReflectionProperty::cloneSet(ObjectData *cl) {
-  c_ReflectionProperty *clone = static_cast<c_ReflectionProperty*>(cl);
-  ObjectData::cloneSet(clone);
-  clone->m_info.setWithRef(m_info);
-  clone->m_name.setWithRef(m_name);
-  clone->m_class.setWithRef(m_class);
-}
 CallInfo c_ReflectionProperty::ci_isprivate((void*)&c_ReflectionProperty::i_isprivate, (void*)&c_ReflectionProperty::ifa_isprivate, 0, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionProperty::ci_getvalue((void*)&c_ReflectionProperty::i_getvalue, (void*)&c_ReflectionProperty::ifa_getvalue, 1, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionProperty::ci___tostring((void*)&c_ReflectionProperty::i___tostring, (void*)&c_ReflectionProperty::ifa___tostring, 0, 4, 0x0000000000000000LL);
@@ -4265,15 +4192,6 @@ const int c_ReflectionFunction::s_instanceof_index[] = {
   -1,0,1,-1,-1,2,-1,-1,
 
 };
-ObjectData *c_ReflectionFunction::cloneImpl() {
-  ObjectData *obj = coo_ReflectionFunction();
-  c_ReflectionFunction::cloneSet(obj);
-  return obj;
-}
-void c_ReflectionFunction::cloneSet(ObjectData *cl) {
-  c_ReflectionFunction *clone = static_cast<c_ReflectionFunction*>(cl);
-  c_ReflectionFunctionAbstract::cloneSet(clone);
-}
 CallInfo c_ReflectionFunction::ci___tostring((void*)&c_ReflectionFunction::i___tostring, (void*)&c_ReflectionFunction::ifa___tostring, 0, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionFunction::ci___construct((void*)&c_ReflectionFunction::i___construct, (void*)&c_ReflectionFunction::ifa___construct, 1, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionFunction::ci_invokeargs((void*)&c_ReflectionFunction::i_invokeargs, (void*)&c_ReflectionFunction::ifa_invokeargs, 1, 4, 0x0000000000000000LL);
@@ -4490,16 +4408,6 @@ const int c_ReflectionParameter::s_instanceof_index[] = {
   3,
   -1,0,-1,1,
 };
-ObjectData *c_ReflectionParameter::cloneImpl() {
-  ObjectData *obj = coo_ReflectionParameter();
-  c_ReflectionParameter::cloneSet(obj);
-  return obj;
-}
-void c_ReflectionParameter::cloneSet(ObjectData *cl) {
-  c_ReflectionParameter *clone = static_cast<c_ReflectionParameter*>(cl);
-  ObjectData::cloneSet(clone);
-  clone->m_info.setWithRef(m_info);
-}
 CallInfo c_ReflectionParameter::ci___tostring((void*)&c_ReflectionParameter::i___tostring, (void*)&c_ReflectionParameter::ifa___tostring, 0, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionParameter::ci_getdeclaringclass((void*)&c_ReflectionParameter::i_getdeclaringclass, (void*)&c_ReflectionParameter::ifa_getdeclaringclass, 0, 4, 0x0000000000000000LL);
 CallInfo c_ReflectionParameter::ci_isdefaultvalueavailable((void*)&c_ReflectionParameter::i_isdefaultvalueavailable, (void*)&c_ReflectionParameter::ifa_isdefaultvalueavailable, 0, 4, 0x0000000000000000LL);

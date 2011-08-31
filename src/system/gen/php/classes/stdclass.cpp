@@ -38,15 +38,6 @@ const int c_stdClass::s_instanceof_index[] = {
   1,
   -1,0,
 };
-ObjectData *c_stdClass::cloneImpl() {
-  ObjectData *obj = coo_stdClass();
-  c_stdClass::cloneSet(obj);
-  return obj;
-}
-void c_stdClass::cloneSet(ObjectData *cl) {
-  c_stdClass *clone = static_cast<c_stdClass*>(cl);
-  ObjectData::cloneSet(clone);
-}
 const ObjectStaticCallbacks cw_stdClass = {
   (ObjectData*(*)(ObjectData*))coo_stdClass,
   c_stdClass::s_call_info_table,c_stdClass::s_call_info_index,
@@ -63,15 +54,6 @@ const int c___PHP_Incomplete_Class::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c___PHP_Incomplete_Class::cloneImpl() {
-  ObjectData *obj = coo___PHP_Incomplete_Class();
-  c___PHP_Incomplete_Class::cloneSet(obj);
-  return obj;
-}
-void c___PHP_Incomplete_Class::cloneSet(ObjectData *cl) {
-  c___PHP_Incomplete_Class *clone = static_cast<c___PHP_Incomplete_Class*>(cl);
-  ObjectData::cloneSet(clone);
-}
 const ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
   (ObjectData*(*)(ObjectData*))coo___PHP_Incomplete_Class,
   c___PHP_Incomplete_Class::s_call_info_table,c___PHP_Incomplete_Class::s_call_info_index,

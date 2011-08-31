@@ -40,22 +40,6 @@ const int c_SoapFault::s_instanceof_index[] = {
   3,
   0,1,-1,-1,
 };
-ObjectData *c_SoapFault::cloneImpl() {
-  ObjectData *obj = coo_SoapFault();
-  c_SoapFault::cloneSet(obj);
-  return obj;
-}
-void c_SoapFault::cloneSet(ObjectData *cl) {
-  c_SoapFault *clone = static_cast<c_SoapFault*>(cl);
-  c_Exception::cloneSet(clone);
-  clone->m_faultcode.setWithRef(m_faultcode);
-  clone->m_faultcodens.setWithRef(m_faultcodens);
-  clone->m_faultstring.setWithRef(m_faultstring);
-  clone->m_faultactor.setWithRef(m_faultactor);
-  clone->m_detail.setWithRef(m_detail);
-  clone->m__name.setWithRef(m__name);
-  clone->m_headerfault.setWithRef(m_headerfault);
-}
 CallInfo c_SoapFault::ci___tostring((void*)&c_SoapFault::i___tostring, (void*)&c_SoapFault::ifa___tostring, 0, 4, 0x0000000000000000LL);
 CallInfo c_SoapFault::ci___construct((void*)&c_SoapFault::i___construct, (void*)&c_SoapFault::ifa___construct, 6, 4, 0x0000000000000000LL);
 Variant c_SoapFault::i___tostring(MethodCallPackage &mcp, CArrRef params) {

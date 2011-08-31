@@ -62,7 +62,6 @@ class DynamicObjectData : public ObjectData {
   ObjectData *getRedeclaredParent() const { return parent.get(); }
 
  protected:
-  void cloneSet(ObjectData *clone);
   ObjectData* root;
   Object parent;
 };

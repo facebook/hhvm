@@ -297,11 +297,8 @@ class ObjectData : public CountableNF {
   static Variant NullConstructor(MethodCallPackage &info, CArrRef params);
   static Variant NullConstructorFewArgs(MethodCallPackage &info, int count,
       INVOKE_FEW_ARGS_IMPL_ARGS);
-  virtual void cloneSet(ObjectData *clone);
   static int GetMaxId() ATTRIBUTE_COLD;
  protected:
-  virtual ObjectData* cloneImpl() = 0;
-
   virtual bool php_sleep(Variant &ret);
 public:
   virtual bool hasCall();
@@ -325,7 +322,7 @@ public:
  protected:
   int o_id;                      // a numeric identifier of this object
   mutable Array *o_properties;   // dynamic properties
-
+  void          cloneDynamic(ObjectData *orig);
  private:
   mutable int16  o_attribute;    // vairous flags
 

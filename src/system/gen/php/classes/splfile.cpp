@@ -50,15 +50,6 @@ const int c_SplFileObject::s_instanceof_index[] = {
   -1,-1,-1,-1,-1,-1,5,-1,
 
 };
-ObjectData *c_SplFileObject::cloneImpl() {
-  ObjectData *obj = coo_SplFileObject();
-  c_SplFileObject::cloneSet(obj);
-  return obj;
-}
-void c_SplFileObject::cloneSet(ObjectData *cl) {
-  c_SplFileObject *clone = static_cast<c_SplFileObject*>(cl);
-  c_SplFileInfo::cloneSet(clone);
-}
 CallInfo c_SplFileObject::ci_fscanf((void*)&c_SplFileObject::i_fscanf, (void*)&c_SplFileObject::ifa_fscanf, 1, 5, 0x0000000000000000LL);
 CallInfo c_SplFileObject::ci_next((void*)&c_SplFileObject::i_next, (void*)&c_SplFileObject::ifa_next, 0, 4, 0x0000000000000000LL);
 CallInfo c_SplFileObject::ci_fseek((void*)&c_SplFileObject::i_fseek, (void*)&c_SplFileObject::ifa_fseek, 2, 4, 0x0000000000000000LL);
@@ -965,16 +956,6 @@ const int c_SplFileInfo::s_instanceof_index[] = {
   1,
   -1,0,
 };
-ObjectData *c_SplFileInfo::cloneImpl() {
-  ObjectData *obj = coo_SplFileInfo();
-  c_SplFileInfo::cloneSet(obj);
-  return obj;
-}
-void c_SplFileInfo::cloneSet(ObjectData *cl) {
-  c_SplFileInfo *clone = static_cast<c_SplFileInfo*>(cl);
-  ObjectData::cloneSet(clone);
-  clone->m_rsrc.setWithRef(m_rsrc);
-}
 CallInfo c_SplFileInfo::ci_getperms((void*)&c_SplFileInfo::i_getperms, (void*)&c_SplFileInfo::ifa_getperms, 0, 4, 0x0000000000000000LL);
 CallInfo c_SplFileInfo::ci_iswritable((void*)&c_SplFileInfo::i_iswritable, (void*)&c_SplFileInfo::ifa_iswritable, 0, 4, 0x0000000000000000LL);
 CallInfo c_SplFileInfo::ci_getbasename((void*)&c_SplFileInfo::i_getbasename, (void*)&c_SplFileInfo::ifa_getbasename, 1, 4, 0x0000000000000000LL);

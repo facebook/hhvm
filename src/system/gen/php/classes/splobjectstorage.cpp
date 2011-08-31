@@ -43,17 +43,6 @@ const int c_SplObjectStorage::s_instanceof_index[] = {
   -1,0,-1,-1,-1,-1,2,3,
 
 };
-ObjectData *c_SplObjectStorage::cloneImpl() {
-  ObjectData *obj = coo_SplObjectStorage();
-  c_SplObjectStorage::cloneSet(obj);
-  return obj;
-}
-void c_SplObjectStorage::cloneSet(ObjectData *cl) {
-  c_SplObjectStorage *clone = static_cast<c_SplObjectStorage*>(cl);
-  ObjectData::cloneSet(clone);
-  clone->m_storage.setWithRef(m_storage);
-  clone->m_index = m_index;
-}
 CallInfo c_SplObjectStorage::ci_next((void*)&c_SplObjectStorage::i_next, (void*)&c_SplObjectStorage::ifa_next, 0, 4, 0x0000000000000000LL);
 CallInfo c_SplObjectStorage::ci_detach((void*)&c_SplObjectStorage::i_detach, (void*)&c_SplObjectStorage::ifa_detach, 1, 4, 0x0000000000000000LL);
 CallInfo c_SplObjectStorage::ci_attach((void*)&c_SplObjectStorage::i_attach, (void*)&c_SplObjectStorage::ifa_attach, 1, 4, 0x0000000000000000LL);

@@ -38,29 +38,6 @@ const int c_FB_MySQLLexer::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_FB_MySQLLexer::cloneImpl() {
-  ObjectData *obj = coo_FB_MySQLLexer();
-  c_FB_MySQLLexer::cloneSet(obj);
-  return obj;
-}
-void c_FB_MySQLLexer::cloneSet(ObjectData *cl) {
-  c_FB_MySQLLexer *clone = static_cast<c_FB_MySQLLexer*>(cl);
-  ObjectData::cloneSet(clone);
-  clone->m_symbols.setWithRef(m_symbols);
-  clone->m_tokPtr.setWithRef(m_tokPtr);
-  clone->m_tokStart.setWithRef(m_tokStart);
-  clone->m_tokLen.setWithRef(m_tokLen);
-  clone->m_tokText.setWithRef(m_tokText);
-  clone->m_lineNo.setWithRef(m_lineNo);
-  clone->m_lineBegin.setWithRef(m_lineBegin);
-  clone->m_string.setWithRef(m_string);
-  clone->m_stringLen.setWithRef(m_stringLen);
-  clone->m_tokAbsStart.setWithRef(m_tokAbsStart);
-  clone->m_skipText.setWithRef(m_skipText);
-  clone->m_lookahead.setWithRef(m_lookahead);
-  clone->m_tokenStack.setWithRef(m_tokenStack);
-  clone->m_stackPtr.setWithRef(m_stackPtr);
-}
 CallInfo c_FB_MySQLLexer::ci_lex((void*)&c_FB_MySQLLexer::i_lex, (void*)&c_FB_MySQLLexer::ifa_lex, 0, 4, 0x0000000000000000LL);
 CallInfo c_FB_MySQLLexer::ci___construct((void*)&c_FB_MySQLLexer::i___construct, (void*)&c_FB_MySQLLexer::ifa___construct, 2, 4, 0x0000000000000000LL);
 CallInfo c_FB_MySQLLexer::ci_iscompop((void*)&c_FB_MySQLLexer::i_iscompop, (void*)&c_FB_MySQLLexer::ifa_iscompop, 1, 4, 0x0000000000000000LL);

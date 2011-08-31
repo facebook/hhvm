@@ -49,17 +49,6 @@ const int c_ArrayIterator::s_instanceof_index[] = {
   -1,-1,-1,4,-1,-1,5,-1,
 
 };
-ObjectData *c_ArrayIterator::cloneImpl() {
-  ObjectData *obj = coo_ArrayIterator();
-  c_ArrayIterator::cloneSet(obj);
-  return obj;
-}
-void c_ArrayIterator::cloneSet(ObjectData *cl) {
-  c_ArrayIterator *clone = static_cast<c_ArrayIterator*>(cl);
-  ObjectData::cloneSet(clone);
-  clone->m_arr.setWithRef(m_arr);
-  clone->m_flags.setWithRef(m_flags);
-}
 CallInfo c_ArrayIterator::ci_getarraycopy((void*)&c_ArrayIterator::i_getarraycopy, (void*)&c_ArrayIterator::ifa_getarraycopy, 0, 4, 0x0000000000000000LL);
 CallInfo c_ArrayIterator::ci_next((void*)&c_ArrayIterator::i_next, (void*)&c_ArrayIterator::ifa_next, 0, 4, 0x0000000000000000LL);
 CallInfo c_ArrayIterator::ci_count((void*)&c_ArrayIterator::i_count, (void*)&c_ArrayIterator::ifa_count, 0, 4, 0x0000000000000000LL);
@@ -761,16 +750,6 @@ const int c_AppendIterator::s_instanceof_index[] = {
   0,1,-1,-1,-1,2,3,-1,
 
 };
-ObjectData *c_AppendIterator::cloneImpl() {
-  ObjectData *obj = coo_AppendIterator();
-  c_AppendIterator::cloneSet(obj);
-  return obj;
-}
-void c_AppendIterator::cloneSet(ObjectData *cl) {
-  c_AppendIterator *clone = static_cast<c_AppendIterator*>(cl);
-  ObjectData::cloneSet(clone);
-  clone->m_iterators.setWithRef(m_iterators);
-}
 Variant c_AppendIterator::doCall(Variant v_name, Variant v_arguments, bool fatal) {
   return t___call(v_name, !v_arguments.isNull() ? v_arguments : Variant(Array::Create()));
 }
@@ -1267,16 +1246,6 @@ const int c_IteratorIterator::s_instanceof_index[] = {
   -1,0,-1,-1,1,2,3,-1,
 
 };
-ObjectData *c_IteratorIterator::cloneImpl() {
-  ObjectData *obj = coo_IteratorIterator();
-  c_IteratorIterator::cloneSet(obj);
-  return obj;
-}
-void c_IteratorIterator::cloneSet(ObjectData *cl) {
-  c_IteratorIterator *clone = static_cast<c_IteratorIterator*>(cl);
-  ObjectData::cloneSet(clone);
-  clone->m_iterator.setWithRef(m_iterator);
-}
 Variant c_IteratorIterator::doCall(Variant v_name, Variant v_arguments, bool fatal) {
   return t___call(v_name, !v_arguments.isNull() ? v_arguments : Variant(Array::Create()));
 }
@@ -1592,16 +1561,6 @@ const int c_RecursiveIteratorIterator::s_instanceof_index[] = {
   -1,0,1,-1,-1,2,3,-1,
 
 };
-ObjectData *c_RecursiveIteratorIterator::cloneImpl() {
-  ObjectData *obj = coo_RecursiveIteratorIterator();
-  c_RecursiveIteratorIterator::cloneSet(obj);
-  return obj;
-}
-void c_RecursiveIteratorIterator::cloneSet(ObjectData *cl) {
-  c_RecursiveIteratorIterator *clone = static_cast<c_RecursiveIteratorIterator*>(cl);
-  ObjectData::cloneSet(clone);
-  clone->m_rsrc.setWithRef(m_rsrc);
-}
 CallInfo c_RecursiveIteratorIterator::ci_next((void*)&c_RecursiveIteratorIterator::i_next, (void*)&c_RecursiveIteratorIterator::ifa_next, 0, 4, 0x0000000000000000LL);
 CallInfo c_RecursiveIteratorIterator::ci_key((void*)&c_RecursiveIteratorIterator::i_key, (void*)&c_RecursiveIteratorIterator::ifa_key, 0, 4, 0x0000000000000000LL);
 CallInfo c_RecursiveIteratorIterator::ci_valid((void*)&c_RecursiveIteratorIterator::i_valid, (void*)&c_RecursiveIteratorIterator::ifa_valid, 0, 4, 0x0000000000000000LL);
@@ -1836,15 +1795,6 @@ const int c_MutableArrayIterator::s_instanceof_index[] = {
   -1,-1,-1,4,-1,-1,5,6,
 
 };
-ObjectData *c_MutableArrayIterator::cloneImpl() {
-  ObjectData *obj = coo_MutableArrayIterator();
-  c_MutableArrayIterator::cloneSet(obj);
-  return obj;
-}
-void c_MutableArrayIterator::cloneSet(ObjectData *cl) {
-  c_MutableArrayIterator *clone = static_cast<c_MutableArrayIterator*>(cl);
-  c_ArrayIterator::cloneSet(clone);
-}
 CallInfo c_MutableArrayIterator::ci_currentref((void*)&c_MutableArrayIterator::i_currentref, (void*)&c_MutableArrayIterator::ifa_currentref, 0, 4, 0x0000000000000000LL);
 CallInfo c_MutableArrayIterator::ci___construct((void*)&c_MutableArrayIterator::i___construct, (void*)&c_MutableArrayIterator::ifa___construct, 2, 4, 0x0000000000000001LL);
 Variant c_MutableArrayIterator::i_currentref(MethodCallPackage &mcp, CArrRef params) {
@@ -1948,16 +1898,6 @@ const int c_FilterIterator::s_instanceof_index[] = {
   -1,-1,-1,-1,-1,3,4,-1,
 
 };
-ObjectData *c_FilterIterator::cloneImpl() {
-  ObjectData *obj = coo_FilterIterator();
-  c_FilterIterator::cloneSet(obj);
-  return obj;
-}
-void c_FilterIterator::cloneSet(ObjectData *cl) {
-  c_FilterIterator *clone = static_cast<c_FilterIterator*>(cl);
-  c_IteratorIterator::cloneSet(clone);
-  clone->m_it.setWithRef(m_it);
-}
 Variant c_FilterIterator::doCall(Variant v_name, Variant v_arguments, bool fatal) {
   return t___call(v_name, !v_arguments.isNull() ? v_arguments : Variant(Array::Create()));
 }

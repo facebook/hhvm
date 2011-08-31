@@ -284,8 +284,6 @@ public:
   void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPPropertyDecl(CodeGenerator &cg, AnalysisResultPtr ar,
       bool dynamicObject = false);
-  void outputCPPPropertyClone(CodeGenerator &cg, AnalysisResultPtr ar,
-                              bool dynamicObject = false);
   void outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPStaticVariables(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPStaticLocals(CodeGenerator &cg, AnalysisResultPtr ar,

@@ -82,14 +82,14 @@ public:
   virtual Object fiberUnmarshal(FiberReferenceMap &refMap) const;
 
 protected:
-  virtual ObjectData* cloneImpl();
-  virtual void cloneSet(ObjectData *clone);
+  virtual ObjectData* clone();
 
   virtual bool hasCall();
   virtual bool hasCallStatic();
   virtual bool php_sleep(Variant &ret);
 
 private:
+  EvalObjectData(EvalObjectData *original); // for clone
   ClassEvalState &m_cls;
   Array m_privates;
   String m_class_name;

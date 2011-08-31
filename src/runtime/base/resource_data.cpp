@@ -55,10 +55,6 @@ String ResourceData::t___tostring() {
   return String("Resource id #") + String(o_getId());
 }
 
-ObjectData* ResourceData::cloneImpl() {
-  return NULL;
-}
-
 void ResourceData::serialize(VariableSerializer *serializer) const {
   if (serializer->incNestedLevel((void*)this, true)) {
     serializer->writeOverflow((void*)this, true);

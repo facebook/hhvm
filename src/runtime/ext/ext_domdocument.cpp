@@ -1977,7 +1977,7 @@ Variant c_DOMNode::t_appendchild(CObjRef newnode) {
 }
 
 ObjectData *c_DOMNode::clone() {
-  ObjectData *obj = cloneImpl();
+  ObjectData *obj = ObjectData::clone();
   c_DOMNode *node = static_cast<c_DOMNode*>(obj);
   node->m_node = m_node;
   node->m_doc = doc();

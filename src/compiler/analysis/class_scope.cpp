@@ -2718,28 +2718,6 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     cg_indentEnd("};\n");
   }
 
-  // Cloning
-  cg_indentBegin("ObjectData *%s%s::cloneImpl() {\n",
-                 Option::ClassPrefix, clsName);
-  cg_printf("ObjectData *obj = %s%s();\n",
-            Option::CreateObjectOnlyPrefix, clsName);
-  cg_printf("%s%s::cloneSet(obj);\n", Option::ClassPrefix, clsName);
-  cg_printf("return obj;\n");
-  cg_indentEnd("}\n");
-  cg_indentBegin("void %s%s::cloneSet(ObjectData *cl) {\n",
-                 Option::ClassPrefix, clsName);
-  cg_printf("%s%s *clone = static_cast<%s%s*>(cl);\n",
-            Option::ClassPrefix, clsName, Option::ClassPrefix, clsName);
-  if (derivesFromRedeclaring() == DirectFromRedeclared) {
-    cg_printf("DynamicObjectData::cloneSet(clone);\n");
-  } else if(!getParent().empty()) {
-    cg_printf("%s%s::cloneSet(clone);\n", Option::ClassPrefix, parent.c_str());
-  } else {
-    cg_printf("ObjectData::cloneSet(clone);\n");
-  }
-  getVariables()->outputCPPPropertyClone(cg, ar, derivesFromRedeclaring());
-  cg_indentEnd("}\n");
-
   // doCall
   if (getAttribute(ClassScope::HasUnknownMethodHandler)) {
     cg_indentBegin("Variant %s%s::doCall(Variant v_name, Variant "

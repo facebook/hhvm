@@ -84,15 +84,6 @@ const int c_DOMDocumentFragment::s_instanceof_index[] = {
   3,
   -1,0,1,-1,
 };
-ObjectData *c_DOMDocumentFragment::cloneImpl() {
-  ObjectData *obj = coo_DOMDocumentFragment();
-  c_DOMDocumentFragment::cloneSet(obj);
-  return obj;
-}
-void c_DOMDocumentFragment::cloneSet(ObjectData *cl) {
-  c_DOMDocumentFragment *clone = static_cast<c_DOMDocumentFragment*>(cl);
-  c_DOMNode::cloneSet(clone);
-}
 CallInfo c_DOMDocumentFragment::ci___destruct((void*)&c_DOMDocumentFragment::i___destruct, (void*)&c_DOMDocumentFragment::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMDocumentFragment::ci___construct((void*)&c_DOMDocumentFragment::i___construct, (void*)&c_DOMDocumentFragment::ifa___construct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMDocumentFragment::ci_appendxml((void*)&c_DOMDocumentFragment::i_appendxml, (void*)&c_DOMDocumentFragment::ifa_appendxml, 1, 4, 0x0000000000000000LL);
@@ -191,15 +182,6 @@ const int c_DOMText::s_instanceof_index[] = {
   -1,-1,0,1,-1,2,-1,-1,
 
 };
-ObjectData *c_DOMText::cloneImpl() {
-  ObjectData *obj = coo_DOMText();
-  c_DOMText::cloneSet(obj);
-  return obj;
-}
-void c_DOMText::cloneSet(ObjectData *cl) {
-  c_DOMText *clone = static_cast<c_DOMText*>(cl);
-  c_DOMCharacterData::cloneSet(clone);
-}
 CallInfo c_DOMText::ci___destruct((void*)&c_DOMText::i___destruct, (void*)&c_DOMText::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMText::ci___set((void*)&c_DOMText::i___set, (void*)&c_DOMText::ifa___set, 2, 4, 0x0000000000000000LL);
 CallInfo c_DOMText::ci___construct((void*)&c_DOMText::i___construct, (void*)&c_DOMText::ifa___construct, 1, 4, 0x0000000000000000LL);
@@ -400,15 +382,6 @@ const int c_DebuggerClient::s_instanceof_index[] = {
   1,
   -1,0,
 };
-ObjectData *c_DebuggerClient::cloneImpl() {
-  ObjectData *obj = coo_DebuggerClient();
-  c_DebuggerClient::cloneSet(obj);
-  return obj;
-}
-void c_DebuggerClient::cloneSet(ObjectData *cl) {
-  c_DebuggerClient *clone = static_cast<c_DebuggerClient*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_DebuggerClient::ci_argcount((void*)&c_DebuggerClient::i_argcount, (void*)&c_DebuggerClient::ifa_argcount, 0, 4, 0x0000000000000000LL);
 CallInfo c_DebuggerClient::ci_arg((void*)&c_DebuggerClient::i_arg, (void*)&c_DebuggerClient::ifa_arg, 2, 4, 0x0000000000000000LL);
 CallInfo c_DebuggerClient::ci_helpcmds((void*)&c_DebuggerClient::i_helpcmds, (void*)&c_DebuggerClient::ifa_helpcmds, 2, 5, 0x0000000000000000LL);
@@ -1202,15 +1175,6 @@ const int c_EncodingDetector::s_instanceof_index[] = {
   1,
   -1,0,
 };
-ObjectData *c_EncodingDetector::cloneImpl() {
-  ObjectData *obj = coo_EncodingDetector();
-  c_EncodingDetector::cloneSet(obj);
-  return obj;
-}
-void c_EncodingDetector::cloneSet(ObjectData *cl) {
-  c_EncodingDetector *clone = static_cast<c_EncodingDetector*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_EncodingDetector::ci_settext((void*)&c_EncodingDetector::i_settext, (void*)&c_EncodingDetector::ifa_settext, 1, 4, 0x0000000000000000LL);
 CallInfo c_EncodingDetector::ci___destruct((void*)&c_EncodingDetector::i___destruct, (void*)&c_EncodingDetector::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_EncodingDetector::ci___construct((void*)&c_EncodingDetector::i___construct, (void*)&c_EncodingDetector::ifa___construct, 0, 4, 0x0000000000000000LL);
@@ -1374,15 +1338,6 @@ const int c_DOMCDATASection::s_instanceof_index[] = {
   -1,-1,0,1,2,3,-1,-1,
 
 };
-ObjectData *c_DOMCDATASection::cloneImpl() {
-  ObjectData *obj = coo_DOMCDATASection();
-  c_DOMCDATASection::cloneSet(obj);
-  return obj;
-}
-void c_DOMCDATASection::cloneSet(ObjectData *cl) {
-  c_DOMCDATASection *clone = static_cast<c_DOMCDATASection*>(cl);
-  c_DOMText::cloneSet(clone);
-}
 CallInfo c_DOMCDATASection::ci___destruct((void*)&c_DOMCDATASection::i___destruct, (void*)&c_DOMCDATASection::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMCDATASection::ci___construct((void*)&c_DOMCDATASection::i___construct, (void*)&c_DOMCDATASection::ifa___construct, 1, 4, 0x0000000000000000LL);
 Variant c_DOMCDATASection::i___destruct(MethodCallPackage &mcp, CArrRef params) {
@@ -1458,15 +1413,6 @@ const int c_Locale::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_Locale::cloneImpl() {
-  ObjectData *obj = coo_Locale();
-  c_Locale::cloneSet(obj);
-  return obj;
-}
-void c_Locale::cloneSet(ObjectData *cl) {
-  c_Locale *clone = static_cast<c_Locale*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_Locale::ci___destruct((void*)&c_Locale::i___destruct, (void*)&c_Locale::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_Locale::ci___construct((void*)&c_Locale::i___construct, (void*)&c_Locale::ifa___construct, 0, 4, 0x0000000000000000LL);
 Variant c_Locale::i___destruct(MethodCallPackage &mcp, CArrRef params) {
@@ -1536,15 +1482,6 @@ const int c_Closure::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_Closure::cloneImpl() {
-  ObjectData *obj = coo_Closure();
-  c_Closure::cloneSet(obj);
-  return obj;
-}
-void c_Closure::cloneSet(ObjectData *cl) {
-  c_Closure *clone = static_cast<c_Closure*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_Closure::ci___destruct((void*)&c_Closure::i___destruct, (void*)&c_Closure::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_Closure::ci___construct((void*)&c_Closure::i___construct, (void*)&c_Closure::ifa___construct, 0, 4, 0x0000000000000000LL);
 CallInfo c_Closure::ci___clone((void*)&c_Closure::i___clone, (void*)&c_Closure::ifa___clone, 0, 4, 0x0000000000000000LL);
@@ -1660,15 +1597,6 @@ const int c_DOMDocumentType::s_instanceof_index[] = {
   3,
   -1,0,1,-1,
 };
-ObjectData *c_DOMDocumentType::cloneImpl() {
-  ObjectData *obj = coo_DOMDocumentType();
-  c_DOMDocumentType::cloneSet(obj);
-  return obj;
-}
-void c_DOMDocumentType::cloneSet(ObjectData *cl) {
-  c_DOMDocumentType *clone = static_cast<c_DOMDocumentType*>(cl);
-  c_DOMNode::cloneSet(clone);
-}
 CallInfo c_DOMDocumentType::ci___destruct((void*)&c_DOMDocumentType::i___destruct, (void*)&c_DOMDocumentType::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMDocumentType::ci___set((void*)&c_DOMDocumentType::i___set, (void*)&c_DOMDocumentType::ifa___set, 2, 4, 0x0000000000000000LL);
 CallInfo c_DOMDocumentType::ci___construct((void*)&c_DOMDocumentType::i___construct, (void*)&c_DOMDocumentType::ifa___construct, 0, 4, 0x0000000000000000LL);
@@ -1821,16 +1749,6 @@ const int c_GenericContinuation::s_instanceof_index[] = {
   -1,0,1,-1,-1,2,3,-1,
 
 };
-ObjectData *c_GenericContinuation::cloneImpl() {
-  ObjectData *obj = coo_GenericContinuation();
-  c_GenericContinuation::cloneSet(obj);
-  return obj;
-}
-void c_GenericContinuation::cloneSet(ObjectData *cl) {
-  c_GenericContinuation *clone = static_cast<c_GenericContinuation*>(cl);
-  c_Continuation::cloneSet(clone);
-  clone->m_vars = m_vars;
-}
 CallInfo c_GenericContinuation::ci___destruct((void*)&c_GenericContinuation::i___destruct, (void*)&c_GenericContinuation::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_GenericContinuation::ci_getvars((void*)&c_GenericContinuation::i_getvars, (void*)&c_GenericContinuation::ifa_getvars, 0, 4, 0x0000000000000000LL);
 CallInfo c_GenericContinuation::ci___construct((void*)&c_GenericContinuation::i___construct, (void*)&c_GenericContinuation::ifa___construct, 7, 4, 0x0000000000000000LL);
@@ -1969,15 +1887,6 @@ const int c_SQLite3Stmt::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_SQLite3Stmt::cloneImpl() {
-  ObjectData *obj = coo_SQLite3Stmt();
-  c_SQLite3Stmt::cloneSet(obj);
-  return obj;
-}
-void c_SQLite3Stmt::cloneSet(ObjectData *cl) {
-  c_SQLite3Stmt *clone = static_cast<c_SQLite3Stmt*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_SQLite3Stmt::ci___destruct((void*)&c_SQLite3Stmt::i___destruct, (void*)&c_SQLite3Stmt::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_SQLite3Stmt::ci___construct((void*)&c_SQLite3Stmt::i___construct, (void*)&c_SQLite3Stmt::ifa___construct, 2, 4, 0x0000000000000000LL);
 CallInfo c_SQLite3Stmt::ci_close((void*)&c_SQLite3Stmt::i_close, (void*)&c_SQLite3Stmt::ifa_close, 0, 4, 0x0000000000000000LL);
@@ -2220,15 +2129,6 @@ const int c_DOMNodeList::s_instanceof_index[] = {
   -1,0,-1,-1,-1,-1,-1,2,
 
 };
-ObjectData *c_DOMNodeList::cloneImpl() {
-  ObjectData *obj = coo_DOMNodeList();
-  c_DOMNodeList::cloneSet(obj);
-  return obj;
-}
-void c_DOMNodeList::cloneSet(ObjectData *cl) {
-  c_DOMNodeList *clone = static_cast<c_DOMNodeList*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_DOMNodeList::ci_item((void*)&c_DOMNodeList::i_item, (void*)&c_DOMNodeList::ifa_item, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMNodeList::ci___destruct((void*)&c_DOMNodeList::i___destruct, (void*)&c_DOMNodeList::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMNodeList::ci___set((void*)&c_DOMNodeList::i___set, (void*)&c_DOMNodeList::ifa___set, 2, 4, 0x0000000000000000LL);
@@ -2421,15 +2321,6 @@ const int c_Normalizer::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_Normalizer::cloneImpl() {
-  ObjectData *obj = coo_Normalizer();
-  c_Normalizer::cloneSet(obj);
-  return obj;
-}
-void c_Normalizer::cloneSet(ObjectData *cl) {
-  c_Normalizer *clone = static_cast<c_Normalizer*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_Normalizer::ci___destruct((void*)&c_Normalizer::i___destruct, (void*)&c_Normalizer::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_Normalizer::ci___construct((void*)&c_Normalizer::i___construct, (void*)&c_Normalizer::ifa___construct, 0, 4, 0x0000000000000000LL);
 CallInfo c_Normalizer::ci_normalize((void*)&c_Normalizer::i_normalize, (void*)&c_Normalizer::ifa_normalize, 2, 12, 0x0000000000000000LL);
@@ -2543,15 +2434,6 @@ const int c_DOMCharacterData::s_instanceof_index[] = {
   3,
   -1,-1,0,1,
 };
-ObjectData *c_DOMCharacterData::cloneImpl() {
-  ObjectData *obj = coo_DOMCharacterData();
-  c_DOMCharacterData::cloneSet(obj);
-  return obj;
-}
-void c_DOMCharacterData::cloneSet(ObjectData *cl) {
-  c_DOMCharacterData *clone = static_cast<c_DOMCharacterData*>(cl);
-  c_DOMNode::cloneSet(clone);
-}
 CallInfo c_DOMCharacterData::ci___destruct((void*)&c_DOMCharacterData::i___destruct, (void*)&c_DOMCharacterData::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMCharacterData::ci_substringdata((void*)&c_DOMCharacterData::i_substringdata, (void*)&c_DOMCharacterData::ifa_substringdata, 2, 4, 0x0000000000000000LL);
 CallInfo c_DOMCharacterData::ci___set((void*)&c_DOMCharacterData::i___set, (void*)&c_DOMCharacterData::ifa___set, 2, 4, 0x0000000000000000LL);
@@ -2838,15 +2720,6 @@ const int c_DOMEntityReference::s_instanceof_index[] = {
   3,
   -1,-1,0,-1,
 };
-ObjectData *c_DOMEntityReference::cloneImpl() {
-  ObjectData *obj = coo_DOMEntityReference();
-  c_DOMEntityReference::cloneSet(obj);
-  return obj;
-}
-void c_DOMEntityReference::cloneSet(ObjectData *cl) {
-  c_DOMEntityReference *clone = static_cast<c_DOMEntityReference*>(cl);
-  c_DOMNode::cloneSet(clone);
-}
 CallInfo c_DOMEntityReference::ci___destruct((void*)&c_DOMEntityReference::i___destruct, (void*)&c_DOMEntityReference::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMEntityReference::ci___construct((void*)&c_DOMEntityReference::i___construct, (void*)&c_DOMEntityReference::ifa___construct, 1, 4, 0x0000000000000000LL);
 Variant c_DOMEntityReference::i___destruct(MethodCallPackage &mcp, CArrRef params) {
@@ -2925,15 +2798,6 @@ const int c_SimpleXMLElementIterator::s_instanceof_index[] = {
   -1,0,-1,1,-1,-1,2,-1,
 
 };
-ObjectData *c_SimpleXMLElementIterator::cloneImpl() {
-  ObjectData *obj = coo_SimpleXMLElementIterator();
-  c_SimpleXMLElementIterator::cloneSet(obj);
-  return obj;
-}
-void c_SimpleXMLElementIterator::cloneSet(ObjectData *cl) {
-  c_SimpleXMLElementIterator *clone = static_cast<c_SimpleXMLElementIterator*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_SimpleXMLElementIterator::ci_next((void*)&c_SimpleXMLElementIterator::i_next, (void*)&c_SimpleXMLElementIterator::ifa_next, 0, 4, 0x0000000000000000LL);
 CallInfo c_SimpleXMLElementIterator::ci_key((void*)&c_SimpleXMLElementIterator::i_key, (void*)&c_SimpleXMLElementIterator::ifa_key, 0, 4, 0x0000000000000000LL);
 CallInfo c_SimpleXMLElementIterator::ci_valid((void*)&c_SimpleXMLElementIterator::i_valid, (void*)&c_SimpleXMLElementIterator::ifa_valid, 0, 4, 0x0000000000000000LL);
@@ -3101,15 +2965,6 @@ const int c_GeneratorClosure::s_instanceof_index[] = {
   3,
   0,1,-1,-1,
 };
-ObjectData *c_GeneratorClosure::cloneImpl() {
-  ObjectData *obj = coo_GeneratorClosure();
-  c_GeneratorClosure::cloneSet(obj);
-  return obj;
-}
-void c_GeneratorClosure::cloneSet(ObjectData *cl) {
-  c_GeneratorClosure *clone = static_cast<c_GeneratorClosure*>(cl);
-  c_Closure::cloneSet(clone);
-}
 CallInfo c_GeneratorClosure::ci___destruct((void*)&c_GeneratorClosure::i___destruct, (void*)&c_GeneratorClosure::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_GeneratorClosure::ci___construct((void*)&c_GeneratorClosure::i___construct, (void*)&c_GeneratorClosure::ifa___construct, 0, 4, 0x0000000000000000LL);
 Variant c_GeneratorClosure::i___destruct(MethodCallPackage &mcp, CArrRef params) {
@@ -3179,15 +3034,6 @@ const int c_DateTimeZone::s_instanceof_index[] = {
   1,
   -1,0,
 };
-ObjectData *c_DateTimeZone::cloneImpl() {
-  ObjectData *obj = coo_DateTimeZone();
-  c_DateTimeZone::cloneSet(obj);
-  return obj;
-}
-void c_DateTimeZone::cloneSet(ObjectData *cl) {
-  c_DateTimeZone *clone = static_cast<c_DateTimeZone*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_DateTimeZone::ci_gettransitions((void*)&c_DateTimeZone::i_gettransitions, (void*)&c_DateTimeZone::ifa_gettransitions, 0, 4, 0x0000000000000000LL);
 CallInfo c_DateTimeZone::ci_listidentifiers((void*)&c_DateTimeZone::i_listidentifiers, (void*)&c_DateTimeZone::ifa_listidentifiers, 0, 12, 0x0000000000000000LL);
 CallInfo c_DateTimeZone::ci___destruct((void*)&c_DateTimeZone::i___destruct, (void*)&c_DateTimeZone::ifa___destruct, 0, 4, 0x0000000000000000LL);
@@ -3353,15 +3199,6 @@ const int c_DOMNodeIterator::s_instanceof_index[] = {
   -1,0,-1,-1,-1,-1,1,2,
 
 };
-ObjectData *c_DOMNodeIterator::cloneImpl() {
-  ObjectData *obj = coo_DOMNodeIterator();
-  c_DOMNodeIterator::cloneSet(obj);
-  return obj;
-}
-void c_DOMNodeIterator::cloneSet(ObjectData *cl) {
-  c_DOMNodeIterator *clone = static_cast<c_DOMNodeIterator*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_DOMNodeIterator::ci_next((void*)&c_DOMNodeIterator::i_next, (void*)&c_DOMNodeIterator::ifa_next, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMNodeIterator::ci_key((void*)&c_DOMNodeIterator::i_key, (void*)&c_DOMNodeIterator::ifa_key, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMNodeIterator::ci_valid((void*)&c_DOMNodeIterator::i_valid, (void*)&c_DOMNodeIterator::ifa_valid, 0, 4, 0x0000000000000000LL);
@@ -3528,15 +3365,6 @@ const int c_DOMImplementation::s_instanceof_index[] = {
   1,
   -1,0,
 };
-ObjectData *c_DOMImplementation::cloneImpl() {
-  ObjectData *obj = coo_DOMImplementation();
-  c_DOMImplementation::cloneSet(obj);
-  return obj;
-}
-void c_DOMImplementation::cloneSet(ObjectData *cl) {
-  c_DOMImplementation *clone = static_cast<c_DOMImplementation*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_DOMImplementation::ci_createdocument((void*)&c_DOMImplementation::i_createdocument, (void*)&c_DOMImplementation::ifa_createdocument, 3, 4, 0x0000000000000000LL);
 CallInfo c_DOMImplementation::ci_createdocumenttype((void*)&c_DOMImplementation::i_createdocumenttype, (void*)&c_DOMImplementation::ifa_createdocumenttype, 3, 4, 0x0000000000000000LL);
 CallInfo c_DOMImplementation::ci___destruct((void*)&c_DOMImplementation::i___destruct, (void*)&c_DOMImplementation::ifa___destruct, 0, 4, 0x0000000000000000LL);
@@ -3705,15 +3533,6 @@ const int c_SoapHeader::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_SoapHeader::cloneImpl() {
-  ObjectData *obj = coo_SoapHeader();
-  c_SoapHeader::cloneSet(obj);
-  return obj;
-}
-void c_SoapHeader::cloneSet(ObjectData *cl) {
-  c_SoapHeader *clone = static_cast<c_SoapHeader*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_SoapHeader::ci___destruct((void*)&c_SoapHeader::i___destruct, (void*)&c_SoapHeader::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_SoapHeader::ci___construct((void*)&c_SoapHeader::i___construct, (void*)&c_SoapHeader::ifa___construct, 5, 4, 0x0000000000000000LL);
 Variant c_SoapHeader::i___destruct(MethodCallPackage &mcp, CArrRef params) {
@@ -3804,15 +3623,6 @@ const int c_DOMNotation::s_instanceof_index[] = {
   3,
   -1,-1,0,1,
 };
-ObjectData *c_DOMNotation::cloneImpl() {
-  ObjectData *obj = coo_DOMNotation();
-  c_DOMNotation::cloneSet(obj);
-  return obj;
-}
-void c_DOMNotation::cloneSet(ObjectData *cl) {
-  c_DOMNotation *clone = static_cast<c_DOMNotation*>(cl);
-  c_DOMNode::cloneSet(clone);
-}
 CallInfo c_DOMNotation::ci___destruct((void*)&c_DOMNotation::i___destruct, (void*)&c_DOMNotation::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMNotation::ci___set((void*)&c_DOMNotation::i___set, (void*)&c_DOMNotation::ifa___set, 2, 4, 0x0000000000000000LL);
 CallInfo c_DOMNotation::ci___construct((void*)&c_DOMNotation::i___construct, (void*)&c_DOMNotation::ifa___construct, 0, 4, 0x0000000000000000LL);
@@ -3961,15 +3771,6 @@ const int c_DebuggerProxy::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_DebuggerProxy::cloneImpl() {
-  ObjectData *obj = coo_DebuggerProxy();
-  c_DebuggerProxy::cloneSet(obj);
-  return obj;
-}
-void c_DebuggerProxy::cloneSet(ObjectData *cl) {
-  c_DebuggerProxy *clone = static_cast<c_DebuggerProxy*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_DebuggerProxy::ci_islocal((void*)&c_DebuggerProxy::i_islocal, (void*)&c_DebuggerProxy::ifa_islocal, 0, 4, 0x0000000000000000LL);
 CallInfo c_DebuggerProxy::ci___destruct((void*)&c_DebuggerProxy::i___destruct, (void*)&c_DebuggerProxy::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DebuggerProxy::ci___construct((void*)&c_DebuggerProxy::i___construct, (void*)&c_DebuggerProxy::ifa___construct, 0, 4, 0x0000000000000000LL);
@@ -4084,15 +3885,6 @@ const int c_Memcached::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_Memcached::cloneImpl() {
-  ObjectData *obj = coo_Memcached();
-  c_Memcached::cloneSet(obj);
-  return obj;
-}
-void c_Memcached::cloneSet(ObjectData *cl) {
-  c_Memcached *clone = static_cast<c_Memcached*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_Memcached::ci_getmulti((void*)&c_Memcached::i_getmulti, (void*)&c_Memcached::ifa_getmulti, 3, 4, 0x0000000000000002LL);
 CallInfo c_Memcached::ci_getresultmessage((void*)&c_Memcached::i_getresultmessage, (void*)&c_Memcached::ifa_getresultmessage, 0, 4, 0x0000000000000000LL);
 CallInfo c_Memcached::ci_getresultcode((void*)&c_Memcached::i_getresultcode, (void*)&c_Memcached::ifa_getresultcode, 0, 4, 0x0000000000000000LL);
@@ -5237,15 +5029,6 @@ const int c_XMLReader::s_instanceof_index[] = {
   1,
   -1,0,
 };
-ObjectData *c_XMLReader::cloneImpl() {
-  ObjectData *obj = coo_XMLReader();
-  c_XMLReader::cloneSet(obj);
-  return obj;
-}
-void c_XMLReader::cloneSet(ObjectData *cl) {
-  c_XMLReader *clone = static_cast<c_XMLReader*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_XMLReader::ci_lookupnamespace((void*)&c_XMLReader::i_lookupnamespace, (void*)&c_XMLReader::ifa_lookupnamespace, 1, 4, 0x0000000000000000LL);
 CallInfo c_XMLReader::ci_next((void*)&c_XMLReader::i_next, (void*)&c_XMLReader::ifa_next, 1, 4, 0x0000000000000000LL);
 CallInfo c_XMLReader::ci_getattribute((void*)&c_XMLReader::i_getattribute, (void*)&c_XMLReader::ifa_getattribute, 1, 4, 0x0000000000000000LL);
@@ -5940,15 +5723,6 @@ const int c_DOMComment::s_instanceof_index[] = {
   0,-1,1,2,-1,-1,-1,-1,
 
 };
-ObjectData *c_DOMComment::cloneImpl() {
-  ObjectData *obj = coo_DOMComment();
-  c_DOMComment::cloneSet(obj);
-  return obj;
-}
-void c_DOMComment::cloneSet(ObjectData *cl) {
-  c_DOMComment *clone = static_cast<c_DOMComment*>(cl);
-  c_DOMCharacterData::cloneSet(clone);
-}
 CallInfo c_DOMComment::ci___destruct((void*)&c_DOMComment::i___destruct, (void*)&c_DOMComment::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMComment::ci___construct((void*)&c_DOMComment::i___construct, (void*)&c_DOMComment::ifa___construct, 1, 4, 0x0000000000000000LL);
 Variant c_DOMComment::i___destruct(MethodCallPackage &mcp, CArrRef params) {
@@ -6026,15 +5800,6 @@ const int c_SQLite3::s_instanceof_index[] = {
   1,
   -1,0,
 };
-ObjectData *c_SQLite3::cloneImpl() {
-  ObjectData *obj = coo_SQLite3();
-  c_SQLite3::cloneSet(obj);
-  return obj;
-}
-void c_SQLite3::cloneSet(ObjectData *cl) {
-  c_SQLite3 *clone = static_cast<c_SQLite3*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_SQLite3::ci_exec((void*)&c_SQLite3::i_exec, (void*)&c_SQLite3::ifa_exec, 1, 4, 0x0000000000000000LL);
 CallInfo c_SQLite3::ci_version((void*)&c_SQLite3::i_version, (void*)&c_SQLite3::ifa_version, 0, 4, 0x0000000000000000LL);
 CallInfo c_SQLite3::ci_loadextension((void*)&c_SQLite3::i_loadextension, (void*)&c_SQLite3::ifa_loadextension, 1, 4, 0x0000000000000000LL);
@@ -6511,15 +6276,6 @@ const int c_DOMAttr::s_instanceof_index[] = {
   3,
   0,-1,1,-1,
 };
-ObjectData *c_DOMAttr::cloneImpl() {
-  ObjectData *obj = coo_DOMAttr();
-  c_DOMAttr::cloneSet(obj);
-  return obj;
-}
-void c_DOMAttr::cloneSet(ObjectData *cl) {
-  c_DOMAttr *clone = static_cast<c_DOMAttr*>(cl);
-  c_DOMNode::cloneSet(clone);
-}
 CallInfo c_DOMAttr::ci_isid((void*)&c_DOMAttr::i_isid, (void*)&c_DOMAttr::ifa_isid, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMAttr::ci___destruct((void*)&c_DOMAttr::i___destruct, (void*)&c_DOMAttr::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMAttr::ci___set((void*)&c_DOMAttr::i___set, (void*)&c_DOMAttr::ifa___set, 2, 4, 0x0000000000000000LL);
@@ -6697,15 +6453,6 @@ const int c_SoapVar::s_instanceof_index[] = {
   1,
   -1,0,
 };
-ObjectData *c_SoapVar::cloneImpl() {
-  ObjectData *obj = coo_SoapVar();
-  c_SoapVar::cloneSet(obj);
-  return obj;
-}
-void c_SoapVar::cloneSet(ObjectData *cl) {
-  c_SoapVar *clone = static_cast<c_SoapVar*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_SoapVar::ci___destruct((void*)&c_SoapVar::i___destruct, (void*)&c_SoapVar::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_SoapVar::ci___construct((void*)&c_SoapVar::i___construct, (void*)&c_SoapVar::ifa___construct, 6, 4, 0x0000000000000000LL);
 Variant c_SoapVar::i___destruct(MethodCallPackage &mcp, CArrRef params) {
@@ -6802,15 +6549,6 @@ const int c_DOMNamedNodeMap::s_instanceof_index[] = {
   -1,0,-1,-1,-1,-1,1,2,
 
 };
-ObjectData *c_DOMNamedNodeMap::cloneImpl() {
-  ObjectData *obj = coo_DOMNamedNodeMap();
-  c_DOMNamedNodeMap::cloneSet(obj);
-  return obj;
-}
-void c_DOMNamedNodeMap::cloneSet(ObjectData *cl) {
-  c_DOMNamedNodeMap *clone = static_cast<c_DOMNamedNodeMap*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_DOMNamedNodeMap::ci_item((void*)&c_DOMNamedNodeMap::i_item, (void*)&c_DOMNamedNodeMap::ifa_item, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMNamedNodeMap::ci_getnameditem((void*)&c_DOMNamedNodeMap::i_getnameditem, (void*)&c_DOMNamedNodeMap::ifa_getnameditem, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMNamedNodeMap::ci___destruct((void*)&c_DOMNamedNodeMap::i___destruct, (void*)&c_DOMNamedNodeMap::ifa___destruct, 0, 4, 0x0000000000000000LL);
@@ -7057,15 +6795,6 @@ const int c_SQLite3Result::s_instanceof_index[] = {
   1,
   -1,0,
 };
-ObjectData *c_SQLite3Result::cloneImpl() {
-  ObjectData *obj = coo_SQLite3Result();
-  c_SQLite3Result::cloneSet(obj);
-  return obj;
-}
-void c_SQLite3Result::cloneSet(ObjectData *cl) {
-  c_SQLite3Result *clone = static_cast<c_SQLite3Result*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_SQLite3Result::ci_columnname((void*)&c_SQLite3Result::i_columnname, (void*)&c_SQLite3Result::ifa_columnname, 1, 4, 0x0000000000000000LL);
 CallInfo c_SQLite3Result::ci_columntype((void*)&c_SQLite3Result::i_columntype, (void*)&c_SQLite3Result::ifa_columntype, 1, 4, 0x0000000000000000LL);
 CallInfo c_SQLite3Result::ci___destruct((void*)&c_SQLite3Result::i___destruct, (void*)&c_SQLite3Result::ifa___destruct, 0, 4, 0x0000000000000000LL);
@@ -7277,15 +7006,6 @@ const int c_SimpleXMLElement::s_instanceof_index[] = {
   -1,-1,-1,4,-1,-1,-1,-1,
 
 };
-ObjectData *c_SimpleXMLElement::cloneImpl() {
-  ObjectData *obj = coo_SimpleXMLElement();
-  c_SimpleXMLElement::cloneSet(obj);
-  return obj;
-}
-void c_SimpleXMLElement::cloneSet(ObjectData *cl) {
-  c_SimpleXMLElement *clone = static_cast<c_SimpleXMLElement*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_SimpleXMLElement::ci_addattribute((void*)&c_SimpleXMLElement::i_addattribute, (void*)&c_SimpleXMLElement::ifa_addattribute, 3, 4, 0x0000000000000000LL);
 CallInfo c_SimpleXMLElement::ci_count((void*)&c_SimpleXMLElement::i_count, (void*)&c_SimpleXMLElement::ifa_count, 0, 4, 0x0000000000000000LL);
 CallInfo c_SimpleXMLElement::ci___tostring((void*)&c_SimpleXMLElement::i___tostring, (void*)&c_SimpleXMLElement::ifa___tostring, 0, 4, 0x0000000000000000LL);
@@ -7926,15 +7646,6 @@ const int c_Memcache::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_Memcache::cloneImpl() {
-  ObjectData *obj = coo_Memcache();
-  c_Memcache::cloneSet(obj);
-  return obj;
-}
-void c_Memcache::cloneSet(ObjectData *cl) {
-  c_Memcache *clone = static_cast<c_Memcache*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_Memcache::ci_addserver((void*)&c_Memcache::i_addserver, (void*)&c_Memcache::ifa_addserver, 9, 4, 0x0000000000000000LL);
 CallInfo c_Memcache::ci_set((void*)&c_Memcache::i_set, (void*)&c_Memcache::ifa_set, 4, 4, 0x0000000000000000LL);
 CallInfo c_Memcache::ci_setserverparams((void*)&c_Memcache::i_setserverparams, (void*)&c_Memcache::ifa_setserverparams, 6, 4, 0x0000000000000000LL);
@@ -8623,15 +8334,6 @@ const int c_DOMProcessingInstruction::s_instanceof_index[] = {
   3,
   0,-1,1,-1,
 };
-ObjectData *c_DOMProcessingInstruction::cloneImpl() {
-  ObjectData *obj = coo_DOMProcessingInstruction();
-  c_DOMProcessingInstruction::cloneSet(obj);
-  return obj;
-}
-void c_DOMProcessingInstruction::cloneSet(ObjectData *cl) {
-  c_DOMProcessingInstruction *clone = static_cast<c_DOMProcessingInstruction*>(cl);
-  c_DOMNode::cloneSet(clone);
-}
 CallInfo c_DOMProcessingInstruction::ci___destruct((void*)&c_DOMProcessingInstruction::i___destruct, (void*)&c_DOMProcessingInstruction::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMProcessingInstruction::ci___set((void*)&c_DOMProcessingInstruction::i___set, (void*)&c_DOMProcessingInstruction::ifa___set, 2, 4, 0x0000000000000000LL);
 CallInfo c_DOMProcessingInstruction::ci___construct((void*)&c_DOMProcessingInstruction::i___construct, (void*)&c_DOMProcessingInstruction::ifa___construct, 2, 4, 0x0000000000000000LL);
@@ -8790,15 +8492,6 @@ const int c_EncodingMatch::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_EncodingMatch::cloneImpl() {
-  ObjectData *obj = coo_EncodingMatch();
-  c_EncodingMatch::cloneSet(obj);
-  return obj;
-}
-void c_EncodingMatch::cloneSet(ObjectData *cl) {
-  c_EncodingMatch *clone = static_cast<c_EncodingMatch*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_EncodingMatch::ci___destruct((void*)&c_EncodingMatch::i___destruct, (void*)&c_EncodingMatch::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_EncodingMatch::ci___construct((void*)&c_EncodingMatch::i___construct, (void*)&c_EncodingMatch::ifa___construct, 0, 4, 0x0000000000000000LL);
 CallInfo c_EncodingMatch::ci_getutf8((void*)&c_EncodingMatch::i_getutf8, (void*)&c_EncodingMatch::ifa_getutf8, 0, 4, 0x0000000000000000LL);
@@ -8968,15 +8661,6 @@ const int c_PDOStatement::s_instanceof_index[] = {
   -1,0,-1,-1,1,-1,2,-1,
 
 };
-ObjectData *c_PDOStatement::cloneImpl() {
-  ObjectData *obj = coo_PDOStatement();
-  c_PDOStatement::cloneSet(obj);
-  return obj;
-}
-void c_PDOStatement::cloneSet(ObjectData *cl) {
-  c_PDOStatement *clone = static_cast<c_PDOStatement*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_PDOStatement::ci_next((void*)&c_PDOStatement::i_next, (void*)&c_PDOStatement::ifa_next, 0, 4, 0x0000000000000000LL);
 CallInfo c_PDOStatement::ci_errorcode((void*)&c_PDOStatement::i_errorcode, (void*)&c_PDOStatement::ifa_errorcode, 0, 4, 0x0000000000000000LL);
 CallInfo c_PDOStatement::ci_getattribute((void*)&c_PDOStatement::i_getattribute, (void*)&c_PDOStatement::ifa_getattribute, 1, 4, 0x0000000000000000LL);
@@ -9695,15 +9379,6 @@ const int c_SoapClient::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_SoapClient::cloneImpl() {
-  ObjectData *obj = coo_SoapClient();
-  c_SoapClient::cloneSet(obj);
-  return obj;
-}
-void c_SoapClient::cloneSet(ObjectData *cl) {
-  c_SoapClient *clone = static_cast<c_SoapClient*>(cl);
-  ObjectData::cloneSet(clone);
-}
 Variant c_SoapClient::doCall(Variant v_name, Variant v_arguments, bool fatal) {
   return t___call(v_name, !v_arguments.isNull() ? v_arguments : Variant(Array::Create()));
 }
@@ -10089,15 +9764,6 @@ const int c_SoapParam::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_SoapParam::cloneImpl() {
-  ObjectData *obj = coo_SoapParam();
-  c_SoapParam::cloneSet(obj);
-  return obj;
-}
-void c_SoapParam::cloneSet(ObjectData *cl) {
-  c_SoapParam *clone = static_cast<c_SoapParam*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_SoapParam::ci___destruct((void*)&c_SoapParam::i___destruct, (void*)&c_SoapParam::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_SoapParam::ci___construct((void*)&c_SoapParam::i___construct, (void*)&c_SoapParam::ifa___construct, 2, 4, 0x0000000000000000LL);
 Variant c_SoapParam::i___destruct(MethodCallPackage &mcp, CArrRef params) {
@@ -10175,15 +9841,6 @@ const int c_DateTime::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_DateTime::cloneImpl() {
-  ObjectData *obj = coo_DateTime();
-  c_DateTime::cloneSet(obj);
-  return obj;
-}
-void c_DateTime::cloneSet(ObjectData *cl) {
-  c_DateTime *clone = static_cast<c_DateTime*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_DateTime::ci_format((void*)&c_DateTime::i_format, (void*)&c_DateTime::ifa_format, 1, 4, 0x0000000000000000LL);
 CallInfo c_DateTime::ci_setdate((void*)&c_DateTime::i_setdate, (void*)&c_DateTime::ifa_setdate, 3, 4, 0x0000000000000000LL);
 CallInfo c_DateTime::ci___destruct((void*)&c_DateTime::i___destruct, (void*)&c_DateTime::ifa___destruct, 0, 4, 0x0000000000000000LL);
@@ -10473,15 +10130,6 @@ const int c_Collator::s_instanceof_index[] = {
   1,
   -1,0,
 };
-ObjectData *c_Collator::cloneImpl() {
-  ObjectData *obj = coo_Collator();
-  c_Collator::cloneSet(obj);
-  return obj;
-}
-void c_Collator::cloneSet(ObjectData *cl) {
-  c_Collator *clone = static_cast<c_Collator*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_Collator::ci_getattribute((void*)&c_Collator::i_getattribute, (void*)&c_Collator::ifa_getattribute, 1, 4, 0x0000000000000000LL);
 CallInfo c_Collator::ci_sortwithsortkeys((void*)&c_Collator::i_sortwithsortkeys, (void*)&c_Collator::ifa_sortwithsortkeys, 1, 4, 0x0000000000000001LL);
 CallInfo c_Collator::ci___destruct((void*)&c_Collator::i___destruct, (void*)&c_Collator::ifa___destruct, 0, 4, 0x0000000000000000LL);
@@ -10852,15 +10500,6 @@ const int c_PDO::s_instanceof_index[] = {
   1,
   -1,0,
 };
-ObjectData *c_PDO::cloneImpl() {
-  ObjectData *obj = coo_PDO();
-  c_PDO::cloneSet(obj);
-  return obj;
-}
-void c_PDO::cloneSet(ObjectData *cl) {
-  c_PDO *clone = static_cast<c_PDO*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_PDO::ci_errorcode((void*)&c_PDO::i_errorcode, (void*)&c_PDO::ifa_errorcode, 0, 4, 0x0000000000000000LL);
 CallInfo c_PDO::ci_getattribute((void*)&c_PDO::i_getattribute, (void*)&c_PDO::ifa_getattribute, 1, 4, 0x0000000000000000LL);
 CallInfo c_PDO::ci_exec((void*)&c_PDO::i_exec, (void*)&c_PDO::ifa_exec, 1, 4, 0x0000000000000000LL);
@@ -11287,15 +10926,6 @@ const int c_ImageSprite::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_ImageSprite::cloneImpl() {
-  ObjectData *obj = coo_ImageSprite();
-  c_ImageSprite::cloneSet(obj);
-  return obj;
-}
-void c_ImageSprite::cloneSet(ObjectData *cl) {
-  c_ImageSprite *clone = static_cast<c_ImageSprite*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_ImageSprite::ci_addstring((void*)&c_ImageSprite::i_addstring, (void*)&c_ImageSprite::ifa_addstring, 3, 4, 0x0000000000000000LL);
 CallInfo c_ImageSprite::ci_loaddims((void*)&c_ImageSprite::i_loaddims, (void*)&c_ImageSprite::ifa_loaddims, 1, 4, 0x0000000000000000LL);
 CallInfo c_ImageSprite::ci___destruct((void*)&c_ImageSprite::i___destruct, (void*)&c_ImageSprite::ifa___destruct, 0, 4, 0x0000000000000000LL);
@@ -11656,25 +11286,6 @@ const int c_Continuation::s_instanceof_index[] = {
   -1,0,1,-1,-1,-1,2,-1,
 
 };
-ObjectData *c_Continuation::cloneImpl() {
-  ObjectData *obj = coo_Continuation();
-  c_Continuation::cloneSet(obj);
-  return obj;
-}
-void c_Continuation::cloneSet(ObjectData *cl) {
-  c_Continuation *clone = static_cast<c_Continuation*>(cl);
-  ObjectData::cloneSet(clone);
-  clone->m_obj = m_obj;
-  clone->m_args = m_args;
-  clone->m_label = m_label;
-  clone->m_index = m_index;
-  clone->m_value.setWithRef(m_value);
-  clone->m_received.setWithRef(m_received);
-  clone->m_origFuncName = m_origFuncName;
-  clone->m_called_class = m_called_class;
-  clone->m_done = m_done;
-  clone->m_running = m_running;
-}
 CallInfo c_Continuation::ci_raised((void*)&c_Continuation::i_raised, (void*)&c_Continuation::ifa_raised, 0, 4, 0x0000000000000000LL);
 CallInfo c_Continuation::ci_next((void*)&c_Continuation::i_next, (void*)&c_Continuation::ifa_next, 0, 4, 0x0000000000000000LL);
 CallInfo c_Continuation::ci_raise((void*)&c_Continuation::i_raise, (void*)&c_Continuation::ifa_raise, 1, 4, 0x0000000000000000LL);
@@ -12122,15 +11733,6 @@ const int c_DOMEntity::s_instanceof_index[] = {
   3,
   -1,-1,0,1,
 };
-ObjectData *c_DOMEntity::cloneImpl() {
-  ObjectData *obj = coo_DOMEntity();
-  c_DOMEntity::cloneSet(obj);
-  return obj;
-}
-void c_DOMEntity::cloneSet(ObjectData *cl) {
-  c_DOMEntity *clone = static_cast<c_DOMEntity*>(cl);
-  c_DOMNode::cloneSet(clone);
-}
 CallInfo c_DOMEntity::ci___destruct((void*)&c_DOMEntity::i___destruct, (void*)&c_DOMEntity::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMEntity::ci___set((void*)&c_DOMEntity::i___set, (void*)&c_DOMEntity::ifa___set, 2, 4, 0x0000000000000000LL);
 CallInfo c_DOMEntity::ci___construct((void*)&c_DOMEntity::i___construct, (void*)&c_DOMEntity::ifa___construct, 0, 4, 0x0000000000000000LL);
@@ -12279,15 +11881,6 @@ const int c_XMLWriter::s_instanceof_index[] = {
   1,
   -1,0,
 };
-ObjectData *c_XMLWriter::cloneImpl() {
-  ObjectData *obj = coo_XMLWriter();
-  c_XMLWriter::cloneSet(obj);
-  return obj;
-}
-void c_XMLWriter::cloneSet(ObjectData *cl) {
-  c_XMLWriter *clone = static_cast<c_XMLWriter*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_XMLWriter::ci_writeelementns((void*)&c_XMLWriter::i_writeelementns, (void*)&c_XMLWriter::ifa_writeelementns, 4, 4, 0x0000000000000000LL);
 CallInfo c_XMLWriter::ci_outputmemory((void*)&c_XMLWriter::i_outputmemory, (void*)&c_XMLWriter::ifa_outputmemory, 1, 4, 0x0000000000000000LL);
 CallInfo c_XMLWriter::ci_enddtdattlist((void*)&c_XMLWriter::i_enddtdattlist, (void*)&c_XMLWriter::ifa_enddtdattlist, 0, 4, 0x0000000000000000LL);
@@ -13427,15 +13020,6 @@ const int c_DOMXPath::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_DOMXPath::cloneImpl() {
-  ObjectData *obj = coo_DOMXPath();
-  c_DOMXPath::cloneSet(obj);
-  return obj;
-}
-void c_DOMXPath::cloneSet(ObjectData *cl) {
-  c_DOMXPath *clone = static_cast<c_DOMXPath*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_DOMXPath::ci___destruct((void*)&c_DOMXPath::i___destruct, (void*)&c_DOMXPath::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMXPath::ci___set((void*)&c_DOMXPath::i___set, (void*)&c_DOMXPath::ifa___set, 2, 4, 0x0000000000000000LL);
 CallInfo c_DOMXPath::ci___construct((void*)&c_DOMXPath::i___construct, (void*)&c_DOMXPath::ifa___construct, 1, 4, 0x0000000000000000LL);
@@ -13704,15 +13288,6 @@ const int c_SoapServer::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_SoapServer::cloneImpl() {
-  ObjectData *obj = coo_SoapServer();
-  c_SoapServer::cloneSet(obj);
-  return obj;
-}
-void c_SoapServer::cloneSet(ObjectData *cl) {
-  c_SoapServer *clone = static_cast<c_SoapServer*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_SoapServer::ci_addfunction((void*)&c_SoapServer::i_addfunction, (void*)&c_SoapServer::ifa_addfunction, 1, 4, 0x0000000000000000LL);
 CallInfo c_SoapServer::ci___destruct((void*)&c_SoapServer::i___destruct, (void*)&c_SoapServer::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_SoapServer::ci___construct((void*)&c_SoapServer::i___construct, (void*)&c_SoapServer::ifa___construct, 2, 4, 0x0000000000000000LL);
@@ -14013,15 +13588,6 @@ const int c_DOMNode::s_instanceof_index[] = {
   1,
   0,-1,
 };
-ObjectData *c_DOMNode::cloneImpl() {
-  ObjectData *obj = coo_DOMNode();
-  c_DOMNode::cloneSet(obj);
-  return obj;
-}
-void c_DOMNode::cloneSet(ObjectData *cl) {
-  c_DOMNode *clone = static_cast<c_DOMNode*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_DOMNode::ci_getlineno((void*)&c_DOMNode::i_getlineno, (void*)&c_DOMNode::ifa_getlineno, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMNode::ci_insertbefore((void*)&c_DOMNode::i_insertbefore, (void*)&c_DOMNode::ifa_insertbefore, 2, 4, 0x0000000000000000LL);
 CallInfo c_DOMNode::ci_isdefaultnamespace((void*)&c_DOMNode::i_isdefaultnamespace, (void*)&c_DOMNode::ifa_isdefaultnamespace, 1, 4, 0x0000000000000000LL);
@@ -14611,15 +14177,6 @@ const int c_SpoofChecker::s_instanceof_index[] = {
   1,
   -1,0,
 };
-ObjectData *c_SpoofChecker::cloneImpl() {
-  ObjectData *obj = coo_SpoofChecker();
-  c_SpoofChecker::cloneSet(obj);
-  return obj;
-}
-void c_SpoofChecker::cloneSet(ObjectData *cl) {
-  c_SpoofChecker *clone = static_cast<c_SpoofChecker*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_SpoofChecker::ci_setallowedlocales((void*)&c_SpoofChecker::i_setallowedlocales, (void*)&c_SpoofChecker::ifa_setallowedlocales, 1, 4, 0x0000000000000000LL);
 CallInfo c_SpoofChecker::ci___destruct((void*)&c_SpoofChecker::i___destruct, (void*)&c_SpoofChecker::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_SpoofChecker::ci___construct((void*)&c_SpoofChecker::i___construct, (void*)&c_SpoofChecker::ifa___construct, 0, 4, 0x0000000000000000LL);
@@ -14804,15 +14361,6 @@ const int c_DOMDocument::s_instanceof_index[] = {
   3,
   -1,-1,0,1,
 };
-ObjectData *c_DOMDocument::cloneImpl() {
-  ObjectData *obj = coo_DOMDocument();
-  c_DOMDocument::cloneSet(obj);
-  return obj;
-}
-void c_DOMDocument::cloneSet(ObjectData *cl) {
-  c_DOMDocument *clone = static_cast<c_DOMDocument*>(cl);
-  c_DOMNode::cloneSet(clone);
-}
 CallInfo c_DOMDocument::ci_getelementsbytagname((void*)&c_DOMDocument::i_getelementsbytagname, (void*)&c_DOMDocument::ifa_getelementsbytagname, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMDocument::ci_createcdatasection((void*)&c_DOMDocument::i_createcdatasection, (void*)&c_DOMDocument::ifa_createcdatasection, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMDocument::ci_validate((void*)&c_DOMDocument::i_validate, (void*)&c_DOMDocument::ifa_validate, 0, 4, 0x0000000000000000LL);
@@ -15757,15 +15305,6 @@ const int c_LibXMLError::s_instanceof_index[] = {
   1,
   -1,0,
 };
-ObjectData *c_LibXMLError::cloneImpl() {
-  ObjectData *obj = coo_LibXMLError();
-  c_LibXMLError::cloneSet(obj);
-  return obj;
-}
-void c_LibXMLError::cloneSet(ObjectData *cl) {
-  c_LibXMLError *clone = static_cast<c_LibXMLError*>(cl);
-  ObjectData::cloneSet(clone);
-}
 CallInfo c_LibXMLError::ci___destruct((void*)&c_LibXMLError::i___destruct, (void*)&c_LibXMLError::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_LibXMLError::ci___construct((void*)&c_LibXMLError::i___construct, (void*)&c_LibXMLError::ifa___construct, 0, 4, 0x0000000000000000LL);
 Variant c_LibXMLError::i___destruct(MethodCallPackage &mcp, CArrRef params) {
@@ -15836,15 +15375,6 @@ const int c_DOMElement::s_instanceof_index[] = {
   3,
   -1,-1,0,1,
 };
-ObjectData *c_DOMElement::cloneImpl() {
-  ObjectData *obj = coo_DOMElement();
-  c_DOMElement::cloneSet(obj);
-  return obj;
-}
-void c_DOMElement::cloneSet(ObjectData *cl) {
-  c_DOMElement *clone = static_cast<c_DOMElement*>(cl);
-  c_DOMNode::cloneSet(clone);
-}
 CallInfo c_DOMElement::ci_getelementsbytagname((void*)&c_DOMElement::i_getelementsbytagname, (void*)&c_DOMElement::ifa_getelementsbytagname, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMElement::ci_setidattributens((void*)&c_DOMElement::i_setidattributens, (void*)&c_DOMElement::ifa_setidattributens, 3, 4, 0x0000000000000000LL);
 CallInfo c_DOMElement::ci_getattribute((void*)&c_DOMElement::i_getattribute, (void*)&c_DOMElement::ifa_getattribute, 1, 4, 0x0000000000000000LL);

@@ -47,6 +47,32 @@ EvalObjectData::EvalObjectData(ClassEvalState &cls, const char* pname,
   m_invokeMcp.isObj = true;
 }
 
+EvalObjectData::EvalObjectData(EvalObjectData *original) :
+    DynamicObjectData(0, this), m_cls(original->m_cls) {
+
+  RequestEvalState::registerObject(this);
+
+  if (getMethodStatement("__get")) setAttribute(UseGet);
+  if (getMethodStatement("__set")) setAttribute(UseSet);
+
+  // an object can never live longer than its class
+  m_class_name = m_cls.getClass()->name();
+
+  // seems to require both
+  m_invokeMcp.obj = m_invokeMcp.rootObj = this;
+  // so that getClassName() will work
+  m_invokeMcp.isObj = true;
+
+  if (ObjectData *p = original->parent.get()) {
+    CountableHelper h(this);
+    parent = p->clone();
+    parent->setRoot(this);
+    setAttributes(parent.get());
+  }
+  m_privates = original->m_privates;
+  cloneDynamic(original);
+}
+
 void EvalObjectData::init() {
   m_cls.getClass()->initializeObject(this);
   DynamicObjectData::init();
@@ -340,17 +366,8 @@ Variant EvalObjectData::t___clone() {
   }
 }
 
-ObjectData* EvalObjectData::cloneImpl() {
-  EvalObjectData *e =
-    NEWOBJ(EvalObjectData)(m_cls, parent.isNull() ? 0 :
-                           parent->o_getClassName().c_str());
-  EvalObjectData::cloneSet(e);
-  return e;
-}
-
-void EvalObjectData::cloneSet(ObjectData *clone) {
-  DynamicObjectData::cloneSet(clone);
-  static_cast<EvalObjectData*>(clone)->m_privates = m_privates;
+ObjectData* EvalObjectData::clone() {
+  return NEWOBJ(EvalObjectData)(this);
 }
 
 Variant &EvalObjectData::___offsetget_lval(Variant v_name) {

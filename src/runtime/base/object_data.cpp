@@ -1346,13 +1346,74 @@ void ObjectData::dump() const {
 }
 
 ObjectData *ObjectData::clone() {
-  ObjectData *clone = cloneImpl();
-  return clone;
+  const ObjectStaticCallbacks *osc = o_get_callbacks();
+  if (UNLIKELY(!osc)) {
+    raise_error("Cannot clone non-object");
+    return 0;
+  }
+
+  ObjectData *clone = osc->createOnlyNoInit(NULL), *orig = clone;
+  CountableHelper h(clone);
+  clone->init();
+  ObjectData *obj = this;
+
+  while (true) {
+    const ClassPropTable *ct = osc->cpt;
+    while (ct) {
+      const ClassPropTableEntry *p = ct->m_entries;
+      int off = ct->m_offset;
+      if (off >= 0) {
+        do {
+          p += off;
+          if (UNLIKELY(p->isOverride())) continue;
+          const char *a1 = (const char*)obj + p->offset;
+          const char *a2 = (const char*)clone + p->offset;
+          switch (p->type) {
+            case KindOfBoolean:
+              *(bool*)a2 = *(bool*)a1;
+              break;
+            case KindOfInt32:
+              *(int*)a2 = *(int*)a1;
+              break;
+            case KindOfInt64:
+              *(int64*)a2 = *(int64*)a1;
+              break;
+            case KindOfDouble:
+              *(double*)a2 = *(double*)a1;
+              break;
+            case KindOfString:
+              *(String*)a2 = *(String*)a1;
+              break;
+            case KindOfArray:
+              *(Array*)a2 = *(Array*)a1;
+              break;
+            case KindOfObject:
+              *(Object*)a2 = *(Object*)a1;
+              break;
+            case KindOfVariant:
+              ((Variant*)a2)->setWithRef(*(Variant*)a1);
+              break;
+            default:
+              assert(false);
+          }
+        } while ((off = p->next) != 0);
+      }
+      ct = ct->m_parent;
+    }
+    if (LIKELY(!osc->redeclaredParent)) break;
+    osc = *(ObjectStaticCallbacks**)((char*)get_global_variables() +
+                                     osc->redeclaredParent);
+    obj = obj->getRedeclaredParent();
+    clone = clone->getRedeclaredParent();
+  }
+
+  clone->cloneDynamic(obj);
+  return orig;
 }
 
-void ObjectData::cloneSet(ObjectData *clone) {
-  if (o_properties) {
-    clone->o_properties = NEW(Array)(*o_properties);
+void ObjectData::cloneDynamic(ObjectData *orig) {
+  if (orig->o_properties) {
+    o_properties = NEW(Array)(*orig->o_properties);
   }
 }
 

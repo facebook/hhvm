@@ -198,7 +198,8 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
   MethodCallPackage mcp;
   String classname, methodname;
   bool doBind;
-  if (!get_user_func_handler(callback, mcp, classname, methodname, doBind)) {
+  if (callback.isNull() ||
+      !get_user_func_handler(callback, mcp, classname, methodname, doBind)) {
     return ArrayUtil::Map(inputs, map_func, NULL);
   }
   if (doBind) {

@@ -32,7 +32,7 @@ ForStatement::ForStatement(STATEMENT_ARGS,
 
 static Variant evalVector(const std::vector<ExpressionPtr> &v,
                           VariableEnvironment &env) {
-  if (LIKELY(v.size() == 1)) return v[0]->eval(env);
+  ASSERT(v.size() != 1);
 
   for (unsigned int i  = 0; i < v.size(); i++) {
     CVarRef res = v[i]->eval(env);
@@ -40,9 +40,6 @@ static Variant evalVector(const std::vector<ExpressionPtr> &v,
   }
   return null;
 }
-
-#define EVAL_LOOP_EXPR(v, env) \
-  (LIKELY(v.size() == 1) ? v[0]->eval(env) : evalVector(v, env))
 
 void ForStatement::optimize(VariableEnvironment &env) {
   for (unsigned int i = 0; i < m_init.size(); i++) {
@@ -66,20 +63,32 @@ void ForStatement::eval(VariableEnvironment &env) const {
   }
   ENTER_STMT;
   LOOP_COUNTER(1);
-  EVAL_LOOP_EXPR(m_init, env);
 
-  begin:
-  if (!m_cond.empty() && !EVAL_LOOP_EXPR(m_cond, env)) {
-    goto end;
+  if (LIKELY(m_init.size() == 1)) {
+    m_init[0]->eval(env);
+  } else {
+    evalVector(m_init, env);
   }
 
+  begin:
+  if (LIKELY(m_cond.size() == 1)) {
+    if (!m_cond[0]->eval(env)) return;
+  } else if (m_cond.size() == 0 || evalVector(m_cond, env)) {
+    goto body;
+  } else {
+    return;
+  }
   body:
   LOOP_COUNTER_CHECK_INFO(1);
   EVAL_STMT_HANDLE_GOTO_BEGIN(restart);
   if (m_body) EVAL_STMT_HANDLE_GOTO(m_body, env);
   EVAL_STMT_HANDLE_GOTO_END(restart);
 
-  EVAL_LOOP_EXPR(m_next, env);
+  if (LIKELY(m_next.size() == 1)) {
+    m_next[0]->eval(env);
+  } else {
+    evalVector(m_next, env);
+  }
   goto begin;
   end:;
 }

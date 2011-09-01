@@ -37,13 +37,19 @@ static StaticString s_this("this");
 
 class TempStack {
 public:
-  TempStack() : m_prevSize(0), m_size(0), m_alloc(TEMP_STACK_SIZE) {
-    m_stack = new Variant[TEMP_STACK_SIZE];
+  TempStack() : m_prevSize(0), m_size(0), m_capacity(TEMP_STACK_SIZE) {}
+  ~TempStack() {
+    assert(m_size == 0);
+#ifdef DEBUG 
+    for (Variant *v = m_stack; v < m_stack + m_capacity; v++) {
+      ASSERT(!v->isInitialized());
+    }
+#endif
   }
   Variant *alloc(int size, int &oldPrevSize) {
     ASSERT(size > 0);
     oldPrevSize = m_prevSize;
-    if (UNLIKELY(m_size + size >= m_alloc)) {
+    if (UNLIKELY(m_size + size >= m_capacity)) {
       throw FatalErrorException("temp stack overflow");
     }
     m_prevSize = m_size;
@@ -53,7 +59,7 @@ public:
   void release (int size, int oldPrevSize) {
     ASSERT(size > 0 && m_size - m_prevSize == size);
     for (Variant *v = m_stack + m_prevSize; v < m_stack + m_size; v++) {
-      if (IS_REFCOUNTED_TYPE(v->getRawType())) v->~Variant();
+      v->unset();
     }
     m_size = m_prevSize;
     m_prevSize = oldPrevSize;
@@ -64,10 +70,10 @@ public:
     return m_stack[m_prevSize + index];
   }
 private:
-  Variant *m_stack;
+  Variant m_stack[TEMP_STACK_SIZE];
   int m_prevSize;
   int m_size;
-  int m_alloc;
+  int m_capacity;
 };
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(TempStack, s_tempStack);
 

@@ -35,6 +35,7 @@ public:
   class ArgStack {
   public:
     ArgStack();
+    ~ArgStack();
     void checkSize(int size);
     int m_size;
     int m_alloc;

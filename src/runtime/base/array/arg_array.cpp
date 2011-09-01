@@ -29,6 +29,16 @@ ArgArray::ArgStack::ArgStack() : m_size(0), m_alloc(INITIAL_STACK_SIZE) {
   m_stack = new Argument[INITIAL_STACK_SIZE];
 }
 
+ArgArray::ArgStack::~ArgStack() {
+  assert(m_size == 0);
+#ifdef DEBUG
+    for (Argument *argp = m_stack; argp < m_stack + m_alloc; argp++) {
+      ASSERT(!argp->m_val.isInitialized());
+    }
+#endif
+  delete m_stack;
+}
+
 void ArgArray::ArgStack::checkSize(int size) {
   m_size += size;
   if (m_size < m_alloc) return;

@@ -26,8 +26,9 @@ BreakStatement::BreakStatement(STATEMENT_ARGS, ExpressionPtr level,
                                bool isBreak)
   : Statement(STATEMENT_PASS), m_level(level), m_isBreak(isBreak) {}
 
-void BreakStatement::optimize(VariableEnvironment &env) {
+Statement *BreakStatement::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_level);
+  return NULL;
 }
 
 void BreakStatement::eval(VariableEnvironment &env) const {

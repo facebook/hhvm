@@ -29,7 +29,7 @@ DECLARE_AST_PTR(Expression);
 class EchoStatement : public Statement {
 public:
   EchoStatement(STATEMENT_ARGS, const std::vector<ExpressionPtr> &args);
-  virtual void optimize(VariableEnvironment &env);
+  virtual Statement *optimize(VariableEnvironment &env);
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:

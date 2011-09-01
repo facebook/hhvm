@@ -41,7 +41,7 @@ static Variant evalVector(const std::vector<ExpressionPtr> &v,
   return null;
 }
 
-void ForStatement::optimize(VariableEnvironment &env) {
+Statement *ForStatement::optimize(VariableEnvironment &env) {
   for (unsigned int i = 0; i < m_init.size(); i++) {
     Eval::optimize(env, m_init[i]);
   }
@@ -51,7 +51,8 @@ void ForStatement::optimize(VariableEnvironment &env) {
   for (unsigned int i = 0; i < m_next.size(); i++) {
     Eval::optimize(env, m_next[i]);
   }
-  if (m_body) m_body->optimize(env);
+  Eval::optimize(env, m_body);
+  return NULL;
 }
 
 void ForStatement::eval(VariableEnvironment &env) const {

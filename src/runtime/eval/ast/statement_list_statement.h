@@ -30,7 +30,7 @@ public:
   StatementListStatement(STATEMENT_ARGS,
                          const std::vector<StatementPtr> &stmts);
   StatementListStatement(STATEMENT_ARGS);
-  virtual void optimize(VariableEnvironment &env);
+  virtual Statement *optimize(VariableEnvironment &env);
   virtual void eval(VariableEnvironment &env) const;
   void add(StatementPtr stmt);
   const std::vector<StatementPtr> &stmts() const { return m_stmts; }

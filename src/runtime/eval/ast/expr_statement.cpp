@@ -25,8 +25,9 @@ namespace Eval {
 ExprStatement::ExprStatement(STATEMENT_ARGS, ExpressionPtr exp)
   : Statement(STATEMENT_PASS), m_exp(exp) {}
 
-void ExprStatement::optimize(VariableEnvironment &env) {
+Statement *ExprStatement::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_exp);
+  return NULL;
 }
 
 void ExprStatement::eval(VariableEnvironment &env) const {

@@ -30,7 +30,7 @@ class CatchBlock : public Construct {
 public:
   CatchBlock(CONSTRUCT_ARGS, const std::string &ename, const std::string &vname,
              StatementPtr body);
-  void optimize(VariableEnvironment &env);
+  CatchBlock *optimize(VariableEnvironment &env);
   bool proc(CObjRef exn, VariableEnvironment &env) const;
   bool match(CObjRef exn) const;
   const StatementPtr &body() const { return m_body; }
@@ -48,13 +48,15 @@ class TryStatement : public Statement {
 public:
   TryStatement(STATEMENT_ARGS, StatementPtr body,
                const std::vector<CatchBlockPtr> &catches);
-  virtual void optimize(VariableEnvironment &env);
+  virtual Statement *optimize(VariableEnvironment &env);
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:
   std::vector<CatchBlockPtr> m_catches;
   StatementPtr m_body;
 };
+
+void optimize(VariableEnvironment &env, CatchBlockPtr &cb);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

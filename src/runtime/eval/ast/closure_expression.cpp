@@ -46,7 +46,7 @@ ClosureExpression::ClosureExpression(EXPRESSION_ARGS,
 }
 
 Expression *ClosureExpression::optimize(VariableEnvironment &env) {
-  m_func->optimize(env);
+  Eval::optimize(env, m_func);
   return NULL;
 }
 

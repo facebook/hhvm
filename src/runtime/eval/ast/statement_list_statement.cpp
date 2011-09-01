@@ -29,10 +29,11 @@ StatementListStatement(STATEMENT_ARGS, const std::vector<StatementPtr> &stmts)
 StatementListStatement::StatementListStatement(STATEMENT_ARGS)
   : Statement(STATEMENT_PASS) {}
 
-void StatementListStatement::optimize(VariableEnvironment &env) {
+Statement *StatementListStatement::optimize(VariableEnvironment &env) {
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
-    m_stmts[i]->optimize(env);
+    Eval::optimize(env, m_stmts[i]);
   }
+  return NULL;
 }
 
 void StatementListStatement::eval(VariableEnvironment &env) const {

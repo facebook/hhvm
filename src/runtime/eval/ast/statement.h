@@ -33,7 +33,7 @@ class ByteCodeProgram;
 class Statement : public Construct {
 public:
   Statement(STATEMENT_ARGS) : Construct(CONSTRUCT_PASS) {};
-  virtual void optimize(VariableEnvironment &env) {}
+  virtual Statement *optimize(VariableEnvironment &env) { return NULL; }
   virtual void eval(VariableEnvironment &env) const = 0;
   virtual void byteCode(ByteCodeProgram &code) const;
 };
@@ -82,6 +82,22 @@ public:
 
 #define ENTER_STMT \
   SET_LINE_VOID
+
+void optimize(VariableEnvironment &env, StatementPtr &stmt);
+template<typename T>
+void optimize(VariableEnvironment &env, AstPtr<T> &before) {
+  if (before) {
+    Statement *optStmt = before->optimize(env);
+    if (optStmt) {
+      AstPtr<T> after = dynamic_cast<T*>(optStmt);
+      if (after) {
+        before = after;
+      } else {
+        assert(false);
+      }
+    }
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

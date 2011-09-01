@@ -26,8 +26,9 @@ namespace Eval {
 ReturnStatement::ReturnStatement(STATEMENT_ARGS, ExpressionPtr value)
   : Statement(STATEMENT_PASS), m_value(value) {}
 
-void ReturnStatement::optimize(VariableEnvironment &env) {
+Statement *ReturnStatement::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_value);
+  return NULL;
 }
 
 void ReturnStatement::eval(VariableEnvironment &env) const {

@@ -25,8 +25,9 @@ namespace Eval {
 ThrowStatement::ThrowStatement(STATEMENT_ARGS, ExpressionPtr value)
   : Statement(STATEMENT_PASS), m_value(value) {}
 
-void ThrowStatement::optimize(VariableEnvironment &env) {
+Statement *ThrowStatement::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_value);
+  return NULL;
 }
 
 void ThrowStatement::eval(VariableEnvironment &env) const {

@@ -194,10 +194,11 @@ void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
   }
 }
 
-void ClassStatement::optimize(VariableEnvironment &env) {
+Statement *ClassStatement::optimize(VariableEnvironment &env) {
   for (unsigned int i = 0; i < m_methodsVec.size(); i++) {
-    m_methodsVec[i]->optimize(env);
+    Eval::optimize(env, m_methodsVec[i]);
   }
+  return NULL;
 }
 
 void ClassStatement::eval(VariableEnvironment &env) const {

@@ -34,7 +34,7 @@ class CaseStatement : public Statement {
 public:
   CaseStatement(STATEMENT_ARGS, ExpressionPtr match, StatementPtr body);
   bool match(VariableEnvironment &env, CVarRef value) const;
-  virtual void optimize(VariableEnvironment &env);
+  virtual Statement *optimize(VariableEnvironment &env);
   virtual void eval(VariableEnvironment &env) const;
   bool isDefault() const;
   virtual void dump(std::ostream &out) const;
@@ -47,7 +47,7 @@ class SwitchStatement : public Statement {
 public:
   SwitchStatement(STATEMENT_ARGS, ExpressionPtr source,
                   const std::vector<CaseStatementPtr> &cases);
-  virtual void optimize(VariableEnvironment &env);
+  virtual Statement *optimize(VariableEnvironment &env);
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:

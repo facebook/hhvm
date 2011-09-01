@@ -23,6 +23,13 @@ void Statement::byteCode(ByteCodeProgram &code) const {
   throw FatalErrorException(0,"Cannot compile %s:%d", m_loc.file, m_loc.line1);
 }
 
+void optimize(VariableEnvironment &env, StatementPtr &stmt) {
+  if (!stmt) return;
+  if (StatementPtr optStmt = stmt->optimize(env)) {
+    stmt = optStmt;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

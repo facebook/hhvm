@@ -29,7 +29,7 @@ DECLARE_AST_PTR(Expression);
 class WhileStatement : public Statement {
 public:
   WhileStatement(STATEMENT_ARGS, ExpressionPtr cond, StatementPtr body);
-  virtual void optimize(VariableEnvironment &env);
+  virtual Statement *optimize(VariableEnvironment &env);
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:

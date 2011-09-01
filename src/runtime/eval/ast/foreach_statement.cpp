@@ -29,9 +29,10 @@ ForEachStatement::ForEachStatement(STATEMENT_ARGS, ExpressionPtr source,
   :  Statement(STATEMENT_PASS), m_source(source), m_key(key), m_value(value),
      m_body(body) {}
 
-void ForEachStatement::optimize(VariableEnvironment &env) {
+Statement *ForEachStatement::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_source);
-  if (m_body) m_body->optimize(env);
+  Eval::optimize(env, m_body);
+  return NULL;
 }
 
 void ForEachStatement::eval(VariableEnvironment &env) const {

@@ -62,7 +62,7 @@ public:
   std::string name() const;
   String getName() const;
   bool getSuperGlobal(SuperGlobal &sg);
-  void optimize(VariableEnvironment &env);
+  Parameter *optimize(VariableEnvironment &env);
 private:
   std::string m_type;
   NamePtr m_name;
@@ -90,7 +90,7 @@ public:
             StatementListStatementPtr body, bool has_call_to_get_args);
   String name() const { return m_name; }
   void changeName(const std::string &name);
-  virtual void optimize(VariableEnvironment &env);
+  virtual Statement *optimize(VariableEnvironment &env);
   // Eval is called at declaration, not invocation
   virtual void eval(VariableEnvironment &env) const;
   Variant invoke(CArrRef params) const;
@@ -185,6 +185,8 @@ private:
 
   CallInfo m_closureCallInfo;
 };
+
+void optimize(VariableEnvironment &env, ParameterPtr &param);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

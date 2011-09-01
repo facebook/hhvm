@@ -38,9 +38,10 @@ bool IfBranch::proc(VariableEnvironment &env) const {
   return false;
 }
 
-void IfBranch::optimize(VariableEnvironment &env) {
+Statement *IfBranch::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_cond);
-  if (m_body) m_body->optimize(env);
+  Eval::optimize(env, m_body);
+  return NULL;
 }
 
 Variant IfBranch::evalCond(VariableEnvironment &env) const {
@@ -60,11 +61,12 @@ IfStatement::IfStatement(STATEMENT_ARGS,
                          StatementPtr els)
   : Statement(STATEMENT_PASS), m_branches(branches), m_else(els) {}
 
-void IfStatement::optimize(VariableEnvironment &env) {
+Statement *IfStatement::optimize(VariableEnvironment &env) {
   for (unsigned int i = 0; i < m_branches.size(); i++) {
-    m_branches[i]->optimize(env);
+    Eval::optimize(env, m_branches[i]);
   }
-  if (m_else) m_else->optimize(env);
+  Eval::optimize(env, m_else);
+  return NULL;
 }
 
 void IfStatement::eval(VariableEnvironment &env) const {

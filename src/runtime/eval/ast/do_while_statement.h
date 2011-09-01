@@ -29,7 +29,7 @@ DECLARE_AST_PTR(Expression);
 class DoWhileStatement : public Statement {
 public:
   DoWhileStatement(STATEMENT_ARGS, StatementPtr body, ExpressionPtr cond);
-  virtual void optimize(VariableEnvironment &env);
+  virtual Statement *optimize(VariableEnvironment &env);
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:

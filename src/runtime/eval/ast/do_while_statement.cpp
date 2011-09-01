@@ -26,9 +26,10 @@ DoWhileStatement::DoWhileStatement(STATEMENT_ARGS, StatementPtr body,
                                    ExpressionPtr cond)
   : Statement(STATEMENT_PASS), m_cond(cond), m_body(body) {}
 
-void DoWhileStatement::optimize(VariableEnvironment &env) {
+Statement *DoWhileStatement::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_cond);
-  if (m_body) m_body->optimize(env);
+  Eval::optimize(env, m_body);
+  return NULL;
 }
 
 void DoWhileStatement::eval(VariableEnvironment &env) const {

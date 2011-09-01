@@ -28,10 +28,11 @@ EchoStatement::EchoStatement(STATEMENT_ARGS,
                              const std::vector<ExpressionPtr> &args)
   : Statement(STATEMENT_PASS), m_args(args) {}
 
-void EchoStatement::optimize(VariableEnvironment &env) {
+Statement *EchoStatement::optimize(VariableEnvironment &env) {
   for (unsigned int i = 0; i < m_args.size(); i++) {
     Eval::optimize(env, m_args[i]);
   }
+  return NULL;
 }
 
 void EchoStatement::eval(VariableEnvironment &env) const {

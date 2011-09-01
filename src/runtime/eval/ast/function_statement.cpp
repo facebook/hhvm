@@ -110,8 +110,9 @@ Parameter::Parameter(CONSTRUCT_ARGS, const string &type,
   }
 }
 
-void Parameter::optimize(VariableEnvironment &env) {
+Parameter *Parameter::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_defVal);
+  return NULL;
 }
 
 Variant *Parameter::getParam(FuncScopeVariableEnvironment &fenv) const {
@@ -331,11 +332,19 @@ FunctionStatement::computeInjectionName() const {
   return injectionName;
 }
 
-void FunctionStatement::optimize(VariableEnvironment &env) {
-  for (unsigned int i = 0; i < m_params.size(); i++) {
-    m_params[i]->optimize(env);
+void optimize(VariableEnvironment &env, ParameterPtr &param) {
+  if (!param) return;
+  if (ParameterPtr optParam = param->optimize(env)) {
+    param = optParam;
   }
-  if (m_body) m_body->optimize(env);
+}
+
+Statement *FunctionStatement::optimize(VariableEnvironment &env) {
+  for (unsigned int i = 0; i < m_params.size(); i++) {
+    Eval::optimize(env, m_params[i]);
+  }
+  Eval::optimize(env, m_body);
+  return NULL;
 }
 
 void FunctionStatement::eval(VariableEnvironment &env) const {

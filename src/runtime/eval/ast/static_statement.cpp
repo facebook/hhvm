@@ -42,8 +42,16 @@ void StaticVariable::dump(std::ostream &out) const {
   }
 }
 
-void StaticVariable::optimize(VariableEnvironment &env) {
+StaticVariable *StaticVariable::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_val);
+  return NULL;
+}
+
+void optimize(VariableEnvironment &env, StaticVariablePtr &var) {
+  if (!var) return;
+  if (StaticVariablePtr optVar = var->optimize(env)) {
+    var = optVar;
+  }
 }
 
 const NamePtr &StaticVariable::name() {
@@ -55,10 +63,11 @@ StaticStatement::StaticStatement(STATEMENT_ARGS,
   : Statement(STATEMENT_PASS), m_vars(vars) {}
 
 
-void StaticStatement::optimize(VariableEnvironment &env) {
+Statement *StaticStatement::optimize(VariableEnvironment &env) {
   for (unsigned int i = 0; i < m_vars.size(); i++) {
-    m_vars[i]->optimize(env);
+    Eval::optimize(env, m_vars[i]);
   }
+  return NULL;
 }
 
 void StaticStatement::eval(VariableEnvironment &env) const {

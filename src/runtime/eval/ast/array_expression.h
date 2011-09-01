@@ -32,7 +32,7 @@ class ArrayPair : public Construct {
 public:
   ArrayPair(CONSTRUCT_ARGS);
   ArrayPair(CONSTRUCT_ARGS, ExpressionPtr key);
-  virtual void optimize(VariableEnvironment &env) = 0;
+  virtual ArrayPair *optimize(VariableEnvironment &env) = 0;
   virtual void set(VariableEnvironment &env, Array &arr) const = 0;
   virtual bool evalScalar(VariableEnvironment &env, Variant &r) const = 0;
   virtual bool checkStaticScalar(VariableEnvironment &env) const
@@ -48,7 +48,7 @@ public:
   ArrayPairVal(CONSTRUCT_ARGS, ExpressionPtr val);
   virtual void set(VariableEnvironment &env, Array &arr) const;
   virtual void dump(std::ostream &out) const;
-  virtual void optimize(VariableEnvironment &env);
+  virtual ArrayPair *optimize(VariableEnvironment &env);
   virtual bool evalScalar(VariableEnvironment &env, Variant &r) const {
     return (!m_key || m_key->evalScalar(env, r)) && m_val->evalScalar(env, r);
   }
@@ -68,7 +68,7 @@ public:
   ArrayPairRef(CONSTRUCT_ARGS, LvalExpressionPtr val);
   virtual void set(VariableEnvironment &env, Array &arr) const;
   virtual void dump(std::ostream &out) const;
-  virtual void optimize(VariableEnvironment &env);
+  virtual ArrayPair *optimize(VariableEnvironment &env);
   virtual bool evalScalar(VariableEnvironment &env, Variant &r) const {
     return false;
   }
@@ -91,6 +91,8 @@ public:
 private:
   std::vector<ArrayPairPtr> m_elems;
 };
+
+void optimize(VariableEnvironment &env, ArrayPairPtr &ap);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

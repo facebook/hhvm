@@ -35,9 +35,10 @@ bool CaseStatement::match(VariableEnvironment &env, CVarRef value) const {
   return equal(match, value);
 }
 
-void CaseStatement::optimize(VariableEnvironment &env) {
+Statement *CaseStatement::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_match);
-  if (m_body) m_body->optimize(env); 
+  Eval::optimize(env, m_body);
+  return NULL;
 }
 
 void CaseStatement::eval(VariableEnvironment &env) const {
@@ -66,11 +67,12 @@ SwitchStatement::SwitchStatement(STATEMENT_ARGS, ExpressionPtr source,
   m_simpleVar = m_source->isKindOf(Expression::KindOfVariableExpression);
 }
 
-void SwitchStatement::optimize(VariableEnvironment &env) {
+Statement *SwitchStatement::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_source);
   for (unsigned int i = 0; i < m_cases.size(); i++) {
-    m_cases[i]->optimize(env);
+    Eval::optimize(env, m_cases[i]);
   }
+  return NULL;
 }
 
 void SwitchStatement::eval(VariableEnvironment &env) const {

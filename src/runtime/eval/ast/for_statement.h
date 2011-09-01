@@ -33,7 +33,7 @@ public:
                const std::vector<ExpressionPtr> &cond,
                const std::vector<ExpressionPtr> &next,
                StatementPtr body);
-  virtual void optimize(VariableEnvironment &env);
+  virtual Statement *optimize(VariableEnvironment &env);
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:

@@ -44,9 +44,10 @@ Variant ArrayPairVal::val(VariableEnvironment &env) const {
   return m_val->eval(env);
 }
 
-void ArrayPairVal::optimize(VariableEnvironment &env) {
+ArrayPair *ArrayPairVal::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_key);
   Eval::optimize(env, m_val);
+  return NULL;
 }
 
 void ArrayPairVal::set(VariableEnvironment &env, Array &arr) const {
@@ -72,8 +73,9 @@ ArrayPairRef::ArrayPairRef(CONSTRUCT_ARGS, LvalExpressionPtr val) :
   ArrayPair(CONSTRUCT_PASS), m_val(val) {}
 
 
-void ArrayPairRef::optimize(VariableEnvironment &env) {
+ArrayPair *ArrayPairRef::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_key);
+  return NULL;
 }
 
 Variant &ArrayPairRef::val(VariableEnvironment &env) const {
@@ -111,9 +113,16 @@ Variant ArrayExpression::eval(VariableEnvironment &env) const {
   return arr;
 }
 
+void optimize(VariableEnvironment &env, ArrayPairPtr &ap) {
+  if (!ap) return;
+  if (ArrayPairPtr optAp = ap->optimize(env)) {
+    ap = optAp;
+  }
+}
+
 Expression *ArrayExpression::optimize(VariableEnvironment &env) {
   for (unsigned int i = 0; i < m_elems.size(); i++) {
-    m_elems[i]->optimize(env);
+    Eval::optimize(env, m_elems[i]);
   }
   Variant v;
   if (evalScalar(env, v)) {

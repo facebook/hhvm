@@ -26,9 +26,10 @@ WhileStatement::WhileStatement(STATEMENT_ARGS, ExpressionPtr cond,
                                StatementPtr body)
   : Statement(STATEMENT_PASS), m_cond(cond), m_body(body) {}
 
-void WhileStatement::optimize(VariableEnvironment &env) {
+Statement *WhileStatement::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_cond);
-  if (m_body) m_body->optimize(env);
+  Eval::optimize(env, m_body);
+  return NULL;
 }
 
 void WhileStatement::eval(VariableEnvironment &env) const {

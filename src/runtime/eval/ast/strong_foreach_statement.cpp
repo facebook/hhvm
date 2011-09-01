@@ -31,9 +31,10 @@ StrongForEachStatement(STATEMENT_ARGS, ExpressionPtr source,
   m_body(body)
 {}
 
-void StrongForEachStatement::optimize(VariableEnvironment &env) {
+Statement *StrongForEachStatement::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_source);
-  if (m_body) m_body->optimize(env);
+  Eval::optimize(env, m_body);
+  return NULL;
 }
 
 void StrongForEachStatement::eval(VariableEnvironment &env) const {

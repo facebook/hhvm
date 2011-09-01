@@ -32,7 +32,7 @@ public:
   IfBranch(CONSTRUCT_ARGS, ExpressionPtr cond, StatementPtr body);
   bool proc(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
-  virtual void optimize(VariableEnvironment &env);
+  virtual Statement *optimize(VariableEnvironment &env);
   Variant evalCond(VariableEnvironment &env) const;
   const ExpressionPtr &cond() { return m_cond; }
   const StatementPtr &body() { return m_body; }
@@ -45,7 +45,7 @@ class IfStatement : public Statement {
 public:
   IfStatement(STATEMENT_ARGS, const std::vector<IfBranchPtr> &branches,
               StatementPtr els);
-  virtual void optimize(VariableEnvironment &env);
+  virtual Statement *optimize(VariableEnvironment &env);
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:

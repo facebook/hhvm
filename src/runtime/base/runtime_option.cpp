@@ -100,6 +100,7 @@ bool RuntimeOption::ServerThreadJobLIFO = false;
 int RuntimeOption::PageletServerThreadCount = 0;
 bool RuntimeOption::PageletServerThreadRoundRobin = false;
 int RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds = 0;
+int RuntimeOption::PageletServerQueueLimit = 0;
 int RuntimeOption::FiberCount = 1;
 int RuntimeOption::RequestTimeoutSeconds = 0;
 size_t RuntimeOption::ServerMemoryHeadRoom = 0;
@@ -856,6 +857,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     PageletServerThreadRoundRobin = pagelet["ThreadRoundRobin"].getBool();
     PageletServerThreadDropCacheTimeoutSeconds =
       pagelet["ThreadDropCacheTimeoutSeconds"].getInt32(0);
+    PageletServerQueueLimit = pagelet["QueueLimit"].getInt32(0);
   }
   {
     FiberCount = config["Fiber.ThreadCount"].getInt32(Process::GetCPUCount());

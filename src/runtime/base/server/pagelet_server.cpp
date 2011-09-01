@@ -296,6 +296,10 @@ Object PageletServer::TaskStart(CStrRef url, CArrRef headers,
   if (RuntimeOption::PageletServerThreadCount <= 0) {
     return null_object;
   }
+  if (RuntimeOption::PageletServerQueueLimit > 0 &&
+      s_dispatcher->getQueuedJobs() > RuntimeOption::PageletServerQueueLimit) {
+    return null_object;
+  }
   PageletTask *task = NEWOBJ(PageletTask)(url, headers, remote_host, post_data,
                                           get_uploaded_files(), files);
   Object ret(task);

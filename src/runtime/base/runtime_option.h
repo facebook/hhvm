@@ -94,6 +94,7 @@ public:
   static int PageletServerThreadCount;
   static bool PageletServerThreadRoundRobin;
   static int PageletServerThreadDropCacheTimeoutSeconds;
+  static int PageletServerQueueLimit;
   static int FiberCount;
   static int RequestTimeoutSeconds;
   static size_t ServerMemoryHeadRoom;

@@ -109,16 +109,19 @@ static bool posix_addlimit(int limit, const char *name, Array &ret) {
     return false;
   }
 
+  String softStr(soft, CopyString);
+  String hardStr(hard, CopyString);
+
   if (rl.rlim_cur == RLIM_INFINITY) {
-    ret.set(soft, "unlimited");
+    ret.set(softStr, "unlimited");
   } else {
-    ret.set(soft, (int)rl.rlim_cur);
+    ret.set(softStr, (int)rl.rlim_cur);
   }
 
   if (rl.rlim_max == RLIM_INFINITY) {
-    ret.set(hard, "unlimited");
+    ret.set(hardStr, "unlimited");
   } else {
-    ret.set(hard, (int)rl.rlim_max);
+    ret.set(hardStr, (int)rl.rlim_max);
   }
 
   return true;

@@ -36,7 +36,7 @@ ArgArray::ArgStack::~ArgStack() {
       ASSERT(!argp->m_val.isInitialized());
     }
 #endif
-  delete m_stack;
+  delete[] m_stack;
 }
 
 void ArgArray::ArgStack::checkSize(int size) {

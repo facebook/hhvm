@@ -16,6 +16,7 @@
 
 #include <runtime/base/server/admin_request_handler.h>
 #include <runtime/base/server/http_server.h>
+#include <runtime/base/server/pagelet_server.h>
 #include <runtime/base/util/http_client.h>
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/runtime_option.h>
@@ -123,6 +124,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/check-load:      how many threads are actively handling requests\n"
         "/check-queued:    how many http requests are queued waiting to be\n"
         "                  handled\n"
+        "/check-pl-load:   how many pagelet threads are actively handling\n"
+        "                  requests\n"
+        "/check-pl-queued: how many pagelet requests are queued waiting to\n"
+        "                  be handled\n"
         "/check-mem:       report memory quick statistics in log file\n"
         "/check-apc:       report APC quick statistics\n"
         "/check-sql:       report SQL table statistics\n"
@@ -487,6 +492,16 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
   }
   if (cmd == "check-queued") {
     int count = HttpServer::Server->getPageServer()->getQueuedJobs();
+    transport->sendString(lexical_cast<string>(count));
+    return true;
+  }
+  if (cmd == "check-pl-load") {
+    int count = PageletServer::GetActiveWorker();
+    transport->sendString(lexical_cast<string>(count));
+    return true;
+  }
+  if (cmd == "check-pl-queued") {
+    int count = PageletServer::GetQueuedJobs();
     transport->sendString(lexical_cast<string>(count));
     return true;
   }

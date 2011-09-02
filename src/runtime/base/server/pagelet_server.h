@@ -51,6 +51,12 @@ public:
    * Add a piece of response to the pipeline.
    */
   static void AddToPipeline(const std::string &s);
+
+  /**
+   * Check active threads and queued requests
+   */
+  static int GetActiveWorker();
+  static int GetQueuedJobs();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

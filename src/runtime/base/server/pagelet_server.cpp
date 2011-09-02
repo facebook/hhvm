@@ -336,5 +336,13 @@ void PageletServer::AddToPipeline(const string &s) {
   job->addToPipeline(s);
 }
 
+int PageletServer::GetActiveWorker() {
+  return s_dispatcher->getActiveWorker();
+}
+
+int PageletServer::GetQueuedJobs() {
+  return s_dispatcher->getQueuedJobs();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

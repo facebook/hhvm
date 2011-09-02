@@ -77,9 +77,9 @@ void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
-const string &ClassConstantExpression::getActualClassName() const {
+string ClassConstantExpression::getActualClassName() const {
   if (m_defScope) {
-    return static_cast<ClassScope*>(m_defScope)->getOriginalName();
+    return static_cast<ClassScope*>(m_defScope)->getId();
   }
   return m_className;
 }

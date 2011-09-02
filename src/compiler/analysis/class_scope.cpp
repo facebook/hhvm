@@ -1998,11 +1998,11 @@ void ClassScope::outputCPPGetClassPropTableImpl(
             p = &siIndex[n];
             if (!*p) {
               if (cls.size()) {
-              cg_printf("(int64)&%s%s%s%s,\n",
-                        Option::ClassConstantPrefix,
-                        CodeGenerator::FormatLabel(cls).c_str(),
-                        Option::IdPrefix.c_str(),
-                        CodeGenerator::FormatLabel(name).c_str());
+                cg_printf("(int64)&%s%s%s%s,\n",
+                          Option::ClassConstantPrefix,
+                          cls.c_str(),
+                          Option::IdPrefix.c_str(),
+                          CodeGenerator::FormatLabel(name).c_str());
               } else {
                 cg_printf("(int64)&%s%s,\n",
                           Option::ConstantPrefix,
@@ -2053,8 +2053,7 @@ void ClassScope::outputCPPGetClassPropTableImpl(
             cls_ix = *p - 1;
           } else if (cls.size() &&
                      flags & (ConstDerivesFromRedeclared|ConstDynamic)) {
-            string n = Option::ClassStaticsCallbackPrefix +
-              CodeGenerator::FormatLabel(cls);
+            string n = Option::ClassStaticsCallbackPrefix + cls;
             p = &siIndex[n];
             if (!*p) {
               cg_printf("(int64)&%s,\n", n.c_str());
@@ -2110,7 +2109,7 @@ void ClassScope::outputCPPGetClassPropTableImpl(
               cg_printf("(int64(offsetof(%s,%s%s%s%s)<<32))+0x%x2",
                         system ? "SystemGlobals" : "GlobalVariables",
                         Option::ClassConstantPrefix,
-                        CodeGenerator::FormatLabel(cls).c_str(),
+                        cls.c_str(),
                         Option::IdPrefix.c_str(),
                         CodeGenerator::FormatLabel(name).c_str(),
                         cls_ix);

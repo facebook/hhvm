@@ -29,9 +29,12 @@ namespace HPHP {
 RequestURI::RequestURI(const VirtualHost *vhost, Transport *transport,
                        const std::string &sourceRoot,
                        const std::string &pathTranslation)
-  :  m_rewritten(false), m_defaultDoc(false), m_done(false) {
+  :  m_rewritten(false), m_defaultDoc(false), m_done(false),
+     m_forbidden(false), m_ext(NULL) {
   if (!process(vhost, transport, sourceRoot, pathTranslation,
-               transport->getServerObject())) {
+               transport->getServerObject()) ||
+      (m_forbidden && RuntimeOption::ForbiddenAs404)) {
+    m_forbidden = false; // put down forbidden flag since we are redirecting
     if (!RuntimeOption::ErrorDocument404.empty()) {
       String redirectURL(RuntimeOption::ErrorDocument404);
       if (m_queryString != "") {
@@ -216,6 +219,7 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
     }
     m_path = fullname;
     m_absolutePath = String(sourceRoot) + m_path;
+    processExt();
 
     if (StaticContentCache::TheFileCache && !fullname.empty() &&
         StaticContentCache::TheFileCache->fileExists(fullname.c_str())) {
@@ -230,6 +234,7 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
   }
   m_path = filename;
   m_absolutePath = String(sourceRoot) + filename;
+  processExt();
   return true;
 }
 
@@ -250,6 +255,7 @@ bool RequestURI::virtualFolderExists(const VirtualHost *vhost,
     }
     m_path = fullname;
     m_absolutePath = String(sourceRoot) + m_path;
+    processExt();
 
     if (StaticContentCache::TheFileCache && !fullname.empty() &&
         StaticContentCache::TheFileCache->dirExists(fullname.c_str())) {
@@ -269,7 +275,35 @@ bool RequestURI::virtualFolderExists(const VirtualHost *vhost,
   }
   m_path = foldername;
   m_absolutePath = String(sourceRoot) + foldername;
+  processExt();
   return true;
+}
+
+void RequestURI::processExt() {
+  m_ext = parseExt(m_path);
+  if (RuntimeOption::ForbiddenFileExtensions.empty()) {
+    return;
+  }
+  if (m_ext &&
+      RuntimeOption::ForbiddenFileExtensions.find(m_ext) !=
+      RuntimeOption::ForbiddenFileExtensions.end()) {
+    m_forbidden = true;
+  }
+}
+
+/*
+ * Parse file extension from a path
+ */
+const char *RequestURI::parseExt(CStrRef s) {
+  int pos = s.rfind('.');
+  if (pos == -1) {
+    return NULL;
+  }
+  if (s.find('/', pos) != -1) {
+    // '/' after '.' is not extension, e.g., "./foo" "../bar"
+    return NULL;
+  }
+  return s.data() + pos + 1;
 }
 
 void RequestURI::PrependSlash(String &s) {

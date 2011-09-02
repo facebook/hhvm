@@ -171,6 +171,7 @@ std::vector<std::string> RuntimeOption::IncludeSearchPaths;
 std::string RuntimeOption::FileCache;
 std::string RuntimeOption::DefaultDocument;
 std::string RuntimeOption::ErrorDocument404;
+bool RuntimeOption::ForbiddenAs404 = false;
 std::string RuntimeOption::ErrorDocument500;
 std::string RuntimeOption::FatalErrorMessage;
 std::string RuntimeOption::FontPath;
@@ -654,6 +655,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     DefaultDocument = server["DefaultDocument"].getString();
     ErrorDocument404 = server["ErrorDocument404"].getString();
     normalizePath(ErrorDocument404);
+    ForbiddenAs404 = server["ForbiddenAs404"].getBool();
     ErrorDocument500 = server["ErrorDocument500"].getString();
     normalizePath(ErrorDocument500);
     FatalErrorMessage = server["FatalErrorMessage"].getString();

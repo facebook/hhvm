@@ -38,12 +38,14 @@ public:
   CStrRef queryString() const { return m_queryString; }
 
   CStrRef path() const { return m_path; }
+  const char *ext() const { return m_ext; }
   CStrRef absolutePath() const { return m_absolutePath; }
   CStrRef pathInfo() const { return m_pathInfo; }
 
   bool rewritten() const { return m_rewritten; }
   bool defaultDoc() const { return m_defaultDoc; }
   bool done() const { return m_done; }
+  bool forbidden() const { return m_forbidden; }
 
   void dump();
   void clear();
@@ -63,6 +65,8 @@ private:
   bool m_rewritten;  // whether rewrite rules have applied
   bool m_defaultDoc; // whether DefaultDocument was appended
   bool m_done;
+  bool m_forbidden;
+  const char *m_ext;   // file extension
 
   bool process(const VirtualHost *vhost, Transport *transport,
                const std::string &pathTranslation,
@@ -81,7 +85,9 @@ private:
                            const std::string &pathTranslation,
                            const std::string &sourceRoot,
                            CStrRef foldername);
+  void processExt();
 
+  static const char *parseExt(CStrRef s);
   static void PrependSlash(String &s);
 
 };

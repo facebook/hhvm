@@ -157,18 +157,11 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   bool compressed = transport->decideCompression();
 
   const char *data; int len;
-  size_t pos = path.rfind('.');
-  const char *ext =
-    (pos != string::npos) &&
-    path.find('/', pos) == string::npos // no extention in ./foo or ../bar
-      ? (path.c_str() + pos + 1) : NULL;
+  const char *ext = reqURI.ext();
 
-  if (ext && !RuntimeOption::ForbiddenFileExtensions.empty()) {
-    if (RuntimeOption::ForbiddenFileExtensions.find(ext) !=
-        RuntimeOption::ForbiddenFileExtensions.end()) {
-      transport->sendString("Forbidden", 403);
-      return;
-    }
+  if (reqURI.forbidden()) {
+    transport->sendString("Forbidden", 403);
+    return;
   }
 
   bool cachableDynamicContent =
@@ -302,18 +295,6 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
 
   int code;
   bool ret = true;
-  if (!RuntimeOption::ForbiddenFileExtensions.empty()) {
-    size_t pos = file.rfind('.');
-    if (pos != string::npos) {
-      const char *ext = file.c_str() + pos + 1;
-      if (RuntimeOption::ForbiddenFileExtensions.find(ext) !=
-          RuntimeOption::ForbiddenFileExtensions.end()) {
-        code = 403;
-        transport->sendString("Forbidden", 403);
-        ret = false;
-      }
-    }
-  }
 
   if (ret) {
     if (RuntimeOption::EnableDebugger) {

@@ -166,6 +166,7 @@ public:
   static std::string FileCache;
   static std::string DefaultDocument;
   static std::string ErrorDocument404;
+  static bool ForbiddenAs404;
   static std::string ErrorDocument500;
   static std::string FatalErrorMessage;
   static std::string FontPath;

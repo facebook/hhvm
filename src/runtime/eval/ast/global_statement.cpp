@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/ast/global_statement.h>
 #include <runtime/eval/ast/name.h>
 #include <runtime/eval/runtime/variable_environment.h>
@@ -27,13 +28,31 @@ GlobalStatement::GlobalStatement(STATEMENT_ARGS,
   : Statement(STATEMENT_PASS), m_vars(vars) {}
 GlobalStatement::GlobalStatement(STATEMENT_ARGS) : Statement(STATEMENT_PASS) {}
 
+SimpleGlobalStatement::SimpleGlobalStatement(STATEMENT_ARGS,
+  const std::vector<LvalExpressionPtr> &vars)
+  : Statement(STATEMENT_PASS), m_vars(vars) {}
+
 void GlobalStatement::eval(VariableEnvironment &env) const {
   if (env.isGotoing()) return;
   ENTER_STMT;
   for (std::vector<NamePtr>::const_iterator it = m_vars.begin();
        it != m_vars.end(); ++it) {
-    String n = (*it)->get(env);
-    env.flagGlobal(n, (*it)->hash());
+    env.flagGlobal((*it)->get(env));
+  }
+}
+
+void SimpleGlobalStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
+  ENTER_STMT;
+  for (std::vector<LvalExpressionPtr>::const_iterator it = m_vars.begin();
+       it != m_vars.end(); ++it) {
+    ASSERT(dynamic_cast<VariableExpression *>((*it).get()));
+    VariableExpression *var = static_cast<VariableExpression *>((*it).get());
+    Name *name = var->getName();
+    ASSERT(dynamic_cast<StringName *>(name));
+    StringName *sname = static_cast<StringName *>(name);
+    StringData *sd = sname->getName();
+    env.flagGlobal(sd, var->getIdx());
   }
 }
 
@@ -55,6 +74,27 @@ void GlobalStatement::dump(std::ostream &out) const {
   out << ";\n";
 }
 
+void SimpleGlobalStatement::dump(std::ostream &out) const {
+  out << "global ";
+
+  for (uint i = 0; i < m_vars.size(); i++) {
+    if (i > 0) out << ", ";
+    ASSERT(dynamic_cast<VariableExpression *>(m_vars[i].get()));
+    VariableExpression *var =
+      static_cast<VariableExpression *>(m_vars[i].get());
+    Name *name = var->getName();
+    if (name->get().isNull()) {
+      out << "${";
+      name->dump(out);
+      out << "}";
+    } else {
+      out << "$";
+      name->dump(out);
+    }
+  }
+
+  out << ";\n";
+}
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

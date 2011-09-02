@@ -102,6 +102,8 @@ extern void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
                               Token &value, Token &stmt, int count,
                               bool hasValue, bool byRef);
 
+static StaticString s_this("this");
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void Token::reset() {
@@ -432,6 +434,29 @@ void Parser::onStaticVariable(Token &out, Token *exprs, Token &var,
     push_back(StaticVariablePtr(new StaticVariable(this, var.text(), exp)));
 }
 
+LvalExpressionPtr Parser::makeStringVariable(CStrRef s) {
+  int idx = -1;
+  String svar = StringData::GetStaticString(s.get());
+  if (haveFunc()) {
+    idx = peekFunc()->declareVariable(svar);
+  } else {
+    idx = m_fileBlock.declareVariable(svar);
+  }
+  assert(idx != -1);
+  if (svar.same(s_this)) {
+    return NEW_EXP(ThisVariable, Name::fromString(this, svar), idx);
+  } else {
+    return NEW_EXP(Variable, Name::fromString(this, svar), idx);
+  }
+}
+
+LvalExpressionPtr Parser::makeStringVariable(const std::string &s) {
+  return makeStringVariable(String(s));
+}
+
+LvalExpressionPtr Parser::makeStringVariable(const Eval::StringName *s) {
+  return makeStringVariable(s->get());
+}
 void Parser::onSimpleVariable(Token &out, Token &var) {
   out.reset();
   if (var.text() == "this") {
@@ -445,20 +470,18 @@ void Parser::onSimpleVariable(Token &out, Token &var) {
       return;
     }
   }
-  int idx = -1;
-  String svar = StringData::GetStaticString(var.text());
-  if (haveFunc()) {
-    idx = peekFunc()->declareVariable(svar);
-  } else {
-    idx = m_fileBlock.declareVariable(svar);
-  }
-  out->exp() = NEW_EXP(Variable, Name::fromString(this, svar), idx);
+  out->exp() = makeStringVariable(var.text()); 
 }
 
 void Parser::onSynthesizedVariable(Token &out, Token &var) {
   out.reset();
-  if (var.text() == "this" && haveClass()) {
-    out->exp() = NEW_EXP0(This);
+  if (var.text() == "this") {
+    if (haveClass()) {
+      out->exp() = NEW_EXP0(This);
+    } else {
+      out->exp() =
+        NEW_EXP(ThisVariable, Name::fromString(this, var.text()), -1);
+    }
   } else {
     // Synthesized variables are essentially like normal simple variables,
     // but they are always looked up by the name, becasue they might have
@@ -524,7 +547,7 @@ ExpressionPtr Parser::getDynamicVariable(ExpressionPtr exp, bool encap) {
   if (encap) {
     ConstantExpression *var = exp->cast<ConstantExpression>();
     if (var) {
-      return NEW_EXP(Variable, Name::fromString(this, var->getName()));
+      return makeStringVariable(var->getName());
     }
   }
 
@@ -688,15 +711,16 @@ void Parser::encapRefDim(Token &out, Token &var, Token &offset) {
   case T_NUM_STRING:
     dim = NEW_EXP(Scalar, T_NUM_STRING, offset.text());
     break;
-  case T_VARIABLE:
-    dim = NEW_EXP(Variable, Name::fromString(this, offset.text()));
+  case T_VARIABLE: {
+    dim = makeStringVariable(offset.text());
     break;
+  }
   default:
     ASSERT(false);
   }
 
   LvalExpressionPtr arr =
-    NEW_EXP(Variable, Name::fromString(this, var.text()));
+    makeStringVariable(var.text());
   out->exp() = NEW_EXP(ArrayElement, arr, createOffset(ExpressionPtr(), dim));
   setOffset(out->exp(), ExpressionPtr(), dim);
 }
@@ -704,10 +728,14 @@ void Parser::encapRefDim(Token &out, Token &var, Token &offset) {
 void Parser::encapObjProp(Token &out, Token &var, Token &name) {
   out.reset();
   ExpressionPtr obj;
-  if (var.text() == "this" && haveClass()) {
-    obj = NEW_EXP0(This);
+  if (var.text() == "this") {
+    if (haveClass()) {
+      obj = NEW_EXP0(This);
+    } else {
+      obj = makeStringVariable(var.text());
+    }
   } else {
-    obj = NEW_EXP(Variable, Name::fromString(this, var.text()));
+    obj = makeStringVariable(var.text());
   }
   out->exp() = NEW_EXP(ObjectProperty, obj,
                        Name::fromString(this, name.text()));
@@ -715,8 +743,7 @@ void Parser::encapObjProp(Token &out, Token &var, Token &name) {
 
 void Parser::encapArray(Token &out, Token &var, Token &expr) {
   out.reset();
-  LvalExpressionPtr arr =
-    NEW_EXP(Variable, Name::fromString(this, var.text()));
+  LvalExpressionPtr arr = makeStringVariable(var.text());
   out->exp() = NEW_EXP(ArrayElement, arr,
                        createOffset(ExpressionPtr(), expr->exp()));
   setOffset(out->exp(), ExpressionPtr(), expr->exp());
@@ -1488,7 +1515,28 @@ void Parser::onYield(Token &out, Token *expr, bool assign) {
 
 void Parser::onGlobal(Token &out, Token &expr) {
   out.reset();
-  out->stmt() = NEW_STMT(Global, expr->names());
+  const std::vector<NamePtr> &vars = expr->names();
+   bool allStringNames = true;
+  for (unsigned int i = 0; i < vars.size(); i++) {
+    Eval::StringName *sn = dynamic_cast<Eval::StringName *>(vars[i].get());
+    if (!sn) {
+      allStringNames = false;
+      break;
+    }
+    if (sn->get() == "this") {
+      error("Cannot re-assign $this");
+    }
+  }
+  if (!allStringNames) {
+    out->stmt() = NEW_STMT(Global, vars);
+    return;
+  }
+  std::vector<LvalExpressionPtr> varExps;
+  for (unsigned int i = 0; i < vars.size(); i++) {
+    Eval::StringName *sn = static_cast<Eval::StringName *>(vars[i].get());
+    varExps.push_back(makeStringVariable(sn));
+  }
+  out->stmt() = NEW_STMT(SimpleGlobal, varExps);
 }
 
 void Parser::onGlobalVar(Token &out, Token *exprs, Token &expr) {
@@ -1559,23 +1607,29 @@ void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
     return;
   }
   out.reset();
+  LvalExpressionPtr n = name->getExp<LvalExpression>();
+  if (dynamic_cast<ThisVariableExpression *>(n.get())) {
+    error("Cannot re-assign $this");
+  }
   if (value->exp()) {
+    LvalExpressionPtr v = value->getExp<LvalExpression>();
+    if (dynamic_cast<ThisVariableExpression *>(v.get())) {
+      error("Cannot re-assign $this");
+    }
     if (value.num() == 0) {
       out->stmt() = NEW_STMT(ForEach, arr->exp(),
-                             name->getExp<LvalExpression>(),
-                             value->getExp<LvalExpression>(), stmt->stmt());
+                             n, v, stmt->stmt());
     } else {
       out->stmt() = NEW_STMT(StrongForEach, arr->exp(),
-                             name->getExp<LvalExpression>(),
-                             value->getExp<LvalExpression>(), stmt->stmt());
+                             n, v, stmt->stmt());
     }
   } else {
     if (name.num() == 0) {
       out->stmt() = NEW_STMT(ForEach, arr->exp(), LvalExpressionPtr(),
-                             name->getExp<LvalExpression>(), stmt->stmt());
+                             n, stmt->stmt());
     } else {
       out->stmt() = NEW_STMT(StrongForEach, arr->exp(), LvalExpressionPtr(),
-                             name->getExp<LvalExpression>(), stmt->stmt());
+                             n, stmt->stmt());
     }
   }
 }

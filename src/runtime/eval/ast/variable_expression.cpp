@@ -23,6 +23,8 @@ namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+static StaticString s_this("this");
+
 VariableExpression::VariableExpression(EXPRESSION_ARGS, NamePtr name,
                                        int idx /* = -1 */)
   : LvalExpression(KindOfVariableExpression, EXPRESSION_PASS),
@@ -65,7 +67,29 @@ Variant VariableExpression::eval(VariableEnvironment &env) const {
   return getRefCheck(env);
 }
 
+Variant *ThisVariableExpression::getThis(VariableEnvironment &env) const {
+  if (!env.currentObject().isNull()) {
+    Variant *var = NULL;
+    ASSERT(m_idx != -1);
+    if (var = env.getIdx(m_idx)) return var;
+    var = &env.getVar(s_this, SgNormal);
+    var->assign(env.currentObject());
+    return var;
+  }
+  return NULL;
+}
+
+Variant ThisVariableExpression::eval(VariableEnvironment &env) const {
+  if (Variant *var = getThis(env)) return *var;
+  return getRefCheck(env);
+}
+
 Variant VariableExpression::evalExist(VariableEnvironment &env) const {
+  return getRef(env);
+}
+
+Variant ThisVariableExpression::evalExist(VariableEnvironment &env) const {
+  if (Variant *var = getThis(env)) return *var;
   return getRef(env);
 }
 
@@ -73,8 +97,20 @@ Variant &VariableExpression::lval(VariableEnvironment &env) const {
   return getRef(env);
 }
 
-bool VariableExpression::weakLval(VariableEnvironment &env, Variant* &v) const
-{
+Variant &ThisVariableExpression::lval(VariableEnvironment &env) const {
+  if (Variant *var = getThis(env)) return *var;
+  return getRef(env);
+}
+
+bool VariableExpression::weakLval(VariableEnvironment &env, Variant* &v)
+  const {
+  v = &getRefCheck(env);
+  return true;
+}
+
+bool ThisVariableExpression::weakLval(VariableEnvironment &env, Variant* &v)
+  const {
+  if (v = getThis(env)) return true;
   v = &getRefCheck(env);
   return true;
 }
@@ -116,7 +152,8 @@ Variant VariableExpression::set(VariableEnvironment &env, CVarRef val) const {
   return lhs.assignVal(val);
 }
 
-Variant VariableExpression::setRef(VariableEnvironment &env, CVarRef val) const {
+Variant VariableExpression::setRef(VariableEnvironment &env, CVarRef val)
+  const {
   Variant &lhs = lval(env);
   if (RuntimeOption::EnableStrict) {
     if (!CheckCompatibleAssignment(lhs, val)) {
@@ -140,12 +177,15 @@ Variant VariableExpression::setOp(VariableEnvironment &env, int op, CVarRef rhs)
 }
 
 void VariableExpression::unset(VariableEnvironment &env) const {
-  String name(m_name->get(env));
-  env.unset(name, m_name->hash());
+  HPHP::unset(getRef(env));
 }
 
-NamePtr VariableExpression::getName() const {
-  return m_name;
+void ThisVariableExpression::unset(VariableEnvironment &env) const {
+  if (Variant *var = getThis(env)) {
+    HPHP::unset(*var);
+    return;
+  }
+  HPHP::unset(getRefCheck(env));
 }
 
 void VariableExpression::dump(std::ostream &out) const {

@@ -87,7 +87,24 @@ VariableEnvironment::VariableEnvironment()
 {
 }
 
-void VariableEnvironment::flagGlobal(CStrRef name, int64 hash) {
+void VariableEnvironment::flagGlobal(CStrRef name, int idx) {
+  if (isKindOf(KindOfFuncScopeVariableEnvironment)) {
+    FuncScopeVariableEnvironment *fenv =
+      static_cast<FuncScopeVariableEnvironment *>(this);
+    Variant *var = fenv->getIdx(idx);
+    if (!var) {
+      AssocList &alist = fenv->getAssocList();
+      ASSERT(!alist.getPtr(name));
+      var = &alist.append(name);
+      fenv->setIdx(idx, var);
+    }
+    var->assignRef(get_globals()->get(name));
+    return;
+  }
+  getVar(name, SgNormal).assignRef(get_globals()->get(name));
+}
+
+void VariableEnvironment::flagGlobal(CStrRef name) {
   getVar(name, SgNormal).assignRef(get_globals()->get(name));
 }
 
@@ -100,7 +117,6 @@ void VariableEnvironment::setCurrentObject(CObjRef co) {
   ASSERT(!m_currentClass);
   m_currentObject = co;
   m_currentClass = co->o_getClassName();
-  getVar(s_this, SgNormal) = co;
 }
 void VariableEnvironment::setCurrentClass(const char* cls) {
   ASSERT(m_currentObject.isNull());
@@ -147,7 +163,10 @@ DummyVariableEnvironment::DummyVariableEnvironment() {
 void DummyVariableEnvironment::flagStatic(CStrRef name, int64 hash) {
   ASSERT(false);
 }
-void DummyVariableEnvironment::flagGlobal(CStrRef name, int64 hash) {
+void DummyVariableEnvironment::flagGlobal(CStrRef name) {
+  ASSERT(false);
+}
+void DummyVariableEnvironment::flagGlobal(CStrRef name, int idx) {
   ASSERT(false);
 }
 void DummyVariableEnvironment::unset(CStrRef name, int64 hash) {

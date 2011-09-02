@@ -344,6 +344,9 @@ private:
   TempExpressionPtr m_offset; // created by createOffset()
   ExpressionPtr createOffset(ExpressionPtr var, ExpressionPtr offset);
   void setOffset(ExpressionPtr &out, ExpressionPtr var, ExpressionPtr offset);
+  LvalExpressionPtr makeStringVariable(CStrRef s);
+  LvalExpressionPtr makeStringVariable(const std::string &s);
+  LvalExpressionPtr makeStringVariable(const Eval::StringName *s);
 
   bool hasType(Token &type);
 

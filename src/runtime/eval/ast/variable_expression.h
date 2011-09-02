@@ -26,6 +26,7 @@ namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_AST_PTR(VariableExpression);
+DECLARE_AST_PTR(ThisVariableExpression);
 
 class VariableExpression : public LvalExpression {
 public:
@@ -38,7 +39,8 @@ public:
   virtual Variant set(VariableEnvironment &env, CVarRef val) const;
   virtual Variant setRef(VariableEnvironment &env, CVarRef val) const;
   virtual Variant setOp(VariableEnvironment &env, int op, CVarRef rhs) const;
-  NamePtr getName() const;
+  Name *getName() const { return m_name.get(); }
+  int getIdx() const { return m_idx; }
   virtual void dump(std::ostream &out) const;
   static bool CheckCompatibleAssignment(CVarRef left, CVarRef right);
   bool isSuperGlobal() const;
@@ -52,7 +54,7 @@ public:
     ASSERT(exp->isKindOf(KindOfVariableExpression));
     return static_cast<VariableExpression *>(exp)->getRef(env);
   }
-private:
+protected:
   NamePtr m_name;
   int m_idx;
   void raiseUndefined(VariableEnvironment &env) const;
@@ -69,6 +71,30 @@ private:
     if (!var.isInitialized()) raiseUndefined(env);
     return var;
   }
+};
+
+class ThisVariableExpression : public VariableExpression {
+public:
+  ThisVariableExpression(EXPRESSION_ARGS, NamePtr name, int idx = -1) :
+    VariableExpression(EXPRESSION_PASS, name, idx) {
+    m_kindOf = KindOfThisVariableExpression;
+  }
+  virtual Variant eval(VariableEnvironment &env) const;
+  virtual Variant evalExist(VariableEnvironment &env) const;
+  virtual Variant &lval(VariableEnvironment &env) const;
+  virtual bool weakLval(VariableEnvironment &env, Variant* &v) const;
+  virtual void unset(VariableEnvironment &env) const;
+  virtual Variant set(VariableEnvironment &env, CVarRef val) const {
+    // Cannot re-assign $this
+    assert(false);
+  }
+  virtual Variant setRef(VariableEnvironment &env, CVarRef val) const {
+    // Cannot re-assign $this
+    assert(false);
+  }
+  // virtual Variant setOp(VariableEnvironment &env, int op, CVarRef rhs) const;
+private:
+  Variant *getThis(VariableEnvironment &env) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

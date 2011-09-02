@@ -45,7 +45,8 @@ public:
   void setCurrentObject(CObjRef co);
   void setCurrentClass(const char* cls);
   virtual void flagStatic(CStrRef name, int64 hash = -1) = 0;
-  virtual void flagGlobal(CStrRef name, int64 hash = -1);
+  virtual void flagGlobal(CStrRef name);
+  virtual void flagGlobal(CStrRef name, int idx);
   virtual void unset(CStrRef name, int64 hash = -1);
   Variant *getIdx(int idx) { return m_byIdx[idx]; }
   bool isKindOf(KindOf kindOf) { return m_kindOf == kindOf; }
@@ -135,7 +136,8 @@ class DummyVariableEnvironment : public VariableEnvironment {
 public:
   DummyVariableEnvironment();
   virtual void flagStatic(CStrRef name, int64 hash = -1);
-  virtual void flagGlobal(CStrRef name, int64 hash = -1);
+  virtual void flagGlobal(CStrRef name);
+  virtual void flagGlobal(CStrRef name, int idx);
   virtual void unset(CStrRef name, int64 hash = -1);
   virtual bool exists(CStrRef name) const;
   virtual Variant &getImpl(CStrRef s);

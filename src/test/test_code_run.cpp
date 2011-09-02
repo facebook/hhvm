@@ -7191,6 +7191,28 @@ bool TestCodeRun::TestUnset() {
        "unset($a[0][0]);\n"
        "var_dump($a);\n");
 
+  MVCR("<?php\n"
+       "class A {\n"
+       "  public function foo() {\n"
+       "    unset($this);\n"
+       "    var_dump($this);\n"
+       "  }\n"
+       "  public static function bar() {\n"
+       "    unset($this);\n"
+       "    var_dump($this);\n"
+       "  }\n"
+       "}\n"
+       "function goo() {\n"
+       "  unset($this);\n"
+       "  var_dump($this);\n"
+       "}\n"
+       "$obj = new A;\n"
+       "$obj->foo(); \n"
+       "$obj->bar();\n"
+       "A::bar();\n"
+       "goo();\n"
+       "unset($this);\n"
+       "var_dump($this);\n");
   return true;
 }
 

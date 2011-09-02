@@ -18,13 +18,16 @@
 #define __EVAL_GLOBAL_STATEMENT_H__
 
 #include <runtime/eval/ast/statement.h>
+#include <runtime/eval/ast/variable_expression.h>
 
 namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_AST_PTR(GlobalStatement);
+DECLARE_AST_PTR(SimpleGlobalStatement);
 DECLARE_AST_PTR(Name);
+DECLARE_AST_PTR(LvalExpression);
 
 class GlobalStatement : public Statement {
 public:
@@ -34,6 +37,16 @@ public:
   virtual void dump(std::ostream &out) const;
 private:
   std::vector<NamePtr> m_vars;
+};
+
+class SimpleGlobalStatement : public Statement {
+public:
+  SimpleGlobalStatement(STATEMENT_ARGS,
+    const std::vector<LvalExpressionPtr> &vars);
+  virtual void eval(VariableEnvironment &env) const;
+  virtual void dump(std::ostream &out) const;
+private:
+  std::vector<LvalExpressionPtr> m_vars;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -62,6 +62,7 @@ public:
     KindOfThisExpression,
     KindOfUnaryOpExpression,
     KindOfVariableExpression,
+    KindOfThisVariableExpression,
   };
   Expression(KindOf kindOf, EXPRESSION_ARGS) : Construct(CONSTRUCT_PASS),
     m_kindOf(kindOf) {}

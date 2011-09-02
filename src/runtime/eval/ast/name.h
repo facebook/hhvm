@@ -59,6 +59,7 @@ public:
   virtual String get(VariableEnvironment &env) const;
   virtual int64 hash() const;
   virtual String get() const;
+  StringData *getName() const { return m_name; }
   virtual bool getSuperGlobal(SuperGlobal &sg);
   virtual bool isSp() const;
   virtual void dump(std::ostream &out) const;

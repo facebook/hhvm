@@ -51,7 +51,12 @@ static void read_buf(FILE *fin, char *buf) {
 
 static bool send_fd(int afdt_fd, int fd) {
   afdt_error_t err;
+  errno = 0;
   int ret = afdt_send_fd_msg(afdt_fd, 0, 0, fd, &err);
+  if (ret < 0 && errno == 0) {
+    // Set non-empty errno if afdt_send_fd_msg doesn't set one on error
+    errno = EPROTO;
+  }
   return ret >= 0;
 }
 
@@ -60,7 +65,12 @@ static int recv_fd(int afdt_fd) {
   afdt_error_t err;
   uint8_t afdt_buf[AFDT_MSGLEN];
   uint32_t afdt_len;
+  errno = 0;
   if (afdt_recv_fd_msg(afdt_fd, afdt_buf, &afdt_len, &fd, &err) < 0) {
+    if (errno == 0) {
+      // Set non-empty errno if afdt_send_fd_msg doesn't set one on error
+      errno = EPROTO;
+    }
     return -1;
   }
   return fd;
@@ -180,7 +190,7 @@ static void do_proc_open(FILE *fin, FILE *fout, int afdt_fd) {
   for (int i = 0; i < pipe_size; i++) {
     int fd = recv_fd(afdt_fd);
     if (fd < 0) {
-      fprintf(fout, "error\n%d\n", errno);
+      fprintf(fout, "error\n%d\n", EPROTO);
       fflush(fout);
       close_fds(pkeys);
       return;
@@ -242,6 +252,7 @@ static void do_waitpid(FILE *fin, FILE *fout) {
     alarm(timeout);
   }
   pid_t ret = ::waitpid(pid, &stat, options);
+  alarm(0); // cancel the previous alarm if not triggered yet
   waited = 0;
   fprintf(fout, "%lld %d\n", (int64)ret, stat);
   if (ret < 0) {
@@ -422,14 +433,19 @@ void LightProcess::runShadow(int fdin, int fdout) {
   pfd[0].fd = fdin;
   pfd[0].events = POLLIN;
   while (true) {
-    poll(pfd, 1, -1);
+    int ret = poll(pfd, 1, -1);
+    if (ret < 0 && errno == EINTR) {
+      continue;
+    }
     if (pfd[0].revents & POLLHUP) {
       // no more command can come in
+      Logger::Error("Lost parent, LightProcess exiting");
       break;
     }
     else if (pfd[0].revents & POLLIN) {
       if (!fgets(buf, BUFFER_SIZE, fin)) buf[0] = '\0';
       if (strncmp(buf, "exit", 4) == 0) {
+        Logger::Info("LightProces exiting upon request");
         break;
       } else if (strncmp(buf, "popen", 5) == 0) {
         do_popen(fin, fout, m_afdt_fd);
@@ -563,7 +579,10 @@ pid_t LightProcess::proc_open(const char *cmd, const vector<int> &created,
   assert(Available());
   assert(created.size() == desired.size());
 
-  fprintf(g_procs[id].m_fout, "proc_open\n%s\n%s\n", cmd, cwd);
+  if (fprintf(g_procs[id].m_fout, "proc_open\n%s\n%s\n", cmd, cwd) <= 0) {
+    Logger::Error("Failed to send command proc_open");
+    return -1;
+  }
   fprintf(g_procs[id].m_fout, "%d\n", (int)env.size());
   for (unsigned int i = 0; i < env.size(); i++) {
     fprintf(g_procs[id].m_fout, "%s\n", env[i].c_str());
@@ -575,8 +594,14 @@ pid_t LightProcess::proc_open(const char *cmd, const vector<int> &created,
     fprintf(g_procs[id].m_fout, "%d\n", desired[i]);
   }
   fflush(g_procs[id].m_fout);
+  bool error_send = false;
+  int save_errno = 0;
   for (unsigned int i = 0; i < created.size(); i++) {
-    if (!send_fd(g_procs[id].m_afdt_fd, created[i])) break;
+    if (!send_fd(g_procs[id].m_afdt_fd, created[i])) {
+      error_send = true;
+      save_errno = errno;
+      break;
+    }
   }
 
   char buf[BUFFER_SIZE];
@@ -584,6 +609,11 @@ pid_t LightProcess::proc_open(const char *cmd, const vector<int> &created,
   if (strncmp(buf, "error", 5) == 0) {
     read_buf(g_procs[id].m_fin, buf);
     sscanf(buf, "%d", &errno);
+    if (error_send) {
+      // On this error, the receiver side returns dummy errno,
+      // use the sender side errno here.
+      errno = save_errno;
+    }
     return -1;
   }
   int64 pid = -1;

@@ -373,6 +373,24 @@ Variant call_user_func_few_args(CVarRef function, int count, ...) {
   }
 }
 
+Variant invoke_func_few_handler(void *extra, CArrRef params,
+                                Variant (*few_args)(
+                                  void *extra, int count,
+                                  INVOKE_FEW_ARGS_IMPL_ARGS)) {
+  VariantVector<INVOKE_FEW_ARGS_COUNT> args;
+  int s = params.size();
+  if (LIKELY(s != 0)) {
+    int i = s > INVOKE_FEW_ARGS_COUNT ? INVOKE_FEW_ARGS_COUNT : s;
+    ArrayData *ad(params.get());
+    ssize_t pos = ad->iter_begin();
+    do {
+      args.pushWithRef(ad->getValueRef(pos));
+      pos = ad->iter_advance(pos);
+    } while (--i);
+  }
+  return few_args(extra, s, INVOKE_FEW_ARGS_PASS_ARR_ARGS);
+}
+
 Variant invoke(CStrRef function, CArrRef params, int64 hash /* = -1 */,
                bool tryInterp /* = true */, bool fatal /* = true */) {
   StringData *sd = function.get();

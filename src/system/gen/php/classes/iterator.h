@@ -21,20 +21,20 @@
 #include <php/classes/iterator.fw.h>
 
 // Declarations
+#include <cls/RecursiveIteratorIterator.h>
 #include <cls/OuterIterator.h>
-#include <cls/Serializable.h>
-#include <cls/Traversable.h>
-#include <cls/Countable.h>
-#include <cls/ArrayIterator.h>
 #include <cls/Iterator.h>
-#include <cls/AppendIterator.h>
-#include <cls/IteratorIterator.h>
+#include <cls/Countable.h>
 #include <cls/SeekableIterator.h>
+#include <cls/FilterIterator.h>
+#include <cls/AppendIterator.h>
+#include <cls/MutableArrayIterator.h>
+#include <cls/ArrayIterator.h>
+#include <cls/Traversable.h>
+#include <cls/Serializable.h>
+#include <cls/IteratorIterator.h>
 #include <cls/RecursiveIterator.h>
 #include <cls/IteratorAggregate.h>
-#include <cls/RecursiveIteratorIterator.h>
-#include <cls/MutableArrayIterator.h>
-#include <cls/FilterIterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

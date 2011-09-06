@@ -41,27 +41,10 @@ const int c_XhprofFrame::s_instanceof_index[] = {
 CallInfo c_XhprofFrame::ci___destruct((void*)&c_XhprofFrame::i___destruct, (void*)&c_XhprofFrame::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_XhprofFrame::ci___construct((void*)&c_XhprofFrame::i___construct, (void*)&c_XhprofFrame::ifa___construct, 1, 4, 0x0000000000000000LL);
 Variant c_XhprofFrame::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i___destruct, coo_XhprofFrame);
-  }
-  c_XhprofFrame *self ATTRIBUTE_UNUSED (static_cast<c_XhprofFrame*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("XhprofFrame::__destruct", 0, 1);
-  return (self->t___destruct());
+  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant c_XhprofFrame::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i___construct, coo_XhprofFrame);
-  }
-  c_XhprofFrame *self ATTRIBUTE_UNUSED (static_cast<c_XhprofFrame*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("XhprofFrame::__construct", count, 1, 1, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (self->t___construct(arg0), null);
-  }
+  return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
 Variant c_XhprofFrame::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {

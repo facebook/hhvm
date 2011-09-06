@@ -73,6 +73,7 @@ class MutableArrayIter;
 class Variant {
  public:
   friend class Array;
+  friend class VariantVectorBase;
 
   /**
    * Variant does not formally derive from Countable, however it has a
@@ -1464,6 +1465,30 @@ private:
 #endif
   }
   DataType convertToNumeric(int64 *lval, double *dval) const;
+};
+
+class VariantVectorBase {
+public:
+  ~VariantVectorBase();
+  Variant &operator[](int i) {
+    return ((Variant*)m_elems)[i];
+  }
+  void pushWithRef(CVarRef v);
+protected:
+  int           m_size;
+  TypedValue    m_elems[1];
+};
+
+template <int num>
+class VariantVector : public VariantVectorBase {
+public:
+  VariantVector() { m_size = 0; }
+  VariantVector(int n) {
+    m_size = n;
+    memset(m_elems, 0, n * sizeof(TypedValue));
+  }
+protected:
+  TypedValue    m_extraElems[num > 1 ? num - 1 : num];
 };
 
 class RefResultValue {

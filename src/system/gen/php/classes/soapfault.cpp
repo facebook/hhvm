@@ -43,36 +43,10 @@ const int c_SoapFault::s_instanceof_index[] = {
 CallInfo c_SoapFault::ci___tostring((void*)&c_SoapFault::i___tostring, (void*)&c_SoapFault::ifa___tostring, 0, 4, 0x0000000000000000LL);
 CallInfo c_SoapFault::ci___construct((void*)&c_SoapFault::i___construct, (void*)&c_SoapFault::ifa___construct, 6, 4, 0x0000000000000000LL);
 Variant c_SoapFault::i___tostring(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i___tostring, coo_SoapFault);
-  }
-  c_SoapFault *self ATTRIBUTE_UNUSED (static_cast<c_SoapFault*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SoapFault::__toString", 0, 1);
-  return (self->t___tostring());
+  return invoke_meth_few_handler(mcp, params, &ifa___tostring);
 }
 Variant c_SoapFault::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i___construct, coo_SoapFault);
-  }
-  c_SoapFault *self ATTRIBUTE_UNUSED (static_cast<c_SoapFault*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 2 || count > 6)) return throw_wrong_arguments("SoapFault::__construct", count, 2, 6, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 2) return (self->t___construct(arg0, arg1), null);
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 3) return (self->t___construct(arg0, arg1, arg2), null);
-    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 4) return (self->t___construct(arg0, arg1, arg2, arg3), null);
-    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 5) return (self->t___construct(arg0, arg1, arg2, arg3, arg4), null);
-    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
-    return (self->t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
-  }
+  return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
 Variant c_SoapFault::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {

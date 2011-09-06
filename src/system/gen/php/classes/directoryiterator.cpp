@@ -68,124 +68,40 @@ CallInfo c_RecursiveDirectoryIterator::ci_getchildren((void*)&c_RecursiveDirecto
 CallInfo c_RecursiveDirectoryIterator::ci_current((void*)&c_RecursiveDirectoryIterator::i_current, (void*)&c_RecursiveDirectoryIterator::ifa_current, 0, 4, 0x0000000000000000LL);
 CallInfo c_RecursiveDirectoryIterator::ci_rewind((void*)&c_RecursiveDirectoryIterator::i_rewind, (void*)&c_RecursiveDirectoryIterator::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_RecursiveDirectoryIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_next, coo_RecursiveDirectoryIterator);
-  }
-  c_RecursiveDirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveDirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::next", 0, 1);
-  return (self->t_next(), null);
+  return invoke_meth_few_handler(mcp, params, &ifa_next);
 }
 Variant c_RecursiveDirectoryIterator::i_key(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_key, coo_RecursiveDirectoryIterator);
-  }
-  c_RecursiveDirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveDirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::key", 0, 1);
-  return (self->t_key());
+  return invoke_meth_few_handler(mcp, params, &ifa_key);
 }
 Variant c_RecursiveDirectoryIterator::i_valid(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_valid, coo_RecursiveDirectoryIterator);
-  }
-  c_RecursiveDirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveDirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::valid", 0, 1);
-  return (self->t_valid());
+  return invoke_meth_few_handler(mcp, params, &ifa_valid);
 }
 Variant c_RecursiveDirectoryIterator::i___tostring(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i___tostring, coo_RecursiveDirectoryIterator);
-  }
-  c_RecursiveDirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveDirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::__toString", 0, 1);
-  return (self->t___tostring());
+  return invoke_meth_few_handler(mcp, params, &ifa___tostring);
 }
 Variant c_RecursiveDirectoryIterator::i_getsubpathname(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_getsubpathname, coo_RecursiveDirectoryIterator);
-  }
-  c_RecursiveDirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveDirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPathname", 0, 1);
-  return (self->t_getsubpathname());
+  return invoke_meth_few_handler(mcp, params, &ifa_getsubpathname);
 }
 Variant c_RecursiveDirectoryIterator::i_getsubpath(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_getsubpath, coo_RecursiveDirectoryIterator);
-  }
-  c_RecursiveDirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveDirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPath", 0, 1);
-  return (self->t_getsubpath());
+  return invoke_meth_few_handler(mcp, params, &ifa_getsubpath);
 }
 Variant c_RecursiveDirectoryIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i___construct, coo_RecursiveDirectoryIterator);
-  }
-  c_RecursiveDirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveDirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("RecursiveDirectoryIterator::__construct", count, 1, 2, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) return (self->t___construct(arg0), null);
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (self->t___construct(arg0, arg1), null);
-  }
+  return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
 Variant c_RecursiveDirectoryIterator::i_haschildren(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_haschildren, coo_RecursiveDirectoryIterator);
-  }
-  c_RecursiveDirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveDirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::hasChildren", 0, 1);
-  return (self->t_haschildren());
+  return invoke_meth_few_handler(mcp, params, &ifa_haschildren);
 }
 Variant c_RecursiveDirectoryIterator::i_seek(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_seek, coo_RecursiveDirectoryIterator);
-  }
-  c_RecursiveDirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveDirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("RecursiveDirectoryIterator::seek", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (self->t_seek(arg0), null);
-  }
+  return invoke_meth_few_handler(mcp, params, &ifa_seek);
 }
 Variant c_RecursiveDirectoryIterator::i_getchildren(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_getchildren, coo_RecursiveDirectoryIterator);
-  }
-  c_RecursiveDirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveDirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::getChildren", 0, 1);
-  return (self->t_getchildren());
+  return invoke_meth_few_handler(mcp, params, &ifa_getchildren);
 }
 Variant c_RecursiveDirectoryIterator::i_current(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_current, coo_RecursiveDirectoryIterator);
-  }
-  c_RecursiveDirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveDirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::current", 0, 1);
-  return (self->t_current());
+  return invoke_meth_few_handler(mcp, params, &ifa_current);
 }
 Variant c_RecursiveDirectoryIterator::i_rewind(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_rewind, coo_RecursiveDirectoryIterator);
-  }
-  c_RecursiveDirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_RecursiveDirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::rewind", 0, 1);
-  return (self->t_rewind(), null);
+  return invoke_meth_few_handler(mcp, params, &ifa_rewind);
 }
 Variant c_RecursiveDirectoryIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -438,95 +354,31 @@ CallInfo c_DirectoryIterator::ci_current((void*)&c_DirectoryIterator::i_current,
 CallInfo c_DirectoryIterator::ci_isdot((void*)&c_DirectoryIterator::i_isdot, (void*)&c_DirectoryIterator::ifa_isdot, 0, 4, 0x0000000000000000LL);
 CallInfo c_DirectoryIterator::ci_rewind((void*)&c_DirectoryIterator::i_rewind, (void*)&c_DirectoryIterator::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_DirectoryIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_next, coo_DirectoryIterator);
-  }
-  c_DirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_DirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("DirectoryIterator::next", 0, 1);
-  return (self->t_next(), null);
+  return invoke_meth_few_handler(mcp, params, &ifa_next);
 }
 Variant c_DirectoryIterator::i_key(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_key, coo_DirectoryIterator);
-  }
-  c_DirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_DirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("DirectoryIterator::key", 0, 1);
-  return (self->t_key());
+  return invoke_meth_few_handler(mcp, params, &ifa_key);
 }
 Variant c_DirectoryIterator::i_valid(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_valid, coo_DirectoryIterator);
-  }
-  c_DirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_DirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("DirectoryIterator::valid", 0, 1);
-  return (self->t_valid());
+  return invoke_meth_few_handler(mcp, params, &ifa_valid);
 }
 Variant c_DirectoryIterator::i___tostring(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i___tostring, coo_DirectoryIterator);
-  }
-  c_DirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_DirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("DirectoryIterator::__toString", 0, 1);
-  return (self->t___tostring());
+  return invoke_meth_few_handler(mcp, params, &ifa___tostring);
 }
 Variant c_DirectoryIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i___construct, coo_DirectoryIterator);
-  }
-  c_DirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_DirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("DirectoryIterator::__construct", count, 1, 1, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (self->t___construct(arg0), null);
-  }
+  return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
 Variant c_DirectoryIterator::i_seek(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_seek, coo_DirectoryIterator);
-  }
-  c_DirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_DirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("DirectoryIterator::seek", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (self->t_seek(arg0), null);
-  }
+  return invoke_meth_few_handler(mcp, params, &ifa_seek);
 }
 Variant c_DirectoryIterator::i_current(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_current, coo_DirectoryIterator);
-  }
-  c_DirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_DirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("DirectoryIterator::current", 0, 1);
-  return (self->t_current());
+  return invoke_meth_few_handler(mcp, params, &ifa_current);
 }
 Variant c_DirectoryIterator::i_isdot(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_isdot, coo_DirectoryIterator);
-  }
-  c_DirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_DirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("DirectoryIterator::isDot", 0, 1);
-  return (self->t_isdot());
+  return invoke_meth_few_handler(mcp, params, &ifa_isdot);
 }
 Variant c_DirectoryIterator::i_rewind(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_rewind, coo_DirectoryIterator);
-  }
-  c_DirectoryIterator *self ATTRIBUTE_UNUSED (static_cast<c_DirectoryIterator*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("DirectoryIterator::rewind", 0, 1);
-  return (self->t_rewind(), null);
+  return invoke_meth_few_handler(mcp, params, &ifa_rewind);
 }
 Variant c_DirectoryIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {

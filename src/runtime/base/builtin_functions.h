@@ -340,6 +340,21 @@ bool get_user_func_handler(CVarRef function, bool skip,
                            String &classname, String &methodname,
                            bool &doBind);
 
+Variant invoke_func_few_handler(void *extra, CArrRef params,
+                                Variant (*few_args)(
+                                  void *extra, int count,
+                                  INVOKE_FEW_ARGS_IMPL_ARGS));
+
+inline Variant invoke_meth_few_handler(MethodCallPackage &mcp, CArrRef params,
+                                       Variant (*few_args)(
+                                         MethodCallPackage &mcp, int count,
+                                         INVOKE_FEW_ARGS_IMPL_ARGS)) {
+  return invoke_func_few_handler((void*)&mcp, params,
+                                 (Variant (*)(
+                                   void *extra, int count,
+                                   INVOKE_FEW_ARGS_IMPL_ARGS))few_args);
+}
+
 Variant invoke(CStrRef function, CArrRef params, int64 hash = -1,
                bool tryInterp = true, bool fatal = true);
 

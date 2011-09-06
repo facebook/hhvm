@@ -21,23 +21,23 @@
 #include <php/classes/exception.fw.h>
 
 // Declarations
-#include <cls/PDOException.h>
-#include <cls/UnexpectedValueException.h>
-#include <cls/OverflowException.h>
 #include <cls/OutOfBoundsException.h>
-#include <cls/LogicException.h>
+#include <cls/OutOfRangeException.h>
+#include <cls/ErrorException.h>
+#include <cls/UnexpectedValueException.h>
 #include <cls/RangeException.h>
 #include <cls/InvalidArgumentException.h>
-#include <cls/UnderflowException.h>
-#include <cls/OutOfRangeException.h>
+#include <cls/BadFunctionCallException.h>
 #include <cls/BadMethodCallException.h>
 #include <cls/RuntimeException.h>
-#include <cls/Exception.h>
-#include <cls/ErrorException.h>
-#include <cls/DOMException.h>
-#include <cls/BadFunctionCallException.h>
-#include <cls/LengthException.h>
 #include <cls/DomainException.h>
+#include <cls/UnderflowException.h>
+#include <cls/OverflowException.h>
+#include <cls/PDOException.h>
+#include <cls/DOMException.h>
+#include <cls/LengthException.h>
+#include <cls/LogicException.h>
+#include <cls/Exception.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

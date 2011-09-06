@@ -2941,11 +2941,6 @@ void ClassScope::outputCPPMethodInvokeBareObjectSupport(
     CodeGenerator &cg, AnalysisResultPtr ar,
     FunctionScopePtr func, bool fewArgs) {
   if (isTrait()) return;
-  if (Option::InvokeWithSpecificArgs && !fewArgs &&
-      !ar->isSystem() && !ar->isSepExtension() &&
-      func->getMaxParamCount() == 0 && !func->isVariableArgument()) {
-    return;
-  }
 
   const string &id(getId());
   const string &lname(func->getName());
@@ -3000,14 +2995,6 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
     ASSERT(iterFuncs != funcScopes.end());
     FunctionScopePtr func = iterFuncs->second[0];
 
-    // For functions with no parameter, we can combine the i_ wrapper and
-    // the ifa_ wrapper.
-    if (Option::InvokeWithSpecificArgs && !fewArgs &&
-        !ar->isSystem() && !ar->isSepExtension() &&
-        func->getMaxParamCount() == 0 && !func->isVariableArgument()) {
-      continue;
-    }
-
     const char *extra = NULL;
     string prefix;
     const char *instance = NULL;
@@ -3028,7 +3015,7 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
     string origName = func->getOriginalFullName();
     cg_printf("Variant");
     if (fewArgs && Option::FunctionSections.find(origName) !=
-                   Option::FunctionSections.end()) {
+        Option::FunctionSections.end()) {
       string funcSection = Option::FunctionSections[origName];
       if (!funcSection.empty()) {
         cg_printf(" __attribute__ ((section (\".text.%s\")))",
@@ -3045,38 +3032,55 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
       cg_printf("CArrRef params");
     }
     cg_printf(") {\n");
-    const char *class_name = "";
-    if (!func->isStatic()) {
-      // Instance method called as such
-      cg_indentBegin("if (UNLIKELY(mcp.obj == 0)) {\n");
-      cg_printf("return ObjectData::%sdummy(mcp, ",
-                fewArgs ? Option::InvokeFewArgsPrefix : Option::InvokePrefix);
-      if (fewArgs) {
-        cg_printf("count, INVOKE_FEW_ARGS_PASS_ARGS");
+    if (!fewArgs && func->getMaxParamCount() <= Option::InvokeFewArgsCount &&
+        !func->isVariableArgument()) {
+
+      if (Option::InvokeWithSpecificArgs && !func->getMaxParamCount() &&
+          !ar->isSystem() && !ar->isSepExtension()) {
+        // For functions with no parameter, we can combine the i_ wrapper and
+        // the ifa_ wrapper.
+        cg_printf("return ((CallInfo::MethInvoker0Args)&%s%s)(mcp, 0);\n",
+                  Option::InvokeFewArgsPrefix, lname.c_str());
       } else {
-        cg_printf("params");
+        cg_printf("return invoke_meth_few_handler(mcp, params, &%s%s);\n",
+                  Option::InvokeFewArgsPrefix, lname.c_str());
       }
-      cg_printf(", %s%s, %s%s);\n",
-                fewArgs ? Option::InvokeFewArgsPrefix : Option::InvokePrefix,
-                lname.c_str(),
-                Option::CreateObjectOnlyPrefix, id.c_str());
-      cg_indentEnd("}\n");
-      cg_printf("%s%s *self ATTRIBUTE_UNUSED (static_cast<%s%s*>(mcp.obj));\n",
-                Option::ClassPrefix, id.c_str(),
-                Option::ClassPrefix, id.c_str());
-    } else if (func->needsClassParam()) {
-      // If mcp contains an object, was a static method invoked instance style.
-      // Use rootObj's class name as invoking class
-      class_name =
-        "CStrRef c(mcp.isObj"
-        " ? mcp.rootObj->o_getClassName()"
-        " : String(mcp.rootCls));\n";
+    } else {
+      const char *class_name = "";
+      if (!func->isStatic()) {
+        // Instance method called as such
+        cg_indentBegin("if (UNLIKELY(mcp.obj == 0)) {\n");
+        cg_printf("return ObjectData::%sdummy(mcp, ",
+                  fewArgs ? Option::InvokeFewArgsPrefix : Option::InvokePrefix);
+        if (fewArgs) {
+          cg_printf("count, INVOKE_FEW_ARGS_PASS_ARGS");
+        } else {
+          cg_printf("params");
+        }
+        cg_printf(", %s%s, %s%s);\n",
+                  fewArgs ? Option::InvokeFewArgsPrefix : Option::InvokePrefix,
+                  lname.c_str(),
+                  Option::CreateObjectOnlyPrefix, id.c_str());
+        cg_indentEnd("}\n");
+        cg_printf("%s%s *self ATTRIBUTE_UNUSED "
+                  "(static_cast<%s%s*>(mcp.obj));\n",
+                  Option::ClassPrefix, id.c_str(),
+                  Option::ClassPrefix, id.c_str());
+      } else if (func->needsClassParam()) {
+        // If mcp contains an object, was a static method
+        // invoked instance style.
+        // Use rootObj's class name as invoking class
+        class_name =
+          "CStrRef c(mcp.isObj"
+          " ? mcp.rootObj->o_getClassName()"
+          " : String(mcp.rootCls));\n";
+      }
+      if (!fewArgs) FunctionScope::OutputCPPDynamicInvokeCount(cg);
+      func->outputCPPDynamicInvoke(cg, ar, prefix.c_str(),
+                                   lname.c_str(), false, fewArgs, true, extra,
+                                   func->isConstructor(self), instance,
+                                   class_name);
     }
-    if (!fewArgs) FunctionScope::OutputCPPDynamicInvokeCount(cg);
-    func->outputCPPDynamicInvoke(cg, ar, prefix.c_str(),
-                                 lname.c_str(), false, fewArgs, true, extra,
-                                 func->isConstructor(self), instance,
-                                 class_name);
     cg_indentEnd("}\n");
   }
 }
@@ -3159,20 +3163,10 @@ void ClassScope::outputCPPJumpTableDecl(CodeGenerator &cg,
     FunctionScopePtr func = iter->second[0];
     string id = CodeGenerator::FormatLabel(func->getName());
     bool needsWrapper = func->getName() == "__invoke";
-    if (Option::InvokeWithSpecificArgs &&
-        !ar->isSystem() && !ar->isSepExtension() &&
-        func->getMaxParamCount() == 0 && !func->isVariableArgument()) {
-      cg_printf("DECLARE_METHOD_INVOKE_HELPERS_NOPARAM(%s);\n", id.c_str());
-      if (needsWrapper) {
-        cg_printf("DECLARE_METHOD_INVOKE_WRAPPER_HELPERS_NOPARAM(%s);\n",
-                  id.c_str());
-      }
-    } else {
-      cg_printf("DECLARE_METHOD_INVOKE_HELPERS(%s);\n", id.c_str());
-      if (needsWrapper) {
-        cg_printf("DECLARE_METHOD_INVOKE_WRAPPER_HELPERS(%s);\n",
-                  id.c_str());
-      }
+    cg_printf("DECLARE_METHOD_INVOKE_HELPERS(%s);\n", id.c_str());
+    if (needsWrapper) {
+      cg_printf("DECLARE_METHOD_INVOKE_WRAPPER_HELPERS(%s);\n",
+                id.c_str());
     }
   }
 }

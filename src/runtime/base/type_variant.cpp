@@ -4056,6 +4056,18 @@ void Variant::dump() const {
   printf("Variant: %s", ret.toString().data());
 }
 
+VariantVectorBase::~VariantVectorBase() {
+  Variant *e = (Variant*)m_elems;
+  while (m_size--) {
+    if (IS_REFCOUNTED_TYPE(e->m_type)) e->destructImpl();
+    e++;
+  }
+}
+
+void VariantVectorBase::pushWithRef(CVarRef v) {
+  (*this)[m_size++].constructWithRefHelper(v, 0);
+}
+
 VarNR::VarNR(CStrRef v) {
   init(KindOfString);
   StringData *s = v.get();

@@ -48,98 +48,31 @@ CallInfo c_FB_MySQLLexer::ci_nexttoken((void*)&c_FB_MySQLLexer::i_nexttoken, (vo
 CallInfo c_FB_MySQLLexer::ci_pushback((void*)&c_FB_MySQLLexer::i_pushback, (void*)&c_FB_MySQLLexer::ifa_pushback, 0, 4, 0x0000000000000000LL);
 CallInfo c_FB_MySQLLexer::ci_revert((void*)&c_FB_MySQLLexer::i_revert, (void*)&c_FB_MySQLLexer::ifa_revert, 0, 4, 0x0000000000000000LL);
 Variant c_FB_MySQLLexer::i_lex(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_lex, coo_FB_MySQLLexer);
-  }
-  c_FB_MySQLLexer *self ATTRIBUTE_UNUSED (static_cast<c_FB_MySQLLexer*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FB_MySQLLexer::lex", 0, 1);
-  return (self->t_lex());
+  return invoke_meth_few_handler(mcp, params, &ifa_lex);
 }
 Variant c_FB_MySQLLexer::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i___construct, coo_FB_MySQLLexer);
-  }
-  c_FB_MySQLLexer *self ATTRIBUTE_UNUSED (static_cast<c_FB_MySQLLexer*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 2)) return throw_toomany_arguments("FB_MySQLLexer::__construct", 2, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    if (count <= 0) return (self->t___construct(), null);
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) return (self->t___construct(arg0), null);
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (self->t___construct(arg0, arg1), null);
-  }
+  return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
 Variant c_FB_MySQLLexer::i_iscompop(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_iscompop, coo_FB_MySQLLexer);
-  }
-  c_FB_MySQLLexer *self ATTRIBUTE_UNUSED (static_cast<c_FB_MySQLLexer*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("FB_MySQLLexer::isCompop", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (self->t_iscompop(arg0));
-  }
+  return invoke_meth_few_handler(mcp, params, &ifa_iscompop);
 }
 Variant c_FB_MySQLLexer::i_get(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_get, coo_FB_MySQLLexer);
-  }
-  c_FB_MySQLLexer *self ATTRIBUTE_UNUSED (static_cast<c_FB_MySQLLexer*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FB_MySQLLexer::get", 0, 1);
-  return (self->t_get());
+  return invoke_meth_few_handler(mcp, params, &ifa_get);
 }
 Variant c_FB_MySQLLexer::i_skip(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_skip, coo_FB_MySQLLexer);
-  }
-  c_FB_MySQLLexer *self ATTRIBUTE_UNUSED (static_cast<c_FB_MySQLLexer*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FB_MySQLLexer::skip", 0, 1);
-  return (self->t_skip());
+  return invoke_meth_few_handler(mcp, params, &ifa_skip);
 }
 Variant c_FB_MySQLLexer::i_unget(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_unget, coo_FB_MySQLLexer);
-  }
-  c_FB_MySQLLexer *self ATTRIBUTE_UNUSED (static_cast<c_FB_MySQLLexer*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FB_MySQLLexer::unget", 0, 1);
-  return (self->t_unget(), null);
+  return invoke_meth_few_handler(mcp, params, &ifa_unget);
 }
 Variant c_FB_MySQLLexer::i_nexttoken(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_nexttoken, coo_FB_MySQLLexer);
-  }
-  c_FB_MySQLLexer *self ATTRIBUTE_UNUSED (static_cast<c_FB_MySQLLexer*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FB_MySQLLexer::nextToken", 0, 1);
-  return (self->t_nexttoken());
+  return invoke_meth_few_handler(mcp, params, &ifa_nexttoken);
 }
 Variant c_FB_MySQLLexer::i_pushback(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_pushback, coo_FB_MySQLLexer);
-  }
-  c_FB_MySQLLexer *self ATTRIBUTE_UNUSED (static_cast<c_FB_MySQLLexer*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FB_MySQLLexer::pushBack", 0, 1);
-  return (self->t_pushback(), null);
+  return invoke_meth_few_handler(mcp, params, &ifa_pushback);
 }
 Variant c_FB_MySQLLexer::i_revert(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_revert, coo_FB_MySQLLexer);
-  }
-  c_FB_MySQLLexer *self ATTRIBUTE_UNUSED (static_cast<c_FB_MySQLLexer*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("FB_MySQLLexer::revert", 0, 1);
-  return (self->t_revert(), null);
+  return invoke_meth_few_handler(mcp, params, &ifa_revert);
 }
 Variant c_FB_MySQLLexer::ifa_lex(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {

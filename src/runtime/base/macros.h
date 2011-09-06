@@ -79,21 +79,22 @@ namespace HPHP {
 #define INVOKE_FEW_ARGS_PASS6  INVOKE_FEW_ARGS_PASS3, a3, a4, a5
 #define INVOKE_FEW_ARGS_PASS10 INVOKE_FEW_ARGS_PASS6, a6, a7, a8, a9
 
-#if INVOKE_FEW_ARGS_COUNT == 3
-#define INVOKE_FEW_ARGS_DECL_ARGS INVOKE_FEW_ARGS_DECL3
-#define INVOKE_FEW_ARGS_PASS_ARGS INVOKE_FEW_ARGS_PASS3
-#define INVOKE_FEW_ARGS_IMPL_ARGS INVOKE_FEW_ARGS_IMPL3
-#elif INVOKE_FEW_ARGS_COUNT == 6
-#define INVOKE_FEW_ARGS_DECL_ARGS INVOKE_FEW_ARGS_DECL6
-#define INVOKE_FEW_ARGS_PASS_ARGS INVOKE_FEW_ARGS_PASS6
-#define INVOKE_FEW_ARGS_IMPL_ARGS INVOKE_FEW_ARGS_IMPL6
-#elif INVOKE_FEW_ARGS_COUNT == 10
-#define INVOKE_FEW_ARGS_DECL_ARGS INVOKE_FEW_ARGS_DECL10
-#define INVOKE_FEW_ARGS_PASS_ARGS INVOKE_FEW_ARGS_PASS10
-#define INVOKE_FEW_ARGS_IMPL_ARGS INVOKE_FEW_ARGS_IMPL10
-#else
-#error Bad INVOKE_FEW_ARGS_COUNT
-#endif
+#define INVOKE_FEW_ARGS_PASS_ARR3 args[0], args[1], args[2]
+#define INVOKE_FEW_ARGS_PASS_ARR6 INVOKE_FEW_ARGS_PASS_ARR3, \
+    args[3], args[4], args[5]
+#define INVOKE_FEW_ARGS_PASS_ARR10 INVOKE_FEW_ARGS_PASS_ARR6, \
+    args[6], args[7], args[8], args[9]
+
+#define INVOKE_FEW_ARGS_HELPER(kind,num) kind##num
+#define INVOKE_FEW_ARGS(kind,num) \
+  INVOKE_FEW_ARGS_HELPER(INVOKE_FEW_ARGS_##kind,num)
+
+
+#define INVOKE_FEW_ARGS_DECL_ARGS INVOKE_FEW_ARGS(DECL,INVOKE_FEW_ARGS_COUNT)
+#define INVOKE_FEW_ARGS_PASS_ARGS INVOKE_FEW_ARGS(PASS,INVOKE_FEW_ARGS_COUNT)
+#define INVOKE_FEW_ARGS_PASS_ARR_ARGS \
+  INVOKE_FEW_ARGS(PASS_ARR,INVOKE_FEW_ARGS_COUNT)
+#define INVOKE_FEW_ARGS_IMPL_ARGS INVOKE_FEW_ARGS(IMPL,INVOKE_FEW_ARGS_COUNT)
 
 #define DECLARE_STATIC_PROP_OPS                                         \
   public:                                                               \
@@ -159,22 +160,6 @@ namespace HPHP {
   static Variant iwfa_##methname(void *self,                            \
                                  int count, INVOKE_FEW_ARGS_IMPL_ARGS); \
   static Variant iw_##methname(void *self, CArrRef params);             \
-
-#define DECLARE_METHOD_INVOKE_HELPERS_NOPARAM(methname)                 \
-  static CallInfo ci_##methname;                                        \
-  static Variant ifa_##methname(MethodCallPackage &mcp,                 \
-                                int count, INVOKE_FEW_ARGS_IMPL_ARGS);  \
-  static Variant i_##methname(MethodCallPackage &mcp, CArrRef params) { \
-    return ((CallInfo::MethInvoker0Args)ifa_##methname)(mcp, 0);        \
-  }                                                                     \
-
-#define DECLARE_METHOD_INVOKE_WRAPPER_HELPERS_NOPARAM(methname)         \
-  static CallInfo ciw_##methname;                                       \
-  static Variant iwfa_##methname(void *self,                            \
-                                 int count, INVOKE_FEW_ARGS_IMPL_ARGS); \
-  static Variant iw_##methname(void *self, CArrRef params) {            \
-    return ((CallInfo::FuncInvoker0Args)iwfa_##methname)(self, 0);      \
-  }                                                                     \
 
 //////////////////////////////////////////////////////////////////////////////
 // jump table entries

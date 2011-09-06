@@ -53,100 +53,31 @@ CallInfo c_SplObjectStorage::ci_contains((void*)&c_SplObjectStorage::i_contains,
 CallInfo c_SplObjectStorage::ci_current((void*)&c_SplObjectStorage::i_current, (void*)&c_SplObjectStorage::ifa_current, 0, 4, 0x0000000000000000LL);
 CallInfo c_SplObjectStorage::ci_rewind((void*)&c_SplObjectStorage::i_rewind, (void*)&c_SplObjectStorage::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_SplObjectStorage::i_next(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_next, coo_SplObjectStorage);
-  }
-  c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplObjectStorage::next", 0, 1);
-  return (self->t_next(), null);
+  return invoke_meth_few_handler(mcp, params, &ifa_next);
 }
 Variant c_SplObjectStorage::i_detach(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_detach, coo_SplObjectStorage);
-  }
-  c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplObjectStorage::detach", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (self->t_detach(arg0), null);
-  }
+  return invoke_meth_few_handler(mcp, params, &ifa_detach);
 }
 Variant c_SplObjectStorage::i_attach(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_attach, coo_SplObjectStorage);
-  }
-  c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (self->t_attach(arg0), null);
-  }
+  return invoke_meth_few_handler(mcp, params, &ifa_attach);
 }
 Variant c_SplObjectStorage::i_count(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_count, coo_SplObjectStorage);
-  }
-  c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplObjectStorage::count", 0, 1);
-  return (self->t_count());
+  return invoke_meth_few_handler(mcp, params, &ifa_count);
 }
 Variant c_SplObjectStorage::i_key(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_key, coo_SplObjectStorage);
-  }
-  c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplObjectStorage::key", 0, 1);
-  return (self->t_key());
+  return invoke_meth_few_handler(mcp, params, &ifa_key);
 }
 Variant c_SplObjectStorage::i_valid(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_valid, coo_SplObjectStorage);
-  }
-  c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplObjectStorage::valid", 0, 1);
-  return (self->t_valid());
+  return invoke_meth_few_handler(mcp, params, &ifa_valid);
 }
 Variant c_SplObjectStorage::i_contains(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_contains, coo_SplObjectStorage);
-  }
-  c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("SplObjectStorage::contains", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (self->t_contains(arg0));
-  }
+  return invoke_meth_few_handler(mcp, params, &ifa_contains);
 }
 Variant c_SplObjectStorage::i_current(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_current, coo_SplObjectStorage);
-  }
-  c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplObjectStorage::current", 0, 1);
-  return (self->t_current());
+  return invoke_meth_few_handler(mcp, params, &ifa_current);
 }
 Variant c_SplObjectStorage::i_rewind(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_rewind, coo_SplObjectStorage);
-  }
-  c_SplObjectStorage *self ATTRIBUTE_UNUSED (static_cast<c_SplObjectStorage*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("SplObjectStorage::rewind", 0, 1);
-  return (self->t_rewind(), null);
+  return invoke_meth_few_handler(mcp, params, &ifa_rewind);
 }
 Variant c_SplObjectStorage::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {

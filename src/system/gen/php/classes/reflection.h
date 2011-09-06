@@ -21,16 +21,16 @@
 #include <php/classes/reflection.fw.h>
 
 // Declarations
-#include <cls/ReflectionFunctionAbstract.h>
 #include <cls/ReflectionObject.h>
-#include <cls/Reflector.h>
-#include <cls/ReflectionException.h>
-#include <cls/ReflectionClass.h>
-#include <cls/ReflectionExtension.h>
-#include <cls/ReflectionMethod.h>
 #include <cls/ReflectionProperty.h>
-#include <cls/ReflectionFunction.h>
+#include <cls/ReflectionException.h>
+#include <cls/ReflectionMethod.h>
 #include <cls/ReflectionParameter.h>
+#include <cls/Reflector.h>
+#include <cls/ReflectionExtension.h>
+#include <cls/ReflectionFunctionAbstract.h>
+#include <cls/ReflectionFunction.h>
+#include <cls/ReflectionClass.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

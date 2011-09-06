@@ -43,45 +43,16 @@ CallInfo c_Directory::ci_close((void*)&c_Directory::i_close, (void*)&c_Directory
 CallInfo c_Directory::ci_read((void*)&c_Directory::i_read, (void*)&c_Directory::ifa_read, 0, 4, 0x0000000000000000LL);
 CallInfo c_Directory::ci_rewind((void*)&c_Directory::i_rewind, (void*)&c_Directory::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_Directory::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i___construct, coo_Directory);
-  }
-  c_Directory *self ATTRIBUTE_UNUSED (static_cast<c_Directory*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (self->t___construct(arg0), null);
-  }
+  return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
 Variant c_Directory::i_close(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_close, coo_Directory);
-  }
-  c_Directory *self ATTRIBUTE_UNUSED (static_cast<c_Directory*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Directory::close", 0, 1);
-  return (self->t_close(), null);
+  return invoke_meth_few_handler(mcp, params, &ifa_close);
 }
 Variant c_Directory::i_read(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_read, coo_Directory);
-  }
-  c_Directory *self ATTRIBUTE_UNUSED (static_cast<c_Directory*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Directory::read", 0, 1);
-  return (self->t_read());
+  return invoke_meth_few_handler(mcp, params, &ifa_read);
 }
 Variant c_Directory::i_rewind(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_rewind, coo_Directory);
-  }
-  c_Directory *self ATTRIBUTE_UNUSED (static_cast<c_Directory*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("Directory::rewind", 0, 1);
-  return (self->t_rewind(), null);
+  return invoke_meth_few_handler(mcp, params, &ifa_rewind);
 }
 Variant c_Directory::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {

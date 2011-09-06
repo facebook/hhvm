@@ -136,11 +136,6 @@ void FunctionContainer::outputCPPJumpTableSupportMethod
  const char *funcPrefix) {
   string name = func->getId();
   const char *cname = name.c_str();
-  cg_indentBegin("Variant %s%s(void *extra, CArrRef params) {\n",
-      Option::InvokePrefix, cname);
-  FunctionScope::OutputCPPDynamicInvokeCount(cg);
-  func->outputCPPDynamicInvoke(cg, ar, funcPrefix, cname);
-  cg_indentEnd("}\n");
 
   string origName = !func->inPseudoMain() ? func->getOriginalName() :
                     ("run_init::" + func->getContainingFile()->getName());
@@ -156,8 +151,27 @@ void FunctionContainer::outputCPPJumpTableSupportMethod
   cg_indentBegin(" %s%s(void *extra, int count, "
                  "INVOKE_FEW_ARGS_IMPL_ARGS) {\n",
                  Option::InvokeFewArgsPrefix, cname);
-  func->outputCPPDynamicInvoke(cg, ar, funcPrefix, cname, false,
-                               true);
+  func->outputCPPDynamicInvoke(cg, ar, funcPrefix, cname, false, true);
+  cg_indentEnd("}\n");
+
+  cg_indentBegin("Variant %s%s(void *extra, CArrRef params) {\n",
+                 Option::InvokePrefix, cname);
+  if (func->getMaxParamCount() <= Option::InvokeFewArgsCount &&
+      !func->isVariableArgument()) {
+    if (Option::InvokeWithSpecificArgs && !func->getMaxParamCount() &&
+        !ar->isSystem() && !ar->isSepExtension()) {
+      // For functions with no parameter, we can combine the i_ wrapper and
+      // the ifa_ wrapper.
+      cg_printf("return ((CallInfo::FuncInvoker0Args)&%s%s)(extra, 0);\n",
+                Option::InvokeFewArgsPrefix, cname);
+    } else {
+      cg_printf("return invoke_func_few_handler(extra, params, &%s%s);\n",
+                Option::InvokeFewArgsPrefix, cname);
+    }
+  } else {
+    FunctionScope::OutputCPPDynamicInvokeCount(cg);
+    func->outputCPPDynamicInvoke(cg, ar, funcPrefix, cname);
+  }
   cg_indentEnd("}\n");
 }
 

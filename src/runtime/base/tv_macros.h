@@ -14,10 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifdef __HPHP_TV_MACROS__
-#error Including 'tv_macros.h' multiple times is prohibited.
-#endif
-
+#ifndef __HPHP_TV_MACROS__
 #define __HPHP_TV_MACROS__
 
 // Assumes 'tv' is live
@@ -145,3 +142,4 @@
   (tv)->_count = 0; \
   (tv)->m_type = KindOfUninit
 
+#endif

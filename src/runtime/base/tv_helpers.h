@@ -23,15 +23,7 @@
 #define __HPHP_TV_HELPERS_H__
 
 #include <runtime/base/types.h>
-
-// We want to use the TypedValue macros inside this header file, but we don't
-// want to pollute the environment of files that include this header file.
-// Thus, we record whether they were already defined here. That way, we know
-// whether we need to undefine the macros at the end of this header file.
-#ifndef __HPHP_TV_MACROS__
 #include <runtime/base/tv_macros.h>
-#define __HPHP_TV_HELPERS_H_SHOULD_UNDEF_TV__
-#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -350,11 +342,5 @@ void tvCastToObjectInPlace(TypedValue* tv);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-// Undefine the TypedValue macros if appropriate
-#ifdef __HPHP_TV_HELPERS_H_SHOULD_UNDEF_TV__
-#undef __HPHP_TV_HELPERS_H_SHOULD_UNDEF_TV__
-#include <runtime/base/undef_tv_macros.h>
-#endif
 
 #endif // __HPHP_TV_HELPERS_H__

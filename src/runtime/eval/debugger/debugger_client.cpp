@@ -1469,7 +1469,7 @@ bool DebuggerClient::processTakeCode() {
     m_code = string("<?php ") + (m_line.c_str() + 1) + ";";
     return processEval();
   } else if (first == '=') {
-    m_code = string("<?php $_") + m_line + "; " + m_printFunction;
+    m_code = string("<?php $_=(") + m_line.substr(1) + "); " + m_printFunction;
     return processEval();
   } else if (first != '<') {
     // User entered something that did not start with @, =, or <

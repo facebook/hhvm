@@ -140,10 +140,26 @@ struct string_hash {
   size_t hash(const std::string &s) const {
     return operator()(s);
   }
-  bool equal(const std::string &lhs,
-             const std::string &rhs) const {
-    return lhs == rhs;
+};
+
+struct string_case_hash {
+  size_t operator()(const std::string &s) const {
+    return hash_string_i(s.c_str(), s.size());
   }
+  size_t hash(const std::string &s) const {
+    return operator()(s);
+  }
+};
+
+struct string_case_eq {
+  bool operator()(const std::string &lhs,
+             const std::string &rhs) const {
+    return !strcasecmp(lhs.c_str(), rhs.c_str());
+  }
+};
+
+template<class type, class T> struct gnu_case_hash :
+  public __gnu_cxx::hash_map<std::string, type, string_hash> {
 };
 
 struct int64_hash {
@@ -283,12 +299,12 @@ typedef std::vector<StringPairSet> StringPairSetVec;
   typedef std::set<classname ## Ptr> classname ## PtrSet;               \
   typedef std::list<classname ## Ptr> classname ## PtrList;             \
   typedef std::deque<classname ## Ptr> classname ## PtrQueue;           \
-  typedef __gnu_cxx::hash_map<std::string, classname ## Ptr,            \
-    string_hash> StringTo ## classname ## PtrMap;                       \
-  typedef __gnu_cxx::hash_map<std::string, classname ## PtrVec,         \
-    string_hash> StringTo ## classname ## PtrVecMap;                    \
-  typedef __gnu_cxx::hash_map<std::string, classname ## PtrSet,         \
-    string_hash> StringTo ## classname ## PtrSetMap;                    \
+  typedef gnu_case_hash<classname ## Ptr, classname>                    \
+      StringTo ## classname ## PtrMap;                                  \
+  typedef gnu_case_hash<classname ## PtrVec, classname>                 \
+      StringTo ## classname ## PtrVecMap;                               \
+  typedef gnu_case_hash<classname ## PtrSet, classname>                 \
+      StringTo ## classname ## PtrSetMap;                               \
 
 typedef boost::shared_ptr<FILE> FilePtr;
 

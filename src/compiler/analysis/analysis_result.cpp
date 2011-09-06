@@ -234,8 +234,6 @@ ClassScopePtr AnalysisResult::findClass(const std::string &name,
 
 const ClassScopePtrVec &AnalysisResult::findRedeclaredClasses
 (const std::string &name) const {
-  ASSERT(name == Util::toLower(name));
-
   StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.find(name);
   if (iter == m_classDecs.end()) {
     static ClassScopePtrVec empty;
@@ -246,8 +244,6 @@ const ClassScopePtrVec &AnalysisResult::findRedeclaredClasses
 }
 
 ClassScopePtrVec AnalysisResult::findClasses(const std::string &name) const {
-  ASSERT(name == Util::toLower(name));
-
   StringToClassScopePtrMap::const_iterator sysIter =
     m_systemClasses.find(name);
   if (sysIter != m_systemClasses.end()) {
@@ -383,7 +379,6 @@ bool AnalysisResult::declareClass(ClassScopePtr classScope) const {
 }
 
 void AnalysisResult::declareUnknownClass(const std::string &name) {
-  ASSERT(name == Util::toLower(name));
   m_classDecs.operator[](name);
 }
 
@@ -3599,7 +3594,7 @@ void AnalysisResult::outputCPPHashTableClassDeclaredFlagsLookup(
   cg_printf(text1, tableSize, classes.size());
   for (unsigned int i = 0; i < classes.size(); i++) {
     const string &lowerFormatName =
-      CodeGenerator::FormatLabel(string(classes[i].first));
+      CodeGenerator::FormatLabel(Util::toLower(string(classes[i].first)));
     const char *originalName = classes[i].second;
     const string &originalEscapedName =
       CodeGenerator::EscapeLabel(string(originalName));

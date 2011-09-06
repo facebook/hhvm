@@ -21,6 +21,13 @@
 
 #include <util/base.h>
 
+namespace HPHP {
+  class ClassScope;
+  template<class type> struct gnu_case_hash<type, ClassScope> :
+    public __gnu_cxx::hash_map<std::string, type, string_case_hash,
+                               string_case_eq> {};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #endif  // __HPHP_H__

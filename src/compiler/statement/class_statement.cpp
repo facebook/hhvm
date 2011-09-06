@@ -74,12 +74,13 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
   }
 
   vector<string> bases;
-  if (!m_parent.empty()) {
-    bases.push_back(m_parent);
+  if (!m_originalParent.empty()) {
+    bases.push_back(m_originalParent);
   }
-  if (m_base) m_base->getStrings(bases);
+  if (m_base) m_base->getOriginalStrings(bases);
   StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
-  ClassScopePtr classScope(new ClassScope(kindOf, m_originalName, m_parent,
+  ClassScopePtr classScope(new ClassScope(kindOf, m_originalName,
+                                          m_originalParent,
                                           bases, m_docComment,
                                           stmt));
   setBlockScope(classScope);

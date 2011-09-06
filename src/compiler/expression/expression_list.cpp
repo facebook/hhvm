@@ -158,6 +158,13 @@ void ExpressionList::getStrings(std::vector<std::string> &strings) {
   }
 }
 
+void ExpressionList::getOriginalStrings(std::vector<std::string> &strings) {
+  for (unsigned int i = 0; i < m_exps.size(); i++) {
+    ScalarExpressionPtr s = dynamic_pointer_cast<ScalarExpression>(m_exps[i]);
+    strings.push_back(s->getOriginalString());
+  }
+}
+
 bool
 ExpressionList::flattenLiteralStrings(vector<ExpressionPtr> &literals) const {
   for (unsigned i = 0; i < m_exps.size(); i++) {

@@ -61,6 +61,7 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
     m_traitStatus(NOT_FLATTENED) {
 
   m_dynamic = Option::IsDynamicClass(m_name);
+  m_lowerCaseParent = Util::toLower(m_parent);
 
   // dynamic class is also volatile
   m_volatile = Option::AllVolatile || m_dynamic;
@@ -709,7 +710,7 @@ bool ClassScope::needsInvokeParent(AnalysisResultConstPtr ar,
 
 bool ClassScope::derivesDirectlyFrom(const std::string &base) const {
   BOOST_FOREACH(std::string base_i, m_bases) {
-    if (base_i == base) return true;
+    if (strcasecmp(base_i.c_str(), base.c_str()) == 0) return true;
   }
   return false;
 }
@@ -956,7 +957,7 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (baseCls) {
       base = baseCls->getOriginalName();
     } else {
-      base = m_bases[i];
+      base = Util::toLower(m_bases[i]);
     }
     cg_printf("\"%s\", ", CodeGenerator::EscapeLabel(base).c_str());
   }

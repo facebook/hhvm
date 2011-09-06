@@ -121,7 +121,8 @@ public:
   virtual std::string getId() const;
 
   void checkDerivation(AnalysisResultPtr ar, hphp_string_set &seen);
-  const std::string &getParent() const { return m_parent;}
+  const std::string &getParent() const { return m_lowerCaseParent;}
+  const std::string &getOriginalParent() const { return m_parent; }
   std::string getHeaderFilename();
   std::string getForwardHeaderFilename();
 
@@ -518,6 +519,7 @@ private:
 
   KindOf m_kindOf;
   std::string m_parent;
+  std::string m_lowerCaseParent;
   mutable std::vector<std::string> m_bases;
   mutable int m_attribute;
   bool m_dynamic;

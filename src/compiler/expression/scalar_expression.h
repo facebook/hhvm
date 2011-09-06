@@ -57,6 +57,7 @@ public:
 
   int getType() const { return m_type;}
   const std::string &getString() const { return m_value;}
+  const std::string &getOriginalString() const { return m_originalValue; }
   void appendEncapString(const std::string &value);
   bool isLiteralInteger() const;
 

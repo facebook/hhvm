@@ -9085,6 +9085,20 @@ bool TestCodeRun::TestCompilation() {
        "  }"
        "}");
 
+  {
+    WithNoOpt w1(Option::LocalCopyProp);
+    WithNoOpt w2(Option::EliminateDeadCode);
+    MVCR("<?php "
+         "function setAttribute() {"
+         "  if (($v_size = func_num_args()) == 0) {"
+         "    return true;"
+         "  }"
+         "  $v_att_list = &func_get_args();"
+         "  return true;"
+         "}"
+         "setAttribute('a');");
+  }
+
   return true;
 }
 

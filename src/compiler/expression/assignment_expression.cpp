@@ -488,6 +488,9 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
       wrapped = true;
       ref = false;
     } else {
+      if (m_variable->getCPPType()->isExactType()) {
+        ref = false;
+      }
       if ((wrapped = !isUnused())) {
         cg_printf("(");
       }

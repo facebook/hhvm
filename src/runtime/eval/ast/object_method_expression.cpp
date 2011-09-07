@@ -30,6 +30,12 @@ ObjectMethodExpression::ObjectMethodExpression(EXPRESSION_ARGS,
                                                std::vector<ExpressionPtr> param)
   : SimpleFunctionCallExpression(EXPRESSION_PASS, name, param), m_obj(obj) {}
 
+Expression *ObjectMethodExpression::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_obj);
+  SimpleFunctionCallExpression::optimize(env);
+  return NULL;
+}
+
 Variant ObjectMethodExpression::eval(VariableEnvironment &env) const {
   String name(m_name->get(env));
   Variant obj(m_obj->eval(env));

@@ -32,6 +32,12 @@ StaticMethodExpression(EXPRESSION_ARGS, const NamePtr &cname,
   SimpleFunctionCallExpression(EXPRESSION_PASS, name, params), m_cname(cname),
   m_construct(name->get() == "__construct") {}
 
+Expression *StaticMethodExpression::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_name);
+  SimpleFunctionCallExpression::optimize(env);
+  return NULL;
+}
+
 Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
   SET_LINE;
   // Static method expressions can be object method expressions inside

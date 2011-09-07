@@ -29,6 +29,12 @@ NewObjectExpression::NewObjectExpression(EXPRESSION_ARGS, NamePtr name,
                       const std::vector<ExpressionPtr> &params)
   : FunctionCallExpression(EXPRESSION_PASS, params), m_name(name) {}
 
+Expression *NewObjectExpression::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_name);
+  FunctionCallExpression::optimize(env);
+  return NULL;
+}
+
 Variant NewObjectExpression::eval(VariableEnvironment &env) const {
   String name(m_name->get(env));
   Object o(create_object_only(name));

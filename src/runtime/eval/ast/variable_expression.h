@@ -54,11 +54,6 @@ public:
     ASSERT(exp->isKindOf(KindOfVariableExpression));
     return static_cast<VariableExpression *>(exp)->getRef(env);
   }
-protected:
-  NamePtr m_name;
-  int m_idx;
-  void raiseUndefined(VariableEnvironment &env) const;
-  Variant &getRefHelper(VariableEnvironment &env) const;
   Variant &getRef(VariableEnvironment &env) const {
     Variant *var = NULL;
     if (m_idx != -1 && (var = env.getIdx(m_idx))) return *var;
@@ -71,6 +66,11 @@ protected:
     if (!var.isInitialized()) raiseUndefined(env);
     return var;
   }
+protected:
+  NamePtr m_name;
+  int m_idx;
+  void raiseUndefined(VariableEnvironment &env) const;
+  Variant &getRefHelper(VariableEnvironment &env) const;
 };
 
 class ThisVariableExpression : public VariableExpression {

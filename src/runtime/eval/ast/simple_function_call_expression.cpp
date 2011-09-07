@@ -47,6 +47,12 @@ SimpleFunctionCallExpression::SimpleFunctionCallExpression
   }
 }
 
+Expression *SimpleFunctionCallExpression::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_name);
+  FunctionCallExpression::optimize(env);
+  return NULL;
+}
+
 Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   SET_LINE;
   bool hasRenamed = *s_hasRenamedFunction;

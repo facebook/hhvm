@@ -47,6 +47,7 @@ public:
   static NamePtr LateStatic(CONSTRUCT_ARGS);
   void setOriginalText(const std::string &text) { m_originalText = text;}
   const std::string &getOriginalText() const { return m_originalText;}
+  virtual Name *optimize(VariableEnvironment &env) { return NULL; }
 
 private:
   std::string m_originalText;
@@ -79,8 +80,9 @@ public:
   virtual String get() const { return Name::get(); }
   virtual void dump(std::ostream &out) const;
 
-  ExpressionPtr getExp();
+  Expression *getExp() { return m_name.get(); }
   void setExp(ExpressionPtr name);
+  virtual Name *optimize(VariableEnvironment &env);
 
 protected:
   ExpressionPtr m_name;
@@ -101,6 +103,7 @@ public:
   virtual void dump(std::ostream &out) const;
 };
 
+void optimize(VariableEnvironment &env, NamePtr &before);
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

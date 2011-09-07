@@ -32,6 +32,7 @@ public:
   LvalExpression(KindOf kindOf, const Location *loc) :
     Expression(kindOf, loc) {}
   virtual Variant eval(VariableEnvironment &env) const { return lval(env); }
+  virtual Expression *optimize(VariableEnvironment &env) { return NULL; }
   virtual Variant &lval(VariableEnvironment &env) const = 0;
   virtual bool weakLval(VariableEnvironment &env, Variant* &v) const;
   virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
@@ -42,6 +43,8 @@ public:
   virtual void unset(VariableEnvironment &env) const;
   virtual const LvalExpression *toLval() const;
 };
+
+void optimize(VariableEnvironment &env, LvalExpressionPtr &exp);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

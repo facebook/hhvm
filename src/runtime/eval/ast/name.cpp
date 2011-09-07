@@ -106,12 +106,13 @@ void ExprName::dump(std::ostream &out) const {
   }
 }
 
-ExpressionPtr ExprName::getExp() {
-  return m_name;
-}
-
 void ExprName::setExp(ExpressionPtr name) {
   m_name = name;
+}
+
+Name *ExprName::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_name);
+  return NULL;
 }
 
 StaticClassExprName::StaticClassExprName(CONSTRUCT_ARGS, ExpressionPtr name)
@@ -130,6 +131,20 @@ String LateStaticName::get(VariableEnvironment &env) const {
 
 void LateStaticName::dump(std::ostream &out) const {
   out << "static";
+}
+
+void optimize(VariableEnvironment &env, NamePtr &before) {
+  if (before) {
+    Name *optName = before->optimize(env);
+    if (optName) {
+      NamePtr after = dynamic_cast<Name*>(optName);
+      if (after) {
+        before = after;
+      } else {
+        assert(false);
+      }
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

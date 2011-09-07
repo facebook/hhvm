@@ -24,6 +24,7 @@ namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_AST_PTR(ObjectPropertyExpression);
+DECLARE_AST_PTR(VariableExpression);
 DECLARE_AST_PTR(Name);
 
 class ObjectPropertyExpression : public LvalExpression {
@@ -46,6 +47,44 @@ private:
   ExpressionPtr m_obj;
   NamePtr m_name;
   bool m_reverseOrder;
+};
+
+class ThisStringPropertyExpression : public LvalExpression {
+public:
+  ThisStringPropertyExpression(CStrRef name, const Location *loc);
+  virtual Variant eval(VariableEnvironment &env) const;
+  virtual Variant evalExist(VariableEnvironment &env) const;
+  virtual Variant &lval(VariableEnvironment &env) const;
+  virtual bool weakLval(VariableEnvironment &env, Variant* &v) const;
+  virtual Variant set(VariableEnvironment &env, CVarRef val) const;
+  virtual Variant setRef(VariableEnvironment &env, CVarRef val) const;
+  virtual bool exist(VariableEnvironment &env, int op) const;
+  virtual void unset(VariableEnvironment &env) const;
+  virtual Variant setOp(VariableEnvironment &env, int op, CVarRef rhs) const;
+  String getProperty() const;
+  virtual void dump(std::ostream &out) const;
+private:
+  String m_name;
+};
+
+class VariableStringPropertyExpression : public LvalExpression {
+public:
+  VariableStringPropertyExpression(VariableExpressionPtr obj,
+    CStrRef name, const Location *loc);
+  virtual Variant eval(VariableEnvironment &env) const;
+  virtual Variant evalExist(VariableEnvironment &env) const;
+  virtual Variant &lval(VariableEnvironment &env) const;
+  virtual bool weakLval(VariableEnvironment &env, Variant* &v) const;
+  virtual Variant set(VariableEnvironment &env, CVarRef val) const;
+  virtual Variant setRef(VariableEnvironment &env, CVarRef val) const;
+  virtual bool exist(VariableEnvironment &env, int op) const;
+  virtual void unset(VariableEnvironment &env) const;
+  virtual Variant setOp(VariableEnvironment &env, int op, CVarRef rhs) const;
+  String getProperty() const;
+  virtual void dump(std::ostream &out) const;
+private:
+  VariableExpressionPtr m_obj;
+  String m_name;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

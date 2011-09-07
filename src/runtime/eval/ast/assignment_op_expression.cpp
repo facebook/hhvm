@@ -31,6 +31,7 @@ AssignmentOpExpression::AssignmentOpExpression(EXPRESSION_ARGS, int op,
   m_op(op), m_lhs(lhs), m_rhs(rhs) {}
 
 Expression *AssignmentOpExpression::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_lhs);
   Eval::optimize(env, m_rhs);
   return NULL;
 }

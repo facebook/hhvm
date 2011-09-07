@@ -52,6 +52,8 @@ public:
     KindOfIssetExpression,
     KindOfListAssignmentExpression,
     KindOfObjectPropertyExpression,
+    KindOfThisStringPropertyExpression,
+    KindOfVariableStringPropertyExpression,
     KindOfQOpExpression,
     KindOfRefParamExpression,
     KindOfScalarExpression,

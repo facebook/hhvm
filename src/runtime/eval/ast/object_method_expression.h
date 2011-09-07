@@ -31,6 +31,7 @@ public:
  ObjectMethodExpression(EXPRESSION_ARGS, ExpressionPtr obj, NamePtr name,
                         std::vector<ExpressionPtr> params);
   virtual Variant eval(VariableEnvironment &env) const;
+  virtual Expression *optimize(VariableEnvironment &env);
   virtual void dump(std::ostream &out) const;
 private:
   ExpressionPtr m_obj;

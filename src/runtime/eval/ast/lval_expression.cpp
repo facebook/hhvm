@@ -87,6 +87,20 @@ const LvalExpression *LvalExpression::toLval() const {
   return this;
 }
 
+void optimize(VariableEnvironment &env, LvalExpressionPtr &before) {
+  if (before) {
+    Expression *optLvalExp = before->optimize(env);
+    if (optLvalExp) {
+      LvalExpressionPtr after = dynamic_cast<LvalExpression *>(optLvalExp);
+      if (after) {
+        before = after;
+      } else {
+        assert(false);
+      }
+    }
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

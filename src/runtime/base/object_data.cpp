@@ -979,7 +979,7 @@ void ObjectData::o_getArray(Array &props, bool pubOnly /* = false */) const {
     for (ArrayIter it(o_properties); !it.end(); it.next()) {
       Variant key = it.first();
       CVarRef value = it.secondRef();
-      props.addLval(key, true).setWithRef(value);
+      props.lvalAt(key, AccessFlags::Key).setWithRef(value);
     }
   }
 }

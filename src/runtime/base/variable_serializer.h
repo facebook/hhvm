@@ -59,6 +59,9 @@ public:
    * Top level entry function called by f_ functions.
    */
   String serialize(CVarRef v, bool ret);
+  // Serialize with limit size of output, always return the serialized string.
+  // It does not work with Serialize, JSON, APCSerialize, DebuggerSerialize.
+  String serializeWithLimit(CVarRef v, int limit);
 
   /**
    * Type specialized output functions.
@@ -114,7 +117,6 @@ private:
   int m_objId;                   // for object serialization
   int m_rsrcId;                  // for resource serialization
   int m_maxCount;                // for max recursive levels
-  int64 m_outputLimit;           // Maximum size of output
   int m_levelDebugger;           // keep track of levels for DebuggerSerialize
   int m_maxLevelDebugger;        // for max level of DebuggerSerialize
 

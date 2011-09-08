@@ -286,7 +286,7 @@ String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */) {
     }
   } else {
     VariableSerializer vs(VariableSerializer::DebuggerDump, 0, 2);
-    value = vs.serialize(v, true);
+    value = vs.serializeWithLimit(v, maxlen);
   }
 
   if (maxlen <= 0 || value.length() - maxlen < 30) {
@@ -294,11 +294,8 @@ String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */) {
   }
 
   StringBuffer sb;
-  sb.append(value.substr(0, maxlen / 2));
-  sb.append(" ...(omitted ");
-  sb.append(value.size() - maxlen);
-  sb.append(" chars)... ");
-  sb.append(value.substr(value.size() - maxlen / 2));
+  sb.append(value.substr(0, maxlen));
+  sb.append(" ...(omitted)");
   return sb.detach();
 }
 

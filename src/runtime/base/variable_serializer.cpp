@@ -78,6 +78,28 @@ String VariableSerializer::serialize(CVarRef v, bool ret) {
   return null_string;
 }
 
+String VariableSerializer::serializeWithLimit(CVarRef v, int limit) {
+  if (m_type == Serialize || m_type == JSON || m_type == APCSerialize ||
+      m_type == DebuggerSerialize) {
+    ASSERT(false);
+    return null_string;
+  }
+  StringBuffer buf;
+  m_buf = &buf;
+  if (RuntimeOption::SerializationSizeLimit > 0 &&
+      (limit <= 0 || limit > RuntimeOption::SerializationSizeLimit)) {
+    limit = RuntimeOption::SerializationSizeLimit;
+  }
+  buf.setOutputLimit(limit);
+  //Does not need m_valueCount, which is only useful with the unsupported types
+  try {
+    write(v);
+  } catch (StringBufferLimitException &e) {
+    return e.m_result;
+  }
+  return m_buf->detach();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void VariableSerializer::write(bool v) {

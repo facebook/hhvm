@@ -2205,9 +2205,8 @@ void ClassScope::outputCPPGetClassPropTableImpl(
             if (!sym->isStatic()) {
               prop = '\0' + cls->getOriginalName() + '\0' + prop;
             }
-          }
-          if (sym->isOverride() ||
-              (!sym->isStatic() && cls->derivesFromRedeclaring())) {
+          } else if (sym->isOverride() ||
+                     (!sym->isStatic() && cls->derivesFromRedeclaring())) {
             ASSERT(!system);
             flags |= ClassPropTableEntry::Override;
           }

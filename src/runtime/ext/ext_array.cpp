@@ -119,7 +119,8 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
   MethodCallPackage mcp;
   String classname, methodname;
   bool doBind;
-  if (!get_user_func_handler(callback, mcp, classname, methodname, doBind)) {
+  if (!get_user_func_handler(callback, true,
+                             mcp, classname, methodname, doBind)) {
     return null;
   }
   if (doBind) {
@@ -197,7 +198,8 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
   String classname, methodname;
   bool doBind;
   if (callback.isNull() ||
-      !get_user_func_handler(callback, mcp, classname, methodname, doBind)) {
+      !get_user_func_handler(callback, true,
+                             mcp, classname, methodname, doBind)) {
     return ArrayUtil::Map(inputs, map_func, NULL);
   }
   if (doBind) {
@@ -413,7 +415,8 @@ Variant f_array_reduce(CVarRef input, CVarRef callback,
   MethodCallPackage mcp;
   String classname, methodname;
   bool doBind;
-  if (!get_user_func_handler(callback, mcp, classname, methodname, doBind)) {
+  if (!get_user_func_handler(callback, true,
+                             mcp, classname, methodname, doBind)) {
     return null;
   }
   if (doBind) {
@@ -547,7 +550,8 @@ bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
   MethodCallPackage mcp;
   String classname, methodname;
   bool doBind;
-  if (!get_user_func_handler(funcname, mcp, classname, methodname, doBind)) {
+  if (!get_user_func_handler(funcname, true,
+                             mcp, classname, methodname, doBind)) {
     return null;
   }
   PointerSet seen;
@@ -571,7 +575,8 @@ bool f_array_walk(VRefParam input, CVarRef funcname,
   MethodCallPackage mcp;
   String classname, methodname;
   bool doBind;
-  if (!get_user_func_handler(funcname, mcp, classname, methodname, doBind)) {
+  if (!get_user_func_handler(funcname, true,
+                             mcp, classname, methodname, doBind)) {
     return null;
   }
   if (doBind) {

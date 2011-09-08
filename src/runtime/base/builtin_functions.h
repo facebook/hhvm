@@ -335,7 +335,8 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
  * The MethodCallPackage does not hold the reference of the class name or
  * the method name. Therefore caller must provide the holders.
  */
-bool get_user_func_handler(CVarRef function, MethodCallPackage& mcp,
+bool get_user_func_handler(CVarRef function, bool skip,
+                           MethodCallPackage& mcp,
                            String &classname, String &methodname,
                            bool &doBind);
 
@@ -605,11 +606,11 @@ public:
     m_fatal(true), m_isFunc(false) {}
 
   // e->n() style method call
-  void methodCall(CObjRef self, CStrRef method, int64 prehash = -1) {
-    methodCall(self.objectForCall(), method, prehash);
+  bool methodCall(CObjRef self, CStrRef method, int64 prehash = -1) {
+    return methodCall(self.objectForCall(), method, prehash);
   }
-  void methodCall(ObjectData *self, CStrRef method, int64 prehash = -1);
-  void methodCall(CVarRef self, CStrRef method, int64 prehash = -1);
+  bool methodCall(ObjectData *self, CStrRef method, int64 prehash = -1);
+  bool methodCall(CVarRef self, CStrRef method, int64 prehash = -1);
   // K::n() style call, where K is a parent and n is not static and in an
   // instance method. Lookup is done outside since K is known.
   void methodCallEx(CObjRef self, CStrRef method) {
@@ -628,12 +629,13 @@ public:
     name = &method;
   }
   // e::n() call. e could evaluate to be either a string or object.
-  void dynamicNamedCall(CVarRef self, CStrRef method, int64 prehash = -1);
+  bool dynamicNamedCall(CVarRef self, CStrRef method, int64 prehash = -1);
   // e::n() call where e is definitely a string
-  void dynamicNamedCall(CStrRef self, CStrRef method, int64 prehash = -1);
+  bool dynamicNamedCall(CStrRef self, CStrRef method, int64 prehash = -1);
   // function call
   void functionNamedCall(CVarRef func);
   void functionNamedCall(CStrRef func);
+  void functionNamedCall(ObjectData *func);
   // Get constructor
   void construct(CObjRef self);
 
@@ -839,15 +841,6 @@ public:
     return (MethInvoker10Args)m_invokerFewArgs;
   }
 };
-
-Variant call_user_func_array_helper(int kind,
-                                    CVarRef classname,
-                                    CVarRef methodname,
-                                    CStrRef cls,
-                                    CStrRef method,
-                                    CStrRef sclass,
-                                    ObjectData *obj,
-                                    CArrRef params);
 
 #define CALL_USER_FUNC_FEW_ARGS_COUNT 6
 #if CALL_USER_FUNC_FEW_ARGS_COUNT == 6

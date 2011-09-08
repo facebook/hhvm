@@ -354,27 +354,30 @@ CStrRef FrameInjection::getClassName() const {
   return empty_string;
 }
 
-ObjectData *FrameInjection::getObjectV() const {
-  // Must check first: an EvalFrame can also be
-  // an ObjectMethodFrame (but its still implemented
-  // using EvalFrameInjection).
-  if (UNLIKELY(isEvalFrame())) {
-    const Eval::EvalFrameInjection* efi =
-      static_cast<const Eval::EvalFrameInjection*>(this);
-    return efi->getThis();
-  }
+ObjectData *FrameInjection::GetObjectV(
+  const FrameInjection *fi) {
+  do {
+    // Must check first: an EvalFrame can also be
+    // an ObjectMethodFrame (but its still implemented
+    // using EvalFrameInjection).
+    if (UNLIKELY(fi->isEvalFrame())) {
+      const Eval::EvalFrameInjection* efi =
+        static_cast<const Eval::EvalFrameInjection*>(fi);
+      return efi->getThis();
+    }
 
-  if (LIKELY(isObjectMethodFrame())) {
-    const FrameInjectionObjectMethod* ofi =
-      static_cast<const FrameInjectionObjectMethod*>(this);
-    return ofi->getThis();
-  }
+    if (LIKELY(fi->isObjectMethodFrame())) {
+      const FrameInjectionObjectMethod* ofi =
+        static_cast<const FrameInjectionObjectMethod*>(fi);
+      return ofi->getThis();
+    }
 
-  if (m_flags & PseudoMain) {
-    const FrameInjectionFunction *ffi =
-      static_cast<const FrameInjectionFunction*>(this);
-    return ffi->getThis();
-  }
+    if (!(fi->m_flags & (PseudoMain | BuiltinFunction)) || !fi->m_prev) {
+      return NULL;
+    }
+
+    fi = fi->m_prev;
+  } while (true);
   return NULL;
 }
 

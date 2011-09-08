@@ -39,6 +39,7 @@ public:
     ParserFrame     =  1 << 7
  };
 
+  static ObjectData *GetObjectV(const FrameInjection *fi);
   static CStrRef GetClassName(bool skip = false);
   static CStrRef GetParentClassName(bool skip = false);
   static ObjectData *GetThis(bool skip = false);
@@ -120,7 +121,9 @@ public:
    * Simple accessors
    */
   CStrRef getClassName() const;
-  ObjectData *getObjectV() const;
+  ObjectData *getObjectV() const {
+    return GetObjectV(this);
+  }
   const char *getFunction() const { return m_name;}
   FrameInjection *getPrev() const { return m_prev;}
   int getFlags() const { return m_flags;}

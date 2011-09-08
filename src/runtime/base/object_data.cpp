@@ -118,6 +118,25 @@ CStrRef ObjectData::o_getClassName() const {
   return *osc->cls;
 }
 
+CStrRef ObjectData::o_getParentName() const {
+  const ObjectStaticCallbacks *osc = o_get_callbacks();
+  if (UNLIKELY(!osc)) {
+    return GetParentName(o_getClassNameHook());
+  }
+  return osc->parent ? *osc->parent->cls : empty_string;
+}
+
+CStrRef ObjectData::GetParentName(CStrRef cls) {
+  const ClassInfo *classInfo = ClassInfo::FindClass(cls);
+  if (classInfo) {
+    CStrRef parentClass = classInfo->getParentClass();
+    if (!parentClass.isNull()) {
+      return parentClass;
+    }
+  }
+  return empty_string;
+}
+
 const ClassPropTable *ObjectData::o_getClassPropTable() const {
   const ObjectStaticCallbacks *osc = o_get_callbacks();
   if (UNLIKELY(!osc)) {
@@ -560,7 +579,6 @@ inline ALWAYS_INLINE bool GetCallInfoHelper(bool ex, const char *cls,
     bool ok = false;
     if (!obj || !obj->o_instanceof(cls)) {
       obj = create_object_only_no_init(cls);
-      obj->setDummy();
       ok = obj->hasCallStatic();
       obj->release();
       obj = 0;

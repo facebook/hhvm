@@ -1148,6 +1148,11 @@ class Variant {
     return *(Array*)acc;
   }
 
+  static String &GetAsString(TypedValueAccessor acc) {
+    ASSERT(IsString(acc));
+    return *(String*)acc;
+  }
+
   static void RuntimeCheck();
 
   /**

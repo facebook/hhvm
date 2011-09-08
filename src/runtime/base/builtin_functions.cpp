@@ -78,259 +78,227 @@ String getUndefinedConstant(CStrRef name) {
   return name;
 }
 
-enum CallUserFuncKind {
-  CallUserFuncError = -1,
-  CallUserFuncCommon = 0, // don't change these two values
-  CallUserFuncObjStatic,
-  CallUserFuncObj,
-  CallUserFuncWithinCls,
-  CallUserFuncUnbound,
-};
-
-static CallUserFuncKind getClassMethodInfo(
-  CVarRef function,
-  Variant &classname,
-  Variant &methodname,
-  String &cls,
-  String &method,
-  String &sclass,
-  ObjectData *&obj,
-  bool skip,
-  bool bound = false) {
-  Array arr = function.toArray();
-  if (!(arr.size() == 2 && arr.exists(0LL) && arr.exists(1LL))) {
-    throw_invalid_argument("function: not a valid callback array");
-    return CallUserFuncError;
-  }
-  classname = arr.rvalAt(0LL);
-  methodname = arr.rvalAt(1LL);
-  if (!methodname.isString()) {
-    throw_invalid_argument("function: methodname not string");
-    return CallUserFuncError;
-  }
-
-  method = methodname.toString();
-  if (classname.is(KindOfObject)) {
-    int c = method.find("::");
-    if (c != 0 && c != String::npos && c + 2 < method.size()) {
-      cls = method.substr(0, c);
-      if (cls->same(s_self.get())) {
-        cls = FrameInjection::GetClassName(skip);
-      } else if (cls->same(s_parent.get())) {
-        cls = FrameInjection::GetParentClassName(skip);
-      }
-      method = method.substr(c + 2);
-      return CallUserFuncObjStatic;
-    }
-    obj = classname.getObjectData();
-    sclass = bound ? FrameInjection::GetClassName(skip) : obj->o_getClassName();
-    return CallUserFuncObj;
-  }
-  if (!classname.isString()) {
-    throw_invalid_argument("function: classname not string");
-    return CallUserFuncError;
-  }
-  sclass = classname.toString();
-  if (sclass->same(s_self.get())) {
-    sclass = FrameInjection::GetClassName(skip);
-  } else if (sclass->same(s_parent.get())) {
-    sclass = FrameInjection::GetParentClassName(skip);
-  }
-  obj = FrameInjection::GetThis(skip);
-  if (obj && obj->o_instanceof(sclass)) {
-    return CallUserFuncWithinCls;
-  }
-  if (!bound) {
-    return CallUserFuncUnbound;
-  }
-  return CallUserFuncCommon;
-}
-
-Variant call_user_func_array_helper(int kind,
-                                    CVarRef classname,
-                                    CVarRef methodname,
-                                    CStrRef cls,
-                                    CStrRef method,
-                                    CStrRef sclass,
-                                    ObjectData *obj,
-                                    CArrRef params) {
-  switch (kind) {
-  case CallUserFuncCommon:
-    return invoke_static_method(sclass, method, params, false);
-  case CallUserFuncObjStatic:
-    return classname.getObjectData()->o_invoke_ex(cls, method, params, false);
-  case CallUserFuncObj: {
-    FrameInjection::StaticClassNameHelper scn(
-      ThreadInfo::s_threadInfo.getNoCheck(), sclass);
-    return obj->o_invoke(method, params, -1, false);
-  }
-  case CallUserFuncWithinCls:
-    return obj->o_invoke_ex(sclass, method, params, false);
-  case CallUserFuncUnbound:
-    return invoke_static_method_bind(sclass, method, params, false);
-  case CallUserFuncError:
-    return null;
-  default:
-    ASSERT(false);
-    return null;
-  }
-}
-
-Variant f_call_user_func_array(CVarRef function, CArrRef params,
-                               bool bound /* = false */) {
-  if (function.is(KindOfArray)) {
-    Variant classname;
-    Variant methodname;
-    String cls;
-    String method;
-    String sclass;
-    ObjectData *obj;
-    int kind = getClassMethodInfo(function, classname, methodname,
-                                  cls, method, sclass, obj, true, bound);
-    return call_user_func_array_helper(kind,
-                                       classname,
-                                       methodname,
-                                       cls,
-                                       method,
-                                       sclass,
-                                       obj,
-                                       params);
-  } else if (function.isString()) {
-    String sfunction = function.toString();
-    int c = sfunction.find("::");
-    if (c != 0 && c != String::npos && c + 2 < sfunction.size()) {
-      if (!bound) {
-        return invoke_static_method_bind(sfunction.substr(0, c),
-                                         sfunction.substr(c + 2), params,
-                                         false);
-      }
-      return invoke_static_method(sfunction.substr(0, c),
-                                  sfunction.substr(c + 2), params,
-                                  false);
-    }
-    return invoke(sfunction, params, -1, true, false);
-  } else if (function.isObject()) {
-    return invoke(function, params, true, false);
-  }
-
-  throw_invalid_argument("function: not string or array");
-  return null;
-}
-
-// get_user_func_handler takes a Variant 'function', decodes it into
-// 'classname' and 'methodname', and sets up MethodCallPackage 'mcp'
-// appropriately for the given function. It also sets 'doBind' to
-// indicate whether the caller needs to set the late bound class.
-bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp,
+/* get_user_func_handler takes a Variant 'function', and sets
+ * up MethodCallPackage 'mcp' appropriately for the given function.
+ * It also sets 'doBind' to indicate whether the caller needs to
+ * set the late bound class.
+ * Note that classname and methodname are needed even though they
+ * dont really pass any information back; the mcp can end up with
+ * references to them, which need to survive until the mcp is used
+ * (after this function returns).
+ */
+bool get_user_func_handler(CVarRef function, bool skip,
+                           MethodCallPackage &mcp,
                            String &classname, String &methodname,
                            bool &doBind) {
   doBind = false;
   mcp.noFatal();
 
-  if (function.isObject()) {
-    mcp.functionNamedCall(function);
-    if (mcp.ci) return true;
+  Variant::TypedValueAccessor tv_func = function.getTypedAccessor();
+  if (Variant::GetAccessorType(tv_func) == KindOfObject) {
+    mcp.functionNamedCall(Variant::GetObjectData(tv_func));
+    if (LIKELY(mcp.ci != 0)) return true;
     raise_warning("call_user_func to non-callback object");
     return false;
   }
 
-  if (function.isString()) {
-    String sfunction = function.toString();
-    int c = sfunction.find("::");
-    if (c != 0 && c != String::npos && c + 2 < sfunction.size()) {
-      classname = sfunction.substr(0, c);
-      methodname = sfunction.substr(c + 2);
-      if (classname->same(s_self.get())) {
-        classname = FrameInjection::GetClassName(true);
-      } else if (classname->same(s_parent.get())) {
-        classname = FrameInjection::GetParentClassName(true);
+  if (Variant::IsString(tv_func)) {
+    StringData *sfunc = Variant::GetStringData(tv_func);
+    const char *base = sfunc->data();
+    const char *cc = strstr(base, "::");
+    if (cc && cc != base && cc[2]) {
+      methodname = String(cc + 2, sfunc->size() - (cc - base) - 2, CopyString);
+      if (cc - base == 4 && !strncasecmp(base, "self", 4)) {
+        if (LIKELY(mcp.dynamicNamedCall(FrameInjection::GetClassName(skip),
+                                        methodname))) {
+          return true;
+        }
+      } else if (cc - base == 6 &&
+                 !strncasecmp(base, "parent", 6)) {
+        CStrRef cls = FrameInjection::GetParentClassName(skip);
+        if (cls.empty()) {
+          raise_warning("cannot access parent:: when current "
+                        "class scope has no parent");
+          return false;
+        }
+        if (LIKELY(mcp.dynamicNamedCall(cls, methodname))) return true;
+      } else if (cc - base == 6 &&
+                 !strncasecmp(base, "static", 6)) {
+        ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+        if (LIKELY(mcp.dynamicNamedCall(FrameInjection::GetStaticClassName(ti),
+                                        methodname))) {
+          return true;
+        }
       } else {
-        if (classname->same(s_static.get())) {
+        classname = String(base, cc - base, CopyString);
+        if (LIKELY(mcp.dynamicNamedCall(classname, methodname))) {
+          doBind = !mcp.isObj || (mcp.ci->m_flags & CallInfo::StaticMethod);
+          return true;
+        }
+      }
+      raise_warning("call_user_func to non-existent function %s", base);
+      return false;
+    }
+    mcp.functionNamedCall(Variant::GetAsString(tv_func));
+    if (LIKELY(mcp.ci != 0)) return true;
+    raise_warning("call_user_func to non-existent function %s", base);
+    return false;
+  }
+
+  if (LIKELY(Variant::GetAccessorType(tv_func) == KindOfArray)) {
+    CArrRef arr = Variant::GetAsArray(tv_func);
+    CVarRef clsname = arr.rvalAtRef(0LL);
+    CVarRef mthname = arr.rvalAtRef(1LL);
+    if (arr.size() != 2 ||
+        &clsname == &null_variant ||
+        &mthname == &null_variant) {
+      throw_invalid_argument("function: not a valid callback array");
+      return false;
+    }
+
+    Variant::TypedValueAccessor tv_meth = mthname.getTypedAccessor();
+    if (!Variant::IsString(tv_meth)) {
+      throw_invalid_argument("function: methodname not string");
+      return false;
+    }
+
+    Variant::TypedValueAccessor tv_cls = clsname.getTypedAccessor();
+
+    if (Variant::GetAccessorType(tv_cls) == KindOfObject) {
+      ObjectData *obj = Variant::GetObjectData(tv_cls);
+
+      StringData *smeth = Variant::GetStringData(tv_meth);
+      const char *base = smeth->data();
+      const char *cc = strstr(base, "::");
+      if (UNLIKELY(cc && cc != base && cc[2])) {
+        methodname = String(cc + 2, smeth->size() - (cc - base) - 2,
+                            CopyString);
+        mcp.methodCallEx(obj, methodname);
+
+        if (cc - base == 4 && !strncasecmp(base, "self", 4)) {
+          classname = obj->o_getClassName();
+        } else if (cc - base == 6 &&
+                   !strncasecmp(base, "parent", 6)) {
+          classname = obj->o_getParentName();
+          if (classname.empty()) {
+            raise_warning("cannot access parent:: when current "
+                          "class scope has no parent");
+            return false;
+          }
+        } else if (cc - base == 6 &&
+                   !strncasecmp(base, "static", 6)) {
           ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
           classname = FrameInjection::GetStaticClassName(ti);
         } else {
           doBind = true;
+          classname = String(base, cc - base, CopyString);
         }
-      }
-      mcp.dynamicNamedCall(classname, methodname);
-      if (mcp.ci) return true;
-      raise_warning("call_user_func to non-existent function %s",
-                    sfunction.data());
-      return false;
-    }
-    methodname = sfunction;
-    mcp.functionNamedCall(methodname);
-    if (mcp.ci) return true;
-    raise_warning("call_user_func to non-existent function %s",
-                  sfunction.data());
-    return false;
-  } else if (function.is(KindOfArray)) {
-    Array arr = function.toArray();
-    if (!(arr.size() == 2 && arr.exists(0LL) && arr.exists(1LL))) {
-      throw_invalid_argument("function: not a valid callback array");
-      return false;
-    }
-    Variant clsname = arr.rvalAt(0LL);
-    Variant mthname = arr.rvalAt(1LL);
-    if (!mthname.isString()) {
-      throw_invalid_argument("function: methodname not string");
-      return false;
-    }
-    String method = mthname.toString();
-    if (clsname.is(KindOfObject)) {
-      Object obj = clsname.toObject();
-      int c = method.find("::");
-      if (c != 0 && c != String::npos && c + 2 < method.size()) {
-        String cls = method.substr(0, c);
-        if (cls->same(s_self.get())) {
-          cls = FrameInjection::GetClassName(true);
-        } else if (cls->same(s_parent.get())) {
-          cls = FrameInjection::GetParentClassName(true);
-        }
-        methodname = method.substr(c + 2);
-        mcp.methodCallEx(obj, methodname);
-        if (obj->o_get_call_info_ex(cls, mcp)) {
+        if (LIKELY(obj->o_get_call_info_ex(classname, mcp))) {
+          if (!(mcp.ci->m_flags & CallInfo::StaticMethod)) {
+            doBind = false;
+          }
           return true;
+        }
+        if (!obj->o_instanceof(classname)) {
+          raise_warning("class '%s' is not a subclass of '%s'",
+                        obj->o_getClassName().data(), classname.data());
+        } else {
+          raise_warning("class '%s' does not have a method '%s'",
+                        classname.data(), methodname.data());
         }
         return false;
       }
-      methodname = method;
-      mcp.methodCall(obj, methodname);
-      if (mcp.ci) return true;
+
+      methodname = smeth;
+      if (LIKELY(mcp.methodCall(obj, methodname))) {
+        if (mcp.ci->m_flags & CallInfo::StaticMethod) {
+          doBind = true;
+          classname = obj->o_getClassName();
+        }
+        return true;
+      }
       return false;
     } else {
-      if (!clsname.isString()) {
+      if (UNLIKELY(!Variant::IsString(tv_cls))) {
         throw_invalid_argument("function: classname not string");
         return false;
       }
-      String sclass = clsname.toString();
-      if (sclass->same(s_self.get())) {
-        sclass = FrameInjection::GetClassName(true);
-      } else if (sclass->same(s_parent.get())) {
-        sclass = FrameInjection::GetParentClassName(true);
+      StringData *sclass = Variant::GetStringData(tv_cls);
+      if (sclass->isame(s_self.get())) {
+        classname = FrameInjection::GetClassName(skip);
+      } else if (sclass->isame(s_parent.get())) {
+        classname = FrameInjection::GetParentClassName(skip);
+        if (classname.empty()) {
+          raise_warning("cannot access parent:: when current "
+                        "class scope has no parent");
+          return false;
+        }
       } else {
-        if (sclass->same(s_static.get())) {
+        if (sclass->isame(s_static.get())) {
           ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-          sclass = FrameInjection::GetStaticClassName(ti);
+          classname = FrameInjection::GetStaticClassName(ti);
         } else {
+          classname = sclass;
           doBind = true;
         }
       }
-      ObjectData *obj = FrameInjection::GetThis(true);
-      if (obj && obj->o_instanceof(sclass)) {
-        methodname = method;
-        mcp.methodCallEx(obj, methodname);
-        if (obj->o_get_call_info_ex(sclass, mcp)) {
-          return true;
-        }
-        return false;
+
+      StringData *smeth = Variant::GetStringData(tv_meth);
+      methodname = smeth;
+      if (LIKELY(mcp.dynamicNamedCall(classname, methodname))) {
+        doBind &= !mcp.isObj || (mcp.ci->m_flags & CallInfo::StaticMethod);
+        return true;
       }
-      classname = sclass;
-      methodname = method;
-      mcp.dynamicNamedCall(classname, methodname);
-      if (mcp.ci) return true;
+
+      const char *base = smeth->data();
+      const char *cc = strstr(base, "::");
+      if (UNLIKELY(cc && cc != base && cc[2])) {
+        methodname = String(cc + 2, smeth->size() - (cc - base) - 2,
+                            CopyString);
+        if (cc - base == 4 && !strncasecmp(base, "self", 4)) {
+          doBind = false;
+        } else if (cc - base == 6 &&
+                   !strncasecmp(base, "parent", 6)) {
+          classname = ObjectData::GetParentName(classname);
+          if (classname.empty()) {
+            raise_warning("cannot access parent:: when current "
+                          "class scope has no parent");
+            return false;
+          }
+          doBind = false;
+        } else if (cc - base == 6 &&
+                   !strncasecmp(base, "static", 6)) {
+          ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+          CStrRef cls = FrameInjection::GetStaticClassName(ti);
+          if (UNLIKELY(!classname.get()->isame(cls.get()) &&
+                       !f_is_subclass_of(classname, cls))) {
+            raise_warning("class '%s' is not a subclass of '%s'",
+                          classname.data(), cls.data());
+            return false;
+          }
+          doBind = false;
+          classname = cls;
+        } else {
+          CStrRef cls = String(base, cc - base, CopyString);
+          if (UNLIKELY(!classname.get()->isame(cls.get()) &&
+                       !f_is_subclass_of(classname, cls))) {
+            raise_warning("class '%s' is not a subclass of '%s'",
+                          classname.data(), cls.data());
+            return false;
+          }
+          doBind = true;
+          classname = cls;
+        }
+      } else {
+        methodname = Variant::GetStringData(tv_meth);
+      }
+
+      if (LIKELY(mcp.dynamicNamedCall(classname, methodname))) {
+        doBind &= !mcp.isObj || (mcp.ci->m_flags & CallInfo::StaticMethod);
+        return true;
+      }
       raise_warning("call_user_func to non-existent function %s::%s",
-                    sclass.data(), method.data());
+                    classname.data(), methodname.data());
       return false;
     }
     raise_warning("call_user_func to non-existent function");
@@ -338,6 +306,71 @@ bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp,
   }
   throw_invalid_argument("function: not string or array");
   return false;
+}
+
+Variant f_call_user_func_array(CVarRef function, CArrRef params,
+                               bool bound /* = false */) {
+  MethodCallPackage mcp;
+  String classname, methodname;
+  bool doBind;
+  if (UNLIKELY(!get_user_func_handler(function, true, mcp,
+                                      classname, methodname, doBind))) {
+    return null;
+  }
+
+  if (doBind && !bound) {
+    FrameInjection::StaticClassNameHelper scn(
+      ThreadInfo::s_threadInfo.getNoCheck(), classname);
+    ASSERT(!mcp.m_isFunc);
+    return mcp.ci->getMeth()(mcp, params);
+  } else {
+    if (mcp.m_isFunc) {
+      return mcp.ci->getFunc()(mcp.extra, params);
+    } else {
+      return mcp.ci->getMeth()(mcp, params);
+    }
+  }
+}
+
+Variant call_user_func_few_args(CVarRef function, int count, ...) {
+  ASSERT(count <= CALL_USER_FUNC_FEW_ARGS_COUNT);
+  va_list ap;
+  va_start(ap, count);
+  CVarRef a0 = (count > 0) ? *va_arg(ap, const Variant *) : null_variant;
+  CVarRef a1 = (count > 1) ? *va_arg(ap, const Variant *) : null_variant;
+  CVarRef a2 = (count > 2) ? *va_arg(ap, const Variant *) : null_variant;
+  CVarRef a3 = (count > 3) ? *va_arg(ap, const Variant *) : null_variant;
+  CVarRef a4 = (count > 4) ? *va_arg(ap, const Variant *) : null_variant;
+  CVarRef a5 = (count > 5) ? *va_arg(ap, const Variant *) : null_variant;
+  va_end(ap);
+
+  MethodCallPackage mcp;
+  String classname, methodname;
+  bool doBind;
+  if (UNLIKELY(!get_user_func_handler(function, false, mcp,
+                                      classname, methodname, doBind))) {
+    return null;
+  }
+
+  if (doBind) {
+    FrameInjection::StaticClassNameHelper scn(
+      ThreadInfo::s_threadInfo.getNoCheck(), classname);
+    ASSERT(!mcp.m_isFunc);
+    if (UNLIKELY(!mcp.ci->getMethFewArgs())) {
+      return mcp.ci->getMeth()(
+        mcp, Array(ArrayInit::CreateParams(count, &a0, &a1, &a2,
+                                           &a3, &a4, &a5)));
+    }
+    return mcp.ci->getMethFewArgs()(mcp, count, a0, a1, a2, a3, a4, a5);
+  } else {
+    void *extra = mcp.m_isFunc ? mcp.extra : (void*)&mcp;
+    if (UNLIKELY(!mcp.ci->getFuncFewArgs())) {
+      return mcp.ci->getFunc()(
+        extra, Array(ArrayInit::CreateParams(count, &a0, &a1, &a2,
+                                             &a3, &a4, &a5)));
+    }
+    return mcp.ci->getFuncFewArgs()(extra, count, a0, a1, a2, a3, a4, a5);
+  }
 }
 
 Variant invoke(CStrRef function, CArrRef params, int64 hash /* = -1 */,
@@ -1602,56 +1635,56 @@ Variant invoke_static_method_bind(CStrRef s, CStrRef method,
   return strongBind(ret);
 }
 
-void MethodCallPackage::methodCall(ObjectData *self, CStrRef method,
+bool MethodCallPackage::methodCall(ObjectData *self, CStrRef method,
                                    int64 prehash /* = -1 */) {
   isObj = true;
   rootObj = self;
   name = &method;
-  self->o_get_call_info(*this, prehash);
+  return self->o_get_call_info(*this, prehash);
 }
 
 HOT_FUNC
-void MethodCallPackage::methodCall(CVarRef self, CStrRef method,
+bool MethodCallPackage::methodCall(CVarRef self, CStrRef method,
                                    int64 prehash /* = -1 */) {
   isObj = true;
   ObjectData *s = self.objectForCall();
   rootObj = s;
   name = &method;
-  s->o_get_call_info(*this, prehash);
+  return s->o_get_call_info(*this, prehash);
 }
 
-void MethodCallPackage::dynamicNamedCall(CVarRef self, CStrRef method,
+bool MethodCallPackage::dynamicNamedCall(CVarRef self, CStrRef method,
                                          int64 prehash /* = -1 */) {
   name = &method;
   if (self.is(KindOfObject)) {
     isObj = true;
     rootObj = self.getObjectData();
-    rootObj->o_get_call_info(*this, prehash);
+    return rootObj->o_get_call_info(*this, prehash);
   } else {
     String str = self.toString();
     ObjectData *obj = FrameInjection::GetThis();
     if (!obj || !obj->o_instanceof(str)) {
       rootCls = str.get();
-      get_call_info_static_method(*this);
+      return get_call_info_static_method(*this);
     } else {
       isObj = true;
       rootObj = obj;
-      obj->o_get_call_info_ex(str->data(), *this, prehash);
+      return obj->o_get_call_info_ex(str->data(), *this, prehash);
     }
   }
 }
 
-void MethodCallPackage::dynamicNamedCall(CStrRef self, CStrRef method,
+bool MethodCallPackage::dynamicNamedCall(CStrRef self, CStrRef method,
     int64 prehash /* = -1 */) {
   rootCls = self.get();
   name = &method;
   ObjectData *obj = FrameInjection::GetThis();
   if (!obj || !obj->o_instanceof(self)) {
-    get_call_info_static_method(*this);
+    return get_call_info_static_method(*this);
   } else {
     isObj = true;
     rootObj = obj;
-    obj->o_get_call_info_ex(self, *this, prehash);
+    return obj->o_get_call_info_ex(self, *this, prehash);
   }
 }
 
@@ -1663,6 +1696,11 @@ void MethodCallPackage::functionNamedCall(CVarRef func) {
 void MethodCallPackage::functionNamedCall(CStrRef func) {
   m_isFunc = true;
   get_call_info(ci, extra, func.data());
+}
+
+void MethodCallPackage::functionNamedCall(ObjectData *func) {
+  m_isFunc = true;
+  ci = func->t___invokeCallInfoHelper(extra);
 }
 
 void MethodCallPackage::construct(CObjRef self) {
@@ -1694,51 +1732,6 @@ const CallInfo *MethodCallPackage::bindClass(FrameInjection &fi) {
     fi.setStaticClassName(obj->getRoot()->o_getClassName());
   }
   return ci;
-}
-
-Variant call_user_func_few_args(CVarRef function, int count, ...) {
-  ASSERT(count <= CALL_USER_FUNC_FEW_ARGS_COUNT);
-  va_list ap;
-  va_start(ap, count);
-  CVarRef a0 = (count > 0) ? *va_arg(ap, const Variant *) : null_variant;
-  CVarRef a1 = (count > 1) ? *va_arg(ap, const Variant *) : null_variant;
-  CVarRef a2 = (count > 2) ? *va_arg(ap, const Variant *) : null_variant;
-  CVarRef a3 = (count > 3) ? *va_arg(ap, const Variant *) : null_variant;
-  CVarRef a4 = (count > 4) ? *va_arg(ap, const Variant *) : null_variant;
-  CVarRef a5 = (count > 5) ? *va_arg(ap, const Variant *) : null_variant;
-  va_end(ap);
-  if (function.is(KindOfArray)) {
-    Variant classname;
-    Variant methodname;
-    String cls;
-    String method;
-    String sclass;
-    ObjectData *obj;
-    int kind = getClassMethodInfo(function, classname, methodname,
-                                  cls, method, sclass, obj, false);
-    if (kind == 0) {
-      MethodCallPackage mcp;
-      mcp.noFatal();
-      mcp.dynamicNamedCall(sclass, method, -1);
-      if (LIKELY(mcp.ci != NULL)) {
-        return (mcp.ci->getMethFewArgs())(mcp, count,
-          a0, a1, a2, a3, a4, a5);
-      } else {
-        o_invoke_failed(sclass.data(), method.data(), false);
-        return null;
-      }
-    }
-    return call_user_func_array_helper(
-      kind, classname, methodname, cls, method, sclass, obj,
-      Array(ArrayInit::CreateParams(count, &a0, &a1, &a2, &a3, &a4, &a5)));
-  }
-  const CallInfo *ci;
-  void *extra;
-  if (!has_eval_support && get_call_info(ci, extra, function)) {
-    return (ci->getFuncFewArgs())(extra, count, a0, a1, a2, a3, a4, a5);
-  }
-  return f_call_user_func(count, function,
-    Array(ArrayInit::CreateParams(count, &a0, &a1, &a2, &a3, &a4, &a5)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -409,7 +409,7 @@ DefineFunction(
     'desc'   => "Gets the name of the class the static method is called in.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => String,
+      'type'   => Variant,
       'desc'   => "Returns the class name. Returns FALSE if called from outside a class.",
     ),
     'taint_observer' => false,

@@ -249,14 +249,13 @@ Variant f_forward_static_call(int _argc, CVarRef function, CArrRef _argv /* = nu
                 "when no class scope is active");
     return null;
   }
-  FrameInjection::StaticClassNameHelper h(ThreadInfo::s_threadInfo.getNoCheck(),
-                                          cls);
   return f_call_user_func_array(function, _argv, true);
 }
 
-String f_get_called_class() {
-  return FrameInjection::GetStaticClassName(
+Variant f_get_called_class() {
+  CStrRef cls = FrameInjection::GetStaticClassName(
     ThreadInfo::s_threadInfo.getNoCheck());
+  return cls.size() ? Variant(cls.get()) : Variant(false);
 }
 
 String f_create_function(CStrRef args, CStrRef code) {

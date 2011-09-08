@@ -454,7 +454,8 @@ Object FiberAsyncFunc::Start(CVarRef function, CArrRef params) {
   MethodCallPackage mcp;
   String classname, methodname;
   bool doBind;
-  if (!get_user_func_handler(function, mcp, classname, methodname, doBind) ||
+  if (!get_user_func_handler(function, true,
+                             mcp, classname, methodname, doBind) ||
       !mcp.ci) {
     raise_warning("call_user_func_async: not a valid callback");
     return null_object;

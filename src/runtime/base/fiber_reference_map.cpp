@@ -24,11 +24,15 @@ namespace HPHP {
 FiberReferenceMap::FiberReferenceMap() : m_mainRefVariants(NULL) {
 }
 
-void FiberReferenceMap::reset() {
+void FiberReferenceMap::resetMain() {
   if (m_mainRefVariants) {
     DELETE(Array)(m_mainRefVariants);
     m_mainRefVariants = NULL;
   }
+}
+
+void FiberReferenceMap::resetFiber() {
+  m_fiberRefVariants.reset();
 }
 
 void FiberReferenceMap::insert(ObjectData *src, ObjectData *copy) {

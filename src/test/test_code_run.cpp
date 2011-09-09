@@ -18027,6 +18027,20 @@ bool TestCodeRun::TestFiber() {
         "$c();\n",
         "int(32)\n");
 
+  MVCRO("<?php "
+        "$calls = array();"
+        "function foo() { return 'DONE'; }"
+        "for ($i = 1; $i < 100; $i++) {"
+        "  $call = @call_user_func_async('foo');"
+        "  while (check_user_func_async($call) == false) {"
+        "    sleep(0.1);"
+        "  }"
+        "  end_user_func_async($call);"
+        "  $calls[] = $call;"
+        "}"
+        "unset($calls);",
+        "");
+
   return true;
 }
 

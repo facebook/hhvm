@@ -121,7 +121,7 @@ public:
         DELETE(Variant)(m_unmarshaled_params);
         m_unmarshaled_function = NULL;
         m_unmarshaled_params = NULL;
-        m_refMap.reset();
+        m_refMap.resetMain();
       }
       // else not safe to touch these members because thread has moved to
       // next request after deleting/collecting all these dangling ones
@@ -135,10 +135,6 @@ public:
 
   bool isDone() {
     return m_done;
-  }
-
-  bool canDelete() {
-    return (m_delete && m_refCount == 1) || m_reqId != m_thread->m_reqId;
   }
 
   // FIBER THREAD
@@ -297,14 +293,36 @@ public:
   }
   void decRefCount() {
     ASSERT(m_refCount);
-    if (atomic_dec(m_refCount) == 0 && !m_async) {
+    if (atomic_dec(m_refCount) == 0) {
       delete this;
-    } else {
-      notify();
     }
   }
 
   FiberAsyncFuncData *getOwnerThread() { return m_thread; }
+
+  bool destroy() {
+    ASSERT(m_async);
+    if (m_reqId == m_thread->m_reqId) {
+      if (!m_delete) return false;
+      if (m_refCount > 1) {
+        /*
+          Free all the SmartAllocated objects that belong
+          to the Fiber thread, because the job is going to
+          be deleted by the main thread
+        */
+        m_refCount--;
+        m_refMap.resetFiber();
+        m_function.unset();
+        m_params.reset();
+        m_fatal.reset();
+        m_exception.reset();
+        m_return.unset();
+        return true;
+      }
+    }
+    delete this;
+    return true;
+  }
 
 private:
   FiberAsyncFuncData *m_thread;
@@ -344,15 +362,12 @@ private:
 
 class FiberWorker : public JobQueueWorker<FiberJob*> {
 public:
-  FiberWorker() : m_owner(0) {}
+  FiberWorker() {}
 
   // FIBER THREAD
   virtual void onThreadEnter();
   virtual void doJob(FiberJob *job);
   virtual void onThreadExit();
-
-private:
-  FiberAsyncFuncData *m_owner;
 };
 
 static JobQueueDispatcher<FiberJob*, FiberWorker> *s_dispatcher;
@@ -368,18 +383,18 @@ void FiberWorker::doJob(FiberJob *job) {
   } catch (...) {
     Logger::Error("Internal Fiber Engine Error");
   }
+
+  FiberAsyncFuncData *owner = job->getOwnerThread();
   {
     Lock lock(job);
-    while (!job->canDelete()) {
+    while (!job->destroy()) {
       job->wait(1);
     }
   }
-  m_owner = job->getOwnerThread();
-  delete job;
 
   hphp_context_exit(g_context.getNoCheck(), false, true);
-  if (m_owner && !m_owner->decRefCount()) {
-    m_owner->notify();
+  if (owner && !owner->decRefCount()) {
+    owner->notify();
   }
 }
 
@@ -400,7 +415,10 @@ public:
   }
 
   ~FiberAsyncFuncHandle() {
-    if (!m_async || m_reqId == s_fiber_data->m_reqId) m_job->decRefCount();
+    if (!m_async || m_reqId == s_fiber_data->m_reqId) {
+      Lock lock(m_job);
+      m_job->decRefCount();
+    }
   }
 
   FiberJob *getJob() { return m_job;}

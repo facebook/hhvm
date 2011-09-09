@@ -30,7 +30,8 @@ namespace HPHP {
 class FiberReferenceMap {
 public:
   FiberReferenceMap();
-  void reset();
+  void resetMain();
+  void resetFiber();
 
   void insert(ObjectData *src, ObjectData *copy);
   void insert(Variant *src, Variant *copy, bool marshaling);

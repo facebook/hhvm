@@ -35,7 +35,7 @@ public:
     Serialize = 2,
   };
 
-  RPCRequestHandler();
+  RPCRequestHandler(bool info = true);
   virtual ~RPCRequestHandler();
 
   void setServerInfo(SatelliteServerInfoPtr info) { m_serverInfo = info;}

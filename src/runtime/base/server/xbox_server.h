@@ -81,6 +81,7 @@ public:
     m_warmupDoc   = RuntimeOption::XboxServerInfoWarmupDoc;
     m_reqInitFunc = RuntimeOption::XboxServerInfoReqInitFunc;
     m_reqInitDoc  = RuntimeOption::XboxServerInfoReqInitDoc;
+    m_alwaysReset = RuntimeOption::XboxServerInfoAlwaysReset;
   }
 
   void setMaxDuration(int duration) { m_maxDuration = duration; }

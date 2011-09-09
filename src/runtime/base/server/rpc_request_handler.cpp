@@ -31,14 +31,17 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-RPCRequestHandler::RPCRequestHandler() : m_count(0), m_reset(false),
+RPCRequestHandler::RPCRequestHandler(bool info /* = true */)
+  : m_count(0), m_reset(false),
   m_returnEncodeType(Json) {
   hphp_session_init();
   m_context = hphp_context_init();
   m_created = time(0);
 
   Logger::ResetRequestCount();
-  Logger::Info("creating new RPC request handler");
+  if (info) {
+    Logger::Info("creating new RPC request handler");
+  }
 }
 
 RPCRequestHandler::~RPCRequestHandler() {

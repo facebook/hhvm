@@ -162,6 +162,8 @@ int RuntimeOption::XboxServerInfoDuration = 120;
 std::string RuntimeOption::XboxServerInfoWarmupDoc;
 std::string RuntimeOption::XboxServerInfoReqInitFunc;
 std::string RuntimeOption::XboxServerInfoReqInitDoc;
+bool RuntimeOption::XboxServerInfoAlwaysReset = false;
+bool RuntimeOption::XboxServerLogInfo = true;
 std::string RuntimeOption::XboxProcessMessageFunc = "xbox_process_message";
 std::string RuntimeOption::XboxPassword;
 std::set<std::string> RuntimeOption::XboxPasswords;
@@ -850,6 +852,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     XboxServerInfoWarmupDoc = xbox["ServerInfo.WarmupDocument"].get("");
     XboxServerInfoReqInitFunc = xbox["ServerInfo.RequestInitFunction"].get("");
     XboxServerInfoReqInitDoc = xbox["ServerInfo.RequestInitDocument"].get("");
+    XboxServerInfoAlwaysReset = xbox["ServerInfo.AlwaysReset"].getBool(false);
+    XboxServerLogInfo = xbox["ServerInfo.LogInfo"].getBool(true);
     XboxProcessMessageFunc =
       xbox["ProcessMessageFunc"].get("xbox_process_message");
   }

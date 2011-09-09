@@ -157,6 +157,8 @@ public:
   static std::string XboxServerInfoWarmupDoc;
   static std::string XboxServerInfoReqInitFunc;
   static std::string XboxServerInfoReqInitDoc;
+  static bool XboxServerInfoAlwaysReset;
+  static bool XboxServerLogInfo;
   static std::string XboxProcessMessageFunc;
   static std::string XboxPassword;
   static std::set<std::string> XboxPasswords;

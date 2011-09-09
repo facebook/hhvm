@@ -136,10 +136,18 @@ private:
   string m_host;
 };
 
+class XboxRequestHandler: public RPCRequestHandler {
+public:
+  XboxRequestHandler() : RPCRequestHandler(Info) {}
+  static bool Info;
+};
+
+bool XboxRequestHandler::Info = false;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static IMPLEMENT_THREAD_LOCAL(XboxServerInfoPtr, s_xbox_server_info);
-static IMPLEMENT_THREAD_LOCAL(RPCRequestHandler, s_xbox_request_handler);
+static IMPLEMENT_THREAD_LOCAL(XboxRequestHandler, s_xbox_request_handler);
 ///////////////////////////////////////////////////////////////////////////////
 
 class XboxWorker : public JobQueueWorker<XboxTransport*, true> {
@@ -158,11 +166,13 @@ private:
     if (!*s_xbox_server_info) {
       *s_xbox_server_info = XboxServerInfoPtr(new XboxServerInfo());
     }
+    if (RuntimeOption::XboxServerLogInfo) XboxRequestHandler::Info = true;
     s_xbox_request_handler->setServerInfo(*s_xbox_server_info);
     s_xbox_request_handler->setReturnEncodeType(RPCRequestHandler::Serialize);
     if (s_xbox_request_handler->needReset() ||
         s_xbox_request_handler->incRequest() >
         (*s_xbox_server_info)->getMaxRequest()) {
+      Logger::Verbose("resetting xbox request handler");
       s_xbox_request_handler.destroy();
       s_xbox_request_handler->setServerInfo(*s_xbox_server_info);
       s_xbox_request_handler->setReturnEncodeType(RPCRequestHandler::Serialize);
@@ -189,7 +199,9 @@ void XboxServer::Restart() {
        RuntimeOption::ServerThreadRoundRobin,
        RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
        NULL);
-    Logger::Info("xbox server started");
+    if (RuntimeOption::XboxServerLogInfo) {
+      Logger::Info("xbox server started");
+    }
     s_dispatcher->start();
   }
 }

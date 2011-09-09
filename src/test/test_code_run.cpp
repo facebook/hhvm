@@ -14476,7 +14476,8 @@ bool TestCodeRun::TestConstant() {
        "var_dump(FLUB);"
        // defeat optimizations
        "var_dump(define('BLAH', array_map('strlen', array('a', 'bc'))));"
-       "var_dump(BLAH);");
+       "var_dump(BLAH);"
+       "define('FOO', array(1,2,3));");
 
   return true;
 }

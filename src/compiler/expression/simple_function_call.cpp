@@ -752,13 +752,23 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             assert(sym);
             m_extra = (void *)sym;
             Lock lock(BlockScope::s_constMutex);
-            if (!sym->isDynamic() && sym->getValue() != (*m_params)[1]) {
-              if (sym->getDeclaration() != shared_from_this()) {
-                // redeclared
-                const_cast<Symbol*>(sym)->setDynamic();
+            if (!sym->isDynamic()) {
+              if (sym->getValue() != (*m_params)[1]) {
+                if (sym->getDeclaration() != shared_from_this()) {
+                  // redeclared
+                  const_cast<Symbol*>(sym)->setDynamic();
+                }
+                const_cast<Symbol*>(sym)->setValue((*m_params)[1]);
+                getScope()->addUpdates(BlockScope::UseKindConstRef);
               }
-              const_cast<Symbol*>(sym)->setValue((*m_params)[1]);
-              getScope()->addUpdates(BlockScope::UseKindConstRef);
+              Variant v;
+              ExpressionPtr value =
+                static_pointer_cast<Expression>(sym->getValue());
+              if (value->getScalarValue(v)) {
+                if (!v.isAllowedAsConstantValue()) {
+                  const_cast<Symbol*>(sym)->setDynamic();
+                }
+              }
             }
             break;
           }

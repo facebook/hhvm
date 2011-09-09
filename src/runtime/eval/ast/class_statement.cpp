@@ -55,19 +55,6 @@ void ClassVariable::setStatic(VariableEnvironment &env, LVariableTable &st)
     Variant val;
     if (m_value) {
       val = m_value->eval(env);
-    } else if (m_modifiers & ClassStatement::Public) {
-      const ClassStatement *parent = m_cls->parentStatement();
-      if (parent) {
-        const ClassVariable* var = parent->findVariable(m_name, true);
-        if (var && (var->m_modifiers & ClassStatement::Protected) &&
-            (var->m_modifiers & ClassStatement::Static)) {
-          // When there is no initial value, and base class's property is
-          // protected and this class's same property is public, and both are
-          // static, they refer to the same property. In this case, we don't
-          // set the variable in st, so it will go to parent class for it.
-          return;
-        }
-      }
     }
     st.get(String(m_name)) = val;
   }

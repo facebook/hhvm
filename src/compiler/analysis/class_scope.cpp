@@ -1652,9 +1652,7 @@ static bool buildClassPropTableMap(
         cls->getVariables()->getSymbols();
       for (unsigned j = 0; j < symbolVec.size(); j++) {
         const Symbol *sym = symbolVec[j];
-        if (sym->isStatic()) {
-          if (sym->isOverride()) continue;
-        }
+        assert(!sym->isStatic() || !sym->isOverride());
         entries[sym->isStatic()].push_back(sym);
       }
       const std::vector<Symbol*> &constVec =
@@ -1724,17 +1722,11 @@ static bool buildClassPropTableMap(
 
 bool ClassScope::checkHasPropTable() {
   VariableTablePtr variables = getVariables();
-  if (variables->hasPrivate()) return true;
 
-  const std::vector<Symbol*> &symbolVec = variables->getSymbols();
-  for (unsigned j = 0; j < symbolVec.size(); j++) {
-    const Symbol *sym = symbolVec[j];
-    if (!sym->isStatic() || !sym->isOverride()) return true;
-  }
+  if (variables->getSymbols().size()) return true;
 
   ConstantTablePtr constants = getConstants();
-  const std::vector<Symbol*> &constVec =
-    constants->getSymbols();
+  const std::vector<Symbol*> &constVec = constants->getSymbols();
   if (!constVec.size()) return false;
   for (int i = 0, sz = constVec.size(); i < sz; i++) {
     const Symbol *sym = constVec[i];

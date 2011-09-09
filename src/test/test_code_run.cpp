@@ -4471,16 +4471,19 @@ bool TestCodeRun::TestObject() {
 }
 
 bool TestCodeRun::TestObjectProperty() {
-  MVCR("<?php "
-       "class A { static protected $foo = 11; "
-       "  function foo() { var_dump(A::$foo);}} "
-       "class B extends A { static public $foo;} "
-       "var_dump(B::$foo); B::$foo = 123; A::foo();");
-  MVCR("<?php "
-       "class A { static protected $foo = 11; } "
-       "class B extends A {} "
-       "class C extends B { static public $foo;} "
-       "var_dump(C::$foo); ");
+  MVCRO("<?php "
+        "class A { static protected $foo = 11; "
+        "  function foo() { var_dump(A::$foo);}} "
+        "class B extends A { static public $foo;} "
+        "var_dump(B::$foo); B::$foo = 123; A::foo();",
+        "NULL\n"
+        "int(11)\n");
+  MVCRO("<?php "
+        "class A { static protected $foo = 11; } "
+        "class B extends A {} "
+        "class C extends B { static public $foo;} "
+        "var_dump(C::$foo); ",
+        "NULL\n");
   MVCR("<?php "
        "class A { static private $foo = 11; } "
        "class B extends A {} "

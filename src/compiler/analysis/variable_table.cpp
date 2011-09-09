@@ -379,7 +379,7 @@ bool VariableTable::markOverride(AnalysisResultPtr ar, const string &name) {
       ASSERT(s2 && s2->isPresent());
       if (!s2->isPrivate()) {
         if (!sym->isStatic() || s2->isProtected()) {
-          if (sym->isPrivate()) {
+          if (sym->isPrivate() || sym->isStatic()) {
             // don't mark the symbol as overridden
             return true;
           }
@@ -496,9 +496,10 @@ Symbol *VariableTable::findProperty(ClassScopePtr &cls,
   Symbol *sym = getSymbol(name);
   if (sym) {
     ASSERT(sym->declarationSet());
-    if (!sym->isOverride() || !sym->isStatic()) {
+    if (!sym->isOverride()) {
       return sym;
     }
+    ASSERT(!sym->isStatic());
     sym = NULL;
   }
 
@@ -829,7 +830,8 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
          m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     StaticGlobalInfoPtr sgi = iter->second;
-    if (!sgi->func && !sgi->sym->isOverride()) {
+    if (!sgi->func) {
+      ASSERT(!sgi->sym->isOverride());
       TypePtr varType = sgi->sym->getFinalType();
       if (varType->isSpecificObject()) {
         cg_printf("FORWARD_DECLARE_CLASS(%s);\n",
@@ -910,7 +912,8 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     // id can change if we discover it is redeclared
     const string &id = StaticGlobalInfo::GetId(sgi->cls, sgi->func,
                                                sgi->sym->getName());
-    if (!sgi->func && !sgi->sym->isOverride()) {
+    if (!sgi->func) {
+      ASSERT(!sgi->sym->isOverride());
       TypePtr varType = sgi->sym->getFinalType();
       type2names[varType->getCPPDecl(ar, BlockScopeRawPtr())].insert
         (string(Option::StaticPropertyPrefix) + id);
@@ -1041,7 +1044,8 @@ void VariableTable::collectCPPGlobalSymbols(StringPairSetVec &symbols,
     // id can change if we discover it is redeclared
     const string &id = StaticGlobalInfo::GetId(sgi->cls, sgi->func,
                                                sgi->sym->getName());
-    if (!sgi->func && !sgi->sym->isOverride()) {
+    if (!sgi->func) {
+      ASSERT(!sgi->sym->isOverride());
       string name = Option::StaticPropertyPrefix + id;
       names->insert(StringPair(name, name));
     }
@@ -1153,7 +1157,8 @@ void VariableTable::outputCPPGlobalVariablesDtorIncludes(CodeGenerator &cg,
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
          m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     StaticGlobalInfoPtr sgi = iter->second;
-    if (!sgi->func && !sgi->sym->isOverride()) {
+    if (!sgi->func) {
+      ASSERT(!sgi->sym->isOverride());
       TypePtr varType = sgi->sym->getFinalType();
       if (varType->isSpecificObject()) {
         ClassScopePtr cls = ar->findClass(varType->getName());

@@ -4911,7 +4911,7 @@ bool c_DOMNamedNodeMap::t___isset(Variant name) {
 Variant c_DOMNamedNodeMap::t_getiterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMNamedNodeMap, DOMNamedNodeMap::getiterator);
   c_DOMNodeIterator *iter = NEWOBJ(c_DOMNodeIterator)();
-  iter->reset_iterator(this);
+  iter->set_iterator(this, this);
   return Object(iter);
 }
 
@@ -5048,7 +5048,7 @@ Variant c_DOMNodeList::t_item(int64 index) {
 Variant c_DOMNodeList::t_getiterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMNodeList, DOMNodeList::getiterator);
   c_DOMNodeIterator *iter = NEWOBJ(c_DOMNodeIterator)();
-  iter->reset_iterator(this);
+  iter->set_iterator(this, this);
   return Object(iter);
 }
 
@@ -5453,9 +5453,8 @@ void c_DOMNodeIterator::sweep() {
   delete m_iter;
 }
 
-void c_DOMNodeIterator::reset_iterator(dom_iterable *objmap) {
-  m_objmap = objmap;
-
+void c_DOMNodeIterator::reset_iterator() {
+  ASSERT(m_objmap);
   xmlNodePtr curnode = NULL;
   bool owner = false;
   if (m_objmap->m_nodetype != XML_ENTITY_NODE &&
@@ -5505,6 +5504,12 @@ void c_DOMNodeIterator::reset_iterator(dom_iterable *objmap) {
   } else {
     m_curobj.reset();
   }
+}
+
+void c_DOMNodeIterator::set_iterator(ObjectData* o, dom_iterable *objmap) {
+  m_o = o;
+  m_objmap = objmap;
+  reset_iterator();
 }
 
 void c_DOMNodeIterator::t___construct() {
@@ -5589,7 +5594,7 @@ Variant c_DOMNodeIterator::t_rewind() {
   delete m_iter;
   m_iter = NULL;
   m_index = -1;
-  reset_iterator(m_objmap);
+  reset_iterator();
   return null;
 }
 

@@ -2637,6 +2637,15 @@ bool TestCodeRun::TestArrayIterator() {
       "foreach (getIter() as $a => $b) {"
       "  print \"$a: $b\n\";"
       "}"
+      "class MyIteratorAggregate implements IteratorAggregate {"
+      "  public function getIterator() {"
+      "    return getIter();"
+      "  }"
+      "}"
+      "$obj = new MyIteratorAggregate();"
+      "foreach ($obj as $a => $b) {"
+      "  print \"$a: $b\n\";"
+      "}"
       );
   MVCR("<?php\n"
       "$a = array(1, 2, 3, 4, 5, 6);\n"
@@ -15629,6 +15638,24 @@ bool TestCodeRun::TestDOMDocument() {
        "  $r->parentNode->removeChild($r);\n"
        "}\n"
        "echo $dom->saveXML();\n"
+      );
+
+  MVCRO("<?php\n"
+       "function foo() {\n"
+       "  $html = '<b>Hello</b><i>World</i>';\n"
+       "  $doc = new DOMDocument();\n"
+       "  $element = $doc->createDocumentFragment();\n"
+       "  $element->appendXML($html);\n"
+       "  foreach ($element->childNodes->getIterator() as $child) {\n"
+       "    $element = null;\n"
+       "    $doc = null;\n"
+       "    var_dump($child->nodeValue);\n"
+       "  }\n"
+       "}\n"
+       "foo();\n",
+
+       "string(5) \"Hello\"\n"
+       "string(5) \"World\"\n"
       );
 
   return true;

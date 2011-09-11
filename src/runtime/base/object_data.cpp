@@ -636,7 +636,7 @@ ArrayIter ObjectData::begin(CStrRef context /* = null_string */) {
     Variant iterator = obj->o_invoke(s_getIterator, Array());
     if (!iterator.isObject()) break;
     if (iterator.instanceof(s_Iterator)) {
-      return ArrayIter(iterator.getObjectData(), false);
+      return ArrayIter(iterator.getObjectData());
     }
     obj = iterator.getObjectData();
   }

@@ -662,8 +662,10 @@ class c_DOMNodeIterator : public ExtObjectData, public Sweepable {
 
 
 public:
-  void reset_iterator(dom_iterable *objmap);
+  void reset_iterator();
+  void set_iterator(ObjectData* o, dom_iterable *objmap);
 
+  Object m_o;
   dom_iterable *m_objmap;
   ArrayIter *m_iter;
   int m_index;

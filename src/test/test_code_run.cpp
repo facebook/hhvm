@@ -3390,6 +3390,22 @@ bool TestCodeRun::TestArrayForEach() {
        "  var_dump($a[1],$a[2]);"
        "}");
 
+  MVCR("<?php "
+       "function g1($a) {"
+       "  var_dump($a);"
+       "  $arr = array(0,1,2,3);"
+       "  $b = true;"
+       "  foreach ($arr as &$v) {"
+       "    if ($b && $v == 1) {"
+       "      $b = false;"
+       "      $arr = $a;"
+       "    } else {"
+       "      $v = 5;"
+       "    }"
+       "  }"
+       "  var_dump($a);"
+       "}"
+       "g1(array(0, 0, 0, 0));");
 
   return true;
 }

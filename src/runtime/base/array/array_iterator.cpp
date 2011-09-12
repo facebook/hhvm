@@ -172,6 +172,13 @@ bool MutableArrayIter::advance() {
     }
     // Create a new strong iterator for the new array
     ASSERT(m_fp.container == NULL);
+    if (data->getCount() > 1 && !data->isGlobalArrayWrapper()) {
+      if (m_var) {
+        *const_cast<Variant*>(m_var) = (data = data->copy());
+      } else {
+        m_data = data = data->copy();
+      }
+    }
     data->newFullPos(m_fp);
   }
   ASSERT(m_fp.container == data);

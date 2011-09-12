@@ -269,6 +269,8 @@ class hphp_string_map :
 typedef hphp_hash_set<std::string, string_hash> hphp_string_set;
 typedef hphp_hash_set<const char *, hphp_hash<const char *>,
                       eqstr> hphp_const_char_set;
+typedef hphp_hash_set<std::string, string_case_hash, string_case_eq>
+                      hphp_istring_set;
 
 typedef hphp_hash_map<void*, void*, pointer_hash<void> > PointerMap;
 typedef hphp_hash_map<void*, int, pointer_hash<void> > PointerCounterMap;

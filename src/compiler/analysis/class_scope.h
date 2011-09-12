@@ -120,7 +120,7 @@ public:
 
   virtual std::string getId() const;
 
-  void checkDerivation(AnalysisResultPtr ar, hphp_string_set &seen);
+  void checkDerivation(AnalysisResultPtr ar, hphp_istring_set &seen);
   const std::string &getParent() const { return m_lowerCaseParent;}
   const std::string &getOriginalParent() const { return m_parent; }
   std::string getHeaderFilename();

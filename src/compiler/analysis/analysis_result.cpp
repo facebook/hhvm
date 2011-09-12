@@ -546,7 +546,7 @@ void AnalysisResult::checkClassDerivations() {
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
     BOOST_FOREACH(cls, iter->second) {
-      hphp_string_set seen;
+      hphp_istring_set seen;
       cls->checkDerivation(ar, seen);
     }
   }

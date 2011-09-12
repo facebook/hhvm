@@ -33,6 +33,7 @@ ObjectPropertyExpression::ObjectPropertyExpression(EXPRESSION_ARGS,
 
 Expression *ObjectPropertyExpression::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_obj);
+  Eval::optimize(env, m_name);
   if (dynamic_cast<StringName *>(m_name.get())) {
     if (m_obj->isKindOf(Expression::KindOfThisExpression)) {
       return new ThisStringPropertyExpression(

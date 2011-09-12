@@ -32,6 +32,11 @@ ClassConstantExpression::ClassConstantExpression(EXPRESSION_ARGS,
   : Expression(KindOfClassConstantExpression, EXPRESSION_PASS),
   m_class(cls), m_constant(constant) {}
 
+Expression *ClassConstantExpression::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_class);
+  return NULL;
+}
+
 Variant ClassConstantExpression::eval(VariableEnvironment &env) const {
   DECLARE_THREAD_INFO;
   check_recursion(info);

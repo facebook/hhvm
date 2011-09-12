@@ -34,7 +34,18 @@ public:
   enum KindOf {
     KindOfArrayElementExpression,
     KindOfArrayExpression,
+
     KindOfAssignmentOpExpression,
+    KindOfVariableAssignmentExpression,
+    KindOfVariablePlusEqualExpression,
+    KindOfVariableMinusEqualExpression,
+    KindOfVariableMulEqualExpression,
+    KindOfVariableAndEqualExpression,
+    KindOfVariableOrEqualExpression,
+    KindOfVariableXorEqualExpression,
+    KindOfVariableSLEqualExpression,
+    KindOfVariableSREqualExpression,
+
     KindOfAssignmentRefExpression,
     KindOfBinaryOpExpression,
     KindOfClassConstantExpression,

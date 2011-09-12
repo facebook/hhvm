@@ -42,6 +42,7 @@ class ClassVariable : public Construct {
 public:
   ClassVariable(CONSTRUCT_ARGS, const std::string &name, int modifiers,
       ExpressionPtr value, const std::string &doc, ClassStatement *cls);
+  virtual ClassVariable *optimize(VariableEnvironment &env);
   void set(VariableEnvironment &env, EvalObjectData *self) const;
   void setStatic(VariableEnvironment &env, LVariableTable &statics) const;
   virtual void dump(std::ostream &out) const;
@@ -183,6 +184,8 @@ public:
 protected:
   ClassStatement *m_class;
 };
+
+void optimize(VariableEnvironment &env, ClassVariablePtr &before);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

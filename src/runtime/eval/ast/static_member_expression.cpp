@@ -48,6 +48,12 @@ bool StaticMemberExpression::exist(VariableEnvironment &env, int op) const {
   return lv == NULL || !lv->toBoolean();
 }
 
+Expression *StaticMemberExpression::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_class);
+  Eval::optimize(env, m_variable);
+  return NULL;
+}
+
 Variant &StaticMemberExpression::lval(VariableEnvironment &env) const {
   String cls = m_class->get(env);
   String variable(m_variable->get(env));

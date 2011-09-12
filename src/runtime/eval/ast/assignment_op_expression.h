@@ -42,8 +42,116 @@ private:
   ExpressionPtr m_rhs;
 };
 
+class VariableAssignmentExpression : public Expression {
+public:
+  VariableAssignmentExpression(LvalExpressionPtr lhs, ExpressionPtr rhs,
+                               const Location *loc);
+  virtual Variant eval(VariableEnvironment &env) const;
+  virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
+  virtual void dump(std::ostream &out) const;
+private:
+  LvalExpressionPtr m_lhs;
+  ExpressionPtr m_rhs;
+};
+
+class VariablePlusEqualExpression : public Expression {
+public:
+  VariablePlusEqualExpression(LvalExpressionPtr lhs, ExpressionPtr rhs,
+                              const Location *loc);
+  virtual Variant eval(VariableEnvironment &env) const;
+  virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
+  virtual void dump(std::ostream &out) const;
+private:
+  LvalExpressionPtr m_lhs;
+  ExpressionPtr m_rhs;
+};
+
+class VariableMinusEqualExpression : public Expression {
+public:
+  VariableMinusEqualExpression(LvalExpressionPtr lhs, ExpressionPtr rhs,
+                              const Location *loc);
+  virtual Variant eval(VariableEnvironment &env) const;
+  virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
+  virtual void dump(std::ostream &out) const;
+private:
+  LvalExpressionPtr m_lhs;
+  ExpressionPtr m_rhs;
+};
+
+class VariableMulEqualExpression : public Expression {
+public:
+  VariableMulEqualExpression(LvalExpressionPtr lhs, ExpressionPtr rhs,
+                              const Location *loc);
+  virtual Variant eval(VariableEnvironment &env) const;
+  virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
+  virtual void dump(std::ostream &out) const;
+private:
+  LvalExpressionPtr m_lhs;
+  ExpressionPtr m_rhs;
+};
+
+class VariableAndEqualExpression : public Expression {
+public:
+  VariableAndEqualExpression(LvalExpressionPtr lhs, ExpressionPtr rhs,
+                              const Location *loc);
+  virtual Variant eval(VariableEnvironment &env) const;
+  virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
+  virtual void dump(std::ostream &out) const;
+private:
+  LvalExpressionPtr m_lhs;
+  ExpressionPtr m_rhs;
+};
+
+class VariableOrEqualExpression : public Expression {
+public:
+  VariableOrEqualExpression(LvalExpressionPtr lhs, ExpressionPtr rhs,
+                              const Location *loc);
+  virtual Variant eval(VariableEnvironment &env) const;
+  virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
+  virtual void dump(std::ostream &out) const;
+private:
+  LvalExpressionPtr m_lhs;
+  ExpressionPtr m_rhs;
+};
+
+class VariableXorEqualExpression : public Expression {
+public:
+  VariableXorEqualExpression(LvalExpressionPtr lhs, ExpressionPtr rhs,
+                              const Location *loc);
+  virtual Variant eval(VariableEnvironment &env) const;
+  virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
+  virtual void dump(std::ostream &out) const;
+private:
+  LvalExpressionPtr m_lhs;
+  ExpressionPtr m_rhs;
+};
+
+class VariableSLEqualExpression : public Expression {
+public:
+  VariableSLEqualExpression(LvalExpressionPtr lhs, ExpressionPtr rhs,
+                              const Location *loc);
+  virtual Variant eval(VariableEnvironment &env) const;
+  virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
+  virtual void dump(std::ostream &out) const;
+private:
+  LvalExpressionPtr m_lhs;
+  ExpressionPtr m_rhs;
+};
+
+class VariableSREqualExpression : public Expression {
+public:
+  VariableSREqualExpression(LvalExpressionPtr lhs, ExpressionPtr rhs,
+                              const Location *loc);
+  virtual Variant eval(VariableEnvironment &env) const;
+  virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
+  virtual void dump(std::ostream &out) const;
+private:
+  LvalExpressionPtr m_lhs;
+  ExpressionPtr m_rhs;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
 
-#endif /* __EVAL_BINARY_OP_EXPRESSION_H__ */
+#endif /* __EVAL_ASSIGNMENT_OP_EXPRESSION_H__ */

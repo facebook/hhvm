@@ -33,7 +33,7 @@ StaticMethodExpression(EXPRESSION_ARGS, const NamePtr &cname,
   m_construct(name->get() == "__construct") {}
 
 Expression *StaticMethodExpression::optimize(VariableEnvironment &env) {
-  Eval::optimize(env, m_name);
+  Eval::optimize(env, m_cname);
   SimpleFunctionCallExpression::optimize(env);
   return NULL;
 }

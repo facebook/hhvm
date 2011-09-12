@@ -39,6 +39,11 @@ ClassVariable::ClassVariable(CONSTRUCT_ARGS, const string &name, int modifiers,
     m_modifiers(modifiers), m_value(value), m_docComment(doc), m_cls(cls) {
 }
 
+ClassVariable *ClassVariable::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_value);
+  return NULL; 
+}
+
 void ClassVariable::set(VariableEnvironment &env, EvalObjectData *self) const {
   if (!(m_modifiers & ClassStatement::Static)) {
     Variant val(m_value ? m_value->eval(env) : null_variant);
@@ -186,8 +191,25 @@ void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
 }
 
 Statement *ClassStatement::optimize(VariableEnvironment &env) {
+  std::vector<ClassVariablePtr> variablesVec = m_variablesVec;
+  for (unsigned int i = 0; i < m_variablesVec.size(); i++) {
+    Eval::optimize(env, m_variablesVec[i]);
+  }
+  // shared with m_variables so cannot change
+  for (unsigned int i = 0; i < variablesVec.size(); i++) {
+    assert(variablesVec[i].get() == m_variablesVec[i].get());
+  }
+  for (StringMap<ExpressionPtr>::iterator it = m_constants.begin();
+       it != m_constants.end(); it++) {
+    Eval::optimize(env, it->second);
+  }
+  std::vector<MethodStatementPtr> methodsVec = m_methodsVec;
   for (unsigned int i = 0; i < m_methodsVec.size(); i++) {
     Eval::optimize(env, m_methodsVec[i]);
+  }
+  // shared with m_methods so cannot change
+  for (unsigned int i = 0; i < m_methodsVec.size(); i++) {
+    assert(methodsVec[i].get() == m_methodsVec[i].get());
   }
   return NULL;
 }
@@ -1715,6 +1737,20 @@ void ClassStatementMarker::eval(VariableEnvironment &env) const {
 }
 
 void ClassStatementMarker::dump(std::ostream &out) const {
+}
+
+void optimize(VariableEnvironment &env, ClassVariablePtr &before) {
+  if (before) {
+    ClassVariable *optCV = before->optimize(env);
+    if (optCV) {
+      ClassVariablePtr after = dynamic_cast<ClassVariable *>(optCV);
+      if (after) {
+        before = after;
+      } else {
+        assert(false);
+      }
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

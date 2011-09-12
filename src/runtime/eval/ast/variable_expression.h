@@ -31,6 +31,7 @@ DECLARE_AST_PTR(ThisVariableExpression);
 class VariableExpression : public LvalExpression {
 public:
   VariableExpression(EXPRESSION_ARGS, NamePtr name, int idx = -1);
+  virtual Expression *optimize(VariableEnvironment &env);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual Variant evalExist(VariableEnvironment &env) const;
   virtual Variant &lval(VariableEnvironment &env) const;

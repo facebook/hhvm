@@ -28,6 +28,7 @@ InstanceOfExpression::InstanceOfExpression(EXPRESSION_ARGS, ExpressionPtr obj,
 
 Expression *InstanceOfExpression::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_obj);
+  Eval::optimize(env, m_name);
   return NULL;
 }
 

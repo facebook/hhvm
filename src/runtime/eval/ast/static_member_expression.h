@@ -32,6 +32,7 @@ public:
       const NamePtr &variable);
   virtual void unset(VariableEnvironment &env) const;
   virtual bool exist(VariableEnvironment &env, int op) const;
+  virtual Expression *optimize(VariableEnvironment &env);
   virtual Variant &lval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:

@@ -30,6 +30,7 @@ DECLARE_AST_PTR(LvalExpression);
 class UnsetStatement : public Statement {
 public:
   UnsetStatement(STATEMENT_ARGS, const std::vector<ExpressionPtr> &vals);
+  virtual Statement *optimize(VariableEnvironment &env);
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:

@@ -63,6 +63,11 @@ void VariableExpression::raiseUndefined(VariableEnvironment &env) const {
   raise_notice("Undefined variable: %s", m_name->get(env).c_str());
 }
 
+Expression *VariableExpression::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_name);
+  return NULL;
+}
+
 Variant VariableExpression::eval(VariableEnvironment &env) const {
   return getRefCheck(env);
 }

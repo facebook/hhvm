@@ -39,6 +39,13 @@ UnsetStatement::UnsetStatement(STATEMENT_ARGS,
   }
 }
 
+Statement *UnsetStatement::optimize(VariableEnvironment &env) {
+  for (unsigned int i = 0; i < m_vals.size(); i++) {
+    Eval::optimize(env, m_vals[i]);
+  }
+  return NULL;
+}
+
 void UnsetStatement::eval(VariableEnvironment &env) const {
   if (env.isGotoing()) return;
   ENTER_STMT;

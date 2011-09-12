@@ -230,7 +230,7 @@ static MYSQL *create_new_conn() {
 MySQL::MySQL(const char *host, int port, const char *username,
              const char *password, const char *database)
     : m_port(port), m_last_error_set(false), m_last_errno(0),
-      m_xaction_count(0) {
+      m_xaction_count(0), m_multi_query(false) {
   if (host) m_host = host;
   if (username) m_username = username;
   if (password) m_password = password;
@@ -862,6 +862,13 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
                   "runtime/ext_mysql: slow query", query.data());
   IOStatusHelper io("mysql::query", rconn->m_host.c_str(), rconn->m_port);
   unsigned long tid = mysql_thread_id(conn);
+
+  // disable explicitly
+  MySQL *mySQL = MySQL::Get(link_id);
+  if (mySQL->m_multi_query && !mysql_set_server_option(conn, MYSQL_OPTION_MULTI_STATEMENTS_OFF)) {
+    mySQL->m_multi_query = false;
+  }
+
   if (mysql_real_query(conn, query.data(), query.size())) {
     raise_notice("runtime/ext_mysql: failed executing [%s] [%s]", query.data(),
                  mysql_error(conn));
@@ -933,6 +940,57 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
 
 Variant f_mysql_query(CStrRef query, CVarRef link_identifier /* = null */) {
   return php_mysql_do_query_general(query, link_identifier, true);
+}
+
+Variant f_mysql_multi_query(CStrRef query, CVarRef link_identifier /* = null */) {
+  MYSQL *conn = MySQL::GetConn(link_identifier);
+  MySQL *mySQL = MySQL::Get(link_identifier);
+  if (!mySQL->m_multi_query && !mysql_set_server_option(conn, MYSQL_OPTION_MULTI_STATEMENTS_ON)) {
+    mySQL->m_multi_query = true;
+  }
+
+  if (mysql_real_query(conn, query.data(), query.size())) {
+    raise_notice("runtime/ext_mysql: failed executing [%s] [%s]", query.data(),
+                  mysql_error(conn));
+      // turning this off clears the errors
+      if (!mysql_set_server_option(conn, MYSQL_OPTION_MULTI_STATEMENTS_OFF)) {
+        mySQL->m_multi_query = false;
+      }
+      return false;
+  }
+  return true;
+}
+
+bool f_mysql_next_result(CVarRef link_identifier /* = null */) {
+  MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (!mysql_more_results(conn)) {
+    raise_strict_warning("There is no next result set. "
+      "Please, call mysql_more_results() to check "
+      "whether to call this function/method");
+  }
+  return !mysql_next_result(conn);
+}
+
+bool f_mysql_more_results(CVarRef link_identifier /* = null */) {
+  MYSQL *conn = MySQL::GetConn(link_identifier);
+  return mysql_more_results(conn);
+}
+
+Variant f_mysql_fetch_result(CVarRef link_identifier /* = null */) {
+    MYSQL *conn = MySQL::GetConn(link_identifier);
+    MYSQL_RES *mysql_result;
+
+    mysql_result = mysql_store_result(conn);
+
+    if (!mysql_result) {
+      if (mysql_field_count(conn) > 0) {
+        raise_warning("Unable to save result set");
+        return false;
+      }
+      return true;
+    }
+
+    return Object(NEWOBJ(MySQLResult)(mysql_result));
 }
 
 Variant f_mysql_unbuffered_query(CStrRef query,

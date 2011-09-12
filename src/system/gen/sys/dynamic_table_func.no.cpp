@@ -3150,6 +3150,15 @@ Variant ifa_hphp_splfileobject_fseek(void *extra, int count, INVOKE_FEW_ARGS_IMP
 Variant i_hphp_splfileobject_fseek(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_hphp_splfileobject_fseek);
 }
+Variant ifa_mysql_fetch_result(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("mysql_fetch_result", 1, 1);
+  if (count <= 0) return (x_mysql_fetch_result());
+  CVarRef arg0(a0);
+  return (x_mysql_fetch_result(arg0));
+}
+Variant i_mysql_fetch_result(void *extra, CArrRef params) {
+  return invoke_func_few_handler(extra, params, &ifa_mysql_fetch_result);
+}
 Variant ifa_ctype_alnum(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ctype_alnum", count, 1, 1, 1);
   CVarRef arg0(a0);
@@ -14348,6 +14357,15 @@ Variant ifa_hphp_splfileinfo_getpathinfo(void *extra, int count, INVOKE_FEW_ARGS
 Variant i_hphp_splfileinfo_getpathinfo(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_hphp_splfileinfo_getpathinfo);
 }
+Variant ifa_mysql_next_result(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("mysql_next_result", 1, 1);
+  if (count <= 0) return (x_mysql_next_result());
+  CVarRef arg0(a0);
+  return (x_mysql_next_result(arg0));
+}
+Variant i_mysql_next_result(void *extra, CArrRef params) {
+  return invoke_func_few_handler(extra, params, &ifa_mysql_next_result);
+}
 Variant ifa_magickgetimagegamma(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("magickgetimagegamma", count, 1, 1, 1);
   CVarRef arg0(a0);
@@ -14772,14 +14790,17 @@ Variant i_mysql_connect(void *extra, CArrRef params) {
     return (x_mysql_connect(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
   }
 }
-Variant ifa_xmlwriter_write_raw(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 2)) return throw_wrong_arguments("xmlwriter_write_raw", count, 2, 2, 1);
+Variant ifa_imap_mail_copy(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count < 3 || count > 4)) return throw_wrong_arguments("imap_mail_copy", count, 3, 4, 1);
   CVarRef arg0(a0);
   CVarRef arg1(a1);
-  return (x_xmlwriter_write_raw(arg0, arg1));
+  CVarRef arg2(a2);
+  if (count <= 3) return (x_imap_mail_copy(arg0, arg1, arg2));
+  CVarRef arg3(a3);
+  return (x_imap_mail_copy(arg0, arg1, arg2, arg3));
 }
-Variant i_xmlwriter_write_raw(void *extra, CArrRef params) {
-  return invoke_func_few_handler(extra, params, &ifa_xmlwriter_write_raw);
+Variant i_imap_mail_copy(void *extra, CArrRef params) {
+  return invoke_func_few_handler(extra, params, &ifa_imap_mail_copy);
 }
 Variant ifa_fgetss(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count < 1 || count > 3)) return throw_wrong_arguments("fgetss", count, 1, 3, 1);
@@ -14793,17 +14814,14 @@ Variant ifa_fgetss(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 Variant i_fgetss(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_fgetss);
 }
-Variant ifa_imap_mail_copy(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count < 3 || count > 4)) return throw_wrong_arguments("imap_mail_copy", count, 3, 4, 1);
+Variant ifa_xmlwriter_write_raw(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("xmlwriter_write_raw", count, 2, 2, 1);
   CVarRef arg0(a0);
   CVarRef arg1(a1);
-  CVarRef arg2(a2);
-  if (count <= 3) return (x_imap_mail_copy(arg0, arg1, arg2));
-  CVarRef arg3(a3);
-  return (x_imap_mail_copy(arg0, arg1, arg2, arg3));
+  return (x_xmlwriter_write_raw(arg0, arg1));
 }
-Variant i_imap_mail_copy(void *extra, CArrRef params) {
-  return invoke_func_few_handler(extra, params, &ifa_imap_mail_copy);
+Variant i_xmlwriter_write_raw(void *extra, CArrRef params) {
+  return invoke_func_few_handler(extra, params, &ifa_xmlwriter_write_raw);
 }
 Variant ifa_drawarc(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
    return throw_wrong_arguments("drawarc", count, 7, 7, 1);
@@ -18041,6 +18059,16 @@ Variant ifa_mysql_stat(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 Variant i_mysql_stat(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_mysql_stat);
 }
+Variant ifa_mysql_multi_query(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("mysql_multi_query", count, 1, 2, 1);
+  CVarRef arg0(a0);
+  if (count <= 1) return (x_mysql_multi_query(arg0));
+  CVarRef arg1(a1);
+  return (x_mysql_multi_query(arg0, arg1));
+}
+Variant i_mysql_multi_query(void *extra, CArrRef params) {
+  return invoke_func_few_handler(extra, params, &ifa_mysql_multi_query);
+}
 Variant ifa_get_object_vars(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("get_object_vars", count, 1, 1, 1);
   CVarRef arg0(a0);
@@ -18048,6 +18076,15 @@ Variant ifa_get_object_vars(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 }
 Variant i_get_object_vars(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_get_object_vars);
+}
+Variant ifa_mysql_more_results(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("mysql_more_results", 1, 1);
+  if (count <= 0) return (x_mysql_more_results());
+  CVarRef arg0(a0);
+  return (x_mysql_more_results(arg0));
+}
+Variant i_mysql_more_results(void *extra, CArrRef params) {
+  return invoke_func_few_handler(extra, params, &ifa_mysql_more_results);
 }
 Variant ifa_msg_receive(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count < 5)) return throw_wrong_arguments("msg_receive", count, 5, 8, 1);
@@ -21640,6 +21677,7 @@ CallInfo ci_dom_document_create_text_node((void*)&i_dom_document_create_text_nod
 CallInfo ci_imap_num_msg((void*)&i_imap_num_msg, (void*)&ifa_imap_num_msg, 1, 0, 0x0000000000000000LL);
 CallInfo ci_getrandmax((void*)&i_getrandmax, (void*)&ifa_getrandmax, 0, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileobject_fseek((void*)&i_hphp_splfileobject_fseek, (void*)&ifa_hphp_splfileobject_fseek, 3, 0, 0x0000000000000000LL);
+CallInfo ci_mysql_fetch_result((void*)&i_mysql_fetch_result, (void*)&ifa_mysql_fetch_result, 1, 0, 0x0000000000000000LL);
 CallInfo ci_ctype_alnum((void*)&i_ctype_alnum, (void*)&ifa_ctype_alnum, 1, 0, 0x0000000000000000LL);
 CallInfo ci_tan((void*)&i_tan, (void*)&ifa_tan, 1, 0, 0x0000000000000000LL);
 CallInfo ci_set_exception_handler((void*)&i_set_exception_handler, (void*)&ifa_set_exception_handler, 1, 0, 0x0000000000000000LL);
@@ -22765,6 +22803,7 @@ CallInfo ci_clock_getres((void*)&i_clock_getres, (void*)&ifa_clock_getres, 3, 0,
 CallInfo ci_magicktrimimage((void*)&i_magicktrimimage, (void*)&ifa_magicktrimimage, 2, 0, 0x0000000000000000LL);
 CallInfo ci_imap_gc((void*)&i_imap_gc, (void*)&ifa_imap_gc, 2, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileinfo_getpathinfo((void*)&i_hphp_splfileinfo_getpathinfo, (void*)&ifa_hphp_splfileinfo_getpathinfo, 2, 0, 0x0000000000000000LL);
+CallInfo ci_mysql_next_result((void*)&i_mysql_next_result, (void*)&ifa_mysql_next_result, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimagegamma((void*)&i_magickgetimagegamma, (void*)&ifa_magickgetimagegamma, 1, 0, 0x0000000000000000LL);
 CallInfo ci_newdrawingwand((void*)&i_newdrawingwand, (void*)&ifa_newdrawingwand, 0, 0, 0x0000000000000000LL);
 CallInfo ci_gzrewind((void*)&i_gzrewind, (void*)&ifa_gzrewind, 1, 0, 0x0000000000000000LL);
@@ -22806,9 +22845,9 @@ CallInfo ci_pcntl_alarm((void*)&i_pcntl_alarm, (void*)&ifa_pcntl_alarm, 1, 0, 0x
 CallInfo ci_drawpolygon((void*)&i_drawpolygon, (void*)&ifa_drawpolygon, 2, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_get_call_info_extra((void*)&i_hphp_get_call_info_extra, (void*)&ifa_hphp_get_call_info_extra, 2, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_connect((void*)&i_mysql_connect, (void*)&ifa_mysql_connect, 7, 0, 0x0000000000000000LL);
-CallInfo ci_xmlwriter_write_raw((void*)&i_xmlwriter_write_raw, (void*)&ifa_xmlwriter_write_raw, 2, 0, 0x0000000000000000LL);
-CallInfo ci_fgetss((void*)&i_fgetss, (void*)&ifa_fgetss, 3, 0, 0x0000000000000000LL);
 CallInfo ci_imap_mail_copy((void*)&i_imap_mail_copy, (void*)&ifa_imap_mail_copy, 4, 0, 0x0000000000000000LL);
+CallInfo ci_fgetss((void*)&i_fgetss, (void*)&ifa_fgetss, 3, 0, 0x0000000000000000LL);
+CallInfo ci_xmlwriter_write_raw((void*)&i_xmlwriter_write_raw, (void*)&ifa_xmlwriter_write_raw, 2, 0, 0x0000000000000000LL);
 CallInfo ci_drawarc((void*)&i_drawarc, (void*)&ifa_drawarc, 7, 0, 0x0000000000000000LL);
 CallInfo ci_set_error_handler((void*)&i_set_error_handler, (void*)&ifa_set_error_handler, 2, 0, 0x0000000000000000LL);
 CallInfo ci_str_word_count((void*)&i_str_word_count, (void*)&ifa_str_word_count, 3, 0, 0x0000000000000000LL);
@@ -23126,7 +23165,9 @@ CallInfo ci_hphp_recursivedirectoryiterator_key((void*)&i_hphp_recursivedirector
 CallInfo ci_get_class_constants((void*)&i_get_class_constants, (void*)&ifa_get_class_constants, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_create_db((void*)&i_mysql_create_db, (void*)&ifa_mysql_create_db, 2, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_stat((void*)&i_mysql_stat, (void*)&ifa_mysql_stat, 1, 0, 0x0000000000000000LL);
+CallInfo ci_mysql_multi_query((void*)&i_mysql_multi_query, (void*)&ifa_mysql_multi_query, 2, 0, 0x0000000000000000LL);
 CallInfo ci_get_object_vars((void*)&i_get_object_vars, (void*)&ifa_get_object_vars, 1, 0, 0x0000000000000000LL);
+CallInfo ci_mysql_more_results((void*)&i_mysql_more_results, (void*)&ifa_mysql_more_results, 1, 0, 0x0000000000000000LL);
 CallInfo ci_msg_receive((void*)&i_msg_receive, (void*)&ifa_msg_receive, 8, 0, 0x0000000000000094LL);
 CallInfo ci_is_integer((void*)&i_is_integer, (void*)&ifa_is_integer, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imagecreatefromgif((void*)&i_imagecreatefromgif, (void*)&ifa_imagecreatefromgif, 1, 0, 0x0000000000000000LL);
@@ -28888,6 +28929,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_fread;
         return true;
       }
+      HASH_GUARD(0x772FA9788923EE20LL, mysql_multi_query) {
+        ci = &ci_mysql_multi_query;
+        return true;
+      }
       break;
     case 3617:
       HASH_GUARD(0x5B7F218FA08D8E21LL, imagefilledellipse) {
@@ -31928,6 +31973,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_pixelgetbluequantum;
         return true;
       }
+      HASH_GUARD(0x3BE6E7D13F22355CLL, mysql_next_result) {
+        ci = &ci_mysql_next_result;
+        return true;
+      }
       break;
     case 5475:
       HASH_GUARD(0x1B1B2D70792D9563LL, mysql_get_client_info) {
@@ -32383,9 +32432,21 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 5832:
+      HASH_GUARD(0x57181A054A8F36C8LL, mysql_fetch_result) {
+        ci = &ci_mysql_fetch_result;
+        return true;
+      }
+      break;
     case 5834:
       HASH_GUARD(0x41BCD0A72B1396CALL, xmlwriter_start_dtd_attlist) {
         ci = &ci_xmlwriter_start_dtd_attlist;
+        return true;
+      }
+      break;
+    case 5839:
+      HASH_GUARD(0x2AD1BCC2AEBDB6CFLL, mysql_more_results) {
+        ci = &ci_mysql_more_results;
         return true;
       }
       break;

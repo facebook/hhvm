@@ -159,6 +159,26 @@ inline Variant x_mysql_query(CStrRef query, CVarRef link_identifier = null) {
   return f_mysql_query(query, link_identifier);
 }
 
+inline Variant x_mysql_multi_query(CStrRef query, CVarRef link_identifier = null) {
+  FUNCTION_INJECTION_BUILTIN(mysql_multi_query);
+  return f_mysql_multi_query(query, link_identifier);
+}
+
+inline bool x_mysql_next_result(CVarRef link_identifier = null) {
+  FUNCTION_INJECTION_BUILTIN(mysql_next_result);
+  return f_mysql_next_result(link_identifier);
+}
+
+inline bool x_mysql_more_results(CVarRef link_identifier = null) {
+  FUNCTION_INJECTION_BUILTIN(mysql_more_results);
+  return f_mysql_more_results(link_identifier);
+}
+
+inline Variant x_mysql_fetch_result(CVarRef link_identifier = null) {
+  FUNCTION_INJECTION_BUILTIN(mysql_fetch_result);
+  return f_mysql_fetch_result(link_identifier);
+}
+
 inline Variant x_mysql_unbuffered_query(CStrRef query, CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_unbuffered_query);
   return f_mysql_unbuffered_query(query, link_identifier);

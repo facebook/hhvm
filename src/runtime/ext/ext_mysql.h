@@ -121,6 +121,7 @@ public:
   int m_last_errno;
   std::string m_last_error;
   int m_xaction_count;
+  bool m_multi_query;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -336,6 +337,13 @@ bool f_mysql_set_timeout(int query_timeout_ms = -1,
                          CVarRef link_identifier = null);
 
 Variant f_mysql_query(CStrRef query, CVarRef link_identifier = null);
+Variant f_mysql_multi_query(CStrRef query, CVarRef link_identifier = null);
+
+bool f_mysql_next_result(CVarRef link_identifier = null);
+
+bool f_mysql_more_results(CVarRef link_identifier = null);
+
+Variant f_mysql_fetch_result(CVarRef link_identifier = null);
 
 Variant f_mysql_unbuffered_query(CStrRef query,
                                  CVarRef link_identifier = null);

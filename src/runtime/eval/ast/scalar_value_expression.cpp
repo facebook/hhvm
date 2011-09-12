@@ -62,6 +62,7 @@ ScalarValueExpression *ScalarValueExpression::GetScalarValueExpression(
     acc->second = exp;
     acc->second->setStatic();
     acc->second->m_value.setEvalScalar();
+    acc->second->m_value.setVarNR();
   }
   return acc->second;
 }
@@ -114,6 +115,7 @@ void ScalarValueExpression::registerScalarValues() {
       }
     } else {
       p->m_value.setEvalScalar();
+      p->m_value.setVarNR();
     }
   }
   s_scalarValueExpressions->clear();

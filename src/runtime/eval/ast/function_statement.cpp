@@ -371,6 +371,24 @@ Variant FunctionStatement::invoke(CArrRef params) const {
   return invokeImpl(env, params);
 }
 
+Variant FunctionStatement::invokeFewArgs(
+  int count, INVOKE_FEW_ARGS_IMPL_ARGS) const {
+  DECLARE_THREAD_INFO_NOINIT
+  if (m_closure) {
+    if (m_ref) {
+      return strongBind(invokeClosureFewArgs(count, INVOKE_FEW_ARGS_PASS_ARGS));
+    }
+    return invokeClosureFewArgs(count, INVOKE_FEW_ARGS_PASS_ARGS);
+  }
+  FuncScopeVariableEnvironment env(this);
+  EvalFrameInjection fi(empty_string, m_injectionName.c_str(), env,
+                        loc()->file);
+  if (m_ref) {
+    return strongBind(invokeImplFewArgs(env, count, INVOKE_FEW_ARGS_PASS_ARGS));
+  }
+  return invokeImplFewArgs(env, count, INVOKE_FEW_ARGS_PASS_ARGS);
+}
+
 void FunctionStatement::directBind(VariableEnvironment &env,
                                    const FunctionCallExpression *caller,
                                    FuncScopeVariableEnvironment &fenv,
@@ -486,40 +504,11 @@ Variant FunctionStatement::invokeClosure(CObjRef closure,
   directBind(env, caller, fenv, start);
 
   p_GeneratorClosure c = closure.getTyped<c_GeneratorClosure>();
-  const std::vector<ParameterPtr> &vars =
-    ((ClosureExpression *)m_closure)->getVars();
-  for (ArrayIter iter(c->m_vars); iter; ++iter) {
-    int i = iter.first();
-    CVarRef var = iter.secondRef();
-    Parameter *param = vars[i].get();
-    if (param->isRef()) {
-      fenv.get(param->getName()).assignRef(var);
-    } else {
-      fenv.get(param->getName()).assignVal(var);
-    }
-  }
-
-  EvalFrameInjection fi(empty_string, "{closure}", fenv, loc()->file);
-  if (m_ref) {
-    return strongBind(evalBody(fenv));
-  } else {
-    return evalBody(fenv);
-  }
+  return invokeClosureCommon(c.get(), fenv);
 }
 
-Variant FunctionStatement::invokeClosure(CArrRef params) const {
-  FuncScopeVariableEnvironment fenv(this);
-  bindParams(fenv, params);
-
-  DECLARE_THREAD_INFO;
-  FrameInjection *fi;
-  for (fi = info->m_top; fi; fi= fi->getPrev()) {
-    if (fi->isEvalFrame()) {
-      break;
-    }
-  }
-  EvalFrameInjection *efi = static_cast<EvalFrameInjection*>(fi);
-  c_GeneratorClosure *closure = (c_GeneratorClosure*)efi->getEnv().getClosure();
+inline Variant FunctionStatement::invokeClosureCommon(
+  c_GeneratorClosure *closure, FuncScopeVariableEnvironment &fenv) const {
   const std::vector<ParameterPtr> &vars =
     ((ClosureExpression *)m_closure)->getVars();
   for (ArrayIter iter(closure->m_vars); iter; ++iter) {
@@ -541,6 +530,48 @@ Variant FunctionStatement::invokeClosure(CArrRef params) const {
   }
 }
 
+Variant FunctionStatement::invokeClosure(CArrRef params) const {
+  FuncScopeVariableEnvironment fenv(this);
+  bindParams(fenv, params);
+  DECLARE_THREAD_INFO;
+  FrameInjection *fi;
+  for (fi = info->m_top; fi; fi= fi->getPrev()) {
+    if (fi->isEvalFrame()) {
+      break;
+    }
+  }
+  EvalFrameInjection *efi = static_cast<EvalFrameInjection*>(fi);
+  c_GeneratorClosure *closure = (c_GeneratorClosure*)efi->getEnv().getClosure();
+  return invokeClosureCommon(closure, fenv);
+}
+
+Variant FunctionStatement::invokeClosureFewArgs(
+  ObjectData *closure, int count, INVOKE_FEW_ARGS_IMPL_ARGS) const {
+  ASSERT(closure);
+  ASSERT(m_closure);
+  FuncScopeVariableEnvironment fenv(this);
+  fenv.setClosure(closure);
+  bindFewArgs(fenv, count, INVOKE_FEW_ARGS_PASS_ARGS);
+  p_GeneratorClosure c(closure);
+  return invokeClosureCommon(c.get(), fenv);
+}
+
+Variant FunctionStatement::invokeClosureFewArgs(
+  int count, INVOKE_FEW_ARGS_IMPL_ARGS) const {
+  FuncScopeVariableEnvironment fenv(this);
+  bindFewArgs(fenv, count, INVOKE_FEW_ARGS_PASS_ARGS);
+  DECLARE_THREAD_INFO;
+  FrameInjection *fi;
+  for (fi = info->m_top; fi; fi= fi->getPrev()) {
+    if (fi->isEvalFrame()) {
+      break;
+    }
+  }
+  EvalFrameInjection *efi = static_cast<EvalFrameInjection*>(fi);
+  c_GeneratorClosure *closure = (c_GeneratorClosure*)efi->getEnv().getClosure();
+  return invokeClosureCommon(closure, fenv);
+}
+
 Variant FunctionStatement::invokeClosure(ObjectData *closure,
                                          CArrRef params) const {
   ASSERT(closure);
@@ -550,25 +581,7 @@ Variant FunctionStatement::invokeClosure(ObjectData *closure,
   bindParams(fenv, params);
 
   p_GeneratorClosure c(closure);
-  const std::vector<ParameterPtr> &vars =
-    ((ClosureExpression *)m_closure)->getVars();
-  for (ArrayIter iter(c->m_vars); iter; ++iter) {
-    int i = iter.first();
-    CVarRef var = iter.secondRef();
-    Parameter *param = vars[i].get();
-    if (param->isRef()) {
-      fenv.get(param->getName()).assignRef(var);
-    } else {
-      fenv.get(param->getName()).assignVal(var);
-    }
-  }
-
-  EvalFrameInjection fi(empty_string, "{closure}", fenv, loc()->file);
-  if (m_ref) {
-    return strongBind(evalBody(fenv));
-  } else {
-    return evalBody(fenv);
-  }
+  return invokeClosureCommon(c.get(), fenv);
 }
 
 LVariableTable *FunctionStatement::getStaticVars(VariableEnvironment &env)
@@ -609,9 +622,63 @@ void FunctionStatement::bindParams(FuncScopeVariableEnvironment &fenv,
   }
 }
 
+void FunctionStatement::bindFewArgs(
+  FuncScopeVariableEnvironment &fenv, int count, INVOKE_FEW_ARGS_IMPL_ARGS)
+  const {
+  VariantStack &as = RequestEvalState::argStack();
+  const Variant *argp[INVOKE_FEW_ARGS_COUNT];
+  ASSERT(count <= 6);
+  if (count > 0) argp[0] = &a0;
+  if (count > 1) argp[1] = &a1;
+  if (count > 2) argp[2] = &a2;
+  if (count > 3) argp[3] = &a3;
+  if (count > 4) argp[4] = &a4;
+  if (count > 5) argp[5] = &a5;
+  for (int i = 0; i < count; i++) {
+    as.push(*argp[i]);
+    fenv.incArgc();
+  }
+  vector<ParameterPtr>::const_iterator piter = m_params.begin();
+  for (int i = 0; i < count && piter != m_params.end();
+       ++piter, i++) {
+    if ((*piter)->isRef()) {
+      (*piter)->bind(fenv, *argp[i], true);
+    } else {
+      (*piter)->bind(fenv, Variant(*argp[i]));
+    }
+  }
+
+  // more params than actual args
+  for (; piter != m_params.end(); ++piter) {
+    if (!(*piter)->isOptional()) {
+      if ((*piter)->hasTypeHint()) {
+        const string &t = (*piter)->type();
+        throw_missing_typed_argument(fullName().c_str(),
+                                     (t == "array" ? 0 : t.c_str()),
+                                     (*piter)->argNum());
+      } else {
+        throw_missing_arguments(fullName().c_str(), (*piter)->argNum());
+      }
+    }
+    (*piter)->bindDefault(fenv);
+  }
+}
+
 Variant FunctionStatement::invokeImpl(FuncScopeVariableEnvironment &fenv,
                                       CArrRef params) const {
   bindParams(fenv, params);
+
+  if (m_ref) {
+    return strongBind(evalBody(fenv));
+  } else {
+    return evalBody(fenv);
+  }
+}
+
+Variant FunctionStatement::invokeImplFewArgs(
+  FuncScopeVariableEnvironment &fenv, int count, INVOKE_FEW_ARGS_IMPL_ARGS)
+  const {
+  bindFewArgs(fenv, count, INVOKE_FEW_ARGS_PASS_ARGS);
 
   if (m_ref) {
     return strongBind(evalBody(fenv));
@@ -691,9 +758,14 @@ Variant FunctionStatement::FSInvoker(void *extra, CArrRef params) {
 }
 
 Variant FunctionStatement::FSInvokerFewArgs(void *extra, int count,
-    INVOKE_FEW_ARGS_IMPL_ARGS) {
-  return FSInvoker(extra,
-                   collect_few_args_ref(count, INVOKE_FEW_ARGS_PASS_ARGS));
+  INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Closure *c = (c_Closure*) extra;
+  const FunctionStatement *ms = (const FunctionStatement*) c->extraData();
+  if (ms->refReturn()) {
+    return strongBind(ms->invokeClosureFewArgs(c, count,
+                                               INVOKE_FEW_ARGS_PASS_ARGS));
+  }
+  return ms->invokeClosureFewArgs(c, count, INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
 Variant FunctionStatement::Invoker(void *extra, CArrRef params) {
@@ -707,8 +779,12 @@ Variant FunctionStatement::Invoker(void *extra, CArrRef params) {
 
 Variant FunctionStatement::InvokerFewArgs(void *extra, int count,
     INVOKE_FEW_ARGS_IMPL_ARGS) {
-  return Invoker(extra,
-                 collect_few_args_ref(count, INVOKE_FEW_ARGS_PASS_ARGS));
+  const Function *f = (const Function*)extra;
+  const FunctionStatement *ms = static_cast<const FunctionStatement*>(f);
+  if (ms->refReturn()) {
+    return strongBind(ms->invokeFewArgs(count, INVOKE_FEW_ARGS_PASS_ARGS));
+  }
+  return ms->invokeFewArgs(count, INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
 void Parameter::error(Parser *parser, const char *fmt, ...) const {

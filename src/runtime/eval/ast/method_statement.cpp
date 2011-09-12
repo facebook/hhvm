@@ -84,6 +84,26 @@ Variant MethodStatement::invokeInstance(CObjRef obj, CArrRef params,
   return invokeImpl(env, params);
 }
 
+Variant MethodStatement::invokeInstanceFewArgs(CObjRef obj, int count,
+  INVOKE_FEW_ARGS_IMPL_ARGS, bool check) const {
+  if (getModifiers() & ClassStatement::Static) {
+    return invokeStaticFewArgs(obj->o_getClassName(), count,
+                               INVOKE_FEW_ARGS_PASS_ARGS, check);
+  }
+  if (check) attemptAccess(FrameInjection::GetClassName(false));
+  // The debug frame should have been pushed at ObjectMethodExpression
+  DECLARE_THREAD_INFO_NOINIT
+  MethScopeVariableEnvironment env(this);
+  env.setCurrentObject(obj);
+  String clsName(m_class->name());
+  EvalFrameInjection fi(clsName, m_fullName->data(), env,
+                        loc()->file, obj.get(), FrameInjection::ObjectMethod);
+  if (m_ref) {
+    return strongBind(invokeImplFewArgs(env, count, INVOKE_FEW_ARGS_PASS_ARGS));
+  }
+  return invokeImplFewArgs(env, count, INVOKE_FEW_ARGS_PASS_ARGS);
+}
+
 Variant MethodStatement::
 invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
                      const FunctionCallExpression *caller,
@@ -119,6 +139,21 @@ Variant MethodStatement::invokeStatic(const char* cls, CArrRef params,
     return strongBind(invokeImpl(env, params));
   }
   return invokeImpl(env, params);
+}
+
+Variant MethodStatement::invokeStaticFewArgs(const char* cls, int count,
+  INVOKE_FEW_ARGS_IMPL_ARGS, bool check) const {
+  if (check) attemptAccess(FrameInjection::GetClassName(false));
+  DECLARE_THREAD_INFO_NOINIT
+  MethScopeVariableEnvironment env(this);
+  env.setCurrentClass(cls);
+  String clsName(m_class->name());
+  EvalFrameInjection fi(clsName, m_fullName->data(), env, loc()->file,
+                        NULL, FrameInjection::StaticMethod);
+  if (m_ref) {
+    return strongBind(invokeImplFewArgs(env, count, INVOKE_FEW_ARGS_PASS_ARGS));
+  }
+  return invokeImplFewArgs(env, count, INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
 Variant MethodStatement::
@@ -245,8 +280,34 @@ Variant MethodStatement::MethInvoker(MethodCallPackage &mcp, CArrRef params) {
 
 Variant MethodStatement::MethInvokerFewArgs(MethodCallPackage &mcp,
     int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  return MethInvoker(mcp,
-                     collect_few_args_ref(count, INVOKE_FEW_ARGS_PASS_ARGS));
+  const MethodStatement *ms = (const MethodStatement*)mcp.extra;
+  bool check = strcasecmp(ms->m_name->data(), "__invoke") != 0;
+  bool isStatic = ms->getModifiers() & ClassStatement::Static;
+  if (isStatic || !mcp.obj) {
+    String cn;
+    if (UNLIKELY(!isStatic && mcp.isObj && mcp.obj == NULL)) {
+      // this is needed for continuations where
+      // we are passed the dummy object
+      cn = ms->getClass()->name();
+    } else {
+      cn = mcp.getClassName();
+    }
+    if (ms->refReturn()) {
+      return strongBind(ms->invokeStaticFewArgs(cn.c_str(), count,
+        INVOKE_FEW_ARGS_PASS_ARGS, check));
+    } else {
+      return ms->invokeStaticFewArgs(cn.c_str(), count,
+        INVOKE_FEW_ARGS_PASS_ARGS, check);
+    }
+  } else {
+    if (ms->refReturn()) {
+      return strongBind(ms->invokeInstanceFewArgs(mcp.rootObj, count,
+        INVOKE_FEW_ARGS_PASS_ARGS, check));
+    } else {
+      return ms->invokeInstanceFewArgs(mcp.rootObj, count,
+        INVOKE_FEW_ARGS_PASS_ARGS, check);
+    }
+  }
 }
 
 void MethodStatement::dump(std::ostream &out) const {

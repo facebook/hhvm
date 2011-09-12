@@ -40,6 +40,12 @@ public:
     const;
   Variant invokeStatic(const char* cls, CArrRef params, bool check = true)
     const;
+  Variant invokeInstanceFewArgs(CObjRef obj, int count,
+                                INVOKE_FEW_ARGS_IMPL_ARGS,
+                                bool check = true) const;
+  Variant invokeStaticFewArgs(const char* cls, int count,
+                              INVOKE_FEW_ARGS_IMPL_ARGS,
+                              bool check = true) const;
   Variant invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
                                const FunctionCallExpression *caller,
                                bool check = true) const;

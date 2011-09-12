@@ -172,6 +172,7 @@ class Variant {
 
  public:
   bool isVarNR() const { return _count == NR_FLAG; }
+  void setVarNR() const { _count = NR_FLAG; }
 
   /**
    * Break bindings and set to null.

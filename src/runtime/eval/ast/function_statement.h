@@ -28,6 +28,7 @@
 #include <util/parser/parser.h>
 
 namespace HPHP {
+class c_GeneratorClosure;
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -94,6 +95,7 @@ public:
   // Eval is called at declaration, not invocation
   virtual void eval(VariableEnvironment &env) const;
   Variant invoke(CArrRef params) const;
+  Variant invokeFewArgs(int count, INVOKE_FEW_ARGS_IMPL_ARGS) const;
   // Direct invoke is faster and gives access to the caller and its env
   Variant directInvoke(VariableEnvironment &env,
                        const FunctionCallExpression *caller) const;
@@ -102,7 +104,12 @@ public:
                         int start = 0) const;
   Variant invokeClosure(CArrRef params) const;
   Variant invokeClosure(ObjectData *closure, CArrRef params) const;
+  Variant invokeClosureFewArgs(ObjectData *closure, int count,
+                               INVOKE_FEW_ARGS_IMPL_ARGS) const;
+  Variant invokeClosureFewArgs(int count, INVOKE_FEW_ARGS_IMPL_ARGS) const;
   Variant invokeImpl(FuncScopeVariableEnvironment &fenv, CArrRef params) const;
+  Variant invokeImplFewArgs(FuncScopeVariableEnvironment &fenv, int count,
+                            INVOKE_FEW_ARGS_IMPL_ARGS) const;
   virtual LVariableTable *getStaticVars(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
   void getInfo(ClassInfo::MethodInfo &info) const;
@@ -174,6 +181,11 @@ protected:
 
 private:
   void bindParams(FuncScopeVariableEnvironment &fenv, CArrRef params) const;
+  void bindFewArgs(FuncScopeVariableEnvironment &fenv, int count,
+                   INVOKE_FEW_ARGS_IMPL_ARGS) const;
+  Variant invokeClosureCommon(c_GeneratorClosure *closure,
+                              FuncScopeVariableEnvironment &fenv) const;
+
   static Variant Invoker(void *ms, CArrRef params);
   static Variant InvokerFewArgs(void *ms, int count, INVOKE_FEW_ARGS_IMPL_ARGS);
 

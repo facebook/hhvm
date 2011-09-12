@@ -371,7 +371,6 @@ Variant o_invoke_failed(const char *cls, const char *meth,
                         bool fatal = true);
 
 Array collect_few_args(int count, INVOKE_FEW_ARGS_IMPL_ARGS);
-Array collect_few_args_ref(int count, INVOKE_FEW_ARGS_IMPL_ARGS);
 
 bool get_call_info(const CallInfo *&ci, void *&extra, CVarRef func);
 bool get_call_info_no_eval(const CallInfo *&ci, void *&extra, CStrRef func);

@@ -547,7 +547,10 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
     if (!isUnused() && !type->is(Type::KindOfAny)) {
       if (!hasContext(ReturnContext) &&
           !func->isFirstPass() && !func->isAbstract()) {
-        Compiler::Error(Compiler::UseVoidReturn, self);
+        if (Option::WholeProgram || !func->getContainingClass() ||
+            func->isStatic() || func->isFinal() || func->isPrivate()) {
+          Compiler::Error(Compiler::UseVoidReturn, self);
+        }
       }
       m_voidWrapper = true;
     }

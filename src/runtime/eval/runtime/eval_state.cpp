@@ -53,7 +53,7 @@ const MethodStatement *ClassEvalState::getMethod(const char *m) {
   return it->second.first;
 }
 
-inline void ClassEvalState::semanticCheck() {
+void ClassEvalState::semanticCheck() {
   if (!m_doneSemanticCheck) {
     m_class->loadMethodTable(*this);
     m_class->semanticCheck(NULL);

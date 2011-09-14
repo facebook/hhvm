@@ -583,6 +583,7 @@ void ClassStatement::getInfo(ClassInfoEvaled &info) const {
 
   for (vector<MethodStatementPtr>::const_iterator it = m_methodsVec.begin();
        it != m_methodsVec.end(); ++it) {
+    if (ParserBase::IsAnonFunctionName((*it)->name())) continue;
     ClassInfo::MethodInfo *m = new ClassInfo::MethodInfo;
     (*it)->getInfo(*m);
     info.m_methods[(*it)->name()] = m;

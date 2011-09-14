@@ -9272,6 +9272,14 @@ bool TestCodeRun::TestReflection() {
       "$funcs = get_defined_functions();"
       "var_dump($funcs['user']);");
 
+  {
+    WithOpt w(Option::EnableHipHopSyntax);
+    MVCRO("<?php "
+          "class bar { function baz() { yield 5; } }"
+          "$x = new ReflectionClass('bar');"
+          "var_dump(count($x->getMethods()));",
+          "int(1)\n");
+  }
   return true;
 }
 

@@ -83,8 +83,10 @@ public:
   static bool IsContinuationName           (const std::string &name);
   static bool IsContinuationFromClosureName(const std::string &name);
   static bool IsClosureOrContinuationName  (const std::string &name);
-  static bool IsAnonFunctionName           (const std::string &name);
-
+  static bool IsAnonFunctionName           (const std::string &name) {
+    return IsAnonFunctionName(name.c_str());
+  }
+  static bool IsAnonFunctionName           (const char *name);
   /**
    * Reset parser static variables. Good for unit tests.
    */

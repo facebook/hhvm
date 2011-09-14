@@ -1782,6 +1782,9 @@ void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
 }
 
 void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
+  if (m_method && ParserBase::IsAnonFunctionName(m_name)) {
+    return;
+  }
   int attribute = ClassInfo::IsNothing;
   if (!isUserFunction()) attribute |= ClassInfo::IsSystem;
   if (isRedeclaring()) attribute |= ClassInfo::IsRedeclared;

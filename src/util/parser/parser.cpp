@@ -59,8 +59,8 @@ bool ParserBase::IsClosureOrContinuationName(const std::string &name) {
   return IsClosureName(name) || IsContinuationName(name);
 }
 
-bool ParserBase::IsAnonFunctionName(const std::string &name) {
-  if (name.empty()) return true;
+bool ParserBase::IsAnonFunctionName(const char *name) {
+  if (!*name) return true;
   char begin = CharClosure;
   char end   = CharContinuation;
   char test  = name[0];

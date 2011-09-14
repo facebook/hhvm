@@ -251,13 +251,12 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
         if (sym && sym->isStatic()) {
           {
             GET_LOCK(clsr);
-            clsr->checkProperty(getScope(), sym, type, coerce, ar);
-          }
-          if (modified) {
-            // concurrent modifications here are OK because:
-            // 1) you never clear the bit (you only set it to true)
-            // 2) the value isn't read in type inference
-            sym->setIndirectAltered();
+            if (modified) {
+              sym->setType(ar, getScope(), Type::Variant, true);
+              sym->setIndirectAltered();
+            } else {
+              clsr->checkProperty(getScope(), sym, type, coerce, ar);
+            }
           }
           found = true;
         }

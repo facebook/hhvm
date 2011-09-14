@@ -286,9 +286,12 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
             cls->collectMethods(ar, cur, false, forInvoke);
             inheritedMagicMethods(cls);
             funcs.insert(cur.begin(), cur.end());
+            cls->getVariables()->
+              forceVariants(ar, VariableTable::AnyNonPrivateVars);
           }
           m_derivesFromRedeclaring = DirectFromRedeclared;
-          getVariables()->forceVariants(ar, VariableTable::AnyNonPrivateVars);
+          getVariables()->forceVariants(ar, VariableTable::AnyNonPrivateVars,
+                                        false);
           getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
         } else if (isInterface()) {
           m_derivesFromRedeclaring = DirectFromRedeclared;
@@ -2342,7 +2345,6 @@ void ClassScope::setRedeclaring(AnalysisResultConstPtr ar, int redecId) {
          m_functionsVec.begin(); iter != m_functionsVec.end(); ++iter) {
     (*iter)->setDynamic();
   }
-  m_variables->forceVariants(ar, VariableTable::AnyNonPrivateVars);
 }
 
 ClassScopePtr ClassScope::getRootParent(AnalysisResultConstPtr ar,

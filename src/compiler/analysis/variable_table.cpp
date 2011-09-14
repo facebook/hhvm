@@ -629,7 +629,7 @@ void VariableTable::forceVariants(AnalysisResultConstPtr ar, int varClass,
 
     if (recur) {
       ClassScopePtr parent = m_blockScope.getParentScope(ar);
-      if (parent) {
+      if (parent && !parent->isRedeclaring()) {
         parent->getVariables()->forceVariants(ar, varClass & ~AnyPrivateVars);
       }
     }

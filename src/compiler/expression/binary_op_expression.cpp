@@ -1323,8 +1323,8 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
             }
           } else if (s == "parent" && notQuoted) {
             ClassScopeRawPtr cls = getOriginalClass();
-            if (cls && !cls->getParent().empty()) {
-              s = cls->getParent();
+            if (cls && !cls->getOriginalParent().empty()) {
+              s = cls->getOriginalParent();
             }
           }
           cg_printString(s, ar, shared_from_this());

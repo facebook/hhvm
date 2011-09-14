@@ -121,7 +121,6 @@ public:
   virtual std::string getId() const;
 
   void checkDerivation(AnalysisResultPtr ar, hphp_istring_set &seen);
-  const std::string &getParent() const { return m_lowerCaseParent;}
   const std::string &getOriginalParent() const { return m_parent; }
   std::string getHeaderFilename();
   std::string getForwardHeaderFilename();
@@ -517,25 +516,9 @@ private:
   // need to maintain declaration order for ClassInfo map
   FunctionScopePtrVec m_functionsVec;
 
-  KindOf m_kindOf;
   std::string m_parent;
-  std::string m_lowerCaseParent;
   mutable std::vector<std::string> m_bases;
-  mutable int m_attribute;
-  bool m_dynamic;
-  int m_redeclaring; // multiple definition of the same class
-  bool m_volatile; // for class_exists
-  Derivation m_derivesFromRedeclaring;
-  bool m_derivedByDynamic;
   std::set<std::string> m_missingMethods;
-  bool m_sep;
-  bool m_needsCppCtor;
-  bool m_needsInit;
-  enum TraitStatus {
-    NOT_FLATTENED,
-    BEING_FLATTENED,
-    FLATTENED
-  } m_traitStatus;
 
   std::set<JumpTableName> m_emptyJumpTables;
   std::set<std::string> m_usedLiteralStringsHeader;
@@ -577,6 +560,22 @@ private:
 
   typedef std::list<TraitMethod> TraitMethodList;
   std::map<std::string, TraitMethodList> m_importMethToTraitMap;
+
+  mutable int m_attribute;
+  int m_redeclaring; // multiple definition of the same class
+  KindOf m_kindOf;
+  Derivation m_derivesFromRedeclaring;
+  enum TraitStatus {
+    NOT_FLATTENED,
+    BEING_FLATTENED,
+    FLATTENED
+  } m_traitStatus;
+  bool m_dynamic;
+  bool m_volatile; // for class_exists
+  bool m_derivedByDynamic;
+  bool m_sep;
+  bool m_needsCppCtor;
+  bool m_needsInit;
 
   void addImportTraitMethod(const TraitMethod &traitMethod,
                             const std::string &methName);

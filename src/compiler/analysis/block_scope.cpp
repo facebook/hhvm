@@ -103,7 +103,7 @@ ClassScopeRawPtr BlockScope::getContainingClass() {
 
 ClassScopePtr BlockScope::findExactClass(const std::string &className) {
   if (ClassScopePtr currentCls = getContainingClass()) {
-    if (className == currentCls->getName()) {
+    if (!strcasecmp(className.c_str(), currentCls->getName().c_str())) {
       return currentCls;
     }
   }
@@ -114,7 +114,7 @@ ClassScopePtr BlockScope::findExactClass(const std::string &className) {
       if (s && s->is(Statement::KindOfClassStatement)) {
         ClassScopePtr scope =
           static_pointer_cast<ClassStatement>(s)->getClassScope();
-        if (className == scope->getName()) {
+        if (!strcasecmp(className.c_str(), scope->getName().c_str())) {
           return scope;
         }
       }

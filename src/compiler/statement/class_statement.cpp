@@ -373,6 +373,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                   classScope->getId().c_str());
       }
       cg_printf("g->CDEC(%s) = true;\n", name.c_str());
+      cg.addHoistedClass(name);
 
       const vector<string> &bases = classScope->getBases();
       for (vector<string>::const_iterator it = bases.begin();
@@ -381,8 +382,8 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         ClassScopePtr base = ar->findClass(*it);
         if (base && base->isVolatile()) {
           cg_printf("checkClassExistsThrow(");
-          cg_printString(base->getOriginalName(), ar, shared_from_this());
-          string lname = Util::toLower(base->getOriginalName());
+          cg_printString(*it, ar, shared_from_this());
+          string lname = Util::toLower(*it);
           cg_printf(", &%s->CDEC(%s));\n",
                     cg.getGlobals(ar),
                     CodeGenerator::FormatLabel(lname).c_str());

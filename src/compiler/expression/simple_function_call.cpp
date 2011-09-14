@@ -1655,7 +1655,8 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
                        shared_from_this());
       } else if (m_name == "get_parent_class" && getOriginalClass() &&
                  paramCount == 0) {
-        const std::string parentClass = getOriginalClass()->getParent();
+        const std::string &parentClass =
+          getOriginalClass()->getOriginalParent();
         cg_printf("(");
         if (!parentClass.empty()) {
           cg_printString(parentClass, ar, shared_from_this());
@@ -2312,8 +2313,8 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
         if (!cls) {
           if (sclass == "parent") {
             cls = call->getClassScope();
-            if (cls && !cls->getParent().empty()) {
-              sclass = cls->getParent();
+            if (cls && !cls->getOriginalParent().empty()) {
+              sclass = cls->getOriginalParent();
             }
           }
           cls = ar->findClass(sclass);

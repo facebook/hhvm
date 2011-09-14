@@ -81,8 +81,8 @@ ClassScopePtr StaticClassName::resolveClass() {
     }
   } else if (m_parent) {
     if (ClassScopePtr self = scope->getContainingClass()) {
-      if (!self->getParent().empty()) {
-        m_className = self->getParent();
+      if (!self->getOriginalParent().empty()) {
+        m_className = Util::toLower(self->getOriginalParent());
         m_present = true;
       }
     } else {

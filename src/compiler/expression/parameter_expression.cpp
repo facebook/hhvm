@@ -59,8 +59,8 @@ void ParameterExpression::parseHandler(ClassScopePtr cls) {
     if (m_type == "self") {
       m_type = cls->getName();
     } else if (m_type == "parent") {
-      if (!cls->getParent().empty()) {
-        m_type = cls->getParent();
+      if (!cls->getOriginalParent().empty()) {
+        m_type = Util::toLower(cls->getOriginalParent());
       }
     }
   }

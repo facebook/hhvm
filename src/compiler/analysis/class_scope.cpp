@@ -54,14 +54,12 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
                        const vector<string> &bases,
                        const std::string &docComment, StatementPtr stmt)
   : BlockScope(name, docComment, stmt, BlockScope::ClassScope),
-    m_kindOf(kindOf), m_parent(parent), m_bases(bases), m_attribute(0),
-    m_redeclaring(-1), m_volatile(false),
-    m_derivesFromRedeclaring(FromNormal), m_derivedByDynamic(false),
-    m_sep(false), m_needsCppCtor(false), m_needsInit(true),
-    m_traitStatus(NOT_FLATTENED) {
+    m_parent(parent), m_bases(bases), m_attribute(0), m_redeclaring(-1),
+    m_kindOf(kindOf), m_derivesFromRedeclaring(FromNormal),
+    m_traitStatus(NOT_FLATTENED), m_volatile(false), m_derivedByDynamic(false),
+    m_sep(false), m_needsCppCtor(false), m_needsInit(true) {
 
   m_dynamic = Option::IsDynamicClass(m_name);
-  m_lowerCaseParent = Util::toLower(m_parent);
 
   // dynamic class is also volatile
   m_volatile = Option::AllVolatile || m_dynamic;
@@ -69,18 +67,18 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
   ASSERT(m_parent.empty() || (!m_bases.empty() && m_bases[0] == m_parent));
 }
 
-
 // System
 ClassScope::ClassScope(AnalysisResultPtr ar,
                        const std::string &name, const std::string &parent,
                        const std::vector<std::string> &bases,
                        const FunctionScopePtrVec &methods)
   : BlockScope(name, "", StatementPtr(), BlockScope::ClassScope),
-    m_kindOf(KindOfObjectClass), m_parent(parent), m_bases(bases),
-    m_attribute(0), m_dynamic(false), m_redeclaring(-1), m_volatile(false),
-    m_derivesFromRedeclaring(FromNormal), m_derivedByDynamic(false),
-    m_sep(false), m_needsCppCtor(false), m_needsInit(true),
-    m_traitStatus(NOT_FLATTENED) {
+    m_parent(parent), m_bases(bases),
+    m_attribute(0), m_redeclaring(-1),
+    m_kindOf(KindOfObjectClass), m_derivesFromRedeclaring(FromNormal),
+    m_traitStatus(NOT_FLATTENED), m_dynamic(false), m_volatile(false),
+    m_derivedByDynamic(false), m_sep(false), m_needsCppCtor(false),
+    m_needsInit(true) {
   BOOST_FOREACH(FunctionScopePtr f, methods) {
     if (f->getName() == "__construct") setAttribute(HasConstructor);
     else if (f->getName() == "__destruct") setAttribute(HasDestructor);
@@ -927,19 +925,10 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
     attribute &= ~ClassInfo::HasDocComment;
   }
 
-  string parent;
-  if (!m_parent.empty()) {
-    ClassScopePtr parCls = ar->findClass(m_parent);
-    if (parCls) {
-      parent = parCls->getOriginalName();
-    } else {
-      parent = m_parent;
-    }
-  }
   cg_printf("(const char *)0x%04X, \"%s\", \"%s\", \"%s\", (const char *)%d, "
             "(const char *)%d,\n", attribute,
             CodeGenerator::EscapeLabel(getOriginalName()).c_str(),
-            CodeGenerator::EscapeLabel(parent).c_str(),
+            CodeGenerator::EscapeLabel(m_parent).c_str(),
             m_stmt ? m_stmt->getLocation()->file : "",
             m_stmt ? m_stmt->getLocation()->line0 : 0,
             m_stmt ? m_stmt->getLocation()->line1 : 0);
@@ -952,14 +941,7 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   // parent interfaces
   for (unsigned int i = (m_parent.empty() ? 0 : 1); i < m_bases.size(); i++) {
-    string base;
-    ClassScopePtr baseCls = ar->findClass(m_bases[i]);
-    if (baseCls) {
-      base = baseCls->getOriginalName();
-    } else {
-      base = Util::toLower(m_bases[i]);
-    }
-    cg_printf("\"%s\", ", CodeGenerator::EscapeLabel(base).c_str());
+    cg_printf("\"%s\", ", CodeGenerator::EscapeLabel(m_bases[i]).c_str());
   }
   cg_printf("NULL,\n");
 
@@ -1052,7 +1034,7 @@ void ClassScope::getInterfaces(AnalysisResultConstPtr ar,
   if (recursive && !m_parent.empty()) {
     ClassScopePtr cls(ar->findClass(m_parent));
     if (cls && cls->isRedeclaring()) {
-      cls = self->findExactClass(Util::toLower(m_parent));
+      cls = self->findExactClass(m_parent);
     }
     if (cls) cls->getInterfaces(ar, names, true);
   }
@@ -1063,7 +1045,7 @@ void ClassScope::getInterfaces(AnalysisResultConstPtr ar,
          it != m_bases.end(); ++it) {
       ClassScopePtr cls(ar->findClass(*it));
       if (cls && cls->isRedeclaring()) {
-        cls = self->findExactClass(Util::toLower(*it));
+        cls = self->findExactClass(*it);
       }
       if (cls) names.push_back(cls->getDocName());
       else     names.push_back(*it);
@@ -1126,7 +1108,7 @@ static inline string GetDocName(AnalysisResultPtr ar,
                                 const string &name) {
   ClassScopePtr c(ar->findClass(name));
   if (c && c->isRedeclaring()) {
-    ClassScopePtr exact(scope->findExactClass(Util::toLower(name)));
+    ClassScopePtr exact(scope->findExactClass(name));
     return exact ?
       exact->getDocName() :
       c->getOriginalName(); // if we can't tell which redec class,
@@ -1238,7 +1220,7 @@ void ClassScope::outputCPPClassJumpTable
        jt.next()) {
     const char *clsName = jt.key();
     StringToClassScopePtrVecMap::const_iterator iterClasses =
-      classScopes.find(Util::toLower(clsName));
+      classScopes.find(clsName);
     bool redeclaring = iterClasses->second[0]->isRedeclaring();
     if (iterClasses != classScopes.end()) {
       const char *suffix = "";
@@ -1323,7 +1305,7 @@ void ClassScope::outputCPPHashTableClassVarInit
     }
     const char *clsName = jt.key();
     StringToClassScopePtrVecMap::const_iterator iterClasses =
-      classScopes.find(Util::toLower(clsName));
+      classScopes.find(clsName);
     cg_printf("  {0x%016llXLL,\"%s\",",
               hash_string_i(clsName) + (changed ? min64 : 0),
               CodeGenerator::EscapeLabel(clsName).c_str());
@@ -2618,17 +2600,6 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
   if (isTrait()) return;
   string clsNameStr = getId();
   const char *clsName = clsNameStr.c_str();
-  string parent = "ObjectData";
-  string parentName = "ObjectData";
-  if (!getParent().empty()) {
-    parentName = getParent();
-    ClassScopePtr cls = ar->findClass(parentName);
-    if (cls) {
-      parent = cls->getId();
-    } else {
-      parent = parentName;
-    }
-  }
 
   cg.addClass(getName(), getContainingClass());
 
@@ -3294,13 +3265,13 @@ void ClassScope::OutputVolatileCheckEnd(CodeGenerator &cg) {
 void ClassScope::OutputVolatileCheck(CodeGenerator &cg, AnalysisResultPtr ar,
                                      BlockScopePtr bs, const string &origName,
                                      bool noThrow) {
-  string lwrName(Util::toLower(origName));
-  bool exist = ar->findClass(lwrName);
+  bool exist = ar->findClass(origName);
   cg_printf("%s%s(",
             exist ? "checkClassExists" : "autoloadClass",
             noThrow ? "NoThrow" : "Throw");
   cg_printString(origName, ar, bs);
   if (exist) {
+    string lwrName(Util::toLower(origName));
     cg_printf(", &%s->CDEC(%s))",
               cg.getGlobals(ar), CodeGenerator::FormatLabel(lwrName).c_str());
   } else {

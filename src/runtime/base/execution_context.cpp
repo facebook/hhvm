@@ -204,9 +204,7 @@ void ExecutionContext::setStdout(PFUNC_STDOUT func, void *data) {
 }
 
 static void safe_stdout(const  void  *ptr,  size_t  size) {
-  if (write(fileno(stdout), ptr, size) < 0) {
-    throw FatalErrorException("unable to write to stdout");
-  }
+  write(fileno(stdout), ptr, size);
 }
 
 void ExecutionContext::writeStdout(const char *s, int len) {

@@ -15768,6 +15768,10 @@ bool TestCodeRun::TestFile() {
   MVCR("<?php "
        "$fp = fopen('test/nonexist.txt', 'r');"
        "var_dump(pclose($fp));");
+  MVCR("<?php "
+       "fclose(STDOUT);"
+       "echo 'test';"
+       "ob_start();");
   return true;
 }
 

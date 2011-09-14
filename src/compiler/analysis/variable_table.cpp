@@ -608,7 +608,8 @@ void VariableTable::clearUsed() {
   }
 }
 
-void VariableTable::forceVariants(AnalysisResultConstPtr ar, int varClass) {
+void VariableTable::forceVariants(AnalysisResultConstPtr ar, int varClass,
+                                  bool recur /* = true */) {
   int mask = varClass & ~m_forcedVariants;
   if (mask) {
     if (!m_hasPrivate) mask &= ~AnyPrivateVars;
@@ -626,9 +627,11 @@ void VariableTable::forceVariants(AnalysisResultConstPtr ar, int varClass) {
     }
     m_forcedVariants |= varClass;
 
-    ClassScopePtr parent = m_blockScope.getParentScope(ar);
-    if (parent) {
-      parent->getVariables()->forceVariants(ar, varClass & ~AnyPrivateVars);
+    if (recur) {
+      ClassScopePtr parent = m_blockScope.getParentScope(ar);
+      if (parent) {
+        parent->getVariables()->forceVariants(ar, varClass & ~AnyPrivateVars);
+      }
     }
   }
 }

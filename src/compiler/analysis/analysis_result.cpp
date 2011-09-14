@@ -1975,7 +1975,8 @@ AnalysisResult::forceClassVariants(
   if (curScope) {
     COND_TRY_LOCK(curScope, acquireLocks);
     curScope->getVariables()->forceVariants(
-      shared_from_this(), VariableTable::GetVarClassMask(true, doStatic));
+      shared_from_this(), VariableTable::GetVarClassMask(true, doStatic),
+      false);
   }
 
   ConditionalLock lock(getMutex(), acquireLocks);
@@ -1990,7 +1991,7 @@ AnalysisResult::forceClassVariants(
     BOOST_FOREACH(ClassScopePtr cls, iter->second) {
       COND_TRY_LOCK(cls, acquireLocks);
       cls->getVariables()->forceVariants(
-        ar, VariableTable::GetVarClassMask(false, doStatic));
+        ar, VariableTable::GetVarClassMask(false, doStatic), false);
     }
   }
 }

@@ -258,7 +258,8 @@ public:
   /**
    * Set all matching variables to variants, since l-dynamic value was used.
    */
-  void forceVariants(AnalysisResultConstPtr ar, int varClass);
+  void forceVariants(AnalysisResultConstPtr ar, int varClass,
+                     bool recur = true);
 
   /**
    * Set one matching variable to be Type::Variant.

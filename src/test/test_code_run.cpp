@@ -19857,6 +19857,31 @@ bool TestCodeRun::TestClosure() {
         "int(0)\n"
         "int(1)\n");
 
+  MVCRO("<?php\n"
+        "class A {"
+        "  public function foo() {"
+        "    $values = array(1, 2, 3);"
+        "    $values = array_map(function($p) use ($this) {"
+        "      return $this->goo($p);"
+        "    }, $values);"
+        "    var_dump($values);"
+        "  }"
+        "  public function bar() { return $this; }"
+        "  public function goo($p) { return $p; }"
+        "}"
+        "$obj = new A;"
+        "var_dump($obj->bar());"
+        "$obj->foo();",
+        "object(A)#1 (0) {\n"
+        "}\n"
+        "array(3) {\n"
+        "  [0]=>\n"
+        "  int(1)\n"
+        "  [1]=>\n"
+        "  int(2)\n"
+        "  [2]=>\n"
+        "  int(3)\n"
+        "}\n");
   return true;
 }
 

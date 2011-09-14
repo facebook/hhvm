@@ -117,6 +117,7 @@ void VariableEnvironment::setCurrentObject(CObjRef co) {
   ASSERT(!m_currentClass);
   m_currentObject = co;
   m_currentClass = co->o_getClassName();
+  getVar(s_this, SgNormal) = co;
 }
 void VariableEnvironment::setCurrentClass(const char* cls) {
   ASSERT(m_currentObject.isNull());

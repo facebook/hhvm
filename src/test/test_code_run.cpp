@@ -20376,7 +20376,7 @@ bool TestCodeRun::TestYield() {
         "  try {\n"
         "    $res = $obj->doIt();\n"
         "  } catch (Exception $e) {\n"
-        "    $res = $e->message;\n"
+        "    $res = $e->getMessage();\n"
         "  }\n"
         "  yield $res;\n"
         "}\n"

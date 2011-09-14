@@ -285,7 +285,7 @@ private:
   bool m_inFileOrClassHeader;
   bool m_inNamespace;
   int m_localId[StreamCount];
-  std::set<std::string> *m_hoistedClasses;
+  std::set<std::string, stdltistr> *m_hoistedClasses;
   bool m_collectHoistedClasses;
 
   static int s_idLambda;

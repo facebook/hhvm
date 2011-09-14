@@ -614,7 +614,7 @@ string CodeGenerator::printString(const std::string &str, AnalysisResultPtr ar,
 }
 
 void CodeGenerator::beginHoistedClasses() {
-  m_hoistedClasses = new set<string>();
+  m_hoistedClasses = new set<string,stdltistr>();
   m_collectHoistedClasses = true;
 }
 

@@ -71,7 +71,7 @@ void SubListElement::set(VariableEnvironment &env, CVarRef val) const {
   for (int i = m_elems.size() - 1; i >= 0; i--) {
     const ListElementPtr &le = m_elems[i];
     if (le) {
-      le->set(env, val.rvalAt(i, AccessFlags::Error));
+      le->set(env, val[i]);
     }
   }
 }

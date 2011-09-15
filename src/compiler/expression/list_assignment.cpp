@@ -244,8 +244,7 @@ void ListAssignment::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 static string getArrRef(const string &arrTmp, int index) {
   if (arrTmp == "null_variant") return arrTmp;
-  return arrTmp + ".rvalAt(" + lexical_cast<string>(index) +
-    ", AccessFlags::Error)";
+  return arrTmp + "[" + lexical_cast<string>(index) + "]";
 }
 
 bool ListAssignment::outputCPPAssignment(CodeGenerator &cg,

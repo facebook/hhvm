@@ -553,7 +553,12 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   } catch (Exception &e) {
     sb.append(Debugger::ColorStderr(String(e.what())));
   } catch (Object &e) {
-    sb.append(Debugger::ColorStderr(e.toString()));
+    try {
+      sb.append(Debugger::ColorStderr(e.toString()));
+    } catch (BadTypeConversionException &e) {
+      sb.append(Debugger::ColorStderr
+                (String("(object without __toString() is thrown)")));
+    }
   } catch (...) {
     sb.append(Debugger::ColorStderr(String("(unknown exception was thrown)")));
   }

@@ -251,16 +251,25 @@ class SignalHandlers : public RequestEventHandler {
 public:
   SignalHandlers() {
     memset(signaled, 0, sizeof(signaled));
+    pthread_sigmask(SIG_SETMASK, NULL, &oldSet);
   }
   virtual void requestInit() {
     handlers.reset();
+    // restore the old signal mask, thus unblock those that should be
+    pthread_sigmask(SIG_SETMASK, &oldSet, NULL);
   }
   virtual void requestShutdown() {
+    // block all signals
+    sigset_t set;
+    sigfillset(&set);
+    pthread_sigmask(SIG_BLOCK, &set, NULL);
+
     handlers.reset();
   }
 
   Array handlers;
   int signaled[_NSIG];
+  sigset_t oldSet;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(SignalHandlers, s_signal_handlers);
 
@@ -272,6 +281,7 @@ static void pcntl_signal_handler(int signo) {
     data.setSignaledFlag();
   }
 }
+
 class SignalHandlersStaticInitializer {
 public:
   SignalHandlersStaticInitializer() {

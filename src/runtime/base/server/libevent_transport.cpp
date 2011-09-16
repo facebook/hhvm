@@ -258,7 +258,8 @@ void LibEventTransport::sendImpl(const void *data, int size, int code,
   } else {
     if (m_method != HEAD) {
       evbuffer_add(m_request->output_buffer, data, size);
-    } else {
+    } else if (!evhttp_find_header(m_request->output_headers,
+                                   "Content-Length")) {
       char buf[11];
       snprintf(buf, sizeof(buf), "%d", size);
       addHeaderImpl("Content-Length", buf);

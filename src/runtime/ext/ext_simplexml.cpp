@@ -856,7 +856,7 @@ Array c_SimpleXMLElement::o_toArray() const {
 Variant c_SimpleXMLElement::t_getiterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::getiterator);
   c_SimpleXMLElementIterator *iter = NEWOBJ(c_SimpleXMLElementIterator)();
-  iter->reset_iterator(this);
+  iter->set_parent(this);
   return Object(iter);
 }
 
@@ -971,7 +971,7 @@ void c_SimpleXMLElement::t_offsetunset(CVarRef index) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_SimpleXMLElementIterator::c_SimpleXMLElementIterator()
-    : m_parent(NULL), m_iter1(NULL), m_iter2(NULL) {
+    : m_parent(), m_iter1(NULL), m_iter2(NULL) {
 }
 
 c_SimpleXMLElementIterator::~c_SimpleXMLElementIterator() {
@@ -979,10 +979,15 @@ c_SimpleXMLElementIterator::~c_SimpleXMLElementIterator() {
   delete m_iter2;
 }
 
-void c_SimpleXMLElementIterator::reset_iterator(c_SimpleXMLElement *parent) {
+void c_SimpleXMLElementIterator::set_parent(c_SimpleXMLElement* parent) {
+  m_parent = parent;
+  reset_iterator();
+}
+
+void c_SimpleXMLElementIterator::reset_iterator() {
+  ASSERT(m_parent.get() != NULL);
   delete m_iter1; m_iter1 = NULL;
   delete m_iter2; m_iter2 = NULL;
-  m_parent = parent;
 
   if (m_parent->m_is_attribute) {
     m_iter1 = new ArrayIter(m_parent->m_attributes);
@@ -997,8 +1002,6 @@ void c_SimpleXMLElementIterator::reset_iterator(c_SimpleXMLElement *parent) {
                               "", false);
     Variant children = m_parent->m_children[name];
     m_parent->m_children = CREATE_MAP1(name, children);
-
-    m_temp = m_parent;
     // fall through
   }
 
@@ -1090,7 +1093,7 @@ Variant c_SimpleXMLElementIterator::t_next() {
 
 Variant c_SimpleXMLElementIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElementIterator, SimpleXMLElementIterator::rewind);
-  reset_iterator(m_parent);
+  reset_iterator();
   return null;
 }
 

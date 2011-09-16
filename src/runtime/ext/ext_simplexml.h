@@ -172,12 +172,12 @@ class c_SimpleXMLElementIterator : public ExtObjectData, public Sweepable {
 
 
 public:
-  void reset_iterator(c_SimpleXMLElement *parent);
+  void set_parent(c_SimpleXMLElement* parent);
+  void reset_iterator();
 
-  c_SimpleXMLElement *m_parent;
+  SmartPtr<c_SimpleXMLElement> m_parent;
   ArrayIter *m_iter1;
   ArrayIter *m_iter2;
-  Object     m_temp;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

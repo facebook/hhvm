@@ -37,20 +37,21 @@ FunctionContainer::FunctionContainer() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-bool FunctionContainer::addFunction(AnalysisResultConstPtr ar,
-                                    FunctionScopePtr funcScope) {
-  if (ar->declareFunction(funcScope)) {
-    m_functions[funcScope->getName()].push_back(funcScope);
-    return true;
-  }
-  m_ignoredFunctions.push_back(funcScope);
-  return false;
-}
-
-void FunctionContainer::countReturnTypes(std::map<std::string, int> &counts) {
-  for (StringToFunctionScopePtrVecMap::const_iterator iter =
+void FunctionContainer::countReturnTypes(
+  std::map<std::string, int> &counts,
+  const StringToFunctionScopePtrVecMap *redec) {
+  for (StringToFunctionScopePtrMap::const_iterator iter =
          m_functions.begin(); iter != m_functions.end(); ++iter) {
-    BOOST_FOREACH(FunctionScopePtr f, iter->second) {
+    FunctionScopePtr f = iter->second;
+    if (f->isLocalRedeclaring()) {
+      assert(redec);
+      BOOST_FOREACH(f, redec->find(iter->first)->second) {
+        TypePtr type = f->getReturnType();
+        if (type) {
+          type->count(counts);
+        }
+      }
+    } else {
       TypePtr type = f->getReturnType();
       if (type) {
         type->count(counts);
@@ -62,31 +63,19 @@ void FunctionContainer::countReturnTypes(std::map<std::string, int> &counts) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void
-FunctionContainer::getFunctionsFlattened(FunctionScopePtrVec &funcs,
-                                         bool excludePseudoMains /* = false */)
-const {
-  for (StringToFunctionScopePtrVecMap::const_iterator it = m_functions.begin();
+void FunctionContainer::getFunctionsFlattened(
+  const StringToFunctionScopePtrVecMap *redec,
+  FunctionScopePtrVec &funcs,
+  bool excludePseudoMains /* = false */) const {
+  for (StringToFunctionScopePtrMap::const_iterator it = m_functions.begin();
        it != m_functions.end(); ++it) {
-    BOOST_FOREACH(FunctionScopePtr func, it->second) {
-      if (!excludePseudoMains || !func->inPseudoMain()) {
+    FunctionScopePtr func = it->second;
+    if (!excludePseudoMains || !func->inPseudoMain()) {
+      if (func->isLocalRedeclaring()) {
+        const FunctionScopePtrVec &r = redec->find(it->first)->second;
+        funcs.insert(funcs.end(), r.begin(), r.end());
+      } else {
         funcs.push_back(func);
-      }
-    }
-  }
-}
-
-void FunctionContainer::outputCPPJumpTableDecl(CodeGenerator &cg,
-                                               AnalysisResultPtr ar) {
-  for (StringToFunctionScopePtrVecMap::const_iterator iter =
-         m_functions.begin(); iter != m_functions.end(); ++iter) {
-    if (iter->second[0]->isRedeclaring()) {
-      BOOST_FOREACH(FunctionScopePtr func, iter->second) {
-        cg_printf("Variant %s%s(void *extra, CArrRef params);\n",
-                  Option::InvokePrefix, func->getId().c_str());
-        cg_printf("Variant %s%s(void *extra, int count, "
-                  "INVOKE_FEW_ARGS_IMPL_ARGS);\n",
-                  Option::InvokeFewArgsPrefix, func->getId().c_str());
       }
     }
   }
@@ -94,39 +83,84 @@ void FunctionContainer::outputCPPJumpTableDecl(CodeGenerator &cg,
 
 class FunctionIterator {
 public:
-  FunctionIterator(const StringToFunctionScopePtrVecMap &map,
-      bool &hasRedec) : m_map(map),
-  m_iter(map.begin()), m_hasRedec(hasRedec) {
-    if (ready()) {
-      m_innerIter = m_iter->second.begin();
-      head();
+  FunctionIterator(const StringToFunctionScopePtrVecMap &mmap,
+                   bool &hasRedec) : m_mmap(&mmap), m_smap(0),
+                                     m_miter(mmap.begin()),
+                                     m_hasRedec(hasRedec) {
+    setup();
+  }
+  FunctionIterator(const StringToFunctionScopePtrMap &smap,
+                   const StringToFunctionScopePtrVecMap *mmap,
+                   bool &hasRedec) : m_mmap(mmap), m_smap(&smap),
+                                     m_siter(smap.begin()),
+                                     m_hasRedec(hasRedec) {
+    setup();
+  }
+
+  bool ready() const {
+    if (m_smap) {
+      return m_siter != m_smap->end();
+    } else {
+      return m_miter != m_mmap->end();
     }
   }
-  bool ready() const { return m_iter != m_map.end(); }
-  bool firstInner() const { return m_innerIter == m_iter->second.begin(); }
+
+  bool firstInner() const {
+    if (m_smap && !m_siter->second->isLocalRedeclaring()) {
+      return true;
+    }
+    return m_innerIter == m_miter->second.begin();
+  }
+
   void next() {
+    if (m_smap && !m_siter->second->isLocalRedeclaring()) {
+      ++m_siter;
+      setup();
+      return;
+    }
+
     ++m_innerIter;
-    if (m_innerIter == m_iter->second.end()) {
-      ++m_iter;
-      if (ready()) {
-        m_innerIter = m_iter->second.begin();
-        head();
+    if (m_innerIter == m_miter->second.end()) {
+      if (m_smap) {
+        ++m_siter;
+      } else {
+        ++m_miter;
       }
+      setup();
     }
   }
-  const string &name() const { return m_iter->first; }
+  const string &name() const {
+    return m_smap ? m_siter->first : m_miter->first;
+  }
   FunctionScopePtr get() const {
-    return *m_innerIter;
+    return m_smap && !m_siter->second->isLocalRedeclaring() ?
+      m_siter->second : *m_innerIter;
   }
 
 private:
-  const StringToFunctionScopePtrVecMap &m_map;
-  StringToFunctionScopePtrVecMap::const_iterator m_iter;
+  const StringToFunctionScopePtrVecMap *m_mmap;
+  const StringToFunctionScopePtrMap *m_smap;
+  StringToFunctionScopePtrVecMap::const_iterator m_miter;
   FunctionScopePtrVec::const_iterator m_innerIter;
+  StringToFunctionScopePtrMap::const_iterator m_siter;
   bool &m_hasRedec;
-  void head() {
-    if (m_iter->second[0]->isRedeclaring()) {
-      m_hasRedec = true;
+  void setup() {
+    if (ready()) {
+      if (m_smap) {
+        if (!m_siter->second->isRedeclaring()) {
+          return;
+        }
+        m_hasRedec = true;
+        if (!m_siter->second->isLocalRedeclaring()) {
+          return;
+        }
+        m_miter = m_mmap->find(m_siter->first);
+      } else {
+        if (m_miter->second.size() != 1) {
+          m_hasRedec = true;
+        }
+      }
+      m_innerIter = m_miter->second.begin();
     }
   }
 };
@@ -176,24 +210,26 @@ void FunctionContainer::outputCPPJumpTableSupportMethod
 }
 
 void
-FunctionContainer::outputCPPHelperClassAllocSupport(CodeGenerator &cg,
-                                                    AnalysisResultPtr ar) {
+FunctionContainer::outputCPPHelperClassAllocSupport(
+  CodeGenerator &cg, AnalysisResultPtr ar,
+  const StringToFunctionScopePtrVecMap *redec) {
   bool hasRedeclared;
-  for (FunctionIterator fit(m_functions, hasRedeclared); fit.ready();
+  for (FunctionIterator fit(m_functions, redec, hasRedeclared); fit.ready();
       fit.next()) {
     FunctionScopePtr func = fit.get();
     func->outputCPPHelperClassAlloc(cg, ar);
   }
 }
 
-void FunctionContainer::outputCPPJumpTableSupport
-(CodeGenerator &cg, AnalysisResultPtr ar, bool &hasRedeclared,
- vector<const char *> *funcs /* = NULL */) {
+void FunctionContainer::outputCPPJumpTableSupport(
+  CodeGenerator &cg, AnalysisResultPtr ar,
+  const StringToFunctionScopePtrVecMap *redec, bool &hasRedeclared,
+  vector<const char *> *funcs /* = NULL */) {
   bool systemcpp = cg.getOutput() == CodeGenerator::SystemCPP;
   const char *funcPrefix = Option::FunctionPrefix;
   if (systemcpp) funcPrefix = Option::BuiltinFunctionPrefix;
   // output invoke support methods
-  for (FunctionIterator fit(m_functions, hasRedeclared); fit.ready();
+  for (FunctionIterator fit(m_functions, redec, hasRedeclared); fit.ready();
       fit.next()) {
     FunctionScopePtr func = fit.get();
     if (func->inPseudoMain() || !(systemcpp || func->isDynamic())) continue;
@@ -202,18 +238,19 @@ void FunctionContainer::outputCPPJumpTableSupport
     }
 
     outputCPPJumpTableSupportMethod(cg, ar, func, funcPrefix);
-
-    if (func->isRedeclaring()) hasRedeclared = true;
   }
 }
 
-void FunctionContainer::outputCPPCallInfoTableSupport
-(CodeGenerator &cg, AnalysisResultPtr ar, bool &hasRedeclared,
- vector<const char *> *funcs /* = NULL */) {
+void FunctionContainer::outputCPPCallInfoTableSupport(
+  CodeGenerator &cg, AnalysisResultPtr ar,
+  const StringToFunctionScopePtrVecMap *redec, bool &hasRedeclared,
+  vector<const char *> *funcs /* = NULL */) {
   bool systemcpp = cg.getOutput() == CodeGenerator::SystemCPP;
-  for (FunctionIterator fit(m_functions, hasRedeclared); fit.ready();
+
+  for (FunctionIterator fit(m_functions, redec, hasRedeclared); fit.ready();
       fit.next()) {
     FunctionScopePtr func = fit.get();
+
     if (func->inPseudoMain() || !(systemcpp || func->isDynamic())) continue;
     if (funcs && fit.firstInner()) {
       funcs->push_back(fit.name().c_str());
@@ -221,15 +258,14 @@ void FunctionContainer::outputCPPCallInfoTableSupport
     func->outputCPPCallInfo(cg, ar);
   }
 }
-void FunctionContainer::outputCPPJumpTableEvalSupport
-(CodeGenerator &cg, AnalysisResultPtr ar, bool &hasRedeclared,
- bool implementation /* = true */,
- const StringToFunctionScopePtrVecMap *in /* = NULL */,
- vector<const char *> *funcs /* = NULL */) {
-  if (!in) in = &m_functions;
+void FunctionContainer::outputCPPJumpTableEvalSupport(
+  CodeGenerator &cg, AnalysisResultPtr ar,
+  const StringToFunctionScopePtrVecMap *redec,
+  bool &hasRedeclared) {
   bool systemcpp = cg.getOutput() == CodeGenerator::SystemCPP;
   // output invoke support methods
-  for (FunctionIterator fit(*in, hasRedeclared); fit.ready();
+
+  for (FunctionIterator fit(m_functions, redec, hasRedeclared); fit.ready();
       fit.next()) {
     FunctionScopePtr func = fit.get();
     if (func->inPseudoMain() ||
@@ -237,25 +273,18 @@ void FunctionContainer::outputCPPJumpTableEvalSupport
                         !(func->isSepExtension() || func->isDynamic())))) {
       continue;
     }
-    if (funcs && fit.firstInner()) {
-      funcs->push_back(fit.name().c_str());
-    }
-    if (!implementation && func->isRedeclaring()) continue;
     string sname = func->getId();
-
-    if (func->isRedeclaring()) {
-      hasRedeclared = true;
-    }
   }
 }
 
-void FunctionContainer::outputCPPJumpTable(CodeGenerator &cg,
-                                           AnalysisResultPtr ar) {
+void FunctionContainer::outputCPPJumpTable(
+  CodeGenerator &cg, AnalysisResultPtr ar,
+  const StringToFunctionScopePtrVecMap *redec) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
 
   vector<const char *> funcs;
   bool needGlobals = false;
-  outputCPPJumpTableSupport(cg, ar, needGlobals, &funcs);
+  outputCPPJumpTableSupport(cg, ar, redec, needGlobals, &funcs);
 
   // output invoke()
   cg_indentBegin("Variant invoke_old%s"
@@ -265,10 +294,10 @@ void FunctionContainer::outputCPPJumpTable(CodeGenerator &cg,
 
   for (JumpTable fit(cg, funcs, true, true, false); fit.ready(); fit.next()) {
     const char *name = fit.key();
-    StringToFunctionScopePtrVecMap::const_iterator iterFuncs =
+    StringToFunctionScopePtrMap::const_iterator iterFuncs =
       m_functions.find(name);
     ASSERT(iterFuncs != m_functions.end());
-    FunctionScopePtr func = iterFuncs->second[0];
+    FunctionScopePtr func = iterFuncs->second;
     if (func->isRedeclaring()) {
       cg_printf("HASH_INVOKE_REDECLARED(0x%016llXLL, %s);\n",
                 hash_string_i(name), CodeGenerator::FormatLabel(name).c_str());
@@ -314,7 +343,7 @@ void FunctionContainer::outputGetCallInfoTail(CodeGenerator &cg,
 
 void FunctionContainer::outputCPPHashTableGetCallInfo(
   CodeGenerator &cg, bool system, bool noEval,
-  const StringToFunctionScopePtrVecMap *functions,
+  const StringToFunctionScopePtrMap *functions,
   const vector<const char *> &funcs) {
   ASSERT(cg.getCurrentIndentation() == 0);
   const char text1[] =
@@ -380,14 +409,13 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
       }
       const char *name = jt.key();
 
-      StringToFunctionScopePtrVecMap::const_iterator iterFuncs =
-        functions->find(name);iterFuncs =
-      functions->find(name);
+      StringToFunctionScopePtrMap::const_iterator iterFuncs =
+        functions->find(name);
       ASSERT(iterFuncs != functions->end());
       // We have assumptions that function names do not contain ".."
       // (e.g., call_user_func0 ~ call_user_func6)
       if (strstr(name, "..")) assert(false);
-      FunctionScopePtr func = iterFuncs->second[0];
+      FunctionScopePtr func = iterFuncs->second;
       cg_printf(" {0x%016llXLL,%d,%d,\"%s\",",
                 hash_string_i(name),
                 (int)func->isRedeclaring(), (int)jt.last(),
@@ -431,21 +459,19 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
 
 void FunctionContainer::outputCPPCodeInfoTable(
   CodeGenerator &cg, AnalysisResultPtr ar, bool support,
-  const StringToFunctionScopePtrVecMap *functions /* = NULL */) {
-  if (!functions) functions = &m_functions;
+  const StringToFunctionScopePtrMap &functions) {
   bool needGlobals = false;
   vector<const char *> funcs;
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
   if (support) {
-    outputCPPCallInfoTableSupport(cg, ar, needGlobals, NULL);
+    outputCPPCallInfoTableSupport(cg, ar, 0, needGlobals, NULL);
   }
-  for (FunctionIterator fit(*functions, needGlobals); fit.ready();
-      fit.next()) {
-    FunctionScopePtr func = fit.get();
+  for (StringToFunctionScopePtrMap::const_iterator iter = functions.begin(),
+         end = functions.end(); iter != end; ++iter) {
+    FunctionScopePtr func = iter->second;
     if (!func->inPseudoMain() &&
-        (system || func->isDynamic() || func->isSepExtension()) &&
-        fit.firstInner()) {
-      funcs.push_back(fit.name().c_str());
+        (system || func->isDynamic() || func->isSepExtension())) {
+      funcs.push_back(iter->first.c_str());
       if (!support && !func->isRedeclaring() && !func->isSepExtension()) {
         cg_printf("extern CallInfo %s%s;\n", Option::CallInfoPrefix,
                   func->getId().c_str());
@@ -453,10 +479,8 @@ void FunctionContainer::outputCPPCodeInfoTable(
     }
   }
   if (!system) {
-    outputCPPHashTableGetCallInfo(cg, system, false, functions, funcs);
-    if (!system) {
-      outputCPPHashTableGetCallInfo(cg, system, true, functions, funcs);
-    }
+    outputCPPHashTableGetCallInfo(cg, system, false, &functions, funcs);
+    outputCPPHashTableGetCallInfo(cg, system, true, &functions, funcs);
     return;
   }
   if (!system) cg_printf("static ");
@@ -464,18 +488,18 @@ void FunctionContainer::outputCPPCodeInfoTable(
 
   for (JumpTable fit(cg, funcs, true, true, false); fit.ready(); fit.next()) {
     const char *name = fit.key();
-    StringToFunctionScopePtrVecMap::const_iterator iterFuncs =
-      functions->find(name);
-    ASSERT(iterFuncs != functions->end());
+    StringToFunctionScopePtrMap::const_iterator iterFuncs =
+      functions.find(name);
+    ASSERT(iterFuncs != functions.end());
     cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
                    hash_string_i(name),
                    CodeGenerator::EscapeLabel(name).c_str());
-    if (iterFuncs->second[0]->isRedeclaring()) {
+    if (iterFuncs->second->isRedeclaring()) {
       string lname(CodeGenerator::FormatLabel(name));
       cg_printf("ci = g->GCI(%s);\n", lname.c_str());
     } else {
       cg_printf("ci = &%s%s;\n", Option::CallInfoPrefix,
-                iterFuncs->second[0]->getId().c_str());
+                iterFuncs->second->getId().c_str());
     }
     cg_printf("return true;\n");
     cg_indentEnd("}\n");

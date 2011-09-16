@@ -41,7 +41,8 @@ using namespace std;
 
 FileScope::FileScope(const string &fileName, int fileSize)
   : BlockScope("", "", StatementPtr(), BlockScope::FileScope),
-    m_size(fileSize), m_fileName(fileName), m_hasNonPrivateInclude(false) {
+    m_size(fileSize), m_fileName(fileName), m_redeclaredFunctions(0),
+    m_hasNonPrivateInclude(false) {
   pushAttribute(); // for global scope
 }
 
@@ -71,10 +72,35 @@ FunctionScopePtr FileScope::setTree(AnalysisResultConstPtr ar,
 }
 
 void FileScope::cleanupForError() {
-  StringToFunctionScopePtrVecMap().swap(m_functions);
+  StringToFunctionScopePtrMap().swap(m_functions);
+  delete m_redeclaredFunctions;
+  m_redeclaredFunctions = 0;
   StringToClassScopePtrVecMap().swap(m_classes);
-  ClassScopePtrVec().swap(m_ignoredClasses);
   m_pseudoMain.reset();
+}
+
+bool FileScope::addFunction(AnalysisResultConstPtr ar,
+                            FunctionScopePtr funcScope) {
+  if (ar->declareFunction(funcScope)) {
+    FunctionScopePtr &fs = m_functions[funcScope->getName()];
+    if (fs) {
+      if (!m_redeclaredFunctions) {
+        m_redeclaredFunctions = new StringToFunctionScopePtrVecMap;
+      }
+      FunctionScopePtrVec &funcVec =
+        (*m_redeclaredFunctions)[funcScope->getName()];
+      if (!funcVec.size()) {
+        fs->setLocalRedeclaring();
+        funcVec.push_back(fs);
+      }
+      funcScope->setLocalRedeclaring();
+      funcVec.push_back(funcScope);
+    } else {
+      fs = funcScope;
+    }
+    return true;
+  }
+  return false;
 }
 
 bool FileScope::addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope) {
@@ -82,7 +108,6 @@ bool FileScope::addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope) {
     m_classes[classScope->getName()].push_back(classScope);
     return true;
   }
-  m_ignoredClasses.push_back(classScope);
   return false;
 }
 
@@ -105,11 +130,11 @@ int FileScope::getFunctionCount() const {
 }
 
 void FileScope::countReturnTypes(std::map<std::string, int> &counts) {
-  FunctionContainer::countReturnTypes(counts);
+  FunctionContainer::countReturnTypes(counts, m_redeclaredFunctions);
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classes.begin();
        iter != m_classes.end(); ++iter) {
     BOOST_FOREACH(ClassScopePtr cls, iter->second) {
-      cls->countReturnTypes(counts);
+      cls->countReturnTypes(counts, 0);
     }
   }
 }
@@ -241,7 +266,9 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
                             shared_from_this(),
                             true));
   f->setBlockScope(pseudoMain);
-  m_functions[pseudoMainName()].push_back(pseudoMain);
+  FunctionScopePtr &fs = m_functions[pseudoMainName()];
+  assert(!fs);
+  fs = pseudoMain;
   m_pseudoMain = pseudoMain;
   return pseudoMain;
 }
@@ -255,6 +282,43 @@ string FileScope::outputFilebase() const {
     out = file + ".nophp";
   }
   return Option::MangleFilename(out, false);
+}
+
+static void getFuncScopesSet(BlockScopeRawPtrQueue &v,
+                             const StringToFunctionScopePtrMap &funcMap) {
+  for (StringToFunctionScopePtrMap::const_iterator
+         iter = funcMap.begin(), end = funcMap.end();
+       iter != end; ++iter) {
+    FunctionScopePtr f = iter->second;
+    if (f->isUserFunction()) {
+      v.push_back(f);
+    }
+  }
+}
+
+void FileScope::getScopesSet(BlockScopeRawPtrQueue &v) {
+  const StringToClassScopePtrVecMap &classes = getClasses();
+  for (StringToClassScopePtrVecMap::const_iterator iter = classes.begin(),
+         end = classes.end(); iter != end; ++iter) {
+    for (ClassScopePtrVec::const_iterator it = iter->second.begin(),
+           e = iter->second.end(); it != e; ++it) {
+      ClassScopePtr cls = *it;
+      if (cls->isUserClass() && !cls->isTrait()) {
+        v.push_back(cls);
+        getFuncScopesSet(v, cls->getFunctions());
+      }
+    }
+  }
+
+  getFuncScopesSet(v, getFunctions());
+  if (const StringToFunctionScopePtrVecMap *redec = m_redeclaredFunctions) {
+    for (StringToFunctionScopePtrVecMap::const_iterator iter = redec->begin(),
+           end = redec->end(); iter != end; ++iter) {
+      FunctionScopePtrVec::const_iterator i = iter->second.begin(),
+        e = iter->second.end();
+      v.insert(v.end(), ++i, e);
+    }
+  }
 }
 
 void FileScope::getClassesFlattened(ClassScopePtrVec &classes) const {
@@ -275,7 +339,7 @@ void FileScope::serialize(JSON::DocTarget::OutputStream &out) const {
   ms.add("classes", classes);
 
   FunctionScopePtrVec funcs;
-  getFunctionsFlattened(funcs, true); // excluding pseudo-mains for now
+  getFunctionsFlattened(m_redeclaredFunctions, funcs, true);
   ms.add("functions", funcs);
 
   // TODO(stephentu): constants
@@ -293,9 +357,14 @@ void FileScope::outputCPPHelper(CodeGenerator &cg, AnalysisResultPtr ar,
       }
     }
   }
-  for (StringToFunctionScopePtrVecMap::iterator it = m_functions.begin();
+  for (StringToFunctionScopePtrMap::iterator it = m_functions.begin();
        it != m_functions.end(); ++it) {
-    BOOST_FOREACH(FunctionScopePtr func, it->second) {
+    FunctionScopePtr func = it->second;
+    if (func->isLocalRedeclaring()) {
+      BOOST_FOREACH(func, m_redeclaredFunctions->find(it->first)->second) {
+        func->getStmt()->outputCPP(cg, ar);
+      }
+    } else {
       func->getStmt()->outputCPP(cg, ar);
     }
   }
@@ -310,9 +379,14 @@ void FileScope::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg.setContext(CodeGenerator::CppImplementation);
   cg_printf("/* preface starts */\n");
 
-  for (StringToFunctionScopePtrVecMap::iterator it = m_functions.begin();
+  for (StringToFunctionScopePtrMap::iterator it = m_functions.begin();
        it != m_functions.end(); ++it) {
-    BOOST_FOREACH(FunctionScopePtr func, it->second) {
+    FunctionScopePtr func = it->second;
+    if (func->isLocalRedeclaring()) {
+      BOOST_FOREACH(func, m_redeclaredFunctions->find(it->first)->second) {
+        func->outputCPPPreface(cg, ar);
+      }
+    } else {
       func->outputCPPPreface(cg, ar);
     }
   }
@@ -320,12 +394,10 @@ void FileScope::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
        it != m_classes.end(); ++it) {
     BOOST_FOREACH(ClassScopePtr cls, it->second) {
-      for (StringToFunctionScopePtrVecMap::const_iterator fit =
-             cls->getFunctions().begin();
-           fit != cls->getFunctions().end(); ++fit) {
-        BOOST_FOREACH(FunctionScopePtr func, fit->second) {
-          func->outputCPPPreface(cg, ar);
-        }
+      const FunctionScopePtrVec &funcs = cls->getFunctionsVec();
+      for (int i = 0, size = funcs.size(); i < size; ++i) {
+        FunctionScopePtr func = funcs[i];
+        func->outputCPPPreface(cg, ar);
       }
     }
   }
@@ -336,12 +408,12 @@ void FileScope::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (Option::GenerateCPPMacros) {
     bool hasRedec;
-    outputCPPJumpTableSupport(cg, ar, hasRedec);
+    outputCPPJumpTableSupport(cg, ar, m_redeclaredFunctions, hasRedec);
     if (Option::EnableEval >= Option::LimitedEval) {
-      outputCPPJumpTableEvalSupport(cg, ar, hasRedec);
+      outputCPPJumpTableEvalSupport(cg, ar, m_redeclaredFunctions, hasRedec);
     }
-    outputCPPCallInfoTableSupport(cg, ar, hasRedec);
-    outputCPPHelperClassAllocSupport(cg, ar);
+    outputCPPCallInfoTableSupport(cg, ar, m_redeclaredFunctions, hasRedec);
+    outputCPPHelperClassAllocSupport(cg, ar, m_redeclaredFunctions);
     for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
          it != m_classes.end(); ++it) {
       BOOST_FOREACH(ClassScopePtr cls, it->second) {
@@ -521,22 +593,8 @@ void FileScope::outputCPPDeclarations(CodeGenerator &cg,
       cg_printf("// (omitted in MonoCPP mode)\n");
     }
 
-    cg.printSection("Redeclared Functions");
-    outputCPPJumpTableDecl(cg, ar);
-
     cg.namespaceEnd();
   }
-}
-
-void FileScope::outputCPPForwardDeclHeader(CodeGenerator &cg,
-                                           AnalysisResultPtr ar) {
-  cg.setFileOrClassHeader(true);
-  string header = outputFilebase() + ".fw.h";
-  cg.headerBegin(header);
-  cg.printBasicIncludes();
-  outputCPPForwardDeclarations(cg, ar);
-  cg.headerEnd(header);
-  cg.setFileOrClassHeader(false);
 }
 
 void FileScope::outputCPPForwardStaticDecl(CodeGenerator &cg,
@@ -631,10 +689,12 @@ void FileScope::outputCPPForwardStaticDecl(CodeGenerator &cg,
 
 void FileScope::outputCPPDeclHeader(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg.setFileOrClassHeader(true);
-  string fwheader = outputFilebase() + ".fw.h";
   string header = outputFilebase() + ".h";
   cg.headerBegin(header);
-  cg_printInclude(fwheader);
+  if (Option::GenerateCppLibCode) {
+    cg.printBasicIncludes();
+  }
+  outputCPPForwardDeclarations(cg, ar);
   outputCPPDeclarations(cg, ar);
   cg.headerEnd(header);
 }
@@ -646,18 +706,6 @@ void FileScope::outputCPPClassHeaders(AnalysisResultPtr ar,
        it != m_classes.end(); ++it) {
     BOOST_FOREACH(ClassScopePtr cls, it->second) {
       cls->outputCPPHeader(ar, output);
-    }
-  }
-}
-
-void FileScope::outputCPPForwardClassHeaders(CodeGenerator &cg,
-                                             AnalysisResultPtr ar,
-                                             CodeGenerator::Output output) {
-  ClassScopePtr cls;
-  for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
-       it != m_classes.end(); ++it) {
-    BOOST_FOREACH(ClassScopePtr cls, it->second) {
-      cls->outputCPPForwardHeader(ar, output);
     }
   }
 }
@@ -681,9 +729,14 @@ void FileScope::outputHSFFI(CodeGenerator &cg,
 
 void FileScope::outputJavaFFI(CodeGenerator &cg, AnalysisResultPtr ar) {
   // first, generate methods in HphpMain.java
-  for (StringToFunctionScopePtrVecMap::iterator it = m_functions.begin();
+  for (StringToFunctionScopePtrMap::iterator it = m_functions.begin();
        it != m_functions.end(); ++it) {
-    BOOST_FOREACH(FunctionScopePtr func, it->second) {
+    FunctionScopePtr func = it->second;
+    if (func->isLocalRedeclaring()) {
+      BOOST_FOREACH(func, m_redeclaredFunctions->find(it->first)->second) {
+        func->getStmt()->outputCPP(cg, ar);
+      }
+    } else {
       func->getStmt()->outputCPP(cg, ar);
     }
   }

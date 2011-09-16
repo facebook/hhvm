@@ -166,9 +166,9 @@ public:
 
   template<typename K, typename T, typename C>
   _OutputStream &operator<<
-    (const __gnu_cxx::hash_map<K, T, C> &v) {
+    (const hphp_hash_map<K, T, C> &v) {
     m_out << "{";
-    for (typename __gnu_cxx::hash_map<K, T, C>::const_iterator
+    for (typename hphp_hash_map<K, T, C>::const_iterator
            iter = v.begin(); iter != v.end(); ++iter) {
       if (iter != v.begin()) m_out << ',';
       *this << Name(iter->first);

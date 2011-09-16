@@ -342,8 +342,8 @@ protected:
    * token's start char * addresses in ParamMaps. Therefore, this entire
    * process is very efficient without excessive string copying.
    */
-  typedef __gnu_cxx::hash_map<const char *, std::vector<const char *>,
-                              __gnu_cxx::hash<const char *>, eqstr> ParamMap;
+  typedef hphp_hash_map<const char *, std::vector<const char *>,
+                        hphp_hash<const char *>, eqstr> ParamMap;
 
   // timers
   timespec m_queueTime;

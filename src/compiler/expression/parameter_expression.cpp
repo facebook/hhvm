@@ -219,6 +219,8 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
   Symbol *sym = variables->getSymbol(m_name);
   assert(sym && sym->isParameter());
 
+  bool inHeader = cg.isFileOrClassHeader();
+  cg.setFileOrClassHeader(true);
   CodeGenerator::Context context = cg.getContext();
   bool typedWrapper = (context == CodeGenerator::CppTypedParamsWrapperImpl ||
                        context == CodeGenerator::CppTypedParamsWrapperDecl);
@@ -306,4 +308,5 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
       cg_printf("\n");
     }
   }
+  cg.setFileOrClassHeader(inHeader);
 }

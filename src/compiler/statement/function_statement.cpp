@@ -213,7 +213,10 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
 
   TypePtr type = funcScope->getReturnType();
   if (type) {
+    bool isHeader = cg.isFileOrClassHeader();
+    cg.setFileOrClassHeader(true);
     type->outputCPPDecl(cg, ar, getScope());
+    cg.setFileOrClassHeader(isHeader);
   } else {
     cg_printf("void");
   }

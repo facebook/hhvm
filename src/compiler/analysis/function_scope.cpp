@@ -63,7 +63,7 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
       m_contextSensitive(false),
       m_directInvoke(false), m_needsRefTemp(false), m_needsCheckMem(false),
       m_closureGenerator(false), m_noLSB(false), m_nextLSB(false),
-      m_hasTry(false), m_hasGoto(false),
+      m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
       m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0) {
   init(ar);
 }
@@ -90,10 +90,13 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
       m_inlineAsExpr(orig->m_inlineAsExpr),
       m_inlineSameContext(orig->m_inlineSameContext),
       m_contextSensitive(orig->m_contextSensitive),
-      m_directInvoke(orig->m_directInvoke), m_needsRefTemp(orig->m_needsRefTemp),
+      m_directInvoke(orig->m_directInvoke),
+      m_needsRefTemp(orig->m_needsRefTemp),
       m_needsCheckMem(orig->m_needsCheckMem),
       m_closureGenerator(orig->m_closureGenerator), m_noLSB(orig->m_noLSB),
-      m_nextLSB(orig->m_nextLSB), m_redeclaring(orig->m_redeclaring),
+      m_nextLSB(orig->m_nextLSB), m_hasTry(orig->m_hasTry),
+      m_hasGoto(orig->m_hasGoto), m_localRedeclaring(orig->m_localRedeclaring),
+      m_redeclaring(orig->m_redeclaring),
       m_inlineIndex(orig->m_inlineIndex), m_optFunction(orig->m_optFunction) {
   init(ar);
   m_originalName = originalName;
@@ -186,7 +189,7 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_contextSensitive(false),
       m_directInvoke(false), m_needsRefTemp(false),
       m_closureGenerator(false), m_noLSB(false), m_nextLSB(false),
-      m_hasTry(false), m_hasGoto(false),
+      m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
       m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0) {
   m_dynamic = Option::IsDynamicFunction(method, m_name) ||
     Option::EnableEval == Option::FullEval || Option::AllDynamic;
@@ -350,10 +353,6 @@ bool FunctionScope::isFoldable() const {
 
 void FunctionScope::setIsFoldable() {
   m_attribute |= FileScope::IsFoldable;
-}
-
-bool FunctionScope::isHelperFunction() const {
-  return m_attribute & FileScope::HelperFunction;
 }
 
 void FunctionScope::setHelperFunction() {
@@ -2227,10 +2226,9 @@ static Mutex s_refParamInfoLock;
 
 void FunctionScope::RecordFunctionInfo(string fname, FunctionScopePtr func) {
   Lock lock(s_refParamInfoLock);
-  FunctionInfoPtr info = s_refParamInfo[fname];
+  FunctionInfoPtr &info = s_refParamInfo[fname];
   if (!info) {
     info = FunctionInfoPtr(new FunctionInfo());
-    s_refParamInfo[fname] = info;
   }
   if (func->isStatic()) {
     info->setMaybeStatic();

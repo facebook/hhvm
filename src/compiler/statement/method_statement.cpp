@@ -833,7 +833,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         if (opt < 3) cg_printf(") __attribute__((optimize(%d)));\n", opt);
         else cg_printf(");\n");
       } else if (funcScope->isPerfectVirtual()) {
-        cg_printf(") { return throw_fatal(\"pure virtual\");}\n");
+        cg_printf(");\n");
       } else {
         cg_printf(") = 0;\n");
       }
@@ -853,14 +853,17 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     break;
     case CodeGenerator::CppImplementation:
     case CodeGenerator::CppTypedParamsWrapperImpl:
-      if (m_stmt) {
+      if (m_stmt || funcScope->isPerfectVirtual()) {
         int startLineImplementation = -1;
         if (context == CodeGenerator::CppImplementation) {
           startLineImplementation = cg.getLineNo(CodeGenerator::PrimaryStream);
         }
         TypePtr type = funcScope->getReturnType();
         if (type) {
+          bool isHeader = cg.isFileOrClassHeader();
+          cg.setFileOrClassHeader(true);
           type->outputCPPDecl(cg, ar, getScope());
+          cg.setFileOrClassHeader(isHeader);
         } else {
           cg_printf("void");
         }
@@ -899,7 +902,10 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         }
         funcScope->outputCPPParamsDecl(cg, ar, m_params, false);
         cg_indentBegin(") {\n");
-        if (context != CodeGenerator::CppTypedParamsWrapperImpl) {
+        if (!m_stmt) {
+          cg_printf("return throw_fatal(\"pure virtual\");\n");
+          cg_indentEnd("}\n");
+        } else if (context != CodeGenerator::CppTypedParamsWrapperImpl) {
           if (m_stmt->hasBody()) {
             const char *suffix =
               (cg.getOutput() == CodeGenerator::SystemCPP ? "_BUILTIN" : "");

@@ -71,9 +71,7 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
       if (cls) {
         m_classScope = cls;
         m_funcScope = func = cls->findFunction(ar, m_name, true, true);
-        if (!func) {
-          cls->addMissingMethod(m_name);
-        } else {
+        if (func) {
           func->addCaller(getScope());
         }
       }

@@ -206,6 +206,10 @@ public:
     } catch (Exception &e) {
       Logger::Error("%s", e.getMessage().c_str());
       ret = false;
+    } catch (...) {
+      Logger::Error("Fatal: An unexpected exception was thrown");
+      m_ret = false;
+      return;
     }
     if (!ret && job.second) {
       Logger::Error("Fatal: Unable to stat/parse %s", job.first);

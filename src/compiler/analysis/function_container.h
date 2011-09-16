@@ -35,60 +35,56 @@ DECLARE_BOOST_TYPES(FunctionContainer);
 class FunctionContainer {
 public:
   FunctionContainer();
-  virtual ~FunctionContainer() {}
 
   /**
    * Functions this container has.
    */
-  virtual int getFunctionCount() const { return m_functions.size();}
-  virtual void countReturnTypes(std::map<std::string, int> &counts);
-
-  /**
-   * Called by parser to add a new function.
-   */
-  virtual bool addFunction(AnalysisResultConstPtr ar,
-                           FunctionScopePtr funcScope);
+  int getFunctionCount() const { return m_functions.size(); }
+  void countReturnTypes(std::map<std::string, int> &counts,
+                        const StringToFunctionScopePtrVecMap *redec);
 
   /**
    * Code generation functions.
    */
-  void outputCPPJumpTableDecl(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar);
-  const StringToFunctionScopePtrVecMap &getFunctions() const {
+  void outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
+                          const StringToFunctionScopePtrVecMap *redec);
+  const StringToFunctionScopePtrMap &getFunctions() const {
     return m_functions;
   }
-  void getFunctionsFlattened(FunctionScopePtrVec &funcs,
+  void getFunctionsFlattened(const StringToFunctionScopePtrVecMap *redec,
+                             FunctionScopePtrVec &funcs,
                              bool excludePseudoMains = false) const;
   void outputCPPCodeInfoTable(
     CodeGenerator &cg, AnalysisResultPtr ar, bool support,
-    const StringToFunctionScopePtrVecMap *functions = NULL);
+    const StringToFunctionScopePtrMap &functions);
 
 protected:
   // name => functions. Order of declaration
-  StringToFunctionScopePtrVecMap m_functions;
-  StringToFunctionScopePtrVecMap m_helperFunctions;
-  FunctionScopePtrVec m_ignoredFunctions;
+  StringToFunctionScopePtrMap m_functions;
   void outputCPPJumpTableSupport(CodeGenerator &cg, AnalysisResultPtr ar,
+                                 const StringToFunctionScopePtrVecMap *redec,
                                  bool &hasRedeclared,
                                  std::vector<const char *> *funcs = NULL);
-  void outputCPPJumpTableEvalSupport(CodeGenerator &cg, AnalysisResultPtr ar,
-      bool &hasRedeclared, bool implementation = true,
-      const StringToFunctionScopePtrVecMap *in = NULL,
-      std::vector<const char *> *funcs = NULL);
-  void outputCPPCallInfoTableSupport(CodeGenerator &cg, AnalysisResultPtr ar,
-      bool &hasRedeclared, std::vector<const char *> *funcs = NULL);
+  void outputCPPJumpTableEvalSupport(
+    CodeGenerator &cg, AnalysisResultPtr ar,
+    const StringToFunctionScopePtrVecMap *redec, bool &hasRedeclared);
+  void outputCPPCallInfoTableSupport(
+    CodeGenerator &cg, AnalysisResultPtr ar,
+    const StringToFunctionScopePtrVecMap *redec,
+    bool &hasRedeclared, std::vector<const char *> *funcs = NULL);
   void outputCPPJumpTableSupportMethod(CodeGenerator &cg, AnalysisResultPtr ar,
                                        FunctionScopePtr func,
                                        const char *funcPrefix);
-  void outputCPPHelperClassAllocSupport(CodeGenerator &cg,
-                                        AnalysisResultPtr ar);
+  void outputCPPHelperClassAllocSupport(
+    CodeGenerator &cg, AnalysisResultPtr ar,
+    const StringToFunctionScopePtrVecMap *redec);
 private:
   void outputGetCallInfoHeader(CodeGenerator &cg, const char *suffix,
                                bool needGlobals);
   void outputGetCallInfoTail(CodeGenerator &cg, bool system);
   void outputCPPHashTableGetCallInfo(
     CodeGenerator &cg, bool system, bool noEval,
-    const StringToFunctionScopePtrVecMap *functions,
+    const StringToFunctionScopePtrMap *functions,
     const std::vector<const char *> &funcs);
 };
 

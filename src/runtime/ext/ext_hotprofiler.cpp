@@ -706,7 +706,7 @@ private:
     int64 tsc;
     int64 vtsc;
   };
-  typedef __gnu_cxx::hash_map<std::string, CountMap, string_hash> StatsMap;
+  typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
   StatsMap m_stats; // outcome
 
 public:
@@ -774,7 +774,7 @@ private:
     int64 memory;
     int64 peak_memory;
   };
-  typedef __gnu_cxx::hash_map<std::string, CountMap, string_hash> StatsMap;
+  typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
   StatsMap m_stats; // outcome
 
 public:
@@ -1068,7 +1068,7 @@ public:
     int64 count;
     CountMap() : count(0)  { clear(); }
   };
-  typedef __gnu_cxx::hash_map<std::string, CountMap, string_hash> StatsMap;
+  typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
   StatsMap m_stats; // outcome
 
   TraceProfiler(int flags) : Profiler(), nTrace(0),
@@ -1353,8 +1353,8 @@ pthread_mutex_t TraceProfiler::s_in_use = PTHREAD_MUTEX_INITIALIZER;
  */
 class SampleProfiler : public Profiler {
 private:
-  typedef __gnu_cxx::hash_map<std::string, int64, string_hash> CountMap;
-  typedef __gnu_cxx::hash_map<std::string, CountMap, string_hash> StatsMap;
+  typedef hphp_hash_map<std::string, int64, string_hash> CountMap;
+  typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
   StatsMap m_stats; // outcome
 
 public:

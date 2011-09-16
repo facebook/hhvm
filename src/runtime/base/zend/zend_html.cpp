@@ -416,8 +416,8 @@ static int utf32_to_utf8(unsigned char *buf, int k) {
   return retval;
 }
 
-typedef __gnu_cxx::hash_map
-<const char *, std::string, __gnu_cxx::hash<const char *>, eqstr>
+typedef hphp_hash_map
+<const char *, std::string, hphp_hash<const char *>, eqstr>
 HtmlEntityMap;
 
 static volatile bool EntityMapInited = false;

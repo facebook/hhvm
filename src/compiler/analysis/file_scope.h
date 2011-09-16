@@ -64,7 +64,7 @@ public:
 
 public:
   FileScope(const std::string &fileName, int fileSize);
-  ~FileScope() {}
+  ~FileScope() { delete m_redeclaredFunctions; }
   int getSize() const { return m_size;}
 
   // implementing FunctionContainer
@@ -77,9 +77,10 @@ public:
   }
   void getClassesFlattened(ClassScopePtrVec &classes) const;
   ClassScopePtr getClass(const char *name);
+  void getScopesSet(BlockScopeRawPtrQueue &v);
 
-  virtual int getFunctionCount() const;
-  virtual void countReturnTypes(std::map<std::string, int> &counts);
+  int getFunctionCount() const;
+  void countReturnTypes(std::map<std::string, int> &counts);
   int getClassCount() const { return m_classes.size();}
 
   void pushAttribute();
@@ -104,8 +105,11 @@ public:
   FunctionScopePtr setTree(AnalysisResultConstPtr ar, StatementListPtr tree);
   void cleanupForError();
 
+  bool addFunction(AnalysisResultConstPtr ar, FunctionScopePtr funcScope);
   bool addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope);
-
+  const StringToFunctionScopePtrVecMap *getRedecFunctions() {
+    return m_redeclaredFunctions;
+  }
   void addUsedLiteralString(std::string s) {
     m_usedLiteralStrings.insert(s);
   }
@@ -223,13 +227,10 @@ public:
   }
   void setHasNonPrivateScope() { m_hasNonPrivateInclude = true;}
   void outputCPPForwardStaticDecl(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPForwardDeclHeader(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPDeclHeader(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPForwardDeclarations(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPDeclarations(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPClassHeaders(AnalysisResultPtr ar,
-                             CodeGenerator::Output output);
-  void outputCPPForwardClassHeaders(CodeGenerator &cg, AnalysisResultPtr ar,
                              CodeGenerator::Output output);
   void outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPPseudoMain(CodeGenerator &cg, AnalysisResultPtr ar);
@@ -251,8 +252,8 @@ private:
   std::vector<int> m_attributes;
   std::string m_fileName;
   StatementListPtr m_tree;
+  StringToFunctionScopePtrVecMap *m_redeclaredFunctions;
   StringToClassScopePtrVecMap m_classes;      // name => class
-  ClassScopePtrVec m_ignoredClasses;
   FunctionScopeRawPtr m_pseudoMain;
 
   vertex_descriptor m_vertex;

@@ -64,7 +64,7 @@ private:
     int clen;    // compressed len
     char *cdata; // compressed data
   };
-  typedef __gnu_cxx::hash_map<std::string, Buffer, string_hash> FileMap;
+  typedef hphp_hash_map<std::string, Buffer, string_hash> FileMap;
 
   FileMap m_files;
   int m_fd;

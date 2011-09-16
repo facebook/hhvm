@@ -123,7 +123,6 @@ public:
   void checkDerivation(AnalysisResultPtr ar, hphp_istring_set &seen);
   const std::string &getOriginalParent() const { return m_parent; }
   std::string getHeaderFilename();
-  std::string getForwardHeaderFilename();
 
   /**
    * Returns topmost parent class that has the method.
@@ -181,8 +180,8 @@ public:
     return m_attribute & attr;
   }
 
-  void addMissingMethod(const std::string &name) {
-    m_missingMethods.insert(name);
+  const FunctionScopePtrVec &getFunctionsVec() const {
+    return m_functionsVec;
   }
 
   /**
@@ -395,8 +394,7 @@ public:
   bool hasConst(const std::string &name) const;
   void outputCPPHeader(AnalysisResultPtr ar,
                        CodeGenerator::Output output);
-  void outputCPPForwardHeader(AnalysisResultPtr ar,
-                              CodeGenerator::Output output);
+  void outputCPPForwardHeader(CodeGenerator &cg,AnalysisResultPtr ar);
   void outputCPPJumpTableDecl(CodeGenerator &cg, AnalysisResultPtr ar);
 
   void outputMethodWrappers(CodeGenerator &cg, AnalysisResultPtr ar);
@@ -441,11 +439,8 @@ public:
   /**
    * Override function container
    */
-  virtual bool addFunction(AnalysisResultConstPtr ar,
-                           FunctionScopePtr funcScope);
-
-  void outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
-                          bool staticOnly, bool dynamicObject);
+  bool addFunction(AnalysisResultConstPtr ar,
+                   FunctionScopePtr funcScope);
 
   void outputVolatileCheckBegin(CodeGenerator &cg,
                                 AnalysisResultPtr ar,
@@ -518,7 +513,6 @@ private:
 
   std::string m_parent;
   mutable std::vector<std::string> m_bases;
-  std::set<std::string> m_missingMethods;
 
   std::set<JumpTableName> m_emptyJumpTables;
   std::set<std::string> m_usedLiteralStringsHeader;
@@ -628,11 +622,11 @@ private:
   void outputCPPMethodInvokeTable
     (CodeGenerator &cg, AnalysisResultPtr ar,
      const std::vector <const char*> &keys,
-     const StringToFunctionScopePtrVecMap &funcScopes, bool fewArgs,
+     const StringToFunctionScopePtrMap &funcScopes, bool fewArgs,
      bool staticOnly);
   void outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
       AnalysisResultPtr ar, const std::vector<const char*> &keys,
-      const StringToFunctionScopePtrVecMap &funcScopes, bool fewArgs);
+      const StringToFunctionScopePtrMap &funcScopes, bool fewArgs);
   hphp_const_char_imap<int> m_implemented;
 
   ClassScopePtr getNextParentWithProp(AnalysisResultPtr ar);

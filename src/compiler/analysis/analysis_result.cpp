@@ -154,25 +154,15 @@ FileScopePtr AnalysisResult::findFileScope(const std::string &name) const {
 
 FunctionScopePtr AnalysisResult::findFunction(
   const std::string &funcName) const {
-  StringToFunctionScopePtrVecMap::const_iterator bit =
+  StringToFunctionScopePtrMap::const_iterator bit =
     m_functions.find(funcName);
   if (bit != m_functions.end()) {
-    return bit->second[0];
+    return bit->second;
   }
-  StringToFunctionScopePtrVecMap::const_iterator iter =
+  StringToFunctionScopePtrMap::const_iterator iter =
     m_functionDecs.find(funcName);
   if (iter != m_functionDecs.end()) {
-    return iter->second.back();
-  }
-  return FunctionScopePtr();
-}
-
-FunctionScopePtr AnalysisResult::findHelperFunction(const std::string &
-                                                    funcName) const {
-  StringToFunctionScopePtrVecMap::const_iterator bit =
-    m_helperFunctions.find(funcName);
-  if (bit != m_helperFunctions.end()) {
-    return bit->second[0];
+    return iter->second;
   }
   return FunctionScopePtr();
 }
@@ -352,6 +342,9 @@ bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) const {
   string fname = funcScope->getName();
   // System functions override
   if (m_functions.find(fname) != m_functions.end()) {
+    // we need someone to hold on to a reference to it
+    // even though we're not going to do anything with it
+    this->lock()->m_ignoredScopes.push_back(funcScope);
     return false;
   }
 
@@ -364,6 +357,9 @@ bool AnalysisResult::declareClass(ClassScopePtr classScope) const {
   string cname = classScope->getName();
   // System classes override
   if (m_systemClasses.find(cname) != m_systemClasses.end()) {
+    // we need someone to hold on to a reference to it
+    // even though we're not going to do anything with it
+    this->lock()->m_ignoredScopes.push_back(classScope);
     return false;
   }
 
@@ -401,28 +397,6 @@ static bool by_source(const BlockScopePtr &b1, const BlockScopePtr &b2) {
 void AnalysisResult::canonicalizeSymbolOrder() {
   getConstants()->canonicalizeSymbolOrder();
   getVariables()->canonicalizeSymbolOrder();
-
-  for (StringToFunctionScopePtrVecMap::iterator iter = m_functions.begin();
-       iter != m_functions.end(); ++iter) {
-    FunctionScopePtrVec &funcs = iter->second;
-    if (funcs.size() > 1) {
-      sort(funcs.begin(), funcs.end(), by_source);
-    }
-  }
-
-  for (StringToFunctionScopePtrVecMap::iterator iter = m_functionDecs.begin();
-       iter != m_functionDecs.end(); ++iter) {
-    const string &fname = iter->first;
-    FunctionScopePtrVec &funcs = iter->second;
-    if (funcs.size() > 1 ||
-        Option::DynamicInvokeFunctions.find(fname) !=
-        Option::DynamicInvokeFunctions.end()) {
-      sort(funcs.begin(), funcs.end(), by_source);
-      for (unsigned int i = 0; i < funcs.size(); i++) {
-        funcs[i]->setRedeclaring(i);
-      }
-    }
-  }
 
   AnalysisResultPtr ar = shared_from_this();
   for (StringToClassScopePtrVecMap::iterator iter = m_classDecs.begin();
@@ -469,11 +443,12 @@ bool AnalysisResult::addFunctionDependency(FileScopePtr usingFile,
   if (BuiltinSymbols::s_functions.find(functionName) !=
       BuiltinSymbols::s_functions.end())
     return true;
-  StringToFunctionScopePtrVecMap::const_iterator iter =
+  StringToFunctionScopePtrMap::const_iterator iter =
     m_functionDecs.find(functionName);
-  if (iter == m_functionDecs.end() ||
-      iter->second.size() != 1) return false;
-  FunctionScopePtr functionScope = iter->second[0];
+  if (iter == m_functionDecs.end() || iter->second->isRedeclaring()) {
+    return false;
+  }
+  FunctionScopePtr functionScope = iter->second;
   FileScopePtr fileScope = functionScope->getContainingFile();
   link(usingFile, fileScope);
   return true;
@@ -528,13 +503,11 @@ bool AnalysisResult::isSystemConstant(const std::string &constName) const {
 void AnalysisResult::loadBuiltinFunctions() {
   AnalysisResultPtr ar = shared_from_this();
   BuiltinSymbols::LoadFunctions(ar, m_functions);
-  BuiltinSymbols::LoadHelperFunctions(ar, m_helperFunctions);
 }
 
 void AnalysisResult::loadBuiltins() {
   AnalysisResultPtr ar = shared_from_this();
   BuiltinSymbols::LoadFunctions(ar, m_functions);
-  BuiltinSymbols::LoadHelperFunctions(ar, m_helperFunctions);
   BuiltinSymbols::LoadClasses(ar, m_systemClasses);
   BuiltinSymbols::LoadVariables(ar, m_variables);
   BuiltinSymbols::LoadConstants(ar, m_constants);
@@ -553,14 +526,44 @@ void AnalysisResult::checkClassDerivations() {
 }
 
 void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
-  const StringToFunctionScopePtrVecMap &funcs = fs->getFunctions();
-  for (StringToFunctionScopePtrVecMap::const_iterator iter = funcs.begin();
+  const StringToFunctionScopePtrMap &funcs = fs->getFunctions();
+
+  for (StringToFunctionScopePtrMap::const_iterator iter = funcs.begin();
        iter != funcs.end(); ++iter) {
-    for (unsigned int i = 0; i < iter->second.size(); i++) {
-      FunctionScopePtr func = iter->second[i];
-      if (!func->inPseudoMain()) {
-        FunctionScopePtrVec &funcVec = m_functionDecs[iter->first];
+    FunctionScopePtr func = iter->second;
+    if (!func->inPseudoMain()) {
+      FunctionScopePtr &funcDec = m_functionDecs[iter->first];
+      if (funcDec) {
+        FunctionScopePtrVec &funcVec = m_functionReDecs[iter->first];
+        int sz = funcVec.size();
+        if (!sz) {
+          funcDec->setRedeclaring(sz++);
+          funcVec.push_back(funcDec);
+        }
+        func->setRedeclaring(sz++);
         funcVec.push_back(func);
+      } else {
+        funcDec = func;
+      }
+    }
+  }
+
+  if (const StringToFunctionScopePtrVecMap *redec = fs->getRedecFunctions()) {
+    for (StringToFunctionScopePtrVecMap::const_iterator iter = redec->begin();
+         iter != redec->end(); ++iter) {
+      FunctionScopePtrVec::const_iterator i = iter->second.begin();
+      FunctionScopePtrVec::const_iterator e = iter->second.end();
+      FunctionScopePtr &funcDec = m_functionDecs[iter->first];
+      ASSERT(funcDec); // because the first one was in funcs above
+      FunctionScopePtrVec &funcVec = m_functionReDecs[iter->first];
+      int sz = funcVec.size();
+      if (!sz) {
+        funcDec->setRedeclaring(sz++);
+        funcVec.push_back(funcDec);
+      }
+      while (++i != e) { // we already added the first one
+        (*i)->setRedeclaring(sz++);
+        funcVec.push_back(*i);
       }
     }
   }
@@ -662,8 +665,8 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
 
 static void addClassRootMethods(AnalysisResultPtr ar, ClassScopePtr cls,
                                 hphp_string_set &methods) {
-  const StringToFunctionScopePtrVecMap &funcs = cls->getFunctions();
-  for (StringToFunctionScopePtrVecMap::const_iterator iter =
+  const StringToFunctionScopePtrMap &funcs = cls->getFunctions();
+  for (StringToFunctionScopePtrMap::const_iterator iter =
          funcs.begin(); iter != funcs.end(); ++iter) {
     ClassScopePtrVec roots;
     cls->getRootParents(ar, iter->first, roots, cls);
@@ -675,13 +678,13 @@ static void addClassRootMethods(AnalysisResultPtr ar, ClassScopePtr cls,
 
 static void addClassRootMethods(AnalysisResultPtr ar, ClassScopePtr cls,
                                 StringToFunctionScopePtrVecMap &methods) {
-  const StringToFunctionScopePtrVecMap &funcs = cls->getFunctions();
-  for (StringToFunctionScopePtrVecMap::const_iterator iter =
+  const StringToFunctionScopePtrMap &funcs = cls->getFunctions();
+  for (StringToFunctionScopePtrMap::const_iterator iter =
          funcs.begin(); iter != funcs.end(); ++iter) {
     ClassScopePtr root = cls->getRootParent(ar, iter->first);
     string cluster = root->getName() + "::" + iter->first;
     FunctionScopePtrVec &fs = methods[cluster];
-    fs.insert(fs.end(), iter->second.begin(), iter->second.end());
+    fs.push_back(iter->second);
   }
 }
 
@@ -809,39 +812,11 @@ void AnalysisResult::visitFiles(void (*cb)(AnalysisResultPtr,
   }
 }
 
-void AnalysisResult::getFuncScopesSet(BlockScopeRawPtrQueue &v,
-                                      FunctionContainerPtr fc) {
-  const StringToFunctionScopePtrVecMap &funcMap = fc->getFunctions();
-  for (StringToFunctionScopePtrVecMap::const_iterator
-         iter = funcMap.begin(), end = funcMap.end();
-       iter != end; ++iter) {
-    for (FunctionScopePtrVec::const_iterator it = iter->second.begin(),
-           e = iter->second.end(); it != e; ++it) {
-      FunctionScopePtr f = *it;
-      if (f->isUserFunction()) {
-        v.push_back(f);
-      }
-    }
-  }
-}
-
 void AnalysisResult::getScopesSet(BlockScopeRawPtrQueue &v) {
-  for (StringToClassScopePtrVecMap::iterator iter = m_classDecs.begin(),
-         end = m_classDecs.end(); iter != end; ++iter) {
-    for (ClassScopePtrVec::iterator it = iter->second.begin(),
-           e = iter->second.end(); it != e; ++it) {
-      ClassScopePtr cls = *it;
-      if (cls->isUserClass() && !cls->isTrait()) {
-        v.push_back(cls);
-        getFuncScopesSet(v, cls);
-      }
-    }
-  }
-
   for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
        iter != m_files.end(); ++iter) {
     FileScopePtr file = iter->second;
-    getFuncScopesSet(v, file);
+    file->getScopesSet(v);
   }
 }
 
@@ -2341,10 +2316,8 @@ public:
     BOOST_FOREACH(FileScopePtr fs, m_files) {
       string fileBase = fs->outputFilebase();
       string header = fileBase + ".h";
-      string fwheader = fileBase + ".fw.h";
       string fwsheader = fileBase + ".fws.h";
       string fileHeader = m_root + header;
-      string fwFileHeader = m_root + fwheader;
       string fwsFileHeader = m_root + fwsheader;
       {
         ofstream f(fileHeader.c_str());
@@ -2353,13 +2326,6 @@ public:
         f.close();
       }
       fs->outputCPPClassHeaders(m_ar, m_output);
-      fs->outputCPPForwardClassHeaders(cg, m_ar, m_output);
-      {
-        ofstream f(fwFileHeader.c_str());
-        CodeGenerator cg(&f, m_output);
-        fs->outputCPPForwardDeclHeader(cg, m_ar);
-        f.close();
-      }
       {
         ofstream f(fwsFileHeader.c_str());
         CodeGenerator cg(&f, m_output);
@@ -2969,18 +2935,18 @@ void AnalysisResult::outputCPPDynamicTablesHeader
 
 void AnalysisResult::createGlobalFuncTable() {
   vector<const char *> funcs;
-  for (StringToFunctionScopePtrVecMap::const_iterator iter =
+  for (StringToFunctionScopePtrMap::const_iterator iter =
          m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
-    FunctionScopePtr func = iter->second[0];
+    FunctionScopePtr func = iter->second;
     if (func->isDynamic() || func->isRedeclaring()) {
-      funcs.push_back(iter->second[0]->getOriginalName().c_str());
+      funcs.push_back(iter->second->getOriginalName().c_str());
     }
   }
-  for (StringToFunctionScopePtrVecMap::const_iterator iter =
+  for (StringToFunctionScopePtrMap::const_iterator iter =
          m_functions.begin(); iter != m_functions.end(); ++iter) {
-    FunctionScopePtr func = iter->second[0];
+    FunctionScopePtr func = iter->second;
     if (func->isSepExtension()) {
-      funcs.push_back(iter->second[0]->getOriginalName().c_str());
+      funcs.push_back(func->getOriginalName().c_str());
     }
   }
   if (funcs.size() > 0) {
@@ -3443,22 +3409,23 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
     cg.printSection("Function Invoke Table");
     if (system) {
       bool needGlobals;
-      outputCPPJumpTableSupport(cg, ar, needGlobals);
-      outputCPPCodeInfoTable(cg, ar, true);
+      outputCPPJumpTableSupport(cg, ar, 0, needGlobals);
+      outputCPPCodeInfoTable(cg, ar, true, m_functions);
     } else {
       // For functions declared in separable extensions, generate CallInfo and
       // add to declaration list to be included it the table.
-      for (StringToFunctionScopePtrVecMap::const_iterator iter =
+      for (StringToFunctionScopePtrMap::const_iterator iter =
              m_functions.begin(); iter != m_functions.end(); ++iter) {
-        FunctionScopePtr func = iter->second[0];
+        FunctionScopePtr func = iter->second;
         if (func->isSepExtension()) {
           outputCPPJumpTableSupportMethod(cg, ar, func, Option::FunctionPrefix);
           func->outputCPPCallInfo(cg, ar);
-          FunctionScopePtrVec &funcVec = m_functionDecs[iter->first];
-          funcVec.push_back(func);
+          FunctionScopePtr &funcDec = m_functionDecs[iter->first];
+          ASSERT(!funcDec);
+          funcDec = func;
         }
       }
-      outputCPPCodeInfoTable(cg, ar, false, &m_functionDecs);
+      outputCPPCodeInfoTable(cg, ar, false, m_functionDecs);
     }
     cg.namespaceEnd();
     fTable.close();
@@ -3659,12 +3626,12 @@ void AnalysisResult::getCPPRedeclaredFunctionDecl
 (CodeGenerator &cg, Type2SymbolSetMap &type2names) {
   SymbolSet &symbols = type2names["CallInfo*"];
   SymbolSet &bools = type2names["bool"];
-  for (StringToFunctionScopePtrVecMap::const_iterator iter =
+  for (StringToFunctionScopePtrMap::const_iterator iter =
       m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
-    if (iter->second[0]->isVolatile()) {
+    if (iter->second->isVolatile()) {
       std::string fname = CodeGenerator::FormatLabel(iter->first);
       const char *name = fname.c_str();
-      if (iter->second[0]->isRedeclaring()) {
+      if (iter->second->isRedeclaring()) {
         symbols.insert(string("cim_") + name);
       }
       if (strcmp(name, "__autoload")) {
@@ -4326,12 +4293,12 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairSetVec &symbols,
 
   // redeclared functions
   names = &symbols[KindOfRedeclaredFunction];
-  for (StringToFunctionScopePtrVecMap::const_iterator iter =
+  for (StringToFunctionScopePtrMap::const_iterator iter =
          m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
-    if (iter->second[0]->isVolatile()) {
+    if (iter->second->isVolatile()) {
       std::string fname = CodeGenerator::FormatLabel(iter->first);
       const char *name = fname.c_str();
-      if (iter->second[0]->isRedeclaring()) {
+      if (iter->second->isRedeclaring()) {
         string varname = string("cim_") + name;
         names->insert(StringPair(varname, varname));
       }
@@ -4661,9 +4628,9 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
   cg_printf("(const char *)ClassInfo::IsSystem, NULL, \"\","
             " \"\", NULL, NULL,\n");
   cg_printf("NULL,\n"); // interfaces
-  for (StringToFunctionScopePtrVecMap::const_iterator iter =
+  for (StringToFunctionScopePtrMap::const_iterator iter =
          m_functions.begin(); iter != m_functions.end(); ++iter) {
-    FunctionScopePtr func = iter->second[0];
+    FunctionScopePtr func = iter->second;
     ASSERT(!func->isUserFunction());
     func->outputCPPClassMap(cg, ar);
   }
@@ -4687,9 +4654,9 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
   cg_printf("(const char *)ClassInfo::IsNothing, NULL, \"\","
             " \"\", NULL, NULL,\n");
   cg_printf("NULL,\n"); // interfaces
-  for (StringToFunctionScopePtrVecMap::const_iterator iter =
+  for (StringToFunctionScopePtrMap::const_iterator iter =
          m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
-    FunctionScopePtr func = iter->second[0];
+    FunctionScopePtr func = iter->second;
     if (func->isUserFunction()) {
       func->outputCPPClassMap(cg, ar);
     }
@@ -4745,6 +4712,7 @@ void AnalysisResult::outputCPPClusterImpl(CodeGenerator &cg,
                                           const FileScopePtrVec &files) {
   cg_printf("\n");
 
+  cg.printBasicIncludes();
   // includes
   map<string, FileScopePtr> toInclude;
   BOOST_FOREACH(FileScopePtr fs, files) {
@@ -4914,11 +4882,23 @@ void AnalysisResult::outputHSFFIStubs() {
   cg_printf("module HphpStubs (");
   bool first = true;
   BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    const StringToFunctionScopePtrVecMap &fns = fs->getFunctions();
-    for (StringToFunctionScopePtrVecMap::const_iterator it = fns.begin();
+    const StringToFunctionScopePtrMap &fns = fs->getFunctions();
+    for (StringToFunctionScopePtrMap::const_iterator it = fns.begin();
          it != fns.end(); ++it) {
-      BOOST_FOREACH(FunctionScopePtr func, it->second) {
-        if (func->inPseudoMain()) continue;
+      FunctionScopePtr func = it->second;
+      if (func->inPseudoMain()) continue;
+      if (func->isLocalRedeclaring()) {
+        StringToFunctionScopePtrVecMap::const_iterator iter =
+          fs->getRedecFunctions()->find(it->first);
+        BOOST_FOREACH(FunctionScopePtr func, iter->second) {
+          if (first) {
+            first = false;
+          } else {
+            cg_printf(", ");
+          }
+          cg_printf("f_%s", func->getId().c_str());
+        }
+      } else {
         if (first) {
           first = false;
         } else {
@@ -5180,13 +5160,23 @@ void AnalysisResult::addRTTIFunction(const std::string &id) {
   m_rttiFuncs.insert(id);
 }
 
-void AnalysisResult::cloneRTTIFuncs
-(ClassScopePtr cls, const StringToFunctionScopePtrVecMap &functions) {
-  for (StringToFunctionScopePtrVecMap::const_iterator iter =
-       functions.begin(); iter != functions.end(); ++iter) {
-    for (unsigned int j = 0; j < iter->second.size(); j++) {
-      FunctionScopePtr func = iter->second[j];
-      const string funcId = getFuncId(cls, func);
+void AnalysisResult::cloneRTTIFuncs(
+  const StringToFunctionScopePtrMap &functions,
+  const StringToFunctionScopePtrVecMap *redecFunctions) {
+  for (StringToFunctionScopePtrMap::const_iterator iter =
+         functions.begin(); iter != functions.end(); ++iter) {
+    FunctionScopePtr func = iter->second;
+    if (func->isRedeclaring()) {
+      ASSERT(redecFunctions);
+      BOOST_FOREACH(func, redecFunctions->find(iter->first)->second) {
+        const string funcId = getFuncId(func->getContainingClass(), func);
+        if (RTTIInfo::TheRTTIInfo.exists(funcId.c_str())) {
+          StatementPtr stmt = func->getStmt();
+          func->setStmtCloned(stmt->clone());
+        }
+      }
+    } else {
+      const string funcId = getFuncId(func->getContainingClass(), func);
       if (RTTIInfo::TheRTTIInfo.exists(funcId.c_str())) {
         StatementPtr stmt = func->getStmt();
         func->setStmtCloned(stmt->clone());
@@ -5201,7 +5191,8 @@ void AnalysisResult::cloneRTTIFuncs(const char *RTTIDirectory) {
 
   for (unsigned int i = 0; i < m_fileScopes.size(); i++) {
     // standalone rtti functions
-    cloneRTTIFuncs(ClassScopePtr(), m_fileScopes[i]->getFunctions());
+    cloneRTTIFuncs(m_fileScopes[i]->getFunctions(),
+                   m_fileScopes[i]->getRedecFunctions());
 
     // class rtti methods
     for (StringToClassScopePtrVecMap::const_iterator iter =
@@ -5209,7 +5200,7 @@ void AnalysisResult::cloneRTTIFuncs(const char *RTTIDirectory) {
          iter != m_fileScopes[i]->getClasses().end(); ++iter) {
       for (unsigned int j = 0; j < iter->second.size(); j++) {
         ClassScopePtr cls = iter->second[j];
-        cloneRTTIFuncs(cls, cls->getFunctions());
+        cloneRTTIFuncs(cls->getFunctions(), 0);
       }
     }
   }

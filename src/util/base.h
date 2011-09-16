@@ -52,8 +52,6 @@
 #include <set>
 #include <deque>
 #include <exception>
-#include <ext/hash_map>
-#include <ext/hash_set>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -64,6 +62,48 @@
 #include <boost/filesystem/operations.hpp>
 
 #include <util/hash.h>
+
+#if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 4))
+
+#include <tr1/unordered_map>
+#include <tr1/unordered_set>
+
+#define hphp_hash     std::tr1::hash
+namespace std {
+namespace tr1 {
+template<>
+struct hash<const char*> {
+  size_t operator()(const char *s) const {
+    return HPHP::hash_string_cs(s, strlen(s));
+  }
+};
+}
+}
+
+namespace HPHP {
+template <class _T,class _U,
+          class _V = hphp_hash<_T>,class _W = std::equal_to<_T> >
+struct hphp_hash_map : std::tr1::unordered_map<_T,_U,_V,_W> {
+  hphp_hash_map() : std::tr1::unordered_map<_T,_U,_V,_W>(0) {}
+};
+
+template <class _T,
+          class _V = hphp_hash<_T>,class _W = std::equal_to<_T> >
+struct hphp_hash_set : std::tr1::unordered_set<_T,_V,_W> {
+  hphp_hash_set() : std::tr1::unordered_set<_T,_V,_W>(0) {}
+};
+}
+
+#else
+
+#include <ext/hash_map>
+#include <ext/hash_set>
+
+#define hphp_hash_map __gnu_cxx::hash_map
+#define hphp_hash_set __gnu_cxx::hash_set
+#define hphp_hash     __gnu_cxx::hash
+
+#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -105,10 +145,6 @@ typedef unsigned long long uint64;
 ///////////////////////////////////////////////////////////////////////////////
 // stl classes
 
-#define hphp_hash_map __gnu_cxx::hash_map
-#define hphp_hash_set __gnu_cxx::hash_set
-#define hphp_hash     __gnu_cxx::hash
-
 struct ltstr {
   bool operator()(const char *s1, const char *s2) const {
     return strcmp(s1, s2) < 0;
@@ -133,9 +169,9 @@ struct stdltistr {
   }
 };
 
-struct string_hash {
+struct string_hash : public hphp_hash<const char*> {
   size_t operator()(const std::string &s) const {
-    return __gnu_cxx::__stl_hash_string(s.c_str());
+    return hphp_hash<const char*>::operator()(s.c_str());
   }
   size_t hash(const std::string &s) const {
     return operator()(s);
@@ -159,7 +195,7 @@ struct string_case_eq {
 };
 
 template<class type, class T> struct gnu_case_hash :
-  public __gnu_cxx::hash_map<std::string, type, string_hash> {
+  public hphp_hash_map<std::string, type, string_hash> {
 };
 
 struct int64_hash {

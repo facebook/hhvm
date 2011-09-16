@@ -38,9 +38,7 @@ public:
   static bool Load(AnalysisResultPtr ar, bool extOnly = false);
 
   static void LoadFunctions(AnalysisResultPtr ar,
-                            StringToFunctionScopePtrVecMap &functions);
-  static void LoadHelperFunctions(AnalysisResultPtr ar,
-                                  StringToFunctionScopePtrVecMap &functions);
+                            StringToFunctionScopePtrMap &functions);
   static void LoadClasses(AnalysisResultPtr ar,
                           StringToClassScopePtrMap &classes);
   static void LoadVariables(AnalysisResultPtr ar,

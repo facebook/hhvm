@@ -203,7 +203,6 @@ public:
   /**
    * Whether this function is a runtime helper function
    */
-  bool isHelperFunction() const;
   void setHelperFunction();
 
   /**
@@ -271,6 +270,9 @@ public:
     setVolatile(); // redeclared function is also volatile
   }
   bool isRedeclaring() const { return m_redeclaring >= 0;}
+
+  void setLocalRedeclaring() { m_localRedeclaring = true; }
+  bool isLocalRedeclaring() const { return m_localRedeclaring; }
 
   /* For function_exists */
   void setVolatile() { m_volatile = true;}
@@ -522,6 +524,7 @@ private:
   unsigned m_nextLSB : 1;
   unsigned m_hasTry : 1;
   unsigned m_hasGoto : 1;
+  unsigned m_localRedeclaring : 1;
 
   int m_redeclaring; // multiple definition of the same function
   StatementPtr m_stmtCloned; // cloned method body stmt

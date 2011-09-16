@@ -507,25 +507,13 @@ AnalysisResultPtr BuiltinSymbols::LoadGlobalSymbols(const char *fileName) {
 }
 
 void BuiltinSymbols::LoadFunctions(AnalysisResultPtr ar,
-                                   StringToFunctionScopePtrVecMap &functions) {
+                                   StringToFunctionScopePtrMap &functions) {
   ASSERT(Loaded);
   for (StringToFunctionScopePtrMap::const_iterator it = s_functions.begin();
        it != s_functions.end(); ++it) {
     if (functions.find(it->first) == functions.end()) {
-      functions[it->first].push_back(it->second);
+      functions[it->first] = it->second;
       FunctionScope::RecordFunctionInfo(it->first, it->second);
-    }
-  }
-}
-
-void BuiltinSymbols::LoadHelperFunctions(
-  AnalysisResultPtr ar,
-  StringToFunctionScopePtrVecMap &functions) {
-  ASSERT(Loaded);
-  for (StringToFunctionScopePtrMap::const_iterator it =
-          s_helperFunctions.begin(); it != s_helperFunctions.end(); ++it) {
-    if (functions.find(it->first) == functions.end()) {
-      functions[it->first].push_back(it->second);
     }
   }
 }
@@ -539,10 +527,10 @@ void BuiltinSymbols::LoadClasses(AnalysisResultPtr ar,
   // will not overwrite them with their own file and line number information
   for (StringToClassScopePtrMap::const_iterator iter =
          s_classes.begin(); iter != s_classes.end(); ++iter) {
-    const StringToFunctionScopePtrVecMap &funcs = iter->second->getFunctions();
-    for (StringToFunctionScopePtrVecMap::const_iterator iter =
+    const StringToFunctionScopePtrMap &funcs = iter->second->getFunctions();
+    for (StringToFunctionScopePtrMap::const_iterator iter =
            funcs.begin(); iter != funcs.end(); ++iter) {
-      FunctionScope::RecordFunctionInfo(iter->first, iter->second.back());
+      FunctionScope::RecordFunctionInfo(iter->first, iter->second);
     }
   }
 }

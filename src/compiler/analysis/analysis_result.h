@@ -163,7 +163,6 @@ public:
   void visitFiles(void (*cb)(AnalysisResultPtr, StatementPtr, void*),
                   void *data);
 
-  void getFuncScopesSet(BlockScopeRawPtrQueue &v, FunctionContainerPtr fc);
   void getScopesSet(BlockScopeRawPtrQueue &v);
 
   void preOptimize();
@@ -288,7 +287,6 @@ public:
   ClassScopePtr findExactClass(ConstructPtr cs, const std::string &name) const;
   bool checkClassPresent(ConstructPtr cs, const std::string &name) const;
   FunctionScopePtr findFunction(const std::string &funcName) const ;
-  FunctionScopePtr findHelperFunction(const std::string &funcName) const;
   BlockScopeConstPtr findConstantDeclarer(const std::string &constName) const {
     return const_cast<AnalysisResult*>(this)->findConstantDeclarer(constName);
   }
@@ -384,7 +382,8 @@ private:
   std::map<std::string, std::string> m_extraCodes;
 
   StringToClassScopePtrMap m_systemClasses;
-  StringToFunctionScopePtrVecMap m_functionDecs;
+  StringToFunctionScopePtrMap m_functionDecs;
+  StringToFunctionScopePtrVecMap m_functionReDecs;
   StringToClassScopePtrVecMap m_classDecs;
   StringToClassScopePtrVecMap m_methodToClassDecs;
   StringToFileScopePtrMap m_constDecs;
@@ -459,6 +458,7 @@ private:
   std::vector<ScalarArrayExp> m_scalarArraySorted;
   int m_scalarArrayCompressedTextSize;
   bool m_pregenerating, m_pregenerated;
+  BlockScopePtrVec m_ignoredScopes;
 
   typedef boost::adjacency_list<boost::setS, boost::vecS> Graph;
   typedef boost::graph_traits<Graph>::vertex_descriptor vertex_descriptor;
@@ -598,8 +598,8 @@ private:
   void outputCPPHashTableGetConstant(CodeGenerator &cg, bool system,
          const std::map<std::string, TypePtr> &constMap,
          const hphp_const_char_map<bool> &dyns);
-  void cloneRTTIFuncs(ClassScopePtr cls,
-                      const StringToFunctionScopePtrVecMap &functions);
+  void cloneRTTIFuncs(const StringToFunctionScopePtrMap &functions,
+                      const StringToFunctionScopePtrVecMap *redecFunctions);
   void outputInitLiteralVarStrings(CodeGenerator &cg, int fileIndex,
          std::vector<int> &litVarStrFileIndices,
          std::vector<std::pair<int, int> > &litVarStrs);

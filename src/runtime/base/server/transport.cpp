@@ -458,11 +458,28 @@ bool Transport::cookieExists(const char *name) {
       if (hasValue) {
         if (pos == header.size() || header[pos] == ';') return true;
       } else {
-        if (header[pos] == '=') return true;
+        if (pos < header.size() && header[pos] == '=') return true;
       }
     }
   }
   return false;
+}
+
+string Transport::getCookie(const string &name) {
+  ASSERT(!name.empty());
+  string header = getHeader("Cookie");
+  for (size_t pos = header.find(name); pos != string::npos;
+       pos = header.find(name, pos + 1)) {
+    if (pos == 0 || isspace(header[pos-1]) || header[pos-1] == ';') {
+      pos += name.size();
+      if (pos < header.size() && header[pos] == '=') {
+        size_t end = header.find(';', pos + 1);
+        if (end != string::npos) end -= pos + 1;
+        return header.substr(pos + 1, end);
+      }
+    }
+  }
+  return "";
 }
 
 bool Transport::decideCompression() {

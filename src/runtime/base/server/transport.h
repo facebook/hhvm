@@ -268,6 +268,11 @@ public:
   bool cookieExists(const char *name);
 
   /**
+   * Get value of cookie "name"
+   */
+  std::string getCookie(const std::string &name);
+
+  /**
    * Test whether client is okay to accept compressed response.
    */
   bool decideCompression();

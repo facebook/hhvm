@@ -217,10 +217,10 @@ bool ClassScope::implementsAccessor(int prop) {
   return m_attribute & prop;
 }
 
-void ClassScope::checkDerivation(AnalysisResultPtr ar, hphp_istring_set &seen) {
+void ClassScope::checkDerivation(AnalysisResultPtr ar, hphp_string_iset &seen) {
   seen.insert(m_name);
 
-  hphp_istring_set bases;
+  hphp_string_iset bases;
   for (int i = m_bases.size() - 1; i >= 0; i--) {
     const string &base = m_bases[i];
 

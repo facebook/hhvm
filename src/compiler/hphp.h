@@ -17,17 +17,19 @@
 #ifndef __HPHP_H__
 #define __HPHP_H__
 
-///////////////////////////////////////////////////////////////////////////////
-
 #include <util/base.h>
+#include <util/case_insensitive.h>
 
 namespace HPHP {
-  class ClassScope;
-  template<class type> struct gnu_case_hash<type, ClassScope> :
-    public hphp_hash_map<std::string, type, string_case_hash,
-                         string_case_eq> {};
-}
+///////////////////////////////////////////////////////////////////////////////
+
+class ClassScope;
+
+template<class type> struct hphp_string_hash_map<type, ClassScope> :
+      public hphp_hash_map<std::string, type, string_hashi,
+                           string_eqstri> {};
 
 ///////////////////////////////////////////////////////////////////////////////
+}
 
 #endif  // __HPHP_H__

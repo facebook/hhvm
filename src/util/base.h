@@ -169,32 +169,16 @@ struct stdltistr {
   }
 };
 
-struct string_hash : public hphp_hash<const char*> {
+struct string_hash {
   size_t operator()(const std::string &s) const {
-    return hphp_hash<const char*>::operator()(s.c_str());
+    return hash_string_cs(s.c_str(), s.size());
   }
   size_t hash(const std::string &s) const {
     return operator()(s);
   }
 };
 
-struct string_case_hash {
-  size_t operator()(const std::string &s) const {
-    return hash_string_i(s.c_str(), s.size());
-  }
-  size_t hash(const std::string &s) const {
-    return operator()(s);
-  }
-};
-
-struct string_case_eq {
-  bool operator()(const std::string &lhs,
-             const std::string &rhs) const {
-    return !strcasecmp(lhs.c_str(), rhs.c_str());
-  }
-};
-
-template<class type, class T> struct gnu_case_hash :
+template<class type, class T> struct hphp_string_hash_map :
   public hphp_hash_map<std::string, type, string_hash> {
 };
 
@@ -239,39 +223,39 @@ struct smart_pointer_hash {
 
 template <class T> class hphp_raw_ptr {
 public:
-  hphp_raw_ptr() : ptr(0) {}
-  explicit hphp_raw_ptr(T *p) : ptr(p) {}
+  hphp_raw_ptr() : px(0) {}
+  explicit hphp_raw_ptr(T *p) : px(p) {}
 
-  hphp_raw_ptr(const boost::weak_ptr<T> &p) : ptr(p.lock().get()) {}
+  hphp_raw_ptr(const boost::weak_ptr<T> &p) : px(p.lock().get()) {}
 
   template <class S>
-  hphp_raw_ptr(const boost::shared_ptr<S> &p) : ptr(p.get()) {}
+  hphp_raw_ptr(const boost::shared_ptr<S> &p) : px(p.get()) {}
   template <class S>
-  hphp_raw_ptr(const boost::weak_ptr<S> &p) : ptr(p.lock().get()) {}
+  hphp_raw_ptr(const boost::weak_ptr<S> &p) : px(p.lock().get()) {}
   template <class S>
-  hphp_raw_ptr(const hphp_raw_ptr<S> &p) : ptr(p.get()) {}
+  hphp_raw_ptr(const hphp_raw_ptr<S> &p) : px(p.get()) {}
 
   boost::shared_ptr<T> lock() const {
-    return ptr ? boost::static_pointer_cast<T>(ptr->shared_from_this()) :
+    return px ? boost::static_pointer_cast<T>(px->shared_from_this()) :
       boost::shared_ptr<T>();
   }
   bool expired() const {
-    return !ptr;
+    return !px;
   }
 
   template <class S>
   operator boost::shared_ptr<S>() const {
-    S *s = ptr; // just to verify the implicit conversion T->S
-    return s ? boost::static_pointer_cast<S>(ptr->shared_from_this()) :
+    S *s = px; // just to verify the implicit conversion T->S
+    return s ? boost::static_pointer_cast<S>(px->shared_from_this()) :
       boost::shared_ptr<S>();
   }
 
-  T *operator->() const { ASSERT(ptr); return ptr; }
-  T *get() const { return ptr; }
+  T *operator->() const { ASSERT(px); return px; }
+  T *get() const { return px; }
   operator bool() const { return !expired(); }
-  void reset() { ptr = 0; }
+  void reset() { px = 0; }
 private:
-  T     *ptr;
+  T     *px;
 };
 
 #define IMPLEMENT_PTR_OPERATORS(A, B) \
@@ -305,8 +289,6 @@ class hphp_string_map :
 typedef hphp_hash_set<std::string, string_hash> hphp_string_set;
 typedef hphp_hash_set<const char *, hphp_hash<const char *>,
                       eqstr> hphp_const_char_set;
-typedef hphp_hash_set<std::string, string_case_hash, string_case_eq>
-                      hphp_istring_set;
 
 typedef hphp_hash_map<void*, void*, pointer_hash<void> > PointerMap;
 typedef hphp_hash_map<void*, int, pointer_hash<void> > PointerCounterMap;
@@ -336,12 +318,11 @@ typedef std::vector<StringPairSet> StringPairSetVec;
   typedef std::vector<classname ## Ptr> classname ## PtrVec;            \
   typedef std::set<classname ## Ptr> classname ## PtrSet;               \
   typedef std::list<classname ## Ptr> classname ## PtrList;             \
-  typedef std::deque<classname ## Ptr> classname ## PtrQueue;           \
-  typedef gnu_case_hash<classname ## Ptr, classname>                    \
+  typedef hphp_string_hash_map<classname ## Ptr, classname>             \
       StringTo ## classname ## PtrMap;                                  \
-  typedef gnu_case_hash<classname ## PtrVec, classname>                 \
+  typedef hphp_string_hash_map<classname ## PtrVec, classname>          \
       StringTo ## classname ## PtrVecMap;                               \
-  typedef gnu_case_hash<classname ## PtrSet, classname>                 \
+  typedef hphp_string_hash_map<classname ## PtrSet, classname>          \
       StringTo ## classname ## PtrSetMap;                               \
 
 typedef boost::shared_ptr<FILE> FilePtr;

@@ -965,7 +965,7 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   state &= ~StashAll;
   bool doStash = (state & FixOrder) != 0 || needsFastCastTemp(ar);
   bool ret = doStash;
-  int kidState = (state & ~(StashKidVars|StashVars|FixOrder));
+  int kidState = (state & ~(StashKidVars|StashVars|FixOrder|ForceTemp));
   if (state & StashKidVars) kidState |= StashVars;
   int lastEffect = -1, i;
   int n = getKidCount();

@@ -356,6 +356,10 @@ void AssignmentExpression::preOutputStash(CodeGenerator &cg,
 
 bool AssignmentExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                         int state) {
+  if (hasContext(RefValue) && !m_ref) {
+    if (!cg.inExpression()) return true;
+    state |= FixOrder | ForceTemp;
+  }
   if (m_variable->is(Expression::KindOfArrayElementExpression)) {
     ExpressionPtr exp = m_value;
     ExpressionPtr vv(

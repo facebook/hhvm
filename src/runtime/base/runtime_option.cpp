@@ -329,6 +329,7 @@ bool RuntimeOption::CheckSymLink = false;
 bool RuntimeOption::NativeXHP = true;
 int RuntimeOption::ScannerType = 0;
 bool RuntimeOption::SandboxCheckMd5 = false;
+int RuntimeOption::MaxUserFunctionId = 65536;
 
 #ifdef TAINTED
 bool RuntimeOption::EnableTaintWarnings = false;
@@ -1025,6 +1026,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     EnableObjDestructCall = eval["EnableObjDestructCall"].getBool(false);
     EnableEvalOptimization = eval["EnableEvalOptimization"].getBool(true);
     EvalScalarValueExprLimit = eval["EvalScalarValueExprLimit"].getInt32(64);
+    MaxUserFunctionId = eval["MaxUserFunctionId"].getInt32(65536);
     CheckSymLink = eval["CheckSymLink"].getBool(false);
     NativeXHP = eval["NativeXHP"].getBool(true);
     if (EnableXHP && !NativeXHP) ScannerType |= Scanner::PreprocessXHP;

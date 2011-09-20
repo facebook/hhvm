@@ -47,6 +47,7 @@ private:
       void *extra,
       VariableEnvironment &env) const;
   void *m_builtinPtr;
+  int m_userFuncId;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

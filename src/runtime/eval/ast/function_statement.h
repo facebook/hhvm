@@ -90,6 +90,7 @@ public:
   void init(void *parser, bool ref, const std::vector<ParameterPtr> &params,
             StatementListStatementPtr body, bool has_call_to_get_args);
   String name() const { return m_name; }
+  int getId() const { return m_id; }
   void changeName(const std::string &name);
   virtual Statement *optimize(VariableEnvironment &env);
   // Eval is called at declaration, not invocation
@@ -196,6 +197,31 @@ private:
   std::string computeInjectionName() const;
 
   CallInfo m_closureCallInfo;
+  int m_id;
+};
+
+class UserFunctionIdTable: public RequestEventHandler {
+public:
+  UserFunctionIdTable();
+  ~UserFunctionIdTable() {
+    if (m_funcStmts) free(m_funcStmts);
+  }
+  virtual void requestInit();
+  virtual void requestShutdown() {}
+
+  static int GetUserFunctionId(CStrRef funcName);
+  static bool DeclareUserFunction(const FunctionStatement *funcStmt);
+  static const FunctionStatement *GetUserFunction(int id);
+  static DECLARE_THREAD_LOCAL_NO_CHECK(UserFunctionIdTable,
+                                       s_userFunctionIdTable);
+private:
+  bool declareUserFunction(const FunctionStatement *funcStmt);
+  int getUserFunctionId(CStrRef funcName);
+  const FunctionStatement *getUserFunction(int id);
+  bool grow(int id);
+  int m_alloc;
+  int m_size;
+  const FunctionStatement **m_funcStmts;
 };
 
 void optimize(VariableEnvironment &env, ParameterPtr &param);

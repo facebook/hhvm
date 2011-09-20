@@ -35,14 +35,17 @@ using namespace std;
 SimpleFunctionCallExpression::SimpleFunctionCallExpression
 (EXPRESSION_ARGS, NamePtr name, const std::vector<ExpressionPtr> &params) :
   FunctionCallExpression(EXPRESSION_PASS, params), m_name(name),
-  m_builtinPtr(NULL) {
+  m_builtinPtr(NULL), m_userFuncId(-1) {
   if (dynamic_cast<StringName*>(name.get())) {
     String func(name->get());
     const CallInfo* ci;
     void *extra;
-    if (!evalOverrides.findFunction(func->data()) &&
-        get_call_info_no_eval(ci, extra, func)) {
-      m_builtinPtr = (void *)ci;
+    if (!evalOverrides.findFunction(func->data())) {
+      if (get_call_info_no_eval(ci, extra, func)) {
+        m_builtinPtr = (void *)ci;
+      } else {
+        m_userFuncId = UserFunctionIdTable::GetUserFunctionId(func);
+      }
     }
   }
 }
@@ -59,6 +62,13 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   if (m_builtinPtr && !hasRenamed) {
     const CallInfo *ci = (const CallInfo *)m_builtinPtr;
     return strongBind(evalCallInfo(ci, NULL, env));
+  }
+  if (m_userFuncId != -1 && !hasRenamed) {
+    const FunctionStatement *fs =
+      UserFunctionIdTable::GetUserFunction(m_userFuncId);
+    if (fs) {
+      return strongBind(fs->directInvoke(env, this));
+    }
   }
   Variant var(m_name->getAsVariant(env));
   if (var.is(KindOfObject)) {

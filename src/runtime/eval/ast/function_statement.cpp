@@ -37,11 +37,97 @@
 #include <system/lib/systemlib.h>
 
 #include <util/parser/parser.h>
+#include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {
 namespace Eval {
 using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
+
+typedef tbb::concurrent_hash_map<StringData *, int,
+                                 StringDataHashICompare> UserFunctionIdMap;
+static UserFunctionIdMap s_userFunctionIdMap;
+
+static int s_id = -1;
+
+#define INITIAL_FUNC_ID_TABLE_SIZE 4096
+#define INC_FUNC_ID_TABLE_SIZE 1024
+
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(UserFunctionIdTable,
+                                UserFunctionIdTable::s_userFunctionIdTable);
+
+UserFunctionIdTable::UserFunctionIdTable() : m_size(0) {
+  m_funcStmts = (const FunctionStatement **)
+    calloc(INITIAL_FUNC_ID_TABLE_SIZE, sizeof(FunctionStatement *));
+  if (m_funcStmts) {
+    m_size = m_alloc = INITIAL_FUNC_ID_TABLE_SIZE;
+  }
+}
+
+void UserFunctionIdTable::requestInit() {
+  ASSERT(s_id < RuntimeOption::MaxUserFunctionId);
+  grow(atomic_add(s_id, 0) + 1);
+}
+
+bool UserFunctionIdTable::grow(int id) {
+  ASSERT(id < RuntimeOption::MaxUserFunctionId);
+  int inc = id - m_size;
+  if (inc <= 0) return false;
+  if (id >= m_alloc) {
+    m_alloc += INC_FUNC_ID_TABLE_SIZE;
+    if (inc > INC_FUNC_ID_TABLE_SIZE) {
+      m_alloc += inc - inc % INC_FUNC_ID_TABLE_SIZE;
+    }
+    m_funcStmts = (const FunctionStatement **)
+      realloc(m_funcStmts, m_alloc * sizeof(FunctionStatement *));
+  }
+  memset(m_funcStmts + m_size, 0, sizeof(FunctionStatement *) * inc);
+  m_size = id;
+  return true;
+}
+
+int UserFunctionIdTable::getUserFunctionId(CStrRef func) {
+  ASSERT(func->isStatic());
+  UserFunctionIdMap::accessor acc;
+  if (s_userFunctionIdMap.insert(acc, func.get())) {
+    int id = atomic_inc(s_id);
+    acc->second = id;
+    grow(id + 1);
+  }
+  return acc->second;
+}
+
+int UserFunctionIdTable::GetUserFunctionId(CStrRef func) {
+  if (s_id >= RuntimeOption::MaxUserFunctionId) {
+    raise_warning("Maximum function id reached: %d", s_id);
+    return -1;
+  }
+  return s_userFunctionIdTable->getUserFunctionId(func);
+}
+
+bool UserFunctionIdTable::declareUserFunction(
+  const FunctionStatement *funcStmt) {
+  int id = funcStmt->getId();
+  if (id == -1 || id >= m_size) return false;
+  ASSERT(id >= 0);
+  m_funcStmts[id] = funcStmt;
+  return true;
+}
+
+bool UserFunctionIdTable::DeclareUserFunction(
+  const FunctionStatement *funcStmt) {
+  return s_userFunctionIdTable->declareUserFunction(funcStmt);
+}
+
+const FunctionStatement *UserFunctionIdTable::getUserFunction(int id) {
+  if (id == -1 || id >= m_size) return NULL;
+  ASSERT(id >= 0);
+  return m_funcStmts[id];
+}
+
+const FunctionStatement *UserFunctionIdTable::GetUserFunction(int id) {
+  return s_userFunctionIdTable->getUserFunction(id);
+}
 
 bool Parameter::checkTypeHint(DataType hint, DataType type) const {
   switch (hint) {
@@ -240,6 +326,7 @@ FunctionStatement::FunctionStatement(STATEMENT_ARGS, const string &name,
     m_docComment(doc),
     m_callInfo((void*)Invoker, (void*)InvokerFewArgs, 0, 0, 0),
     m_closureCallInfo((void*)FSInvoker, (void*)FSInvokerFewArgs, 0, 0, 0) {
+  m_id = UserFunctionIdTable::GetUserFunctionId(m_name);
 }
 
 FunctionStatement::~FunctionStatement() {

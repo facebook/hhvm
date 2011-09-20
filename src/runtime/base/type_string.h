@@ -426,6 +426,17 @@ struct StringDataHashCompare {
   }
 };
 
+struct StringDataHashICompare {
+  bool equal(StringData *s1, StringData *s2) const {
+    ASSERT(s1 && s2);
+    return s1->isame(s2);
+  }
+  size_t hash(const StringData *s) const {
+    ASSERT(s);
+    return s->hash();
+  }
+};
+
 struct stringHashCompare {
   bool equal(const std::string &s1, const std::string &s2) const {
     return s1 == s2;

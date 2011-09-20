@@ -339,6 +339,7 @@ public:
   static bool CheckSymLink;
   static bool NativeXHP;
   static int ScannerType;
+  static int MaxUserFunctionId;
 
 #ifdef TAINTED
   static bool EnableTaintWarnings;

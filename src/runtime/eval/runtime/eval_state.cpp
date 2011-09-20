@@ -221,6 +221,9 @@ void RequestEvalState::declareFunction(const FunctionStatement *fn) {
   } else if (get_renamed_function(name) == name) {
     std::pair<StringIMap<const FunctionStatement*>::iterator,
       bool> p = self->m_functions.insert(make_pair(name, fn));
+    if (p.second) {
+      UserFunctionIdTable::DeclareUserFunction(fn);
+    }
     if (p.second ||
         (p.first->second == fn &&
          ParserBase::IsClosureOrContinuationName(name.c_str()))) return;

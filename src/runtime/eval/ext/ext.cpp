@@ -97,7 +97,6 @@ Variant ExtFunction::directInvoke(VariableEnvironment &env,
   CallInfo Eval##name::s_ci((void*)Eval##name::Invoker, NULL, 0, 0, 0);
 
 EVAL_EXT(Extract);
-EVAL_EXT(Define);
 EVAL_EXT(FuncGetArg);
 EVAL_EXT(FuncGetArgs);
 EVAL_EXT(FuncNumArgs);
@@ -132,7 +131,6 @@ CallInfo EvalFunctionExists::s_ci((void*)EvalFunctionExists::Invoker, NULL, 0,
 
 EvalOverrides::EvalOverrides() {
   m_functions["extract"] = new EvalExtract();
-  m_functions["define"] = new EvalDefine();
   m_functions["func_get_arg"] = new EvalFuncGetArg();
   m_functions["func_get_args"] = new EvalFuncGetArgs();
   m_functions["func_num_args"] = new EvalFuncNumArgs();
@@ -184,30 +182,6 @@ Variant EvalExtract::InvokeImpl(VariableEnvironment &env,
   default: return invalid_function_call("extract");
   }
 }
-Variant EvalDefine::InvokeImpl(VariableEnvironment &env,
-                               CArrRef params) {
-  int size = params.size();
-  switch (size) {
-  case 2:
-  case 3:
-    {
-      Variant n = params.rvalAt(0);
-      CVarRef v = params.rvalAt(1);
-      if (!v.isAllowedAsConstantValue()) {
-        raise_warning("Constants may only evaluate to scalar values");
-        return false;
-      }
-      if (!f_defined(n)) {
-        return RequestEvalState::declareConstant(n, v);
-      } else {
-        raise_notice("Constant %s already defined", n.toString().data());
-        return false;
-      }
-    }
-  default: return invalid_function_call("define");
-  }
-}
-
 Variant EvalFuncGetArg::InvokeImpl(VariableEnvironment &env,
                                    CArrRef params) {
   int size = params.size();

@@ -24,6 +24,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/server_stats.h>
 #include <util/parser/scanner.h>
+#include <runtime/eval/runtime/eval_state.h>
 
 namespace HPHP {
 using namespace std;
@@ -92,7 +93,18 @@ Variant f_constant(CStrRef name) {
 
 bool f_define(CStrRef name, CVarRef value,
               bool case_insensitive /* = false */) {
-  ASSERT(false); // define() should be turned into constant definition by HPHP
+  if (!has_eval_support) {
+    ASSERT(false); // define() should be turned into constant definition by HPHP
+    return false;
+  }
+  if (!value.isAllowedAsConstantValue()) {
+    raise_warning("Constants may only evaluate to scalar values");
+    return false;
+  }
+  if (!f_defined(name)) {
+    return Eval::RequestEvalState::declareConstant(name, value);
+  }
+  raise_notice("Constant %s already defined", name.data());
   return false;
 }
 

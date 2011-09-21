@@ -34,42 +34,51 @@ using namespace std;
 
 SimpleFunctionCallExpression::SimpleFunctionCallExpression
 (EXPRESSION_ARGS, NamePtr name, const std::vector<ExpressionPtr> &params) :
-  FunctionCallExpression(EXPRESSION_PASS, params), m_name(name),
-  m_builtinPtr(NULL), m_userFuncId(-1) {
-  if (dynamic_cast<StringName*>(name.get())) {
-    String func(name->get());
-    const CallInfo* ci;
-    void *extra;
-    if (!evalOverrides.findFunction(func->data())) {
-      if (get_call_info_no_eval(ci, extra, func)) {
-        m_builtinPtr = (void *)ci;
-      } else {
-        m_userFuncId = UserFunctionIdTable::GetUserFunctionId(func);
-      }
-    }
-  }
-}
+  FunctionCallExpression(EXPRESSION_PASS, params), m_name(name) {}
+
+SimpleFunctionCallExpression::SimpleFunctionCallExpression
+(NamePtr name, const std::vector<ExpressionPtr> &params, const Location *loc) :
+  FunctionCallExpression(params, loc), m_name(name) {}
+
+BuiltinFunctionCallExpression::BuiltinFunctionCallExpression(
+  NamePtr name, const std::vector<ExpressionPtr> &params,
+  const CallInfo *callInfo, const Location *loc) :
+  SimpleFunctionCallExpression(name, params, loc),
+  m_callInfo(callInfo) {}
+
+UserFunctionCallExpression::UserFunctionCallExpression(
+  NamePtr name, const std::vector<ExpressionPtr> &params,
+  const int userFuncId, const Location *loc) :
+  SimpleFunctionCallExpression(name, params, loc),
+  m_userFuncId(userFuncId) {}
+
+OverrideFunctionCallExpression::OverrideFunctionCallExpression(
+  NamePtr name, const std::vector<ExpressionPtr> &params,
+  const Function *override, const Location *loc) :
+  SimpleFunctionCallExpression(name, params, loc),
+  m_override(override) {}
 
 Expression *SimpleFunctionCallExpression::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_name);
   FunctionCallExpression::optimize(env);
+  if (dynamic_cast<StringName*>(m_name.get())) {
+    String func(m_name->get());
+    const CallInfo* ci;
+    void *extra;
+    if (const Function *f = evalOverrides.findFunction(func->data())) {
+      return new OverrideFunctionCallExpression(m_name, m_params, f, loc());
+    }
+    if (get_call_info_no_eval(ci, extra, func)) {
+      return new BuiltinFunctionCallExpression(m_name, m_params, ci, loc());
+    }
+    int userFuncId = UserFunctionIdTable::GetUserFunctionId(func);
+    return new UserFunctionCallExpression(m_name, m_params, userFuncId, loc());
+  }
   return NULL;
 }
 
 Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   SET_LINE;
-  bool hasRenamed = *s_hasRenamedFunction;
-  if (m_builtinPtr && !hasRenamed) {
-    const CallInfo *ci = (const CallInfo *)m_builtinPtr;
-    return strongBind(evalCallInfo(ci, NULL, env));
-  }
-  if (m_userFuncId != -1 && !hasRenamed) {
-    const FunctionStatement *fs =
-      UserFunctionIdTable::GetUserFunction(m_userFuncId);
-    if (fs) {
-      return strongBind(fs->directInvoke(env, this));
-    }
-  }
   Variant var(m_name->getAsVariant(env));
   if (var.is(KindOfObject)) {
     const CallInfo *cit;
@@ -82,7 +91,7 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   String name = var.toString();
   String originalName = name;
 
-  if (UNLIKELY(hasRenamed)) {
+  if (UNLIKELY(*s_hasRenamedFunction)) {
     name = get_renamed_function(name);
   }
   if (UNLIKELY(name[0] == '\\')) {
@@ -112,6 +121,29 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   // so if we reach here cit1 must not be NULL
   ASSERT(cit1);
   return strongBind(evalCallInfo(cit1, vt1, env));
+}
+
+Variant BuiltinFunctionCallExpression::eval(VariableEnvironment &env) const {
+  SET_LINE;
+  if (!*s_hasRenamedFunction) {
+    return strongBind(evalCallInfo(m_callInfo, NULL, env));
+  }
+  return SimpleFunctionCallExpression::eval(env);
+}
+
+Variant UserFunctionCallExpression::eval(VariableEnvironment &env) const {
+  SET_LINE;
+  if (!*s_hasRenamedFunction) {
+    const FunctionStatement *fs =
+      UserFunctionIdTable::GetUserFunction(m_userFuncId);
+    if (fs) return strongBind(fs->directInvoke(env, this));
+  }
+  return SimpleFunctionCallExpression::eval(env);
+}
+
+Variant OverrideFunctionCallExpression::eval(VariableEnvironment &env) const {
+  SET_LINE;
+  return strongBind(m_override->directInvoke(env, this));
 }
 
 Variant SimpleFunctionCallExpression::evalCallInfo(

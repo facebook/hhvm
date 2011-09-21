@@ -28,6 +28,12 @@ FunctionCallExpression::FunctionCallExpression(EXPRESSION_ARGS,
   : Expression(KindOfFunctionCallExpression, EXPRESSION_PASS),
   m_params(params) {}
 
+FunctionCallExpression::FunctionCallExpression(const std::vector<ExpressionPtr>
+                                               &params,
+                                               const Location *loc)
+  : Expression(KindOfFunctionCallExpression, loc),
+  m_params(params) {}
+
 ArgArray *FunctionCallExpression::prepareArgArray(VariableEnvironment &env,
   const CallInfo* ci, unsigned int count) const {
   ArgArray *args = NEW(ArgArray)(count);

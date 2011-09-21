@@ -34,6 +34,8 @@ public:
 protected:
   FunctionCallExpression(EXPRESSION_ARGS,
                          const std::vector<ExpressionPtr> &params);
+  FunctionCallExpression(const std::vector<ExpressionPtr> &params,
+                         const Location *loc);
   inline Variant evalParam(VariableEnvironment &env,
     const CallInfo *ci, unsigned int index) const {
     ASSERT(0 <= index && index <= m_params.size());

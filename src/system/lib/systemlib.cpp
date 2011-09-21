@@ -15,7 +15,7 @@
 */
 
 #include <system/lib/systemlib.h>
-#include <runtime/base/complex_types.h>
+#include <runtime/base/hphp_system.h>
 #include <system/gen/php/classes/exception.h>
 #include <system/gen/php/classes/stdclass.h>
 #include <system/gen/php/classes/soapfault.h>

@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_Countable_hf53ba6c0__
 #define __GENERATED_cls_Countable_hf53ba6c0__
 
-#include <cls/Countable.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -18,7 +18,9 @@
 #ifndef __GENERATED_php_classes_directory_hd42b8663__
 #define __GENERATED_php_classes_directory_hd42b8663__
 
-#include <php/classes/directory.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 // Declarations
 #include <cls/Directory.h>
@@ -30,8 +32,6 @@ namespace HPHP {
 Variant pm_php$classes$directory_php(bool incOnce, LVariableTable* variables, Globals *globals);
 
 // Constants
-
-// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

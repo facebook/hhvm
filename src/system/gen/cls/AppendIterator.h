@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_AppendIterator_h34b70f7d__
 #define __GENERATED_cls_AppendIterator_h34b70f7d__
 
-#include <cls/AppendIterator.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/OuterIterator.h>
 
 namespace HPHP {
@@ -50,15 +52,15 @@ class c_AppendIterator : public ExtObjectData {
   public: Variant t_key();
   public: void t_next();
   public: Variant t___call(Variant v_func, Variant v_params);
-  DECLARE_METHOD_INVOKE_HELPERS(next);
-  DECLARE_METHOD_INVOKE_HELPERS(key);
-  DECLARE_METHOD_INVOKE_HELPERS(valid);
-  DECLARE_METHOD_INVOKE_HELPERS(getinneriterator);
-  DECLARE_METHOD_INVOKE_HELPERS(append);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  DECLARE_METHOD_INVOKE_HELPERS(current);
-  DECLARE_METHOD_INVOKE_HELPERS(__call);
+  DECLARE_METHOD_INVOKE_HELPERS(append);
+  DECLARE_METHOD_INVOKE_HELPERS(getinneriterator);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
+  DECLARE_METHOD_INVOKE_HELPERS(valid);
+  DECLARE_METHOD_INVOKE_HELPERS(current);
+  DECLARE_METHOD_INVOKE_HELPERS(key);
+  DECLARE_METHOD_INVOKE_HELPERS(next);
+  DECLARE_METHOD_INVOKE_HELPERS(__call);
 };
 ObjectData *coo_AppendIterator() NEVER_INLINE;
 

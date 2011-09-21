@@ -18,13 +18,17 @@
 #ifndef __GENERATED_cls_ArrayIterator_hf630121e__
 #define __GENERATED_cls_ArrayIterator_hf630121e__
 
-#include <cls/ArrayIterator.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/ArrayAccess.h>
 #include <cls/SeekableIterator.h>
 #include <cls/Countable.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+extern const VarNR &s_sys_svif01bca90;
 
 /* SRC: classes/iterator.php line 329 */
 FORWARD_DECLARE_CLASS(ArrayIterator);
@@ -64,28 +68,28 @@ class c_ArrayIterator : public ExtObjectData {
   public: void t_uasort(CVarRef v_cmp_function);
   public: void t_uksort(CVarRef v_cmp_function);
   public: bool t_valid();
-  DECLARE_METHOD_INVOKE_HELPERS(getarraycopy);
-  DECLARE_METHOD_INVOKE_HELPERS(next);
-  DECLARE_METHOD_INVOKE_HELPERS(count);
-  DECLARE_METHOD_INVOKE_HELPERS(natsort);
-  DECLARE_METHOD_INVOKE_HELPERS(key);
-  DECLARE_METHOD_INVOKE_HELPERS(valid);
-  DECLARE_METHOD_INVOKE_HELPERS(append);
-  DECLARE_METHOD_INVOKE_HELPERS(setflags);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  DECLARE_METHOD_INVOKE_HELPERS(offsetexists);
-  DECLARE_METHOD_INVOKE_HELPERS(uksort);
-  DECLARE_METHOD_INVOKE_HELPERS(offsetget);
-  DECLARE_METHOD_INVOKE_HELPERS(natcasesort);
+  DECLARE_METHOD_INVOKE_HELPERS(append);
   DECLARE_METHOD_INVOKE_HELPERS(asort);
-  DECLARE_METHOD_INVOKE_HELPERS(offsetunset);
-  DECLARE_METHOD_INVOKE_HELPERS(seek);
-  DECLARE_METHOD_INVOKE_HELPERS(getflags);
+  DECLARE_METHOD_INVOKE_HELPERS(count);
   DECLARE_METHOD_INVOKE_HELPERS(current);
+  DECLARE_METHOD_INVOKE_HELPERS(getarraycopy);
+  DECLARE_METHOD_INVOKE_HELPERS(getflags);
+  DECLARE_METHOD_INVOKE_HELPERS(key);
   DECLARE_METHOD_INVOKE_HELPERS(ksort);
-  DECLARE_METHOD_INVOKE_HELPERS(uasort);
-  DECLARE_METHOD_INVOKE_HELPERS(rewind);
+  DECLARE_METHOD_INVOKE_HELPERS(natcasesort);
+  DECLARE_METHOD_INVOKE_HELPERS(natsort);
+  DECLARE_METHOD_INVOKE_HELPERS(next);
+  DECLARE_METHOD_INVOKE_HELPERS(offsetexists);
+  DECLARE_METHOD_INVOKE_HELPERS(offsetget);
   DECLARE_METHOD_INVOKE_HELPERS(offsetset);
+  DECLARE_METHOD_INVOKE_HELPERS(offsetunset);
+  DECLARE_METHOD_INVOKE_HELPERS(rewind);
+  DECLARE_METHOD_INVOKE_HELPERS(seek);
+  DECLARE_METHOD_INVOKE_HELPERS(setflags);
+  DECLARE_METHOD_INVOKE_HELPERS(uasort);
+  DECLARE_METHOD_INVOKE_HELPERS(uksort);
+  DECLARE_METHOD_INVOKE_HELPERS(valid);
 };
 ObjectData *coo_ArrayIterator() NEVER_INLINE;
 extern const int64 q_ArrayIterator$$STD_PROP_LIST;

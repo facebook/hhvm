@@ -18,7 +18,9 @@
 #ifndef __GENERATED_php_globals_symbols_he2a8df4d__
 #define __GENERATED_php_globals_symbols_he2a8df4d__
 
-#include <php/globals/symbols.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 // Declarations
 
@@ -29,8 +31,6 @@ namespace HPHP {
 Variant pm_php$globals$symbols_php(bool incOnce, LVariableTable* variables, Globals *globals);
 
 // Constants
-
-// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

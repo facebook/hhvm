@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_Traversable_h25a23027__
 #define __GENERATED_cls_Traversable_h25a23027__
 
-#include <cls/Traversable.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

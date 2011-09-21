@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_OutOfRangeException_hd4da4fc9__
 #define __GENERATED_cls_OutOfRangeException_hd4da4fc9__
 
-#include <cls/OutOfRangeException.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/LogicException.h>
 
 namespace HPHP {

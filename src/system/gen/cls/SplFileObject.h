@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_SplFileObject_h54740373__
 #define __GENERATED_cls_SplFileObject_h54740373__
 
-#include <cls/SplFileObject.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/SplFileInfo.h>
 #include <cls/RecursiveIterator.h>
 #include <cls/Traversable.h>
@@ -26,6 +28,16 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+extern StaticString s_sys_ss7e5fc106;
+extern StaticString s_sys_ssd332baa7;
+extern StaticString s_sys_ssd59e789f;
+extern StaticString s_sys_ss0d42ecf6;
+
+extern VarNR s_sys_svs7e5fc106;
+extern VarNR s_sys_svsd332baa7;
+extern VarNR s_sys_svsd59e789f;
+extern VarNR s_sys_svs0d42ecf6;
 
 /* SRC: classes/splfile.php line 384 */
 FORWARD_DECLARE_CLASS(SplFileObject);
@@ -68,35 +80,35 @@ class c_SplFileObject : public c_SplFileInfo {
   public: void t_setflags(CVarRef v_flags);
   public: void t_setmaxlinelen(CVarRef v_max_len);
   public: bool t_valid();
-  DECLARE_METHOD_INVOKE_HELPERS(fscanf);
-  DECLARE_METHOD_INVOKE_HELPERS(next);
-  DECLARE_METHOD_INVOKE_HELPERS(fseek);
-  DECLARE_METHOD_INVOKE_HELPERS(key);
-  DECLARE_METHOD_INVOKE_HELPERS(fgetss);
-  DECLARE_METHOD_INVOKE_HELPERS(fgetcsv);
-  DECLARE_METHOD_INVOKE_HELPERS(valid);
-  DECLARE_METHOD_INVOKE_HELPERS(setcsvcontrol);
-  DECLARE_METHOD_INVOKE_HELPERS(getcsvcontrol);
-  DECLARE_METHOD_INVOKE_HELPERS(setflags);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  DECLARE_METHOD_INVOKE_HELPERS(setmaxlinelen);
-  DECLARE_METHOD_INVOKE_HELPERS(getmaxlinelen);
-  DECLARE_METHOD_INVOKE_HELPERS(ftruncate);
-  DECLARE_METHOD_INVOKE_HELPERS(fflush);
-  DECLARE_METHOD_INVOKE_HELPERS(eof);
-  DECLARE_METHOD_INVOKE_HELPERS(fgetc);
-  DECLARE_METHOD_INVOKE_HELPERS(fpassthru);
-  DECLARE_METHOD_INVOKE_HELPERS(haschildren);
-  DECLARE_METHOD_INVOKE_HELPERS(fgets);
-  DECLARE_METHOD_INVOKE_HELPERS(seek);
-  DECLARE_METHOD_INVOKE_HELPERS(flock);
-  DECLARE_METHOD_INVOKE_HELPERS(getflags);
-  DECLARE_METHOD_INVOKE_HELPERS(getchildren);
   DECLARE_METHOD_INVOKE_HELPERS(current);
-  DECLARE_METHOD_INVOKE_HELPERS(fwrite);
-  DECLARE_METHOD_INVOKE_HELPERS(ftell);
+  DECLARE_METHOD_INVOKE_HELPERS(eof);
+  DECLARE_METHOD_INVOKE_HELPERS(fflush);
+  DECLARE_METHOD_INVOKE_HELPERS(fgetc);
+  DECLARE_METHOD_INVOKE_HELPERS(fgetcsv);
+  DECLARE_METHOD_INVOKE_HELPERS(fgets);
+  DECLARE_METHOD_INVOKE_HELPERS(fgetss);
+  DECLARE_METHOD_INVOKE_HELPERS(flock);
+  DECLARE_METHOD_INVOKE_HELPERS(fpassthru);
+  DECLARE_METHOD_INVOKE_HELPERS(fscanf);
+  DECLARE_METHOD_INVOKE_HELPERS(fseek);
   DECLARE_METHOD_INVOKE_HELPERS(fstat);
+  DECLARE_METHOD_INVOKE_HELPERS(ftell);
+  DECLARE_METHOD_INVOKE_HELPERS(ftruncate);
+  DECLARE_METHOD_INVOKE_HELPERS(fwrite);
+  DECLARE_METHOD_INVOKE_HELPERS(getchildren);
+  DECLARE_METHOD_INVOKE_HELPERS(getcsvcontrol);
+  DECLARE_METHOD_INVOKE_HELPERS(getflags);
+  DECLARE_METHOD_INVOKE_HELPERS(getmaxlinelen);
+  DECLARE_METHOD_INVOKE_HELPERS(haschildren);
+  DECLARE_METHOD_INVOKE_HELPERS(key);
+  DECLARE_METHOD_INVOKE_HELPERS(next);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
+  DECLARE_METHOD_INVOKE_HELPERS(seek);
+  DECLARE_METHOD_INVOKE_HELPERS(setcsvcontrol);
+  DECLARE_METHOD_INVOKE_HELPERS(setflags);
+  DECLARE_METHOD_INVOKE_HELPERS(setmaxlinelen);
+  DECLARE_METHOD_INVOKE_HELPERS(valid);
 };
 ObjectData *coo_SplFileObject() NEVER_INLINE;
 extern const int64 q_SplFileObject$$DROP_NEW_LINE;

@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+
+#include <runtime/base/hphp_system.h>
 #include <runtime/base/server/http_protocol.h>
 #include <runtime/base/zend/zend_url.h>
 #include <runtime/base/zend/zend_string.h>

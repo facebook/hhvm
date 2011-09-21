@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_ReflectionParameter_h178d2c14__
 #define __GENERATED_cls_ReflectionParameter_h178d2c14__
 
-#include <cls/ReflectionParameter.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/Reflector.h>
 
 namespace HPHP {
@@ -51,19 +53,19 @@ class c_ReflectionParameter : public ExtObjectData {
   public: bool t_isdefaultvalueavailable();
   public: Variant t_getdefaultvalue();
   public: Variant t_getposition();
-  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
-  DECLARE_METHOD_INVOKE_HELPERS(getdeclaringclass);
-  DECLARE_METHOD_INVOKE_HELPERS(isdefaultvalueavailable);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  DECLARE_METHOD_INVOKE_HELPERS(getclass);
+  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   DECLARE_METHOD_INVOKE_HELPERS(export);
-  DECLARE_METHOD_INVOKE_HELPERS(allowsnull);
-  DECLARE_METHOD_INVOKE_HELPERS(getposition);
-  DECLARE_METHOD_INVOKE_HELPERS(isarray);
-  DECLARE_METHOD_INVOKE_HELPERS(isoptional);
-  DECLARE_METHOD_INVOKE_HELPERS(getdefaultvalue);
   DECLARE_METHOD_INVOKE_HELPERS(getname);
   DECLARE_METHOD_INVOKE_HELPERS(ispassedbyreference);
+  DECLARE_METHOD_INVOKE_HELPERS(getdeclaringclass);
+  DECLARE_METHOD_INVOKE_HELPERS(getclass);
+  DECLARE_METHOD_INVOKE_HELPERS(isarray);
+  DECLARE_METHOD_INVOKE_HELPERS(allowsnull);
+  DECLARE_METHOD_INVOKE_HELPERS(isoptional);
+  DECLARE_METHOD_INVOKE_HELPERS(isdefaultvalueavailable);
+  DECLARE_METHOD_INVOKE_HELPERS(getdefaultvalue);
+  DECLARE_METHOD_INVOKE_HELPERS(getposition);
 };
 ObjectData *coo_ReflectionParameter() NEVER_INLINE;
 

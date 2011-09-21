@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_Directory_h6dfdf420__
 #define __GENERATED_cls_Directory_h6dfdf420__
 
-#include <cls/Directory.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,9 +45,9 @@ class c_Directory : public ExtObjectData {
   public: void t_rewind();
   public: void t_close();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  DECLARE_METHOD_INVOKE_HELPERS(close);
   DECLARE_METHOD_INVOKE_HELPERS(read);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
+  DECLARE_METHOD_INVOKE_HELPERS(close);
 };
 ObjectData *coo_Directory() NEVER_INLINE;
 

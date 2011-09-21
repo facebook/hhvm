@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_ReflectionException_hd4ca6983__
 #define __GENERATED_cls_ReflectionException_hd4ca6983__
 
-#include <cls/ReflectionException.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/Exception.h>
 
 namespace HPHP {

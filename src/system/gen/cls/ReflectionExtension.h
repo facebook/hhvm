@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_ReflectionExtension_h84b2b41d__
 #define __GENERATED_cls_ReflectionExtension_h84b2b41d__
 
-#include <cls/ReflectionExtension.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/Reflector.h>
 
 namespace HPHP {
@@ -50,17 +52,17 @@ class c_ReflectionExtension : public ExtObjectData {
   public: Variant t_getclasses();
   public: Array t_getclassnames();
   public: Variant t_info();
-  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  DECLARE_METHOD_INVOKE_HELPERS(getfunctions);
+  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   DECLARE_METHOD_INVOKE_HELPERS(export);
-  DECLARE_METHOD_INVOKE_HELPERS(info);
-  DECLARE_METHOD_INVOKE_HELPERS(getinientries);
-  DECLARE_METHOD_INVOKE_HELPERS(getconstants);
-  DECLARE_METHOD_INVOKE_HELPERS(getclassnames);
-  DECLARE_METHOD_INVOKE_HELPERS(getversion);
   DECLARE_METHOD_INVOKE_HELPERS(getname);
+  DECLARE_METHOD_INVOKE_HELPERS(getversion);
+  DECLARE_METHOD_INVOKE_HELPERS(getfunctions);
+  DECLARE_METHOD_INVOKE_HELPERS(getconstants);
+  DECLARE_METHOD_INVOKE_HELPERS(getinientries);
   DECLARE_METHOD_INVOKE_HELPERS(getclasses);
+  DECLARE_METHOD_INVOKE_HELPERS(getclassnames);
+  DECLARE_METHOD_INVOKE_HELPERS(info);
 };
 ObjectData *coo_ReflectionExtension() NEVER_INLINE;
 

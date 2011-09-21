@@ -18,7 +18,9 @@
 #ifndef __GENERATED_php_classes_directoryiterator_hd6c56940__
 #define __GENERATED_php_classes_directoryiterator_hd6c56940__
 
-#include <php/classes/directoryiterator.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 // Declarations
 #include <cls/RecursiveDirectoryIterator.h>
@@ -31,8 +33,6 @@ namespace HPHP {
 Variant pm_php$classes$directoryiterator_php(bool incOnce, LVariableTable* variables, Globals *globals);
 
 // Constants
-
-// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

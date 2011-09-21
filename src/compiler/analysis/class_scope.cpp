@@ -2405,6 +2405,11 @@ void ClassScope::outputCPPHeader(AnalysisResultPtr ar,
 
   cg.headerBegin(filename);
 
+  if (Option::GenerateCppLibCode ||
+      cg.getOutput() == CodeGenerator::SystemCPP) {
+    cg.printBasicIncludes();
+  }
+
   // 1. includes
   BOOST_FOREACH(string base, m_bases) {
     ClassScopePtr cls = ar->findClass(base);

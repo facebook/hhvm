@@ -18,26 +18,28 @@
 #ifndef __GENERATED_php_classes_exception_h3232185f__
 #define __GENERATED_php_classes_exception_h3232185f__
 
-#include <php/classes/exception.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 // Declarations
-#include <cls/OutOfBoundsException.h>
 #include <cls/OutOfRangeException.h>
-#include <cls/ErrorException.h>
-#include <cls/UnexpectedValueException.h>
-#include <cls/RangeException.h>
-#include <cls/InvalidArgumentException.h>
-#include <cls/BadFunctionCallException.h>
-#include <cls/BadMethodCallException.h>
 #include <cls/RuntimeException.h>
+#include <cls/BadFunctionCallException.h>
 #include <cls/DomainException.h>
-#include <cls/UnderflowException.h>
-#include <cls/OverflowException.h>
+#include <cls/ErrorException.h>
+#include <cls/BadMethodCallException.h>
 #include <cls/PDOException.h>
-#include <cls/DOMException.h>
-#include <cls/LengthException.h>
-#include <cls/LogicException.h>
+#include <cls/RangeException.h>
+#include <cls/UnexpectedValueException.h>
+#include <cls/UnderflowException.h>
 #include <cls/Exception.h>
+#include <cls/LogicException.h>
+#include <cls/LengthException.h>
+#include <cls/InvalidArgumentException.h>
+#include <cls/DOMException.h>
+#include <cls/OverflowException.h>
+#include <cls/OutOfBoundsException.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,8 +48,6 @@ namespace HPHP {
 Variant pm_php$classes$exception_php(bool incOnce, LVariableTable* variables, Globals *globals);
 
 // Constants
-
-// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

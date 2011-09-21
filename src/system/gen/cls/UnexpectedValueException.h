@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_UnexpectedValueException_hce6f5a94__
 #define __GENERATED_cls_UnexpectedValueException_hce6f5a94__
 
-#include <cls/UnexpectedValueException.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/RuntimeException.h>
 
 namespace HPHP {

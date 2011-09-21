@@ -18,12 +18,16 @@
 #ifndef __GENERATED_cls_RecursiveIteratorIterator_habb8beb5__
 #define __GENERATED_cls_RecursiveIteratorIterator_habb8beb5__
 
-#include <cls/RecursiveIteratorIterator.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/OuterIterator.h>
 #include <cls/Traversable.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+extern const VarNR &s_sys_svif01bca90;
 
 /* SRC: classes/iterator.php line 228 */
 FORWARD_DECLARE_CLASS(RecursiveIteratorIterator);
@@ -46,13 +50,13 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   public: void t_next();
   public: void t_rewind();
   public: bool t_valid();
-  DECLARE_METHOD_INVOKE_HELPERS(next);
-  DECLARE_METHOD_INVOKE_HELPERS(key);
-  DECLARE_METHOD_INVOKE_HELPERS(valid);
-  DECLARE_METHOD_INVOKE_HELPERS(getinneriterator);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  DECLARE_METHOD_INVOKE_HELPERS(getinneriterator);
   DECLARE_METHOD_INVOKE_HELPERS(current);
+  DECLARE_METHOD_INVOKE_HELPERS(key);
+  DECLARE_METHOD_INVOKE_HELPERS(next);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
+  DECLARE_METHOD_INVOKE_HELPERS(valid);
 };
 ObjectData *coo_RecursiveIteratorIterator() NEVER_INLINE;
 extern const int64 q_RecursiveIteratorIterator$$LEAVES_ONLY;

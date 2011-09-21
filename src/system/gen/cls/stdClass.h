@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_stdClass_hd2e0228e__
 #define __GENERATED_cls_stdClass_hd2e0228e__
 
-#include <cls/stdClass.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

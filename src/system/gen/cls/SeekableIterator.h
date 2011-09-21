@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_SeekableIterator_h36f44c42__
 #define __GENERATED_cls_SeekableIterator_h36f44c42__
 
-#include <cls/SeekableIterator.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/Iterator.h>
 
 namespace HPHP {

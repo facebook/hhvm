@@ -18,11 +18,18 @@
 #ifndef __GENERATED_cls_ReflectionClass_hf4d8c830__
 #define __GENERATED_cls_ReflectionClass_hf4d8c830__
 
-#include <cls/ReflectionClass.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/Reflector.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+extern const VarNR &s_sys_svi5830e7c6;
+
+FORWARD_DECLARE_CLASS(ReflectionMethod);
+FORWARD_DECLARE_CLASS(ReflectionProperty);
 
 /* SRC: classes/reflection.php line 538 */
 FORWARD_DECLARE_CLASS(ReflectionClass);
@@ -85,52 +92,52 @@ class c_ReflectionClass : public ExtObjectData {
   public: bool t_implementsinterface(Variant v_cls);
   public: Variant t_getextension();
   public: Variant t_getextensionname();
-  DECLARE_METHOD_INVOKE_HELPERS(getmethods);
-  DECLARE_METHOD_INVOKE_HELPERS(isiterateable);
-  DECLARE_METHOD_INVOKE_HELPERS(gettraitnames);
-  DECLARE_METHOD_INVOKE_HELPERS(istrait);
-  DECLARE_METHOD_INVOKE_HELPERS(getstaticpropertyvalue);
-  DECLARE_METHOD_INVOKE_HELPERS(isuserdefined);
-  DECLARE_METHOD_INVOKE_HELPERS(newinstance);
-  DECLARE_METHOD_INVOKE_HELPERS(getextension);
-  DECLARE_METHOD_INVOKE_HELPERS(getconstructor);
-  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
-  DECLARE_METHOD_INVOKE_HELPERS(newinstanceargs);
-  DECLARE_METHOD_INVOKE_HELPERS(getendline);
-  DECLARE_METHOD_INVOKE_HELPERS(isinstance);
-  DECLARE_METHOD_INVOKE_HELPERS(hasmethod);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  DECLARE_METHOD_INVOKE_HELPERS(isfinal);
-  DECLARE_METHOD_INVOKE_HELPERS(getmodifiers);
+  DECLARE_METHOD_INVOKE_HELPERS(fetch);
+  DECLARE_METHOD_INVOKE_HELPERS(test);
+  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   DECLARE_METHOD_INVOKE_HELPERS(export);
-  DECLARE_METHOD_INVOKE_HELPERS(getproperties);
+  DECLARE_METHOD_INVOKE_HELPERS(getname);
+  DECLARE_METHOD_INVOKE_HELPERS(isinternal);
+  DECLARE_METHOD_INVOKE_HELPERS(isuserdefined);
+  DECLARE_METHOD_INVOKE_HELPERS(isinstantiable);
   DECLARE_METHOD_INVOKE_HELPERS(hasconstant);
-  DECLARE_METHOD_INVOKE_HELPERS(getmethod);
-  DECLARE_METHOD_INVOKE_HELPERS(getextensionname);
-  DECLARE_METHOD_INVOKE_HELPERS(getparentclass);
+  DECLARE_METHOD_INVOKE_HELPERS(hasmethod);
+  DECLARE_METHOD_INVOKE_HELPERS(hasproperty);
   DECLARE_METHOD_INVOKE_HELPERS(getfilename);
-  DECLARE_METHOD_INVOKE_HELPERS(implementsinterface);
-  DECLARE_METHOD_INVOKE_HELPERS(getinterfacenames);
-  DECLARE_METHOD_INVOKE_HELPERS(getconstant);
   DECLARE_METHOD_INVOKE_HELPERS(getstartline);
-  DECLARE_METHOD_INVOKE_HELPERS(getconstants);
+  DECLARE_METHOD_INVOKE_HELPERS(getendline);
   DECLARE_METHOD_INVOKE_HELPERS(getdoccomment);
+  DECLARE_METHOD_INVOKE_HELPERS(getconstructor);
+  DECLARE_METHOD_INVOKE_HELPERS(getmethod);
+  DECLARE_METHOD_INVOKE_HELPERS(getmethods);
+  DECLARE_METHOD_INVOKE_HELPERS(getproperty);
+  DECLARE_METHOD_INVOKE_HELPERS(getproperties);
+  DECLARE_METHOD_INVOKE_HELPERS(getconstants);
+  DECLARE_METHOD_INVOKE_HELPERS(getconstant);
+  DECLARE_METHOD_INVOKE_HELPERS(getinterfaces);
+  DECLARE_METHOD_INVOKE_HELPERS(gettraits);
+  DECLARE_METHOD_INVOKE_HELPERS(getinterfacenames);
+  DECLARE_METHOD_INVOKE_HELPERS(gettraitnames);
   DECLARE_METHOD_INVOKE_HELPERS(gettraitaliases);
   DECLARE_METHOD_INVOKE_HELPERS(isinterface);
-  DECLARE_METHOD_INVOKE_HELPERS(issubclassof);
-  DECLARE_METHOD_INVOKE_HELPERS(hasproperty);
-  DECLARE_METHOD_INVOKE_HELPERS(getstaticproperties);
-  DECLARE_METHOD_INVOKE_HELPERS(test);
-  DECLARE_METHOD_INVOKE_HELPERS(getdefaultproperties);
-  DECLARE_METHOD_INVOKE_HELPERS(setstaticpropertyvalue);
-  DECLARE_METHOD_INVOKE_HELPERS(isinstantiable);
-  DECLARE_METHOD_INVOKE_HELPERS(getinterfaces);
-  DECLARE_METHOD_INVOKE_HELPERS(fetch);
   DECLARE_METHOD_INVOKE_HELPERS(isabstract);
-  DECLARE_METHOD_INVOKE_HELPERS(getname);
-  DECLARE_METHOD_INVOKE_HELPERS(getproperty);
-  DECLARE_METHOD_INVOKE_HELPERS(isinternal);
-  DECLARE_METHOD_INVOKE_HELPERS(gettraits);
+  DECLARE_METHOD_INVOKE_HELPERS(isfinal);
+  DECLARE_METHOD_INVOKE_HELPERS(istrait);
+  DECLARE_METHOD_INVOKE_HELPERS(getmodifiers);
+  DECLARE_METHOD_INVOKE_HELPERS(isinstance);
+  DECLARE_METHOD_INVOKE_HELPERS(newinstance);
+  DECLARE_METHOD_INVOKE_HELPERS(newinstanceargs);
+  DECLARE_METHOD_INVOKE_HELPERS(getparentclass);
+  DECLARE_METHOD_INVOKE_HELPERS(issubclassof);
+  DECLARE_METHOD_INVOKE_HELPERS(getstaticproperties);
+  DECLARE_METHOD_INVOKE_HELPERS(getstaticpropertyvalue);
+  DECLARE_METHOD_INVOKE_HELPERS(setstaticpropertyvalue);
+  DECLARE_METHOD_INVOKE_HELPERS(getdefaultproperties);
+  DECLARE_METHOD_INVOKE_HELPERS(isiterateable);
+  DECLARE_METHOD_INVOKE_HELPERS(implementsinterface);
+  DECLARE_METHOD_INVOKE_HELPERS(getextension);
+  DECLARE_METHOD_INVOKE_HELPERS(getextensionname);
 };
 ObjectData *coo_ReflectionClass() NEVER_INLINE;
 extern const int64 q_ReflectionClass$$IS_IMPLICIT_ABSTRACT;

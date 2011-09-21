@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_IteratorAggregate_h29174a62__
 #define __GENERATED_cls_IteratorAggregate_h29174a62__
 
-#include <cls/IteratorAggregate.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/Traversable.h>
 
 namespace HPHP {

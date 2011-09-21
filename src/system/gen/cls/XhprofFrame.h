@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_XhprofFrame_hed1dc80a__
 #define __GENERATED_cls_XhprofFrame_hed1dc80a__
 
-#include <cls/XhprofFrame.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,8 +38,8 @@ class c_XhprofFrame : public ExtObjectData {
   public: void t___construct(Variant v_name);
   public: c_XhprofFrame *create(CVarRef v_name);
   public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 };
 ObjectData *coo_XhprofFrame() NEVER_INLINE;
 

@@ -18,7 +18,9 @@
 #ifndef __GENERATED_php_classes_soapfault_h9eb8c67d__
 #define __GENERATED_php_classes_soapfault_h9eb8c67d__
 
-#include <php/classes/soapfault.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 // Declarations
 #include <cls/SoapFault.h>
@@ -30,8 +32,6 @@ namespace HPHP {
 Variant pm_php$classes$soapfault_php(bool incOnce, LVariableTable* variables, Globals *globals);
 
 // Constants
-
-// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

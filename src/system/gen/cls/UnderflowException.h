@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_UnderflowException_h2fad4bbb__
 #define __GENERATED_cls_UnderflowException_h2fad4bbb__
 
-#include <cls/UnderflowException.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/RuntimeException.h>
 
 namespace HPHP {

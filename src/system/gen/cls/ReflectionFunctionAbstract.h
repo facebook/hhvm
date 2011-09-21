@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_ReflectionFunctionAbstract_h8c29f291__
 #define __GENERATED_cls_ReflectionFunctionAbstract_h8c29f291__
 
-#include <cls/ReflectionFunctionAbstract.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,19 +51,19 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   public: Array t_getparameters();
   public: int t_getnumberofparameters();
   public: int64 t_getnumberofrequiredparameters();
-  DECLARE_METHOD_INVOKE_HELPERS(getnumberofrequiredparameters);
-  DECLARE_METHOD_INVOKE_HELPERS(isuserdefined);
-  DECLARE_METHOD_INVOKE_HELPERS(getnumberofparameters);
-  DECLARE_METHOD_INVOKE_HELPERS(getendline);
-  DECLARE_METHOD_INVOKE_HELPERS(getstaticvariables);
-  DECLARE_METHOD_INVOKE_HELPERS(getparameters);
-  DECLARE_METHOD_INVOKE_HELPERS(returnsreference);
-  DECLARE_METHOD_INVOKE_HELPERS(getfilename);
-  DECLARE_METHOD_INVOKE_HELPERS(getstartline);
-  DECLARE_METHOD_INVOKE_HELPERS(getdoccomment);
-  DECLARE_METHOD_INVOKE_HELPERS(getclosure);
   DECLARE_METHOD_INVOKE_HELPERS(getname);
   DECLARE_METHOD_INVOKE_HELPERS(isinternal);
+  DECLARE_METHOD_INVOKE_HELPERS(getclosure);
+  DECLARE_METHOD_INVOKE_HELPERS(isuserdefined);
+  DECLARE_METHOD_INVOKE_HELPERS(getfilename);
+  DECLARE_METHOD_INVOKE_HELPERS(getstartline);
+  DECLARE_METHOD_INVOKE_HELPERS(getendline);
+  DECLARE_METHOD_INVOKE_HELPERS(getdoccomment);
+  DECLARE_METHOD_INVOKE_HELPERS(getstaticvariables);
+  DECLARE_METHOD_INVOKE_HELPERS(returnsreference);
+  DECLARE_METHOD_INVOKE_HELPERS(getparameters);
+  DECLARE_METHOD_INVOKE_HELPERS(getnumberofparameters);
+  DECLARE_METHOD_INVOKE_HELPERS(getnumberofrequiredparameters);
 };
 ObjectData *coo_ReflectionFunctionAbstract() NEVER_INLINE;
 

@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls___PHP_Incomplete_Class_h914d7894__
 #define __GENERATED_cls___PHP_Incomplete_Class_h914d7894__
 
-#include <cls/__PHP_Incomplete_Class.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_PDOException_h9d7a3e4e__
 #define __GENERATED_cls_PDOException_h9d7a3e4e__
 
-#include <cls/PDOException.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/Exception.h>
 
 namespace HPHP {

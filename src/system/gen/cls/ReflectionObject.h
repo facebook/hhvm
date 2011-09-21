@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_ReflectionObject_h8fef8256__
 #define __GENERATED_cls_ReflectionObject_h8fef8256__
 
-#include <cls/ReflectionObject.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/ReflectionClass.h>
 
 namespace HPHP {

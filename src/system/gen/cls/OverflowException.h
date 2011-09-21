@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_OverflowException_hafddf195__
 #define __GENERATED_cls_OverflowException_hafddf195__
 
-#include <cls/OverflowException.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/RuntimeException.h>
 
 namespace HPHP {

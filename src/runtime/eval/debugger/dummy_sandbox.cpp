@@ -20,7 +20,7 @@
 #include <runtime/base/program_functions.h>
 #include <runtime/base/server/source_root_info.h>
 #include <runtime/base/externals.h>
-#include <system/gen/sys/system_globals.h>
+#include <runtime/base/hphp_system.h>
 #include <util/process.h>
 
 using namespace std;

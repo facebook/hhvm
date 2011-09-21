@@ -18,7 +18,7 @@
 #include <runtime/eval/debugger/debugger_server.h>
 #include <runtime/eval/debugger/debugger_client.h>
 #include <runtime/eval/debugger/cmd/cmd_interrupt.h>
-#include <system/gen/sys/system_globals.h>
+#include <runtime/base/hphp_system.h>
 #include <util/text_color.h>
 #include <util/util.h>
 

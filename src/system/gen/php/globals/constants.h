@@ -18,7 +18,9 @@
 #ifndef __GENERATED_php_globals_constants_h2a357269__
 #define __GENERATED_php_globals_constants_h2a357269__
 
-#include <php/globals/constants.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 // Declarations
 
@@ -2066,8 +2068,6 @@ extern const int64 k_XSD_UNSIGNEDLONG;
 extern const int64 k_XSD_UNSIGNEDSHORT;
 extern const int64 k_YESEXPR;
 extern const bool k_ZEND_THREAD_SAFE;
-
-// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

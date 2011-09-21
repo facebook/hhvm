@@ -18,10 +18,18 @@
 #ifndef __GENERATED_cls_FB_MySQLLexer_hc86f2669__
 #define __GENERATED_cls_FB_MySQLLexer_hc86f2669__
 
-#include <cls/FB_MySQLLexer.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+extern StaticString s_sys_ss00000000;
+
+extern const VarNR &s_sys_svif01bca90;
+
+extern VarNR s_sys_svs00000000;
 
 /* SRC: classes/fbmysqllexer.php line 40 */
 FORWARD_DECLARE_CLASS(FB_MySQLLexer);
@@ -59,15 +67,15 @@ class c_FB_MySQLLexer : public ExtObjectData {
   public: void t_pushback();
   public: Variant t_lex();
   public: Variant t_nexttoken();
-  DECLARE_METHOD_INVOKE_HELPERS(lex);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  DECLARE_METHOD_INVOKE_HELPERS(iscompop);
   DECLARE_METHOD_INVOKE_HELPERS(get);
-  DECLARE_METHOD_INVOKE_HELPERS(skip);
   DECLARE_METHOD_INVOKE_HELPERS(unget);
-  DECLARE_METHOD_INVOKE_HELPERS(nexttoken);
-  DECLARE_METHOD_INVOKE_HELPERS(pushback);
+  DECLARE_METHOD_INVOKE_HELPERS(skip);
   DECLARE_METHOD_INVOKE_HELPERS(revert);
+  DECLARE_METHOD_INVOKE_HELPERS(iscompop);
+  DECLARE_METHOD_INVOKE_HELPERS(pushback);
+  DECLARE_METHOD_INVOKE_HELPERS(lex);
+  DECLARE_METHOD_INVOKE_HELPERS(nexttoken);
 };
 ObjectData *coo_FB_MySQLLexer() NEVER_INLINE;
 

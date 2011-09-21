@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_SplObjectStorage_h3ad1ae4b__
 #define __GENERATED_cls_SplObjectStorage_h3ad1ae4b__
 
-#include <cls/SplObjectStorage.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/Iterator.h>
 #include <cls/Countable.h>
 
@@ -49,15 +51,15 @@ class c_SplObjectStorage : public ExtObjectData {
   public: bool t_contains(CVarRef v_obj);
   public: void t_attach(CVarRef v_obj);
   public: void t_detach(CVarRef v_obj);
-  DECLARE_METHOD_INVOKE_HELPERS(next);
-  DECLARE_METHOD_INVOKE_HELPERS(detach);
-  DECLARE_METHOD_INVOKE_HELPERS(attach);
-  DECLARE_METHOD_INVOKE_HELPERS(count);
-  DECLARE_METHOD_INVOKE_HELPERS(key);
-  DECLARE_METHOD_INVOKE_HELPERS(valid);
-  DECLARE_METHOD_INVOKE_HELPERS(contains);
-  DECLARE_METHOD_INVOKE_HELPERS(current);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
+  DECLARE_METHOD_INVOKE_HELPERS(valid);
+  DECLARE_METHOD_INVOKE_HELPERS(key);
+  DECLARE_METHOD_INVOKE_HELPERS(current);
+  DECLARE_METHOD_INVOKE_HELPERS(next);
+  DECLARE_METHOD_INVOKE_HELPERS(count);
+  DECLARE_METHOD_INVOKE_HELPERS(contains);
+  DECLARE_METHOD_INVOKE_HELPERS(attach);
+  DECLARE_METHOD_INVOKE_HELPERS(detach);
 };
 ObjectData *coo_SplObjectStorage() NEVER_INLINE;
 

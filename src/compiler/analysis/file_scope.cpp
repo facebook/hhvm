@@ -691,7 +691,8 @@ void FileScope::outputCPPDeclHeader(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg.setFileOrClassHeader(true);
   string header = outputFilebase() + ".h";
   cg.headerBegin(header);
-  if (Option::GenerateCppLibCode) {
+  if (Option::GenerateCppLibCode ||
+      cg.getOutput() == CodeGenerator::SystemCPP) {
     cg.printBasicIncludes();
   }
   outputCPPForwardDeclarations(cg, ar);

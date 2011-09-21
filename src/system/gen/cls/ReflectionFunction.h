@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_ReflectionFunction_hd66cb4e2__
 #define __GENERATED_cls_ReflectionFunction_hd66cb4e2__
 
-#include <cls/ReflectionFunction.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/ReflectionFunctionAbstract.h>
 #include <cls/Reflector.h>
 
@@ -42,11 +44,11 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   public: static Variant t_export(CVarRef v_name, CVarRef v_ret);
   public: Variant t_invoke(int num_args, Array args = Array());
   public: Variant t_invokeargs(CVarRef v_args);
-  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  DECLARE_METHOD_INVOKE_HELPERS(invokeargs);
+  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   DECLARE_METHOD_INVOKE_HELPERS(export);
   DECLARE_METHOD_INVOKE_HELPERS(invoke);
+  DECLARE_METHOD_INVOKE_HELPERS(invokeargs);
 };
 ObjectData *coo_ReflectionFunction() NEVER_INLINE;
 extern const int64 q_ReflectionFunction$$IS_DEPRECATED;

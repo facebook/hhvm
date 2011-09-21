@@ -18,7 +18,9 @@
 #ifndef __GENERATED_cls_FilterIterator_h189f6b17__
 #define __GENERATED_cls_FilterIterator_h189f6b17__
 
-#include <cls/FilterIterator.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/IteratorIterator.h>
 
 namespace HPHP {
@@ -52,17 +54,17 @@ class c_FilterIterator : public c_IteratorIterator {
   public: Variant t___clone();
   public: Variant t_getinneriterator();
   public: Variant t___call(Variant v_func, Variant v_params);
-  DECLARE_METHOD_INVOKE_HELPERS(next);
-  DECLARE_METHOD_INVOKE_HELPERS(key);
-  DECLARE_METHOD_INVOKE_HELPERS(valid);
-  DECLARE_METHOD_INVOKE_HELPERS(getinneriterator);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  DECLARE_METHOD_INVOKE_HELPERS(__clone);
-  DECLARE_METHOD_INVOKE_HELPERS(fetch);
-  DECLARE_METHOD_INVOKE_HELPERS(current);
-  DECLARE_METHOD_INVOKE_HELPERS(__call);
-  DECLARE_METHOD_INVOKE_HELPERS(accept);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
+  DECLARE_METHOD_INVOKE_HELPERS(accept);
+  DECLARE_METHOD_INVOKE_HELPERS(fetch);
+  DECLARE_METHOD_INVOKE_HELPERS(next);
+  DECLARE_METHOD_INVOKE_HELPERS(valid);
+  DECLARE_METHOD_INVOKE_HELPERS(key);
+  DECLARE_METHOD_INVOKE_HELPERS(current);
+  DECLARE_METHOD_INVOKE_HELPERS(__clone);
+  DECLARE_METHOD_INVOKE_HELPERS(getinneriterator);
+  DECLARE_METHOD_INVOKE_HELPERS(__call);
 };
 ObjectData *coo_FilterIterator() NEVER_INLINE;
 

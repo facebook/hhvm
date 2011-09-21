@@ -18,11 +18,13 @@
 #ifndef __GENERATED_php_classes_stdclass_hd7c356f1__
 #define __GENERATED_php_classes_stdclass_hd7c356f1__
 
-#include <php/classes/stdclass.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 // Declarations
-#include <cls/stdClass.h>
 #include <cls/__PHP_Incomplete_Class.h>
+#include <cls/stdClass.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,8 +33,6 @@ namespace HPHP {
 Variant pm_php$classes$stdclass_php(bool incOnce, LVariableTable* variables, Globals *globals);
 
 // Constants
-
-// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

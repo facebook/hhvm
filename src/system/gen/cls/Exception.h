@@ -18,10 +18,18 @@
 #ifndef __GENERATED_cls_Exception_h22b3de5c__
 #define __GENERATED_cls_Exception_h22b3de5c__
 
-#include <cls/Exception.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+extern StaticString s_sys_ss00000000;
+
+extern const VarNR &s_sys_svif01bca90;
+
+extern VarNR s_sys_svs00000000;
 
 /* SRC: classes/exception.php line 10 */
 FORWARD_DECLARE_CLASS(Exception);
@@ -53,16 +61,16 @@ class c_Exception : public ExtObjectData {
   public: Variant t_gettrace();
   public: String t_gettraceasstring();
   public: String t___tostring();
-  DECLARE_METHOD_INVOKE_HELPERS(getmessage);
-  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  DECLARE_METHOD_INVOKE_HELPERS(getcode);
-  DECLARE_METHOD_INVOKE_HELPERS(getprevious);
-  DECLARE_METHOD_INVOKE_HELPERS(getline);
   DECLARE_METHOD_INVOKE_HELPERS(__init__);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  DECLARE_METHOD_INVOKE_HELPERS(getmessage);
+  DECLARE_METHOD_INVOKE_HELPERS(getprevious);
+  DECLARE_METHOD_INVOKE_HELPERS(getcode);
   DECLARE_METHOD_INVOKE_HELPERS(getfile);
-  DECLARE_METHOD_INVOKE_HELPERS(gettraceasstring);
+  DECLARE_METHOD_INVOKE_HELPERS(getline);
   DECLARE_METHOD_INVOKE_HELPERS(gettrace);
+  DECLARE_METHOD_INVOKE_HELPERS(gettraceasstring);
+  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
 };
 ObjectData *coo_Exception() NEVER_INLINE;
 

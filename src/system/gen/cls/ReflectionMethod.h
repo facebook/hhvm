@@ -18,12 +18,18 @@
 #ifndef __GENERATED_cls_ReflectionMethod_hf3cea799__
 #define __GENERATED_cls_ReflectionMethod_hf3cea799__
 
-#include <cls/ReflectionMethod.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/ReflectionFunctionAbstract.h>
 #include <cls/Reflector.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+extern StaticString s_sys_ss00000000;
+
+extern VarNR s_sys_svs00000000;
 
 /* SRC: classes/reflection.php line 1607 */
 FORWARD_DECLARE_CLASS(ReflectionMethod);
@@ -56,22 +62,22 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   public: Variant t_getmodifiers();
   public: Variant t_getclosure();
   public: Variant t_getdeclaringclass();
-  DECLARE_METHOD_INVOKE_HELPERS(isprivate);
-  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
-  DECLARE_METHOD_INVOKE_HELPERS(isprotected);
-  DECLARE_METHOD_INVOKE_HELPERS(isstatic);
-  DECLARE_METHOD_INVOKE_HELPERS(getdeclaringclass);
-  DECLARE_METHOD_INVOKE_HELPERS(isconstructor);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  DECLARE_METHOD_INVOKE_HELPERS(isfinal);
-  DECLARE_METHOD_INVOKE_HELPERS(invokeargs);
-  DECLARE_METHOD_INVOKE_HELPERS(getmodifiers);
+  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   DECLARE_METHOD_INVOKE_HELPERS(export);
   DECLARE_METHOD_INVOKE_HELPERS(invoke);
-  DECLARE_METHOD_INVOKE_HELPERS(ispublic);
-  DECLARE_METHOD_INVOKE_HELPERS(isdestructor);
-  DECLARE_METHOD_INVOKE_HELPERS(getclosure);
+  DECLARE_METHOD_INVOKE_HELPERS(invokeargs);
+  DECLARE_METHOD_INVOKE_HELPERS(isfinal);
   DECLARE_METHOD_INVOKE_HELPERS(isabstract);
+  DECLARE_METHOD_INVOKE_HELPERS(ispublic);
+  DECLARE_METHOD_INVOKE_HELPERS(isprivate);
+  DECLARE_METHOD_INVOKE_HELPERS(isprotected);
+  DECLARE_METHOD_INVOKE_HELPERS(isstatic);
+  DECLARE_METHOD_INVOKE_HELPERS(isconstructor);
+  DECLARE_METHOD_INVOKE_HELPERS(isdestructor);
+  DECLARE_METHOD_INVOKE_HELPERS(getmodifiers);
+  DECLARE_METHOD_INVOKE_HELPERS(getclosure);
+  DECLARE_METHOD_INVOKE_HELPERS(getdeclaringclass);
 };
 ObjectData *coo_ReflectionMethod() NEVER_INLINE;
 extern const int64 q_ReflectionMethod$$IS_STATIC;

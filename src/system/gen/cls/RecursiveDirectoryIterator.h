@@ -18,12 +18,16 @@
 #ifndef __GENERATED_cls_RecursiveDirectoryIterator_h20f53fae__
 #define __GENERATED_cls_RecursiveDirectoryIterator_h20f53fae__
 
-#include <cls/RecursiveDirectoryIterator.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/DirectoryIterator.h>
 #include <cls/RecursiveIterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+extern const VarNR &s_sys_svi86af027e;
 
 /* SRC: classes/directoryiterator.php line 122 */
 FORWARD_DECLARE_CLASS(RecursiveDirectoryIterator);
@@ -49,18 +53,18 @@ class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   public: Object t_getchildren();
   public: String t_getsubpath();
   public: String t_getsubpathname();
-  DECLARE_METHOD_INVOKE_HELPERS(next);
-  DECLARE_METHOD_INVOKE_HELPERS(key);
-  DECLARE_METHOD_INVOKE_HELPERS(valid);
-  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
-  DECLARE_METHOD_INVOKE_HELPERS(getsubpathname);
-  DECLARE_METHOD_INVOKE_HELPERS(getsubpath);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  DECLARE_METHOD_INVOKE_HELPERS(haschildren);
-  DECLARE_METHOD_INVOKE_HELPERS(seek);
-  DECLARE_METHOD_INVOKE_HELPERS(getchildren);
   DECLARE_METHOD_INVOKE_HELPERS(current);
+  DECLARE_METHOD_INVOKE_HELPERS(key);
+  DECLARE_METHOD_INVOKE_HELPERS(next);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
+  DECLARE_METHOD_INVOKE_HELPERS(seek);
+  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
+  DECLARE_METHOD_INVOKE_HELPERS(valid);
+  DECLARE_METHOD_INVOKE_HELPERS(haschildren);
+  DECLARE_METHOD_INVOKE_HELPERS(getchildren);
+  DECLARE_METHOD_INVOKE_HELPERS(getsubpath);
+  DECLARE_METHOD_INVOKE_HELPERS(getsubpathname);
 };
 ObjectData *coo_RecursiveDirectoryIterator() NEVER_INLINE;
 extern const int64 q_RecursiveDirectoryIterator$$CURRENT_AS_SELF;

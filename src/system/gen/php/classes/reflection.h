@@ -18,19 +18,21 @@
 #ifndef __GENERATED_php_classes_reflection_h1b89e197__
 #define __GENERATED_php_classes_reflection_h1b89e197__
 
-#include <php/classes/reflection.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 
 // Declarations
-#include <cls/ReflectionObject.h>
-#include <cls/ReflectionProperty.h>
-#include <cls/ReflectionException.h>
-#include <cls/ReflectionMethod.h>
 #include <cls/ReflectionParameter.h>
-#include <cls/Reflector.h>
+#include <cls/ReflectionMethod.h>
 #include <cls/ReflectionExtension.h>
-#include <cls/ReflectionFunctionAbstract.h>
 #include <cls/ReflectionFunction.h>
+#include <cls/ReflectionProperty.h>
+#include <cls/ReflectionFunctionAbstract.h>
+#include <cls/ReflectionException.h>
+#include <cls/ReflectionObject.h>
 #include <cls/ReflectionClass.h>
+#include <cls/Reflector.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,8 +41,6 @@ namespace HPHP {
 Variant pm_php$classes$reflection_php(bool incOnce, LVariableTable* variables, Globals *globals);
 
 // Constants
-
-// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

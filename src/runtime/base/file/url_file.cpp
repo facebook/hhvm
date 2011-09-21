@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/base/hphp_system.h>
 #include <runtime/base/file/url_file.h>
-#include <runtime/base/complex_types.h>
 #include <runtime/base/util/http_client.h>
 #include <system/gen/sys/system_globals.h>
 #include <runtime/base/runtime_error.h>

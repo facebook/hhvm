@@ -18,11 +18,15 @@
 #ifndef __GENERATED_cls_MutableArrayIterator_hcdab4664__
 #define __GENERATED_cls_MutableArrayIterator_hcdab4664__
 
-#include <cls/MutableArrayIterator.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/ArrayIterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+extern const VarNR &s_sys_svif01bca90;
 
 /* SRC: classes/iterator.php line 644 */
 FORWARD_DECLARE_CLASS(MutableArrayIterator);
@@ -37,8 +41,8 @@ class c_MutableArrayIterator : public c_ArrayIterator {
   public: void t___construct(VRefParam rv_array, Variant v_flags = 0LL);
   public: c_MutableArrayIterator *create(VRefParam v_array, CVarRef v_flags = NAMVAR(s_sys_svif01bca90, 0LL));
   public: Variant t_currentref();
-  DECLARE_METHOD_INVOKE_HELPERS(currentref);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  DECLARE_METHOD_INVOKE_HELPERS(currentref);
 };
 ObjectData *coo_MutableArrayIterator() NEVER_INLINE;
 

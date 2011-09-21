@@ -18,11 +18,19 @@
 #ifndef __GENERATED_cls_ErrorException_h8c3c27ba__
 #define __GENERATED_cls_ErrorException_h8c3c27ba__
 
-#include <cls/ErrorException.fw.h>
+#include <runtime/base/hphp_system.h>
+#include <system/gen/sys/literal_strings_remap.h>
+#include <system/gen/sys/scalar_arrays_remap.h>
 #include <cls/Exception.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+extern StaticString s_sys_ss00000000;
+
+extern const VarNR &s_sys_svif01bca90;
+
+extern VarNR s_sys_svs00000000;
 
 /* SRC: classes/exception.php line 286 */
 FORWARD_DECLARE_CLASS(ErrorException);

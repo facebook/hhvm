@@ -3613,6 +3613,7 @@ void AnalysisResult::outputCPPSystem() {
   cg.setContext(CodeGenerator::CppImplementation);
   cg.useStream(CodeGenerator::ImplFile);
   cg_printf("\n");
+  cg.printBasicIncludes();
   cg_printInclude(filename.c_str());
   cg.namespaceBegin();
   outputCPPGlobalImplementations(cg);

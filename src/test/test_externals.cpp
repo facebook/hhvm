@@ -37,7 +37,7 @@ static String test_preg_rep(CStrRef a, CStrRef b, CStrRef c) {
 }
 
 #define CLASS_INFO_EMPTY_ENTRY   "", NULL, NULL, NULL
-#define METHOD_INFO_EMPTY_ENTRY  NULL, NULL, NULL, NULL, NULL, NULL, NULL
+#define METHOD_INFO_EMPTY_ENTRY  NULL, NULL, NULL, NULL, NULL
 
 const char *g_class_map[] = {
   /* header */ (const char *)ClassInfo::IsSystem,

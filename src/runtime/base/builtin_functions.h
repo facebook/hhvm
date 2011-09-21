@@ -856,6 +856,15 @@ public:
   }
 };
 
+class RedeclaredCallInfo : public CallInfo {
+public:
+  RedeclaredCallInfo(int redecId,
+                     void *inv, void *invFa, int ac, int flags, int64 refs) :
+      CallInfo(inv, invFa, ac, flags, refs),
+      redeclaredId(redecId) {}
+  int redeclaredId;
+};
+
 #define CALL_USER_FUNC_FEW_ARGS_COUNT 6
 #if CALL_USER_FUNC_FEW_ARGS_COUNT == 6
 

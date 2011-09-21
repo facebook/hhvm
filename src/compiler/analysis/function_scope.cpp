@@ -1786,8 +1786,7 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
   int attribute = ClassInfo::IsNothing;
   if (!isUserFunction()) attribute |= ClassInfo::IsSystem;
-  if (isRedeclaring()) attribute |= ClassInfo::IsRedeclared;
-  if (isVolatile()) attribute |= ClassInfo::IsVolatile;
+  if (isVolatile() && !isRedeclaring()) attribute |= ClassInfo::IsVolatile;
   if (isRefReturn()) attribute |= ClassInfo::IsReference;
 
   if (isProtected()) {
@@ -1822,11 +1821,17 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   // Use the original cased name, for reflection to work correctly.
   cg_printf("(const char *)0x%04X, \"%s\", \"%s\", (const char *)%d, "
-            "(const char *)%d, NULL, NULL,\n", attribute,
+            "(const char *)%d,\n", attribute,
             CodeGenerator::EscapeLabel(getOriginalName()).c_str(),
             m_stmt ? m_stmt->getLocation()->file : "",
             m_stmt ? m_stmt->getLocation()->line0 : 0,
             m_stmt ? m_stmt->getLocation()->line1 : 0);
+
+
+  if (attribute & ClassInfo::IsVolatile) {
+    cg_printf("(const char*)offsetof(GlobalVariables, FVF(%s)),\n",
+              CodeGenerator::FormatLabel(m_name).c_str());
+  }
 
   if (!m_docComment.empty() && Option::GenerateDocComments) {
     char *dc = string_cplus_escape(m_docComment.c_str(), m_docComment.size());
@@ -1958,9 +1963,15 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
                 Option::InvokeWrapperFewArgsPrefix, id.c_str());
     }
   } else {
-    cg.printf("CallInfo %s%s((void*)&%s%s, ", Option::CallInfoPrefix,
-              id.c_str(), Option::InvokePrefix, id.c_str());
-    cg.printf("(void*)&%s%s", Option::InvokeFewArgsPrefix, id.c_str());
+    cg.printf("%sCallInfo %s%s(",
+              isRedeclaring() ? "Redeclared" : "",
+              Option::CallInfoPrefix, id.c_str());
+    if (isRedeclaring()) {
+      cg_printf("%d, ", getRedeclaringId());
+    }
+    cg_printf("(void*)&%s%s, (void*)&%s%s",
+              Option::InvokePrefix, id.c_str(),
+              Option::InvokeFewArgsPrefix, id.c_str());
   }
   cg.printf(", %d, %d, 0x%.16llXLL);\n", m_maxParam, flags, refflags);
 }
@@ -2033,8 +2044,9 @@ void FunctionScope::outputCPPSubClassParam(CodeGenerator &cg,
 void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (!getContainingClass()) {
     // spit out extern CallInfo decl
-    cg_printf("extern CallInfo %s%s;\n", Option::CallInfoPrefix,
-              getId().c_str());
+    cg_printf("extern %sCallInfo %s%s;\n",
+              isRedeclaring() ? "Redeclared" : "",
+              Option::CallInfoPrefix, getId().c_str());
   }
 
   const string &funcName = CodeGenerator::FormatLabel(m_name);

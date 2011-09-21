@@ -25342,8 +25342,7 @@ bool TestCodeRun::TestTraits() {
         "var_dump(in_array('T1', $traits));\n"
         "var_dump(in_array('T1', get_declared_traits()));\n"
        ,
-        "array(0) {\n"
-        "}\n"
+        "NULL\n"
         "bool(false)\n"
         "bool(false)\n"
        );

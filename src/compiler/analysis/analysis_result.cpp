@@ -3919,14 +3919,6 @@ void AnalysisResult::outputCPPGlobalDeclarations() {
     cg_printf("RVariableTable *get_variable_table();\n");
   }
 
-  for (StringToClassScopePtrVecMap::const_iterator iter =
-         m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
-    if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
-      const string &name = CodeGenerator::FormatLabel(iter->first);
-      cg_printf("int %s%s();\n", Option::ClassStaticsIdGetterPrefix,
-                     name.c_str());
-    }
-  }
   cg.namespaceEnd();
   cg.headerEnd(filename);
   f.close();
@@ -3937,19 +3929,6 @@ void AnalysisResult::outputCPPGlobalImplementations(CodeGenerator &cg) {
   CodeGenerator::Context con = cg.getContext();
   cg.setContext(CodeGenerator::CppImplementation);
   getVariables()->outputCPP(cg, ar);
-
-  for (StringToClassScopePtrVecMap::const_iterator iter =
-         m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
-    if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
-      const string &name = CodeGenerator::FormatLabel(iter->first);
-      cg_indentBegin("int %s%s() {\n", Option::ClassStaticsIdGetterPrefix,
-                     name.c_str());
-      cg.printDeclareGlobals();
-      cg_printf("return g->%s%s->getRedeclaringId();\n",
-                Option::ClassStaticsCallbackPrefix, name.c_str());
-      cg_indentEnd("}\n");
-    }
-  }
   cg.setContext(con);
 }
 
@@ -4651,7 +4630,20 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
          m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
     FunctionScopePtr func = iter->second;
     if (func->isUserFunction()) {
-      func->outputCPPClassMap(cg, ar);
+      if (func->isRedeclaring()) {
+        cg_printf("(const char *)(ClassInfo::IsRedeclared), \"%s\", "
+                  "(const char *)offsetof(GlobalVariables, GCI(%s)),\n",
+                  CodeGenerator::EscapeLabel(iter->first).c_str(),
+                  CodeGenerator::FormatLabel(iter->first).c_str());
+        StringToFunctionScopePtrVecMap::const_iterator it =
+          m_functionReDecs.find(iter->first);
+        BOOST_FOREACH(func, it->second) {
+          func->outputCPPClassMap(cg, ar);
+        }
+        cg_printf("NULL,\n");
+      } else {
+        func->outputCPPClassMap(cg, ar);
+      }
     }
   }
   cg_printf("NULL,\n"); // methods
@@ -4672,21 +4664,13 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
   // user classes
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
-    bool redec = !iter->second.size() || iter->second[0]->isRedeclaring();
+    bool redec = iter->second.size() != 1;
     if (redec) {
-      bool isInterface = true;
-      for (size_t i = 0; i < iter->second.size(); i++) {
-        if (!iter->second[i]->isInterface()) {
-          isInterface = false;
-          break;
-        }
-      }
       cg_printf("(const char *)(ClassInfo::IsRedeclared | "
-                "ClassInfo::IsVolatile%s), \"%s\", "
-                "(const char *)%s%s,\n",
-                isInterface ? " | ClassInfo::IsInterface" : "",
+                "ClassInfo::IsVolatile), \"%s\", "
+                "(const char *)offsetof(GlobalVariables,%s%s),\n",
                 CodeGenerator::EscapeLabel(iter->first).c_str(),
-                Option::ClassStaticsIdGetterPrefix,
+                Option::ClassStaticsCallbackPrefix,
                 CodeGenerator::FormatLabel(iter->first).c_str());
     }
     BOOST_FOREACH(ClassScopePtr cls, iter->second) {

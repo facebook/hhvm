@@ -901,8 +901,7 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   // header
   int attribute = ClassInfo::IsNothing;
   if (!isUserClass()) attribute |= ClassInfo::IsSystem;
-  if (isRedeclaring()) attribute |= ClassInfo::IsRedeclared;
-  if (isVolatile()) attribute |= ClassInfo::IsVolatile;
+  if (isVolatile() && !isRedeclaring()) attribute |= ClassInfo::IsVolatile;
   if (isInterface()) attribute |= ClassInfo::IsInterface|ClassInfo::IsAbstract;
   if (isTrait()) attribute |= ClassInfo::IsTrait;
   if (m_usedTraitNames.size() > 0) attribute |= ClassInfo::UsesTraits;
@@ -925,6 +924,11 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
             m_stmt ? m_stmt->getLocation()->file : "",
             m_stmt ? m_stmt->getLocation()->line0 : 0,
             m_stmt ? m_stmt->getLocation()->line1 : 0);
+
+  if (attribute & ClassInfo::IsVolatile) {
+    cg_printf("(const char *)offsetof(GlobalVariables, CDEC(%s)),\n",
+              CodeGenerator::FormatLabel(m_name).c_str());
+  }
 
   if (!m_docComment.empty() && Option::GenerateDocComments) {
     char *dc = string_cplus_escape(m_docComment.c_str(), m_docComment.size());

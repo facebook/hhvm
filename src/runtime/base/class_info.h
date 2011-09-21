@@ -109,11 +109,12 @@ public:
   class MethodInfo {
   public:
     MethodInfo() : docComment(NULL) {}
+    MethodInfo(const char **&p);
     ~MethodInfo();
+    MethodInfo *getDeclared();
     Attribute attribute;
+    int volatile_redec_offset;
     String name;
-    Variant (**invokeFn)(const Array& params);
-    Variant (*invokeFailedFn)(const Array& params);
 
     std::vector<const ParameterInfo *> parameters;
     std::vector<const ConstantInfo *> staticVariables;
@@ -172,12 +173,11 @@ public:
   /**
    * Return a list of declared classes.
    */
-  static Array GetClasses(bool declaredOnly);
+  static Array GetClasses() { return GetClassLike(IsInterface|IsTrait, 0); }
 
-  /**
-   * Whether a class exists, without considering interfaces.
-   */
-  static bool HasClass(CStrRef name);
+  static bool HasClassInterfaceOrTrait(CStrRef name) {
+    return FindClassInterfaceOrTrait(name);
+  }
 
   /**
    * Locate one class.
@@ -187,22 +187,12 @@ public:
   /**
    * Return a list of declared interfaces.
    */
-  static Array GetInterfaces(bool declaredOnly);
+  static Array GetInterfaces() { return GetClassLike(IsInterface, IsInterface); }
 
   /**
    * Return a list of declared traits.
    */
-  static Array GetTraits(bool declaredOnly);
-
-  /**
-   * Whether an interface exists.
-   */
-  static bool HasInterface(CStrRef name);
-
-  /**
-   * Whether a trait exists.
-   */
-  static bool HasTrait(CStrRef name);
+  static Array GetTraits() { return GetClassLike(IsTrait, IsTrait); }
 
   /**
    * Locate one interface.
@@ -264,32 +254,27 @@ public:
   static void SetHook(ClassInfoHook *hook) { s_hook = hook; }
 
 public:
-  ClassInfo() : m_docComment(NULL), m_parentCache(NULL) {}
+  ClassInfo() : m_cdec_offset(0), m_docComment(NULL) {}
   virtual ~ClassInfo() {}
 
-  Attribute getAttribute() const { return getCurrent()->m_attribute;}
-  const char *getFile() const { return getCurrent()->m_file;}
-  int getLine1() const { return getCurrent()->m_line1;}
-  int getLine2() const { return getCurrent()->m_line2;}
+  inline const ClassInfo *checkCurrent() const {
+    ASSERT(!(m_attribute & IsRedeclared));
+    return this;
+  }
+
+  Attribute getAttribute() const { return checkCurrent()->m_attribute;}
+  const char *getFile() const { return checkCurrent()->m_file;}
+  int getLine1() const { return checkCurrent()->m_line1;}
+  int getLine2() const { return checkCurrent()->m_line2;}
+  virtual const ClassInfo* getCurrentOrNull() const { return this; }
   virtual CStrRef getName() const { return m_name;}
   const char *getDocComment() const { return m_docComment; }
-  virtual const ClassInfo *getCurrent() const { return this; }
-  virtual bool isClassInfoRedeclared() const { return false; }
-  /**
-   * Whether or not declaration is executed.
-   */
-  bool isDeclared() const;
 
   /**
    * Parents of this class.
    */
   virtual CStrRef getParentClass() const = 0;
-  const ClassInfo *getParentClassInfo() const {
-    if (m_parentCache) return m_parentCache;
-    CStrRef parentName = getParentClass();
-    if (parentName.empty()) return NULL;
-    return m_parentCache = FindClass(parentName);
-  }
+  const ClassInfo *getParentClassInfo() const;
   virtual const InterfaceSet &getInterfaces() const = 0;
   virtual const InterfaceVec &getInterfacesVec() const = 0;
   virtual const TraitSet &getTraits() const = 0;
@@ -339,23 +324,25 @@ protected:
   static bool s_loaded;            // whether class map is loaded
   static ClassInfo *s_systemFuncs; // all system functions
   static ClassInfo *s_userFuncs;   // all user functions
-  static ClassMap s_classes;       // all classes
-  static ClassMap s_interfaces;    // all interfaces
-  static ClassMap s_traits;        // all traits
 
   static ClassInfoHook *s_hook;
 
   Attribute m_attribute;
+  int m_cdec_offset;
   String m_name;
   const char *m_file;
   int m_line1;
   int m_line2;
   const char *m_docComment;
-  mutable const ClassInfo *m_parentCache; // cache the found parent class
 
   bool derivesFromImpl(CStrRef name, bool considerInterface) const;
   bool checkAccess(ClassInfo *defClass, MethodInfo *methodInfo,
                    bool staticCall, bool hasObject) const;
+
+private:
+  static ClassMap s_class_like;       // all classes, interfaces and traits
+  static Array GetClassLike(unsigned mask, unsigned value);
+  const ClassInfo *getDeclared() const;
 };
 
 /**
@@ -409,8 +396,6 @@ public:
   ClassInfoRedeclared(const char **&p);
 
   // implementing ClassInfo
-  virtual const ClassInfo *getCurrent() const { return current(); }
-  virtual bool isClassInfoRedeclared() const { return true; }
   virtual CStrRef getName() const { return current()->getName();}
   CStrRef getParentClass() const { return current()->getParentClass();}
 
@@ -450,14 +435,11 @@ public:
 
 private:
   std::vector<ClassInfo*> m_redeclaredClasses;
-  int (*m_redeclaredIdGetter)();
+  int m_redeclaredIdOffset;
 
+  const ClassInfo* getCurrentOrNull() const;
   const ClassInfo* current() const {
-    int id = m_redeclaredIdGetter();
-    if (LIKELY(id >= 0)) {
-      return m_redeclaredClasses[id];
-    }
-    // Not sure what to do
+    assert(false);
     return this;
   }
 };
@@ -475,9 +457,7 @@ public:
   virtual Array getTraits() const = 0;
   virtual Array getConstants() const = 0;
   virtual const ClassInfo::MethodInfo *findFunction(CStrRef name) const = 0;
-  virtual const ClassInfo *findClass(CStrRef name) const = 0;
-  virtual const ClassInfo *findInterface(CStrRef name) const = 0;
-  virtual const ClassInfo *findTrait(CStrRef name) const = 0;
+  virtual const ClassInfo *findClassLike(CStrRef name) const = 0;
   virtual const ClassInfo::ConstantInfo *findConstant(CStrRef name) const = 0;
 };
 

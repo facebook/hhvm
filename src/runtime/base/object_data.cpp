@@ -1084,9 +1084,6 @@ Array ObjectData::o_toIterArray(CStrRef context,
 
   if (!classInfo) {
     return Array::Create();
-  } else {
-    // Resolve redeclared class info
-    classInfo = classInfo->getCurrent();
   }
 
   Array ret(Array::Create());

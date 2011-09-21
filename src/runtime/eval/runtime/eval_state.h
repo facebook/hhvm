@@ -173,9 +173,7 @@ public:
   static Array getTraitsInfo();
   static Array getConstants();
   static const ClassInfo::MethodInfo *findFunctionInfo(CStrRef name);
-  static const ClassInfo *findClassInfo(const char *name);
-  static const ClassInfo *findInterfaceInfo(const char *name);
-  static const ClassInfo *findTraitInfo(const char *name);
+  static const ClassInfo *findClassLikeInfo(const char *name);
   static const ClassInfo::ConstantInfo *findConstantInfo(const char *name);
 
   // Global state getters
@@ -212,8 +210,6 @@ private:
   std::map<std::string, SmartPtr<EvalConstantInfo> > m_constantInfos;
   StringIMap<SmartPtr<EvalMethodInfo> > m_methodInfos;
   std::map<std::string, SmartPtr<ClassInfoEvaled> > m_classInfos;
-  std::map<std::string, SmartPtr<ClassInfoEvaled> > m_interfaceInfos;
-  std::map<std::string, SmartPtr<ClassInfoEvaled> > m_traitInfos;
   std::set<EvalObjectData*> m_livingObjects;
   int64 m_ids;
   VariantStack m_argStack;

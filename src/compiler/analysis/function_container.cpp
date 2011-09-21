@@ -473,8 +473,8 @@ void FunctionContainer::outputCPPCodeInfoTable(
         (system || func->isDynamic() || func->isSepExtension())) {
       funcs.push_back(iter->first.c_str());
       if (!support && !func->isRedeclaring() && !func->isSepExtension()) {
-        cg_printf("extern CallInfo %s%s;\n", Option::CallInfoPrefix,
-                  func->getId().c_str());
+        cg_printf("extern CallInfo %s%s;\n",
+                  Option::CallInfoPrefix, func->getId().c_str());
       }
     }
   }

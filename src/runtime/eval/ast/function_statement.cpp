@@ -812,8 +812,6 @@ void FunctionStatement::getInfo(ClassInfo::MethodInfo &info) const {
   if (!m_docComment.empty()) {
     info.docComment = m_docComment.c_str();
   }
-  info.invokeFn = NULL;
-  info.invokeFailedFn = NULL;
   DummyVariableEnvironment env;
   for (vector<ParameterPtr>::const_iterator it = m_params.begin();
        it != m_params.end(); ++it) {

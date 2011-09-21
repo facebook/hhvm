@@ -208,7 +208,6 @@ public:
   static const char *ClassPrefix;
   static const char *ClassStaticsCallbackPrefix;
   static const char *ClassStaticsCallbackNullPrefix;
-  static const char *ClassStaticsIdGetterPrefix;
   static const char *ClassStaticInitializerFlagPrefix;
   static const char *ObjectPrefix;
   static const char *ObjectStaticPrefix;

@@ -150,8 +150,6 @@ void RequestEvalState::reset() {
   m_constantInfos.clear();
   m_methodInfos.clear();
   m_classInfos.clear();
-  m_interfaceInfos.clear();
-  m_traitInfos.clear();
   m_ids = 0;
   m_argStack.clear();
 
@@ -276,8 +274,7 @@ const ClassStatement *RequestEvalState::findClass(CStrRef name,
     return it->second.getClass();
   }
   if (autoload &&
-      (!ClassInfo::HasClass(name) && !ClassInfo::HasInterface(name) &&
-       !ClassInfo::HasTrait(name)) &&
+      !ClassInfo::HasClassInterfaceOrTrait(name) &&
       eval_try_autoload(name)) {
     return findClass(name, false);
   }
@@ -291,7 +288,8 @@ ClassEvalState *RequestEvalState::findClassState(CStrRef name,
   if (it != self->m_classes.end()) {
     return &it->second;
   }
-  if (autoload && !ClassInfo::HasClass(name) && eval_try_autoload(name)) {
+  if (autoload && !ClassInfo::HasClassInterfaceOrTrait(name) &&
+      eval_try_autoload(name)) {
     return findClassState(name, false);
   }
   return NULL;
@@ -511,7 +509,7 @@ const ClassInfo::MethodInfo *RequestEvalState::findFunctionInfo(CStrRef name) {
   }
 }
 
-const ClassInfo *RequestEvalState::findClassInfo(const char *name) {
+const ClassInfo *RequestEvalState::findClassLikeInfo(const char *name) {
   RequestEvalState *self = s_res.get();
   if (self->m_classInfos.empty() && self->m_classes.empty()) {
     // short cut for the compiled version
@@ -521,45 +519,8 @@ const ClassInfo *RequestEvalState::findClassInfo(const char *name) {
     self->m_classInfos.find(name);
   if (it == self->m_classInfos.end()) {
     const ClassStatement *cls = findClass(name);
-    if (cls && !(cls->getModifiers() &
-                 (ClassStatement::Interface | ClassStatement::Trait))) {
+    if (cls) {
       SmartPtr<ClassInfoEvaled> &cl = self->m_classInfos[name];
-      cl = new ClassInfoEvaled();
-      cls->getInfo(*cl.get());
-      return cl.get();
-    }
-    return NULL;
-  } else {
-    return it->second.get();
-  }
-}
-
-const ClassInfo *RequestEvalState::findInterfaceInfo(const char *name) {
-  RequestEvalState *self = s_res.get();
-  map<string, SmartPtr<ClassInfoEvaled> >::const_iterator it =
-    self->m_interfaceInfos.find(name);
-  if (it == self->m_interfaceInfos.end()) {
-    const ClassStatement *cls = findClass(name);
-    if (cls && (cls->getModifiers() & ClassStatement::Interface)) {
-      SmartPtr<ClassInfoEvaled> &cl = self->m_interfaceInfos[name];
-      cl = new ClassInfoEvaled();
-      cls->getInfo(*cl.get());
-      return cl.get();
-    }
-    return NULL;
-  } else {
-    return it->second.get();
-  }
-}
-
-const ClassInfo *RequestEvalState::findTraitInfo(const char *name) {
-  RequestEvalState *self = s_res.get();
-  map<string, SmartPtr<ClassInfoEvaled> >::const_iterator it =
-    self->m_traitInfos.find(name);
-  if (it == self->m_traitInfos.end()) {
-    const ClassStatement *cls = findClass(name);
-    if (cls && (cls->getModifiers() & ClassStatement::Trait)) {
-      SmartPtr<ClassInfoEvaled> &cl = self->m_traitInfos[name];
       cl = new ClassInfoEvaled();
       cls->getInfo(*cl.get());
       return cl.get();
@@ -703,16 +664,6 @@ void RequestEvalState::fiberInit(RequestEvalState *res,
       res->m_classInfos.begin(); it != res->m_classInfos.end(); ++it) {
     m_classInfos[it->first] = it->second;
   }
-  // Interface infos
-  for (map<string, SmartPtr<ClassInfoEvaled> >::iterator it =
-      res->m_interfaceInfos.begin(); it != res->m_interfaceInfos.end(); ++it) {
-    m_interfaceInfos[it->first] = it->second;
-  }
-  // Trait infos
-  for (map<string, SmartPtr<ClassInfoEvaled> >::iterator it =
-      res->m_traitInfos.begin(); it != res->m_traitInfos.end(); ++it) {
-    m_traitInfos[it->first] = it->second;
-  }
   // Classes
   for (StringIMap<ClassEvalState>::iterator it = res->m_classes.begin();
        it != res->m_classes.end(); ++it) {
@@ -793,16 +744,6 @@ void RequestEvalState::fiberExit(RequestEvalState *res,
       res->m_classInfos.begin(); it != res->m_classInfos.end(); ++it) {
     m_classInfos[it->first] = it->second;
   }
-  // Interface infos
-  for (map<string, SmartPtr<ClassInfoEvaled> >::iterator it =
-      res->m_interfaceInfos.begin(); it != res->m_interfaceInfos.end(); ++it) {
-    m_interfaceInfos[it->first] = it->second;
-  }
-  // Trait infos
-  for (map<string, SmartPtr<ClassInfoEvaled> >::iterator it =
-      res->m_traitInfos.begin(); it != res->m_traitInfos.end(); ++it) {
-    m_traitInfos[it->first] = it->second;
-  }
   // Classes
   for (StringIMap<ClassEvalState>::iterator it = res->m_classes.begin();
        it != res->m_classes.end(); ++it) {
@@ -860,14 +801,8 @@ public:
   virtual const ClassInfo::MethodInfo *findFunction(CStrRef name) const {
     return RequestEvalState::findFunctionInfo(name);
   }
-  virtual const ClassInfo *findClass(CStrRef name) const {
-    return RequestEvalState::findClassInfo(name);
-  }
-  virtual const ClassInfo *findInterface(CStrRef name) const {
-    return RequestEvalState::findInterfaceInfo(name);
-  }
-  virtual const ClassInfo *findTrait(CStrRef name) const {
-    return RequestEvalState::findTraitInfo(name);
+  virtual const ClassInfo *findClassLike(CStrRef name) const {
+    return RequestEvalState::findClassLikeInfo(name);
   }
   virtual const ClassInfo::ConstantInfo *findConstant(CStrRef name) const {
     return RequestEvalState::findConstantInfo(name);

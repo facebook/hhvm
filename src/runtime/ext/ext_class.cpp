@@ -33,40 +33,23 @@ static String get_classname(Variant class_or_object) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Array f_get_declared_classes() {
-  return ClassInfo::GetClasses(true);
+  return ClassInfo::GetClasses();
 }
 
 Array f_get_declared_interfaces() {
-  return ClassInfo::GetInterfaces(true);
+  return ClassInfo::GetInterfaces();
 }
 
 Array f_get_declared_traits() {
-  return ClassInfo::GetTraits(true);
+  return ClassInfo::GetTraits();
 }
 
 bool f_class_exists(CStrRef class_name, bool autoload /* = true */) {
-  const ClassInfo *info = ClassInfo::FindClass(class_name);
+  const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(class_name);
 
   if (info) {
-    if (!(info->getAttribute() & ClassInfo::IsVolatile)) return true;
-    if (info->isClassInfoRedeclared()) {
-      const ClassInfo *actual = info->getCurrent();
-      if (actual != info) {
-        return !(actual->getAttribute() & (ClassInfo::IsInterface|
-                                         ClassInfo::IsTrait));
-      }
-    } else if (info->isDeclared()) {
-      return true;
-    }
-    // volatile and not yet loaded and not an interface
-  } else {
-    info = ClassInfo::FindInterface(class_name);
-    if (info) {
-      if (!(info->getAttribute() & ClassInfo::IsVolatile) ||
-          info->isDeclared()) {
-        return false;
-      }
-    }
+    ClassInfo::Attribute attr = info->getAttribute();
+    return !(attr & (ClassInfo::IsInterface|ClassInfo::IsTrait));
   }
 
   if (!autoload) return false;
@@ -76,32 +59,10 @@ bool f_class_exists(CStrRef class_name, bool autoload /* = true */) {
 }
 
 bool f_interface_exists(CStrRef interface_name, bool autoload /* = true */) {
-  const ClassInfo *info = ClassInfo::FindInterface(interface_name);
+  const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(interface_name);
 
   if (info) {
-    if (!(info->getAttribute() & ClassInfo::IsVolatile)) return true;
-    if (info->isClassInfoRedeclared()) {
-      const ClassInfo *actual = info->getCurrent();
-      if (actual != info) {
-        return actual->getAttribute() & ClassInfo::IsInterface;
-      }
-    } else if (info->isDeclared()) {
-      return true;
-    }
-    // volatile and not yet loaded and not a class
-  } else {
-    info = ClassInfo::FindClass(interface_name);
-    if (info) {
-      if (!(info->getAttribute() & ClassInfo::IsVolatile)) return false;
-      if (info->isClassInfoRedeclared()) {
-        const ClassInfo *actual = info->getCurrent();
-        if (actual != info) {
-          return actual->getAttribute() & ClassInfo::IsInterface;
-        }
-      } else if (info->isDeclared()) {
-        return false;
-      }
-    }
+    return info->getAttribute() & ClassInfo::IsInterface;
   }
 
   if (!autoload) return false;
@@ -111,27 +72,16 @@ bool f_interface_exists(CStrRef interface_name, bool autoload /* = true */) {
 }
 
 bool f_trait_exists(CStrRef trait_name, bool autoload /* = true */) {
-  const ClassInfo *info = ClassInfo::FindTrait(trait_name);
-
-  if (autoload && (!info || (info->getAttribute() & ClassInfo::IsVolatile))) {
-    AutoloadHandler::s_instance->invokeHandler(trait_name);
-    if (!info && ClassInfo::FindTrait(trait_name)) {
-      return true;
-    }
-  }
+  const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(trait_name);
 
   if (info) {
-    return info->isDeclared();
+    return info->getAttribute() & ClassInfo::IsTrait;
   }
 
-  // look for traits redeclared by classes
-  info = ClassInfo::FindClass(trait_name);
-  if (info && info->isClassInfoRedeclared()) {
-    if (!info->isDeclared()) return false;
-    return info->getCurrent()->isClassInfoRedeclared();
-  }
+  if (!autoload) return false;
 
-  return false;
+  AutoloadHandler::s_instance->invokeHandler(trait_name);
+  return f_trait_exists(trait_name, false);
 }
 
 Array f_get_class_methods(CVarRef class_or_object) {

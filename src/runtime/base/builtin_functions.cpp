@@ -1472,17 +1472,7 @@ String AutoloadHandler::getSignature(CVarRef handler) {
 
 bool function_exists(CStrRef function_name) {
   String name = get_renamed_function(function_name);
-  const ClassInfo::MethodInfo *info = ClassInfo::FindFunction(name);
-  if (info) {
-    if (info->attribute & ClassInfo::IsSystem) return true;
-    if (info->attribute & ClassInfo::IsVolatile) {
-      return ((Globals *)get_global_variables())->function_exists(name);
-    } else {
-      return true;
-    }
-  } else {
-    return false;
-  }
+  return ClassInfo::FindFunction(name);
 }
 
 void checkClassExists(CStrRef name, Globals *g, bool nothrow /* = false */) {

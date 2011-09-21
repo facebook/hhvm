@@ -170,7 +170,14 @@ bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
     SharedVariant *converted = svar->convertObj(value);
     if (converted) {
       Map::accessor acc;
-      m_vars.find(acc, key.data()); // start a write lock
+      if (!m_vars.find(acc, key.data())) {
+        // There is a chance another thread deletes the key when this thread is
+        // converting the object. In that case, we just bail
+        converted->decRef();
+        svar->decRef();
+        return true;
+      }
+      // A write lock was acquired during find
       StoreValue *sval = &acc->second;
       SharedVariant *sv = sval->var;
       // sv may not be same as svar here because some other thread may have

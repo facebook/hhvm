@@ -610,11 +610,6 @@ private:
     CodeGenerator &cg, AnalysisResultPtr ar,
     FunctionScopePtr func, bool fewArgs);
 
-  static void outputCPPClassJumpTable
-  (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
-   const std::vector<const char*> &classes, const char* macro,
-   bool useString = false);
-
   static void outputCPPHashTableClassVarInit
     (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
      const std::vector<const char*> &classes);

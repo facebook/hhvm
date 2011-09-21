@@ -3091,18 +3091,20 @@ void AnalysisResult::outputCPPDynamicClassTables(
   ClassScopePtr cls;
   StringToClassScopePtrVecMap classScopes;
   for (StringToClassScopePtrVecMap::const_iterator iter =
-      m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
+         m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
     if (iter->second.size()) {
       for (ClassScopePtrVec::const_iterator iter2 = iter->second.begin();
-          iter2 != iter->second.end(); ++iter2) {
+           iter2 != iter->second.end(); ++iter2) {
         cls = *iter2;
         if (cls->isUserClass() && !cls->isInterface() && !cls->isTrait()) {
           classes.push_back(cls->getOriginalName().c_str());
           classScopes[cls->getName()].push_back(cls);
-          if (!system) {
-            cls->outputCPPDynamicClassDecl(cg);
+          if (!cls->isRedeclaring()) {
+            if (!system) {
+              cls->outputCPPDynamicClassDecl(cg);
+            }
+            cls->outputCPPGlobalTableWrappersDecl(cg, ar);
           }
-          cls->outputCPPGlobalTableWrappersDecl(cg, ar);
           break;
         }
       }
@@ -3656,7 +3658,7 @@ void AnalysisResult::getCPPRedeclaredClassDecl
 void AnalysisResult::outputCPPRedeclaredClassImpl(CodeGenerator &cg) {
   for (StringToClassScopePtrVecMap::const_iterator iter =
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
-    if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
+    if (iter->second.size() != 1) {
       string s = CodeGenerator::EscapeLabel(iter->first);
       string l = CodeGenerator::FormatLabel(iter->first);
       const char *str = s.c_str();
@@ -4427,12 +4429,7 @@ void AnalysisResult::outputCPPFiberGlobalState() {
           cg_printf("if (g2->%s) g1->%s = g2->%s;\n", name, name, name);
           break;
         case KindOfRedeclaredClass:
-          if (strncmp(name, "cso_", 4)) {
-            cg_printf("if (g2->%s) g1->%s = g2->%s;\n", name, name, name);
-          } else {
-            cg_printf("if (g2->%s.get()) g1->%s = g2->%s;\n",
-                      name, name, name);
-          }
+          cg_printf("g1->%s = g2->%s;\n", name, name, name);
           break;
         case KindOfPseudoMain:
         case KindOfVolatileClass:
@@ -4503,12 +4500,7 @@ void AnalysisResult::outputCPPFiberGlobalState() {
           cg_printf("if (g2->%s) g1->%s = g2->%s;\n", name, name, name);
           break;
         case KindOfRedeclaredClass:
-          if (strncmp(name, "cso_", 4)) {
-            cg_printf("if (g2->%s) g1->%s = g2->%s;\n", name, name, name);
-          } else {
-            cg_printf("if (g2->%s.get()) g1->%s = g2->%s;\n",
-                      name, name, name);
-          }
+          cg_printf("g1->%s = g2->%s;\n", name, name, name);
           break;
         case KindOfPseudoMain:
         case KindOfVolatileClass:

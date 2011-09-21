@@ -11998,6 +11998,7 @@ bool TestCodeRun::TestRedeclaredClasses() {
        "}"
        "PEAR::f();");
   MVCR("<?php\n"
+       "function __autoload($c) { var_dump($c); }\n"
        "function f() { return false; }\n"
        "if (f()) {\n"
        "  interface A { }\n"
@@ -12177,6 +12178,26 @@ bool TestCodeRun::TestRedeclaredClasses() {
        "}"
        "$x = new d;"
        "$x->t2();");
+
+  MVCR("<?php "
+       "if (!isset($h)) {"
+       "  if (isset($g)) {"
+       "    interface A { function foo(); }"
+       "  } else {"
+       "    interface A { function foo(); }"
+       "  }"
+       "} else {"
+       "  if (isset($g)) {"
+       "    interface X { function foo(); }"
+       "  } else {"
+       "    interface X { function foo(); }"
+       "  }"
+       "}"
+       "abstract class B implements A { function bar() {} }"
+       "var_dump(get_class_methods('A'));"
+       "var_dump(get_class_methods('B'));"
+       "var_dump(get_class_methods('X'));"
+       "var_dump(get_class_methods('Y'));");
 
   return true;
 }

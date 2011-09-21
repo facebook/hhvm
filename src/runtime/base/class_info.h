@@ -234,7 +234,7 @@ public:
    * interfaces.
    *   type: 0: unknown; 1: class; 2: interface
    */
-  static void GetClassMethods(MethodVec &ret, CStrRef classname, int type = 0);
+  static bool GetClassMethods(MethodVec &ret, CStrRef classname, int type = 0);
 
   /**
    * Return all properties a class has, including the ones on base classes and
@@ -454,7 +454,7 @@ private:
 
   const ClassInfo* current() const {
     int id = m_redeclaredIdGetter();
-    if (id >= 0) {
+    if (LIKELY(id >= 0)) {
       return m_redeclaredClasses[id];
     }
     // Not sure what to do

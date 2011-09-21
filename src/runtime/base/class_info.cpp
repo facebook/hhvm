@@ -299,11 +299,12 @@ Array ClassInfo::GetConstants() {
   return res;
 }
 
-void ClassInfo::GetClassMethods(MethodVec &ret, CStrRef classname,
+bool ClassInfo::GetClassMethods(MethodVec &ret, CStrRef classname,
                                 int type /* = 0 */) {
-  if (!classname.empty()) {
-    const ClassInfo *classInfo = NULL;
-    switch (type) {
+  if (classname.empty()) return false;
+
+  const ClassInfo *classInfo = NULL;
+  switch (type) {
     case 0:
       classInfo = FindClass(classname);
       if (classInfo == NULL) {
@@ -326,26 +327,33 @@ void ClassInfo::GetClassMethods(MethodVec &ret, CStrRef classname,
       break;
     default:
       ASSERT(false);
-    }
+  }
 
-    if (classInfo) {
-      const ClassInfo::MethodVec &methods = classInfo->getMethodsVec();
-      ret.insert(ret.end(), methods.begin(), methods.end());
+  if (!classInfo) return false;
 
-      if (type < 2) {
-        CStrRef parentClass = classInfo->getParentClass();
-        if (!parentClass.empty()) {
-          GetClassMethods(ret, parentClass, 1);
-        }
-      }
+  if (classInfo->isClassInfoRedeclared()) {
+    const ClassInfo *info = classInfo->getCurrent();
+    if (info == classInfo) return false;
+    classInfo = info;
+  }
 
-      const ClassInfo::InterfaceVec &interfaces =
-        classInfo->getInterfacesVec();
-      for (unsigned int i = 0; i < interfaces.size(); i++) {
-        GetClassMethods(ret, interfaces[i], 2);
-      }
+  const ClassInfo::MethodVec &methods = classInfo->getMethodsVec();
+  ret.insert(ret.end(), methods.begin(), methods.end());
+
+  if (type < 2) {
+    CStrRef parentClass = classInfo->getParentClass();
+    if (!parentClass.empty()) {
+      if (!GetClassMethods(ret, parentClass, 1)) return false;
     }
   }
+
+  const ClassInfo::InterfaceVec &interfaces =
+    classInfo->getInterfacesVec();
+  for (unsigned int i = 0; i < interfaces.size(); i++) {
+    if (!GetClassMethods(ret, interfaces[i], 2)) return false;
+  }
+
+  return true;
 }
 
 void ClassInfo::GetClassProperties(PropertyMap &props, CStrRef classname) {

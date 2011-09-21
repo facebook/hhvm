@@ -245,8 +245,15 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg,
   ClassScopeRawPtr classScope = getClassScope();
   if (cg.getContext() == CodeGenerator::NoContext) {
     if (classScope->isVolatile()) {
-      cg_printf("g->CDEC(%s) = true;\n",
-                CodeGenerator::FormatLabel(m_name).c_str());
+      string name = CodeGenerator::FormatLabel(m_name);
+      if (classScope->isRedeclaring()) {
+        cg_printf("g->%s%s = &%s%s;\n",
+                  Option::ClassStaticsCallbackPrefix,
+                  name.c_str(),
+                  Option::ClassStaticsCallbackPrefix,
+                  classScope->getId().c_str());
+      }
+      cg_printf("g->CDEC(%s) = true;\n", name.c_str());
     }
     return;
   }
@@ -260,6 +267,9 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg,
       printSource(cg);
       if (Option::GenerateCPPMacros) {
         classScope->outputForwardDeclaration(cg);
+      }
+      if (classScope->isRedeclaring()) {
+        classScope->outputCPPGlobalTableWrappersDecl(cg, ar);
       }
       cg_printf("class %s%s", Option::ClassPrefix, clsName);
       if (m_base && Option::UseVirtualDispatch &&
@@ -294,6 +304,9 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg,
         cg.setContext(CodeGenerator::CppClassConstantsImpl);
         m_stmt->outputCPP(cg, ar);
         cg.setContext(CodeGenerator::CppImplementation);
+      }
+      if (classScope->isRedeclaring()) {
+        classScope->outputCPPGlobalTableWrappersImpl(cg, ar);
       }
     }
     break;

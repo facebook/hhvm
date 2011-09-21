@@ -1200,31 +1200,6 @@ void ClassScope::outputCPPDynamicClassImpl(CodeGenerator &cg,
   cg_indentEnd("}\n");
 }
 
-void ClassScope::outputCPPClassJumpTable
-(CodeGenerator &cg,
- const StringToClassScopePtrVecMap &classScopes,
- const vector<const char*> &classes, const char* macro,
- bool useString /* = false */) {
-  cg.printDeclareGlobals();
-  for (JumpTable jt(cg, classes, true, false, useString); jt.ready();
-       jt.next()) {
-    const char *clsName = jt.key();
-    StringToClassScopePtrVecMap::const_iterator iterClasses =
-      classScopes.find(clsName);
-    bool redeclaring = iterClasses->second[0]->isRedeclaring();
-    if (iterClasses != classScopes.end()) {
-      const char *suffix = "";
-      if (redeclaring) suffix = "_REDECLARED";
-      else if (iterClasses->second[0]->isVolatile()) suffix = "_VOLATILE";
-      cg_printf("%s%s", macro, suffix);
-      cg_printf("(0x%016llXLL, %s);\n",
-                hash_string_i(clsName),
-                redeclaring ? iterClasses->second[0]->getName().c_str() :
-                CodeGenerator::FormatLabel(clsName).c_str());
-    }
-  }
-}
-
 void ClassScope::outputCPPHashTableClassVarInit
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
@@ -1332,8 +1307,7 @@ void ClassScope::outputCPPClassVarInitImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  bool useHashTable = (classes.size() > 0);
-  if (useHashTable) {
+  if (classes.size()) {
     outputCPPHashTableClassVarInit(cg, classScopes, classes);
   }
   cg_indentBegin("Variant get%s_class_var_init(CStrRef s, "
@@ -1348,10 +1322,7 @@ void ClassScope::outputCPPClassVarInitImpl
               "return r;\n");
     cg_indentEnd("}\n");
   }
-  if (!useHashTable) {
-    outputCPPClassJumpTable(cg, classScopes, classes,
-                            "HASH_GET_CLASS_VAR_INIT");
-  } else {
+  if (classes.size()) {
     if (system) {
       cg_printf("const hashNodeCTD *p = findCTD(s);\n"
                 "if (p) {\n"
@@ -1365,8 +1336,7 @@ void ClassScope::outputCPPClassVarInitImpl
                 "if (!p) return get_builtin_class_var_init(s, var);\n"
                 "return getCallbacks(p,s,g)->os_getInit(var);\n");
     }
-  }
-  if (!useHashTable) {
+  } else {
     if (system) {
       cg_printf("return throw_missing_class(s);\n");
     } else {
@@ -1381,7 +1351,6 @@ void ClassScope::outputCPPDynamicClassCreateImpl
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
   bool withEval = !system && Option::EnableEval == Option::FullEval;
-  bool useHashTable = (classes.size() > 0);
 
   // output create_object_only_no_init()
   cg_indentBegin("ObjectData *create%s_object_only_no_init(CStrRef s, "
@@ -1394,9 +1363,7 @@ void ClassScope::outputCPPDynamicClassCreateImpl
               "return r;\n");
     cg_indentEnd("}\n");
   }
-  if (!useHashTable) {
-    outputCPPClassJumpTable(cg, classScopes, classes,
-                            "HASH_CREATE_OBJECT_ONLY");
+  if (!classes.size()) {
     if (system) {
       cg_printf("throw_missing_class(s);\n");
       cg_printf("return 0;\n");
@@ -1477,15 +1444,11 @@ void ClassScope::outputCPPGetStaticPropertyImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  bool useHashTable = (classes.size() > 0);
 
   cg_indentBegin("const ObjectStaticCallbacks * "
                  "get%s_object_static_callbacks(CStrRef s) {\n",
                  system ? "_builtin" : "");
-  if (!useHashTable) {
-    outputCPPClassJumpTable(cg, classScopes, classes,
-                            "HASH_GET_OBJECT_STATIC_CALLBACKS");
-  } else {
+  if (classes.size()) {
     if (system) {
       cg_printf("const hashNodeCTD *p = findCTD(s);\n"
                 "if (p) {\n"
@@ -1499,8 +1462,7 @@ void ClassScope::outputCPPGetStaticPropertyImpl
                 "if (!p) return get_builtin_object_static_callbacks(s);\n"
                 "return getCallbacks(p,s,g);\n");
     }
-  }
-  if (!useHashTable) {
+  } else {
     if (system) {
       cg_printf("return NULL;\n");
     } else {
@@ -2791,55 +2753,60 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
   if (isRedeclaring()) {
     cg_indentBegin("{\n");
   }
-  cg_printf("(ObjectData*(*)(ObjectData*))%s%s,\n",
-            Option::CreateObjectOnlyPrefix, id.c_str());
-  cg_printf("%s%s::s_call_info_table,%s%s::s_call_info_index,\n",
-            Option::ClassPrefix, id.c_str(),
-            Option::ClassPrefix, id.c_str());
-  cg_printf("%s%s::s_instanceof_table,%s%s::s_instanceof_index,\n",
-            Option::ClassPrefix, id.c_str(),
-            Option::ClassPrefix, id.c_str());
-  cg_printf("&%s%s::s_class_name,\n", Option::ClassPrefix, id.c_str());
-  if (prop.empty()) {
-    cg_printf("0,");
+  if (isInterface()) {
+    cg_printf("0,0,0,0,0,0,0,0,0,0\n");
   } else {
-    cg_printf("&%s%s::%sprop_table,",
-              Option::ClassPrefix, prop.c_str(),
-              Option::ObjectStaticPrefix);
+    cg_printf("(ObjectData*(*)(ObjectData*))%s%s,\n",
+              Option::CreateObjectOnlyPrefix, id.c_str());
+    cg_printf("%s%s::s_call_info_table,%s%s::s_call_info_index,\n",
+              Option::ClassPrefix, id.c_str(),
+              Option::ClassPrefix, id.c_str());
+    cg_printf("%s%s::s_instanceof_table,%s%s::s_instanceof_index,\n",
+              Option::ClassPrefix, id.c_str(),
+              Option::ClassPrefix, id.c_str());
+    cg_printf("&%s%s::s_class_name,\n", Option::ClassPrefix, id.c_str());
+    if (prop.empty()) {
+      cg_printf("0,");
+    } else {
+      cg_printf("&%s%s::%sprop_table,",
+                Option::ClassPrefix, prop.c_str(),
+                Option::ObjectStaticPrefix);
+    }
+
+    FunctionScopeRawPtr fs = findConstructor(ar, true);
+    if (fs && !fs->isAbstract()) {
+      cg_printf("&%s%s::%s%s,",
+                Option::ClassPrefix, fs->getContainingClass()->getId().c_str(),
+                Option::CallInfoPrefix,
+                CodeGenerator::FormatLabel(fs->getName()).c_str());
+    } else {
+      cg_printf("0,");
+    }
+
+    ClassScopeRawPtr par;
+    if (derivesFromRedeclaring() != FromNormal) {
+      par = ClassScopeRawPtr(this);
+      do {
+        par = par->getParentScope(ar);
+      } while (par && !par->isRedeclaring());
+    }
+    if (par) {
+      cg_printf("offsetof(GlobalVariables, %s%s),",
+                Option::ClassStaticsCallbackPrefix,
+                CodeGenerator::FormatLabel(par->m_name).c_str());
+    } else {
+      cg_printf("0,");
+    }
+
+    if (derivesFromRedeclaring() != DirectFromRedeclared &&
+        (par = getParentScope(ar))) {
+      cg_printf("&%s%s\n",
+                Option::ClassStaticsCallbackPrefix, par->getId().c_str());
+    } else {
+      cg_printf("0\n");
+    }
   }
 
-  FunctionScopeRawPtr fs = findConstructor(ar, true);
-  if (fs && !fs->isAbstract()) {
-    cg_printf("&%s%s::%s%s,",
-              Option::ClassPrefix, fs->getContainingClass()->getId().c_str(),
-              Option::CallInfoPrefix,
-              CodeGenerator::FormatLabel(fs->getName()).c_str());
-  } else {
-    cg_printf("0,");
-  }
-
-  ClassScopeRawPtr par;
-  if (derivesFromRedeclaring() != FromNormal) {
-    par = ClassScopeRawPtr(this);
-    do {
-      par = par->getParentScope(ar);
-    } while (par && !par->isRedeclaring());
-  }
-  if (par) {
-    cg_printf("offsetof(GlobalVariables, %s%s),",
-              Option::ClassStaticsCallbackPrefix,
-              CodeGenerator::FormatLabel(par->m_name).c_str());
-  } else {
-    cg_printf("0,");
-  }
-
-  if (derivesFromRedeclaring() != DirectFromRedeclared &&
-      (par = getParentScope(ar))) {
-    cg_printf("&%s%s\n",
-              Option::ClassStaticsCallbackPrefix, par->getId().c_str());
-  } else {
-    cg_printf("0\n");
-  }
   if (isRedeclaring()) {
     cg_indentEnd("},\n");
     cg_printf("%d\n", m_redeclaring);

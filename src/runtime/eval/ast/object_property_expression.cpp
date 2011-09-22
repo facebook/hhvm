@@ -67,7 +67,7 @@ Variant ObjectPropertyExpression::eval(VariableEnvironment &env) const {
   CStrRef context = obj.isObject() ?
                       obj.getObjectData()->o_getClassName() :
                       null_string;
-  return obj.o_get(name, true, context);
+  return obj.o_get(name, false, context);
 }
 
 Variant ObjectPropertyExpression::evalExist(VariableEnvironment &env) const {
@@ -257,7 +257,7 @@ Variant ThisStringPropertyExpression::eval(VariableEnvironment &env) const {
   CStrRef context = op->isObject() ?
                     op->getObjectData()->o_getClassName() :
                     null_string;
-  return op->o_get(m_name, true, context);
+  return op->o_get(m_name, false, context);
 }
 
 Variant ThisStringPropertyExpression::evalExist(VariableEnvironment &env)
@@ -391,7 +391,7 @@ Variant VariableStringPropertyExpression::eval(VariableEnvironment &env) const {
   CStrRef context = obj.isObject() ?
                     obj.getObjectData()->o_getClassName() :
                     null_string;
-  return obj.o_get(m_name, true, context);
+  return obj.o_get(m_name, false, context);
 }
 
 Variant VariableStringPropertyExpression::evalExist(VariableEnvironment &env)

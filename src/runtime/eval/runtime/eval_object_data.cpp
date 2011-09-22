@@ -136,7 +136,20 @@ Variant *EvalObjectData::o_realPropHook(
     return NULL;
   }
   if (parent.get()) return parent->o_realProp(s, flags);
-  return ObjectData::o_realPropHook(s, flags, context);
+  if (Variant *ret = ObjectData::o_realPropHook(s, flags, context)) {
+    return ret;
+  }
+
+  if (g_context->getDebuggerBypassCheck()) {
+    for (ArrayIter it(m_privates); !it.end(); it.next()) {
+      // iterating up to the base class chain
+      Variant *ret = it.second().lvalPtr(s, flags & RealPropWrite, false);
+      if (ret) {
+        return ret;
+      }
+    }
+  }
+  return NULL;
 }
 
 Variant EvalObjectData::o_getError(CStrRef prop, CStrRef context) {

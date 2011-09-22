@@ -126,10 +126,19 @@ void CodeGenerator::indentBegin(const char *fmt, ...) {
   m_indentation[m_curStream]++;
 }
 
+void CodeGenerator::indentBegin() {
+  m_indentation[m_curStream]++;
+}
+
 void CodeGenerator::indentEnd(const char *fmt, ...) {
   ASSERT(m_indentation[m_curStream]);
   m_indentation[m_curStream]--;
   va_list ap; va_start(ap, fmt); print(fmt, ap); va_end(ap);
+}
+
+void CodeGenerator::indentEnd() {
+  ASSERT(m_indentation[m_curStream]);
+  m_indentation[m_curStream]--;
 }
 
 bool CodeGenerator::wrapExpressionBegin() {
@@ -597,9 +606,9 @@ string CodeGenerator::printString(const string &str, AnalysisResultPtr ar,
   if (isBinary) {
     if (stringWrapper) {
       printf("String(\"%s\", %d, AttachLiteral)",
-             escaped.c_str(), str.length());
+             escaped.c_str(), (int)str.length());
     } else {
-      printf("\"%s\", %d", escaped.c_str(), str.length());
+      printf("\"%s\", %d", escaped.c_str(), (int)str.length());
     }
   } else {
     printf("\"%s\"", escaped.c_str());

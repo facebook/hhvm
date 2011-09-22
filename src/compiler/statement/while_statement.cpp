@@ -135,7 +135,7 @@ void WhileStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     m_stmt->outputCPP(cg, ar);
   }
   if (cg.findLabelId("continue", labelId)) {
-    cg_printf("continue%d:;\n", labelId, labelId);
+    cg_printf("continue%d:;\n", labelId);
   }
   cg_indentEnd("}\n");
   if (cg.findLabelId("break", labelId)) {

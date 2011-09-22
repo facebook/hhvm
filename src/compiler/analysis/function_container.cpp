@@ -449,7 +449,7 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
   }
   outputGetCallInfoHeader(cg, system ? "_builtin" : noEval ? "_no_eval" : 0,
                           !system);
-  cg_indentEnd("");
+  cg_indentEnd();
   if (numEntries > 0) {
     cg_printf(system ? text4s : text4);
   }

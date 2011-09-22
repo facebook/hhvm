@@ -132,9 +132,11 @@ public:
   /**
    * Output strings.
    */
-  void printf(const char *fmt, ...);
-  void indentBegin(const char *fmt, ...);
-  void indentEnd(const char *fmt, ...);
+  void printf(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  void indentBegin(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  void indentBegin();
+  void indentEnd(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  void indentEnd();
   void printRaw(const char *msg) { print(msg, false);}
   bool wrapExpressionBegin();
   bool wrapExpressionEnd();
@@ -158,8 +160,8 @@ public:
   bool ensureOutOfNamespace();
   void headerBegin(const std::string &file);
   void headerEnd(const std::string &file);
-  void ifdefBegin(bool ifdef, const char *fmt, ...);
-  void ifdefEnd(const char *fmt, ...);
+  void ifdefBegin(bool ifdef, const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
+  void ifdefEnd(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
   void printInclude(const std::string &file);
   void printBasicIncludes();
   void printDeclareGlobals();

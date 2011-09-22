@@ -640,7 +640,7 @@ void ExpressionList::outputCPPUniqLitKeyArrayInit(
   bool arrayElements /* = true */, unsigned int start /* = 0 */) {
   if (arrayElements) ASSERT(m_arrayElements);
   unsigned int n =  m_exps.size();
-  cg_printf("array_createv%c(%lu, ", litstrKeys ? 's' : 'i', num);
+  cg_printf("array_createv%c(%lld, ", litstrKeys ? 's' : 'i', num);
   assert(n - start == num);
   for (unsigned int i = start; i < n; i++) {
     ExpressionPtr exp = m_exps[i];
@@ -738,7 +738,7 @@ bool ExpressionList::outputCPPInternal(CodeGenerator &cg,
     if (pre) {
       cg_printf(" %s", m_cppTemp.c_str());
     }
-    cg_printf("(%d)", m_exps.size());
+    cg_printf("(%d)", (int)m_exps.size());
     if (pre) cg_printf(";\n");
     needsComma = true;
     anyOutput = true;

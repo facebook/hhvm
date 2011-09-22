@@ -1404,7 +1404,7 @@ int FunctionScope::outputCPPInvokeArgCountCheck(
     } else {
       if (maxCount >= m_minParam) {
         if (maxCount <= m_maxParam) {
-          cg_printf("if (UNLIKELY(count < %d))", m_minParam, m_maxParam);
+          cg_printf("if (UNLIKELY(count < %d))", m_minParam);
         } else {
           cg_printf("if (UNLIKELY(count < %d || count > %d))",
                     m_minParam, m_maxParam);
@@ -1916,7 +1916,7 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
   } else {
     id = getId();
   }
-  int64 refflags = 0;
+  uint64 refflags = 0;
   for (int i = 0; i < m_maxParam; ++i) {
     if (isRefParam(i)) {
       refflags |= 1 << i;
@@ -1946,7 +1946,8 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
               Option::InvokeFewArgsPrefix, id.c_str());
     if (m_name == "__invoke" &&
         strcasecmp(clsName.c_str(), "closure")) {
-      cg.printf(", %d, %d, 0x%.16lXLL);\n", m_maxParam, flags, refflags);
+      cg.printf(", %d, %d, 0x%.16llXLL);\n",
+                m_maxParam, flags, refflags);
 
       // need to generate an extra call info for an extra wrapper
       cg.printf("CallInfo %s%s::%s%s((void*)&%s%s::%s%s, ", Option::ClassPrefix,
@@ -1961,7 +1962,7 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
               id.c_str(), Option::InvokePrefix, id.c_str());
     cg.printf("(void*)&%s%s", Option::InvokeFewArgsPrefix, id.c_str());
   }
-  cg.printf(", %d, %d, 0x%.16lXLL);\n", m_maxParam, flags, refflags);
+  cg.printf(", %d, %d, 0x%.16llXLL);\n", m_maxParam, flags, refflags);
 }
 
 void FunctionScope::getClosureUseVars(

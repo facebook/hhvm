@@ -134,7 +134,7 @@ void CaseStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_stmt) {
     m_stmt->outputPHP(cg, ar);
   }
-  cg_indentEnd("");
+  cg_indentEnd();
 }
 
 void CaseStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
@@ -150,7 +150,7 @@ void CaseStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     m_stmt->outputCPP(cg, ar);
   }
   cg_indentEnd("}\n");
-  cg_indentEnd("");
+  cg_indentEnd();
 }
 
 void CaseStatement::outputCPPByNumber(CodeGenerator &cg, AnalysisResultPtr ar,
@@ -164,7 +164,7 @@ void CaseStatement::outputCPPByNumber(CodeGenerator &cg, AnalysisResultPtr ar,
   }
   cg_indentEnd("}\n");
   if (caseNum >= 0) {
-    cg_indentEnd("");
+    cg_indentEnd();
   }
 }
 

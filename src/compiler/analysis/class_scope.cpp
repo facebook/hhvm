@@ -1555,7 +1555,7 @@ void ClassScope::outputCPPGetClassConstantImpl
     cg_indentBegin("if (fatal) {\n");
     cg_printf("raise_error(\"Couldn't find constant %%s::%%s\", s.data(), "
               "constant);\n");
-    cg_indentEnd("");
+    cg_indentEnd();
     cg_indentBegin("} else {\n");
     cg_printf("raise_warning(\"Couldn't find constant %%s::%%s\", s.data(), "
               "constant);\n");
@@ -2146,7 +2146,7 @@ void ClassScope::outputCPPGetClassPropTableImpl(
                     hash_string(sym->getName().c_str(),
                                 sym->getName().size()),
                     next - cur, off,
-                    s ? 0 : prop.size() - sym->getName().size(),
+                    int(s ? 0 : prop.size() - sym->getName().size()),
                     flags, dtype);
           if (s) {
             if (s == 2 && !sym->isDynamic()) {
@@ -2261,14 +2261,14 @@ void ClassScope::outputCPPGetClassPropTableImpl(
     cg_printf("%d,%d,%d,%d,%d,%d,%d,",
               tableSizeN - 1,
               tableSizeN ?
-              info.actualIndex[2].size() + info.actualIndex[1].size() +
+              int(info.actualIndex[2].size() + info.actualIndex[1].size()) +
               info.actualIndex[0][0] - 2 : -1,
               tableSizeS - 1,
-              tableSizeS ? info.actualIndex[2].size() +
-              info.actualIndex[1][0] - 1 : -1,
+              int(tableSizeS ? info.actualIndex[2].size() +
+                  info.actualIndex[1][0] - 1 : -1),
               tableSizeC - 1,
               tableSizeC ? info.actualIndex[2][0] : -1,
-              tableSizeN + info.privateIndex[0].size() + 1);
+              int(tableSizeN + info.privateIndex[0].size() + 1));
     if (info.cls->needLazyStaticInitializer()) {
       cg_printf("offsetof(%s,%s%s),",
                 system ? "SystemGlobals" : "GlobalVariables",

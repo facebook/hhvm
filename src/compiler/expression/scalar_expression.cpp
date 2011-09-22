@@ -517,7 +517,7 @@ void ScalarExpression::outputCPPInteger(CodeGenerator &cg,
   Variant v = getVariant();
   ASSERT(v.isInteger());
   if (v.toInt64() == LONG_MIN) {
-    cg_printf("(int64)0x%llxLL", LONG_MIN);
+    cg_printf("(int64)0x%llxLL", (uint64)LONG_MIN);
   } else {
     cg_printf("%lldLL", v.toInt64());
   }
@@ -547,7 +547,7 @@ void ScalarExpression::outputCPPNamedDouble(CodeGenerator &cg,
   } else if (dval > 0) {
     cg_printf("INF_varNR");
   } else {
-    cg_printf("NEGINF_varNR", Option::ConstantPrefix);
+    cg_printf("NEGINF_varNR");
   }
 }
 

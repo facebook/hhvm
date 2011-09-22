@@ -360,6 +360,13 @@ struct file_closer {
 ///////////////////////////////////////////////////////////////////////////////
 // Non-gcc compat
 #define ATTRIBUTE_UNUSED __attribute__((unused))
+#ifndef ATTRIBUTE_PRINTF
+#if __GNUC__ > 2 || __GNUC__ == 2 && __GNUC_MINOR__ > 6
+#define ATTRIBUTE_PRINTF(a1,a2) __attribute__((__format__ (__printf__, a1, a2)))
+#else
+#define ATTRIBUTE_PRINTF(a1,a2)
+#endif
+#endif
 #if (__GNUC__ == 4 && __GNUC_MINOR__ >= 3) || __ICC >= 1200 || __GNUC__ > 4
 #define ATTRIBUTE_COLD __attribute__((cold))
 #else

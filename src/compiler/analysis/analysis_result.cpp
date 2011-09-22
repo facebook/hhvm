@@ -3069,7 +3069,7 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
   cg_printf(text3);
   if (needEvalHook) outputCPPEvalHook(cg);
   if (entries.size() == 1) outputCPPDefaultInvokeFile(cg, entries[0]);
-  cg_indentEnd("");
+  cg_indentEnd();
   cg_printf(text4);
 }
 
@@ -3712,7 +3712,7 @@ void AnalysisResult::outputCPPScalarArrayDecl(CodeGenerator &cg) {
   const char *prefix = system ? Option::SystemScalarArrayName :
     Option::ScalarArrayName;
   if (m_scalarArrayIds.size() > 0) {
-    cg_printf("static StaticArray %s[%d];\n", prefix, m_scalarArrayIds.size());
+    cg_printf("static StaticArray %s[%lu];\n", prefix, m_scalarArrayIds.size());
   }
 }
 
@@ -3760,7 +3760,7 @@ void AnalysisResult::outputCPPScalarArrayImpl(CodeGenerator &cg) {
   const char *prefix = system ? Option::SystemScalarArrayName :
     Option::ScalarArrayName;
 
-  cg_printf("StaticArray %s::%s[%d];\n",
+  cg_printf("StaticArray %s::%s[%lu];\n",
             clsname, prefix, m_scalarArrayIds.size());
 }
 
@@ -4049,7 +4049,7 @@ void AnalysisResult::outputCPPScalarArrays(CodeGenerator &cg, int fileCount,
     if (m_scalarArrayIds.size() > 0) {
       if (Option::ScalarArrayCompression && !system) {
         ASSERT(m_scalarArrayCompressedTextSize > 0);
-        cg_printf("ArrayUtil::InitScalarArrays(%s, %d, sa_cdata, %d);\n",
+        cg_printf("ArrayUtil::InitScalarArrays(%s, %lu, sa_cdata, %d);\n",
                   prefix, m_scalarArrayIds.size(),
                   m_scalarArrayCompressedTextSize);
         cg_printf("%s::initializeNamed();\n", clsname);
@@ -4430,7 +4430,7 @@ void AnalysisResult::outputCPPFiberGlobalState() {
           cg_printf("if (g2->%s) g1->%s = g2->%s;\n", name, name, name);
           break;
         case KindOfRedeclaredClass:
-          cg_printf("g1->%s = g2->%s;\n", name, name, name);
+          cg_printf("g1->%s = g2->%s;\n", name, name);
           break;
         case KindOfPseudoMain:
         case KindOfVolatileClass:
@@ -4501,7 +4501,7 @@ void AnalysisResult::outputCPPFiberGlobalState() {
           cg_printf("if (g2->%s) g1->%s = g2->%s;\n", name, name, name);
           break;
         case KindOfRedeclaredClass:
-          cg_printf("g1->%s = g2->%s;\n", name, name, name);
+          cg_printf("g1->%s = g2->%s;\n", name, name);
           break;
         case KindOfPseudoMain:
         case KindOfVolatileClass:

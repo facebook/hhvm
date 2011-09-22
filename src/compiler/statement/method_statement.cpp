@@ -1525,7 +1525,7 @@ void MethodStatement::outputHSFFIStub(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf("ppres <- peek pres\n");
     cg_printf("buildVariant (fromIntegral t) ppres");
   }
-  cg_indentEnd(""); // end do
+  cg_indentEnd(); // end do
   if (varArgs) {
     cg_indentEnd(")"); // end varargs
   }
@@ -1535,7 +1535,7 @@ void MethodStatement::outputHSFFIStub(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (ret) {
     cg_indentEnd(")"); // end alloca
   } else {
-    cg_indentEnd("");
+    cg_indentEnd();
   }
   cg_printf("\n");
   return;

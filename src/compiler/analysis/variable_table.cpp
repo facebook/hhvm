@@ -974,7 +974,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   if (!system) {
     cg.printSection("Global Array Wrapper Methods");
     cg_indentBegin("virtual ssize_t staticSize() const {\n");
-    cg_printf("return %d;\n", m_symbolVec.size());
+    cg_printf("return %lu;\n", m_symbolVec.size());
     cg_indentEnd("}\n");
 
     cg.printSection("LVariableTable Methods");
@@ -1263,9 +1263,9 @@ void VariableTable::outputCPPGVHashTableGetImpl(CodeGenerator &cg,
     cg_printf("  (const char *)\"%s\",\n"
               "  (const char *)%lld,\n"
               "  (const char *)GET_GV_OFFSET(%s),\n"
-              "  (const char *)%d,\n",
+              "  (const char *)%u,\n",
               escaped.c_str(),
-              name.size(),
+              (int64)name.size(),
               varName.c_str(),
               i);
   }
@@ -1800,7 +1800,7 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       case VariableTable::JumpSet:
         cg_printf("HASH_SET_STRING(0x%016llXLL, %s,\n",
                   hash_string(name), varName.c_str());
-        cg_printf("                \"%s\", %d);\n",
+        cg_printf("                \"%s\", %lu);\n",
                   CodeGenerator::EscapeLabel(name).c_str(), strlen(name));
         break;
       case VariableTable::JumpInitialized:
@@ -1816,14 +1816,14 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
         string lisnam = ar->getLiteralStringName(stringId, index);
         cg_printf("HASH_INITIALIZED_NAMSTR(0x%016llXLL, %s, %s,\n",
                   hash_string(name), lisnam.c_str(), varName.c_str());
-        cg_printf("                   %d);\n", strlen(name));
+        cg_printf("                   %lu);\n", strlen(name));
         break;
       }
       case VariableTable::JumpIndex: {
         hphp_const_char_map<ssize_t>::const_iterator it = varIdx.find(name);
         ASSERT(it != varIdx.end());
         ssize_t idx = it->second;
-        cg_printf("HASH_INDEX(0x%016llXLL, \"%s\", %d);\n",
+        cg_printf("HASH_INDEX(0x%016llXLL, \"%s\", %ld);\n",
                   hash_string(name),
                   CodeGenerator::EscapeLabel(name).c_str(), idx);
         break;
@@ -1835,7 +1835,7 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
         string lisnam = ar->getLiteralStringName(stringId, index);
         cg_printf("HASH_RETURN_NAMSTR(0x%016llXLL, %s, %s,\n",
                   hash_string(name), lisnam.c_str(), varName.c_str());
-        cg_printf("                   %d);\n", strlen(name));
+        cg_printf("                   %lu);\n", strlen(name));
         break;
       }
     }

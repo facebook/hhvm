@@ -240,7 +240,7 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
   if (!nonStatic) {
     cg_printf(");\n");
-    if (lsb) cg_printf("mcp%d.lateStaticBind(fi.getThreadInfo());\n");
+    if (lsb) cg_printf("mcp%d.lateStaticBind(fi.getThreadInfo());\n", m_ciTemp);
     cg_printf("const CallInfo *&cit%d = mcp%d.ci;\n", m_ciTemp, m_ciTemp);
     if (m_classScope) {
       cg_printf("%s%s.%sget_call_info(mcp%d",

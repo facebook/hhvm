@@ -620,7 +620,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         ASSERT(p.second->getCondition());
 
         // emit equality check
-        cg.indentBegin("");
+        cg.indentBegin();
         p.second->getCondition()->outputCPPBegin(cg, ar);
         cg_printf("if (equal(%s, (", var.c_str());
         p.second->getCondition()->outputCPP(cg, ar);
@@ -642,16 +642,16 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                       varId, c);
           }
         }
-        cg.indentEnd("");
+        cg.indentEnd();
       }
       // emit jump to default:
-      cg.indentBegin("");
+      cg.indentBegin();
       if (defaultCaseNum >= 0) {
         cg_printf("goto case_%d_%d;\n", varId, defaultCaseNum);
       } else {
         cg_printf("goto break%d;\n", labelId);
       }
-      cg.indentEnd("");
+      cg.indentEnd();
     }
 
     if (defaultCaseNum >= 0) {

@@ -7959,8 +7959,6 @@ bool TestCodeRun::TestRenameFunction() {
        "fb_rename_function('test2', 'test1');"
        "fb_rename_function('test1', 'test2');"
        "fb_rename_function('test3', 'test1');");
-
-
   Option::DynamicInvokeFunctions.clear();
   return true;
 }
@@ -14397,6 +14395,9 @@ bool TestCodeRun::TestConcat() {
        "}"
        "var_dump(json_encode(test('x', 'y')));");
 
+  MVCR("<?php "
+       "$a = 1;"
+       "var_dump($a . '2' . '3');");
   return true;
 }
 

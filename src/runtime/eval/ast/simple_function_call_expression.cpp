@@ -143,7 +143,10 @@ Variant UserFunctionCallExpression::eval(VariableEnvironment &env) const {
 
 Variant OverrideFunctionCallExpression::eval(VariableEnvironment &env) const {
   SET_LINE;
-  return strongBind(m_override->directInvoke(env, this));
+  if (!*s_hasRenamedFunction) {
+    return strongBind(m_override->directInvoke(env, this));
+  }
+  return SimpleFunctionCallExpression::eval(env);
 }
 
 Variant SimpleFunctionCallExpression::evalCallInfo(

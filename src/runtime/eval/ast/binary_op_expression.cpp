@@ -463,7 +463,7 @@ VectorConcatExpression::VectorConcatExpression(VectorConcatExpression *vce) :
 Variant VectorConcatExpression::eval(VariableEnvironment &env) const {
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   unsigned int count = m_exps.size();
-  ASSERT(count > 2);
+  ASSERT(count >= 2);
   String *temps = new String[count];
   if (m_exps[0]->isKindOf(KindOfVariableExpression)) {
     temps[1] = m_exps[1]->eval(env);

@@ -33,15 +33,15 @@ $(OUT_DIR)test_suite.inc:: $(TEST_SUITE_INC)
 $(OUT_DIR)test_fast.inc: $(TEST_FAST_INC)
 	$(V)cat $^ > $@
 
-TEST_MYSQL_INC := $(if $(OUT_DIR), $(OUT_DIR)test_mysql_info.inc) \
-	test_mysql_info.inc
+TEST_MYSQL_INC := $(OUT_DIR)test_mysql_info.inc
+
 $(TEST_MYSQL_INC): $(TEST_MYSQL_INFO_INC)
 	$(V)cat $^ > $@
 
 $(OUT_DIR)test_all.o: $(OUT_DIR)test_suite.inc \
         $(OUT_DIR)test_fast.inc
-$(OUT_DIR)test_cpp_base.o: $(TEST_MYSQL_INC)
-$(OUT_DIR)test_ext_mysql.o: $(TEST_MYSQL_INC)
+$(OUT_DIR)test_cpp_base.o $(OUT_DIR)test_ext_mysql.o \
+  $(OUT_DIR)test_code_run.o $(OUT_DIR)test_ext_pdo.o : $(TEST_MYSQL_INC)
 all: $(TARGETS)
 
 clean clobber::

@@ -10443,106 +10443,107 @@ const ObjectStaticCallbacks cw_SoapClient = {
 };
 struct hashNodeCTD {
   int64 hash;
+  int32 flags;
+  int32 cdec;
   const char *name;
   int64 ptv1;
-  ObjectData*(* const ptr2)();
 };
 static const hashNodeCTD ctdBuckets[] = {
-  {0xCDA860E5647C3908LL,"ImageSprite",(int64)&cw_ImageSprite,&coo_ImageSprite},
-  {0xA1EF70351574EC09LL,"ReflectionFunction",(int64)&cw_ReflectionFunction,&coo_ReflectionFunction},
-  {0xC365BE9E5A85E60BLL,"DOMNotation",(int64)&cw_DOMNotation,&coo_DOMNotation},
-  {0x69EDCA1CC29CFE0BLL,"ErrorException",(int64)&cw_ErrorException,&coo_ErrorException},
-  {0xE48FB595C359F411LL,"SpoofChecker",(int64)&cw_SpoofChecker,&coo_SpoofChecker},
-  {0xF8B42582709BAF12LL,"DebuggerProxy",(int64)&cw_DebuggerProxy,&coo_DebuggerProxy},
-  {0xEA76B9AABB7CC713LL,"SimpleXMLElement",(int64)&cw_SimpleXMLElement,&coo_SimpleXMLElement},
-  {0xB2E5C767255D2515LL,"SoapFault",(int64)&cw_SoapFault,&coo_SoapFault},
-  {0xDCBA5B52C68B501ALL,"DOMEntityReference",(int64)&cw_DOMEntityReference,&coo_DOMEntityReference},
-  {0xB5A44A5E6AE2E71DLL,"ReflectionClass",(int64)&cw_ReflectionClass,&coo_ReflectionClass},
-  {0xBDB8FB455A602A1ELL,"DateTime",(int64)&cw_DateTime,&coo_DateTime},
-  {0x9C85D092180A6325LL,"XMLReader",(int64)&cw_XMLReader,&coo_XMLReader},
-  {0xFE66D362EAB5BF2BLL,"SimpleXMLElementIterator",(int64)&cw_SimpleXMLElementIterator,&coo_SimpleXMLElementIterator},
-  {0xDA1D16E68CA95F2FLL,"MutableArrayIterator",(int64)&cw_MutableArrayIterator,&coo_MutableArrayIterator},
-  {0xFA394042E7488231LL,"FilterIterator",(int64)&cw_FilterIterator,&coo_FilterIterator},
-  {0xB65899865E2EAA32LL,"RecursiveIteratorIterator",(int64)&cw_RecursiveIteratorIterator,&coo_RecursiveIteratorIterator},
-  {0xC6D7EC2E443AFA34LL,"IteratorIterator",(int64)&cw_IteratorIterator,&coo_IteratorIterator},
-  {0xF909270014376235LL,"SoapVar",(int64)&cw_SoapVar,&coo_SoapVar},
-  {0xFFF7A8442616EF37LL,"DOMNodeIterator",(int64)&cw_DOMNodeIterator,&coo_DOMNodeIterator},
-  {0xE72AD818DDE95538LL,"ReflectionException",(int64)&cw_ReflectionException,&coo_ReflectionException},
-  {0xCC6991D3CF5CA03DLL,"Collator",(int64)&cw_Collator,&coo_Collator},
-  {0x05DE30099B58533DLL,"GenericContinuation",(int64)&cw_GenericContinuation,&coo_GenericContinuation},
-  {0xC9FC1A1F7B878C3ELL,"SoapServer",(int64)&cw_SoapServer,&coo_SoapServer},
-  {0xA27C70ED5B143841LL,"OutOfBoundsException",(int64)&cw_OutOfBoundsException,&coo_OutOfBoundsException},
-  {0xC253D8488B734244LL,"PDOStatement",(int64)&cw_PDOStatement,&coo_PDOStatement},
-  {0x483F5149CA964744LL,"EncodingMatch",(int64)&cw_EncodingMatch,&coo_EncodingMatch},
-  {0x996F76C9C527B946LL,"DOMNamedNodeMap",(int64)&cw_DOMNamedNodeMap,&coo_DOMNamedNodeMap},
-  {0x66282FC8E4EF4E46LL,"BadFunctionCallException",(int64)&cw_BadFunctionCallException,&coo_BadFunctionCallException},
-  {0xDAA2EE582E0D3849LL,"UnexpectedValueException",(int64)&cw_UnexpectedValueException,&coo_UnexpectedValueException},
-  {0xF2A49A22C192034ALL,"Memcached",(int64)&cw_Memcached,&coo_Memcached},
-  {0xC860DC2F9B0E6D4BLL,"LogicException",(int64)&cw_LogicException,&coo_LogicException},
-  {0x964F490DAC49174DLL,"DOMText",(int64)&cw_DOMText,&coo_DOMText},
-  {0xB08D1D59986A3D4ELL,"SoapHeader",(int64)&cw_SoapHeader,&coo_SoapHeader},
-  {0xDBA243B9FBA7A64FLL,"SplObjectStorage",(int64)&cw_SplObjectStorage,&coo_SplObjectStorage},
-  {0xD2EA111229F87A50LL,"Normalizer",(int64)&cw_Normalizer,&coo_Normalizer},
-  {0xB955263C51FB4A51LL,"GeneratorClosure",(int64)&cw_GeneratorClosure,&coo_GeneratorClosure},
-  {0x82239AA5D64B1453LL,"DOMCharacterData",(int64)&cw_DOMCharacterData,&coo_DOMCharacterData},
-  {0x6AF83706F76A9D53LL,"RangeException",(int64)&cw_RangeException,&coo_RangeException},
-  {0xF754323897E8A15ELL,"DirectoryIterator",(int64)&cw_DirectoryIterator,&coo_DirectoryIterator},
-  {0xF0EBB2CC1FBF9761LL,"DOMDocumentType",(int64)&cw_DOMDocumentType,&coo_DOMDocumentType},
-  {0xF0747A09B3523662LL,"DOMNode",(int64)&cw_DOMNode,&coo_DOMNode},
-  {0xFD1235273F521A63LL,"DebuggerClient",(int64)&cw_DebuggerClient,&coo_DebuggerClient},
-  {0xAFF1EF6EBB3DA065LL,"XMLWriter",(int64)&cw_XMLWriter,&coo_XMLWriter},
-  {0xFE07B9C27FE59D68LL,"DOMComment",(int64)&cw_DOMComment,&coo_DOMComment},
-  {0x17A40D895C55D968LL,"SoapParam",(int64)&cw_SoapParam,&coo_SoapParam},
-  {0xEA5B99D5B1A4566ALL,"DOMException",(int64)&cw_DOMException,&coo_DOMException},
-  {0xBCAE91CFA2AAD16BLL,"LengthException",(int64)&cw_LengthException,&coo_LengthException},
-  {0xB280F0C292E92A6CLL,"Closure",(int64)&cw_Closure,&coo_Closure},
-  {0x8B61E0BFCFA06573LL,"ReflectionExtension",(int64)&cw_ReflectionExtension,&coo_ReflectionExtension},
-  {0x3D5870E53BF89873LL,"ArrayIterator",(int64)&cw_ArrayIterator,&coo_ArrayIterator},
-  {0x885A4F6FD393D475LL,"InvalidArgumentException",(int64)&cw_InvalidArgumentException,&coo_InvalidArgumentException},
-  {0xC1A9F7D81254DD7ALL,"ReflectionObject",(int64)&cw_ReflectionObject,&coo_ReflectionObject},
-  {0xFAD161197633B87DLL,"DOMDocumentFragment",(int64)&cw_DOMDocumentFragment,&coo_DOMDocumentFragment},
-  {0x2E899D2A2572EF7DLL,"SQLite3Result",(int64)&cw_SQLite3Result,&coo_SQLite3Result},
-  {0xD9B3EFD1CD987F80LL,"DOMProcessingInstruction",(int64)&cw_DOMProcessingInstruction,&coo_DOMProcessingInstruction},
-  {0xB3BD46E935281082LL,"ReflectionFunctionAbstract",(int64)&cw_ReflectionFunctionAbstract,&coo_ReflectionFunctionAbstract},
-  {0xA4DE53FD7D3E8383LL,"DateTimeZone",(int64)&cw_DateTimeZone,&coo_DateTimeZone},
-  {0xF0D4A29DE6A7BA84LL,"DomainException",(int64)&cw_DomainException,&coo_DomainException},
-  {0xA2500D8A3618ED87LL,"EncodingDetector",(int64)&cw_EncodingDetector,&coo_EncodingDetector},
-  {0xB4C95AF311506C8FLL,"Directory",(int64)&cw_Directory,&coo_Directory},
-  {0x86335FF83CDEA590LL,"BadMethodCallException",(int64)&cw_BadMethodCallException,&coo_BadMethodCallException},
-  {0xAE7081C468A05993LL,"ReflectionParameter",(int64)&cw_ReflectionParameter,&coo_ReflectionParameter},
-  {0xEFFDF8DF15CABE94LL,"DOMCDATASection",(int64)&cw_DOMCDATASection,&coo_DOMCDATASection},
-  {0x6576EACCCE24D694LL,"__PHP_Incomplete_Class",(int64)&cw___PHP_Incomplete_Class,&coo___PHP_Incomplete_Class},
-  {0x47D93E6F80B66A94LL,"Exception",(int64)&cw_Exception,&coo_Exception},
-  {0xF1089C29FE923FA7LL,"SplFileInfo",(int64)&cw_SplFileInfo,&coo_SplFileInfo},
-  {0xFD46DB2E09C6DBA8LL,"DOMXPath",(int64)&cw_DOMXPath,&coo_DOMXPath},
-  {0x9D35C3EFD00E11A9LL,"SQLite3",(int64)&cw_SQLite3,&coo_SQLite3},
-  {0xE7E31D42F2DFE4AALL,"Locale",(int64)&cw_Locale,&coo_Locale},
-  {0x8A34015F67C804ADLL,"PDO",(int64)&cw_PDO,&coo_PDO},
-  {0xAE650138BA043AAFLL,"DOMDocument",(int64)&cw_DOMDocument,&coo_DOMDocument},
-  {0xC3BBC8F6F28E44B0LL,"ReflectionMethod",(int64)&cw_ReflectionMethod,&coo_ReflectionMethod},
-  {0xEDD772FA3B20B8B1LL,"DOMNodeList",(int64)&cw_DOMNodeList,&coo_DOMNodeList},
-  {0xA86D5ADE799762BALL,"FB_MySQLLexer",(int64)&cw_FB_MySQLLexer,&coo_FB_MySQLLexer},
-  {0xDD8785ACD19F77BDLL,"PDOException",(int64)&cw_PDOException,&coo_PDOException},
-  {0xC0B3C44077F5DDC3LL,"DOMElement",(int64)&cw_DOMElement,&coo_DOMElement},
-  {0xAE363D51549781C8LL,"AppendIterator",(int64)&cw_AppendIterator,&coo_AppendIterator},
-  {0xA53AC17234FC8CCBLL,"LibXMLError",(int64)&cw_LibXMLError,&coo_LibXMLError},
-  {0xBC122DF8859C72D0LL,"Memcache",(int64)&cw_Memcache,&coo_Memcache},
-  {0xD2E5CC58B841AED2LL,"SQLite3Stmt",(int64)&cw_SQLite3Stmt,&coo_SQLite3Stmt},
-  {0x297ECCC7A259EDD2LL,"SplFileObject",(int64)&cw_SplFileObject,&coo_SplFileObject},
-  {0xDE623FEAF7B068D4LL,"UnderflowException",(int64)&cw_UnderflowException,&coo_UnderflowException},
-  {0xC64D3427431A6ED8LL,"RecursiveDirectoryIterator",(int64)&cw_RecursiveDirectoryIterator,&coo_RecursiveDirectoryIterator},
-  {0x8E4CCE95F6A727D9LL,"OverflowException",(int64)&cw_OverflowException,&coo_OverflowException},
-  {0xFA52EBE538182BDALL,"SoapClient",(int64)&cw_SoapClient,&coo_SoapClient},
-  {0x9078CB3118A8B3DCLL,"RuntimeException",(int64)&cw_RuntimeException,&coo_RuntimeException},
-  {0xE1DD21ABF790E9E2LL,"Continuation",(int64)&cw_Continuation,&coo_Continuation},
-  {0xF5AA2571BDB659E4LL,"ReflectionProperty",(int64)&cw_ReflectionProperty,&coo_ReflectionProperty},
-  {0xA97174231D4912F4LL,"DOMAttr",(int64)&cw_DOMAttr,&coo_DOMAttr},
-  {0xBD69936178BA13F7LL,"stdClass",(int64)&cw_stdClass,&coo_stdClass},
-  {0xE22D4DF07E2A01FCLL,"OutOfRangeException",(int64)&cw_OutOfRangeException,&coo_OutOfRangeException},
-  {0xF4419B70A46387FDLL,"DOMImplementation",(int64)&cw_DOMImplementation,&coo_DOMImplementation},
-  {0x3D290BF933ED12FDLL,"XhprofFrame",(int64)&cw_XhprofFrame,&coo_XhprofFrame},
-  {0xE24835B2D74B86FFLL,"DOMEntity",(int64)&cw_DOMEntity,&coo_DOMEntity},
-  { -1,0,0,0 } };
+  {0x4DA860E5647C3908LL,1,0,"ImageSprite",(int64)&cw_ImageSprite },
+  {0x21EF70351574EC09LL,1,0,"ReflectionFunction",(int64)&cw_ReflectionFunction },
+  {0x4365BE9E5A85E60BLL,0,0,"DOMNotation",(int64)&cw_DOMNotation },
+  {0x69EDCA1CC29CFE0BLL,1,0,"ErrorException",(int64)&cw_ErrorException },
+  {0x648FB595C359F411LL,1,0,"SpoofChecker",(int64)&cw_SpoofChecker },
+  {0x78B42582709BAF12LL,1,0,"DebuggerProxy",(int64)&cw_DebuggerProxy },
+  {0x6A76B9AABB7CC713LL,1,0,"SimpleXMLElement",(int64)&cw_SimpleXMLElement },
+  {0x32E5C767255D2515LL,1,0,"SoapFault",(int64)&cw_SoapFault },
+  {0x5CBA5B52C68B501ALL,1,0,"DOMEntityReference",(int64)&cw_DOMEntityReference },
+  {0x35A44A5E6AE2E71DLL,1,0,"ReflectionClass",(int64)&cw_ReflectionClass },
+  {0x3DB8FB455A602A1ELL,1,0,"DateTime",(int64)&cw_DateTime },
+  {0x1C85D092180A6325LL,1,0,"XMLReader",(int64)&cw_XMLReader },
+  {0x7E66D362EAB5BF2BLL,1,0,"SimpleXMLElementIterator",(int64)&cw_SimpleXMLElementIterator },
+  {0x5A1D16E68CA95F2FLL,1,0,"MutableArrayIterator",(int64)&cw_MutableArrayIterator },
+  {0x7A394042E7488231LL,1,0,"FilterIterator",(int64)&cw_FilterIterator },
+  {0x365899865E2EAA32LL,1,0,"RecursiveIteratorIterator",(int64)&cw_RecursiveIteratorIterator },
+  {0x46D7EC2E443AFA34LL,1,0,"IteratorIterator",(int64)&cw_IteratorIterator },
+  {0x7909270014376235LL,1,0,"SoapVar",(int64)&cw_SoapVar },
+  {0x7FF7A8442616EF37LL,1,0,"DOMNodeIterator",(int64)&cw_DOMNodeIterator },
+  {0x672AD818DDE95538LL,1,0,"ReflectionException",(int64)&cw_ReflectionException },
+  {0x4C6991D3CF5CA03DLL,0,0,"Collator",(int64)&cw_Collator },
+  {0x05DE30099B58533DLL,1,0,"GenericContinuation",(int64)&cw_GenericContinuation },
+  {0x49FC1A1F7B878C3ELL,1,0,"SoapServer",(int64)&cw_SoapServer },
+  {0x227C70ED5B143841LL,1,0,"OutOfBoundsException",(int64)&cw_OutOfBoundsException },
+  {0x4253D8488B734244LL,0,0,"PDOStatement",(int64)&cw_PDOStatement },
+  {0x483F5149CA964744LL,1,0,"EncodingMatch",(int64)&cw_EncodingMatch },
+  {0x196F76C9C527B946LL,0,0,"DOMNamedNodeMap",(int64)&cw_DOMNamedNodeMap },
+  {0x66282FC8E4EF4E46LL,1,0,"BadFunctionCallException",(int64)&cw_BadFunctionCallException },
+  {0x5AA2EE582E0D3849LL,1,0,"UnexpectedValueException",(int64)&cw_UnexpectedValueException },
+  {0x72A49A22C192034ALL,1,0,"Memcached",(int64)&cw_Memcached },
+  {0x4860DC2F9B0E6D4BLL,1,0,"LogicException",(int64)&cw_LogicException },
+  {0x164F490DAC49174DLL,1,0,"DOMText",(int64)&cw_DOMText },
+  {0x308D1D59986A3D4ELL,1,0,"SoapHeader",(int64)&cw_SoapHeader },
+  {0x5BA243B9FBA7A64FLL,1,0,"SplObjectStorage",(int64)&cw_SplObjectStorage },
+  {0x52EA111229F87A50LL,1,0,"Normalizer",(int64)&cw_Normalizer },
+  {0x3955263C51FB4A51LL,1,0,"GeneratorClosure",(int64)&cw_GeneratorClosure },
+  {0x02239AA5D64B1453LL,0,0,"DOMCharacterData",(int64)&cw_DOMCharacterData },
+  {0x6AF83706F76A9D53LL,1,0,"RangeException",(int64)&cw_RangeException },
+  {0x7754323897E8A15ELL,1,0,"DirectoryIterator",(int64)&cw_DirectoryIterator },
+  {0x70EBB2CC1FBF9761LL,1,0,"DOMDocumentType",(int64)&cw_DOMDocumentType },
+  {0x70747A09B3523662LL,1,0,"DOMNode",(int64)&cw_DOMNode },
+  {0x7D1235273F521A63LL,1,0,"DebuggerClient",(int64)&cw_DebuggerClient },
+  {0x2FF1EF6EBB3DA065LL,1,0,"XMLWriter",(int64)&cw_XMLWriter },
+  {0x7E07B9C27FE59D68LL,0,0,"DOMComment",(int64)&cw_DOMComment },
+  {0x17A40D895C55D968LL,1,0,"SoapParam",(int64)&cw_SoapParam },
+  {0x6A5B99D5B1A4566ALL,1,0,"DOMException",(int64)&cw_DOMException },
+  {0x3CAE91CFA2AAD16BLL,1,0,"LengthException",(int64)&cw_LengthException },
+  {0x3280F0C292E92A6CLL,1,0,"Closure",(int64)&cw_Closure },
+  {0x0B61E0BFCFA06573LL,0,0,"ReflectionExtension",(int64)&cw_ReflectionExtension },
+  {0x3D5870E53BF89873LL,1,0,"ArrayIterator",(int64)&cw_ArrayIterator },
+  {0x085A4F6FD393D475LL,1,0,"InvalidArgumentException",(int64)&cw_InvalidArgumentException },
+  {0x41A9F7D81254DD7ALL,1,0,"ReflectionObject",(int64)&cw_ReflectionObject },
+  {0x7AD161197633B87DLL,0,0,"DOMDocumentFragment",(int64)&cw_DOMDocumentFragment },
+  {0x2E899D2A2572EF7DLL,1,0,"SQLite3Result",(int64)&cw_SQLite3Result },
+  {0x59B3EFD1CD987F80LL,1,0,"DOMProcessingInstruction",(int64)&cw_DOMProcessingInstruction },
+  {0x33BD46E935281082LL,1,0,"ReflectionFunctionAbstract",(int64)&cw_ReflectionFunctionAbstract },
+  {0x24DE53FD7D3E8383LL,1,0,"DateTimeZone",(int64)&cw_DateTimeZone },
+  {0x70D4A29DE6A7BA84LL,1,0,"DomainException",(int64)&cw_DomainException },
+  {0x22500D8A3618ED87LL,1,0,"EncodingDetector",(int64)&cw_EncodingDetector },
+  {0x34C95AF311506C8FLL,1,0,"Directory",(int64)&cw_Directory },
+  {0x06335FF83CDEA590LL,1,0,"BadMethodCallException",(int64)&cw_BadMethodCallException },
+  {0x2E7081C468A05993LL,1,0,"ReflectionParameter",(int64)&cw_ReflectionParameter },
+  {0x6FFDF8DF15CABE94LL,0,0,"DOMCDATASection",(int64)&cw_DOMCDATASection },
+  {0x6576EACCCE24D694LL,0,0,"__PHP_Incomplete_Class",(int64)&cw___PHP_Incomplete_Class },
+  {0x47D93E6F80B66A94LL,1,0,"Exception",(int64)&cw_Exception },
+  {0x71089C29FE923FA7LL,1,0,"SplFileInfo",(int64)&cw_SplFileInfo },
+  {0x7D46DB2E09C6DBA8LL,1,0,"DOMXPath",(int64)&cw_DOMXPath },
+  {0x1D35C3EFD00E11A9LL,1,0,"SQLite3",(int64)&cw_SQLite3 },
+  {0x67E31D42F2DFE4AALL,1,0,"Locale",(int64)&cw_Locale },
+  {0x0A34015F67C804ADLL,1,0,"PDO",(int64)&cw_PDO },
+  {0x2E650138BA043AAFLL,1,0,"DOMDocument",(int64)&cw_DOMDocument },
+  {0x43BBC8F6F28E44B0LL,1,0,"ReflectionMethod",(int64)&cw_ReflectionMethod },
+  {0x6DD772FA3B20B8B1LL,1,0,"DOMNodeList",(int64)&cw_DOMNodeList },
+  {0x286D5ADE799762BALL,1,0,"FB_MySQLLexer",(int64)&cw_FB_MySQLLexer },
+  {0x5D8785ACD19F77BDLL,1,0,"PDOException",(int64)&cw_PDOException },
+  {0x40B3C44077F5DDC3LL,1,0,"DOMElement",(int64)&cw_DOMElement },
+  {0x2E363D51549781C8LL,1,0,"AppendIterator",(int64)&cw_AppendIterator },
+  {0x253AC17234FC8CCBLL,1,0,"LibXMLError",(int64)&cw_LibXMLError },
+  {0x3C122DF8859C72D0LL,1,0,"Memcache",(int64)&cw_Memcache },
+  {0x52E5CC58B841AED2LL,0,0,"SQLite3Stmt",(int64)&cw_SQLite3Stmt },
+  {0x297ECCC7A259EDD2LL,1,0,"SplFileObject",(int64)&cw_SplFileObject },
+  {0x5E623FEAF7B068D4LL,1,0,"UnderflowException",(int64)&cw_UnderflowException },
+  {0x464D3427431A6ED8LL,1,0,"RecursiveDirectoryIterator",(int64)&cw_RecursiveDirectoryIterator },
+  {0x0E4CCE95F6A727D9LL,1,0,"OverflowException",(int64)&cw_OverflowException },
+  {0x7A52EBE538182BDALL,1,0,"SoapClient",(int64)&cw_SoapClient },
+  {0x1078CB3118A8B3DCLL,1,0,"RuntimeException",(int64)&cw_RuntimeException },
+  {0x61DD21ABF790E9E2LL,1,0,"Continuation",(int64)&cw_Continuation },
+  {0x75AA2571BDB659E4LL,1,0,"ReflectionProperty",(int64)&cw_ReflectionProperty },
+  {0x297174231D4912F4LL,1,0,"DOMAttr",(int64)&cw_DOMAttr },
+  {0x3D69936178BA13F7LL,1,0,"stdClass",(int64)&cw_stdClass },
+  {0x622D4DF07E2A01FCLL,1,0,"OutOfRangeException",(int64)&cw_OutOfRangeException },
+  {0x74419B70A46387FDLL,0,0,"DOMImplementation",(int64)&cw_DOMImplementation },
+  {0x3D290BF933ED12FDLL,1,0,"XhprofFrame",(int64)&cw_XhprofFrame },
+  {0x624835B2D74B86FFLL,1,0,"DOMEntity",(int64)&cw_DOMEntity },
+};
 static const int ctdMapTable[] = {
   -1,-1,-1,-1,-1,-1,-1,-1,
   0,1,-1,2,-1,-1,-1,-1,
@@ -10585,25 +10586,26 @@ findCTD(CStrRef name) {
   int o = ctdMapTable[hash & 255];
   if (UNLIKELY(o < 0)) return NULL;
   const hashNodeCTD *p = &ctdBuckets[o];
-  int64 h = p->hash & (uint64(-1)>>1);
   do {
+    int64 h = p->hash;
     if (h == hash && (LIKELY(p->name==name.data())||LIKELY(!strcasecmp(p->name, name.data())))) return p;
-    h = (++p)->hash;
-  } while (h >= 0);
+  } while (!(p++->flags & 1));
+  return NULL;
+}
+const ObjectStaticCallbacks * get_builtin_object_static_callbacks(CStrRef s) {
+  const hashNodeCTD *p = findCTD(s);
+  if (p) {
+    return ((const ObjectStaticCallbacks *)p->ptv1);
+  }
   return NULL;
 }
 Variant get_builtin_class_var_init(CStrRef s, const char *var) {
-  const hashNodeCTD *p = findCTD(s);
-  if (p) {
-    return ((const ObjectStaticCallbacks *)p->ptv1)->os_getInit(var);
-  }
-  return throw_missing_class(s);
+  const ObjectStaticCallbacks *cwo = get_builtin_object_static_callbacks(s);
+  return LIKELY(cwo != 0) ? cwo->os_getInit(var) : throw_missing_class(s);
 }
 ObjectData *create_builtin_object_only_no_init(CStrRef s, ObjectData* root /* = NULL*/) {
-  const hashNodeCTD *p = findCTD(s);
-  if (p) {
-    return p->ptr2();
-  }
+  const ObjectStaticCallbacks *cwo = get_builtin_object_static_callbacks(s);
+  if (LIKELY(cwo != 0)) return cwo->createOnlyNoInit(root);
   throw_missing_class(s);
   return 0;
 }
@@ -10614,39 +10616,27 @@ Object create_builtin_object_only(CStrRef s, ObjectData* root /* = NULL*/) {
 }
 bool get_call_info_static_method_builtin(MethodCallPackage &mcp) {
   StringData *s ATTRIBUTE_UNUSED (mcp.rootCls);
-  const hashNodeCTD *p = findCTD(StrNR(s));
-  const ObjectStaticCallbacks *osc=p?(const ObjectStaticCallbacks *)p->ptv1:0;
-  return ObjectStaticCallbacks::GetCallInfo(osc,mcp,-1);
-}
-const ObjectStaticCallbacks * get_builtin_object_static_callbacks(CStrRef s) {
-  const hashNodeCTD *p = findCTD(s);
-  if (p) {
-    return ((const ObjectStaticCallbacks *)p->ptv1);
-  }
-  return NULL;
+  const ObjectStaticCallbacks *cwo = get_builtin_object_static_callbacks(s);
+  return ObjectStaticCallbacks::GetCallInfo(cwo,mcp,-1);
 }
 Variant get_builtin_static_property(CStrRef s, const char *prop) {
-  {
-    const ObjectStaticCallbacks * cwo = get_builtin_object_static_callbacks(s);
-    if (cwo) return cwo->os_get(prop);
-  }
+  const ObjectStaticCallbacks * cwo = get_builtin_object_static_callbacks(s);
+  if (cwo) return cwo->os_get(prop);
   return null;
 }
 Variant *get_builtin_static_property_lv(CStrRef s, const char *prop) {
-  {
-    const ObjectStaticCallbacks * cwo = get_builtin_object_static_callbacks(s);
-    if (cwo) return &cwo->os_lval(prop);
-  }
+  const ObjectStaticCallbacks * cwo = get_builtin_object_static_callbacks(s);
+  if (cwo) return &cwo->os_lval(prop);
   return NULL;
 }
-Variant get_builtin_class_constant(CStrRef s, const char *constant, bool fatal /* = true */) {
+Variant get_builtin_class_constant(CStrRef s, const char *constant, int fatal /* = true */) {
   {
     const ObjectStaticCallbacks * cwo = get_builtin_object_static_callbacks(s);
     if (cwo) return cwo->os_constant(constant);
   }
-  if (fatal) {
+  if (fatal > 0) {
     raise_error("Couldn't find constant %s::%s", s.data(), constant);
-  } else {
+  } else if (!fatal) {
     raise_warning("Couldn't find constant %s::%s", s.data(), constant);
   }
   return null;

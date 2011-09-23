@@ -86,9 +86,9 @@ extern ConstantType check_constant(CStrRef name);
  * Getting a class constant
  */
 extern Variant get_class_constant(CStrRef s, const char *prop,
-                                  bool fatal = true);
+                                  int fatal = true);
 extern Variant get_builtin_class_constant(CStrRef s, const char *prop,
-                                          bool fatal = true);
+                                          int fatal = true);
 
 /**
  * Getting function info

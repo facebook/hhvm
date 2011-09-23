@@ -1207,116 +1207,140 @@ void ClassScope::outputCPPDynamicClassImpl(CodeGenerator &cg,
   cg_indentEnd("}\n");
 }
 
-void ClassScope::outputCPPHashTableClassVarInit
+void ClassScope::outputCPPHashTableClasses
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  ASSERT(cg.getCurrentIndentation() == 0);
-  const char text1[] =
-    "struct hashNodeCTD {\n"
-    "  int64 hash;\n"
-    "  const char *name;\n"
-    "  int64 ptv1;\n"
-    "  ObjectData*(* const ptr2)();\n"
-    "};\n";
+  if (classes.size()) {
+    ASSERT(cg.getCurrentIndentation() == 0);
+    const char text1[] =
+      "struct hashNodeCTD {\n"
+      "  int64 hash;\n"
+      "  int32 flags;\n"
+      "  int32 cdec;\n"
+      "  const char *name;\n"
+      "  int64 ptv1;\n"
+      "};\n";
 
-  const char text2[] =
-    "#define GET_CS_OFFSET(n) "
-    "((offsetof(GlobalVariables, %s ## n) -"
-    "  offsetof(GlobalVariables, tgv_RedeclaredObjectStaticCallbacksConstPtr))/"
-    "sizeof(RedeclaredObjectStaticCallbacksConst*))\n"
-    "inline ALWAYS_INLINE "
-    "const ObjectStaticCallbacks *getCallbacks(\n"
-    "  const hashNodeCTD *p, CStrRef s, GlobalVariables *g) {\n"
-    "  int64 off = p->ptv1;\n"
-    "  if (LIKELY(!(off & 1))) return ((const ObjectStaticCallbacks *)off);\n"
-    "  checkClassExists(s, g);\n"
-    "  if (LIKELY(p->ptr2!=0)) /* volatile class */ return "
-    "((const ObjectStaticCallbacks *)(off-1));\n"
-    "  /* redeclared class */\n"
-    "  return &g->tgv_RedeclaredObjectStaticCallbacksConstPtr[off>>1]->oscb;\n"
-    "}\n";
+    const char text2[] =
+      "#define GET_CS_OFFSET(n) offsetof(GlobalVariables, %s ## n)\n"
+      "inline ALWAYS_INLINE "
+      "const ObjectStaticCallbacks *getCallbacks(\n"
+      "  const hashNodeCTD *p, CStrRef s) {\n"
+      "  int64 off = p->ptv1;\n"
+      "  if (LIKELY(!(off & 1))) return ((const ObjectStaticCallbacks *)off);\n"
+      "  DECLARE_GLOBAL_VARIABLES(g);\n"
+      "  checkClassExistsThrow(s, (bool*)((char*)g + p->cdec));\n"
+      "  if (LIKELY(!(off & 2))) /* volatile class */ return "
+      "((const ObjectStaticCallbacks *)(off-1));\n"
+      "  /* redeclared class */\n"
+      "  return *(ObjectStaticCallbacks**)((char*)g + (off-3));\n"
+      "}\n";
 
-  const char text3[] =
-    "\n"
-    "static const hashNodeCTD *\n"
-    "findCTD(CStrRef name) {\n"
-    "  int64 hash = name->hash();\n"
-    "  int o = ctdMapTable[hash & %d];\n"
-    "  if (UNLIKELY(o < 0)) return NULL;\n"
-    "  const hashNodeCTD *p = &ctdBuckets[o];\n"
-    "  int64 h = p->hash & (uint64(-1)>>1);\n"
-    "  do {\n"
-    "    if (h == hash && "
-    "(LIKELY(p->name==name.data())||"
-    "LIKELY(!strcasecmp(p->name, name.data())))) return p;\n"
-    "    h = (++p)->hash;\n"
-    "  } while (h >= 0);\n"
-    "  return NULL;\n"
-    "}\n";
+    const char text3[] =
+      "\n"
+      "static const hashNodeCTD *\n"
+      "findCTD(CStrRef name) {\n"
+      "  int64 hash = name->hash();\n"
+      "  int o = ctdMapTable[hash & %d];\n"
+      "  if (UNLIKELY(o < 0)) return NULL;\n"
+      "  const hashNodeCTD *p = &ctdBuckets[o];\n"
+      "  do {\n"
+      "    int64 h = p->hash;\n"
+      "    if (h == hash && "
+      "(LIKELY(p->name==name.data())||"
+      "LIKELY(!strcasecmp(p->name, name.data())))) return p;\n"
+      "  } while (!(p++->flags & 1));\n"
+      "  return NULL;\n"
+      "}\n";
 
-  JumpTable jt(cg, classes, true, true, true, true);
-  cg_printf(text1);
-  if (!system) {
-    cg_printf(text2, Option::ClassStaticsCallbackPrefix);
-  }
-  cg_printf("static const hashNodeCTD ctdBuckets[] = {\n");
+    JumpTable jt(cg, classes, true, true, true, true);
+    cg_printf(text1);
+    if (!system) {
+      cg_printf(text2, Option::ClassStaticsCallbackPrefix);
+    }
+    cg_printf("static const hashNodeCTD ctdBuckets[] = {\n");
 
-  int64 min64 = -1-int64(uint64(-1)>>1);
-  vector<int> offsets;
-  int prev = -1;
-  for (int n = 0; jt.ready(); ++n, jt.next()) {
-    int cur = jt.current();
-    bool changed = false;
-    if (prev != cur) {
-      changed = true;
-      while (++prev != cur) {
-        offsets.push_back(-1);
+    vector<int> offsets;
+    int prev = -1;
+    for (int n = 0; jt.ready(); ++n, jt.next()) {
+      int cur = jt.current();
+      if (prev != cur) {
+        while (++prev != cur) {
+          offsets.push_back(-1);
+        }
+        offsets.push_back(n);
       }
-      offsets.push_back(n);
+      const char *clsName = jt.key();
+      StringToClassScopePtrVecMap::const_iterator iterClasses =
+        classScopes.find(clsName);
+      ClassScopeRawPtr cls = iterClasses->second[0];
+      cg_printf("  {0x%016llXLL,%d,",
+                hash_string_i(clsName), jt.last() ? 1 : 0);
+      if (cls->isVolatile()) {
+        cg_printf("offsetof(GlobalVariables,CDEC(%s))",
+                  CodeGenerator::FormatLabel(cls->getName()).c_str());
+      } else {
+        cg_printf("0");
+      }
+      cg_printf(",\"%s\",", CodeGenerator::EscapeLabel(clsName).c_str());
+      if (cls->isRedeclaring()) {
+        ASSERT(!system);
+        cg_printf("GET_CS_OFFSET(%s)+3",
+                  CodeGenerator::FormatLabel(cls->getName()).c_str());
+      } else {
+        string clsFmt = CodeGenerator::FormatLabel(clsName);
+        cg_printf("(int64)&%s%s%s",
+                  Option::ClassStaticsCallbackPrefix,
+                  clsFmt.c_str(),
+                  cls->isVolatile() ? "+1" : "");
+      }
+      cg_printf(" },\n");
     }
-    const char *clsName = jt.key();
-    StringToClassScopePtrVecMap::const_iterator iterClasses =
-      classScopes.find(clsName);
-    cg_printf("  {0x%016llXLL,\"%s\",",
-              hash_string_i(clsName) + (changed ? min64 : 0),
-              CodeGenerator::EscapeLabel(clsName).c_str());
-    ClassScopeRawPtr cls = iterClasses->second[0];
-    if (cls->isRedeclaring()) {
-      ASSERT(!system);
-      cg_printf("GET_CS_OFFSET(%s)*2+1,0",
-                CodeGenerator::FormatLabel(cls->getName()).c_str());
+
+    cg_printf("};\n");
+    cg_indentBegin("static const int ctdMapTable[] = {\n");
+    for (int i = 0, e = jt.size(), s = offsets.size(); i < e; i++) {
+      cg_printf("%d,", i < s ? offsets[i] : -1);
+      if ((i & 7) == 7) cg_printf("\n");
+    }
+    cg_printf("\n");
+    cg_indentEnd("};\n");
+
+    cg_printf(text3, jt.size() - 1);
+  }
+
+  cg_indentBegin("const ObjectStaticCallbacks * "
+                 "get%s_object_static_callbacks(CStrRef s) {\n",
+                 system ? "_builtin" : "");
+  if (classes.size()) {
+    if (system) {
+      cg_printf("const hashNodeCTD *p = findCTD(s);\n"
+                "if (p) {\n"
+                "  return "
+                "((const ObjectStaticCallbacks *)p->ptv1);\n"
+                "}\n"
+                "return NULL;\n");
     } else {
-      string clsFmt = CodeGenerator::FormatLabel(clsName);
-      cg_printf("%s(int64)&%s%s,&%s%s",
-                cls->isVolatile() ? "1+" : "",
-                Option::ClassStaticsCallbackPrefix,
-                clsFmt.c_str(),
-                Option::CreateObjectOnlyPrefix,
-                clsFmt.c_str());
+      cg_printf("const hashNodeCTD *p = findCTD(s);\n"
+                "if (!p) return get_builtin_object_static_callbacks(s);\n"
+                "return getCallbacks(p,s);\n");
     }
-    cg_printf("},\n");
+  } else {
+    if (system) {
+      cg_printf("return NULL;\n");
+    } else {
+      cg_printf("return get_builtin_object_static_callbacks(s);\n");
+    }
   }
-
-  cg_printf("  { -1,0,0,0 } };\n");
-  cg_indentBegin("static const int ctdMapTable[] = {\n");
-  for (int i = 0, e = jt.size(), s = offsets.size(); i < e; i++) {
-    cg_printf("%d,", i < s ? offsets[i] : -1);
-    if ((i & 7) == 7) cg_printf("\n");
-  }
-  cg_printf("\n");
-  cg_indentEnd("};\n");
-
-  cg_printf(text3, jt.size() - 1);
+  cg_indentEnd("}\n");
 }
 
 void ClassScope::outputCPPClassVarInitImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  if (classes.size()) {
-    outputCPPHashTableClassVarInit(cg, classScopes, classes);
-  }
+
   cg_indentBegin("Variant get%s_class_var_init(CStrRef s, "
                  "const char *var) {\n",
                  system ? "_builtin" : "");
@@ -1330,19 +1354,11 @@ void ClassScope::outputCPPClassVarInitImpl
     cg_indentEnd("}\n");
   }
   if (classes.size()) {
-    if (system) {
-      cg_printf("const hashNodeCTD *p = findCTD(s);\n"
-                "if (p) {\n"
-                "  return "
-                "((const ObjectStaticCallbacks *)p->ptv1)->os_getInit(var);\n"
-                "}\n"
-                "return throw_missing_class(s);\n");
-    } else {
-      cg.printDeclareGlobals();
-      cg_printf("const hashNodeCTD *p = findCTD(s);\n"
-                "if (!p) return get_builtin_class_var_init(s, var);\n"
-                "return getCallbacks(p,s,g)->os_getInit(var);\n");
-    }
+    cg_printf("const ObjectStaticCallbacks *cwo = "
+              "get_%sobject_static_callbacks(s);\n"
+              "return LIKELY(cwo != 0) ? "
+              "cwo->os_getInit(var) : throw_missing_class(s);\n",
+              system ? "builtin_" : "");
   } else {
     if (system) {
       cg_printf("return throw_missing_class(s);\n");
@@ -1378,19 +1394,12 @@ void ClassScope::outputCPPDynamicClassCreateImpl
       cg_printf("return create_builtin_object_only_no_init(s, root);\n");
     }
   } else {
-    if (system) {
-      cg_printf("const hashNodeCTD *p = findCTD(s);\n"
-                "if (p) {\n"
-                "  return p->ptr2();\n"
-                "}\n"
-                "throw_missing_class(s);\n"
-                "return 0;\n");
-    } else {
-      cg.printDeclareGlobals();
-      cg_printf("const hashNodeCTD *p = findCTD(s);\n"
-                "if (!p) return create_builtin_object_only_no_init(s, root);\n"
-                "return getCallbacks(p,s,g)->createOnlyNoInit(root);\n");
-    }
+    cg_printf("const ObjectStaticCallbacks *cwo = "
+              "get_%sobject_static_callbacks(s);\n"
+              "if (LIKELY(cwo != 0)) return cwo->createOnlyNoInit(root);\n"
+              "throw_missing_class(s);\n"
+              "return 0;\n",
+              system ? "builtin_" : "");
   }
   cg_indentEnd("}\n");
   // output create_object_only()
@@ -1424,17 +1433,10 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl(
     cg_indentEnd("}\n");
   }
   if (useHashTable) {
-    if (system) {
-      cg_printf("const hashNodeCTD *p = findCTD(StrNR(s));\n"
-                "const ObjectStaticCallbacks *osc=p?"
-                "(const ObjectStaticCallbacks *)p->ptv1:0;\n"
-                "return ObjectStaticCallbacks::GetCallInfo(osc,mcp,-1);\n");
-    } else {
-      cg.printDeclareGlobals();
-      cg_printf("const hashNodeCTD *p = findCTD(StrNR(s));\n"
-                "if (!p) return get_call_info_static_method_builtin(mcp);\n"
-                "return getCallbacks(p,s,g)->os_get_call_info(mcp, -1);\n");
-    }
+    cg_printf("const ObjectStaticCallbacks *cwo = "
+              "get_%sobject_static_callbacks(s);\n"
+              "return ObjectStaticCallbacks::GetCallInfo(cwo,mcp,-1);\n" ,
+              system ? "builtin_" : "");
   } else {
     if (system) {
       cg_printf("return ObjectStaticCallbacks::GetCallInfo(0,mcp,-1);\n");
@@ -1452,32 +1454,6 @@ void ClassScope::outputCPPGetStaticPropertyImpl
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
 
-  cg_indentBegin("const ObjectStaticCallbacks * "
-                 "get%s_object_static_callbacks(CStrRef s) {\n",
-                 system ? "_builtin" : "");
-  if (classes.size()) {
-    if (system) {
-      cg_printf("const hashNodeCTD *p = findCTD(s);\n"
-                "if (p) {\n"
-                "  return "
-                "((const ObjectStaticCallbacks *)p->ptv1);\n"
-                "}\n"
-                "return NULL;\n");
-    } else {
-      cg.printDeclareGlobals();
-      cg_printf("const hashNodeCTD *p = findCTD(s);\n"
-                "if (!p) return get_builtin_object_static_callbacks(s);\n"
-                "return getCallbacks(p,s,g);\n");
-    }
-  } else {
-    if (system) {
-      cg_printf("return NULL;\n");
-    } else {
-      cg_printf("return get_builtin_object_static_callbacks(s);\n");
-    }
-  }
-  cg_indentEnd("}\n");
-
   cg_indentBegin("Variant get%s_static_property(CStrRef s, "
                  "const char *prop) {\n",
                  system ? "_builtin" : "");
@@ -1490,18 +1466,12 @@ void ClassScope::outputCPPGetStaticPropertyImpl
     cg_indentEnd("}\n");
   }
 
-  cg.indentBegin("{\n");
   cg.printf("const ObjectStaticCallbacks * cwo = "
             "get%s_object_static_callbacks(s);\n",
             system ? "_builtin" : "");
   cg.printf("if (cwo) return cwo->os_get(prop);\n");
-  cg.indentEnd("}\n");
 
-  if (!system) {
-    cg_printf("return get_builtin_static_property(s, prop);\n");
-  } else {
-    cg_printf("return null;\n");
-  }
+  cg_printf("return null;\n");
   cg_indentEnd("}\n");
 
   cg_indentBegin("Variant *get%s_static_property_lv(CStrRef s, "
@@ -1516,18 +1486,12 @@ void ClassScope::outputCPPGetStaticPropertyImpl
     cg_indentEnd("}\n");
   }
 
-  cg.indentBegin("{\n");
   cg.printf("const ObjectStaticCallbacks * cwo = "
             "get%s_object_static_callbacks(s);\n",
             system ? "_builtin" : "");
   cg.printf("if (cwo) return &cwo->os_lval(prop);\n");
-  cg.indentEnd("}\n");
 
-  if (!system) {
-    cg_printf("return get_builtin_static_property_lv(s, prop);\n");
-  } else {
-    cg_printf("return NULL;\n");
-  }
+  cg_printf("return NULL;\n");
   cg_indentEnd("}\n");
 }
 
@@ -1535,7 +1499,7 @@ void ClassScope::outputCPPGetClassConstantImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
   cg_indentBegin("Variant get%s_class_constant(CStrRef s, "
-                 "const char *constant, bool fatal /* = true */) {\n",
+                 "const char *constant, int fatal /* = true */) {\n",
                  system ? "_builtin" : "");
   if (!system && Option::EnableEval == Option::FullEval) {
     // See if there's an eval'd version
@@ -1553,19 +1517,16 @@ void ClassScope::outputCPPGetClassConstantImpl
   cg.printf("if (cwo) return cwo->os_constant(constant);\n");
   cg.indentEnd("}\n");
 
-  if (!system) {
-    cg_printf("return get_builtin_class_constant(s, constant, fatal);\n");
-  } else {
-    cg_indentBegin("if (fatal) {\n");
-    cg_printf("raise_error(\"Couldn't find constant %%s::%%s\", s.data(), "
-              "constant);\n");
-    cg_indentEnd();
-    cg_indentBegin("} else {\n");
-    cg_printf("raise_warning(\"Couldn't find constant %%s::%%s\", s.data(), "
-              "constant);\n");
-    cg_indentEnd("}\n");
-    cg_printf("return null;\n");
-  }
+  cg_indentBegin("if (fatal > 0) {\n");
+  cg_printf("raise_error(\"Couldn't find constant %%s::%%s\", s.data(), "
+            "constant);\n");
+  cg_indentEnd();
+  cg_indentBegin("} else if (!fatal) {\n");
+  cg_printf("raise_warning(\"Couldn't find constant %%s::%%s\", s.data(), "
+            "constant);\n");
+  cg_indentEnd("}\n");
+  cg_printf("return null;\n");
+
   cg_indentEnd("}\n");
 }
 

@@ -2607,6 +2607,7 @@ void AnalysisResult::outputCPPExtClassImpl(CodeGenerator &cg) {
     }
   }
 
+  ClassScope::outputCPPHashTableClasses(cg, merged, classes);
   ClassScope::outputCPPClassVarInitImpl(cg, merged, classes);
   ClassScope::outputCPPDynamicClassCreateImpl(cg, merged, classes);
   ClassScope::outputCPPGetCallInfoStaticMethodImpl(cg, merged, classes);
@@ -3100,9 +3101,6 @@ void AnalysisResult::outputCPPDynamicClassTables(
           classes.push_back(cls->getOriginalName().c_str());
           classScopes[cls->getName()].push_back(cls);
           if (!cls->isRedeclaring()) {
-            if (!system) {
-              cls->outputCPPDynamicClassDecl(cg);
-            }
             cls->outputCPPGlobalTableWrappersDecl(cg, ar);
           }
           break;
@@ -3126,6 +3124,7 @@ void AnalysisResult::outputCPPDynamicClassTables(
         classScopes[cls->getName()].push_back(cls);
       }
     }
+    ClassScope::outputCPPHashTableClasses(cg, classScopes, classes);
     ClassScope::outputCPPClassVarInitImpl(cg, classScopes, classes);
     ClassScope::outputCPPDynamicClassCreateImpl(cg, classScopes, classes);
     ClassScope::outputCPPGetCallInfoStaticMethodImpl(cg, classScopes, classes);

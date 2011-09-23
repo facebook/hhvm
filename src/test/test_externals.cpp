@@ -348,7 +348,7 @@ Variant get_constant(CStrRef name, bool error) {
   return name;
 }
 Variant get_class_constant(CStrRef s, const char *prop,
-                           bool fatal /* = true */) {
+                           int fatal /* = true */) {
   return null;
 }
 

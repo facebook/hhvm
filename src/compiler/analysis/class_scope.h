@@ -362,6 +362,9 @@ public:
   void serialize(JSON::CodeError::OutputStream &out) const;
   void serialize(JSON::DocTarget::OutputStream &out) const;
 
+  static void outputCPPHashTableClasses
+    (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
+     const std::vector<const char*> &classes);
   static void outputCPPClassVarInitImpl(
     CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
     const std::vector<const char *> &classes);
@@ -609,10 +612,6 @@ private:
   void outputCPPMethodInvokeBareObjectSupport(
     CodeGenerator &cg, AnalysisResultPtr ar,
     FunctionScopePtr func, bool fewArgs);
-
-  static void outputCPPHashTableClassVarInit
-    (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
-     const std::vector<const char*> &classes);
 
   void outputCPPMethodInvokeTable
     (CodeGenerator &cg, AnalysisResultPtr ar,

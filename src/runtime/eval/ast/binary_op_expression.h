@@ -53,6 +53,17 @@ private:
   OperandKindOf m_operandKindOf;
 };
 
+class VectorConcatExpression : public Expression {
+public:
+  VectorConcatExpression(ExpressionPtr exp, const Location *loc);
+  VectorConcatExpression(VectorConcatExpression *vce);
+  virtual Variant eval(VariableEnvironment &env) const;
+  virtual void dump(std::ostream &out) const;
+  void addElement(ExpressionPtr exp);
+private:
+  std::vector<ExpressionPtr> m_exps;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

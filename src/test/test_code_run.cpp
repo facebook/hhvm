@@ -12866,6 +12866,22 @@ bool TestCodeRun::TestEvalOrder() {
        "function f() { global $a; return ++$a; }"
        "var_dump(array($a,f(),$a));");
 
+  MVCR("<?php "
+       "function foo() {"
+       "  global $a;"
+       "  $a = 1;"
+       "}"
+       "$a = 'a'; $r = ++$a . $a; var_dump($r);"
+       "$a = 'a'; $r = $a++ . $a; var_dump($r);"
+       "$a = 'a'; $r = $a . ++$a; var_dump($r);"
+       "$a = 'a'; $r = $a . $a++; var_dump($r);"
+       "$a = 'a'; $r = ++$a . ++$a; var_dump($r);"
+       "$a = 'a'; $r = ++$a . $a++; var_dump($r);"
+       "$a = 'a'; $r = $a++ . ++$a; var_dump($r);"
+       "$a = 'a'; $r = $a++ . $a++; var_dump($r);"
+       /*
+       "$a = 'a'; $b = 'b'; $r = $a . foo() . $b; var_dump($r);"
+       "$a = 'a'; $b = 'b'; $r = $a . (foo() . $b); var_dump($r);"*/);
   return true;
 }
 

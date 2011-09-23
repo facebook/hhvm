@@ -76,6 +76,7 @@ public:
     KindOfUnaryOpExpression,
     KindOfVariableExpression,
     KindOfThisVariableExpression,
+    KindOfVectorConcatExpression,
   };
   Expression(KindOf kindOf, EXPRESSION_ARGS) : Construct(CONSTRUCT_PASS),
     m_kindOf(kindOf) {}

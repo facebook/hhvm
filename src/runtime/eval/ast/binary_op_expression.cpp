@@ -81,6 +81,23 @@ Expression *BinaryOpExpression::optimize(VariableEnvironment &env) {
   if (evalScalar(env, v)) {
     return new ScalarValueExpression(v, loc());
   }
+  if (m_exp1->isKindOf(KindOfBinaryOpExpression)) {
+    BinaryOpExpression *binOpExp =
+      static_cast<BinaryOpExpression *>(m_exp1.get());
+    if (binOpExp->m_op == '.') {
+      VectorConcatExpression *vce =
+        new VectorConcatExpression(binOpExp->m_exp1, loc());
+      vce->addElement(binOpExp->m_exp2);
+      vce->addElement(m_exp2);
+      return vce;
+    }
+  } else if (m_exp1->isKindOf(KindOfVectorConcatExpression)) {
+    VectorConcatExpression *vce =
+      new VectorConcatExpression(
+        static_cast<VectorConcatExpression *>(m_exp1.get()));
+    vce->addElement(m_exp2);
+    return vce;
+  }
   setOperandKindOf();
   return NULL;
 }
@@ -430,6 +447,69 @@ void BinaryOpExpression::dump(std::ostream &out) const {
   }
   out << " ";
   m_exp2->dump(out);
+}
+
+VectorConcatExpression::VectorConcatExpression(
+  ExpressionPtr exp, const Location *loc) :
+  Expression(KindOfVectorConcatExpression, loc) {
+  m_exps.push_back(exp);
+}
+
+VectorConcatExpression::VectorConcatExpression(VectorConcatExpression *vce) :
+  Expression(KindOfVectorConcatExpression, vce->loc()) {
+  m_exps = vce->m_exps;
+}
+
+Variant VectorConcatExpression::eval(VariableEnvironment &env) const {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  unsigned int count = m_exps.size();
+  ASSERT(count > 2);
+  String *temps = new String[count];
+  if (m_exps[0]->isKindOf(KindOfVariableExpression)) {
+    temps[1] = m_exps[1]->eval(env);
+    temps[0] = m_exps[0]->eval(env);
+  } else {
+    temps[0] = m_exps[0]->eval(env);
+    temps[1] = m_exps[1]->eval(env);
+  }
+  int len = temps[0].size() + temps[1].size();
+  for (unsigned int i = 2; i < count; i++) {
+    temps[i] = m_exps[i]->eval(env);
+    len += temps[i].size();
+  }
+  char *buf = (char *)malloc(len + 1);
+  if (buf == NULL) {
+    throw FatalErrorException(0, "malloc failed: %d", len);
+  }
+  char *p = buf;
+  for (unsigned int i = 0; i < count; i++) {
+    memcpy(p, temps[i].data(), temps[i].size());
+    p += temps[i].size();
+  }
+  buf[len] = 0;
+  delete[] temps;
+  return String(buf, len, AttachString);
+}
+
+void VectorConcatExpression::addElement(ExpressionPtr exp) {
+  // try to merge scalars
+  ExpressionPtr &last = m_exps.back();
+  DummyVariableEnvironment env;
+  Variant v1;
+  Variant v2;
+  if (last->evalScalar(env, v1) && exp->evalScalar(env, v2)) {
+    Variant r = concat(v1, v2);
+    last = new ScalarValueExpression(r, last->loc());
+    return;
+  }
+  m_exps.push_back(exp);
+}
+
+void VectorConcatExpression::dump(std::ostream &out) const {
+  for (unsigned int i = 0; i < m_exps.size(); i++) {
+    if (i > 0) out << ".";
+    m_exps[i]->dump(out);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

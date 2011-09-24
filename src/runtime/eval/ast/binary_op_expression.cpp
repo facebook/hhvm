@@ -81,22 +81,24 @@ Expression *BinaryOpExpression::optimize(VariableEnvironment &env) {
   if (evalScalar(env, v)) {
     return new ScalarValueExpression(v, loc());
   }
-  if (m_exp1->isKindOf(KindOfBinaryOpExpression)) {
-    BinaryOpExpression *binOpExp =
-      static_cast<BinaryOpExpression *>(m_exp1.get());
-    if (binOpExp->m_op == '.') {
+  if (m_op == '.') {
+    if (m_exp1->isKindOf(KindOfBinaryOpExpression)) {
+      BinaryOpExpression *binOpExp =
+        static_cast<BinaryOpExpression *>(m_exp1.get());
+      if (binOpExp->m_op == '.') {
+        VectorConcatExpression *vce =
+          new VectorConcatExpression(binOpExp->m_exp1, loc());
+        vce->addElement(binOpExp->m_exp2);
+        vce->addElement(m_exp2);
+        return vce;
+      }
+    } else if (m_exp1->isKindOf(KindOfVectorConcatExpression)) {
       VectorConcatExpression *vce =
-        new VectorConcatExpression(binOpExp->m_exp1, loc());
-      vce->addElement(binOpExp->m_exp2);
+        new VectorConcatExpression(
+          static_cast<VectorConcatExpression *>(m_exp1.get()));
       vce->addElement(m_exp2);
       return vce;
     }
-  } else if (m_exp1->isKindOf(KindOfVectorConcatExpression)) {
-    VectorConcatExpression *vce =
-      new VectorConcatExpression(
-        static_cast<VectorConcatExpression *>(m_exp1.get()));
-    vce->addElement(m_exp2);
-    return vce;
   }
   setOperandKindOf();
   return NULL;

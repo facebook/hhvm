@@ -212,8 +212,8 @@ public:
   static int GetUserFunctionId(CStrRef funcName);
   static bool DeclareUserFunction(const FunctionStatement *funcStmt);
   static const FunctionStatement *GetUserFunction(int id);
-  static DECLARE_THREAD_LOCAL_NO_CHECK(UserFunctionIdTable,
-                                       s_userFunctionIdTable);
+  DECLARE_STATIC_REQUEST_LOCAL(UserFunctionIdTable,
+                               s_userFunctionIdTable);
 private:
   bool declareUserFunction(const FunctionStatement *funcStmt);
   int getUserFunctionId(CStrRef funcName);

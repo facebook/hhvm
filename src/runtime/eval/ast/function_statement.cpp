@@ -53,8 +53,8 @@ static int s_id = -1;
 #define INITIAL_FUNC_ID_TABLE_SIZE 4096
 #define INC_FUNC_ID_TABLE_SIZE 1024
 
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(UserFunctionIdTable,
-                                UserFunctionIdTable::s_userFunctionIdTable);
+IMPLEMENT_REQUEST_LOCAL(UserFunctionIdTable,
+                        UserFunctionIdTable::s_userFunctionIdTable);
 
 UserFunctionIdTable::UserFunctionIdTable() : m_size(0) {
   m_funcStmts = (const FunctionStatement **)
@@ -66,6 +66,7 @@ UserFunctionIdTable::UserFunctionIdTable() : m_size(0) {
 
 void UserFunctionIdTable::requestInit() {
   ASSERT(s_id < RuntimeOption::MaxUserFunctionId);
+  memset(m_funcStmts, 0, sizeof(FunctionStatement *) * m_size);
   grow(atomic_add(s_id, 0) + 1);
 }
 

@@ -14405,6 +14405,13 @@ bool TestCodeRun::TestConcat() {
   MVCR("<?php "
        "$a = 1;"
        "var_dump($a . '2' . '3');");
+
+  MVCR("<?php "
+       "$a= 'a';"
+       "$b = 'b';"
+       "$c = 0;"
+       "var_dump($a . $b == $c);");
+
   return true;
 }
 

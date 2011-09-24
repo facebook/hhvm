@@ -12877,9 +12877,8 @@ bool TestCodeRun::TestEvalOrder() {
        "$a = 'a'; $r = ++$a . $a++; var_dump($r);"
        "$a = 'a'; $r = $a++ . ++$a; var_dump($r);"
        "$a = 'a'; $r = $a++ . $a++; var_dump($r);"
-       /*
        "$a = 'a'; $b = 'b'; $r = $a . foo() . $b; var_dump($r);"
-       "$a = 'a'; $b = 'b'; $r = $a . (foo() . $b); var_dump($r);"*/);
+       "$a = 'a'; $b = 'b'; $r = $a . (foo() . $b); var_dump($r);");
   return true;
 }
 

@@ -913,8 +913,20 @@ int BinaryOpExpression::getConcatList(ExpressionPtrVec &ev, ExpressionPtr exp,
     } else if (exp->is(Expression::KindOfBinaryOpExpression)) {
       BinaryOpExpressionPtr b = static_pointer_cast<BinaryOpExpression>(exp);
       if (b->getOp() == '.') {
-        return getConcatList(ev, b->getExp1(), hasVoid) +
-          getConcatList(ev, b->getExp2(), hasVoid);
+        if (b->getExp1()->is(Expression::KindOfSimpleVariable) &&
+            b->getExp1()->isLocalExprAltered() &&
+            !b->getExp1()->hasCPPTemp() &&
+            b->getExp2()->hasEffect() &&
+            !b->getExp2()->hasCPPTemp()) {
+          /*
+            In this case, the simple variable must be evaluated
+            after b->getExp2(). But when we output a concat list we
+            explicitly order the expressions from left to right.
+          */
+        } else {
+          return getConcatList(ev, b->getExp1(), hasVoid) +
+            getConcatList(ev, b->getExp2(), hasVoid);
+        }
       }
     } else if (exp->is(Expression::KindOfEncapsListExpression)) {
       EncapsListExpressionPtr e =
@@ -929,6 +941,8 @@ int BinaryOpExpression::getConcatList(ExpressionPtrVec &ev, ExpressionPtr exp,
         return num;
       }
     }
+  } else if (!exp->getActualType()) {
+    return 0;
   }
 
   ev.push_back(exp);
@@ -987,7 +1001,9 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
           numConcat++;
         }
       }
-      numConcat += getConcatList(ev, m_exp2, hasVoid);
+      if (ok) {
+        numConcat += getConcatList(ev, m_exp2, hasVoid);
+      }
     }
     if (ok) {
       if (!cg.inExpression()) return true;
@@ -1002,7 +1018,9 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       } else if (numConcat) {
         buf = m_cppTemp = genCPPTemp(cg, ar);
         buf += "_buf";
-        cg_printf("StringBuffer %s;\n", buf.c_str());
+        if (numConcat > 1) {
+          cg_printf("StringBuffer %s;\n", buf.c_str());
+        }
       } else {
         m_cppTemp = "\"\"";
       }
@@ -1012,8 +1030,14 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         bool is_void = !exp->getActualType();
         exp->preOutputCPP(cg, ar, 0);
         if (!is_void) {
-          cg_printf("%s.appendWithTaint(", buf.c_str());
-          outputStringExpr(cg, ar, exp, true);
+          bool asLit = true;
+          if (numConcat > 1) {
+            cg_printf("%s.appendWithTaint(", buf.c_str());
+          } else {
+            asLit = false;
+            cg_printf("CStrRef %s = (", m_cppTemp.c_str());
+          }
+          outputStringExpr(cg, ar, exp, asLit);
           cg_printf(")");
         } else {
           exp->outputCPPUnneeded(cg, ar);
@@ -1021,7 +1045,7 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         cg_printf(";\n");
       }
 
-      if (numConcat && !prefix) {
+      if (numConcat > 1 && !prefix) {
         cg_printf("CStrRef %s(%s.detachWithTaint());\n",
                   m_cppTemp.c_str(), buf.c_str());
         if (m_op == T_CONCAT_EQUAL) {
@@ -1176,10 +1200,12 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       ExpressionPtrVec ev;
       bool hasVoid = false;
       getConcatList(ev, m_exp2, hasVoid);
-      cg_printf("%s", stringBufferName(Option::TempPrefix, prefix,
-                                       sv->getName().c_str()).c_str());
-      outputStringBufExprs(ev, cg, ar);
-      return;
+      if (!hasVoid) {
+        cg_printf("%s", stringBufferName(Option::TempPrefix, prefix,
+                                         sv->getName().c_str()).c_str());
+        outputStringBufExprs(ev, cg, ar);
+        return;
+      }
     }
     cg_printf("concat_assign");
     break;
@@ -1189,9 +1215,12 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       ExpressionPtrVec ev;
       bool hasVoid = false;
       int num = getConcatList(ev, self, hasVoid);
+      if (num < 2) {
+        cg_printf("concat");
+        break;
+      }
       assert(!hasVoid);
       if (num <= MAX_CONCAT_ARGS) {
-        assert(num >= 2);
         if (num == 2) {
           cg_printf("concat(");
         } else {

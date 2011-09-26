@@ -115,7 +115,7 @@ bool CmdWhere::onClient(DebuggerClient *client) {
 }
 
 bool CmdWhere::onServer(DebuggerProxy *proxy) {
-  m_stacktrace = FrameInjection::GetBacktrace(false, false, false);
+  m_stacktrace = FrameInjection::GetBacktrace(false, true, false);
   return proxy->send(this);
 }
 

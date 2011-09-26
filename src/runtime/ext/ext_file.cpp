@@ -569,6 +569,12 @@ Variant f_fileinode(CStrRef filename) {
 }
 
 Variant f_filesize(CStrRef filename) {
+  if (StaticContentCache::TheFileCache) {
+    int64 size =
+      StaticContentCache::TheFileCache->fileSize(filename.data(),
+        filename.data()[0] != '/');
+    if (size >= 0) return size;
+  }
   struct stat sb;
   CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
   return (int64)sb.st_size;

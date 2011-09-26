@@ -465,6 +465,29 @@ char *FileCache::read(const char *name, int &len, bool &compressed) const {
   return NULL;
 }
 
+int64 FileCache::fileSize(const char *name, bool isRelative) const {
+  if (!name || !*name) return -1;
+  if (isRelative) {
+    FileMap::const_iterator iter = m_files.find(name);
+    if (iter != m_files.end()) {
+      const Buffer &buf = iter->second;
+      if (buf.len >= 0) return buf.len;
+      if (buf.cdata) {
+        int new_len = buf.len;
+        char *uncompressed = gzdecode(buf.cdata, new_len);
+        if (uncompressed == NULL) {
+          throw Exception("Bad compressed data in archive %s", name);
+        } else {
+          free(uncompressed);
+        }
+        return new_len;
+      }
+    }
+    return -1;
+  }
+  return fileSize(GetRelativePath(name).c_str(), true);
+}
+
 void FileCache::dump() {
   // sort by file names
   std::set<string> files;

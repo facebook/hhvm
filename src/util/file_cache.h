@@ -53,7 +53,7 @@ public:
   bool dirExists(const char *name, bool isRelative = true) const;
   bool exists(const char *name, bool isRelative = true) const;
   char *read(const char *name, int &len, bool &compressed) const;
-
+  int64 fileSize(const char *name, bool isRelative) const;
   void dump();
 
   static std::string GetRelativePath(const char *path);

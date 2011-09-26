@@ -9156,6 +9156,14 @@ bool TestCodeRun::TestCompilation() {
          "setAttribute('a');");
   }
 
+  {
+    WithOpt w1(Option::EnableHipHopSyntax);
+    MVCR("<?php "
+         "class X {}"
+         "function bar(string $x = X::FIZ, $y=null, $z=null,"
+         "             $a=null, $b=null, $c=null, $d=null) {}");
+  }
+
   return true;
 }
 

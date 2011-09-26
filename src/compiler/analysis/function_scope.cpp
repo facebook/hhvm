@@ -1528,7 +1528,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
             bool isScalar = defVal->isScalar();
             if (Option::UseScalarVariant && isScalar && !ref && fewArgs) isCVarRef = true;
             TypePtr type = p->defaultValue()->getCPPType();
-            bool isVariant = type && type->is(Type::KindOfVariant);
+            bool isVariant = type && Type::IsMappedToVariant(type);
             cg_printf("%s(", ref ? "VRefParamValue" :
                       (!fewArgs || i >= maxCount) && !isVariant && !isCVarRef ?
                       "Variant" : "");
@@ -1539,7 +1539,12 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
             ASSERT(!cg.hasScalarVariant());
             cg.setScalarVariant();
           }
+
+          TypePtr exp = defVal->getExpectedType();
+          defVal->setExpectedType(TypePtr());
           defVal->outputCPP(cg, ar);
+          defVal->setExpectedType(exp);
+
           if (isCVarRef) cg.clearScalarVariant();
           ASSERT(!cg.hasScalarVariant());
           cg.setContext(context);

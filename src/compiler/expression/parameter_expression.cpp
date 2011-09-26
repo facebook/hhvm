@@ -187,9 +187,11 @@ TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   }
 
   if (m_defaultValue && !m_ref) {
-    ret = m_defaultValue->inferAndCheck(ar, ret, false);
-    // TODO: emit compiler error when default value does not
-    // match the type spec (if we have a type spec)
+    TypePtr r = m_defaultValue->inferAndCheck(ar, Type::Some, false);
+    if (!m_defaultValue->is(KindOfConstantExpression) ||
+        !static_pointer_cast<ConstantExpression>(m_defaultValue)->isNull()) {
+      ret = Type::Coerce(ar, r, ret);
+    }
   }
 
   // parameters are like variables, but we need to remember these are

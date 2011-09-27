@@ -1197,14 +1197,22 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   case T_CONCAT_EQUAL:
     if (const char *prefix = stringBufferPrefix(cg, ar, m_exp1)) {
       SimpleVariablePtr sv = static_pointer_cast<SimpleVariable>(m_exp1);
-      ExpressionPtrVec ev;
-      bool hasVoid = false;
-      getConcatList(ev, m_exp2, hasVoid);
-      if (!hasVoid) {
-        cg_printf("%s", stringBufferName(Option::TempPrefix, prefix,
-                                         sv->getName().c_str()).c_str());
-        outputStringBufExprs(ev, cg, ar);
+      if (m_exp2->hasCPPTemp()) {
+        cg_printf("%s.addWithTaint(%s)",
+                  stringBufferName(Option::TempPrefix, prefix,
+                                   sv->getName().c_str()).c_str(),
+                  m_exp2->cppTemp().c_str());
         return;
+      } else {
+        ExpressionPtrVec ev;
+        bool hasVoid = false;
+        getConcatList(ev, m_exp2, hasVoid);
+        if (!hasVoid) {
+          cg_printf("%s", stringBufferName(Option::TempPrefix, prefix,
+                                           sv->getName().c_str()).c_str());
+          outputStringBufExprs(ev, cg, ar);
+          return;
+        }
       }
     }
     cg_printf("concat_assign");

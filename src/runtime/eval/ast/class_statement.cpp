@@ -41,7 +41,7 @@ ClassVariable::ClassVariable(CONSTRUCT_ARGS, const string &name, int modifiers,
 
 ClassVariable *ClassVariable::optimize(VariableEnvironment &env) {
   Eval::optimize(env, m_value);
-  return NULL; 
+  return NULL;
 }
 
 void ClassVariable::set(VariableEnvironment &env, EvalObjectData *self) const {
@@ -589,11 +589,13 @@ void ClassStatement::getInfo(ClassInfoEvaled &info) const {
   }
   getPropertyInfo(info);
   DummyVariableEnvironment dv;
-  for (StringMap<ExpressionPtr>::const_iterator it = m_constants.begin();
-       it != m_constants.end(); ++it) {
+  for (std::vector<StringData*>::const_iterator it = m_constantNames.begin();
+       it != m_constantNames.end(); ++it) {
+    const Expression *con = m_constants.find(*it)->second.get();
+    StringData *conName = *it;
     ClassInfo::ConstantInfo *c = new ClassInfo::ConstantInfo;
-    c->name = it->first;
-    c->setValue(it->second->eval(dv));
+    c->name = conName;
+    c->setValue(con->eval(dv));
     String sv = c->getValue().toString();
     char* buf = new char[sv.size()+1];
     memcpy(buf, sv.data(), sv.size()+1);

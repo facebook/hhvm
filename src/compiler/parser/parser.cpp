@@ -719,7 +719,8 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
                     dynamic_pointer_cast<StatementList>(stmt->stmt),
                     attribute, comment);
     out->stmt = func;
-    func->setLocation(loc);
+    func->getLocation()->line0 = loc->line0;
+    func->getLocation()->char0 = loc->char0;
     {
       func->onParse(m_ar, m_file);
     }
@@ -764,7 +765,8 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
     if (m_closureGenerator) {
       func->getFunctionScope()->setClosureGenerator();
     }
-    func->setLocation(loc);
+    func->getLocation()->line0 = loc->line0;
+    func->getLocation()->char0 = loc->char0;
     if (func->ignored()) {
       out->stmt = NEW_STMT0(StatementList);
     }
@@ -993,7 +995,8 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
                    attribute, comment);
     out->stmt = mth;
     if (reloc) {
-      mth->setLocation(loc);
+      mth->getLocation()->line0 = loc->line0;
+      mth->getLocation()->char0 = loc->char0;
     }
     {
       completeScope(mth->onInitialParse(m_ar, m_file));
@@ -1012,7 +1015,8 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
                    old_params, stmts, attribute, comment);
     out->stmt = mth;
     if (reloc) {
-      mth->setLocation(loc);
+      mth->getLocation()->line0 = loc->line0;
+      mth->getLocation()->char0 = loc->char0;
     }
     completeScope(mth->onInitialParse(m_ar, m_file));
   }

@@ -470,7 +470,7 @@ void Parser::onSimpleVariable(Token &out, Token &var) {
       return;
     }
   }
-  out->exp() = makeStringVariable(var.text()); 
+  out->exp() = makeStringVariable(var.text());
 }
 
 void Parser::onSynthesizedVariable(Token &out, Token &var) {
@@ -1065,7 +1065,12 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
   FunctionStatementPtr func = peekFunc();
   ASSERT(func);
   popFunc();
-  func->setLoc(popFuncLocation().get());
+  Location *start_loc = popFuncLocation().get();
+  Location loc;
+  this->getLocation(loc);
+  loc.line0 = start_loc->line0;
+  loc.char0 = start_loc->char0;
+  func->setLoc(&loc);
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
   m_foreaches.pop_back();
@@ -1238,10 +1243,15 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   MethodStatementPtr ms = peekFunc()->unsafe_cast<MethodStatement>();
   ASSERT(ms);
   popFunc();
+  Location *start_loc = popFuncLocation().get();
+  Location loc;
+  this->getLocation(loc);
+  loc.line0 = start_loc->line0;
+  loc.char0 = start_loc->char0;
+
   if (reloc) {
-    ms->setLoc(popFuncLocation().get());
+    ms->setLoc(&loc);
   }
-  ms->resetLoc(this);
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
   m_foreaches.pop_back();
@@ -1255,7 +1265,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     Token new_params;
     prepare_generator(this, stmt, new_params, ms->getYieldCount());
     StatementListStatementPtr stmts = stmt->getStmtList();
-    if (stmts) stmts->resetLoc(this);
+    if (stmts) stmts->setLoc(&loc);
     ms->init(this, ref.num(), new_params->params(), stmts, hasCallToGetArgs);
 
     String clsname = cs->name();
@@ -1270,7 +1280,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
 
   } else {
     StatementListStatementPtr stmts = stmt->getStmtList();
-    if (stmts) stmts->resetLoc(this);
+    if (stmts) stmts->setLoc(&loc);
     ms->init(this, ref.num(), params->params(), stmts, hasCallToGetArgs);
     out.reset();
     out->stmt() = ms;

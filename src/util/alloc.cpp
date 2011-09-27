@@ -14,7 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
+#include <sys/mman.h>
+#include <sys/user.h>
 #include "alloc.h"
+#include "util.h"
 
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
@@ -62,6 +65,25 @@ void flush_thread_caches() {
     MallocExtensionInstance()->MarkThreadIdle();
   }
 #endif
+}
+
+__thread uintptr_t s_stackBottom;
+
+static NEVER_INLINE uintptr_t get_stack_top() {
+  char marker;
+  uintptr_t rsp;
+
+  rsp = uintptr_t(&marker);
+  return rsp;
+}
+
+void flush_thread_stack() {
+  uintptr_t top = get_stack_top() & ~(PAGE_SIZE - 1);
+  // s_stackBottom is already aligned
+  ASSERT(top > s_stackBottom);
+  size_t len = top - s_stackBottom;
+  ASSERT((len & (PAGE_SIZE - 1)) == 0);
+  madvise((void*)s_stackBottom, len, MADV_DONTNEED);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

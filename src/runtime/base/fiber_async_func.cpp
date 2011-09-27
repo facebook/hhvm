@@ -458,7 +458,9 @@ void FiberAsyncFunc::Restart() {
   if (RuntimeOption::FiberCount > 0) {
     s_dispatcher = new JobQueueDispatcher<FiberJob*, FiberWorker>
       (RuntimeOption::FiberCount, RuntimeOption::ServerThreadRoundRobin,
-       RuntimeOption::ServerThreadDropCacheTimeoutSeconds, NULL);
+       RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
+       RuntimeOption::ServerThreadDropStack,
+       NULL);
     Logger::Verbose("fiber job dispatcher started");
     s_dispatcher->start();
   }

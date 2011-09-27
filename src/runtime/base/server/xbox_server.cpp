@@ -198,6 +198,7 @@ void XboxServer::Restart() {
       (RuntimeOption::XboxServerThreadCount,
        RuntimeOption::ServerThreadRoundRobin,
        RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
+       RuntimeOption::ServerThreadDropStack,
        NULL);
     if (RuntimeOption::XboxServerLogInfo) {
       Logger::Info("xbox server started");

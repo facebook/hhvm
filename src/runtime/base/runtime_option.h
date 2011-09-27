@@ -91,10 +91,12 @@ public:
   static bool ServerThreadRoundRobin;
   static int ServerThreadDropCacheTimeoutSeconds;
   static bool ServerThreadJobLIFO;
+  static bool ServerThreadDropStack;
   static int PageletServerThreadCount;
   static bool PageletServerThreadRoundRobin;
   static int PageletServerThreadDropCacheTimeoutSeconds;
   static int PageletServerQueueLimit;
+  static bool PageletServerThreadDropStack;
   static int FiberCount;
   static int RequestTimeoutSeconds;
   static size_t ServerMemoryHeadRoom;

@@ -1065,7 +1065,7 @@ typedef   OptWorker<Post>          PostOptWorker;
     if (threadCount <= 0) threadCount = 1; \
     this->m_data.m_dispatcher = \
       new JobQueueDispatcher<BlockScope *, worker >( \
-        threadCount, true, 0, this); \
+        threadCount, true, 0, false, this); \
   } while (0)
 
 #define IMPLEMENT_OPT_VISITOR_ENQUEUE(scope) \
@@ -1600,7 +1600,7 @@ void AnalysisResult::postOptimize() {
     if (threadCount <= 0) threadCount = 1;
 
     JobQueueDispatcher<FinalWorker::JobType, FinalWorker> dispatcher(
-      threadCount, true, 0, this);
+      threadCount, true, 0, false, this);
 
     processScopesParallel<Post>("PostOptimize", &dispatcher);
 
@@ -2463,7 +2463,7 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
   {
     vector<OutputJob*> jobs;
     JobQueueDispatcher<OutputJob*, OutputWorker>
-      dispatcher(threadCount, true, 0, NULL);
+      dispatcher(threadCount, true, 0, false, NULL);
 
     string root = getOutputPath() + "/";
     for (StringToFileScopePtrVecMap::const_iterator iter = clusters.begin();
@@ -2496,7 +2496,7 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
   {
     vector<OutputJob*> jobs;
     JobQueueDispatcher<OutputJob*, OutputWorker>
-      dispatcher(threadCount, true, 0, NULL);
+      dispatcher(threadCount, true, 0, false, NULL);
 
     if (clusterCount > 0) {
       OutputJob *job = new RepartitionJob(ar, filenames, additionalCPPs);
@@ -4746,7 +4746,7 @@ void AnalysisResult::preGenerateCPP(CodeGenerator::Output output,
   AnalysisResultPtr ar = shared_from_this();
   vector<PreGenerateCPPJob*> jobs;
   JobQueueDispatcher<OutputJob*, OutputWorker>
-    dispatcher(threadCount, true, 0, NULL);
+    dispatcher(threadCount, true, 0, false, NULL);
 
   m_pregenerating = true;
   BOOST_FOREACH(FileScopePtr fs, files) {

@@ -18,10 +18,12 @@
 #define __CONCURRENCY_ASYNC_FUNC_H__
 
 #include "base.h"
+#include <sys/user.h>
 #include <pthread.h>
 #include "synchronizable.h"
 #include "lock.h"
 #include "exception.h"
+#include "alloc.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -102,6 +104,17 @@ public:
    * the work to AsyncFuncImpl::threadFuncImpl().
    */
   static void *ThreadFunc(void *obj) {
+    char marker;
+    size_t stacksize;
+    pthread_attr_t info;
+    const size_t StackSlack = 64*1024;
+
+    pthread_attr_init(&info);
+    pthread_attr_getstacksize(&info, &stacksize);
+    pthread_attr_destroy(&info);
+    Util::s_stackBottom = uintptr_t(&marker - (stacksize - StackSlack));
+    Util::s_stackBottom &= ~(PAGE_SIZE - 1);
+
     ((AsyncFuncImpl*)obj)->threadFuncImpl();
     return NULL;
   }

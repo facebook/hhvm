@@ -156,6 +156,7 @@ LibEventServer::LibEventServer(const std::string &address, int port,
     m_timeoutThread(&m_timeoutThreadData, &TimeoutThread::run),
     m_dispatcher(thread, RuntimeOption::ServerThreadRoundRobin,
                  RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
+                 RuntimeOption::ServerThreadDropStack,
                  this, RuntimeOption::ServerThreadJobLIFO),
     m_dispatcherThread(this, &LibEventServer::dispatch) {
   m_eventBase = event_base_new();

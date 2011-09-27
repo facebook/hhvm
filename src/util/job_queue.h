@@ -81,10 +81,11 @@ public:
    * Constructor.
    */
   JobQueue(int threadCount, bool threadRoundRobin, int dropCacheTimeout,
-           bool lifo)
+           bool dropStack, bool lifo)
       : SynchronizableMulti(threadRoundRobin ? 1 : threadCount),
         m_jobCount(0), m_stopped(false), m_workerCount(0),
-        m_dropCacheTimeout(dropCacheTimeout), m_lifo(lifo) {
+        m_dropCacheTimeout(dropCacheTimeout), m_dropStack(dropStack),
+        m_lifo(lifo) {
   }
 
   /**
@@ -115,6 +116,9 @@ public:
         // since we timed out, maybe we can turn idle without holding memory
         if (m_jobs.empty()) {
           Util::flush_thread_caches();
+          if (m_dropStack && Util::s_stackBottom) {
+            Util::flush_thread_stack();
+          }
           flushed = true;
         }
       }
@@ -169,6 +173,7 @@ public:
   bool m_stopped;
   int m_workerCount;
   int m_dropCacheTimeout;
+  bool m_dropStack;
   bool m_lifo;
 };
 
@@ -176,8 +181,9 @@ template<typename TJob>
 class JobQueue<TJob,true> : public JobQueue<TJob,false> {
 public:
   JobQueue(int threadCount, bool threadRoundRobin, int dropCacheTimeout,
-           bool lifo) : JobQueue<TJob,false>(threadCount, threadRoundRobin,
-                                             dropCacheTimeout, lifo) {
+           bool dropStack, bool lifo) :
+    JobQueue<TJob,false>(threadCount, threadRoundRobin, dropCacheTimeout,
+                         dropStack, lifo) {
     pthread_cond_init(&m_cond, NULL);
   }
   ~JobQueue() {
@@ -292,9 +298,11 @@ public:
    * Constructor.
    */
   JobQueueDispatcher(int threadCount, bool threadRoundRobin,
-                     int dropCacheTimeout, void *opaque, bool lifo = false)
+                     int dropCacheTimeout, bool dropStack, void *opaque,
+                     bool lifo = false)
       : m_stopped(true), m_id(0), m_opaque(opaque),
-        m_queue(threadCount, threadRoundRobin, dropCacheTimeout, lifo) {
+        m_queue(threadCount, threadRoundRobin, dropCacheTimeout, dropStack,
+                lifo) {
     ASSERT(threadCount >= 1);
     for (int i = 0; i < threadCount; i++) {
       addWorkerImpl(false);

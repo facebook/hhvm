@@ -23,6 +23,7 @@
 #include <runtime/base/zend/zend_strtod.h>
 #include <runtime/base/zend/zend_math.h>
 #include <util/async_func.h>
+#include <util/alloc.h>
 #include <runtime/ext/ext_icu.h>
 #include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/base/intercept.h>

@@ -17,6 +17,8 @@
 #ifndef __HPHP_UTIL_ALLOC_H__
 #define __HPHP_UTIL_ALLOC_H__
 
+#include <stdint.h>
+
 #include "exception.h"
 
 #ifndef NO_TCMALLOC
@@ -72,6 +74,14 @@ void  safe_free(void* ptr);
  */
 void flush_thread_caches();
 
+/**
+ * Instruct the kernel to free parts of the unused stack back to the system.
+ * Like flush_thread_caches, this is called when the thread has been idle
+ * and predicted to continue to be idle for a while.
+ */
+void flush_thread_stack();
+
+extern __thread uintptr_t s_stackBottom;
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

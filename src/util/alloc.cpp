@@ -16,6 +16,8 @@
 
 #include <sys/mman.h>
 #include <sys/user.h>
+#include <stdlib.h>
+#include <errno.h>
 #include "alloc.h"
 #include "util.h"
 
@@ -83,7 +85,11 @@ void flush_thread_stack() {
   ASSERT(top > s_stackBottom);
   size_t len = top - s_stackBottom;
   ASSERT((len & (PAGE_SIZE - 1)) == 0);
-  madvise((void*)s_stackBottom, len, MADV_DONTNEED);
+  if (madvise((void*)s_stackBottom, len, MADV_DONTNEED) != 0 &&
+      errno != EAGAIN) {
+    fprintf(stderr, "%s failed to madvise with error %d\n", __func__, errno);
+    abort();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

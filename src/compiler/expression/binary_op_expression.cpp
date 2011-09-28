@@ -979,7 +979,11 @@ static void outputStringBufExprs(ExpressionPtrVec &ev,
 
 bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                       int state) {
-  if (isOpEqual()) return Expression::preOutputCPP(cg, ar, state);
+  if (isOpEqual() && (m_exp1->is(KindOfArrayElementExpression) ||
+                      m_exp1->is(KindOfObjectPropertyExpression))) {
+    return Expression::preOutputCPP(cg, ar, state);
+  }
+
   bool effect2 = m_exp2->hasEffect();
   const char *prefix = 0;
   if (effect2 || m_exp1->hasEffect()) {
@@ -1003,6 +1007,9 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       }
       if (ok) {
         numConcat += getConcatList(ev, m_exp2, hasVoid);
+        if (numConcat <= 2 && !prefix) {
+          return Expression::preOutputCPP(cg, ar, state);
+        }
       }
     }
     if (ok) {
@@ -1031,7 +1038,7 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         exp->preOutputCPP(cg, ar, 0);
         if (!is_void) {
           bool asLit = true;
-          if (numConcat > 1) {
+          if (numConcat > 1 || prefix) {
             cg_printf("%s.appendWithTaint(", buf.c_str());
           } else {
             asLit = false;
@@ -1198,7 +1205,7 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     if (const char *prefix = stringBufferPrefix(cg, ar, m_exp1)) {
       SimpleVariablePtr sv = static_pointer_cast<SimpleVariable>(m_exp1);
       if (m_exp2->hasCPPTemp()) {
-        cg_printf("%s.addWithTaint(%s)",
+        cg_printf("%s.appendWithTaint(%s)",
                   stringBufferName(Option::TempPrefix, prefix,
                                    sv->getName().c_str()).c_str(),
                   m_exp2->cppTemp().c_str());

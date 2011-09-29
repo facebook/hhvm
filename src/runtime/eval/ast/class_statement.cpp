@@ -296,8 +296,11 @@ void ClassStatement::evalImpl(VariableEnvironment &env) const {
 
 Object ClassStatement::create(ClassEvalState &ce,
                               ObjectData* root /* = NULL*/) const {
-  if (getModifiers() & Abstract) {
-    throw FatalErrorException(0, "Cannot instantiate abstract class %s",
+  if (getModifiers() & (Abstract|Interface|Trait)) {
+    throw FatalErrorException(0, "Cannot instantiate %s %s",
+                              getModifiers() & Trait ? "trait" :
+                              getModifiers() & Interface ?
+                              "interface" : "abstract class",
                               name().c_str());
   }
 

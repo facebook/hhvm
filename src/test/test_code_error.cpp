@@ -694,3 +694,13 @@ bool TestCodeError::TestRedeclaredTrait() {
 
   return true;
 }
+
+bool TestCodeError::TestInvalidInstantiation() {
+  VE(InvalidInstantiation, "<?php interface T {}; $a = new T();");
+  VE(InvalidInstantiation,
+     "<?php abstract class T { function foo(); };"
+     "$a = new T();");
+
+  VEN(InvalidInstantiation, "<?php class T {}; $a = new T();");
+  return true;
+}

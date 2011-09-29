@@ -110,6 +110,12 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       if (m_params) m_params->inferAndCheck(ar, Type::Any, false);
       return Type::Object;
     }
+
+    if (getScope()->isFirstPass() &&
+        (cls->isInterface() || cls->isAbstract())) {
+      Compiler::Error(Compiler::InvalidInstantiation, self);
+    }
+
     if (cls->isVolatile() && !isPresent()) {
       getScope()->getVariables()->
         setAttribute(VariableTable::NeedGlobalPointer);
@@ -190,8 +196,21 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   string &cname = isSelf() || isParent() ? m_name : m_origName;
   bool outsideClass = !isPresent();
+  if (m_classScope &&
+      (m_classScope->isAbstract() ||
+       m_classScope->isTrait() ||
+       m_classScope->isInterface())) {
+    cg_printf("throw_fatal(\"Cannot instantiate %s %s\").toObject()",
+              m_classScope->isTrait() ? "trait" :
+              m_classScope->isInterface() ? "interface" : "abstract class",
+              CodeGenerator::EscapeLabel(
+                m_classScope->getOriginalName()).c_str());
+    return;
+  }
+
   if (!m_name.empty() && m_classScope && !m_dynamic) {
     ClassScopePtr cls = m_classScope;
+
     const string& lClassName = cls->getId();
     bool skipCreate = cls->canSkipCreateMethod();
     if (m_receiverTemp.empty()) {
@@ -247,6 +266,13 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
 
 bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                        int state) {
+  if (m_classScope &&
+      (m_classScope->isAbstract() ||
+       m_classScope->isInterface() ||
+       m_classScope->isTrait())) {
+    return false;
+  }
+
   string &cname = isSelf() || isParent() ? m_name : m_origName;
   if (m_name.empty() || !m_classScope || m_dynamic) {
     // Short circuit out if inExpression() returns false

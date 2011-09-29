@@ -104,16 +104,23 @@ public:
    * the work to AsyncFuncImpl::threadFuncImpl().
    */
   static void *ThreadFunc(void *obj) {
-    char marker;
-    size_t stacksize;
     pthread_attr_t info;
-    const size_t StackSlack = 64*1024;
+    size_t stacksize, guardsize;
+    void *stackaddr;
 
-    pthread_attr_init(&info);
-    pthread_attr_getstacksize(&info, &stacksize);
-    pthread_attr_destroy(&info);
-    Util::s_stackBottom = uintptr_t(&marker - (stacksize - StackSlack));
-    Util::s_stackBottom &= ~(PAGE_SIZE - 1);
+    pthread_getattr_np(pthread_self(), &info);
+    pthread_attr_getstack(&info, &stackaddr, &stacksize);
+
+    // Get the guard page's size, because the stack address returned
+    // above starts at the guard page, so the thread's stack limit is
+    // stackaddr + guardsize.
+    if (pthread_attr_getguardsize(&info, &guardsize) != 0)
+      guardsize = 0;
+
+    ASSERT(stackaddr != NULL);
+    ASSERT(stacksize >= PTHREAD_STACK_MIN);
+    Util::s_stackLimit = uintptr_t(stackaddr) + guardsize;
+    Util::s_stackSize = stacksize;
 
     ((AsyncFuncImpl*)obj)->threadFuncImpl();
     return NULL;

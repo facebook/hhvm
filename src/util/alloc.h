@@ -81,7 +81,8 @@ void flush_thread_caches();
  */
 void flush_thread_stack();
 
-extern __thread uintptr_t s_stackBottom;
+extern __thread uintptr_t s_stackLimit;
+extern __thread size_t s_stackSize;
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

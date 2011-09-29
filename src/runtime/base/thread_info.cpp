@@ -17,6 +17,7 @@
 #include <runtime/base/hphp_system.h>
 #include <runtime/base/memory/smart_allocator.h>
 #include <util/lock.h>
+#include <util/alloc.h>
 
 using namespace std;
 
@@ -33,12 +34,6 @@ ThreadInfo::ThreadInfo() : m_executing(Idling) {
 
   m_profiler = NULL;
   m_pendingException = false;
-
-  // get the default thread stack size once
-  pthread_attr_t info;
-  pthread_attr_init(&info);
-  pthread_attr_getstacksize(&info, &m_stacksize);
-  pthread_attr_destroy(&info);
 
   onSessionInit();
 
@@ -60,17 +55,14 @@ void ThreadInfo::GetExecutionSamples(std::map<Executing, int> &counts) {
 }
 
 void ThreadInfo::onSessionInit() {
-  char marker;
-
   m_top = NULL;
   m_reqInjectionData.onSessionInit();
 
-  // We assume that this will be called reasonably low in the call stack.
-  // Taking the address of marker gives us a location in this stack frame;
-  // then, use that to calculate where the bottom of the stack should be,
-  // allowing some slack for (a) stack usage above the caller of reset() and
-  // (b) stack usage after the position gets checked.
-  m_stacklimit = &marker - (m_stacksize - StackSlack);
+  // Take the address of the cached per-thread stackLimit, and use this to allow
+  // some slack for (a) stack usage above the caller of reset() and (b) stack
+  // usage after the position gets checked.
+  m_stacklimit = (char *)Util::s_stackLimit + StackSlack;
+  ASSERT(uintptr_t(m_stacklimit) < (Util::s_stackLimit + Util::s_stackSize));
 }
 
 void ThreadInfo::clearPendingException() {

@@ -116,7 +116,7 @@ public:
         // since we timed out, maybe we can turn idle without holding memory
         if (m_jobs.empty()) {
           Util::flush_thread_caches();
-          if (m_dropStack && Util::s_stackBottom) {
+          if (m_dropStack && Util::s_stackLimit) {
             Util::flush_thread_stack();
           }
           flushed = true;

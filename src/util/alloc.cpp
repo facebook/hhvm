@@ -20,6 +20,7 @@
 #include <errno.h>
 #include "alloc.h"
 #include "util.h"
+#include "logger.h"
 
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,7 +70,8 @@ void flush_thread_caches() {
 #endif
 }
 
-__thread uintptr_t s_stackBottom;
+__thread uintptr_t s_stackLimit;
+__thread size_t s_stackSize;
 
 static NEVER_INLINE uintptr_t get_stack_top() {
   char marker;
@@ -81,11 +83,11 @@ static NEVER_INLINE uintptr_t get_stack_top() {
 
 void flush_thread_stack() {
   uintptr_t top = get_stack_top() & ~(PAGE_SIZE - 1);
-  // s_stackBottom is already aligned
-  ASSERT(top > s_stackBottom);
-  size_t len = top - s_stackBottom;
+  // s_stackLimit is already aligned
+  ASSERT(top >= s_stackLimit);
+  size_t len = top - s_stackLimit;
   ASSERT((len & (PAGE_SIZE - 1)) == 0);
-  if (madvise((void*)s_stackBottom, len, MADV_DONTNEED) != 0 &&
+  if (madvise((void*)s_stackLimit, len, MADV_DONTNEED) != 0 &&
       errno != EAGAIN) {
     fprintf(stderr, "%s failed to madvise with error %d\n", __func__, errno);
     abort();

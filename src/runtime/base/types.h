@@ -255,7 +255,6 @@ public:
   RequestInjectionData m_reqInjectionData;
 
   // For infinite recursion detection
-  size_t m_stacksize;
   char *m_stacklimit;
 
   // This is the amount of "slack" in stack usage checks - if the

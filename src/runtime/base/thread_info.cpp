@@ -55,14 +55,25 @@ void ThreadInfo::GetExecutionSamples(std::map<Executing, int> &counts) {
 }
 
 void ThreadInfo::onSessionInit() {
+  char marker;
   m_top = NULL;
   m_reqInjectionData.onSessionInit();
 
   // Take the address of the cached per-thread stackLimit, and use this to allow
   // some slack for (a) stack usage above the caller of reset() and (b) stack
   // usage after the position gets checked.
-  m_stacklimit = (char *)Util::s_stackLimit + StackSlack;
-  ASSERT(uintptr_t(m_stacklimit) < (Util::s_stackLimit + Util::s_stackSize));
+  // If we're not in a threaded environment, then Util::s_stackSize will be
+  // zero. Use getrlimit to figure out what the size of the stack is to
+  // calculate an approximation of where the bottom of the stack should be.
+  if (Util::s_stackSize == 0) {
+    struct rlimit rl;
+
+    getrlimit(RLIMIT_STACK, &rl);
+    m_stacklimit = (char *)&marker - (rl.rlim_cur - StackSlack);
+  } else {
+    m_stacklimit = (char *)Util::s_stackLimit + StackSlack;
+    ASSERT(uintptr_t(m_stacklimit) < (Util::s_stackLimit + Util::s_stackSize));
+  }
 }
 
 void ThreadInfo::clearPendingException() {

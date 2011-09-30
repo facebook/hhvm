@@ -675,27 +675,25 @@ String c_Exception::t_gettraceasstring() {
             continue;
           }
           {
-            StringBuffer tmp0_buf;
-            tmp0_buf.appendWithTaint("#", 1);
-            tmp0_buf.appendWithTaint(toString(v_i));
-            tmp0_buf.appendWithTaint(" ", 1);
-            tmp0_buf.appendWithTaint(toString((isset(v_frame, NAMSTR(s_sys_ss8ce7db5b, "file"), true) ? ((Variant)(v_frame.rvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), AccessFlags::Error_Key))) : ((Variant)(NAMSTR(s_sys_ss00000000, ""))))));
-            tmp0_buf.appendWithTaint("(", 1);
-            tmp0_buf.appendWithTaint(toString((isset(v_frame, NAMSTR(s_sys_ssddf8728c, "line"), true) ? ((Variant)(v_frame.rvalAt(NAMSTR(s_sys_ssddf8728c, "line"), AccessFlags::Error_Key))) : ((Variant)(NAMSTR(s_sys_ss00000000, ""))))));
-            tmp0_buf.appendWithTaint("): ", 3);
-            Variant tmp1;
+            tmp_sbuf_v_s.appendWithTaint("#", 1);
+            tmp_sbuf_v_s.appendWithTaint(toString(v_i));
+            tmp_sbuf_v_s.appendWithTaint(" ", 1);
+            tmp_sbuf_v_s.appendWithTaint(toString((isset(v_frame, NAMSTR(s_sys_ss8ce7db5b, "file"), true) ? ((Variant)(v_frame.rvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), AccessFlags::Error_Key))) : ((Variant)(NAMSTR(s_sys_ss00000000, ""))))));
+            tmp_sbuf_v_s.appendWithTaint("(", 1);
+            tmp_sbuf_v_s.appendWithTaint(toString((isset(v_frame, NAMSTR(s_sys_ssddf8728c, "line"), true) ? ((Variant)(v_frame.rvalAt(NAMSTR(s_sys_ssddf8728c, "line"), AccessFlags::Error_Key))) : ((Variant)(NAMSTR(s_sys_ss00000000, ""))))));
+            tmp_sbuf_v_s.appendWithTaint("): ", 3);
+            Variant tmp0;
             if (isset(v_frame, NAMSTR(s_sys_ssc82dbd12, "class"), true)) {
-              const String &tmp2((toString(v_frame.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
-              const String &tmp3((toString(v_frame.rvalAt(NAMSTR(s_sys_ss724a760a, "type"), AccessFlags::Error_Key))));
-              tmp1 = (concat(tmp2, tmp3));
+              const String &tmp1((toString(v_frame.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
+              const String &tmp2((toString(v_frame.rvalAt(NAMSTR(s_sys_ss724a760a, "type"), AccessFlags::Error_Key))));
+              tmp0 = (concat(tmp1, tmp2));
             } else {
-              tmp1 = (NAMSTR(s_sys_ss00000000, ""));
+              tmp0 = (NAMSTR(s_sys_ss00000000, ""));
             }
-            tmp0_buf.appendWithTaint(toString(tmp1));
-            tmp0_buf.appendWithTaint(toString(v_frame.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key)));
-            tmp0_buf.appendWithTaint("()\n", 3);
-            CStrRef tmp0(tmp0_buf.detachWithTaint());
-            tmp_sbuf_v_s.addWithTaint(tmp0);
+            tmp_sbuf_v_s.appendWithTaint(toString(tmp0));
+            tmp_sbuf_v_s.appendWithTaint(toString(v_frame.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key)));
+            tmp_sbuf_v_s.appendWithTaint("()\n", 3);
+            ;
           }
           v_i++;
         }

@@ -37,7 +37,7 @@ class c_ImageSprite : public ExtObjectData, public Sweepable {
   DECLARE_CLASS(ImageSprite, ImageSprite, ObjectData)
 
   // need to implement
-  public: c_ImageSprite();
+  public: c_ImageSprite(const ObjectStaticCallbacks *cb = &cw_ImageSprite);
   public: ~c_ImageSprite();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);

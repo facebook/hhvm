@@ -45,6 +45,7 @@ class c_OverflowException : public c_RuntimeException {
   static const int s_call_info_index = 0;
 
   public:
+  c_OverflowException(const ObjectStaticCallbacks *cb = &cw_OverflowException) : c_RuntimeException(cb) {}
 };
 ObjectData *coo_OverflowException() NEVER_INLINE;
 

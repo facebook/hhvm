@@ -45,6 +45,7 @@ class c_BadMethodCallException : public c_BadFunctionCallException {
   static const int s_call_info_index = 0;
 
   public:
+  c_BadMethodCallException(const ObjectStaticCallbacks *cb = &cw_BadMethodCallException) : c_BadFunctionCallException(cb) {}
 };
 ObjectData *coo_BadMethodCallException() NEVER_INLINE;
 

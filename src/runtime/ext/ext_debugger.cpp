@@ -68,7 +68,7 @@ void f_hphpd_break(bool condition /* = true */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DebuggerProxy::c_DebuggerProxy() {
+c_DebuggerProxy::c_DebuggerProxy(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
 }
 
 c_DebuggerProxy::~c_DebuggerProxy() {
@@ -95,7 +95,7 @@ Variant c_DebuggerProxy::t___destruct() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DebuggerClient::c_DebuggerClient() {
+c_DebuggerClient::c_DebuggerClient(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
 }
 
 c_DebuggerClient::~c_DebuggerClient() {

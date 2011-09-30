@@ -21,7 +21,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Closure::c_Closure() {
+c_Closure::c_Closure(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
   throw_fatal("Cannot explicitly instantiate and/or subclass Closure");
 }
 c_Closure::~c_Closure() {}
@@ -58,7 +58,8 @@ bool c_Closure::php_sleep(Variant &ret) {
   return true;
 }
 
-c_GeneratorClosure::c_GeneratorClosure() {
+c_GeneratorClosure::c_GeneratorClosure(const ObjectStaticCallbacks *cb) :
+    c_Closure(cb) {
   throw_fatal(
       "Cannot explicitly instantiate and/or subclass GeneratorClosure");
 }

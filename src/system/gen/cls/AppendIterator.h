@@ -38,7 +38,7 @@ class c_AppendIterator : public ExtObjectData {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(AppendIterator, AppendIterator, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_AppendIterator(ObjectData* r = NULL) : m_iterators(Variant::nullInit) {
+  c_AppendIterator(const ObjectStaticCallbacks *cb = &cw_AppendIterator) : ExtObjectData(cb), m_iterators(Variant::nullInit) {
     setAttribute(HasCall);
   }
   Variant doCall(Variant v_name, Variant v_arguments, bool fatal);

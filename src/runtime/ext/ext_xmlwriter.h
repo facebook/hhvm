@@ -80,7 +80,7 @@ class c_XMLWriter : public ExtObjectData, public Sweepable {
   DECLARE_CLASS(XMLWriter, XMLWriter, ObjectData)
 
   // need to implement
-  public: c_XMLWriter();
+  public: c_XMLWriter(const ObjectStaticCallbacks *cb = &cw_XMLWriter);
   public: ~c_XMLWriter();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);

@@ -28,7 +28,7 @@ int ResourceData::GetMaxResourceId() {
   return *(os_max_resource_id.getCheck());
 }
 
-ResourceData::ResourceData() : ObjectData(true), m_static (false) {
+ResourceData::ResourceData() : ObjectData(0, true), m_static(false) {
   int &pmax = *os_max_resource_id;
   if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
   o_id = ++pmax;

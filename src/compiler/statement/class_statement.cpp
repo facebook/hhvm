@@ -470,12 +470,16 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       bool needsInit    = classScope->needsInitMethod();
 
       if (Option::GenerateCPPMacros) {
-        bool dyn = (!parCls && !m_parent.empty()) ||
-          classScope->derivesFromRedeclaring() ==
+        bool dyn = classScope->derivesFromRedeclaring() ==
           ClassScope::DirectFromRedeclared;
         bool idyn = parCls && classScope->derivesFromRedeclaring() ==
           ClassScope::IndirectFromRedeclared;
         bool redec = classScope->isRedeclaring();
+
+        if (!parCls && !m_parent.empty()) {
+          assert(dyn);
+        }
+
         if (!classScope->derivesFromRedeclaring()) {
           outputCPPClassDecl(cg, ar, clsName, m_originalName.c_str(),
                              parCls ? parCls->getId().c_str()
@@ -505,81 +509,79 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         bool hasCallStatic = classScope->getAttribute(
           ClassScope::HasUnknownStaticMethodHandler);
 
-        if (dyn || idyn || redec || hasGet || hasSet || hasIsset || hasUnset ||
-            hasCall || hasCallStatic) {
-          if (redec && classScope->derivedByDynamic()) {
-            if (!dyn && !idyn) {
-              cg_printf("private: ObjectData* root;\n");
-              cg_printf("public:\n");
-              cg_printf("virtual ObjectData *getRoot() { return root; }\n");
-            }
+        bool hasRootParam =
+          classScope->derivedByDynamic() && (redec || dyn || idyn);
+        string lateInit = "";
+        if (redec && classScope->derivedByDynamic()) {
+          if (!dyn && !idyn && (!parCls || parCls->isUserClass())) {
+            cg_printf("private: ObjectData* root;\n");
+            cg_printf("public:\n");
+            cg_printf("virtual ObjectData *getRoot() { return root; }\n");
+            lateInit = "root(r ? r : this)";
           }
-
-          string conInit = "";
-          bool hasParam = false;
-          bool needsLateInit = false;
-          if (dyn) {
-            conInit = " : DynamicObjectData(\"" + m_parent + "\", r)";
-            hasParam = true;
-          } else if (idyn) {
-            conInit = " : " + string(Option::ClassPrefix) + parCls->getId() +
-              "(r ? r : this)";
-            hasParam = true;
-          } else {
-            if (redec && classScope->derivedByDynamic()) {
-              conInit = "root(r ? r : this)";
-              needsLateInit = true;
-            }
-            hasParam = true;
-          }
-
-          // this dance around the initialization list is to make
-          // sure members get set in the right order - since properties
-          // come first, and root comes later, we need to init the
-          // properties first, and then root.
-          if (needsLateInit) {
-            cg_printf("%s%s(%s) : ",
-                      Option::ClassPrefix,
-                      clsName,
-                      hasParam ? "ObjectData* r = NULL" : "");
-            if (needsCppCtor) {
-              cg.setContext(CodeGenerator::CppConstructor);
-              ASSERT(!cg.hasInitListFirstElem());
-              m_stmt->outputCPP(cg, ar);
-              cg.clearInitListFirstElem();
-              cg.setContext(CodeGenerator::CppDeclaration);
-              cg_printf(", ");
-            }
-            cg_printf("%s", conInit.c_str());
-          } else {
-            cg_printf("%s%s(%s)%s%s",
-                      Option::ClassPrefix,
-                      clsName,
-                      hasParam ? "ObjectData* r = NULL" : "",
-                      conInit.c_str(),
-                      needsCppCtor ? conInit.empty() ? " : " : ", " : "");
-            if (needsCppCtor) {
-              cg.setContext(CodeGenerator::CppConstructor);
-              ASSERT(!cg.hasInitListFirstElem());
-              m_stmt->outputCPP(cg, ar);
-              cg.clearInitListFirstElem();
-              cg.setContext(CodeGenerator::CppDeclaration);
-            }
-          }
-
-          cg_indentBegin(" {%s",
-                         hasGet || hasSet || hasIsset || hasUnset ||
-                         hasCall || hasCallStatic ?
-                         "\n" : "");
-          if (hasGet) cg_printf("setAttribute(UseGet);\n");
-          if (hasSet) cg_printf("setAttribute(UseSet);\n");
-          if (hasIsset) cg_printf("setAttribute(UseIsset);\n");
-          if (hasUnset) cg_printf("setAttribute(UseUnset);\n");
-          if (hasCall) cg_printf("setAttribute(HasCall);\n");
-          if (hasCallStatic) cg_printf("setAttribute(HasCallStatic);\n");
-          cg_indentEnd("}\n");
-          hasEmitCppCtor = true;
         }
+
+        string callbacks = Option::ClassStaticsCallbackPrefix + clsNameStr;
+        string conInit = "";
+        if (dyn) {
+          conInit = "DynamicObjectData(cb, \"" +
+            CodeGenerator::EscapeLabel(m_parent) + "\", ";
+          if (hasRootParam) {
+            conInit += "r)";
+          } else {
+            conInit += "this)";
+          }
+        } else if (parCls) {
+          conInit = string(Option::ClassPrefix) + parCls->getId() + "(";
+          if (parCls->derivedByDynamic() &&
+              (parCls->isRedeclaring() ||
+               parCls->derivesFromRedeclaring() != ClassScope::FromNormal)) {
+            if (hasRootParam) {
+              conInit += "r ? r : ";
+            }
+            conInit += "this, ";
+          }
+          conInit += "cb)";
+        } else {
+          if (system) {
+            conInit = "ExtObjectData(cb)";
+          } else {
+            conInit = "ObjectData(cb, false)";
+          }
+        }
+
+        cg_printf("%s%s(%sconst ObjectStaticCallbacks *cb = &%s%s) : %s",
+                  Option::ClassPrefix,
+                  clsName,
+                  hasRootParam ? "ObjectData* r = NULL," : "",
+                  callbacks.c_str(),
+                  redec ? ".oscb" : "",
+                  conInit.c_str());
+
+        if (needsCppCtor) {
+          cg_printf(", ");
+          cg.setContext(CodeGenerator::CppConstructor);
+          ASSERT(!cg.hasInitListFirstElem());
+          m_stmt->outputCPP(cg, ar);
+          cg.clearInitListFirstElem();
+          cg.setContext(CodeGenerator::CppDeclaration);
+        }
+        if (!lateInit.empty()) {
+          cg_printf(", %s", lateInit.c_str());
+        }
+
+        cg_indentBegin(" {%s",
+                       hasGet || hasSet || hasIsset || hasUnset ||
+                       hasCall || hasCallStatic ?
+                       "\n" : "");
+        if (hasGet) cg_printf("setAttribute(UseGet);\n");
+        if (hasSet) cg_printf("setAttribute(UseSet);\n");
+        if (hasIsset) cg_printf("setAttribute(UseIsset);\n");
+        if (hasUnset) cg_printf("setAttribute(UseUnset);\n");
+        if (hasCall) cg_printf("setAttribute(HasCall);\n");
+        if (hasCallStatic) cg_printf("setAttribute(HasCallStatic);\n");
+        cg_indentEnd("}\n");
+        hasEmitCppCtor = true;
       }
 
       if (needsCppCtor && !hasEmitCppCtor) {

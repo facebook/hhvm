@@ -35,6 +35,7 @@ class c_XhprofFrame : public ExtObjectData {
 
   // Class Map
   DECLARE_CLASS_NO_SWEEP(XhprofFrame, XhprofFrame, ObjectData)
+  c_XhprofFrame(const ObjectStaticCallbacks *cb = &cw_XhprofFrame) : ExtObjectData(cb) {}
   public: void t___construct(Variant v_name);
   public: c_XhprofFrame *create(CVarRef v_name);
   public: Variant t___destruct();

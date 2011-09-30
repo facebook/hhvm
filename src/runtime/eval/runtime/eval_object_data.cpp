@@ -31,7 +31,7 @@ IMPLEMENT_OBJECT_ALLOCATION_CLS(HPHP::Eval,EvalObjectData)
 
 EvalObjectData::EvalObjectData(ClassEvalState &cls, const char* pname,
                                ObjectData* r /* = NULL */)
-: DynamicObjectData(pname, r ? r : this), m_cls(cls) {
+: DynamicObjectData(0, pname, r ? r : this), m_cls(cls) {
   if (pname) setRoot(root); // For ext classes
   if (r == NULL) {
     RequestEvalState::registerObject(this);
@@ -51,7 +51,7 @@ EvalObjectData::EvalObjectData(ClassEvalState &cls, const char* pname,
 }
 
 EvalObjectData::EvalObjectData(EvalObjectData *original) :
-    DynamicObjectData(0, this), m_cls(original->m_cls) {
+    DynamicObjectData(0, 0, this), m_cls(original->m_cls) {
 
   RequestEvalState::registerObject(this);
 

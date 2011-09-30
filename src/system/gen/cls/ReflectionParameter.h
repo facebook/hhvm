@@ -38,7 +38,7 @@ class c_ReflectionParameter : public ExtObjectData {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionParameter, ReflectionParameter, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_ReflectionParameter() : m_info(Variant::nullInit) {}
+  c_ReflectionParameter(const ObjectStaticCallbacks *cb = &cw_ReflectionParameter) : ExtObjectData(cb), m_info(Variant::nullInit) {}
   public: void t___construct(Variant v_func, Variant v_param);
   public: c_ReflectionParameter *create(CVarRef v_func, CVarRef v_param);
   public: String t___tostring();

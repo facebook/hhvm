@@ -45,6 +45,7 @@ class c_OutOfRangeException : public c_LogicException {
   static const int s_call_info_index = 0;
 
   public:
+  c_OutOfRangeException(const ObjectStaticCallbacks *cb = &cw_OutOfRangeException) : c_LogicException(cb) {}
 };
 ObjectData *coo_OutOfRangeException() NEVER_INLINE;
 

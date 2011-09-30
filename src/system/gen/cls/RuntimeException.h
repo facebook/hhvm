@@ -45,6 +45,7 @@ class c_RuntimeException : public c_Exception {
   static const int s_call_info_index = 0;
 
   public:
+  c_RuntimeException(const ObjectStaticCallbacks *cb = &cw_RuntimeException) : c_Exception(cb) {}
 };
 ObjectData *coo_RuntimeException() NEVER_INLINE;
 

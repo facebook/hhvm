@@ -35,7 +35,7 @@ class c_Closure : public ExtObjectData {
   DECLARE_CLASS(Closure, Closure, ObjectData)
 
   // need to implement
-  public: c_Closure();
+  public: c_Closure(const ObjectStaticCallbacks *cb = &cw_Closure);
   public: ~c_Closure();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -64,8 +64,9 @@ public:
    * This is the constructor which is called internally-
    * PHP code will never be able to call this constructor
    */
-  c_Closure(const CallInfo *callInfo, void *extraData) :
-    m_callInfo(callInfo), m_extraData(extraData) {
+  c_Closure(const CallInfo *callInfo, void *extraData,
+            const ObjectStaticCallbacks *cb = &cw_Closure) :
+      ExtObjectData(cb), m_callInfo(callInfo), m_extraData(extraData) {
     ASSERT(callInfo);
   }
 protected:
@@ -87,7 +88,7 @@ class c_GeneratorClosure : public c_Closure {
   DECLARE_CLASS(GeneratorClosure, Closure, Closure)
 
   // need to implement
-  public: c_GeneratorClosure();
+  public: c_GeneratorClosure(const ObjectStaticCallbacks *cb = &cw_GeneratorClosure);
   public: ~c_GeneratorClosure();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -105,7 +106,7 @@ public:
     const CallInfo *callInfo,
     void *extraData,
     CArrRef vars) :
-    c_Closure(callInfo, extraData), m_vars(vars) {}
+    c_Closure(callInfo, extraData, &cw_GeneratorClosure), m_vars(vars) {}
 public:
   Array          m_vars;    /* use variables */
   LVariableTable m_statics; /* static variables */

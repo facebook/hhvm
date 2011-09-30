@@ -45,6 +45,7 @@ class c_LengthException : public c_LogicException {
   static const int s_call_info_index = 0;
 
   public:
+  c_LengthException(const ObjectStaticCallbacks *cb = &cw_LengthException) : c_LogicException(cb) {}
 };
 ObjectData *coo_LengthException() NEVER_INLINE;
 

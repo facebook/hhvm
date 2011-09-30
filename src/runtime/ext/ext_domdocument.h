@@ -107,7 +107,7 @@ class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSe
   DECLARE_CLASS(DOMNode, DOMNode, ObjectData)
 
   // need to implement
-  public: c_DOMNode();
+  public: c_DOMNode(const ObjectStaticCallbacks *cb = &cw_DOMNode);
   public: ~c_DOMNode();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -174,7 +174,7 @@ class c_DOMAttr : public c_DOMNode {
   DECLARE_CLASS(DOMAttr, DOMAttr, DOMNode)
 
   // need to implement
-  public: c_DOMAttr();
+  public: c_DOMAttr(const ObjectStaticCallbacks *cb = &cw_DOMAttr);
   public: ~c_DOMAttr();
   public: void t___construct(CStrRef name, CStrRef value = null_string);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -204,7 +204,7 @@ class c_DOMCharacterData : public c_DOMNode {
   DECLARE_CLASS(DOMCharacterData, DOMCharacterData, DOMNode)
 
   // need to implement
-  public: c_DOMCharacterData();
+  public: c_DOMCharacterData(const ObjectStaticCallbacks *cb = &cw_DOMCharacterData);
   public: ~c_DOMCharacterData();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -242,7 +242,7 @@ class c_DOMComment : public c_DOMCharacterData {
   DECLARE_CLASS(DOMComment, DOMComment, DOMCharacterData)
 
   // need to implement
-  public: c_DOMComment();
+  public: c_DOMComment(const ObjectStaticCallbacks *cb = &cw_DOMComment);
   public: ~c_DOMComment();
   public: void t___construct(CStrRef value = null_string);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -264,7 +264,7 @@ class c_DOMText : public c_DOMCharacterData {
   DECLARE_CLASS(DOMText, DOMText, DOMCharacterData)
 
   // need to implement
-  public: c_DOMText();
+  public: c_DOMText(const ObjectStaticCallbacks *cb = &cw_DOMText);
   public: ~c_DOMText();
   public: void t___construct(CStrRef value = null_string);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -296,7 +296,7 @@ class c_DOMCDATASection : public c_DOMText {
   DECLARE_CLASS(DOMCDATASection, DOMCDATASection, DOMText)
 
   // need to implement
-  public: c_DOMCDATASection();
+  public: c_DOMCDATASection(const ObjectStaticCallbacks *cb = &cw_DOMCDATASection);
   public: ~c_DOMCDATASection();
   public: void t___construct(CStrRef value);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -318,7 +318,7 @@ class c_DOMDocument : public c_DOMNode, public Sweepable {
   DECLARE_CLASS(DOMDocument, DOMDocument, DOMNode)
 
   // need to implement
-  public: c_DOMDocument();
+  public: c_DOMDocument(const ObjectStaticCallbacks *cb = &cw_DOMDocument);
   public: ~c_DOMDocument();
   public: void t___construct(CStrRef version = null_string, CStrRef encoding = null_string);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -418,7 +418,7 @@ class c_DOMDocumentFragment : public c_DOMNode {
   DECLARE_CLASS(DOMDocumentFragment, DOMDocumentFragment, DOMNode)
 
   // need to implement
-  public: c_DOMDocumentFragment();
+  public: c_DOMDocumentFragment(const ObjectStaticCallbacks *cb = &cw_DOMDocumentFragment);
   public: ~c_DOMDocumentFragment();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -442,7 +442,7 @@ class c_DOMDocumentType : public c_DOMNode {
   DECLARE_CLASS(DOMDocumentType, DOMDocumentType, DOMNode)
 
   // need to implement
-  public: c_DOMDocumentType();
+  public: c_DOMDocumentType(const ObjectStaticCallbacks *cb = &cw_DOMDocumentType);
   public: ~c_DOMDocumentType();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -470,7 +470,7 @@ class c_DOMElement : public c_DOMNode {
   DECLARE_CLASS(DOMElement, DOMElement, DOMNode)
 
   // need to implement
-  public: c_DOMElement();
+  public: c_DOMElement(const ObjectStaticCallbacks *cb = &cw_DOMElement);
   public: ~c_DOMElement();
   public: void t___construct(CStrRef name, CStrRef value = null_string, CStrRef namespaceuri = null_string);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -534,7 +534,7 @@ class c_DOMEntity : public c_DOMNode {
   DECLARE_CLASS(DOMEntity, DOMEntity, DOMNode)
 
   // need to implement
-  public: c_DOMEntity();
+  public: c_DOMEntity(const ObjectStaticCallbacks *cb = &cw_DOMEntity);
   public: ~c_DOMEntity();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -562,7 +562,7 @@ class c_DOMEntityReference : public c_DOMNode {
   DECLARE_CLASS(DOMEntityReference, DOMEntityReference, DOMNode)
 
   // need to implement
-  public: c_DOMEntityReference();
+  public: c_DOMEntityReference(const ObjectStaticCallbacks *cb = &cw_DOMEntityReference);
   public: ~c_DOMEntityReference();
   public: void t___construct(CStrRef name);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -584,7 +584,7 @@ class c_DOMNotation : public c_DOMNode {
   DECLARE_CLASS(DOMNotation, DOMNotation, DOMNode)
 
   // need to implement
-  public: c_DOMNotation();
+  public: c_DOMNotation(const ObjectStaticCallbacks *cb = &cw_DOMNotation);
   public: ~c_DOMNotation();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -612,7 +612,7 @@ class c_DOMProcessingInstruction : public c_DOMNode {
   DECLARE_CLASS(DOMProcessingInstruction, DOMProcessingInstruction, DOMNode)
 
   // need to implement
-  public: c_DOMProcessingInstruction();
+  public: c_DOMProcessingInstruction(const ObjectStaticCallbacks *cb = &cw_DOMProcessingInstruction);
   public: ~c_DOMProcessingInstruction();
   public: void t___construct(CStrRef name, CStrRef value = null_string);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -640,7 +640,7 @@ class c_DOMNodeIterator : public ExtObjectData, public Sweepable {
   DECLARE_CLASS(DOMNodeIterator, DOMNodeIterator, ObjectData)
 
   // need to implement
-  public: c_DOMNodeIterator();
+  public: c_DOMNodeIterator(const ObjectStaticCallbacks *cb = &cw_DOMNodeIterator);
   public: ~c_DOMNodeIterator();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -681,7 +681,7 @@ class c_DOMNamedNodeMap : public ExtObjectDataFlags<ObjectData::UseGet|ObjectDat
   DECLARE_CLASS(DOMNamedNodeMap, DOMNamedNodeMap, ObjectData)
 
   // need to implement
-  public: c_DOMNamedNodeMap();
+  public: c_DOMNamedNodeMap(const ObjectStaticCallbacks *cb = &cw_DOMNamedNodeMap);
   public: ~c_DOMNamedNodeMap();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -717,7 +717,7 @@ class c_DOMNodeList : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::U
   DECLARE_CLASS(DOMNodeList, DOMNodeList, ObjectData)
 
   // need to implement
-  public: c_DOMNodeList();
+  public: c_DOMNodeList(const ObjectStaticCallbacks *cb = &cw_DOMNodeList);
   public: ~c_DOMNodeList();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -749,7 +749,7 @@ class c_DOMImplementation : public ExtObjectData {
   DECLARE_CLASS(DOMImplementation, DOMImplementation, ObjectData)
 
   // need to implement
-  public: c_DOMImplementation();
+  public: c_DOMImplementation(const ObjectStaticCallbacks *cb = &cw_DOMImplementation);
   public: ~c_DOMImplementation();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -777,7 +777,7 @@ class c_DOMXPath : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseS
   DECLARE_CLASS(DOMXPath, DOMXPath, ObjectData)
 
   // need to implement
-  public: c_DOMXPath();
+  public: c_DOMXPath(const ObjectStaticCallbacks *cb = &cw_DOMXPath);
   public: ~c_DOMXPath();
   public: void t___construct(CVarRef doc);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);

@@ -38,6 +38,7 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionFunction, ReflectionFunction, ReflectionFunctionAbstract)
   static const ClassPropTable os_prop_table;
+  c_ReflectionFunction(const ObjectStaticCallbacks *cb = &cw_ReflectionFunction) : c_ReflectionFunctionAbstract(cb) {}
   public: void t___construct(Variant v_name);
   public: c_ReflectionFunction *create(CVarRef v_name);
   public: String t___tostring();

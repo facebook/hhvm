@@ -45,6 +45,7 @@ class c_UnexpectedValueException : public c_RuntimeException {
   static const int s_call_info_index = 0;
 
   public:
+  c_UnexpectedValueException(const ObjectStaticCallbacks *cb = &cw_UnexpectedValueException) : c_RuntimeException(cb) {}
 };
 ObjectData *coo_UnexpectedValueException() NEVER_INLINE;
 

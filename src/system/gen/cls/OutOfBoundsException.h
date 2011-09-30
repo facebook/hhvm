@@ -45,6 +45,7 @@ class c_OutOfBoundsException : public c_RuntimeException {
   static const int s_call_info_index = 0;
 
   public:
+  c_OutOfBoundsException(const ObjectStaticCallbacks *cb = &cw_OutOfBoundsException) : c_RuntimeException(cb) {}
 };
 ObjectData *coo_OutOfBoundsException() NEVER_INLINE;
 

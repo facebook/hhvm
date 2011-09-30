@@ -38,7 +38,7 @@ class c_FilterIterator : public c_IteratorIterator {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(FilterIterator, FilterIterator, IteratorIterator)
   static const ClassPropTable os_prop_table;
-  c_FilterIterator(ObjectData* r = NULL) : m_it(Variant::nullInit) {
+  c_FilterIterator(const ObjectStaticCallbacks *cb = &cw_FilterIterator) : c_IteratorIterator(cb), m_it(Variant::nullInit) {
     setAttribute(HasCall);
   }
   Variant doCall(Variant v_name, Variant v_arguments, bool fatal);

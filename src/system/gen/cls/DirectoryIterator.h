@@ -38,6 +38,7 @@ class c_DirectoryIterator : public c_SplFileInfo {
 
   // Class Map
   DECLARE_CLASS_NO_SWEEP(DirectoryIterator, DirectoryIterator, SplFileInfo)
+  c_DirectoryIterator(const ObjectStaticCallbacks *cb = &cw_DirectoryIterator) : c_SplFileInfo(cb) {}
   public: void t___construct(Variant v_path);
   public: c_DirectoryIterator *create(CVarRef v_path);
   public: Variant t_current();

@@ -262,8 +262,11 @@ Variant f_simplexml_load_file(CStrRef filename,
 ///////////////////////////////////////////////////////////////////////////////
 // SimpleXMLElement
 
-c_SimpleXMLElement::c_SimpleXMLElement()
-    : m_node(NULL), m_is_text(false), m_free_text(false),
+c_SimpleXMLElement::c_SimpleXMLElement(const ObjectStaticCallbacks *cb) :
+    ExtObjectDataFlags<ObjectData::UseGet|
+                       ObjectData::UseSet|
+                       ObjectData::UseIsset|
+                       ObjectData::UseUnset>(cb), m_node(NULL), m_is_text(false), m_free_text(false),
       m_is_attribute(false), m_is_children(false), m_is_property(false),
       m_xpath(NULL) {
   setAttribute(HasLval);
@@ -970,8 +973,9 @@ void c_SimpleXMLElement::t_offsetunset(CVarRef index) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_SimpleXMLElementIterator::c_SimpleXMLElementIterator()
-    : m_parent(), m_iter1(NULL), m_iter2(NULL) {
+c_SimpleXMLElementIterator::c_SimpleXMLElementIterator(
+  const ObjectStaticCallbacks *cb) :
+    ExtObjectData(cb), m_parent(), m_iter1(NULL), m_iter2(NULL) {
 }
 
 c_SimpleXMLElementIterator::~c_SimpleXMLElementIterator() {
@@ -1105,7 +1109,8 @@ Variant c_SimpleXMLElementIterator::t_valid() {
 ///////////////////////////////////////////////////////////////////////////////
 // LibXMLError
 
-c_LibXMLError::c_LibXMLError() {
+c_LibXMLError::c_LibXMLError(const ObjectStaticCallbacks *cb) :
+    ExtObjectData(cb) {
 }
 c_LibXMLError::~c_LibXMLError() {
 }

@@ -44,7 +44,7 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionMethod, ReflectionMethod, ReflectionFunctionAbstract)
   static const ClassPropTable os_prop_table;
-  c_ReflectionMethod() : m_name(Variant::nullInit), m_class(Variant::nullInit) {}
+  c_ReflectionMethod(const ObjectStaticCallbacks *cb = &cw_ReflectionMethod) : c_ReflectionFunctionAbstract(cb), m_name(Variant::nullInit), m_class(Variant::nullInit) {}
   public: void t___construct(Variant v_cls, Variant v_name = NAMSTR(s_sys_ss00000000, ""));
   public: c_ReflectionMethod *create(CVarRef v_cls, CVarRef v_name = NAMVAR(s_sys_svs00000000, ""));
   public: String t___tostring();

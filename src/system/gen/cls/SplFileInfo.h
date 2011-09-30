@@ -47,7 +47,7 @@ class c_SplFileInfo : public ExtObjectData {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(SplFileInfo, SplFileInfo, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_SplFileInfo() : m_rsrc(Variant::nullInit) {}
+  c_SplFileInfo(const ObjectStaticCallbacks *cb = &cw_SplFileInfo) : ExtObjectData(cb), m_rsrc(Variant::nullInit) {}
   public: void t___construct(Variant v_file_name);
   public: c_SplFileInfo *create(CVarRef v_file_name);
   public: String t_getpath();

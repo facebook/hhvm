@@ -714,7 +714,8 @@ EOT
     fprintf($f, "  // constructor must call setAttributes(%s)\n",
             implode('|', $flags));
   }
-  fprintf($f, "  public: c_%s();\n", $class['name']);
+  fprintf($f, "  public: c_%s(const ObjectStaticCallbacks *cb = &cw_%s);\n",
+          $class['name'], $class['name']);
   fprintf($f, "  public: ~c_%s();\n", $class['name']);
   foreach ($class['methods'] as $m) {
     generateMethodCPPHeader($m, $class, $f);
@@ -724,6 +725,9 @@ EOT
   fprintf($f, "  // implemented by HPHP\n");
   foreach ($class['methods'] as $m) {
     generatePreImplemented($m, $class, $f);
+  }
+  if (!empty($class['properties'])) {
+    fprintf($f, "  public: static const ClassPropTable os_prop_table;\n");
   }
   if (!empty($class['footer'])) {
     fprintf($f, $class['footer']);

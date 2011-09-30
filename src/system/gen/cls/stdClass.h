@@ -44,6 +44,7 @@ class c_stdClass : public ExtObjectData {
   static const int s_call_info_index = 0;
 
   public:
+  c_stdClass(const ObjectStaticCallbacks *cb = &cw_stdClass) : ExtObjectData(cb) {}
 };
 ObjectData *coo_stdClass() NEVER_INLINE;
 

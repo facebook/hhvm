@@ -49,7 +49,7 @@ class c_SpoofChecker : public ExtObjectData {
   DECLARE_CLASS(SpoofChecker, SpoofChecker, ObjectData)
 
   // need to implement
-  public: c_SpoofChecker();
+  public: c_SpoofChecker(const ObjectStaticCallbacks *cb = &cw_SpoofChecker);
   public: ~c_SpoofChecker();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);

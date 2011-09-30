@@ -39,7 +39,7 @@ class c_DebuggerProxy : public ExtObjectData {
   DECLARE_CLASS(DebuggerProxy, DebuggerProxy, ObjectData)
 
   // need to implement
-  public: c_DebuggerProxy();
+  public: c_DebuggerProxy(const ObjectStaticCallbacks *cb = &cw_DebuggerProxy);
   public: ~c_DebuggerProxy();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -77,7 +77,7 @@ class c_DebuggerClient : public ExtObjectData {
   DECLARE_CLASS(DebuggerClient, DebuggerClient, ObjectData)
 
   // need to implement
-  public: c_DebuggerClient();
+  public: c_DebuggerClient(const ObjectStaticCallbacks *cb = &cw_DebuggerClient);
   public: ~c_DebuggerClient();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);

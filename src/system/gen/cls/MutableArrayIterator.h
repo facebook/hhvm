@@ -38,6 +38,7 @@ class c_MutableArrayIterator : public c_ArrayIterator {
 
   // Class Map
   DECLARE_CLASS_NO_SWEEP(MutableArrayIterator, MutableArrayIterator, ArrayIterator)
+  c_MutableArrayIterator(const ObjectStaticCallbacks *cb = &cw_MutableArrayIterator) : c_ArrayIterator(cb) {}
   public: void t___construct(VRefParam rv_array, Variant v_flags = 0LL);
   public: c_MutableArrayIterator *create(VRefParam v_array, CVarRef v_flags = NAMVAR(s_sys_svif01bca90, 0LL));
   public: Variant t_currentref();

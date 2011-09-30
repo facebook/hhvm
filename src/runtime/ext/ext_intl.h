@@ -82,7 +82,7 @@ class c_Collator : public ExtObjectData, public Sweepable {
   DECLARE_CLASS(Collator, Collator, ObjectData)
 
   // need to implement
-  public: c_Collator();
+  public: c_Collator(const ObjectStaticCallbacks *cb = &cw_Collator);
   public: ~c_Collator();
   public: void t___construct(CStrRef locale);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -137,7 +137,7 @@ class c_Locale : public ExtObjectData {
   DECLARE_CLASS(Locale, Locale, ObjectData)
 
   // need to implement
-  public: c_Locale();
+  public: c_Locale(const ObjectStaticCallbacks *cb = &cw_Locale);
   public: ~c_Locale();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -169,7 +169,7 @@ class c_Normalizer : public ExtObjectData, public Sweepable {
   DECLARE_CLASS(Normalizer, Normalizer, ObjectData)
 
   // need to implement
-  public: c_Normalizer();
+  public: c_Normalizer(const ObjectStaticCallbacks *cb = &cw_Normalizer);
   public: ~c_Normalizer();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);

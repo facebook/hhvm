@@ -50,6 +50,7 @@ class c_SplFileObject : public c_SplFileInfo {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(SplFileObject, SplFileObject, SplFileInfo)
   static const ClassPropTable os_prop_table;
+  c_SplFileObject(const ObjectStaticCallbacks *cb = &cw_SplFileObject) : c_SplFileInfo(cb) {}
   public: void t___construct(Variant v_filename, Variant v_open_mode = NAMSTR(s_sys_ss0d42ecf6, "r"), Variant v_use_include_path = false, Variant v_context = null);
   public: c_SplFileObject *create(CVarRef v_filename, CVarRef v_open_mode = NAMVAR(s_sys_svs0d42ecf6, "r"), CVarRef v_use_include_path = false_varNR, CVarRef v_context = null_variant);
   public: Variant t_current();

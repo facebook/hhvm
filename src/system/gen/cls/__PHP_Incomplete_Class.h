@@ -44,6 +44,7 @@ class c___PHP_Incomplete_Class : public ExtObjectData {
   static const int s_call_info_index = 0;
 
   public:
+  c___PHP_Incomplete_Class(const ObjectStaticCallbacks *cb = &cw___PHP_Incomplete_Class) : ExtObjectData(cb) {}
 };
 ObjectData *coo___PHP_Incomplete_Class() NEVER_INLINE;
 

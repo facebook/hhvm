@@ -45,6 +45,7 @@ class c_BadFunctionCallException : public c_LogicException {
   static const int s_call_info_index = 0;
 
   public:
+  c_BadFunctionCallException(const ObjectStaticCallbacks *cb = &cw_BadFunctionCallException) : c_LogicException(cb) {}
 };
 ObjectData *coo_BadFunctionCallException() NEVER_INLINE;
 

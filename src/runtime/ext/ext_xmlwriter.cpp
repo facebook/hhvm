@@ -280,7 +280,8 @@ static xmlChar *xmls(CStrRef s) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_XMLWriter::c_XMLWriter() : m_ptr(NULL), m_output(NULL), m_uri_output(NULL) {
+c_XMLWriter::c_XMLWriter(const ObjectStaticCallbacks *cb) :
+    ExtObjectData(cb), m_ptr(NULL), m_output(NULL), m_uri_output(NULL) {
 }
 
 c_XMLWriter::~c_XMLWriter() {

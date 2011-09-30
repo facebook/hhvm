@@ -44,7 +44,7 @@ class c_ErrorException : public c_Exception {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ErrorException, ErrorException, Exception)
   static const ClassPropTable os_prop_table;
-  c_ErrorException() : m_severity(Variant::nullInit) {}
+  c_ErrorException(const ObjectStaticCallbacks *cb = &cw_ErrorException) : c_Exception(cb), m_severity(Variant::nullInit) {}
   public: void t___construct(Variant v_message = NAMSTR(s_sys_ss00000000, ""), Variant v_code = 0LL, Variant v_severity = 0LL, Variant v_filename = null, Variant v_lineno = null);
   public: c_ErrorException *create(CVarRef v_message = NAMVAR(s_sys_svs00000000, ""), CVarRef v_code = NAMVAR(s_sys_svif01bca90, 0LL), CVarRef v_severity = NAMVAR(s_sys_svif01bca90, 0LL), CVarRef v_filename = null_variant, CVarRef v_lineno = null_variant);
   public: Variant t_getseverity();

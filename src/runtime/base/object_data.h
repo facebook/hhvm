@@ -79,7 +79,8 @@ class ObjectData : public CountableNF {
     RealPropUnchecked = 8,// Dont check property accessibility
   };
 
-  ObjectData(bool isResource = false) : o_attribute(0) {
+  ObjectData(const ObjectStaticCallbacks *cb, bool isResource) :
+      o_attribute(0), o_callbacks(cb) {
     if (!isResource) {
       o_id = ++(*os_max_id);
     }
@@ -242,7 +243,9 @@ class ObjectData : public CountableNF {
   Variant o_root_invoke_few_args(CStrRef s, int64 hash, int count,
                                  INVOKE_FEW_ARGS_DECL_ARGS);
   bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
-  virtual const ObjectStaticCallbacks *o_get_callbacks() const = 0;
+  const ObjectStaticCallbacks *o_get_callbacks() const {
+    return o_callbacks;
+  }
   bool o_get_call_info_ex(const char *clsname,
                           MethodCallPackage &mcp, int64 hash = -1);
   virtual bool o_get_call_info_hook(const char *clsname,
@@ -320,11 +323,14 @@ public:
                                        const ObjectData *obj,
                                        const ObjectStaticCallbacks *osc);
  protected:
-  int o_id;                      // a numeric identifier of this object
-  Array         o_properties;    // dynamic properties
-  void          cloneDynamic(ObjectData *orig);
+  int           o_id;            // a numeric identifier of this object
  private:
-  mutable int16  o_attribute;    // vairous flags
+  mutable int16 o_attribute;     // various flags
+ protected:
+  Array         o_properties;    // dynamic properties
+  const ObjectStaticCallbacks *o_callbacks;
+
+  void          cloneDynamic(ObjectData *orig);
 
 #ifdef FAST_REFCOUNT_FOR_VARIANT
  private:
@@ -340,7 +346,8 @@ typedef ObjectData c_ObjectData; // purely for easier code generation
 
 class ExtObjectData : public ObjectData {
 public:
-  ExtObjectData() : root(this) {}
+  ExtObjectData(const ObjectStaticCallbacks *cb) :
+      ObjectData(cb, false), root(this) {}
   virtual void setRoot(ObjectData *r) { root = r; }
   virtual ObjectData *getRoot() { return root; }
 protected: ObjectData *root;
@@ -349,7 +356,7 @@ protected: ObjectData *root;
 
 template <int flags> class ExtObjectDataFlags : public ExtObjectData {
 public:
-  ExtObjectDataFlags() {
+  ExtObjectDataFlags(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
     ObjectData::setAttributes(flags);
   }
 };

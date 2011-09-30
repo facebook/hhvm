@@ -45,6 +45,7 @@ class c_UnderflowException : public c_RuntimeException {
   static const int s_call_info_index = 0;
 
   public:
+  c_UnderflowException(const ObjectStaticCallbacks *cb = &cw_UnderflowException) : c_RuntimeException(cb) {}
 };
 ObjectData *coo_UnderflowException() NEVER_INLINE;
 

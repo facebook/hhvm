@@ -45,6 +45,7 @@ class c_LogicException : public c_Exception {
   static const int s_call_info_index = 0;
 
   public:
+  c_LogicException(const ObjectStaticCallbacks *cb = &cw_LogicException) : c_Exception(cb) {}
 };
 ObjectData *coo_LogicException() NEVER_INLINE;
 

@@ -38,7 +38,7 @@ class c_IteratorIterator : public ExtObjectData {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(IteratorIterator, IteratorIterator, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_IteratorIterator(ObjectData* r = NULL) : m_iterator(Variant::nullInit) {
+  c_IteratorIterator(const ObjectStaticCallbacks *cb = &cw_IteratorIterator) : ExtObjectData(cb), m_iterator(Variant::nullInit) {
     setAttribute(HasCall);
   }
   Variant doCall(Variant v_name, Variant v_arguments, bool fatal);

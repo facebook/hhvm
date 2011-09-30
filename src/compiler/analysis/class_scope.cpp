@@ -1183,7 +1183,8 @@ void ClassScope::outputCPPDynamicClassDecl(CodeGenerator &cg) {
   const char *clsName = clsStr.c_str();
   cg_printf("ObjectData *%s%s(%s) NEVER_INLINE;\n",
             Option::CreateObjectOnlyPrefix, clsName,
-            isRedeclaring() ? "ObjectData *root = NULL" : "");
+            isRedeclaring() && derivedByDynamic() ?
+            "ObjectData *root = NULL" : "");
 }
 
 void ClassScope::outputCPPDynamicClassCreateDecl(CodeGenerator &cg) {
@@ -1200,10 +1201,11 @@ void ClassScope::outputCPPDynamicClassImpl(CodeGenerator &cg,
   const char *clsName = clsStr.c_str();
   cg_indentBegin("ObjectData *%s%s(%s) {\n",
                  Option::CreateObjectOnlyPrefix, clsName,
-                 isRedeclaring() ? "ObjectData *root /* = NULL */" : "");
+                 isRedeclaring() && derivedByDynamic() ?
+                 "ObjectData *root /* = NULL */" : "");
   cg_printf("return NEWOBJ(%s%s)(%s);\n",
             Option::ClassPrefix, clsName,
-            isRedeclaring() ? "root" : "");
+            isRedeclaring() && derivedByDynamic() ? "root" : "");
   cg_indentEnd("}\n");
 }
 

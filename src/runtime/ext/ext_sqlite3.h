@@ -46,7 +46,7 @@ class c_SQLite3 : public ExtObjectData {
   DECLARE_CLASS(SQLite3, SQLite3, ObjectData)
 
   // need to implement
-  public: c_SQLite3();
+  public: c_SQLite3(const ObjectStaticCallbacks *cb = &cw_SQLite3);
   public: ~c_SQLite3();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -110,7 +110,7 @@ class c_SQLite3Stmt : public ExtObjectData {
   DECLARE_CLASS(SQLite3Stmt, SQLite3Stmt, ObjectData)
 
   // need to implement
-  public: c_SQLite3Stmt();
+  public: c_SQLite3Stmt(const ObjectStaticCallbacks *cb = &cw_SQLite3Stmt);
   public: ~c_SQLite3Stmt();
   public: void t___construct(CObjRef dbobject, CStrRef statement);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -156,7 +156,7 @@ class c_SQLite3Result : public ExtObjectData {
   DECLARE_CLASS(SQLite3Result, SQLite3Result, ObjectData)
 
   // need to implement
-  public: c_SQLite3Result();
+  public: c_SQLite3Result(const ObjectStaticCallbacks *cb = &cw_SQLite3Result);
   public: ~c_SQLite3Result();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);

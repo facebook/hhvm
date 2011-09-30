@@ -39,7 +39,7 @@ class c_ReflectionExtension : public ExtObjectData {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionExtension, ReflectionExtension, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_ReflectionExtension() : m_name(Variant::nullInit), m_info(Variant::nullInit) {}
+  c_ReflectionExtension(const ObjectStaticCallbacks *cb = &cw_ReflectionExtension) : ExtObjectData(cb), m_name(Variant::nullInit), m_info(Variant::nullInit) {}
   public: void t___construct(Variant v_name);
   public: c_ReflectionExtension *create(CVarRef v_name);
   public: String t___tostring();

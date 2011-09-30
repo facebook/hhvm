@@ -56,6 +56,7 @@ class c_FB_MySQLLexer : public ExtObjectData {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(FB_MySQLLexer, FB_MySQLLexer, ObjectData)
   static const ClassPropTable os_prop_table;
+  c_FB_MySQLLexer(const ObjectStaticCallbacks *cb = &cw_FB_MySQLLexer) : ExtObjectData(cb) {}
   void init();
   public: void t___construct(Variant v_string = NAMSTR(s_sys_ss00000000, ""), Variant v_lookahead = 0LL);
   public: c_FB_MySQLLexer *create(CVarRef v_string = NAMVAR(s_sys_svs00000000, ""), CVarRef v_lookahead = NAMVAR(s_sys_svif01bca90, 0LL));

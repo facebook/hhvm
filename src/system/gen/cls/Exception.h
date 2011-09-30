@@ -48,7 +48,7 @@ class c_Exception : public ExtObjectData {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(Exception, Exception, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_Exception() : m_previous(Variant::nullInit), m_file(Variant::nullInit), m_line(Variant::nullInit), m_trace(Variant::nullInit) {}
+  c_Exception(const ObjectStaticCallbacks *cb = &cw_Exception) : ExtObjectData(cb), m_previous(Variant::nullInit), m_file(Variant::nullInit), m_line(Variant::nullInit), m_trace(Variant::nullInit) {}
   void init();
   public: void t___init__();
   public: void t___construct(Variant v_message = NAMSTR(s_sys_ss00000000, ""), Variant v_code = 0LL, Variant v_previous = null);

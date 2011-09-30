@@ -45,6 +45,7 @@ class c_InvalidArgumentException : public c_LogicException {
   static const int s_call_info_index = 0;
 
   public:
+  c_InvalidArgumentException(const ObjectStaticCallbacks *cb = &cw_InvalidArgumentException) : c_LogicException(cb) {}
 };
 ObjectData *coo_InvalidArgumentException() NEVER_INLINE;
 

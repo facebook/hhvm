@@ -22,7 +22,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 IMPLEMENT_DEFAULT_EXTENSION(icu_ucsdet);
 
-c_EncodingDetector::c_EncodingDetector() {
+c_EncodingDetector::c_EncodingDetector(const ObjectStaticCallbacks *cb) :
+    ExtObjectData(cb) {
   UErrorCode status = U_ZERO_ERROR;
   m_encoding_detector = ucsdet_open(&status);
 
@@ -114,8 +115,8 @@ Variant c_EncodingDetector::t___destruct() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-c_EncodingMatch::c_EncodingMatch() :
-m_encoding_match(0) {
+c_EncodingMatch::c_EncodingMatch(const ObjectStaticCallbacks *cb) :
+    ExtObjectData(cb), m_encoding_match(0) {
 }
 
 c_EncodingMatch::~c_EncodingMatch() {

@@ -104,8 +104,9 @@ public:
    * This is the constructor which is called internally-
    * PHP code will never be able to call this constructor
    */
-  c_Closure(const CallInfo *callInfo, void *extraData) :
-    m_callInfo(callInfo), m_extraData(extraData) {
+  c_Closure(const CallInfo *callInfo, void *extraData,
+            const ObjectStaticCallbacks *cb = &cw_Closure) :
+    ExtObjectData(cb), m_callInfo(callInfo), m_extraData(extraData) {
     ASSERT(callInfo);
   }
 protected:
@@ -160,10 +161,10 @@ public:
     const CallInfo *callInfo,
     void *extraData,
     CArrRef vars) :
-    c_Closure(callInfo, extraData), m_vars(vars) {}
+    c_Closure(callInfo, extraData, &cw_GeneratorClosure), m_vars(vars) {}
 public:
-  Array m_vars;    /* use variables    */
-  Array m_statics; /* static variables */
+  Array          m_vars;    /* use variables    */
+  LVariableTable m_statics; /* static variables */
 EOT
 ,
   )

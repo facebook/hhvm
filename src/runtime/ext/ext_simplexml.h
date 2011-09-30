@@ -47,7 +47,7 @@ class c_SimpleXMLElement :
   DECLARE_CLASS(SimpleXMLElement, SimpleXMLElement, ObjectData)
 
   // need to implement
-  public: c_SimpleXMLElement();
+  public: c_SimpleXMLElement(const ObjectStaticCallbacks *cb = &cw_SimpleXMLElement);
   public: ~c_SimpleXMLElement();
   public: void t___construct(CStrRef data, int64 options = 0, bool data_is_url = false, CStrRef ns = "", bool is_prefix = false);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -128,7 +128,7 @@ class c_LibXMLError : public ExtObjectData {
   DECLARE_CLASS(LibXMLError, LibXMLError, ObjectData)
 
   // need to implement
-  public: c_LibXMLError();
+  public: c_LibXMLError(const ObjectStaticCallbacks *cb = &cw_LibXMLError);
   public: ~c_LibXMLError();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -150,7 +150,7 @@ class c_SimpleXMLElementIterator : public ExtObjectData, public Sweepable {
   DECLARE_CLASS(SimpleXMLElementIterator, SimpleXMLElementIterator, ObjectData)
 
   // need to implement
-  public: c_SimpleXMLElementIterator();
+  public: c_SimpleXMLElementIterator(const ObjectStaticCallbacks *cb = &cw_SimpleXMLElementIterator);
   public: ~c_SimpleXMLElementIterator();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);

@@ -42,7 +42,7 @@ class c_EncodingDetector : public ExtObjectData {
   DECLARE_CLASS(EncodingDetector, EncodingDetector, ObjectData)
 
   // need to implement
-  public: c_EncodingDetector();
+  public: c_EncodingDetector(const ObjectStaticCallbacks *cb = &cw_EncodingDetector);
   public: ~c_EncodingDetector();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -73,7 +73,7 @@ class c_EncodingMatch : public ExtObjectData {
   DECLARE_CLASS(EncodingMatch, EncodingMatch, ObjectData)
 
   // need to implement
-  public: c_EncodingMatch();
+  public: c_EncodingMatch(const ObjectStaticCallbacks *cb = &cw_EncodingMatch);
   public: ~c_EncodingMatch();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);

@@ -119,7 +119,8 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(String source, int type,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-c_XMLReader::c_XMLReader() : m_ptr(NULL), m_input(NULL), m_schema(NULL) {
+c_XMLReader::c_XMLReader(const ObjectStaticCallbacks *cb) :
+    ExtObjectDataFlags<ObjectData::UseGet>(cb), m_ptr(NULL), m_input(NULL), m_schema(NULL) {
 }
 
 c_XMLReader::~c_XMLReader() {

@@ -37,7 +37,7 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionFunctionAbstract, ReflectionFunctionAbstract, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_ReflectionFunctionAbstract() : m_info(Variant::nullInit) {}
+  c_ReflectionFunctionAbstract(const ObjectStaticCallbacks *cb = &cw_ReflectionFunctionAbstract) : ExtObjectData(cb), m_info(Variant::nullInit) {}
   public: Variant t_getname();
   public: Variant t_isinternal();
   public: Variant t_getclosure();

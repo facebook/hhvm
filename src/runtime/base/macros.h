@@ -108,8 +108,6 @@ namespace HPHP {
   static StaticString s_class_name;                                     \
   static const InstanceOfInfo s_instanceof_table[];                     \
   static const int s_instanceof_index[];                                \
-  virtual const ObjectStaticCallbacks *o_get_callbacks() const {        \
-    return cw_##cls; }                                                  \
 
 #define DECLARE_CLASS_COMMON(cls, originalName) \
   DECLARE_OBJECT_ALLOCATION(c_##cls)                                    \
@@ -118,8 +116,6 @@ namespace HPHP {
   static StaticString s_class_name;                                     \
   static const InstanceOfInfo s_instanceof_table[];                     \
   static const int s_instanceof_index[];                                \
-  virtual const ObjectStaticCallbacks *o_get_callbacks() const {        \
-    return cw_##cls; }                                                  \
 
 #define DECLARE_CLASS_NO_SWEEP(cls, originalName, parent)               \
   DECLARE_CLASS_COMMON_NO_SWEEP(cls, originalName)                      \

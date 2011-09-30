@@ -154,12 +154,13 @@ BeginClass(
     'name' => 'Continuation',
     'ifaces' => array('Iterator'),
     'footer' => <<<EOT
-protected:
-  virtual bool php_sleep(Variant &ret);
+public:    void setCalledClass(CStrRef cls) { m_called_class = cls; }
+protected: virtual bool php_sleep(Variant &ret);
 private:
+  bool m_should_throw;
+  bool m_isMethod;
   const CallInfo *m_callInfo;
   void *m_extra;
-  bool m_isMethod;
 EOT
 ,
   )

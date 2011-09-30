@@ -38,7 +38,7 @@ class c_SoapServer : public ExtObjectData {
   DECLARE_CLASS(SoapServer, SoapServer, ObjectData)
 
   // need to implement
-  public: c_SoapServer();
+  public: c_SoapServer(const ObjectStaticCallbacks *cb = &cw_SoapServer);
   public: ~c_SoapServer();
   public: void t___construct(CVarRef wsdl, CArrRef options = null_array);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -90,7 +90,7 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
   DECLARE_CLASS(SoapClient, SoapClient, ObjectData)
 
   // need to implement
-  public: c_SoapClient();
+  public: c_SoapClient(const ObjectStaticCallbacks *cb = &cw_SoapClient);
   public: ~c_SoapClient();
   public: void t___construct(CVarRef wsdl, CArrRef options = null_array);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -170,7 +170,7 @@ class c_SoapVar : public ExtObjectData {
   DECLARE_CLASS(SoapVar, SoapVar, ObjectData)
 
   // need to implement
-  public: c_SoapVar();
+  public: c_SoapVar(const ObjectStaticCallbacks *cb = &cw_SoapVar);
   public: ~c_SoapVar();
   public: void t___construct(CVarRef data, CVarRef type, CStrRef type_name = null_string, CStrRef type_namespace = null_string, CStrRef node_name = null_string, CStrRef node_namespace = null_string);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -198,7 +198,7 @@ class c_SoapParam : public ExtObjectData {
   DECLARE_CLASS(SoapParam, SoapParam, ObjectData)
 
   // need to implement
-  public: c_SoapParam();
+  public: c_SoapParam(const ObjectStaticCallbacks *cb = &cw_SoapParam);
   public: ~c_SoapParam();
   public: void t___construct(CVarRef data, CStrRef name);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -222,7 +222,7 @@ class c_SoapHeader : public ExtObjectData {
   DECLARE_CLASS(SoapHeader, SoapHeader, ObjectData)
 
   // need to implement
-  public: c_SoapHeader();
+  public: c_SoapHeader(const ObjectStaticCallbacks *cb = &cw_SoapHeader);
   public: ~c_SoapHeader();
   public: void t___construct(CStrRef ns, CStrRef name, CVarRef data = null, bool mustunderstand = false, CVarRef actor = null);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);

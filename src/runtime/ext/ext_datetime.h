@@ -45,7 +45,7 @@ class c_DateTime : public ExtObjectData {
   DECLARE_CLASS(DateTime, DateTime, ObjectData)
 
   // need to implement
-  public: c_DateTime();
+  public: c_DateTime(const ObjectStaticCallbacks *cb = &cw_DateTime);
   public: ~c_DateTime();
   public: void t___construct(CStrRef time = "now",
                              CObjRef timezone = null_object);
@@ -121,7 +121,7 @@ class c_DateTimeZone : public ExtObjectData {
   DECLARE_CLASS(DateTimeZone, DateTimeZone, ObjectData)
 
   // need to implement
-  public: c_DateTimeZone();
+  public: c_DateTimeZone(const ObjectStaticCallbacks *cb = &cw_DateTimeZone);
   public: ~c_DateTimeZone();
   public: void t___construct(CStrRef timezone);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);

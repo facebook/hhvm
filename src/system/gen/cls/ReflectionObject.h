@@ -36,6 +36,7 @@ class c_ReflectionObject : public c_ReflectionClass {
 
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionObject, ReflectionObject, ReflectionClass)
+  c_ReflectionObject(const ObjectStaticCallbacks *cb = &cw_ReflectionObject) : c_ReflectionClass(cb) {}
   public: static Variant t_export(Variant v_obj, CVarRef v_ret);
   DECLARE_METHOD_INVOKE_HELPERS(export);
 };

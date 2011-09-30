@@ -160,7 +160,8 @@ static void php_sqlite3_callback_final(sqlite3_context *context) {
 ///////////////////////////////////////////////////////////////////////////////
 // sqlite3
 
-c_SQLite3::c_SQLite3() : m_raw_db(NULL) {
+c_SQLite3::c_SQLite3(const ObjectStaticCallbacks *cb) :
+    ExtObjectData(cb), m_raw_db(NULL) {
 }
 
 c_SQLite3::~c_SQLite3() {
@@ -432,7 +433,8 @@ Variant c_SQLite3::t___destruct() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_SQLite3Stmt::c_SQLite3Stmt() : m_raw_stmt(NULL) {
+c_SQLite3Stmt::c_SQLite3Stmt(const ObjectStaticCallbacks *cb) :
+    ExtObjectData(cb), m_raw_stmt(NULL) {
 }
 
 c_SQLite3Stmt::~c_SQLite3Stmt() {
@@ -612,7 +614,8 @@ Variant c_SQLite3Stmt::t___destruct() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_SQLite3Result::c_SQLite3Result() {
+c_SQLite3Result::c_SQLite3Result(const ObjectStaticCallbacks *cb) :
+    ExtObjectData(cb) {
 }
 
 c_SQLite3Result::~c_SQLite3Result() {

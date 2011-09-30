@@ -47,10 +47,9 @@ class c_Continuation : public ExtObjectData {
   public: String m_called_class;
   public: bool m_done;
   public: bool m_running;
-  public: bool m_should_throw;
 
   // need to implement
-  public: c_Continuation();
+  public: c_Continuation(const ObjectStaticCallbacks *cb = &cw_Continuation);
   public: ~c_Continuation();
   public: void t___construct(int64 func, int64 extra, bool isMethod, CStrRef origFuncName, CVarRef obj = null, CArrRef args = null_array);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -91,16 +90,16 @@ class c_Continuation : public ExtObjectData {
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
-  public: void setCalledClass(CStrRef cls) { m_called_class = cls; }
   // implemented by HPHP
   public: c_Continuation *create(int64 func, int64 extra, bool isMethod, String origFuncName, Variant obj = null, Array args = null_array);
   public: static const ClassPropTable os_prop_table;
-protected:
-  virtual bool php_sleep(Variant &ret);
+public:    void setCalledClass(CStrRef cls) { m_called_class = cls; }
+protected: virtual bool php_sleep(Variant &ret);
 private:
+  bool m_should_throw;
+  bool m_isMethod;
   const CallInfo *m_callInfo;
   void *m_extra;
-  bool m_isMethod;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -115,7 +114,7 @@ class c_GenericContinuation : public c_Continuation {
   public: Array m_vars;
 
   // need to implement
-  public: c_GenericContinuation();
+  public: c_GenericContinuation(const ObjectStaticCallbacks *cb = &cw_GenericContinuation);
   public: ~c_GenericContinuation();
   public: void t___construct(int64 func, int64 extra, bool isMethod, CStrRef origFuncName, CArrRef vars, CVarRef obj = null, CArrRef args = null_array);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
@@ -128,9 +127,9 @@ class c_GenericContinuation : public c_Continuation {
 
   // implemented by HPHP
   public: c_GenericContinuation *create(int64 func, int64 extra, bool isMethod, String origFuncName, Array vars, Variant obj = null, Array args = null_array);
+  public: static const ClassPropTable os_prop_table;
 public:
   LVariableTable m_statics;
-  public: static const ClassPropTable os_prop_table;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

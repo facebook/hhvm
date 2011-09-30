@@ -45,6 +45,7 @@ class c_RangeException : public c_RuntimeException {
   static const int s_call_info_index = 0;
 
   public:
+  c_RangeException(const ObjectStaticCallbacks *cb = &cw_RangeException) : c_RuntimeException(cb) {}
 };
 ObjectData *coo_RangeException() NEVER_INLINE;
 

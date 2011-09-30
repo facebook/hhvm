@@ -89,11 +89,13 @@ void f_hphp_unpack_continuation(CObjRef continuation) {
 
 static StaticString s___cont__("__cont__");
 
-c_Continuation::c_Continuation() :
-  m_label(0LL), m_index(-1LL),
-  m_value(Variant::nullInit), m_received(Variant::nullInit),
-  m_done(false), m_running(false), m_should_throw(false),
-  m_callInfo(NULL), m_extra(NULL), m_isMethod(false) {}
+c_Continuation::c_Continuation(const ObjectStaticCallbacks *cb) :
+    ExtObjectData(cb),
+    m_label(0LL), m_index(-1LL),
+    m_value(Variant::nullInit), m_received(Variant::nullInit),
+    m_done(false), m_running(false), m_should_throw(false),
+    m_isMethod(false), m_callInfo(NULL), m_extra(NULL) {}
+
 c_Continuation::~c_Continuation() {}
 
 void c_Continuation::t___construct(
@@ -280,7 +282,8 @@ Variant c_Continuation::t___destruct() {
 
 #undef NEXT_IMPL
 
-c_GenericContinuation::c_GenericContinuation()  {}
+c_GenericContinuation::c_GenericContinuation(const ObjectStaticCallbacks *cb) :
+    c_Continuation(cb)  {}
 c_GenericContinuation::~c_GenericContinuation() {}
 
 void

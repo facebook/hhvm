@@ -1813,14 +1813,15 @@ int64 f__soap_active_version() {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapServer
 
-c_SoapServer::c_SoapServer() :
-  m_type(SOAP_FUNCTIONS),
-  m_version(SOAP_1_1),
-  m_sdl(NULL),
-  m_encoding(NULL),
-  m_typemap(NULL),
-  m_features(0),
-  m_send_errors(1) {
+c_SoapServer::c_SoapServer(const ObjectStaticCallbacks *cb) :
+    ExtObjectData(cb),
+    m_type(SOAP_FUNCTIONS),
+    m_version(SOAP_1_1),
+    m_sdl(NULL),
+    m_encoding(NULL),
+    m_typemap(NULL),
+    m_features(0),
+    m_send_errors(1) {
 }
 
 c_SoapServer::~c_SoapServer() {
@@ -2282,22 +2283,23 @@ Variant c_SoapServer::t___destruct() {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapClient
 
-c_SoapClient::c_SoapClient() :
-  m_soap_version(SOAP_1_1),
-  m_sdl(NULL),
-  m_encoding(NULL),
-  m_typemap(NULL),
-  m_features(0),
-  m_style(SOAP_RPC),
-  m_use(SOAP_LITERAL),
-  m_authentication(SOAP_AUTHENTICATION_BASIC),
-  m_proxy_port(0),
-  m_connection_timeout(0),
-  m_max_redirect(0),
-  m_use11(true),
-  m_compression(false),
-  m_exceptions(true),
-  m_trace(false) {
+c_SoapClient::c_SoapClient(const ObjectStaticCallbacks *cb) :
+    ExtObjectDataFlags<ObjectData::HasCall>(cb),
+    m_soap_version(SOAP_1_1),
+    m_sdl(NULL),
+    m_encoding(NULL),
+    m_typemap(NULL),
+    m_features(0),
+    m_style(SOAP_RPC),
+    m_use(SOAP_LITERAL),
+    m_authentication(SOAP_AUTHENTICATION_BASIC),
+    m_proxy_port(0),
+    m_connection_timeout(0),
+    m_max_redirect(0),
+    m_use11(true),
+    m_compression(false),
+    m_exceptions(true),
+    m_trace(false) {
 }
 
 c_SoapClient::~c_SoapClient() {
@@ -2754,7 +2756,7 @@ Variant c_SoapClient::t___destruct() {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapVar
 
-c_SoapVar::c_SoapVar() {
+c_SoapVar::c_SoapVar(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
 }
 
 c_SoapVar::~c_SoapVar() {
@@ -2795,7 +2797,7 @@ Variant c_SoapVar::t___destruct() {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapParam
 
-c_SoapParam::c_SoapParam() {
+c_SoapParam::c_SoapParam(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
 }
 
 c_SoapParam::~c_SoapParam() {
@@ -2819,7 +2821,8 @@ Variant c_SoapParam::t___destruct() {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapHeader
 
-c_SoapHeader::c_SoapHeader() {
+c_SoapHeader::c_SoapHeader(const ObjectStaticCallbacks *cb) :
+    ExtObjectData(cb) {
 }
 
 c_SoapHeader::~c_SoapHeader() {

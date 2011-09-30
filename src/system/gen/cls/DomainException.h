@@ -45,6 +45,7 @@ class c_DomainException : public c_LogicException {
   static const int s_call_info_index = 0;
 
   public:
+  c_DomainException(const ObjectStaticCallbacks *cb = &cw_DomainException) : c_LogicException(cb) {}
 };
 ObjectData *coo_DomainException() NEVER_INLINE;
 

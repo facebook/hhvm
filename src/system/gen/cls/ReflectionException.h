@@ -45,6 +45,7 @@ class c_ReflectionException : public c_Exception {
   static const int s_call_info_index = 0;
 
   public:
+  c_ReflectionException(const ObjectStaticCallbacks *cb = &cw_ReflectionException) : c_Exception(cb) {}
 };
 ObjectData *coo_ReflectionException() NEVER_INLINE;
 

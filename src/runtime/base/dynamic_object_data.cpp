@@ -27,9 +27,10 @@ namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 // constructor/destructor
 
-DynamicObjectData::DynamicObjectData(const char* pname,
+DynamicObjectData::DynamicObjectData(const ObjectStaticCallbacks *cb,
+                                     const char* pname,
                                      ObjectData* r /* = NULL */) :
-  root(r ? r : this) {
+    ObjectData(cb, false), root(r ? r : this) {
   if (pname) {
     CountableHelper h(root);
     parent = create_object(pname, Array(), false, root);

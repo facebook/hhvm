@@ -341,7 +341,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
                   constants = block->getConstants();
                   // set to be dynamic
                   if (m_type == DefinedFunction) {
-                    constants->setDynamic(ar, symbol);
+                    constants->setDynamic(ar, symbol, true);
                   }
                 }
               }
@@ -978,7 +978,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
           if (constants != ar->getConstants()) {
             TRY_LOCK(block);
             if (value && !value->isScalar()) {
-              constants->setDynamic(ar, varName);
+              constants->setDynamic(ar, varName, true);
               varType = Type::Variant;
             }
             if (constants->isDynamic(varName)) {

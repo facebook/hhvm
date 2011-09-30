@@ -459,7 +459,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
     s_constants = ConstantTablePtr(new ConstantTable(*ar2.get()));
     NoSuperGlobals = true;
   }
-  s_constants->setDynamic(ar, "SID");
+  s_constants->setDynamic(ar, "SID", true);
 
   // load extension constants, classes and dynamics
   ParseExtConsts(ar, ExtensionConsts, false);

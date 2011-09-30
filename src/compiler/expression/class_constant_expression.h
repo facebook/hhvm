@@ -50,6 +50,7 @@ private:
   std::string m_varName;
   BlockScope *m_defScope;
   bool m_valid;
+  bool m_depsSet;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

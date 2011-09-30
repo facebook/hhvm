@@ -123,15 +123,16 @@ void AssignmentExpression::analyzeProgram(AnalysisResultPtr ar) {
       VariableTablePtr variables = getScope()->getVariables();
       variables->addUsed(name);
     }
+  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
     if (m_variable->is(Expression::KindOfConstantExpression)) {
       ConstantExpressionPtr exp =
         dynamic_pointer_cast<ConstantExpression>(m_variable);
       if (!m_value->isScalar()) {
-        getScope()->getConstants()->setDynamic(ar, exp->getName());
+        getScope()->getConstants()->setDynamic(ar, exp->getName(), false);
       }
+    } else {
+      CheckNeeded(m_variable, m_value);
     }
-  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    CheckNeeded(m_variable, m_value);
   }
 }
 

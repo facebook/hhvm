@@ -154,7 +154,9 @@ public:
   ExpressionPtr replaceValue(ExpressionPtr rep);
   void clearContext();
   int getContext() const { return m_context;}
-  bool hasContext(Context context) const { return (m_context & context) == context; }
+  bool hasContext(Context context) const {
+    return (m_context & context) == context;
+  }
   bool hasAnyContext(int context) const {
     if ((context & Declaration) == Declaration) {
       // special case Declaration because it is 2 bit fields
@@ -164,7 +166,9 @@ public:
     }
     return m_context & context;
   }
-  bool hasAllContext(int context) const { return (m_context & context) == context; }
+  bool hasAllContext(int context) const {
+    return (m_context & context) == context;
+  }
   bool hasSubExpr(ExpressionPtr sub) const;
   virtual void setComment(const std::string &) {}
   /**
@@ -197,7 +201,8 @@ public:
   void collectCPPTemps(ExpressionPtrVec &collection);
   void disableCSE();
   bool hasChainRoots();
-  bool preOutputCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar, bool emitTemps);
+  bool preOutputCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar,
+                        bool emitTemps);
   virtual bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                             int state);
   bool preOutputOffsetLHS(CodeGenerator &cg, AnalysisResultPtr ar,

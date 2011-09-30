@@ -63,10 +63,11 @@ private:
   Symbol *resolveNS(AnalysisResultConstPtr ar);
   std::string m_name;
   std::string m_docComment;
+  std::string m_comment; // for inlined constant name
   bool m_valid;
   bool m_dynamic;
   bool m_visited;
-  std::string m_comment; // for inlined constant name
+  bool m_depsSet;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

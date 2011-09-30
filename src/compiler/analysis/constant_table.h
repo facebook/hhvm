@@ -53,7 +53,8 @@ public:
   /**
    * Explicitly setting a constant to be dynamic, mainly for "Dynamic" note.
    */
-  void setDynamic(AnalysisResultConstPtr ar, const std::string &name);
+  void setDynamic(AnalysisResultConstPtr ar, const std::string &name,
+                  bool forceVariant);
 
   /**
    * Called when a constant is declared (l-value).

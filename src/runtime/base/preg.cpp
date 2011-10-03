@@ -938,7 +938,16 @@ static String php_pcre_replace(CStrRef pattern, CStrRef subject,
       } else { /* do regular backreference copying */
         walk = replace;
         walk_last = 0;
+        Array params;
+        const char* lastStart = NULL;
         while (walk < replace_end) {
+          bool handleQuote = eval && '"' == *walk && walk_last != '\\';
+          if (handleQuote && lastStart != NULL) {
+            String str(lastStart, walkbuf - lastStart, CopyString);
+            params.append(str);
+            lastStart = NULL;
+            handleQuote = false;
+          }
           if ('\\' == *walk || '$' == *walk) {
             if (walk_last == '\\') {
               *(walkbuf-1) = *walk++;
@@ -957,35 +966,12 @@ static String php_pcre_replace(CStrRef pattern, CStrRef subject,
           }
           *walkbuf++ = *walk++;
           walk_last = walk[-1];
+          if (handleQuote && lastStart == NULL) {
+            lastStart = walkbuf;
+          }
         }
         *walkbuf = '\0';
         if (eval) {
-          String args(result + result_len, walkbuf - (result + result_len),
-                     CopyString);
-          Array params;
-          bool slashed = false;
-          int lastStart = -1;
-          for (int i = 0; i < args.size(); i++) {
-            char c = args.charAt(i);
-            if (slashed) {
-              slashed = false;
-              continue;
-            }
-            switch (c) {
-            case '"':
-              if (lastStart >= 0) {
-                params.append(args.substr(lastStart, i - lastStart));
-                lastStart = -1;
-              } else {
-                lastStart = i + 1;
-              }
-              break;
-            case '\\':
-              slashed = true;
-              break;
-            }
-          }
-
           eval_result = f_call_user_func_array(eval_fn, params);
           memcpy(result + result_len, eval_result.data(), eval_result.size());
           result_len += eval_result.size();

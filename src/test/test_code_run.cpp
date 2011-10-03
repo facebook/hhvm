@@ -16883,6 +16883,8 @@ bool TestCodeRun::TestExtString() {
       "var_dump($out);"
       "var_dump(sscanf(\"-\", \"%da\", $out));"
       "var_dump($out);");
+  MVCR("<?php\n"
+       "preg_replace(\"/(..)/e\", 'var_dump(\"$1\")', '\"\"');\n");
   return true;
 }
 

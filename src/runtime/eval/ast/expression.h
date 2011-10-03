@@ -65,6 +65,7 @@ public:
     KindOfObjectPropertyExpression,
     KindOfThisStringPropertyExpression,
     KindOfVariableStringPropertyExpression,
+    KindOfObjectStringPropertyExpression,
     KindOfQOpExpression,
     KindOfRefParamExpression,
     KindOfScalarExpression,

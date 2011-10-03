@@ -87,6 +87,26 @@ private:
   String m_name;
 };
 
+class ObjectStringPropertyExpression : public LvalExpression {
+public:
+  ObjectStringPropertyExpression(ExpressionPtr obj,
+    CStrRef name, const Location *loc);
+  virtual Variant eval(VariableEnvironment &env) const;
+  virtual Variant evalExist(VariableEnvironment &env) const;
+  virtual Variant &lval(VariableEnvironment &env) const;
+  virtual bool weakLval(VariableEnvironment &env, Variant* &v) const;
+  virtual Variant set(VariableEnvironment &env, CVarRef val) const;
+  virtual Variant setRef(VariableEnvironment &env, CVarRef val) const;
+  virtual bool exist(VariableEnvironment &env, int op) const;
+  virtual void unset(VariableEnvironment &env) const;
+  virtual Variant setOp(VariableEnvironment &env, int op, CVarRef rhs) const;
+  String getProperty() const;
+  virtual void dump(std::ostream &out) const;
+private:
+  ExpressionPtr m_obj;
+  String m_name;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

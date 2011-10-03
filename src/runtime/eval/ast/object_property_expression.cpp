@@ -29,6 +29,7 @@ ObjectPropertyExpression::ObjectPropertyExpression(EXPRESSION_ARGS,
                                                    NamePtr name)
   : LvalExpression(KindOfObjectPropertyExpression, EXPRESSION_PASS),
   m_obj(obj), m_name(name) {
+  m_reverseOrder = m_obj->isKindOf(KindOfVariableExpression);
 }
 
 Expression *ObjectPropertyExpression::optimize(VariableEnvironment &env) {
@@ -44,6 +45,8 @@ Expression *ObjectPropertyExpression::optimize(VariableEnvironment &env) {
         (static_cast<VariableExpression *>(m_obj.get()),
         static_cast<StringName *>(m_name.get())->get(), loc());
     }
+    return new ObjectStringPropertyExpression
+      (m_obj.get(), static_cast<StringName *>(m_name.get())->get(), loc());
   }
   return NULL;
 }
@@ -487,6 +490,168 @@ void VariableStringPropertyExpression::unset(VariableEnvironment &env) const {
 }
 
 void VariableStringPropertyExpression::dump(std::ostream &out) const {
+  m_obj->dump(out);
+  out << "->";
+  out << m_name.data();
+}
+
+ObjectStringPropertyExpression::ObjectStringPropertyExpression(
+  ExpressionPtr obj, CStrRef name, const Location *loc) :
+  LvalExpression(KindOfObjectStringPropertyExpression, loc),
+  m_obj(obj), m_name(name) {}
+
+Variant ObjectStringPropertyExpression::eval(VariableEnvironment &env) const {
+  CVarRef obj = m_obj->eval(env);
+  SET_LINE;
+  if (!g_context->getDebuggerBypassCheck()) {
+    return obj.o_get(m_name);
+  }
+  Variant v = obj.o_get(m_name, false);
+  if (!v.isNull()) return v;
+  CStrRef context = obj.isObject() ?
+                    obj.getObjectData()->o_getClassName() :
+                    null_string;
+  return obj.o_get(m_name, false, context);
+}
+
+Variant ObjectStringPropertyExpression::evalExist(
+  VariableEnvironment &env) const {
+  Variant obj(m_obj->evalExist(env));
+  SET_LINE;
+  return obj.o_get(m_name, false);
+}
+
+Variant &ObjectStringPropertyExpression::lval(VariableEnvironment &env) const {
+  const LvalExpression *lobj = m_obj->toLval();
+  Variant &proxy = get_globals()->__lvalProxy;
+  if (lobj) {
+    Variant &lv = lobj->lval(env);
+    SET_LINE;
+    return lv.o_lval(m_name, proxy);
+  } else {
+    Variant obj(m_obj->eval(env));
+    SET_LINE;
+    proxy = ref(obj.o_lval(m_name, proxy));
+    return proxy;
+  }
+}
+
+bool ObjectStringPropertyExpression::weakLval(VariableEnvironment &env,
+                                              Variant* &v) const {
+  Variant *obj;
+
+  const LvalExpression *lobj = m_obj->toLval();
+  if (lobj) {
+    bool ok = lobj->weakLval(env, obj);
+    if (!ok || !SET_LINE_EXPR) return false;
+    Variant tmp;
+    v = &obj->o_unsetLval(m_name, tmp);
+    return v != &tmp;
+  }
+
+  m_obj->eval(env);
+  return false;
+}
+
+Variant ObjectStringPropertyExpression::set(VariableEnvironment &env, CVarRef val)
+  const {
+  const LvalExpression *lobj = m_obj->toLval();
+  if (lobj) {
+    Variant &lv = lobj->lval(env);
+    SET_LINE;
+    lv.o_set(m_name, val);
+  } else {
+    Variant obj(m_obj->eval(env));
+    SET_LINE;
+    obj.o_set(m_name, val);
+  }
+  return val;
+}
+
+Variant ObjectStringPropertyExpression::setRef(
+  VariableEnvironment &env, CVarRef val) const {
+  const LvalExpression *lobj = m_obj->toLval();
+  if (lobj) {
+    Variant &lv = lobj->lval(env);
+    SET_LINE;
+    lv.o_setRef(m_name, val);
+  } else {
+    Variant obj(m_obj->eval(env));
+    SET_LINE;
+    obj.o_setRef(m_name, val);
+  }
+  return val;
+}
+
+Variant ObjectStringPropertyExpression::setOp(
+  VariableEnvironment &env, int op, CVarRef rhs) const {
+  Variant *vobj;
+  Variant obj;
+  const LvalExpression *lobj = m_obj->toLval();
+  if (lobj) {
+    vobj = &lobj->lval(env);
+  } else {
+    obj = m_obj->eval(env);
+    vobj = &obj;
+  }
+  SET_LINE;
+  switch (op) {
+    case T_PLUS_EQUAL:
+      return vobj->o_assign_op<Variant, T_PLUS_EQUAL>(m_name, rhs);
+    case T_MINUS_EQUAL:
+      return vobj->o_assign_op<Variant, T_MINUS_EQUAL>(m_name, rhs);
+    case T_MUL_EQUAL:
+      return vobj->o_assign_op<Variant, T_MUL_EQUAL>(m_name, rhs);
+    case T_DIV_EQUAL:
+      return vobj->o_assign_op<Variant, T_DIV_EQUAL>(m_name, rhs);
+    case T_CONCAT_EQUAL:
+      return vobj->o_assign_op<Variant, T_CONCAT_EQUAL>(m_name, rhs);
+    case T_MOD_EQUAL:
+      return vobj->o_assign_op<Variant, T_MOD_EQUAL>(m_name, rhs);
+    case T_AND_EQUAL:
+      return vobj->o_assign_op<Variant, T_AND_EQUAL>(m_name, rhs);
+    case T_OR_EQUAL:
+      return vobj->o_assign_op<Variant, T_OR_EQUAL>(m_name, rhs);
+    case T_XOR_EQUAL:
+      return vobj->o_assign_op<Variant, T_XOR_EQUAL>(m_name, rhs);
+    case T_SL_EQUAL:
+      return vobj->o_assign_op<Variant, T_SL_EQUAL>(m_name, rhs);
+    case T_SR_EQUAL:
+      return vobj->o_assign_op<Variant, T_SR_EQUAL>(m_name, rhs);
+    case T_INC:
+      return vobj->o_assign_op<Variant, T_INC>(m_name, rhs);
+    case T_DEC:
+      return vobj->o_assign_op<Variant, T_DEC>(m_name, rhs);
+    default:
+      ASSERT(false);
+  }
+  return rhs;
+}
+
+bool ObjectStringPropertyExpression::exist(
+  VariableEnvironment &env, int op) const {
+  Variant obj;
+  obj = m_obj->evalExist(env);
+  SET_LINE;
+  if (op == T_ISSET) {
+    return obj.o_isset(m_name);
+  } else {
+    return obj.o_empty(m_name);
+  }
+}
+
+void ObjectStringPropertyExpression::unset(VariableEnvironment &env) const {
+  const LvalExpression *lobj = m_obj->toLval();
+  Variant *obj;
+  if (lobj && lobj->weakLval(env, obj)) {
+    obj->o_unset(m_name);
+  } else {
+    Variant obj(m_obj->evalExist(env));
+    obj.o_unset(m_name);
+  }
+}
+
+void ObjectStringPropertyExpression::dump(std::ostream &out) const {
   m_obj->dump(out);
   out << "->";
   out << m_name.data();

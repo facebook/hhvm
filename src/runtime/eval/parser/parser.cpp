@@ -981,6 +981,18 @@ void Parser::onBinaryOpExp(Token &out, Token &operand1, Token &operand2,
       out->exp() = NEW_EXP(InstanceOf, operand1->exp(), operand2->name());
       break;
     }
+  case T_LOGICAL_OR:
+  case T_BOOLEAN_OR:
+    {
+      out->exp() = NEW_EXP(LogicalOr, operand1->exp(), op, operand2->exp());
+      break;
+    }
+  case T_LOGICAL_AND:
+  case T_BOOLEAN_AND:
+    {
+      out->exp() = NEW_EXP(LogicalAnd, operand1->exp(), op, operand2->exp());
+      break;
+    }
   default:
     out->exp() = NEW_EXP(BinaryOp, operand1->exp(), op, operand2->exp());
   }

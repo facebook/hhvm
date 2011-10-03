@@ -48,6 +48,8 @@ public:
 
     KindOfAssignmentRefExpression,
     KindOfBinaryOpExpression,
+    KindOfLogicalOrExpression,
+    KindOfLogicalAndExpression,
     KindOfClassConstantExpression,
     KindOfClosureExpression,
     KindOfConstantExpression,

@@ -24,6 +24,8 @@ namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_AST_PTR(BinaryOpExpression);
+DECLARE_AST_PTR(LogicalOrExpression);
+DECLARE_AST_PTR(LogicalAndExpression);
 
 class BinaryOpExpression : public Expression {
 public:
@@ -62,6 +64,32 @@ public:
   void addElement(ExpressionPtr exp);
 private:
   std::vector<ExpressionPtr> m_exps;
+};
+
+class LogicalOrExpression: public Expression {
+public:
+  LogicalOrExpression(EXPRESSION_ARGS, ExpressionPtr exp1, int op,
+                      ExpressionPtr exp2);
+  virtual Expression *optimize(VariableEnvironment &env);
+  virtual bool evalScalar(VariableEnvironment &env, Variant &r) const;
+  virtual Variant eval(VariableEnvironment &env) const;
+  virtual void dump(std::ostream &out) const;
+  ExpressionPtr m_exp1;
+  ExpressionPtr m_exp2;
+  int m_op;
+};
+
+class LogicalAndExpression: public Expression {
+public:
+  LogicalAndExpression(EXPRESSION_ARGS, ExpressionPtr exp1, int op,
+                       ExpressionPtr exp2);
+  virtual Expression *optimize(VariableEnvironment &env);
+  virtual bool evalScalar(VariableEnvironment &env, Variant &r) const;
+  virtual Variant eval(VariableEnvironment &env) const;
+  virtual void dump(std::ostream &out) const;
+  ExpressionPtr m_exp1;
+  ExpressionPtr m_exp2;
+  int m_op;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

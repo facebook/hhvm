@@ -105,14 +105,6 @@ Expression *BinaryOpExpression::optimize(VariableEnvironment &env) {
 }
 
 Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
-  switch (m_op) {
-  case T_LOGICAL_OR:
-  case T_BOOLEAN_OR: return m_exp1->eval(env) || m_exp2->eval(env);
-  case T_LOGICAL_AND:
-  case T_BOOLEAN_AND: return m_exp1->eval(env) && m_exp2->eval(env);
-  default:
-    break;
-  }
   Variant r1, r2;
   Variant *v1p, *v2p;
   switch (m_operandKindOf) {
@@ -512,6 +504,96 @@ void VectorConcatExpression::dump(std::ostream &out) const {
     if (i > 0) out << ".";
     m_exps[i]->dump(out);
   }
+}
+
+LogicalOrExpression::LogicalOrExpression(EXPRESSION_ARGS, ExpressionPtr exp1,
+                                         int op, ExpressionPtr exp2)
+  : Expression(KindOfLogicalOrExpression, EXPRESSION_PASS),
+  m_exp1(exp1), m_exp2(exp2), m_op(op) {
+  ASSERT(m_op == T_LOGICAL_OR || m_op == T_BOOLEAN_OR);
+}
+
+Expression *LogicalOrExpression::optimize(VariableEnvironment &env) {
+  Variant v;
+  Eval::optimize(env, m_exp1);
+  Eval::optimize(env, m_exp2);
+  if (evalScalar(env, v)) {
+    return new ScalarValueExpression(v, loc());
+  }
+  return NULL;
+}
+
+Variant LogicalOrExpression::eval(VariableEnvironment &env) const {
+  return m_exp1->eval(env) || m_exp2->eval(env);
+}
+
+bool LogicalOrExpression::evalScalar(
+  VariableEnvironment &env, Variant &r) const {
+  Variant v1;
+  Variant v2;
+  if (!m_exp1->evalScalar(env, v1) || !m_exp2->evalScalar(env, v2)) {
+    r = null;
+    return false;
+  }
+  bool isScalar = true;
+  r = eval(env);
+  return isScalar;
+}
+
+void LogicalOrExpression::dump(std::ostream &out) const {
+  ASSERT(m_op == T_LOGICAL_OR || m_op == T_BOOLEAN_OR);
+  m_exp1->dump(out);
+  if (m_op == T_LOGICAL_OR) {
+    out << " or ";
+  } else {
+    out << " || ";
+  }
+  m_exp2->dump(out);
+}
+
+LogicalAndExpression::LogicalAndExpression(EXPRESSION_ARGS, ExpressionPtr exp1,
+                                         int op, ExpressionPtr exp2)
+  : Expression(KindOfLogicalAndExpression, EXPRESSION_PASS),
+  m_exp1(exp1), m_exp2(exp2), m_op(op) {
+  ASSERT(m_op == T_LOGICAL_AND || m_op == T_BOOLEAN_AND);
+}
+
+Expression *LogicalAndExpression::optimize(VariableEnvironment &env) {
+  Variant v;
+  Eval::optimize(env, m_exp1);
+  Eval::optimize(env, m_exp2);
+  if (evalScalar(env, v)) {
+    return new ScalarValueExpression(v, loc());
+  }
+  return NULL;
+}
+
+Variant LogicalAndExpression::eval(VariableEnvironment &env) const {
+  return m_exp1->eval(env) && m_exp2->eval(env);
+}
+
+bool LogicalAndExpression::evalScalar(
+  VariableEnvironment &env, Variant &r) const {
+  Variant v1;
+  Variant v2;
+  if (!m_exp1->evalScalar(env, v1) || !m_exp2->evalScalar(env, v2)) {
+    r = null;
+    return false;
+  }
+  bool isScalar = true;
+  r = eval(env);
+  return isScalar;
+}
+
+void LogicalAndExpression::dump(std::ostream &out) const {
+  ASSERT(m_op == T_LOGICAL_AND || m_op == T_BOOLEAN_AND);
+  m_exp1->dump(out);
+  if (m_op == T_LOGICAL_AND) {
+    out << " and ";
+  } else {
+    out << " && ";
+  }
+  m_exp2->dump(out);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

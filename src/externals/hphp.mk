@@ -6,14 +6,13 @@
 # EXTERNAL_LDFLAGS - Any extra linker flags
 # EXTERNAL_STATIC_LIBS - Link string to use when performing a static link
 # EXTERNAL_SHARED_LIBS - Link string to use when performing a shared link
+# EXTERNAL_GOLD_DIR - directory with gold linker (with basename 'ld')
 
 EXTERNAL_CXX := $(if $(USE_LLVM), /data/llvm/bin/g++, $(if $(USE_ICC),$(ICC)/bin/icpc $(ICC_ARGS),g++))
 EXTERNAL_CC = $(if $(USE_LLVM), /data/llvm/bin/gcc, $(if $(USE_ICC),$(ICC)/bin/icc $(ICC_ARGS),gcc))
 EXTERNAL_SWIG = swig
 
-ifndef NO_GOLD
-LD_CMD += -B$(EXT_DIR)/binutils/
-endif
+EXTERNAL_GOLD_DIR = $(EXT_DIR)/binutils/
 
 # Use this to signify that this externals tree is compatible
 # with system libs.

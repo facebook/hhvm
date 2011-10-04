@@ -1942,6 +1942,11 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
   }
   if (m_method) {
     flags |= CallInfo::Method;
+    if (isProtected()) {
+      flags |= CallInfo::Protected;
+    } else if (isPrivate()) {
+      flags |= CallInfo::Private;
+    }
     if (isStatic()) {
       flags |= CallInfo::StaticMethod;
     }

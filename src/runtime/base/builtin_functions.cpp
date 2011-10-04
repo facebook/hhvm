@@ -90,7 +90,7 @@ String getUndefinedConstant(CStrRef name) {
 bool get_user_func_handler(CVarRef function, bool skip,
                            MethodCallPackage &mcp,
                            String &classname, String &methodname,
-                           bool &doBind) {
+                           bool &doBind, bool warn /* = true */) {
   doBind = false;
   mcp.noFatal();
 
@@ -98,7 +98,7 @@ bool get_user_func_handler(CVarRef function, bool skip,
   if (Variant::GetAccessorType(tv_func) == KindOfObject) {
     mcp.functionNamedCall(Variant::GetObjectData(tv_func));
     if (LIKELY(mcp.ci != 0)) return true;
-    raise_warning("call_user_func to non-callback object");
+    if (warn) raise_warning("call_user_func to non-callback object");
     return false;
   }
 
@@ -136,12 +136,14 @@ bool get_user_func_handler(CVarRef function, bool skip,
           return true;
         }
       }
-      raise_warning("call_user_func to non-existent function %s", base);
+      if (warn) {
+        raise_warning("call_user_func to non-existent function %s", base);
+      }
       return false;
     }
     mcp.functionNamedCall(Variant::GetAsString(tv_func));
     if (LIKELY(mcp.ci != 0)) return true;
-    raise_warning("call_user_func to non-existent function %s", base);
+    if (warn) raise_warning("call_user_func to non-existent function %s", base);
     return false;
   }
 
@@ -152,13 +154,13 @@ bool get_user_func_handler(CVarRef function, bool skip,
     if (arr.size() != 2 ||
         &clsname == &null_variant ||
         &mthname == &null_variant) {
-      throw_invalid_argument("function: not a valid callback array");
+      if (warn) throw_invalid_argument("function: not a valid callback array");
       return false;
     }
 
     Variant::TypedValueAccessor tv_meth = mthname.getTypedAccessor();
     if (!Variant::IsString(tv_meth)) {
-      throw_invalid_argument("function: methodname not string");
+      if (warn) throw_invalid_argument("function: methodname not string");
       return false;
     }
 
@@ -181,8 +183,8 @@ bool get_user_func_handler(CVarRef function, bool skip,
                    !strncasecmp(base, "parent", 6)) {
           classname = obj->o_getParentName();
           if (classname.empty()) {
-            raise_warning("cannot access parent:: when current "
-                          "class scope has no parent");
+            if (warn) raise_warning("cannot access parent:: when current "
+                                    "class scope has no parent");
             return false;
           }
         } else if (cc - base == 6 &&
@@ -199,12 +201,14 @@ bool get_user_func_handler(CVarRef function, bool skip,
           }
           return true;
         }
-        if (!obj->o_instanceof(classname)) {
-          raise_warning("class '%s' is not a subclass of '%s'",
-                        obj->o_getClassName().data(), classname.data());
-        } else {
-          raise_warning("class '%s' does not have a method '%s'",
-                        classname.data(), methodname.data());
+        if (warn) {
+          if (!obj->o_instanceof(classname)) {
+            raise_warning("class '%s' is not a subclass of '%s'",
+                          obj->o_getClassName().data(), classname.data());
+          } else {
+            raise_warning("class '%s' does not have a method '%s'",
+                          classname.data(), methodname.data());
+          }
         }
         return false;
       }
@@ -220,7 +224,7 @@ bool get_user_func_handler(CVarRef function, bool skip,
       return false;
     } else {
       if (UNLIKELY(!Variant::IsString(tv_cls))) {
-        throw_invalid_argument("function: classname not string");
+        if (warn) throw_invalid_argument("function: classname not string");
         return false;
       }
       StringData *sclass = Variant::GetStringData(tv_cls);
@@ -229,8 +233,8 @@ bool get_user_func_handler(CVarRef function, bool skip,
       } else if (sclass->isame(s_parent.get())) {
         classname = FrameInjection::GetParentClassName(skip);
         if (classname.empty()) {
-          raise_warning("cannot access parent:: when current "
-                        "class scope has no parent");
+          if (warn) raise_warning("cannot access parent:: when current "
+                                  "class scope has no parent");
           return false;
         }
       } else {
@@ -261,8 +265,8 @@ bool get_user_func_handler(CVarRef function, bool skip,
                    !strncasecmp(base, "parent", 6)) {
           classname = ObjectData::GetParentName(classname);
           if (classname.empty()) {
-            raise_warning("cannot access parent:: when current "
-                          "class scope has no parent");
+            if (warn) raise_warning("cannot access parent:: when current "
+                                    "class scope has no parent");
             return false;
           }
           doBind = false;
@@ -272,8 +276,8 @@ bool get_user_func_handler(CVarRef function, bool skip,
           CStrRef cls = FrameInjection::GetStaticClassName(ti);
           if (UNLIKELY(!classname.get()->isame(cls.get()) &&
                        !f_is_subclass_of(classname, cls))) {
-            raise_warning("class '%s' is not a subclass of '%s'",
-                          classname.data(), cls.data());
+            if (warn) raise_warning("class '%s' is not a subclass of '%s'",
+                                    classname.data(), cls.data());
             return false;
           }
           doBind = false;
@@ -282,29 +286,29 @@ bool get_user_func_handler(CVarRef function, bool skip,
           CStrRef cls = String(base, cc - base, CopyString);
           if (UNLIKELY(!classname.get()->isame(cls.get()) &&
                        !f_is_subclass_of(classname, cls))) {
-            raise_warning("class '%s' is not a subclass of '%s'",
-                          classname.data(), cls.data());
+            if (warn) raise_warning("class '%s' is not a subclass of '%s'",
+                                    classname.data(), cls.data());
             return false;
           }
           doBind = true;
           classname = cls;
         }
+        if (LIKELY(mcp.dynamicNamedCall(classname, methodname))) {
+          doBind &= !mcp.isObj || (mcp.ci->m_flags & CallInfo::StaticMethod);
+          return true;
+        }
       } else {
-        methodname = Variant::GetStringData(tv_meth);
+        // nothing to do. we already checked this case.
       }
 
-      if (LIKELY(mcp.dynamicNamedCall(classname, methodname))) {
-        doBind &= !mcp.isObj || (mcp.ci->m_flags & CallInfo::StaticMethod);
-        return true;
-      }
-      raise_warning("call_user_func to non-existent function %s::%s",
-                    classname.data(), methodname.data());
+      if (warn) raise_warning("call_user_func to non-existent function %s::%s",
+                              classname.data(), methodname.data());
       return false;
     }
-    raise_warning("call_user_func to non-existent function");
+    if (warn) raise_warning("call_user_func to non-existent function");
     return false;
   }
-  throw_invalid_argument("function: not string or array");
+  if (warn) throw_invalid_argument("function: not string or array");
   return false;
 }
 

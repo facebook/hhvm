@@ -509,7 +509,7 @@ CallInfo c_PDOStatement::ci_debugdumpparams((void*)&c_PDOStatement::i_debugdumpp
 CallInfo c_PDOStatement::ci_nextrowset((void*)&c_PDOStatement::i_nextrowset, (void*)&c_PDOStatement::ifa_nextrowset, 0, 4, 0x0000000000000000LL);
 CallInfo c_PDOStatement::ci_bindvalue((void*)&c_PDOStatement::i_bindvalue, (void*)&c_PDOStatement::ifa_bindvalue, 3, 4, 0x0000000000000000LL);
 CallInfo c_PDOStatement::ci_getattribute((void*)&c_PDOStatement::i_getattribute, (void*)&c_PDOStatement::ifa_getattribute, 1, 4, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci___construct((void*)&c_PDOStatement::i___construct, (void*)&c_PDOStatement::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci___construct((void*)&c_PDOStatement::i___construct, (void*)&c_PDOStatement::ifa___construct, 0, 68, 0x0000000000000000LL);
 CallInfo c_PDOStatement::ci___destruct((void*)&c_PDOStatement::i___destruct, (void*)&c_PDOStatement::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_PDOStatement::ci___wakeup((void*)&c_PDOStatement::i___wakeup, (void*)&c_PDOStatement::ifa___wakeup, 0, 4, 0x0000000000000000LL);
 Variant c_PDOStatement::i___construct(MethodCallPackage &mcp, CArrRef params) {
@@ -10606,12 +10606,13 @@ Variant get_builtin_class_var_init(CStrRef s, const char *var) {
 ObjectData *create_builtin_object_only_no_init(CStrRef s, ObjectData* root /* = NULL*/) {
   const ObjectStaticCallbacks *cwo = get_builtin_object_static_callbacks(s);
   if (LIKELY(cwo != 0)) return cwo->createOnlyNoInit(root);
-  throw_missing_class(s);
   return 0;
 }
 Object create_builtin_object_only(CStrRef s, ObjectData* root /* = NULL*/) {
-  Object r(create_builtin_object_only_no_init(s, root));
-  r->init();
+  ObjectData *obj = create_builtin_object_only_no_init(s, root);
+  if (UNLIKELY(!obj)) throw_missing_class(s);
+  Object r = obj;
+  obj->init();
   return r;
 }
 bool get_call_info_static_method_builtin(MethodCallPackage &mcp) {

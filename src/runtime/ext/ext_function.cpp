@@ -47,77 +47,74 @@ bool f_function_exists(CStrRef function_name) {
 
 bool f_is_callable(CVarRef v, bool syntax /* = false */,
                    VRefParam name /* = null */) {
-  if (v.isString()) {
-    if (name.isReferenced()) name = v;
-    if (syntax) return true;
-
-    String str = v.toString();
-    int c = str.find("::");
-    if (c != 0 && c != String::npos && c + 2 < str.size()) {
-      String classname = str.substr(0, c);
-      String methodname = str.substr(c + 2);
-      return f_class_exists(classname) &&
-        ClassInfo::HasAccess(classname, methodname, true, false);
+  bool ret = true;
+  if (LIKELY(!syntax)) {
+    MethodCallPackage mcp;
+    String classname, methodname;
+    bool doBind;
+    ret = get_user_func_handler(v, true, mcp,
+                                     classname, methodname, doBind, false);
+    if (ret && mcp.ci->m_flags & (CallInfo::Protected|CallInfo::Private)) {
+      classname = mcp.getClassName();
+      if (!ClassInfo::HasAccess(classname, *mcp.name,
+                                mcp.ci->m_flags & CallInfo::StaticMethod ||
+                                !mcp.obj,
+                                mcp.obj)) {
+        ret = false;
+      }
     }
-    return f_function_exists(str);
+    if (!name.isReferenced()) return ret;
   }
 
-  if (v.is(KindOfArray)) {
-    Array arr = v.toArray();
-    if (arr.size() == 2 && arr.exists(0LL) && arr.exists(1LL)) {
-      Variant v0 = arr.rvalAt(0LL);
-      Variant v1 = arr.rvalAt(1LL);
-      Object obj;
-      bool staticCall = false;
-      if (v0.is(KindOfObject)) {
-        obj = v0.toObject();
-        v0 = obj->o_getClassName();
-      } else if (v0.isString()) {
-        if (!f_class_exists(v0.toString())) {
-          return false;
-        }
-        staticCall = true;
-      }
-      if (v1.isString()) {
-        String str = v1.toString();
-        int c = str.find("::");
-        if (c != 0 && c != String::npos && c + 2 < str.size()) {
-          String name1 = v0.toString();
-          String name2 = str.substr(0, c);
-          ASSERT(name1.get() && name2.get());
-          if (name1->isame(name2.get()) ||
-              ClassInfo::IsSubClass(name1, name2, false)) {
-            staticCall = true;
-            v0 = name2;
-            v1 = str.substr(c + 2);
-          }
-        }
-      }
-      if (v0.isString() && v1.isString()) {
-        if (name.isReferenced()) {
-          name = v0.toString() + "::" + v1.toString();
-        }
-        if (same(v0, s_self) || same(v0, s_parent)) {
-          throw NotImplementedException("augmenting class scope info");
-        }
-        return ClassInfo::HasAccess(v0, v1, staticCall, !obj.isNull());
-      }
-    }
+  Variant::TypedValueAccessor tv_func = v.getTypedAccessor();
+  if (Variant::IsString(tv_func)) {
+    if (name.isReferenced()) name = Variant::GetStringData(tv_func);
+    return ret;
   }
 
-  if (v.isObject()) {
-    ObjectData *d = v.objectForCall();
-    if (name.isReferenced()) {
-      name = d->o_getClassName() + "::__invoke";
+  if (Variant::GetAccessorType(tv_func) == KindOfArray) {
+    CArrRef arr = Variant::GetAsArray(tv_func);
+    CVarRef clsname = arr.rvalAtRef(0LL);
+    CVarRef mthname = arr.rvalAtRef(1LL);
+    if (arr.size() != 2 ||
+        &clsname == &null_variant ||
+        &mthname == &null_variant) {
+      name = v.toString();
+      return false;
     }
+
+    Variant::TypedValueAccessor tv_meth = mthname.getTypedAccessor();
+    if (!Variant::IsString(tv_meth)) {
+      if (name.isReferenced()) name = v.toString();
+      return false;
+    }
+
+    Variant::TypedValueAccessor tv_cls = clsname.getTypedAccessor();
+    if (Variant::GetAccessorType(tv_cls) == KindOfObject) {
+      name = Variant::GetObjectData(tv_cls)->o_getClassName();
+    } else if (Variant::IsString(tv_cls)) {
+      name = Variant::GetStringData(tv_cls);
+    } else {
+      name = v.toString();
+      return false;
+    }
+
+    name = concat3(name, "::", Variant::GetAsString(tv_meth));
+    return ret;
+  }
+
+  if (Variant::GetAccessorType(tv_func) == KindOfObject) {
+    ObjectData *d = Variant::GetObjectData(tv_func);
     void *extra;
-    const CallInfo *cit = d->t___invokeCallInfoHelper(extra);
-    return cit != NULL;
+    if (d->t___invokeCallInfoHelper(extra)) {
+      name = d->o_getClassName() + "::__invoke";
+      return ret;
+    }
+    if (name.isReferenced()) {
+      name = v.toString();
+    }
   }
 
-  if (name.isReferenced()) {
-    name = v.toString();
-  }
   return false;
 }
 

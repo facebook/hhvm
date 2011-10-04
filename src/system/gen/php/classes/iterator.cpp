@@ -240,9 +240,9 @@ CallInfo c_FilterIterator::ci___call((void*)&c_FilterIterator::i___call, (void*)
 CallInfo c_FilterIterator::ci_rewind((void*)&c_FilterIterator::i_rewind, (void*)&c_FilterIterator::ifa_rewind, 0, 4, 0x0000000000000000LL);
 CallInfo c_FilterIterator::ci_next((void*)&c_FilterIterator::i_next, (void*)&c_FilterIterator::ifa_next, 0, 4, 0x0000000000000000LL);
 CallInfo c_FilterIterator::ci_getinneriterator((void*)&c_FilterIterator::i_getinneriterator, (void*)&c_FilterIterator::ifa_getinneriterator, 0, 4, 0x0000000000000000LL);
-CallInfo c_FilterIterator::ci___clone((void*)&c_FilterIterator::i___clone, (void*)&c_FilterIterator::ifa___clone, 0, 4, 0x0000000000000000LL);
+CallInfo c_FilterIterator::ci___clone((void*)&c_FilterIterator::i___clone, (void*)&c_FilterIterator::ifa___clone, 0, 68, 0x0000000000000000LL);
 CallInfo c_FilterIterator::ci_current((void*)&c_FilterIterator::i_current, (void*)&c_FilterIterator::ifa_current, 0, 4, 0x0000000000000000LL);
-CallInfo c_FilterIterator::ci_fetch((void*)&c_FilterIterator::i_fetch, (void*)&c_FilterIterator::ifa_fetch, 0, 4, 0x0000000000000000LL);
+CallInfo c_FilterIterator::ci_fetch((void*)&c_FilterIterator::i_fetch, (void*)&c_FilterIterator::ifa_fetch, 0, 132, 0x0000000000000000LL);
 CallInfo c_FilterIterator::ci_valid((void*)&c_FilterIterator::i_valid, (void*)&c_FilterIterator::ifa_valid, 0, 4, 0x0000000000000000LL);
 CallInfo c_FilterIterator::ci_key((void*)&c_FilterIterator::i_key, (void*)&c_FilterIterator::ifa_key, 0, 4, 0x0000000000000000LL);
 Variant c_FilterIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {

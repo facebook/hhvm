@@ -338,7 +338,7 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
 bool get_user_func_handler(CVarRef function, bool skip,
                            MethodCallPackage& mcp,
                            String &classname, String &methodname,
-                           bool &doBind);
+                           bool &doBind, bool warn = true);
 
 Variant invoke_func_few_handler(void *extra, CArrRef params,
                                 Variant (*few_args)(
@@ -616,8 +616,8 @@ class CallInfo;
 class MethodCallPackage {
 public:
   MethodCallPackage()
-  : ci(NULL), extra(NULL), isObj(false), obj(NULL),
-    m_fatal(true), m_isFunc(false) {}
+  : ci(NULL), extra(NULL), obj(NULL),
+    isObj(false), m_fatal(true), m_isFunc(false) {}
 
   // e->n() style method call
   bool methodCall(CObjRef self, CStrRef method, int64 prehash = -1) {
@@ -662,13 +662,13 @@ public:
   // Data members
   const CallInfo *ci;
   void *extra;
-  bool isObj;
   union { // object or class name
     ObjectData *rootObj;
     StringData *rootCls;
   };
   ObjectData *obj;
   const String *name;
+  bool isObj;
   bool m_fatal;
   bool m_isFunc;
 };
@@ -676,12 +676,14 @@ public:
 class CallInfo {
 public:
   enum Flags {
-    VarArgs = 0x1,
-    RefVarArgs = 0x2,
-    Method = 0x4,
-    StaticMethod = 0x8,
+    VarArgs         = 0x1,
+    RefVarArgs      = 0x2,
+    Method          = 0x4,
+    StaticMethod    = 0x8,
     CallMagicMethod = 0x10, // Special flag for __call handler
-    MixedVarArgs = 0x20
+    MixedVarArgs    = 0x20,
+    Protected       = 0x40,
+    Private         = 0x80
   };
   CallInfo(void *inv, void *invFa, int ac, int flags, int64 refs)
     : m_invoker(inv), m_invokerFewArgs(invFa),

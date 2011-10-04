@@ -63,7 +63,7 @@ bool TestExtFunction::test_function_exists() {
 
 bool TestExtFunction::test_is_callable() {
   VERIFY(f_is_callable("TEst"));
-  VERIFY(f_is_callable(CREATE_VECTOR2("tesT", "foo")));
+  // lots of testing in TestCodeRun::TestObjectMethod()
   return Count(true);
 }
 

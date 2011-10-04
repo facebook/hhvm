@@ -579,9 +579,11 @@ inline ALWAYS_INLINE bool GetCallInfoHelper(bool ex, const char *cls,
     bool ok = false;
     if (!obj || !obj->o_instanceof(cls)) {
       obj = create_object_only_no_init(cls);
-      ok = obj->hasCallStatic();
-      obj->release();
-      obj = 0;
+      if (obj) {
+        ok = obj->hasCallStatic();
+        obj->release();
+        obj = 0;
+      }
     } else {
       ok = obj->hasCallStatic() || obj->hasCall();
     }
@@ -614,8 +616,10 @@ Variant ObjectData::os_invoke(CStrRef c, CStrRef s,
                               bool fatal /* = true */) {
   Object obj = FrameInjection::GetThis();
   if (!obj.instanceof(c)) {
-    obj = create_object_only_no_init(c);
-    obj->setDummy();
+    ObjectData *o = create_object_only_no_init(c);
+    if (UNLIKELY(!o)) throw_missing_class(c);
+    o->setDummy();
+    obj = o;
   }
   return obj->o_invoke_ex(c, s, params, fatal);
 }

@@ -289,6 +289,11 @@ Variant invokeImpl(void *extra, CArrRef params) {
 CallInfo invokeImplCallInfo((void*)invokeImpl, NULL, 0, CallInfo::VarArgs, 0);
 bool get_call_info(const CallInfo *&ci, void *&extra, const char *s,
                    int64 hash /* = -1 */) {
+  if (!strcasecmp(s, "nontest")) {
+    extra = 0;
+    ci = 0;
+    return false;
+  }
   extra = (void*)s;
   ci = &invokeImplCallInfo;
   return true;

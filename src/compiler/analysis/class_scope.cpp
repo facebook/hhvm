@@ -1234,7 +1234,8 @@ void ClassScope::outputCPPHashTableClasses
       "  int64 off = p->ptv1;\n"
       "  if (LIKELY(!(off & 1))) return ((const ObjectStaticCallbacks *)off);\n"
       "  DECLARE_GLOBAL_VARIABLES(g);\n"
-      "  checkClassExistsThrow(s, (bool*)((char*)g + p->cdec));\n"
+      "  if (UNLIKELY(!checkClassExistsNoThrow("
+      "s, (bool*)((char*)g + p->cdec)))) return 0;\n"
       "  if (LIKELY(!(off & 2))) /* volatile class */ return "
       "((const ObjectStaticCallbacks *)(off-1));\n"
       "  /* redeclared class */\n"
@@ -1392,7 +1393,6 @@ void ClassScope::outputCPPDynamicClassCreateImpl
   }
   if (!classes.size()) {
     if (system) {
-      cg_printf("throw_missing_class(s);\n");
       cg_printf("return 0;\n");
     } else {
       cg_printf("return create_builtin_object_only_no_init(s, root);\n");
@@ -1401,7 +1401,6 @@ void ClassScope::outputCPPDynamicClassCreateImpl
     cg_printf("const ObjectStaticCallbacks *cwo = "
               "get_%sobject_static_callbacks(s);\n"
               "if (LIKELY(cwo != 0)) return cwo->createOnlyNoInit(root);\n"
-              "throw_missing_class(s);\n"
               "return 0;\n",
               system ? "builtin_" : "");
   }
@@ -1410,9 +1409,11 @@ void ClassScope::outputCPPDynamicClassCreateImpl
   cg_indentBegin("Object create%s_object_only(CStrRef s, "
                  "ObjectData* root /* = NULL*/) {\n",
                  system ?  "_builtin" : "");
-  cg_printf("Object r(create%s_object_only_no_init(s, root));\n",
+  cg_printf("ObjectData *obj = create%s_object_only_no_init(s, root);\n",
             system ? "_builtin" : "");
-  cg_printf("r->init();\n");
+  cg_printf("if (UNLIKELY(!obj)) throw_missing_class(s);\n");
+  cg_printf("Object r = obj;\n");
+  cg_printf("obj->init();\n");
   cg_printf("return r;\n");
   cg_indentEnd("}\n");
 }

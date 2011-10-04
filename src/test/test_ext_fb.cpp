@@ -151,7 +151,7 @@ bool TestExtFb::test_fb_call_user_func_array_safe() {
   }
   {
     Variant ret = f_fb_call_user_func_array_safe
-      ("NonT", CREATE_VECTOR1("param"));
+      ("NonTest", CREATE_VECTOR1("param"));
     VS(ret, CREATE_VECTOR2(false, null));
   }
   return Count(true);

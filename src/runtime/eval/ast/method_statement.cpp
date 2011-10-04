@@ -44,6 +44,11 @@ MethodStatement::MethodStatement(STATEMENT_ARGS, const string &name,
   } else {
     m_callInfo.m_flags |= CallInfo::Method;
   }
+  if (m_modifiers & ClassStatement::Protected) {
+    m_callInfo.m_flags |= CallInfo::Protected;
+  } else if (m_modifiers & ClassStatement::Private) {
+    m_callInfo.m_flags |= CallInfo::Private;
+  }
 }
 
 void MethodStatement::setPublic() {

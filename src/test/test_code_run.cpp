@@ -6089,7 +6089,7 @@ bool TestCodeRun::TestObjectInvokeMethod() {
         "$c = new C2;\n"
         "$c($x);\n"
         "var_dump($x); // $x = 1\n"
-        "call_user_func($c, $x);\n"
+        "call_user_func_array($c, array(&$x));\n"
         "var_dump($x); // $x = 2\n",
         "int(0)\n"
         "int(1)\n"
@@ -17947,7 +17947,7 @@ bool TestCodeRun::TestFiber() {
   MVCRO("<?php "
         "function fiber(&$a) { $a = 123;}"
         "$b = 456;"
-        "call_user_func('fiber', $b);"
+        "call_user_func_array('fiber', array(&$b));"
         "var_dump($b);",
 
         "int(123)\n"

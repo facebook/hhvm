@@ -15840,11 +15840,11 @@ Variant ifa_forward_static_call(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARG
   if (UNLIKELY(count < 1)) return throw_missing_arguments("forward_static_call", count+1, 1);
   CVarRef arg0(a0);
   Array p;
-  if (count >= 2) p.append(ref(a1));
-  if (count >= 3) p.append(ref(a2));
-  if (count >= 4) p.append(ref(a3));
-  if (count >= 5) p.append(ref(a4));
-  if (count >= 6) p.append(ref(a5));
+  if (count >= 2) p.append(a1);
+  if (count >= 3) p.append(a2);
+  if (count >= 4) p.append(a3);
+  if (count >= 5) p.append(a4);
+  if (count >= 6) p.append(a5);
   return (x_forward_static_call(count, arg0, p));
 }
 Variant i_forward_static_call(void *extra, CArrRef params) {
@@ -16440,11 +16440,11 @@ Variant ifa_call_user_func(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count < 1)) return throw_missing_arguments("call_user_func", count+1, 1);
   CVarRef arg0(a0);
   Array p;
-  if (count >= 2) p.append(ref(a1));
-  if (count >= 3) p.append(ref(a2));
-  if (count >= 4) p.append(ref(a3));
-  if (count >= 5) p.append(ref(a4));
-  if (count >= 6) p.append(ref(a5));
+  if (count >= 2) p.append(a1);
+  if (count >= 3) p.append(a2);
+  if (count >= 4) p.append(a3);
+  if (count >= 5) p.append(a4);
+  if (count >= 6) p.append(a5);
   return (x_call_user_func(count, arg0, p));
 }
 Variant i_call_user_func(void *extra, CArrRef params) {
@@ -22960,7 +22960,7 @@ CallInfo ci_ucfirst((void*)&i_ucfirst, (void*)&ifa_ucfirst, 1, 0, 0x000000000000
 CallInfo ci_hphp_recursivedirectoryiterator_getsubpathname((void*)&i_hphp_recursivedirectoryiterator_getsubpathname, (void*)&ifa_hphp_recursivedirectoryiterator_getsubpathname, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimagesignature((void*)&i_magickgetimagesignature, (void*)&ifa_magickgetimagesignature, 1, 0, 0x0000000000000000LL);
 CallInfo ci_set_file_buffer((void*)&i_set_file_buffer, (void*)&ifa_set_file_buffer, 2, 0, 0x0000000000000000LL);
-CallInfo ci_forward_static_call((void*)&i_forward_static_call, (void*)&ifa_forward_static_call, 1, 32, 0x0000000000000000LL);
+CallInfo ci_forward_static_call((void*)&i_forward_static_call, (void*)&ifa_forward_static_call, 1, 1, 0x0000000000000000LL);
 CallInfo ci_ctype_cntrl((void*)&i_ctype_cntrl, (void*)&ifa_ctype_cntrl, 1, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileobject_setmaxlinelen((void*)&i_hphp_splfileobject_setmaxlinelen, (void*)&ifa_hphp_splfileobject_setmaxlinelen, 2, 0, 0x0000000000000000LL);
 CallInfo ci_ldap_err2str((void*)&i_ldap_err2str, (void*)&ifa_ldap_err2str, 1, 0, 0x0000000000000000LL);
@@ -23023,7 +23023,7 @@ CallInfo ci_ob_get_contents((void*)&i_ob_get_contents, (void*)&ifa_ob_get_conten
 CallInfo ci_drawsetstrokelinecap((void*)&i_drawsetstrokelinecap, (void*)&ifa_drawsetstrokelinecap, 2, 0, 0x0000000000000000LL);
 CallInfo ci_strlen((void*)&i_strlen, (void*)&ifa_strlen, 1, 0, 0x0000000000000000LL);
 CallInfo ci_drawpushclippath((void*)&i_drawpushclippath, (void*)&ifa_drawpushclippath, 2, 0, 0x0000000000000000LL);
-CallInfo ci_call_user_func((void*)&i_call_user_func, (void*)&ifa_call_user_func, 1, 32, 0x0000000000000000LL);
+CallInfo ci_call_user_func((void*)&i_call_user_func, (void*)&ifa_call_user_func, 1, 1, 0x0000000000000000LL);
 CallInfo ci_dl((void*)&i_dl, (void*)&ifa_dl, 1, 0, 0x0000000000000000LL);
 CallInfo ci_cpu_get_count((void*)&i_cpu_get_count, (void*)&ifa_cpu_get_count, 0, 0, 0x0000000000000000LL);
 CallInfo ci_dom_document_save_html_file((void*)&i_dom_document_save_html_file, (void*)&ifa_dom_document_save_html_file, 2, 0, 0x0000000000000000LL);

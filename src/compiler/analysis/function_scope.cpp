@@ -1245,22 +1245,22 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
         break;
       }
       extra = true;
-      // Parameter arrays are always vectors.
-      if (Option::GenArrayCreate &&
-          cg.getOutput() != CodeGenerator::SystemCPP) {
-        if (!params->hasNonArrayCreateValue(false, i)) {
-          assert(!callUserFuncFewArgs);
-          if (ar->m_arrayIntegerKeyMaxSize < paramCount - i) {
-            ar->m_arrayIntegerKeyMaxSize  = paramCount - i;
-          }
-          cg_printf("Array(");
-          params->outputCPPUniqLitKeyArrayInit(cg, ar, false,
-                                               paramCount - i, false, i);
-          cg_printf(")");
-          return;
-        }
-      }
       if (!callUserFuncFewArgs) {
+        // Parameter arrays are always vectors.
+        if (Option::GenArrayCreate &&
+            cg.getOutput() != CodeGenerator::SystemCPP) {
+          if (!params->hasNonArrayCreateValue(false, i)) {
+            assert(!callUserFuncFewArgs);
+            if (ar->m_arrayIntegerKeyMaxSize < paramCount - i) {
+              ar->m_arrayIntegerKeyMaxSize  = paramCount - i;
+            }
+            cg_printf("Array(");
+            params->outputCPPUniqLitKeyArrayInit(cg, ar, false,
+                                                 paramCount - i, false, i);
+            cg_printf(")");
+            return;
+          }
+        }
         cg_printf("Array(ArrayInit(%d).", paramCount - i);
       }
     }

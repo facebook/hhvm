@@ -143,7 +143,7 @@ DefineFunction(
   array(
     'name'   => "call_user_func",
     'desc'   => "Call a user defined function given by the function parameter.",
-    'flags'  =>  HasDocComment | MixedVariableArguments | HasOptFunction | NoProfile | ContextSensitive,
+    'flags'  =>  HasDocComment | VariableArguments | HasOptFunction | NoProfile | ContextSensitive,
     'opt'    => "hphp_opt_call_user_func",
     'return' => array(
       'type'   => Variant,
@@ -388,7 +388,7 @@ DefineFunction(
   array(
     'name'   => "forward_static_call",
     'desc'   => "Calls a user defined function or method given by the function parameter, with the following arguments. This function must be called within a method context, it can't be used outside a class.",
-    'flags'  =>  HasDocComment | MixedVariableArguments | ContextSensitive,
+    'flags'  =>  HasDocComment | VariableArguments | ContextSensitive,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the function result, or FALSE on error.",

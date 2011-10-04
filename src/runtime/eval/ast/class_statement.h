@@ -124,7 +124,8 @@ public:
   void failPropertyAccess(CStrRef prop, const char *context,
       int mods) const;
   void toArray(Array &props, Array &vals) const;
-  void loadMethodTable(ClassEvalState &ce) const;
+  void loadMethodTable(ClassEvalState &ce,
+                       std::set<const ClassStatement*> &seen) const;
   void semanticCheck(const ClassStatement *cls) const;
   ClassStatementMarkerPtr getMarker() const;
   void delayDeclaration() { m_delayDeclaration = true; }
@@ -155,7 +156,6 @@ protected:
       bool excludeParent) const;
   void abstractMethodCheck(hphp_const_char_imap<const char*> &abstracts,
       bool ifaces) const;
-  void recursiveParentCheck(std::set<const ClassStatement*> &seen) const;
 private:
 
   template <typename ParentClass, typename ChildClass>

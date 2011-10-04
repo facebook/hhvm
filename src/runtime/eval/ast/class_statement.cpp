@@ -116,12 +116,23 @@ void ClassStatement::loadInterfaceStatements() const {
   }
 }
 
-void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
+void ClassStatement::loadMethodTable(
+  ClassEvalState &ce, std::set<const ClassStatement*> &seen) const {
+  // make sure classes don't define each other as their
+  // own parents (no cycles in the inheritance tree).
+  // omit this check for builtin classes (since we assume
+  // that our builtin runtime is sane, plus it's impossible
+  // for a builtin class to extends a user-defind class).
+  if (seen.find(this) != seen.end()) {
+    raise_error("%s is defined as its own parent", name().c_str());
+  } else {
+    seen.insert(this);
+  }
   ClassEvalState::MethodTable &mtable = ce.getMethodTable();
   if (!m_parent->empty()) {
     const ClassStatement* parent_cls = parentStatement();
     if (parent_cls) {
-      parent_cls->loadMethodTable(ce);
+      parent_cls->loadMethodTable(ce, seen);
     } else {
       // Built in
       ClassInfo::MethodVec meths;
@@ -1510,16 +1521,6 @@ const {
                                 builtinParent->getName().c_str());
     }
 
-    // make sure classes don't define each other as their
-    // own parents (no cycles in the inheritance tree).
-    // omit this check for builtin classes (since we assume
-    // that our builtin runtime is sane, plus it's impossible
-    // for a builtin class to extends a user-defind class).
-    if (parent) {
-      set<const ClassStatement *> seen;
-      recursiveParentCheck(seen);
-    }
-
     // make sure classes don't loosen the access level of
     // inherited methods
     if (parent) {
@@ -1703,19 +1704,6 @@ void ClassStatement::collectBuiltinInterfaceInfos(
       const ClassInfo *ci = ClassInfo::FindInterface(m_bases[i]->data());
       if (ci) infos.push_back(ci);
     }
-  }
-}
-
-void ClassStatement::recursiveParentCheck(
-    std::set<const ClassStatement*> &seen) const {
-  if (seen.find(this) != seen.end()) {
-    raise_error("%s is defined as its own parent", name().c_str());
-  } else {
-    seen.insert(this);
-  }
-  const ClassStatement *parent = parentStatement();
-  if (parent) {
-    parent->recursiveParentCheck(seen);
   }
 }
 

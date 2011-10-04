@@ -55,7 +55,8 @@ const MethodStatement *ClassEvalState::getMethod(const char *m) {
 
 void ClassEvalState::semanticCheck() {
   if (!m_doneSemanticCheck) {
-    m_class->loadMethodTable(*this);
+    set<const ClassStatement *> seen;
+    m_class->loadMethodTable(*this, seen);
     m_class->semanticCheck(NULL);
     m_doneSemanticCheck = true;
   }

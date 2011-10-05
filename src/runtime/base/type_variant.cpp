@@ -3603,7 +3603,8 @@ void Variant::setEvalScalar() const {
 // output functions
 
 void Variant::serialize(VariableSerializer *serializer,
-                        bool isArrayKey /* = false */) const {
+                        bool isArrayKey /* = false */,
+                        bool skipNestCheck /* = false */) const {
   if (m_type == KindOfVariant) {
     // Ugly, but behavior is different for serialize
     if (serializer->getType() == VariableSerializer::Serialize ||
@@ -3612,7 +3613,8 @@ void Variant::serialize(VariableSerializer *serializer,
       if (serializer->incNestedLevel(m_data.pvar)) {
         serializer->writeOverflow(m_data.pvar);
       } else {
-        m_data.pvar->serialize(serializer, isArrayKey);
+        // Tell the inner variant to skip the nesting check for data inside
+        m_data.pvar->serialize(serializer, isArrayKey, true);
       }
       serializer->decNestedLevel(m_data.pvar);
     } else {
@@ -3641,7 +3643,8 @@ void Variant::serialize(VariableSerializer *serializer,
     break;
   case KindOfArray:
     ASSERT(!isArrayKey);
-    m_data.parr->serialize(serializer);     break;
+    m_data.parr->serialize(serializer, skipNestCheck);
+    break;
   case KindOfObject:
     ASSERT(!isArrayKey);
     m_data.pobj->serialize(serializer);     break;

@@ -509,6 +509,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestCopyProp);
   RUN_TEST(TestParser);
   RUN_TEST(TestTypeAssertions);
+  RUN_TEST(TestSerialize);
 
   // PHP 5.3 features
   RUN_TEST(TestVariableClassName);
@@ -18655,6 +18656,21 @@ bool TestCodeRun::TestCopyProp() {
         "int(32)\n"
         "bool(true)\n");
 
+  return true;
+}
+
+bool TestCodeRun::TestSerialize() {
+  MVCR("<?php\n"
+       "function f() {\n"
+       "  $a = array(123);\n"
+       "  $b = $a;\n"
+       "  $c = &$b;\n"
+       "  $d = new stdClass();\n"
+       "  $v = array(&$a, &$b, &$c, $d, $d);\n"
+       "  $s = serialize($v);\n"
+       "  echo $s;\n"
+       "}\n"
+       "f();\n");
   return true;
 }
 

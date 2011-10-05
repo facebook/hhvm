@@ -312,7 +312,7 @@ class ArrayData : public Countable {
    * specialized implementation, which is normally more optimized.
    */
   void serialize(VariableSerializer *serializer,
-                 bool isObject = false) const;
+                 bool skipNestCheck = false) const;
 
   virtual void dump();
   virtual void dump(std::string &out);

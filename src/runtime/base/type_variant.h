@@ -709,7 +709,8 @@ class Variant {
    * Output functions
    */
   void serialize(VariableSerializer *serializer,
-                 bool isArrayKey = false) const;
+                 bool isArrayKey = false,
+                 bool skipNestCheck = false) const;
   void unserialize(VariableUnserializer *unserializer);
 
   /**

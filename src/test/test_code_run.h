@@ -180,6 +180,7 @@ class TestCodeRun : public TestBase {
   bool TestMaxInt();
   bool TestParser();
   bool TestTypeAssertions();
+  bool TestSerialize();
 
   // PHP 5.3
   bool TestVariableClassName();

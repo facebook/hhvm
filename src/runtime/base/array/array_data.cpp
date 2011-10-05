@@ -417,13 +417,13 @@ void ArrayData::serializeImpl(VariableSerializer *serializer) const {
 }
 
 void ArrayData::serialize(VariableSerializer *serializer,
-                          bool isObject /* = false */) const {
+                          bool skipNestCheck /* = false */) const {
   if (size() == 0) {
     serializer->writeArrayHeader(this, 0);
     serializer->writeArrayFooter(this);
     return;
   }
-  if (!isObject) {
+  if (!skipNestCheck) {
     if (serializer->incNestedLevel((void*)this)) {
       serializer->writeOverflow((void*)this);
     } else {

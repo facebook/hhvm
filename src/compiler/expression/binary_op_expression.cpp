@@ -267,11 +267,12 @@ ExpressionPtr BinaryOpExpression::simplifyArithmetic(
       // 1 * $a => $a, 0 + $a => $a
       if ((ival1 == 1 && m_op == '*') || (ival1 == 0 && m_op == '+')) {
         TypePtr actType2 = m_exp2->getActualType();
-        TypePtr expType2 = m_exp2->getExpectedType();
-        if ((actType2 && actType2->mustBe(Type::KindOfNumeric)
-                      && actType2->isExactType()) ||
-            (expType2 && expType2->mustBe(Type::KindOfNumeric)
-                      && Type::IsCastNeeded(ar, actType2, expType2))) {
+        TypePtr expType = getExpectedType();
+        if (actType2 &&
+            (actType2->mustBe(Type::KindOfNumeric) ||
+             (expType && expType->mustBe(Type::KindOfNumeric) &&
+              !actType2->couldBe(Type::KindOfArray) &&
+              Type::IsCastNeeded(ar, actType2, expType)))) {
           return m_exp2;
         }
       }
@@ -279,13 +280,16 @@ ExpressionPtr BinaryOpExpression::simplifyArithmetic(
       String sval1 = v1.toString();
       if ((sval1.empty() && m_op == '.')) {
         TypePtr actType2 = m_exp2->getActualType();
-        TypePtr expType2 = m_exp2->getExpectedType();
+        TypePtr expType = getExpectedType();
         // '' . $a => $a
-        if ((actType2 && actType2->is(Type::KindOfString)) ||
-            (expType2 && expType2->is(Type::KindOfString) &&
-             Type::IsCastNeeded(ar, actType2, expType2))) {
+        if ((expType && expType->is(Type::KindOfString)) ||
+            (actType2 && actType2->is(Type::KindOfString))) {
           return m_exp2;
         }
+        ExpressionPtr rep(new UnaryOpExpression(
+                            getScope(), getLocation(),
+                            m_exp2, T_STRING_CAST, true));
+        return rep;
       }
     }
   }
@@ -295,11 +299,12 @@ ExpressionPtr BinaryOpExpression::simplifyArithmetic(
       // $a * 1 => $a, $a + 0 => $a
       if ((ival2 == 1 && m_op == '*') || (ival2 == 0 && m_op == '+')) {
         TypePtr actType1 = m_exp1->getActualType();
-        TypePtr expType1 = m_exp1->getExpectedType();
-        if ((actType1 && actType1->mustBe(Type::KindOfNumeric)
-                      && actType1->isExactType()) ||
-            (expType1 && expType1->mustBe(Type::KindOfNumeric)
-                      && Type::IsCastNeeded(ar, actType1, expType1))) {
+        TypePtr expType = getExpectedType();
+        if (actType1 &&
+            (actType1->mustBe(Type::KindOfNumeric) ||
+             (expType && expType->mustBe(Type::KindOfNumeric) &&
+              !actType1->couldBe(Type::KindOfArray) &&
+              Type::IsCastNeeded(ar, actType1, expType)))) {
           return m_exp1;
         }
       }
@@ -307,13 +312,16 @@ ExpressionPtr BinaryOpExpression::simplifyArithmetic(
       String sval2 = v2.toString();
       if ((sval2.empty() && m_op == '.')) {
         TypePtr actType1 = m_exp1->getActualType();
-        TypePtr expType1 = m_exp1->getExpectedType();
+        TypePtr expType = getExpectedType();
         // $a . '' => $a
-        if ((actType1 && actType1->is(Type::KindOfString)) ||
-            (expType1 && expType1->is(Type::KindOfString) &&
-             Type::IsCastNeeded(ar, actType1, expType1))) {
+        if ((expType && expType->is(Type::KindOfString)) ||
+            (actType1 && actType1->is(Type::KindOfString))) {
           return m_exp1;
         }
+        ExpressionPtr rep(new UnaryOpExpression(
+                            getScope(), getLocation(),
+                            m_exp1, T_STRING_CAST, true));
+        return rep;
       }
     }
   }

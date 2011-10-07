@@ -4571,6 +4571,9 @@ void AnalysisResult::outputCPPMain() {
   cg_printf("\n");
   cg_printf("#ifndef HPHP_BUILD_LIBRARY\n");
   cg_indentBegin("int main(int argc, char** argv) {\n");
+  cg_indentBegin("#ifdef THUNK_FILENAME\n");
+  cg_printf("DO_THUNK(THUNK_FILENAME, argv);\n");
+  cg_indentEnd("#endif\n");
   cg_printf("return HPHP::execute_program(argc, argv);\n");
   cg_indentEnd("}\n");
   cg_printf("#endif\n");

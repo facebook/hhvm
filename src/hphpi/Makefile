@@ -15,7 +15,8 @@ all: $(HPHPI)
 
 $(HPHPI): $(HPHP) $(PHP_FILES)
 	@echo "Compiling hphpi..."
-	$(V)$(if $(OUT_TOP),HPHP_LIB=$(LIB_DIR)) $(HPHP) \
+	$(V)$(if $(OUT_TOP),HPHP_LIB=$(LIB_DIR)) HPHPI_THUNK=1 \
+		$(HPHP) \
 		-t cpp -f exe --input-dir . \
 		-i $(PHP_FILES) -o $(OUT_DIR)gen \
 		-vEnableEval=2 --log=1 \

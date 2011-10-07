@@ -451,6 +451,12 @@ do { \
     }                                           \
   } while(0)                                    \
 
+#define DO_THUNK(thunkFilename, argv) {         \
+  if (strlen(thunkFilename) > 0) {              \
+    execv(thunkFilename, argv);                 \
+  }                                             \
+}
+
 //////////////////////////////////////////////////////////////////////////////
 }
 

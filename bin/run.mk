@@ -22,6 +22,10 @@ endif
 
 -include sep_extensions.mk
 
+ifdef HPHPI_THUNK
+CPPFLAGS += -DTHUNK_FILENAME='"/.hphpi-thunk"'
+endif
+
 CPPFLAGS += -I. $(SEP_EXTENSION_INCLUDE_PATHS)
 LIBS = $(SEP_EXTENSION_LIBS) $(HPHP_LIB)/libhphp_runtime.a $(ALL_LIBS)
 

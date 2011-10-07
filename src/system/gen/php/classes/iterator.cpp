@@ -18,8 +18,8 @@
 #include <runtime/base/hphp_system.h>
 #include <system/gen/sys/literal_strings_remap.h>
 #include <system/gen/sys/scalar_arrays_remap.h>
-#include <php/classes/iterator.h>
 #include <php/classes/iterator.fws.h>
+#include <php/classes/iterator.h>
 
 // Dependencies
 #include <php/classes/arrayaccess.h>

@@ -145,8 +145,11 @@ public:
     // substantially exceed m_stats.usage.
     if (s_statsEnabled) {
       int64 delta = int64(*m_allocated) - int64(*m_deallocated);
+      int64 deltaAllocated = int64(*m_allocated) - m_prevAllocated;
       m_stats.usage += delta - m_delta;
+      m_stats.totalAlloc += deltaAllocated;
       m_delta = delta;
+      m_prevAllocated = int64(*m_allocated);
     }
 #endif
     if (m_stats.usage > m_stats.peakUsage) {
@@ -214,6 +217,7 @@ private:
   uint64* m_allocated;
   uint64* m_deallocated;
   int64  m_delta;
+  int64  m_prevAllocated;
   size_t* m_cactive;
   size_t m_cactiveLimit;
   bool m_stopped; // Set to true if m_cactive exceeded limit.

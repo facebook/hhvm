@@ -656,6 +656,15 @@ String f_ini_set(CStrRef varname, CStrRef newvalue) {
   return oldvalue;
 }
 
+int64 f_memory_get_allocation() {
+  if (RuntimeOption::EnableMemoryManager) {
+    MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
+    const MemoryUsageStats &stats = mm->getStats(true);
+    return stats.totalAlloc;
+  }
+  return 0;
+}
+
 int64 f_memory_get_peak_usage(bool real_usage /* = false */) {
   if (RuntimeOption::EnableMemoryManager) {
     MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();

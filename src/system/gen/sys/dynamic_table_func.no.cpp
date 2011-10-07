@@ -1337,6 +1337,13 @@ Variant ifa_imap_utf7_decode(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) 
 Variant i_imap_utf7_decode(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_imap_utf7_decode);
 }
+Variant ifa_memory_get_allocation(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("memory_get_allocation", 0, 1);
+  return (x_memory_get_allocation());
+}
+Variant i_memory_get_allocation(void *extra, CArrRef params) {
+  return invoke_func_few_handler(extra, params, &ifa_memory_get_allocation);
+}
 Variant ifa_magicknextimage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("magicknextimage", count, 1, 1, 1);
   CVarRef arg0(a0);
@@ -21502,6 +21509,7 @@ CallInfo ci_drawpathcurvetosmoothabsolute((void*)&i_drawpathcurvetosmoothabsolut
 CallInfo ci_wandgetexception((void*)&i_wandgetexception, (void*)&ifa_wandgetexception, 1, 0, 0x0000000000000000LL);
 CallInfo ci_crc32((void*)&i_crc32, (void*)&ifa_crc32, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imap_utf7_decode((void*)&i_imap_utf7_decode, (void*)&ifa_imap_utf7_decode, 1, 0, 0x0000000000000000LL);
+CallInfo ci_memory_get_allocation((void*)&i_memory_get_allocation, (void*)&ifa_memory_get_allocation, 0, 0, 0x0000000000000000LL);
 CallInfo ci_magicknextimage((void*)&i_magicknextimage, (void*)&ifa_magicknextimage, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imagecreatefromwbmp((void*)&i_imagecreatefromwbmp, (void*)&ifa_imagecreatefromwbmp, 1, 0, 0x0000000000000000LL);
 CallInfo ci_libxml_get_last_error((void*)&i_libxml_get_last_error, (void*)&ifa_libxml_get_last_error, 0, 0, 0x0000000000000000LL);
@@ -27550,6 +27558,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 2723:
+      HASH_GUARD(0x57B7D47A9D1E6AA3LL, memory_get_allocation) {
+        ci = &ci_memory_get_allocation;
+        return true;
+      }
       HASH_GUARD(0x2B75B48A53AACAA3LL, imagestring) {
         ci = &ci_imagestring;
         return true;

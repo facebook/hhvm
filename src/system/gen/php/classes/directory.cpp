@@ -18,8 +18,8 @@
 #include <runtime/base/hphp_system.h>
 #include <system/gen/sys/literal_strings_remap.h>
 #include <system/gen/sys/scalar_arrays_remap.h>
-#include <php/classes/directory.h>
 #include <php/classes/directory.fws.h>
+#include <php/classes/directory.h>
 
 // Dependencies
 #include <runtime/ext/ext.h>

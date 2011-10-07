@@ -656,6 +656,18 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "memory_get_allocation",
+    'desc'   => "Returns the total memory, in bytes, that your PHP script has allocated.",
+    'flags'  =>  HasDocComment | NoProfile,
+    'return' => array(
+      'type'   => Int64,
+      'desc'   => "Returns the total memory allocated in bytes.",
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
     'name'   => "memory_get_peak_usage",
     'desc'   => "Returns the peak of memory, in bytes, that's been allocated to your PHP script.",
     'flags'  =>  HasDocComment,

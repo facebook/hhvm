@@ -198,6 +198,11 @@ inline String x_ini_set(CStrRef varname, CStrRef newvalue) {
   return f_ini_set(varname, newvalue);
 }
 
+inline int64 x_memory_get_allocation() {
+  FUNCTION_NOPROFILE_BUILTIN(memory_get_allocation);
+  return f_memory_get_allocation();
+}
+
 inline int64 x_memory_get_peak_usage(bool real_usage = false) {
   FUNCTION_INJECTION_BUILTIN(memory_get_peak_usage);
   return f_memory_get_peak_usage(real_usage);

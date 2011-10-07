@@ -285,9 +285,6 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
                      VariableTable::NonPrivateStaticVars);
       tp = Type::Variant;
     }
-    if (!found && getScope()->isFirstPass()) {
-      Compiler::Error(Compiler::UseUndeclaredVariable, self);
-    }
     m_valid = found || isRedeclared() || m_dynamicClass;
     m_implementedType.reset();
     return tp;

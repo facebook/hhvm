@@ -171,7 +171,8 @@ TypePtr ConstantTable::check(BlockScopeRawPtr context,
           }
         }
         Compiler::Error(Compiler::UseUndeclaredConstant, construct);
-        actualType = isClassScope ? Type::Variant : Type::String;
+        actualType = isClassScope || !Option::WholeProgram ?
+          Type::Variant : Type::String;
       }
     } else {
       ASSERT(sym->isPresent());

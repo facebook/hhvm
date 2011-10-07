@@ -646,7 +646,8 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
     StringToFunctionScopePtrMap methods;
     cls->collectMethods(ar, methods);
     bool needAbstractMethodImpl =
-      (!cls->isAbstract() && !cls->isInterface());
+      (!cls->isAbstract() && !cls->isInterface() &&
+       !cls->derivesFromRedeclaring());
     for (StringToFunctionScopePtrMap::const_iterator iterMethod =
            methods.begin(); iterMethod != methods.end(); ++iterMethod) {
       FunctionScopePtr func = iterMethod->second;

@@ -621,33 +621,47 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
     m_fileScopes[i]->analyzeProgram(ar);
   }
 
-  // Collect methods
-  string cname;
+  /*
+    Note that cls->collectMethods() can add entries to m_classDecs,
+    which can invalidate iterators. So we have to create an array
+    and then iterate over that.
+    The new entries added to m_classDecs are always empty, so it
+    doesnt matter that we dont include them in the iteration
+  */
   ClassScopePtr cls;
+  std::vector<ClassScopePtr> classes;
+  classes.reserve(m_classDecs.size());
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
     BOOST_FOREACH(cls, iter->second) {
-      if (cls->isRedeclaring()) {
-        cls->setStaticDynamic(ar);
-      }
-      StringToFunctionScopePtrMap methods;
-      cls->collectMethods(ar, methods);
-      bool needAbstractMethodImpl =
-        (!cls->isAbstract() && !cls->isInterface());
-      for (StringToFunctionScopePtrMap::const_iterator iterMethod =
-           methods.begin(); iterMethod != methods.end(); ++iterMethod) {
-        FunctionScopePtr func = iterMethod->second;
-        if (!func->hasImpl() && needAbstractMethodImpl) {
-          FunctionScopePtr tmpFunc =
-            cls->findFunction(ar, func->getName(), true, true);
-          assert(!tmpFunc || !tmpFunc->hasImpl());
-          Compiler::Error(Compiler::MissingAbstractMethodImpl,
-                          func->getStmt(), cls->getStmt());
-        }
-        m_methodToClassDecs[iterMethod->first].push_back(cls);
-      }
+      classes.push_back(cls);
     }
   }
+
+  // Collect methods
+  BOOST_FOREACH(cls, classes) {
+    if (cls->isRedeclaring()) {
+      cls->setStaticDynamic(ar);
+    }
+    StringToFunctionScopePtrMap methods;
+    cls->collectMethods(ar, methods);
+    bool needAbstractMethodImpl =
+      (!cls->isAbstract() && !cls->isInterface());
+    for (StringToFunctionScopePtrMap::const_iterator iterMethod =
+           methods.begin(); iterMethod != methods.end(); ++iterMethod) {
+      FunctionScopePtr func = iterMethod->second;
+      if (!func->hasImpl() && needAbstractMethodImpl) {
+        FunctionScopePtr tmpFunc =
+          cls->findFunction(ar, func->getName(), true, true);
+        assert(!tmpFunc || !tmpFunc->hasImpl());
+        Compiler::Error(Compiler::MissingAbstractMethodImpl,
+                        func->getStmt(), cls->getStmt());
+      }
+      m_methodToClassDecs[iterMethod->first].push_back(cls);
+    }
+  }
+
+  string cname;
   BOOST_FOREACH(tie(cname, cls), m_systemClasses) {
     StringToFunctionScopePtrMap methods;
     cls->collectMethods(ar, methods);

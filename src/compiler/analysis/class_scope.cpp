@@ -326,6 +326,8 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
           m_derivesFromRedeclaring = DirectFromRedeclared;
         }
         m_bases.erase(m_bases.begin() + i);
+        n--;
+        i--;
       }
     }
   }

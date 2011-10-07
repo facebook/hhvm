@@ -60,10 +60,10 @@ bool SynchronizableMulti::waitImpl(int id, bool front, timespec *ts) {
 
   if (front) {
     m_cond_list.push_front(cond);
-    m_cond_map[cond] = m_cond_list.begin();
+    m_cond_map.insert(make_pair(cond, m_cond_list.begin()));
   } else {
     m_cond_list.push_back(cond);
-    m_cond_map[cond] = --m_cond_list.end();
+    m_cond_map.insert(make_pair(cond, --m_cond_list.end()));
   }
 
   int ret;

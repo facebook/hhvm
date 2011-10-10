@@ -141,7 +141,7 @@ void FunctionScope::init(AnalysisResultConstPtr ar) {
     m_variables->setAttribute(VariableTable::ContainsGetDefinedVars);
   }
 
-  if (m_stmt && Option::AllVolatile && !m_pseudoMain) {
+  if (m_stmt && Option::AllVolatile && !m_pseudoMain && !m_method) {
     m_volatile = true;
   }
 

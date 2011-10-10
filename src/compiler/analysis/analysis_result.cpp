@@ -4713,8 +4713,8 @@ void AnalysisResult::outputCPPClusterImpl(CodeGenerator &cg,
     getTrueDeps(fs, toInclude);
   }
   BOOST_FOREACH(FileScopePtr fs, files) {
-    cg_printInclude(fs->outputFilebase());
     cg_printInclude(fs->outputFilebase() + ".fws");
+    cg_printInclude(fs->outputFilebase());
     toInclude.erase(fs->getName());
   }
   cg.printSection("Dependencies");

@@ -181,6 +181,7 @@ bool Option::GenerateCPPNameSpace = true;
 bool Option::GenArrayCreate = true;
 bool Option::UseScalarVariant = true;
 bool Option::UseCallUserFuncFewArgs = true;
+bool Option::GenGlobalState = false;
 bool Option::KeepStatementsWithNoEffect = false;
 bool Option::GenerateDummyPseudoMain = true;
 

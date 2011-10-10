@@ -144,6 +144,8 @@ public:
 
   static bool UseCallUserFuncFewArgs;
 
+  static bool GenGlobalState;
+
   /**
    * Separate compilation
    */

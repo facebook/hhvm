@@ -4213,6 +4213,15 @@ void AnalysisResult::outputCPPGlobalState() {
   AnalysisResultPtr ar = shared_from_this();
   outputCPPGlobalStateFileHeader(cg);
 
+  if (!Option::GenGlobalState) {
+    cg_printf("}\n\nusing namespace global_state;\n\n");
+    cg_indentBegin("Array get_global_state() {\n");
+    cg_printf("return Array();\n");
+    cg_indentEnd("}\n\n");
+    cg.namespaceEnd();
+    f.close();
+    return;
+  }
   StringPairSetVec symbols(GlobalSymbolTypeCount);
   getVariables()->collectCPPGlobalSymbols(symbols, cg, ar);
   collectCPPGlobalSymbols(symbols, cg);

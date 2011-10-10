@@ -374,7 +374,7 @@ bool TestCodeError::TestMissingAbstractMethodImpl() {
      "}"
      "class B implements A {"
      "}");
-  VE(MissingAbstractMethodImpl,
+  VEN(MissingAbstractMethodImpl,
      "<?php "
      "if (true) {"
      "  abstract class A {"
@@ -382,7 +382,6 @@ bool TestCodeError::TestMissingAbstractMethodImpl() {
      "  }"
      "} else {"
      "  abstract class A {"
-     "    abstract function foo();"
      "  }"
      "}"
      "class B extends A {"

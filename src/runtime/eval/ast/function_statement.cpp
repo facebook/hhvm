@@ -37,6 +37,7 @@
 #include <system/lib/systemlib.h>
 
 #include <util/parser/parser.h>
+#include <util/logger.h>
 #include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {
@@ -65,16 +66,16 @@ UserFunctionIdTable::UserFunctionIdTable() : m_size(0) {
 }
 
 void UserFunctionIdTable::requestInit() {
-  ASSERT(s_id < RuntimeOption::MaxUserFunctionId);
+  ASSERT(s_id <= RuntimeOption::MaxUserFunctionId);
   memset(m_funcStmts, 0, sizeof(FunctionStatement *) * m_size);
   grow(atomic_add(s_id, 0) + 1);
 }
 
-bool UserFunctionIdTable::grow(int id) {
-  ASSERT(id < RuntimeOption::MaxUserFunctionId);
-  int inc = id - m_size;
+bool UserFunctionIdTable::grow(int size) {
+  ASSERT(size <= RuntimeOption::MaxUserFunctionId + 1);
+  int inc = size - m_size;
   if (inc <= 0) return false;
-  if (id >= m_alloc) {
+  if (size >= m_alloc) {
     m_alloc += INC_FUNC_ID_TABLE_SIZE;
     if (inc > INC_FUNC_ID_TABLE_SIZE) {
       m_alloc += inc - inc % INC_FUNC_ID_TABLE_SIZE;
@@ -83,7 +84,7 @@ bool UserFunctionIdTable::grow(int id) {
       realloc(m_funcStmts, m_alloc * sizeof(FunctionStatement *));
   }
   memset(m_funcStmts + m_size, 0, sizeof(FunctionStatement *) * inc);
-  m_size = id;
+  m_size = size;
   return true;
 }
 
@@ -100,7 +101,7 @@ int UserFunctionIdTable::getUserFunctionId(CStrRef func) {
 
 int UserFunctionIdTable::GetUserFunctionId(CStrRef func) {
   if (s_id >= RuntimeOption::MaxUserFunctionId) {
-    raise_warning("Maximum function id reached: %d", s_id);
+    Logger::Warning("Maximum function id reached: %d", s_id);
     return -1;
   }
   return s_userFunctionIdTable->getUserFunctionId(func);

@@ -86,6 +86,16 @@ private:
  */
 class FileRepository {
 public:
+  class FileInfo {
+  public:
+    FileInfo() : m_phpFile(NULL) {}
+    PhpFile *m_phpFile;
+    String m_inputString;
+    std::string m_md5;
+    std::string m_srcRoot;
+    std::string m_relPath;
+  };
+
   /**
    * The first time you attempt to invoke a file in a request, this is called.
    * From then on, invoke_file will store the PhpFile and use that.
@@ -93,8 +103,9 @@ public:
   static PhpFile *checkoutFile(const std::string &name, const struct stat &s);
   static bool findFile(const std::string &path, struct stat *s);
   static bool fileDump(const char *filename);
-  static PhpFile *readFile(const std::string &name, const struct stat &s,
-                           bool &created);
+  static bool readFile(const std::string &name, const struct stat &s,
+                       FileInfo &fileInfo);
+  static PhpFile *parseFile(const std::string &name, const FileInfo &fileInfo);
   static String translateFileName(const std::string &file);
   static void onZeroRef(PhpFile *f);
 private:

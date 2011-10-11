@@ -125,6 +125,7 @@ void FileRepository::onZeroRef(PhpFile *f) {
 
 PhpFile *FileRepository::checkoutFile(const string &rname,
                                       const struct stat &s) {
+  FileInfo fileInfo;
   PhpFile *ret = NULL;
   string name;
 
@@ -136,18 +137,17 @@ PhpFile *FileRepository::checkoutFile(const string &rname,
     name = RuntimeOption::SourceRoot + "/" + rname;
   }
 
-  bool created = false;
   bool changed = false;
   {
     ReadLock lock(s_lock);
     hphp_hash_map<string, PhpFileWrapper*, string_hash>::iterator it =
       s_files.find(name);
     if (it == s_files.end()) {
-      ret = readFile(name, s, created);
-      if (!ret) return NULL;
+      if (!readFile(name, s, fileInfo)) return NULL;
+      ret = fileInfo.m_phpFile;
     } else if (it->second->isChanged(s)) {
-      ret = readFile(name, s, created);
-      if (!ret) return NULL;
+      if (!readFile(name, s, fileInfo)) return NULL;
+      ret = fileInfo.m_phpFile;
       PhpFile *f = it->second->getPhpFile();
       if (ret == f) {
         if (RuntimeOption::SandboxCheckMd5) {
@@ -163,6 +163,14 @@ PhpFile *FileRepository::checkoutFile(const string &rname,
       ret->incRef();
       return ret;
     }
+  }
+
+  // parseFile is lock free
+  bool created = false;
+  if (!ret) {
+    ret = parseFile(name, fileInfo);
+    if (!ret) return NULL;
+    created = true;
   }
 
   WriteLock lock(s_lock);
@@ -229,54 +237,59 @@ bool FileRepository::findFile(const string &path, struct stat *s) {
   return fileStat(path.c_str(), s) && !S_ISDIR(s->st_mode);
 }
 
-PhpFile *FileRepository::readFile(const string &name,
-                                  const struct stat &s,
-                                  bool &created) {
-  created = false;
-  vector<StaticStatementPtr> sts;
-  Block::VariableIndices variableIndices;
+bool FileRepository::readFile(const string &name,
+                              const struct stat &s,
+                              FileInfo &fileInfo) {
   if (s.st_size > StringData::LenMask) {
     throw FatalErrorException(0, "file %s is too big", name.c_str());
   }
   int fileSize = s.st_size;
-  if (!fileSize) return NULL;
+  if (!fileSize) return false;
   int fd = open(name.c_str(), O_RDONLY);
-  if (!fd) return NULL; // ignore file open exception
+  if (!fd) return false; // ignore file open exception
   char *input = (char *)malloc(fileSize + 1);
-  if (!input) return NULL;
+  if (!input) return false;
   int nbytes = read(fd, input, fileSize);
   close(fd);
   input[fileSize] = 0;
-  String strHelper(input, fileSize, AttachString);
-  if (nbytes != fileSize) return NULL;
+  fileInfo.m_inputString = String(input, fileSize, AttachString);
+  if (nbytes != fileSize) return false;
 
-  string md5;
-  string relPath;
-  string srcRoot;
   if (RuntimeOption::SandboxCheckMd5) {
-    md5 = StringUtil::MD5(strHelper).c_str();
-    srcRoot = SourceRootInfo::GetCurrentSourceRoot();
-    if (srcRoot.empty()) srcRoot = RuntimeOption::SourceRoot;
-    int srcRootLen = srcRoot.size();
+    fileInfo.m_md5 = StringUtil::MD5(fileInfo.m_inputString).c_str();
+    fileInfo.m_srcRoot = SourceRootInfo::GetCurrentSourceRoot();
+    if (fileInfo.m_srcRoot.empty()) {
+      fileInfo.m_srcRoot = RuntimeOption::SourceRoot;
+    }
+    int srcRootLen = fileInfo.m_srcRoot.size();
     if (srcRootLen) {
-      if (!strncmp(name.c_str(), srcRoot.c_str(), srcRootLen)) {
-        relPath = string(name.c_str() + srcRootLen);
+      if (!strncmp(name.c_str(), fileInfo.m_srcRoot.c_str(), srcRootLen)) {
+        fileInfo.m_relPath = string(name.c_str() + srcRootLen);
       }
     }
     hphp_hash_map<string, PhpFile*, string_hash>::iterator it =
-      s_md5Files.find(md5);
+      s_md5Files.find(fileInfo.m_md5);
     if (it != s_md5Files.end()) {
       PhpFile *f = it->second;
-      if (!relPath.empty() && relPath == f->getRelPath()) {
-        return it->second;
+      if (!fileInfo.m_relPath.empty() &&
+          fileInfo.m_relPath == f->getRelPath()) {
+        fileInfo.m_phpFile = f;
       }
     }
   }
+  return true;
+}
+
+PhpFile *FileRepository::parseFile(const std::string &name,
+                                   const FileInfo &fileInfo) {
+  vector<StaticStatementPtr> sts;
+  Block::VariableIndices variableIndices;
   if (RuntimeOption::EnableEvalOptimization) {
     ScalarValueExpression::initScalarValues();
   }
   StatementPtr stmt =
-    Parser::ParseString(strHelper, name.c_str(), sts, variableIndices);
+    Parser::ParseString(fileInfo.m_inputString, name.c_str(),
+                        sts, variableIndices);
   if (stmt && RuntimeOption::EnableEvalOptimization) {
     DummyVariableEnvironment env;
     stmt->optimize(env);
@@ -285,9 +298,9 @@ PhpFile *FileRepository::readFile(const string &name,
     if (RuntimeOption::EnableEvalOptimization) {
       ScalarValueExpression::registerScalarValues();
     } 
-    created = true;
     PhpFile *p = new PhpFile(stmt, sts, variableIndices,
-                             name, srcRoot, relPath, md5);
+                             name, fileInfo.m_srcRoot,
+                             fileInfo.m_relPath, fileInfo.m_md5);
     return p;
   }
   return NULL;

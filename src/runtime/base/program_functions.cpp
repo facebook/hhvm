@@ -852,9 +852,9 @@ static int execute_program_impl(int argc, char **argv) {
     struct stat s;
     if (!Eval::FileRepository::findFile(fileName, &s)) return 0;
     Eval::Parser::Reset();
-    bool created;
-    Eval::PhpFile *f =
-      Eval::FileRepository::readFile(fileName, s, created);
+    Eval::FileRepository::FileInfo fileInfo;
+    if (!Eval::FileRepository::readFile(fileName, s, fileInfo)) return 0;
+    Eval::PhpFile *f = Eval::FileRepository::parseFile(fileName, fileInfo);
     if (!f) return 0;
     const Eval::StatementPtr &tree = f->getTree();
     tree->dump(cout);

@@ -24,12 +24,17 @@ namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 const char *CmdPrint::Formats[] = {
-  "x", "hex", "oct", "dec", "unsigned", "time", NULL
+  "x", "v", "hex", "oct", "dec", "unsigned", "time", NULL
 };
 
 std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
   if (format == NULL) {
     String sret = DebuggerClient::FormatVariable(ret, -1);
+    return string(sret.data(), sret.size());
+  }
+
+  if (strcmp(format, "v") == 0) {
+    String sret = DebuggerClient::FormatVariable(ret, -1, true);
     return string(sret.data(), sret.size());
   }
 
@@ -161,7 +166,8 @@ void CmdPrint::list(DebuggerClient *client) {
 bool CmdPrint::help(DebuggerClient *client) {
   client->helpTitle("Print Command");
   client->helpCmds(
-    "[p]rint {php}",              "prints result of PHP code",
+    "[p]rint {php}",              "prints result of PHP code, (print_r)",
+    "[p]rint v {php}",            "prints result of PHP code, (var_dump)",
     "[p]rint x {php}",            "prints hex encoded string or number",
     "[p]rint [h]ex {php}",        "prints hex encoded string or number",
     "[p]rint [o]ct {php}",        "prints octal encoded string or number",

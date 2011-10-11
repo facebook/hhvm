@@ -272,11 +272,15 @@ bool DebuggerClient::IsValidNumber(const std::string &arg) {
   return true;
 }
 
-String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */) {
+String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */,
+                                      bool vardump /* = false */) {
   String value;
   if (maxlen <= 0) {
     try {
-      VariableSerializer vs(VariableSerializer::VarDump, 0, 2);
+      VariableSerializer::Type t = vardump ?
+                                   VariableSerializer::VarDump :
+                                   VariableSerializer::PrintR;
+      VariableSerializer vs(t, 0, 2);
       value = vs.serialize(v, true);
     } catch (StringBufferLimitException &e) {
       value = "Serialization limit reached";
@@ -1786,8 +1790,8 @@ void DebuggerClient::loadConfig() {
   }
 
   m_printFunction = (boost::format(
-    "(function_exists(\"%s\") ? %s($_) : print_r($_));")  % pprint % pprint)
-    .str();
+    "(function_exists(\"%s\") ? %s($_) : print_r(print_r($_, true)));")
+    % pprint % pprint).str();
 
   m_config["Tutorial"]["Visited"].get(m_tutorialVisited);
 

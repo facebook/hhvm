@@ -172,8 +172,6 @@ void HttpServer::onServerShutdown() {
     Logger::Info("debugger server stopped");
   }
 
-  XboxServer::Stop();
-
   // When a new instance of HPHP has taken over our page server socket,
   // stop our admin server and satellites so it can acquire those ports.
   for (unsigned int i = 0; i < m_satellites.size(); i++) {

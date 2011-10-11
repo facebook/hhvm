@@ -35,15 +35,7 @@ RPCRequestHandler::RPCRequestHandler(bool info /* = true */)
   : m_count(0), m_reset(false),
   m_returnEncodeType(Json) {
   hphp_session_init();
-  bool isServer = (strcmp(RuntimeOption::ExecutionMode, "srv") == 0);
-  if (isServer) {
-    m_context = hphp_context_init();
-  } else {
-    // In command line mode, we want the xbox workers to
-    // output to STDOUT
-    m_context = g_context.getNoCheck();
-    m_context->obSetImplicitFlush(true);
-  }
+  m_context = hphp_context_init();
   m_created = time(0);
 
   Logger::ResetRequestCount();
@@ -189,8 +181,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     Variant funcRet;
     string errorMsg = "Internal Server Error";
     string warmupDoc, reqInitFunc, reqInitDoc;
-    reqInitDoc = transport->getHeader("ReqInitDoc");
-    if (reqInitDoc.empty() && m_serverInfo) {
+    if (m_serverInfo) {
       warmupDoc = m_serverInfo->getWarmupDoc();
       reqInitFunc = m_serverInfo->getReqInitFunc();
       reqInitDoc = m_serverInfo->getReqInitDoc();
@@ -202,7 +193,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
 
     if (!reqInitDoc.empty()) reqInitDoc = canonicalize_path(reqInitDoc, "", 0);
     if (!reqInitDoc.empty()) {
-      reqInitDoc = getSourceFilename(reqInitDoc, sourceRootInfo);
+        reqInitDoc = getSourceFilename(reqInitDoc, sourceRootInfo);
     }
 
     bool runOnce = false;

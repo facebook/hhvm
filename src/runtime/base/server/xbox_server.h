@@ -34,7 +34,6 @@ public:
    * Start or restart xbox server.
    */
   static void Restart();
-  static void Stop();
 
 public:
   /**
@@ -52,7 +51,7 @@ public:
   /**
    * Local tasklet for parallel processing.
    */
-  static Object TaskStart(CStrRef msg, CStrRef reqInitDoc = "");
+  static Object TaskStart(CStrRef message);
   static bool TaskStatus(CObjRef task);
   static int TaskResult(CObjRef task, int timeout_ms, Variant &ret);
 

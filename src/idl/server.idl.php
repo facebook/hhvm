@@ -324,24 +324,6 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "xbox_process_call_message",
-    'desc'   => "This function is invoked by the xbox facility to start an xbox call task. This function is not intended to be called directly by user code.",
-    'flags'  =>  HasDocComment | HipHopSpecific,
-    'return' => array(
-      'type'   => Variant,
-      'desc'   => "The return value of the xbox call task.",
-    ),
-    'args'   => array(
-      array(
-        'name'   => "msg",
-        'type'   => String,
-        'desc'   => "The call message.",
-      ),
-    ),
-  ));
-
-DefineFunction(
-  array(
     'name'   => "xbox_get_thread_timeout",
     'desc'   => "Gets the timeout (maximum duration), in seconds, of the current xbox thread. Throws for non-xbox threads.",
     'flags'  =>  HasDocComment | HipHopSpecific,

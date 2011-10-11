@@ -12232,6 +12232,20 @@ bool TestCodeRun::TestRedeclaredClasses() {
        "var_dump(get_class_methods('X'));"
        "var_dump(get_class_methods('Y'));");
 
+  MVCR("<?php "
+       "if (isset($g)) {"
+       "  class X { function foo() { var_dump(__METHOD__); } }"
+       "  class Y extends X {}"
+       "} else {"
+       "  class X { function foo() { var_dump(__METHOD__); } }"
+       "  class Y {}"
+       "}"
+       "class Z extends Y {"
+       "  function foo() { var_dump(__METHOD__); }"
+       "  function bar() { X::foo(); }"
+       "}"
+       "Z::bar();");
+
   return true;
 }
 

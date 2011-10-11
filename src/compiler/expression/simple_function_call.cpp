@@ -1424,7 +1424,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       }
     }
 
-    if (objCall && !isUnknown() && !m_classScope) {
+    if (objCall > 0 && !isUnknown() && !m_classScope) {
       // class must be redeclaring, and cant be the originalClass
       // (because then m_classScope would not be null).
       // so we can start the search by following the redeclared parent.

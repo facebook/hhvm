@@ -440,7 +440,7 @@ Variant ObjectStaticCallbacks::os_get(CStrRef s) const {
   const ClassPropTable *cpt;
   const ClassPropTableEntry *prop = PropertyFinder(
     &cpt, s, s->hash(),
-    ClassPropTableEntry::Static|ClassPropTableEntry::Private,
+    ClassPropTableEntry::Static,
     ClassPropTableEntry::Static, this);
 
   if (UNLIKELY(!prop)) {
@@ -460,7 +460,7 @@ Variant &ObjectStaticCallbacks::os_lval(CStrRef s) const {
   const ClassPropTable *cpt;
   const ClassPropTableEntry *prop = PropertyFinder(
     &cpt, s, s->hash(),
-    ClassPropTableEntry::Static|ClassPropTableEntry::Private,
+    ClassPropTableEntry::Static,
     ClassPropTableEntry::Static, this);
 
   if (LIKELY(prop != 0) && LIKELY(prop->type == KindOfVariant)) {

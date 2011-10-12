@@ -46,7 +46,7 @@ const ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
   c___PHP_Incomplete_Class::s_call_info_table,c___PHP_Incomplete_Class::s_call_info_index,
   c___PHP_Incomplete_Class::s_instanceof_table,c___PHP_Incomplete_Class::s_instanceof_index,
   &c___PHP_Incomplete_Class::s_class_name,
-  0,0,0,0
+  0,0,0,0,0x0
 };
 /* SRC: classes/stdclass.php line 4 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(stdClass)
@@ -62,7 +62,7 @@ const ObjectStaticCallbacks cw_stdClass = {
   c_stdClass::s_call_info_table,c_stdClass::s_call_info_index,
   c_stdClass::s_instanceof_table,c_stdClass::s_instanceof_index,
   &c_stdClass::s_class_name,
-  0,0,0,0
+  0,0,0,0,0x0
 };
 ObjectData *coo___PHP_Incomplete_Class() {
   return NEWOBJ(c___PHP_Incomplete_Class)();

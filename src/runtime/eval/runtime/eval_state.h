@@ -40,6 +40,7 @@ public:
   typedef hphp_const_char_imap<std::pair<const MethodStatement*, int> >
     MethodTable;
   ClassEvalState() : m_class(NULL), m_constructor(NULL),
+                     m_attributes(0),
                      m_initializedInstance(false),
                      m_initializedStatics(false),
                      m_doneSemanticCheck(false)
@@ -58,6 +59,8 @@ public:
   LVariableTable &getStatics() {
     return m_statics;
   }
+  void setAttributes(int attrs) { m_attributes |= attrs; }
+  int getAttributes() const { return m_attributes; }
   void initializeInstance();
   void initializeStatics();
   void semanticCheck();
@@ -72,6 +75,7 @@ private:
   MethodTable m_methodTable;
   const MethodStatement *m_constructor;
   LVariableTable m_statics;
+  int m_attributes;
   bool m_initializedInstance;
   bool m_initializedStatics;
   bool m_doneSemanticCheck;

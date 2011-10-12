@@ -127,6 +127,7 @@ class ObjectData : public CountableNF {
   CStrRef o_getParentName() const;
   virtual CStrRef o_getClassNameHook() const;
   static CStrRef GetParentName(CStrRef cls);
+  static CallInfo *GetCallHandler();
   virtual bool isResource() const { return false;}
   bool o_isClass(const char *s) const;
   int o_getId() const { return o_id;}
@@ -304,8 +305,8 @@ class ObjectData : public CountableNF {
  protected:
   virtual bool php_sleep(Variant &ret);
 public:
-  virtual bool hasCall();
-  virtual bool hasCallStatic();
+  bool hasCall();
+  bool hasCallStatic();
 
  private:
   ObjectData(const ObjectData &) { ASSERT(false);}
@@ -396,6 +397,7 @@ struct ObjectStaticCallbacks {
                             const ObjectStaticCallbacks *osc,
                             MethodCallPackage &mcp, int64 hash);
 
+  bool checkAttribute(int attrs) const;
   operator const ObjectStaticCallbacks*() const { return this; }
   const ObjectStaticCallbacks* operator->() const { return this; }
   GlobalVariables *lazy_initializer(GlobalVariables *g) const;
@@ -411,6 +413,7 @@ struct ObjectStaticCallbacks {
   const CallInfo              *constructor;
   int64                       redeclaredParent;
   const ObjectStaticCallbacks *parent;
+  int                         attributes;
 };
 
 struct RedeclaredObjectStaticCallbacks {

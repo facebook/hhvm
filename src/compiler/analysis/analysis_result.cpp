@@ -3682,7 +3682,7 @@ void AnalysisResult::outputCPPRedeclaredClassImpl(CodeGenerator &cg) {
       cg_printf("static const RedeclaredObjectStaticCallbacks %s%s = {\n"
                 "  {\n"
                 "    coo_ObjectData,\n"
-                "    0,0,0,0,&s_%s,0,0,0,0\n"
+                "    0,0,0,0,&s_%s,0,0,0,0,0\n"
                 "  },\n"
                 "  -1\n"
                 "};\n",

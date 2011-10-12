@@ -1344,13 +1344,12 @@ void ClassScope::outputCPPHashTableClasses
 void ClassScope::outputCPPClassVarInitImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
-  bool system = cg.getOutput() == CodeGenerator::SystemCPP;
+  if (cg.getOutput() == CodeGenerator::SystemCPP) return;
 
-  cg_indentBegin("Variant get%s_class_var_init(CStrRef s, "
-                 "const char *var) {\n",
-                 system ? "_builtin" : "");
-  bool withEval = !system && Option::EnableEval == Option::FullEval;
-  if (withEval) {
+  cg_indentBegin("Variant get_class_var_init(CStrRef s, "
+                 "const char *var) {\n");
+
+  if (Option::EnableEval == Option::FullEval) {
     // See if there's an eval'd version
     cg_indentBegin("{\n");
     cg_printf("Variant r;\n");
@@ -1358,19 +1357,11 @@ void ClassScope::outputCPPClassVarInitImpl
               "return r;\n");
     cg_indentEnd("}\n");
   }
-  if (classes.size()) {
-    cg_printf("const ObjectStaticCallbacks *cwo = "
-              "get_%sobject_static_callbacks(s);\n"
-              "return LIKELY(cwo != 0) ? "
-              "cwo->os_getInit(var) : throw_missing_class(s);\n",
-              system ? "builtin_" : "");
-  } else {
-    if (system) {
-      cg_printf("return throw_missing_class(s);\n");
-    } else {
-      cg_printf("return get_builtin_class_var_init(s, var);\n");
-    }
-  }
+  cg_printf("const ObjectStaticCallbacks *cwo = "
+            "get_%sobject_static_callbacks(s);\n"
+            "return LIKELY(cwo != 0) ? "
+            "cwo->os_getInit(var) : throw_missing_class(s);\n",
+            !classes.size() ? "builtin_" : "");
   cg_indentEnd("}\n");
 }
 
@@ -1391,19 +1382,11 @@ void ClassScope::outputCPPDynamicClassCreateImpl
               "return r;\n");
     cg_indentEnd("}\n");
   }
-  if (!classes.size()) {
-    if (system) {
-      cg_printf("return 0;\n");
-    } else {
-      cg_printf("return create_builtin_object_only_no_init(s, root);\n");
-    }
-  } else {
-    cg_printf("const ObjectStaticCallbacks *cwo = "
-              "get_%sobject_static_callbacks(s);\n"
-              "if (LIKELY(cwo != 0)) return cwo->createOnlyNoInit(root);\n"
-              "return 0;\n",
-              system ? "builtin_" : "");
-  }
+  cg_printf("const ObjectStaticCallbacks *cwo = "
+            "get_%sobject_static_callbacks(s);\n"
+            "if (LIKELY(cwo != 0)) return cwo->createOnlyNoInit(root);\n"
+            "return 0;\n",
+            system || !classes.size() ? "builtin_" : "");
   cg_indentEnd("}\n");
   // output create_object_only()
   cg_indentBegin("Object create%s_object_only(CStrRef s, "
@@ -1421,14 +1404,11 @@ void ClassScope::outputCPPDynamicClassCreateImpl
 void ClassScope::outputCPPGetCallInfoStaticMethodImpl(
   CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
   const vector<const char*> &classes) {
-  bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  bool useHashTable = (classes.size() > 0);
-  cg_indentBegin("bool get_call_info_static_method%s(MethodCallPackage &mcp)"
-      " {\n", system ? "_builtin" : "");
+  if (cg.getOutput() == CodeGenerator::SystemCPP) return;
+  cg_indentBegin(
+    "bool get_call_info_static_method(MethodCallPackage &mcp) {\n");
 
-  cg_printf("StringData *s ATTRIBUTE_UNUSED (mcp.rootCls);\n");
-
-  if (!system && Option::EnableEval == Option::FullEval) {
+  if (Option::EnableEval == Option::FullEval) {
     cg_printf("bool foundClass = false;\n");
     cg_printf("if (eval_get_call_info_static_method_hook(mcp, foundClass)) "
               "return true;\n");
@@ -1437,32 +1417,28 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl(
     cg_printf("return false;\n");
     cg_indentEnd("}\n");
   }
-  if (useHashTable) {
-    cg_printf("const ObjectStaticCallbacks *cwo = "
-              "get_%sobject_static_callbacks(s);\n"
-              "return ObjectStaticCallbacks::GetCallInfo(cwo,mcp,-1);\n" ,
-              system ? "builtin_" : "");
-  } else {
-    if (system) {
-      cg_printf("return ObjectStaticCallbacks::GetCallInfo(0,mcp,-1);\n");
-    } else {
-      cg_printf("return get_call_info_static_method_builtin(mcp);\n");
-    }
-  }
+
+  cg_printf("StringData *s ATTRIBUTE_UNUSED (mcp.rootCls);\n");
+
+  cg_printf("const ObjectStaticCallbacks *cwo = "
+            "get_%sobject_static_callbacks(s);\n"
+            "if (LIKELY(cwo != 0)) "
+            "return ObjectStaticCallbacks::GetCallInfo(cwo,mcp,-1);\n"
+            "if (mcp.m_fatal) throw_missing_class(s->data());\n"
+            "return false;\n",
+            !classes.size() ? "builtin_" : "");
 
   cg_indentEnd("}\n");
 }
 
-
 void ClassScope::outputCPPGetStaticPropertyImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
-  bool system = cg.getOutput() == CodeGenerator::SystemCPP;
+  if (cg.getOutput() == CodeGenerator::SystemCPP) return;
 
-  cg_indentBegin("Variant get%s_static_property(CStrRef s, "
-                 "const char *prop) {\n",
-                 system ? "_builtin" : "");
-  if (!system && Option::EnableEval == Option::FullEval) {
+  cg_indentBegin("Variant get_static_property(CStrRef s, "
+                 "const char *prop) {\n");
+  if (Option::EnableEval == Option::FullEval) {
     // See if there's an eval'd version
     cg_indentBegin("{\n");
     cg_printf("Variant r;\n");
@@ -1473,16 +1449,14 @@ void ClassScope::outputCPPGetStaticPropertyImpl
 
   cg.printf("const ObjectStaticCallbacks * cwo = "
             "get%s_object_static_callbacks(s);\n",
-            system ? "_builtin" : "");
+            !classes.size() ? "_builtin" : "");
   cg.printf("if (cwo) return cwo->os_get(prop);\n");
-
   cg_printf("return null;\n");
   cg_indentEnd("}\n");
 
-  cg_indentBegin("Variant *get%s_static_property_lv(CStrRef s, "
-                 "const char *prop) {\n",
-                 system ? "_builtin" : "");
-  if (!system && Option::EnableEval == Option::FullEval) {
+  cg_indentBegin("Variant *get_static_property_lv(CStrRef s, "
+                 "const char *prop) {\n");
+  if (Option::EnableEval == Option::FullEval) {
     // See if there's an eval'd version
     cg_indentBegin("{\n");
     cg_printf("Variant *r;\n");
@@ -1493,20 +1467,18 @@ void ClassScope::outputCPPGetStaticPropertyImpl
 
   cg.printf("const ObjectStaticCallbacks * cwo = "
             "get%s_object_static_callbacks(s);\n",
-            system ? "_builtin" : "");
+            !classes.size() ? "_builtin" : "");
   cg.printf("if (cwo) return &cwo->os_lval(prop);\n");
-
   cg_printf("return NULL;\n");
   cg_indentEnd("}\n");
 }
 
 void ClassScope::outputCPPGetClassConstantImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes) {
-  bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  cg_indentBegin("Variant get%s_class_constant(CStrRef s, "
-                 "const char *constant, int fatal /* = true */) {\n",
-                 system ? "_builtin" : "");
-  if (!system && Option::EnableEval == Option::FullEval) {
+  if (cg.getOutput() == CodeGenerator::SystemCPP) return;
+  cg_indentBegin("Variant get_class_constant(CStrRef s, "
+                 "const char *constant, int fatal /* = true */) {\n");
+  if (Option::EnableEval == Option::FullEval) {
     // See if there's an eval'd version
     cg_indentBegin("{\n");
     cg_printf("Variant r;\n");
@@ -1518,7 +1490,7 @@ void ClassScope::outputCPPGetClassConstantImpl
   cg.indentBegin("{\n");
   cg.printf("const ObjectStaticCallbacks * cwo = "
             "get%s_object_static_callbacks(s);\n",
-            system ? "_builtin" : "");
+            !classScopes.size() ? "_builtin" : "");
   cg.printf("if (cwo) return cwo->os_constant(constant);\n");
   cg.indentEnd("}\n");
 
@@ -2731,7 +2703,7 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
     cg_indentBegin("{\n");
   }
   if (isInterface()) {
-    cg_printf("0,0,0,0,0,0,0,0,0,0\n");
+    cg_printf("0,0,0,0,0,0,0,0,0,0,0\n");
   } else {
     cg_printf("(ObjectData*(*)(ObjectData*))%s%s,\n",
               Option::CreateObjectOnlyPrefix, id.c_str());
@@ -2777,11 +2749,22 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
 
     if (derivesFromRedeclaring() != DirectFromRedeclared &&
         (par = getParentScope(ar))) {
-      cg_printf("&%s%s\n",
+      cg_printf("&%s%s",
                 Option::ClassStaticsCallbackPrefix, par->getId().c_str());
     } else {
-      cg_printf("0\n");
+      cg_printf("0");
     }
+
+    int attributes = 0;
+    if (m_attribute & (HasUnknownStaticMethodHandler|
+                       InheritsUnknownStaticMethodHandler)) {
+      attributes |= ObjectData::HasCallStatic;
+    }
+    if (m_attribute & (HasUnknownMethodHandler|
+                       InheritsUnknownMethodHandler)) {
+      attributes |= ObjectData::HasCall;
+    }
+    cg_printf(",0x%x\n", attributes);
   }
 
   if (isRedeclaring()) {

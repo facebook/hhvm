@@ -95,12 +95,18 @@ void ClassVariable::eval(VariableEnvironment &env, Variant &res) const {
 ClassStatement::ClassStatement(STATEMENT_ARGS, const string &name,
                                const string &parent, const string &doc)
   : Statement(STATEMENT_PASS), m_name(StringData::GetStaticString(name)),
-    m_modifiers(0), m_parent(StringData::GetStaticString(parent)),
-    m_docComment(doc),
+    m_modifiers(0), m_attributes(0),
+    m_parent(StringData::GetStaticString(parent)), m_docComment(doc),
     m_marker(new ClassStatementMarker(STATEMENT_PASS, this)),
     m_delayDeclaration(false) { }
 
 void ClassStatement::finish() {
+  if (findMethod("__get")) m_attributes        |= ObjectData::UseGet;
+  if (findMethod("__set")) m_attributes        |= ObjectData::UseSet;
+  if (findMethod("__isset")) m_attributes      |= ObjectData::UseIsset;
+  if (findMethod("__unset")) m_attributes      |= ObjectData::UseUnset;
+  if (findMethod("__call")) m_attributes       |= ObjectData::HasCall;
+  if (findMethod("__callstatic")) m_attributes |= ObjectData::HasCallStatic;
 }
 
 const ClassStatement *ClassStatement::parentStatement() const {
@@ -128,6 +134,7 @@ void ClassStatement::loadMethodTable(
   } else {
     seen.insert(this);
   }
+  ce.setAttributes(m_attributes);
   ClassEvalState::MethodTable &mtable = ce.getMethodTable();
   if (!m_parent->empty()) {
     const ClassStatement* parent_cls = parentStatement();
@@ -137,6 +144,17 @@ void ClassStatement::loadMethodTable(
       // Built in
       ClassInfo::MethodVec meths;
       ClassInfo::GetClassMethods(meths, m_parent, 1);
+      if (const ClassInfo *info =
+          ClassInfo::FindClassInterfaceOrTrait(m_parent)) {
+        int attr = info->getAttribute(), o_attr = 0;
+        if (attr & ClassInfo::HasCall) {
+          o_attr |= ObjectData::HasCall;
+        }
+        if (attr & ClassInfo::HasCallStatic) {
+          o_attr |= ObjectData::HasCallStatic;
+        }
+        ce.setAttributes(o_attr);
+      }
       for (ClassInfo::MethodVec::const_iterator it = meths.begin();
            it != meths.end(); ++it) {
         int mods = 0;

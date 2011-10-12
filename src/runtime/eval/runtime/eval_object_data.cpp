@@ -36,10 +36,7 @@ EvalObjectData::EvalObjectData(ClassEvalState &cls, const char* pname,
   if (r == NULL) {
     RequestEvalState::registerObject(this);
   }
-  if (getMethodStatement("__get")) setAttribute(UseGet);
-  if (getMethodStatement("__set")) setAttribute(UseSet);
-  if (getMethodStatement("__isset")) setAttribute(UseIsset);
-  if (getMethodStatement("__unset")) setAttribute(UseUnset);
+  setAttributes(m_cls.getAttributes());
 
   // an object can never live longer than its class
   m_class_name = m_cls.getClass()->name();
@@ -55,8 +52,7 @@ EvalObjectData::EvalObjectData(EvalObjectData *original) :
 
   RequestEvalState::registerObject(this);
 
-  if (getMethodStatement("__get")) setAttribute(UseGet);
-  if (getMethodStatement("__set")) setAttribute(UseSet);
+  setAttributes(m_cls.getAttributes());
 
   // an object can never live longer than its class
   m_class_name = m_cls.getClass()->name();
@@ -335,13 +331,6 @@ Variant EvalObjectData::t___unset(Variant v_name) {
   }
 }
 
-bool EvalObjectData::hasCall() {
-  return getMethodStatement("__call") || DynamicObjectData::hasCall();
-}
-bool EvalObjectData::hasCallStatic() {
-  return getMethodStatement("__callStatic") ||
-         DynamicObjectData::hasCallStatic();
-}
 bool EvalObjectData::php_sleep(Variant &ret) {
   ret = t___sleep();
   return getMethodStatement("__sleep");

@@ -56,6 +56,9 @@ ObjectData::~ObjectData() {
   }
 }
 
+CallInfo *ObjectData::GetCallHandler() {
+  return &s_ObjectData_call_handler;
+}
 
 static CallInfo s_ObjectData_null_constructor(
     (void*)ObjectData::NullConstructor,
@@ -529,11 +532,12 @@ inline ALWAYS_INLINE bool GetCallInfoHelper(bool ex, const char *cls,
       return true;
     }
   } else {
+    const ObjectStaticCallbacks *cur = osc;
     do {
-      if (!ex || found || !strcasecmp(cls, osc->cls->data())) {
+      if (!ex || found || !strcasecmp(cls, cur->cls->data())) {
         if (ex) found = true;
-        if (const int *ix = osc->mcit_ix) {
-          const MethodCallInfoTable *info = osc->mcit;
+        if (const int *ix = cur->mcit_ix) {
+          const MethodCallInfoTable *info = cur->mcit;
 
           int h = hash & ix[0];
           int o = ix[h + 1];
@@ -551,20 +555,20 @@ inline ALWAYS_INLINE bool GetCallInfoHelper(bool ex, const char *cls,
           }
         }
       }
-      if (!osc->parent) {
-        if (LIKELY(!osc->redeclaredParent)) break;
+      if (!cur->parent) {
+        if (LIKELY(!cur->redeclaredParent)) break;
         if (LIKELY(!globals)) {
           globals = (char*)get_global_variables();
         }
-        osc = *(ObjectStaticCallbacks**)(globals + osc->redeclaredParent);
+        cur = *(ObjectStaticCallbacks**)(globals + cur->redeclaredParent);
         if (mcp.obj) {
           mcp.obj = static_cast<DynamicObjectData*>(mcp.obj)->
             getRedeclaredParent();
         }
       } else {
-        osc = osc->parent;
+        cur = cur->parent;
       }
-    } while (osc);
+    } while (cur);
   }
 
   if (mcp.obj) {
@@ -578,12 +582,17 @@ inline ALWAYS_INLINE bool GetCallInfoHelper(bool ex, const char *cls,
     StrNR cls = mcp.rootCls;
     bool ok = false;
     if (!obj || !obj->o_instanceof(cls)) {
-      obj = create_object_only_no_init(cls);
-      if (obj) {
-        ok = obj->hasCallStatic();
-        obj->release();
-        obj = 0;
+      if (LIKELY(osc != 0)) {
+        ok = osc->checkAttribute(ObjectData::HasCallStatic);
+      } else {
+        const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(cls);
+        if (info) {
+          ok = info->getAttribute() & ClassInfo::HasCallStatic;
+        } else if (mcp.m_fatal) {
+          throw_missing_class(cls);
+        }
       }
+      obj = 0;
     } else {
       ok = obj->hasCallStatic() || obj->hasCall();
     }
@@ -609,6 +618,16 @@ bool ObjectStaticCallbacks::GetCallInfoEx(const char *cls,
                                           MethodCallPackage &mcp,
                                           int64 hash) {
   return GetCallInfoHelper(true, cls, osc, mcp, hash);
+}
+
+bool ObjectStaticCallbacks::checkAttribute(int attrs) const {
+  if (attributes & attrs) return true;
+  if (LIKELY(!redeclaredParent)) return false;
+
+  const ObjectStaticCallbacks *osc =
+    *(ObjectStaticCallbacks**)((char*)get_global_variables() +
+                               redeclaredParent);
+  return osc->checkAttribute(attrs);
 }
 
 Variant ObjectData::os_invoke(CStrRef c, CStrRef s,

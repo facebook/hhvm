@@ -181,8 +181,12 @@ bool eval_get_call_info_static_method_hook(MethodCallPackage &info,
   }
 
   if (foundClass) {
-    // deal with callStatic
-    return ObjectStaticCallbacks::GetCallInfo(0, info, -1);
+    ClassEvalState *ce = Eval::RequestEvalState::findClassState(info.rootCls);
+    if (ce->getAttributes() & ObjectData::HasCallStatic) {
+      info.obj = 0;
+      info.ci = ObjectData::GetCallHandler();
+      return true;
+    }
   }
   return false;
 }

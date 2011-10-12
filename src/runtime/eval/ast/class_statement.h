@@ -84,6 +84,7 @@ public:
   void loadInterfaceStatements() const;
   void setModifiers(int m) { m_modifiers = m; }
   int getModifiers() const { return m_modifiers; }
+  int getAttributes() const { return m_attributes; }
   void addBases(const std::vector<String> &bases);
   void addVariable(ClassVariablePtr v);
   void addMethod(MethodStatementPtr m);
@@ -132,6 +133,7 @@ public:
 protected:
   StringData *m_name;
   int m_modifiers;
+  int m_attributes;
 
   StringData *m_parent;
   std::vector<StringData *> m_bases;

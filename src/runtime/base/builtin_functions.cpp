@@ -504,7 +504,7 @@ Variant o_invoke_failed(const char *cls, const char *meth,
 
 Array collect_few_args(int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (RuntimeOption::UseArgArray) {
-    if (count == 0) return Array();
+    if (count == 0) return Array::Create();
     ArgArray *args = NEW(ArgArray)(count);
     ArgArray::Argument *argp = args->getStack();
     if (count > 0) {
@@ -556,7 +556,7 @@ Array collect_few_args(int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   }
   switch (count) {
   case 0: {
-    return Array();
+    return Array::Create();
   }
   case 1: {
     return Array(ArrayInit(1).set(a0).create());

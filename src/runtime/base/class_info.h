@@ -49,6 +49,8 @@ public:
     IsPrivate              = (1 <<  8), //           x             x
     IsStatic               = (1 <<  9), //           x             x
     IsInherited            = (1 << 10), //                         x
+    HasCall                = IsPublic,  //    x
+    HasCallStatic          = IsProtected,//   x
 
     IsReference            = (1 << 11), //                  x      x     x
     IsOptional             = (1 << 12), //                               x

@@ -19435,7 +19435,54 @@ bool TestCodeRun::TestCallStatic() {
         "string(17) \"in object context\"\n"
         "string(7) \"runTest\"\n"
         "string(17) \"in static context\"\n");
-
+  MVCRO("<?php\n"
+        "abstract class BaseClass {"
+        "  public static function __callStatic($name,  $arguments) {"
+        "    echo \"Calling static method '$name' \""
+        "         . implode(', ', $arguments). \"\\n\";"
+        "  }"
+        "}"
+        "BaseClass::foo();",
+        "Calling static method 'foo' \n");
+  MVCRO("<?php\n"
+        "abstract class BaseClass {"
+        "}"
+        "class SubClass extends BaseClass {"
+        "  public static function __callStatic($name,  $arguments) {"
+        "    echo \"Calling static method '$name' \""
+        "         . implode(', ', $arguments). \"\\n\";"
+        "  }"
+        "}"
+        "SubClass::foo();",
+        "Calling static method 'foo' \n");
+  MVCRO("<?php\n"
+        "abstract class BaseClass {"
+        "  public static function __callStatic($name,  $arguments) {"
+        "    echo \"Calling static method '$name' \""
+        "         . implode(', ', $arguments). \"\\n\";"
+        "  }"
+        "}"
+        "class SubClass extends BaseClass {"
+        "}"
+        "SubClass::foo();",
+        "Calling static method 'foo' \n");
+  MVCRO("<?php\n"
+        "abstract class BaseClass {"
+        "  public static function __callStatic($name,  $arguments) {"
+        "    echo \"Calling BaseClass static method '$name' \""
+        "         . implode(', ', $arguments). \"\\n\";"
+        "  }"
+        "}"
+        "class SubClass extends BaseClass {"
+        "  public static function __callStatic($name,  $arguments) {"
+        "    echo \"Calling SubClass static method '$name' \""
+        "         . implode(', ', $arguments). \"\\n\";"
+        "  }"
+        "}"
+        "SubClass::foo();"
+        "BaseClass::foo();",
+        "Calling SubClass static method 'foo' \n"
+        "Calling BaseClass static method 'foo' \n");
   return true;
 }
 

@@ -236,7 +236,7 @@ const ObjectStaticCallbacks cw_ReflectionParameter = {
   c_ReflectionParameter::s_call_info_table,c_ReflectionParameter::s_call_info_index,
   c_ReflectionParameter::s_instanceof_table,c_ReflectionParameter::s_instanceof_index,
   &c_ReflectionParameter::s_class_name,
-  &c_ReflectionParameter::os_prop_table,&c_ReflectionParameter::ci___construct,0,0
+  &c_ReflectionParameter::os_prop_table,&c_ReflectionParameter::ci___construct,0,0,0x0
 };
 /* SRC: classes/reflection.php line 49 */
 void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
@@ -683,7 +683,7 @@ const ObjectStaticCallbacks cw_ReflectionMethod = {
   c_ReflectionMethod::s_call_info_table,c_ReflectionMethod::s_call_info_index,
   c_ReflectionMethod::s_instanceof_table,c_ReflectionMethod::s_instanceof_index,
   &c_ReflectionMethod::s_class_name,
-  &c_ReflectionMethod::os_prop_table,&c_ReflectionMethod::ci___construct,0,&cw_ReflectionFunctionAbstract
+  &c_ReflectionMethod::os_prop_table,&c_ReflectionMethod::ci___construct,0,&cw_ReflectionFunctionAbstract,0x0
 };
 /* SRC: classes/reflection.php line 1619 */
 void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMSTR(s_sys_ss00000000, "")
@@ -1118,7 +1118,7 @@ const ObjectStaticCallbacks cw_ReflectionExtension = {
   c_ReflectionExtension::s_call_info_table,c_ReflectionExtension::s_call_info_index,
   c_ReflectionExtension::s_instanceof_table,c_ReflectionExtension::s_instanceof_index,
   &c_ReflectionExtension::s_class_name,
-  &c_ReflectionExtension::os_prop_table,&c_ReflectionExtension::ci___construct,0,0
+  &c_ReflectionExtension::os_prop_table,&c_ReflectionExtension::ci___construct,0,0,0x0
 };
 /* SRC: classes/reflection.php line 1873 */
 void c_ReflectionExtension::t___construct(Variant v_name) {
@@ -1338,7 +1338,7 @@ const ObjectStaticCallbacks cw_ReflectionFunction = {
   c_ReflectionFunction::s_call_info_table,c_ReflectionFunction::s_call_info_index,
   c_ReflectionFunction::s_instanceof_table,c_ReflectionFunction::s_instanceof_index,
   &c_ReflectionFunction::s_class_name,
-  &c_ReflectionFunction::os_prop_table,&c_ReflectionFunction::ci___construct,0,&cw_ReflectionFunctionAbstract
+  &c_ReflectionFunction::os_prop_table,&c_ReflectionFunction::ci___construct,0,&cw_ReflectionFunctionAbstract,0x0
 };
 /* SRC: classes/reflection.php line 465 */
 void c_ReflectionFunction::t___construct(Variant v_name) {
@@ -1648,7 +1648,7 @@ const ObjectStaticCallbacks cw_ReflectionProperty = {
   c_ReflectionProperty::s_call_info_table,c_ReflectionProperty::s_call_info_index,
   c_ReflectionProperty::s_instanceof_table,c_ReflectionProperty::s_instanceof_index,
   &c_ReflectionProperty::s_class_name,
-  &c_ReflectionProperty::os_prop_table,&c_ReflectionProperty::ci___construct,0,0
+  &c_ReflectionProperty::os_prop_table,&c_ReflectionProperty::ci___construct,0,0,0x0
 };
 /* SRC: classes/reflection.php line 1365 */
 void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
@@ -2083,7 +2083,7 @@ const ObjectStaticCallbacks cw_ReflectionFunctionAbstract = {
   c_ReflectionFunctionAbstract::s_call_info_table,c_ReflectionFunctionAbstract::s_call_info_index,
   c_ReflectionFunctionAbstract::s_instanceof_table,c_ReflectionFunctionAbstract::s_instanceof_index,
   &c_ReflectionFunctionAbstract::s_class_name,
-  &c_ReflectionFunctionAbstract::os_prop_table,0,0,0
+  &c_ReflectionFunctionAbstract::os_prop_table,0,0,0,0x0
 };
 /* SRC: classes/reflection.php line 261 */
 Variant c_ReflectionFunctionAbstract::t_getname() {
@@ -2243,7 +2243,7 @@ const ObjectStaticCallbacks cw_ReflectionException = {
   c_ReflectionException::s_call_info_table,c_ReflectionException::s_call_info_index,
   c_ReflectionException::s_instanceof_table,c_ReflectionException::s_instanceof_index,
   &c_ReflectionException::s_class_name,
-  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_Exception
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_Exception,0x0
 };
 /* SRC: classes/reflection.php line 1317 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionObject)
@@ -2280,7 +2280,7 @@ const ObjectStaticCallbacks cw_ReflectionObject = {
   c_ReflectionObject::s_call_info_table,c_ReflectionObject::s_call_info_index,
   c_ReflectionObject::s_instanceof_table,c_ReflectionObject::s_instanceof_index,
   &c_ReflectionObject::s_class_name,
-  &c_ReflectionClass::os_prop_table,&c_ReflectionClass::ci___construct,0,&cw_ReflectionClass
+  &c_ReflectionClass::os_prop_table,&c_ReflectionClass::ci___construct,0,&cw_ReflectionClass,0x0
 };
 /* SRC: classes/reflection.php line 1334 */
 Variant c_ReflectionObject::t_export(Variant v_obj, CVarRef v_ret) {
@@ -2980,7 +2980,7 @@ const ObjectStaticCallbacks cw_ReflectionClass = {
   c_ReflectionClass::s_call_info_table,c_ReflectionClass::s_call_info_index,
   c_ReflectionClass::s_instanceof_table,c_ReflectionClass::s_instanceof_index,
   &c_ReflectionClass::s_class_name,
-  &c_ReflectionClass::os_prop_table,&c_ReflectionClass::ci___construct,0,0
+  &c_ReflectionClass::os_prop_table,&c_ReflectionClass::ci___construct,0,0,0x0
 };
 /* SRC: classes/reflection.php line 546 */
 void c_ReflectionClass::t___construct(Variant v_name) {

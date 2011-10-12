@@ -173,7 +173,7 @@ const ObjectStaticCallbacks cw_DOMDocumentType = {
   c_DOMDocumentType::s_call_info_table,c_DOMDocumentType::s_call_info_index,
   c_DOMDocumentType::s_instanceof_table,c_DOMDocumentType::s_instanceof_index,
   &c_DOMDocumentType::s_class_name,
-  0,&c_DOMDocumentType::ci___construct,0,&cw_DOMNode
+  0,&c_DOMDocumentType::ci___construct,0,&cw_DOMNode,0x0
 };
 ObjectData *coo_DOMNodeList() {
   return NEWOBJ(c_DOMNodeList)();
@@ -305,7 +305,7 @@ const ObjectStaticCallbacks cw_DOMNodeList = {
   c_DOMNodeList::s_call_info_table,c_DOMNodeList::s_call_info_index,
   c_DOMNodeList::s_instanceof_table,c_DOMNodeList::s_instanceof_index,
   &c_DOMNodeList::s_class_name,
-  0,&c_DOMNodeList::ci___construct,0,0
+  0,&c_DOMNodeList::ci___construct,0,0,0x0
 };
 ObjectData *coo_DOMNamedNodeMap() {
   return NEWOBJ(c_DOMNamedNodeMap)();
@@ -468,7 +468,7 @@ const ObjectStaticCallbacks cw_DOMNamedNodeMap = {
   c_DOMNamedNodeMap::s_call_info_table,c_DOMNamedNodeMap::s_call_info_index,
   c_DOMNamedNodeMap::s_instanceof_table,c_DOMNamedNodeMap::s_instanceof_index,
   &c_DOMNamedNodeMap::s_class_name,
-  0,&c_DOMNamedNodeMap::ci___construct,0,0
+  0,&c_DOMNamedNodeMap::ci___construct,0,0,0x0
 };
 ObjectData *coo_PDOStatement() {
   return NEWOBJ(c_PDOStatement)();
@@ -937,7 +937,7 @@ const ObjectStaticCallbacks cw_PDOStatement = {
   c_PDOStatement::s_call_info_table,c_PDOStatement::s_call_info_index,
   c_PDOStatement::s_instanceof_table,c_PDOStatement::s_instanceof_index,
   &c_PDOStatement::s_class_name,
-  0,&c_PDOStatement::ci___construct,0,0
+  0,&c_PDOStatement::ci___construct,0,0,0x0
 };
 ObjectData *coo_DOMNodeIterator() {
   return NEWOBJ(c_DOMNodeIterator)();
@@ -1064,7 +1064,7 @@ const ObjectStaticCallbacks cw_DOMNodeIterator = {
   c_DOMNodeIterator::s_call_info_table,c_DOMNodeIterator::s_call_info_index,
   c_DOMNodeIterator::s_instanceof_table,c_DOMNodeIterator::s_instanceof_index,
   &c_DOMNodeIterator::s_class_name,
-  0,&c_DOMNodeIterator::ci___construct,0,0
+  0,&c_DOMNodeIterator::ci___construct,0,0,0x0
 };
 ObjectData *coo_Locale() {
   return NEWOBJ(c_Locale)();
@@ -1121,7 +1121,7 @@ const ObjectStaticCallbacks cw_Locale = {
   c_Locale::s_call_info_table,c_Locale::s_call_info_index,
   c_Locale::s_instanceof_table,c_Locale::s_instanceof_index,
   &c_Locale::s_class_name,
-  &c_Locale::os_prop_table,&c_Locale::ci___construct,0,0
+  &c_Locale::os_prop_table,&c_Locale::ci___construct,0,0,0x0
 };
 ObjectData *coo_SpoofChecker() {
   return NEWOBJ(c_SpoofChecker)();
@@ -1241,7 +1241,7 @@ const ObjectStaticCallbacks cw_SpoofChecker = {
   c_SpoofChecker::s_call_info_table,c_SpoofChecker::s_call_info_index,
   c_SpoofChecker::s_instanceof_table,c_SpoofChecker::s_instanceof_index,
   &c_SpoofChecker::s_class_name,
-  &c_SpoofChecker::os_prop_table,&c_SpoofChecker::ci___construct,0,0
+  &c_SpoofChecker::os_prop_table,&c_SpoofChecker::ci___construct,0,0,0x0
 };
 ObjectData *coo_XMLWriter() {
   return NEWOBJ(c_XMLWriter)();
@@ -1932,7 +1932,7 @@ const ObjectStaticCallbacks cw_XMLWriter = {
   c_XMLWriter::s_call_info_table,c_XMLWriter::s_call_info_index,
   c_XMLWriter::s_instanceof_table,c_XMLWriter::s_instanceof_index,
   &c_XMLWriter::s_class_name,
-  0,&c_XMLWriter::ci___construct,0,0
+  0,&c_XMLWriter::ci___construct,0,0,0x0
 };
 ObjectData *coo_DOMComment() {
   return NEWOBJ(c_DOMComment)();
@@ -1994,7 +1994,7 @@ const ObjectStaticCallbacks cw_DOMComment = {
   c_DOMComment::s_call_info_table,c_DOMComment::s_call_info_index,
   c_DOMComment::s_instanceof_table,c_DOMComment::s_instanceof_index,
   &c_DOMComment::s_class_name,
-  0,&c_DOMComment::ci___construct,0,&cw_DOMCharacterData
+  0,&c_DOMComment::ci___construct,0,&cw_DOMCharacterData,0x0
 };
 ObjectData *coo_Closure() {
   return NEWOBJ(c_Closure)();
@@ -2090,7 +2090,7 @@ const ObjectStaticCallbacks cw_Closure = {
   c_Closure::s_call_info_table,c_Closure::s_call_info_index,
   c_Closure::s_instanceof_table,c_Closure::s_instanceof_index,
   &c_Closure::s_class_name,
-  0,&c_Closure::ci___construct,0,0
+  0,&c_Closure::ci___construct,0,0,0x0
 };
 ObjectData *coo_SQLite3() {
   return NEWOBJ(c_SQLite3)();
@@ -2390,7 +2390,7 @@ const ObjectStaticCallbacks cw_SQLite3 = {
   c_SQLite3::s_call_info_table,c_SQLite3::s_call_info_index,
   c_SQLite3::s_instanceof_table,c_SQLite3::s_instanceof_index,
   &c_SQLite3::s_class_name,
-  0,&c_SQLite3::ci___construct,0,0
+  0,&c_SQLite3::ci___construct,0,0,0x0
 };
 ObjectData *coo_DOMProcessingInstruction() {
   return NEWOBJ(c_DOMProcessingInstruction)();
@@ -2496,7 +2496,7 @@ const ObjectStaticCallbacks cw_DOMProcessingInstruction = {
   c_DOMProcessingInstruction::s_call_info_table,c_DOMProcessingInstruction::s_call_info_index,
   c_DOMProcessingInstruction::s_instanceof_table,c_DOMProcessingInstruction::s_instanceof_index,
   &c_DOMProcessingInstruction::s_class_name,
-  0,&c_DOMProcessingInstruction::ci___construct,0,&cw_DOMNode
+  0,&c_DOMProcessingInstruction::ci___construct,0,&cw_DOMNode,0x0
 };
 ObjectData *coo_Collator() {
   return NEWOBJ(c_Collator)();
@@ -2726,7 +2726,7 @@ const ObjectStaticCallbacks cw_Collator = {
   c_Collator::s_call_info_table,c_Collator::s_call_info_index,
   c_Collator::s_instanceof_table,c_Collator::s_instanceof_index,
   &c_Collator::s_class_name,
-  &c_Collator::os_prop_table,&c_Collator::ci___construct,0,0
+  &c_Collator::os_prop_table,&c_Collator::ci___construct,0,0,0x0
 };
 ObjectData *coo_SoapHeader() {
   return NEWOBJ(c_SoapHeader)();
@@ -2791,7 +2791,7 @@ const ObjectStaticCallbacks cw_SoapHeader = {
   c_SoapHeader::s_call_info_table,c_SoapHeader::s_call_info_index,
   c_SoapHeader::s_instanceof_table,c_SoapHeader::s_instanceof_index,
   &c_SoapHeader::s_class_name,
-  0,&c_SoapHeader::ci___construct,0,0
+  0,&c_SoapHeader::ci___construct,0,0,0x0
 };
 ObjectData *coo_GeneratorClosure() {
   return NEWOBJ(c_GeneratorClosure)();
@@ -2849,7 +2849,7 @@ const ObjectStaticCallbacks cw_GeneratorClosure = {
   c_GeneratorClosure::s_call_info_table,c_GeneratorClosure::s_call_info_index,
   c_GeneratorClosure::s_instanceof_table,c_GeneratorClosure::s_instanceof_index,
   &c_GeneratorClosure::s_class_name,
-  0,&c_GeneratorClosure::ci___construct,0,&cw_Closure
+  0,&c_GeneratorClosure::ci___construct,0,&cw_Closure,0x0
 };
 ObjectData *coo_EncodingDetector() {
   return NEWOBJ(c_EncodingDetector)();
@@ -2962,7 +2962,7 @@ const ObjectStaticCallbacks cw_EncodingDetector = {
   c_EncodingDetector::s_call_info_table,c_EncodingDetector::s_call_info_index,
   c_EncodingDetector::s_instanceof_table,c_EncodingDetector::s_instanceof_index,
   &c_EncodingDetector::s_class_name,
-  0,&c_EncodingDetector::ci___construct,0,0
+  0,&c_EncodingDetector::ci___construct,0,0,0x0
 };
 ObjectData *coo_ImageSprite() {
   return NEWOBJ(c_ImageSprite)();
@@ -3184,7 +3184,7 @@ const ObjectStaticCallbacks cw_ImageSprite = {
   c_ImageSprite::s_call_info_table,c_ImageSprite::s_call_info_index,
   c_ImageSprite::s_instanceof_table,c_ImageSprite::s_instanceof_index,
   &c_ImageSprite::s_class_name,
-  0,&c_ImageSprite::ci___construct,0,0
+  0,&c_ImageSprite::ci___construct,0,0,0x0
 };
 ObjectData *coo_DOMDocumentFragment() {
   return NEWOBJ(c_DOMDocumentFragment)();
@@ -3257,7 +3257,7 @@ const ObjectStaticCallbacks cw_DOMDocumentFragment = {
   c_DOMDocumentFragment::s_call_info_table,c_DOMDocumentFragment::s_call_info_index,
   c_DOMDocumentFragment::s_instanceof_table,c_DOMDocumentFragment::s_instanceof_index,
   &c_DOMDocumentFragment::s_class_name,
-  0,&c_DOMDocumentFragment::ci___construct,0,&cw_DOMNode
+  0,&c_DOMDocumentFragment::ci___construct,0,&cw_DOMNode,0x0
 };
 ObjectData *coo_DOMXPath() {
   return NEWOBJ(c_DOMXPath)();
@@ -3424,7 +3424,7 @@ const ObjectStaticCallbacks cw_DOMXPath = {
   c_DOMXPath::s_call_info_table,c_DOMXPath::s_call_info_index,
   c_DOMXPath::s_instanceof_table,c_DOMXPath::s_instanceof_index,
   &c_DOMXPath::s_class_name,
-  0,&c_DOMXPath::ci___construct,0,0
+  0,&c_DOMXPath::ci___construct,0,0,0x0
 };
 ObjectData *coo_DebuggerClient() {
   return NEWOBJ(c_DebuggerClient)();
@@ -4007,7 +4007,7 @@ const ObjectStaticCallbacks cw_DebuggerClient = {
   c_DebuggerClient::s_call_info_table,c_DebuggerClient::s_call_info_index,
   c_DebuggerClient::s_instanceof_table,c_DebuggerClient::s_instanceof_index,
   &c_DebuggerClient::s_class_name,
-  &c_DebuggerClient::os_prop_table,&c_DebuggerClient::ci___construct,0,0
+  &c_DebuggerClient::os_prop_table,&c_DebuggerClient::ci___construct,0,0,0x0
 };
 ObjectData *coo_DebuggerProxy() {
   return NEWOBJ(c_DebuggerProxy)();
@@ -4092,7 +4092,7 @@ const ObjectStaticCallbacks cw_DebuggerProxy = {
   c_DebuggerProxy::s_call_info_table,c_DebuggerProxy::s_call_info_index,
   c_DebuggerProxy::s_instanceof_table,c_DebuggerProxy::s_instanceof_index,
   &c_DebuggerProxy::s_class_name,
-  0,&c_DebuggerProxy::ci___construct,0,0
+  0,&c_DebuggerProxy::ci___construct,0,0,0x0
 };
 ObjectData *coo_SoapParam() {
   return NEWOBJ(c_SoapParam)();
@@ -4151,7 +4151,7 @@ const ObjectStaticCallbacks cw_SoapParam = {
   c_SoapParam::s_call_info_table,c_SoapParam::s_call_info_index,
   c_SoapParam::s_instanceof_table,c_SoapParam::s_instanceof_index,
   &c_SoapParam::s_class_name,
-  0,&c_SoapParam::ci___construct,0,0
+  0,&c_SoapParam::ci___construct,0,0,0x0
 };
 ObjectData *coo_Memcached() {
   return NEWOBJ(c_Memcached)();
@@ -4819,7 +4819,7 @@ const ObjectStaticCallbacks cw_Memcached = {
   c_Memcached::s_call_info_table,c_Memcached::s_call_info_index,
   c_Memcached::s_instanceof_table,c_Memcached::s_instanceof_index,
   &c_Memcached::s_class_name,
-  &c_Memcached::os_prop_table,&c_Memcached::ci___construct,0,0
+  &c_Memcached::os_prop_table,&c_Memcached::ci___construct,0,0,0x0
 };
 ObjectData *coo_DOMAttr() {
   return NEWOBJ(c_DOMAttr)();
@@ -4938,7 +4938,7 @@ const ObjectStaticCallbacks cw_DOMAttr = {
   c_DOMAttr::s_call_info_table,c_DOMAttr::s_call_info_index,
   c_DOMAttr::s_instanceof_table,c_DOMAttr::s_instanceof_index,
   &c_DOMAttr::s_class_name,
-  0,&c_DOMAttr::ci___construct,0,&cw_DOMNode
+  0,&c_DOMAttr::ci___construct,0,&cw_DOMNode,0x0
 };
 ObjectData *coo_SQLite3Result() {
   return NEWOBJ(c_SQLite3Result)();
@@ -5079,7 +5079,7 @@ const ObjectStaticCallbacks cw_SQLite3Result = {
   c_SQLite3Result::s_call_info_table,c_SQLite3Result::s_call_info_index,
   c_SQLite3Result::s_instanceof_table,c_SQLite3Result::s_instanceof_index,
   &c_SQLite3Result::s_class_name,
-  0,&c_SQLite3Result::ci___construct,0,0
+  0,&c_SQLite3Result::ci___construct,0,0,0x0
 };
 ObjectData *coo_DOMDocument() {
   return NEWOBJ(c_DOMDocument)();
@@ -5638,7 +5638,7 @@ const ObjectStaticCallbacks cw_DOMDocument = {
   c_DOMDocument::s_call_info_table,c_DOMDocument::s_call_info_index,
   c_DOMDocument::s_instanceof_table,c_DOMDocument::s_instanceof_index,
   &c_DOMDocument::s_class_name,
-  0,&c_DOMDocument::ci___construct,0,&cw_DOMNode
+  0,&c_DOMDocument::ci___construct,0,&cw_DOMNode,0x0
 };
 ObjectData *coo_SoapVar() {
   return NEWOBJ(c_SoapVar)();
@@ -5705,7 +5705,7 @@ const ObjectStaticCallbacks cw_SoapVar = {
   c_SoapVar::s_call_info_table,c_SoapVar::s_call_info_index,
   c_SoapVar::s_instanceof_table,c_SoapVar::s_instanceof_index,
   &c_SoapVar::s_class_name,
-  0,&c_SoapVar::ci___construct,0,0
+  0,&c_SoapVar::ci___construct,0,0,0x0
 };
 ObjectData *coo_SimpleXMLElementIterator() {
   return NEWOBJ(c_SimpleXMLElementIterator)();
@@ -5832,7 +5832,7 @@ const ObjectStaticCallbacks cw_SimpleXMLElementIterator = {
   c_SimpleXMLElementIterator::s_call_info_table,c_SimpleXMLElementIterator::s_call_info_index,
   c_SimpleXMLElementIterator::s_instanceof_table,c_SimpleXMLElementIterator::s_instanceof_index,
   &c_SimpleXMLElementIterator::s_class_name,
-  0,&c_SimpleXMLElementIterator::ci___construct,0,0
+  0,&c_SimpleXMLElementIterator::ci___construct,0,0,0x0
 };
 ObjectData *coo_PDO() {
   return NEWOBJ(c_PDO)();
@@ -6108,7 +6108,7 @@ const ObjectStaticCallbacks cw_PDO = {
   c_PDO::s_call_info_table,c_PDO::s_call_info_index,
   c_PDO::s_instanceof_table,c_PDO::s_instanceof_index,
   &c_PDO::s_class_name,
-  &c_PDO::os_prop_table,&c_PDO::ci___construct,0,0
+  &c_PDO::os_prop_table,&c_PDO::ci___construct,0,0,0x0
 };
 ObjectData *coo_Continuation() {
   return NEWOBJ(c_Continuation)();
@@ -6410,7 +6410,7 @@ const ObjectStaticCallbacks cw_Continuation = {
   c_Continuation::s_call_info_table,c_Continuation::s_call_info_index,
   c_Continuation::s_instanceof_table,c_Continuation::s_instanceof_index,
   &c_Continuation::s_class_name,
-  &c_Continuation::os_prop_table,&c_Continuation::ci___construct,0,0
+  &c_Continuation::os_prop_table,&c_Continuation::ci___construct,0,0,0x0
 };
 ObjectData *coo_SimpleXMLElement() {
   return NEWOBJ(c_SimpleXMLElement)();
@@ -6800,7 +6800,7 @@ const ObjectStaticCallbacks cw_SimpleXMLElement = {
   c_SimpleXMLElement::s_call_info_table,c_SimpleXMLElement::s_call_info_index,
   c_SimpleXMLElement::s_instanceof_table,c_SimpleXMLElement::s_instanceof_index,
   &c_SimpleXMLElement::s_class_name,
-  0,&c_SimpleXMLElement::ci___construct,0,0
+  0,&c_SimpleXMLElement::ci___construct,0,0,0x0
 };
 ObjectData *coo_DOMText() {
   return NEWOBJ(c_DOMText)();
@@ -6934,7 +6934,7 @@ const ObjectStaticCallbacks cw_DOMText = {
   c_DOMText::s_call_info_table,c_DOMText::s_call_info_index,
   c_DOMText::s_instanceof_table,c_DOMText::s_instanceof_index,
   &c_DOMText::s_class_name,
-  0,&c_DOMText::ci___construct,0,&cw_DOMCharacterData
+  0,&c_DOMText::ci___construct,0,&cw_DOMCharacterData,0x0
 };
 ObjectData *coo_SoapServer() {
   return NEWOBJ(c_SoapServer)();
@@ -7135,7 +7135,7 @@ const ObjectStaticCallbacks cw_SoapServer = {
   c_SoapServer::s_call_info_table,c_SoapServer::s_call_info_index,
   c_SoapServer::s_instanceof_table,c_SoapServer::s_instanceof_index,
   &c_SoapServer::s_class_name,
-  0,&c_SoapServer::ci___construct,0,0
+  0,&c_SoapServer::ci___construct,0,0,0x0
 };
 ObjectData *coo_DOMCDATASection() {
   return NEWOBJ(c_DOMCDATASection)();
@@ -7197,7 +7197,7 @@ const ObjectStaticCallbacks cw_DOMCDATASection = {
   c_DOMCDATASection::s_call_info_table,c_DOMCDATASection::s_call_info_index,
   c_DOMCDATASection::s_instanceof_table,c_DOMCDATASection::s_instanceof_index,
   &c_DOMCDATASection::s_class_name,
-  0,&c_DOMCDATASection::ci___construct,0,&cw_DOMText
+  0,&c_DOMCDATASection::ci___construct,0,&cw_DOMText,0x0
 };
 ObjectData *coo_DOMNode() {
   return NEWOBJ(c_DOMNode)();
@@ -7558,7 +7558,7 @@ const ObjectStaticCallbacks cw_DOMNode = {
   c_DOMNode::s_call_info_table,c_DOMNode::s_call_info_index,
   c_DOMNode::s_instanceof_table,c_DOMNode::s_instanceof_index,
   &c_DOMNode::s_class_name,
-  0,&c_DOMNode::ci___construct,0,0
+  0,&c_DOMNode::ci___construct,0,0,0x0
 };
 ObjectData *coo_SQLite3Stmt() {
   return NEWOBJ(c_SQLite3Stmt)();
@@ -7720,7 +7720,7 @@ const ObjectStaticCallbacks cw_SQLite3Stmt = {
   c_SQLite3Stmt::s_call_info_table,c_SQLite3Stmt::s_call_info_index,
   c_SQLite3Stmt::s_instanceof_table,c_SQLite3Stmt::s_instanceof_index,
   &c_SQLite3Stmt::s_class_name,
-  0,&c_SQLite3Stmt::ci___construct,0,0
+  0,&c_SQLite3Stmt::ci___construct,0,0,0x0
 };
 ObjectData *coo_DOMEntity() {
   return NEWOBJ(c_DOMEntity)();
@@ -7823,7 +7823,7 @@ const ObjectStaticCallbacks cw_DOMEntity = {
   c_DOMEntity::s_call_info_table,c_DOMEntity::s_call_info_index,
   c_DOMEntity::s_instanceof_table,c_DOMEntity::s_instanceof_index,
   &c_DOMEntity::s_class_name,
-  0,&c_DOMEntity::ci___construct,0,&cw_DOMNode
+  0,&c_DOMEntity::ci___construct,0,&cw_DOMNode,0x0
 };
 ObjectData *coo_DOMElement() {
   return NEWOBJ(c_DOMElement)();
@@ -8201,7 +8201,7 @@ const ObjectStaticCallbacks cw_DOMElement = {
   c_DOMElement::s_call_info_table,c_DOMElement::s_call_info_index,
   c_DOMElement::s_instanceof_table,c_DOMElement::s_instanceof_index,
   &c_DOMElement::s_class_name,
-  0,&c_DOMElement::ci___construct,0,&cw_DOMNode
+  0,&c_DOMElement::ci___construct,0,&cw_DOMNode,0x0
 };
 ObjectData *coo_Memcache() {
   return NEWOBJ(c_Memcache)();
@@ -8627,7 +8627,7 @@ const ObjectStaticCallbacks cw_Memcache = {
   c_Memcache::s_call_info_table,c_Memcache::s_call_info_index,
   c_Memcache::s_instanceof_table,c_Memcache::s_instanceof_index,
   &c_Memcache::s_class_name,
-  0,&c_Memcache::ci___construct,0,0
+  0,&c_Memcache::ci___construct,0,0,0x0
 };
 ObjectData *coo_DOMEntityReference() {
   return NEWOBJ(c_DOMEntityReference)();
@@ -8686,7 +8686,7 @@ const ObjectStaticCallbacks cw_DOMEntityReference = {
   c_DOMEntityReference::s_call_info_table,c_DOMEntityReference::s_call_info_index,
   c_DOMEntityReference::s_instanceof_table,c_DOMEntityReference::s_instanceof_index,
   &c_DOMEntityReference::s_class_name,
-  0,&c_DOMEntityReference::ci___construct,0,&cw_DOMNode
+  0,&c_DOMEntityReference::ci___construct,0,&cw_DOMNode,0x0
 };
 ObjectData *coo_GenericContinuation() {
   return NEWOBJ(c_GenericContinuation)();
@@ -8803,7 +8803,7 @@ const ObjectStaticCallbacks cw_GenericContinuation = {
   c_GenericContinuation::s_call_info_table,c_GenericContinuation::s_call_info_index,
   c_GenericContinuation::s_instanceof_table,c_GenericContinuation::s_instanceof_index,
   &c_GenericContinuation::s_class_name,
-  &c_GenericContinuation::os_prop_table,&c_GenericContinuation::ci___construct,0,&cw_Continuation
+  &c_GenericContinuation::os_prop_table,&c_GenericContinuation::ci___construct,0,&cw_Continuation,0x0
 };
 ObjectData *coo_Normalizer() {
   return NEWOBJ(c_Normalizer)();
@@ -8885,7 +8885,7 @@ const ObjectStaticCallbacks cw_Normalizer = {
   c_Normalizer::s_call_info_table,c_Normalizer::s_call_info_index,
   c_Normalizer::s_instanceof_table,c_Normalizer::s_instanceof_index,
   &c_Normalizer::s_class_name,
-  &c_Normalizer::os_prop_table,&c_Normalizer::ci___construct,0,0
+  &c_Normalizer::os_prop_table,&c_Normalizer::ci___construct,0,0,0x0
 };
 ObjectData *coo_EncodingMatch() {
   return NEWOBJ(c_EncodingMatch)();
@@ -9009,7 +9009,7 @@ const ObjectStaticCallbacks cw_EncodingMatch = {
   c_EncodingMatch::s_call_info_table,c_EncodingMatch::s_call_info_index,
   c_EncodingMatch::s_instanceof_table,c_EncodingMatch::s_instanceof_index,
   &c_EncodingMatch::s_class_name,
-  0,&c_EncodingMatch::ci___construct,0,0
+  0,&c_EncodingMatch::ci___construct,0,0,0x0
 };
 ObjectData *coo_XMLReader() {
   return NEWOBJ(c_XMLReader)();
@@ -9440,7 +9440,7 @@ const ObjectStaticCallbacks cw_XMLReader = {
   c_XMLReader::s_call_info_table,c_XMLReader::s_call_info_index,
   c_XMLReader::s_instanceof_table,c_XMLReader::s_instanceof_index,
   &c_XMLReader::s_class_name,
-  &c_XMLReader::os_prop_table,&c_XMLReader::ci___construct,0,0
+  &c_XMLReader::os_prop_table,&c_XMLReader::ci___construct,0,0,0x0
 };
 ObjectData *coo_DateTime() {
   return NEWOBJ(c_DateTime)();
@@ -9623,7 +9623,7 @@ const ObjectStaticCallbacks cw_DateTime = {
   c_DateTime::s_call_info_table,c_DateTime::s_call_info_index,
   c_DateTime::s_instanceof_table,c_DateTime::s_instanceof_index,
   &c_DateTime::s_class_name,
-  &c_DateTime::os_prop_table,&c_DateTime::ci___construct,0,0
+  &c_DateTime::os_prop_table,&c_DateTime::ci___construct,0,0,0x0
 };
 ObjectData *coo_DOMNotation() {
   return NEWOBJ(c_DOMNotation)();
@@ -9726,7 +9726,7 @@ const ObjectStaticCallbacks cw_DOMNotation = {
   c_DOMNotation::s_call_info_table,c_DOMNotation::s_call_info_index,
   c_DOMNotation::s_instanceof_table,c_DOMNotation::s_instanceof_index,
   &c_DOMNotation::s_class_name,
-  0,&c_DOMNotation::ci___construct,0,&cw_DOMNode
+  0,&c_DOMNotation::ci___construct,0,&cw_DOMNode,0x0
 };
 ObjectData *coo_DOMCharacterData() {
   return NEWOBJ(c_DOMCharacterData)();
@@ -9906,7 +9906,7 @@ const ObjectStaticCallbacks cw_DOMCharacterData = {
   c_DOMCharacterData::s_call_info_table,c_DOMCharacterData::s_call_info_index,
   c_DOMCharacterData::s_instanceof_table,c_DOMCharacterData::s_instanceof_index,
   &c_DOMCharacterData::s_class_name,
-  0,&c_DOMCharacterData::ci___construct,0,&cw_DOMNode
+  0,&c_DOMCharacterData::ci___construct,0,&cw_DOMNode,0x0
 };
 ObjectData *coo_LibXMLError() {
   return NEWOBJ(c_LibXMLError)();
@@ -9963,7 +9963,7 @@ const ObjectStaticCallbacks cw_LibXMLError = {
   c_LibXMLError::s_call_info_table,c_LibXMLError::s_call_info_index,
   c_LibXMLError::s_instanceof_table,c_LibXMLError::s_instanceof_index,
   &c_LibXMLError::s_class_name,
-  0,&c_LibXMLError::ci___construct,0,0
+  0,&c_LibXMLError::ci___construct,0,0,0x0
 };
 ObjectData *coo_DateTimeZone() {
   return NEWOBJ(c_DateTimeZone)();
@@ -10081,7 +10081,7 @@ const ObjectStaticCallbacks cw_DateTimeZone = {
   c_DateTimeZone::s_call_info_table,c_DateTimeZone::s_call_info_index,
   c_DateTimeZone::s_instanceof_table,c_DateTimeZone::s_instanceof_index,
   &c_DateTimeZone::s_class_name,
-  &c_DateTimeZone::os_prop_table,&c_DateTimeZone::ci___construct,0,0
+  &c_DateTimeZone::os_prop_table,&c_DateTimeZone::ci___construct,0,0,0x0
 };
 ObjectData *coo_DOMImplementation() {
   return NEWOBJ(c_DOMImplementation)();
@@ -10193,7 +10193,7 @@ const ObjectStaticCallbacks cw_DOMImplementation = {
   c_DOMImplementation::s_call_info_table,c_DOMImplementation::s_call_info_index,
   c_DOMImplementation::s_instanceof_table,c_DOMImplementation::s_instanceof_index,
   &c_DOMImplementation::s_class_name,
-  0,&c_DOMImplementation::ci___construct,0,0
+  0,&c_DOMImplementation::ci___construct,0,0,0x0
 };
 ObjectData *coo_SoapClient() {
   return NEWOBJ(c_SoapClient)();
@@ -10439,7 +10439,7 @@ const ObjectStaticCallbacks cw_SoapClient = {
   c_SoapClient::s_call_info_table,c_SoapClient::s_call_info_index,
   c_SoapClient::s_instanceof_table,c_SoapClient::s_instanceof_index,
   &c_SoapClient::s_class_name,
-  0,&c_SoapClient::ci___construct,0,0
+  0,&c_SoapClient::ci___construct,0,0,0x100
 };
 struct hashNodeCTD {
   int64 hash;
@@ -10599,10 +10599,6 @@ const ObjectStaticCallbacks * get_builtin_object_static_callbacks(CStrRef s) {
   }
   return NULL;
 }
-Variant get_builtin_class_var_init(CStrRef s, const char *var) {
-  const ObjectStaticCallbacks *cwo = get_builtin_object_static_callbacks(s);
-  return LIKELY(cwo != 0) ? cwo->os_getInit(var) : throw_missing_class(s);
-}
 ObjectData *create_builtin_object_only_no_init(CStrRef s, ObjectData* root /* = NULL*/) {
   const ObjectStaticCallbacks *cwo = get_builtin_object_static_callbacks(s);
   if (LIKELY(cwo != 0)) return cwo->createOnlyNoInit(root);
@@ -10614,33 +10610,6 @@ Object create_builtin_object_only(CStrRef s, ObjectData* root /* = NULL*/) {
   Object r = obj;
   obj->init();
   return r;
-}
-bool get_call_info_static_method_builtin(MethodCallPackage &mcp) {
-  StringData *s ATTRIBUTE_UNUSED (mcp.rootCls);
-  const ObjectStaticCallbacks *cwo = get_builtin_object_static_callbacks(s);
-  return ObjectStaticCallbacks::GetCallInfo(cwo,mcp,-1);
-}
-Variant get_builtin_static_property(CStrRef s, const char *prop) {
-  const ObjectStaticCallbacks * cwo = get_builtin_object_static_callbacks(s);
-  if (cwo) return cwo->os_get(prop);
-  return null;
-}
-Variant *get_builtin_static_property_lv(CStrRef s, const char *prop) {
-  const ObjectStaticCallbacks * cwo = get_builtin_object_static_callbacks(s);
-  if (cwo) return &cwo->os_lval(prop);
-  return NULL;
-}
-Variant get_builtin_class_constant(CStrRef s, const char *constant, int fatal /* = true */) {
-  {
-    const ObjectStaticCallbacks * cwo = get_builtin_object_static_callbacks(s);
-    if (cwo) return cwo->os_constant(constant);
-  }
-  if (fatal > 0) {
-    raise_error("Couldn't find constant %s::%s", s.data(), constant);
-  } else if (!fatal) {
-    raise_warning("Couldn't find constant %s::%s", s.data(), constant);
-  }
-  return null;
 }
 
 // Class tables

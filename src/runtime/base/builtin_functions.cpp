@@ -1558,6 +1558,10 @@ Variant invoke_static_method_bind(CStrRef s, CStrRef method,
   return strongBind(ret);
 }
 
+MethodCallPackage::MethodCallPackage()
+  : ci(NULL), extra(NULL), obj(NULL),
+    isObj(false), m_fatal(true), m_isFunc(false) {}
+
 bool MethodCallPackage::methodCall(ObjectData *self, CStrRef method,
                                    int64 prehash /* = -1 */) {
   isObj = true;

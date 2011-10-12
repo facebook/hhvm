@@ -619,9 +619,7 @@ class CallInfo;
 
 class MethodCallPackage {
 public:
-  MethodCallPackage()
-  : ci(NULL), extra(NULL), obj(NULL),
-    isObj(false), m_fatal(true), m_isFunc(false) {}
+  MethodCallPackage();
 
   // e->n() style method call
   bool methodCall(CObjRef self, CStrRef method, int64 prehash = -1) {

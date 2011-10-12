@@ -19,6 +19,7 @@
 #include <time.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/server_note.h>
+#include <runtime/base/server/server_stats.h>
 #include <runtime/base/server/request_uri.h>
 #include <util/process.h>
 #include <util/atomic.h>
@@ -385,6 +386,12 @@ bool AccessLog::genField(ostringstream &out, const char* &format,
       }
     }
     break;
+  case 'Z':
+     out << ServerStats::Get("page.wall.psp");
+     break;
+  case 'z':
+     out << ServerStats::Get("page.cpu.psp");
+     break;
   default:
     return false;
   }

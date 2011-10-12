@@ -645,6 +645,10 @@ int64 ServerStats::Get(const string &name) {
   return ServerStats::s_logger->get(name);
 }
 
+void ServerStats::Reset() {
+  ServerStats::s_logger->reset();
+}
+
 void ServerStats::Clear() {
   Lock lock(s_lock, false);
   for (unsigned int i = 0; i < s_loggers.size(); i++) {
@@ -1027,7 +1031,6 @@ void ServerStats::logPage(const string &url, int code) {
     Merge(ps.m_values, m_values);
   }
 
-  m_values.clear();
   m_last = now;
   if (m_min == 0) {
     m_min = now;
@@ -1038,6 +1041,10 @@ void ServerStats::logPage(const string &url, int code) {
 
   m_threadStatus.m_mode = Idling;
   m_threadStatus.m_done = time(0);
+}
+
+void ServerStats::reset() {
+  m_values.clear();
 }
 
 void ServerStats::clear() {

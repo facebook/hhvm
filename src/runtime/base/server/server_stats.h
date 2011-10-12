@@ -47,6 +47,7 @@ public:
   static void Log(const std::string &name, int64 value);
   static int64 Get(const std::string &name);
   static void LogPage(const std::string &url, int code);
+  static void Reset();
   static void Clear();
   static void GetKeys(std::string &out, int64 from, int64 to);
   static void Report(std::string &out, Format format, int64 from, int64 to,
@@ -132,6 +133,7 @@ private:
   void log(const std::string &name, int64 value);
   int64 get(const std::string &name);
   void logPage(const std::string &url, int code);
+  void reset();
   void clear();
   void collect(std::list<TimeSlot*> &slots, int64 from, int64 to);
 

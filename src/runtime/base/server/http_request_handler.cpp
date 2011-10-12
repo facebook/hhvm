@@ -263,6 +263,11 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     Logger::Error("Unhandled exception in HPHP server engine.");
   }
   GetAccessLog().log(transport, vhost);
+  /*
+   * HPHP logs may need to access data in ServerStats, so we have to
+   * clear the hashtable after writing the log entry.
+   */
+  ServerStats::Reset();
   hphp_session_exit();
 
   HttpProtocol::ClearRecord(ret, tmpfile);

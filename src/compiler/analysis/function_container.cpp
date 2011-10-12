@@ -375,6 +375,7 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
     "  const hashNodeFunc *p = findFunc(s, hash);\n"
     "  if (LIKELY(p!=0)) {\n"
     "    if (UNLIKELY(p->offset)) {\n"
+    "      DECLARE_GLOBAL_VARIABLES(g);\n"
     "      const char *addr = (const char *)g + (int64)p->data;\n"
     "      ci = *(const CallInfo **)addr;\n"
     "      return ci != 0;\n"
@@ -448,7 +449,7 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
     cg_printf(text3, jt.size() - 1);
   }
   outputGetCallInfoHeader(cg, system ? "_builtin" : noEval ? "_no_eval" : 0,
-                          !system);
+                          false);
   cg_indentEnd();
   if (numEntries > 0) {
     cg_printf(system ? text4s : text4);

@@ -312,6 +312,25 @@ bool get_user_func_handler(CVarRef function, bool skip,
   return false;
 }
 
+bool get_callable_user_func_handler(CVarRef function,
+                                    MethodCallPackage &mcp,
+                                    String &classname, String &methodname,
+                                    bool &doBind) {
+  bool ret = get_user_func_handler(function, true, mcp,
+                                   classname, methodname, doBind, false);
+  if (ret && mcp.ci->m_flags & (CallInfo::Protected|CallInfo::Private)) {
+    classname = mcp.getClassName();
+    if (!ClassInfo::HasAccess(classname, *mcp.name,
+                              mcp.ci->m_flags & CallInfo::StaticMethod ||
+                              !mcp.obj,
+                              mcp.obj)) {
+      ret = false;
+    }
+  }
+
+  return ret;
+}
+
 Variant f_call_user_func_array(CVarRef function, CArrRef params,
                                bool bound /* = false */) {
   MethodCallPackage mcp;

@@ -339,6 +339,10 @@ bool get_user_func_handler(CVarRef function, bool skip,
                            MethodCallPackage& mcp,
                            String &classname, String &methodname,
                            bool &doBind, bool warn = true);
+bool get_callable_user_func_handler(CVarRef function,
+                                    MethodCallPackage& mcp,
+                                    String &classname, String &methodname,
+                                    bool &doBind);
 
 Variant invoke_func_few_handler(void *extra, CArrRef params,
                                 Variant (*few_args)(

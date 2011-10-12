@@ -53,7 +53,7 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
     String classname, methodname;
     bool doBind;
     ret = get_user_func_handler(v, true, mcp,
-                                     classname, methodname, doBind, false);
+                                classname, methodname, doBind, false);
     if (ret && mcp.ci->m_flags & (CallInfo::Protected|CallInfo::Private)) {
       classname = mcp.getClassName();
       if (!ClassInfo::HasAccess(classname, *mcp.name,

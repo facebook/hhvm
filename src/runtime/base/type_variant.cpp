@@ -87,6 +87,8 @@ static StaticString s_scalar("scalar");
 static StaticString s_array("Array");
 static StaticString s_1("1");
 static StaticString s_unserialize("unserialize");
+static StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
+static StaticString s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
 
 ///////////////////////////////////////////////////////////////////////////////
 // local helpers
@@ -3801,10 +3803,10 @@ void Variant::unserialize(VariableUnserializer *uns) {
 
       Object obj;
       try {
-        obj = create_object(clsName.data(), Array::Create(), false);
+        obj = create_object_only(clsName);
       } catch (ClassNotFoundException &e) {
-        obj = create_object("__PHP_Incomplete_Class", Array::Create(), false);
-        obj->o_set("__PHP_Incomplete_Class_Name", clsName);
+        obj = create_object_only(s_PHP_Incomplete_Class);
+        obj->o_set(s_PHP_Incomplete_Class_Name, clsName);
       }
       operator=(obj);
       int64 size = uns->readInt();
@@ -3863,7 +3865,7 @@ void Variant::unserialize(VariableUnserializer *uns) {
 
       Object obj;
       try {
-        obj = create_object(clsName.data(), Array::Create(), false);
+        obj = create_object_only(clsName);
         if (!obj->o_instanceof("Serializable")) {
           raise_error("%s didn't implement Serializable", clsName.data());
         }
@@ -3872,8 +3874,8 @@ void Variant::unserialize(VariableUnserializer *uns) {
         if (!uns->allowUnknownSerializableClass()) {
           throw;
         }
-        obj = create_object("__PHP_Incomplete_Class", Array::Create(), false);
-        obj->o_set("__PHP_Incomplete_Class_Name", clsName);
+        obj = create_object_only(s_PHP_Incomplete_Class);
+        obj->o_set(s_PHP_Incomplete_Class_Name, clsName);
         obj->o_set("serialized", serialized);
       }
       operator=(obj);

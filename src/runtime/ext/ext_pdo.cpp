@@ -1828,7 +1828,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
       return false;
     }
     if ((flags & PDO_FETCH_SERIALIZE) == 0) {
-      ret = create_object(clsname, Array(), false);
+      ret = create_object_only(clsname);
       if (!do_fetch_class_prepare(stmt)) {
         return false;
       }

@@ -347,7 +347,7 @@ bool f_hphp_instanceof(CObjRef obj, CStrRef name) {
 }
 
 Object f_hphp_create_object(CStrRef name, CArrRef params) {
-  return create_object(name.data(), params);
+  return create_object(name, params);
 }
 
 Variant f_hphp_get_property(CObjRef obj, CStrRef cls, CStrRef prop) {

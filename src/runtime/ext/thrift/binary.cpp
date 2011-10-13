@@ -57,7 +57,7 @@ Object createObject(CStrRef obj_typename, int nargs = 0,
   } else if (nargs == 2 ) {
     args = CREATE_VECTOR2(arg1, arg2);
   }
-  return create_object(obj_typename.data(), args);
+  return create_object(obj_typename, args);
 }
 
 void throw_tprotocolexception(CStrRef what, long errorcode) {

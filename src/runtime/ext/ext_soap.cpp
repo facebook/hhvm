@@ -2131,7 +2131,7 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
     soap_obj = m_soap_object;
   } else if (m_type == SOAP_CLASS) {
     try {
-      soap_obj = create_object(m_soap_class.name.data(),
+      soap_obj = create_object(m_soap_class.name,
                                m_soap_class.argv);
     } catch (Exception &e) {
       send_soap_server_fault(function, e, NULL);

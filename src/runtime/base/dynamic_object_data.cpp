@@ -33,7 +33,7 @@ DynamicObjectData::DynamicObjectData(const ObjectStaticCallbacks *cb,
     ObjectData(cb, false), root(r ? r : this) {
   if (pname) {
     CountableHelper h(root);
-    parent = create_object(pname, Array(), false, root);
+    parent = create_object_only(pname, root);
     setAttributes(parent.get());
   }
 }

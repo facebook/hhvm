@@ -56,7 +56,7 @@ ImmutableObj::ImmutableObj(ObjectData *obj) {
 Object ImmutableObj::getObject() {
   Object obj;
   try {
-    obj = create_object(m_cls->data(), Array::Create(), false);
+    obj = create_object_only(m_cls);
   } catch (ClassNotFoundException &e) {
     ASSERT(false);
   }

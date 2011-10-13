@@ -27,6 +27,8 @@ endif
 include $(PROJECT_ROOT)/src/rules.mk
 TARGETS = $(APP_TARGET)
 
+CPPFLAGS += -DHPHPI_PATH='"$(if $(OUT_TOP),$(OUT_TOP)hphpi,hphpi/hphpi)"'
+
 $(OUT_DIR)test_suite.inc:: $(TEST_SUITE_INC)
 	$(V)cat $^ > $@
 

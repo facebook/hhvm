@@ -23,8 +23,6 @@ CXX_SOURCES += $(filter-out $(TEST_SOURCES), $(wildcard *.cpp))
 CXXFLAGS += -DSEP_EXTENSION
 INTERMEDIATE_FILES += $(OUT_DIR)schema.so
 
-HPHP = $(PROJECT_ROOT)/src/hphp/hphp
-
 include $(PROJECT_ROOT)/src/rules.mk
 TARGETS = $(if $(EXT),$(OUT_DIR)lib$(EXT).so $(OUT_TOP)test_$(EXT)) $(OUT_DIR)lib$(EXT).a
 

@@ -257,7 +257,7 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
                             "-v Fiber.ThreadCount=5",
                             "-v Eval.EnableObjDestructCall=true",
                             NULL};
-      Process::Exec("hphpi/hphpi", argv, NULL, actual, &err);
+      Process::Exec(HPHPI_PATH, argv, NULL, actual, &err);
     }
 
     if (perfMode) {

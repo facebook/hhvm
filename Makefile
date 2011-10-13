@@ -3,12 +3,6 @@ include src/dirs.mk
 
 TEST := $(if $(OUT_TOP),$(OUT_TOP),test/)test
 
-ifneq ($(OUT_TOP),)
-COPY = && cp $(OUT_TOP)/hphpi src/hphpi/hphpi && cp $(OUT_TOP)/hphp src/hphp/hphp
-else
-COPY =
-endif
-
 TOBUILD := $(filter clean% clobber% both debug release, $(MAKECMDGOALS))
 CLEAN := $(filter clean% clobber%,$(MAKECMDGOALS))
 TOTEST := $(filter-out $(TOBUILD), $(MAKECMDGOALS))
@@ -40,14 +34,14 @@ $(FAST_TESTS) $(SLOW_TESTS) TestCodeRunStatic: % : setup
 	cd src && $(TEST) $(if $($@),$($@),$@)
 
 setup: $(CLEAN)
-	$(MAKE) -C src $(COPY)
+	$(MAKE) -C src
 
 fast_tests: $(FAST_TESTS)
 slow_tests: $(SLOW_TESTS)
 
 .PHONY: $(FAST_TESTS) $(SLOW_TESTS) TestCodeRun%
 
-TestCodeRun-% TestCodeRunEval-% TestCodeRunStatic-% : setup
+TestCodeRun-% TestCodeRunEval-% TestCodeRunStatic-% TestServer-% : setup
 	cd src && $(TEST) $(patsubst %-$*,%,$@) Test$*
 
 .PHONY: debug release both check_by_type fast_tests slow_tests setup

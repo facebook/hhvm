@@ -143,7 +143,7 @@ void TestServer::RunServer() {
                           "--mode=server", portConfig.c_str(), "-v",
                           "--config=test/config-eval.hdf",
                           portConfig.c_str(), "--port-fd", fd.c_str(), NULL};
-    Process::Exec("hphpi/hphpi", argv, NULL, out, &err);
+    Process::Exec(HPHPI_PATH, argv, NULL, out, &err);
   }
 }
 

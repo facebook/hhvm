@@ -77,7 +77,9 @@ bool CmdWhere::onClient(DebuggerClient *client) {
     int i = 0;
     for (ArrayIter iter(st); iter; ++iter) {
       client->printFrame(i, iter.second());
-      if (++i % DebuggerClient::ScrollBlockSize == 0 &&
+      ++i;
+      if (!client->isApiMode() &&
+          i % DebuggerClient::ScrollBlockSize == 0 &&
           client->ask("There are %d more frames. Continue? [Y/n]",
                       st.size() - i) == 'n') {
         break;
@@ -91,6 +93,9 @@ bool CmdWhere::onClient(DebuggerClient *client) {
     }
     if (!DebuggerClient::IsValidNumber(snum)) {
       client->error("The argument, if specified, has to be numeric.");
+      if (client->isApiMode()) {
+        client->setStackTrace(null_array);
+      }
       return true;
     }
     if (num > 0) {
@@ -111,6 +116,9 @@ bool CmdWhere::onClient(DebuggerClient *client) {
     }
   }
 
+  if (client->isApiMode()) {
+    client->setStackTrace(null_array);
+  }
   return true;
 }
 

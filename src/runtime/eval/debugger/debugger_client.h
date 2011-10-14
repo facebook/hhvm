@@ -22,7 +22,11 @@
 #include <util/text_color.h>
 #include <util/hdf.h>
 
-namespace HPHP { namespace Eval {
+namespace HPHP {
+
+class StringBuffer;
+
+namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(DebuggerCommand);
@@ -166,6 +170,7 @@ public:
    * Test if argument matches specified. "index" is 1-based.
    */
   const std::string &getCommand() const { return m_command;}
+  void setCommand(const std::string &cmd) { m_command = cmd;}
   bool arg(int index, const char *s);
   int argCount() { return m_args.size();}
   std::string argValue(int index);
@@ -251,6 +256,19 @@ public:
   void addCompletion(const char *name);
   void addCompletion(const std::vector<String> &items);
   void setLiveLists(LiveListsPtr liveLists) { m_acLiveLists = liveLists;}
+
+  /**
+   * For DebuggerClient API
+   */
+  bool isApiMode() const { return m_options.apiMode; }
+  void setConfigFileName(const std::string& fn) { m_configFileName = fn;}
+  bool isInited() const { return m_inited;}
+  void setInited() { m_inited = true;}
+  void init(const DebuggerClientOptions &options);
+  DebuggerCommandPtr waitForNextInterrupt();
+  std::string getPrintString();
+  bool isTakingCommand() const { return m_inputState == TakingCommand; }
+  void setTakingInterrupt() { m_inputState = TakingInterrupt; }
 
   /**
    * Macro functions
@@ -340,6 +358,10 @@ private:
 
   Array m_stacktrace;
   int m_frame;
+
+  bool m_inited;
+  std::string m_sourceRoot;
+  StringBuffer* m_outputBuf;
 
   // helpers
   void runImpl();

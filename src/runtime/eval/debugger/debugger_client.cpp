@@ -165,7 +165,6 @@ const char *DebuggerClient::LineNoFormat = "%4d ";
 const char *DebuggerClient::LocalPrompt = "hphpd";
 const char *DebuggerClient::ConfigFileName = ".hphpd.hdf";
 const char *DebuggerClient::HistoryFileName = ".hphpd.history";
-std::string DebuggerClient::SourceRoot;
 
 bool DebuggerClient::UseColor = true;
 bool DebuggerClient::NoPrompt = false;
@@ -351,10 +350,15 @@ DebuggerClient::DebuggerClient()
       m_inputState(TakingCommand), m_runState(NotYet),
       m_signum(CmdSignal::SignalNone), m_sigTime(0),
       m_acLen(0), m_acIndex(0), m_acPos(0), m_acLiveListsDirty(true),
-      m_threadId(0), m_listLine(0), m_listLineFocus(0), m_frame(0) {
+      m_threadId(0), m_listLine(0), m_listLineFocus(0), m_frame(0),
+      m_inited(false), m_outputBuf(NULL) {
 }
 
 DebuggerClient::~DebuggerClient() {
+  if (m_outputBuf) {
+    delete m_outputBuf;
+    m_outputBuf = NULL;
+  }
 }
 
 void DebuggerClient::reset() {
@@ -370,12 +374,12 @@ void DebuggerClient::reset() {
 }
 
 bool DebuggerClient::isLocal() {
-  return m_machines[0] == m_machine;
+  return !isApiMode() && m_machines[0] == m_machine;
 }
 
 bool DebuggerClient::connect(const std::string &host, int port) {
-  ASSERT(!m_machines.empty());
-  ASSERT(m_machines[0]->m_name == LocalPrompt);
+  ASSERT(isApiMode() ||
+         (!m_machines.empty() && m_machines[0]->m_name == LocalPrompt));
   for (unsigned int i = 1; i < m_machines.size(); i++) {
     if (f_gethostbyname(m_machines[i]->m_name) ==
         f_gethostbyname(host)) {
@@ -451,6 +455,11 @@ bool DebuggerClient::connectRemote(const std::string &host, int port) {
   info("Connecting to %s:%d...", host.c_str(), port);
   Socket *sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET,
                             String(host), port);
+  // To ensure the sock is not swept, we need to mark it persistent
+  // This should have no effect on normal client mode as it never does sweeping
+  // It is needed in API mode otherwise the Socket will be swept and the client
+  // will hold an invalid pointer.
+  sock->incPersistent();
   Object obj(sock);
   if (f_socket_connect(sock, String(host), port)) {
     DMachineInfoPtr machine(new DMachineInfo());
@@ -512,12 +521,32 @@ std::string DebuggerClient::getPrompt() {
   return *name + "> ";
 }
 
-void DebuggerClient::start(const DebuggerClientOptions &options) {
+void DebuggerClient::init(const DebuggerClientOptions &options) {
+  if (isApiMode()) {
+    if (options.configFName.empty() || options.user.empty()) {
+      // api mode must specify the config file name since we don't have
+      // a valid home directory to look for config. we also need user name
+      // to access sandbox
+      return;
+    }
+  } else {
+    if (!options.configFName.empty()) {
+      m_configFileName = options.configFName;
+    }
+  }
+
   loadConfig();
+
   if (!options.cmds.empty()) {
     UseColor = false;
     s_use_utf8 = false;
     NoPrompt = true;
+  }
+
+  if (options.apiMode) {
+    UseColor = false;
+    NoPrompt = true;
+    m_outputBuf = new StringBuffer();
   }
 
   if (!NoPrompt) {
@@ -530,6 +559,10 @@ void DebuggerClient::start(const DebuggerClientOptions &options) {
   }
 
   m_options = options;
+}
+
+void DebuggerClient::start(const DebuggerClientOptions &options) {
+  init(options);
   m_mainThread.start();
 }
 
@@ -539,6 +572,9 @@ void DebuggerClient::stop() {
 }
 
 void DebuggerClient::run() {
+  // Make sure we don't run the interface thread for API mode
+  ASSERT(!isApiMode());
+
   ReadlineApp app;
   playMacro("startup");
 
@@ -790,7 +826,9 @@ bool DebuggerClient::initializeMachine() {
     // attaching to default sandbox
     if (!m_machine->m_sandboxAttached) {
       try {
-        CmdMachine::AttachSandbox(this, NULL, m_options.sandbox.c_str());
+        const char *user = m_options.user.empty() ?
+                           NULL : m_options.user.c_str();
+        CmdMachine::AttachSandbox(this, user, m_options.sandbox.c_str());
       } catch (DebuggerConsoleExitException &e) {
         m_machine->m_sandboxAttached = true;
       }
@@ -799,13 +837,43 @@ bool DebuggerClient::initializeMachine() {
         return false;
       }
 
-      m_machine->m_initialized = true;
-      throw DebuggerConsoleExitException();
+      if (!isApiMode()) {
+        m_machine->m_initialized = true;
+        throw DebuggerConsoleExitException();
+      }
     }
 
     m_machine->m_initialized = true;
   }
   return true;
+}
+
+DebuggerCommandPtr DebuggerClient::waitForNextInterrupt() {
+  const char *func = "DebuggerClient::waitForNextInterrupt()";
+  while (!m_stopped) {
+    DebuggerCommandPtr cmd;
+    if (DebuggerCommand::Receive(m_machine->m_thrift, cmd, func)) {
+      if (!cmd) {
+        Logger::Error("Unable to communicate with server.");
+        return DebuggerCommandPtr();
+      }
+      if (cmd->is(DebuggerCommand::KindOfSignal)) {
+        if (!cmd->onClient(this)) {
+          Logger::Error("Unable to handle signal command.");
+          return DebuggerCommandPtr();
+        }
+        continue;
+      }
+      if (!cmd->is(DebuggerCommand::KindOfInterrupt)) {
+        Logger::Error("Bad cmd type: %d", cmd->getType());
+        return cmd;
+      }
+      m_machine->m_interrupting = true;
+      m_inputState = TakingCommand;
+      return cmd;
+    }
+  }
+  return DebuggerCommandPtr();
 }
 
 void DebuggerClient::runImpl() {
@@ -934,6 +1002,14 @@ bool DebuggerClient::console() {
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
 
+std::string DebuggerClient::getPrintString() {
+  int size = m_outputBuf->size();
+  if (size) {
+    return std::string(m_outputBuf->detach());
+  }
+  return "";
+}
+
 void DebuggerClient::shortCode(BreakPointInfoPtr bp) {
   if (bp && !bp->m_file.empty() && bp->m_line1) {
     Variant source = CmdList::GetSourceFile(this, bp->m_file);
@@ -950,8 +1026,13 @@ bool DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
                           int line2 /* = 0 */, int charFocus0 /* = 0 */,
                           int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
   if (line1 == 0 && line2 == 0) {
-    String highlighted = highlight_code(source, 0, lineFocus, charFocus0,
-                                        lineFocus1, charFocus1);
+    String highlighted;
+    if (isApiMode()) {
+      highlighted = source;
+    } else {
+      highlighted = highlight_code(source, 0, lineFocus, charFocus0,
+                                   lineFocus1, charFocus1);
+    }
     if (!highlighted.empty()) {
       print(highlighted);
       return true;
@@ -959,8 +1040,13 @@ bool DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
     return false;
   }
 
-  String highlighted = highlight_php(source, 1, lineFocus, charFocus0,
-                                     lineFocus1, charFocus1);
+  String highlighted;
+  if (isApiMode()) {
+    highlighted = source;
+  } else {
+    highlighted = highlight_php(source, 1, lineFocus, charFocus0,
+                                lineFocus1, charFocus1);
+  }
   int line = 1;
   const char *begin = highlighted.data();
   StringBuffer sb;
@@ -974,13 +1060,14 @@ bool DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
     }
   }
   if (!sb.empty()) {
-    print("%s%s", sb.data(), ANSI_COLOR_END);
+    print("%s%s", sb.data(), isApiMode() ? "\0" : ANSI_COLOR_END);
     return true;
   }
   return false;
 }
 
 char DebuggerClient::ask(const char *fmt, ...) {
+  ASSERT(!isApiMode());
   string msg;
   va_list ap;
   va_start(ap, fmt);
@@ -993,6 +1080,16 @@ char DebuggerClient::ask(const char *fmt, ...) {
   return tolower(getchar());
 }
 
+#define FWRITE(ptr, size, nmemb, stream)                                \
+do {                                                                    \
+  if (isApiMode()) {                                                    \
+    ASSERT(m_outputBuf);                                                \
+    m_outputBuf->append(ptr, size * nmemb);                             \
+  }                                                                     \
+  /* For debugging, still output to stdout */                           \
+  fwrite(ptr, size, nmemb, stream);                                     \
+} while (0)                                                             \
+
 void DebuggerClient::print(const char *fmt, ...) {
   string msg;
   va_list ap;
@@ -1002,27 +1099,27 @@ void DebuggerClient::print(const char *fmt, ...) {
 }
 
 void DebuggerClient::print(const std::string &s) {
-  fwrite(s.data(), 1, s.length(), stdout);
-  fwrite("\n", 1, 1, stdout);
+  FWRITE(s.data(), 1, s.length(), stdout);
+  FWRITE("\n", 1, 1, stdout);
   fflush(stdout);
 }
 
 void DebuggerClient::print(CStrRef msg) {
-  fwrite(msg.data(), 1, msg.length(), stdout);
-  fwrite("\n", 1, 1, stdout);
+  FWRITE(msg.data(), 1, msg.length(), stdout);
+  FWRITE("\n", 1, 1, stdout);
   fflush(stdout);
 }
 
 #define IMPLEMENT_COLOR_OUTPUT(name, where, color)                      \
   void DebuggerClient::name(CStrRef msg) {                              \
     if (UseColor && color) {                                            \
-      fwrite(color, 1, strlen(color), where);                           \
+      FWRITE(color, 1, strlen(color), where);                           \
     }                                                                   \
-    fwrite(msg.data(), 1, msg.length(), where);                         \
+    FWRITE(msg.data(), 1, msg.length(), where);                         \
     if (UseColor && color) {                                            \
-      fwrite(ANSI_COLOR_END, 1, strlen(ANSI_COLOR_END), where);         \
+      FWRITE(ANSI_COLOR_END, 1, strlen(ANSI_COLOR_END), where);         \
     }                                                                   \
-    fwrite("\n", 1, 1, where);                                          \
+    FWRITE("\n", 1, 1, where);                                          \
     fflush(where);                                                      \
   }                                                                     \
   void DebuggerClient::name(const char *fmt, ...) {                     \
@@ -1040,6 +1137,9 @@ IMPLEMENT_COLOR_OUTPUT(help,     stdout,  HelpColor);
 IMPLEMENT_COLOR_OUTPUT(info,     stdout,  InfoColor);
 IMPLEMENT_COLOR_OUTPUT(output,   stdout,  OutputColor);
 IMPLEMENT_COLOR_OUTPUT(error,    stderr,  ErrorColor);
+
+#undef WRITE
+#undef IMPLEMENT_COLOR_OUTPUT
 
 string DebuggerClient::wrap(const std::string &s) {
   String ret = StringUtil::WordWrap(String(s.c_str(), s.size(), AttachLiteral),
@@ -1433,6 +1533,13 @@ DebuggerCommandPtr DebuggerClient::send(DebuggerCommand *cmd, int expected) {
         throw DebuggerProtocolException();
       }
 
+      if (isApiMode()) {
+        // FIXME: for now just continue in this case to ignore breakpoints
+        // during eval.
+        // Need to find a way to handle eval triggering a breakpoint later.
+        continue;
+      }
+
       // eval() can cause more breakpoints
       if (!res->onClient(this) || !console()) {
         Logger::Error("%s: unable to process %d", func, res->getType());
@@ -1567,11 +1674,11 @@ void DebuggerClient::getListLocation(std::string &file, int &line,
 void DebuggerClient::setListLocation(const std::string &file, int line,
                                      bool center) {
   m_listFile = file;
-  if (!m_listFile.empty() && m_listFile[0] != '/' && !SourceRoot.empty()) {
-    if (SourceRoot[SourceRoot.size() - 1] != '/') {
-      SourceRoot += "/";
+  if (!m_listFile.empty() && m_listFile[0] != '/' && !m_sourceRoot.empty()) {
+    if (m_sourceRoot[m_sourceRoot.size() - 1] != '/') {
+      m_sourceRoot += "/";
     }
-    m_listFile = SourceRoot + m_listFile;
+    m_listFile = m_sourceRoot + m_listFile;
   }
 
   m_listLine = line;
@@ -1585,7 +1692,7 @@ void DebuggerClient::setListLocation(const std::string &file, int line,
 }
 
 void DebuggerClient::setSourceRoot(const std::string &sourceRoot) {
-  m_config["SourceRoot"] = SourceRoot = sourceRoot;
+  m_config["SourceRoot"] = m_sourceRoot = sourceRoot;
   saveConfig();
 
   // apply change right away
@@ -1757,7 +1864,9 @@ void DebuggerClient::record(const char *line) {
 // configuration
 
 void DebuggerClient::loadConfig() {
-  m_configFileName = Process::GetHomeDirectory() + ConfigFileName;
+  if (m_configFileName.empty()) {
+    m_configFileName = Process::GetHomeDirectory() + ConfigFileName;
+  }
 
   // make sure file exists
   FILE *f = fopen(m_configFileName.c_str(), "a");
@@ -1802,7 +1911,7 @@ void DebuggerClient::loadConfig() {
     m_macros.push_back(macro);
   }
 
-  SourceRoot = m_config["SourceRoot"].getString();
+  m_sourceRoot = m_config["SourceRoot"].getString();
 
   saveConfig(); // so to generate a starter for people
 }

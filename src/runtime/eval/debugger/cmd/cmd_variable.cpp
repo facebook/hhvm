@@ -85,7 +85,9 @@ void CmdVariable::PrintVariables(DebuggerClient *client, CArrRef variables,
         system = false;
       }
 
-      if (++i % DebuggerClient::ScrollBlockSize == 0 &&
+      ++i;
+      if (!client->isApiMode() &&
+          i % DebuggerClient::ScrollBlockSize == 0 &&
           client->ask("There are %d more variables. Continue? [Y/n]",
                       variables.size() - i) == 'n') {
         break;

@@ -2498,6 +2498,91 @@ const ObjectStaticCallbacks cw_DOMProcessingInstruction = {
   &c_DOMProcessingInstruction::s_class_name,
   0,&c_DOMProcessingInstruction::ci___construct,0,&cw_DOMNode,0x0
 };
+ObjectData *coo_DebuggerProxyCmdUser() {
+  return NEWOBJ(c_DebuggerProxyCmdUser)();
+}
+IMPLEMENT_CLASS(DebuggerProxyCmdUser)
+const InstanceOfInfo c_DebuggerProxyCmdUser::s_instanceof_table[] = {
+  {0x7B5115B086867BADLL,1,"DebuggerProxyCmdUser",&cw_DebuggerProxyCmdUser},
+};
+const int c_DebuggerProxyCmdUser::s_instanceof_index[] = {
+  1,
+  -1,0,
+};
+CallInfo c_DebuggerProxyCmdUser::ci_islocal((void*)&c_DebuggerProxyCmdUser::i_islocal, (void*)&c_DebuggerProxyCmdUser::ifa_islocal, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerProxyCmdUser::ci___destruct((void*)&c_DebuggerProxyCmdUser::i___destruct, (void*)&c_DebuggerProxyCmdUser::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerProxyCmdUser::ci_send((void*)&c_DebuggerProxyCmdUser::i_send, (void*)&c_DebuggerProxyCmdUser::ifa_send, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerProxyCmdUser::ci___construct((void*)&c_DebuggerProxyCmdUser::i___construct, (void*)&c_DebuggerProxyCmdUser::ifa___construct, 0, 4, 0x0000000000000000LL);
+Variant c_DebuggerProxyCmdUser::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___construct);
+}
+Variant c_DebuggerProxyCmdUser::i_islocal(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_islocal);
+}
+Variant c_DebuggerProxyCmdUser::i_send(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_send);
+}
+Variant c_DebuggerProxyCmdUser::i___destruct(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
+}
+Variant c_DebuggerProxyCmdUser::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_DebuggerProxyCmdUser);
+  }
+  c_DebuggerProxyCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerProxyCmdUser*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__construct", 0, 1);
+  return (self->t___construct(), null);
+}
+Variant c_DebuggerProxyCmdUser::ifa_islocal(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_islocal, coo_DebuggerProxyCmdUser);
+  }
+  c_DebuggerProxyCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerProxyCmdUser*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("islocal", 0, 1);
+  return (self->t_islocal());
+}
+Variant c_DebuggerProxyCmdUser::ifa_send(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_send, coo_DebuggerProxyCmdUser);
+  }
+  c_DebuggerProxyCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerProxyCmdUser*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("send", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_send(arg0));
+}
+Variant c_DebuggerProxyCmdUser::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DebuggerProxyCmdUser);
+  }
+  c_DebuggerProxyCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerProxyCmdUser*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
+  return (self->t___destruct());
+}
+const MethodCallInfoTable c_DebuggerProxyCmdUser::s_call_info_table[] = {
+  { 0x3E0170A7802E3888LL, 1, 4, "send", &c_DebuggerProxyCmdUser::ci_send },
+  { 0x7F974836AACC1EF3LL, 1, 10, "__destruct", &c_DebuggerProxyCmdUser::ci___destruct },
+  { 0x7B58587A529D270CLL, 1, 7, "isLocal", &c_DebuggerProxyCmdUser::ci_islocal },
+  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_DebuggerProxyCmdUser::ci___construct },
+  { 0, 1, 0, 0 }
+};
+const int c_DebuggerProxyCmdUser::s_call_info_index[] = {
+  7,
+  0,-1,-1,1,2,-1,-1,3,
+
+};
+c_DebuggerProxyCmdUser *c_DebuggerProxyCmdUser::create() {
+  CountableHelper h(this);
+  init();
+  t___construct();
+  return this;
+}
+const ObjectStaticCallbacks cw_DebuggerProxyCmdUser = {
+  (ObjectData*(*)(ObjectData*))coo_DebuggerProxyCmdUser,
+  c_DebuggerProxyCmdUser::s_call_info_table,c_DebuggerProxyCmdUser::s_call_info_index,
+  c_DebuggerProxyCmdUser::s_instanceof_table,c_DebuggerProxyCmdUser::s_instanceof_index,
+  &c_DebuggerProxyCmdUser::s_class_name,
+  0,&c_DebuggerProxyCmdUser::ci___construct,0,0,0x0
+};
 ObjectData *coo_Collator() {
   return NEWOBJ(c_Collator)();
 }
@@ -3437,207 +3522,26 @@ const int c_DebuggerClient::s_instanceof_index[] = {
   1,
   -1,0,
 };
-CallInfo c_DebuggerClient::ci_getcode((void*)&c_DebuggerClient::i_getcode, (void*)&c_DebuggerClient::ifa_getcode, 0, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_error((void*)&c_DebuggerClient::i_error, (void*)&c_DebuggerClient::ifa_error, 1, 5, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_helpbody((void*)&c_DebuggerClient::i_helpbody, (void*)&c_DebuggerClient::ifa_helpbody, 1, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_output((void*)&c_DebuggerClient::i_output, (void*)&c_DebuggerClient::ifa_output, 1, 5, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_argrest((void*)&c_DebuggerClient::i_argrest, (void*)&c_DebuggerClient::ifa_argrest, 1, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_getstacktrace((void*)&c_DebuggerClient::i_getstacktrace, (void*)&c_DebuggerClient::ifa_getstacktrace, 0, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_helpsection((void*)&c_DebuggerClient::i_helpsection, (void*)&c_DebuggerClient::ifa_helpsection, 1, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_send((void*)&c_DebuggerClient::i_send, (void*)&c_DebuggerClient::ifa_send, 1, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_info((void*)&c_DebuggerClient::i_info, (void*)&c_DebuggerClient::ifa_info, 1, 5, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_argvalue((void*)&c_DebuggerClient::i_argvalue, (void*)&c_DebuggerClient::ifa_argvalue, 1, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_args((void*)&c_DebuggerClient::i_args, (void*)&c_DebuggerClient::ifa_args, 0, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_getcommand((void*)&c_DebuggerClient::i_getcommand, (void*)&c_DebuggerClient::ifa_getcommand, 0, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_code((void*)&c_DebuggerClient::i_code, (void*)&c_DebuggerClient::ifa_code, 4, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_arg((void*)&c_DebuggerClient::i_arg, (void*)&c_DebuggerClient::ifa_arg, 2, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_helptitle((void*)&c_DebuggerClient::i_helptitle, (void*)&c_DebuggerClient::ifa_helptitle, 1, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_getframe((void*)&c_DebuggerClient::i_getframe, (void*)&c_DebuggerClient::ifa_getframe, 0, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_ask((void*)&c_DebuggerClient::i_ask, (void*)&c_DebuggerClient::ifa_ask, 1, 5, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_addcompletion((void*)&c_DebuggerClient::i_addcompletion, (void*)&c_DebuggerClient::ifa_addcompletion, 1, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_getcurrentlocation((void*)&c_DebuggerClient::i_getcurrentlocation, (void*)&c_DebuggerClient::ifa_getcurrentlocation, 0, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_helpcmds((void*)&c_DebuggerClient::i_helpcmds, (void*)&c_DebuggerClient::ifa_helpcmds, 2, 5, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_print((void*)&c_DebuggerClient::i_print, (void*)&c_DebuggerClient::ifa_print, 1, 5, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_wrap((void*)&c_DebuggerClient::i_wrap, (void*)&c_DebuggerClient::ifa_wrap, 1, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_quit((void*)&c_DebuggerClient::i_quit, (void*)&c_DebuggerClient::ifa_quit, 0, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_argcount((void*)&c_DebuggerClient::i_argcount, (void*)&c_DebuggerClient::ifa_argcount, 0, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_xend((void*)&c_DebuggerClient::i_xend, (void*)&c_DebuggerClient::ifa_xend, 1, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_printframe((void*)&c_DebuggerClient::i_printframe, (void*)&c_DebuggerClient::ifa_printframe, 1, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_tutorial((void*)&c_DebuggerClient::i_tutorial, (void*)&c_DebuggerClient::ifa_tutorial, 1, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_help((void*)&c_DebuggerClient::i_help, (void*)&c_DebuggerClient::ifa_help, 1, 5, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_processcmd((void*)&c_DebuggerClient::i_processcmd, (void*)&c_DebuggerClient::ifa_processcmd, 2, 4, 0x0000000000000000LL);
 CallInfo c_DebuggerClient::ci___construct((void*)&c_DebuggerClient::i___construct, (void*)&c_DebuggerClient::ifa___construct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DebuggerClient::ci___destruct((void*)&c_DebuggerClient::i___destruct, (void*)&c_DebuggerClient::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_getstate((void*)&c_DebuggerClient::i_getstate, (void*)&c_DebuggerClient::ifa_getstate, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_interrupt((void*)&c_DebuggerClient::i_interrupt, (void*)&c_DebuggerClient::ifa_interrupt, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_init((void*)&c_DebuggerClient::i_init, (void*)&c_DebuggerClient::ifa_init, 1, 4, 0x0000000000000000LL);
 Variant c_DebuggerClient::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
-Variant c_DebuggerClient::i_quit(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_quit);
+Variant c_DebuggerClient::i_getstate(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getstate);
 }
-Variant c_DebuggerClient::i_print(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_print, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1)) return throw_missing_arguments("print", count+1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    const Array &p(count > 1 ? params.slice(1, count - 1, false) : Array());
-    return (self->t_print(count, arg0, p), null);
-  }
+Variant c_DebuggerClient::i_init(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_init);
 }
-Variant c_DebuggerClient::i_help(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_help, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1)) return throw_missing_arguments("help", count+1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    const Array &p(count > 1 ? params.slice(1, count - 1, false) : Array());
-    return (self->t_help(count, arg0, p), null);
-  }
+Variant c_DebuggerClient::i_processcmd(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_processcmd);
 }
-Variant c_DebuggerClient::i_info(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_info, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1)) return throw_missing_arguments("info", count+1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    const Array &p(count > 1 ? params.slice(1, count - 1, false) : Array());
-    return (self->t_info(count, arg0, p), null);
-  }
-}
-Variant c_DebuggerClient::i_output(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_output, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1)) return throw_missing_arguments("output", count+1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    const Array &p(count > 1 ? params.slice(1, count - 1, false) : Array());
-    return (self->t_output(count, arg0, p), null);
-  }
-}
-Variant c_DebuggerClient::i_error(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_error, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1)) return throw_missing_arguments("error", count+1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    const Array &p(count > 1 ? params.slice(1, count - 1, false) : Array());
-    return (self->t_error(count, arg0, p), null);
-  }
-}
-Variant c_DebuggerClient::i_code(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_code);
-}
-Variant c_DebuggerClient::i_ask(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_ask, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 1)) return throw_missing_arguments("ask", count+1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    const Array &p(count > 1 ? params.slice(1, count - 1, false) : Array());
-    return (self->t_ask(count, arg0, p));
-  }
-}
-Variant c_DebuggerClient::i_wrap(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_wrap);
-}
-Variant c_DebuggerClient::i_helptitle(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_helptitle);
-}
-Variant c_DebuggerClient::i_helpcmds(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i_helpcmds, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 2)) return throw_missing_arguments("helpcmds", count+1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    const Array &p(count > 2 ? params.slice(2, count - 2, false) : Array());
-    return (self->t_helpcmds(count, arg0, arg1, p), null);
-  }
-}
-Variant c_DebuggerClient::i_helpbody(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_helpbody);
-}
-Variant c_DebuggerClient::i_helpsection(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_helpsection);
-}
-Variant c_DebuggerClient::i_tutorial(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_tutorial);
-}
-Variant c_DebuggerClient::i_getcode(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_getcode);
-}
-Variant c_DebuggerClient::i_getcommand(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_getcommand);
-}
-Variant c_DebuggerClient::i_arg(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_arg);
-}
-Variant c_DebuggerClient::i_argcount(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_argcount);
-}
-Variant c_DebuggerClient::i_argvalue(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_argvalue);
-}
-Variant c_DebuggerClient::i_argrest(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_argrest);
-}
-Variant c_DebuggerClient::i_args(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_args);
-}
-Variant c_DebuggerClient::i_send(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_send);
-}
-Variant c_DebuggerClient::i_xend(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_xend);
-}
-Variant c_DebuggerClient::i_getcurrentlocation(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_getcurrentlocation);
-}
-Variant c_DebuggerClient::i_getstacktrace(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_getstacktrace);
-}
-Variant c_DebuggerClient::i_getframe(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_getframe);
-}
-Variant c_DebuggerClient::i_printframe(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_printframe);
-}
-Variant c_DebuggerClient::i_addcompletion(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_addcompletion);
+Variant c_DebuggerClient::i_interrupt(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_interrupt);
 }
 Variant c_DebuggerClient::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___destruct);
@@ -3650,298 +3554,40 @@ Variant c_DebuggerClient::ifa___construct(MethodCallPackage &mcp, int count, INV
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
 }
-Variant c_DebuggerClient::ifa_quit(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant c_DebuggerClient::ifa_getstate(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_quit, coo_DebuggerClient);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getstate, coo_DebuggerClient);
   }
   c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("quit", 0, 1);
-  return (self->t_quit(), null);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getstate", 0, 1);
+  return (self->t_getstate());
 }
-Variant c_DebuggerClient::ifa_print(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant c_DebuggerClient::ifa_init(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_print, coo_DebuggerClient);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_init, coo_DebuggerClient);
   }
   c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count < 1)) return throw_missing_arguments("print", count+1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("init", count, 1, 1, 1);
   CVarRef arg0(a0);
-  Array p;
-  if (count >= 2) p.append(a1);
-  if (count >= 3) p.append(a2);
-  if (count >= 4) p.append(a3);
-  if (count >= 5) p.append(a4);
-  if (count >= 6) p.append(a5);
-  return (self->t_print(count, arg0, p), null);
+  return (self->t_init(arg0));
 }
-Variant c_DebuggerClient::ifa_help(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant c_DebuggerClient::ifa_processcmd(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_help, coo_DebuggerClient);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_processcmd, coo_DebuggerClient);
   }
   c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count < 1)) return throw_missing_arguments("help", count+1, 1);
-  CVarRef arg0(a0);
-  Array p;
-  if (count >= 2) p.append(a1);
-  if (count >= 3) p.append(a2);
-  if (count >= 4) p.append(a3);
-  if (count >= 5) p.append(a4);
-  if (count >= 6) p.append(a5);
-  return (self->t_help(count, arg0, p), null);
-}
-Variant c_DebuggerClient::ifa_info(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_info, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count < 1)) return throw_missing_arguments("info", count+1, 1);
-  CVarRef arg0(a0);
-  Array p;
-  if (count >= 2) p.append(a1);
-  if (count >= 3) p.append(a2);
-  if (count >= 4) p.append(a3);
-  if (count >= 5) p.append(a4);
-  if (count >= 6) p.append(a5);
-  return (self->t_info(count, arg0, p), null);
-}
-Variant c_DebuggerClient::ifa_output(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_output, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count < 1)) return throw_missing_arguments("output", count+1, 1);
-  CVarRef arg0(a0);
-  Array p;
-  if (count >= 2) p.append(a1);
-  if (count >= 3) p.append(a2);
-  if (count >= 4) p.append(a3);
-  if (count >= 5) p.append(a4);
-  if (count >= 6) p.append(a5);
-  return (self->t_output(count, arg0, p), null);
-}
-Variant c_DebuggerClient::ifa_error(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_error, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count < 1)) return throw_missing_arguments("error", count+1, 1);
-  CVarRef arg0(a0);
-  Array p;
-  if (count >= 2) p.append(a1);
-  if (count >= 3) p.append(a2);
-  if (count >= 4) p.append(a3);
-  if (count >= 5) p.append(a4);
-  if (count >= 6) p.append(a5);
-  return (self->t_error(count, arg0, p), null);
-}
-Variant c_DebuggerClient::ifa_code(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_code, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count < 1 || count > 4)) return throw_wrong_arguments("code", count, 1, 4, 1);
-  CVarRef arg0(a0);
-  if (count <= 1) return (self->t_code(arg0), null);
-  CVarRef arg1(a1);
-  if (count <= 2) return (self->t_code(arg0, arg1), null);
-  CVarRef arg2(a2);
-  if (count <= 3) return (self->t_code(arg0, arg1, arg2), null);
-  CVarRef arg3(a3);
-  return (self->t_code(arg0, arg1, arg2, arg3), null);
-}
-Variant c_DebuggerClient::ifa_ask(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_ask, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count < 1)) return throw_missing_arguments("ask", count+1, 1);
-  CVarRef arg0(a0);
-  Array p;
-  if (count >= 2) p.append(a1);
-  if (count >= 3) p.append(a2);
-  if (count >= 4) p.append(a3);
-  if (count >= 5) p.append(a4);
-  if (count >= 6) p.append(a5);
-  return (self->t_ask(count, arg0, p));
-}
-Variant c_DebuggerClient::ifa_wrap(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_wrap, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("wrap", count, 1, 1, 1);
-  CVarRef arg0(a0);
-  return (self->t_wrap(arg0));
-}
-Variant c_DebuggerClient::ifa_helptitle(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_helptitle, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("helptitle", count, 1, 1, 1);
-  CVarRef arg0(a0);
-  return (self->t_helptitle(arg0), null);
-}
-Variant c_DebuggerClient::ifa_helpcmds(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_helpcmds, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count < 2)) return throw_missing_arguments("helpcmds", count+1, 1);
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("processcmd", count, 2, 2, 1);
   CVarRef arg0(a0);
   CVarRef arg1(a1);
-  Array p;
-  if (count >= 3) p.append(a2);
-  if (count >= 4) p.append(a3);
-  if (count >= 5) p.append(a4);
-  if (count >= 6) p.append(a5);
-  return (self->t_helpcmds(count, arg0, arg1, p), null);
+  return (self->t_processcmd(arg0, arg1));
 }
-Variant c_DebuggerClient::ifa_helpbody(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant c_DebuggerClient::ifa_interrupt(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_helpbody, coo_DebuggerClient);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_interrupt, coo_DebuggerClient);
   }
   c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("helpbody", count, 1, 1, 1);
-  CVarRef arg0(a0);
-  return (self->t_helpbody(arg0), null);
-}
-Variant c_DebuggerClient::ifa_helpsection(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_helpsection, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("helpsection", count, 1, 1, 1);
-  CVarRef arg0(a0);
-  return (self->t_helpsection(arg0), null);
-}
-Variant c_DebuggerClient::ifa_tutorial(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_tutorial, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("tutorial", count, 1, 1, 1);
-  CVarRef arg0(a0);
-  return (self->t_tutorial(arg0), null);
-}
-Variant c_DebuggerClient::ifa_getcode(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getcode, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getcode", 0, 1);
-  return (self->t_getcode());
-}
-Variant c_DebuggerClient::ifa_getcommand(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getcommand, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getcommand", 0, 1);
-  return (self->t_getcommand());
-}
-Variant c_DebuggerClient::ifa_arg(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_arg, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count != 2)) return throw_wrong_arguments("arg", count, 2, 2, 1);
-  CVarRef arg0(a0);
-  CVarRef arg1(a1);
-  return (self->t_arg(arg0, arg1));
-}
-Variant c_DebuggerClient::ifa_argcount(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_argcount, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("argcount", 0, 1);
-  return (self->t_argcount());
-}
-Variant c_DebuggerClient::ifa_argvalue(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_argvalue, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("argvalue", count, 1, 1, 1);
-  CVarRef arg0(a0);
-  return (self->t_argvalue(arg0));
-}
-Variant c_DebuggerClient::ifa_argrest(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_argrest, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("argrest", count, 1, 1, 1);
-  CVarRef arg0(a0);
-  return (self->t_argrest(arg0));
-}
-Variant c_DebuggerClient::ifa_args(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_args, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("args", 0, 1);
-  return (self->t_args());
-}
-Variant c_DebuggerClient::ifa_send(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_send, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("send", count, 1, 1, 1);
-  CVarRef arg0(a0);
-  return (self->t_send(arg0));
-}
-Variant c_DebuggerClient::ifa_xend(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_xend, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("xend", count, 1, 1, 1);
-  CVarRef arg0(a0);
-  return (self->t_xend(arg0));
-}
-Variant c_DebuggerClient::ifa_getcurrentlocation(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getcurrentlocation, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getcurrentlocation", 0, 1);
-  return (self->t_getcurrentlocation());
-}
-Variant c_DebuggerClient::ifa_getstacktrace(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getstacktrace, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getstacktrace", 0, 1);
-  return (self->t_getstacktrace());
-}
-Variant c_DebuggerClient::ifa_getframe(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getframe, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getframe", 0, 1);
-  return (self->t_getframe());
-}
-Variant c_DebuggerClient::ifa_printframe(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_printframe, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("printframe", count, 1, 1, 1);
-  CVarRef arg0(a0);
-  return (self->t_printframe(arg0), null);
-}
-Variant c_DebuggerClient::ifa_addcompletion(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_addcompletion, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("addcompletion", count, 1, 1, 1);
-  CVarRef arg0(a0);
-  return (self->t_addcompletion(arg0), null);
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("interrupt", 0, 1);
+  return (self->t_interrupt());
 }
 Variant c_DebuggerClient::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -3952,48 +3598,18 @@ Variant c_DebuggerClient::ifa___destruct(MethodCallPackage &mcp, int count, INVO
   return (self->t___destruct());
 }
 const MethodCallInfoTable c_DebuggerClient::s_call_info_table[] = {
-  { 0x07768FF90B181780LL, 1, 13, "addCompletion", &c_DebuggerClient::ci_addcompletion },
-  { 0x20F2EA2BBFF5AA42LL, 1, 3, "ask", &c_DebuggerClient::ci_ask },
-  { 0x0E836DA3377C4984LL, 1, 8, "getFrame", &c_DebuggerClient::ci_getframe },
-  { 0x1D033DFD1DCAEA85LL, 1, 10, "printFrame", &c_DebuggerClient::ci_printframe },
-  { 0x3E0170A7802E3888LL, 1, 4, "send", &c_DebuggerClient::ci_send },
-  { 0x7A24AFD8ADE43B8ELL, 1, 4, "args", &c_DebuggerClient::ci_args },
-  { 0x6B3BF595A55159CFLL, 1, 8, "helpBody", &c_DebuggerClient::ci_helpbody },
-  { 0x5C108B351DC3D04FLL, 0, 7, "getCode", &c_DebuggerClient::ci_getcode },
-  { 0x1015EB3F52B098D1LL, 1, 5, "print", &c_DebuggerClient::ci_print },
-  { 0x687DF38195F5B951LL, 0, 8, "helpCmds", &c_DebuggerClient::ci_helpcmds },
-  { 0x182AC39D2C493A97LL, 1, 10, "getCommand", &c_DebuggerClient::ci_getcommand },
-  { 0x67A7ABCB74D168D7LL, 0, 7, "argRest", &c_DebuggerClient::ci_argrest },
+  { 0x614F97E16B435A03LL, 1, 4, "init", &c_DebuggerClient::ci_init },
+  { 0x7F974836AACC1EF3LL, 0, 10, "__destruct", &c_DebuggerClient::ci___destruct },
+  { 0x44EE5338D48C877ALL, 1, 9, "interrupt", &c_DebuggerClient::ci_interrupt },
+  { 0x673621833E95130CLL, 1, 8, "getState", &c_DebuggerClient::ci_getstate },
+  { 0x1BA771910BD0F64ELL, 1, 10, "processCmd", &c_DebuggerClient::ci_processcmd },
   { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_DebuggerClient::ci___construct },
-  { 0x0F2EF58F157D479FLL, 0, 4, "info", &c_DebuggerClient::ci_info },
-  { 0x016509DCA13DB6DFLL, 0, 5, "error", &c_DebuggerClient::ci_error },
-  { 0x5F8B4ACA3731C423LL, 1, 9, "helpTitle", &c_DebuggerClient::ci_helptitle },
-  { 0x2191643700554726LL, 1, 18, "getCurrentLocation", &c_DebuggerClient::ci_getcurrentlocation },
-  { 0x620C55BAC770E928LL, 1, 8, "argValue", &c_DebuggerClient::ci_argvalue },
-  { 0x6CB0A07E0516B6ACLL, 1, 8, "tutorial", &c_DebuggerClient::ci_tutorial },
-  { 0x5CE665973E2B4C6FLL, 1, 11, "helpSection", &c_DebuggerClient::ci_helpsection },
-  { 0x5412C8462A696DEFLL, 0, 8, "argCount", &c_DebuggerClient::ci_argcount },
-  { 0x7F974836AACC1EF3LL, 1, 10, "__destruct", &c_DebuggerClient::ci___destruct },
-  { 0x665AFB5CDFD23534LL, 1, 4, "help", &c_DebuggerClient::ci_help },
-  { 0x64C0B4BCDA99F6F4LL, 0, 3, "arg", &c_DebuggerClient::ci_arg },
-  { 0x04A108469024B7B6LL, 1, 4, "xend", &c_DebuggerClient::ci_xend },
-  { 0x6C5E35754AA2B277LL, 1, 4, "wrap", &c_DebuggerClient::ci_wrap },
-  { 0x7C41EEC813FC6FB7LL, 0, 13, "getStackTrace", &c_DebuggerClient::ci_getstacktrace },
-  { 0x58C72230857ACDB9LL, 1, 4, "code", &c_DebuggerClient::ci_code },
-  { 0x0732FA520631017ALL, 1, 4, "quit", &c_DebuggerClient::ci_quit },
-  { 0x07B89E83B77C677FLL, 1, 6, "output", &c_DebuggerClient::ci_output },
   { 0, 1, 0, 0 }
 };
 const int c_DebuggerClient::s_call_info_index[] = {
-  63,
-  0,-1,1,-1,2,3,-1,-1,
-  4,-1,-1,-1,-1,-1,5,6,
-  -1,8,-1,-1,-1,-1,-1,10,
-  -1,-1,-1,-1,-1,-1,-1,12,
-  -1,-1,-1,15,-1,-1,16,-1,
-  17,-1,-1,-1,18,-1,-1,19,
-  -1,-1,-1,21,22,-1,24,25,
-  -1,27,28,-1,-1,-1,-1,29,
+  15,
+  -1,-1,-1,0,-1,-1,-1,-1,
+  -1,-1,2,-1,3,-1,4,5,
 
 };
 c_DebuggerClient *c_DebuggerClient::create() {
@@ -4008,91 +3624,6 @@ const ObjectStaticCallbacks cw_DebuggerClient = {
   c_DebuggerClient::s_instanceof_table,c_DebuggerClient::s_instanceof_index,
   &c_DebuggerClient::s_class_name,
   &c_DebuggerClient::os_prop_table,&c_DebuggerClient::ci___construct,0,0,0x0
-};
-ObjectData *coo_DebuggerProxy() {
-  return NEWOBJ(c_DebuggerProxy)();
-}
-IMPLEMENT_CLASS(DebuggerProxy)
-const InstanceOfInfo c_DebuggerProxy::s_instanceof_table[] = {
-  {0x78B42582709BAF12LL,1,"DebuggerProxy",&cw_DebuggerProxy},
-};
-const int c_DebuggerProxy::s_instanceof_index[] = {
-  1,
-  0,-1,
-};
-CallInfo c_DebuggerProxy::ci_islocal((void*)&c_DebuggerProxy::i_islocal, (void*)&c_DebuggerProxy::ifa_islocal, 0, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerProxy::ci___destruct((void*)&c_DebuggerProxy::i___destruct, (void*)&c_DebuggerProxy::ifa___destruct, 0, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerProxy::ci_send((void*)&c_DebuggerProxy::i_send, (void*)&c_DebuggerProxy::ifa_send, 1, 4, 0x0000000000000000LL);
-CallInfo c_DebuggerProxy::ci___construct((void*)&c_DebuggerProxy::i___construct, (void*)&c_DebuggerProxy::ifa___construct, 0, 4, 0x0000000000000000LL);
-Variant c_DebuggerProxy::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___construct);
-}
-Variant c_DebuggerProxy::i_islocal(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_islocal);
-}
-Variant c_DebuggerProxy::i_send(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_send);
-}
-Variant c_DebuggerProxy::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
-}
-Variant c_DebuggerProxy::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_DebuggerProxy);
-  }
-  c_DebuggerProxy *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerProxy*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__construct", 0, 1);
-  return (self->t___construct(), null);
-}
-Variant c_DebuggerProxy::ifa_islocal(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_islocal, coo_DebuggerProxy);
-  }
-  c_DebuggerProxy *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerProxy*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("islocal", 0, 1);
-  return (self->t_islocal());
-}
-Variant c_DebuggerProxy::ifa_send(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_send, coo_DebuggerProxy);
-  }
-  c_DebuggerProxy *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerProxy*>(mcp.obj));
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("send", count, 1, 1, 1);
-  CVarRef arg0(a0);
-  return (self->t_send(arg0));
-}
-Variant c_DebuggerProxy::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DebuggerProxy);
-  }
-  c_DebuggerProxy *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerProxy*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
-const MethodCallInfoTable c_DebuggerProxy::s_call_info_table[] = {
-  { 0x3E0170A7802E3888LL, 1, 4, "send", &c_DebuggerProxy::ci_send },
-  { 0x7F974836AACC1EF3LL, 1, 10, "__destruct", &c_DebuggerProxy::ci___destruct },
-  { 0x7B58587A529D270CLL, 1, 7, "isLocal", &c_DebuggerProxy::ci_islocal },
-  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_DebuggerProxy::ci___construct },
-  { 0, 1, 0, 0 }
-};
-const int c_DebuggerProxy::s_call_info_index[] = {
-  7,
-  0,-1,-1,1,2,-1,-1,3,
-
-};
-c_DebuggerProxy *c_DebuggerProxy::create() {
-  CountableHelper h(this);
-  init();
-  t___construct();
-  return this;
-}
-const ObjectStaticCallbacks cw_DebuggerProxy = {
-  (ObjectData*(*)(ObjectData*))coo_DebuggerProxy,
-  c_DebuggerProxy::s_call_info_table,c_DebuggerProxy::s_call_info_index,
-  c_DebuggerProxy::s_instanceof_table,c_DebuggerProxy::s_instanceof_index,
-  &c_DebuggerProxy::s_class_name,
-  0,&c_DebuggerProxy::ci___construct,0,0,0x0
 };
 ObjectData *coo_SoapParam() {
   return NEWOBJ(c_SoapParam)();
@@ -9442,6 +8973,589 @@ const ObjectStaticCallbacks cw_XMLReader = {
   &c_XMLReader::s_class_name,
   &c_XMLReader::os_prop_table,&c_XMLReader::ci___construct,0,0,0x0
 };
+ObjectData *coo_DebuggerClientCmdUser() {
+  return NEWOBJ(c_DebuggerClientCmdUser)();
+}
+IMPLEMENT_CLASS(DebuggerClientCmdUser)
+const InstanceOfInfo c_DebuggerClientCmdUser::s_instanceof_table[] = {
+  {0x02704CB21822944ALL,1,"DebuggerClientCmdUser",&cw_DebuggerClientCmdUser},
+};
+const int c_DebuggerClientCmdUser::s_instanceof_index[] = {
+  1,
+  0,-1,
+};
+CallInfo c_DebuggerClientCmdUser::ci_getcode((void*)&c_DebuggerClientCmdUser::i_getcode, (void*)&c_DebuggerClientCmdUser::ifa_getcode, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_error((void*)&c_DebuggerClientCmdUser::i_error, (void*)&c_DebuggerClientCmdUser::ifa_error, 1, 5, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_helpbody((void*)&c_DebuggerClientCmdUser::i_helpbody, (void*)&c_DebuggerClientCmdUser::ifa_helpbody, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_output((void*)&c_DebuggerClientCmdUser::i_output, (void*)&c_DebuggerClientCmdUser::ifa_output, 1, 5, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_argrest((void*)&c_DebuggerClientCmdUser::i_argrest, (void*)&c_DebuggerClientCmdUser::ifa_argrest, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_getstacktrace((void*)&c_DebuggerClientCmdUser::i_getstacktrace, (void*)&c_DebuggerClientCmdUser::ifa_getstacktrace, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_helpsection((void*)&c_DebuggerClientCmdUser::i_helpsection, (void*)&c_DebuggerClientCmdUser::ifa_helpsection, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_send((void*)&c_DebuggerClientCmdUser::i_send, (void*)&c_DebuggerClientCmdUser::ifa_send, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_info((void*)&c_DebuggerClientCmdUser::i_info, (void*)&c_DebuggerClientCmdUser::ifa_info, 1, 5, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_argvalue((void*)&c_DebuggerClientCmdUser::i_argvalue, (void*)&c_DebuggerClientCmdUser::ifa_argvalue, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_args((void*)&c_DebuggerClientCmdUser::i_args, (void*)&c_DebuggerClientCmdUser::ifa_args, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_getcommand((void*)&c_DebuggerClientCmdUser::i_getcommand, (void*)&c_DebuggerClientCmdUser::ifa_getcommand, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_code((void*)&c_DebuggerClientCmdUser::i_code, (void*)&c_DebuggerClientCmdUser::ifa_code, 4, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_arg((void*)&c_DebuggerClientCmdUser::i_arg, (void*)&c_DebuggerClientCmdUser::ifa_arg, 2, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_helptitle((void*)&c_DebuggerClientCmdUser::i_helptitle, (void*)&c_DebuggerClientCmdUser::ifa_helptitle, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_getframe((void*)&c_DebuggerClientCmdUser::i_getframe, (void*)&c_DebuggerClientCmdUser::ifa_getframe, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_ask((void*)&c_DebuggerClientCmdUser::i_ask, (void*)&c_DebuggerClientCmdUser::ifa_ask, 1, 5, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_addcompletion((void*)&c_DebuggerClientCmdUser::i_addcompletion, (void*)&c_DebuggerClientCmdUser::ifa_addcompletion, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_getcurrentlocation((void*)&c_DebuggerClientCmdUser::i_getcurrentlocation, (void*)&c_DebuggerClientCmdUser::ifa_getcurrentlocation, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_helpcmds((void*)&c_DebuggerClientCmdUser::i_helpcmds, (void*)&c_DebuggerClientCmdUser::ifa_helpcmds, 2, 5, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_print((void*)&c_DebuggerClientCmdUser::i_print, (void*)&c_DebuggerClientCmdUser::ifa_print, 1, 5, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_wrap((void*)&c_DebuggerClientCmdUser::i_wrap, (void*)&c_DebuggerClientCmdUser::ifa_wrap, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_quit((void*)&c_DebuggerClientCmdUser::i_quit, (void*)&c_DebuggerClientCmdUser::ifa_quit, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_argcount((void*)&c_DebuggerClientCmdUser::i_argcount, (void*)&c_DebuggerClientCmdUser::ifa_argcount, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_xend((void*)&c_DebuggerClientCmdUser::i_xend, (void*)&c_DebuggerClientCmdUser::ifa_xend, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_printframe((void*)&c_DebuggerClientCmdUser::i_printframe, (void*)&c_DebuggerClientCmdUser::ifa_printframe, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_tutorial((void*)&c_DebuggerClientCmdUser::i_tutorial, (void*)&c_DebuggerClientCmdUser::ifa_tutorial, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci_help((void*)&c_DebuggerClientCmdUser::i_help, (void*)&c_DebuggerClientCmdUser::ifa_help, 1, 5, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci___construct((void*)&c_DebuggerClientCmdUser::i___construct, (void*)&c_DebuggerClientCmdUser::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClientCmdUser::ci___destruct((void*)&c_DebuggerClientCmdUser::i___destruct, (void*)&c_DebuggerClientCmdUser::ifa___destruct, 0, 4, 0x0000000000000000LL);
+Variant c_DebuggerClientCmdUser::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___construct);
+}
+Variant c_DebuggerClientCmdUser::i_quit(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_quit);
+}
+Variant c_DebuggerClientCmdUser::i_print(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_print, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 1)) return throw_missing_arguments("print", count+1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    const Array &p(count > 1 ? params.slice(1, count - 1, false) : Array());
+    return (self->t_print(count, arg0, p), null);
+  }
+}
+Variant c_DebuggerClientCmdUser::i_help(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_help, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 1)) return throw_missing_arguments("help", count+1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    const Array &p(count > 1 ? params.slice(1, count - 1, false) : Array());
+    return (self->t_help(count, arg0, p), null);
+  }
+}
+Variant c_DebuggerClientCmdUser::i_info(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_info, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 1)) return throw_missing_arguments("info", count+1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    const Array &p(count > 1 ? params.slice(1, count - 1, false) : Array());
+    return (self->t_info(count, arg0, p), null);
+  }
+}
+Variant c_DebuggerClientCmdUser::i_output(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_output, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 1)) return throw_missing_arguments("output", count+1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    const Array &p(count > 1 ? params.slice(1, count - 1, false) : Array());
+    return (self->t_output(count, arg0, p), null);
+  }
+}
+Variant c_DebuggerClientCmdUser::i_error(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_error, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 1)) return throw_missing_arguments("error", count+1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    const Array &p(count > 1 ? params.slice(1, count - 1, false) : Array());
+    return (self->t_error(count, arg0, p), null);
+  }
+}
+Variant c_DebuggerClientCmdUser::i_code(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_code);
+}
+Variant c_DebuggerClientCmdUser::i_ask(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_ask, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 1)) return throw_missing_arguments("ask", count+1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    const Array &p(count > 1 ? params.slice(1, count - 1, false) : Array());
+    return (self->t_ask(count, arg0, p));
+  }
+}
+Variant c_DebuggerClientCmdUser::i_wrap(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_wrap);
+}
+Variant c_DebuggerClientCmdUser::i_helptitle(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_helptitle);
+}
+Variant c_DebuggerClientCmdUser::i_helpcmds(MethodCallPackage &mcp, CArrRef params) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::i_dummy(mcp, params, i_helpcmds, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  int count ATTRIBUTE_UNUSED = params.size();
+  if (UNLIKELY(count < 2)) return throw_missing_arguments("helpcmds", count+1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    const Array &p(count > 2 ? params.slice(2, count - 2, false) : Array());
+    return (self->t_helpcmds(count, arg0, arg1, p), null);
+  }
+}
+Variant c_DebuggerClientCmdUser::i_helpbody(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_helpbody);
+}
+Variant c_DebuggerClientCmdUser::i_helpsection(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_helpsection);
+}
+Variant c_DebuggerClientCmdUser::i_tutorial(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_tutorial);
+}
+Variant c_DebuggerClientCmdUser::i_getcode(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getcode);
+}
+Variant c_DebuggerClientCmdUser::i_getcommand(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getcommand);
+}
+Variant c_DebuggerClientCmdUser::i_arg(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_arg);
+}
+Variant c_DebuggerClientCmdUser::i_argcount(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_argcount);
+}
+Variant c_DebuggerClientCmdUser::i_argvalue(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_argvalue);
+}
+Variant c_DebuggerClientCmdUser::i_argrest(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_argrest);
+}
+Variant c_DebuggerClientCmdUser::i_args(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_args);
+}
+Variant c_DebuggerClientCmdUser::i_send(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_send);
+}
+Variant c_DebuggerClientCmdUser::i_xend(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_xend);
+}
+Variant c_DebuggerClientCmdUser::i_getcurrentlocation(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getcurrentlocation);
+}
+Variant c_DebuggerClientCmdUser::i_getstacktrace(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getstacktrace);
+}
+Variant c_DebuggerClientCmdUser::i_getframe(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getframe);
+}
+Variant c_DebuggerClientCmdUser::i_printframe(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_printframe);
+}
+Variant c_DebuggerClientCmdUser::i_addcompletion(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_addcompletion);
+}
+Variant c_DebuggerClientCmdUser::i___destruct(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
+}
+Variant c_DebuggerClientCmdUser::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__construct", 0, 1);
+  return (self->t___construct(), null);
+}
+Variant c_DebuggerClientCmdUser::ifa_quit(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_quit, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("quit", 0, 1);
+  return (self->t_quit(), null);
+}
+Variant c_DebuggerClientCmdUser::ifa_print(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_print, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count < 1)) return throw_missing_arguments("print", count+1, 1);
+  CVarRef arg0(a0);
+  Array p;
+  if (count >= 2) p.append(a1);
+  if (count >= 3) p.append(a2);
+  if (count >= 4) p.append(a3);
+  if (count >= 5) p.append(a4);
+  if (count >= 6) p.append(a5);
+  return (self->t_print(count, arg0, p), null);
+}
+Variant c_DebuggerClientCmdUser::ifa_help(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_help, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count < 1)) return throw_missing_arguments("help", count+1, 1);
+  CVarRef arg0(a0);
+  Array p;
+  if (count >= 2) p.append(a1);
+  if (count >= 3) p.append(a2);
+  if (count >= 4) p.append(a3);
+  if (count >= 5) p.append(a4);
+  if (count >= 6) p.append(a5);
+  return (self->t_help(count, arg0, p), null);
+}
+Variant c_DebuggerClientCmdUser::ifa_info(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_info, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count < 1)) return throw_missing_arguments("info", count+1, 1);
+  CVarRef arg0(a0);
+  Array p;
+  if (count >= 2) p.append(a1);
+  if (count >= 3) p.append(a2);
+  if (count >= 4) p.append(a3);
+  if (count >= 5) p.append(a4);
+  if (count >= 6) p.append(a5);
+  return (self->t_info(count, arg0, p), null);
+}
+Variant c_DebuggerClientCmdUser::ifa_output(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_output, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count < 1)) return throw_missing_arguments("output", count+1, 1);
+  CVarRef arg0(a0);
+  Array p;
+  if (count >= 2) p.append(a1);
+  if (count >= 3) p.append(a2);
+  if (count >= 4) p.append(a3);
+  if (count >= 5) p.append(a4);
+  if (count >= 6) p.append(a5);
+  return (self->t_output(count, arg0, p), null);
+}
+Variant c_DebuggerClientCmdUser::ifa_error(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_error, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count < 1)) return throw_missing_arguments("error", count+1, 1);
+  CVarRef arg0(a0);
+  Array p;
+  if (count >= 2) p.append(a1);
+  if (count >= 3) p.append(a2);
+  if (count >= 4) p.append(a3);
+  if (count >= 5) p.append(a4);
+  if (count >= 6) p.append(a5);
+  return (self->t_error(count, arg0, p), null);
+}
+Variant c_DebuggerClientCmdUser::ifa_code(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_code, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count < 1 || count > 4)) return throw_wrong_arguments("code", count, 1, 4, 1);
+  CVarRef arg0(a0);
+  if (count <= 1) return (self->t_code(arg0), null);
+  CVarRef arg1(a1);
+  if (count <= 2) return (self->t_code(arg0, arg1), null);
+  CVarRef arg2(a2);
+  if (count <= 3) return (self->t_code(arg0, arg1, arg2), null);
+  CVarRef arg3(a3);
+  return (self->t_code(arg0, arg1, arg2, arg3), null);
+}
+Variant c_DebuggerClientCmdUser::ifa_ask(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_ask, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count < 1)) return throw_missing_arguments("ask", count+1, 1);
+  CVarRef arg0(a0);
+  Array p;
+  if (count >= 2) p.append(a1);
+  if (count >= 3) p.append(a2);
+  if (count >= 4) p.append(a3);
+  if (count >= 5) p.append(a4);
+  if (count >= 6) p.append(a5);
+  return (self->t_ask(count, arg0, p));
+}
+Variant c_DebuggerClientCmdUser::ifa_wrap(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_wrap, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("wrap", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_wrap(arg0));
+}
+Variant c_DebuggerClientCmdUser::ifa_helptitle(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_helptitle, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("helptitle", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_helptitle(arg0), null);
+}
+Variant c_DebuggerClientCmdUser::ifa_helpcmds(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_helpcmds, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count < 2)) return throw_missing_arguments("helpcmds", count+1, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  Array p;
+  if (count >= 3) p.append(a2);
+  if (count >= 4) p.append(a3);
+  if (count >= 5) p.append(a4);
+  if (count >= 6) p.append(a5);
+  return (self->t_helpcmds(count, arg0, arg1, p), null);
+}
+Variant c_DebuggerClientCmdUser::ifa_helpbody(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_helpbody, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("helpbody", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_helpbody(arg0), null);
+}
+Variant c_DebuggerClientCmdUser::ifa_helpsection(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_helpsection, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("helpsection", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_helpsection(arg0), null);
+}
+Variant c_DebuggerClientCmdUser::ifa_tutorial(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_tutorial, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("tutorial", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_tutorial(arg0), null);
+}
+Variant c_DebuggerClientCmdUser::ifa_getcode(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getcode, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getcode", 0, 1);
+  return (self->t_getcode());
+}
+Variant c_DebuggerClientCmdUser::ifa_getcommand(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getcommand, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getcommand", 0, 1);
+  return (self->t_getcommand());
+}
+Variant c_DebuggerClientCmdUser::ifa_arg(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_arg, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("arg", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  return (self->t_arg(arg0, arg1));
+}
+Variant c_DebuggerClientCmdUser::ifa_argcount(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_argcount, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("argcount", 0, 1);
+  return (self->t_argcount());
+}
+Variant c_DebuggerClientCmdUser::ifa_argvalue(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_argvalue, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("argvalue", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_argvalue(arg0));
+}
+Variant c_DebuggerClientCmdUser::ifa_argrest(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_argrest, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("argrest", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_argrest(arg0));
+}
+Variant c_DebuggerClientCmdUser::ifa_args(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_args, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("args", 0, 1);
+  return (self->t_args());
+}
+Variant c_DebuggerClientCmdUser::ifa_send(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_send, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("send", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_send(arg0));
+}
+Variant c_DebuggerClientCmdUser::ifa_xend(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_xend, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("xend", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_xend(arg0));
+}
+Variant c_DebuggerClientCmdUser::ifa_getcurrentlocation(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getcurrentlocation, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getcurrentlocation", 0, 1);
+  return (self->t_getcurrentlocation());
+}
+Variant c_DebuggerClientCmdUser::ifa_getstacktrace(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getstacktrace, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getstacktrace", 0, 1);
+  return (self->t_getstacktrace());
+}
+Variant c_DebuggerClientCmdUser::ifa_getframe(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getframe, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getframe", 0, 1);
+  return (self->t_getframe());
+}
+Variant c_DebuggerClientCmdUser::ifa_printframe(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_printframe, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("printframe", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_printframe(arg0), null);
+}
+Variant c_DebuggerClientCmdUser::ifa_addcompletion(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_addcompletion, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("addcompletion", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_addcompletion(arg0), null);
+}
+Variant c_DebuggerClientCmdUser::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DebuggerClientCmdUser);
+  }
+  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
+  return (self->t___destruct());
+}
+const MethodCallInfoTable c_DebuggerClientCmdUser::s_call_info_table[] = {
+  { 0x07768FF90B181780LL, 1, 13, "addCompletion", &c_DebuggerClientCmdUser::ci_addcompletion },
+  { 0x20F2EA2BBFF5AA42LL, 1, 3, "ask", &c_DebuggerClientCmdUser::ci_ask },
+  { 0x0E836DA3377C4984LL, 1, 8, "getFrame", &c_DebuggerClientCmdUser::ci_getframe },
+  { 0x1D033DFD1DCAEA85LL, 1, 10, "printFrame", &c_DebuggerClientCmdUser::ci_printframe },
+  { 0x3E0170A7802E3888LL, 1, 4, "send", &c_DebuggerClientCmdUser::ci_send },
+  { 0x7A24AFD8ADE43B8ELL, 1, 4, "args", &c_DebuggerClientCmdUser::ci_args },
+  { 0x6B3BF595A55159CFLL, 1, 8, "helpBody", &c_DebuggerClientCmdUser::ci_helpbody },
+  { 0x5C108B351DC3D04FLL, 0, 7, "getCode", &c_DebuggerClientCmdUser::ci_getcode },
+  { 0x1015EB3F52B098D1LL, 1, 5, "print", &c_DebuggerClientCmdUser::ci_print },
+  { 0x687DF38195F5B951LL, 0, 8, "helpCmds", &c_DebuggerClientCmdUser::ci_helpcmds },
+  { 0x182AC39D2C493A97LL, 1, 10, "getCommand", &c_DebuggerClientCmdUser::ci_getcommand },
+  { 0x67A7ABCB74D168D7LL, 0, 7, "argRest", &c_DebuggerClientCmdUser::ci_argrest },
+  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_DebuggerClientCmdUser::ci___construct },
+  { 0x0F2EF58F157D479FLL, 0, 4, "info", &c_DebuggerClientCmdUser::ci_info },
+  { 0x016509DCA13DB6DFLL, 0, 5, "error", &c_DebuggerClientCmdUser::ci_error },
+  { 0x5F8B4ACA3731C423LL, 1, 9, "helpTitle", &c_DebuggerClientCmdUser::ci_helptitle },
+  { 0x2191643700554726LL, 1, 18, "getCurrentLocation", &c_DebuggerClientCmdUser::ci_getcurrentlocation },
+  { 0x620C55BAC770E928LL, 1, 8, "argValue", &c_DebuggerClientCmdUser::ci_argvalue },
+  { 0x6CB0A07E0516B6ACLL, 1, 8, "tutorial", &c_DebuggerClientCmdUser::ci_tutorial },
+  { 0x5CE665973E2B4C6FLL, 1, 11, "helpSection", &c_DebuggerClientCmdUser::ci_helpsection },
+  { 0x5412C8462A696DEFLL, 0, 8, "argCount", &c_DebuggerClientCmdUser::ci_argcount },
+  { 0x7F974836AACC1EF3LL, 1, 10, "__destruct", &c_DebuggerClientCmdUser::ci___destruct },
+  { 0x665AFB5CDFD23534LL, 1, 4, "help", &c_DebuggerClientCmdUser::ci_help },
+  { 0x64C0B4BCDA99F6F4LL, 0, 3, "arg", &c_DebuggerClientCmdUser::ci_arg },
+  { 0x04A108469024B7B6LL, 1, 4, "xend", &c_DebuggerClientCmdUser::ci_xend },
+  { 0x6C5E35754AA2B277LL, 1, 4, "wrap", &c_DebuggerClientCmdUser::ci_wrap },
+  { 0x7C41EEC813FC6FB7LL, 0, 13, "getStackTrace", &c_DebuggerClientCmdUser::ci_getstacktrace },
+  { 0x58C72230857ACDB9LL, 1, 4, "code", &c_DebuggerClientCmdUser::ci_code },
+  { 0x0732FA520631017ALL, 1, 4, "quit", &c_DebuggerClientCmdUser::ci_quit },
+  { 0x07B89E83B77C677FLL, 1, 6, "output", &c_DebuggerClientCmdUser::ci_output },
+  { 0, 1, 0, 0 }
+};
+const int c_DebuggerClientCmdUser::s_call_info_index[] = {
+  63,
+  0,-1,1,-1,2,3,-1,-1,
+  4,-1,-1,-1,-1,-1,5,6,
+  -1,8,-1,-1,-1,-1,-1,10,
+  -1,-1,-1,-1,-1,-1,-1,12,
+  -1,-1,-1,15,-1,-1,16,-1,
+  17,-1,-1,-1,18,-1,-1,19,
+  -1,-1,-1,21,22,-1,24,25,
+  -1,27,28,-1,-1,-1,-1,29,
+
+};
+c_DebuggerClientCmdUser *c_DebuggerClientCmdUser::create() {
+  CountableHelper h(this);
+  init();
+  t___construct();
+  return this;
+}
+const ObjectStaticCallbacks cw_DebuggerClientCmdUser = {
+  (ObjectData*(*)(ObjectData*))coo_DebuggerClientCmdUser,
+  c_DebuggerClientCmdUser::s_call_info_table,c_DebuggerClientCmdUser::s_call_info_index,
+  c_DebuggerClientCmdUser::s_instanceof_table,c_DebuggerClientCmdUser::s_instanceof_index,
+  &c_DebuggerClientCmdUser::s_class_name,
+  &c_DebuggerClientCmdUser::os_prop_table,&c_DebuggerClientCmdUser::ci___construct,0,0,0x0
+};
 ObjectData *coo_DateTime() {
   return NEWOBJ(c_DateTime)();
 }
@@ -10454,7 +10568,6 @@ static const hashNodeCTD ctdBuckets[] = {
   {0x4365BE9E5A85E60BLL,0,0,"DOMNotation",(int64)&cw_DOMNotation },
   {0x69EDCA1CC29CFE0BLL,1,0,"ErrorException",(int64)&cw_ErrorException },
   {0x648FB595C359F411LL,1,0,"SpoofChecker",(int64)&cw_SpoofChecker },
-  {0x78B42582709BAF12LL,1,0,"DebuggerProxy",(int64)&cw_DebuggerProxy },
   {0x6A76B9AABB7CC713LL,1,0,"SimpleXMLElement",(int64)&cw_SimpleXMLElement },
   {0x32E5C767255D2515LL,1,0,"SoapFault",(int64)&cw_SoapFault },
   {0x5CBA5B52C68B501ALL,1,0,"DOMEntityReference",(int64)&cw_DOMEntityReference },
@@ -10478,7 +10591,8 @@ static const hashNodeCTD ctdBuckets[] = {
   {0x196F76C9C527B946LL,0,0,"DOMNamedNodeMap",(int64)&cw_DOMNamedNodeMap },
   {0x66282FC8E4EF4E46LL,1,0,"BadFunctionCallException",(int64)&cw_BadFunctionCallException },
   {0x5AA2EE582E0D3849LL,1,0,"UnexpectedValueException",(int64)&cw_UnexpectedValueException },
-  {0x72A49A22C192034ALL,1,0,"Memcached",(int64)&cw_Memcached },
+  {0x72A49A22C192034ALL,0,0,"Memcached",(int64)&cw_Memcached },
+  {0x02704CB21822944ALL,1,0,"DebuggerClientCmdUser",(int64)&cw_DebuggerClientCmdUser },
   {0x4860DC2F9B0E6D4BLL,1,0,"LogicException",(int64)&cw_LogicException },
   {0x164F490DAC49174DLL,1,0,"DOMText",(int64)&cw_DOMText },
   {0x308D1D59986A3D4ELL,1,0,"SoapHeader",(int64)&cw_SoapHeader },
@@ -10518,6 +10632,7 @@ static const hashNodeCTD ctdBuckets[] = {
   {0x7D46DB2E09C6DBA8LL,1,0,"DOMXPath",(int64)&cw_DOMXPath },
   {0x1D35C3EFD00E11A9LL,1,0,"SQLite3",(int64)&cw_SQLite3 },
   {0x67E31D42F2DFE4AALL,1,0,"Locale",(int64)&cw_Locale },
+  {0x7B5115B086867BADLL,0,0,"DebuggerProxyCmdUser",(int64)&cw_DebuggerProxyCmdUser },
   {0x0A34015F67C804ADLL,1,0,"PDO",(int64)&cw_PDO },
   {0x2E650138BA043AAFLL,1,0,"DOMDocument",(int64)&cw_DOMDocument },
   {0x43BBC8F6F28E44B0LL,1,0,"ReflectionMethod",(int64)&cw_ReflectionMethod },
@@ -10547,14 +10662,14 @@ static const hashNodeCTD ctdBuckets[] = {
 static const int ctdMapTable[] = {
   -1,-1,-1,-1,-1,-1,-1,-1,
   0,1,-1,2,-1,-1,-1,-1,
-  -1,4,5,6,-1,7,-1,-1,
-  -1,-1,8,-1,-1,9,10,-1,
-  -1,-1,-1,-1,-1,11,-1,-1,
-  -1,-1,-1,12,-1,-1,-1,13,
-  -1,14,15,-1,16,17,-1,18,
-  19,-1,-1,-1,-1,20,22,-1,
-  -1,23,-1,-1,24,-1,26,-1,
-  -1,28,29,30,-1,31,32,33,
+  -1,4,-1,5,-1,6,-1,-1,
+  -1,-1,7,-1,-1,8,9,-1,
+  -1,-1,-1,-1,-1,10,-1,-1,
+  -1,-1,-1,11,-1,-1,-1,12,
+  -1,13,14,-1,15,16,-1,17,
+  18,-1,-1,-1,-1,19,21,-1,
+  -1,22,-1,-1,23,-1,25,-1,
+  -1,27,28,30,-1,31,32,33,
   34,35,-1,36,-1,-1,-1,-1,
   -1,-1,-1,-1,-1,-1,38,-1,
   -1,39,40,41,-1,42,-1,-1,
@@ -10566,17 +10681,17 @@ static const int ctdMapTable[] = {
   60,-1,-1,61,62,-1,-1,-1,
   -1,-1,-1,-1,-1,-1,-1,-1,
   -1,-1,-1,-1,-1,-1,-1,65,
-  66,67,68,-1,-1,69,-1,70,
-  71,72,-1,-1,-1,-1,-1,-1,
-  -1,-1,73,-1,-1,74,-1,-1,
-  -1,-1,-1,75,-1,-1,-1,-1,
-  76,-1,-1,77,-1,-1,-1,-1,
-  78,-1,79,-1,81,-1,-1,-1,
-  82,83,84,-1,85,-1,-1,-1,
-  -1,-1,86,-1,87,-1,-1,-1,
+  66,67,68,-1,-1,69,-1,71,
+  72,73,-1,-1,-1,-1,-1,-1,
+  -1,-1,74,-1,-1,75,-1,-1,
+  -1,-1,-1,76,-1,-1,-1,-1,
+  77,-1,-1,78,-1,-1,-1,-1,
+  79,-1,80,-1,82,-1,-1,-1,
+  83,84,85,-1,86,-1,-1,-1,
+  -1,-1,87,-1,88,-1,-1,-1,
   -1,-1,-1,-1,-1,-1,-1,-1,
-  -1,-1,-1,-1,88,-1,-1,89,
-  -1,-1,-1,-1,90,91,-1,93,
+  -1,-1,-1,-1,89,-1,-1,90,
+  -1,-1,-1,-1,91,92,-1,94,
 
 };
 
@@ -10713,382 +10828,390 @@ static const int64 cpt_static_inits[] = {
   0x0000005f00000047,
   (int64)&q_DateTimeZone$$ANTARCTICA,
   0x0000006100000047,
-  (int64)&q_DebuggerClient$$AUTO_COMPLETE_VARIABLES,
+  (int64)&q_DebuggerClient$$STATE_UNINIT,
   0x0000006300000047,
-  (int64)&q_DebuggerClient$$AUTO_COMPLETE_FILENAMES,
+  (int64)&q_DebuggerClient$$STATE_BUSY,
   0x0000006500000047,
-  (int64)&q_DebuggerClient$$AUTO_COMPLETE_CLASSES,
+  (int64)&q_DebuggerClient$$STATE_INVALID,
   0x0000006700000047,
-  (int64)&q_DebuggerClient$$AUTO_COMPLETE_CLASS_CONSTANTS,
+  (int64)&q_DebuggerClient$$STATE_READY_FOR_COMMAND,
   0x0000006900000047,
-  (int64)&q_DebuggerClient$$AUTO_COMPLETE_CLASS_PROPERTIES,
+  (int64)&q_DebuggerClientCmdUser$$AUTO_COMPLETE_VARIABLES,
   0x0000006b00000047,
-  (int64)&q_DebuggerClient$$AUTO_COMPLETE_CODE,
+  (int64)&q_DebuggerClientCmdUser$$AUTO_COMPLETE_FILENAMES,
   0x0000006d00000047,
-  (int64)&q_DebuggerClient$$AUTO_COMPLETE_CLASS_METHODS,
+  (int64)&q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASSES,
   0x0000006f00000047,
-  (int64)&q_DebuggerClient$$AUTO_COMPLETE_KEYWORDS,
+  (int64)&q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_CONSTANTS,
   0x0000007100000047,
-  (int64)&q_DebuggerClient$$AUTO_COMPLETE_CONSTANTS,
+  (int64)&q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_PROPERTIES,
   0x0000007300000047,
-  (int64)&q_DebuggerClient$$AUTO_COMPLETE_FUNCTIONS,
+  (int64)&q_DebuggerClientCmdUser$$AUTO_COMPLETE_CODE,
   0x0000007500000047,
-  (int64)&q_Locale$$VALID_LOCALE,
+  (int64)&q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_METHODS,
   0x0000007700000047,
-  (int64)&q_Locale$$ACTUAL_LOCALE,
+  (int64)&q_DebuggerClientCmdUser$$AUTO_COMPLETE_KEYWORDS,
   0x0000007900000047,
+  (int64)&q_DebuggerClientCmdUser$$AUTO_COMPLETE_CONSTANTS,
+  0x0000007b00000047,
+  (int64)&q_DebuggerClientCmdUser$$AUTO_COMPLETE_FUNCTIONS,
+  0x0000007d00000047,
+  (int64)&q_Locale$$VALID_LOCALE,
+  0x0000007f00000047,
+  (int64)&q_Locale$$ACTUAL_LOCALE,
+  0x0000008100000047,
   (int64)&q_Memcached$$RES_ERRNO,
-  0x0000007b00000037,
-  (int64)&q_Memcached$$OPT_TCP_NODELAY,
-  0x0000007d00000037,
-  (int64)&q_Memcached$$RES_BUFFERED,
-  0x0000007f00000037,
-  (int64)&q_Memcached$$OPT_SERVER_FAILURE_LIMIT,
-  0x0000008100000037,
-  (int64)&q_Memcached$$RES_NO_SERVERS,
   0x0000008300000037,
-  (int64)&q_Memcached$$OPT_LIBKETAMA_COMPATIBLE,
+  (int64)&q_Memcached$$OPT_TCP_NODELAY,
   0x0000008500000037,
-  (int64)&q_Memcached$$RES_SUCCESS,
+  (int64)&q_Memcached$$RES_BUFFERED,
   0x0000008700000037,
-  (int64)&q_Memcached$$OPT_PREFIX_KEY,
+  (int64)&q_Memcached$$OPT_SERVER_FAILURE_LIMIT,
   0x0000008900000037,
-  (int64)&q_Memcached$$OPT_HASH,
+  (int64)&q_Memcached$$RES_NO_SERVERS,
   0x0000008b00000037,
-  (int64)&q_Memcached$$DISTRIBUTION_CONSISTENT,
+  (int64)&q_Memcached$$OPT_LIBKETAMA_COMPATIBLE,
   0x0000008d00000037,
-  (int64)&q_Memcached$$HASH_HSIEH,
+  (int64)&q_Memcached$$RES_SUCCESS,
   0x0000008f00000037,
-  (int64)&q_Memcached$$OPT_BINARY_PROTOCOL,
+  (int64)&q_Memcached$$OPT_PREFIX_KEY,
   0x0000009100000037,
-  (int64)&q_Memcached$$RES_UNKNOWN_READ_FAILURE,
+  (int64)&q_Memcached$$OPT_HASH,
   0x0000009300000037,
-  (int64)&q_Memcached$$RES_NOTFOUND,
+  (int64)&q_Memcached$$DISTRIBUTION_CONSISTENT,
   0x0000009500000037,
-  (int64)&q_Memcached$$RES_PROTOCOL_ERROR,
+  (int64)&q_Memcached$$HASH_HSIEH,
   0x0000009700000037,
-  (int64)&q_Memcached$$RES_CLIENT_ERROR,
+  (int64)&q_Memcached$$OPT_BINARY_PROTOCOL,
   0x0000009900000037,
-  (int64)&q_Memcached$$RES_SERVER_ERROR,
+  (int64)&q_Memcached$$RES_UNKNOWN_READ_FAILURE,
   0x0000009b00000037,
-  (int64)&q_Memcached$$HASH_FNV1A_64,
+  (int64)&q_Memcached$$RES_NOTFOUND,
   0x0000009d00000037,
-  (int64)&q_Memcached$$OPT_CACHE_LOOKUPS,
+  (int64)&q_Memcached$$RES_PROTOCOL_ERROR,
   0x0000009f00000037,
-  (int64)&q_Memcached$$HASH_FNV1_64,
+  (int64)&q_Memcached$$RES_CLIENT_ERROR,
   0x000000a100000037,
-  (int64)&q_Memcached$$OPT_SEND_TIMEOUT,
+  (int64)&q_Memcached$$RES_SERVER_ERROR,
   0x000000a300000037,
-  (int64)&q_Memcached$$RES_TIMEOUT,
+  (int64)&q_Memcached$$HASH_FNV1A_64,
   0x000000a500000037,
-  (int64)&q_Memcached$$RES_BAD_KEY_PROVIDED,
+  (int64)&q_Memcached$$OPT_CACHE_LOOKUPS,
   0x000000a700000037,
-  (int64)&q_Memcached$$RES_SOME_ERRORS,
+  (int64)&q_Memcached$$HASH_FNV1_64,
   0x000000a900000037,
-  (int64)&q_Memcached$$OPT_SOCKET_SEND_SIZE,
+  (int64)&q_Memcached$$OPT_SEND_TIMEOUT,
   0x000000ab00000037,
-  (int64)&q_Memcached$$OPT_COMPRESSION,
+  (int64)&q_Memcached$$RES_TIMEOUT,
   0x000000ad00000037,
-  (int64)&q_Memcached$$SERIALIZER_PHP,
+  (int64)&q_Memcached$$RES_BAD_KEY_PROVIDED,
   0x000000af00000037,
-  (int64)&q_Memcached$$OPT_RETRY_TIMEOUT,
+  (int64)&q_Memcached$$RES_SOME_ERRORS,
   0x000000b100000037,
-  (int64)&q_Memcached$$HAVE_JSON,
-  0x000000b300000027,
-  (int64)&q_Memcached$$SERIALIZER_JSON,
+  (int64)&q_Memcached$$OPT_SOCKET_SEND_SIZE,
+  0x000000b300000037,
+  (int64)&q_Memcached$$OPT_COMPRESSION,
   0x000000b500000037,
-  (int64)&q_Memcached$$SERIALIZER_IGBINARY,
+  (int64)&q_Memcached$$SERIALIZER_PHP,
   0x000000b700000037,
-  (int64)&q_Memcached$$OPT_NO_BLOCK,
+  (int64)&q_Memcached$$OPT_RETRY_TIMEOUT,
   0x000000b900000037,
-  (int64)&q_Memcached$$DISTRIBUTION_MODULA,
-  0x000000bb00000037,
-  (int64)&q_Memcached$$HASH_CRC,
+  (int64)&q_Memcached$$HAVE_JSON,
+  0x000000bb00000027,
+  (int64)&q_Memcached$$SERIALIZER_JSON,
   0x000000bd00000037,
-  (int64)&q_Memcached$$RES_WRITE_FAILURE,
+  (int64)&q_Memcached$$SERIALIZER_IGBINARY,
   0x000000bf00000037,
-  (int64)&q_Memcached$$HASH_FNV1_32,
+  (int64)&q_Memcached$$OPT_NO_BLOCK,
   0x000000c100000037,
-  (int64)&q_Memcached$$OPT_SOCKET_RECV_SIZE,
+  (int64)&q_Memcached$$DISTRIBUTION_MODULA,
   0x000000c300000037,
-  (int64)&q_Memcached$$OPT_POLL_TIMEOUT,
+  (int64)&q_Memcached$$HASH_CRC,
   0x000000c500000037,
-  (int64)&q_Memcached$$OPT_DISTRIBUTION,
+  (int64)&q_Memcached$$RES_WRITE_FAILURE,
   0x000000c700000037,
-  (int64)&q_Memcached$$RES_CONNECTION_SOCKET_CREATE_FAILURE,
+  (int64)&q_Memcached$$HASH_FNV1_32,
   0x000000c900000037,
-  (int64)&q_Memcached$$OPT_RECV_TIMEOUT,
+  (int64)&q_Memcached$$OPT_SOCKET_RECV_SIZE,
   0x000000cb00000037,
-  (int64)&q_Memcached$$GET_PRESERVE_ORDER,
+  (int64)&q_Memcached$$OPT_POLL_TIMEOUT,
   0x000000cd00000037,
-  (int64)&q_Memcached$$HASH_DEFAULT,
+  (int64)&q_Memcached$$OPT_DISTRIBUTION,
   0x000000cf00000037,
-  (int64)&q_Memcached$$OPT_BUFFER_WRITES,
+  (int64)&q_Memcached$$RES_CONNECTION_SOCKET_CREATE_FAILURE,
   0x000000d100000037,
-  (int64)&q_Memcached$$HASH_FNV1A_32,
+  (int64)&q_Memcached$$OPT_RECV_TIMEOUT,
   0x000000d300000037,
-  (int64)&q_Memcached$$RES_HOST_LOOKUP_FAILURE,
+  (int64)&q_Memcached$$GET_PRESERVE_ORDER,
   0x000000d500000037,
-  (int64)&q_Memcached$$RES_DATA_EXISTS,
+  (int64)&q_Memcached$$HASH_DEFAULT,
   0x000000d700000037,
-  (int64)&q_Memcached$$RES_NOTSTORED,
+  (int64)&q_Memcached$$OPT_BUFFER_WRITES,
   0x000000d900000037,
-  (int64)&q_Memcached$$HASH_MD5,
+  (int64)&q_Memcached$$HASH_FNV1A_32,
   0x000000db00000037,
-  (int64)&q_Memcached$$RES_END,
+  (int64)&q_Memcached$$RES_HOST_LOOKUP_FAILURE,
   0x000000dd00000037,
-  (int64)&q_Memcached$$OPT_SERIALIZER,
+  (int64)&q_Memcached$$RES_DATA_EXISTS,
   0x000000df00000037,
-  (int64)&q_Memcached$$RES_FAILURE,
+  (int64)&q_Memcached$$RES_NOTSTORED,
   0x000000e100000037,
-  (int64)&q_Memcached$$HAVE_IGBINARY,
-  0x000000e300000027,
-  (int64)&q_Memcached$$OPT_CONNECT_TIMEOUT,
+  (int64)&q_Memcached$$HASH_MD5,
+  0x000000e300000037,
+  (int64)&q_Memcached$$RES_END,
   0x000000e500000037,
-  (int64)&q_Memcached$$RES_PARTIAL_READ,
+  (int64)&q_Memcached$$OPT_SERIALIZER,
   0x000000e700000037,
-  (int64)&q_Memcached$$HASH_MURMUR,
+  (int64)&q_Memcached$$RES_FAILURE,
   0x000000e900000037,
+  (int64)&q_Memcached$$HAVE_IGBINARY,
+  0x000000eb00000027,
+  (int64)&q_Memcached$$OPT_CONNECT_TIMEOUT,
+  0x000000ed00000037,
+  (int64)&q_Memcached$$RES_PARTIAL_READ,
+  0x000000ef00000037,
+  (int64)&q_Memcached$$HASH_MURMUR,
+  0x000000f100000037,
   (int64)&q_Memcached$$RES_PAYLOAD_FAILURE,
-  0x000000eb00000037,
+  0x000000f300000037,
   (int64)&q_Normalizer$$FORM_KD,
-  0x000000ed00000047,
-  (int64)&q_Normalizer$$FORM_KC,
-  0x000000ef00000047,
-  (int64)&q_Normalizer$$NFKC,
-  0x000000f100000047,
-  (int64)&q_Normalizer$$FORM_D,
-  0x000000f300000047,
-  (int64)&q_Normalizer$$NFC,
   0x000000f500000047,
-  (int64)&q_Normalizer$$NFD,
+  (int64)&q_Normalizer$$FORM_KC,
   0x000000f700000047,
-  (int64)&q_Normalizer$$NFKD,
+  (int64)&q_Normalizer$$NFKC,
   0x000000f900000047,
-  (int64)&q_Normalizer$$NONE,
+  (int64)&q_Normalizer$$FORM_D,
   0x000000fb00000047,
-  (int64)&q_Normalizer$$FORM_C,
+  (int64)&q_Normalizer$$NFC,
   0x000000fd00000047,
-  (int64)&q_PDO$$ATTR_CASE,
+  (int64)&q_Normalizer$$NFD,
   0x000000ff00000047,
-  (int64)&q_PDO$$ATTR_STATEMENT_CLASS,
+  (int64)&q_Normalizer$$NFKD,
   0x0000010100000047,
-  (int64)&q_PDO$$ERRMODE_EXCEPTION,
+  (int64)&q_Normalizer$$NONE,
   0x0000010300000047,
-  (int64)&q_PDO$$CASE_NATURAL,
+  (int64)&q_Normalizer$$FORM_C,
   0x0000010500000047,
-  (int64)&q_PDO$$FETCH_OBJ,
+  (int64)&q_PDO$$ATTR_CASE,
   0x0000010700000047,
-  (int64)&q_PDO$$FETCH_INTO,
+  (int64)&q_PDO$$ATTR_STATEMENT_CLASS,
   0x0000010900000047,
-  (int64)&q_PDO$$FETCH_BOUND,
+  (int64)&q_PDO$$ERRMODE_EXCEPTION,
   0x0000010b00000047,
-  (int64)&q_PDO$$MYSQL_ATTR_INIT_COMMAND,
+  (int64)&q_PDO$$CASE_NATURAL,
   0x0000010d00000047,
-  (int64)&q_PDO$$ATTR_CLIENT_VERSION,
+  (int64)&q_PDO$$FETCH_OBJ,
   0x0000010f00000047,
-  (int64)&q_PDO$$ATTR_FETCH_CATALOG_NAMES,
+  (int64)&q_PDO$$FETCH_INTO,
   0x0000011100000047,
-  (int64)&q_PDO$$CASE_LOWER,
+  (int64)&q_PDO$$FETCH_BOUND,
   0x0000011300000047,
-  (int64)&q_PDO$$FETCH_GROUP,
+  (int64)&q_PDO$$MYSQL_ATTR_INIT_COMMAND,
   0x0000011500000047,
-  (int64)&q_PDO$$CASE_UPPER,
+  (int64)&q_PDO$$ATTR_CLIENT_VERSION,
   0x0000011700000047,
-  (int64)&q_PDO$$PARAM_EVT_FETCH_POST,
+  (int64)&q_PDO$$ATTR_FETCH_CATALOG_NAMES,
   0x0000011900000047,
-  (int64)&q_PDO$$ATTR_TIMEOUT,
+  (int64)&q_PDO$$CASE_LOWER,
   0x0000011b00000047,
-  (int64)&q_PDO$$PARAM_EVT_EXEC_PRE,
+  (int64)&q_PDO$$FETCH_GROUP,
   0x0000011d00000047,
-  (int64)&q_PDO$$ATTR_ERRMODE,
+  (int64)&q_PDO$$CASE_UPPER,
   0x0000011f00000047,
-  (int64)&q_PDO$$ATTR_DEFAULT_FETCH_MODE,
+  (int64)&q_PDO$$PARAM_EVT_FETCH_POST,
   0x0000012100000047,
-  (int64)&q_PDO$$ATTR_EMULATE_PREPARES,
+  (int64)&q_PDO$$ATTR_TIMEOUT,
   0x0000012300000047,
-  (int64)&q_PDO$$ATTR_PREFETCH,
+  (int64)&q_PDO$$PARAM_EVT_EXEC_PRE,
   0x0000012500000047,
-  (int64)&q_PDO$$FETCH_UNIQUE,
+  (int64)&q_PDO$$ATTR_ERRMODE,
   0x0000012700000047,
-  (int64)&q_PDO$$MYSQL_ATTR_READ_DEFAULT_GROUP,
+  (int64)&q_PDO$$ATTR_DEFAULT_FETCH_MODE,
   0x0000012900000047,
-  (int64)&q_PDO$$ATTR_SERVER_INFO,
+  (int64)&q_PDO$$ATTR_EMULATE_PREPARES,
   0x0000012b00000047,
-  (int64)&q_PDO$$PARAM_EVT_NORMALIZE,
+  (int64)&q_PDO$$ATTR_PREFETCH,
   0x0000012d00000047,
-  (int64)&q_PDO$$ATTR_CONNECTION_STATUS,
+  (int64)&q_PDO$$FETCH_UNIQUE,
   0x0000012f00000047,
-  (int64)&q_PDO$$ATTR_ORACLE_NULLS,
+  (int64)&q_PDO$$MYSQL_ATTR_READ_DEFAULT_GROUP,
   0x0000013100000047,
-  (int64)&q_PDO$$MYSQL_ATTR_FOUND_ROWS,
+  (int64)&q_PDO$$ATTR_SERVER_INFO,
   0x0000013300000047,
-  (int64)&q_PDO$$FETCH_ORI_NEXT,
+  (int64)&q_PDO$$PARAM_EVT_NORMALIZE,
   0x0000013500000047,
-  (int64)&q_PDO$$ATTR_FETCH_TABLE_NAMES,
+  (int64)&q_PDO$$ATTR_CONNECTION_STATUS,
   0x0000013700000047,
-  (int64)&q_PDO$$FETCH_ORI_REL,
+  (int64)&q_PDO$$ATTR_ORACLE_NULLS,
   0x0000013900000047,
-  (int64)&q_PDO$$FETCH_ASSOC,
+  (int64)&q_PDO$$MYSQL_ATTR_FOUND_ROWS,
   0x0000013b00000047,
-  (int64)&q_PDO$$ATTR_CURSOR_NAME,
+  (int64)&q_PDO$$FETCH_ORI_NEXT,
   0x0000013d00000047,
-  (int64)&q_PDO$$ATTR_MAX_COLUMN_LEN,
+  (int64)&q_PDO$$ATTR_FETCH_TABLE_NAMES,
   0x0000013f00000047,
-  (int64)&q_PDO$$ATTR_AUTOCOMMIT,
+  (int64)&q_PDO$$FETCH_ORI_REL,
   0x0000014100000047,
-  (int64)&q_PDO$$PARAM_NULL,
+  (int64)&q_PDO$$FETCH_ASSOC,
   0x0000014300000047,
-  (int64)&q_PDO$$PARAM_EVT_ALLOC,
+  (int64)&q_PDO$$ATTR_CURSOR_NAME,
   0x0000014500000047,
-  (int64)&q_PDO$$PARAM_BOOL,
+  (int64)&q_PDO$$ATTR_MAX_COLUMN_LEN,
   0x0000014700000047,
-  (int64)&q_PDO$$NULL_NATURAL,
+  (int64)&q_PDO$$ATTR_AUTOCOMMIT,
   0x0000014900000047,
-  (int64)&q_PDO$$PARAM_INT,
+  (int64)&q_PDO$$PARAM_NULL,
   0x0000014b00000047,
-  (int64)&q_PDO$$FETCH_NUM,
+  (int64)&q_PDO$$PARAM_EVT_ALLOC,
   0x0000014d00000047,
-  (int64)&q_PDO$$FETCH_ORI_PRIOR,
+  (int64)&q_PDO$$PARAM_BOOL,
   0x0000014f00000047,
-  (int64)&q_PDO$$PARAM_EVT_EXEC_POST,
+  (int64)&q_PDO$$NULL_NATURAL,
   0x0000015100000047,
-  (int64)&q_PDO$$MYSQL_ATTR_USE_BUFFERED_QUERY,
+  (int64)&q_PDO$$PARAM_INT,
   0x0000015300000047,
-  (int64)&q_PDO$$PARAM_STR,
+  (int64)&q_PDO$$FETCH_NUM,
   0x0000015500000047,
-  (int64)&q_PDO$$ATTR_CURSOR,
+  (int64)&q_PDO$$FETCH_ORI_PRIOR,
   0x0000015700000047,
-  (int64)&q_PDO$$ATTR_DRIVER_NAME,
+  (int64)&q_PDO$$PARAM_EVT_EXEC_POST,
   0x0000015900000047,
-  (int64)&q_PDO$$FETCH_USE_DEFAULT,
+  (int64)&q_PDO$$MYSQL_ATTR_USE_BUFFERED_QUERY,
   0x0000015b00000047,
-  (int64)&q_PDO$$ATTR_SERVER_VERSION,
+  (int64)&q_PDO$$PARAM_STR,
   0x0000015d00000047,
-  (int64)&q_PDO$$MYSQL_ATTR_DIRECT_QUERY,
+  (int64)&q_PDO$$ATTR_CURSOR,
   0x0000015f00000047,
-  (int64)&q_PDO$$FETCH_PROPS_LATE,
+  (int64)&q_PDO$$ATTR_DRIVER_NAME,
   0x0000016100000047,
-  (int64)&q_PDO$$FETCH_COLUMN,
+  (int64)&q_PDO$$FETCH_USE_DEFAULT,
   0x0000016300000047,
-  (int64)&q_PDO$$FETCH_CLASSTYPE,
+  (int64)&q_PDO$$ATTR_SERVER_VERSION,
   0x0000016500000047,
-  (int64)&q_PDO$$FETCH_SERIALIZE,
+  (int64)&q_PDO$$MYSQL_ATTR_DIRECT_QUERY,
   0x0000016700000047,
-  (int64)&q_PDO$$MYSQL_ATTR_LOCAL_INFILE,
+  (int64)&q_PDO$$FETCH_PROPS_LATE,
   0x0000016900000047,
-  (int64)&q_PDO$$FETCH_BOTH,
+  (int64)&q_PDO$$FETCH_COLUMN,
   0x0000016b00000047,
-  (int64)&q_PDO$$FETCH_KEY_PAIR,
+  (int64)&q_PDO$$FETCH_CLASSTYPE,
   0x0000016d00000047,
-  (int64)&q_PDO$$PARAM_EVT_FETCH_PRE,
+  (int64)&q_PDO$$FETCH_SERIALIZE,
   0x0000016f00000047,
-  (int64)&q_PDO$$CURSOR_FWDONLY,
+  (int64)&q_PDO$$MYSQL_ATTR_LOCAL_INFILE,
   0x0000017100000047,
-  (int64)&q_PDO$$FETCH_ORI_FIRST,
+  (int64)&q_PDO$$FETCH_BOTH,
   0x0000017300000047,
-  (int64)&q_PDO$$CURSOR_SCROLL,
+  (int64)&q_PDO$$FETCH_KEY_PAIR,
   0x0000017500000047,
-  (int64)&q_PDO$$FETCH_ORI_LAST,
+  (int64)&q_PDO$$PARAM_EVT_FETCH_PRE,
   0x0000017700000047,
-  (int64)&q_PDO$$ATTR_PERSISTENT,
+  (int64)&q_PDO$$CURSOR_FWDONLY,
   0x0000017900000047,
-  (int64)&q_PDO$$NULL_EMPTY_STRING,
+  (int64)&q_PDO$$FETCH_ORI_FIRST,
   0x0000017b00000047,
-  (int64)&q_PDO$$ATTR_STRINGIFY_FETCHES,
+  (int64)&q_PDO$$CURSOR_SCROLL,
   0x0000017d00000047,
-  (int64)&q_PDO$$MYSQL_ATTR_READ_DEFAULT_FILE,
+  (int64)&q_PDO$$FETCH_ORI_LAST,
   0x0000017f00000047,
-  (int64)&q_PDO$$FETCH_FUNC,
+  (int64)&q_PDO$$ATTR_PERSISTENT,
   0x0000018100000047,
-  (int64)&q_PDO$$FETCH_ORI_ABS,
+  (int64)&q_PDO$$NULL_EMPTY_STRING,
   0x0000018300000047,
-  (int64)&q_PDO$$NULL_TO_STRING,
+  (int64)&q_PDO$$ATTR_STRINGIFY_FETCHES,
   0x0000018500000047,
-  (int64)&q_PDO$$MYSQL_ATTR_MAX_BUFFER_SIZE,
+  (int64)&q_PDO$$MYSQL_ATTR_READ_DEFAULT_FILE,
   0x0000018700000047,
-  (int64)&q_PDO$$FETCH_CLASS,
+  (int64)&q_PDO$$FETCH_FUNC,
   0x0000018900000047,
-  (int64)&q_PDO$$FETCH_LAZY,
+  (int64)&q_PDO$$FETCH_ORI_ABS,
   0x0000018b00000047,
-  (int64)&q_PDO$$MYSQL_ATTR_COMPRESS,
+  (int64)&q_PDO$$NULL_TO_STRING,
   0x0000018d00000047,
-  (int64)&q_PDO$$ERRMODE_WARNING,
+  (int64)&q_PDO$$MYSQL_ATTR_MAX_BUFFER_SIZE,
   0x0000018f00000047,
-  (int64)&q_PDO$$ERRMODE_SILENT,
+  (int64)&q_PDO$$FETCH_CLASS,
   0x0000019100000047,
-  (int64)&q_PDO$$ERR_NONE,
-  0x0000019300000077,
-  (int64)&q_PDO$$PARAM_LOB,
+  (int64)&q_PDO$$FETCH_LAZY,
+  0x0000019300000047,
+  (int64)&q_PDO$$MYSQL_ATTR_COMPRESS,
   0x0000019500000047,
-  (int64)&q_PDO$$FETCH_NAMED,
+  (int64)&q_PDO$$ERRMODE_WARNING,
   0x0000019700000047,
-  (int64)&q_PDO$$PARAM_INPUT_OUTPUT,
+  (int64)&q_PDO$$ERRMODE_SILENT,
   0x0000019900000047,
-  (int64)&q_PDO$$MYSQL_ATTR_IGNORE_SPACE,
-  0x0000019b00000047,
-  (int64)&q_PDO$$PARAM_STMT,
+  (int64)&q_PDO$$ERR_NONE,
+  0x0000019b00000077,
+  (int64)&q_PDO$$PARAM_LOB,
   0x0000019d00000047,
-  (int64)&q_PDO$$PARAM_EVT_FREE,
+  (int64)&q_PDO$$FETCH_NAMED,
   0x0000019f00000047,
+  (int64)&q_PDO$$PARAM_INPUT_OUTPUT,
+  0x000001a100000047,
+  (int64)&q_PDO$$MYSQL_ATTR_IGNORE_SPACE,
+  0x000001a300000047,
+  (int64)&q_PDO$$PARAM_STMT,
+  0x000001a500000047,
+  (int64)&q_PDO$$PARAM_EVT_FREE,
+  0x000001a700000047,
   (int64)&q_SpoofChecker$$SINGLE_SCRIPT_CONFUSABLE,
-  0x000001a100000037,
-  (int64)&q_SpoofChecker$$WHOLE_SCRIPT_CONFUSABLE,
-  0x000001a300000037,
-  (int64)&q_SpoofChecker$$CHAR_LIMIT,
-  0x000001a500000037,
-  (int64)&q_SpoofChecker$$INVISIBLE,
-  0x000001a700000037,
-  (int64)&q_SpoofChecker$$SINGLE_SCRIPT,
   0x000001a900000037,
-  (int64)&q_SpoofChecker$$ANY_CASE,
+  (int64)&q_SpoofChecker$$WHOLE_SCRIPT_CONFUSABLE,
   0x000001ab00000037,
-  (int64)&q_SpoofChecker$$MIXED_SCRIPT_CONFUSABLE,
+  (int64)&q_SpoofChecker$$CHAR_LIMIT,
   0x000001ad00000037,
+  (int64)&q_SpoofChecker$$INVISIBLE,
+  0x000001af00000037,
+  (int64)&q_SpoofChecker$$SINGLE_SCRIPT,
+  0x000001b100000037,
+  (int64)&q_SpoofChecker$$ANY_CASE,
+  0x000001b300000037,
+  (int64)&q_SpoofChecker$$MIXED_SCRIPT_CONFUSABLE,
+  0x000001b500000037,
   (int64)&q_XMLReader$$DOC_FRAGMENT,
-  0x000001af00000047,
-  (int64)&q_XMLReader$$NOTATION,
-  0x000001b100000047,
-  (int64)&q_XMLReader$$COMMENT,
-  0x000001b300000047,
-  (int64)&q_XMLReader$$ELEMENT,
-  0x000001b500000047,
-  (int64)&q_XMLReader$$SUBST_ENTITIES,
   0x000001b700000047,
-  (int64)&q_XMLReader$$DEFAULTATTRS,
+  (int64)&q_XMLReader$$NOTATION,
   0x000001b900000047,
-  (int64)&q_XMLReader$$CDATA,
+  (int64)&q_XMLReader$$COMMENT,
   0x000001bb00000047,
-  (int64)&q_XMLReader$$LOADDTD,
+  (int64)&q_XMLReader$$ELEMENT,
   0x000001bd00000047,
-  (int64)&q_XMLReader$$TEXT,
+  (int64)&q_XMLReader$$SUBST_ENTITIES,
   0x000001bf00000047,
-  (int64)&q_XMLReader$$WHITESPACE,
+  (int64)&q_XMLReader$$DEFAULTATTRS,
   0x000001c100000047,
-  (int64)&q_XMLReader$$DOC_TYPE,
+  (int64)&q_XMLReader$$CDATA,
   0x000001c300000047,
-  (int64)&q_XMLReader$$SIGNIFICANT_WHITESPACE,
+  (int64)&q_XMLReader$$LOADDTD,
   0x000001c500000047,
-  (int64)&q_XMLReader$$PI,
+  (int64)&q_XMLReader$$TEXT,
   0x000001c700000047,
-  (int64)&q_XMLReader$$DOC,
+  (int64)&q_XMLReader$$WHITESPACE,
   0x000001c900000047,
-  (int64)&q_XMLReader$$ENTITY,
+  (int64)&q_XMLReader$$DOC_TYPE,
   0x000001cb00000047,
-  (int64)&q_XMLReader$$END_ELEMENT,
+  (int64)&q_XMLReader$$SIGNIFICANT_WHITESPACE,
   0x000001cd00000047,
-  (int64)&q_XMLReader$$XML_DECLARATION,
+  (int64)&q_XMLReader$$PI,
   0x000001cf00000047,
-  (int64)&q_XMLReader$$NONE,
+  (int64)&q_XMLReader$$DOC,
   0x000001d100000047,
-  (int64)&q_XMLReader$$END_ENTITY,
+  (int64)&q_XMLReader$$ENTITY,
   0x000001d300000047,
-  (int64)&q_XMLReader$$ATTRIBUTE,
+  (int64)&q_XMLReader$$END_ELEMENT,
   0x000001d500000047,
-  (int64)&q_XMLReader$$VALIDATE,
+  (int64)&q_XMLReader$$XML_DECLARATION,
   0x000001d700000047,
-  (int64)&q_XMLReader$$ENTITY_REF,
+  (int64)&q_XMLReader$$NONE,
   0x000001d900000047,
+  (int64)&q_XMLReader$$END_ENTITY,
+  0x000001db00000047,
+  (int64)&q_XMLReader$$ATTRIBUTE,
+  0x000001dd00000047,
+  (int64)&q_XMLReader$$VALIDATE,
+  0x000001df00000047,
+  (int64)&q_XMLReader$$ENTITY_REF,
+  0x000001e100000047,
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
   {0x44D1DA387595A403LL,5,1,0,36,4,0,&NAMSTR(s_sys_ss7595a403, "SORT_REGULAR") },
@@ -11154,202 +11277,207 @@ static const ClassPropTableEntry cpt_table_entries[] = {
   {0x690180C3BA732B5ELL,-7,96,0,100,4,0,&NAMSTR(s_sys_ssba732b5e, "ALL_WITH_BC") },
   {0x6B29DE65F46EAFDFLL,-11,98,0,100,4,0,&NAMSTR(s_sys_ssf46eafdf, "ANTARCTICA") },
 
-  {0x2038737F45604DE2LL,8,100,0,100,4,0,&NAMSTR(s_sys_ss45604de2, "AUTO_COMPLETE_VARIABLES") },
-  {0x1B352E31B034F827LL,-1,102,0,36,4,0,&NAMSTR(s_sys_ssb034f827, "AUTO_COMPLETE_FILENAMES") },
-  {0x0F17BB5BEC004CA7LL,7,104,0,100,4,0,&NAMSTR(s_sys_ssec004ca7, "AUTO_COMPLETE_CLASSES") },
-  {0x6A811D407DC24A29LL,4,106,0,100,4,0,&NAMSTR(s_sys_ss7dc24a29, "AUTO_COMPLETE_CLASS_CONSTANTS") },
-  {0x1858E5511222BC8BLL,-1,108,0,36,4,0,&NAMSTR(s_sys_ss1222bc8b, "AUTO_COMPLETE_CLASS_PROPERTIES") },
-  {0x1DE12226E1E87B6BLL,0,110,0,100,4,0,&NAMSTR(s_sys_sse1e87b6b, "AUTO_COMPLETE_CODE") },
-  {0x2C29DCF63AAC70EFLL,-2,112,0,36,4,0,&NAMSTR(s_sys_ss3aac70ef, "AUTO_COMPLETE_CLASS_METHODS") },
-  {0x76A6B174D3E2108FLL,-2,114,0,100,4,0,&NAMSTR(s_sys_ssd3e2108f, "AUTO_COMPLETE_KEYWORDS") },
-  {0x78221A7B002235D3LL,-6,116,0,100,4,0,&NAMSTR(s_sys_ss002235d3, "AUTO_COMPLETE_CONSTANTS") },
-  {0x7CAE318E6EF6449FLL,-3,118,0,100,4,0,&NAMSTR(s_sys_ss6ef6449f, "AUTO_COMPLETE_FUNCTIONS") },
+  {0x7A6CBDB0410FE591LL,3,100,0,100,4,0,&NAMSTR(s_sys_ss410fe591, "STATE_UNINIT") },
+  {0x78376AC8F4AC1CDBLL,0,102,0,100,4,0,&NAMSTR(s_sys_ssf4ac1cdb, "STATE_BUSY") },
+  {0x332D8AF6D31FF28DLL,-2,104,0,100,4,0,&NAMSTR(s_sys_ssd31ff28d, "STATE_INVALID") },
+  {0x066F2DBE64D6C96FLL,-2,106,0,100,4,0,&NAMSTR(s_sys_ss64d6c96f, "STATE_READY_FOR_COMMAND") },
+
+  {0x2038737F45604DE2LL,8,108,0,100,4,0,&NAMSTR(s_sys_ss45604de2, "AUTO_COMPLETE_VARIABLES") },
+  {0x1B352E31B034F827LL,-1,110,0,36,4,0,&NAMSTR(s_sys_ssb034f827, "AUTO_COMPLETE_FILENAMES") },
+  {0x0F17BB5BEC004CA7LL,7,112,0,100,4,0,&NAMSTR(s_sys_ssec004ca7, "AUTO_COMPLETE_CLASSES") },
+  {0x6A811D407DC24A29LL,4,114,0,100,4,0,&NAMSTR(s_sys_ss7dc24a29, "AUTO_COMPLETE_CLASS_CONSTANTS") },
+  {0x1858E5511222BC8BLL,-1,116,0,36,4,0,&NAMSTR(s_sys_ss1222bc8b, "AUTO_COMPLETE_CLASS_PROPERTIES") },
+  {0x1DE12226E1E87B6BLL,0,118,0,100,4,0,&NAMSTR(s_sys_sse1e87b6b, "AUTO_COMPLETE_CODE") },
+  {0x2C29DCF63AAC70EFLL,-2,120,0,36,4,0,&NAMSTR(s_sys_ss3aac70ef, "AUTO_COMPLETE_CLASS_METHODS") },
+  {0x76A6B174D3E2108FLL,-2,122,0,100,4,0,&NAMSTR(s_sys_ssd3e2108f, "AUTO_COMPLETE_KEYWORDS") },
+  {0x78221A7B002235D3LL,-6,124,0,100,4,0,&NAMSTR(s_sys_ss002235d3, "AUTO_COMPLETE_CONSTANTS") },
+  {0x7CAE318E6EF6449FLL,-3,126,0,100,4,0,&NAMSTR(s_sys_ss6ef6449f, "AUTO_COMPLETE_FUNCTIONS") },
 
   {0x44CC7F6BF50518ECLL,0,48,21,65,8,GET_PROPERTY_OFFSET(c_GenericContinuation, m_vars),&NAMSTR(s_sys_ss020cf65e, "\000GenericContinuation\000vars") },
 
-  {0x35B10383BBF3BAE1LL,0,120,0,100,4,0,&NAMSTR(s_sys_ssbbf3bae1, "VALID_LOCALE") },
-  {0x78695696B47AF8CDLL,-1,122,0,100,4,0,&NAMSTR(s_sys_ssb47af8cd, "ACTUAL_LOCALE") },
+  {0x35B10383BBF3BAE1LL,0,128,0,100,4,0,&NAMSTR(s_sys_ssbbf3bae1, "VALID_LOCALE") },
+  {0x78695696B47AF8CDLL,-1,130,0,100,4,0,&NAMSTR(s_sys_ssb47af8cd, "ACTUAL_LOCALE") },
 
-  {0x2CCABB2638D29583LL,2,124,0,100,3,0,&NAMSTR(s_sys_ss38d29583, "RES_ERRNO") },
-  {0x6AF4D4CD7B6B9E85LL,23,126,0,100,3,0,&NAMSTR(s_sys_ss7b6b9e85, "OPT_TCP_NODELAY") },
-  {0x1FBB5AC58A77E707LL,19,128,0,100,3,0,&NAMSTR(s_sys_ss8a77e707, "RES_BUFFERED") },
-  {0x261AB88649B2E58ALL,49,130,0,36,3,0,&NAMSTR(s_sys_ss49b2e58a, "OPT_SERVER_FAILURE_LIMIT") },
-  {0x2072FB05B0D6540ALL,45,132,0,100,3,0,&NAMSTR(s_sys_ssb0d6540a, "RES_NO_SERVERS") },
-  {0x5EC3EFCB1563B68DLL,38,134,0,36,3,0,&NAMSTR(s_sys_ss1563b68d, "OPT_LIBKETAMA_COMPATIBLE") },
-  {0x0C53D08ECD9ACC0DLL,45,136,0,100,3,0,&NAMSTR(s_sys_sscd9acc0d, "RES_SUCCESS") },
-  {0x7071566611A71D96LL,1,138,0,36,3,0,&NAMSTR(s_sys_ss11a71d96, "OPT_PREFIX_KEY") },
-  {0x425EDC08E649F716LL,34,140,0,100,3,0,&NAMSTR(s_sys_sse649f716, "OPT_HASH") },
-  {0x64B6C925C7A41498LL,-4,142,0,100,3,0,&NAMSTR(s_sys_ssc7a41498, "DISTRIBUTION_CONSISTENT") },
-  {0x200711C7E62DFB1CLL,45,144,0,36,3,0,&NAMSTR(s_sys_sse62dfb1c, "HASH_HSIEH") },
-  {0x6B8DE2AA09E1749CLL,20,146,0,36,3,0,&NAMSTR(s_sys_ss09e1749c, "OPT_BINARY_PROTOCOL") },
-  {0x47FC6D6596D2411CLL,2,148,0,100,3,0,&NAMSTR(s_sys_ss96d2411c, "RES_UNKNOWN_READ_FAILURE") },
-  {0x6364909F8AA5869DLL,41,150,0,100,3,0,&NAMSTR(s_sys_ss8aa5869d, "RES_NOTFOUND") },
-  {0x56E8EF0A2966E7A2LL,1,152,0,36,3,0,&NAMSTR(s_sys_ss2966e7a2, "RES_PROTOCOL_ERROR") },
-  {0x4A25210D326D0922LL,1,154,0,100,3,0,&NAMSTR(s_sys_ss326d0922, "RES_CLIENT_ERROR") },
-  {0x2B230612FB5D80A3LL,18,156,0,100,3,0,&NAMSTR(s_sys_ssfb5d80a3, "RES_SERVER_ERROR") },
-  {0x49D8D4184B78B3A5LL,18,158,0,100,3,0,&NAMSTR(s_sys_ssbe91a4e3, "HASH_FNV1A_64") },
-  {0x6808EBB81DDE422FLL,-15,160,0,100,3,0,&NAMSTR(s_sys_ss1dde422f, "OPT_CACHE_LOOKUPS") },
-  {0x3A7E842A627341B2LL,-2,162,0,100,3,0,&NAMSTR(s_sys_ss5769d4fd, "HASH_FNV1_64") },
-  {0x56895500D1F05334LL,20,164,0,100,3,0,&NAMSTR(s_sys_ssd1f05334, "OPT_SEND_TIMEOUT") },
-  {0x6BC90BF53C6E7CC3LL,1,166,0,36,3,0,&NAMSTR(s_sys_ss3c6e7cc3, "RES_TIMEOUT") },
-  {0x4155BF3DCFA655C3LL,17,168,0,100,3,0,&NAMSTR(s_sys_sscfa655c3, "RES_BAD_KEY_PROVIDED") },
-  {0x490A114712BBA544LL,-19,170,0,100,3,0,&NAMSTR(s_sys_ss12bba544, "RES_SOME_ERRORS") },
-  {0x68724938D592E4C6LL,12,172,0,100,3,0,&NAMSTR(s_sys_ssd592e4c6, "OPT_SOCKET_SEND_SIZE") },
-  {0x073E4D38138A7DC7LL,25,174,0,100,3,0,&NAMSTR(s_sys_ss138a7dc7, "OPT_COMPRESSION") },
-  {0x7B91B2E2CC4DE648LL,4,176,0,100,3,0,&NAMSTR(s_sys_sscc4de648, "SERIALIZER_PHP") },
-  {0x138CD297B9FD244BLL,-7,178,0,100,3,0,&NAMSTR(s_sys_ssb9fd244b, "OPT_RETRY_TIMEOUT") },
-  {0x74824687F4C8D7CELL,13,180,0,100,2,0,&NAMSTR(s_sys_ssf4c8d7ce, "HAVE_JSON") },
-  {0x7AC058297870C1D0LL,-22,182,0,100,3,0,&NAMSTR(s_sys_ss7870c1d0, "SERIALIZER_JSON") },
-  {0x2B4E411F0C7596D1LL,-1,184,0,36,3,0,&NAMSTR(s_sys_ss0c7596d1, "SERIALIZER_IGBINARY") },
-  {0x1E8ABFABE00D2651LL,-30,186,0,100,3,0,&NAMSTR(s_sys_sse00d2651, "OPT_NO_BLOCK") },
-  {0x49856B6165627AD4LL,-23,188,0,100,3,0,&NAMSTR(s_sys_ss65627ad4, "DISTRIBUTION_MODULA") },
-  {0x02FAAD1AB87BA2D5LL,-14,190,0,36,3,0,&NAMSTR(s_sys_ssb87ba2d5, "HASH_CRC") },
-  {0x1045EAC17F112855LL,12,192,0,100,3,0,&NAMSTR(s_sys_ss7f112855, "RES_WRITE_FAILURE") },
-  {0x3A3731492FB1B557LL,9,194,0,36,3,0,&NAMSTR(s_sys_ss2bfdc708, "HASH_FNV1_32") },
-  {0x345B7B934684B3D7LL,17,196,0,100,3,0,&NAMSTR(s_sys_ss4684b3d7, "OPT_SOCKET_RECV_SIZE") },
-  {0x296424A39A9F1AD8LL,-19,198,0,100,3,0,&NAMSTR(s_sys_ss9a9f1ad8, "OPT_POLL_TIMEOUT") },
-  {0x3DD14F50C65BCDDBLL,-6,200,0,36,3,0,&NAMSTR(s_sys_ssc65bcddb, "OPT_DISTRIBUTION") },
-  {0x0224412EA957C9DBLL,17,202,0,100,3,0,&NAMSTR(s_sys_ssa957c9db, "RES_CONNECTION_SOCKET_CREATE_FAILURE") },
-  {0x6460D48B93209DDELL,-3,204,0,100,3,0,&NAMSTR(s_sys_ss93209dde, "OPT_RECV_TIMEOUT") },
-  {0x68D025242664C361LL,-35,206,0,100,3,0,&NAMSTR(s_sys_ss2664c361, "GET_PRESERVE_ORDER") },
-  {0x53A1149CE01E8C64LL,6,208,0,100,3,0,&NAMSTR(s_sys_sse01e8c64, "HASH_DEFAULT") },
-  {0x76B0604A2B4408EBLL,-32,210,0,100,3,0,&NAMSTR(s_sys_ss2b4408eb, "OPT_BUFFER_WRITES") },
-  {0x3C4C4E1BC9DFDCECLL,-34,212,0,36,3,0,&NAMSTR(s_sys_ss08c5e518, "HASH_FNV1A_32") },
-  {0x4197FC89C9F88DECLL,-33,214,0,100,3,0,&NAMSTR(s_sys_ssc9f88dec, "RES_HOST_LOOKUP_FAILURE") },
-  {0x56C85759C5701DEDLL,1,216,0,100,3,0,&NAMSTR(s_sys_ssc5701ded, "RES_DATA_EXISTS") },
-  {0x153143A96D687E6ELL,-34,218,0,100,3,0,&NAMSTR(s_sys_ss6d687e6e, "RES_NOTSTORED") },
-  {0x2BB4CFA54A5085F0LL,-15,220,0,100,3,0,&NAMSTR(s_sys_ssfe91db32, "HASH_MD5") },
-  {0x74109B06DAD2F9F1LL,-49,222,0,100,3,0,&NAMSTR(s_sys_ssdad2f9f1, "RES_END") },
-  {0x73ABA23A4A0C5D74LL,-24,224,0,100,3,0,&NAMSTR(s_sys_ss4a0c5d74, "OPT_SERIALIZER") },
-  {0x460A66958F0524F8LL,-6,226,0,100,3,0,&NAMSTR(s_sys_ss8f0524f8, "RES_FAILURE") },
-  {0x1C014F2A2E707EF9LL,-24,228,0,100,2,0,&NAMSTR(s_sys_ss2e707ef9, "HAVE_IGBINARY") },
-  {0x0443DA24DAD42EFBLL,-26,230,0,36,3,0,&NAMSTR(s_sys_ssdad42efb, "OPT_CONNECT_TIMEOUT") },
-  {0x35B252ECC21E5F7BLL,-31,232,0,100,3,0,&NAMSTR(s_sys_ssc21e5f7b, "RES_PARTIAL_READ") },
-  {0x7A68C36A2F5D27FELL,-17,234,0,100,3,0,&NAMSTR(s_sys_ss2f5d27fe, "HASH_MURMUR") },
-  {0x6948F797B210F37FLL,0,236,0,100,3,0,&NAMSTR(s_sys_ssb210f37f, "RES_PAYLOAD_FAILURE") },
+  {0x2CCABB2638D29583LL,2,132,0,100,3,0,&NAMSTR(s_sys_ss38d29583, "RES_ERRNO") },
+  {0x6AF4D4CD7B6B9E85LL,23,134,0,100,3,0,&NAMSTR(s_sys_ss7b6b9e85, "OPT_TCP_NODELAY") },
+  {0x1FBB5AC58A77E707LL,19,136,0,100,3,0,&NAMSTR(s_sys_ss8a77e707, "RES_BUFFERED") },
+  {0x261AB88649B2E58ALL,49,138,0,36,3,0,&NAMSTR(s_sys_ss49b2e58a, "OPT_SERVER_FAILURE_LIMIT") },
+  {0x2072FB05B0D6540ALL,45,140,0,100,3,0,&NAMSTR(s_sys_ssb0d6540a, "RES_NO_SERVERS") },
+  {0x5EC3EFCB1563B68DLL,38,142,0,36,3,0,&NAMSTR(s_sys_ss1563b68d, "OPT_LIBKETAMA_COMPATIBLE") },
+  {0x0C53D08ECD9ACC0DLL,45,144,0,100,3,0,&NAMSTR(s_sys_sscd9acc0d, "RES_SUCCESS") },
+  {0x7071566611A71D96LL,1,146,0,36,3,0,&NAMSTR(s_sys_ss11a71d96, "OPT_PREFIX_KEY") },
+  {0x425EDC08E649F716LL,34,148,0,100,3,0,&NAMSTR(s_sys_sse649f716, "OPT_HASH") },
+  {0x64B6C925C7A41498LL,-4,150,0,100,3,0,&NAMSTR(s_sys_ssc7a41498, "DISTRIBUTION_CONSISTENT") },
+  {0x200711C7E62DFB1CLL,45,152,0,36,3,0,&NAMSTR(s_sys_sse62dfb1c, "HASH_HSIEH") },
+  {0x6B8DE2AA09E1749CLL,20,154,0,36,3,0,&NAMSTR(s_sys_ss09e1749c, "OPT_BINARY_PROTOCOL") },
+  {0x47FC6D6596D2411CLL,2,156,0,100,3,0,&NAMSTR(s_sys_ss96d2411c, "RES_UNKNOWN_READ_FAILURE") },
+  {0x6364909F8AA5869DLL,41,158,0,100,3,0,&NAMSTR(s_sys_ss8aa5869d, "RES_NOTFOUND") },
+  {0x56E8EF0A2966E7A2LL,1,160,0,36,3,0,&NAMSTR(s_sys_ss2966e7a2, "RES_PROTOCOL_ERROR") },
+  {0x4A25210D326D0922LL,1,162,0,100,3,0,&NAMSTR(s_sys_ss326d0922, "RES_CLIENT_ERROR") },
+  {0x2B230612FB5D80A3LL,18,164,0,100,3,0,&NAMSTR(s_sys_ssfb5d80a3, "RES_SERVER_ERROR") },
+  {0x49D8D4184B78B3A5LL,18,166,0,100,3,0,&NAMSTR(s_sys_ssbe91a4e3, "HASH_FNV1A_64") },
+  {0x6808EBB81DDE422FLL,-15,168,0,100,3,0,&NAMSTR(s_sys_ss1dde422f, "OPT_CACHE_LOOKUPS") },
+  {0x3A7E842A627341B2LL,-2,170,0,100,3,0,&NAMSTR(s_sys_ss5769d4fd, "HASH_FNV1_64") },
+  {0x56895500D1F05334LL,20,172,0,100,3,0,&NAMSTR(s_sys_ssd1f05334, "OPT_SEND_TIMEOUT") },
+  {0x6BC90BF53C6E7CC3LL,1,174,0,36,3,0,&NAMSTR(s_sys_ss3c6e7cc3, "RES_TIMEOUT") },
+  {0x4155BF3DCFA655C3LL,17,176,0,100,3,0,&NAMSTR(s_sys_sscfa655c3, "RES_BAD_KEY_PROVIDED") },
+  {0x490A114712BBA544LL,-19,178,0,100,3,0,&NAMSTR(s_sys_ss12bba544, "RES_SOME_ERRORS") },
+  {0x68724938D592E4C6LL,12,180,0,100,3,0,&NAMSTR(s_sys_ssd592e4c6, "OPT_SOCKET_SEND_SIZE") },
+  {0x073E4D38138A7DC7LL,25,182,0,100,3,0,&NAMSTR(s_sys_ss138a7dc7, "OPT_COMPRESSION") },
+  {0x7B91B2E2CC4DE648LL,4,184,0,100,3,0,&NAMSTR(s_sys_sscc4de648, "SERIALIZER_PHP") },
+  {0x138CD297B9FD244BLL,-7,186,0,100,3,0,&NAMSTR(s_sys_ssb9fd244b, "OPT_RETRY_TIMEOUT") },
+  {0x74824687F4C8D7CELL,13,188,0,100,2,0,&NAMSTR(s_sys_ssf4c8d7ce, "HAVE_JSON") },
+  {0x7AC058297870C1D0LL,-22,190,0,100,3,0,&NAMSTR(s_sys_ss7870c1d0, "SERIALIZER_JSON") },
+  {0x2B4E411F0C7596D1LL,-1,192,0,36,3,0,&NAMSTR(s_sys_ss0c7596d1, "SERIALIZER_IGBINARY") },
+  {0x1E8ABFABE00D2651LL,-30,194,0,100,3,0,&NAMSTR(s_sys_sse00d2651, "OPT_NO_BLOCK") },
+  {0x49856B6165627AD4LL,-23,196,0,100,3,0,&NAMSTR(s_sys_ss65627ad4, "DISTRIBUTION_MODULA") },
+  {0x02FAAD1AB87BA2D5LL,-14,198,0,36,3,0,&NAMSTR(s_sys_ssb87ba2d5, "HASH_CRC") },
+  {0x1045EAC17F112855LL,12,200,0,100,3,0,&NAMSTR(s_sys_ss7f112855, "RES_WRITE_FAILURE") },
+  {0x3A3731492FB1B557LL,9,202,0,36,3,0,&NAMSTR(s_sys_ss2bfdc708, "HASH_FNV1_32") },
+  {0x345B7B934684B3D7LL,17,204,0,100,3,0,&NAMSTR(s_sys_ss4684b3d7, "OPT_SOCKET_RECV_SIZE") },
+  {0x296424A39A9F1AD8LL,-19,206,0,100,3,0,&NAMSTR(s_sys_ss9a9f1ad8, "OPT_POLL_TIMEOUT") },
+  {0x3DD14F50C65BCDDBLL,-6,208,0,36,3,0,&NAMSTR(s_sys_ssc65bcddb, "OPT_DISTRIBUTION") },
+  {0x0224412EA957C9DBLL,17,210,0,100,3,0,&NAMSTR(s_sys_ssa957c9db, "RES_CONNECTION_SOCKET_CREATE_FAILURE") },
+  {0x6460D48B93209DDELL,-3,212,0,100,3,0,&NAMSTR(s_sys_ss93209dde, "OPT_RECV_TIMEOUT") },
+  {0x68D025242664C361LL,-35,214,0,100,3,0,&NAMSTR(s_sys_ss2664c361, "GET_PRESERVE_ORDER") },
+  {0x53A1149CE01E8C64LL,6,216,0,100,3,0,&NAMSTR(s_sys_sse01e8c64, "HASH_DEFAULT") },
+  {0x76B0604A2B4408EBLL,-32,218,0,100,3,0,&NAMSTR(s_sys_ss2b4408eb, "OPT_BUFFER_WRITES") },
+  {0x3C4C4E1BC9DFDCECLL,-34,220,0,36,3,0,&NAMSTR(s_sys_ss08c5e518, "HASH_FNV1A_32") },
+  {0x4197FC89C9F88DECLL,-33,222,0,100,3,0,&NAMSTR(s_sys_ssc9f88dec, "RES_HOST_LOOKUP_FAILURE") },
+  {0x56C85759C5701DEDLL,1,224,0,100,3,0,&NAMSTR(s_sys_ssc5701ded, "RES_DATA_EXISTS") },
+  {0x153143A96D687E6ELL,-34,226,0,100,3,0,&NAMSTR(s_sys_ss6d687e6e, "RES_NOTSTORED") },
+  {0x2BB4CFA54A5085F0LL,-15,228,0,100,3,0,&NAMSTR(s_sys_ssfe91db32, "HASH_MD5") },
+  {0x74109B06DAD2F9F1LL,-49,230,0,100,3,0,&NAMSTR(s_sys_ssdad2f9f1, "RES_END") },
+  {0x73ABA23A4A0C5D74LL,-24,232,0,100,3,0,&NAMSTR(s_sys_ss4a0c5d74, "OPT_SERIALIZER") },
+  {0x460A66958F0524F8LL,-6,234,0,100,3,0,&NAMSTR(s_sys_ss8f0524f8, "RES_FAILURE") },
+  {0x1C014F2A2E707EF9LL,-24,236,0,100,2,0,&NAMSTR(s_sys_ss2e707ef9, "HAVE_IGBINARY") },
+  {0x0443DA24DAD42EFBLL,-26,238,0,36,3,0,&NAMSTR(s_sys_ssdad42efb, "OPT_CONNECT_TIMEOUT") },
+  {0x35B252ECC21E5F7BLL,-31,240,0,100,3,0,&NAMSTR(s_sys_ssc21e5f7b, "RES_PARTIAL_READ") },
+  {0x7A68C36A2F5D27FELL,-17,242,0,100,3,0,&NAMSTR(s_sys_ss2f5d27fe, "HASH_MURMUR") },
+  {0x6948F797B210F37FLL,0,244,0,100,3,0,&NAMSTR(s_sys_ssb210f37f, "RES_PAYLOAD_FAILURE") },
 
-  {0x2C9DA0E379A28381LL,6,238,0,36,4,0,&NAMSTR(s_sys_ss79a28381, "FORM_KD") },
-  {0x1C369D0E14B76C41LL,1,240,0,36,4,0,&NAMSTR(s_sys_ss14b76c41, "FORM_KC") },
-  {0x3E3AA0A97BD09921LL,0,242,0,100,4,0,&NAMSTR(s_sys_ss7bd09921, "NFKC") },
-  {0x07512AA38ADD1AE2LL,2,244,0,100,4,0,&NAMSTR(s_sys_ss8add1ae2, "FORM_D") },
-  {0x51422F059BEFCD86LL,-3,246,0,100,4,0,&NAMSTR(s_sys_ss9befcd86, "NFC") },
-  {0x58B301790FA834EFLL,-5,248,0,36,4,0,&NAMSTR(s_sys_ss0fa834ef, "NFD") },
-  {0x3CF19F2D23C185CFLL,2,250,0,100,4,0,&NAMSTR(s_sys_ss23c185cf, "NFKD") },
-  {0x2EFDCA1922BFB273LL,-4,252,0,100,4,0,&NAMSTR(s_sys_ss22bfb273, "NONE") },
-  {0x3BE3511FDA9A9E7FLL,-4,254,0,100,4,0,&NAMSTR(s_sys_ssda9a9e7f, "FORM_C") },
+  {0x2C9DA0E379A28381LL,6,246,0,36,4,0,&NAMSTR(s_sys_ss79a28381, "FORM_KD") },
+  {0x1C369D0E14B76C41LL,1,248,0,36,4,0,&NAMSTR(s_sys_ss14b76c41, "FORM_KC") },
+  {0x3E3AA0A97BD09921LL,0,250,0,100,4,0,&NAMSTR(s_sys_ss7bd09921, "NFKC") },
+  {0x07512AA38ADD1AE2LL,2,252,0,100,4,0,&NAMSTR(s_sys_ss8add1ae2, "FORM_D") },
+  {0x51422F059BEFCD86LL,-3,254,0,100,4,0,&NAMSTR(s_sys_ss9befcd86, "NFC") },
+  {0x58B301790FA834EFLL,-5,256,0,36,4,0,&NAMSTR(s_sys_ss0fa834ef, "NFD") },
+  {0x3CF19F2D23C185CFLL,2,258,0,100,4,0,&NAMSTR(s_sys_ss23c185cf, "NFKD") },
+  {0x2EFDCA1922BFB273LL,-4,260,0,100,4,0,&NAMSTR(s_sys_ss22bfb273, "NONE") },
+  {0x3BE3511FDA9A9E7FLL,-4,262,0,100,4,0,&NAMSTR(s_sys_ssda9a9e7f, "FORM_C") },
 
-  {0x1800ED92A8884D00LL,31,256,0,100,4,0,&NAMSTR(s_sys_ssa8884d00, "ATTR_CASE") },
-  {0x07BAFBAE5A431902LL,27,258,0,100,4,0,&NAMSTR(s_sys_ss5a431902, "ATTR_STATEMENT_CLASS") },
-  {0x0229D662F91D9C04LL,1,260,0,100,4,0,&NAMSTR(s_sys_ssf91d9c04, "ERRMODE_EXCEPTION") },
-  {0x3BE7A02FD980AA08LL,7,262,0,100,4,0,&NAMSTR(s_sys_ssd980aa08, "CASE_NATURAL") },
-  {0x099B533427CCC20DLL,2,264,0,100,4,0,&NAMSTR(s_sys_ss27ccc20d, "FETCH_OBJ") },
-  {0x5FAD218776C6E511LL,60,266,0,100,4,0,&NAMSTR(s_sys_ss76c6e511, "FETCH_INTO") },
-  {0x78CB81320C710019LL,44,268,0,100,4,0,&NAMSTR(s_sys_ss0c710019, "FETCH_BOUND") },
-  {0x3158D52C3627FE1BLL,57,270,0,100,4,0,&NAMSTR(s_sys_ss3627fe1b, "MYSQL_ATTR_INIT_COMMAND") },
-  {0x03CF598D3CCCD01CLL,14,272,0,100,4,0,&NAMSTR(s_sys_ss3cccd01c, "ATTR_CLIENT_VERSION") },
-  {0x2BE16C4111A7B41DLL,36,274,0,100,4,0,&NAMSTR(s_sys_ss11a7b41d, "ATTR_FETCH_CATALOG_NAMES") },
-  {0x2A5BA04D0218F11ELL,2,276,0,100,4,0,&NAMSTR(s_sys_ss0218f11e, "CASE_LOWER") },
-  {0x16B15CF4B0DD7E23LL,9,278,0,100,4,0,&NAMSTR(s_sys_ssb0dd7e23, "FETCH_GROUP") },
-  {0x37F650C462FB6A25LL,25,280,0,100,4,0,&NAMSTR(s_sys_ss62fb6a25, "CASE_UPPER") },
-  {0x262D9BE84029992ALL,10,282,0,100,4,0,&NAMSTR(s_sys_ss4029992a, "PARAM_EVT_FETCH_POST") },
-  {0x15D2BCCED7726933LL,2,284,0,100,4,0,&NAMSTR(s_sys_ssd7726933, "ATTR_TIMEOUT") },
-  {0x01B17428BEE0243BLL,26,286,0,100,4,0,&NAMSTR(s_sys_ssbee0243b, "PARAM_EVT_EXEC_PRE") },
-  {0x2739A1D49673D43CLL,31,288,0,36,4,0,&NAMSTR(s_sys_ss9673d43c, "ATTR_ERRMODE") },
-  {0x6AC5C285F4DD863CLL,56,290,0,100,4,0,&NAMSTR(s_sys_ssf4dd863c, "ATTR_DEFAULT_FETCH_MODE") },
-  {0x3E11051E4101D73DLL,-1,292,0,100,4,0,&NAMSTR(s_sys_ss4101d73d, "ATTR_EMULATE_PREPARES") },
-  {0x2189354E22363544LL,-5,294,0,100,4,0,&NAMSTR(s_sys_ss22363544, "ATTR_PREFETCH") },
-  {0x428D5CA64BB99E48LL,35,296,0,100,4,0,&NAMSTR(s_sys_ss4bb99e48, "FETCH_UNIQUE") },
-  {0x39B4E90F36E93B4ELL,50,298,0,100,4,0,&NAMSTR(s_sys_ss36e93b4e, "MYSQL_ATTR_READ_DEFAULT_GROUP") },
-  {0x58A833E2336C6152LL,2,300,0,100,4,0,&NAMSTR(s_sys_ss336c6152, "ATTR_SERVER_INFO") },
-  {0x57B75F4773C81556LL,23,302,0,100,4,0,&NAMSTR(s_sys_ss73c81556, "PARAM_EVT_NORMALIZE") },
-  {0x5495020CF262F15BLL,-24,304,0,36,4,0,&NAMSTR(s_sys_ssf262f15b, "ATTR_CONNECTION_STATUS") },
-  {0x37888F551D85275BLL,36,306,0,100,4,0,&NAMSTR(s_sys_ss1d85275b, "ATTR_ORACLE_NULLS") },
-  {0x416A0550A8F12E61LL,52,308,0,100,4,0,&NAMSTR(s_sys_ssa8f12e61, "MYSQL_ATTR_FOUND_ROWS") },
-  {0x15A3522970275465LL,13,310,0,100,4,0,&NAMSTR(s_sys_ss70275465, "FETCH_ORI_NEXT") },
-  {0x162EAA2134F1C068LL,-19,312,0,100,4,0,&NAMSTR(s_sys_ss34f1c068, "ATTR_FETCH_TABLE_NAMES") },
-  {0x350E9275757FD66FLL,28,314,0,100,4,0,&NAMSTR(s_sys_ss757fd66f, "FETCH_ORI_REL") },
-  {0x6870D9DE66F43D70LL,9,316,0,100,4,0,&NAMSTR(s_sys_ss66f43d70, "FETCH_ASSOC") },
-  {0x713C8339790FC071LL,13,318,0,100,4,0,&NAMSTR(s_sys_ss790fc071, "ATTR_CURSOR_NAME") },
-  {0x1FB97A35B6711374LL,-14,320,0,100,4,0,&NAMSTR(s_sys_ssb6711374, "ATTR_MAX_COLUMN_LEN") },
-  {0x0E51487F9370EE75LL,-14,322,0,100,4,0,&NAMSTR(s_sys_ss9370ee75, "ATTR_AUTOCOMMIT") },
-  {0x630122BA9EC73379LL,4,324,0,36,4,0,&NAMSTR(s_sys_ss9ec73379, "PARAM_NULL") },
-  {0x05B00276031D7D79LL,45,326,0,100,4,0,&NAMSTR(s_sys_ss031d7d79, "PARAM_EVT_ALLOC") },
-  {0x500C039681520C7DLL,-2,328,0,100,4,0,&NAMSTR(s_sys_ss81520c7d, "PARAM_BOOL") },
-  {0x5CF4F38A0D7D087ELL,25,330,0,100,4,0,&NAMSTR(s_sys_ss0d7d087e, "NULL_NATURAL") },
-  {0x3F414F2735132983LL,5,332,0,100,4,0,&NAMSTR(s_sys_ss35132983, "PARAM_INT") },
-  {0x2011B5A528057784LL,15,334,0,100,4,0,&NAMSTR(s_sys_ss28057784, "FETCH_NUM") },
-  {0x5451E44C627DD885LL,18,336,0,100,4,0,&NAMSTR(s_sys_ss627dd885, "FETCH_ORI_PRIOR") },
-  {0x1B8BA5EEAABCB786LL,15,338,0,36,4,0,&NAMSTR(s_sys_ssaabcb786, "PARAM_EVT_EXEC_POST") },
-  {0x1B51C692B91D7486LL,11,340,0,100,4,0,&NAMSTR(s_sys_ssb91d7486, "MYSQL_ATTR_USE_BUFFERED_QUERY") },
-  {0x7E64209D5A925F88LL,32,342,0,100,4,0,&NAMSTR(s_sys_ss5a925f88, "PARAM_STR") },
-  {0x45AB9806DE21EA8ALL,-19,344,0,100,4,0,&NAMSTR(s_sys_ssde21ea8a, "ATTR_CURSOR") },
-  {0x0EDB017494A81E8DLL,18,346,0,100,4,0,&NAMSTR(s_sys_ss94a81e8d, "ATTR_DRIVER_NAME") },
-  {0x126B3038F3355A8ELL,24,348,0,100,4,0,&NAMSTR(s_sys_ssf3355a8e, "FETCH_USE_DEFAULT") },
-  {0x1F200B094608BE8FLL,-39,350,0,36,4,0,&NAMSTR(s_sys_ss4608be8f, "ATTR_SERVER_VERSION") },
-  {0x1175C5F56147488FLL,-22,352,0,100,4,0,&NAMSTR(s_sys_ss6147488f, "MYSQL_ATTR_DIRECT_QUERY") },
-  {0x25BE9238386C2796LL,27,354,0,100,4,0,&NAMSTR(s_sys_ss386c2796, "FETCH_PROPS_LATE") },
-  {0x657BEA5F741C4999LL,19,356,0,36,4,0,&NAMSTR(s_sys_ss741c4999, "FETCH_COLUMN") },
-  {0x18B801DE8D8C9099LL,1,358,0,100,4,0,&NAMSTR(s_sys_ss8d8c9099, "FETCH_CLASSTYPE") },
-  {0x1EC178DF86F4FD9CLL,-3,360,0,100,4,0,&NAMSTR(s_sys_ss86f4fd9c, "FETCH_SERIALIZE") },
-  {0x052245CE02FBF4A0LL,15,362,0,100,4,0,&NAMSTR(s_sys_ss02fbf4a0, "MYSQL_ATTR_LOCAL_INFILE") },
-  {0x28D5B850B76FEEA2LL,-50,364,0,36,4,0,&NAMSTR(s_sys_ssb76feea2, "FETCH_BOTH") },
-  {0x0D0BCCC6768A88A2LL,-4,366,0,100,4,0,&NAMSTR(s_sys_ss768a88a2, "FETCH_KEY_PAIR") },
-  {0x6851B7545234FCA4LL,-43,368,0,100,4,0,&NAMSTR(s_sys_ss5234fca4, "PARAM_EVT_FETCH_PRE") },
-  {0x167DD614E842FAA8LL,2,370,0,100,4,0,&NAMSTR(s_sys_sse842faa8, "CURSOR_FWDONLY") },
-  {0x6AEB66DE7A454FA9LL,2,372,0,100,4,0,&NAMSTR(s_sys_ss7a454fa9, "FETCH_ORI_FIRST") },
-  {0x392400A66B305EAALL,-17,374,0,100,4,0,&NAMSTR(s_sys_ss6b305eaa, "CURSOR_SCROLL") },
-  {0x2F6AE87AF5701AABLL,6,376,0,100,4,0,&NAMSTR(s_sys_ssf5701aab, "FETCH_ORI_LAST") },
-  {0x56D59339A0F5D8B4LL,-60,378,0,100,4,0,&NAMSTR(s_sys_ssa0f5d8b4, "ATTR_PERSISTENT") },
-  {0x08657D6005DD08B8LL,5,380,0,100,4,0,&NAMSTR(s_sys_ss05dd08b8, "NULL_EMPTY_STRING") },
-  {0x60CE39F6493319C5LL,-31,382,0,100,4,0,&NAMSTR(s_sys_ss493319c5, "ATTR_STRINGIFY_FETCHES") },
-  {0x61BD1667BB46C9C6LL,-43,384,0,100,4,0,&NAMSTR(s_sys_ssbb46c9c6, "MYSQL_ATTR_READ_DEFAULT_FILE") },
-  {0x30D00303975C98C8LL,-54,386,0,36,4,0,&NAMSTR(s_sys_ss975c98c8, "FETCH_FUNC") },
-  {0x47D4494BE4FA26C8LL,-37,388,0,100,4,0,&NAMSTR(s_sys_sse4fa26c8, "FETCH_ORI_ABS") },
-  {0x29B68A596E0615CALL,7,390,0,100,4,0,&NAMSTR(s_sys_ss6e0615ca, "NULL_TO_STRING") },
-  {0x73FAA1AA068D19CBLL,-61,392,0,100,4,0,&NAMSTR(s_sys_ss068d19cb, "MYSQL_ATTR_MAX_BUFFER_SIZE") },
-  {0x439351C7C64634D0LL,-64,394,0,100,4,0,&NAMSTR(s_sys_ssc64634d0, "FETCH_CLASS") },
-  {0x5C75BB222F23C4D1LL,-40,396,0,100,4,0,&NAMSTR(s_sys_ss2f23c4d1, "FETCH_LAZY") },
-  {0x57F9152D7EC3A5D3LL,-23,398,0,100,4,0,&NAMSTR(s_sys_ss7ec3a5d3, "MYSQL_ATTR_COMPRESS") },
-  {0x4D1DDF7F772C54DCLL,-70,400,0,100,4,0,&NAMSTR(s_sys_ss772c54dc, "ERRMODE_WARNING") },
-  {0x2E4175EAAB1F75EBLL,-1,402,0,100,4,0,&NAMSTR(s_sys_ssab1f75eb, "ERRMODE_SILENT") },
-  {0x16017F3F58821EF5LL,-47,404,0,100,7,0,&NAMSTR(s_sys_ss58821ef5, "ERR_NONE") },
-  {0x674F9B0D2030C3F6LL,4,406,0,100,4,0,&NAMSTR(s_sys_ss2030c3f6, "PARAM_LOB") },
-  {0x16EC9F213D7F57F7LL,-43,408,0,100,4,0,&NAMSTR(s_sys_ss3d7f57f7, "FETCH_NAMED") },
-  {0x6C0021FD5D20A1F8LL,-42,410,0,100,4,0,&NAMSTR(s_sys_ss5d20a1f8, "PARAM_INPUT_OUTPUT") },
-  {0x13EC16B8F7B7B1FBLL,0,412,0,100,4,0,&NAMSTR(s_sys_ssf7b7b1fb, "MYSQL_ATTR_IGNORE_SPACE") },
-  {0x51938FCA0AE827FDLL,-2,414,0,100,4,0,&NAMSTR(s_sys_ss0ae827fd, "PARAM_STMT") },
-  {0x56335EC3392D8EFELL,-65,416,0,100,4,0,&NAMSTR(s_sys_ss392d8efe, "PARAM_EVT_FREE") },
+  {0x1800ED92A8884D00LL,31,264,0,100,4,0,&NAMSTR(s_sys_ssa8884d00, "ATTR_CASE") },
+  {0x07BAFBAE5A431902LL,27,266,0,100,4,0,&NAMSTR(s_sys_ss5a431902, "ATTR_STATEMENT_CLASS") },
+  {0x0229D662F91D9C04LL,1,268,0,100,4,0,&NAMSTR(s_sys_ssf91d9c04, "ERRMODE_EXCEPTION") },
+  {0x3BE7A02FD980AA08LL,7,270,0,100,4,0,&NAMSTR(s_sys_ssd980aa08, "CASE_NATURAL") },
+  {0x099B533427CCC20DLL,2,272,0,100,4,0,&NAMSTR(s_sys_ss27ccc20d, "FETCH_OBJ") },
+  {0x5FAD218776C6E511LL,60,274,0,100,4,0,&NAMSTR(s_sys_ss76c6e511, "FETCH_INTO") },
+  {0x78CB81320C710019LL,44,276,0,100,4,0,&NAMSTR(s_sys_ss0c710019, "FETCH_BOUND") },
+  {0x3158D52C3627FE1BLL,57,278,0,100,4,0,&NAMSTR(s_sys_ss3627fe1b, "MYSQL_ATTR_INIT_COMMAND") },
+  {0x03CF598D3CCCD01CLL,14,280,0,100,4,0,&NAMSTR(s_sys_ss3cccd01c, "ATTR_CLIENT_VERSION") },
+  {0x2BE16C4111A7B41DLL,36,282,0,100,4,0,&NAMSTR(s_sys_ss11a7b41d, "ATTR_FETCH_CATALOG_NAMES") },
+  {0x2A5BA04D0218F11ELL,2,284,0,100,4,0,&NAMSTR(s_sys_ss0218f11e, "CASE_LOWER") },
+  {0x16B15CF4B0DD7E23LL,9,286,0,100,4,0,&NAMSTR(s_sys_ssb0dd7e23, "FETCH_GROUP") },
+  {0x37F650C462FB6A25LL,25,288,0,100,4,0,&NAMSTR(s_sys_ss62fb6a25, "CASE_UPPER") },
+  {0x262D9BE84029992ALL,10,290,0,100,4,0,&NAMSTR(s_sys_ss4029992a, "PARAM_EVT_FETCH_POST") },
+  {0x15D2BCCED7726933LL,2,292,0,100,4,0,&NAMSTR(s_sys_ssd7726933, "ATTR_TIMEOUT") },
+  {0x01B17428BEE0243BLL,26,294,0,100,4,0,&NAMSTR(s_sys_ssbee0243b, "PARAM_EVT_EXEC_PRE") },
+  {0x2739A1D49673D43CLL,31,296,0,36,4,0,&NAMSTR(s_sys_ss9673d43c, "ATTR_ERRMODE") },
+  {0x6AC5C285F4DD863CLL,56,298,0,100,4,0,&NAMSTR(s_sys_ssf4dd863c, "ATTR_DEFAULT_FETCH_MODE") },
+  {0x3E11051E4101D73DLL,-1,300,0,100,4,0,&NAMSTR(s_sys_ss4101d73d, "ATTR_EMULATE_PREPARES") },
+  {0x2189354E22363544LL,-5,302,0,100,4,0,&NAMSTR(s_sys_ss22363544, "ATTR_PREFETCH") },
+  {0x428D5CA64BB99E48LL,35,304,0,100,4,0,&NAMSTR(s_sys_ss4bb99e48, "FETCH_UNIQUE") },
+  {0x39B4E90F36E93B4ELL,50,306,0,100,4,0,&NAMSTR(s_sys_ss36e93b4e, "MYSQL_ATTR_READ_DEFAULT_GROUP") },
+  {0x58A833E2336C6152LL,2,308,0,100,4,0,&NAMSTR(s_sys_ss336c6152, "ATTR_SERVER_INFO") },
+  {0x57B75F4773C81556LL,23,310,0,100,4,0,&NAMSTR(s_sys_ss73c81556, "PARAM_EVT_NORMALIZE") },
+  {0x5495020CF262F15BLL,-24,312,0,36,4,0,&NAMSTR(s_sys_ssf262f15b, "ATTR_CONNECTION_STATUS") },
+  {0x37888F551D85275BLL,36,314,0,100,4,0,&NAMSTR(s_sys_ss1d85275b, "ATTR_ORACLE_NULLS") },
+  {0x416A0550A8F12E61LL,52,316,0,100,4,0,&NAMSTR(s_sys_ssa8f12e61, "MYSQL_ATTR_FOUND_ROWS") },
+  {0x15A3522970275465LL,13,318,0,100,4,0,&NAMSTR(s_sys_ss70275465, "FETCH_ORI_NEXT") },
+  {0x162EAA2134F1C068LL,-19,320,0,100,4,0,&NAMSTR(s_sys_ss34f1c068, "ATTR_FETCH_TABLE_NAMES") },
+  {0x350E9275757FD66FLL,28,322,0,100,4,0,&NAMSTR(s_sys_ss757fd66f, "FETCH_ORI_REL") },
+  {0x6870D9DE66F43D70LL,9,324,0,100,4,0,&NAMSTR(s_sys_ss66f43d70, "FETCH_ASSOC") },
+  {0x713C8339790FC071LL,13,326,0,100,4,0,&NAMSTR(s_sys_ss790fc071, "ATTR_CURSOR_NAME") },
+  {0x1FB97A35B6711374LL,-14,328,0,100,4,0,&NAMSTR(s_sys_ssb6711374, "ATTR_MAX_COLUMN_LEN") },
+  {0x0E51487F9370EE75LL,-14,330,0,100,4,0,&NAMSTR(s_sys_ss9370ee75, "ATTR_AUTOCOMMIT") },
+  {0x630122BA9EC73379LL,4,332,0,36,4,0,&NAMSTR(s_sys_ss9ec73379, "PARAM_NULL") },
+  {0x05B00276031D7D79LL,45,334,0,100,4,0,&NAMSTR(s_sys_ss031d7d79, "PARAM_EVT_ALLOC") },
+  {0x500C039681520C7DLL,-2,336,0,100,4,0,&NAMSTR(s_sys_ss81520c7d, "PARAM_BOOL") },
+  {0x5CF4F38A0D7D087ELL,25,338,0,100,4,0,&NAMSTR(s_sys_ss0d7d087e, "NULL_NATURAL") },
+  {0x3F414F2735132983LL,5,340,0,100,4,0,&NAMSTR(s_sys_ss35132983, "PARAM_INT") },
+  {0x2011B5A528057784LL,15,342,0,100,4,0,&NAMSTR(s_sys_ss28057784, "FETCH_NUM") },
+  {0x5451E44C627DD885LL,18,344,0,100,4,0,&NAMSTR(s_sys_ss627dd885, "FETCH_ORI_PRIOR") },
+  {0x1B8BA5EEAABCB786LL,15,346,0,36,4,0,&NAMSTR(s_sys_ssaabcb786, "PARAM_EVT_EXEC_POST") },
+  {0x1B51C692B91D7486LL,11,348,0,100,4,0,&NAMSTR(s_sys_ssb91d7486, "MYSQL_ATTR_USE_BUFFERED_QUERY") },
+  {0x7E64209D5A925F88LL,32,350,0,100,4,0,&NAMSTR(s_sys_ss5a925f88, "PARAM_STR") },
+  {0x45AB9806DE21EA8ALL,-19,352,0,100,4,0,&NAMSTR(s_sys_ssde21ea8a, "ATTR_CURSOR") },
+  {0x0EDB017494A81E8DLL,18,354,0,100,4,0,&NAMSTR(s_sys_ss94a81e8d, "ATTR_DRIVER_NAME") },
+  {0x126B3038F3355A8ELL,24,356,0,100,4,0,&NAMSTR(s_sys_ssf3355a8e, "FETCH_USE_DEFAULT") },
+  {0x1F200B094608BE8FLL,-39,358,0,36,4,0,&NAMSTR(s_sys_ss4608be8f, "ATTR_SERVER_VERSION") },
+  {0x1175C5F56147488FLL,-22,360,0,100,4,0,&NAMSTR(s_sys_ss6147488f, "MYSQL_ATTR_DIRECT_QUERY") },
+  {0x25BE9238386C2796LL,27,362,0,100,4,0,&NAMSTR(s_sys_ss386c2796, "FETCH_PROPS_LATE") },
+  {0x657BEA5F741C4999LL,19,364,0,36,4,0,&NAMSTR(s_sys_ss741c4999, "FETCH_COLUMN") },
+  {0x18B801DE8D8C9099LL,1,366,0,100,4,0,&NAMSTR(s_sys_ss8d8c9099, "FETCH_CLASSTYPE") },
+  {0x1EC178DF86F4FD9CLL,-3,368,0,100,4,0,&NAMSTR(s_sys_ss86f4fd9c, "FETCH_SERIALIZE") },
+  {0x052245CE02FBF4A0LL,15,370,0,100,4,0,&NAMSTR(s_sys_ss02fbf4a0, "MYSQL_ATTR_LOCAL_INFILE") },
+  {0x28D5B850B76FEEA2LL,-50,372,0,36,4,0,&NAMSTR(s_sys_ssb76feea2, "FETCH_BOTH") },
+  {0x0D0BCCC6768A88A2LL,-4,374,0,100,4,0,&NAMSTR(s_sys_ss768a88a2, "FETCH_KEY_PAIR") },
+  {0x6851B7545234FCA4LL,-43,376,0,100,4,0,&NAMSTR(s_sys_ss5234fca4, "PARAM_EVT_FETCH_PRE") },
+  {0x167DD614E842FAA8LL,2,378,0,100,4,0,&NAMSTR(s_sys_sse842faa8, "CURSOR_FWDONLY") },
+  {0x6AEB66DE7A454FA9LL,2,380,0,100,4,0,&NAMSTR(s_sys_ss7a454fa9, "FETCH_ORI_FIRST") },
+  {0x392400A66B305EAALL,-17,382,0,100,4,0,&NAMSTR(s_sys_ss6b305eaa, "CURSOR_SCROLL") },
+  {0x2F6AE87AF5701AABLL,6,384,0,100,4,0,&NAMSTR(s_sys_ssf5701aab, "FETCH_ORI_LAST") },
+  {0x56D59339A0F5D8B4LL,-60,386,0,100,4,0,&NAMSTR(s_sys_ssa0f5d8b4, "ATTR_PERSISTENT") },
+  {0x08657D6005DD08B8LL,5,388,0,100,4,0,&NAMSTR(s_sys_ss05dd08b8, "NULL_EMPTY_STRING") },
+  {0x60CE39F6493319C5LL,-31,390,0,100,4,0,&NAMSTR(s_sys_ss493319c5, "ATTR_STRINGIFY_FETCHES") },
+  {0x61BD1667BB46C9C6LL,-43,392,0,100,4,0,&NAMSTR(s_sys_ssbb46c9c6, "MYSQL_ATTR_READ_DEFAULT_FILE") },
+  {0x30D00303975C98C8LL,-54,394,0,36,4,0,&NAMSTR(s_sys_ss975c98c8, "FETCH_FUNC") },
+  {0x47D4494BE4FA26C8LL,-37,396,0,100,4,0,&NAMSTR(s_sys_sse4fa26c8, "FETCH_ORI_ABS") },
+  {0x29B68A596E0615CALL,7,398,0,100,4,0,&NAMSTR(s_sys_ss6e0615ca, "NULL_TO_STRING") },
+  {0x73FAA1AA068D19CBLL,-61,400,0,100,4,0,&NAMSTR(s_sys_ss068d19cb, "MYSQL_ATTR_MAX_BUFFER_SIZE") },
+  {0x439351C7C64634D0LL,-64,402,0,100,4,0,&NAMSTR(s_sys_ssc64634d0, "FETCH_CLASS") },
+  {0x5C75BB222F23C4D1LL,-40,404,0,100,4,0,&NAMSTR(s_sys_ss2f23c4d1, "FETCH_LAZY") },
+  {0x57F9152D7EC3A5D3LL,-23,406,0,100,4,0,&NAMSTR(s_sys_ss7ec3a5d3, "MYSQL_ATTR_COMPRESS") },
+  {0x4D1DDF7F772C54DCLL,-70,408,0,100,4,0,&NAMSTR(s_sys_ss772c54dc, "ERRMODE_WARNING") },
+  {0x2E4175EAAB1F75EBLL,-1,410,0,100,4,0,&NAMSTR(s_sys_ssab1f75eb, "ERRMODE_SILENT") },
+  {0x16017F3F58821EF5LL,-47,412,0,100,7,0,&NAMSTR(s_sys_ss58821ef5, "ERR_NONE") },
+  {0x674F9B0D2030C3F6LL,4,414,0,100,4,0,&NAMSTR(s_sys_ss2030c3f6, "PARAM_LOB") },
+  {0x16EC9F213D7F57F7LL,-43,416,0,100,4,0,&NAMSTR(s_sys_ss3d7f57f7, "FETCH_NAMED") },
+  {0x6C0021FD5D20A1F8LL,-42,418,0,100,4,0,&NAMSTR(s_sys_ss5d20a1f8, "PARAM_INPUT_OUTPUT") },
+  {0x13EC16B8F7B7B1FBLL,0,420,0,100,4,0,&NAMSTR(s_sys_ssf7b7b1fb, "MYSQL_ATTR_IGNORE_SPACE") },
+  {0x51938FCA0AE827FDLL,-2,422,0,100,4,0,&NAMSTR(s_sys_ss0ae827fd, "PARAM_STMT") },
+  {0x56335EC3392D8EFELL,-65,424,0,100,4,0,&NAMSTR(s_sys_ss392d8efe, "PARAM_EVT_FREE") },
 
-  {0x76DAF4F4BD608481LL,6,418,0,100,3,0,&NAMSTR(s_sys_ssbd608481, "SINGLE_SCRIPT_CONFUSABLE") },
-  {0x330C21B4435FDA12LL,4,420,0,100,3,0,&NAMSTR(s_sys_ss435fda12, "WHOLE_SCRIPT_CONFUSABLE") },
-  {0x33D91DB93B53D955LL,0,422,0,100,3,0,&NAMSTR(s_sys_ss3b53d955, "CHAR_LIMIT") },
-  {0x727F3BA1A7798546LL,-1,424,0,100,3,0,&NAMSTR(s_sys_ssa7798546, "INVISIBLE") },
-  {0x7244AE82909D364ALL,-1,426,0,100,3,0,&NAMSTR(s_sys_ss909d364a, "SINGLE_SCRIPT") },
-  {0x5A4E3956DA2E533CLL,-1,428,0,100,3,0,&NAMSTR(s_sys_ssda2e533c, "ANY_CASE") },
-  {0x3189877F80D9ABBFLL,-5,430,0,100,3,0,&NAMSTR(s_sys_ss80d9abbf, "MIXED_SCRIPT_CONFUSABLE") },
+  {0x76DAF4F4BD608481LL,6,426,0,100,3,0,&NAMSTR(s_sys_ssbd608481, "SINGLE_SCRIPT_CONFUSABLE") },
+  {0x330C21B4435FDA12LL,4,428,0,100,3,0,&NAMSTR(s_sys_ss435fda12, "WHOLE_SCRIPT_CONFUSABLE") },
+  {0x33D91DB93B53D955LL,0,430,0,100,3,0,&NAMSTR(s_sys_ss3b53d955, "CHAR_LIMIT") },
+  {0x727F3BA1A7798546LL,-1,432,0,100,3,0,&NAMSTR(s_sys_ssa7798546, "INVISIBLE") },
+  {0x7244AE82909D364ALL,-1,434,0,100,3,0,&NAMSTR(s_sys_ss909d364a, "SINGLE_SCRIPT") },
+  {0x5A4E3956DA2E533CLL,-1,436,0,100,3,0,&NAMSTR(s_sys_ssda2e533c, "ANY_CASE") },
+  {0x3189877F80D9ABBFLL,-5,438,0,100,3,0,&NAMSTR(s_sys_ss80d9abbf, "MIXED_SCRIPT_CONFUSABLE") },
 
-  {0x13B3121CBF212DC1LL,1,432,0,100,4,0,&NAMSTR(s_sys_ssbf212dc1, "DOC_FRAGMENT") },
-  {0x6071F0A4D7F152C9LL,8,434,0,100,4,0,&NAMSTR(s_sys_ssd7f152c9, "NOTATION") },
-  {0x16AD79F9AF3ECC0DLL,11,436,0,100,4,0,&NAMSTR(s_sys_ssaf3ecc0d, "COMMENT") },
-  {0x5BB72110C0F94F8FLL,16,438,0,36,4,0,&NAMSTR(s_sys_ssc0f94f8f, "ELEMENT") },
-  {0x4431B68F8476210FLL,0,440,0,100,4,0,&NAMSTR(s_sys_ss8476210f, "SUBST_ENTITIES") },
-  {0x66710CEFCACCEAD4LL,15,442,0,100,4,0,&NAMSTR(s_sys_sscaccead4, "DEFAULTATTRS") },
-  {0x0A70D397C0570F56LL,15,444,0,100,4,0,&NAMSTR(s_sys_ssc0570f56, "CDATA") },
-  {0x69070452A320C4D8LL,-2,446,0,100,4,0,&NAMSTR(s_sys_ssa320c4d8, "LOADDTD") },
-  {0x4D26D167066BB11DLL,-2,448,0,36,4,0,&NAMSTR(s_sys_ss066bb11d, "TEXT") },
-  {0x507641F239996F9DLL,2,450,0,100,4,0,&NAMSTR(s_sys_ss39996f9d, "WHITESPACE") },
-  {0x7EB865DC91D7AC1FLL,-10,452,0,100,4,0,&NAMSTR(s_sys_ss91d7ac1f, "DOC_TYPE") },
-  {0x4A21896B12C338E5LL,4,454,0,100,4,0,&NAMSTR(s_sys_ss12c338e5, "SIGNIFICANT_WHITESPACE") },
-  {0x18CF3E4A60E4AAACLL,-10,456,0,100,4,0,&NAMSTR(s_sys_ss60e4aaac, "PI") },
-  {0x5C1091C88F8EB6EDLL,-3,458,0,100,4,0,&NAMSTR(s_sys_ss8f8eb6ed, "DOC") },
-  {0x18FB7BF5786BF72FLL,-2,460,0,100,4,0,&NAMSTR(s_sys_ss786bf72f, "ENTITY") },
-  {0x3EBBF7FE181568B0LL,3,462,0,36,4,0,&NAMSTR(s_sys_ss181568b0, "END_ELEMENT") },
-  {0x2907A7E1425D0970LL,-9,464,0,100,4,0,&NAMSTR(s_sys_ss425d0970, "XML_DECLARATION") },
-  {0x2EFDCA1922BFB273LL,-14,466,0,36,4,0,&NAMSTR(s_sys_ss22bfb273, "NONE") },
-  {0x66785D8330DBC573LL,-2,468,0,100,4,0,&NAMSTR(s_sys_ss30dbc573, "END_ENTITY") },
-  {0x21A6FB97A47EB4F5LL,-11,470,0,100,4,0,&NAMSTR(s_sys_ssa47eb4f5, "ATTRIBUTE") },
-  {0x1CA408E02262F737LL,-16,472,0,100,4,0,&NAMSTR(s_sys_ss2262f737, "VALIDATE") },
-  {0x631C49B1B9F742FCLL,-7,474,0,100,4,0,&NAMSTR(s_sys_ssb9f742fc, "ENTITY_REF") },
+  {0x13B3121CBF212DC1LL,1,440,0,100,4,0,&NAMSTR(s_sys_ssbf212dc1, "DOC_FRAGMENT") },
+  {0x6071F0A4D7F152C9LL,8,442,0,100,4,0,&NAMSTR(s_sys_ssd7f152c9, "NOTATION") },
+  {0x16AD79F9AF3ECC0DLL,11,444,0,100,4,0,&NAMSTR(s_sys_ssaf3ecc0d, "COMMENT") },
+  {0x5BB72110C0F94F8FLL,16,446,0,36,4,0,&NAMSTR(s_sys_ssc0f94f8f, "ELEMENT") },
+  {0x4431B68F8476210FLL,0,448,0,100,4,0,&NAMSTR(s_sys_ss8476210f, "SUBST_ENTITIES") },
+  {0x66710CEFCACCEAD4LL,15,450,0,100,4,0,&NAMSTR(s_sys_sscaccead4, "DEFAULTATTRS") },
+  {0x0A70D397C0570F56LL,15,452,0,100,4,0,&NAMSTR(s_sys_ssc0570f56, "CDATA") },
+  {0x69070452A320C4D8LL,-2,454,0,100,4,0,&NAMSTR(s_sys_ssa320c4d8, "LOADDTD") },
+  {0x4D26D167066BB11DLL,-2,456,0,36,4,0,&NAMSTR(s_sys_ss066bb11d, "TEXT") },
+  {0x507641F239996F9DLL,2,458,0,100,4,0,&NAMSTR(s_sys_ss39996f9d, "WHITESPACE") },
+  {0x7EB865DC91D7AC1FLL,-10,460,0,100,4,0,&NAMSTR(s_sys_ss91d7ac1f, "DOC_TYPE") },
+  {0x4A21896B12C338E5LL,4,462,0,100,4,0,&NAMSTR(s_sys_ss12c338e5, "SIGNIFICANT_WHITESPACE") },
+  {0x18CF3E4A60E4AAACLL,-10,464,0,100,4,0,&NAMSTR(s_sys_ss60e4aaac, "PI") },
+  {0x5C1091C88F8EB6EDLL,-3,466,0,100,4,0,&NAMSTR(s_sys_ss8f8eb6ed, "DOC") },
+  {0x18FB7BF5786BF72FLL,-2,468,0,100,4,0,&NAMSTR(s_sys_ss786bf72f, "ENTITY") },
+  {0x3EBBF7FE181568B0LL,3,470,0,36,4,0,&NAMSTR(s_sys_ss181568b0, "END_ELEMENT") },
+  {0x2907A7E1425D0970LL,-9,472,0,100,4,0,&NAMSTR(s_sys_ss425d0970, "XML_DECLARATION") },
+  {0x2EFDCA1922BFB273LL,-14,474,0,36,4,0,&NAMSTR(s_sys_ss22bfb273, "NONE") },
+  {0x66785D8330DBC573LL,-2,476,0,100,4,0,&NAMSTR(s_sys_ss30dbc573, "END_ENTITY") },
+  {0x21A6FB97A47EB4F5LL,-11,478,0,100,4,0,&NAMSTR(s_sys_ssa47eb4f5, "ATTRIBUTE") },
+  {0x1CA408E02262F737LL,-16,480,0,100,4,0,&NAMSTR(s_sys_ss2262f737, "VALIDATE") },
+  {0x631C49B1B9F742FCLL,-7,482,0,100,4,0,&NAMSTR(s_sys_ssb9f742fc, "ENTITY_REF") },
 
 };
 static const int cpt_hash_entries[] = {
@@ -11378,8 +11506,14 @@ static const int cpt_hash_entries[] = {
   -1,
   -1,
   // DebuggerClient hash
-  9,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,-1,-1,-1,6,-1,-1,-1,4,-1,3,-1,1,-1,-1,-1,-1,0,-1,-1,
+  3,-1,2,-1,1,-1,0,-1,
   // DebuggerClient lists
+  -1,
+  -1,
+  -1,
+  // DebuggerClientCmdUser hash
+  9,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,-1,-1,-1,6,-1,-1,-1,4,-1,3,-1,1,-1,-1,-1,-1,0,-1,-1,
+  // DebuggerClientCmdUser lists
   -1,
   -1,
   -1,
@@ -11443,36 +11577,40 @@ const ClassPropTable c_DateTimeZone::os_prop_table = {
   cpt_hash_entries+179,0,cpt_table_entries+45,cpt_static_inits
 };
 const ClassPropTable c_DebuggerClient::os_prop_table = {
+  -1,-1,-1,-1,7,2,1,0,
+  cpt_hash_entries+190,0,cpt_table_entries+59,cpt_static_inits
+};
+const ClassPropTable c_DebuggerClientCmdUser::os_prop_table = {
   -1,-1,-1,-1,31,1,1,0,
-  cpt_hash_entries+214,0,cpt_table_entries+59,cpt_static_inits
+  cpt_hash_entries+225,0,cpt_table_entries+63,cpt_static_inits
 };
 const ClassPropTable c_GenericContinuation::os_prop_table = {
   7,0,-1,-1,-1,-1,10,0,
-  cpt_hash_entries+217,&c_Continuation::os_prop_table,cpt_table_entries+69,cpt_static_inits
+  cpt_hash_entries+228,&c_Continuation::os_prop_table,cpt_table_entries+73,cpt_static_inits
 };
 const ClassPropTable c_Locale::os_prop_table = {
   -1,-1,-1,-1,7,1,1,0,
-  cpt_hash_entries+237,0,cpt_table_entries+70,cpt_static_inits
+  cpt_hash_entries+248,0,cpt_table_entries+74,cpt_static_inits
 };
 const ClassPropTable c_Memcached::os_prop_table = {
   -1,-1,-1,-1,127,25,1,0,
-  cpt_hash_entries+368,0,cpt_table_entries+72,cpt_static_inits
+  cpt_hash_entries+379,0,cpt_table_entries+76,cpt_static_inits
 };
 const ClassPropTable c_Normalizer::os_prop_table = {
   -1,-1,-1,-1,31,7,1,0,
-  cpt_hash_entries+403,0,cpt_table_entries+129,cpt_static_inits
+  cpt_hash_entries+414,0,cpt_table_entries+133,cpt_static_inits
 };
 const ClassPropTable c_PDO::os_prop_table = {
   -1,-1,-1,-1,255,36,1,0,
-  cpt_hash_entries+662,0,cpt_table_entries+138,cpt_static_inits
+  cpt_hash_entries+673,0,cpt_table_entries+142,cpt_static_inits
 };
 const ClassPropTable c_SpoofChecker::os_prop_table = {
   -1,-1,-1,-1,15,0,1,0,
-  cpt_hash_entries+681,0,cpt_table_entries+219,cpt_static_inits
+  cpt_hash_entries+692,0,cpt_table_entries+223,cpt_static_inits
 };
 const ClassPropTable c_XMLReader::os_prop_table = {
   -1,-1,-1,-1,63,17,1,0,
-  cpt_hash_entries+748,0,cpt_table_entries+226,cpt_static_inits
+  cpt_hash_entries+759,0,cpt_table_entries+230,cpt_static_inits
 };
 
 ///////////////////////////////////////////////////////////////////////////////

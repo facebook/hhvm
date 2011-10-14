@@ -16310,6 +16310,15 @@ Variant ifa_socket_create(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 Variant i_socket_create(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_socket_create);
 }
+Variant ifa_hphpd_get_client(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count > 1)) return throw_toomany_arguments("hphpd_get_client", 1, 1);
+  if (count <= 0) return (x_hphpd_get_client());
+  CVarRef arg0(a0);
+  return (x_hphpd_get_client(arg0));
+}
+Variant i_hphpd_get_client(void *extra, CArrRef params) {
+  return invoke_func_few_handler(extra, params, &ifa_hphpd_get_client);
+}
 Variant ifa_magicksetimageinterlacescheme(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("magicksetimageinterlacescheme", count, 2, 2, 1);
   CVarRef arg0(a0);
@@ -23001,6 +23010,7 @@ CallInfo ci_call_user_func_serialized((void*)&i_call_user_func_serialized, (void
 CallInfo ci_magickgetimagemattecolor((void*)&i_magickgetimagemattecolor, (void*)&ifa_magickgetimagemattecolor, 1, 0, 0x0000000000000000LL);
 CallInfo ci_posix_getpgrp((void*)&i_posix_getpgrp, (void*)&ifa_posix_getpgrp, 0, 0, 0x0000000000000000LL);
 CallInfo ci_socket_create((void*)&i_socket_create, (void*)&ifa_socket_create, 3, 0, 0x0000000000000000LL);
+CallInfo ci_hphpd_get_client((void*)&i_hphpd_get_client, (void*)&ifa_hphpd_get_client, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magicksetimageinterlacescheme((void*)&i_magicksetimageinterlacescheme, (void*)&ifa_magicksetimageinterlacescheme, 2, 0, 0x0000000000000000LL);
 CallInfo ci_debug_backtrace((void*)&i_debug_backtrace, (void*)&ifa_debug_backtrace, 1, 0, 0x0000000000000000LL);
 CallInfo ci_stream_set_timeout((void*)&i_stream_set_timeout, (void*)&ifa_stream_set_timeout, 3, 0, 0x0000000000000000LL);
@@ -25317,6 +25327,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1271:
       HASH_GUARD(0x0BD9C5D811CB04F7LL, dom_element_set_id_attribute_ns) {
         ci = &ci_dom_element_set_id_attribute_ns;
+        return true;
+      }
+      HASH_GUARD(0x3F534CE94DD984F7LL, hphpd_get_client) {
+        ci = &ci_hphpd_get_client;
         return true;
       }
       break;

@@ -45,6 +45,9 @@ bool CmdDown::onClient(DebuggerClient *client) {
 
   CmdWhere().fetchStackTrace(client);
   client->moveToFrame(client->getFrame() - CmdUp::ParseNumber(client));
+  if (client->isApiMode()){
+    client->setStackTrace(null_array);
+  }
   return true;
 }
 

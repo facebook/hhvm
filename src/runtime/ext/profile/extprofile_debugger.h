@@ -40,6 +40,11 @@ inline void x_hphpd_break(bool condition = true) {
   f_hphpd_break(condition);
 }
 
+inline Variant x_hphpd_get_client(CStrRef name = null) {
+  FUNCTION_INJECTION_BUILTIN(hphpd_get_client);
+  return f_hphpd_get_client(name);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

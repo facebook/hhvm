@@ -9,40 +9,43 @@ ifndef REPO_DEL
 REPO_DEL = git rm
 endif
 
+PHP := $(wildcard /usr/local/hphpi/bin/hphpi)
+PHP := $(if $(PHP),$(PHP) -v Preg.ErrorLog=false,php)
+
 all:
 
 lists: ../system/ext.inc ../test/test_ext.h ../test/test_ext.inc ../runtime/ext/ext.h
 
 ../system/ext.inc: idl_list.php $(IDL_PHPS)
 	@echo 'Generating $@'
-	$(V)php idl_list.php inc $@
+	$(V)$(PHP) idl_list.php inc $@
 	$(V)touch ../compiler/builtin_symbols.cpp
 
 ../test/test_ext.h: idl_list.php $(IDL_PHPS)
 	@echo 'Generating $@'
-	$(V)php idl_list.php test_ext $@
+	$(V)$(PHP) idl_list.php test_ext $@
 
 ../test/test_ext.inc: idl_list.php $(IDL_PHPS)
 	@echo 'Generating $@'
-	$(V)php idl_list.php test_suites $@
+	$(V)$(PHP) idl_list.php test_suites $@
 	$(V)touch ../test/test.cpp
 
 ../runtime/ext/ext.h: idl_list.php $(IDL_PHPS)
 	@echo 'Generating $@'
-	$(V)php idl_list.php ext $@
+	$(V)$(PHP) idl_list.php ext $@
 
 $(EXT): $(EXT).idl.php idl.php base.php
 	@echo 'Generating files from $<...'
 	@echo ' --> ext_$@.h ext_$@.cpp'
-	$(V)php idl.php cpp  $< ext_$@.h ext_$@.cpp
+	$(V)$(PHP) idl.php cpp  $< ext_$@.h ext_$@.cpp
 	@echo ' --> $@.inc'
-	$(V)php idl.php inc  $< $@.inc
+	$(V)$(PHP) idl.php inc  $< $@.inc
 	@echo ' --> test_ext_$@.h test_ext_$@.cpp'
-	$(V)php idl.php test $< test_ext_$@.h test_ext_$@.cpp
+	$(V)$(PHP) idl.php test $< test_ext_$@.h test_ext_$@.cpp
 	@echo ' --> ../runtime/ext/ext_$@.h ../runtime/ext/ext_$@.cpp'
-	$(V)php idl.php param $< ../runtime/ext/ext_$@.h ../runtime/ext/ext_$@.cpp
+	$(V)$(PHP) idl.php param $< ../runtime/ext/ext_$@.h ../runtime/ext/ext_$@.cpp
 	@echo ' --> ../runtime/ext/profile/extprofile_$@.h'
-	$(V)php idl.php profile $< ../runtime/ext/profile/extprofile_$@.h
+	$(V)$(PHP) idl.php profile $< ../runtime/ext/profile/extprofile_$@.h
 
 # run this for a newly prepared idl file
 install: $(EXT) lists
@@ -54,13 +57,13 @@ install: $(EXT) lists
 	$(V)touch ../compiler/builtin_symbols.cpp
 	$(V)cp test_ext_$<.h test_ext_$<.cpp ../test/
 	$(REPO_ADD) ../test/test_ext_$<.h ../test/test_ext_$<.cpp
-	$(V)php ../../bin/license.php
+	$(V)$(PHP) ../../bin/license.php
 
 # run this to add or remove a function from an existing idl file
 update: $(EXT) lists
 	$(V)cp $<.inc ../system/
 	$(V)touch ../compiler/builtin_symbols.cpp
-	$(V)php ../../bin/license.php
+	$(V)$(PHP) ../../bin/license.php
 
 remove:
 	@echo 'Removing extension index...'

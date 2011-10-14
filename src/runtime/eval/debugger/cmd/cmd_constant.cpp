@@ -79,7 +79,9 @@ bool CmdConstant::onClient(DebuggerClient *client) {
         }
       } else {
         client->print("%s = %s", name.data(), value.data());
-        if (++i % DebuggerClient::ScrollBlockSize == 0 &&
+        ++i;
+        if (!client->isApiMode() &&
+            i % DebuggerClient::ScrollBlockSize == 0 &&
             client->ask("There are %d more constants. Continue? [Y/n]",
                         constants.toArray().size() - i) == 'n') {
           break;

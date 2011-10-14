@@ -29,18 +29,19 @@ namespace HPHP {
 bool f_hphpd_install_user_command(CStrRef cmd, CStrRef clsname);
 Array f_hphpd_get_user_commands();
 void f_hphpd_break(bool condition = true);
+Variant f_hphpd_get_client(CStrRef name = null);
 
 ///////////////////////////////////////////////////////////////////////////////
-// class DebuggerProxy
+// class DebuggerProxyCmdUser
 
-FORWARD_DECLARE_CLASS_BUILTIN(DebuggerProxy);
-class c_DebuggerProxy : public ExtObjectData {
+FORWARD_DECLARE_CLASS_BUILTIN(DebuggerProxyCmdUser);
+class c_DebuggerProxyCmdUser : public ExtObjectData {
  public:
-  DECLARE_CLASS(DebuggerProxy, DebuggerProxy, ObjectData)
+  DECLARE_CLASS(DebuggerProxyCmdUser, DebuggerProxyCmdUser, ObjectData)
 
   // need to implement
-  public: c_DebuggerProxy(const ObjectStaticCallbacks *cb = &cw_DebuggerProxy);
-  public: ~c_DebuggerProxy();
+  public: c_DebuggerProxyCmdUser(const ObjectStaticCallbacks *cb = &cw_DebuggerProxyCmdUser);
+  public: ~c_DebuggerProxyCmdUser();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: bool t_islocal();
@@ -51,34 +52,33 @@ class c_DebuggerProxy : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
-  public: c_DebuggerProxy *create();
-
+  public: c_DebuggerProxyCmdUser *create();
 
  public:
   Eval::DebuggerProxy *m_proxy;
 };
-extern const int64 q_DebuggerClient$$AUTO_COMPLETE_FILENAMES;
-extern const int64 q_DebuggerClient$$AUTO_COMPLETE_VARIABLES;
-extern const int64 q_DebuggerClient$$AUTO_COMPLETE_CONSTANTS;
-extern const int64 q_DebuggerClient$$AUTO_COMPLETE_CLASSES;
-extern const int64 q_DebuggerClient$$AUTO_COMPLETE_FUNCTIONS;
-extern const int64 q_DebuggerClient$$AUTO_COMPLETE_CLASS_METHODS;
-extern const int64 q_DebuggerClient$$AUTO_COMPLETE_CLASS_PROPERTIES;
-extern const int64 q_DebuggerClient$$AUTO_COMPLETE_CLASS_CONSTANTS;
-extern const int64 q_DebuggerClient$$AUTO_COMPLETE_KEYWORDS;
-extern const int64 q_DebuggerClient$$AUTO_COMPLETE_CODE;
+extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_FILENAMES;
+extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_VARIABLES;
+extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CONSTANTS;
+extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASSES;
+extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_FUNCTIONS;
+extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_METHODS;
+extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_PROPERTIES;
+extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_CONSTANTS;
+extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_KEYWORDS;
+extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CODE;
 
 ///////////////////////////////////////////////////////////////////////////////
-// class DebuggerClient
+// class DebuggerClientCmdUser
 
-FORWARD_DECLARE_CLASS_BUILTIN(DebuggerClient);
-class c_DebuggerClient : public ExtObjectData {
+FORWARD_DECLARE_CLASS_BUILTIN(DebuggerClientCmdUser);
+class c_DebuggerClientCmdUser : public ExtObjectData {
  public:
-  DECLARE_CLASS(DebuggerClient, DebuggerClient, ObjectData)
+  DECLARE_CLASS(DebuggerClientCmdUser, DebuggerClientCmdUser, ObjectData)
 
   // need to implement
-  public: c_DebuggerClient(const ObjectStaticCallbacks *cb = &cw_DebuggerClient);
-  public: ~c_DebuggerClient();
+  public: c_DebuggerClientCmdUser(const ObjectStaticCallbacks *cb = &cw_DebuggerClientCmdUser);
+  public: ~c_DebuggerClientCmdUser();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: void t_quit();
@@ -141,9 +141,45 @@ class c_DebuggerClient : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
-  public: c_DebuggerClient *create();
+  public: c_DebuggerClientCmdUser *create();
   static const ClassPropTable os_prop_table;
 
+ public:
+  Eval::DebuggerClient *m_client;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class DebuggerClient
+
+extern const int64 q_DebuggerClient$$STATE_INVALID;
+extern const int64 q_DebuggerClient$$STATE_UNINIT;
+extern const int64 q_DebuggerClient$$STATE_READY_FOR_COMMAND;
+extern const int64 q_DebuggerClient$$STATE_BUSY;
+
+FORWARD_DECLARE_CLASS_BUILTIN(DebuggerClient);
+class c_DebuggerClient : public ExtObjectData {
+ public:
+  DECLARE_CLASS(DebuggerClient, DebuggerClient, ObjectData)
+
+  // need to implement
+  public: c_DebuggerClient(const ObjectStaticCallbacks *cb = &cw_DebuggerClient);
+  public: ~c_DebuggerClient();
+  public: void t___construct();
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  public: int64 t_getstate();
+  DECLARE_METHOD_INVOKE_HELPERS(getstate);
+  public: Variant t_init(CVarRef options);
+  DECLARE_METHOD_INVOKE_HELPERS(init);
+  public: Variant t_processcmd(CVarRef cmdName, CVarRef args);
+  DECLARE_METHOD_INVOKE_HELPERS(processcmd);
+  public: Variant t_interrupt();
+  DECLARE_METHOD_INVOKE_HELPERS(interrupt);
+  public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
+
+  // implemented by HPHP
+  public: c_DebuggerClient *create();
+  static const ClassPropTable os_prop_table;
 
  public:
   Eval::DebuggerClient *m_client;

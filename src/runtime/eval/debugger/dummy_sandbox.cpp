@@ -21,6 +21,7 @@
 #include <runtime/base/server/source_root_info.h>
 #include <runtime/base/externals.h>
 #include <runtime/base/hphp_system.h>
+#include <util/logger.h>
 #include <util/process.h>
 
 using namespace std;
@@ -74,6 +75,7 @@ void DummySandbox::run() {
           sri.setServerVariables(g->GV(_SERVER));
         }
 
+        Logger::Info("Start loading startup doc");
         std::string doc = getStartupDoc(sandbox);
         bool error; string errorMsg;
         bool ret = hphp_invoke(g_context.getNoCheck(), doc, false, null_array,
@@ -84,6 +86,7 @@ void DummySandbox::run() {
             msg += ": " + errorMsg;
           }
         }
+        Logger::Info("Startup doc " + doc + " loaded");
       }
 
       m_inited = true;

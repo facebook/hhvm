@@ -961,6 +961,11 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     return false;
   }
 
+  bool paramList =
+    is(KindOfExpressionList) &&
+    static_cast<ExpressionList*>(this)->getListKind() ==
+    ExpressionList::ListKindParam;
+
   bool stashAll = state & StashAll;
   state &= ~StashAll;
   bool doStash = (state & FixOrder) != 0 || needsFastCastTemp(ar);
@@ -976,7 +981,10 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       if (k && !k->isScalar()) {
         if (k->hasEffect()) {
           lastEffect = i;
-          if (!j && k->isTemporary()) {
+          if (!j && (n > 1 || paramList) && k->isTemporary() &&
+              (!k->hasContext(ExistContext) ||
+               (!k->is(KindOfObjectPropertyExpression) &&
+                !k->is(KindOfArrayElementExpression)))) {
             j++;
           }
         }
@@ -1347,6 +1355,11 @@ bool Expression::getTypeCastPtrs(
 bool Expression::needsFastCastTemp(AnalysisResultPtr ar) {
   if (is(KindOfSimpleVariable)) return false;
   if (!canUseFastCast(ar))      return false;
+  if (hasAnyContext(ExistContext|AccessContext) &&
+      (is(KindOfObjectPropertyExpression) ||
+       is(KindOfArrayElementExpression))) {
+    return false;
+  }
   ASSERT(m_actualType);
   return !m_actualType->isPrimitive();
 }

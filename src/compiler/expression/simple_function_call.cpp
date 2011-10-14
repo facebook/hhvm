@@ -1126,7 +1126,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       (!m_funcScope || !m_funcScope->isStatic())) {
     int objCall = checkObjCall(ar);
 
-    if (objCall < 0 || (objCall > 0 && !m_localThis.empty())) {
+    if (objCall <= 0 || !m_localThis.empty()) {
       m_implementedType = Type::Variant;
     }
   }

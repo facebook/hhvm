@@ -161,14 +161,17 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
       }
       CopyParams(request, g->GV(_POST));
       if (needDelete) {
-        if (RuntimeOption::AlwaysPopulateRawPostData) {
+        if (RuntimeOption::AlwaysPopulateRawPostData &&
+            size <= (int)StringData::LenMask) {
           g->GV(HTTP_RAW_POST_DATA) = String((char*)data, size, AttachString);
         } else {
           free((void *)data);
         }
       } else {
         // For literal we disregard RuntimeOption::AlwaysPopulateRawPostData
-        g->GV(HTTP_RAW_POST_DATA) = String((char*)data, size, AttachLiteral);
+        if (size <= (int)StringData::LenMask) {
+          g->GV(HTTP_RAW_POST_DATA) = String((char*)data, size, AttachLiteral);
+        }
       }
     }
   }

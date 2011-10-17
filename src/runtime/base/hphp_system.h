@@ -53,7 +53,7 @@ class Globals : public LVariableTable {
 public:
   Globals() : FVF(__autoload)(false) {}
   void initialize();
-  CVarRef declareConstant(CStrRef name, Variant &constant, CVarRef value);
+  bool declareConstant(CStrRef name, Variant &constant, CVarRef value);
   void declareFunction(const char *name);
   void declareFunctionLit(CStrRef name);
   bool defined(CStrRef name);

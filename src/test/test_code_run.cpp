@@ -14629,6 +14629,10 @@ bool TestCodeRun::TestConstant() {
        "var_dump(BLAH);"
        "define('FOO', array(1,2,3));");
 
+  MVCR("<?php "
+       "var_dump(define('foo', false));"
+       "var_dump(define('foo', true));");
+
   return true;
 }
 

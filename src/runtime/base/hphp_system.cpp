@@ -92,17 +92,19 @@ void Globals::initialize() {
   }
 }
 
-CVarRef Globals::declareConstant(CStrRef name, Variant &constant,
-                                 CVarRef value) {
+bool Globals::declareConstant(CStrRef name, Variant &constant,
+                              CVarRef value) {
   if (!value.isAllowedAsConstantValue()) {
     raise_warning("Constants may only evaluate to scalar values");
-    return false_varNR;
+    return false;
   }
   if (!m_dynamicConstants.exists(name)) {
     m_dynamicConstants.set(name, value);
     constant = value;
+    return true;
   }
-  return value;
+  raise_warning("Constant %s already defined", name.data());
+  return false;
 }
 
 void Globals::declareFunction(const char *name) {

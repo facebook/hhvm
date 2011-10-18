@@ -313,11 +313,10 @@ public:
                 if (!id) id = labelIdMap.size();
                 lid = id;
                 gi.goto_stmt->setId(lid);
-                ti.targets[it->first] = -lid;
+                ti.targets[-lid] = it->first;
               } else {
-                ti.targets[it->first] = lid;
+                ti.targets[lid] = it->first;
               }
-
 
               gi.goto_stmt->setLabel(labelStr);
             }
@@ -427,16 +426,16 @@ public:
         if (doTry) {
           StatementListPtr cases(new StatementList(
                                    s->getScope(), s->getLocation()));
-          for (map<string,int>::iterator it = ti.targets.begin(),
+          for (map<int,string>::iterator it = ti.targets.begin(),
                  end = ti.targets.end(); it != end; ++it) {
             StatementPtr g(new GotoStatement(
-                             s->getScope(), s->getLocation(), it->first));
-            if (it->second < 0) {
+                             s->getScope(), s->getLocation(), it->second));
+            if (it->first < 0) {
               g = replaceGoto(static_pointer_cast<GotoStatement>(g), 0);
             }
             CaseStatementPtr c(new CaseStatement(
                                  s->getScope(), s->getLocation(),
-                                 s->makeScalarExpression(m_ar, abs(it->second)),
+                                 s->makeScalarExpression(m_ar, abs(it->first)),
                                  g));
             cases->addElement(c);
           }
@@ -510,12 +509,12 @@ private:
   };
   typedef std::vector<GotoInfo> GotoVector;
   struct LabelInfo {
-    TryVector trys;
-    GotoVector gotos;
+    TryVector   trys;
+    GotoVector  gotos;
   };
   struct TryInfo {
     int label;
-    std::map<string,int> targets;
+    std::map<int,string> targets;
   };
   TryVector trys;
   typedef map<string,LabelInfo> LabelInfoMap;

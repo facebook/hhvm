@@ -50,7 +50,7 @@ void ClassVariable::set(VariableEnvironment &env, EvalObjectData *self) const {
     if (m_modifiers & ClassStatement::Private) {
       self->o_setPrivate(m_cls->name(), m_name, val);
     } else if (!self->o_exists(m_name)) {
-      self->o_set(m_name, val, true);
+      self->o_i_set(m_name, val);
     }
   }
 }

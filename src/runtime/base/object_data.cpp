@@ -937,22 +937,28 @@ inline ALWAYS_INLINE Variant ObjectData::o_setImpl(CStrRef propName, T v,
   return variant(v);
 }
 
-Variant ObjectData::o_set(CStrRef propName, CVarRef v,
-                          bool forInit /* = false */,
-                          CStrRef context /* = null_string */) {
-  return o_setImpl<CVarRef>(propName, v, forInit, context);
+Variant ObjectData::o_set(CStrRef propName, CVarRef v) {
+  return o_setImpl<CVarRef>(propName, v, false, null_string);
 }
 
-Variant ObjectData::o_setRef(CStrRef propName, CVarRef v,
-                             bool forInit /* = false */,
-                             CStrRef context /* = null_string */) {
-  return o_setImpl<RefResult>(propName, ref(v), forInit, context);
+Variant ObjectData::o_set(CStrRef propName, RefResult v) {
+  return o_setRef(propName, variant(v), null_string);
 }
 
-Variant ObjectData::o_set(CStrRef propName, RefResult v,
-                          bool forInit /* = false */,
-                          CStrRef context /* = null_string */) {
-  return o_setRef(propName, variant(v), forInit, context);
+Variant ObjectData::o_setRef(CStrRef propName, CVarRef v) {
+  return o_setImpl<RefResult>(propName, ref(v), false, null_string);
+}
+
+Variant ObjectData::o_set(CStrRef propName, CVarRef v, CStrRef context) {
+  return o_setImpl<CVarRef>(propName, v, false, context);
+}
+
+Variant ObjectData::o_set(CStrRef propName, RefResult v, CStrRef context) {
+  return o_setRef(propName, variant(v), context);
+}
+
+Variant ObjectData::o_setRef(CStrRef propName, CVarRef v, CStrRef context) {
+  return o_setImpl<RefResult>(propName, ref(v), false, context);
 }
 
 template<typename T>
@@ -984,24 +990,28 @@ inline ALWAYS_INLINE Variant ObjectData::o_setPublicImpl(CStrRef propName,
   return variant(v);
 }
 
-Variant ObjectData::o_setPublic(CStrRef propName, CVarRef v,
-                                bool forInit /* = false */) {
-  return o_setPublicImpl<CVarRef>(propName, v, forInit);
+Variant ObjectData::o_setPublic(CStrRef propName, CVarRef v) {
+  return o_setPublicImpl<CVarRef>(propName, v, false);
 }
 
-Variant ObjectData::o_setPublic(CStrRef propName, RefResult v,
-                                bool forInit /* = false */) {
-  return o_setPublicRef(propName, variant(v), forInit);
+Variant ObjectData::o_setPublic(CStrRef propName, RefResult v) {
+  return o_setPublicRef(propName, variant(v));
 }
 
-Variant ObjectData::o_setPublicRef(CStrRef propName, CVarRef v,
-                                   bool forInit /* = false */) {
-  return o_setPublicImpl<CVarStrongBind>(propName, strongBind(v), forInit);
+Variant ObjectData::o_setPublicRef(CStrRef propName, CVarRef v) {
+  return o_setPublicImpl<CVarStrongBind>(propName, strongBind(v), false);
 }
 
-Variant ObjectData::o_setPublicWithRef(CStrRef propName, CVarRef v,
-                                       bool forInit /* = false */) {
-  return o_setPublicImpl<CVarWithRefBind>(propName, withRefBind(v), forInit);
+Variant ObjectData::o_setPublicWithRef(CStrRef propName, CVarRef v) {
+  return o_setPublicImpl<CVarWithRefBind>(propName, withRefBind(v), false);
+}
+
+Variant ObjectData::o_i_set(CStrRef propName, CVarRef v) {
+  return o_setPublicImpl<CVarRef>(propName, v, true);
+}
+
+Variant ObjectData::o_i_setPublicWithRef(CStrRef propName, CVarRef v) {
+  return o_setPublicImpl<CVarWithRefBind>(propName, withRefBind(v), true);
 }
 
 void ObjectData::o_setArray(CArrRef properties) {
@@ -1010,7 +1020,7 @@ void ObjectData::o_setArray(CArrRef properties) {
     if (key.empty() || key.charAt(0) != '\0') {
       // non-private property
       CVarRef secondRef = iter.secondRef();
-      o_setPublicWithRef(key, secondRef, true);
+      o_i_setPublicWithRef(key, secondRef);
     }
   }
 }

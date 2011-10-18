@@ -191,16 +191,22 @@ class ObjectData : public CountableNF {
                 CStrRef context = null_string);
   Variant o_getPublic(CStrRef s, bool error = true);
   Variant o_getUnchecked(CStrRef s, CStrRef context = null_string);
-  Variant o_set(CStrRef s, CVarRef v, bool forInit = false,
-                CStrRef context = null_string);
-  Variant o_set(CStrRef s, RefResult v, bool forInit = false,
-                CStrRef context = null_string);
-  Variant o_setRef(CStrRef s, CVarRef v, bool forInit = false,
-                   CStrRef context = null_string);
-  Variant o_setPublic(CStrRef s, CVarRef v, bool forInit = false);
-  Variant o_setPublic(CStrRef s, RefResult v, bool forInit = false);
-  Variant o_setPublicRef(CStrRef s, CVarRef v, bool forInit = false);
-  Variant o_setPublicWithRef(CStrRef s, CVarRef v, bool forInit = false);
+
+  Variant o_i_set(CStrRef s, CVarRef v);
+  Variant o_i_setPublicWithRef(CStrRef s, CVarRef v);
+
+  Variant o_set(CStrRef s, CVarRef v);
+  Variant o_set(CStrRef s, RefResult v);
+  Variant o_setRef(CStrRef s, CVarRef v);
+
+  Variant o_set(CStrRef s, CVarRef v, CStrRef context);
+  Variant o_set(CStrRef s, RefResult v, CStrRef context);
+  Variant o_setRef(CStrRef s, CVarRef v, CStrRef context);
+  Variant o_setPublic(CStrRef s, CVarRef v);
+  Variant o_setPublic(CStrRef s, RefResult v);
+  Variant o_setPublicRef(CStrRef s, CVarRef v);
+  Variant o_setPublicWithRef(CStrRef s, CVarRef v);
+
   Variant &o_lval(CStrRef s, CVarRef tmpForGet, CStrRef context = null_string);
   Variant &o_unsetLval(CStrRef s, CVarRef tmpForGet,
                        CStrRef context = null_string) {
@@ -317,8 +323,7 @@ public:
   inline Variant o_setImpl(CStrRef propName, T v,
                            bool forInit, CStrRef context);
   template <typename T>
-  inline Variant o_setPublicImpl(CStrRef propName, T v,
-                                 bool forInit);
+  inline Variant o_setPublicImpl(CStrRef propName, T v, bool forInit);
 
   static Variant *RealPropPublicHelper(CStrRef propName, int64 hash, int flags,
                                        const ObjectData *obj,

@@ -2710,7 +2710,7 @@ Variant Variant::o_set(CStrRef propName, CVarRef val,
     raise_warning("Attempt to assign property of non-object");
     return val;
   }
-  return m_data.pobj->o_set(propName, val, false, context);
+  return m_data.pobj->o_set(propName, val, context);
 }
 
 Variant Variant::o_setRef(CStrRef propName, CVarRef val,
@@ -2729,7 +2729,7 @@ Variant Variant::o_setRef(CStrRef propName, CVarRef val,
     raise_warning("Attempt to assign property of non-object");
     return val;
   }
-  return m_data.pobj->o_setRef(propName, val, false, context);
+  return m_data.pobj->o_setRef(propName, val, context);
 }
 
 Variant Variant::o_setPublic(CStrRef propName, CVarRef val) {
@@ -2747,7 +2747,7 @@ Variant Variant::o_setPublic(CStrRef propName, CVarRef val) {
     raise_warning("Attempt to assign property of non-object");
     return val;
   }
-  return m_data.pobj->o_setPublic(propName, val, false);
+  return m_data.pobj->o_setPublic(propName, val);
 }
 
 Variant Variant::o_setPublicRef(CStrRef propName, CVarRef val) {
@@ -2765,7 +2765,7 @@ Variant Variant::o_setPublicRef(CStrRef propName, CVarRef val) {
     raise_warning("Attempt to assign property of non-object");
     return val;
   }
-  return m_data.pobj->o_setPublicRef(propName, val, false);
+  return m_data.pobj->o_setPublicRef(propName, val);
 }
 
 Variant Variant::o_invoke(CStrRef s, CArrRef params, int64 hash /* = -1 */) {

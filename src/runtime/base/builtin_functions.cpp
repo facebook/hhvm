@@ -1426,7 +1426,7 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
           cur = next.toObject();
           next = cur->o_get(s_previous, false, s_exception);
         }
-        cur->o_set(s_previous, autoloadException, false, s_exception);
+        cur->o_set(s_previous, autoloadException, s_exception);
         autoloadException = ex;
       }
     }

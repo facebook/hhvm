@@ -104,7 +104,6 @@ public:
   Object create(ClassEvalState &ce, ObjectData* root = NULL) const;
   void initializeObject(EvalObjectData *obj) const;
   void initializeStatics(LVariableTable &statics) const;
-
   const MethodStatement* findMethod(const char* name,
                                     bool recursive = false,
                                     bool interfaces = false) const;
@@ -128,7 +127,7 @@ public:
   void loadMethodTable(ClassEvalState &ce,
                        std::set<const ClassStatement*> &seen) const;
   void semanticCheck(const ClassStatement *cls) const;
-  ClassStatementMarkerPtr getMarker() const;
+  ClassStatementMarkerPtr getMarker();
   void delayDeclaration() { m_delayDeclaration = true; }
 protected:
   StringData *m_name;
@@ -179,7 +178,7 @@ private:
 
 class ClassStatementMarker : public Statement {
 public:
-  ClassStatementMarker(STATEMENT_ARGS, ClassStatement *cls);
+  ClassStatementMarker(ClassStatement *cls, const Location *loc);
   virtual void eval(VariableEnvironment &env) const;
   virtual bool skipDump() const { return true;}
   virtual void dump(std::ostream &out) const;

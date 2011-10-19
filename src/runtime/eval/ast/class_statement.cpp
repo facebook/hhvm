@@ -97,7 +97,6 @@ ClassStatement::ClassStatement(STATEMENT_ARGS, const string &name,
   : Statement(STATEMENT_PASS), m_name(StringData::GetStaticString(name)),
     m_modifiers(0), m_attributes(0),
     m_parent(StringData::GetStaticString(parent)), m_docComment(doc),
-    m_marker(new ClassStatementMarker(STATEMENT_PASS, this)),
     m_delayDeclaration(false) { }
 
 void ClassStatement::finish() {
@@ -246,17 +245,6 @@ Statement *ClassStatement::optimize(VariableEnvironment &env) {
 void ClassStatement::eval(VariableEnvironment &env) const {
   if (env.isGotoing()) return;
   if (m_delayDeclaration) return;
-  if (!isBaseClass() && !m_marker) {
-    // Class might not be valid to declare yet. If the parent and bases
-    // have not been defined then don't declare until execution hits the
-    // marker.
-    if (!m_parent->empty() && !f_class_exists(m_parent, false)) {
-      return;
-    }
-    for (uint i = 0; i < m_bases.size(); ++i) {
-      if (!f_interface_exists(m_bases[i])) return;
-    }
-  }
   evalImpl(env);
 }
 
@@ -1727,13 +1715,15 @@ void ClassStatement::collectBuiltinInterfaceInfos(
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ClassStatementMarkerPtr ClassStatement::getMarker() const {
+ClassStatementMarkerPtr ClassStatement::getMarker() {
+  ASSERT(!m_marker);
+  m_marker = new ClassStatementMarker(this, loc());
   return m_marker;
 }
 
-ClassStatementMarker::ClassStatementMarker(STATEMENT_ARGS,
-                                           ClassStatement *cls)
-  : Statement(STATEMENT_PASS), m_class(cls) {
+ClassStatementMarker::ClassStatementMarker(ClassStatement *cls,
+                                           const Location *loc)
+  : Statement(loc), m_class(cls) {
 }
 
 void ClassStatementMarker::eval(VariableEnvironment &env) const {

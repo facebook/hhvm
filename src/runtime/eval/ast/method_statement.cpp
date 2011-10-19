@@ -211,7 +211,7 @@ void MethodStatement::attemptAccess(const char *context) const {
     return;
   }
   int mods = getModifiers();
-  const ClassStatement *cs = getClass();
+  const ClassStatement *cs = m_class;
   ClassStatement::Modifier level = ClassStatement::Public;
   if (mods & ClassStatement::Private) level = ClassStatement::Private;
   else if (mods & ClassStatement::Protected) level = ClassStatement::Protected;

@@ -171,6 +171,7 @@ bool eval_get_call_info_hook(const CallInfo *&ci, void *&extra, const char *s,
 
 bool eval_get_call_info_static_method_hook(MethodCallPackage &info,
                                            bool &foundClass) {
+  ASSERT(!foundClass);
   const MethodStatement *ms =
     Eval::RequestEvalState::findMethod(info.rootCls->data(),
       info.name->data(), foundClass, true);

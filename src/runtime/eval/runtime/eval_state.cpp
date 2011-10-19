@@ -48,6 +48,7 @@ void ClassEvalState::init(const ClassStatement *cls) {
 }
 
 const MethodStatement *ClassEvalState::getMethod(const char *m) {
+  if (!m_doneSemanticCheck) semanticCheck();
   MethodTable::const_iterator it = m_methodTable.find(m);
   if (it == m_methodTable.end()) return NULL;
   return it->second.first;
@@ -301,17 +302,11 @@ const MethodStatement *RequestEvalState::findMethod(const char *cname,
                                                     bool &foundClass,
                                                     bool autoload /* = false */)
 {
-  const Eval::ClassStatement *cls =
-    Eval::RequestEvalState::findClass(cname, autoload);
-  if (cls) {
+  foundClass = false;
+  ClassEvalState *ce = RequestEvalState::findClassState(cname, autoload);
+  if (ce) {
     foundClass = true;
-  }
-  while (cls) {
-    const Eval::MethodStatement *meth = cls->findMethod(name);
-    if (meth) {
-      return meth;
-    }
-    cls = Eval::RequestEvalState::findClass(cls->parent().c_str());
+    return ce->getMethod(name);
   }
   return NULL;
 }

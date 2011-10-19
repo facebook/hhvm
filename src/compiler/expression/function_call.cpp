@@ -465,7 +465,8 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
     var->getSymbol()->setHidden();
     var->getSymbol()->setUsed();
     var->getSymbol()->setReferenced();
-    bool ref = m_funcScope->isRefParam(i);
+    bool ref = m_funcScope->isRefParam(i) || arg->hasContext(RefParameter);
+    arg->clearContext(RefParameter);
     AssignmentExpressionPtr ae
       (new AssignmentExpression(getScope(),
                                 arg->getLocation(),
@@ -503,6 +504,10 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
       ExpressionListPtr result_list
         (new ExpressionList(getScope(), getLocation(),
                             ExpressionList::ListKindLeft));
+      if (ret->hasContext(LValue)) {
+        result_list->setContext(LValue);
+        result_list->setContext(ReturnContext);
+      }
       result_list->addElement(ret);
       result_list->addElement(unset);
       (*info.elist)[i] = result_list;

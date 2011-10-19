@@ -351,7 +351,7 @@ public:
   static bool CopyProp;
   static bool LocalCopyProp;
   static bool StringLoopOpts;
-  static bool AutoInline;
+  static int AutoInline;
   static bool ArrayAccessIdempotent;
 
   /**

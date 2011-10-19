@@ -217,7 +217,7 @@ bool Option::EliminateDeadCode = true;
 bool Option::CopyProp = false;
 bool Option::LocalCopyProp = true;
 bool Option::StringLoopOpts = true;
-bool Option::AutoInline = false;
+int Option::AutoInline = 0;
 bool Option::ControlFlow = true;
 bool Option::VariableCoalescing = false;
 bool Option::ArrayAccessIdempotent = false;
@@ -426,7 +426,7 @@ void Option::Load(Hdf &config) {
   CopyProp                 = config["CopyProp"].getBool(false);
   LocalCopyProp            = config["LocalCopyProp"].getBool(true);
   StringLoopOpts           = config["StringLoopOpts"].getBool(true);
-  AutoInline               = config["AutoInline"].getBool(false);
+  AutoInline               = config["AutoInline"].getInt32(0);
   ControlFlow              = config["ControlFlow"].getBool(true);
   VariableCoalescing       = config["VariableCoalescing"].getBool(false);
   ArrayAccessIdempotent    = config["ArrayAccessIdempotent"].getBool(false);

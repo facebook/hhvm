@@ -173,6 +173,7 @@ TypePtr Type::Intersection(AnalysisResultConstPtr ar,
 }
 
 bool Type::IsMappedToVariant(TypePtr t) {
+  if (!t) return true;
   switch (t->m_kindOf) {
   case KindOfBoolean:
   case KindOfInt32  :

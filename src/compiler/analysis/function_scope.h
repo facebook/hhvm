@@ -444,7 +444,8 @@ public:
 
   class FunctionInfo {
   public:
-    FunctionInfo(int rva = -1) : m_maybeStatic(false), m_refVarArg(rva) { }
+    FunctionInfo(int rva = -1) : m_maybeStatic(false), m_maybeRefReturn(false),
+                                 m_refVarArg(rva) { }
 
     bool isRefParam(int p) const {
       if (m_refVarArg >= 0 && p >= m_refVarArg) return true;
@@ -462,8 +463,12 @@ public:
     void setMaybeStatic() { m_maybeStatic = true; }
     bool getMaybeStatic() { return m_maybeStatic; }
 
+    void setMaybeRefReturn() { m_maybeRefReturn = true; }
+    bool getMaybeRefReturn() { return m_maybeRefReturn; }
+
   private:
     bool m_maybeStatic; // this could be a static method
+    bool m_maybeRefReturn;
     int m_refVarArg; // -1: no ref varargs;
                      // otherwise, any arg >= m_refVarArg is a reference
     std::set<int> m_refParams; // set of ref arg positions

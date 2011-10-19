@@ -303,40 +303,69 @@ void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
   if (hasCPPTemp()) return;
   VariableTablePtr vt(getScope()->getVariables());
   if (hasContext(InvokeArgument) && !hasContext(AccessContext) &&
-      (isLocalExprAltered() || hasEffect()) &&
+      (isLocalExprAltered() || (m_sym && m_sym->isReseated())) &&
       !m_globals /* $GLOBALS always has reference semantics */ &&
       hasAssignableCPPVariable()) {
-    Expression::preOutputStash(cg, ar, state);
-    const string &ref_temp  = cppTemp();
-    ASSERT(!ref_temp.empty());
-    const string &copy_temp = genCPPTemp(cg, ar);
-    const string &arg_temp  = genCPPTemp(cg, ar);
     const string &cppName   = getAssignableCPPVariable(ar);
     ASSERT(!cppName.empty());
-    cg_printf("const Variant %s = %s;\n",
-              copy_temp.c_str(),
-              cppName.c_str());
-    cg_printf("const Variant &%s = cit%d->isRef(%d) ? %s : %s;\n",
-              arg_temp.c_str(),
-              cg.callInfoTop(),
-              m_argNum,
-              ref_temp.c_str(),
-              copy_temp.c_str());
-    setCPPTemp(arg_temp);
+    if (m_sym && m_sym->isReseated()) {
+      const string &arg_temp  = genCPPTemp(cg, ar);
+      cg.wrapExpressionBegin();
+      cg_printf("const Variant %s = cit%d->isRef(%d) ? "
+                "Variant(strongBind(%s)) : %s;\n",
+                arg_temp.c_str(),
+                cg.callInfoTop(),
+                m_argNum,
+                cppName.c_str(),
+                cppName.c_str());
+
+      setCPPTemp(arg_temp);
+    } else {
+      Expression::preOutputStash(cg, ar, state);
+      const string &ref_temp  = cppTemp();
+      ASSERT(!ref_temp.empty());
+      const string &copy_temp = genCPPTemp(cg, ar);
+      const string &arg_temp  = genCPPTemp(cg, ar);
+      cg_printf("const Variant %s = %s;\n",
+                copy_temp.c_str(),
+                cppName.c_str());
+      cg_printf("const Variant &%s = cit%d->isRef(%d) ? %s : %s;\n",
+                arg_temp.c_str(),
+                cg.callInfoTop(),
+                m_argNum,
+                ref_temp.c_str(),
+                copy_temp.c_str());
+      setCPPTemp(arg_temp);
+    }
     return;
   }
-  if (getContext() & (LValue|RefValue|RefParameter)) return;
+  if (hasAnyContext(RefValue|RefParameter)) {
+    if (!hasAnyContext(InvokeArgument|AccessContext|
+                       AssignmentRHS|ReturnContext) &&
+        !m_globals && (!m_sym || m_sym->isReseated()) &&
+        hasAssignableCPPVariable()) {
+      cg.wrapExpressionBegin();
+      const string &cppName = getAssignableCPPVariable(ar);
+      ASSERT(!cppName.empty());
+      const string &tmp = genCPPTemp(cg, ar);
+      cg_printf("VRefParamValue %s((ref(%s)));\n",
+                tmp.c_str(), cppName.c_str());
+      setCPPTemp(tmp);
+      setContext(NoRefWrapper);
+    }
+    return;
+  } else if (hasContext(LValue)) {
+    return;
+  }
   if (!m_alwaysStash && !(state & StashVars)) return;
   Expression::preOutputStash(cg, ar, state);
 }
 
 bool SimpleVariable::hasAssignableCPPVariable() const {
+  if (!m_this) return true;
+  if (hasAnyContext(OprLValue | AssignmentLHS)) return false;
   VariableTablePtr variables = getScope()->getVariables();
-  if (m_this) {
-    return !hasAnyContext(OprLValue | AssignmentLHS) &&
-       variables->getAttribute(VariableTable::ContainsLDynamicVariable);
-  }
-  return true;
+  return variables->getAttribute(VariableTable::ContainsLDynamicVariable);
 }
 
 std::string SimpleVariable::getAssignableCPPVariable(AnalysisResultPtr ar)

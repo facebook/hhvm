@@ -539,6 +539,10 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
           !(e->hasContext(LValue) &&
             !e->hasAnyContext(RefValue|InvokeArgument))) {
         ret = true;
+      } else if (hasContext(RefValue) &&
+                 !e->hasAllContext(LValue|ReturnContext) &&
+                 !e->hasContext(RefValue)) {
+        ret = true;
       }
     }
   }
@@ -570,12 +574,28 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         e->setCPPTemp("/**/");
         continue;
       }
+      /*
+        We inlined a by-value function into the rhs of a by-ref assignment.
+      */
+      bool noRef = hasContext(RefValue) &&
+        !e->hasAllContext(LValue|ReturnContext) &&
+        !e->hasContext(RefValue) &&
+        !e->isTemporary() &&
+        Type::IsMappedToVariant(e->getActualType());
+      /*
+        If we need a non-const reference, but the expression is
+        going to generate a const reference, fix it
+      */
       bool lvSwitch =
         hasContext(LValue) && !hasAnyContext(RefValue|InvokeArgument) &&
         !(e->hasContext(LValue) &&
           !e->hasAnyContext(RefValue|InvokeArgument));
 
-      if (lvSwitch || (!i && n > 1)) {
+      if (e->hasAllContext(LValue|ReturnContext) && i + 1 == n) {
+        e->clearContext(ReturnContext);
+      }
+
+      if (noRef || lvSwitch || (!i && n > 1)) {
         e->Expression::preOutputStash(cg, ar, state | FixOrder);
         if (!(state & FixOrder)) {
           cg_printf("id(%s);\n", e->cppTemp().c_str());
@@ -583,15 +603,19 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       }
       if (e->hasCPPTemp() &&
           Type::SameType(e->getType(), getType())) {
-        const string &t = e->cppTemp();
+        string t = e->cppTemp();
+        if (noRef) {
+          cg_printf("CVarRef %s_nr = wrap_variant(%s);\n",
+                    t.c_str(), t.c_str());
+          t += "_nr";
+        }
 
         if (lvSwitch) {
           cg_printf("Variant &%s_lv = const_cast<Variant&>(%s);\n",
                     t.c_str(), t.c_str());
-          setCPPTemp(t + "_lv");
-        } else {
-          setCPPTemp(t);
+          t += "_lv";
         }
+        setCPPTemp(t);
       }
     }
   }
@@ -784,7 +808,15 @@ bool ExpressionList::outputCPPInternal(CodeGenerator &cg,
             !(exp->hasContext(LValue) &&
               !exp->hasAnyContext(RefValue|InvokeArgument));
         if (wrap) cg_printf("const_cast<Variant&>(");
+        bool noRef = !exp->hasCPPTemp() &&
+          hasContext(RefValue) &&
+          !exp->hasAllContext(LValue|ReturnContext) &&
+          !exp->hasContext(RefValue) &&
+          !exp->isTemporary() &&
+          Type::IsMappedToVariant(exp->getActualType());
+        if (noRef) cg_printf("wrap_variant(");
         exp->outputCPP(cg, ar);
+        if (noRef) cg_printf(")");
         if (wrap) cg_printf(")");
         needsComma = true;
       }

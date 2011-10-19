@@ -106,7 +106,7 @@ bool AliasManager::parseOptimizations(const std::string &optimizations,
     } else if (opt == "string") {
       Option::StringLoopOpts = val;
     } else if (opt == "inline") {
-      Option::AutoInline = val;
+      Option::AutoInline = val ? 1 : 0;
     } else if (opt == "cflow") {
       Option::ControlFlow = val;
     } else if (opt == "coalesce") {
@@ -115,7 +115,7 @@ bool AliasManager::parseOptimizations(const std::string &optimizations,
       val = opt == "all";
       Option::EliminateDeadCode = val;
       Option::LocalCopyProp = val;
-      Option::AutoInline = val;
+      Option::AutoInline = val ? 1 : 0;
       Option::ControlFlow = val;
       Option::CopyProp = val;
     } else {
@@ -2417,7 +2417,7 @@ void AliasManager::gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m) {
 
   if (m_inlineAsExpr) {
     if (!Option::AutoInline ||
-        cost > 1 ||
+        cost > Option::AutoInline ||
         func->isVariableArgument() ||
         m_variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
         m_variables->getAttribute(VariableTable::ContainsExtract) ||

@@ -69,6 +69,7 @@ ExpressionPtr Expression::replaceValue(ExpressionPtr rep) {
     ExpressionListPtr el(new ExpressionList(getScope(), getLocation(),
                                             ExpressionList::ListKindWrapped));
     el->addElement(rep);
+    rep->clearContext(AssignmentRHS);
     rep = el;
   }
   if (rep->is(KindOfSimpleVariable) && !is(KindOfSimpleVariable)) {
@@ -832,18 +833,24 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   if (dstType) {
+    bool inlinedRefReturn = hasAllContext(LValue|ReturnContext) &&
+      !hasAnyContext(InvokeArgument|RefValue);
     bool refParam = hasContext(RefValue) &&
       !hasAnyContext(InvokeArgument|AssignmentRHS|ReturnContext) &&
       (is(KindOfObjectPropertyExpression) ||
        is(KindOfArrayElementExpression));
-    if (refParam) {
+    if (inlinedRefReturn) {
+      cg_printf("Variant");
+    } else if (refParam) {
       cg_printf("VRefParamValue");
     } else {
       dstType->outputCPPDecl(cg, ar, getScope());
     }
     std::string t = genCPPTemp(cg, ar);
     const char *ref =
-      ((isLvalue || constRef) && !(state & ForceTemp)) ? "&" : "";
+      (!inlinedRefReturn &&
+       (isLvalue || constRef) &&
+       !(state & ForceTemp)) ? "&" : "";
     /*
       Note that double parens are necessary:
       type_name1 tmp27(type_name2(foo));
@@ -871,7 +878,9 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
       array elements and object properties.
     */
     int save = m_context;
-    if (refParam) {
+    if (inlinedRefReturn) {
+      cg_printf("strongBind(");
+    } else if (refParam) {
       m_context &= ~RefParameter;
     } else if (hasContext(RefValue)) {
       m_context &= ~RefValue;
@@ -899,6 +908,7 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
     }
     m_context = save;
 
+    if (inlinedRefReturn) cg_printf(")");
     cg_printf("));\n");
     if (!refParam && constRef &&
         (isLvalue || hasContext(DeepReference) || hasContext(UnsetContext))) {

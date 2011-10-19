@@ -19,6 +19,7 @@
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/modifier_expression.h>
 #include <compiler/expression/expression_list.h>
+#include <compiler/expression/function_call.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/statement/statement_list.h>
 #include <compiler/analysis/file_scope.h>
@@ -1281,7 +1282,7 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
       // If the implemented type is ref-counted and expected type is variant,
       // use VarNR to avoid unnecessary ref-counting because we know
       // the actual argument will always has a ref in the callee.
-      bool wrap = false;
+      bool wrap = false, wrapv = false;
       bool scalar = param->isScalar();
       bool isValidFuncIdx = func && i < func->getMaxParamCount();
       TypePtr expType(
@@ -1318,12 +1319,30 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
             if (scalar) cg.clearScalarVariant();
           }
         }
+      } else if (isValidFuncIdx &&
+                 !param->hasCPPTemp() &&
+                 func->getVariables()->isLvalParam(func->getParamName(i)) &&
+                 !param->hasAnyContext(Expression::RefValue|
+                                       Expression::RefParameter|
+                                       Expression::InvokeArgument)) {
+        FunctionCallPtr f = dynamic_pointer_cast<FunctionCall>(param);
+        if (f) {
+          if (f->getFuncScope()) {
+            wrapv = f->getFuncScope()->isRefReturn();
+          } else if (!f->getName().empty()) {
+            FunctionInfoPtr info = GetFunctionInfo(f->getName());
+            wrapv = info && info->getMaybeRefReturn();
+          } else {
+            wrapv = true;
+          }
+          if (wrapv) cg_printf("wrap_variant(");
+        }
       }
       if (wrap) cg_printf("VarNR(");
       param->outputCPP(cg, ar);
       if (scalar) cg.clearScalarVariant();
       ASSERT(!cg.hasScalarVariant());
-      if (wrap) {
+      if (wrap || wrapv) {
         cg_printf(")");
       }
     }
@@ -2255,6 +2274,9 @@ void FunctionScope::RecordFunctionInfo(string fname, FunctionScopePtr func) {
   }
   if (func->isStatic()) {
     info->setMaybeStatic();
+  }
+  if (func->isRefReturn()) {
+    info->setMaybeRefReturn();
   }
   if (func->isReferenceVariableArgument()) {
     info->setRefVarArg(func->getMaxParamCount());

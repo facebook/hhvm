@@ -7607,26 +7607,62 @@ bool TestCodeRun::TestReference() {
        "$p($some_ref = &$q);"
        "var_dump($some_ref,$q);");
 
+  MVCR("<?php "
+       "function foo(&$x, $y) { $x++; var_dump($x); }"
+       "function bar(&$x, $y, $f) {"
+       "  $f($x, $x = &$y);"
+       "  foo($x, $x = &$y);"
+       "  foo($y, $y = 2);"
+       "}"
+       "$x = 0;"
+       "bar($x, $x, 'foo');"
+       "var_dump($x);");
+
+  MVCR("<?php "
+       "function f($x) {"
+       "  global $u;"
+       "  if (isset($u)) return null;"
+       "  return $x;"
+       "}"
+       "function test($a) {"
+       "  $a++;"
+       "  return $a;"
+       "}"
+       "function &foo() {"
+       "  return $GLOBALS['x'];"
+       "}"
+       "$x = 1;"
+       "test(foo());"
+       "var_dump($x);"
+       "$f = f('foo');"
+       "$x = 1;"
+       "test($f());"
+       "var_dump($x);"
+       "$t = f('test');"
+       "$x = 1;"
+       "$t(foo());"
+       "var_dump($x);");
+
   return true;
 }
 
 bool TestCodeRun::TestDynamicConstants() {
   MVCR("<?php function foo($a) { return $a + 10;} define('TEST', foo(10)); "
-      "var_dump(TEST);");
-  MVCR("<?php function foo() { return 15;} "
-      "var_dump(TEST); define('TEST', foo()); var_dump(TEST);");
+       "var_dump(TEST);");
+  MVCR("<?php function foo() { global $g; return $g ? -1 : 15;} "
+       "var_dump(TEST); define('TEST', foo()); var_dump(TEST);");
   MVCR("<?php if (true) define('TEST', 1); else define('TEST', 2); "
-      "var_dump(TEST);");
+       "var_dump(TEST);");
   MVCR("<?php var_dump(TEST); define('TEST', 1); var_dump(TEST); "
-      "define('TEST', 2); var_dump(TEST);");
+       "define('TEST', 2); var_dump(TEST);");
   MVCR("<?php if (false) define('TEST', 1); else define('TEST', 2); "
-      "var_dump(TEST);");
+       "var_dump(TEST);");
   MVCR("<?php var_dump(defined('TEST')); var_dump(TEST);"
-      "define('TEST', 13);"
-      "var_dump(defined('TEST')); var_dump(TEST);");
+       "define('TEST', 13);"
+       "var_dump(defined('TEST')); var_dump(TEST);");
   MVCR("<?php define('FOO', BAR); define('BAR', FOO); echo FOO; echo BAR;");
   MVCR("<?php define('A', 10); class T { static $a = array(A); } "
-      "define('A', 20); var_dump(T::$a);");
+       "define('A', 20); var_dump(T::$a);");
 
   return true;
 }
@@ -18513,7 +18549,8 @@ bool TestCodeRun::TestAPC() {
 }
 
 bool TestCodeRun::TestInlining() {
-  WithOpt w(Option::AutoInline);
+  int ai = Option::AutoInline;
+  Option::AutoInline = 5;
 
   MVCR("<?php "
        "function id($x) {"
@@ -18649,6 +18686,46 @@ bool TestCodeRun::TestInlining() {
           "int(30)\n");
   }
 
+  MVCR("<?php "
+       "function &test(&$x,$y) {"
+       "  $GLOBALS['x'] = &$y;"
+       "  return $x[0];"
+       "}"
+       "$x = array((object)1);"
+       "$y = &test($x,0);"
+       "$y++;"
+       "var_dump($x, $y);");
+
+  MVCR("<?php "
+       "function &test(&$x) {"
+       "  $x = 1;"
+       "  return $x;"
+       "}"
+       "$x = 0;"
+       "$y = &test($x);"
+       "$y++;"
+       "var_dump($x, $y);");
+
+  MVCRNW("<?php "
+        "function foo($u, $v, $w) {"
+        "  $u = 10;"
+        "  $v = 20;"
+        "  $w = 20;"
+        "}"
+        "$u = 1;"
+        "$v = 2;"
+        "$w = 3;"
+        "foo(&$u, &$v, $w);"
+        "var_dump($u, $v, $w);");
+
+  MVCR("<?php "
+       "function foo() { return $GLOBALS['g']; }"
+       "$g = 0;"
+       "$a =& foo();"
+       "$a++;"
+       "var_dump($a, $g);");
+
+  Option::AutoInline = ai;
   return true;
 }
 

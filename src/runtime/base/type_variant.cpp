@@ -3478,7 +3478,9 @@ void Variant::removeImpl(CVarRef key, bool isString /* false */) {
         if (isString) {
           escalated = arr->remove(key, (arr->getCount() > 1));
         } else {
-          escalated = arr->remove(key.toKey(), (arr->getCount() > 1));
+          const VarNR &k = key.toKey();
+          if (k.isNull()) return;
+          escalated = arr->remove(k, (arr->getCount() > 1));
         }
         if (escalated) {
           set(escalated);

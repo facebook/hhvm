@@ -7242,6 +7242,13 @@ bool TestCodeRun::TestUnset() {
        "goo();\n"
        "unset($this);\n"
        "var_dump($this);\n");
+
+  MVCR("<?php "
+       "function rmv($a, $b) { unset($a[$b]); return $a; }"
+       "$a = array('foo');"
+       "$b = array();"
+       "var_dump(rmv($a, $b));");
+
   return true;
 }
 

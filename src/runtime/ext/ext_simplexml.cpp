@@ -79,10 +79,12 @@ static String node_list_to_string(xmlDocPtr doc, xmlNodePtr list) {
 static Array collect_attributes(xmlNodePtr node, CStrRef ns, bool is_prefix) {
   ASSERT(node);
   Array attributes = Array::Create();
-  for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
-    if (match_ns((xmlNodePtr)attr, ns, is_prefix)) {
-      String n = String((char*)attr->name, xmlStrlen(attr->name), CopyString);
-      attributes.set(n, node_list_to_string(node->doc, attr->children));
+  if (node->type != XML_ENTITY_DECL) {
+    for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
+      if (match_ns((xmlNodePtr)attr, ns, is_prefix)) {
+        String n = String((char*)attr->name, xmlStrlen(attr->name), CopyString);
+        attributes.set(n, node_list_to_string(node->doc, attr->children));
+      }
     }
   }
   return attributes;

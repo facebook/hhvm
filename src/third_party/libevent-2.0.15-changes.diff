@@ -1,0 +1,375 @@
+diff -Nuar libevent-2.0.15-stable/http.c libevent-2.0.15-stable-hh/http.c
+--- libevent-2.0.15-stable/http.c	2011-07-05 20:51:24.000000000 +0200
++++ libevent-2.0.15-stable-hh/http.c	2011-10-20 10:52:16.808356809 +0200
+@@ -198,6 +198,11 @@
+ static int evhttp_find_vhost(struct evhttp *http, struct evhttp **outhttp,
+ 		  const char *hostname);
+ 
++void evhttp_server_drop_connection(struct evhttp_connection *evcon);
++void evhttp_server_add_connection(struct evhttp *http, struct evhttp_connection *evcon);
++void evhttp_pause(struct evhttp *http);
++void evhttp_resume(struct evhttp *http);
++
+ #ifndef _EVENT_HAVE_STRSEP
+ /* strsep replacement for platforms that lack it.  Only works if
+  * del is one character long. */
+@@ -1142,10 +1147,8 @@
+ 		evhttp_request_free(req);
+ 	}
+ 
+-	if (evcon->http_server != NULL) {
+-		struct evhttp *http = evcon->http_server;
+-		TAILQ_REMOVE(&http->connections, evcon, next);
+-	}
++	if (evcon->http_server != NULL) 
++        evhttp_server_drop_connection(evcon);
+ 
+ 	if (event_initialized(&evcon->retry_ev)) {
+ 		event_del(&evcon->retry_ev);
+@@ -1529,13 +1532,16 @@
+ 	if (line == NULL)
+ 		return (-1);
+ 	uri = strsep(&line, " ");
+-	if (line == NULL)
+-		return (-1);
+-	version = strsep(&line, " ");
+-	if (line != NULL)
+-		return (-1);
++    if (line == NULL) {
++        version = "HTTP/1.0";
++    } else {
++	    version = strsep(&line, " ");
++	    if (line != NULL)
++		    return (-1);
++    }
+ 
+ 	/* First line */
++    req->ext_method = NULL;
+ 	if (strcmp(method, "GET") == 0) {
+ 		req->type = EVHTTP_REQ_GET;
+ 	} else if (strcmp(method, "POST") == 0) {
+@@ -1544,14 +1550,43 @@
+ 		req->type = EVHTTP_REQ_HEAD;
+ 	} else if (strcmp(method, "PUT") == 0) {
+ 		req->type = EVHTTP_REQ_PUT;
++        req->ext_method = "PUT";
+ 	} else if (strcmp(method, "DELETE") == 0) {
+ 		req->type = EVHTTP_REQ_DELETE;
++        req->ext_method = "DELETE";
+ 	} else if (strcmp(method, "OPTIONS") == 0) {
+ 		req->type = EVHTTP_REQ_OPTIONS;
++        req->ext_method = "OPTIONS";
+ 	} else if (strcmp(method, "TRACE") == 0) {
+ 		req->type = EVHTTP_REQ_TRACE;
++        req->ext_method = "TRACE";
+ 	} else if (strcmp(method, "PATCH") == 0) {
+ 		req->type = EVHTTP_REQ_PATCH;
++        req->ext_method = "PATCH";
++    } else if (strcmp(method, "REPORT") == 0) {
++        req->type = EVHTTP_REQ_POST;
++        req->ext_method = "REPORT";
++    } else if (strcmp(method, "PROPFIND") == 0) {
++        req->type = EVHTTP_REQ_POST;
++        req->ext_method = "PROPFIND";
++    } else if (strcmp(method, "PROPPATH") == 0) {
++        req->type = EVHTTP_REQ_POST;
++        req->ext_method = "PROPPATH";
++    } else if (strcmp(method, "MKCOL") == 0) {
++        req->type = EVHTTP_REQ_POST;
++        req->ext_method = "MKCOL";
++    } else if (strcmp(method, "MKCALENDAR") == 0) {
++        req->type = EVHTTP_REQ_POST;
++        req->ext_method = "MKCALENDAR";
++    } else if (strcmp(method, "PUT") == 0) {
++        req->type = EVHTTP_REQ_POST;
++        req->ext_method = "PUT";
++    } else if (strcmp(method, "LOCK") == 0) {
++        req->type = EVHTTP_REQ_POST;
++        req->ext_method = "LOCK";
++    } else if (strcmp(method, "UNLOCK") == 0) {
++        req->type = EVHTTP_REQ_POST;
++        req->ext_method = "UNLOCK";
+ 	} else {
+ 		req->type = _EVHTTP_REQ_UNKNOWN;
+ 		event_debug(("%s: bad method %s on request %p from %s",
+@@ -2420,6 +2455,42 @@
+ 	evhttp_send(req, databuf);
+ }
+ 
++int
++evhttp_send_reply_sync_begin(struct evhttp_request *req, int code,
++                             const char *reason, struct evbuffer *databuf) {
++   evhttp_response_code(req, code, reason);
++   struct evhttp_connection *evcon = req->evcon;
++
++   EVUTIL_ASSERT(TAILQ_FIRST(&evcon->requests) == req);
++
++   /* xxx: not sure if we really should expose the data buffer this way */
++   if (databuf != NULL)
++       evbuffer_add_buffer(req->output_buffer, databuf);
++
++   /* Adds headers to the response */
++   evhttp_make_header(evcon, req);
++
++   struct evbuffer *output = bufferevent_get_output(evcon->bufev);
++   evbuffer_unfreeze(output, 1);
++   int nwriten = evbuffer_write(output, evcon->fd);
++   evbuffer_freeze(output, 1);
++   return nwriten;
++}
++
++void
++evhttp_send_reply_sync_end(int nwritten, struct evhttp_request *req) {
++   struct evhttp_connection *evcon = req->evcon;
++   struct evbuffer *output = bufferevent_get_output(evcon->bufev);
++
++    if (nwritten <= 0) {
++       evhttp_connection_fail(evcon, EVCON_HTTP_EOF);
++    } else if (evbuffer_get_length(output) == 0) {
++       evhttp_send_done(evcon, NULL);
++    } else {
++       evhttp_write_buffer(evcon, evhttp_send_done, NULL);
++    }
++}
++
+ void
+ evhttp_send_reply_start(struct evhttp_request *req, int code,
+     const char *reason)
+@@ -3067,18 +3138,8 @@
+ 	evhttp_get_request(http, nfd, peer_sa, peer_socklen);
+ }
+ 
+-int
+-evhttp_bind_socket(struct evhttp *http, const char *address, ev_uint16_t port)
+-{
+-	struct evhttp_bound_socket *bound =
+-		evhttp_bind_socket_with_handle(http, address, port);
+-	if (bound == NULL)
+-		return (-1);
+-	return (0);
+-}
+-
+ struct evhttp_bound_socket *
+-evhttp_bind_socket_with_handle(struct evhttp *http, const char *address, ev_uint16_t port)
++evhttp_bind_socket_backlog_with_handle(struct evhttp *http, const char *address, ev_uint16_t port, int backlog)
+ {
+ 	evutil_socket_t fd;
+ 	struct evhttp_bound_socket *bound;
+@@ -3086,7 +3147,7 @@
+ 	if ((fd = bind_socket(address, port, 1 /*reuse*/)) == -1)
+ 		return (NULL);
+ 
+-	if (listen(fd, 128) == -1) {
++	if (listen(fd, backlog) == -1) {
+ 		event_sock_warn(fd, "%s: listen", __func__);
+ 		evutil_closesocket(fd);
+ 		return (NULL);
+@@ -3104,6 +3165,27 @@
+ }
+ 
+ int
++evhttp_bind_socket_backlog(struct evhttp *http, const char *address, ev_uint16_t port, int backlog) {
++	struct evhttp_bound_socket *bound =
++		evhttp_bind_socket_backlog_with_handle(http, address, port, backlog);
++	if (bound == NULL)
++		return (-1);
++	return (0);
++}
++
++int
++evhttp_bind_socket(struct evhttp *http, const char *address, ev_uint16_t port)
++{
++    return evhttp_bind_socket_backlog(http, address, port, 128);
++}
++
++struct evhttp_bound_socket *
++evhttp_bind_socket_with_handle(struct evhttp *http, const char *address, ev_uint16_t port)
++{
++    return evhttp_bind_socket_backlog_with_handle(http, address, port, 128);
++}
++
++int
+ evhttp_accept_socket(struct evhttp *http, evutil_socket_t fd)
+ {
+ 	struct evhttp_bound_socket *bound =
+@@ -3750,13 +3832,71 @@
+ 	 * if we want to accept more than one request on a connection,
+ 	 * we need to know which http server it belongs to.
+ 	 */
+-	evcon->http_server = http;
+-	TAILQ_INSERT_TAIL(&http->connections, evcon, next);
++    evhttp_server_add_connection(http, evcon);
+ 
+ 	if (evhttp_associate_new_request_with_connection(evcon) == -1)
+ 		evhttp_connection_free(evcon);
+ }
+ 
++void
++evhttp_pause(struct evhttp *http)
++{
++   struct evhttp_bound_socket *bound;
++   TAILQ_FOREACH(bound, &http->sockets, next) {
++       evconnlistener_disable(bound->listener);
++   }
++}
++
++void
++evhttp_resume(struct evhttp *http)
++{
++   struct evhttp_bound_socket *bound;
++   TAILQ_FOREACH(bound, &http->sockets, next) {
++       evconnlistener_enable(bound->listener);
++   }
++}
++
++int
++evhttp_get_connection_limit(struct evhttp *http)
++{
++   return http->connection_limit;
++}
++
++int
++evhttp_set_connection_limit(struct evhttp *http, int nlimit)
++{
++   int olimit = http->connection_limit;
++   http->connection_limit = nlimit;
++   return olimit;
++}
++
++void
++evhttp_server_add_connection(struct evhttp *http,
++                struct evhttp_connection *evcon)
++{
++   evcon->http_server = http;
++   TAILQ_INSERT_TAIL(&http->connections, evcon, next);
++
++   http->connection_count++;
++   if (http->connection_limit > 0
++       && http->connection_count >= http->connection_limit)
++   {
++       evhttp_pause(http);
++   }
++}
++
++void
++evhttp_server_drop_connection(struct evhttp_connection *evcon)
++{
++   struct evhttp *http = evcon->http_server;
++   TAILQ_REMOVE(&http->connections, evcon, next);
++   http->connection_count--;
++   if (http->connection_limit > 0
++       && http->connection_count < http->connection_limit)
++   {
++       evhttp_resume(http);
++   }
++}
+ 
+ /*
+  * Network helper functions that we do not want to export to the rest of
+diff -Nuar libevent-2.0.15-stable/http-internal.h libevent-2.0.15-stable-hh/http-internal.h
+--- libevent-2.0.15-stable/http-internal.h	2010-12-16 19:05:27.000000000 +0100
++++ libevent-2.0.15-stable-hh/http-internal.h	2011-10-20 10:52:16.808356809 +0200
+@@ -154,6 +154,9 @@
+ 
+ 	int timeout;
+ 
++    int connection_count;
++    int connection_limit;
++
+ 	size_t default_max_headers_size;
+ 	ev_uint64_t default_max_body_size;
+ 
+diff -Nuar libevent-2.0.15-stable/include/event2/http.h libevent-2.0.15-stable-hh/include/event2/http.h
+--- libevent-2.0.15-stable/include/event2/http.h	2011-07-05 19:04:30.000000000 +0200
++++ libevent-2.0.15-stable-hh/include/event2/http.h	2011-10-20 10:55:13.898356756 +0200
+@@ -104,7 +104,36 @@
+  * @return Handle for the socket on success, NULL on failure.
+  * @see evhttp_bind_socket(), evhttp_del_accept_socket()
+  */
+-struct evhttp_bound_socket *evhttp_bind_socket_with_handle(struct evhttp *http, const char *address, ev_uint16_t port);
++struct evhttp_bound_socket *evhttp_bind_socket_with_handle(struct evhttp *http, 
++        const char *address, ev_uint16_t port);
++
++/**
++ * Like evhttp_bind_socket(), but specifing backlog
++ *
++ * @param http a pointer to an evhttp object
++ * @param address a string containing the IP address to listen(2) on
++ * @param port the port number to listen on
++ * @param backlog the backlog value for listen(2)
++ * @return 0 on success, -1 on failure.
++ * @see evhttp_accept_socket()
++ */
++int evhttp_bind_socket_backlog(struct evhttp *http, const char *address, 
++        ev_uint16_t port, int backlog);
++
++/**
++ * Like evhttp_bind_socket_backlog(), but returns a handle for referencing the socket.
++ *
++ * The returned pointer is not valid after \a http is freed.
++ *
++ * @param http a pointer to an evhttp object
++ * @param address a string containing the IP address to listen(2) on
++ * @param port the port number to listen on
++ * @param backlog the backlog value for listen(2)
++ * @return Handle for the socket on success, NULL on failure.
++ * @see evhttp_bind_socket(), evhttp_del_accept_socket()
++ */
++struct evhttp_bound_socket *evhttp_bind_socket_backlog_with_handle(struct evhttp *http, 
++        const char *address, ev_uint16_t port, int backlog);
+ 
+ /**
+  * Makes an HTTP server accept connections on the specified socket.
+@@ -295,6 +324,21 @@
+  */
+ void evhttp_set_timeout(struct evhttp *http, int timeout_in_secs);
+ 
++/**
++ * Limit the number of simultaneous connections via this http instance.
++ *
++ * @param http an evhttp object
++ * @param nlimit the maximum number of connections, zero is unlimited
++ */
++int evhttp_set_connection_limit(struct evhttp *http, int nlimit);
++ 
++/**
++ * Return the maximum number of connections allowed for this instance.
++ *
++ * @param http an evhttp object
++ */
++int evhttp_get_connection_limit(struct evhttp *http);
++
+ /* Request/Response functionality */
+ 
+ /**
+@@ -324,6 +368,19 @@
+ void evhttp_send_reply(struct evhttp_request *req, int code,
+     const char *reason, struct evbuffer *databuf);
+ 
++/**
++ * Send an HTML reply synchronously as much as possible by calling _begin().
++ * Great for a worker thread to send the reply immediately without queuing up
++ * events back to the loop. Call _end() to send the rest of the packet from
++ * event loop.
++ *
++ * When _begin() returns needs to be fed into _end() as the 1st parameter
++ * "nwritten".
++ */
++int evhttp_send_reply_sync_begin(struct evhttp_request *req, int code,
++                                 const char *reason, struct evbuffer *databuf);
++void evhttp_send_reply_sync_end(int nwritten, struct evhttp_request *req);
++
+ /* Low-level response interface, for streaming/chunked replies */
+ 
+ /**
+diff -Nuar libevent-2.0.15-stable/include/event2/http_struct.h libevent-2.0.15-stable-hh/include/event2/http_struct.h
+--- libevent-2.0.15-stable/include/event2/http_struct.h	2011-07-05 19:04:30.000000000 +0200
++++ libevent-2.0.15-stable-hh/include/event2/http_struct.h	2011-10-20 10:56:15.868356738 +0200
+@@ -90,6 +90,7 @@
+ 
+ 	enum evhttp_request_kind kind;
+ 	enum evhttp_cmd_type type;
++    char *ext_method; /* webdav methods, for example */
+ 
+ 	size_t headers_size;
+ 	size_t body_size;

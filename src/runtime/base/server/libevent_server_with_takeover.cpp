@@ -94,19 +94,13 @@ int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
   Logger::Info("takeover: received request");
   if (request == P_VERSION C_FD_REQ) {
     Logger::Info("takeover: request is a listen socket request");
-    int ret;
     *response = P_VERSION C_FD_RESP;
     // Make evhttp forget our copy of the accept socket so we don't accept any
     // more connections and drop them.  Keep the socket open until we get the
     // shutdown request so that we can still serve AFDT requests (if the new
     // server crashes or something).  The downside is that it will take the LB
     // longer to figure out that we are broken.
-    ret = evhttp_del_accept_socket(m_server, m_accept_sock);
-    if (ret < 0) {
-      // This will fail if we get a second AFDT request, but the spurious
-      // log message is not too harmful.
-      Logger::Error("Unable to delete accept socket");
-    }
+    evhttp_del_accept_socket(m_server, evhttp_sock);
     return m_accept_sock;
   } else if (request == P_VERSION C_TERM_REQ) {
     Logger::Info("takeover: request is a terminate request");
@@ -125,11 +119,7 @@ int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
     // Close SSL server
     if (m_server_ssl) {
       ASSERT(m_accept_sock_ssl > 0);
-      ret = evhttp_del_accept_socket(m_server_ssl, m_accept_sock_ssl);
-      if (ret < 0) {
-        Logger::Error("Unable to delete accept socket for SSL in evhttp");
-        return -1;
-      }
+      evhttp_del_accept_socket(m_server_ssl, evhttp_sock_ssl);
       ret = close(m_accept_sock_ssl);
       if (ret < 0) {
         Logger::Error("Unable to close accept socket for SSL");
@@ -195,11 +185,11 @@ int LibEventServerWithTakeover::getAcceptSocket() {
     m_accept_sock = -1;
   }
 
-  ret = evhttp_bind_socket_backlog_fd(m_server, address,
+  evhttp_sock = evhttp_bind_socket_backlog_with_handle(m_server, address,
                                    m_port, RuntimeOption::ServerBacklog);
-  if (ret >= 0) {
+  if (evhttp_sock) {
     Logger::Info("takeover: bound directly to port %d", m_port);
-    m_accept_sock = ret;
+    m_accept_sock = evhttp_bound_socket_get_fd(evhttp_sock);
     return 0;
   } else if (errno != EADDRINUSE) {
     return -1;

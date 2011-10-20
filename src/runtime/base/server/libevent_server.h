@@ -173,6 +173,9 @@ protected:
 
   int m_accept_sock;
   int m_accept_sock_ssl;
+  struct evhttp_bound_socket *evhttp_sock;
+  struct evhttp_bound_socket *evhttp_sock_ssl;
+
   event_base *m_eventBase;
   evhttp *m_server;
 

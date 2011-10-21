@@ -27,6 +27,7 @@
 #include <runtime/base/time/datetime.h>
 #include <runtime/base/variable_unserializer.h>
 #include <runtime/base/array/array_iterator.h>
+#include <runtime/base/runtime_option.h>
 #include <util/lock.h>
 #include <util/logger.h>
 #include <util/compatibility.h>
@@ -34,6 +35,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <libmemcached/memcached.h>
 
 using namespace std;
 
@@ -185,7 +187,11 @@ public:
                      ini_on_update_string,         &m_hash_func);
     IniSetting::Bind("session.hash_bits_per_character", "4",
                      ini_on_update_long,           &m_hash_bits_per_character);
-  }
+
+    IniSetting::Set("session.save_handler", RuntimeOption::SessionHandler);
+    IniSetting::Set("session.save_path", RuntimeOption::SessionPath);
+    IniSetting::Set("session.hash_bits_per_character", (int64)RuntimeOption::SessionHashBitsPerCharacter);
+ }
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(SessionRequestData, s_session);
 #define PS(name) s_session->m_ ## name
@@ -329,7 +335,7 @@ String SessionModule::create_sid() {
     }
   }
 
-  String hashed = f_hash_final(context);
+  String hashed = f_hash_final(context, true);
 
   if (PS(hash_bits_per_character) < 4 || PS(hash_bits_per_character) > 6) {
     PS(hash_bits_per_character) = 4;
@@ -341,6 +347,121 @@ String SessionModule::create_sid() {
   bin_to_readable(hashed, readable, PS(hash_bits_per_character));
   return readable.detach();
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// FileSessionModule
+class MemcachedSessionData {
+public:
+  MemcachedSessionData() : m_mem(NULL), m_servers(NULL) {
+  }
+
+  // session.save_path = tcp://ip:port;tcp://ip:port;...
+  bool open(const char *save_path, const char *session_name) { 
+    m_mem = memcached_create(NULL);
+    if (!m_mem)
+      raise_warning("Could not create memcached instance");
+
+    m_timeout = 2 * 60 * 60;
+
+    char *args = strdup(save_path);
+    char *tokens = ":;/";
+    char *cur = NULL;
+    char *address = NULL, *start = NULL, *port = NULL;
+
+    start = strtok_r(args, tokens, &cur);
+    while (start)
+    {
+      address = strtok_r(NULL, tokens, &cur);
+      port = strtok_r(NULL, tokens, &cur);
+
+      if (!strcmp(start, "tcp"))
+      {
+        int nport = strtol(port, NULL, 10);
+        m_servers = memcached_server_list_append(m_servers, address, nport, &m_rc);
+        if (m_rc != MEMCACHED_SUCCESS)
+          raise_warning("Error: %s", memcached_strerror(m_mem, m_rc));
+      }
+
+      start = strtok_r(NULL, tokens, &cur);
+    }
+    free(args);
+
+    m_rc = memcached_server_push(m_mem, m_servers);
+    if (m_rc != MEMCACHED_SUCCESS)
+      raise_warning("Error: %s", memcached_strerror(m_mem, m_rc));
+
+    return true;
+  }
+
+  bool close() {
+    if (m_servers)
+      memcached_server_free(m_servers);
+
+    if (m_mem)
+      memcached_free(m_mem);
+
+    m_servers = NULL;
+    m_mem = NULL;
+
+    return true;
+  }
+
+  bool read(const char *key, String &value) {
+    size_t len = 0;
+    uint32_t flags = 0;
+    char *val = memcached_get(m_mem, key, strlen(key), &len, &flags, &m_rc);
+    //if (m_rc != MEMCACHED_SUCCESS)
+    //  raise_warning("read failed: could not get key: %s", memcached_strerror(m_mem, m_rc));
+
+    value = String(val, len, AttachString);
+    return true;
+  }
+
+  bool write(const char *key, CStrRef value) {
+    memcached_set(m_mem, key, strlen(key), value.data(), value.size(), m_timeout, (uint32_t)0);
+    return true;
+  }
+
+  bool destroy(const char *key) {
+    return close();
+  }
+
+  bool gc(int maxlifetime, int *nrdels) {
+    return true;
+  }
+
+private:
+  memcached_st *m_mem;
+  memcached_server_st *m_servers;
+  memcached_return m_rc;
+  time_t m_timeout;
+};
+IMPLEMENT_THREAD_LOCAL(MemcachedSessionData, s_memcached_session_data);
+
+class MemcachedSessionModule : public SessionModule {
+public:
+  MemcachedSessionModule() : SessionModule("memcache") {
+  }
+  virtual bool open(const char *save_path, const char *session_name) {
+    return s_memcached_session_data->open(save_path, session_name);
+  }
+  virtual bool close() {
+    return s_memcached_session_data->close();
+  }
+  virtual bool read(const char *key, String &value) {
+    return s_memcached_session_data->read(key, value);
+  }
+  virtual bool write(const char *key, CStrRef value) {
+    return s_memcached_session_data->write(key, value);
+  }
+  virtual bool destroy(const char *key) {
+    return s_memcached_session_data->destroy(key);
+  }
+  virtual bool gc(int maxlifetime, int *nrdels) {
+    return s_memcached_session_data->gc(maxlifetime, nrdels);
+  }
+};
+static MemcachedSessionModule s_memcached_session_module;
 
 ///////////////////////////////////////////////////////////////////////////////
 // FileSessionModule

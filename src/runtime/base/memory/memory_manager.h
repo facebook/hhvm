@@ -191,6 +191,7 @@ public:
 #ifdef USE_JEMALLOC
       // exclude mallocs and frees since construction
       if (s_statsEnabled) {
+        m_mm->m_prevAllocated = int64(*m_mm->m_allocated);
         m_mm->m_delta = int64(*m_mm->m_allocated) - int64(*m_mm->m_deallocated);
       }
 #endif

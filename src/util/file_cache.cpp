@@ -473,7 +473,7 @@ int64 FileCache::fileSize(const char *name, bool isRelative) const {
       const Buffer &buf = iter->second;
       if (buf.len >= 0) return buf.len;
       if (buf.cdata) {
-        int new_len = buf.len;
+        int new_len = buf.clen;
         char *uncompressed = gzdecode(buf.cdata, new_len);
         if (uncompressed == NULL) {
           throw Exception("Bad compressed data in archive %s", name);

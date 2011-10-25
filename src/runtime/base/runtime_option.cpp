@@ -331,7 +331,7 @@ bool RuntimeOption::CheckSymLink = false;
 bool RuntimeOption::NativeXHP = true;
 int RuntimeOption::ScannerType = 0;
 bool RuntimeOption::SandboxCheckMd5 = false;
-int RuntimeOption::MaxUserFunctionId = 65536;
+int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 
 #ifdef TAINTED
 bool RuntimeOption::EnableTaintWarnings = false;

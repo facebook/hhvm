@@ -849,7 +849,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
                  it != classes.end(); ++it) {
               ClassScopePtr cls = *it;
               if (cls->isUserClass()) cls->setVolatile();
-              if (!cls->isInterface()) {
+              if (!cls->isInterface() && !cls->isTrait()) {
                 classFound = true;
               }
             }

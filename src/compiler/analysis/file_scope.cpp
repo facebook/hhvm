@@ -303,7 +303,7 @@ void FileScope::getScopesSet(BlockScopeRawPtrQueue &v) {
     for (ClassScopePtrVec::const_iterator it = iter->second.begin(),
            e = iter->second.end(); it != e; ++it) {
       ClassScopePtr cls = *it;
-      if (cls->isUserClass() && !cls->isTrait()) {
+      if (cls->isUserClass()) {
         v.push_back(cls);
         getFuncScopesSet(v, cls->getFunctions());
       }
@@ -556,7 +556,6 @@ void FileScope::outputCPPDeclarations(CodeGenerator &cg,
     for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
          it != m_classes.end(); ++it) {
       BOOST_FOREACH(ClassScopePtr cls, it->second) {
-        if (cls->isTrait()) continue;
         cg_printInclude(cls->getHeaderFilename());
       }
     }

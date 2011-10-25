@@ -363,6 +363,14 @@ void ClassScope::importTraitMethod(const TraitMethod &traitMethod,
   const string &origMethName = traitMethod.m_originalName;
   ModifierExpressionPtr modifiers = traitMethod.m_modifiers;
 
+  // For abstract methods, simply return if method already exists in the class
+  if ((modifiers && modifiers->isAbstract()) ||
+      (!modifiers && meth->getModifiers()->isAbstract())) {
+    if (findFunction(ar, methName, true)) {
+      return;
+    }
+  }
+
   // Check for errors before cloning
   if (modifiers && modifiers->isStatic()) {
     Compiler::Error(Compiler::InvalidAccessModifier, traitMethod.m_ruleStmt);
@@ -612,6 +620,37 @@ void ClassScope::applyTraitRules(AnalysisResultPtr ar) {
   }
 }
 
+void ClassScope::removeImplTraitAbstractMethods(AnalysisResultPtr ar) {
+  for (MethodToTraitListMap::iterator iter = m_importMethToTraitMap.begin();
+       iter != m_importMethToTraitMap.end(); iter++) {
+
+    TraitMethodList& tMethList = iter->second;
+    // Check if there's any non-abstract method imported
+    bool hasNonAbstractMeth = false;
+    for (TraitMethodList::const_iterator traitMethIter = tMethList.begin();
+         traitMethIter != tMethList.end(); traitMethIter++) {
+      ModifierExpressionPtr modifiers = traitMethIter->m_modifiers ?
+        traitMethIter->m_modifiers : traitMethIter->m_method->getModifiers();
+      if (!(modifiers->isAbstract())) {
+        hasNonAbstractMeth = true;
+        break;
+      }
+    }
+    if (hasNonAbstractMeth) {
+      // Erase abstract declarations
+      for (TraitMethodList::iterator nextTraitIter = tMethList.begin();
+           nextTraitIter != tMethList.end(); ) {
+        TraitMethodList::iterator traitIter = nextTraitIter++;
+        ModifierExpressionPtr modifiers = traitIter->m_modifiers ?
+          traitIter->m_modifiers : traitIter->m_method->getModifiers();
+        if (modifiers->isAbstract()) {
+          tMethList.erase(traitIter);
+        }
+      }
+    }
+  }
+}
+
 void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   if (m_traitStatus == FLATTENED) return;
   if (m_traitStatus == BEING_FLATTENED) {
@@ -640,11 +679,13 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   // Apply rules
   applyTraitRules(ar);
 
+  // Check for trait abstract methods provided by other traits
+  removeImplTraitAbstractMethods(ar);
+
   // Apply precedence of current class over used traits
-  for (map<string,TraitMethodList>::iterator
-         iter = m_importMethToTraitMap.begin();
+  for (MethodToTraitListMap::iterator iter = m_importMethToTraitMap.begin();
        iter != m_importMethToTraitMap.end(); ) {
-    map<string,TraitMethodList>::iterator thisiter = iter;
+    MethodToTraitListMap::iterator thisiter = iter;
     iter++;
     if (findFunction(ar, thisiter->first, 0, 0) != FunctionScopePtr()) {
       m_importMethToTraitMap.erase(thisiter);
@@ -652,7 +693,7 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   }
 
   // Actually import the methods
-  for (map<string,TraitMethodList>::const_iterator
+  for (MethodToTraitListMap::const_iterator
          iter = m_importMethToTraitMap.begin();
        iter != m_importMethToTraitMap.end(); iter++) {
 
@@ -894,7 +935,6 @@ void ClassScope::setSystem() {
 }
 
 bool ClassScope::needLazyStaticInitializer() {
-  if (isTrait()) return false;
   return getVariables()->getAttribute(VariableTable::ContainsDynamicStatic) ||
     getConstants()->hasDynamic();
 }
@@ -1159,6 +1199,7 @@ void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
   if (m_kindOf == KindOfAbstractClass) mods |= ClassInfo::IsAbstract;
   if (m_kindOf == KindOfFinalClass)    mods |= ClassInfo::IsFinal;
   if (m_kindOf == KindOfInterface)     mods |= ClassInfo::IsInterface;
+  if (m_kindOf == KindOfTrait)         mods |= ClassInfo::IsTrait;
   ms.add("modifiers", mods);
 
   FunctionScopePtrVec funcs;
@@ -1180,7 +1221,6 @@ void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
 }
 
 void ClassScope::outputCPPDynamicClassDecl(CodeGenerator &cg) {
-  if (isTrait()) return;
   string clsStr = getId();
   const char *clsName = clsStr.c_str();
   cg_printf("ObjectData *%s%s(%s) NEVER_INLINE;\n",
@@ -1198,7 +1238,6 @@ void ClassScope::outputCPPDynamicClassCreateDecl(CodeGenerator &cg) {
 
 void ClassScope::outputCPPDynamicClassImpl(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
-  if (isTrait()) return;
   string clsStr = getId();
   const char *clsName = clsStr.c_str();
   cg_indentBegin("ObjectData *%s%s(%s) {\n",
@@ -2337,7 +2376,6 @@ string ClassScope::getHeaderFilename() {
 
 void ClassScope::outputCPPHeader(AnalysisResultPtr ar,
                                  CodeGenerator::Output output) {
-  if (isTrait()) return;
   string filename = getHeaderFilename();
   string root = ar->getOutputPath() + "/";
   Util::mkdir(root + filename);
@@ -2479,7 +2517,6 @@ void ClassScope::outputCPPForwardHeader(CodeGenerator &cg,
 
 void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
                                              AnalysisResultPtr ar) {
-  if (isTrait()) return;
   string clsNameStr = getId();
   const char *clsName = clsNameStr.c_str();
 
@@ -2653,7 +2690,6 @@ void ClassScope::outputCPPStaticMethodWrappers(CodeGenerator &cg,
                                                AnalysisResultPtr ar,
                                                set<string> &done,
                                                const char *cls) {
-  if (isTrait()) return;
   for (FunctionScopePtrVec::const_iterator it = m_functionsVec.begin();
        it != m_functionsVec.end(); ++it) {
     const string &name = (*it)->getName();
@@ -2672,7 +2708,6 @@ void ClassScope::outputCPPStaticMethodWrappers(CodeGenerator &cg,
 
 void ClassScope::outputCPPGlobalTableWrappersDecl(CodeGenerator &cg,
                                                   AnalysisResultPtr ar) {
-  if (isTrait()) return;
   string id = getId();
   cg_printf("extern const %sObjectStaticCallbacks %s%s;\n",
             isRedeclaring() ? "Redeclared" : "",
@@ -2693,7 +2728,6 @@ string ClassScope::getClassPropTableId(AnalysisResultPtr ar) {
 
 void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
                                                   AnalysisResultPtr ar) {
-  if (isTrait()) return;
   string id = getId();
   string prop = getClassPropTableId(ar);
   cg_indentBegin("const %sObjectStaticCallbacks %s%s = {\n",
@@ -2806,8 +2840,6 @@ void ClassScope::findJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar,
 void ClassScope::outputCPPMethodInvokeBareObjectSupport(
     CodeGenerator &cg, AnalysisResultPtr ar,
     FunctionScopePtr func, bool fewArgs) {
-  if (isTrait()) return;
-
   const string &id(getId());
   const string &lname(func->getName());
 
@@ -2849,7 +2881,6 @@ void ClassScope::outputCPPMethodInvokeBareObjectSupport(
 void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
     AnalysisResultPtr ar, const vector<const char*> &keys,
     const StringToFunctionScopePtrMap &funcScopes, bool fewArgs) {
-  if (isTrait()) return;
   string id = getId();
   ClassScopePtr self = dynamic_pointer_cast<ClassScope>(shared_from_this());
   for (vector<const char*>::const_iterator it = keys.begin();
@@ -3023,7 +3054,6 @@ void ClassScope::outputCPPMethodInvokeTable(
 
 void ClassScope::outputCPPJumpTableDecl(CodeGenerator &cg,
     AnalysisResultPtr ar) {
-  if (isTrait()) return;
   for (FunctionScopePtrVec::const_iterator iter =
          m_functionsVec.begin(); iter != m_functionsVec.end(); ++iter) {
     FunctionScopePtr func = *iter;

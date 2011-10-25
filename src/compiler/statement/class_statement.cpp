@@ -286,7 +286,6 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
                                         const char *originalName,
                                         const char *parent) {
   ClassScopeRawPtr classScope = getClassScope();
-  if (classScope->isTrait()) return;
   VariableTablePtr variables = classScope->getVariables();
   ConstantTablePtr constants = classScope->getConstants();
   const char *sweep =
@@ -361,7 +360,6 @@ void ClassStatement::getCtorAndInitInfo(bool &needsCppCtor, bool &needsInit) {
 
 void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();
-  if (classScope->isTrait()) return;
   if (cg.getContext() == CodeGenerator::NoContext) {
     if (classScope->isVolatile()) {
       string name = CodeGenerator::FormatLabel(m_name);

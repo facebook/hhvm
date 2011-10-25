@@ -556,7 +556,8 @@ private:
   };
 
   typedef std::list<TraitMethod> TraitMethodList;
-  std::map<std::string, TraitMethodList> m_importMethToTraitMap;
+  typedef std::map<std::string, TraitMethodList> MethodToTraitListMap;
+  MethodToTraitListMap m_importMethToTraitMap;
 
   mutable int m_attribute;
   int m_redeclaring; // multiple definition of the same class
@@ -602,6 +603,8 @@ private:
 
   ClassScopePtr findSingleTraitWithMethod(AnalysisResultPtr ar,
                                           const std::string &methodName) const;
+
+  void removeImplTraitAbstractMethods(AnalysisResultPtr ar);
 
   bool usesTrait(const std::string &traitName) const;
 

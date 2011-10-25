@@ -332,12 +332,6 @@ void VariableTable::addStaticVariable(Symbol *sym,
   sym->setStatic();
   m_hasStatic = true;
 
-  // don't add trait static vars to vectors of static vars, to avoid code gen
-  ClassScopeRawPtr clsScope = getClassScope();
-  if (clsScope && clsScope->isTrait()) {
-    return;
-  }
-
   FunctionScopeRawPtr funcScope = getFunctionScope();
   if (funcScope &&
       (funcScope->isClosure() || funcScope->isGeneratorFromClosure())) {
@@ -410,10 +404,8 @@ TypePtr VariableTable::add(Symbol *sym, TypePtr type,
   if (getAttribute(InsideStaticStatement)) {
     addStaticVariable(sym, ar);
     ClassScopeRawPtr clsScope = getClassScope();
-    if (!clsScope || !clsScope->isTrait()) {
-      if (ClassScope::NeedStaticArray(getClassScope(), getFunctionScope())) {
-        forceVariant(ar, sym->getName(), AnyVars);
-      }
+    if (ClassScope::NeedStaticArray(getClassScope(), getFunctionScope())) {
+      forceVariant(ar, sym->getName(), AnyVars);
     }
   } else if (getAttribute(InsideGlobalStatement)) {
     sym->setGlobal();

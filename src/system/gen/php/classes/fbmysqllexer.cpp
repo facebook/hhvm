@@ -616,34 +616,28 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
               const String &tmp0((x_strtolower(toString(m_tokText))));
               v_testToken = tmp0;
             }
-            {
-              bool tmp0;
+            if (isset(m_symbols, v_testToken)) {
               {
-                tmp0 = (isset(m_symbols, v_testToken));
-              }
-              if (tmp0) {
                 {
-                  {
-                    const Variant &tmp0((x_substr(toString(m_string), toInt32(m_tokAbsStart), toInt32((m_tokStart - m_tokAbsStart)))));
-                    m_skipText.assignVal(tmp0);
-                  }
-                  m_tokStart.assignVal(m_tokPtr);
-                  return v_testToken;
+                  const Variant &tmp0((x_substr(toString(m_string), toInt32(m_tokAbsStart), toInt32((m_tokStart - m_tokAbsStart)))));
+                  m_skipText.assignVal(tmp0);
                 }
+                m_tokStart.assignVal(m_tokPtr);
+                return v_testToken;
               }
-              else {
+            }
+            else {
+              {
                 {
-                  {
-                    const Variant &tmp0((x_substr(toString(m_string), toInt32(m_tokAbsStart), toInt32((m_tokStart - m_tokAbsStart)))));
-                    m_skipText.assignVal(tmp0);
-                  }
-                  m_tokStart.assignVal(m_tokPtr);
-                  {
-                    const String &tmp0((x_trim(toString(m_tokText), NAMSTR(s_sys_ssddcae8d1, "`"))));
-                    m_tokText = tmp0;
-                  }
-                  return NAMSTR(s_sys_ssa3455f47, "ident");
+                  const Variant &tmp0((x_substr(toString(m_string), toInt32(m_tokAbsStart), toInt32((m_tokStart - m_tokAbsStart)))));
+                  m_skipText.assignVal(tmp0);
                 }
+                m_tokStart.assignVal(m_tokPtr);
+                {
+                  const String &tmp0((x_trim(toString(m_tokText), NAMSTR(s_sys_ssddcae8d1, "`"))));
+                  m_tokText = tmp0;
+                }
+                return NAMSTR(s_sys_ssa3455f47, "ident");
               }
             }
             break;

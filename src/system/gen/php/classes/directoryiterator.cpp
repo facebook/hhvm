@@ -248,18 +248,11 @@ void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::__construct);
   bool oldInCtor = gasInCtor(true);
-  {
-    bool tmp0;
+  if (!(x_hphp_recursivedirectoryiterator___construct(GET_THIS_TYPED(RecursiveDirectoryIterator), toString(v_path), toInt64(v_flags)))) {
     {
-      bool tmp1((x_hphp_recursivedirectoryiterator___construct(GET_THIS_TYPED(RecursiveDirectoryIterator), toString(v_path), toInt64(v_flags))));
-      tmp0 = (!(tmp1));
-    }
-    if (tmp0) {
       {
-        {
-          p_UnexpectedValueException tmp0 = coo_UnexpectedValueException();
-          throw_exception(((c_UnexpectedValueException*)tmp0.get()->create(concat3(NAMSTR(s_sys_ssf0ea8ac1, "RecursiveDirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ssfb6412d4, "): failed to open dir"))), tmp0));
-        }
+        p_UnexpectedValueException tmp0 = coo_UnexpectedValueException();
+        throw_exception(((c_UnexpectedValueException*)tmp0.get()->create(concat3(NAMSTR(s_sys_ssf0ea8ac1, "RecursiveDirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ssfb6412d4, "): failed to open dir"))), tmp0));
       }
     }
   }
@@ -494,18 +487,11 @@ const ObjectStaticCallbacks cw_DirectoryIterator = {
 void c_DirectoryIterator::t___construct(Variant v_path) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::__construct);
   bool oldInCtor = gasInCtor(true);
-  {
-    bool tmp0;
+  if (!(x_hphp_directoryiterator___construct(GET_THIS_TYPED(DirectoryIterator), toString(v_path)))) {
     {
-      bool tmp1((x_hphp_directoryiterator___construct(GET_THIS_TYPED(DirectoryIterator), toString(v_path))));
-      tmp0 = (!(tmp1));
-    }
-    if (tmp0) {
       {
-        {
-          p_UnexpectedValueException tmp0 = coo_UnexpectedValueException();
-          throw_exception(((c_UnexpectedValueException*)tmp0.get()->create(concat3(NAMSTR(s_sys_ssdd233bb0, "DirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ssfb6412d4, "): failed to open dir"))), tmp0));
-        }
+        p_UnexpectedValueException tmp0 = coo_UnexpectedValueException();
+        throw_exception(((c_UnexpectedValueException*)tmp0.get()->create(concat3(NAMSTR(s_sys_ssdd233bb0, "DirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ssfb6412d4, "): failed to open dir"))), tmp0));
       }
     }
   }

@@ -257,20 +257,9 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/splobjectstorage.php line 124 */
 void c_SplObjectStorage::t_attach(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::attach);
-  {
-    bool tmp0;
+  if ((x_is_object(v_obj) && !(t_contains(v_obj)))) {
     {
-      bool tmp1 = (x_is_object(v_obj));
-      if (tmp1) {
-        bool tmp2((t_contains(v_obj)));
-        tmp1 = (!(tmp2));
-      }
-      tmp0 = (tmp1);
-    }
-    if (tmp0) {
-      {
-        m_storage.append((v_obj));
-      }
+      m_storage.append((v_obj));
     }
   }
 }

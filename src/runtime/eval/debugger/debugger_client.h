@@ -260,10 +260,16 @@ public:
   /**
    * For DebuggerClient API
    */
+  enum ClientState {
+    StateUninit,
+    StateInitializing,
+    StateReadyForCommand,
+    StateBusy
+  };
   bool isApiMode() const { return m_options.apiMode; }
   void setConfigFileName(const std::string& fn) { m_configFileName = fn;}
-  bool isInited() const { return m_inited;}
-  void setInited() { m_inited = true;}
+  ClientState getClientState() const { return m_clientState; }
+  void setClientState(ClientState state) { m_clientState = state; }
   void init(const DebuggerClientOptions &options);
   DebuggerCommandPtr waitForNextInterrupt();
   std::string getPrintString();
@@ -359,7 +365,7 @@ private:
   Array m_stacktrace;
   int m_frame;
 
-  bool m_inited;
+  ClientState m_clientState;
   std::string m_sourceRoot;
   StringBuffer* m_outputBuf;
 

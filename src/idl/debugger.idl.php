@@ -815,6 +815,12 @@ DefineConstant(
 
 DefineConstant(
   array(
+    'name'   => "STATE_INITIALIZING",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
     'name'   => "STATE_READY_FOR_COMMAND",
     'type'   => Int64,
   ));

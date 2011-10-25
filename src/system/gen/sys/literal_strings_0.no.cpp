@@ -89,6 +89,7 @@ StaticString s_sys_ss909d364a("SINGLE_SCRIPT");
 StaticString s_sys_ss90a52af9("saveXML");
 StaticString s_sys_ss90d9de57("isConstructor");
 StaticString s_sys_ss90f68f81("getLinkTarget");
+StaticString s_sys_ss90f6b8b6("STATE_INITIALIZING");
 StaticString s_sys_ss914a58e9("SplFileInfo");
 VarNR s_sys_svs914a58e9;
 StaticString s_sys_ss91d7ac1f("DOC_TYPE");

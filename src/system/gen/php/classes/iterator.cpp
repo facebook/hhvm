@@ -1289,9 +1289,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 499 */
 bool c_ArrayIterator::t_offsetexists(CVarRef v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetExists);
-  {
-    return isset(m_arr, v_index);
-  }
+  return isset(m_arr, v_index);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 514 */
@@ -1339,16 +1337,9 @@ void c_ArrayIterator::t_seek(CVarRef v_position) {
     for (v_i = 0LL; (less(v_i, v_position)); v_i++) {
       LOOP_COUNTER_CHECK(1);
       {
-        {
-          bool tmp0;
+        if (!(toBoolean(x_next(ref(m_arr))))) {
           {
-            bool tmp1((toBoolean(x_next(ref(m_arr)))));
-            tmp0 = (!(tmp1));
-          }
-          if (tmp0) {
-            {
-              break;
-            }
+            break;
           }
         }
       }
@@ -1379,8 +1370,7 @@ bool c_ArrayIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::valid);
   {
     const Variant &tmp0((x_key(ref(m_arr))));
-    bool tmp1((x_is_null(tmp0)));
-    return !(tmp1);
+    return !(x_is_null(tmp0));
   }
 }
 namespace hphp_impl_splitter {}

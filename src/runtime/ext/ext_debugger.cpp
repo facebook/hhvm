@@ -341,9 +341,14 @@ Variant c_DebuggerClientCmdUser::t___destruct() {
 ///////////////////////////////////////////////////////////////////////////////
 
 const int64 q_DebuggerClient$$STATE_INVALID = -1;
-const int64 q_DebuggerClient$$STATE_UNINIT = 0;
-const int64 q_DebuggerClient$$STATE_READY_FOR_COMMAND = 1;
-const int64 q_DebuggerClient$$STATE_BUSY = 2;
+const int64 q_DebuggerClient$$STATE_UNINIT
+  = DebuggerClient::StateUninit;
+const int64 q_DebuggerClient$$STATE_INITIALIZING
+  = DebuggerClient::StateInitializing;
+const int64 q_DebuggerClient$$STATE_READY_FOR_COMMAND
+  = DebuggerClient::StateReadyForCommand;
+const int64 q_DebuggerClient$$STATE_BUSY
+  = DebuggerClient::StateBusy;
 
 c_DebuggerClient::c_DebuggerClient(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
   m_client = NULL;
@@ -360,13 +365,7 @@ int64 c_DebuggerClient::t_getstate() {
   if (!m_client) {
     return q_DebuggerClient$$STATE_INVALID;
   }
-  if (!m_client->isInited()) {
-    return q_DebuggerClient$$STATE_UNINIT;
-  }
-  if (m_client->isTakingCommand()) {
-    return q_DebuggerClient$$STATE_READY_FOR_COMMAND;
-  }
-  return q_DebuggerClient$$STATE_BUSY;
+  return m_client->getClientState();
 }
 
 Variant c_DebuggerClient::t_init(CVarRef options) {
@@ -375,13 +374,14 @@ Variant c_DebuggerClient::t_init(CVarRef options) {
     raise_warning("invalid client");
     return false;
   }
-  if (m_client->isInited()) {
-    return true;
+  if (m_client->getClientState() != DebuggerClient::StateUninit) {
+    return m_client->getClientState() == DebuggerClient::StateReadyForCommand;
   }
   if (!options.isArray()) {
     raise_warning("options must be an array");
     return false;
   }
+  m_client->setClientState(DebuggerClient::StateInitializing);
 
   DebuggerClientOptions ops;
   ops.apiMode = true;
@@ -453,15 +453,20 @@ Variant c_DebuggerClient::t_init(CVarRef options) {
     return false;
   }
 
-  m_client->setInited();
+  m_client->setClientState(DebuggerClient::StateReadyForCommand);
 
   return true;
 }
 
 Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClient, DebuggerClient::processcmd);
-  if (!m_client || !m_client->isInited()) {
+  if (!m_client ||
+      m_client->getClientState() < DebuggerClient::StateReadyForCommand) {
     raise_warning("client is not initialized");
+    return null;
+  }
+  if (m_client->getClientState() != DebuggerClient::StateReadyForCommand) {
+    raise_warning("client is not ready to take command");
     return null;
   }
   if (!cmdName.isString()) {
@@ -493,6 +498,7 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
     // Flow-control command goes here
     Logger::Info("wait for debugger client to stop");
     m_client->setTakingInterrupt();
+    m_client->setClientState(DebuggerClient::StateBusy);
     DebuggerCommandPtr cmd = m_client->waitForNextInterrupt();
     if (!cmd || !cmd->is(DebuggerCommand::KindOfInterrupt)) {
       raise_warning("not getting an interrupt");
@@ -514,8 +520,13 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
 
 Variant c_DebuggerClient::t_interrupt() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClient, DebuggerClient::interrupt);
-  if (!m_client || !m_client->isInited()) {
+  if (!m_client ||
+      m_client->getClientState() < DebuggerClient::StateReadyForCommand) {
     raise_warning("client is not initialized");
+    return false;
+  }
+  if (m_client->getClientState() != DebuggerClient::StateBusy) {
+    raise_warning("client is not in a busy state");
     return false;
   }
   m_client->onSignal(SIGINT);

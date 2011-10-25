@@ -351,7 +351,7 @@ DebuggerClient::DebuggerClient()
       m_signum(CmdSignal::SignalNone), m_sigTime(0),
       m_acLen(0), m_acIndex(0), m_acPos(0), m_acLiveListsDirty(true),
       m_threadId(0), m_listLine(0), m_listLineFocus(0), m_frame(0),
-      m_inited(false), m_outputBuf(NULL) {
+      m_clientState(StateUninit), m_outputBuf(NULL) {
 }
 
 DebuggerClient::~DebuggerClient() {
@@ -868,7 +868,9 @@ DebuggerCommandPtr DebuggerClient::waitForNextInterrupt() {
         Logger::Error("Bad cmd type: %d", cmd->getType());
         return cmd;
       }
+      m_sigTime = 0;
       m_machine->m_interrupting = true;
+      setClientState(StateReadyForCommand);
       m_inputState = TakingCommand;
       return cmd;
     }
@@ -904,7 +906,7 @@ void DebuggerClient::runImpl() {
           return;
         }
         m_machine->m_interrupting = true;
-
+        setClientState(StateReadyForCommand);
         m_inputState = TakingCommand;
         if (!m_machine->m_initialized) {
           try {
@@ -918,6 +920,7 @@ void DebuggerClient::runImpl() {
         if (!console()) {
           return;
         }
+        setClientState(StateBusy);
         m_inputState = TakingInterrupt;
       }
     }

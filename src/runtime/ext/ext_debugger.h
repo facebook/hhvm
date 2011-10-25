@@ -153,6 +153,7 @@ class c_DebuggerClientCmdUser : public ExtObjectData {
 
 extern const int64 q_DebuggerClient$$STATE_INVALID;
 extern const int64 q_DebuggerClient$$STATE_UNINIT;
+extern const int64 q_DebuggerClient$$STATE_INITIALIZING;
 extern const int64 q_DebuggerClient$$STATE_READY_FOR_COMMAND;
 extern const int64 q_DebuggerClient$$STATE_BUSY;
 

@@ -799,7 +799,7 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
     if (type == T_FUNC_C) subtype = T_FUNC_C;
     type = T_STRING;
     stext = haveFunc() ? peekFunc()->name() : "";
-    if (stext[0] == '0') {
+    if (ParserBase::IsClosureName(stext)) {
       stext = "{closure}";
     }
     break;

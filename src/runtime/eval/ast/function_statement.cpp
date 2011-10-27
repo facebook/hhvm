@@ -101,7 +101,7 @@ int UserFunctionIdTable::getUserFunctionId(CStrRef func) {
 
 int UserFunctionIdTable::GetUserFunctionId(CStrRef func) {
   if (s_id >= RuntimeOption::MaxUserFunctionId) return -1;
-  if (func.data()[0] == '0') return -1; // closure
+  if (ParserBase::IsClosureName(func.data())) return -1;
   if (strncmp(func.data(), "lambda_", 7) == 0) return -1; // create_function
   return s_userFunctionIdTable->getUserFunctionId(func);
 }

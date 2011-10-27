@@ -100,10 +100,9 @@ int UserFunctionIdTable::getUserFunctionId(CStrRef func) {
 }
 
 int UserFunctionIdTable::GetUserFunctionId(CStrRef func) {
-  if (s_id >= RuntimeOption::MaxUserFunctionId) {
-    Logger::Warning("Maximum function id reached: %d", s_id);
-    return -1;
-  }
+  if (s_id >= RuntimeOption::MaxUserFunctionId) return -1;
+  if (func.data()[0] == '0') return -1; // closure
+  if (strncmp(func.data(), "lambda_", 7) == 0) return -1; // create_function
   return s_userFunctionIdTable->getUserFunctionId(func);
 }
 

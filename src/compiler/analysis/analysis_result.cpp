@@ -134,11 +134,14 @@ void AnalysisResult::parseOnDemand(const std::string &name) const {
     if (name.find(root) == 0) {
       rname = name.substr(root.length());
     }
-    if (m_files.find(rname) == m_files.end() &&
-        (m_parseOnDemand || inParseOnDemandDirs(rname)) &&
+    if ((m_parseOnDemand || inParseOnDemandDirs(rname)) &&
         Option::PackageExcludeFiles.find(rname) ==
         Option::PackageExcludeFiles.end() &&
         !Option::IsFileExcluded(rname, Option::PackageExcludePatterns)) {
+      {
+        Locker l(this);
+        if (m_files.find(rname) != m_files.end()) return;
+      }
       m_package->addSourceFile(rname.c_str());
     }
   }

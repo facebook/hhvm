@@ -1580,6 +1580,10 @@ bool DebuggerClient::processTakeCode() {
     m_code = string("<?php ") + (m_line.c_str() + 1) + ";";
     return processEval();
   } else if (first == '=') {
+    while (m_line.at(m_line.size() - 1) == ';') {
+      // strip the trailing ;
+      m_line = m_line.substr(0, m_line.size() - 1);
+    }
     m_code = string("<?php $_=(") + m_line.substr(1) + "); " + m_printFunction;
     return processEval();
   } else if (first != '<') {

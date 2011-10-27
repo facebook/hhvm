@@ -1404,7 +1404,7 @@ void DebuggerClient::parseCommand(const char *line) {
         break;
       case '"':
       case '\'':
-        if (token.empty() && quote == 0) {
+        if (quote == 0) {
           quote = ch;
           token += ch;
           break;
@@ -1418,11 +1418,15 @@ void DebuggerClient::parseCommand(const char *line) {
         token += ch;
         break;
       case '\\':
-        if (p[1]) {
+        if ((p[1] == ' ' || p[1] == '"' || p[1] == '\'' || p[1] == '\\')) {
+          if (quote == '\'') {
+            token += ch;
+          }
           p++;
           token += *p;
+          break;
         }
-        break;
+        // fall through
       default:
         token += ch;
         break;

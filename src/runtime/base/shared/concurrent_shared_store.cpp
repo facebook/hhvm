@@ -73,7 +73,8 @@ bool ConcurrentTableSharedStore::eraseImpl(CStrRef key, bool expired) {
     if (RuntimeOption::EnableAPCSizeStats) {
       SharedStoreStats::removeDirect(key.size(), acc->second.size);
       if (RuntimeOption::EnableAPCSizeGroup) {
-        SharedStoreStats::onDelete(key.get(), acc->second.var, false);
+        SharedStoreStats::onDelete(key.get(), acc->second.var, false,
+                                   acc->second.expiry == 0);
       }
     }
     eraseAcc(acc);
@@ -184,7 +185,8 @@ bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
       // updated it already, check before updating
       if (!sv->isUnserializedObj()) {
         if (statsDetail) {
-          SharedStoreStats::onDelete(key.get(), sv, true);
+          SharedStoreStats::onDelete(key.get(), sval->var, true,
+                                     sval->expiry == 0);
         }
         sval->var = converted;
         sv->decRef();
@@ -311,7 +313,8 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef val, int64 ttl,
         // if ApcTTLLimit is set, then only primed keys can have expiry == 0
         overwritePrime = (sval->expiry == 0);
         if (statsDetail) {
-          SharedStoreStats::onDelete(key.get(), sval->var, true);
+          SharedStoreStats::onDelete(key.get(), sval->var, true,
+                                     sval->expiry == 0);
         }
         sval->var->decRef();
         if (RuntimeOption::EnableAPCSizeStats && !check_skip(key.data())) {

@@ -225,8 +225,8 @@ private:
 
 class SharedVariantStats {
  public:
-  int64 dataSize;
-  int64 dataTotalSize;
+  int32 dataSize;
+  int32 dataTotalSize;
   int32 variantCount;
 
   void initStats() {

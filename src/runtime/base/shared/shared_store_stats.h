@@ -19,6 +19,7 @@
 
 #include <runtime/base/shared/shared_variant.h>
 #include <runtime/base/complex_types.h>
+#include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,6 +34,7 @@ private:
     totalSize = 0;
     keySize = 0;
     keyCount = 0;
+    sizeNoTTL = 0;
     ttl = 0;
     fetchCount = 0;
     lastFetchTime = 0;
@@ -45,22 +47,23 @@ private:
 public:
   char *key;
   SharedVariantStats var;
-  int64 totalSize;
+  int32 totalSize;
   int32 keySize;
   bool isGroup;
   bool isPrime;
   bool isValid;
   int32 keyCount; // valid only for group
-  int64 ttl; // valid for both, for group key stats, it's average
+  int32 sizeNoTTL; // valid only for group
+  int32 ttl; // valid for both, for group key stats, it's average
   // Also treat no ttl as 48-hrs.
 
-  // getCount and lastGetTime only valid for individual (so that we don't need
+  // fetchCount and lastGetTime only valid for individual (so that we don't need
   // normalize the key for every get)
-  int64 fetchCount;
+  int32 fetchCount;
+  int32 storeCount;
+  int32 deleteCount;
   time_t lastFetchTime;
-  int64 storeCount;
   time_t lastStoreTime;
-  int64 deleteCount;
   time_t lastDeleteTime;
 
 
@@ -75,7 +78,7 @@ public:
     isGroup = false;
   }
 
-  virtual ~SharedValueProfile() {
+  ~SharedValueProfile() {
     if (key) free(key);
   }
 
@@ -89,7 +92,8 @@ public:
   static void onClear();
   static void onStore(StringData *key, SharedVariant *var, int64 ttl,
                       bool prime);
-  static void onDelete(StringData *key, SharedVariant *var, bool replace);
+  static void onDelete(StringData *key, SharedVariant *var, bool replace,
+                       bool noTTL);
   static void onGet(StringData *key, SharedVariant *var);
   static void resetStats() {
     s_keyCount = 0;
@@ -112,6 +116,7 @@ public:
 
 protected:
   static Mutex s_lock;
+  static ReadWriteMutex s_rwlock;
 
   static int32 s_keyCount; // how many distinct keys
   static int32 s_keySize; // how much space these keys take
@@ -132,22 +137,19 @@ protected:
     s_lock.unlock();
   }
 
-  struct StringHash {
-    size_t operator()(const char *s) const {
-      ASSERT(s);
-      return hash_string(s, strlen(s));
-    }
-  };
-
-  struct StringEqual {
-    bool operator()(const char *s1, const char *s2) const {
+  struct charHashCompare {
+    bool equal(const char *s1, const char *s2) const {
       ASSERT(s1 && s2);
-      return strcmp(s1,s2) == 0;
+      return strcmp(s1, s2) == 0;
+    }
+    size_t hash(const char *s) const {
+      ASSERT(s);
+      return hash_string(s);
     }
   };
 
-  typedef hphp_hash_map<char*, SharedValueProfile*, StringHash, StringEqual>
-    StatsMap;
+  typedef tbb::concurrent_hash_map<const char*, SharedValueProfile*,
+                                   charHashCompare> StatsMap;
 
   static StatsMap s_statsMap, s_detailMap;
 };

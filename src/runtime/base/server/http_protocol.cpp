@@ -50,8 +50,7 @@ static bool read_all_post_data(Transport *transport,
     do {
       int delta = 0;
       const void *extra = transport->getMorePostData(delta);
-      if (size + delta < VirtualHost::GetMaxPostSize() &&
-          RuntimeOption::AlwaysPopulateRawPostData) {
+      if (size + delta < VirtualHost::GetMaxPostSize()) {
         data = Util::buffer_append(data, size, extra, delta);
         size += delta;
       }
@@ -131,7 +130,10 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
           Logger::Warning("POST Content-Length of %d bytes exceeds "
                           "the limit of %lld bytes",
                           content_length, VirtualHost::GetMaxPostSize());
-          needDelete = read_all_post_data(transport, data, size);
+          while (transport->hasMorePostData()) {
+            int delta = 0;
+            transport->getMorePostData(delta);
+          }
         } else {
           if (transport->hasMorePostData()) {
             needDelete = true;

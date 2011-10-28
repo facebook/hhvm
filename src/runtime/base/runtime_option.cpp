@@ -630,7 +630,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     EnableEarlyFlush = server["EnableEarlyFlush"].getBool(true);
     ForceChunkedEncoding = server["ForceChunkedEncoding"].getBool();
     MaxPostSize = (server["MaxPostSize"].getInt32(100)) * (1LL << 20);
-    AlwaysPopulateRawPostData = server["AlwaysPopulateRawPostData"].getBool();
+    AlwaysPopulateRawPostData =
+      server["AlwaysPopulateRawPostData"].getBool(true);
     LibEventSyncSend = server["LibEventSyncSend"].getBool(true);
     TakeoverFilename = server["TakeoverFilename"].getString();
     ExpiresActive = server["ExpiresActive"].getBool(true);

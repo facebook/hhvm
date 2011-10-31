@@ -426,7 +426,7 @@ void SharedStoreStats::onDelete(StringData *key, SharedVariant *var,
 
   if (RuntimeOption::EnableAPCSizeGroup) {
     StatsMap::const_accessor cacc;
-    if (s_statsMap.find(cacc, (char*)key->data())) {
+    if (s_statsMap.find(cacc, normalizedKey)) {
       SharedValueProfile *group = cacc->second;
       group->removeFromGroup(&svpTemp);
       if (noTTL) {

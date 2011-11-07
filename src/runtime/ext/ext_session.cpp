@@ -36,6 +36,7 @@
 #include <fcntl.h>
 #include <dirent.h>
 #include <libmemcached/memcached.h>
+#include <zlib.h>
 
 using namespace std;
 
@@ -349,58 +350,39 @@ String SessionModule::create_sid() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// FileSessionModule
+// MemcachedSessionModule
 class MemcachedSessionData {
 public:
-  MemcachedSessionData() : m_mem(NULL), m_servers(NULL) {
+  MemcachedSessionData() : m_mem(NULL) {
   }
 
-  // session.save_path = tcp://ip:port;tcp://ip:port;...
+  // Session.Path = ip:port,ip:port,...
   bool open(const char *save_path, const char *session_name) { 
+    memcached_server_st *servers = memcached_servers_parse(save_path);
+    if (!servers)
+      raise_warning("Could not parse Session.Path, make sure it is in the format: ip:port,ip:port,...,ip:port");
+
     m_mem = memcached_create(NULL);
     if (!m_mem)
+    {
+      memcached_server_list_free(servers);
       raise_warning("Could not create memcached instance");
+    }
 
     m_timeout = 2 * 60 * 60;
 
-    char *args = strdup(save_path);
-    char *tokens = ":;/";
-    char *cur = NULL;
-    char *address = NULL, *start = NULL, *port = NULL;
-
-    start = strtok_r(args, tokens, &cur);
-    while (start)
-    {
-      address = strtok_r(NULL, tokens, &cur);
-      port = strtok_r(NULL, tokens, &cur);
-
-      if (!strcmp(start, "tcp"))
-      {
-        int nport = strtol(port, NULL, 10);
-        m_servers = memcached_server_list_append(m_servers, address, nport, &m_rc);
-        if (m_rc != MEMCACHED_SUCCESS)
-          raise_warning("Error: %s", memcached_strerror(m_mem, m_rc));
-      }
-
-      start = strtok_r(NULL, tokens, &cur);
-    }
-    free(args);
-
-    m_rc = memcached_server_push(m_mem, m_servers);
+    m_rc = memcached_server_push(m_mem, servers);
     if (m_rc != MEMCACHED_SUCCESS)
       raise_warning("Error: %s", memcached_strerror(m_mem, m_rc));
 
+    memcached_server_list_free(servers);
     return true;
   }
 
   bool close() {
-    if (m_servers)
-      memcached_server_free(m_servers);
-
     if (m_mem)
       memcached_free(m_mem);
 
-    m_servers = NULL;
     m_mem = NULL;
 
     return true;
@@ -409,16 +391,63 @@ public:
   bool read(const char *key, String &value) {
     size_t len = 0;
     uint32_t flags = 0;
-    char *val = memcached_get(m_mem, key, strlen(key), &len, &flags, &m_rc);
-    //if (m_rc != MEMCACHED_SUCCESS)
-    //  raise_warning("read failed: could not get key: %s", memcached_strerror(m_mem, m_rc));
 
-    value = String(val, len, AttachString);
+    char *val = memcached_get(m_mem, key, strlen(key), &len, &flags, &m_rc);
+    if (flags & 2) { // compressed
+      bool done = false;
+      std::vector<char> buffer;
+      unsigned long bufferSize = 0;
+      for (int factor = 3; !done && factor <= 16; ++factor) {
+        bufferSize = len * (1 << factor) + 1;
+        buffer.resize(bufferSize);
+        fprintf(stdout, "buffer size = %ld\n", bufferSize);
+        if (uncompress((Bytef *)buffer.data(), &bufferSize, (const Bytef *)val, len) == Z_OK) {
+          fprintf(stdout, "uncompressing ok\n");
+          done = true;
+        }
+        if (!done) {
+          raise_warning("Session data uncompress failed.\n");
+        }
+
+        fprintf(stdout, "returning data size %d\n", buffer.size());
+        value = String(buffer.data(), bufferSize, CopyString);
+	free(val);
+      } 
+    }
+    else {
+      value = String(val, len, AttachString);
+    }
     return true;
   }
 
   bool write(const char *key, CStrRef value) {
-    memcached_set(m_mem, key, strlen(key), value.data(), value.size(), m_timeout, (uint32_t)0);
+    uint32_t flags = 0;
+    if (value.size() > 100) {
+      size_t outLen = compressBound(value.size());
+      char *out = (char *)malloc(outLen);
+      fprintf(stdout, "with compression, buffer size: %zd\n", outLen);
+      if (out != NULL && compress2((Bytef *)out, &outLen, (const Bytef *)value.data(), value.size(), 6) == Z_OK) {
+        flags |= 2;
+        fprintf(stdout, "done, with compression\n");
+        m_rc = memcached_set(m_mem, key, strlen(key), out, outLen, m_timeout, flags);
+        if (m_rc != MEMCACHED_SUCCESS)
+          raise_warning("Error: %s", memcached_strerror(m_mem, m_rc));
+      }
+      else {
+        raise_warning("Session compression failed.\n");
+      }
+
+      if (out) {
+        free(out);
+      }
+    }
+    else {
+      fprintf(stdout, "save without compression\n");
+      m_rc = memcached_set(m_mem, key, strlen(key), value.data(), value.size(), m_timeout, flags);
+      if (m_rc != MEMCACHED_SUCCESS)
+        raise_warning("Error: %s", memcached_strerror(m_mem, m_rc));
+
+    }
     return true;
   }
 
@@ -432,7 +461,6 @@ public:
 
 private:
   memcached_st *m_mem;
-  memcached_server_st *m_servers;
   memcached_return m_rc;
   time_t m_timeout;
 };
@@ -440,7 +468,7 @@ IMPLEMENT_THREAD_LOCAL(MemcachedSessionData, s_memcached_session_data);
 
 class MemcachedSessionModule : public SessionModule {
 public:
-  MemcachedSessionModule() : SessionModule("memcache") {
+  MemcachedSessionModule() : SessionModule("memcached") {
   }
   virtual bool open(const char *save_path, const char *session_name) {
     return s_memcached_session_data->open(save_path, session_name);

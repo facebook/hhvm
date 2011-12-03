@@ -51,11 +51,19 @@ include_directories(${LIBMEMCACHED_INCLUDE_DIR})
 find_package(PCRE REQUIRED)
 include_directories(${PCRE_INCLUDE_DIRS})
 
+if (LINUX OR FREEBSD)
+        FIND_LIBRARY (CRYPT_LIB NAMES xcrypt crypt)
+        FIND_LIBRARY (RT_LIB rt)
+elseif (APPLE)
+        FIND_LIBRARY (CRYPT_LIB crypto)
+        FIND_LIBRARY (ICONV_LIB iconv)
+endif()
+
 # libevent checks
 find_package(LibEvent REQUIRED)
 include_directories(${LIBEVENT_INCLUDE_DIR})
 
-set(CMAKE_REQUIRED_LIBRARIES "${LIBEVENT_LIB}")
+set(CMAKE_REQUIRED_LIBRARIES "${LIBEVENT_LIB}" ${RT_LIB})
 CHECK_FUNCTION_EXISTS("evhttp_bind_socket_with_fd" HAVE_CUSTOM_LIBEVENT)
 if (NOT HAVE_CUSTOM_LIBEVENT)
 	unset(HAVE_CUSTOM_LIBEVENT CACHE)
@@ -80,7 +88,20 @@ endif()
 find_package(CURL REQUIRED)
 include_directories(${CURL_INCLUDE_DIR})
 
-set(CMAKE_REQUIRED_LIBRARIES "${CURL_LIBRARIES}")
+# LDAP
+find_package(Ldap REQUIRED)
+include_directories(${LDAP_INCLUDE_DIR})
+
+# OpenSSL libs
+find_package(OpenSSL REQUIRED)
+include_directories(${OPENSSL_INCLUDE_DIR})
+
+# ZLIB
+find_package(ZLIB REQUIRED)
+include_directories(${ZLIB_INCLUDE_DIR})
+
+set(CMAKE_REQUIRED_LIBRARIES "${CURL_LIBRARIES}" ${LDAP_LIBRARIES} ${OPENSSL_LIBRARIES}
+    ${ZLIB_LIBRARIES} ${RT_LIB})
 CHECK_FUNCTION_EXISTS("curl_multi_select" HAVE_CUSTOM_CURL)
 if (NOT HAVE_CUSTOM_CURL)
 	unset(HAVE_CUSTOM_CURL CACHE)
@@ -216,14 +237,6 @@ link_directories(${TBB_LIBRARY_DIRS})
 find_package(Mcrypt REQUIRED)
 include_directories(${Mcrypt_INCLUDE_DIR})
 
-# OpenSSL libs
-find_package(OpenSSL REQUIRED)
-include_directories(${OPENSSL_INCLUDE_DIR})
-
-# ZLIB
-find_package(ZLIB REQUIRED)
-include_directories(${ZLIB_INCLUDE_DIR})
-
 find_package(BZip2 REQUIRED)
 include_directories(${BZIP2_INCLUDE_DIR})
 add_definitions(${BZIP2_DEFINITIONS})
@@ -231,10 +244,6 @@ add_definitions(${BZIP2_DEFINITIONS})
 # oniguruma
 find_package(ONIGURUMA REQUIRED)
 include_directories(${ONIGURUMA_INCLUDE_DIRS})
-
-# LDAP
-find_package(Ldap REQUIRED)
-include_directories(${LDAP_INCLUDE_DIR})
 
 # ncurses, readline and history
 #set(CURSES_NEED_NCURSES true)
@@ -268,14 +277,6 @@ endif()
 
 if (NOT CCLIENT_HAS_SSL)
 	add_definitions(-DSKIP_IMAP_SSL=1)
-endif()
-
-if (LINUX OR FREEBSD)
-	FIND_LIBRARY (CRYPT_LIB NAMES xcrypt crypt)
-	FIND_LIBRARY (RT_LIB rt)
-elseif (APPLE)
-	FIND_LIBRARY (CRYPT_LIB crypto)
-	FIND_LIBRARY (ICONV_LIB iconv)
 endif()
 
 if (LINUX)
@@ -336,7 +337,7 @@ macro(hphp_link target)
 	target_link_libraries(${target} ${PCRE_LIBRARY})
 	target_link_libraries(${target} ${ICU_LIBRARIES} ${ICU_I18N_LIBRARIES})
 	target_link_libraries(${target} ${LIBEVENT_LIB})
-	target_link_libraries(${target} ${CURL_LIBRARIES})
+        target_link_libraries(${target} ${CURL_LIBRARIES})
 
 if (LINUX)
 	target_link_libraries(${target} ${CAP_LIB})

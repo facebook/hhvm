@@ -3059,6 +3059,10 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
     "  }\n"
     "  return NULL;\n"
     "}\n"
+    "\n"
+    "bool included_php_file(CStrRef s) {\n"
+    "  return findFile(s.c_str(), s->hash()) != NULL;\n"
+    "}\n"
     "\n";
 
   const char text3[] =

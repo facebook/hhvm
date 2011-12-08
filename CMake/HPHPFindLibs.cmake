@@ -247,6 +247,12 @@ include_directories(${READLINE_INCLUDE_DIR})
 find_package(CClient REQUIRED)
 include_directories(${CCLIENT_INCLUDE_PATH})
 
+find_package(LibDwarf REQUIRED)
+include_directories(${LIBDWARF_INCLUDE_DIRS})
+
+find_package(LibElf REQUIRED)
+include_directories(${LIBELF_INCLUDE_DIRS})
+
 CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/utf8.h" U8T_DECOMPOSE RECENT_CCLIENT)
 if (NOT RECENT_CCLIENT)
 	unset(RECENT_CCLIENT CACHE)
@@ -397,5 +403,8 @@ endif()
 	if (CCLIENT_NEEDS_PAM)
 		target_link_libraries(${target} ${PAM_LIBRARY})
 	endif()
+
+        target_link_libraries(${target} ${LIBDWARF_LIBRARIES})
+        target_link_libraries(${target} ${LIBELF_LIBRARIES})
 
 endmacro()

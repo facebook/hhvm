@@ -18,7 +18,7 @@
 include(HPHPSetup)
 
 # find all the source files
-set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/eval runtime/ext system/gen system/lib util)
+set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/eval runtime/ext runtime/vm system/gen system/lib util)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 
 	auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")

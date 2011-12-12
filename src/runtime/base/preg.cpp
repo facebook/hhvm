@@ -75,29 +75,44 @@ public:
   int compile_options;
 };
 
-typedef hphp_hash_map<StringData *, pcre_cache_entry*,
+typedef std::pair<StringData *, pcre_cache_entry*> PCREStringEntry;
+
+typedef std::list<PCREStringEntry> PCREStringList;
+
+typedef hphp_hash_map<StringData *, PCREStringList::iterator,
                       string_data_hash, string_data_same> PCREStringMap;
 
-// TODO LRU cache
 class PCRECache {
 public:
-  ~PCRECache() { }
+  PCRECache() : m_entries(0) {}
 
   void cleanup() {
     TAINT_OBSERVER_CAP_STACK();
     for (PCREStringMap::iterator it = m_cache.begin(); it != m_cache.end();
          ++it) {
-      delete it->second;
+      delete it->second->second;
       if (!it->first->isStatic()) {
         delete it->first;
       }
     }
+    m_cache.clear();
+    m_cachelist.clear();
+  }
+
+  ~PCRECache() {
+    cleanup();
   }
 
   pcre_cache_entry *find(CStrRef regex) {
     TAINT_OBSERVER_CAP_STACK();
-    PCREStringMap::const_iterator it = m_cache.find(regex.get());
-    if (it != m_cache.end()) return it->second;
+    PCREStringMap::iterator it = m_cache.find(regex.get());
+    if (it != m_cache.end()){
+      pcre_cache_entry *ret = it->second->second;
+      m_cachelist.push_front(PCREStringEntry(*(it->second)));
+      m_cachelist.erase(it->second);
+      it->second = m_cachelist.begin();
+      return ret;
+    }
     return NULL;
   }
 
@@ -105,10 +120,23 @@ public:
     TAINT_OBSERVER_CAP_STACK();
     PCREStringMap::iterator it = m_cache.find(regex.get());
     if (it != m_cache.end()) {
-      delete it->second;
-      it->second = pce;
+      delete it->second->second;
+      it->second->second = pce;
     } else {
-      m_cache[regex->copy(true)] = pce;
+      StringData* regex_string = regex->copy(true);
+      m_cachelist.push_front(std::make_pair(regex_string, pce));
+      m_cache[regex_string] = m_cachelist.begin();
+      ++m_entries;
+
+      if (m_entries > RuntimeOption::PregCacheLimit) {
+        m_cache.erase(m_cachelist.back().first);
+        delete m_cachelist.back().second;
+        if (!m_cachelist.back().first->isStatic()) {
+          delete m_cachelist.back().first;
+        }
+        m_cachelist.pop_back();
+        --m_entries;
+      }
     }
   }
 
@@ -117,6 +145,8 @@ public:
 
 private:
   PCREStringMap m_cache;
+  PCREStringList m_cachelist;
+  unsigned int m_entries;
 };
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(PCRECache, s_pcre_cache);
 
@@ -326,18 +356,6 @@ static int *create_offset_array(pcre_cache_entry *pce, int &size_offsets) {
   num_subpats++;
   size_offsets = num_subpats * 3;
   return (int *)malloc(size_offsets * sizeof(int));
-}
-
-static pcre* pcre_get_compiled_regex(CStrRef regex, pcre_extra **extra,
-                                     int *preg_options) {
-  pcre_cache_entry *pce = pcre_get_compiled_regex_cache(regex);
-  if (extra) {
-    *extra = pce ? pce->extra : NULL;
-  }
-  if (preg_options) {
-    *preg_options = pce ? pce->preg_options : 0;
-  }
-  return pce ? pce->re : NULL;
 }
 
 static inline void add_offset_pair(Variant &result, CStrRef str, int offset,
@@ -1177,8 +1195,7 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
   // Get next piece if no limit or limit not yet reached and something matched
   Variant return_value = Array::Create();
   int g_notempty = 0;   /* If the match should not be empty */
-  pcre *re_bump = NULL; /* Regex instance for empty matches */
-  pcre_extra *extra_bump = NULL; /* Almost dummy */
+  pcre_cache_entry *re_bump = NULL; /* Regex instance for empty matches */
   while ((limit == -1 || limit > 1)) {
     int count = pcre_exec(pce->re, extra, ssubject.data(), ssubject.size(),
                           start_offset, g_notempty, offsets, size_offsets);
@@ -1240,13 +1257,11 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
       if (g_notempty != 0 && start_offset < ssubject.size()) {
         if (pce->compile_options & PCRE_UTF8) {
           if (re_bump == NULL) {
-            int dummy;
-            if ((re_bump = pcre_get_compiled_regex("/./us", &extra_bump,
-                                                   &dummy)) == NULL) {
+            if ((re_bump = pcre_get_compiled_regex_cache("/./us")) == NULL) {
               return false;
             }
           }
-          count = pcre_exec(re_bump, extra_bump, ssubject.data(),
+          count = pcre_exec(re_bump->re, re_bump->extra, ssubject.data(),
                             ssubject.size(), start_offset,
                             0, offsets, size_offsets);
           if (count < 1) {

@@ -22,6 +22,7 @@
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/zend/zend_printf.h>
 #include <runtime/base/zend/zend_html.h>
+#include <runtime/base/bstring.h>
 #include <langinfo.h>
 
 namespace HPHP {
@@ -276,7 +277,7 @@ inline int f_strnatcmp(CStrRef str1, CStrRef str2) {
                             false);
 }
 inline int f_strcasecmp(CStrRef str1, CStrRef str2) {
-  return string_strcasecmp(str1.data(), str1.size(), str2.data(), str2.size());
+  return bstrcasecmp(str1.data(), str1.size(), str2.data(), str2.size());
 }
 inline int f_strncasecmp(CStrRef str1, CStrRef str2, int len) {
   return string_strncasecmp(str1.data(), str1.size(), str2.data(), str2.size(),

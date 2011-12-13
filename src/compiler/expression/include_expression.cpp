@@ -85,7 +85,10 @@ static string get_include_file_path(const string &source, string expText,
     struct stat sb;
 
     // relative path to containing file's directory
-    ASSERT(source.size() > 1);
+    if (source.empty() && stat(expText.c_str(), &sb) == 0) {
+      return expText;
+    }
+
     size_t pos = source.rfind('/');
     string resolved;
     if (pos != string::npos) {

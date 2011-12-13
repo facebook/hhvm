@@ -68,6 +68,7 @@ public:
     KindOfShell               = 1001,
     KindOfMacro               = 1002,
     KindOfConfig              = 1003,
+    KindOfInstrument          = 1004,
 
     // DebuggerProxy -> DebuggerClient
     KindOfInterrupt           = 10000,
@@ -90,7 +91,18 @@ public:
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
   virtual bool onClient(DebuggerClient *client);
+  virtual bool onClientVM(DebuggerClient *client) { return onClient(client); }
+  virtual void setClientOutput(DebuggerClient *client);
+  bool onClientD(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
+  virtual bool onServerVM(DebuggerProxy *proxy) { return onServer(proxy); }
+  bool onServerD(DebuggerProxy *proxy) {
+    if (hhvm) {
+      return onServerVM(proxy);
+    } else {
+      return onServer(proxy);
+    }
+  }
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 

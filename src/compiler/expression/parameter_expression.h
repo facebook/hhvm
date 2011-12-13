@@ -39,13 +39,17 @@ public:
   bool isOptional() const { return m_defaultValue;}
   bool hasRTTI() const { return m_hasRTTI;}
   void setHasRTTI() { m_hasRTTI = true;}
-  const std::string &getName() const { return m_name;}
+  const std::string &getName() const { return m_name; }
   void defaultToNull(AnalysisResultPtr ar);
   int getLocalEffects() const { return NoEffect; }
   void rename(const std::string &name) { m_name = name;}
   ExpressionPtr defaultValue() { return m_defaultValue; }
   TypePtr getTypeSpec(AnalysisResultPtr ar, bool forInference);
   bool hasTypeHint() const { return !m_type.empty(); }
+  const std::string &getTypeHint() const {
+    ASSERT(hasTypeHint());
+    return m_type;
+  }
   void parseHandler(ClassScopePtr cls);
 private:
   TypePtr getTypeSpecForClass(AnalysisResultPtr ar, bool forInference);

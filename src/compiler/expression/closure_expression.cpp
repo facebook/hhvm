@@ -114,9 +114,6 @@ void ClosureExpression::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// parser functions
-
-///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
 void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
@@ -205,10 +202,13 @@ TypePtr ClosureExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
         dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
       ASSERT(!var->getExpectedType());
       ASSERT(!var->getImplementedType());
-      TypePtr origVarType(var->getActualType() ?
-          var->getActualType() : Type::Some);
-      var->setActualType(Type::Coerce(ar, origVarType, value->getType()));
-      ASSERT(!var->isRef() || var->getType()->is(Type::KindOfVariant));
+      if (var->isRef()) {
+        var->setActualType(Type::Variant);
+      } else {
+        TypePtr origVarType(var->getActualType() ?
+                            var->getActualType() : Type::Some);
+        var->setActualType(Type::Coerce(ar, origVarType, value->getType()));
+      }
     }
 
     {

@@ -23,6 +23,7 @@
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/analysis/alias_manager.h>
 #include <compiler/analysis/code_error.h>
+#include <compiler/analysis/emitter.h>
 #include <compiler/analysis/type.h>
 #include <util/json.h>
 #include <util/logger.h>
@@ -136,6 +137,7 @@ int process(const ProgramOptions &po);
 int lintTarget(const ProgramOptions &po);
 int analyzeTarget(const ProgramOptions &po, AnalysisResultPtr ar);
 int phpTarget(const ProgramOptions &po, AnalysisResultPtr ar);
+int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar);
 int cppTarget(const ProgramOptions &po, AnalysisResultPtr ar,
               AsyncFileCacheSaver &fcThread, bool allowSys = true);
 int runTargetCheck(const ProgramOptions &po, AnalysisResultPtr ar,
@@ -211,6 +213,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
      "lint | "
      "analyze | "
      "php | "
+     "hhbc | "
      "cpp | "
      "sep-ext-cpp | "
      "filecache | "
@@ -220,6 +223,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
      "analyze: (none); \n"
      "php: trimmed (default) | inlined | pickled | typeinfo |"
      " <any combination of them by any separator>; \n"
+     "hhbc: text (default) | binary; \n"
      "cpp: cluster (default) | file | sys | exe | lib; \n"
      "run: cluster (default) | file")
     ("cluster-count", value<int>(&po.clusterCount)->default_value(0),
@@ -338,7 +342,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
      value<bool>(&po.fl_annotate)->default_value(false),
      "Annote emitted source with compiler file-line info")
     ("opts",
-     value<string>(&po.optimizations)->default_value("none"),
+     value<string>(&po.optimizations)->default_value(""),
      "Set optimizations to enable/disable")
     ("ppp",
      value<string>(&po.ppp)->default_value(""),
@@ -481,6 +485,8 @@ cout << "Compiler: " << COMPILER_ID << "\n";
   }
   Option::SystemGen = (po.target == "cpp" && po.format == "sys") ;
 
+  if (po.target == "hhbc") Option::ParseTimeOpts = false;
+
   Option::ProgramName = po.program;
   Option::PreprocessedPartitionConfig = po.ppp;
 
@@ -490,6 +496,8 @@ cout << "Compiler: " << COMPILER_ID << "\n";
     if (po.format.empty()) po.format = "trimmed";
   } else if (po.target == "run") {
     if (po.format.empty()) po.format = "cluster";
+  } else if (po.target == "hhbc") {
+    if (po.format.empty()) po.format = "text";
   }
 
   if (!po.docjson.empty()) {
@@ -566,7 +574,8 @@ int process(const ProgramOptions &po) {
   // load the type hints
   Type::InitTypeHintMap();
 
-  if (po.target != "php" || po.format != "pickled") {
+  bool isPickledPHP = (po.target == "php" && po.format == "pickled");
+  if (!isPickledPHP && po.target != "hhbc") {
     if (!BuiltinSymbols::Load(ar, po.target == "cpp" && po.format == "sys")) {
       return false;
     }
@@ -575,12 +584,9 @@ int process(const ProgramOptions &po) {
 
   {
     Timer timer(Timer::WallTime, "parsing inputs");
-    if (!po.inputs.empty() && po.target == "php" && po.format == "pickled") {
+    if (!po.inputs.empty() && (isPickledPHP || po.target == "hhbc")) {
       for (unsigned int i = 0; i < po.inputs.size(); i++) {
         package.addSourceFile(po.inputs[i].c_str());
-      }
-      if (!package.parse(!po.force)) {
-        return 1;
       }
     } else {
       ar->setPackage(&package);
@@ -640,6 +646,8 @@ int process(const ProgramOptions &po) {
     ret = analyzeTarget(po, ar);
   } else if (po.target == "php") {
     ret = phpTarget(po, ar);
+  } else if (po.target == "hhbc") {
+    ret = hhbcTarget(po, ar);
   } else if (po.target == "cpp") {
     ret = cppTarget(po, ar, fileCacheThread);
   } else if (po.target == "run") {
@@ -803,6 +811,40 @@ int phpTarget(const ProgramOptions &po, AnalysisResultPtr ar) {
     if (!ar->outputAllPHP(CodeGenerator::TrimmedPHP)) {
       ret = -1;
     }
+  }
+
+  return ret;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar) {
+  int ret = 0;
+
+  int formatCount = 0;
+  if (po.format.find("text") != string::npos) {
+    Option::GenerateTextHHBC = true;
+    formatCount++;
+  }
+  if (po.format.find("binary") != string::npos) {
+    Option::GenerateBinaryHHBC = true;
+    formatCount++;
+  }
+  if (formatCount == 0) {
+    Logger::Error("Unknown format for HHBC target: %s", po.format.c_str());
+    return 1;
+  }
+
+  ar->setOutputPath(po.outputDir);
+  if (Option::GenerateTextHHBC) {
+    CodeGenerator::Output fmt = CodeGenerator::TextHHBC;
+    Logger::Info("creating text HHBC files...");
+    ar->visitFiles(Compiler::emitHHBCVisitor, &fmt);
+  }
+  if (Option::GenerateBinaryHHBC) {
+    CodeGenerator::Output fmt = CodeGenerator::BinaryHHBC;
+    Logger::Info("creating binary HHBC files...");
+    ar->visitFiles(Compiler::emitHHBCVisitor, &fmt);
   }
 
   return ret;

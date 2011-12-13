@@ -65,6 +65,12 @@ public:
   static bool InterruptException(CVarRef e);
 
   /**
+   * Interrupt from VM
+   */
+  static void InterruptVMHook(int type = BreakPointReached,
+                              CVarRef e = null_variant);
+
+  /**
    * Surround text with color, if set.
    */
   static void SetTextColors();

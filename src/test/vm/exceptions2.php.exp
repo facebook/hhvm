@@ -1,0 +1,2 @@
+C::__destruct
+HipHop Fatal error: Stack overflow in src/test/vm/exceptions2.php on line 17

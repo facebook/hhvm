@@ -127,7 +127,11 @@ String f_spl_object_hash(CObjRef obj) {
 }
 
 Variant f_hphp_get_this() {
-  return FrameInjection::GetThis();
+  if (hhvm) {
+    return g_context->getThis(true);
+  } else {
+    return FrameInjection::GetThis();
+  }
 }
 
 static int64 hphp_get_call_info_and_extra(
@@ -139,14 +143,23 @@ static int64 hphp_get_call_info_and_extra(
   if (cls.empty()) {
     const CallInfo *cit;
     void *extrap;
-    get_call_info_or_fail(cit, extrap, func);
+    bool succ = hhvm
+                ? g_context->getCallInfo(cit, extrap, func)
+                : get_call_info(cit, extrap, func->data(), func->hash());
+    if (!succ) {
+      throw InvalidFunctionCallException(func.data());
+    }
     extra = (int64) extrap;
     return (int64) cit;
   } else {
     MethodCallPackage mcp;
     mcp.rootCls = cls.get();
     mcp.name = &func;
-    if (!get_call_info_static_method(mcp)) {
+    bool succ = hhvm
+                ? g_context->getCallInfoStatic(mcp.ci, mcp.extra,
+                                               cls.get(), func.get())
+                : get_call_info_static_method(mcp);
+    if (!succ) {
       throw_spl_exception("Could not find method %s for class %s",
                           func.c_str(), cls.c_str());
     }

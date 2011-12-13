@@ -53,6 +53,8 @@ class c_FB_MySQLLexer : public ExtObjectData {
   Variant m_tokenStack;
   Variant m_stackPtr;
 
+  // Destructor
+  ~c_FB_MySQLLexer() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(FB_MySQLLexer, FB_MySQLLexer, ObjectData)
   static const ClassPropTable os_prop_table;

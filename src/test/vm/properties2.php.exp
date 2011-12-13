@@ -1,0 +1,6 @@
+A::foo 1
+A::foo 123
+object(C)#2 (1) {
+  ["a:protected"]=>
+  int(1)
+}

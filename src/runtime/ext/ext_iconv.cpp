@@ -1496,7 +1496,7 @@ Variant f_iconv_mime_encode(CStrRef field_name, CStrRef field_value,
         ini_in_p = in_p;
 
         for (out_size = char_cnt; out_size > 0;) {
-          size_t prev_out_left;
+          size_t prev_out_left ATTRIBUTE_UNUSED;
 
           nbytes_required = 0;
 

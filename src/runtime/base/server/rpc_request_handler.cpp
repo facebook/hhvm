@@ -35,7 +35,15 @@ RPCRequestHandler::RPCRequestHandler(bool info /* = true */)
   : m_count(0), m_reset(false),
   m_returnEncodeType(Json) {
   hphp_session_init();
-  m_context = hphp_context_init();
+  bool isServer = (strcmp(RuntimeOption::ExecutionMode, "srv") == 0);
+  if (isServer) {
+    m_context = hphp_context_init();
+  } else {
+    // In command line mode, we want the xbox workers to
+    // output to STDOUT
+    m_context = g_context.getNoCheck();
+    m_context->obSetImplicitFlush(true);
+  }
   m_created = time(0);
 
   Logger::ResetRequestCount();
@@ -134,6 +142,8 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     ServerStatsHelper ssh("input");
     RequestURI reqURI(rpcFunc);
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
+    SystemGlobals *g = (SystemGlobals*)get_global_variables();
+    g->GV(_ENV).set("HPHP_RPC", 1);
   }
 
   bool isFile = rpcFunc.rfind('.') != string::npos;
@@ -181,7 +191,8 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     Variant funcRet;
     string errorMsg = "Internal Server Error";
     string warmupDoc, reqInitFunc, reqInitDoc;
-    if (m_serverInfo) {
+    reqInitDoc = transport->getHeader("ReqInitDoc");
+    if (reqInitDoc.empty() && m_serverInfo) {
       warmupDoc = m_serverInfo->getWarmupDoc();
       reqInitFunc = m_serverInfo->getReqInitFunc();
       reqInitDoc = m_serverInfo->getReqInitDoc();
@@ -193,7 +204,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
 
     if (!reqInitDoc.empty()) reqInitDoc = canonicalize_path(reqInitDoc, "", 0);
     if (!reqInitDoc.empty()) {
-        reqInitDoc = getSourceFilename(reqInitDoc, sourceRootInfo);
+      reqInitDoc = getSourceFilename(reqInitDoc, sourceRootInfo);
     }
 
     bool runOnce = false;
@@ -236,13 +247,18 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
                         error, errorMsg);
     }
     if (ret) {
+      bool serializeFailed = false;
       String response;
       switch (output) {
         case 0: {
           ASSERT(m_returnEncodeType == Json ||
                  m_returnEncodeType == Serialize);
-          response = (m_returnEncodeType == Json) ? f_json_encode(funcRet)
-                                                  : f_serialize(funcRet);
+          try {
+            response = (m_returnEncodeType == Json) ? f_json_encode(funcRet)
+                                                    : f_serialize(funcRet);
+          } catch (...) {
+            serializeFailed = true;
+          }
           break;
         }
         case 1: response = m_context->obDetachContents(); break;
@@ -253,8 +269,15 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
           break;
         case 3: response = f_serialize(funcRet); break;
       }
-      transport->sendRaw((void*)response.data(), response.size());
-      code = transport->getResponseCode();
+      if (serializeFailed) {
+        code = 500;
+        transport->sendString(
+            "Serialization of the return value failed", 500);
+        m_reset = true;
+      } else {
+        transport->sendRaw((void*)response.data(), response.size());
+        code = transport->getResponseCode();
+      }
     } else if (error) {
       code = 500;
       transport->sendString(errorMsg, 500);
@@ -267,6 +290,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     code = 400;
     transport->sendString("Bad Request", 400);
   }
+
   params.reset();
   sourceRootInfo.clear();
 

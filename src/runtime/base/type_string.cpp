@@ -35,6 +35,59 @@ const StaticString empty_string("");
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
+#define NUM_CONVERTED_INTEGERS \
+  (String::MaxPrecomputedInteger - String::MinPrecomputedInteger + 1)
+
+StringData *String::converted_integers_raw;
+StringData *String::converted_integers;
+
+String::IntegerStringDataMap String::integer_string_data_map;
+
+const StringData *convert_integer_helper(int64 n, StringData *sd) {
+  char tmpbuf[21];
+  char *p;
+  int is_negative;
+  int len;
+  char *buf;
+
+  tmpbuf[20] = '\0';
+  p = conv_10(n, &is_negative, &tmpbuf[20], &len);
+
+  buf = (char*)malloc(len + 1);
+  memcpy(buf, p, len + 1);
+  if (sd) {
+    new (sd) StringData(buf, len, AttachString);
+  } else {
+    sd = new StringData(buf, len, AttachString);
+  }
+  sd->setStatic();
+  if (!String(sd).checkStatic()) {
+    StaticString::TheStaticStringSet().insert(sd);
+  }
+  return sd;
+}
+
+void String::PreConvertInteger(int64 n) {
+  IntegerStringDataMap::const_iterator it =
+    integer_string_data_map.find(n);
+  if (it != integer_string_data_map.end()) return;
+  integer_string_data_map[n] = convert_integer_helper(n, NULL);
+}
+
+static int precompute_integers() ATTRIBUTE_COLD;
+static int precompute_integers() {
+  String::converted_integers_raw =
+    (StringData *)malloc(NUM_CONVERTED_INTEGERS * sizeof(StringData));
+  String::converted_integers = String::converted_integers_raw - SCHAR_MIN;
+  for (int n = SCHAR_MIN; n < 65536; n++) {
+    StringData *sd = String::converted_integers + n;
+    convert_integer_helper(n, sd);
+  }
+  return NUM_CONVERTED_INTEGERS;
+}
+
+static int ATTRIBUTE_UNUSED initIntegers = precompute_integers();
+
 String String::FromChar(char ch) {
   char tmpbuf[2];
   tmpbuf[0] = ch;
@@ -47,12 +100,12 @@ String String::FromChar(char ch) {
 
 String::~String() {}
 
-String::String(int n) {
+StringData* buildStringData(int n) {
   char tmpbuf[12];
-  char *p;
+  char* p;
   int is_negative;
   int len;
-  char *buf;
+  char* buf;
 
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
 
@@ -61,16 +114,26 @@ String::String(int n) {
 
   buf = (char*)malloc(len + 1);
   memcpy(buf, p, len + 1); // including the null terminator.
-  m_px = NEW(StringData)(buf, len, AttachString);
+  return NEW(StringData)(buf, len, AttachString);
+}
+
+String::String(int n) {
+  const StringData *sd = GetIntegerStringData(n);
+  if (sd) {
+    ASSERT(sd->isStatic());
+    m_px = (StringData *)sd;
+    return;
+  }
+  m_px = buildStringData(n);
   m_px->setRefCount(1);
 }
 
-String::String(int64 n) {
+StringData* buildStringData(int64 n) {
   char tmpbuf[21];
-  char *p;
+  char* p;
   int is_negative;
   int len;
-  char *buf;
+  char* buf;
 
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
 
@@ -79,19 +142,37 @@ String::String(int64 n) {
 
   buf = (char*)malloc(len + 1);
   memcpy(buf, p, len + 1); // including the null terminator.
-  m_px = NEW(StringData)(buf, len, AttachString);
+  return NEW(StringData)(buf, len, AttachString);
+}
+
+String::String(int64 n) {
+  const StringData *sd = GetIntegerStringData(n);
+  if (sd) {
+    ASSERT(sd->isStatic());
+    m_px = (StringData *)sd;
+    return;
+  }
+  m_px = buildStringData(n);
   m_px->setRefCount(1);
 }
 
-String::String(double n) {
+StringData* buildStringData(double n) {
   char *buf;
 
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
 
   if (n == 0.0) n = 0.0; // so to avoid "-0" output
   vspprintf(&buf, 0, "%.*G", 14, n);
-  m_px = NEW(StringData)(buf, AttachString);
+  return NEW(StringData)(buf, AttachString);
+}
+
+String::String(double n) {
+  m_px = buildStringData(n);
   m_px->setRefCount(1);
+}
+
+StringData* buildStringData(litstr s) {
+  return NEW(StringData)(s, AttachLiteral);
 }
 
 String::String(const AtomicString &s) {
@@ -151,7 +232,7 @@ int String::find(CStrRef s, int pos /* = 0 */,
                      s.dataIgnoreTaint(), s.size(), pos, caseSensitive);
 }
 
-int String::rfind(char ch, int pos /* = -1 */,
+int String::rfind(char ch, int pos /* = 0 */,
                   bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   // Ignore taint in comparison functions.
@@ -159,7 +240,7 @@ int String::rfind(char ch, int pos /* = -1 */,
                       pos, caseSensitive);
 }
 
-int String::rfind(const char *s, int pos /* = -1 */,
+int String::rfind(const char *s, int pos /* = 0 */,
                   bool caseSensitive /* = true */) const {
   ASSERT(s);
   if (empty()) return -1;
@@ -171,7 +252,7 @@ int String::rfind(const char *s, int pos /* = -1 */,
                       pos, caseSensitive);
 }
 
-int String::rfind(CStrRef s, int pos /* = -1 */,
+int String::rfind(CStrRef s, int pos /* = 0 */,
                   bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   if (s.size() == 1) {
@@ -778,7 +859,7 @@ StringDataSet &StaticString::TheStaticStringSet() {
 
 void StaticString::FinishInit() {
   if (has_eval_support) {
-    ASSERT(s_stringSet->size() == 0);
+    ASSERT(s_stringSet->size() == NUM_CONVERTED_INTEGERS);
   }
   // release the memory
   StringDataSet empty;

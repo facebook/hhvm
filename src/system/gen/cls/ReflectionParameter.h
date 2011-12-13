@@ -35,6 +35,8 @@ class c_ReflectionParameter : public ExtObjectData {
   // Properties
   Variant m_info;
 
+  // Destructor
+  ~c_ReflectionParameter() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionParameter, ReflectionParameter, ObjectData)
   static const ClassPropTable os_prop_table;
@@ -44,11 +46,11 @@ class c_ReflectionParameter : public ExtObjectData {
   public: String t___tostring();
   public: static Variant t_export(CVarRef v_func, CVarRef v_param, CVarRef v_ret);
   public: Variant t_getname();
-  public: Variant t_ispassedbyreference();
+  public: bool t_ispassedbyreference();
   public: Variant t_getdeclaringclass();
   public: Variant t_getclass();
   public: bool t_isarray();
-  public: Variant t_allowsnull();
+  public: bool t_allowsnull();
   public: bool t_isoptional();
   public: bool t_isdefaultvalueavailable();
   public: Variant t_getdefaultvalue();

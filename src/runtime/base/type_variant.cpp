@@ -44,6 +44,7 @@ static const int64 cnValues[] = {
   0x7ff8000000000000LL, 0x0000000520000000LL, // NAN_varNR
 };
 const Variant &null_variant = *(const Variant *)(cvValues);
+const Variant init_null_variant = Variant(Variant::nullInit);
 const VarNR &null_varNR = *(const VarNR*)(cnValues);
 const VarNR &true_varNR = *(const VarNR*)(cnValues + 2);
 const VarNR &false_varNR = *(const VarNR*)(cnValues + 4);
@@ -2076,7 +2077,8 @@ static void raise_bad_offset_notice() {
     case KindOfNull:                                                    \
       break;                                                            \
     default:                                                            \
-      if (flags & AccessFlags::Error) {                                 \
+      if ((flags & AccessFlags::Error) &&                               \
+          !(flags & AccessFlags::NoHipHop)) {                           \
         raise_bad_offset_notice();                                      \
       }                                                                 \
       break;                                                            \
@@ -2103,7 +2105,7 @@ Variant Variant::rvalAtHelper(int64 offset, ACCESSPARAMS_IMPL) const {
   case KindOfNull:
     break;
   default:
-    if (flags & AccessFlags::Error) {
+    if ((flags & AccessFlags::Error) && !(flags & AccessFlags::NoHipHop)) {
       raise_bad_offset_notice();
     }
     break;
@@ -2137,7 +2139,7 @@ Variant Variant::rvalAt(litstr offset, ACCESSPARAMS_IMPL) const {
   case KindOfNull:
     break;
   default:
-    if (flags & AccessFlags::Error) {
+    if ((flags & AccessFlags::Error) && !(flags & AccessFlags::NoHipHop)) {
       raise_bad_offset_notice();
     }
     break;
@@ -2171,7 +2173,7 @@ Variant Variant::rvalAt(CStrRef offset, ACCESSPARAMS_IMPL) const {
   case KindOfNull:
     break;
   default:
-    if (flags & AccessFlags::Error) {
+    if ((flags & AccessFlags::Error) && !(flags & AccessFlags::NoHipHop)) {
       raise_bad_offset_notice();
     }
     break;
@@ -2231,7 +2233,7 @@ Variant Variant::rvalAt(CVarRef offset, ACCESSPARAMS_IMPL) const {
   case KindOfNull:
     break;
   default:
-    if (flags & AccessFlags::Error) {
+    if ((flags & AccessFlags::Error) && !(flags & AccessFlags::NoHipHop)) {
       raise_bad_offset_notice();
     }
     break;
@@ -2256,7 +2258,7 @@ CVarRef Variant::rvalRefHelper(T offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
   case KindOfNull:
     break;
   default:
-    if (flags & AccessFlags::Error) {
+    if ((flags & AccessFlags::Error) && !(flags & AccessFlags::NoHipHop)) {
       raise_bad_offset_notice();
     }
     break;
@@ -3545,7 +3547,9 @@ void Variant::remove(CVarRef key) {
 }
 
 void Variant::setStatic() const {
-  if (has_eval_support) return setEvalScalar();
+  if (!hhvm) {
+    if (has_eval_support) return setEvalScalar();
+  }
   switch (m_type) {
   case KindOfString:
     m_data.pstr->setStatic();
@@ -3768,7 +3772,7 @@ void Variant::unserialize(VariableUnserializer *uns) {
     }
     break;
   case 'o':
-    {
+    if (uns->getType() == VariableUnserializer::APCSerialize) {
       String clsName;
       clsName.unserialize(uns);
 
@@ -3791,6 +3795,8 @@ void Variant::unserialize(VariableUnserializer *uns) {
 
       obj->t___wakeup();
       return; // array has '}' terminating
+    } else {
+      throw Exception("Unknown type '%c'", type);
     }
     break;
   case 'O':
@@ -3834,14 +3840,36 @@ void Variant::unserialize(VariableUnserializer *uns) {
               }
             }
           }
-          Variant tmp;
-          Variant &value = subLen != 0 ?
-            (key.charAt(1) == '*' ?
-             obj->o_lval(key.substr(subLen), tmp, clsName) :
-             obj->o_lval(key.substr(subLen), tmp,
-                         String(key.data() + 1, subLen - 2, AttachLiteral)))
-            : obj->o_lval(key, tmp);
-          value.unserialize(uns);
+          String context = null_string;
+          if (subLen != 0) {
+            if (key.charAt(1) == '*') {
+              context = clsName;
+            } else {
+              context = String(key.data() + 1, subLen - 2, CopyString);
+            }
+            key = key.substr(subLen);
+          }
+          // Do a two-step look up
+          if (key.size() == 0) {
+            throw EmptyObjectPropertyException();
+          }
+          int flags = ObjectData::RealPropNoDynamic |
+                      ObjectData::RealPropWrite;
+          Variant *val = obj->o_realProp(key, flags, context);
+          if (!val) {
+            // Dynamic property. Need to box it and cache the inner pointer
+            // in case the outer Variant moves in the property array
+            Variant *outerVal = obj->o_realProp(key, ObjectData::RealPropCreate,
+                                                context);
+            if (!outerVal) {
+              // When accessing protected/private property from wrong context,
+              // we could get NULL for o_realProp.
+              throw Exception("Error in accessing property");
+            }
+            // promote outerVal and get the inner Variant*
+            val = outerVal->getVariantData();
+          }
+          val->unserialize(uns);
         }
       }
       sep = uns->readChar();

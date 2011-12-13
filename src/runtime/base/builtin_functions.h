@@ -331,6 +331,18 @@ String get_static_class_name(CVarRef objOrClassName);
 Variant f_call_user_func_array(CVarRef function, CArrRef params,
                                bool bound = false);
 
+const HPHP::VM::Func*
+vm_decode_function(CVarRef function,
+                   HPHP::VM::ActRec* ar,
+                   bool forwarding,
+                   ObjectData*& this_,
+                   HPHP::VM::Class*& cls,
+                   StringData*& invName,
+                   bool warn = true);
+HPHP::VM::ActRec* vm_get_previous_frame();
+Variant vm_call_user_func(CVarRef function, CArrRef params,
+                          bool forwarding = false);
+
 /**
  * The MethodCallPackage does not hold the reference of the class name or
  * the method name. Therefore caller must provide the holders.
@@ -359,11 +371,10 @@ inline Variant invoke_meth_few_handler(MethodCallPackage &mcp, CArrRef params,
                                    INVOKE_FEW_ARGS_IMPL_ARGS))few_args);
 }
 
-Variant invoke(CStrRef function, CArrRef params, int64 hash = -1,
-               bool tryInterp = true, bool fatal = true);
-
 Variant invoke(CVarRef function, CArrRef params,
                bool tryInterp = true, bool fatal = true);
+void hhvm_throw();
+
 /**
  * Invoking an arbitrary static method.
  */
@@ -424,6 +435,13 @@ Variant throw_wrong_arguments(const char *fn, int count, int cmin, int cmax,
                               int level = 0);
 Variant throw_missing_typed_argument(const char *fn, const char *type, int arg);
 Variant throw_assign_this();
+
+void throw_missing_arguments_nr(const char *fn, int num, int level = 0)
+  __attribute__((cold));
+void throw_toomany_arguments_nr(const char *fn, int num, int level = 0)
+  __attribute__((cold));
+void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
+                              int level = 0) __attribute__((cold));
 
 /**
  * When fatal coding errors are transformed to this function call.
@@ -659,6 +677,9 @@ public:
   void fail();
   void lateStaticBind(ThreadInfo *ti);
   const CallInfo *bindClass(FrameInjection &fi);
+  const CallInfo *bindClass(FrameInjectionVM &fi) {
+    assert(false);
+  }
   String getClassName();
 
   // Data members

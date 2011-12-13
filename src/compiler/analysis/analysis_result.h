@@ -370,6 +370,7 @@ public:
   void addNamedLiteralVarString(const std::string &s);
   void addNamedScalarVarArray(const std::string &s);
   StringToClassScopePtrVecMap getExtensionClasses();
+  void addInteger(int64 n) { m_allIntegers.insert(n); }
 private:
   Package *m_package;
   bool m_parseOnDemand;
@@ -405,6 +406,7 @@ private:
 
   Mutex m_namedScalarVarIntegersMutex;
   std::map<int, std::vector<std::string> > m_namedScalarVarIntegers;
+  std::set<int64> m_allIntegers;
 
   Mutex m_namedScalarVarDoublesMutex;
   std::map<int, std::vector<std::string> > m_namedScalarVarDoubles;
@@ -704,7 +706,7 @@ public:
 private:
   inline bool acquireImpl(BlockScopeRawPtr scopeToLock) {
     // A class scope can NEVER grab a lock on a function scope
-    BlockScopeRawPtr current =
+    BlockScopeRawPtr current ATTRIBUTE_UNUSED =
       *(AnalysisResult::s_currentScopeThreadLocal.get());
     ASSERT(current);
     ASSERT(!current->is(BlockScope::ClassScope) ||

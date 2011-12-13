@@ -307,6 +307,8 @@ bool ExpressionList::kidUnused(int i) const {
     return false;
   }
 
+  if (isUnused()) return true;
+
   if (m_kind == ListKindLeft) {
     return i != 0;
   }
@@ -563,7 +565,8 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     setCPPTemp(genCPPTemp(cg, ar));
     outputCPPInternal(cg, ar, true, true);
   } else {
-    unsigned ix = m_kind == ListKindLeft ? 0 : n - 1;
+    unsigned ix = isUnused() ? (unsigned)-1 :
+      m_kind == ListKindLeft ? 0 : n - 1;
     for (unsigned int i = 0; i < n; i++) {
       ExpressionPtr e = m_exps[i];
       e->preOutputCPP(cg, ar, i == ix ? state : 0);

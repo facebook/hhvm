@@ -158,7 +158,7 @@ extern const int64 q_DebuggerClient$$STATE_READY_FOR_COMMAND;
 extern const int64 q_DebuggerClient$$STATE_BUSY;
 
 FORWARD_DECLARE_CLASS_BUILTIN(DebuggerClient);
-class c_DebuggerClient : public ExtObjectData {
+class c_DebuggerClient : public ExtObjectData, public Sweepable {
  public:
   DECLARE_CLASS(DebuggerClient, DebuggerClient, ObjectData)
 

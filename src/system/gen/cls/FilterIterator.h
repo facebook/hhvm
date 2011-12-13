@@ -35,6 +35,8 @@ class c_FilterIterator : public c_IteratorIterator {
   // Properties
   Variant m_it;
 
+  // Destructor
+  ~c_FilterIterator() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(FilterIterator, FilterIterator, IteratorIterator)
   static const ClassPropTable os_prop_table;

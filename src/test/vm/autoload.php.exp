@@ -1,0 +1,9 @@
+__autoload D
+bool(false)
+my_autoload_func D
+bool(true)
+my_autoload_func C
+bool(false)
+my_autoload_func C
+__autoload C
+bool(true)

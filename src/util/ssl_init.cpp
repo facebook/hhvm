@@ -22,7 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static Mutex *s_locks;
+static Mutex *s_locks = NULL;
 
 static unsigned long callback_thread_id() {
   return (unsigned long)Process::GetThreadId();
@@ -36,8 +36,7 @@ static void callback_locking(int mode, int type, const char *file, int line) {
   }
 }
 
-static volatile bool s_isSSLInit = false;
-static Mutex s_lockSSLInit;
+static bool s_isSSLInited = false;
 
 class SSLUnitializer {
 public:
@@ -48,20 +47,18 @@ public:
 static SSLUnitializer s_ssl_uninitializer;
 
 void SSLInit::Init() {
-  if (!s_isSSLInit) {
-    s_lockSSLInit.lock();
-    if (!s_isSSLInit) {
-      s_isSSLInit = true;
-      s_locks = new Mutex[CRYPTO_num_locks()];
-      CRYPTO_set_id_callback((unsigned long (*)())callback_thread_id);
-      CRYPTO_set_locking_callback(
-        (void (*)(int mode, int type, const char *file, int line))
-        callback_locking);
-    }
-    s_lockSSLInit.unlock();
-  }
+  ASSERT(!s_isSSLInited);
+  s_locks = new Mutex[CRYPTO_num_locks()];
+  CRYPTO_set_id_callback((unsigned long (*)())callback_thread_id);
+  CRYPTO_set_locking_callback(
+    (void (*)(int mode, int type, const char *file, int line))
+    callback_locking);
+  s_isSSLInited = true;
 }
 
+bool SSLInit::IsInited() {
+  return s_isSSLInited;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

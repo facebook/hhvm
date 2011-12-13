@@ -31,7 +31,7 @@ extern const VarNR &s_sys_svi5830e7c6;
 FORWARD_DECLARE_CLASS(ReflectionMethod);
 FORWARD_DECLARE_CLASS(ReflectionProperty);
 
-/* SRC: classes/reflection.php line 538 */
+/* SRC: classes/reflection.php line 540 */
 FORWARD_DECLARE_CLASS(ReflectionClass);
 extern const ObjectStaticCallbacks cw_ReflectionClass;
 class c_ReflectionClass : public ExtObjectData {
@@ -41,6 +41,8 @@ class c_ReflectionClass : public ExtObjectData {
   Variant m_name;
   Variant m_info;
 
+  // Destructor
+  ~c_ReflectionClass() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionClass, ReflectionClass, ObjectData)
   static const ClassPropTable os_prop_table;
@@ -48,11 +50,13 @@ class c_ReflectionClass : public ExtObjectData {
   public: void t___construct(Variant v_name);
   public: c_ReflectionClass *create(CVarRef v_name);
   public: Variant t_fetch(CVarRef v_what);
+  public: static Variant t_fetch_recur(CVarRef v_name);
+  public: bool t_check(CVarRef v_what);
   public: bool t_test(CVarRef v_what, CVarRef v_name);
   public: String t___tostring();
   public: static Variant t_export(CVarRef v_name, CVarRef v_ret);
   public: Variant t_getname();
-  public: Variant t_isinternal();
+  public: bool t_isinternal();
   public: bool t_isuserdefined();
   public: bool t_isinstantiable();
   public: bool t_hasconstant(CVarRef v_name);
@@ -74,10 +78,10 @@ class c_ReflectionClass : public ExtObjectData {
   public: Array t_getinterfacenames();
   public: Array t_gettraitnames();
   public: Array t_gettraitaliases();
-  public: Variant t_isinterface();
-  public: Variant t_isabstract();
-  public: Variant t_isfinal();
-  public: Variant t_istrait();
+  public: bool t_isinterface();
+  public: bool t_isabstract();
+  public: bool t_isfinal();
+  public: bool t_istrait();
   public: Variant t_getmodifiers();
   public: bool t_isinstance(CVarRef v_obj);
   public: Object t_newinstance(int num_args, Array args = Array());
@@ -94,6 +98,8 @@ class c_ReflectionClass : public ExtObjectData {
   public: Variant t_getextensionname();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   DECLARE_METHOD_INVOKE_HELPERS(fetch);
+  DECLARE_METHOD_INVOKE_HELPERS(fetch_recur);
+  DECLARE_METHOD_INVOKE_HELPERS(check);
   DECLARE_METHOD_INVOKE_HELPERS(test);
   DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   DECLARE_METHOD_INVOKE_HELPERS(export);

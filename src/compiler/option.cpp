@@ -74,6 +74,9 @@ set<string> Option::VolatileClasses;
 
 map<string, string> Option::FunctionSections;
 
+bool Option::GenerateTextHHBC = false;
+bool Option::GenerateBinaryHHBC = false;
+
 #if defined(HPHP_OSS)
 string Option::IdPrefix = "___";
 string Option::LabelEscape = "___";

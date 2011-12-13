@@ -135,6 +135,7 @@ public:
   static int ExpiresDefault;
   static std::string DefaultCharsetName;
   static bool ForceServerNameToHeader;
+  static bool EnableCufAsync;
   static VirtualHostPtrVec VirtualHosts;
   static IpBlockMapPtr IpBlocks;
   static SatelliteServerInfoPtrVec SatelliteServerInfos;
@@ -287,7 +288,6 @@ public:
   static bool CheckMemory;
   static bool UseHphpArray;
   static bool UseSmallArray;
-  static bool UseArgArray;
   static bool UseDirectCopy;
   static bool EnableApc;
   static bool EnableConstLoad;
@@ -351,6 +351,15 @@ public:
   static bool EnableStrict;
   static int StrictLevel;
   static bool StrictFatal;
+  static bool EvalJit;
+  static bool EvalJitNoGdb;
+  static bool EvalJitStressLease;
+  static bool EvalJitKeepDbgFiles;
+  static bool EvalJitEnableRenameFunction;
+  static bool EvalThreadingJit;
+  static bool EvalDumpBytecode;
+  static bool EvalDumpAst;
+  static bool EvalPeephole;
   static bool RecordCodeCoverage;
   static std::string CodeCoverageOutputFile;
 

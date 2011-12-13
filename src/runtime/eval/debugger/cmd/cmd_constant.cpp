@@ -65,9 +65,9 @@ bool CmdConstant::onClient(DebuggerClient *client) {
   } else {
     int i = 0;
     bool found = false;
-    Variant constants = cmd->m_constants;
-    f_ksort(ref(constants));
-    for (ArrayIter iter(constants); iter; ++iter) {
+    m_constants = cmd->m_constants;
+    f_ksort(ref(m_constants));
+    for (ArrayIter iter(m_constants); iter; ++iter) {
       String name = iter.first().toString();
       String value = DebuggerClient::FormatVariable(iter.second(), 200);
       if (!text.empty()) {
@@ -83,7 +83,7 @@ bool CmdConstant::onClient(DebuggerClient *client) {
         if (!client->isApiMode() &&
             i % DebuggerClient::ScrollBlockSize == 0 &&
             client->ask("There are %d more constants. Continue? [Y/n]",
-                        constants.toArray().size() - i) == 'n') {
+                        m_constants.size() - i) == 'n') {
           break;
         }
       }
@@ -95,6 +95,21 @@ bool CmdConstant::onClient(DebuggerClient *client) {
   }
 
   return true;
+}
+
+void CmdConstant::setClientOutput(DebuggerClient *client) {
+  client->setOutputType(DebuggerClient::OTValues);
+  Array values;
+  for (ArrayIter iter(m_constants); iter; ++iter) {
+    String name = iter.first().toString();
+    if (client->getDebuggerApiModeSerialize()) {
+      values.set(name,
+                 DebuggerClient::FormatVariable(iter.second(), 200));
+    } else {
+      values.set(name, iter.second());
+    }
+  }
+  client->setOTValues(values);
 }
 
 bool CmdConstant::onServer(DebuggerProxy *proxy) {

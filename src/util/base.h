@@ -52,6 +52,7 @@
 #include <set>
 #include <deque>
 #include <exception>
+#include <tr1/functional>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -60,6 +61,7 @@
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/type_traits.hpp>
 
 #include <util/hash.h>
 
@@ -109,6 +111,22 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // debugging
 
+static const bool debug =
+#ifdef DEBUG
+  true
+#else
+  false
+#endif
+  ;
+
+static const bool hhvm =
+#ifdef HHVM
+  true
+#else
+  false
+#endif
+  ;
+
 #include <assert.h>
 
 #ifdef RELEASE
@@ -120,6 +138,34 @@ namespace HPHP {
 #else
 #define ASSERT(x) assert(x)
 #endif
+
+// Usage example: const_assert(hhvm);
+#define const_assert(c) do {                                                  \
+  if (!(c)) {                                                                 \
+    assert(false);                                                            \
+  }                                                                           \
+} while (0)
+
+#define not_reached() /* gcc-4.5 supports __builtin_unreachable() */ \
+  assert(false)
+
+#define NOT_REACHED not_reached
+
+#define not_implemented() do {                   \
+  fprintf(stderr, "not implemented: %s:%d %s\n", \
+          __FILE__, __LINE__, __FUNCTION__);     \
+  assert(false);                                 \
+  not_reached();                                 \
+} while(0)
+
+#define assert_not_implemented(pred) do {        \
+  if (! (pred) ) {                               \
+    not_implemented();                           \
+  }                                              \
+} while(0)
+
+#define ASSERT_NOT_IMPLEMENTED assert_not_implemented
+#define NOT_IMPLEMENTED        not_implemented
 
 ///////////////////////////////////////////////////////////////////////////////
 // system includes
@@ -299,6 +345,112 @@ typedef boost::shared_ptr<std::vector<std::string> > StringVecPtr;
 typedef std::pair<std::string, std::string> StringPair;
 typedef std::set<std::pair<std::string, std::string> > StringPairSet;
 typedef std::vector<StringPairSet> StringPairSetVec;
+
+// Convenience functions to avoid boilerplate checks for map<>::end() after
+// map<>::find().
+
+template<typename Map>
+bool
+mapContains(const Map& m,
+            const typename Map::key_type& k) {
+  return m.find(k) != m.end();
+}
+
+template<typename Map>
+typename Map::mapped_type
+mapGet(const Map& m,
+       const typename Map::key_type& k,
+       const typename Map::mapped_type& defaultVal =
+                      typename Map::mapped_type()) {
+  typename Map::const_iterator i = m.find(k);
+  if (i == m.end()) return defaultVal;
+  return i->second;
+}
+
+template<typename Map>
+bool
+mapGet(const Map& m,
+       const typename Map::key_type& k,
+       typename Map::mapped_type* outResult) {
+  typename Map::const_iterator i = m.find(k);
+  if (i == m.end()) return false;
+  if (outResult) *outResult = i->second;
+  return true;
+}
+
+template<typename Map>
+bool
+mapGetPtr(Map& m,
+          const typename Map::key_type& k,
+          typename Map::mapped_type** outResult) {
+  typename Map::iterator i = m.find(k);
+  if (i == m.end()) return false;
+  if (outResult) *outResult = &i->second;
+  return true;
+}
+
+template<typename Map>
+void
+mapInsert(Map& m,
+          const typename Map::key_type& k,
+          const typename Map::mapped_type& d) {
+  m.insert(typename Map::value_type(k, d));
+}
+
+// Known-unique insertion.
+template<typename Map>
+void
+mapInsertUnique(Map& m,
+                const typename Map::key_type& k,
+                const typename Map::mapped_type& d) {
+  ASSERT(!mapContains(m, k));
+  mapInsert(m, k, d);
+}
+
+// Deep-copy a container of dynamically allocated pointers. Assumes copy
+// constructors do the right thing.
+template<typename Container>
+void
+cloneMembers(Container& c) {
+  for (typename Container::iterator i = c.begin();
+       i != c.end(); ++i) {
+    typedef typename Container::value_type Pointer;
+    typedef typename boost::remove_pointer<Pointer>::type Inner;
+    *i = new Inner(**i);
+  }
+}
+
+// invoke operator delete on the contents of a container.
+template<typename Container>
+void
+destroyMembers(Container& c) {
+  for (typename Container::iterator i = c.begin();
+       i != c.end(); ++i) {
+    delete *i;
+  }
+}
+
+template<typename Container>
+void
+destroyMapValues(Container& c) {
+  for (typename Container::iterator i = c.begin();
+       i != c.end(); ++i) {
+    delete i->second;
+  }
+}
+
+// Arbitrary callback when a scope exits.
+struct ScopeGuard {
+  typedef std::tr1::function<void()> Callback;
+
+  ScopeGuard(void(*cbFptr)()) : m_cb(Callback(cbFptr)) { }
+  ScopeGuard(Callback cb) : m_cb(cb) { }
+  ~ScopeGuard() { m_cb(); }
+private:
+  Callback m_cb;
+};
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // boost

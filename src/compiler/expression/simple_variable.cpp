@@ -40,7 +40,7 @@ SimpleVariable::SimpleVariable
     m_sym(NULL), m_originalSym(NULL),
     m_this(false), m_globals(false),
     m_superGlobal(false), m_alwaysStash(false),
-    m_guardedThis(false) {
+    m_guarded(false) {
   setContext(Expression::NoLValueWrapper);
 }
 

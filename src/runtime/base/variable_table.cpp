@@ -31,11 +31,11 @@ Variant &LVariableTable::getImpl(CStrRef s) {
 }
 
 Array RVariableTable::getDefinedVars() const {
-  return *this;
+  return m_px ? Array(*this) : Array::Create();
 }
 
 Array LVariableTable::getDefinedVars() {
-  return *this;
+  return m_px ? *this : Array::Create();
 }
 
 

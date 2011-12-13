@@ -27,7 +27,6 @@
 #include <runtime/ext/ext_icu.h>
 #include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/base/intercept.h>
-#include <runtime/base/array/arg_array.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,7 +50,6 @@ void init_thread_locals(void *arg /* = NULL */) {
   s_hasRenamedFunction.getCheck();
   if (has_eval_support) {
     Eval::VariableEnvironment::InitTempStack();
-    ArgArray::s_stack.getCheck();
   }
 }
 

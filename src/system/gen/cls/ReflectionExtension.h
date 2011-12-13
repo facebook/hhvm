@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 1869 */
+/* SRC: classes/reflection.php line 1887 */
 FORWARD_DECLARE_CLASS(ReflectionExtension);
 extern const ObjectStaticCallbacks cw_ReflectionExtension;
 class c_ReflectionExtension : public ExtObjectData {
@@ -36,6 +36,8 @@ class c_ReflectionExtension : public ExtObjectData {
   Variant m_name;
   Variant m_info;
 
+  // Destructor
+  ~c_ReflectionExtension() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionExtension, ReflectionExtension, ObjectData)
   static const ClassPropTable os_prop_table;

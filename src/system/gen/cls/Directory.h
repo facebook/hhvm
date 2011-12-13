@@ -35,6 +35,8 @@ class c_Directory : public ExtObjectData {
   Variant m_path;
   Variant m_handle;
 
+  // Destructor
+  ~c_Directory() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(Directory, Directory, ObjectData)
   static const ClassPropTable os_prop_table;

@@ -29,6 +29,8 @@
 #include <unicode/utypes.h>
 #include <unicode/unorm.h>
 
+#include <system/lib/systemlib.h>
+
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(idn);
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,6 +86,7 @@ const int64 q_Collator$$UPPER_FIRST = UCOL_UPPER_FIRST;
 
 c_Collator::c_Collator(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb), m_locale(), m_ucoll(NULL), m_errcode() {
+  CPP_BUILTIN_CLASS_INIT(Collator);
 }
 
 c_Collator::~c_Collator() {
@@ -551,6 +554,7 @@ const int64 q_Locale$$VALID_LOCALE = 1;
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Locale::c_Locale(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
+  CPP_BUILTIN_CLASS_INIT(Locale);
 }
 
 c_Locale::~c_Locale() {
@@ -579,6 +583,7 @@ const int64 q_Normalizer$$NFKC     = UNORM_NFKC;
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Normalizer::c_Normalizer(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
+  CPP_BUILTIN_CLASS_INIT(Normalizer);
 }
 
 c_Normalizer::~c_Normalizer() {

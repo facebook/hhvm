@@ -50,6 +50,11 @@ public:
   virtual ~Exception() throw();
   virtual const char *what() const throw();
 
+  virtual Exception* clone() {
+    return new Exception(*this);
+  }
+  virtual void throwException() { throw *this; }
+
   /**
    * Error message without stacktrace.
    */
@@ -70,6 +75,10 @@ public:
   FileOpenException(const char *filename)
       : Exception("Unable to open file %s", filename) {
   }
+  virtual FileOpenException *clone() {
+    return new FileOpenException(*this);
+  }
+  virtual void throwException() { throw *this; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

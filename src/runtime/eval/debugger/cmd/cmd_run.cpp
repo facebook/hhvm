@@ -59,11 +59,13 @@ bool CmdRun::onClient(DebuggerClient *client) {
   if (DebuggerCommand::onClient(client)) return true;
 
   m_args = StringVecPtr(client->args(), null_deleter());
+  m_smallStep = client->getDebuggerSmallStep();
   client->send(this);
   throw DebuggerConsoleExitException();
 }
 
 bool CmdRun::onServer(DebuggerProxy *proxy) {
+  g_context->setDebuggerSmallStep(m_smallStep);
   throw DebuggerRestartException(m_args);
 }
 

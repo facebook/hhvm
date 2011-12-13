@@ -16,6 +16,11 @@
 
 #include <system/lib/systemlib.h>
 #include <runtime/base/hphp_system.h>
+#include <runtime/base/complex_types.h>
+#include <runtime/vm/unit.h>
+#include <runtime/vm/class.h>
+#include <runtime/base/tv_macros.h>
+#include <runtime/vm/instance.h>
 #include <system/gen/php/classes/exception.h>
 #include <system/gen/php/classes/stdclass.h>
 #include <system/gen/php/classes/soapfault.h>
@@ -23,20 +28,70 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifdef HHVM
+#define ALLOC_OBJECT_STUB_RETURN(name)                                    \
+  HPHP::VM::Instance::newInstance(SystemLib::s_##name##Class)
+#else
+#define ALLOC_OBJECT_STUB_RETURN(name)                                    \
+  NEWOBJ(c_##name)()
+#endif
+#define ALLOC_OBJECT_STUB(name)                                           \
+  HPHP::VM::Class* SystemLib::s_##name##Class = NULL;                     \
+  ObjectData* SystemLib::Alloc##name##Object() {                          \
+    return ALLOC_OBJECT_STUB_RETURN(name);                                \
+  }
+
+bool SystemLib::s_inited = false;
+HPHP::Eval::PhpFile* SystemLib::s_phpFile = NULL;
+HPHP::VM::Unit* SystemLib::s_unit = NULL;
+HPHP::VM::Class* SystemLib::s_stdclassClass = NULL;
+HPHP::VM::Class* SystemLib::s_ExceptionClass = NULL;
+HPHP::VM::Class* SystemLib::s_pinitSentinelClass = NULL;
+HPHP::VM::Class* SystemLib::s_resourceClass = NULL;
+HPHP::VM::Class* SystemLib::s_DOMExceptionClass = NULL;
+HPHP::VM::Class* SystemLib::s_SoapFaultClass = NULL;
+
 ObjectData* SystemLib::AllocStdClassObject() {
-  return NEWOBJ(c_stdClass)();
+  if (hhvm) {
+    return HPHP::VM::Instance::newInstance(SystemLib::s_stdclassClass);
+  } else {
+    return NEWOBJ(c_stdClass)();
+  }
 }
 
+ObjectData* SystemLib::AllocPinitSentinel() {
+  const_assert(hhvm);
+  return HPHP::VM::Instance::newInstance(SystemLib::s_pinitSentinelClass);
+}
+
+#define CREATE_AND_CONSTRUCT(clsname, params)                               \
+  HPHP::VM::Instance* inst =                                                \
+    HPHP::VM::Instance::newInstance(SystemLib::s_##clsname##Class);         \
+  TypedValue sink;                                                          \
+  /* Increment refcount across call to ctor, so the object doesn't get */   \
+  /* destroyed when ctor's frame is torn down */                            \
+  inst->incRefCount();                                                      \
+  inst->invokeUserMethod(&sink, SystemLib::s_##clsname##Class->m_ctor.func, \
+                         params);                                           \
+  inst->decRefCount();                                                      \
+  ASSERT(inst->getCount() == 0);                                            \
+  return inst;
+
+
 ObjectData* SystemLib::AllocExceptionObject(CVarRef message) {
-  return (NEWOBJ(c_Exception)())->create(message);
+  if (hhvm) {
+    CREATE_AND_CONSTRUCT(Exception, CREATE_VECTOR1(message));
+  } else {
+    return (NEWOBJ(c_Exception)())->create(message);
+  }
 }
 
 ObjectData* SystemLib::AllocDOMExceptionObject(CVarRef message, CVarRef code) {
-  return (NEWOBJ(c_DOMException)())->create(message, code);
-}
-
-ObjectData* SystemLib::AllocPDOExceptionObject() {
-  return (NEWOBJ(c_PDOException)())->create();
+  if (hhvm) {
+    CREATE_AND_CONSTRUCT(DOMException, CREATE_VECTOR2(message, code));
+  } else {
+    return (NEWOBJ(c_DOMException)())->create(message, code);
+  }
 }
 
 ObjectData*
@@ -46,9 +101,22 @@ SystemLib::AllocSoapFaultObject(CVarRef code,
                                 CVarRef detail /* = null_variant */,
                                 CVarRef name /* = null_variant */,
                                 CVarRef header /* = null_variant */) {
-  return (NEWOBJ(c_SoapFault)())->create(code, message, actor, detail, name,
-                                         header);
+  if (hhvm) {
+    CREATE_AND_CONSTRUCT(SoapFault, CREATE_VECTOR6(code, message, actor,
+                                                   detail, name, header));
+  } else {
+    return (NEWOBJ(c_SoapFault)())->create(code, message, actor, detail, name,
+                                           header);
+  }
 }
+
+#undef CREATE_AND_CONSTRUCT
+
+ALLOC_OBJECT_STUB(Directory);
+ALLOC_OBJECT_STUB(RecursiveDirectoryIterator);
+ALLOC_OBJECT_STUB(SplFileInfo);
+ALLOC_OBJECT_STUB(SplFileObject);
+ALLOC_OBJECT_STUB(PDOException);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

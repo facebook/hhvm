@@ -264,7 +264,19 @@ bool TestUtil::TestCanonicalize() {
 
 bool TestUtil::TestHDF() {
   // This was causing a crash
-  Hdf doc, node;
-  node = doc["Node"];
+  {
+    Hdf doc, node;
+    node = doc["Node"];
+  }
+
+  {
+    Hdf doc;
+    doc.fromString(
+      "node.* {\n"
+      "  name = value\n"
+      "}");
+    VS(doc["node"][0]["name"].getString(), "value");
+  }
+
   return Count(true);
 }

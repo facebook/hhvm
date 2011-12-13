@@ -396,30 +396,67 @@ std::string Util::safe_strerror(int errnum) {
 #endif
 }
 
-std::string Util::safe_dirname(const char *path) {
-  char* tmp_path = strdup(path);
-  std::string ret;
-
-  {
-    Lock lock(s_file_mutex);
-    char* dir = dirname(tmp_path);
-    ASSERT(dir);
-    ret.assign(dir);
+size_t Util::dirname_helper(char *path, int len) {
+  if (len == 0) {
+    /* Illegal use of this function */
+    return 0;
   }
 
+  /* Strip trailing slashes */
+  register char *end = path + len - 1;
+  while (end >= path && *end == '/') {
+    end--;
+  }
+  if (end < path) {
+    /* The path only contained slashes */
+    path[0] = '/';
+    path[1] = '\0';
+    return 1;
+  }
+
+  /* Strip filename */
+  while (end >= path && *end != '/') {
+    end--;
+  }
+  if (end < path) {
+    /* No slash found, therefore return '.' */
+    path[0] = '.';
+    path[1] = '\0';
+    return 1;
+  }
+
+  /* Strip slashes which came before the file name */
+  while (end >= path && *end == '/') {
+    end--;
+  }
+  if (end < path) {
+    path[0] = '/';
+    path[1] = '\0';
+    return 1;
+  }
+  *(end+1) = '\0';
+
+  return end + 1 - path;
+}
+
+std::string Util::safe_dirname(const char *path, int len) {
+  char* tmp_path = (char*)malloc(len+1);
+  memcpy(tmp_path, path, len);
+  tmp_path[len] = '\0';
+  size_t newLen = dirname_helper(tmp_path, len);
+  std::string ret;
+  ret.assign(tmp_path, newLen);
   free((void *) tmp_path);
   return ret;
 }
 
-bool Util::isPowerOfTwo(int value) {
-  return (value > 0 && (value & (value-1)) == 0);
+std::string Util::safe_dirname(const char *path) {
+  int len = strlen(path);
+  return safe_dirname(path, len);
 }
 
-int Util::roundUpToPowerOfTwo(int value) {
-  while (value & (value - 1)) {
-    value = (value | (value - 1)) + 1;
-  }
-  return (value);
+std::string Util::safe_dirname(const std::string& path) {
+  return safe_dirname(path.c_str(), path.size());
 }
 
 std::string Util::relativePath(const std::string fromDir,

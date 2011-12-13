@@ -19,6 +19,7 @@
 #include <runtime/ext/ext_function.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/zend/zend_collator.h>
+#include <runtime/base/builtin_functions.h>
 #include <util/logger.h>
 
 #define SORT_REGULAR            0
@@ -97,17 +98,26 @@ Variant f_array_fill_keys(CVarRef keys, CVarRef value) {
 }
 
 static bool filter_func(CVarRef value, const void *data) {
-  MethodCallPackage *mcp = (MethodCallPackage *)data;
-  if (mcp->m_isFunc) {
-    if (CallInfo::FuncInvoker1Args invoker = mcp->ci->getFunc1Args()) {
-      return invoker(mcp->extra, 1, value);
-    }
-    return (mcp->ci->getFunc())(mcp->extra, CREATE_VECTOR1(value));
+  if (hhvm) {
+    HPHP::VM::CallCtx* ctx = (HPHP::VM::CallCtx*)data;
+    Variant ret;
+    g_context->invokeFunc((TypedValue*)&ret, ctx->func, CREATE_VECTOR1(value),
+                          ctx->this_, ctx->cls,
+                          NULL, ctx->invName);
+    return ret.toBoolean();
   } else {
-    if (CallInfo::MethInvoker1Args invoker = mcp->ci->getMeth1Args()) {
-      return invoker(*mcp, 1, value);
+    MethodCallPackage *mcp = (MethodCallPackage *)data;
+    if (mcp->m_isFunc) {
+      if (CallInfo::FuncInvoker1Args invoker = mcp->ci->getFunc1Args()) {
+        return invoker(mcp->extra, 1, value);
+      }
+      return (mcp->ci->getFunc())(mcp->extra, CREATE_VECTOR1(value));
+    } else {
+      if (CallInfo::MethInvoker1Args invoker = mcp->ci->getMeth1Args()) {
+        return invoker(*mcp, 1, value);
+      }
+      return (mcp->ci->getMeth())(*mcp, CREATE_VECTOR1(value));
     }
-    return (mcp->ci->getMeth())(*mcp, CREATE_VECTOR1(value));
   }
 }
 Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
@@ -116,21 +126,32 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
   if (callback.isNull()) {
     return ArrayUtil::Filter(arr_input);
   }
-  MethodCallPackage mcp;
-  String classname, methodname;
-  bool doBind;
-  if (!get_user_func_handler(callback, true,
-                             mcp, classname, methodname, doBind)) {
-    return null;
-  }
-  if (doBind) {
-    // If 'doBind' is true, we need to set the late bound class before
-    // calling the user callback
-    FrameInjection::StaticClassNameHelper scn(
-      ThreadInfo::s_threadInfo.getNoCheck(), classname);
-    return ArrayUtil::Filter(arr_input, filter_func, &mcp);
+  if (hhvm) {
+    HPHP::VM::CallCtx ctx;
+    HPHP::VM::ActRec* ar = vm_get_previous_frame();
+    ctx.func = vm_decode_function(callback, ar, false, ctx.this_, ctx.cls,
+                                  ctx.invName);
+    if (ctx.func == NULL) {
+      return null;
+    }
+    return ArrayUtil::Filter(arr_input, filter_func, &ctx);
   } else {
-    return ArrayUtil::Filter(arr_input, filter_func, &mcp);
+    MethodCallPackage mcp;
+    String classname, methodname;
+    bool doBind;
+    if (!get_user_func_handler(callback, true,
+                               mcp, classname, methodname, doBind)) {
+      return null;
+    }
+    if (doBind) {
+      // If 'doBind' is true, we need to set the late bound class before
+      // calling the user callback
+      FrameInjection::StaticClassNameHelper scn(
+        ThreadInfo::s_threadInfo.getNoCheck(), classname);
+      return ArrayUtil::Filter(arr_input, filter_func, &mcp);
+    } else {
+      return ArrayUtil::Filter(arr_input, filter_func, &mcp);
+    }
   }
 }
 
@@ -171,17 +192,32 @@ Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
 }
 
 static Variant map_func(CArrRef params, const void *data) {
-  if (!data) {
-    if (params.size() == 1) {
-      return params[0];
+  if (hhvm) {
+    HPHP::VM::CallCtx* ctx = (HPHP::VM::CallCtx*)data;
+    if (ctx == NULL) {
+      if (params.size() == 1) {
+        return params[0];
+      }
+      return params;
     }
-    return params;
-  }
-  MethodCallPackage *mcp = (MethodCallPackage *)data;
-  if (mcp->m_isFunc) {
-    return (mcp->ci->getFunc())(mcp->extra, params);
+    Variant ret;
+    g_context->invokeFunc((TypedValue*)&ret, ctx->func, params,
+                          ctx->this_, ctx->cls,
+                          NULL, ctx->invName);
+    return ret;
   } else {
-    return (mcp->ci->getMeth())(*mcp, params);
+    if (!data) {
+      if (params.size() == 1) {
+        return params[0];
+      }
+      return params;
+    }
+    MethodCallPackage *mcp = (MethodCallPackage *)data;
+    if (mcp->m_isFunc) {
+      return (mcp->ci->getFunc())(mcp->extra, params);
+    } else {
+      return (mcp->ci->getMeth())(*mcp, params);
+    }
   }
 }
 Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* = null_array */) {
@@ -194,22 +230,36 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
   if (!_argv.empty()) {
     inputs = inputs.merge(_argv);
   }
-  MethodCallPackage mcp;
-  String classname, methodname;
-  bool doBind;
-  if (callback.isNull() ||
-      !get_user_func_handler(callback, true,
-                             mcp, classname, methodname, doBind)) {
-    return ArrayUtil::Map(inputs, map_func, NULL);
-  }
-  if (doBind) {
-    // If 'doBind' is true, we need to set the late bound class before
-    // calling the user callback
-    FrameInjection::StaticClassNameHelper scn(
-      ThreadInfo::s_threadInfo.getNoCheck(), classname);
-    return ArrayUtil::Map(inputs, map_func, &mcp);
+  if (hhvm) {
+    HPHP::VM::CallCtx ctx;
+    ctx.func = NULL;
+    if (!callback.isNull()) {
+      HPHP::VM::ActRec* ar = vm_get_previous_frame();
+      ctx.func = vm_decode_function(callback, ar, false, ctx.this_, ctx.cls,
+                                    ctx.invName);
+    }
+    if (ctx.func == NULL) {
+      return ArrayUtil::Map(inputs, map_func, NULL);
+    }
+    return ArrayUtil::Map(inputs, map_func, &ctx);
   } else {
-    return ArrayUtil::Map(inputs, map_func, &mcp);
+    MethodCallPackage mcp;
+    String classname, methodname;
+    bool doBind;
+    if (callback.isNull() ||
+        !get_user_func_handler(callback, true,
+                               mcp, classname, methodname, doBind)) {
+      return ArrayUtil::Map(inputs, map_func, NULL);
+    }
+    if (doBind) {
+      // If 'doBind' is true, we need to set the late bound class before
+      // calling the user callback
+      FrameInjection::StaticClassNameHelper scn(
+        ThreadInfo::s_threadInfo.getNoCheck(), classname);
+      return ArrayUtil::Map(inputs, map_func, &mcp);
+    } else {
+      return ArrayUtil::Map(inputs, map_func, &mcp);
+    }
   }
 }
 
@@ -396,37 +446,57 @@ Variant f_array_rand(CVarRef input, int num_req /* = 1 */) {
 }
 
 static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
-  MethodCallPackage *mcp = (MethodCallPackage *)data;
-  if (mcp->m_isFunc) {
-    if (CallInfo::FuncInvoker2Args invoker = mcp->ci->getFunc2Args()) {
-      return invoker(mcp->extra, 2, result, operand);
-    }
-    return (mcp->ci->getFunc())(mcp->extra, CREATE_VECTOR2(result, operand));
+  if (hhvm) {
+    HPHP::VM::CallCtx* ctx = (HPHP::VM::CallCtx*)data;
+    Variant ret;
+    g_context->invokeFunc((TypedValue*)&ret, ctx->func,
+                          CREATE_VECTOR2(result, operand), ctx->this_, ctx->cls,
+                          NULL, ctx->invName);
+    return ret;
   } else {
-    if (CallInfo::MethInvoker2Args invoker = mcp->ci->getMeth2Args()) {
-      return invoker(*mcp, 2, result, operand);
+    MethodCallPackage *mcp = (MethodCallPackage *)data;
+    if (mcp->m_isFunc) {
+      if (CallInfo::FuncInvoker2Args invoker = mcp->ci->getFunc2Args()) {
+        return invoker(mcp->extra, 2, result, operand);
+      }
+      return (mcp->ci->getFunc())(mcp->extra, CREATE_VECTOR2(result, operand));
+    } else {
+      if (CallInfo::MethInvoker2Args invoker = mcp->ci->getMeth2Args()) {
+        return invoker(*mcp, 2, result, operand);
+      }
+      return (mcp->ci->getMeth())(*mcp, CREATE_VECTOR2(result, operand));
     }
-    return (mcp->ci->getMeth())(*mcp, CREATE_VECTOR2(result, operand));
   }
 }
 Variant f_array_reduce(CVarRef input, CVarRef callback,
                        CVarRef initial /* = null_variant */) {
   getCheckedArray(input);
-  MethodCallPackage mcp;
-  String classname, methodname;
-  bool doBind;
-  if (!get_user_func_handler(callback, true,
-                             mcp, classname, methodname, doBind)) {
-    return null;
-  }
-  if (doBind) {
-    // If 'doBind' is true, we need to set the late bound class before
-    // calling the user callback
-    FrameInjection::StaticClassNameHelper scn(
-      ThreadInfo::s_threadInfo.getNoCheck(), classname);
-    return ArrayUtil::Reduce(arr_input, reduce_func, &mcp, initial);
+  if (hhvm) {
+    HPHP::VM::CallCtx ctx;
+    HPHP::VM::ActRec* ar = vm_get_previous_frame();
+    ctx.func = vm_decode_function(callback, ar, false, ctx.this_, ctx.cls,
+                                  ctx.invName);
+    if (ctx.func == NULL) {
+      return null;
+    }
+    return ArrayUtil::Reduce(arr_input, reduce_func, &ctx, initial);
   } else {
-    return ArrayUtil::Reduce(arr_input, reduce_func, &mcp, initial);
+    MethodCallPackage mcp;
+    String classname, methodname;
+    bool doBind;
+    if (!get_user_func_handler(callback, true,
+                               mcp, classname, methodname, doBind)) {
+      return null;
+    }
+    if (doBind) {
+      // If 'doBind' is true, we need to set the late bound class before
+      // calling the user callback
+      FrameInjection::StaticClassNameHelper scn(
+        ThreadInfo::s_threadInfo.getNoCheck(), classname);
+      return ArrayUtil::Reduce(arr_input, reduce_func, &mcp, initial);
+    } else {
+      return ArrayUtil::Reduce(arr_input, reduce_func, &mcp, initial);
+    }
   }
 }
 
@@ -514,31 +584,40 @@ Variant f_array_values(CVarRef input) {
 
 static void walk_func(VRefParam value, CVarRef key, CVarRef userdata,
                       const void *data) {
-  MethodCallPackage *mcp = (MethodCallPackage *)data;
-  // Here to avoid crash in interpreter, we need to use different variation
-  // in 'FewArgs' cases
-  if (mcp->m_isFunc) {
-    if (mcp->ci->getFuncFewArgs()) { // To test whether we have FewArgs
-      if (userdata.isNull()) {
-        (mcp->ci->getFunc2Args())(mcp->extra, 2, value, key);
-      } else{
-        (mcp->ci->getFunc3Args())(mcp->extra, 3, value, key, userdata);
-      }
-      return;
-    }
-    (mcp->ci->getFunc())(mcp->extra, CREATE_VECTOR3(ref(value), key,
-                         userdata));
+  if (hhvm) {
+    HPHP::VM::CallCtx* ctx = (HPHP::VM::CallCtx*)data;
+    Variant sink;
+    g_context->invokeFunc((TypedValue*)&sink, ctx->func,
+                          CREATE_VECTOR3(ref(value), key, userdata),
+                          ctx->this_, ctx->cls,
+                          NULL, ctx->invName);
   } else {
-    if (mcp->ci->getMethFewArgs()) { // To test whether we have FewArgs
-      if (userdata.isNull()) {
-        (mcp->ci->getMeth2Args())(*mcp, 2, value, key);
-      } else {
-        (mcp->ci->getMeth3Args())(*mcp, 3, value, key, userdata);
+    MethodCallPackage *mcp = (MethodCallPackage *)data;
+    // Here to avoid crash in interpreter, we need to use different variation
+    // in 'FewArgs' cases
+    if (mcp->m_isFunc) {
+      if (mcp->ci->getFuncFewArgs()) { // To test whether we have FewArgs
+        if (userdata.isNull()) {
+          (mcp->ci->getFunc2Args())(mcp->extra, 2, value, key);
+        } else{
+          (mcp->ci->getFunc3Args())(mcp->extra, 3, value, key, userdata);
+        }
+        return;
       }
-      return;
+      (mcp->ci->getFunc())(mcp->extra, CREATE_VECTOR3(ref(value), key,
+                           userdata));
+    } else {
+      if (mcp->ci->getMethFewArgs()) { // To test whether we have FewArgs
+        if (userdata.isNull()) {
+          (mcp->ci->getMeth2Args())(*mcp, 2, value, key);
+        } else {
+          (mcp->ci->getMeth3Args())(*mcp, 3, value, key, userdata);
+        }
+        return;
+      }
+      (mcp->ci->getMeth())(*mcp, CREATE_VECTOR3(ref(value), key,
+                           userdata));
     }
-    (mcp->ci->getMeth())(*mcp, CREATE_VECTOR3(ref(value), key,
-                         userdata));
   }
 }
 bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
@@ -547,22 +626,34 @@ bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
     throw_bad_array_exception();
     return false;
   }
-  MethodCallPackage mcp;
-  String classname, methodname;
-  bool doBind;
-  if (!get_user_func_handler(funcname, true,
-                             mcp, classname, methodname, doBind)) {
-    return null;
-  }
-  PointerSet seen;
-  if (doBind) {
-    // If 'doBind' is true, we need to set the late bound class before
-    // calling the user callback
-    FrameInjection::StaticClassNameHelper scn(
-      ThreadInfo::s_threadInfo.getNoCheck(), classname);
-    ArrayUtil::Walk(input, walk_func, &mcp, true, &seen, userdata);
+  if (hhvm) {
+    HPHP::VM::CallCtx ctx;
+    HPHP::VM::ActRec* ar = vm_get_previous_frame();
+    ctx.func = vm_decode_function(funcname, ar, false, ctx.this_, ctx.cls,
+                                  ctx.invName);
+    if (ctx.func == NULL) {
+      return null;
+    }
+    PointerSet seen;
+    ArrayUtil::Walk(input, walk_func, &ctx, true, &seen, userdata);
   } else {
-    ArrayUtil::Walk(input, walk_func, &mcp, true, &seen, userdata);
+    MethodCallPackage mcp;
+    String classname, methodname;
+    bool doBind;
+    if (!get_user_func_handler(funcname, true,
+                               mcp, classname, methodname, doBind)) {
+      return null;
+    }
+    PointerSet seen;
+    if (doBind) {
+      // If 'doBind' is true, we need to set the late bound class before
+      // calling the user callback
+      FrameInjection::StaticClassNameHelper scn(
+        ThreadInfo::s_threadInfo.getNoCheck(), classname);
+      ArrayUtil::Walk(input, walk_func, &mcp, true, &seen, userdata);
+    } else {
+      ArrayUtil::Walk(input, walk_func, &mcp, true, &seen, userdata);
+    }
   }
   return true;
 }
@@ -572,27 +663,61 @@ bool f_array_walk(VRefParam input, CVarRef funcname,
     throw_bad_array_exception();
     return false;
   }
-  MethodCallPackage mcp;
-  String classname, methodname;
-  bool doBind;
-  if (!get_user_func_handler(funcname, true,
-                             mcp, classname, methodname, doBind)) {
-    return null;
-  }
-  if (doBind) {
-    // If 'doBind' is true, we need to set the late bound class before
-    // calling the user callback
-    FrameInjection::StaticClassNameHelper scn(
-      ThreadInfo::s_threadInfo.getNoCheck(), classname);
-    ArrayUtil::Walk(input, walk_func, &mcp, false, NULL, userdata);
+  if (hhvm) {
+    HPHP::VM::CallCtx ctx;
+    HPHP::VM::ActRec* ar = vm_get_previous_frame();
+    ctx.func = vm_decode_function(funcname, ar, false, ctx.this_, ctx.cls,
+                                  ctx.invName);
+    if (ctx.func == NULL) {
+      return null;
+    }
+    ArrayUtil::Walk(input, walk_func, &ctx, false, NULL, userdata);
   } else {
-    ArrayUtil::Walk(input, walk_func, &mcp, false, NULL, userdata);
+    MethodCallPackage mcp;
+    String classname, methodname;
+    bool doBind;
+    if (!get_user_func_handler(funcname, true,
+                               mcp, classname, methodname, doBind)) {
+      return null;
+    }
+    if (doBind) {
+      // If 'doBind' is true, we need to set the late bound class before
+      // calling the user callback
+      FrameInjection::StaticClassNameHelper scn(
+        ThreadInfo::s_threadInfo.getNoCheck(), classname);
+      ArrayUtil::Walk(input, walk_func, &mcp, false, NULL, userdata);
+    } else {
+      ArrayUtil::Walk(input, walk_func, &mcp, false, NULL, userdata);
+    }
   }
   return true;
 }
 
+static void compact(HPHP::VM::VarEnv* v, Array &ret, CVarRef var) {
+  if (var.isArray()) {
+    CArrRef vars = var.toArrNR();
+    for (ArrayIter iter(vars); iter; ++iter) {
+      compact(v, ret, iter.second());
+    }
+  } else {
+    String varname = var.toString();
+    if (!varname.empty() && v->lookup(varname.get()) != NULL) {
+      ret.set(varname, *reinterpret_cast<Variant*>(v->lookup(varname.get())));
+    }
+  }
+}
+
 Array f_compact(int _argc, CVarRef varname, CArrRef _argv /* = null_array */) {
-  throw FatalErrorException("bad HPHP code generation");
+  if (hhvm) {
+    Array ret = Array::Create();
+    HPHP::VM::VarEnv* v = g_context->getVarEnv();
+    compact(v, ret, varname);
+    compact(v, ret, _argv);
+    return ret;
+  } else {
+    raise_error("Invalid call to f_compact");
+    return Array::Create();
+  }
 }
 
 template<typename T>
@@ -683,7 +808,9 @@ static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
     return create_object("ArrayIterator", CREATE_VECTOR1(iterable));
   }
   if (iterable.isObject()) {
-    CStrRef context = FrameInjection::GetClassName(true);
+    CStrRef context = hhvm
+                      ? g_context->getContextClassName(true)
+                      : FrameInjection::GetClassName(true);
 
     ObjectData *obj = iterable.getObjectData();
     if (isMutable) {

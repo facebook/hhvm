@@ -508,7 +508,8 @@ const ObjectStaticCallbacks cw_SplFileObject = {
   c_SplFileObject::s_call_info_table,c_SplFileObject::s_call_info_index,
   c_SplFileObject::s_instanceof_table,c_SplFileObject::s_instanceof_index,
   &c_SplFileObject::s_class_name,
-  &c_SplFileObject::os_prop_table,&c_SplFileObject::ci___construct,0,&cw_SplFileInfo,0x0
+  &c_SplFileObject::os_prop_table,&c_SplFileObject::ci___construct,0,&cw_SplFileInfo,0x0,
+  &c_SplFileObject::s_cls
 };
 /* SRC: classes/splfile.php line 392 */
 void c_SplFileObject::t___construct(Variant v_filename, Variant v_open_mode //  = NAMSTR(s_sys_ss0d42ecf6, "r")
@@ -1123,7 +1124,8 @@ const ObjectStaticCallbacks cw_SplFileInfo = {
   c_SplFileInfo::s_call_info_table,c_SplFileInfo::s_call_info_index,
   c_SplFileInfo::s_instanceof_table,c_SplFileInfo::s_instanceof_index,
   &c_SplFileInfo::s_class_name,
-  &c_SplFileInfo::os_prop_table,&c_SplFileInfo::ci___construct,0,0,0x0
+  &c_SplFileInfo::os_prop_table,&c_SplFileInfo::ci___construct,0,0,0x0,
+  &c_SplFileInfo::s_cls
 };
 /* SRC: classes/splfile.php line 14 */
 void c_SplFileInfo::t___construct(Variant v_file_name) {

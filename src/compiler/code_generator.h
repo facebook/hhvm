@@ -41,6 +41,8 @@ public:
     FileCPP,    // 1 to 1 from php to cpp file
     ClusterCPP, // each directory up to a certain depth to a cpp file
     SystemCPP,  // special mode for generating builtin classes
+    TextHHBC,   // HHBC dump in human-readable format
+    BinaryHHBC, // serialized HHBC
   };
 
   enum Stream {

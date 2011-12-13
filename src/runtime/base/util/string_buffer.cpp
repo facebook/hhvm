@@ -199,7 +199,14 @@ void StringBuffer::append(int n) {
   char buf[12];
   int is_negative;
   int len;
-  char *p = conv_10(n, &is_negative, buf + 12, &len);
+  const StringData *sd = String::GetIntegerStringData(n);
+  char *p;
+  if (!sd) {
+    p = conv_10(n, &is_negative, buf + 12, &len);
+  } else {
+    p = (char *)sd->data();
+    len = sd->size();
+  }
   append(p, len);
 }
 
@@ -207,7 +214,14 @@ void StringBuffer::append(int64 n) {
   char buf[21];
   int is_negative;
   int len;
-  char *p = conv_10(n, &is_negative, buf + 21, &len);
+  const StringData *sd = String::GetIntegerStringData(n);
+  char *p;
+  if (!sd) {
+    p = conv_10(n, &is_negative, buf + 21, &len);
+  } else {
+    p = (char *)sd->data();
+    len = sd->size();
+  }
   append(p, len);
 }
 

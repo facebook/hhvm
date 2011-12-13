@@ -28,32 +28,11 @@ using namespace boost;
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-const char *InterruptSite::getFile() const {
-  if (m_file.isNull()) {
-    m_file = m_frame->getFileName();
-  }
-  return m_file.data();
-}
-
-const char *InterruptSite::getFunction() const {
-  if (m_function == NULL) {
-    m_function = m_frame->getFunction();
-    if (m_frame->getFlags() & FrameInjection::PseudoMain) {
-      m_function = "";
-    }
-    const char *name = strstr(m_function, "::");
-    if (name) {
-      m_function = name + 2;
-    }
-  }
-  return m_function;
-}
-
 int InterruptSite::getFileLen() const {
-  if (m_file_strlen == -1) {
-    m_file_strlen = strlen(getFile());
+  if (m_file.empty()) {
+    getFile();
   }
-  return m_file_strlen;
+  return m_file.size();
 }
 
 std::string InterruptSite::desc() const {
@@ -90,6 +69,90 @@ std::string InterruptSite::desc() const {
   }
 
   return ret;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+const char *InterruptSiteFI::getFile() const {
+  if (m_file.empty()) {
+    m_file = m_frame->getFileName();
+  }
+  return m_file.data();
+}
+
+const char *InterruptSiteFI::getClass() const {
+  if (m_class) return m_class;
+  ASSERT(m_frame);
+  return m_frame->getClassName();
+}
+
+const char *InterruptSiteFI::getFunction() const {
+  if (m_function == NULL) {
+    m_function = m_frame->getFunction();
+    if (m_frame->getFlags() & FrameInjection::PseudoMain) {
+      m_function = "";
+    }
+    const char *name = strstr(m_function, "::");
+    if (name) {
+      m_function = name + 2;
+    }
+  }
+  return m_function;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+const VM::SourceLoc InterruptSiteVM::s_dummySourceLoc;
+
+InterruptSiteVM::InterruptSiteVM(bool hardBreakPoint /* = false */,
+                                 CVarRef e /* = null_variant */)
+  : InterruptSite(e), m_sourceLoc(NULL) {
+  const_assert(hhvm);
+  ExecutionContext* context = g_context.getNoCheck();
+  HPHP::VM::ActRec *fp = context->m_fp;
+  const uchar *pc = context->m_pc;
+  if (hardBreakPoint) {
+    // for hard breakpoint, the fp is for an extension function,
+    // so we need to construct the site on the caller
+    fp = context->arGetSfp(fp);
+    // arGetSfp should be valid before returning from the extension function
+  }
+  if (!fp || !fp->m_func->m_unit) {
+    return;
+  }
+  HPHP::VM::Unit *unit = fp->m_func->m_unit;
+  ASSERT(unit->m_filepath);
+  m_file = unit->m_filepath->data();
+  int offset = unit->offsetOf(pc);
+  m_sourceLoc = unit->getSourceLoc(offset);
+  m_line0 = m_sourceLoc->line0;
+  m_char0 = m_sourceLoc->char0;
+  m_line1 = m_sourceLoc->line1;
+  m_char1 = m_sourceLoc->char1;
+  m_function = fp->m_func->m_name->data();
+  if (fp->m_func->m_preClass) {
+    m_class = fp->m_func->m_preClass->m_name->data();
+  } else {
+    m_class = "";
+  }
+}
+
+const char *InterruptSiteVM::getFile() const {
+  return m_file.data();
+}
+
+const char *InterruptSiteVM::getClass() const {
+  if (m_class) {
+    return m_class;
+  }
+  return "";
+}
+
+const char *InterruptSiteVM::getFunction() const {
+  if (m_function) {
+    return m_function;
+  }
+  return "";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -240,10 +303,19 @@ bool BreakPointInfo::match(InterruptType interrupt, InterruptSite &site) {
           checkException(site.getException()) &&
           checkUrl(site.url()) && checkClause();
       case BreakPointReached:
-        return
+      {
+        bool match =
           Match(site.getFile(), site.getFileLen(), m_file, m_regex, false) &&
           checkLines(site.getLine0()) && checkStack(site) &&
-          checkUrl(site.url()) && checkFrame(site.getFrame()) && checkClause();
+          checkUrl(site.url()) && checkClause();
+        InterruptSiteFI *siteFI = dynamic_cast<InterruptSiteFI*>(&site);
+        if (siteFI) {
+          match = match && checkFrame(siteFI->getFrame());
+        } else {
+          match = match && checkFrame();
+        }
+        return match;
+      }
       default:
         break;
     }
@@ -669,21 +741,24 @@ bool BreakPointInfo::checkStack(InterruptSite &site) {
     return false;
   }
 
-  FrameInjection *f = site.getFrame()->getPrev();
-  for (unsigned int i = 1; i < m_funcs.size(); i++) {
-    for (; f; f = f->getPrev()) {
-      InterruptSite prevSite(f);
-      if (Match(prevSite.getNamespace(), 0,
-                m_funcs[i]->m_namespace, m_regex, true) &&
-          Match(prevSite.getFunction(), 0,
-                m_funcs[i]->m_function, m_regex, true) &&
-          MatchClass(prevSite.getClass(), m_funcs[i]->m_class, m_regex,
-                     site.getFunction())) {
-        break;
+  InterruptSiteFI *siteFI = dynamic_cast<InterruptSiteFI*>(&site);
+  if (siteFI) {
+    FrameInjection *f = siteFI->getFrame()->getPrev();
+    for (unsigned int i = 1; i < m_funcs.size(); i++) {
+      for (; f; f = f->getPrev()) {
+        InterruptSiteFI prevSite(f);
+        if (Match(prevSite.getNamespace(), 0,
+              m_funcs[i]->m_namespace, m_regex, true) &&
+            Match(prevSite.getFunction(), 0,
+              m_funcs[i]->m_function, m_regex, true) &&
+            MatchClass(prevSite.getClass(), m_funcs[i]->m_class, m_regex,
+              siteFI->getFunction())) {
+          break;
+        }
       }
-    }
-    if (f == NULL) {
-      return false;
+      if (f == NULL) {
+        return false;
+      }
     }
   }
   return true;
@@ -698,6 +773,13 @@ bool BreakPointInfo::checkFrame(FrameInjection *frame) {
   return true;
 }
 
+bool BreakPointInfo::checkFrame() {
+  if (!m_line1) {
+    return g_context->m_debuggerFuncEntry;
+  }
+  return true;
+}
+
 bool BreakPointInfo::checkClause() {
   if (!m_clause.empty()) {
     if (m_php.empty()) {
@@ -708,7 +790,9 @@ bool BreakPointInfo::checkClause() {
       }
     }
     String output;
-    Variant ret = DebuggerProxy::ExecutePHP(m_php, output, false, 0);
+    Variant ret = hhvm
+                  ? DebuggerProxyVM::ExecutePHP(m_php, output, false, 0)
+                  : DebuggerProxy::ExecutePHP(m_php, output, false, 0);
     if (m_check) {
       return ret.toBoolean();
     }

@@ -42,7 +42,7 @@ namespace HPHP {
   static class name ## Extension : public Extension {   \
   public:                                               \
     name ## Extension() : Extension(#name) {}           \
-  } s_ ## name ## _extension
+  } s_ ## name ## _extension __attribute__((init_priority (101)))
 
 #define IMPLEMENT_DEFAULT_EXTENSION_VERSION(name, v)    \
   static class name ## Extension : public Extension {   \

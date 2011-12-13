@@ -24,11 +24,13 @@ namespace HPHP { namespace Eval {
 void CmdFlowControl::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_count);
+  thrift.write(m_smallStep);
 }
 
 void CmdFlowControl::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_count);
+  thrift.read(m_smallStep);
 }
 
 bool CmdFlowControl::onClient(DebuggerClient *client) {
@@ -53,12 +55,14 @@ bool CmdFlowControl::onClient(DebuggerClient *client) {
       return true;
     }
   }
-
+  m_smallStep = client->getDebuggerSmallStep();
   client->send(this);
   throw DebuggerConsoleExitException();
 }
 
 bool CmdFlowControl::onServer(DebuggerProxy *proxy) {
+  // Should only do setting and nothing else
+  g_context->setDebuggerSmallStep(m_smallStep);
   return true;
 }
 

@@ -20,6 +20,8 @@
 #include <runtime/ext/ext_function.h>
 #include <runtime/base/util/exceptions.h>
 
+#include <system/lib/systemlib.h>
+
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(sqlite3);
 ///////////////////////////////////////////////////////////////////////////////
@@ -162,6 +164,7 @@ static void php_sqlite3_callback_final(sqlite3_context *context) {
 
 c_SQLite3::c_SQLite3(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb), m_raw_db(NULL) {
+  CPP_BUILTIN_CLASS_INIT(SQLite3);
 }
 
 c_SQLite3::~c_SQLite3() {
@@ -435,6 +438,7 @@ Variant c_SQLite3::t___destruct() {
 
 c_SQLite3Stmt::c_SQLite3Stmt(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb), m_raw_stmt(NULL) {
+  CPP_BUILTIN_CLASS_INIT(SQLite3Stmt);
 }
 
 c_SQLite3Stmt::~c_SQLite3Stmt() {
@@ -616,6 +620,7 @@ Variant c_SQLite3Stmt::t___destruct() {
 
 c_SQLite3Result::c_SQLite3Result(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb) {
+  CPP_BUILTIN_CLASS_INIT(SQLite3Result);
 }
 
 c_SQLite3Result::~c_SQLite3Result() {

@@ -64,10 +64,26 @@ bool CmdGlobal::onClient(DebuggerClient *client) {
   if (cmd->m_globals.empty()) {
     client->info("(no global variable was found)");
   } else {
+    m_globals = cmd->m_globals;
     CmdVariable::PrintVariables(client, cmd->m_globals, true, text);
   }
 
   return true;
+}
+
+void CmdGlobal::setClientOutput(DebuggerClient *client) {
+  client->setOutputType(DebuggerClient::OTValues);
+  Array values;
+  for (ArrayIter iter(m_globals); iter; ++iter) {
+    String name = iter.first().toString();
+    if (client->getDebuggerApiModeSerialize()) {
+      values.set(name,
+                 DebuggerClient::FormatVariable(iter.second(), 200));
+    } else {
+      values.set(name, iter.second());
+    }
+  }
+  client->setOTValues(values);
 }
 
 bool CmdGlobal::onServer(DebuggerProxy *proxy) {

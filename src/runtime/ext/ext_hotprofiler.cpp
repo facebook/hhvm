@@ -21,6 +21,7 @@
 #include <runtime/base/zend/zend_math.h>
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/ini_setting.h>
+#include <runtime/vm/dyn_tracer.h>
 #include <util/alloc.h>
 
 #ifdef __FreeBSD__
@@ -496,7 +497,7 @@ enum Flag {
   TrackCPU              = 0x2,
   TrackMemory           = 0x4,
   TrackVtsc             = 0x8,
-  Trace                 = 0x10,
+  XhpTrace              = 0x10,
   MeasureXhprofDisable  = 0x20,
   GetTrace              = 0x40,
   TrackMalloc           = 0x80,
@@ -1491,6 +1492,9 @@ public:
     if (!RuntimeOption::EnableHotProfiler) {
       return;
     }
+    if (hhvm) {
+      HPHP::VM::DynTracer::Enable();
+    }
     if (m_profiler == NULL) {
       switch (level) {
       case Simple:
@@ -1618,7 +1622,7 @@ void f_xhprof_enable(int flags/* = 0 */,
   if (flags & TrackVtsc) {
     flags |= TrackCPU;
   }
-  if (flags & Trace) {
+  if (flags & XhpTrace) {
     s_factory->start(ProfilerFactory::Trace, flags);
   } else {
     s_factory->start(ProfilerFactory::Hierarchical, flags);
@@ -1710,7 +1714,7 @@ const int64 k_XHPROF_FLAGS_NO_BUILTINS = TrackBuiltins;
 const int64 k_XHPROF_FLAGS_CPU = TrackCPU;
 const int64 k_XHPROF_FLAGS_MEMORY = TrackMemory;
 const int64 k_XHPROF_FLAGS_VTSC = TrackVtsc;
-const int64 k_XHPROF_FLAGS_TRACE = Trace;
+const int64 k_XHPROF_FLAGS_TRACE = XhpTrace;
 const int64 k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE = MeasureXhprofDisable;
 const int64 k_XHPROF_FLAGS_GET_TRACE = GetTrace;
 const int64 k_XHPROF_FLAGS_MALLOC = TrackMalloc;

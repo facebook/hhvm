@@ -367,7 +367,6 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       cg_printf(";\n");
     }
 
-    bool tempParams = FunctionCall::preOutputCPP(cg, ar, state);
-    return tempRcvr || tempParams;
+    return FunctionCall::preOutputCPP(cg, ar, state) || tempRcvr || isUnused();
   }
 }

@@ -15,7 +15,7 @@ DefinePreamble(<<<CPP
 #include <runtime/base/zend/zend_collator.h>
 #include <unicode/ucol.h> // icu
 namespace HPHP {
-extern const int64 q_Collator$$SORT_REGULAR;
+extern const int64 q_Collator\$\$SORT_REGULAR;
 }
 CPP
 );
@@ -136,7 +136,7 @@ DefineFunction(
       array(
         'name'   => "sort_flag",
         'type'   => Int64,
-        'value'  => "q_Collator$$SORT_REGULAR",
+        'value'  => "q_Collator\$\$SORT_REGULAR",
         'desc'   => "Optional sorting type, one of the following:\n\nCollator::SORT_REGULAR - compare items normally (don't change types)\n\nCollator::SORT_NUMERIC - compare items numerically\n\nCollator::SORT_STRING - compare items as strings\n\nDefault \$sort_flag value is Collator::SORT_REGULAR. It is also used if an invalid \$sort_flag value has been specified.",
       ),
     ),
@@ -367,7 +367,7 @@ DefineFunction(
       array(
         'name'   => "sort_flag",
         'type'   => Int64,
-        'value'  => "q_Collator$$SORT_REGULAR",
+        'value'  => "q_Collator\$\$SORT_REGULAR",
         'desc'   => "Optional sorting type, one of the following:\n\n\n\nCollator::SORT_REGULAR - compare items normally (don't change types)\n\nCollator::SORT_NUMERIC - compare items numerically\n\nCollator::SORT_STRING - compare items as strings Default sorting type is Collator::SORT_REGULAR.",
       ),
     ),
@@ -684,7 +684,7 @@ DefineFunction(
       array(
         'name'   => "sort_flag",
         'type'   => Int64,
-        'value'  => "q_Collator$$SORT_REGULAR",
+        'value'  => "q_Collator\$\$SORT_REGULAR",
       ),
     ),
   ));
@@ -876,7 +876,7 @@ DefineFunction(
       array(
         'name'   => "sort_flag",
         'type'   => Int64,
-        'value'  => "q_Collator$$SORT_REGULAR",
+        'value'  => "q_Collator\$\$SORT_REGULAR",
         'desc'   => "Array of strings to sort.",
       ),
     ),
@@ -1026,7 +1026,7 @@ DefineFunction(
       array(
         'name'   => "form",
         'type'   => Int64,
-        'value'  => "q_Normalizer$$FORM_C",
+        'value'  => "q_Normalizer\$\$FORM_C",
         'desc'   => "One of the normalization forms.",
       ),
     ),
@@ -1049,7 +1049,7 @@ DefineFunction(
       array(
         'name'   => "form",
         'type'   => Int64,
-        'value'  => "q_Normalizer$$FORM_C",
+        'value'  => "q_Normalizer\$\$FORM_C",
       ),
     ),
   ));

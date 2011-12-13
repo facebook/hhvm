@@ -28,6 +28,8 @@ template <bool enableAssertions>
 class BaseMutex {
 private:
 #ifdef DEBUG
+  static const int kMagic = 0xba5eba11;
+  int m_magic;
   // members for keeping track of lock ownership, useful for debugging
   bool         m_hasOwner;
   pthread_t    m_owner;
@@ -87,6 +89,9 @@ protected:
   }
 public:
   BaseMutex(bool reentrant = true) {
+#ifdef DEBUG
+    m_magic = kMagic;
+#endif
     pthread_mutexattr_init(&m_mutexattr);
     if (reentrant) {
       pthread_mutexattr_settype(&m_mutexattr, PTHREAD_MUTEX_RECURSIVE);
@@ -104,12 +109,21 @@ public:
 #endif
   }
   ~BaseMutex() {
+#ifdef DEBUG
+    assert(m_magic == kMagic);
+#endif
     assertNotOwnedImpl();
     pthread_mutex_destroy(&m_mutex);
     pthread_mutexattr_destroy(&m_mutexattr);
+#ifdef DEBUG
+    m_magic = ~m_magic;
+#endif
   }
 
   bool tryLock() {
+#ifdef DEBUG
+    assert(m_magic == kMagic);
+#endif
     bool success = !pthread_mutex_trylock(&m_mutex);
     if (success) {
       recordAcquisition();
@@ -119,6 +133,9 @@ public:
   }
 
   bool tryLockWait(long long ns) {
+#ifdef DEBUG
+    assert(m_magic == kMagic);
+#endif
     struct timespec delta;
     delta.tv_sec  = 0;
     delta.tv_nsec = ns;
@@ -131,6 +148,9 @@ public:
   }
 
   void lock() {
+#ifdef DEBUG
+    assert(m_magic == kMagic);
+#endif
     int ret = pthread_mutex_lock(&m_mutex);
     if (ret != 0) {
 #ifdef DEBUG
@@ -142,6 +162,9 @@ public:
   }
 
   void unlock() {
+#ifdef DEBUG
+    assert(m_magic == kMagic);
+#endif
     recordRelease();
     int ret = pthread_mutex_unlock(&m_mutex);
     if (ret != 0) {

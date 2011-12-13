@@ -25,11 +25,25 @@
 #include <util/atomic.h>
 
 namespace HPHP {
+namespace VM {
+class Unit;
+}
+}
+
+namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_AST_PTR(Statement);
 DECLARE_AST_PTR(StaticStatement);
+
+static inline bool md5Enabled() {
+  if (hhvm) {
+    return true;
+  } else {
+    return RuntimeOption::SandboxCheckMd5;
+  }
+}
 
 class PhpFile : public Block {
 public:
@@ -37,6 +51,9 @@ public:
           const Block::VariableIndices &variableIndices,
           const std::string &fileName, const std::string &srcRoot,
           const std::string &relPath, const std::string &md5);
+  PhpFile(const std::string &fileName, const std::string &srcRoot,
+          const std::string &relPath, const std::string &md5,
+          HPHP::VM::Unit* unit);
   ~PhpFile();
   Variant eval(LVariableTable *env);
   void incRef() { atomic_inc(m_refCount); }
@@ -51,6 +68,7 @@ public:
   const std::string &getSrcRoot() const { return m_srcRoot; }
   const std::string &getRelPath() const { return m_relPath; }
   const std::string &getMd5() const { return m_md5; }
+  HPHP::VM::Unit* unit() const { return m_unit; }
 private:
   int m_refCount;
   StatementPtr m_tree;
@@ -59,6 +77,7 @@ private:
   std::string m_srcRoot;
   std::string m_relPath;
   std::string m_md5;
+  HPHP::VM::Unit* m_unit;
 };
 
 class PhpFileWrapper {
@@ -101,6 +120,7 @@ public:
    * From then on, invoke_file will store the PhpFile and use that.
    */
   static PhpFile *checkoutFile(const std::string &name, const struct stat &s);
+  static bool findFile(const char* path, struct stat *s);
   static bool findFile(const std::string &path, struct stat *s);
   static bool fileDump(const char *filename);
   static bool readFile(const std::string &name, const struct stat &s,
@@ -116,7 +136,6 @@ private:
   static bool fileStat(const std::string &name, struct stat *s);
   static void onDelete(PhpFile *f);
   static std::set<std::string> s_names;
-  static const char* canonicalize(const std::string &n);
 };
 
 

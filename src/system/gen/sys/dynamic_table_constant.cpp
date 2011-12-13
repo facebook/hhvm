@@ -2089,7 +2089,7 @@ public:
   hashNodeCon *next;
 };
 static hashNodeCon *conMapTable[8192];
-static hashNodeCon conBuckets[2110];
+static hashNodeCon conBuckets[2111];
 
 void init_builtin_constant_table() {
   const char *conMapData[] = {
@@ -2626,6 +2626,7 @@ void init_builtin_constant_table() {
       (const char *)"INI_USER", (const char *)-1, (const char *)32, (const char *)&k_INI_USER,
       (const char *)"INTL_MAX_LOCALE_LEN", (const char *)-1, (const char *)32, (const char *)&k_INTL_MAX_LOCALE_LEN,
       (const char *)"JSON_FB_LOOSE", (const char *)-1, (const char *)32, (const char *)&k_JSON_FB_LOOSE,
+      (const char *)"JSON_FB_UNLIMITED", (const char *)-1, (const char *)32, (const char *)&k_JSON_FB_UNLIMITED,
       (const char *)"JSON_FORCE_OBJECT", (const char *)-1, (const char *)32, (const char *)&k_JSON_FORCE_OBJECT,
       (const char *)"JSON_HEX_AMP", (const char *)-1, (const char *)32, (const char *)&k_JSON_HEX_AMP,
       (const char *)"JSON_HEX_APOS", (const char *)-1, (const char *)32, (const char *)&k_JSON_HEX_APOS,

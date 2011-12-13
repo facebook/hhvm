@@ -29,6 +29,29 @@ SystemGlobals::SystemGlobals() {
   memset(&stgv_int64, 0, sizeof(stgv_int64));
   memset(&stgv_double, 0, sizeof(stgv_double));
   memset(&stgv_CallInfoPtr, 0, sizeof(stgv_CallInfoPtr));
+  // HHBC globals initialization
+  hg_global_storage = NEW(HphpArray)(0, true);
+  hg_global_storage.set("GLOBALS", hg_global_storage);
+  // XXX As a hack, we strongly bind hphpc's superglobals to the matching
+  // keys in our globals array. While this will work for most PHP
+  // programs, this is not strictly correct.
+  hg_global_storage.set("argc", ref(gvm_argc));
+  hg_global_storage.set("argv", ref(gvm_argv));
+  hg_global_storage.set("_SERVER", ref(gvm__SERVER));
+  hg_global_storage.set("_GET", ref(gvm__GET));
+  hg_global_storage.set("_POST", ref(gvm__POST));
+  hg_global_storage.set("_COOKIE", ref(gvm__COOKIE));
+  hg_global_storage.set("_FILES", ref(gvm__FILES));
+  hg_global_storage.set("_ENV", ref(gvm__ENV));
+  hg_global_storage.set("_REQUEST", ref(gvm__REQUEST));
+  hg_global_storage.set("_SESSION", ref(gvm__SESSION));
+  hg_global_storage.set("HTTP_RAW_POST_DATA",
+                        ref(gvm_HTTP_RAW_POST_DATA));
+  hg_global_storage.set("http_response_header",
+                        ref(gvm_http_response_header));
+  // HHBC function/method statics initialization
+  hg_static_storage = Array(NEW(HphpArray)());
+
 
   // Redeclared Classes
 }

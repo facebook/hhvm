@@ -18,6 +18,8 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/variable_serializer.h>
 
+#include <system/lib/systemlib.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -29,6 +31,9 @@ int ResourceData::GetMaxResourceId() {
 }
 
 ResourceData::ResourceData() : ObjectData(0, true), m_static(false) {
+  if (hhvm) {
+    m_cls = SystemLib::s_resourceClass;
+  }
   int &pmax = *os_max_resource_id;
   if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
   o_id = ++pmax;

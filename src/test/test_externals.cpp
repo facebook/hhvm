@@ -21,6 +21,7 @@
 #include <runtime/ext/ext_soap.h>
 #include <runtime/base/program_functions.h>
 #include <system/gen/sys/system_globals.h>
+#include <runtime/ext_hhvm/ext_hhvm.h>
 
 using namespace std;
 
@@ -385,5 +386,11 @@ void fiber_unmarshal_global_state(GlobalVariables *g1, GlobalVariables *g2,
 
 Array get_global_state() { return Array(); }
 
+#ifdef HHVM
+const long long hhbc_ext_funcs_count = 0;
+const HhbcExtFuncInfo hhbc_ext_funcs[] = {};
+const long long hhbc_ext_class_count = 0;
+const HhbcExtClassInfo hhbc_ext_classes[] = {};
+#endif
 ///////////////////////////////////////////////////////////////////////////////
 }

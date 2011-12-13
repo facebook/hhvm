@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 248 */
+/* SRC: classes/reflection.php line 249 */
 FORWARD_DECLARE_CLASS(ReflectionFunctionAbstract);
 extern const ObjectStaticCallbacks cw_ReflectionFunctionAbstract;
 class c_ReflectionFunctionAbstract : public ExtObjectData {
@@ -34,12 +34,14 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   // Properties
   Variant m_info;
 
+  // Destructor
+  ~c_ReflectionFunctionAbstract() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionFunctionAbstract, ReflectionFunctionAbstract, ObjectData)
   static const ClassPropTable os_prop_table;
   c_ReflectionFunctionAbstract(const ObjectStaticCallbacks *cb = &cw_ReflectionFunctionAbstract) : ExtObjectData(cb), m_info(Variant::nullInit) {}
   public: Variant t_getname();
-  public: Variant t_isinternal();
+  public: bool t_isinternal();
   public: Variant t_getclosure();
   public: bool t_isuserdefined();
   public: Variant t_getfilename();
@@ -47,7 +49,7 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   public: Variant t_getendline();
   public: Variant t_getdoccomment();
   public: Variant t_getstaticvariables();
-  public: Variant t_returnsreference();
+  public: bool t_returnsreference();
   public: Array t_getparameters();
   public: int t_getnumberofparameters();
   public: int64 t_getnumberofrequiredparameters();

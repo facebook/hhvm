@@ -465,7 +465,7 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
       if (close) cg_printf("this");
     } else {
       if (!getClassScope() || getClassScope()->derivedByDynamic() ||
-          !static_pointer_cast<SimpleVariable>(m_object)->isGuardedThis()) {
+          !static_pointer_cast<SimpleVariable>(m_object)->isGuarded()) {
         if (close) {
           cg_printf("GET_THIS_VALID()");
         } else {
@@ -495,6 +495,9 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
         cg_printf(".getObjectData())");
       }
       m_object->setActualType(act);
+    } else if (m_object->is(KindOfSimpleVariable) &&
+               static_pointer_cast<SimpleVariable>(m_object)->isGuarded()) {
+      cg_printf(".get()");
     }
     cg_printf("->");
   } else {
@@ -511,7 +514,12 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
     if (!ok) cg_printf("Variant(");
     m_object->outputCPP(cg, ar);
     if (!ok) cg_printf(")");
-    cg_printf(".");
+    if (ok && m_object->is(KindOfSimpleVariable) &&
+        static_pointer_cast<SimpleVariable>(m_object)->isGuarded()) {
+      cg_printf(".get()->");
+    } else {
+      cg_printf(".");
+    }
   }
 
   if (m_valid && m_propSym->isPrivate() &&

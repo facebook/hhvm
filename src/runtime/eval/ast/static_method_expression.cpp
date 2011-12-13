@@ -25,6 +25,7 @@ namespace HPHP {
 namespace Eval {
 using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
+static StaticString s_trait_marker("[trait]");
 
 StaticMethodExpression::
 StaticMethodExpression(EXPRESSION_ARGS, const NamePtr &cname,
@@ -49,16 +50,22 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
   Variant &vco = env.currentObject();
   Object co;
   if (!vco.isNull()) co = vco.toObject();
+  if (cname.same(s_trait_marker)) {
+    cname = ClassStatement::resolveSpInTrait(env, co, m_cname.get());
+  }
   bool withinClass = !co.isNull() && co->o_instanceof(cname.data());
-  bool foundClass;
-  const MethodStatement *ms = RequestEvalState::findMethod(cname,
-                                                           name.data(),
-                                                           foundClass);
+  ClassEvalState *ce = RequestEvalState::findClassState(cname);
+  const MethodStatement *ms = NULL;
+  int access = 0;
+  if (ce) {
+    ms = ce->getMethod(name.data(), access);
+  }
+
   if (withinClass) {
     if (m_construct) {
       String name = cname;
       while (true) {
-        ClassEvalState *ces = RequestEvalState::findClassState(name.data());
+        ClassEvalState *ces = RequestEvalState::findClassState(name);
         if (!ces) {
           // possibly built in
           cname = name;
@@ -67,8 +74,11 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
         // Ugly but needed to populate the method table for the parent
         ces->initializeInstance();
         ms = ces->getConstructor();
-        if (ms) break;
-        name = ces->getClass()->parent().c_str();
+        if (ms) {
+          access = 0; // use method's own access level
+          break;
+        }
+        name = ces->getClass()->parent();
         if (name.empty()) break;
       }
     }
@@ -82,7 +92,7 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
     }
   }
   if (ms) {
-    return strongBind(ms->invokeStaticDirect(cname, env, this, sp));
+    return strongBind(ms->invokeStaticDirect(cname, env, this, sp, access));
   }
 
   // Handle builtins
@@ -102,10 +112,6 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
     CVarRef a5 = (count > 5) ? evalParam(env, ci, 5) : null;
     return
       strongBind((ci->getMethFewArgs())(mcp1, count, a0, a1, a2, a3, a4, a5));
-  }
-  if (RuntimeOption::UseArgArray) {
-    ArgArray *args = prepareArgArray(env, ci, count);
-    return strongBind((ci->getMeth())(mcp1, args));
   }
   ArrayInit ai(count);
   for (unsigned int i = 0; i < count; ++i) {

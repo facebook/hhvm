@@ -4327,6 +4327,15 @@ Variant ifa_mysql_db_name(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 Variant i_mysql_db_name(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_mysql_db_name);
 }
+Variant ifa_hphp_get_method_info(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("hphp_get_method_info", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  return (x_hphp_get_method_info(arg0, arg1));
+}
+Variant i_hphp_get_method_info(void *extra, CArrRef params) {
+  return invoke_func_few_handler(extra, params, &ifa_hphp_get_method_info);
+}
 Variant ifa_drawgetexceptiontype(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("drawgetexceptiontype", count, 1, 1, 1);
   CVarRef arg0(a0);
@@ -12294,6 +12303,14 @@ Variant ifa_fnmatch(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 Variant i_fnmatch(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_fnmatch);
 }
+Variant ifa_xbox_process_call_message(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("xbox_process_call_message", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (x_xbox_process_call_message(arg0));
+}
+Variant i_xbox_process_call_message(void *extra, CArrRef params) {
+  return invoke_func_few_handler(extra, params, &ifa_xbox_process_call_message);
+}
 Variant ifa_forward_static_call_array(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("forward_static_call_array", count, 2, 2, 1);
   CVarRef arg0(a0);
@@ -19079,6 +19096,14 @@ Variant ifa_magicksetimageblueprimary(void *extra, int count, INVOKE_FEW_ARGS_IM
 Variant i_magicksetimageblueprimary(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_magicksetimageblueprimary);
 }
+Variant ifa_drawgetstrokeantialias(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("drawgetstrokeantialias", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (x_drawgetstrokeantialias(arg0));
+}
+Variant i_drawgetstrokeantialias(void *extra, CArrRef params) {
+  return invoke_func_few_handler(extra, params, &ifa_drawgetstrokeantialias);
+}
 Variant ifa_session_module_name(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count > 1)) return throw_toomany_arguments("session_module_name", 1, 1);
   if (count <= 0) return (x_session_module_name());
@@ -19087,14 +19112,6 @@ Variant ifa_session_module_name(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARG
 }
 Variant i_session_module_name(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_session_module_name);
-}
-Variant ifa_drawgetstrokeantialias(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("drawgetstrokeantialias", count, 1, 1, 1);
-  CVarRef arg0(a0);
-  return (x_drawgetstrokeantialias(arg0));
-}
-Variant i_drawgetstrokeantialias(void *extra, CArrRef params) {
-  return invoke_func_few_handler(extra, params, &ifa_drawgetstrokeantialias);
 }
 Variant ifa_checkdnsrr(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("checkdnsrr", count, 1, 2, 1);
@@ -21805,6 +21822,7 @@ CallInfo ci_iptcparse((void*)&i_iptcparse, (void*)&ifa_iptcparse, 1, 0, 0x000000
 CallInfo ci_timezone_identifiers_list((void*)&i_timezone_identifiers_list, (void*)&ifa_timezone_identifiers_list, 0, 0, 0x0000000000000000LL);
 CallInfo ci_imap_get_quotaroot((void*)&i_imap_get_quotaroot, (void*)&ifa_imap_get_quotaroot, 2, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_db_name((void*)&i_mysql_db_name, (void*)&ifa_mysql_db_name, 3, 0, 0x0000000000000000LL);
+CallInfo ci_hphp_get_method_info((void*)&i_hphp_get_method_info, (void*)&ifa_hphp_get_method_info, 2, 0, 0x0000000000000000LL);
 CallInfo ci_drawgetexceptiontype((void*)&i_drawgetexceptiontype, (void*)&ifa_drawgetexceptiontype, 1, 0, 0x0000000000000000LL);
 CallInfo ci_str_replace((void*)&i_str_replace, (void*)&ifa_str_replace, 4, 0, 0x0000000000000008LL);
 CallInfo ci_session_get_cookie_params((void*)&i_session_get_cookie_params, (void*)&ifa_session_get_cookie_params, 0, 0, 0x0000000000000000LL);
@@ -22595,6 +22613,7 @@ CallInfo ci_rename_function((void*)&i_rename_function, (void*)&ifa_rename_functi
 CallInfo ci_apd_set_pprof_trace((void*)&i_apd_set_pprof_trace, (void*)&ifa_apd_set_pprof_trace, 2, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_public_encrypt((void*)&i_openssl_public_encrypt, (void*)&ifa_openssl_public_encrypt, 4, 0, 0x0000000000000002LL);
 CallInfo ci_fnmatch((void*)&i_fnmatch, (void*)&ifa_fnmatch, 3, 0, 0x0000000000000000LL);
+CallInfo ci_xbox_process_call_message((void*)&i_xbox_process_call_message, (void*)&ifa_xbox_process_call_message, 1, 0, 0x0000000000000000LL);
 CallInfo ci_forward_static_call_array((void*)&i_forward_static_call_array, (void*)&ifa_forward_static_call_array, 2, 0, 0x0000000000000000LL);
 CallInfo ci_xmlwriter_write_dtd_element((void*)&i_xmlwriter_write_dtd_element, (void*)&ifa_xmlwriter_write_dtd_element, 3, 0, 0x0000000000000000LL);
 CallInfo ci_intval((void*)&i_intval, (void*)&ifa_intval, 2, 0, 0x0000000000000000LL);
@@ -23279,8 +23298,8 @@ CallInfo ci_mb_eregi_replace((void*)&i_mb_eregi_replace, (void*)&ifa_mb_eregi_re
 CallInfo ci_imagegammacorrect((void*)&i_imagegammacorrect, (void*)&ifa_imagegammacorrect, 3, 0, 0x0000000000000000LL);
 CallInfo ci_magicksetimageresolution((void*)&i_magicksetimageresolution, (void*)&ifa_magicksetimageresolution, 3, 0, 0x0000000000000000LL);
 CallInfo ci_magicksetimageblueprimary((void*)&i_magicksetimageblueprimary, (void*)&ifa_magicksetimageblueprimary, 3, 0, 0x0000000000000000LL);
-CallInfo ci_session_module_name((void*)&i_session_module_name, (void*)&ifa_session_module_name, 1, 0, 0x0000000000000000LL);
 CallInfo ci_drawgetstrokeantialias((void*)&i_drawgetstrokeantialias, (void*)&ifa_drawgetstrokeantialias, 1, 0, 0x0000000000000000LL);
+CallInfo ci_session_module_name((void*)&i_session_module_name, (void*)&ifa_session_module_name, 1, 0, 0x0000000000000000LL);
 CallInfo ci_checkdnsrr((void*)&i_checkdnsrr, (void*)&ifa_checkdnsrr, 2, 0, 0x0000000000000000LL);
 CallInfo ci_apc_filehits((void*)&i_apc_filehits, (void*)&ifa_apc_filehits, 0, 0, 0x0000000000000000LL);
 CallInfo ci_bcpowmod((void*)&i_bcpowmod, (void*)&ifa_bcpowmod, 4, 0, 0x0000000000000000LL);
@@ -30956,6 +30975,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 4841:
+      HASH_GUARD(0x5F2E4347770D32E9LL, hphp_get_method_info) {
+        ci = &ci_hphp_get_method_info;
+        return true;
+      }
+      break;
     case 4845:
       HASH_GUARD(0x1B9FC9E27B8AB2EDLL, memcache_flush) {
         ci = &ci_memcache_flush;
@@ -31803,6 +31828,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x56B908FC91C834D8LL, magickflopimage) {
         ci = &ci_magickflopimage;
+        return true;
+      }
+      break;
+    case 5338:
+      HASH_GUARD(0x1E6E2E538A0754DALL, xbox_process_call_message) {
+        ci = &ci_xbox_process_call_message;
         return true;
       }
       break;

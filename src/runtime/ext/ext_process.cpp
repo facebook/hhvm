@@ -84,8 +84,12 @@ static bool check_cmd(const char *cmd) {
       }
     }
     if (!allow) {
-      String file = FrameInjection::GetContainingFileName(true);
-      int line = FrameInjection::GetLine(true);
+      String file = hhvm
+                    ? g_context->getContainingFileName(true)
+                    : FrameInjection::GetContainingFileName(true);
+      int line = hhvm
+                 ? g_context->getLine(true)
+                 : FrameInjection::GetLine(true);
       Logger::Warning("Command %s is not in the whitelist, called at %s:%d",
                       cmd_tmp, file.data(), line);
       if (!RuntimeOption::WhitelistExecWarningOnly) {

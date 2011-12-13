@@ -32,9 +32,13 @@ public:
   friend class ArrayInit;
 
 public:
-  HphpArray(uint nSize = 0);
+  HphpArray(uint nSize = 0, bool suppressCow = false);
 private:
-  HphpArray(int,int);
+  HphpArray(int,int,int);
+  static inline const void** getVTablePtr() {
+    static const HphpArray tmp(0);
+    return (*(void const***)(&tmp));
+  }
 public:
   virtual ~HphpArray();
 
@@ -73,13 +77,13 @@ public:
   virtual bool idxExists(ssize_t idx) const;
 
   virtual CVarRef get(int64   k, bool error=false) const
-    __attribute__((flatten));
+    FLATTEN;
   virtual CVarRef get(litstr  k, bool error=false) const
-    __attribute__((flatten));
+    FLATTEN;
   virtual CVarRef get(CStrRef k, bool error=false) const
-    __attribute__((flatten));
+    FLATTEN;
   virtual CVarRef get(CVarRef k, bool error=false) const
-    __attribute__((flatten));
+    FLATTEN;
 
   virtual void load(CVarRef k, Variant& v) const;
 
@@ -125,6 +129,7 @@ public:
   virtual ArrayData* remove(CVarRef k, bool copy);
 
   virtual ArrayData* copy() const;
+  virtual ArrayData* nonSmartCopy() const;
   virtual ArrayData* append(CVarRef v, bool copy);
   virtual ArrayData* appendRef(CVarRef v, bool copy);
   virtual ArrayData* appendWithRef(CVarRef v, bool copy);
@@ -134,11 +139,63 @@ public:
   virtual ArrayData* prepend(CVarRef v, bool copy);
   virtual void renumber();
   virtual void onSetStatic();
+  virtual void onSetEvalScalar();
 
   virtual void getFullPos(FullPos& fp);
   virtual bool setFullPos(const FullPos& fp);
   virtual CVarRef currentRef();
   virtual CVarRef endRef();
+
+  // nvGet, nvSet and friends.
+  // "nv" stands for non-variant. If we know the types of keys and values
+  // through runtime and compile-time chicanery, we can directly call these
+  // methods. Note that they are not part of the ArrayData interface. Since
+  // they are by nature micro-optimizations, avoiding vtable indirection is
+  // worthwhile. So, their use is limited to situations where we know we are
+  // using a HphpArray.
+
+  // nvGet returns a pointer to the value if the specified key is in the
+  // array, NULL otherwise.
+  TypedValue* nvGet(int64 ki, bool error=false) const;
+  TypedValue* nvGet(const StringData* k, bool error=false) const;
+
+  // Hinted nvget: the caller provides an ElmInd where the key is likely
+  // to reside. We return NULL on a miss, and mutate *posHintOut if the
+  // ultimate location differs from posHint.
+  TypedValue* nvGet(const StringData* k, int posHint,
+                    int* posHintOut,
+                    bool error=false) const;
+
+  // nvGetCell works the same as nvGet, except that it will unwrap any
+  // value that is KindOfVariant and return the inner cell.
+  TypedValue* nvGetCell(int64 ki, bool error=false) const;
+  inline TypedValue* nvGetCell(const StringData* k, bool error=false) const;
+  TypedValue* nvGetCell(int64 ki1, const StringData* ks2,
+                        bool error=false) const;
+
+  inline ArrayData* nvSet(int64 ki, int64 vi, bool copy);
+  ArrayData* nvSet(int64 ki, TypedValue* v, bool copy);
+  ArrayData* nvSet(StringData* k, TypedValue* v, bool copy);
+  inline ArrayData* nvBind(int64 ki, TypedValue* v, bool copy);
+  ArrayData* nvBind(StringData* k, TypedValue* v, bool copy);
+  ArrayData* nvAppend(TypedValue* v, bool copy);
+  ArrayData* nvNew(TypedValue*& v, bool copy);
+  inline ArrayData* nvRemove(int64 ki, bool copy);
+  ArrayData* nvRemove(const StringData* k, bool copy);
+  ssize_t nvSize() const;
+  TypedValue* nvGetValueRef(ssize_t pos);
+  void nvGetKey(TypedValue* out, ssize_t pos);
+
+  // Assembly linkage helpers. Do not play on or around.
+  static uint offNumElems() { return offsetof(HphpArray, m_nElms); }
+
+  static inline bool isHphpArray(const ArrayData* ad) {
+    return *(void const***)ad == getVTablePtr();
+  }
+
+  void copyTo(HphpArray* target) const {
+    copyImpl(target);
+  }
 
   /**
    * Assumes 'tv' is dead and preserves the element's original value
@@ -158,6 +215,8 @@ public:
    * or NULL if the element used to live in the array.
    */
   TypedValue* migrateAndSet(StringData* k, TypedValue* tv);
+
+  void dumpDebugInfo() const;
 
   // Used in Elm's data.m_type field to denote an invalid Elm.
   static const HPHP::DataType KindOfTombstone = MaxNumDataTypes;
@@ -189,6 +248,9 @@ public:
   static const size_t ElmAlignmentMask = ElmAlignment-1;
 
 private:
+  inline TypedValue* nvGetImpl(const StringData* k, int* outHint,
+                               bool error=false) const;
+
   // Array elements and the hash table are contiguously allocated, such that
   // elements are naturally aligned.  If necessary, m_data starts and ends with
   // padding in order to meet the element alignment requirements.
@@ -207,21 +269,23 @@ private:
   //            +--------------------+
   //            | alignment padding? |
   //            +--------------------+
+private:
   void*   m_data;        // Contains elements and hash table.
   ElmInd* m_hash;        // Hash table.
   int64   m_nextKI;      // Next integer key to use for append.
-  uint32  m_tableMask;   // Bitmask used when indexing into the Hash table.
+  uint32  m_tableMask;   // Bitmask used when indexing into the hash table.
   ElmInd  m_nElms;       // Total number of elements in array.
   uint32  m_hLoad;       // Hash table load (# of non-empty slots).
   ElmInd  m_lastE;       // Index of last used element.
   char    m_linear;      // (true) ? m_data came from linear allocator.
   char    m_siPastEnd;   // (true) ? strong iterators possibly past end.
+  char    m_suppressCow; // (true) ? suppress copy-on-write (e.g. $GLOBALS).
 #ifndef USE_JEMALLOC
   uchar   m_dataPad;     // Number of bytes that m_data was advanced to
-                         //   achieve the required alignment
+                         //   achieve the required alignment.
 #endif
   ElmInd  m_nIndirectElms; // Total number of elements in the array with
-                           //   m_type == KindOfIndirect
+                           //   m_type == KindOfIndirect.
 
   inline void* getBlock() const {
     return ((void*)(uintptr_t(m_data)
@@ -230,8 +294,6 @@ private:
 #endif
             ));
   }
-
-  void dumpDebugInfo() const;
 
   ssize_t /*ElmInd*/ nextElm(Elm* elms, ssize_t /*ElmInd*/ ei) const;
   ssize_t /*ElmInd*/ prevElm(Elm* elms, ssize_t /*ElmInd*/ ei) const;
@@ -264,7 +326,11 @@ private:
   bool updateRef(StringData* key, CVarRef data);
 
   void erase(ElmInd* ei, bool updateNext = false);
-  HphpArray* copyImpl() const;
+
+  // nvUpdate: for internal use by the nv* methods.
+  bool nvUpdate(int64 ki, int64 vi);
+
+  HphpArray* copyImpl(HphpArray* target = NULL, bool sma = true) const;
 
   inline Elm* ALWAYS_INLINE allocElm(ElmInd* ei);
   void reallocData(size_t maxElms, size_t tableSize);
@@ -317,6 +383,63 @@ public:
 private:
   static StaticEmptyHphpArray s_theEmptyArray;
 };
+
+inline bool IsHphpArray(const ArrayData* ad) {
+  return HphpArray::isHphpArray(ad) || ad == StaticEmptyHphpArray::Get();
+}
+
+//=============================================================================
+// VM runtime support functions.
+namespace VM {
+
+ArrayData* array_setm_ik1_iv(TypedValue* cell, ArrayData* ha, int64 key,
+                             int64 value);
+ArrayData* array_setm_ik1_v(TypedValue* cell, ArrayData* ad, int64 key,
+                            TypedValue* value);
+ArrayData* array_setm_ik1_v0(TypedValue* cell, ArrayData* ad, int64 key,
+                             TypedValue* value);
+ArrayData* array_setm_sk1_v(TypedValue* cell, ArrayData* ad, StringData* key,
+                            TypedValue* value);
+ArrayData* array_setm_sk1_v0(TypedValue* cell, ArrayData* ad, StringData* key,
+                             TypedValue* value);
+ArrayData* array_setm_s0k1_v(TypedValue* cell, ArrayData* ad, StringData* key,
+                             TypedValue* value);
+ArrayData* array_setm_s0k1_v0(TypedValue* cell, ArrayData* ad, StringData* key,
+                              TypedValue* value);
+ArrayData* array_setm_wk1_v(TypedValue* cell, ArrayData* ad,
+                            TypedValue* value);
+ArrayData* array_setm_wk1_v0(TypedValue* cell, ArrayData* ad,
+                             TypedValue* value);
+ArrayData* array_getm_i(void* hphpArray, int64 key, TypedValue* out)
+  FLATTEN;
+ArrayData* array_getm_s(void* hphpArray, StringData* sd, TypedValue* out)
+  FLATTEN;
+ArrayData* array_getm_s0(void* hphpArray, StringData* sd, TypedValue* out)
+  FLATTEN;
+ArrayData* array_getm_s_fast(void* hphpArray, StringData* sd, TypedValue* out)
+  FLATTEN;
+ArrayData* array_getm_s0_fast(void* hphpArray, StringData* sd, TypedValue* out)
+  FLATTEN;
+ArrayData* array_getm_is(void* dptr, int64 ik, StringData* sd,
+			 TypedValue *out) FLATTEN;
+ArrayData* array_getm_is0(void* dptr, int64 ik, StringData* sd,
+			  TypedValue *out) FLATTEN;
+uint64 array_issetm_s(const void* hphpArray, StringData* sd)
+  FLATTEN;
+uint64 array_issetm_s0(const void* hphpArray, StringData* sd)
+  FLATTEN;
+uint64 array_issetm_s_fast(const void* hphpArray, StringData* sd)
+  FLATTEN;
+uint64 array_issetm_s0_fast(const void* hphpArray, StringData* sd)
+  FLATTEN;
+ArrayData* array_unsetm_s(ArrayData* hphpArray, StringData* sd)
+                         FLATTEN;
+ArrayData* array_unsetm_s0(ArrayData* hphpArray, StringData* sd)
+                          FLATTEN;
+ArrayData* array_add(ArrayData* a1, ArrayData* a2);
+
+}
+//=============================================================================
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -20,9 +20,12 @@
 #include <runtime/base/types.h>
 #include <runtime/base/util/smart_ptr.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/array/hphp_array.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+struct TypedValue;
 
 /**
  * An iteration normally looks like this:
@@ -42,6 +45,7 @@ public:
    */
   ArrayIter();
   ArrayIter(const ArrayData *data);
+  ArrayIter(const ArrayData *data, int);
   ArrayIter(CArrRef array);
   ArrayIter(ObjectData *obj, bool rewind = true);
   ~ArrayIter();
@@ -83,6 +87,26 @@ public:
     secondHelper(v);
   }
   CVarRef secondRef();
+
+  bool isHphpArray() {
+    return IsHphpArray(m_data);
+  }
+
+  void nvFirst(TypedValue* out) {
+    ASSERT(m_data);
+    ASSERT(m_pos != ArrayData::invalid_index);
+    ASSERT(isHphpArray());
+    HphpArray* ha = (HphpArray*)m_data;
+    ha->nvGetKey(out, m_pos);
+  }
+
+  TypedValue* nvSecond() {
+    ASSERT(m_data);
+    ASSERT(m_pos != ArrayData::invalid_index);
+    ASSERT(isHphpArray());
+    HphpArray* ha = (HphpArray*)m_data;
+    return ha->nvGetValueRef(m_pos);
+  }
 
 private:
   const ArrayData *m_data;

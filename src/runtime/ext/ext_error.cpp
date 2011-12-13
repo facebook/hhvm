@@ -29,11 +29,15 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Array f_debug_backtrace(bool provide_object /* = true */) {
-  if (RuntimeOption::InjectedStackTrace) {
-    return FrameInjection::GetBacktrace(true, false, provide_object);
+  if (hhvm) {
+    return g_context->debugBacktrace(true, false, provide_object);
+  } else {
+    if (RuntimeOption::InjectedStackTrace) {
+      return FrameInjection::GetBacktrace(true, false, provide_object);
+    }
+    StackTrace st;
+    return stackTraceToBackTrace(st);
   }
-  StackTrace st;
-  return stackTraceToBackTrace(st);
 }
 
 /**
@@ -49,14 +53,19 @@ Array f_debug_backtrace(bool provide_object /* = true */) {
  */
 Array f_hphp_debug_caller_info() {
   if (RuntimeOption::InjectedStackTrace) {
-    return FrameInjection::GetCallerInfo(true);
+    return hhvm
+           ? g_context->getCallerInfo(true)
+           : FrameInjection::GetCallerInfo(true);
   }
   return Array::Create();
 }
 
 void f_debug_print_backtrace() {
   if (RuntimeOption::InjectedStackTrace) {
-    Array bt = FrameInjection::GetBacktrace(true);
+    Array bt;
+    bt = hhvm
+         ? g_context->debugBacktrace(true)
+         : FrameInjection::GetBacktrace(true);
     int i = 0;
     for (ArrayIter it = bt.begin(); !it.end(); it.next(), i++) {
       Array frame = it.second().toArray();

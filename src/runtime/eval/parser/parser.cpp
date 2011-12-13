@@ -68,6 +68,9 @@
 #include <runtime/eval/ast/while_statement.h>
 #include <runtime/eval/ast/goto_statement.h>
 #include <runtime/eval/ast/label_statement.h>
+#include <runtime/eval/ast/use_trait_statement.h>
+#include <runtime/eval/ast/trait_prec_statement.h>
+#include <runtime/eval/ast/trait_alias_statement.h>
 #include <runtime/eval/ast/name.h>
 
 #include <util/preprocess.h>
@@ -75,6 +78,7 @@
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/util/exceptions.h>
 #include <runtime/ext/ext_file.h>
+#include <runtime/eval/runtime/eval_state.h>
 
 using namespace HPHP;
 using namespace HPHP::Eval;
@@ -103,6 +107,7 @@ extern void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
                               bool hasValue, bool byRef);
 
 static StaticString s_this("this");
+static StaticString s_trait_marker("[trait]");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -228,7 +233,7 @@ StatementPtr Parser::ParseString(CStrRef input, const char *fileName,
 Parser::Parser(Scanner &scanner, const char *fileName,
                vector<StaticStatementPtr> &statics)
     : ParserBase(scanner, fileName), m_staticStatements(statics),
-      m_errorHandled(false) {
+      m_inTrait(false), m_errorHandled(false) {
   m_prependingStatements.push_back(vector<StatementPtr>());
 }
 
@@ -308,10 +313,14 @@ ClassStatementPtr Parser::peekClass() const {
   }
   return ClassStatementPtr();
 }
-std::string Parser::getCurrentClass() {
+std::string Parser::getCurrentClass(bool allowTrait /* = false */) {
   for (int i = m_scopes.size() - 1; i >= 0; i--) {
     if (m_scopes[i].first) {
-      return m_scopes[i].first->name().data();
+      if (!m_scopes[i].first->isTrait() || allowTrait) {
+        return m_scopes[i].first->name().data();
+      } else {
+        return s_trait_marker.data();
+      }
     }
   }
   return "";
@@ -773,10 +782,18 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
   int subtype = 0;
   switch (type) {
   case T_CLASS_C:
-  case T_TRAIT_C:
     subtype = type;
     type = T_STRING;
     stext = getCurrentClass();
+    break;
+  case T_TRAIT_C:
+    subtype = type;
+    type = T_STRING;
+    if (m_inTrait) {
+      stext = getCurrentClass(true);
+    } else {
+      stext = "";
+    }
     break;
   case T_NS_C:
     subtype = type;
@@ -787,7 +804,7 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
     subtype = type;
     type = T_STRING;
     if (haveClass()) {
-      stext = getCurrentClass();
+      stext = getCurrentClass(true);
       if (haveFunc()) {
         stext += "::";
         stext += peekFunc()->name();
@@ -857,11 +874,11 @@ void Parser::onAListVar(Token &out, Token *list, Token *var) {
   } else {
     out.reset();
   }
-  LvalExpressionPtr lv;
+  ListElementPtr le;
   if (var) {
-    lv = (*var)->getExp<LvalExpression>();
+    LvalExpressionPtr lv = (*var)->getExp<LvalExpression>();
+    le = new LvalListElement(this, lv);
   }
-  ListElementPtr le(new LvalListElement(this, lv));
   out->listElems().push_back(le);
 }
 void Parser::onAListSub(Token &out, Token *list, Token &sublist) {
@@ -1077,7 +1094,7 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
   FunctionStatementPtr func = peekFunc();
   ASSERT(func);
   popFunc();
-  Location *start_loc = popFuncLocation().get();
+  LocationPtr start_loc = popFuncLocation();
   Location loc;
   this->getLocation(loc);
   loc.line0 = start_loc->line0;
@@ -1148,7 +1165,9 @@ void Parser::onClassStart(int type, Token &name, Token *parent) {
   if (type == T_ABSTRACT) mod = ClassStatement::Abstract;
   else if (type == T_FINAL) mod = ClassStatement::Final;
   else if (type == T_INTERFACE) mod = ClassStatement::Interface;
+  else if (type == T_TRAIT) mod = ClassStatement::Trait;
   cs->setModifiers(mod);
+  m_inTrait = type == T_TRAIT;
 }
 
 void Parser::onClass(Token &out, int type, Token &name, Token &base,
@@ -1160,6 +1179,7 @@ void Parser::onClass(Token &out, int type, Token &name, Token &base,
   cs->addBases(interfaceNames);
   cs->finish();
   out->stmt() = cs;
+  m_inTrait = false;
 }
 
 void Parser::onInterface(Token &out, Token &name, Token &base, Token &stmt) {
@@ -1181,31 +1201,66 @@ void Parser::onInterfaceName(Token &out, Token *names, Token &name) {
 }
 
 void Parser::onTraitUse(Token &out, Token &traits, Token &rules) {
-  ASSERT(0); // GO: IMPLEMENT
+  ClassStatementPtr cs = peekClass();
+  if (!rules->stmt()) {
+    rules->stmt() = NEW_STMT0(StatementList);
+  }
+  UseTraitStatementPtr uts =
+    NEW_STMT(UseTrait, traits->names(), rules->getStmtList());
+  cs->addUseTrait(uts);
 }
 
 void Parser::onTraitName(Token &out, Token *names, Token &name) {
-  ASSERT(0); // GO: IMPLEMENT
+  if (names) {
+    out->names() = names->names();
+  } else {
+    out.reset();
+  }
+  out->names().push_back(Name::fromString(this, name.text()));
 }
 
 void Parser::onTraitRule(Token &out, Token &stmtList, Token &newStmt) {
-  ASSERT(0); // GO: IMPLEMENT
+  if (!stmtList->stmt()) {
+    out->stmt() = NEW_STMT0(StatementList);
+  } else {
+    out->stmt() = stmtList->stmt();
+  }
+  ASSERT(newStmt->stmt());
+  out->getStmtList()->add(newStmt->stmt());
 }
 
-void Parser::onTraitPrecRule(Token &out, Token &className, Token &methodName,
-                             Token &otherClasses) {
-  ASSERT(0); // GO: IMPLEMENT
+void Parser::onTraitPrecRule(Token &out, Token &traitName, Token &methodName,
+                             Token &otherTraits) {
+  out->stmt() = NEW_STMT(TraitPrec,
+                         Name::fromString(this, traitName.text()),
+                         Name::fromString(this, methodName.text()),
+                         otherTraits->names());
 }
 
-void Parser::onTraitAliasRuleStart(Token &out, Token &className,
+void Parser::onTraitAliasRuleStart(Token &out, Token &traitName,
                                    Token &methodName) {
-  ASSERT(0); // GO: IMPLEMENT
+  NamePtr methName = Name::fromString(this, methodName.text());
+  out->stmt() = NEW_STMT(TraitAlias,
+                         Name::fromString(this, traitName.text()),
+                         methName, methName, 0);
 }
 
 void Parser::onTraitAliasRuleModify(Token &out, Token &rule,
                                     Token &accessModifiers,
                                     Token &newMethodName) {
-  ASSERT(0); // GO: IMPLEMENT
+  TraitAliasStatementPtr ruleStmt =
+    rule->stmt()->unsafe_cast<TraitAliasStatement>();
+  if (!newMethodName->text().empty()) {
+    NamePtr newMethName = Name::fromString(this, newMethodName.text());
+    ruleStmt->setNewMethodName(newMethName);
+  }
+  int modifiers = accessModifiers->num();
+  if (modifiers & ClassStatement::Static) {
+    error("Cannot use 'static' as method modifier");
+  }
+  if (modifiers) {
+    ruleStmt->setModifiers(modifiers);
+  }
 }
 
 void Parser::onClassVariableModifer(Token &mod) {
@@ -1255,7 +1310,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   MethodStatementPtr ms = peekFunc()->unsafe_cast<MethodStatement>();
   ASSERT(ms);
   popFunc();
-  Location *start_loc = popFuncLocation().get();
+  LocationPtr start_loc = popFuncLocation();
   Location loc;
   this->getLocation(loc);
   loc.line0 = start_loc->line0;
@@ -1352,35 +1407,26 @@ void Parser::saveParseTree(Token &tree) {
   if (s) {
     std::vector<StatementPtr> scopes;
     std::vector<StatementPtr> rest;
+    std::set<StringData *> seen;
     const std::vector<StatementPtr> &svec = s->stmts();
     for (std::vector<StatementPtr>::const_iterator it = svec.begin();
          it != svec.end(); ++it) {
       ClassStatementPtr cs = (*it)->unsafe_cast<ClassStatement>();
-      if (cs || (*it)->unsafe_cast<FunctionStatement>()) {
+      bool needMarker = false;
+      if (cs && cs->isHoistable(seen)) {
+        needMarker = true;
+        scopes.push_back(*it);
+      } else if ((*it)->unsafe_cast<FunctionStatement>()) {
         scopes.push_back(*it);
       } else {
         rest.push_back(*it);
       }
-      if (cs) {
+      if (needMarker) {
         rest.push_back(cs->getMarker());
       }
     }
     rest.insert(rest.begin(), scopes.begin(), scopes.end());
     m_tree = StatementPtr(new StatementListStatement(this, rest));
-    // Classes that have a parent declared after them must be evaluated at
-    // the marker position. I don't know why.
-    hphp_const_char_map<bool> seen;
-    for (int i = svec.size() - 1; i >= 0; --i) {
-      ClassStatementPtr cs = svec[i]->unsafe_cast<ClassStatement>();
-      if (cs) {
-        seen[cs->name().c_str()] = true;
-        if (!cs->parent().empty()) {
-          if (seen.find(cs->parent().c_str()) != seen.end()) {
-            cs->delayDeclaration();
-          }
-        }
-      }
-    }
   } else {
     m_tree = tree->stmt();
   }
@@ -1730,9 +1776,13 @@ NamePtr Parser::procStaticClassName(Token &className, bool text) {
   NamePtr cname;
   if (text) {
     if (cls && className.text() == "self") {
-      cname = Name::fromString(this, peekClass()->name(), true);
+      ClassStatementPtr clsStmt = peekClass();
+      cname = Name::fromString(this,
+        clsStmt->isTrait() ? s_trait_marker : clsStmt->name(), true);
     } else if (cls && className.text() == "parent") {
-      cname = Name::fromString(this, peekClass()->parent(), true);
+      ClassStatementPtr clsStmt = peekClass();
+      cname = Name::fromString(this,
+        clsStmt->isTrait() ? s_trait_marker :  peekClass()->parent(), true);
     } else {
       cname = Name::fromString(this, className.text());
     }
@@ -1742,10 +1792,14 @@ NamePtr Parser::procStaticClassName(Token &className, bool text) {
     cname = className->name();
     if (cls && cname->get()) {
       if (cname->get() == "self") {
-        cname = Name::fromString(this, peekClass()->name(), true);
+        ClassStatementPtr clsStmt = peekClass();
+        cname = Name::fromString(this,
+          clsStmt->isTrait() ? s_trait_marker : clsStmt->name(), true);
         cname->setOriginalText("self");
       } else if (cname->get() == "parent") {
-        cname = Name::fromString(this, peekClass()->parent(), true);
+        ClassStatementPtr clsStmt = peekClass();
+        cname = Name::fromString(this,
+          clsStmt->isTrait() ? s_trait_marker :  peekClass()->parent(), true);
         cname->setOriginalText("parent");
       }
     }

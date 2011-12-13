@@ -23,9 +23,16 @@
 #include <runtime/eval/ast/static_statement.h>
 #include <runtime/base/runtime_option.h>
 #include <util/process.h>
+#include <util/atomic.h>
+#include <util/trace.h>
 #include <runtime/eval/runtime/eval_state.h>
 #include <runtime/base/server/source_root_info.h>
 #include <runtime/eval/ast/scalar_value_expression.h>
+
+#include <runtime/vm/translator/translator-x64.h>
+#include <runtime/vm/bytecode.h>
+#include <runtime/vm/peephole.h>
+#include <runtime/vm/runtime.h>
 
 using namespace std;
 
@@ -44,11 +51,25 @@ PhpFile::PhpFile(StatementPtr tree, const vector<StaticStatementPtr> &statics,
                  const string &relPath, const string &md5)
   : Block(statics, variableIndices), m_refCount(0), m_tree(tree),
     m_profName(string("run_init::") + string(m_tree->loc()->file)),
-    m_fileName(fileName), m_srcRoot(srcRoot), m_relPath(relPath), m_md5(md5) {
+    m_fileName(fileName), m_srcRoot(srcRoot), m_relPath(relPath), m_md5(md5),
+    m_unit(NULL) {
+}
+
+PhpFile::PhpFile(const string &fileName, const string &srcRoot,
+                 const string &relPath, const string &md5,
+                 HPHP::VM::Unit* unit)
+  : m_refCount(0), m_profName(string("run_init::") + string(fileName)),
+    m_fileName(fileName), m_srcRoot(srcRoot), m_relPath(relPath), m_md5(md5),
+    m_unit(unit) {
+  m_unit->setMd5(md5);
+  const_assert(hhvm);
 }
 
 PhpFile::~PhpFile() {
   assert(m_refCount == 0);
+  if (m_unit != NULL) {
+    delete m_unit;
+  }
 }
 
 Variant PhpFile::eval(LVariableTable *vars) {
@@ -64,6 +85,10 @@ Variant PhpFile::eval(LVariableTable *vars) {
     goto restart;
   } catch (UnlimitedGotoException &e) {
     goto restart;
+  }
+  if (env.isGotoing()) {
+    throw FatalErrorException(0, "Unable to reach goto label %s",
+                              env.getGoto().c_str());
   }
   if (env.isGotoing()) {
     throw FatalErrorException(0, "Unable to reach goto label %s",
@@ -107,7 +132,7 @@ bool FileRepository::fileDump(const char *filename) {
 }
 
 void FileRepository::onDelete(PhpFile *f) {
-  if (RuntimeOption::SandboxCheckMd5) {
+  if (md5Enabled()) {
     s_md5Files.erase(f->getMd5());
   }
   delete(f);
@@ -115,7 +140,7 @@ void FileRepository::onDelete(PhpFile *f) {
 
 void FileRepository::onZeroRef(PhpFile *f) {
   ASSERT(f->getRef() == 0);
-  if (RuntimeOption::SandboxCheckMd5) {
+  if (md5Enabled()) {
     WriteLock lock(s_lock);
     onDelete(f);
   } else {
@@ -150,7 +175,7 @@ PhpFile *FileRepository::checkoutFile(const string &rname,
       ret = fileInfo.m_phpFile;
       PhpFile *f = it->second->getPhpFile();
       if (ret == f) {
-        if (RuntimeOption::SandboxCheckMd5) {
+        if (md5Enabled()) {
           ASSERT(s_md5Files.find(ret->getMd5())->second == ret);
         }
         ret->incRef();
@@ -214,8 +239,12 @@ PhpFile *FileRepository::checkoutFile(const string &rname,
   return ret;
 }
 
+bool FileRepository::findFile(const char* path, struct stat *s) {
+  return fileStat(path, s) && !S_ISDIR(s->st_mode);
+}
+
 String FileRepository::translateFileName(const string &file) {
-  ASSERT(RuntimeOption::SandboxCheckMd5);
+  ASSERT(hhvm || RuntimeOption::SandboxCheckMd5);
   hphp_hash_map<string, PhpFileWrapper*, string_hash>::const_iterator iter =
     s_files.find(file);
   if (iter == s_files.end()) return file;
@@ -255,7 +284,7 @@ bool FileRepository::readFile(const string &name,
   fileInfo.m_inputString = String(input, fileSize, AttachString);
   if (nbytes != fileSize) return false;
 
-  if (RuntimeOption::SandboxCheckMd5) {
+  if (md5Enabled()) {
     fileInfo.m_md5 = StringUtil::MD5(fileInfo.m_inputString).c_str();
     fileInfo.m_srcRoot = SourceRootInfo::GetCurrentSourceRoot();
     if (fileInfo.m_srcRoot.empty()) {
@@ -282,36 +311,41 @@ bool FileRepository::readFile(const string &name,
 
 PhpFile *FileRepository::parseFile(const std::string &name,
                                    const FileInfo &fileInfo) {
-  vector<StaticStatementPtr> sts;
-  Block::VariableIndices variableIndices;
-  if (RuntimeOption::EnableEvalOptimization) {
-    ScalarValueExpression::initScalarValues();
-  }
-  StatementPtr stmt =
-    Parser::ParseString(fileInfo.m_inputString, name.c_str(),
-                        sts, variableIndices);
-  if (stmt && RuntimeOption::EnableEvalOptimization) {
-    DummyVariableEnvironment env;
-    stmt->optimize(env);
-  }
-  if (stmt) {
-    if (RuntimeOption::EnableEvalOptimization) {
-      ScalarValueExpression::registerScalarValues();
-    } 
-    PhpFile *p = new PhpFile(stmt, sts, variableIndices,
-                             name, fileInfo.m_srcRoot,
-                             fileInfo.m_relPath, fileInfo.m_md5);
+  if (hhvm) {
+    VM::Unit* unit = VM::compile_string(fileInfo.m_inputString->data(),
+                                        fileInfo.m_inputString->size(),
+                                        name.c_str());
+    PhpFile *p = new PhpFile(name, fileInfo.m_srcRoot, fileInfo.m_relPath,
+                             fileInfo.m_md5, unit);
     return p;
+  } else {
+    vector<StaticStatementPtr> sts;
+    Block::VariableIndices variableIndices;
+    if (RuntimeOption::EnableEvalOptimization) {
+      ScalarValueExpression::initScalarValues();
+    }
+    StatementPtr stmt =
+      Parser::ParseString(fileInfo.m_inputString, name.c_str(),
+                          sts, variableIndices);
+    if (stmt && RuntimeOption::EnableEvalOptimization) {
+      DummyVariableEnvironment env;
+      stmt->optimize(env);
+    }
+    if (stmt) {
+      if (RuntimeOption::EnableEvalOptimization) {
+        ScalarValueExpression::registerScalarValues();
+      }
+      PhpFile *p = new PhpFile(stmt, sts, variableIndices,
+                               name, fileInfo.m_srcRoot,
+                               fileInfo.m_relPath, fileInfo.m_md5);
+      return p;
+    }
+    return NULL;
   }
-  return NULL;
 }
 
 bool FileRepository::fileStat(const string &name, struct stat *s) {
   return stat(name.c_str(), s) == 0;
-}
-
-const char* FileRepository::canonicalize(const string &name) {
-  return s_names.insert(name).first->c_str();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

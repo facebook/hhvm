@@ -49,11 +49,20 @@ class DebuggerProtocolException    : public DebuggerClientException {};
 class DebuggerServerLostException  : public DebuggerClientException {};
 
 // both client and server side exception
-class DebuggerException            : public Exception {};
+class DebuggerException            : public Exception {
+  virtual DebuggerException *clone() {
+    return new DebuggerException(*this);
+  }
+  virtual void throwException() { throw *this; }
+};
 class DebuggerClientExitException  : public DebuggerException {
   virtual const char *what() const throw() {
     return "Debugger client has just quit.";
   }
+  virtual DebuggerClientExitException *clone() {
+    return new DebuggerClientExitException(*this);
+  }
+  virtual void throwException() { throw *this; }
 };
 class DebuggerRestartException     : public DebuggerException {
 public:
@@ -63,6 +72,10 @@ public:
   virtual const char *what() const throw() {
     return "Debugger restarting program or aborting web request.";
   }
+  virtual DebuggerRestartException *clone() {
+    return new DebuggerRestartException(*this);
+  }
+  virtual void throwException() { throw *this; }
 
   StringVecPtr m_args;
 };

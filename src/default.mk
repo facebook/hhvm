@@ -24,8 +24,8 @@ clobber:
 	$(V)$(RM) *.merge-left.* *.merge-right.* *.working www.pid
 	$(V)$(RM) $(OUT_DIR)lib$(PROJECT_NAME).so $(OUT_DIR)lib$(PROJECT_NAME).a
 	$(V)$(RM) $(filter-out $(SUB_PROGRAMS) $(SUB_LIB_TARGETS), $(TARGETS))
-	$(V)find $(OUT_DIR) -name "*.[od]" | xargs $(RM)
-	$(V)find . -name "*~" | xargs $(RM)
+	$(V)find $(OUT_DIR) -name "*.[od]" -delete
+	$(V)find . -name "*~" -delete
 	$(V)rm -f runtime/base/memory/smart_allocator.inc_gen
 	$(V)rm -f $(HPHP_LIB)/tainted_build
 

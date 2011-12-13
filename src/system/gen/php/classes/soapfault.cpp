@@ -101,7 +101,8 @@ const ObjectStaticCallbacks cw_SoapFault = {
   c_SoapFault::s_call_info_table,c_SoapFault::s_call_info_index,
   c_SoapFault::s_instanceof_table,c_SoapFault::s_instanceof_index,
   &c_SoapFault::s_class_name,
-  &c_SoapFault::os_prop_table,&c_SoapFault::ci___construct,0,&cw_Exception,0x0
+  &c_SoapFault::os_prop_table,&c_SoapFault::ci___construct,0,&cw_Exception,0x0,
+  &c_SoapFault::s_cls
 };
 /* SRC: classes/soapfault.php line 12 */
 void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_actor //  = null

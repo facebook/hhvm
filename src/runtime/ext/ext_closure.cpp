@@ -22,6 +22,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Closure::c_Closure(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
+  const_assert(!hhvm);
   throw_fatal("Cannot explicitly instantiate and/or subclass Closure");
 }
 c_Closure::~c_Closure() {}

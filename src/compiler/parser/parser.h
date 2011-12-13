@@ -95,6 +95,9 @@ public:
   virtual bool enableXHP();
   IMPLEMENT_XHP_ATTRIBUTES;
 
+  virtual void fatal(Location *loc, const char *msg);
+  std::string errString();
+
   void failed();
   // result
   StatementListPtr getTree() const { return m_tree;}
@@ -237,6 +240,7 @@ private:
 
   // parser output
   StatementListPtr m_tree;
+  std::string m_error;
 
   std::vector<bool> m_hasCallToGetArgs;
   std::vector<StringToExpressionPtrVecMap> m_staticVars;

@@ -35,24 +35,36 @@ IMPLEMENT_SMART_ALLOCATION(StringData, SmartAllocatorImpl::NeedRestoreOnce);
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
-typedef tbb::concurrent_hash_map<std::string, StringData *,
-                                 stringHashCompare> StringDataMap;
+// The (void *) value is not used.
+typedef tbb::concurrent_hash_map<const StringData *, void *,
+                                 StringDataHashCompare> StringDataMap;
 static StringDataMap *s_stringDataMap;
 
-StringData *StringData::GetStaticString(const std::string &stringData) {
-  StringDataMap::accessor acc;
+StringData *StringData::GetStaticString(const StringData *str) {
+  StringDataMap::const_accessor acc;
   if (!s_stringDataMap) s_stringDataMap = new StringDataMap();
-  if (s_stringDataMap->insert(acc, stringData)) {
-    StringData *sd =
-      new StringData(stringData.data(), stringData.size(), CopyString);
-    sd->setStatic();
-    acc->second = sd;
+  if (s_stringDataMap->find(acc, str)) {
+    return (StringData*)acc->first;
   }
-  return acc->second;
+  // Lookup failed, so do the hard work of creating a StringData with its own
+  // copy of the key string, so that the atomic insert() has a permanent key.
+  StringData *sd = new StringData(str->data(), str->size(), CopyString);
+  sd->setStatic();
+  if (!s_stringDataMap->insert(acc, sd)) {
+    delete sd;
+  }
+  ASSERT(acc->first != NULL);
+  return (StringData*)acc->first;
 }
 
-StringData *StringData::GetStaticString(const StringData *sd) {
-  return GetStaticString(std::string(sd->data(), sd->size()));
+StringData *StringData::GetStaticString(const std::string &str) {
+  StringData sd(str.c_str(), str.size(), AttachLiteral);
+  return GetStaticString(&sd);
+}
+
+StringData *StringData::GetStaticString(const char *str) {
+  StringData sd(str, strlen(str), AttachLiteral);
+  return GetStaticString(&sd);
 }
 
 StringData::StringData(const char *data,
@@ -183,8 +195,8 @@ void StringData::append(const char *s, int len) {
            (m_data < s && s - m_data > dataLen)); // no overlapping
     m_len = len + dataLen;
     m_data = (const char*)realloc((void*)m_data, m_len + 1);
-    memcpy((void*)(m_data + dataLen), s, len);
-    ((char*)m_data)[m_len] = '\0';
+    // The memcpy here will also copy the NULL-terminator for us
+    memcpy((void*)(m_data + dataLen), s, len+1);
     m_hash = 0;
   }
 

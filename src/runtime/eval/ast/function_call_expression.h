@@ -18,7 +18,6 @@
 #define __EVAL_FUNCTION_CALL_EXPRESSION_H__
 
 #include <runtime/eval/ast/expression.h>
-#include <runtime/base/array/arg_array.h>
 
 namespace HPHP {
 namespace Eval {
@@ -43,8 +42,6 @@ protected:
     if (ci->isRef(index)) return strongBind(m_params[index]->refval(env, 0));
     return m_params[index]->eval(env);
   }
-  ArgArray *prepareArgArray(VariableEnvironment &env, const CallInfo *ci,
-                            unsigned int count) const;
   std::vector<ExpressionPtr> m_params;
   void dumpParams(std::ostream &out) const;
 };

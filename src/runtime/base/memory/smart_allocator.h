@@ -46,7 +46,10 @@ namespace HPHP {
 #ifdef DEBUGGING_SMART_ALLOCATOR
 #define NEW(T) new T
 #define NEWOBJ(T) new T
+#define NEWOBJSZ(T,SZ) new (malloc(SZ)) T
+#define ALLOCOBJSZ(SZ) (malloc(SZ))
 #define DELETE(T) delete
+#define DELETEOBJSZ(SZ) delete
 #define DELETEOBJ(NS,T,OBJ) delete OBJ
 #define RELEASEOBJ(NS,T,OBJ) ::operator delete(OBJ)
 #define SWEEPOBJ(T) delete this
@@ -56,7 +59,10 @@ namespace HPHP {
   (ThreadLocalSingleton                                \
     <ObjectAllocator<ItemSize<sizeof(T)>::value> >     \
     ::getNoCheck()) T
+#define NEWOBJSZ(T,SZ) new (info->instanceSizeAllocator(SZ)) T
+#define ALLOCOBJSZ(SZ) (info->instanceSizeAllocator(SZ)->alloc())
 #define DELETE(T) T::AllocatorType::getNoCheck()->release
+#define DELETEOBJSZ(SZ) info->instanceSizeAllocator(SZ)->release
 #define DELETEOBJ(NS,T,OBJ) delete OBJ
 #define RELEASEOBJ(NS,T,OBJ)                           \
   (ThreadLocalSingleton                                \

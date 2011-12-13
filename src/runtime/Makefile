@@ -1,7 +1,7 @@
 
 PROJECT_ROOT = ../..
 
-LIB_TARGETS = base ext eval
+LIB_TARGETS = base ext eval vm
 PROGRAMS = tmp
 SUB_CLEAN_DIRS = tmp
 

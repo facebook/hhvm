@@ -26,6 +26,9 @@ namespace Eval {
 using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
+static StaticString s___construct("__construct");
+static StaticString s___invoke("__invoke");
+
 MethodStatement::MethodStatement(STATEMENT_ARGS, const string &name,
                                  const ClassStatement *cls, int modifiers,
                                  const string &doc)
@@ -55,6 +58,10 @@ void MethodStatement::setPublic() {
   m_modifiers = ClassStatement::Public;
 }
 
+void MethodStatement::setConstructor() {
+  m_modifiers |= ClassStatement::Constructor;
+}
+
 String MethodStatement::fullName() const {
   return m_fullName;
 }
@@ -80,7 +87,8 @@ Variant MethodStatement::invokeInstance(CObjRef obj, CArrRef params,
   DECLARE_THREAD_INFO_NOINIT
   MethScopeVariableEnvironment env(this);
   env.setCurrentObject(obj);
-  String clsName(m_class->name());
+  String clsName(m_class->isTrait() ? env.currentClass()
+                                    : m_class->name());
   EvalFrameInjection fi(clsName, m_fullName->data(), env,
                         loc()->file, obj.get(), FrameInjection::ObjectMethod);
   if (m_ref) {
@@ -100,7 +108,8 @@ Variant MethodStatement::invokeInstanceFewArgs(CObjRef obj, int count,
   DECLARE_THREAD_INFO_NOINIT
   MethScopeVariableEnvironment env(this);
   env.setCurrentObject(obj);
-  String clsName(m_class->name());
+  String clsName(m_class->isTrait() ? env.currentClass()
+                                    : m_class->name());
   EvalFrameInjection fi(clsName, m_fullName->data(), env,
                         loc()->file, obj.get(), FrameInjection::ObjectMethod);
   if (m_ref) {
@@ -112,17 +121,18 @@ Variant MethodStatement::invokeInstanceFewArgs(CObjRef obj, int count,
 Variant MethodStatement::
 invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
                      const FunctionCallExpression *caller,
-                     bool check /* = true */) const {
+                     int access /* = 0 */, bool check /* = true */) const {
   if (getModifiers() & ClassStatement::Static) {
     return invokeStaticDirect(obj->o_getClassName(), env,
-                              caller, false, check);
+                              caller, false, access, check);
   }
-  if (check) attemptAccess(FrameInjection::GetClassName(false));
+  if (check) attemptAccess(FrameInjection::GetClassName(false), access);
   DECLARE_THREAD_INFO_NOINIT
   MethScopeVariableEnvironment fenv(this);
   directBind(env, caller, fenv);
   fenv.setCurrentObject(obj);
-  String clsName(m_class->name());
+  String clsName(m_class->isTrait() ? fenv.currentClass()
+                                    : m_class->name());
   EvalFrameInjection fi(clsName, m_fullName->data(), fenv,
                         loc()->file, obj.get(), FrameInjection::ObjectMethod);
   if (m_ref) {
@@ -131,13 +141,14 @@ invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
   return evalBody(fenv);
 }
 
-Variant MethodStatement::invokeStatic(const char* cls, CArrRef params,
+Variant MethodStatement::invokeStatic(CStrRef cls, CArrRef params,
     bool check /* = true */) const {
   if (check) attemptAccess(FrameInjection::GetClassName(false));
   DECLARE_THREAD_INFO_NOINIT
   MethScopeVariableEnvironment env(this);
   env.setCurrentClass(cls);
-  String clsName(m_class->name());
+  String clsName(m_class->isTrait() ? env.currentClass()
+                                    : m_class->name());
   EvalFrameInjection fi(clsName, m_fullName->data(), env, loc()->file,
                         NULL, FrameInjection::StaticMethod);
   if (m_ref) {
@@ -146,13 +157,14 @@ Variant MethodStatement::invokeStatic(const char* cls, CArrRef params,
   return invokeImpl(env, params);
 }
 
-Variant MethodStatement::invokeStaticFewArgs(const char* cls, int count,
+Variant MethodStatement::invokeStaticFewArgs(CStrRef cls, int count,
   INVOKE_FEW_ARGS_IMPL_ARGS, bool check) const {
   if (check) attemptAccess(FrameInjection::GetClassName(false));
   DECLARE_THREAD_INFO_NOINIT
   MethScopeVariableEnvironment env(this);
   env.setCurrentClass(cls);
-  String clsName(m_class->name());
+  String clsName(m_class->isTrait() ? env.currentClass()
+                                    : m_class->name());
   EvalFrameInjection fi(clsName, m_fullName->data(), env, loc()->file,
                         NULL, FrameInjection::StaticMethod);
   if (m_ref) {
@@ -164,15 +176,16 @@ Variant MethodStatement::invokeStaticFewArgs(const char* cls, int count,
 Variant MethodStatement::
 invokeStaticDirect(CStrRef cls, VariableEnvironment &env,
                    const FunctionCallExpression *caller, bool sp,
-                   bool check /* = true */)
+                   int access /* = 0 */, bool check /* = true */)
   const {
-  if (check) attemptAccess(FrameInjection::GetClassName(false));
+  if (check) attemptAccess(FrameInjection::GetClassName(false), access);
   MethScopeVariableEnvironment fenv(this);
   directBind(env, caller, fenv);
-  fenv.setCurrentClass(cls.data());
+  fenv.setCurrentClass(cls);
   EvalFrameInjection::EvalStaticClassNameHelper helper(cls, sp);
   DECLARE_THREAD_INFO_NOINIT
-  String clsName(m_class->name());
+  String clsName(m_class->isTrait() ? fenv.currentClass()
+                                    : m_class->name());
   EvalFrameInjection fi(clsName, m_fullName->data(), fenv,
                         loc()->file, NULL, FrameInjection::StaticMethod);
   if (m_ref) {
@@ -192,62 +205,71 @@ Variant MethodStatement::evalBody(VariableEnvironment &env) const {
   }
 }
 
-void MethodStatement::getInfo(ClassInfo::MethodInfo &info) const {
+void MethodStatement::getInfo(ClassInfo::MethodInfo &info,
+                              int access /* = 0 */) const {
   FunctionStatement::getInfo(info);
   int attr = info.attribute == ClassInfo::IsNothing ? 0 : info.attribute;
-  if (m_modifiers & ClassStatement::Abstract) attr |= ClassInfo::IsAbstract;
-  if (m_modifiers & ClassStatement::Final) attr |= ClassInfo::IsFinal;
-  if (m_modifiers & ClassStatement::Protected) attr |= ClassInfo::IsProtected;
-  if (m_modifiers & ClassStatement::Private) attr |= ClassInfo::IsPrivate;
-  if (m_modifiers & ClassStatement::Static) attr |= ClassInfo::IsStatic;
+  int mods = m_modifiers;
+  if (access) {
+    ASSERT((access & ClassStatement::AccessMask) == access);
+    mods &= ~ClassStatement::AccessMask;
+    mods |= access;
+  }
+  if (mods & ClassStatement::Abstract) attr |= ClassInfo::IsAbstract;
+  if (mods & ClassStatement::Final) attr |= ClassInfo::IsFinal;
+  if (mods & ClassStatement::Protected) attr |= ClassInfo::IsProtected;
+  if (mods & ClassStatement::Private) attr |= ClassInfo::IsPrivate;
+  if (mods & ClassStatement::Static) attr |= ClassInfo::IsStatic;
   if (!(attr & ClassInfo::IsProtected || attr & ClassInfo::IsPrivate)) {
     attr |= ClassInfo::IsPublic;
   }
+  if (mods & ClassStatement::Constructor) attr |= ClassInfo::IsConstructor;
   info.attribute = (ClassInfo::Attribute)attr;
 }
 
-void MethodStatement::attemptAccess(const char *context) const {
+void MethodStatement::attemptAccess(CStrRef context,
+  int access /* = 0 */) const {
   if (g_context->getDebuggerBypassCheck()) {
     return;
   }
-  int mods = getModifiers();
+  int mods = access ? access : getModifiers();
   const ClassStatement *cs = m_class;
   ClassStatement::Modifier level = ClassStatement::Public;
   if (mods & ClassStatement::Private) level = ClassStatement::Private;
   else if (mods & ClassStatement::Protected) level = ClassStatement::Protected;
-  bool access = true;
+  bool ok = true;
   if (level == ClassStatement::Protected) {
     while (!cs->hasAccess(context, level)) {
       while ((cs = cs->parentStatement())) {
-        if (cs->findMethod(m_name->data())) {
+        if (cs->findMethod(m_name)) {
           break;
         }
       }
       if (!cs) {
-        access = false;
+        ok = false;
         break;
       }
     }
   } else {
-    access = cs->hasAccess(context, level);
+    ok = cs->hasAccess(context, level);
   }
 
   // special case when handling parent's private constructors that are allowed
-  if (!access) {
+  if (!ok) {
     if (level == ClassStatement::Private &&
         (strcasecmp(m_name->data(), "__construct") == 0 ||
          strcasecmp(m_name->data(), getClass()->name().c_str()) == 0)) {
-      access = cs->hasAccess(context, ClassStatement::Protected);
+      ok = cs->hasAccess(context, ClassStatement::Protected);
     }
   }
 
-  if (!access) {
+  if (!ok) {
     const char *mod = "protected";
     if (level == ClassStatement::Private) mod = "private";
     throw FatalErrorException(0, "Attempt to call %s %s::%s()%s%s",
                               mod, getClass()->name().c_str(), m_name->data(),
-                              context[0] ? " from " : "",
-                              context[0] ? context : "");
+                              context->data()[0] ? " from " : "",
+                              context->data()[0] ? context->data() : "");
   }
 }
 
@@ -258,7 +280,7 @@ bool MethodStatement::isAbstract() const {
 
 Variant MethodStatement::MethInvoker(MethodCallPackage &mcp, CArrRef params) {
   const MethodStatement *ms = (const MethodStatement*)mcp.extra;
-  bool check = strcasecmp(ms->m_name->data(), "__invoke") != 0;
+  bool check = !ms->m_name->isame(s___invoke.get());
   bool isStatic = ms->getModifiers() & ClassStatement::Static;
   if (isStatic || !mcp.obj) {
     String cn;
@@ -270,9 +292,9 @@ Variant MethodStatement::MethInvoker(MethodCallPackage &mcp, CArrRef params) {
       cn = mcp.getClassName();
     }
     if (ms->refReturn()) {
-      return strongBind(ms->invokeStatic(cn.c_str(), params, check));
+      return strongBind(ms->invokeStatic(cn, params, check));
     } else {
-      return ms->invokeStatic(cn.c_str(), params, check);
+      return ms->invokeStatic(cn, params, check);
     }
   } else {
     if (ms->refReturn()) {
@@ -286,7 +308,7 @@ Variant MethodStatement::MethInvoker(MethodCallPackage &mcp, CArrRef params) {
 Variant MethodStatement::MethInvokerFewArgs(MethodCallPackage &mcp,
     int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   const MethodStatement *ms = (const MethodStatement*)mcp.extra;
-  bool check = strcasecmp(ms->m_name->data(), "__invoke") != 0;
+  bool check = !ms->m_name->isame(s___invoke.get());
   bool isStatic = ms->getModifiers() & ClassStatement::Static;
   if (isStatic || !mcp.obj) {
     String cn;
@@ -298,10 +320,10 @@ Variant MethodStatement::MethInvokerFewArgs(MethodCallPackage &mcp,
       cn = mcp.getClassName();
     }
     if (ms->refReturn()) {
-      return strongBind(ms->invokeStaticFewArgs(cn.c_str(), count,
+      return strongBind(ms->invokeStaticFewArgs(cn, count,
         INVOKE_FEW_ARGS_PASS_ARGS, check));
     } else {
-      return ms->invokeStaticFewArgs(cn.c_str(), count,
+      return ms->invokeStaticFewArgs(cn, count,
         INVOKE_FEW_ARGS_PASS_ARGS, check);
     }
   } else {

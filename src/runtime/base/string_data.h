@@ -122,7 +122,7 @@ class StringData {
   DataType isNumericWithVal(int64 &lval, double &dval, int allow_errors) const;
   bool isNumeric() const;
   bool isInteger() const;
-  bool isStrictlyInteger(int64 &res) {
+  bool isStrictlyInteger(int64 &res) const {
     if (isStatic() && m_hash < 0) return false;
     return is_strictly_integer(m_data, (m_len & LenMask), res);
   }
@@ -149,6 +149,7 @@ class StringData {
    */
   StringData *getChar(int offset) const;
   void setChar(int offset, CStrRef substring);
+  void setChar(int offset, char ch);
   void inc();
   void negate();
   void set(bool    key, CStrRef v) { setChar(key ? 1 : 0, v); }
@@ -216,8 +217,9 @@ class StringData {
   void dump() const;
   std::string toCPPString() const;
 
-  static StringData *GetStaticString(const std::string &str);
   static StringData *GetStaticString(const StringData *str);
+  static StringData *GetStaticString(const std::string &str);
+  static StringData *GetStaticString(const char *str);
 
   /**
    * The order of the data members is significant. The _count field must
@@ -244,7 +246,6 @@ class StringData {
    */
   int numericCompare(const StringData *v2) const;
   void escalate(); // change to malloc-ed string
-  void setChar(int offset, char ch);
   void removeChar(int offset);
 
   int64 getSharedStringHash() const;

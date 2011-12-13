@@ -32,6 +32,9 @@ namespace Eval {
 using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
+static StaticString s_get_class_marker("[get_class]");
+static StaticString s_get_parent_class_marker("[get_parent_class]");
+
 SimpleFunctionCallExpression::SimpleFunctionCallExpression
 (EXPRESSION_ARGS, NamePtr name, const std::vector<ExpressionPtr> &params) :
   FunctionCallExpression(EXPRESSION_PASS, params), m_name(name) {}
@@ -107,7 +110,7 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   if (originalName[0] == '\\') {
     originalName = originalName.lastToken('\\');
     name = get_renamed_function(originalName);
-    fs = RequestEvalState::findFunction(name.data());
+    fs = RequestEvalState::findFunction(name);
     if (fs) {
       return strongBind(fs->directInvoke(env, this));
     }
@@ -166,10 +169,6 @@ Variant SimpleFunctionCallExpression::evalCallInfo(
     return
       strongBind((ci->getFuncFewArgs())(extra, count, a0, a1, a2, a3, a4, a5));
   }
-  if (RuntimeOption::UseArgArray) {
-    ArgArray *args = prepareArgArray(env, ci, count);
-    return strongBind((ci->getFunc())(extra, args));
-  }
   ArrayInit ai(m_params.size());
   for (unsigned int i = 0; i < m_params.size(); ++i) {
     if (ci->mustBeRef(i)) {
@@ -195,16 +194,26 @@ SimpleFunctionCallExpression::make(EXPRESSION_ARGS, NamePtr name,
   String sname = name->get();
   if (!sname.isNull()) {
     if (strcasecmp(sname.data(), "get_class") == 0 && params.size() == 0) {
-      if (p.currentClass()) {
-        return new ScalarExpression(EXPRESSION_PASS, p.currentClass()->name());
+      ClassStatementPtr cls = p.currentClass();
+      if (cls) {
+        if (cls->isTrait()) {
+          return new ScalarExpression(EXPRESSION_PASS, T_STRING,
+                                      s_get_class_marker->data(), T_CLASS_C);
+        } else {
+          return new ScalarExpression(EXPRESSION_PASS, cls->name());
+        }
       } else {
         return new ScalarExpression(EXPRESSION_PASS, false);
       }
     } else if (strcasecmp(sname.data(), "get_parent_class") == 0 &&
                params.size() == 0) {
-      if (p.currentClass() && !p.currentClass()->parent().empty()) {
-        return new ScalarExpression(EXPRESSION_PASS,
-                                    p.currentClass()->parent());
+      ClassStatementPtr cls = p.currentClass();
+      if (cls && !cls->parent().empty()) {
+        return new ScalarExpression(EXPRESSION_PASS, cls->parent());
+      } else if (cls->isTrait()) {
+        return new ScalarExpression(EXPRESSION_PASS, T_STRING,
+                                    s_get_parent_class_marker->data(),
+                                    T_CLASS_C);
       } else {
         return new ScalarExpression(EXPRESSION_PASS, false);
       }

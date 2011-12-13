@@ -28,9 +28,10 @@ bool TestExtFunction::RunTests(const std::string &which) {
   RUN_TEST(test_is_callable);
   RUN_TEST(test_call_user_func_array);
   RUN_TEST(test_call_user_func);
-  RUN_TEST(test_call_user_func_array_async);
-  RUN_TEST(test_call_user_func_async);
-  RUN_TEST(test_end_user_func_async);
+  // Fibers are no longer supported
+  //RUN_TEST(test_call_user_func_array_async);
+  //RUN_TEST(test_call_user_func_async);
+  //RUN_TEST(test_end_user_func_async);
   RUN_TEST(test_forward_static_call_array);
   RUN_TEST(test_forward_static_call);
   RUN_TEST(test_create_function);

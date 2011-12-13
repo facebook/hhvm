@@ -127,9 +127,13 @@ class c_GenericContinuation : public c_Continuation {
 
   // implemented by HPHP
   public: c_GenericContinuation *create(int64 func, int64 extra, bool isMethod, String origFuncName, Array vars, Variant obj = null, Array args = null_array);
-  public: static const ClassPropTable os_prop_table;
 public:
   LVariableTable m_statics;
+  public: static const ClassPropTable os_prop_table;
+private:
+  SmartPtr<HphpArray> m_VMStatics;
+public:
+  HphpArray* getStaticLocals();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -117,7 +117,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "call_user_func_array",
-    'desc'   => "Call a user defined function with the parameters in param_arr.",
+    'desc'   => "Call a user defined function with the parameters in params.",
     'flags'  =>  HasDocComment | HasOptFunction | NoProfile | ContextSensitive,
     'opt'    => "hphp_opt_call_user_func",
     'return' => array(

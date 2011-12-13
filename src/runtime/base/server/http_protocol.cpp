@@ -97,10 +97,14 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   // $_ENV
   process_env_variables(g->GV(_ENV));
   g->GV(_ENV).set("HPHP", 1);
-  g->GV(_ENV).set("HPHP_SERVER", 1);
+
+  bool isServer = (strcmp(RuntimeOption::ExecutionMode, "srv") == 0);
+  if (isServer) {
+    g->GV(_ENV).set("HPHP_SERVER", 1);
 #ifdef HOTPROFILER
-  g->GV(_ENV).set("HPHP_HOTPROFILER", 1);
+    g->GV(_ENV).set("HPHP_HOTPROFILER", 1);
 #endif
+  }
 
   Variant &request = g->GV(_REQUEST);
 

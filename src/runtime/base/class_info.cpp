@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/base/array/array_util.h>
 #include <runtime/base/class_info.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/externals.h>
@@ -63,6 +64,9 @@ Array ClassInfo::GetUserFunctions() {
     Array dyn = s_hook->getUserFunctions();
     if (!dyn.isNull()) {
       ret.merge(dyn);
+      // De-dup values, then renumber (for aesthetics).
+      ret = ArrayUtil::StringUnique(ret).toArrRef();
+      ret->renumber();
     }
   }
   return ret;
@@ -120,10 +124,44 @@ const ClassInfo *ClassInfo::FindTrait(CStrRef name) {
   return 0;
 }
 
+const ClassInfo *ClassInfo::FindSystemClassInterfaceOrTrait(CStrRef name) {
+  ASSERT(!name.isNull());
+  ASSERT(s_loaded);
+
+  ClassMap::const_iterator iter = s_class_like.find(name);
+  if (iter != s_class_like.end()) {
+    const ClassInfo *ci = iter->second;
+    if (ci->m_attribute & IsSystem) return ci;
+  }
+
+  return 0;
+}
+
+const ClassInfo *ClassInfo::FindSystemClass(CStrRef name) {
+  if (const ClassInfo *r = FindSystemClassInterfaceOrTrait(name)) {
+    return r->getAttribute() & (IsTrait|IsInterface) ? 0 : r;
+  }
+  return 0;
+}
+
+const ClassInfo *ClassInfo::FindSystemInterface(CStrRef name) {
+  if (const ClassInfo *r = FindSystemClassInterfaceOrTrait(name)) {
+    return r->getAttribute() & IsInterface ? r : 0;
+  }
+  return 0;
+}
+
+const ClassInfo *ClassInfo::FindSystemTrait(CStrRef name) {
+  if (const ClassInfo *r = FindSystemClassInterfaceOrTrait(name)) {
+    return r->getAttribute() & IsTrait ? r : 0;
+  }
+  return 0;
+}
+
 Array ClassInfo::GetClassLike(unsigned mask, unsigned value) {
   ASSERT(s_loaded);
 
-  Array ret;
+  Array ret = Array::Create();
   for (ClassMap::const_iterator iter = s_class_like.begin();
        iter != s_class_like.end(); ++iter) {
     const ClassInfo *info = iter->second->getDeclared();
@@ -135,16 +173,25 @@ Array ClassInfo::GetClassLike(unsigned mask, unsigned value) {
       Array dyn = s_hook->getInterfaces();
       if (!dyn.isNull()) {
         ret.merge(dyn);
+        // De-dup values, then renumber (for aesthetics).
+        ret = ArrayUtil::StringUnique(ret).toArrRef();
+        ret->renumber();
       }
     } else if (value & IsTrait) {
       Array dyn = s_hook->getTraits();
       if (!dyn.isNull()) {
         ret.merge(dyn);
+        // De-dup values, then renumber (for aesthetics).
+        ret = ArrayUtil::StringUnique(ret).toArrRef();
+        ret->renumber();
       }
     } else {
       Array dyn = s_hook->getClasses();
       if (!dyn.isNull()) {
         ret.merge(dyn);
+        // De-dup values, then renumber (for aesthetics).
+        ret = ArrayUtil::StringUnique(ret).toArrRef();
+        ret->renumber();
       }
     }
   }
@@ -377,8 +424,10 @@ void ClassInfo::GetSymbolNames(std::vector<String> &classes,
                       clsMethods, clsProperties, clsConstants);
   GetClassSymbolNames(GetInterfaces(), true, false, classes,
                       clsMethods, clsProperties, clsConstants);
-  GetClassSymbolNames(GetTraits(), false, true, classes,
-                      clsMethods, clsProperties, clsConstants);
+  if (!hhvm) {
+    GetClassSymbolNames(GetTraits(), false, true, classes,
+                        clsMethods, clsProperties, clsConstants);
+  }
 
   if (clsMethods && methodSize < clsMethods->size()) {
     methodSize = clsMethods->size();
@@ -537,9 +586,15 @@ bool ClassInfo::HasAccess(CStrRef className, CStrRef methodName,
     clsInfo->hasMethod(methodName, defClass);
   if (!methodInfo) return false;
   if (methodInfo->attribute & ClassInfo::IsPublic) return true;
-  const ClassInfo *ctxClass =
-    ClassInfo::FindClass(FrameInjection::GetClassName(true));
-  bool hasObject = hasCallObject || FrameInjection::GetThis(true);
+  CStrRef ctxName = hhvm
+                    ? g_context->getContextClassName(true)
+                    : FrameInjection::GetClassName(true);
+  if (ctxName->size() == 0) {
+    return false;
+  }
+  const ClassInfo *ctxClass = ClassInfo::FindClass(ctxName);
+  bool hasObject = hasCallObject ||
+    (hhvm ? g_context->getThis(true) : FrameInjection::GetThis(true));
   if (ctxClass) {
     return ctxClass->checkAccess(defClass, methodInfo, staticCall, hasObject);
   }
@@ -752,6 +807,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
   // because the underlying static StringData will not be released.
   m_name = makeStaticString(*p++);
   m_parent = makeStaticString(*p++);
+  m_parentInfo = 0;
 
   m_file = *p++;
   m_line1 = (int)(int64)(*p++);
@@ -846,6 +902,23 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
   p++;
 }
 
+const ClassInfo *ClassInfoUnique::getParentClassInfo() const {
+  if (m_parentInfo) return m_parentInfo;
+  if (m_parent.empty()) return NULL;
+  return FindClass(m_parent);
+}
+
+void ClassInfoUnique::postInit() {
+  if (m_parent.empty()) return;
+  const ClassInfo *ci = FindClassInterfaceOrTrait(m_parent);
+  if (!ci) return;
+  if ((m_attribute & IsInterface) !=
+      (ci->getAttribute() & (IsInterface|IsTrait|IsRedeclared))) {
+    return;
+  }
+  m_parentInfo = ci;
+}
+
 ClassInfoRedeclared::ClassInfoRedeclared(const char **&p) {
   m_attribute = (Attribute)(int64)(*p++);
   m_name = makeStaticString(*p++);
@@ -866,6 +939,12 @@ const ClassInfo *ClassInfoRedeclared::getCurrentOrNull() const {
     return m_redeclaredClasses[id];
   }
   return 0;
+}
+
+void ClassInfoRedeclared::postInit() {
+  for (int i = m_redeclaredClasses.size(); i--; ) {
+    m_redeclaredClasses[i]->postInit();
+  }
 }
 
 void ClassInfo::Load() {
@@ -895,7 +974,14 @@ void ClassInfo::Load() {
   ASSERT(s_systemFuncs);
   ASSERT(s_userFuncs);
   s_loaded = true;
+
+  for (ClassMap::iterator it = s_class_like.begin(), end = s_class_like.end();
+       it != end; ++it) {
+    it->second->postInit();
+  }
 }
+
+void ClassInfo::postInit() {}
 
 ClassInfo::MethodInfo::~MethodInfo() {
   if (attribute & ClassInfo::IsRedeclared) {
@@ -1011,7 +1097,13 @@ void ClassInfo::GetArray(const ObjectData *obj, const ClassPropTable *ct,
       }
     }
   }
-  obj->o_getArray(props, pubOnly);
+  if (hhvm) {
+    HPHP::VM::Instance *inst = static_cast<HPHP::VM::Instance*>(
+                               const_cast<ObjectData*>(obj));
+    inst->HPHP::VM::Instance::o_getArray(props, pubOnly);
+  } else {
+    obj->o_getArray(props, pubOnly);
+  }
 }
 
 void ClassInfo::SetArray(ObjectData *obj, const ClassPropTable *ct,
@@ -1049,7 +1141,12 @@ void ClassInfo::SetArray(ObjectData *obj, const ClassPropTable *ct,
       }
     }
   }
-  obj->o_setArray(props);
+  if (hhvm) {
+    HPHP::VM::Instance *inst = static_cast<HPHP::VM::Instance*>(obj);
+    inst->HPHP::VM::Instance::o_setArray(props);
+  } else {
+    obj->o_setArray(props);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

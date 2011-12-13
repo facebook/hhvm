@@ -22,6 +22,7 @@
 #include <util/async_func.h>
 #include <runtime/base/file/socket.h>
 #include <runtime/eval/debugger/dummy_sandbox.h>
+#include <runtime/vm/instrumentation.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,6 +32,7 @@ DECLARE_BOOST_TYPES(DebuggerProxy);
 DECLARE_BOOST_TYPES(DebuggerCommand);
 DECLARE_BOOST_TYPES(CmdFlowControl);
 DECLARE_BOOST_TYPES(CmdJump);
+
 class DebuggerProxy : public Synchronizable,
                       public boost::enable_shared_from_this<DebuggerProxy> {
 public:
@@ -47,31 +49,33 @@ public:
 
 public:
   DebuggerProxy(SmartPtr<Socket> socket, bool local);
-  ~DebuggerProxy();
+  virtual ~DebuggerProxy();
 
   bool isLocal() const { return m_local;}
+
   const char *getThreadType() const;
   DSandboxInfo getSandbox() const;
   std::string getSandboxId() const;
+
   void getThreads(DThreadInfoPtrVec &threads);
-
-  void startDummySandbox();
-  void startSignalThread();
-
   void switchSandbox(const std::string &newId);
   void updateSandbox(DSandboxInfoPtr sandbox);
   bool switchThread(DThreadInfoPtr thread);
   void switchThreadMode(ThreadMode mode, int64 threadId = 0);
+
+  void startDummySandbox();
+  void notifyDummySandbox();
+
   void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
 
   bool needInterrupt();
-  void interrupt(CmdInterrupt &cmd);
+  virtual void interrupt(CmdInterrupt &cmd);
   bool send(DebuggerCommand *cmd);
 
+  void startSignalThread();
   void pollSignal(); // for signal polling thread
-  void notifyDummySandbox();
 
-private:
+protected:
   bool m_stopped;
 
   bool m_local;
@@ -101,11 +105,43 @@ private:
   bool blockUntilOwn(CmdInterrupt &cmd, bool check);
   bool checkBreakPoints(CmdInterrupt &cmd);
   bool checkJumpFlowBreak(CmdInterrupt &cmd);
-  bool processJumpFlowBreak(CmdInterrupt &cmd);
+  virtual bool processJumpFlowBreak(CmdInterrupt &cmd);
   void processInterrupt(CmdInterrupt &cmd);
-  void processFlowControl(CmdInterrupt &cmd);
-  bool breakByFlowControl(CmdInterrupt &cmd);
+  virtual void processFlowControl(CmdInterrupt &cmd);
+  virtual bool breakByFlowControl(CmdInterrupt &cmd);
+
   DThreadInfoPtr createThreadInfo(const std::string &desc);
+};
+
+class DebuggerProxyVM : public DebuggerProxy {
+public:
+  static Variant ExecutePHP(const std::string &php, String &output, bool log,
+                            int frame);
+
+public:
+  DebuggerProxyVM(SmartPtr<Socket> socket, bool local)
+    : DebuggerProxy(socket, local), m_injTables(NULL) {
+  }
+  virtual ~DebuggerProxyVM() {
+    delete m_injTables;
+  }
+  virtual void interrupt(CmdInterrupt &cmd);
+
+  // For instrumentation
+  HPHP::VM::InjectionTables* getInjTables() const { return m_injTables; }
+  void setInjTables(HPHP::VM::InjectionTables* tables) { m_injTables = tables;}
+  void readInjTablesFromThread();
+  void writeInjTablesToThread();
+
+private:
+  int getStackDepth();
+
+  virtual bool processJumpFlowBreak(CmdInterrupt &cmd);
+  virtual void processFlowControl(CmdInterrupt &cmd);
+  virtual bool breakByFlowControl(CmdInterrupt &cmd);
+
+  // For instrumentation
+  HPHP::VM::InjectionTables* m_injTables;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

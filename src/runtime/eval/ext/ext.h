@@ -29,7 +29,7 @@ class EvalOverrides {
 public:
   EvalOverrides();
   ~EvalOverrides();
-  const Function *findFunction(const char *name) const;
+  const Function *findFunction(CStrRef name) const;
 private:
   hphp_const_char_imap<const Function*> m_functions;
 };

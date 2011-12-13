@@ -116,6 +116,7 @@ ifndef OUTPUT_ROOT
 OUTPUT_ROOT := bin
 endif
 OUT_EXTS := \
+	$(if $(USE_HHVM),-hhvm) \
 	$(if $(USE_LLVM),-llvm) \
 	$(if $(USE_ICC),-icc) \
 	$(if $(USE_JEMALLOC),-je) \
@@ -132,22 +133,27 @@ ABS_PROJECT_ROOT := $(shell cd $(PROJECT_ROOT) && readlink -f `pwd`)
 
 ifdef OUTPUT_ROOT
 
-REL := $(patsubst $(ABS_PROJECT_ROOT)%,%,$(CWD))
-
+OUT_DIRNAME := $(OUTPUT_ROOT)$(OUT_EXT)
 OUTPUT_REL := $(patsubst /%,,$(patsubst ~%,,$(OUTPUT_ROOT)))
-OUT_TOP_BASE := $(if $(OUTPUT_REL),$(ABS_PROJECT_ROOT)/)$(OUTPUT_ROOT)
 
-OUT_TOP := $(OUT_TOP_BASE)$(OUT_EXT)
-OUT_ABS := $(OUT_TOP)$(REL)
+REL_OUT_TOP := $(PROJECT_ROOT)/$(OUT_DIRNAME)/
+OUT_TOP := $(if $(OUTPUT_REL),$(ABS_PROJECT_ROOT)/)$(OUT_DIRNAME)
+OUT_ABS := $(OUT_TOP)$(patsubst $(ABS_PROJECT_ROOT)%,%,$(CWD))
 OUT_DIR := $(OUT_ABS)/
+REL_OUT_DIR := $(PROJECT_ROOT)/$(OUT_DIRNAME)$(patsubst $(ABS_PROJECT_ROOT)%,%,$(CWD))/
+
 LIB_DIR := $(OUT_TOP)
+HPHP_LIB := $(LIB_DIR)
 OUT_TOP := $(OUT_TOP)/
 HPHP := $(OUT_TOP)hphp
 HPHPI := $(OUT_TOP)hphpi
+HHVM := $(OUT_TOP)hhvm
 
 else
 
+REL_OUT_TOP := $(PROJECT_ROOT)/
 OUT_TOP :=
+REL_OUT_DIR := $(PROJECT_ROOT)/$(patsubst $(ABS_PROJECT_ROOT)%,%,$(CWD))/
 OUT_DIR :=
 OUT_ABS := $(shell pwd)
 LIB_DIR := $(PROJECT_ROOT)/bin
@@ -158,6 +164,7 @@ endif
 endif
 HPHP := $(PROJECT_ROOT)/src/hphp/hphp
 HPHPI := $(PROJECT_ROOT)/src/hphpi/hphpi
+HHVM := $(PROJECT_ROOT)/src/hhvm/hhvm
 
 endif
 

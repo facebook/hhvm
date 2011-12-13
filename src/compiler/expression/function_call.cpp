@@ -398,8 +398,7 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
   VariableTablePtr vt = fs->getVariables();
   int nAct = m_params ? m_params->getCount() : 0;
   int nMax = m_funcScope->getMaxParamCount();
-  if (unsigned(nAct - m_funcScope->getMinParamCount()) > (unsigned)nMax ||
-      !m->getStmts()) {
+  if (nAct < m_funcScope->getMinParamCount() || !m->getStmts()) {
     return ExpressionPtr();
   }
 
@@ -452,20 +451,26 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
 
   int i;
 
-  for (i = 0; i < nMax; i++) {
+  for (i = 0; i < nMax || i < nAct; i++) {
     ParameterExpressionPtr param
-      (dynamic_pointer_cast<ParameterExpression>((*plist)[i]));
+      (i < nMax ?
+       dynamic_pointer_cast<ParameterExpression>((*plist)[i]) :
+       ParameterExpressionPtr());
     ExpressionPtr arg = i < nAct ? (*m_params)[i] :
       Clone(param->defaultValue(), getScope());
     SimpleVariablePtr var
       (new SimpleVariable(getScope(),
                           (i < nAct ? arg.get() : this)->getLocation(),
-                          prefix + param->getName()));
+                          prefix + (param ?
+                                    param->getName() :
+                                    lexical_cast<string>(i))));
     var->updateSymbol(SimpleVariablePtr());
     var->getSymbol()->setHidden();
     var->getSymbol()->setUsed();
     var->getSymbol()->setReferenced();
-    bool ref = m_funcScope->isRefParam(i) || arg->hasContext(RefParameter);
+    bool ref =
+      (i < nMax && m_funcScope->isRefParam(i)) ||
+      arg->hasContext(RefParameter);
     arg->clearContext(RefParameter);
     AssignmentExpressionPtr ae
       (new AssignmentExpression(getScope(),

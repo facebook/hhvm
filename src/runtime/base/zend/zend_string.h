@@ -88,23 +88,6 @@ inline int string_strncmp(const char *s1, int len1, const char *s2, int len2,
   }
 }
 /**
- * Compare two binary strings, ignore case.
- */
-inline int string_strcasecmp(const char *s1, int len1,
-                             const char *s2, int len2) {
-  int minlen = len1 < len2 ? len1 : len2;
-  int c1, c2;
-
-  while (minlen--) {
-    c1 = tolower((int)*(unsigned char *)s1++);
-    c2 = tolower((int)*(unsigned char *)s2++);
-    if (c1 != c2) {
-      return c1 - c2;
-    }
-  }
-  return len1 - len2;
-}
-/**
  * Compare two binary strings of the first n bytes, ignore case.
  */
 inline int string_strncasecmp(const char *s1, int len1,
@@ -133,10 +116,7 @@ char *string_concat(const char *s1, int len1, const char *s2, int len2,
 /**
  * Compare strings.
  */
-int string_cmp(const char *s1, int len1, const char *s2, int len2);
-int string_casecmp(const char *s1, int len1, const char *s2, int len2);
 int string_ncmp(const char *s1, const char *s2, int len);
-int string_ncasecmp(const char *s1, const char *s2, int len);
 int string_natural_cmp(char const *a, size_t a_len,
                        char const *b, size_t b_len, int fold_case);
 
@@ -187,7 +167,6 @@ int string_rfind(const char *input, int len, const char *s, int s_len,
 
 const char *string_memnstr(const char *haystack, const char *needle,
                            int needle_len, const char *end);
-void *string_memrchr(const void *s, int c, size_t n);
 
 /**
  * Replace specified substring or search string with specified replacement.

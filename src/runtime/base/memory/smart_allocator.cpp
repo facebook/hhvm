@@ -544,7 +544,7 @@ void SmartAllocatorImpl::prepareFreeMap(FreeMap &freeMap) {
 
     // no double free!
     ASSERT(!freeMap.test(idx * m_itemCount +
-                         (freed - (int64)m_blocks[idx]) / m_itemSize));
+           (freed - (int64)m_blocks[idx]) / m_itemSize));
     freeMap.set(idx * m_itemCount +
                 (freed - (int64)m_blocks[idx]) / m_itemSize);
   }

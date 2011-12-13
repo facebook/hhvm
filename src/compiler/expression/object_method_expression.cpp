@@ -334,6 +334,10 @@ void ObjectMethodExpression::outputCPPObjectCall(CodeGenerator &cg,
   outputCPPObject(cg, ar);
   bool isThis = m_object->isThis();
   if (!isThis) {
+    if (m_object->is(KindOfSimpleVariable) &&
+        static_pointer_cast<SimpleVariable>(m_object)->isGuarded()) {
+      cg_printf(".get()");
+    }
     string objType;
     TypePtr type = m_object->getType();
     if (type->isSpecificObject() && !m_name.empty() && m_valid) {
@@ -408,13 +412,17 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
   cg_printf("mcp%d.methodCall((", m_ciTemp);
   if (isThis) {
     if (!getClassScope() || getClassScope()->derivedByDynamic() ||
-        !static_pointer_cast<SimpleVariable>(m_object)->isGuardedThis()) {
+        !static_pointer_cast<SimpleVariable>(m_object)->isGuarded()) {
       cg_printf("GET_THIS_VALID()");
     } else {
       cg_printf("this");
     }
   } else {
     cg_printf("obj%d", m_ciTemp);
+    if (m_object->is(KindOfSimpleVariable) &&
+        static_pointer_cast<SimpleVariable>(m_object)->isGuarded()) {
+      cg_printf(".get()");
+    }
   }
   cg_printf("), ");
   if (!m_name.empty()) {

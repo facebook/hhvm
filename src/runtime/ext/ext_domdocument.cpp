@@ -1873,6 +1873,7 @@ static PropertyAccessorMap domnode_properties_map
 
 c_DOMNode::c_DOMNode(const ObjectStaticCallbacks *cb) :
     ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|ObjectData::UseIsset>(cb),m_node(NULL) {
+  CPP_BUILTIN_CLASS_INIT(DOMNode);
 }
 
 c_DOMNode::~c_DOMNode() {
@@ -2455,6 +2456,7 @@ static PropertyAccessorMap domattr_properties_map
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DOMAttr::c_DOMAttr(const ObjectStaticCallbacks *cb) : c_DOMNode(cb) {
+  CPP_BUILTIN_CLASS_INIT(DOMAttr);
 }
 
 c_DOMAttr::~c_DOMAttr() {
@@ -2544,6 +2546,7 @@ static PropertyAccessorMap domcharacterdata_properties_map
 
 c_DOMCharacterData::c_DOMCharacterData(const ObjectStaticCallbacks *cb) :
     c_DOMNode(cb) {
+  CPP_BUILTIN_CLASS_INIT(DOMCharacterData);
 }
 
 c_DOMCharacterData::~c_DOMCharacterData() {
@@ -2715,6 +2718,7 @@ String c_DOMCharacterData::t_substringdata(int64 offset, int64 count) {
 
 c_DOMComment::c_DOMComment(const ObjectStaticCallbacks *cb) :
     c_DOMCharacterData(cb) {
+  CPP_BUILTIN_CLASS_INIT(DOMComment);
 }
 
 c_DOMComment::~c_DOMComment() {
@@ -2770,6 +2774,7 @@ static PropertyAccessorMap domtext_properties_map
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DOMText::c_DOMText(const ObjectStaticCallbacks *cb) : c_DOMCharacterData(cb) {
+  CPP_BUILTIN_CLASS_INIT(DOMText);
 }
 
 c_DOMText::~c_DOMText() {
@@ -2852,6 +2857,7 @@ Variant c_DOMText::t_splittext(int64 offset) {
 
 c_DOMCDATASection::c_DOMCDATASection(const ObjectStaticCallbacks *cb) :
     c_DOMText(cb) {
+  CPP_BUILTIN_CLASS_INIT(DOMCDATASection);
 }
 
 c_DOMCDATASection::~c_DOMCDATASection() {
@@ -3058,6 +3064,7 @@ c_DOMDocument::c_DOMDocument(const ObjectStaticCallbacks *cb) :
     m_recover(false),
     m_orphans(new XmlNodeSet),
     m_owner(false) {
+  CPP_BUILTIN_CLASS_INIT(DOMDocument);
 }
 
 c_DOMDocument::~c_DOMDocument() {
@@ -3662,6 +3669,7 @@ Variant c_DOMDocument::t_xinclude(int64 options /* = 0 */) {
 
 c_DOMDocumentFragment::c_DOMDocumentFragment(const ObjectStaticCallbacks *cb) :
   c_DOMNode(cb) {
+  CPP_BUILTIN_CLASS_INIT(DOMDocumentFragment);
 }
 
 c_DOMDocumentFragment::~c_DOMDocumentFragment() {
@@ -3788,6 +3796,7 @@ static PropertyAccessorMap domdocumenttype_properties_map
 
 c_DOMDocumentType::c_DOMDocumentType(const ObjectStaticCallbacks *cb) :
   c_DOMNode(cb) {
+  CPP_BUILTIN_CLASS_INIT(DOMDocumentType);
 }
 
 c_DOMDocumentType::~c_DOMDocumentType() {
@@ -3849,6 +3858,7 @@ static PropertyAccessorMap domelement_properties_map
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DOMElement::c_DOMElement(const ObjectStaticCallbacks *cb) : c_DOMNode(cb) {
+  CPP_BUILTIN_CLASS_INIT(DOMElement);
 }
 
 c_DOMElement::~c_DOMElement() {
@@ -4529,6 +4539,7 @@ static PropertyAccessorMap domentity_properties_map
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DOMEntity::c_DOMEntity(const ObjectStaticCallbacks *cb) : c_DOMNode(cb) {
+  CPP_BUILTIN_CLASS_INIT(DOMEntity);
 }
 
 c_DOMEntity::~c_DOMEntity() {
@@ -4562,6 +4573,7 @@ bool c_DOMEntity::t___isset(Variant name) {
 
 c_DOMEntityReference::c_DOMEntityReference(const ObjectStaticCallbacks *cb) :
   c_DOMNode(cb) {
+  CPP_BUILTIN_CLASS_INIT(DOMEntityReference);
 }
 
 c_DOMEntityReference::~c_DOMEntityReference() {
@@ -4627,6 +4639,7 @@ static PropertyAccessorMap domnotation_properties_map
 
 c_DOMNotation::c_DOMNotation(const ObjectStaticCallbacks *cb) :
   c_DOMNode(cb) {
+  CPP_BUILTIN_CLASS_INIT(DOMNotation);
 }
 
 c_DOMNotation::~c_DOMNotation() {
@@ -4694,6 +4707,7 @@ static PropertyAccessorMap domprocessinginstruction_properties_map
 
 c_DOMProcessingInstruction::c_DOMProcessingInstruction(const ObjectStaticCallbacks *cb) :
   c_DOMNode(cb) {
+  CPP_BUILTIN_CLASS_INIT(DOMProcessingInstruction);
 }
 
 c_DOMProcessingInstruction::~c_DOMProcessingInstruction() {
@@ -4775,6 +4789,7 @@ static PropertyAccessorMap domnamednodemap_properties_map
 c_DOMNamedNodeMap::c_DOMNamedNodeMap(const ObjectStaticCallbacks *cb) :
   ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|
     ObjectData::UseIsset>(cb) {
+  CPP_BUILTIN_CLASS_INIT(DOMNamedNodeMap);
 }
 
 c_DOMNamedNodeMap::~c_DOMNamedNodeMap() {
@@ -4980,6 +4995,7 @@ static PropertyAccessorMap domnodelist_properties_map
 c_DOMNodeList::c_DOMNodeList(const ObjectStaticCallbacks *cb) :
   ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|
     ObjectData::UseIsset>(cb) {
+  CPP_BUILTIN_CLASS_INIT(DOMNodeList);
 }
 
 c_DOMNodeList::~c_DOMNodeList() {
@@ -5068,7 +5084,9 @@ Variant c_DOMNodeList::t_getiterator() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMImplementation::c_DOMImplementation(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
+c_DOMImplementation::c_DOMImplementation(const ObjectStaticCallbacks *cb)
+  : ExtObjectData(cb) {
+  CPP_BUILTIN_CLASS_INIT(DOMImplementation);
 }
 
 c_DOMImplementation::~c_DOMImplementation() {
@@ -5360,6 +5378,7 @@ c_DOMXPath::c_DOMXPath(const ObjectStaticCallbacks *cb) :
     ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|
                        ObjectData::UseIsset>(cb),
     m_node(NULL), m_registerPhpFunctions(0) {
+  CPP_BUILTIN_CLASS_INIT(DOMXPath);
 }
 
 c_DOMXPath::~c_DOMXPath() {
@@ -5460,6 +5479,7 @@ Variant c_DOMXPath::t_registerphpfunctions(CVarRef funcs /* = null */) {
 
 c_DOMNodeIterator::c_DOMNodeIterator(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb), m_objmap(NULL), m_iter(NULL), m_index(-1) {
+  CPP_BUILTIN_CLASS_INIT(DOMNodeIterator);
 }
 
 c_DOMNodeIterator::~c_DOMNodeIterator() {

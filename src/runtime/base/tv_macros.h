@@ -117,6 +117,7 @@
 // Assumes 'fr->m_type == KindOfVariant'
 // NOTE: this helper will initialize to->_count to 0
 #define TV_DUP_VAR(fr, to) { \
+  ASSERT((fr)->m_type == KindOfVariant); \
   TV_DUP_VAR_NC((fr), (to)) \
   (to)->_count = 0; \
 }
@@ -128,17 +129,31 @@
   (to)->_count = 0; \
 }
 
+// Assumes 'fr' is live and 'to' is dead
+// NOTE: this helper will initialize to->_count to 0
+#define TV_DUP_FLATTEN_VARS(fr, to, container) { \
+  if (LIKELY(fr->m_type != KindOfVariant)) { \
+    TV_DUP_CELL_NC(fr, to); \
+  } else if (fr->m_data.ptv->_count <= 1 && \
+             ((container) == NULL || \
+              fr->m_data.ptv->m_data.parr != container)) { \
+    fr = fr->m_data.ptv; \
+    TV_DUP_CELL_NC(fr, to); \
+  } else { \
+    TV_DUP_VAR_NC(fr, to); \
+  } \
+  to->_count = 0; \
+}
+
 // Assumes 'tv' is dead
 // NOTE: this helper will initialize tv->_count to 0
 #define TV_WRITE_NULL(tv) \
-  (tv)->m_data.num = 0; \
   (tv)->_count = 0; \
   (tv)->m_type = KindOfNull
 
 // Assumes 'tv' is dead
 // NOTE: this helper will initialize tv->_count to 0
 #define TV_WRITE_UNINIT(tv) \
-  (tv)->m_data.num = 0; \
   (tv)->_count = 0; \
   (tv)->m_type = KindOfUninit
 

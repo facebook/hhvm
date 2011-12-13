@@ -37,6 +37,11 @@ inline long long hash_int64(long long key) {
   return key < 0 ? -key : key;
 }
 
+inline long long hash_int64_pair(long long k1, long long k2) {
+  // Shift the first key, so (a,b) hashes somewhere other than (b,a)
+  return (hash_int64(k1) << 1) ^ hash_int64(k2);
+}
+
 /*
  * http://murmurhash.googlepages.com/ (64bit, seed = 0)
  *

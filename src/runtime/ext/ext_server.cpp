@@ -183,6 +183,23 @@ int64 f_xbox_task_result(CObjRef task, int64 timeout_ms, VRefParam ret) {
   return XboxServer::TaskResult(task, timeout_ms, ret);
 }
 
+Variant f_xbox_process_call_message(CStrRef msg) {
+  Variant v = f_unserialize(msg);
+  if (!v.isArray()) {
+    raise_error("Error decoding xbox call message");
+  }
+  Array arr = v.toArray();
+  if (arr.size() != 2 || !arr.exists(0) || !arr.exists(1)) {
+    raise_error("Error decoding xbox call message");
+  }
+  Variant fn = arr.rvalAt(0);
+  Variant args = arr.rvalAt(1);
+  if (!fn.isString() || !args.isArray()) {
+    raise_error("Error decoding xbox call message");
+  }
+  return f_call_user_func_array(fn, args.toArray());
+}
+
 int f_xbox_get_thread_timeout() {
   XboxServerInfoPtr server_info = XboxServer::GetServerInfo();
   if (server_info) {

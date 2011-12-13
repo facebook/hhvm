@@ -21,6 +21,7 @@
 #include <runtime/base/zend/zend_url.h>
 #include <runtime/base/zend/zend_printf.h>
 #include <runtime/base/zend/zend_scanf.h>
+#include <runtime/base/bstring.h>
 #include <runtime/base/util/request_local.h>
 #include <util/lock.h>
 #include <locale.h>
@@ -174,7 +175,7 @@ static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
 
 Variant f_str_replace(CVarRef search, CVarRef replace, CVarRef subject,
                       VRefParam count /* = null */) {
-  int nCount;
+  int nCount = 0;
   Variant ret = str_replace(search, replace, subject, nCount, true);
   count = nCount;
   return ret;
@@ -182,7 +183,7 @@ Variant f_str_replace(CVarRef search, CVarRef replace, CVarRef subject,
 
 Variant f_str_ireplace(CVarRef search, CVarRef replace, CVarRef subject,
                        VRefParam count /* = null */) {
-  int nCount;
+  int nCount = 0;
   Variant ret = str_replace(search, replace, subject, nCount, false);
   count = nCount;
   return ret;
@@ -318,7 +319,7 @@ Variant f_substr_compare(CStrRef main_str, CStrRef str, int offset,
 
   const char *s1 = main_str.data();
   if (case_insensitivity) {
-    return string_ncasecmp(s1 + offset, str, cmp_len);
+    return bstrcasecmp(s1 + offset, cmp_len, str, cmp_len);
   }
   return string_ncmp(s1 + offset, str, cmp_len);
 }
@@ -360,6 +361,10 @@ Variant f_strpbrk(CStrRef haystack, CStrRef char_list) {
 }
 
 Variant f_strpos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
+  if (offset < 0 || offset > haystack.size()) {
+    raise_warning("Offset not contained in string");
+    return false;
+  }
   int pos;
   if (needle.isString()) {
     String n(needle.toString());
@@ -376,6 +381,10 @@ Variant f_strpos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
 }
 
 Variant f_stripos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
+  if (offset < 0 || offset > haystack.size()) {
+    raise_warning("Offset not contained in string");
+    return false;
+  }
   int pos;
   if (needle.isString()) {
     pos = haystack.find(needle.toString(), offset, false);
@@ -387,6 +396,10 @@ Variant f_stripos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
 }
 
 Variant f_strrpos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
+  if (offset < -haystack.size() || offset > haystack.size()) {
+    raise_warning("Offset is greater than the length of haystack string");
+    return false;
+  }
   int pos;
   if (needle.isString()) {
     pos = haystack.rfind(needle.toString(), offset);
@@ -398,6 +411,10 @@ Variant f_strrpos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
 }
 
 Variant f_strripos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
+  if (offset < -haystack.size() || offset > haystack.size()) {
+    raise_warning("Offset is greater than the length of haystack string");
+    return false;
+  }
   int pos;
   if (needle.isString()) {
     pos = haystack.rfind(needle.toString(), offset, false);

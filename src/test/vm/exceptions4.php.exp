@@ -1,0 +1,4 @@
+HipHop Fatal error: Uncaught exception exception 'Exception' with message '' in src/test/vm/exceptions4.php:5
+Stack trace:
+#0 src/test/vm/exceptions4.php(21): A->__construct()
+#1 {main}

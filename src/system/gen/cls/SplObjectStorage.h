@@ -37,6 +37,8 @@ class c_SplObjectStorage : public ExtObjectData {
   Variant m_storage;
   int64 m_index;
 
+  // Destructor
+  ~c_SplObjectStorage() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(SplObjectStorage, SplObjectStorage, ObjectData)
   static const ClassPropTable os_prop_table;

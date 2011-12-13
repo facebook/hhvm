@@ -787,11 +787,12 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             BlockScopeConstPtr block = ar->findConstantDeclarer(symbol);
             // not found (i.e., undefined)
             if (!block) {
-              if (symbol.find("::") == std::string::npos) {
+              if (symbol.find("::") == std::string::npos &&
+                  Option::WholeProgram) {
                 return CONSTANT("false");
               } else {
                 // e.g., defined("self::ZERO")
-                return ExpressionPtr();
+                break;
               }
             }
             constants = block->getConstants();
@@ -802,8 +803,6 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             ExpressionPtr constValue = dynamic_pointer_cast<Expression>(decl);
             if (constValue->isScalar()) {
               return CONSTANT("true");
-            } else {
-              return ExpressionPtr();
             }
             break;
           }
@@ -813,8 +812,12 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             if (Option::DynamicInvokeFunctions.find(lname) ==
                 Option::DynamicInvokeFunctions.end()) {
               FunctionScopePtr func = ar->findFunction(lname);
-              if (!func && m_type == FunctionExistsFunction) {
-                return CONSTANT("false");
+              if (!func) {
+                if (m_type == FunctionExistsFunction &&
+                    Option::WholeProgram) {
+                  return CONSTANT("false");
+                }
+                break;
               }
               if (func->isUserFunction()) {
                 func->setVolatile();
@@ -836,7 +839,12 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
                 interfaceFound = true;
               }
             }
-            if (!interfaceFound) return CONSTANT("false");
+            if (!interfaceFound) {
+              if (Option::WholeProgram) {
+                return CONSTANT("false");
+              }
+              break;
+            }
             if (classes.size() == 1 && !classes.back()->isVolatile()) {
               return CONSTANT("true");
             }
@@ -853,7 +861,12 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
                 classFound = true;
               }
             }
-            if (!classFound) return CONSTANT("false");
+            if (!classFound) {
+              if (Option::WholeProgram) {
+                return CONSTANT("false");
+              }
+              break;
+            }
             if (classes.size() == 1 && !classes.back()->isVolatile()) {
               return CONSTANT("true");
             }
@@ -2429,7 +2442,9 @@ ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
           ar, call, mode ? -1 : 0, safe_ret ? 2 : 1, error));
       if (!mode) {
         if (error) {
-          if (safe_ret) {
+          if (!Option::WholeProgram) {
+            rep.reset();
+          } else if (safe_ret) {
             return (*call->getParams())[1];
           } else {
             Array ret(Array::Create(0, false));
@@ -2462,7 +2477,11 @@ ExpressionPtr hphp_opt_is_callable(CodeGenerator *cg,
       SimpleFunctionCall::GetFunctionCallForCallUserFunc(
         ar, call, mode ? 1 : -1, 1, error));
     if (error && !mode) {
-      return call->makeConstant(ar, "false");
+      if (!Option::WholeProgram) {
+        rep.reset();
+      } else {
+        return call->makeConstant(ar, "false");
+      }
     }
     return rep;
   }

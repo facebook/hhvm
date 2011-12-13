@@ -900,6 +900,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(PDORequestData, s_pdo_request_data);
 // PDO
 
 c_PDO::c_PDO(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
+  CPP_BUILTIN_CLASS_INIT(PDO);
 }
 
 c_PDO::~c_PDO() {
@@ -2600,6 +2601,7 @@ clean_up:
 
 c_PDOStatement::c_PDOStatement(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb), m_rowIndex(-1) {
+  CPP_BUILTIN_CLASS_INIT(PDOStatement);
 }
 
 c_PDOStatement::~c_PDOStatement() {

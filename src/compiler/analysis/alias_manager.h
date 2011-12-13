@@ -265,6 +265,7 @@ class AliasManager {
 
   ControlFlowGraph          *m_graph;
   std::map<std::string,int> m_gidMap;
+  std::map<std::string,SimpleVariablePtr> m_objMap;
 
   ExpressionPtr             m_expr;
   int                       m_exprIdx;

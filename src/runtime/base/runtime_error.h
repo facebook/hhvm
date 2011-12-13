@@ -22,6 +22,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+#undef DEPRECATED
+
 class ErrorConstants {
 public:
   enum ErrorModes {
@@ -57,6 +59,10 @@ public:
   };
 };
 
+namespace VM {
+  struct ActRec;
+}
+
 void raise_error(const std::string &msg);
 void raise_error(const char *fmt, ...);
 void raise_recoverable_error(const std::string &msg);
@@ -69,6 +75,21 @@ void raise_notice(const std::string &msg);
 void raise_notice(const char *fmt, ...);
 void raise_debugging(const std::string &msg);
 void raise_debugging(const char *fmt, ...);
+
+template<bool Error>
+void
+warn_or_error(const char* fmt, ...) {
+  std::string msg;
+  va_list ap;
+  va_start(ap, fmt);
+  Util::string_vsnprintf(msg, fmt, ap);
+  va_end(ap);
+  if (Error) {
+    raise_error(msg);
+  } else {
+    raise_warning(msg);
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -88,9 +88,11 @@ Array f_get_class_methods(CVarRef class_or_object) {
   ClassInfo::MethodVec methods;
   CStrRef class_name = get_classname(class_or_object);
   if (!ClassInfo::GetClassMethods(methods, class_name)) return Array();
-  CStrRef klass = FrameInjection::GetClassName(true);
-
+  CStrRef klass = hhvm
+                  ? g_context->getContextClassName(true)
+                  : FrameInjection::GetClassName(true);
   bool allowPrivate = !klass.empty() && klass->isame(class_name.get());
+
   Array ret = Array::Create();
   for (unsigned int i = 0; i < methods.size(); i++) {
     if ((methods[i]->attribute & ClassInfo::IsPublic) || allowPrivate) {
@@ -113,42 +115,125 @@ Array f_get_class_constants(CStrRef class_name) {
   return ret;
 }
 
-Array f_get_class_vars(CStrRef class_name) {
-  ClassInfo::PropertyVec properties;
-  ClassInfo::GetClassProperties(properties, class_name);
-  CStrRef context = FrameInjection::GetClassName(true);
-  const ClassInfo *cls = NULL;
-  if (!context.empty()) {
-    cls = ClassInfo::FindClass(context);
+Array vm_get_class_vars(CStrRef className) {
+  HPHP::VM::Class* cls = g_context->lookupClass(className.get());
+  if (cls == NULL) {
+    raise_error("Unknown class %s", className->data());
+  }
+  cls->initialize();
+
+  HPHP::VM::Class::SPropInfoVec& sPropInfo = cls->m_sPropInfo;
+  HPHP::VM::Class::PropInfoVec& propInfo = cls->m_declPropInfo;
+
+  // The class' instance property initialization template is in different
+  // places, depending on whether it has any request-dependent initializers
+  // (i.e. constants)
+  HPHP::VM::Class::PropInitVec* propVals =
+    (cls->m_pinitVec.size() > 0 ?
+     g_context->getPropData(cls) : &cls->m_declPropInit);
+  ASSERT(propVals != NULL);
+  ASSERT(propVals->size() == propInfo.size());
+
+  // For visibility checks
+  HPHP::VM::ActRec* fp = vm_get_previous_frame();
+  HPHP::VM::PreClass* ctx = fp->m_func->m_preClass;
+  const ClassInfo* ctxCI =
+    (ctx == NULL ? NULL : g_context->findClassInfo(CStrRef(ctx->m_name)));
+  ClassInfo::PropertyMap propMap =
+    g_context->findClassInfo(className)->getProperties();
+
+  HphpArray* ret = NEW(HphpArray)(propInfo.size() + sPropInfo.size());
+
+  for (unsigned int i = 0; i < propInfo.size(); ++i) {
+    StringData* name = const_cast<StringData*>(propInfo[i].m_name);
+    if (propMap[String(name)]->isVisible(ctxCI)) {
+      TypedValue* value = &((*propVals)[i]);
+      ret->nvSet(name, value, false);
+    }
   }
 
-  Array ret = Array::Create();
-  // PHP has instance variables appear before static variables...
-  for (unsigned int i = 0; i < properties.size(); i++) {
-    if (!(properties[i]->attribute & ClassInfo::IsStatic) &&
-        properties[i]->isVisible(cls)) {
-      ret.set(properties[i]->name,
-              get_class_var_init(class_name, properties[i]->name));
+  for (unsigned int i = 0; i < sPropInfo.size(); ++i) {
+    bool vis, access;
+    TypedValue* value = cls->getSProp(ctx, sPropInfo[i].m_name, vis, access);
+    if (vis) {
+      ret->nvSet(const_cast<StringData*>(sPropInfo[i].m_name), value, false);
     }
   }
-  for (unsigned int i = 0; i < properties.size(); i++) {
-    if (properties[i]->attribute & ClassInfo::IsStatic &&
-        properties[i]->isVisible(cls)) {
-      ret.set(properties[i]->name,
-              get_static_property(class_name, properties[i]->name));
-    }
-  }
+
   return ret;
+}
+
+Array f_get_class_vars(CStrRef class_name) {
+  if (hhvm) {
+    return vm_get_class_vars(class_name.get());
+  } else {
+    ClassInfo::PropertyVec properties;
+    ClassInfo::GetClassProperties(properties, class_name);
+    CStrRef context = FrameInjection::GetClassName(true);
+    const ClassInfo *cls = NULL;
+    if (!context.empty()) {
+      cls = ClassInfo::FindClass(context);
+    }
+
+    Array ret = Array::Create();
+    // PHP has instance variables appear before static variables...
+    for (unsigned int i = 0; i < properties.size(); i++) {
+      if (!(properties[i]->attribute & ClassInfo::IsStatic) &&
+          properties[i]->isVisible(cls)) {
+        ret.set(properties[i]->name,
+                get_class_var_init(class_name, properties[i]->name));
+      }
+    }
+    for (unsigned int i = 0; i < properties.size(); i++) {
+      if (properties[i]->attribute & ClassInfo::IsStatic &&
+          properties[i]->isVisible(cls)) {
+        ret.set(properties[i]->name,
+                get_static_property(class_name, properties[i]->name));
+      }
+    }
+    return ret;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_get_class(CVarRef object /* = null_variant */) {
+  // hphpc passes in an *uninitialized* null for:
+  //
+  //   get_class(null)
+  //
+  // Therefore, limit the following block of code to hhvm.
+  if (hhvm) {
+    if (!object.isInitialized()) {
+      // No arg passed.
+      String ret;
+      HPHP::VM::ActRec* fp = vm_get_previous_frame();
+      HPHP::VM::PreClass* preClass = arGetContextPreClass(fp);
+      if (preClass) {
+        ret = CStrRef(preClass->m_name);
+      }
+      if (ret.empty()) {
+        raise_warning("get_class() called without object from outside a class");
+        return false;
+      }
+      return ret;
+    }
+  }
   if (!object.isObject()) return false;
   return object.toObject()->o_getClassName();
 }
 
 Variant f_get_parent_class(CVarRef object /* = null_variant */) {
+  if (hhvm) {
+    if (!object.isInitialized()) {
+      HPHP::VM::ActRec* fp = vm_get_previous_frame();
+      HPHP::VM::PreClass* preClass = arGetContextPreClass(fp);
+      if (preClass && preClass->m_parent && !(preClass->m_parent->empty())) {
+        return CStrRef(preClass->m_parent);
+      }
+      return false;
+    }
+  }
   Variant class_name;
   if (object.isObject()) {
     class_name = f_get_class(object);
@@ -192,8 +277,11 @@ bool f_method_exists(CVarRef class_or_object, CStrRef method_name) {
 
 bool f_property_exists(CVarRef class_or_object, CStrRef property) {
   if (class_or_object.isObject()) {
+    CStrRef context = hhvm
+                      ? g_context->getContextClassName(true)
+                      : FrameInjection::GetClassName(true);
     // Call o_exists for objects, to include dynamic properties.
-    return class_or_object.toObject()->o_propExists(property);
+    return class_or_object.toObject()->o_propExists(property, context);
   }
   const ClassInfo *classInfo =
     ClassInfo::FindClass(get_classname(class_or_object));
@@ -209,7 +297,13 @@ bool f_property_exists(CVarRef class_or_object, CStrRef property) {
 
 Variant f_get_object_vars(CVarRef object) {
   if (object.isObject()) {
-    return object.toObject()->o_toIterArray(FrameInjection::GetClassName(true));
+    if (hhvm) {
+      return object.toObject()->o_toIterArray(
+        g_context->getContextClassName(true));
+    } else {
+      return object.toObject()->o_toIterArray(
+        FrameInjection::GetClassName(true));
+    }
   }
   return false;
 }

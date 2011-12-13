@@ -32,31 +32,32 @@ public:
                   const ClassStatement *cls, int modifiers,
                   const std::string &doc);
   void setPublic();
+  void setConstructor();
 
   // Eval is called at declaration, not invocation
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
   Variant invokeInstance(CObjRef obj, CArrRef params, bool check = true)
     const;
-  Variant invokeStatic(const char* cls, CArrRef params, bool check = true)
+  Variant invokeStatic(CStrRef cls, CArrRef params, bool check = true)
     const;
   Variant invokeInstanceFewArgs(CObjRef obj, int count,
                                 INVOKE_FEW_ARGS_IMPL_ARGS,
                                 bool check = true) const;
-  Variant invokeStaticFewArgs(const char* cls, int count,
+  Variant invokeStaticFewArgs(CStrRef cls, int count,
                               INVOKE_FEW_ARGS_IMPL_ARGS,
                               bool check = true) const;
   Variant invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
                                const FunctionCallExpression *caller,
-                               bool check = true) const;
+                               int access = 0, bool check = true) const;
   Variant invokeStaticDirect(CStrRef cls, VariableEnvironment &env,
                              const FunctionCallExpression *caller,
-                             bool sp, bool check = true) const;
-  void getInfo(ClassInfo::MethodInfo &info) const;
+                             bool sp, int access = 0, bool check = true) const;
+  void getInfo(ClassInfo::MethodInfo &info, int access = 0) const;
   virtual LVariableTable *getStaticVars(VariableEnvironment &env) const;
   const ClassStatement *getClass() const { return m_class; }
   int getModifiers() const { return m_modifiers; }
-  void attemptAccess(const char *context) const;
+  void attemptAccess(CStrRef context, int modifiers = 0) const;
   bool isAbstract() const;
 private:
   const ClassStatement *m_class;

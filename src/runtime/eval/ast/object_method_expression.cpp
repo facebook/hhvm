@@ -50,18 +50,20 @@ Variant ObjectMethodExpression::eval(VariableEnvironment &env) const {
     // Have to try current class first for private method
     const ClassStatement *cls = env.currentClassStatement();
     if (cls) {
-      const MethodStatement *ccms = cls->findMethod(name.c_str());
+      const MethodStatement *ccms = cls->findMethod(name);
       if (ccms && ccms->getModifiers() & ClassStatement::Private) {
         ms = ccms;
       }
     }
   }
+  int access = 0;
   if (!ms) {
-    ms = obj.getObjectData()->getMethodStatement(name.data());
+    ms = obj.getObjectData()->getMethodStatement(name, access);
   }
   SET_LINE;
   if (ms) {
-    return strongBind(ms->invokeInstanceDirect(toObject(obj), env, this));
+    return strongBind(ms->invokeInstanceDirect(toObject(obj), env, this,
+                                               access));
   }
 
   // Handle builtins
@@ -81,10 +83,6 @@ Variant ObjectMethodExpression::eval(VariableEnvironment &env) const {
     CVarRef a5 = (count > 5) ? evalParam(env, ci, 5) : null;
     return
       strongBind((ci->getMethFewArgs())(mcp1, count, a0, a1, a2, a3, a4, a5));
-  }
-  if (RuntimeOption::UseArgArray) {
-    ArgArray *args = prepareArgArray(env, ci, count);
-    return strongBind((ci->getMeth())(mcp1, args));
   }
   ArrayInit ai(count);
   for (unsigned int i = 0; i < count; ++i) {

@@ -17,6 +17,8 @@
 #ifndef __ATOMIC_H__
 #define __ATOMIC_H__
 
+#include <stdint.h>
+
 #if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 2))
 #include <ext/atomicity.h>
 #else
@@ -26,16 +28,16 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline int atomic_inc(int &count) {
+static inline int atomic_inc(int &count) {
   return __gnu_cxx::__exchange_and_add(&count, 1) + 1;
 }
 
-inline int atomic_dec(int &count) {
+static inline int atomic_dec(int &count) {
   return __gnu_cxx::__exchange_and_add(&count, -1) - 1;
 }
 
 template<class T>
-inline T atomic_add(T &mem, T val) {
+static inline T atomic_add(T &mem, T val) {
   T r;
   asm volatile
    (

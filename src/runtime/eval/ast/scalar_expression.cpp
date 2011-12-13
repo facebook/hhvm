@@ -17,6 +17,8 @@
 #include <runtime/eval/ast/scalar_expression.h>
 #include <runtime/eval/ast/scalar_value_expression.h>
 #include <runtime/eval/runtime/file_repository.h>
+#include <runtime/eval/runtime/variable_environment.h>
+#include <runtime/eval/runtime/eval_state.h>
 #include <runtime/eval/ast/name.h>
 #include <util/parser/hphp.tab.hpp>
 #include <util/util.h>
@@ -25,6 +27,10 @@ namespace HPHP {
 namespace Eval {
 using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
+
+static StaticString s_trait_marker("[trait]");
+static StaticString s_get_class_marker("[get_class]");
+static StaticString s_get_parent_class_marker("[get_parent_class]");
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, int type,
                                    const string &value, int subtype /* = 0 */)
@@ -95,27 +101,80 @@ Expression *ScalarExpression::optimize(VariableEnvironment &env) {
 }
 
 bool ScalarExpression::evalScalar(VariableEnvironment &env, Variant &r) const {
-  if (m_kind == SString && m_subtype == T_FILE) {
-    return false;
+  if (m_kind == SString) {
+    switch (m_subtype) {
+    case T_FILE:
+      return false;
+    case T_CLASS_C:
+      if (m_value->same(s_trait_marker.get()) ||
+          m_value->same(s_get_class_marker.get()) ||
+          m_value->same(s_get_parent_class_marker.get())) {
+        return false;
+      }
+      break;
+    default:
+      break;
+    }
   }
-  r = getValue();
+  r = getValue(env);
   return true;
 }
 
 Variant ScalarExpression::eval(VariableEnvironment &env) const {
-  return getValue();
+  return getValue(env);
 }
 
-Variant ScalarExpression::getValue() const {
+Variant ScalarExpression::getValue(VariableEnvironment &env) const {
   switch (m_kind) {
   case SNull:
     return null_variant;
   case SBool:
     return (bool)m_num.num;
   case SString:
-    if (m_subtype == T_FILE && RuntimeOption::SandboxCheckMd5) {
-      return FileRepository::translateFileName
-        (string(m_value->data(), m_value->size()));
+    switch (m_subtype) {
+    case T_FILE:
+      if (RuntimeOption::SandboxCheckMd5) {
+        return FileRepository::translateFileName(
+          string(m_value->data(), m_value->size()));
+      }
+      break; 
+    case T_CLASS_C: {
+      bool tm = m_value->same(s_trait_marker.get());
+      bool gcm = m_value->same(s_get_class_marker.get());
+      bool gpcm = m_value->same(s_get_parent_class_marker.get());
+      if (tm || gcm || gpcm) {
+        DECLARE_THREAD_INFO;
+        FrameInjection *fi = info->m_top;
+        ASSERT(fi->isEvalFrame());
+        const char *func = fi->getFunction();
+        ASSERT(func);
+        const char *m = strstr(func, "::");
+        const char *clsName = env.currentClass();
+        if (m) {
+          m += 2;
+          ClassEvalState *ce = RequestEvalState::findClassState(clsName);
+          do {
+            int access;
+            const ClassStatement *cls = ce->getClass();
+            clsName = cls->name().c_str();
+            if (ce->getTraitMethod(m, access)) break;
+            ce = ce->getParentClassEvalState();
+            if (!ce) {
+              cls = cls->parentStatement();
+              if (cls) {
+                ce = RequestEvalState::findClassState(cls->name());
+              }
+            }
+          } while (ce);
+        }
+        if (!gpcm) return clsName;
+        const ClassStatement *cls = RequestEvalState::findClass(clsName);
+        return cls->parent();
+      }
+      break;
+    }
+    default:
+      break;
     }
     return m_value;
   case SInt:

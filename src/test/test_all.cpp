@@ -33,11 +33,33 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
     RUN_TESTSUITE(TestCodeRun);
     return;
   }
-  if (suite == "TestCodeRunEval") {
-    suite = "TestCodeRun";
-    Option::EnableEval = Option::FullEval;
-    RUN_TESTSUITE(TestCodeRun);
-    return;
+  if (hhvm) {
+    const char *vmFilter = 0;
+
+    if (suite == "TestCodeRunVM") {
+      suite = "TestCodeRun";
+      Option::EnableEval = Option::FullEval;
+      RuntimeOption::EvalJit = false;
+      TestCodeRun::Filter = vmFilter;
+      RUN_TESTSUITE(TestCodeRun);
+      return;
+    }
+    if (suite == "TestCodeRunJit") {
+      suite = "TestCodeRun";
+      Option::EnableEval = Option::FullEval;
+      RuntimeOption::EvalJit = true;
+      TestCodeRun::Filter = vmFilter;
+      RUN_TESTSUITE(TestCodeRun);
+      return;
+    }
+  } else {
+    if (suite == "TestCodeRunEval") {
+      suite = "TestCodeRun";
+      Option::EnableEval = Option::FullEval;
+      RuntimeOption::EvalJit = false;
+      RUN_TESTSUITE(TestCodeRun);
+      return;
+    }
   }
   if (suite == "TestServer") {
     RUN_TESTSUITE(TestServer);

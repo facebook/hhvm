@@ -223,7 +223,7 @@ void Parameter::bind(FuncScopeVariableEnvironment &fenv, CVarRef val,
           otype == m_kind &&
           (m_kind != KindOfObject ||
            m_kind == KindOfObject &&
-           val.toObject().instanceof(m_type.c_str())))) {
+           val.toObject().instanceof(m_type)))) {
       throw_unexpected_argument_type(m_argNum, (m_fnName + "()").c_str(),
                                      m_type.c_str(), val);
     }

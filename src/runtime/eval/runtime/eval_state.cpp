@@ -36,6 +36,13 @@ namespace Eval {
 using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
+static StaticString s___get("__get");
+static StaticString s___set("__set");
+static StaticString s___isset("__isset");
+static StaticString s___unset("__unset");
+static StaticString s___call("__call");
+static StaticString s___callstatic("__callstatic");
+
 void CodeContainer::release() {
   delete this;
 }
@@ -47,17 +54,25 @@ void ClassEvalState::init(const ClassStatement *cls) {
   m_class = cls;
 }
 
-const MethodStatement *ClassEvalState::getMethod(const char *m) {
+const MethodStatement *ClassEvalState::getMethod(CStrRef m, int &access) {
   if (!m_doneSemanticCheck) semanticCheck();
   MethodTable::const_iterator it = m_methodTable.find(m);
   if (it == m_methodTable.end()) return NULL;
+  access = it->second.second;
+  return it->second.first;
+}
+
+const MethodStatement *ClassEvalState::getTraitMethod(CStrRef m,
+                                                      int &access) {
+  MethodTable::const_iterator it = m_traitMethodTable.find(m);
+  if (it == m_traitMethodTable.end()) return NULL;
+  access = it->second.second;
   return it->second.first;
 }
 
 void ClassEvalState::semanticCheck() {
   if (!m_doneSemanticCheck) {
-    set<const ClassStatement *> seen;
-    m_class->loadMethodTable(*this, seen);
+    m_class->loadMethodTable(*this);
     m_class->semanticCheck(NULL);
     m_doneSemanticCheck = true;
   }
@@ -73,8 +88,155 @@ void ClassEvalState::initializeInstance() {
 void ClassEvalState::initializeStatics() {
   if (!m_initializedStatics) {
     semanticCheck();
-    m_class->initializeStatics(m_statics);
+    m_class->initializeStatics(*this, m_statics);
     m_initializedStatics = true;
+  }
+}
+
+void ClassEvalState::implementTrait(const ClassStatement *trait) {
+  bool ignore = false;
+  for (unsigned int i = 0; i < m_traits.size(); i++) {
+    if (m_traits[i] == trait) {
+      ignore = true;
+      break;
+    }
+  }
+  if (!ignore) m_traits.push_back(trait);
+}
+
+void ClassEvalState::compileExcludeTable(
+  StringISet &excludeTable,
+  const std::vector<TraitPrecedence> &traitPrecedences,
+  const ClassStatement *trait) {
+  for (unsigned int i = 0; i < traitPrecedences.size(); i++) {
+    const TraitPrecedence &traitPrecedence = traitPrecedences[i]; 
+    for (unsigned int j = 0;
+         j < traitPrecedence.m_excludeFromClasses.size(); j++) {
+      if (traitPrecedence.m_excludeFromClasses[j]->getClass() == trait) {
+        if (!excludeTable.insert(traitPrecedence.m_method).second) {
+          raise_error("Failed to evaluate a trait precedence (%s). "
+                      "Method of trait %s was defined to be excluded "
+                      "multiple times",
+                      traitPrecedence.m_method.c_str(), trait->name().c_str());
+        }
+      }
+    }
+  }
+}
+
+void ClassEvalState::copyTraitMethodTable(
+  MethodTable &methodTable,
+  const ClassStatement *trait,
+  const std::vector<TraitAlias> &traitAliases,
+  const StringISet &excludeTable) {
+  String traitName = trait->name();
+  ClassEvalState *ce = RequestEvalState::findClassState(traitName);
+  ASSERT(ce);
+  ce->semanticCheck();
+  MethodTable &traitMethods = ce->getMethodTable();
+  for (MethodTable::const_iterator cit = traitMethods.begin();
+       cit != traitMethods.end(); cit++) {
+    String traitMethodName = cit->first;
+    const MethodStatement *traitMethod = cit->second.first;
+    for (unsigned int j = 0; j < traitAliases.size(); j++) {
+      const TraitAlias &traitAlias = traitAliases[j];
+      if ((traitAlias.m_trait.empty() || traitAlias.m_trait == traitName) &&
+          traitAlias.m_method == traitMethodName) {
+        pair<const MethodStatement *, int> &p =
+          methodTable[traitAlias.m_alias.c_str()];
+        p.first = traitMethod;
+        p.second = traitAlias.m_modifiers ? traitAlias.m_modifiers
+                                          : traitMethod->getModifiers();
+      }
+    }
+    if (excludeTable.empty() ||
+        excludeTable.find(traitMethodName) == excludeTable.end()) {
+      methodTable.insert(MethodTable::value_type(
+        traitMethodName.c_str(),
+        std::pair<const MethodStatement*, int>(
+          traitMethod, traitMethod->getModifiers())));
+    }
+  }
+}
+
+void ClassEvalState::mergeTraitMethods(const MethodTable &currentTable,
+  unsigned int current, unsigned count,
+  std::vector<MethodTable> &methodTables,
+  MethodTable &resultTable) {
+  for (MethodTable::const_iterator it = currentTable.begin();
+       it != currentTable.end(); ++it) {
+    int collisions = 0;
+    bool abstract_solved = false;
+    for (unsigned int i = 0; i < methodTables.size(); i++) {
+      if (i == current) continue;
+      ClassEvalState::MethodTable::const_iterator mit = 
+        methodTables[i].find(it->first);
+      if (mit != methodTables[i].end()) {
+        // if it is an abstract method, there is no collision
+        if (mit->second.second & ClassStatement::Abstract) {
+          // we can safely free and remove it from methodTables[i]
+          methodTables[i].erase(it->first);
+        } else {
+          // if it is not an abstract method, there is still no collision
+          // if it->second is an abstract method
+          if (it->second.second & ClassStatement::Abstract) {
+            // just mark as solved, will be added if its own trait is processed
+            abstract_solved = true;
+          } else {
+            // we have a collision of non-abstract methods
+            collisions++;
+            methodTables[i].erase(it->first);
+          }
+        }
+      }
+    }
+    if (collisions) {
+      ClassEvalState::MethodTable::const_iterator mit = 
+        m_methodTable.find(it->first);
+      if (mit == m_methodTable.end() ||
+          (mit->second.first->getClass() != m_class)) {
+        raise_error("Trait method %s has not been applied, because there are "
+                    "collisions with other trait methods on %s",
+                    it->first.c_str(), m_class->name().c_str());
+      }
+    } else if (!abstract_solved) {
+      if (resultTable.find(it->first) != resultTable.end()) {
+        raise_error("Trait method %s has not been applied, because failure "
+                    "occured during updating resulting trait method table",
+                    it->first.c_str());
+      } else {
+        resultTable[it->first] = it->second;
+      }
+    }
+  }
+}
+
+void ClassEvalState::mergeTraitMethodsToClass(const MethodTable &resultTable,
+  const ClassStatement *cls) {
+  for (MethodTable::const_iterator it = resultTable.begin();
+       it != resultTable.end(); ++it) {
+    ClassEvalState::MethodTable::const_iterator mit =
+      m_methodTable.find(it->first);
+    if (mit == m_methodTable.end() ||
+        (mit->second.first->getClass() != m_class) &&
+         !it->second.first->isAbstract()) {
+      m_methodTable[it->first] = it->second;
+      if (m_class == cls) {
+        m_traitMethodTable[it->first] = it->second;
+        if (strcmp(it->first, "__construct") == 0) {
+          m_constructor = it->second.first;
+        }
+      }
+      CStrRef n = it->second.first->name();
+      if (n->isame(s___get.get())) setAttributes(ObjectData::UseGet);
+      if (n->isame(s___set.get())) setAttributes(ObjectData::UseSet);
+      if (n->isame(s___isset.get())) setAttributes(ObjectData::UseIsset);
+      if (n->isame(s___unset.get())) setAttributes(ObjectData::UseUnset);
+      if (n->isame(s___call.get())) setAttributes(ObjectData::HasCall);
+      if (n->isame(s___callstatic.get())) {
+        setAttributes(ObjectData::HasCallStatic);
+      }
+    }
   }
 }
 
@@ -89,6 +251,7 @@ void ClassEvalState::fiberInit(ClassEvalState &oces,
        it != oces.m_methodTable.end(); ++it) {
     m_methodTable[it->first] = it->second;
   }
+  m_attributes |= oces.m_attributes;
   m_initializedStatics |= oces.m_initializedStatics;
   m_initializedInstance |= oces.m_initializedInstance;
   m_doneSemanticCheck |= oces.m_doneSemanticCheck;
@@ -126,6 +289,7 @@ void ClassEvalState::fiberExit(ClassEvalState &oces,
        it != oces.m_methodTable.end(); ++it) {
     m_methodTable[it->first] = it->second;
   }
+  ASSERT(m_attributes == oces.m_attributes);
   m_initializedInstance |= oces.m_initializedInstance;
   m_doneSemanticCheck |= oces.m_doneSemanticCheck;
 }
@@ -172,7 +336,8 @@ void RequestEvalState::DestructObjects() {
 
 void RequestEvalState::destructObject(EvalObjectData *eo) {
   m_livingObjects.erase(eo);
-  const MethodStatement *des = eo->getMethodStatement("__destruct");
+  int access = 0;
+  const MethodStatement *des = eo->getMethodStatement("__destruct", access);
   if (des) {
     try {
       if (RuntimeOption::EnableObjDestructCall) {
@@ -236,7 +401,7 @@ bool RequestEvalState::declareConstant(CStrRef name, CVarRef val) {
   RequestEvalState *self = s_res.get();
   if (self->m_constants.exists(name)) return false;
   self->m_constants.set(name, val);
-  SmartPtr<EvalConstantInfo> &ci = self->m_constantInfos[name.c_str()];
+  SmartPtr<EvalConstantInfo> &ci = self->m_constantInfos[name];
   ci = new EvalConstantInfo();
   // Only need to set value really.
   ci->valueLen = 0;
@@ -297,16 +462,15 @@ ClassEvalState *RequestEvalState::findClassState(CStrRef name,
   return NULL;
 }
 
-const MethodStatement *RequestEvalState::findMethod(const char *cname,
-                                                    const char *name,
-                                                    bool &foundClass,
+const MethodStatement *RequestEvalState::findMethod(CStrRef cname,
+                                                    CStrRef name,
+                                                    ClassEvalState *&ce,
                                                     bool autoload /* = false */)
 {
-  foundClass = false;
-  ClassEvalState *ce = RequestEvalState::findClassState(cname, autoload);
+  ce = RequestEvalState::findClassState(cname, autoload);
   if (ce) {
-    foundClass = true;
-    return ce->getMethod(name);
+    int access;
+    return ce->getMethod(name, access);
   }
   return NULL;
 }
@@ -414,10 +578,11 @@ getFunctionStatics(const FunctionStatement* func) {
 }
 
 LVariableTable &RequestEvalState::
-getMethodStatics(const MethodStatement* func, const char* cls) {
+getMethodStatics(const MethodStatement* func, CStrRef cls) {
+  String c(empty_string);
   RequestEvalState *self = s_res.get();
-  if (func->getModifiers() & ClassStatement::Private) cls="";
-  return self->m_methodStatics[func][cls];
+  if (!(func->getModifiers() & ClassStatement::Private)) c = cls;
+  return self->m_methodStatics[func][c];
 }
 
 LVariableTable *RequestEvalState::getClassStatics(const ClassStatement* cls) {
@@ -505,13 +670,13 @@ const ClassInfo::MethodInfo *RequestEvalState::findFunctionInfo(CStrRef name) {
   }
 }
 
-const ClassInfo *RequestEvalState::findClassLikeInfo(const char *name) {
+const ClassInfo *RequestEvalState::findClassLikeInfo(CStrRef name) {
   RequestEvalState *self = s_res.get();
   if (self->m_classInfos.empty() && self->m_classes.empty()) {
     // short cut for the compiled version
     return NULL;
   }
-  map<string, SmartPtr<ClassInfoEvaled> >::const_iterator it =
+  StringMap<SmartPtr<ClassInfoEvaled> >::const_iterator it =
     self->m_classInfos.find(name);
   if (it == self->m_classInfos.end()) {
     const ClassStatement *cls = findClass(name);
@@ -528,9 +693,9 @@ const ClassInfo *RequestEvalState::findClassLikeInfo(const char *name) {
 }
 
 const ClassInfo::ConstantInfo *RequestEvalState::
-findConstantInfo(const char *name) {
+findConstantInfo(CStrRef name) {
   RequestEvalState *self = s_res.get();
-  map<string, SmartPtr<EvalConstantInfo> >::const_iterator it =
+  StringMap<SmartPtr<EvalConstantInfo> >::const_iterator it =
     self->m_constantInfos.find(name);
   if (it != self->m_constantInfos.end()) {
     return it->second.get();
@@ -554,7 +719,7 @@ void RequestEvalState::GetMethodStaticVariables(Array &arr) {
       self->m_functionStatics.begin(); it != self->m_functionStatics.end();
       ++it) {
     String fprefix = prefix;
-    fprefix += it->first->name().c_str();
+    fprefix += it->first->name();
     fprefix += "$$";
     Array vars(it->second.getDefinedVars());
     for (ArrayIter vit(vars); !vit.end(); vit.next()) {
@@ -567,18 +732,17 @@ void RequestEvalState::GetMethodStaticVariables(Array &arr) {
   for (MethodStatics::iterator it = self->m_methodStatics.begin();
       it != self->m_methodStatics.end(); ++it) {
     String mprefix(prefix);
-    mprefix += it->first->getClass()->name().c_str();
+    mprefix += it->first->getClass()->name();
     mprefix += "$$";
-    mprefix += it->first->name().c_str();
+    mprefix += it->first->name();
     mprefix += "$$";
     Variant val;
     if (it->second.size() > 1) {
-      for (map<string, LVariableTable, string_lessi>::iterator cit =
+      for (StringIMap<LVariableTable>::iterator cit =
           it->second.begin(); cit != it->second.end(); ++cit) {
         Array vars(cit->second.getDefinedVars());
         for (ArrayIter vit(vars); !vit.end(); vit.next()) {
-          arr.lvalAt(mprefix + vit.first()).set(cit->first.c_str(),
-              vit.second());
+          arr.lvalAt(mprefix + vit.first()).set(cit->first, vit.second());
         }
       }
     } else {
@@ -646,7 +810,7 @@ void RequestEvalState::fiberInit(RequestEvalState *res,
     m_includes.set(it.first(), it.second());
   }
   // Constant Info
-  for (map<string, SmartPtr<EvalConstantInfo> >::iterator it =
+  for (StringMap<SmartPtr<EvalConstantInfo> >::iterator it =
       res->m_constantInfos.begin(); it != res->m_constantInfos.end(); ++it) {
     m_constantInfos[it->first] = it->second;
   }
@@ -656,7 +820,7 @@ void RequestEvalState::fiberInit(RequestEvalState *res,
     m_methodInfos[it->first] = it->second;
   }
   // Class Infos
-  for (map<string, SmartPtr<ClassInfoEvaled> >::iterator it =
+  for (StringMap<SmartPtr<ClassInfoEvaled> >::iterator it =
       res->m_classInfos.begin(); it != res->m_classInfos.end(); ++it) {
     m_classInfos[it->first] = it->second;
   }
@@ -685,8 +849,8 @@ void RequestEvalState::fiberInit(RequestEvalState *res,
   // Method statics
   for (MethodStatics::const_iterator it = res->m_methodStatics.begin();
       it != res->m_methodStatics.end(); ++it) {
-    for (map<string, LVariableTable, string_lessi>::const_iterator
-           it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+    for (StringIMap<LVariableTable>::const_iterator
+         it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
       m_methodStatics[it->first][it2->first].
         Array::operator=(it2->second.fiberMarshal(refMap));
     }
@@ -726,7 +890,7 @@ void RequestEvalState::fiberExit(RequestEvalState *res,
   refMap.unmarshal(m_constants, res->m_constants, default_strategy);
   refMap.unmarshal(m_includes, res->m_includes, default_strategy);
   // Constant Info
-  for (map<string, SmartPtr<EvalConstantInfo> >::iterator it =
+  for (StringMap<SmartPtr<EvalConstantInfo> >::iterator it =
       res->m_constantInfos.begin(); it != res->m_constantInfos.end(); ++it) {
     m_constantInfos[it->first] = it->second;
   }
@@ -736,7 +900,7 @@ void RequestEvalState::fiberExit(RequestEvalState *res,
     m_methodInfos[it->first] = it->second;
   }
   // Class Infos
-  for (map<string, SmartPtr<ClassInfoEvaled> >::iterator it =
+  for (StringMap<SmartPtr<ClassInfoEvaled> >::iterator it =
       res->m_classInfos.begin(); it != res->m_classInfos.end(); ++it) {
     m_classInfos[it->first] = it->second;
   }
@@ -765,8 +929,8 @@ void RequestEvalState::fiberExit(RequestEvalState *res,
   // Method statics
   for (MethodStatics::const_iterator it = res->m_methodStatics.begin();
       it != res->m_methodStatics.end(); ++it) {
-    for (map<string, LVariableTable, string_lessi>::const_iterator
-           it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+    for (StringIMap<LVariableTable>::const_iterator
+         it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
       refMap.unmarshal((Array&)m_methodStatics[it->first][it2->first],
                        (Array&)it2->second, default_strategy);
     }

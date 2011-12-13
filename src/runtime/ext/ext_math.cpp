@@ -105,17 +105,17 @@ double f_round(CVarRef val, int64 precision /* = 0 */) {
   int64 ival;
   double dval;
   DataType k = val.toNumeric(ival, dval, true);
- if (k == KindOfInt64) {
-   if (precision >= 0) {
-    return ival;
-   } else {
-     dval = ival;
-   }
- } else if (k != KindOfDouble) {
-   dval = val.toDouble();
- }
- PHP_ROUND_WITH_FUZZ(dval, precision);
- return dval;
+  if (k == KindOfInt64) {
+    if (precision >= 0) {
+     return ival;
+    } else {
+      dval = ival;
+    }
+  } else if (k != KindOfDouble) {
+    dval = val.toDouble();
+  }
+  PHP_ROUND_WITH_FUZZ(dval, precision);
+  return dval;
 }
 
 Variant f_base_convert(CStrRef number, int64 frombase, int64 tobase) {

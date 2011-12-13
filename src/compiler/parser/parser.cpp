@@ -184,6 +184,14 @@ void Parser::error(const char* fmt, ...) {
   Logger::Error("%s", msg.c_str());
 }
 
+void Parser::fatal(Location *loc, const char *msg) {
+  m_error = msg;
+}
+
+string Parser::errString() {
+  return m_error.empty() ? getMessage() : m_error;
+}
+
 bool Parser::enableXHP() {
   return Option::EnableXHP;
 }

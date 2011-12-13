@@ -77,7 +77,7 @@ int InterfaceStatement::getRecursiveCount() const {
 void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
                                  FileScopePtr scope) {
   vector<string> bases;
-  if (m_base) m_base->getStrings(bases);
+  if (m_base) m_base->getOriginalStrings(bases);
 
   StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
   ClassScopePtr classScope

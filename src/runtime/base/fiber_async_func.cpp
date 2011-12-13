@@ -291,16 +291,15 @@ public:
   void incRefCount() {
     atomic_inc(m_refCount);
   }
-  void decRefCount() {
+  int decRefCount() {
     ASSERT(m_refCount);
-    if (atomic_dec(m_refCount) == 0) {
-      delete this;
-    }
+    return atomic_dec(m_refCount);
   }
 
   FiberAsyncFuncData *getOwnerThread() { return m_thread; }
 
-  bool destroy() {
+  bool destroy(bool& readyToDelete) {
+    readyToDelete = false;
     ASSERT(m_async);
     if (m_reqId == m_thread->m_reqId) {
       if (!m_delete) return false;
@@ -320,7 +319,7 @@ public:
         return true;
       }
     }
-    delete this;
+    readyToDelete = true;
     return true;
   }
 
@@ -386,9 +385,15 @@ void FiberWorker::doJob(FiberJob *job) {
 
   FiberAsyncFuncData *owner = job->getOwnerThread();
   {
-    Lock lock(job);
-    while (!job->destroy()) {
-      job->wait(1);
+    bool readyToDelete = false;
+    {
+      Lock lock(job);
+      while (!job->destroy(readyToDelete)) {
+        job->wait(1);
+      }
+    }
+    if (readyToDelete) {
+      delete job;
     }
   }
 
@@ -416,8 +421,14 @@ public:
 
   ~FiberAsyncFuncHandle() {
     if (!m_async || m_reqId == s_fiber_data->m_reqId) {
-      Lock lock(m_job);
-      m_job->decRefCount();
+      int cnt;
+      {
+        Lock lock(m_job);
+        cnt = m_job->decRefCount();
+      }
+      if (cnt == 0) {
+        delete m_job;
+      }
     }
   }
 

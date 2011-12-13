@@ -16,6 +16,7 @@
 */
 
 #include <runtime/ext/thrift/transport.h>
+#include <runtime/ext/ext_reflection.h>
 #include <runtime/ext/ext_thrift.h>
 
 #include <stack>
@@ -180,7 +181,7 @@ class CompactWriter {
       lastFieldNum = 0;
 
       // Get field specification
-      CArrRef spec = get_static_property(obj->o_getClassName(), "_TSPEC")
+      CArrRef spec = f_hphp_get_static_property(obj->o_getClassName(), "_TSPEC")
         .toArray();
 
       // Write each member
@@ -466,12 +467,12 @@ class CompactReader {
 
       if (type == T_REPLY) {
         Object ret = create_object(resultClassName, Array());
-        Variant spec = get_static_property(resultClassName, "_TSPEC");
+        Variant spec = f_hphp_get_static_property(resultClassName, "_TSPEC");
         readStruct(ret, spec);
         return ret;
       } else if (type == T_EXCEPTION) {
         Object exn = create_object("TApplicationException", Array());
-        Variant spec = get_static_property("TApplicationException", "_TSPEC");
+        Variant spec = f_hphp_get_static_property("TApplicationException", "_TSPEC");
         readStruct(exn, spec);
         throw exn;
       } else {
@@ -591,7 +592,7 @@ class CompactReader {
             }
 
             Variant newStructSpec =
-              get_static_property(classNameString, "_TSPEC");
+              f_hphp_get_static_property(classNameString, "_TSPEC");
 
             if (!newStructSpec.is(KindOfArray)) {
               thrift_error("invalid type of spec", ERR_INVALID_DATA);

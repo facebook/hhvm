@@ -619,13 +619,14 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         return T_CONSTANT_ENCAPSED_STRING;
 }
 
-<ST_IN_SCRIPTING>(b?[']([^'\\]|("\\"{ANY_CHAR}))*[']) {
+<ST_IN_SCRIPTING>(b?[']([^'\\]|("\\"{ANY_CHAR}))*[']?) {
         int bprefix = (yytext[0] != '\'') ? 1 : 0;
+        int closed = (yytext[yyleng - 1] == '\'');
         std::string strval =
           _scanner->escape(yytext + bprefix + 1,
                            yyleng - bprefix - 2, '\'');
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
-        return T_CONSTANT_ENCAPSED_STRING;
+        return closed ? T_CONSTANT_ENCAPSED_STRING : T_ENCAPSED_AND_WHITESPACE;
 }
 
 <ST_IN_SCRIPTING>b?["] {

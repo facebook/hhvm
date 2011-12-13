@@ -181,11 +181,15 @@ function get_flag_names($arr, $name) {
 ///////////////////////////////////////////////////////////////////////////////
 // schema functions that will be used (and only used) by schemas
 
-$current_class = '';
-$preamble = '';
-$funcs = array();
-$classes = array();
-$constants = array();
+function ResetSchema() {
+  global $current_class, $preamble, $funcs, $classes, $constants;
+  $current_class = '';
+  $preamble = '';
+  $funcs = array();
+  $classes = array();
+  $constants = array();
+}
+ResetSchema();
 
 function DefinePreamble($p) {
   global $preamble;
@@ -346,6 +350,20 @@ function typename($type, $prefix = true) {
   return 'void';
 }
 
+function typeidlname($type, $null = '') {
+  global $TYPENAMES;
+  if ($type === null) {
+    return $null;
+  }
+  if (is_string($type)) {
+    return "'$type'";
+  }
+  if ($type & Reference) {
+    return $TYPENAMES[$type & ~Reference]['idlname'];
+  }
+  return $TYPENAMES[$type]['idlname'];
+}
+
 function param_typename($arg, $forceRef = false) {
   $type = $arg['type'];
   $ref = idx($arg, 'ref') ?
@@ -416,7 +434,7 @@ function get_serialized_default($s) {
     $s = preg_replace('/k_/', '', $s);
     return serialize(eval("return $s;"));
   }
-  if (preg_match('/^q_([A-Za-z]+)_(\w+)$/', $s, $m)) {
+  if (preg_match('/^q_([A-Za-z]+)\$\$(\w+)$/', $s, $m)) {
     $class = $m[1];
     $constant = $m[2];
     return serialize(eval("return $class::$constant;"));
@@ -737,14 +755,7 @@ EOT
 
 function generateMethodCPPHeader($method, $class, $f) {
   global $MAGIC_METHODS;
-  if ($method['flags'] & IsPrivate) {
-    $vis = "private";
-  } else if ($method['flags'] & IsProtected) {
-    $vis = "protected";
-  } else {
-    $vis = "public";
-  }
-  fprintf($f, "  %s: ", $vis);
+  fprintf($f, "  public: ");
   generateFuncCPPHeader($method, $f, true,
                         isset($MAGIC_METHODS[$method['name']]),
                         $method['flags'] & IsStatic, $class);

@@ -1,0 +1,70 @@
+Test begin
+HipHop Notice:  Undefined constant: CN
+string(2) "CN"
+HipHop Notice:  Undefined constant: CB
+string(2) "CB"
+HipHop Notice:  Undefined constant: CI
+string(2) "CI"
+HipHop Notice:  Undefined constant: CD
+string(2) "CD"
+HipHop Notice:  Undefined constant: CS
+string(2) "CS"
+Enter f()
+HipHop Notice:  Undefined constant: CN
+string(2) "CN"
+HipHop Notice:  Undefined constant: CB
+string(2) "CB"
+HipHop Notice:  Undefined constant: CI
+string(2) "CI"
+HipHop Notice:  Undefined constant: CD
+string(2) "CD"
+HipHop Notice:  Undefined constant: CS
+string(2) "CS"
+Leave f()
+HipHop Notice:  Undefined constant: CN
+string(2) "CN"
+HipHop Notice:  Undefined constant: CB
+string(2) "CB"
+HipHop Notice:  Undefined constant: CI
+string(2) "CI"
+HipHop Notice:  Undefined constant: CD
+string(2) "CD"
+HipHop Notice:  Undefined constant: CS
+string(2) "CS"
+Enter f()
+HipHop Notice:  Undefined constant: CN
+string(2) "CN"
+HipHop Notice:  Undefined constant: CB
+string(2) "CB"
+HipHop Notice:  Undefined constant: CI
+string(2) "CI"
+HipHop Notice:  Undefined constant: CD
+string(2) "CD"
+HipHop Notice:  Undefined constant: CS
+string(2) "CS"
+Leave f()
+NULL
+bool(true)
+int(42)
+float(42.31)
+string(10) "--- CS ---"
+Enter f()
+NULL
+bool(true)
+int(42)
+float(42.31)
+string(10) "--- CS ---"
+Leave f()
+NULL
+bool(true)
+int(42)
+float(42.31)
+string(10) "--- CS ---"
+Enter f()
+NULL
+bool(true)
+int(42)
+float(42.31)
+string(10) "--- CS ---"
+Leave f()
+Test end

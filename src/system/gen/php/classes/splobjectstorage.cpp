@@ -182,7 +182,8 @@ const ObjectStaticCallbacks cw_SplObjectStorage = {
   c_SplObjectStorage::s_call_info_table,c_SplObjectStorage::s_call_info_index,
   c_SplObjectStorage::s_instanceof_table,c_SplObjectStorage::s_instanceof_index,
   &c_SplObjectStorage::s_class_name,
-  &c_SplObjectStorage::os_prop_table,0,0,0,0x0
+  &c_SplObjectStorage::os_prop_table,0,0,0,0x0,
+  &c_SplObjectStorage::s_cls
 };
 void c_SplObjectStorage::init() {
   m_storage = s_sys_sa00000000;

@@ -14,6 +14,12 @@ SOURCES = $(WRAP_FILE)
 EXTERNAL += $(HPHP_LIB)/lib$(NAME).so
 SHARED_LIB = ffi/python/_$(NAME).so
 
+ifneq ($(EXTERNALS),hphp)
+ifneq ($(EXTERNALS),gcc-4.4.5-glibc-2.11.2)
+CXXFLAGS += -Wno-error=unused-but-set-variable
+endif
+endif
+
 all : $(SHARED_LIB)
 
 $(WRAP_FILE) : $(SWIG_FILE)

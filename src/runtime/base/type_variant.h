@@ -22,6 +22,7 @@
 #ifndef __HPHP_VARIANT_H__
 #define __HPHP_VARIANT_H__
 
+#include <util/trace.h>
 #include <runtime/base/types.h>
 #include <runtime/base/hphp_value.h>
 #include <runtime/base/type_string.h>
@@ -365,7 +366,7 @@ class Variant {
     return m_type != KindOfUninit;
   }
   bool isNull() const {
-    return getType() <= KindOfNull;
+    return IS_NULL_TYPE(getType());
   }
   bool isBoolean() const {
     return getType() == KindOfBoolean;
@@ -586,7 +587,7 @@ class Variant {
    * Explicit type conversions
    */
   bool   toBoolean() const {
-    if (m_type <= KindOfNull) return false;
+    if (IS_NULL_TYPE(m_type)) return false;
     if (m_type <= KindOfInt64) return m_data.num;
     return toBooleanHelper();
   }
@@ -594,12 +595,12 @@ class Variant {
   short  toInt16  (int base = 10) const { return (short)toInt64(base);}
   int    toInt32  (int base = 10) const { return (int)toInt64(base);}
   int64  toInt64  () const {
-    if (m_type <= KindOfNull) return 0;
+    if (IS_NULL_TYPE(m_type)) return 0;
     if (m_type <= KindOfInt64) return m_data.num;
     return toInt64Helper(10);
   }
   int64  toInt64  (int base) const {
-    if (m_type <= KindOfNull) return 0;
+    if (IS_NULL_TYPE(m_type)) return 0;
     if (m_type <= KindOfInt64) return m_data.num;
     return toInt64Helper(base);
   }
@@ -1085,9 +1086,18 @@ class Variant {
   ObjectData *getArrayAccess() const;
   void callOffsetUnset(CVarRef key);
   int64 getNumData() const { return m_data.num; }
-  bool isStatic() const { return _count == (1 << 30); }
+  bool isStatic() const { return _count == RefCountStaticValue; }
   void setStatic() const;
   void setEvalScalar() const;
+
+  static size_t getTypeOffset() {
+    Variant *v = 0;
+    return (uintptr_t)&v->m_type;
+  }
+  static size_t getDataOffset() {
+    Variant *v = 0;
+    return (uintptr_t)&v->m_data;
+  }
 
   /**
    * Based on the order in complex_types.h, TypedValue is defined before.

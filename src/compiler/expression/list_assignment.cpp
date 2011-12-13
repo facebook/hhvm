@@ -112,6 +112,24 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
   return ListAssignment::Null;
 }
 
+static bool AssignmentCouldSet(ExpressionListPtr vars, ExpressionPtr var) {
+  for (int i = 0; i < vars->getCount(); i++) {
+    ExpressionPtr v = (*vars)[i];
+    if (!v) continue;
+    if (v->is(Expression::KindOfSimpleVariable) &&
+        v->canonCompare(var)) {
+      return true;
+    }
+    if (v->is(Expression::KindOfDynamicVariable)) return true;
+    if (v->is(Expression::KindOfListAssignment) &&
+        AssignmentCouldSet(static_pointer_cast<ListAssignment>(v)->
+                           getVariables(), var)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 ListAssignment::ListAssignment
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionListPtr variables, ExpressionPtr array)
@@ -121,6 +139,11 @@ ListAssignment::ListAssignment
 
   if (m_array) {
     m_rhsKind = GetRHSKind(m_array);
+    if (m_array->is(KindOfSimpleVariable)) {
+      if (AssignmentCouldSet(m_variables, m_array)) {
+        m_array->setContext(LValue);
+      }
+    }
   }
 }
 
@@ -212,7 +235,7 @@ void ListAssignment::setNthKid(int n, ConstructPtr cp) {
 TypePtr ListAssignment::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                    bool coerce) {
   if (m_variables) {
-    for (int i = 0; i < m_variables->getCount(); i++) {
+    for (int i = m_variables->getCount(); i--; ) {
       ExpressionPtr exp = (*m_variables)[i];
       if (exp) {
         if (exp->is(Expression::KindOfListAssignment)) {

@@ -34,6 +34,8 @@ namespace HPHP { namespace Util {
 #define NEVER_INLINE  __attribute__((noinline))
 #define LIKELY(pred)   __builtin_expect((pred), true)
 #define UNLIKELY(pred) __builtin_expect((pred), false)
+#define UNUSED         __attribute__((unused))
+#define FLATTEN        __attribute__((flatten))
 #define HOT_FUNC       __attribute__ ((section (".text.hot.builtin")))
 
 /*
@@ -143,17 +145,39 @@ std::string safe_strerror(int errnum);
 /**
  * Thread-safe dirname().
  */
+std::string safe_dirname(const char *path, int len);
 std::string safe_dirname(const char *path);
+std::string safe_dirname(const std::string& path);
+
+/**
+ * Helper function for safe_dirname.
+ */
+size_t dirname_helper(char *path, int len);
 
 /**
  * Check if value is a power of two.
  */
-bool isPowerOfTwo(int value);
+template<typename Int>
+static inline bool isPowerOfTwo(Int value) {
+  return (value > 0 && (value & (value-1)) == 0);
+}
 
 /**
  * Round up value to the nearest power of two
  */
-int roundUpToPowerOfTwo(int value);
+template<typename Int>
+static inline Int roundUpToPowerOfTwo(Int value) {
+#ifdef DEBUG
+  (void) (0 / value); // fail for 0; ASSERT is a pain.
+#endif
+  --value;
+  // Verified that gcc is smart enough to unroll this and emit
+  // constant shifts.
+  for (unsigned i = 1; i < sizeof(Int) * 8; i *= 2)
+    value |= value >> i;
+  ++value;
+  return value;
+}
 
 /**
  * Duplicate a buffer of given size, null-terminate the result.

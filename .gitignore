@@ -3,6 +3,9 @@
 /bin*-O
 /bin/*.so
 /bin/tainted_build
+/bin/systemlib.php
+.mkdir
+hphp.log
 
 /src/compiler/analysis/code_error.inc
 /src/compiler/analysis/dependency.inc
@@ -13,6 +16,16 @@
 /src/test/test_mysql_info.inc
 /src/test/test_suite.inc
 /src/test/*.tmp
+/src/test/vm/*.out
+/src/test/vm/*.diff
+/src/test/vm/*.perf
+/src/test/vm/perf/*.out
+/src/test/vm/perf/*.diff
+/src/test/vm/perf/*.perf
+/src/runtime/ext_hhvm/xconstants.php
+/src/runtime/ext_hhvm/ext_hhvm.cpp
+/src/runtime/ext_hhvm/ext_noinline.cpp
+/src/runtime/ext_hhvm/ext_noinline.h
 
 /src/hphp/hphp
 
@@ -23,6 +36,10 @@
 
 /src/hphpi/gen
 /src/hphpi/hphpi
+
+/src/hhvm/gen
+/src/hhvm/hhvm
+
 /src/tools/shmw/shmw
 
 /src/ffi/java/classes
@@ -30,6 +47,8 @@
 
 /facebook/autoload_files
 /facebook/hotcold.hdf
+/facebook/benchmark/shootout/output_bench
+/facebook/benchmark/shootout/output_bintree_new
 /facebook/libcore_files
 /facebook/output_*
 /facebook/push/install
@@ -51,9 +70,11 @@
 /facebook/extensions/gen
 /facebook/extensions/hphpi
 /facebook/extensions/*/*.so
+/facebook/extensions/remake_ext_hhvm
 /facebook/extensions/string/test_string
 /facebook/extensions/photodna/test_photodna
 /facebook/extensions/utils/test_utils
+/facebook/extensions/fbobj/test_fbobj
 /facebook/extensions/fbobj_cache/test_fbobj_cache
 /facebook/extensions/fbobj/test_fbobj
 /local/*.mk

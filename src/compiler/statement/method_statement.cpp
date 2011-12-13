@@ -551,10 +551,15 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
         Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {
       funcScope->setDynamic();
     }
+#ifndef HHVM
+    // This is an hphpc-only transformation to deal with gotos that jump into
+    // try/catch blocks. The VM does not need this transformation, and it does
+    // not support this transformation.
     if (funcScope->hasGoto() && funcScope->hasTry()) {
       TryingGotoFixer tgf(ar);
       tgf.fixTryingGotos(m_stmt);
     }
+#endif
     // TODO: this may have to expand to a concept of "virtual" functions...
     if (m_method) {
       funcScope->disableInline();

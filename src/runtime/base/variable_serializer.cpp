@@ -26,6 +26,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/util/request_local.h>
+#include <runtime/vm/class.h>
 #include <runtime/ext/ext_json.h>
 
 using namespace std;
@@ -76,6 +77,17 @@ String VariableSerializer::serialize(CVarRef v, bool ret) {
     g_context->write(str);
   }
   return null_string;
+}
+
+String VariableSerializer::serializeValue(CVarRef v, bool limit) {
+  StringBuffer buf;
+  m_buf = &buf;
+  if (limit) {
+    buf.setOutputLimit(RuntimeOption::SerializationSizeLimit);
+  }
+  m_valueCount = 1;
+  write(v);
+  return m_buf->detach();
 }
 
 String VariableSerializer::serializeWithLimit(CVarRef v, int limit) {
@@ -584,7 +596,16 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
   // ...so we don't mess up next array output
   if (!m_objClass.empty() || !m_rsrcName.empty()) {
     if (!m_objClass.empty()) {
-      info.class_info = ClassInfo::FindClass(m_objClass);
+      info.class_ = g_context->lookupClass(
+        StringData::GetStaticString(m_objClass.get()));
+      if (info.class_ == NULL) {
+        info.class_info = ClassInfo::FindClass(m_objClass);
+      } else if (info.class_->m_derivesFromBuiltin) {
+        info.class_info = ClassInfo::FindClass
+          (info.class_->m_baseBuiltinCls->m_preClass->m_name->data());
+      } else {
+        info.class_info = NULL;
+      }
     }
     m_objClass.clear();
     info.is_object = true;
@@ -594,20 +615,34 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
 }
 
 void VariableSerializer::writePropertyPrivacy(CStrRef prop,
+                                              VM::Class *class_,
                                               const ClassInfo *cls) {
-  if (!cls) return;
-  const ClassInfo *origCls = cls;
-  ClassInfo::PropertyInfo *p = cls->getPropertyInfo(prop);
-  while (!p && cls) {
-    cls = cls->getParentClassInfo();
-    if (cls) p = cls->getPropertyInfo(prop);
+  if (class_ != NULL) {
+    int propInd = class_->lookupDeclProp(prop.get());
+    if (propInd != -1) {
+      VM::Attr attrs = class_->m_declPropInfo[propInd].m_attrs;
+      if (attrs & VM::AttrProtected) {
+        m_buf->append(":protected");
+      } else if (attrs & VM::AttrPrivate) {
+        m_buf->append(":private");
+      }
+      return;
+    }
   }
-  if (!p) return;
-  ClassInfo::Attribute a = p->attribute;
-  if (a & ClassInfo::IsProtected) {
-    m_buf->append(":protected");
-  } else if (a & ClassInfo::IsPrivate && cls == origCls) {
-    m_buf->append(":private");
+  if (cls != NULL) {
+    const ClassInfo *origCls = cls;
+    ClassInfo::PropertyInfo *p = cls->getPropertyInfo(prop);
+    while (!p && cls) {
+      cls = cls->getParentClassInfo();
+      if (cls) p = cls->getPropertyInfo(prop);
+    }
+    if (!p) return;
+    ClassInfo::Attribute a = p->attribute;
+    if (a & ClassInfo::IsProtected) {
+      m_buf->append(":protected");
+    } else if (a & ClassInfo::IsPrivate && cls == origCls) {
+      m_buf->append(":private");
+    }
   }
 }
 
@@ -657,20 +692,37 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
     return;
   }
   ArrayInfo &info = m_arrayInfos.back();
-  const ClassInfo *cls = info.class_info;
+  VM::Class *class_ = NULL;
+  const ClassInfo *cls = NULL;
   if (info.is_object) {
+    if (info.class_ != NULL) {
+      class_ = info.class_;
+    }
+    if (info.class_info != NULL) {
+      cls = info.class_info;
+    }
+
     String ks(key.toString());
     if (ks.size() > 0 && ks.charAt(0) == '\0') {
-      // fast path for serializing private properties
+      // fast path for serializing private/protected properties
       if (m_type == Serialize) {
         write(ks);
         return;
       }
+
       int span = ks.find('\0', 1);
       ASSERT(span != String::npos);
       String cl(ks.substr(1, span - 1));
-      cls = ClassInfo::FindClass(cl);
-      ASSERT(cls);
+      if (class_ != NULL) {
+        if (cl[0] != '*') {
+          class_ = g_context->lookupClass(StringData::GetStaticString(
+                                          cl.get()));
+          assert(class_ != NULL);
+        }
+      } else {
+        cls = ClassInfo::FindClass(cl);
+        ASSERT(cls);
+      }
       key = ks.substr(span + 1);
     }
   }
@@ -682,7 +734,7 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
       const char *p = keyStr;
       int len = keyStr.length();
       m_buf->append(p, len);
-      if (info.is_object) writePropertyPrivacy(keyStr, cls);
+      if (info.is_object) writePropertyPrivacy(keyStr, class_, cls);
       m_buf->append("] => ");
     break;
   }
@@ -704,7 +756,7 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
       const char *p = keyStr;
       int len = keyStr.length();
       m_buf->append(p, len);
-      if (info.is_object) writePropertyPrivacy(keyStr, cls);
+      if (info.is_object) writePropertyPrivacy(keyStr, class_, cls);
       m_buf->append("\"]=>\n");
     }
     break;

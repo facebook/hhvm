@@ -75,6 +75,7 @@ ClassScopePtr StaticClassName::resolveClass() {
   if (m_self) {
     if (ClassScopePtr self = scope->getContainingClass()) {
       m_className = self->getName();
+      m_origClassName = self->getOriginalName();
       m_present = true;
       m_unknown = false;
       return self;
@@ -83,6 +84,7 @@ ClassScopePtr StaticClassName::resolveClass() {
     if (ClassScopePtr self = scope->getContainingClass()) {
       if (!self->getOriginalParent().empty()) {
         m_className = Util::toLower(self->getOriginalParent());
+        m_origClassName = self->getOriginalParent();
         m_present = true;
       }
     } else {

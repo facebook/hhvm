@@ -40,7 +40,6 @@ DECLARE_BOOST_TYPES(ClassScope);
 
 class Type : public JSON::CodeError::ISerializable,
              public JSON::DocTarget::ISerializable {
-  friend int ::process(const ProgramOptions&);
   friend class ::TestCodeRun;
 public:
   typedef int KindOf;
@@ -273,11 +272,11 @@ public:
    */
   void count(std::map<std::string, int> &counts);
 
-private:
   /**
    * Must not be invoked concurrently
    */
   static void InitTypeHintMap();
+private:
 
   /**
    * Must not be invoked concurrently

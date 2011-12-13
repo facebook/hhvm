@@ -40,6 +40,8 @@ class c_ArrayIterator : public ExtObjectData {
   Variant m_arr;
   Variant m_flags;
 
+  // Destructor
+  ~c_ArrayIterator() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ArrayIterator, ArrayIterator, ObjectData)
   static const ClassPropTable os_prop_table;

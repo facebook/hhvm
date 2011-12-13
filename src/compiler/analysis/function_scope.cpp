@@ -1843,6 +1843,10 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
     attribute &= ~ClassInfo::HasDocComment;
   }
 
+  if (m_method && isConstructor(getContainingClass())) {
+    attribute |= ClassInfo::IsConstructor;
+  }
+
   // Use the original cased name, for reflection to work correctly.
   cg_printf("(const char *)0x%04X, \"%s\", \"%s\", (const char *)%d, "
             "(const char *)%d,\n", attribute,

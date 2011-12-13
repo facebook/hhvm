@@ -175,6 +175,12 @@ public:
   static std::set<std::string> VolatileClasses;
 
   /**
+   * CodeGenerator options for HHBC.
+   */
+  static bool GenerateTextHHBC;
+  static bool GenerateBinaryHHBC;
+
+  /**
    * Names of hot and cold functions to be marked in sources.
    */
   static std::map<std::string, std::string> FunctionSections;

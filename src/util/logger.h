@@ -108,7 +108,8 @@ public:
 protected:
   class ThreadData {
   public:
-    ThreadData() : request(0), message(0), log(NULL), hook(NULL) {}
+    ThreadData() : request(0), message(0), bytesWritten(0), prevBytesWritten(0),
+                   log(NULL), hook(NULL) {}
     int request;
     int message;
     int bytesWritten;

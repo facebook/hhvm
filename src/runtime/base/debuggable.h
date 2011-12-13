@@ -79,6 +79,47 @@ public:
   }
 };
 
+class DebuggerSettings {
+public:
+  bool bypassCheck;
+  int printLevel;
+  bool smallStep;
+  bool apiModeSerialize;
+  DebuggerSettings()
+    : bypassCheck(false), printLevel(-1), smallStep(false),
+      apiModeSerialize(false) {}
+};
+
+#define DECLARE_DBG_SETTING                        \
+  DebuggerSettings m_dbgSettings;                  \
+
+#define DECLARE_DBG_SETTING_ACCESSORS              \
+bool getDebuggerBypassCheck() const {              \
+  return m_dbgSettings.bypassCheck;                \
+}                                                  \
+void setDebuggerBypassCheck(bool bypass) {         \
+  m_dbgSettings.bypassCheck = bypass;              \
+}                                                  \
+int getDebuggerPrintLevel() const {                \
+  return m_dbgSettings.printLevel;                 \
+}                                                  \
+void setDebuggerPrintLevel(int level) {            \
+  m_dbgSettings.printLevel = level;                \
+}                                                  \
+bool getDebuggerSmallStep() const {                \
+  return m_dbgSettings.smallStep;                  \
+}                                                  \
+void setDebuggerSmallStep(bool smallStep) {        \
+  m_dbgSettings.smallStep = smallStep;             \
+}                                                  \
+bool getDebuggerApiModeSerialize() const {         \
+  return m_dbgSettings.apiModeSerialize;           \
+}                                                  \
+void setDebuggerApiModeSerialize(bool serialize) { \
+  m_dbgSettings.apiModeSerialize = serialize;      \
+}                                                  \
+
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -450,8 +450,11 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("public:\n");
 
       cg.printSection("Properties");
-      classScope->getVariables()->outputCPPPropertyDecl(cg, ar,
-          classScope->derivesFromRedeclaring());
+      if (classScope->getVariables()->outputCPPPropertyDecl(
+            cg, ar, classScope->derivesFromRedeclaring())) {
+        cg.printSection("Destructor");
+        cg_printf("~%s%s() NEVER_INLINE {}", Option::ClassPrefix, clsName);
+      }
 
       if (Option::GenerateCppLibCode) {
         cg.printSection("Methods");

@@ -30,6 +30,16 @@ static std::set<ThreadInfo*> s_thread_infos;
 IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(ThreadInfo, ThreadInfo::s_threadInfo);
 
 ThreadInfo::ThreadInfo() : m_executing(Idling) {
+  if (hhvm) {
+    map<int, ObjectAllocatorBaseGetter> &wrappers =
+      ObjectAllocatorCollector::getWrappers();
+    m_allocators.resize(wrappers.rbegin()->first + 1);
+    for (map<int, ObjectAllocatorBaseGetter>::iterator it = wrappers.begin();
+         it != wrappers.end(); it++) {
+      m_allocators[it->first] = it->second();
+      ASSERT(it->second() != NULL);
+    }
+  }
   m_mm = MemoryManager::TheMemoryManager().getNoCheck();
 
   m_profiler = NULL;
@@ -86,6 +96,15 @@ void ThreadInfo::clearPendingException() {
 
 void ThreadInfo::onSessionExit() {
   m_reqInjectionData.reset();
+}
+
+void ThreadInfo::extendInstanceSizeAllocators(unsigned size) {
+  const_assert(hhvm);
+  for (unsigned i = m_instanceSizeAllocators.size(); i <= size; ++i) {
+    int index = ObjectAllocatorCollector::AllocSizeToIndex(i);
+    ASSERT(m_allocators[index] != NULL);
+    m_instanceSizeAllocators.push_back(m_allocators[index]);
+  }
 }
 
 void RequestInjectionData::onSessionInit() {

@@ -137,8 +137,8 @@ public:
   int                   getDfn() const { return m_dfn; }
   BitOps::Bits          *getRow(int row) { return m_bitBlock.getRow(row); }
 
-  void                  setBit(int row, int id) {
-    m_bitBlock.setBit(row, id, true);
+  void                  setBit(int row, int id, bool flag = true) {
+    m_bitBlock.setBit(row, id, flag);
   }
   bool                  getBit(int row, int id) const {
     return m_bitBlock.getBit(row, id);

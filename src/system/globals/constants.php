@@ -442,8 +442,7 @@ define('GRAPHEME_EXTR_COUNT', 0);
 define('GRAPHEME_EXTR_MAXBYTES', 1);
 define('GRAPHEME_EXTR_MAXCHARS', 2);
 define('HASH_HMAC', 1);
-define('HPHP_TRIM_CHARLIST', " 
-	\000");
+define('HPHP_TRIM_CHARLIST', "\n\r\t\v\000 ");
 define('HPHP_VERSION', "1.0.0");
 define('HTML_ENTITIES', 1);
 define('HTML_SPECIALCHARS', 0);

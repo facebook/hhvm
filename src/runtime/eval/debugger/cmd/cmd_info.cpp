@@ -207,11 +207,17 @@ bool CmdInfo::onServer(DebuggerProxy *proxy) {
       Logger::Error("Caught unknown exception, auto-complete lists incomplete");
     }
 
-    FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
-    bool global;
-    Array variables = CmdVariable::GetLocalVariables(frame, global);
-    if (!global) {
+    Array variables;
+    if (hhvm) {
+      variables = g_context->getLocalDefinedVariables(0);
       variables += CmdVariable::GetGlobalVariables();
+    } else {
+      FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
+      bool global;
+      variables = CmdVariable::GetLocalVariables(frame, global);
+      if (!global) {
+        variables += CmdVariable::GetGlobalVariables();
+      }
     }
     vector<String> &vars =
       (*m_acLiveLists)[DebuggerClient::AutoCompleteVariables];

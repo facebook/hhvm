@@ -23,6 +23,7 @@
 #include <util/job_queue.h>
 #include <util/lock.h>
 #include <util/logger.h>
+#include <system/lib/systemlib.h>
 
 using namespace std;
 
@@ -31,10 +32,12 @@ namespace HPHP {
 
 class XboxTransport : public Transport, public Synchronizable {
 public:
-  XboxTransport(CStrRef message) : m_refCount(0), m_done(false), m_code(0) {
+  XboxTransport(CStrRef message, CStrRef reqInitDoc = "")
+      : m_refCount(0), m_done(false), m_code(0) {
     gettime(CLOCK_MONOTONIC, &m_queueTime);
 
     m_message.append(message.data(), message.size());
+    m_reqInitDoc.append(reqInitDoc.data(), reqInitDoc.size());
     disableCompression(); // so we don't have to decompress during sendImpl()
   }
 
@@ -44,6 +47,9 @@ public:
    * Implementing Transport...
    */
   virtual const char *getUrl() {
+    if (!m_reqInitDoc.empty()) {
+      return "xbox_process_call_message";
+    }
     return RuntimeOption::XboxProcessMessageFunc.c_str();
   }
   virtual const char *getRemoteHost() {
@@ -61,6 +67,7 @@ public:
   }
   virtual std::string getHeader(const char *name) {
     if (!strcasecmp(name, "Host")) return m_host;
+    if (!strcasecmp(name, "ReqInitDoc")) return m_reqInitDoc;
     return "";
   }
   virtual void getHeaders(HeaderMap &headers) {
@@ -134,6 +141,7 @@ private:
   string m_response;
   int m_code;
   string m_host;
+  string m_reqInitDoc;
 };
 
 class XboxRequestHandler: public RPCRequestHandler {
@@ -148,28 +156,37 @@ bool XboxRequestHandler::Info = false;
 
 static IMPLEMENT_THREAD_LOCAL(XboxServerInfoPtr, s_xbox_server_info);
 static IMPLEMENT_THREAD_LOCAL(XboxRequestHandler, s_xbox_request_handler);
+static IMPLEMENT_THREAD_LOCAL(string, s_xbox_prev_req_init_doc);
 ///////////////////////////////////////////////////////////////////////////////
 
 class XboxWorker : public JobQueueWorker<XboxTransport*, true> {
 public:
   virtual void doJob(XboxTransport *job) {
     try {
+      // If this job or the previous job that ran on this thread have
+      // a custom initial document, make sure we do a reset
+      string reqInitDoc = job->getHeader("ReqInitDoc");
+      bool needReset = !reqInitDoc.empty() ||
+                       !s_xbox_prev_req_init_doc->empty();
+      *s_xbox_prev_req_init_doc = reqInitDoc;
+
       job->onRequestStart(job->getStartTimer());
-      createRequestHandler()->handleRequest(job);
+      createRequestHandler(needReset)->handleRequest(job);
       job->decRefCount();
     } catch (...) {
       Logger::Error("RpcRequestHandler leaked exceptions");
     }
   }
 private:
-  RequestHandler *createRequestHandler() {
+  RequestHandler *createRequestHandler(bool needReset = false) {
     if (!*s_xbox_server_info) {
       *s_xbox_server_info = XboxServerInfoPtr(new XboxServerInfo());
     }
     if (RuntimeOption::XboxServerLogInfo) XboxRequestHandler::Info = true;
     s_xbox_request_handler->setServerInfo(*s_xbox_server_info);
     s_xbox_request_handler->setReturnEncodeType(RPCRequestHandler::Serialize);
-    if (s_xbox_request_handler->needReset() ||
+    if (needReset ||
+        s_xbox_request_handler->needReset() ||
         s_xbox_request_handler->incRequest() >
         (*s_xbox_server_info)->getMaxRequest()) {
       Logger::Verbose("resetting xbox request handler");
@@ -179,6 +196,12 @@ private:
       s_xbox_request_handler->incRequest();
     }
     return s_xbox_request_handler.get();
+  }
+
+  virtual void onThreadExit() {
+    if (!s_xbox_request_handler.isNull()) {
+      s_xbox_request_handler.destroy();
+    }
   }
 };
 
@@ -204,6 +227,14 @@ void XboxServer::Restart() {
       Logger::Info("xbox server started");
     }
     s_dispatcher->start();
+  }
+}
+
+void XboxServer::Stop() {
+  if (s_dispatcher) {
+    s_dispatcher->stop();
+    delete s_dispatcher;
+    s_dispatcher = NULL;
   }
 }
 
@@ -331,8 +362,8 @@ class XboxTask : public SweepableResourceData {
 public:
   DECLARE_OBJECT_ALLOCATION(XboxTask)
 
-  XboxTask(CStrRef message) {
-    m_job = new XboxTransport(message);
+  XboxTask(CStrRef message, CStrRef reqInitDoc = "") {
+    m_job = new XboxTransport(message, reqInitDoc);
     m_job->incRefCount();
   }
 
@@ -362,12 +393,18 @@ bool XboxServer::Available() {
          RuntimeOption::XboxServerMaxQueueLength;
 }
 
-Object XboxServer::TaskStart(CStrRef message) {
-  if (RuntimeOption::XboxServerThreadCount <= 0 ||
-      !Available()) {
-    return null_object;
+Object XboxServer::TaskStart(CStrRef msg, CStrRef reqInitDoc /* = "" */) {
+  bool xboxEnabled = (RuntimeOption::XboxServerThreadCount > 0);
+  if (!xboxEnabled || !Available()) {
+    const char* errMsg = (xboxEnabled ?
+      "Cannot create new Xbox task because the Xbox queue has " 
+      "reached maximum capacity" :
+      "Cannot create new Xbox task because the Xbox is not enabled");
+    Object e = SystemLib::AllocExceptionObject(errMsg);
+    throw_exception(e);
+    return Object();
   }
-  XboxTask *task = NEWOBJ(XboxTask)(message);
+  XboxTask *task = NEWOBJ(XboxTask)(msg, reqInitDoc);
   Object ret(task);
   XboxTransport *job = task->getJob();
   job->incRefCount(); // paired with worker's decRefCount()

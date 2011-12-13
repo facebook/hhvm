@@ -1,0 +1,38 @@
+C::foo
+string(1) "C"
+C::foo
+string(1) "C"
+HipHop Warning:  call_user_func expects parameter 1 to be a valid callback, class 'C' is not a subclass of 'D' in src/test/vm/cuf03.php on line 18
+HipHop Warning:  call_user_func expects parameter 1 to be a valid callback, class 'C' is not a subclass of 'E' in src/test/vm/cuf03.php on line 19
+C::bar
+string(1) "C"
+C::bar
+string(1) "C"
+HipHop Warning:  call_user_func expects parameter 1 to be a valid callback, class 'C' is not a subclass of 'D' in src/test/vm/cuf03.php on line 23
+HipHop Warning:  call_user_func expects parameter 1 to be a valid callback, class 'C' is not a subclass of 'E' in src/test/vm/cuf03.php on line 24
+D::foo
+string(1) "D"
+C::foo
+string(1) "D"
+D::foo
+string(1) "D"
+HipHop Warning:  call_user_func expects parameter 1 to be a valid callback, class 'D' is not a subclass of 'E' in src/test/vm/cuf03.php on line 30
+D::bar
+string(1) "D"
+C::bar
+string(1) "D"
+D::bar
+string(1) "D"
+HipHop Warning:  call_user_func expects parameter 1 to be a valid callback, class 'D' is not a subclass of 'E' in src/test/vm/cuf03.php on line 35
+E::foo
+string(1) "E"
+HipHop Warning:  call_user_func expects parameter 1 to be a valid callback, class 'E' is not a subclass of 'C' in src/test/vm/cuf03.php on line 39
+HipHop Warning:  call_user_func expects parameter 1 to be a valid callback, class 'E' is not a subclass of 'D' in src/test/vm/cuf03.php on line 40
+E::foo
+string(1) "E"
+E::bar
+string(1) "E"
+HipHop Warning:  call_user_func expects parameter 1 to be a valid callback, class 'E' is not a subclass of 'C' in src/test/vm/cuf03.php on line 44
+HipHop Warning:  call_user_func expects parameter 1 to be a valid callback, class 'E' is not a subclass of 'D' in src/test/vm/cuf03.php on line 45
+E::bar
+string(1) "E"

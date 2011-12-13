@@ -19,6 +19,7 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/externals.h>
 #include <runtime/base/variable_serializer.h>
+#include <runtime/base/execution_context.h>
 #include <util/lock.h>
 #include <runtime/base/class_info.h>
 #include <runtime/base/fiber_reference_map.h>
@@ -44,16 +45,28 @@ static CallInfo s_ObjectData_call_handler((void*)ObjectData::callHandler,
     (void*)ObjectData::callHandlerFewArgs, 0,
     CallInfo::VarArgs | CallInfo::Method | CallInfo::CallMagicMethod, 0);
 
+static StaticString s___call("__call");
 static StaticString s___callStatic("__callStatic");
 static StaticString s_serialize("serialize");
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructor/destructor
+
 ObjectData::~ObjectData() {
   int &pmax = *os_max_id;
   if (o_id && o_id == pmax) {
     --pmax;
   }
+}
+
+HPHP::VM::Class*
+ObjectData::instanceof(const HPHP::VM::PreClass* pc) const {
+  const_assert(hhvm);
+  return m_cls->classof(pc);
+}
+
+bool ObjectData::instanceof(const HPHP::VM::Class* c) const {
+  return (instanceof(c->m_preClass.get()) != NULL);
 }
 
 CallInfo *ObjectData::GetCallHandler() {
@@ -92,11 +105,7 @@ void ObjectData::getConstructor(MethodCallPackage &mcp) {
 }
 
 void ObjectData::release() {
-  ASSERT(getCount() == 0);
-  destruct();
-  if (LIKELY(getCount() == 0)) {
-    delete this;
-  }
+  ObjectData::releaseImpl<true>();
 }
 
 void ObjectData::destruct() {
@@ -108,6 +117,10 @@ void ObjectData::destruct() {
       handle_destructor_exception();
     }
   }
+}
+
+void ObjectData::destructNoThrow() {
+  ObjectData::destruct();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -190,6 +203,13 @@ inline ALWAYS_INLINE bool InstanceOfHelper(CStrRef s,
 }
 
 bool ObjectData::o_instanceof(CStrRef s) const {
+  if (hhvm) {
+    if (isInstance()) {
+      HPHP::VM::Class* cls = g_context->lookupClass(s.get());
+      if (!cls) return false;
+      return m_cls->classof(cls->m_preClass.get());
+    }
+  }
   const ObjectStaticCallbacks *osc = o_get_callbacks();
   return InstanceOfHelper(s, this, osc);
 }
@@ -208,8 +228,8 @@ int64 ObjectData::o_toInt64() const {
   return 1;
 }
 
-const Eval::MethodStatement* ObjectData::getMethodStatement(const char* name)
-  const {
+const Eval::MethodStatement* ObjectData::getMethodStatement(CStrRef name,
+  int &access) const {
   return NULL;
 }
 const Eval::MethodStatement* ObjectData::getConstructorStatement() const {
@@ -310,7 +330,7 @@ static void LazyInitializer(const ClassPropTable *cpt, const char *globals) {
   if (!*(bool*)addr) {
     *(bool*)addr = true;
     int i = 0;
-    for (const int *p = cpt->lazy_inits(); ; *p++) {
+    for (const int *p = cpt->lazy_inits(); ; p++) {
       if (*p < 0) {
         if (i++) break;
         continue;
@@ -650,39 +670,44 @@ static StaticString s_Iterator("Iterator");
 static StaticString s_IteratorAggregate("IteratorAggregate");
 static StaticString s_getIterator("getIterator");
 
-ArrayIter ObjectData::begin(CStrRef context /* = null_string */) {
+Object ObjectData::iterableObject(bool& isInstanceofIterator) {
   if (o_instanceof(s_Iterator)) {
-    return ArrayIter(this);
+    isInstanceofIterator = true;
+    return Object(this);
   }
-  ObjectData *obj = this;
+  Object obj(this);
   while (obj->o_instanceof(s_IteratorAggregate)) {
     Variant iterator = obj->o_invoke(s_getIterator, Array());
     if (!iterator.isObject()) break;
     if (iterator.instanceof(s_Iterator)) {
-      return ArrayIter(iterator.getObjectData());
+      isInstanceofIterator = true;
+      return iterator.getObjectData();
     }
     obj = iterator.getObjectData();
   }
-  return ArrayIter(obj->o_toIterArray(context));
+  isInstanceofIterator = false;
+  return obj;
+}
+
+ArrayIter ObjectData::begin(CStrRef context /* = null_string */) {
+  bool isInstanceofIterator;
+  Object iterable = iterableObject(isInstanceofIterator);
+  if (isInstanceofIterator) {
+    return ArrayIter(iterable.get());
+  } else {
+    return ArrayIter(iterable->o_toIterArray(context));
+  }
 }
 
 MutableArrayIter ObjectData::begin(Variant *key, Variant &val,
                                    CStrRef context /* = null_string */) {
-  if (o_instanceof(s_Iterator)) {
+  bool isInstanceofIterator;
+  Object iterable = iterableObject(isInstanceofIterator);
+  if (isInstanceofIterator) {
     throw FatalErrorException("An iterator cannot be used with "
                               "foreach by reference");
   }
-  ObjectData *obj = this;
-  while (obj->o_instanceof(s_IteratorAggregate)) {
-    Variant iterator = obj->o_invoke(s_getIterator, Array());
-    if (!iterator.isObject()) break;
-    if (iterator.instanceof(s_Iterator)) {
-      throw FatalErrorException("An iterator cannot be used with "
-                                "foreach by reference");
-    }
-    obj = iterator.getObjectData();
-  }
-  Array properties = obj->o_toIterArray(context, true);
+  Array properties = iterable->o_toIterArray(context, true);
   properties.escalate(true);
   ArrayData *arr = properties.getArrayData();
   if (arr->getCount() > 1) {
@@ -746,6 +771,56 @@ Variant *ObjectData::RealPropPublicHelper(
 
 Variant *ObjectData::o_realProp(CStrRef propName, int flags,
                                 CStrRef context /* = null_string */) const {
+  if (hhvm) {
+    if (isInstance()) {
+      /*
+       * Returns a pointer to a place for a property value. This should never
+       * call the magic methods __get or __set. The flags argument describes the
+       * behavior in cases where the named property is nonexistent or
+       * inaccessible.
+       */
+      HPHP::VM::PreClass* ctxPreClass = NULL;
+      if (!context.empty()) {
+        HPHP::VM::Class* ctxClass = g_context->lookupClass(context.get());
+        if (ctxClass) {
+          ctxPreClass = ctxClass->m_preClass.get();
+        }
+      }
+
+      HPHP::VM::Instance* thiz = (HPHP::VM::Instance*)(this);  // sigh
+      bool visible, accessible, unset;
+      TypedValue* ret = thiz->getProp(ctxPreClass, propName.get(), visible,
+                                      accessible, unset);
+
+      if (ret == NULL) {
+        // Property is not declared, and not dynamically created yet.
+        if (flags & RealPropCreate) {
+          ASSERT(!(flags & RealPropNoDynamic));
+          if (m_propMap == NULL) {
+            thiz->initPropMap();
+          }
+          m_propMap->lvalPtr(propName, *(Variant**)(&ret), false, true);
+          return (Variant*)ret;
+        } else {
+          return NULL;
+        }
+      }
+
+      if ((flags & RealPropNoDynamic) &&
+          m_cls->lookupDeclProp(propName.get()) < 0) {
+        return NULL;
+      }
+
+      // ret is non-NULL if we reach here
+      ASSERT(visible);
+      if (accessible && !unset) {
+        return (Variant*)ret;
+      } else {
+        return ((flags & RealPropUnchecked) ? (Variant*)ret : NULL);
+      }
+    }
+  }
+
   const ObjectStaticCallbacks *orig = o_get_callbacks();
   if (UNLIKELY(!orig)) {
     return o_realPropHook(propName, flags, context);
@@ -757,7 +832,16 @@ Variant *ObjectData::o_realProp(CStrRef propName, int flags,
 
   const StringData *ctx = context.get();
   if (!ctx) {
-    ctx = FrameInjection::GetClassName(false).get();
+    if (hhvm) {
+      HPHP::VM::ActRec* ar = g_context->m_fp;
+      if (ar && ar->m_func->m_preClass) {
+        ctx = ar->m_func->m_preClass->m_name;
+      } else {
+        ctx = empty_string.get();
+      }
+    } else {
+      ctx = FrameInjection::GetClassName(false).get();
+    }
   }
   if (ctx->size()) {
     const ObjectStaticCallbacks *osc = orig;
@@ -828,6 +912,11 @@ Variant *ObjectData::o_realProp(CStrRef propName, int flags,
 }
 
 Variant *ObjectData::o_realPropPublic(CStrRef propName, int flags) const {
+  if (hhvm) {
+    if (isInstance()) {
+      return o_realProp(propName, flags);
+    }
+  }
   const ObjectStaticCallbacks *orig = o_get_callbacks();
   if (UNLIKELY(!orig)) {
     return o_realPropHook(propName, flags, empty_string);
@@ -1222,6 +1311,43 @@ Array ObjectData::o_getDynamicProperties() const {
 
 Variant ObjectData::o_invoke(CStrRef s, CArrRef params, int64 hash /* = -1 */,
                              bool fatal /* = true */) {
+  if (hhvm) {
+    if (isInstance()) {
+      // TODO This duplicates some logic from vm_decode_function and
+      // vm_call_user_func, we should refactor this in the near future
+      ObjectData* this_ = this;
+      HPHP::VM::Class* cls = getVMClass();
+      StringData* invName = NULL;
+      // XXX The lookup below doesn't take context into account, so it will lead
+      // to incorrect behavior in some corner cases. o_invoke is gradually being
+      // removed from the HPHP runtime this should be ok for the short term.
+      const HPHP::VM::Func* f = cls->lookupMethod(s.get());
+      if (f && (f->m_attrs & HPHP::VM::AttrStatic)) {
+        // If we found a method and its static, null out this_
+        this_ = NULL;
+      } else if (!f) {
+        if (this_) {
+          // If this_ is non-null AND we could not find a method, try
+          // looking up __call in cls's method table
+          f = cls->lookupMethod(s___call.get());
+        }
+        if (!f) {
+          // Bail if we couldn't find the method or __call
+          o_invoke_failed(o_getClassName().data(), s.data(), fatal);
+          return null;
+        }
+        // We found __call! Stash the original name into invName.
+        ASSERT(!(f->m_attrs & HPHP::VM::AttrStatic));
+        invName = s.get();
+        invName->incRefCount();
+      }
+      ASSERT(f);
+      Variant ret;
+      g_context->invokeFunc((TypedValue*)&ret, f, params, this_, cls,
+                            NULL, invName);
+      return ret;
+    }
+  }
   MethodCallPackage mcp;
   if (!fatal) mcp.noFatal();
   mcp.methodCall(this, s, hash);
@@ -1234,8 +1360,52 @@ Variant ObjectData::o_root_invoke(CStrRef s, CArrRef params,
   return getRoot()->o_invoke(s, params, hash, fatal);
 }
 
+#define APPEND_1_ARGS(params) params.append(a0);
+#define APPEND_2_ARGS(params) APPEND_1_ARGS(params); params.append(a1)
+#define APPEND_3_ARGS(params) APPEND_2_ARGS(params); params.append(a2)
+#define APPEND_4_ARGS(params) APPEND_3_ARGS(params); params.append(a3)
+#define APPEND_5_ARGS(params) APPEND_4_ARGS(params); params.append(a4)
+#define APPEND_6_ARGS(params) APPEND_5_ARGS(params); params.append(a5)
+#define APPEND_7_ARGS(params) APPEND_6_ARGS(params); params.append(a6)
+#define APPEND_8_ARGS(params) APPEND_7_ARGS(params); params.append(a7)
+#define APPEND_9_ARGS(params) APPEND_8_ARGS(params); params.append(a8)
+#define APPEND_10_ARGS(params)  APPEND_9_ARGS(params); params.append(a9)
+
 Variant ObjectData::o_invoke_few_args(CStrRef s, int64 hash, int count,
                                       INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (hhvm) {
+    if (isInstance()) {
+      Array params = Array::Create();
+      switch(count) {
+        case 1: APPEND_1_ARGS(params);
+                break;
+        case 2: APPEND_2_ARGS(params);
+                break;
+        case 3: APPEND_3_ARGS(params);
+                break;
+#if INVOKE_FEW_ARGS_COUNT > 3
+        case 4: APPEND_4_ARGS(params);
+                break;
+        case 5: APPEND_5_ARGS(params);
+                break;
+        case 6: APPEND_6_ARGS(params);
+                break;
+#if INVOKE_FEW_ARGS_COUNT > 6
+        case 7: APPEND_7_ARGS(params);
+                break;
+        case 8: APPEND_8_ARGS(params);
+                break;
+        case 9: APPEND_9_ARGS(params);
+                break;
+        case 10: APPEND_10_ARGS(params);
+                break;
+#endif
+#endif
+        default: not_implemented();
+      }
+      return o_invoke(s, params, hash);
+    }
+  }
   MethodCallPackage mcp;
   mcp.methodCall(this, s, hash);
   return (mcp.ci->getMethFewArgs())(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS);
@@ -1249,6 +1419,11 @@ Variant ObjectData::o_root_invoke_few_args(CStrRef s, int64 hash, int count,
 
 Variant ObjectData::o_invoke_ex(CStrRef clsname, CStrRef s,
                                 CArrRef params, bool fatal /* = true */) {
+  if (hhvm) {
+    if (isInstance()) {
+      not_implemented();
+    }
+  }
   MethodCallPackage mcp;
   if (!fatal) mcp.noFatal();
   String str(s);
@@ -1381,6 +1556,12 @@ void ObjectData::dump() const {
 }
 
 ObjectData *ObjectData::clone() {
+  if (hhvm) {
+    if (LIKELY(isInstance())) {
+      HPHP::VM::Instance* instance = static_cast<HPHP::VM::Instance*>(this);
+      return instance->cloneImpl();
+    }
+  }
   const ObjectStaticCallbacks *osc = o_get_callbacks();
   if (UNLIKELY(!osc)) {
     raise_error("Cannot clone non-object");
@@ -1545,6 +1726,7 @@ Variant ObjectData::t___get(Variant v_name) {
 Variant *ObjectData::___lval(Variant v_name) {
   return NULL;
 }
+
 Variant &ObjectData::___offsetget_lval(Variant v_name) {
   return o_properties.lvalAt(v_name, AccessFlags::Key);
 }
@@ -1629,6 +1811,7 @@ Object ObjectData::fiberMarshal(FiberReferenceMap &refMap) const {
       ClassInfo::SetArray(copy.get(), copy->o_getClassPropTable(),
                           props.fiberMarshal(refMap));
     }
+    copy.get()->setAttributes(this->o_attribute);
     FiberLocal *src = dynamic_cast<FiberLocal*>(const_cast<ObjectData*>(this));
     if (src) {
       FiberLocal *dest = dynamic_cast<FiberLocal*>(copy.get());
@@ -1661,6 +1844,7 @@ Object ObjectData::fiberUnmarshal(FiberReferenceMap &refMap) const {
       ClassInfo::SetArray(px, px->o_getClassPropTable(),
                           props.fiberMarshal(refMap));
     }
+    px->setAttributes(this->o_attribute);
     FiberLocal *src = dynamic_cast<FiberLocal*>(const_cast<ObjectData*>(this));
     if (src) {
       FiberLocal *dest = dynamic_cast<FiberLocal*>(px);
@@ -1671,6 +1855,17 @@ Object ObjectData::fiberUnmarshal(FiberReferenceMap &refMap) const {
     }
   }
   return Object(px);
+}
+
+int ObjectAllocatorCollector::AllocSizeToIndex(int size) {
+  int r = 0;
+  int s = sizeof(ObjectData);
+  while (s < size) {
+    r++;
+    s += (s >> 1);
+    s = ALIGN_WORD(s);
+  }
+  return r;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

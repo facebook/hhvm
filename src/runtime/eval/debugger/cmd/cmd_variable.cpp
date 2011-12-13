@@ -115,10 +115,26 @@ bool CmdVariable::onClient(DebuggerClient *client) {
   if (cmd->m_variables.empty()) {
     client->info("(no variable was defined)");
   } else {
+    m_variables = cmd->m_variables;
     PrintVariables(client, cmd->m_variables, cmd->m_global, text);
   }
 
   return true;
+}
+
+void CmdVariable::setClientOutput(DebuggerClient *client) {
+  client->setOutputType(DebuggerClient::OTValues);
+  Array values;
+  for (ArrayIter iter(m_variables); iter; ++iter) {
+    String name = iter.first().toString();
+    if (client->getDebuggerApiModeSerialize()) {
+      values.set(name,
+                 DebuggerClient::FormatVariable(iter.second(), 200));
+    } else {
+      values.set(name, iter.second());
+    }
+  }
+  client->setOTValues(values);
 }
 
 Array CmdVariable::GetGlobalVariables() {
@@ -128,6 +144,7 @@ Array CmdVariable::GetGlobalVariables() {
 }
 
 Array CmdVariable::GetLocalVariables(FrameInjection* frame, bool &global) {
+  const_assert(!hhvm);
   Array ret;
   if (!frame || FrameInjection::IsGlobalScope(frame)) {
     global = true;
@@ -146,6 +163,11 @@ Array CmdVariable::GetLocalVariables(FrameInjection* frame, bool &global) {
 bool CmdVariable::onServer(DebuggerProxy *proxy) {
   FrameInjection *frame = FrameInjection::GetStackFrame(m_frame);
   m_variables = GetLocalVariables(frame, m_global);
+  return proxy->send(this);
+}
+
+bool CmdVariable::onServerVM(DebuggerProxy *proxy) {
+  m_variables = g_context->getLocalDefinedVariables(m_frame);
   return proxy->send(this);
 }
 

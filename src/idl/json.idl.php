@@ -73,6 +73,12 @@ DefineConstant(
     'type'   => Int64,
   ));
 
+DefineConstant(
+  array(
+    'name'   => "JSON_FB_UNLIMITED",
+    'type'   => Int64,
+  ));
+
 ///////////////////////////////////////////////////////////////////////////////
 // Functions
 //

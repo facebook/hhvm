@@ -41,6 +41,7 @@ static StaticString s_closureGenBrackets("{closureGen}");
 ///////////////////////////////////////////////////////////////////////////////
 
 CStrRef FrameInjection::GetClassName(bool skip /* = false */) {
+  const_assert(!hhvm); // VM should use ExecutionContext::getContextClassName()
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (t && skip) {
     t = t->m_prev;
@@ -61,6 +62,7 @@ CStrRef FrameInjection::GetClassName(bool skip /* = false */) {
 }
 
 CStrRef FrameInjection::GetParentClassName(bool skip /* = false */) {
+  const_assert(!hhvm);
   CStrRef cls = GetClassName(skip);
   if (cls.empty()) return cls;
   const ClassInfo *classInfo = ClassInfo::FindClass(cls);
@@ -74,6 +76,7 @@ CStrRef FrameInjection::GetParentClassName(bool skip /* = false */) {
 }
 
 ObjectData *FrameInjection::GetThis(bool skip /* = false */) {
+  const_assert(!hhvm);
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (t && skip) {
     t = t->m_prev;
@@ -85,6 +88,7 @@ ObjectData *FrameInjection::GetThis(bool skip /* = false */) {
 }
 
 String FrameInjection::GetContainingFileName(bool skip /* = false */) {
+  const_assert(!hhvm);
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (t && skip) {
     t = t->m_prev;
@@ -96,6 +100,7 @@ String FrameInjection::GetContainingFileName(bool skip /* = false */) {
 }
 
 Array FrameInjection::getStackFrame(bool withSelf, bool withThis) {
+  const_assert(!hhvm);
   Array frame = Array::Create();
 
   if (m_prev) {
@@ -161,6 +166,7 @@ Array FrameInjection::getStackFrame(bool withSelf, bool withThis) {
 Array FrameInjection::GetBacktrace(bool skip /* = false */,
                                    bool withSelf /* = false */,
                                    bool withThis /* = true */) {
+  const_assert(!hhvm);
   Array bt = Array::Create();
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (skip && t) {
@@ -229,14 +235,19 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
   return bt;
 }
 
+static bool IsCallUserFunc(const char* name) {
+  return strcasecmp(name, "call_user_func") == 0 ||
+    strcasecmp(name, "call_user_func_array") == 0;
+}
+
 Array FrameInjection::GetCallerInfo(bool skip /* = false */) {
+  const_assert(!hhvm);
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (skip && t) {
     t = t->m_prev;
   }
   while (t) {
-    if (strcasecmp(t->m_name, "call_user_func") == 0 ||
-        strcasecmp(t->m_name, "call_user_func_array") == 0) {
+    if (IsCallUserFunc(t->m_name)) {
       t = t->m_prev;
     } else {
       break;
@@ -252,8 +263,7 @@ Array FrameInjection::GetCallerInfo(bool skip /* = false */) {
     }
     t = t->m_prev;
     if (t) {
-      if (strcasecmp(t->m_name, "call_user_func") == 0 ||
-          strcasecmp(t->m_name, "call_user_func_array") == 0) {
+      if (IsCallUserFunc(t->m_name)) {
         continue;
       }
     }
@@ -264,6 +274,7 @@ Array FrameInjection::GetCallerInfo(bool skip /* = false */) {
 
 Eval::VariableEnvironment *
 FrameInjection::GetVariableEnvironment(bool skip /* = false */) {
+  const_assert(!hhvm);
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (skip && t) {
     t = t->m_prev;
@@ -277,6 +288,7 @@ FrameInjection::GetVariableEnvironment(bool skip /* = false */) {
 }
 
 int FrameInjection::GetLine(bool skip /* = false */) {
+  const_assert(!hhvm);
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (t && skip) {
     t = t->m_prev;
@@ -288,6 +300,7 @@ int FrameInjection::GetLine(bool skip /* = false */) {
 }
 
 CStrRef FrameInjection::GetStaticClassName(ThreadInfo *info) {
+  const_assert(!hhvm);
   ASSERT(info);
   for (FrameInjection *t = info->m_top; t; t = t->m_prev) {
     if (t != info->m_top) {
@@ -306,10 +319,12 @@ CStrRef FrameInjection::GetStaticClassName(ThreadInfo *info) {
 }
 
 bool FrameInjection::IsGlobalScope() {
+  const_assert(!hhvm);
   return IsGlobalScope(ThreadInfo::s_threadInfo->m_top);
 }
 
 bool FrameInjection::IsGlobalScope(FrameInjection *frame) {
+  const_assert(!hhvm);
   while (frame) {
     if ((frame->m_flags & PseudoMain) == 0) {
       return false;
@@ -320,6 +335,7 @@ bool FrameInjection::IsGlobalScope(FrameInjection *frame) {
 }
 
 FrameInjection *FrameInjection::GetStackFrame(int level) {
+  const_assert(!hhvm);
   FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
   for (int i = 0; i < level && frame; i++) {
     while (frame && (frame->m_flags & PseudoMain)) {
@@ -335,6 +351,7 @@ FrameInjection *FrameInjection::GetStackFrame(int level) {
 ///////////////////////////////////////////////////////////////////////////////
 
 CStrRef FrameInjection::getClassName() const {
+  const_assert(!hhvm);
   if (isEvalFrame()) {
     const Eval::EvalFrameInjection *efi =
       static_cast<const Eval::EvalFrameInjection*>(this);
@@ -356,6 +373,7 @@ CStrRef FrameInjection::getClassName() const {
 
 ObjectData *FrameInjection::GetObjectV(
   const FrameInjection *fi) {
+  const_assert(!hhvm);
   do {
     // Must check first: an EvalFrame can also be
     // an ObjectMethodFrame (but its still implemented
@@ -382,6 +400,7 @@ ObjectData *FrameInjection::GetObjectV(
 }
 
 String FrameInjection::getFileName() {
+  const_assert(!hhvm);
   if (isEvalFrame()) {
     Eval::EvalFrameInjection *efi =
       static_cast<Eval::EvalFrameInjection*>(this);
@@ -409,6 +428,7 @@ String FrameInjection::getFileName() {
 }
 
 Array FrameInjection::getArgs() {
+  const_assert(!hhvm);
   if (m_flags & EvalFrame) {
     Eval::EvalFrameInjection *efi =
       static_cast<Eval::EvalFrameInjection*>(this);

@@ -97,7 +97,16 @@ bool CmdJump::onClient(DebuggerClient *client) {
   throw DebuggerConsoleExitException();
 }
 
+bool CmdJump::onClientVM(DebuggerClient *client) {
+  client->error("not supported\n");
+  return true;
+}
+
 bool CmdJump::onServer(DebuggerProxy *proxy) {
+  return true;
+}
+
+bool CmdJump::onServerVM(DebuggerProxy *proxy) {
   return true;
 }
 

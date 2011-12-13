@@ -318,7 +318,7 @@ typedef union {
 static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
                                   int type_to_fetch, bool store,
                                   Array &subarray) {
-  unsigned short type, cls, dlen;
+  unsigned short type, cls ATTRIBUTE_UNUSED, dlen;
   unsigned long ttl;
   int64 n, i;
   unsigned short s;

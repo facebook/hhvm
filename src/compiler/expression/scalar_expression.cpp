@@ -442,8 +442,7 @@ void ScalarExpression::OutputCPPString(
   ASSERT(!fullName.empty());
   string prefix(Option::ScalarPrefix);
   if (Option::SystemGen) prefix += Option::SysPrefix;
-  size_t pos = fullName.find(prefix);
-  ASSERT(pos == 0);
+  ASSERT(fullName.find(prefix) == 0);
   string name =
     fullName.substr(prefix.size() + strlen(Option::StaticStringPrefix));
   cg.printf("NAMVAR(%s%s%s, \"%s\")",
@@ -579,6 +578,7 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     break;
   }
   case T_LINE:
+    ar->addInteger(getVariant().toInt64());
     if (cg.hasScalarVariant() && Option::UseScalarVariant) {
       outputCPPNamedInteger(cg, ar);
     } else {
@@ -599,6 +599,7 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     break;
   }
   case T_LNUMBER:
+    ar->addInteger(getVariant().toInt64());
     if (cg.hasScalarVariant() && Option::UseScalarVariant) {
       outputCPPNamedInteger(cg, ar);
     } else {
@@ -633,7 +634,7 @@ int64 ScalarExpression::getHash() const {
   return hash;
 }
 
-Variant ScalarExpression::getVariant() {
+Variant ScalarExpression::getVariant() const {
   if (!m_serializedValue.empty()) {
     Variant ret = f_unserialize
       (String(m_serializedValue.data(),
@@ -701,7 +702,9 @@ bool ScalarExpression::getInt(int64 &i) const {
 
 bool ScalarExpression::getDouble(double &d) const {
   if (m_type == T_DNUMBER) {
-    d = String(m_value).toDouble();
+    Variant v = getVariant();
+    ASSERT(v.isDouble());
+    d = v.toDouble();
     return true;
   }
   return false;

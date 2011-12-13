@@ -207,6 +207,7 @@ class TestCodeRun : public TestBase {
   bool TestAdHoc();
 
   static bool FastMode;
+  static const char *Filter;
 
  protected:
   bool CleanUp();

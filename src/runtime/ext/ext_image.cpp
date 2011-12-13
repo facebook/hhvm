@@ -3260,15 +3260,16 @@ Variant f_imagegrabscreen() {
 
 Variant f_imagerotate(CObjRef source_image, double angle, int bgd_color,
                      int ignore_transparent /* = 0 */) {
+#if defined(HPHP_OSS)
   throw NotSupportedException(__func__, "gdImageRotate does not exist");
-  /*
+#else
   gdImagePtr im_src = source_image.getTyped<Image>()->get();
   if (!im_src) return false;
   gdImagePtr im_dst = gdImageRotate(im_src, angle, bgd_color,
                                     ignore_transparent);
   if (!im_dst) return false;
   return Object(new Image(im_dst));
-  */
+#endif
 }
 
 bool f_imagesettile(CObjRef image, CObjRef tile) {

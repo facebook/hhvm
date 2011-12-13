@@ -18,6 +18,7 @@
 #include <runtime/ext/ext_iterator.h>
 #include <runtime/ext/ext_file.h>
 #include <runtime/ext/ext_splfile.h>
+#include <system/lib/systemlib.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,23 +40,31 @@ StaticString
 // helper
 static RecursiveIteratorIterator *
 get_recursiveiteratoriterator(CObjRef obj) {
-  c_RecursiveIteratorIterator *c_rii =
-    obj.getTyped<c_RecursiveIteratorIterator>();
-  return c_rii->m_rsrc.toObject().getTyped<RecursiveIteratorIterator>();
+  if (!obj->o_instanceof("RecursiveIteratorIterator")) {
+    throw InvalidObjectTypeException(obj->o_getClassName());
+  }
+  CObjRef rsrc = obj->o_get("rsrc", true, "RecursiveIteratorIterator");
+  return rsrc.getTyped<RecursiveIteratorIterator>();
 }
 
 static RecursiveDirectoryIterator *
 get_recursivedirectoryiterator(CObjRef obj) {
-  c_RecursiveDirectoryIterator *c_rdi =
-    obj.getTyped<c_RecursiveDirectoryIterator>();
-  return c_rdi->m_rsrc.toObject().getTyped<RecursiveDirectoryIterator>();
+  if (!obj->o_instanceof("RecursiveDirectoryIterator")) {
+    throw InvalidObjectTypeException(obj->o_getClassName());
+  }
+  // SplFileInfo as context -- rsrc is a private property
+  CObjRef rsrc = obj->o_get("rsrc", true, "SplFileInfo");
+  return rsrc.getTyped<RecursiveDirectoryIterator>();
 }
 
 static DirectoryIterator *
 get_directoryiterator(CObjRef obj) {
-  c_DirectoryIterator *c_di =
-    obj.getTyped<c_DirectoryIterator>();
-  return c_di->m_rsrc.toObject().getTyped<DirectoryIterator>();
+  if (!obj->o_instanceof("DirectoryIterator")) {
+    throw InvalidObjectTypeException(obj->o_getClassName());
+  }
+  // SplFileInfo as context -- rsrc is a private property
+  CObjRef rsrc = obj->o_get("rsrc", true, "SplFileInfo");
+  return rsrc.getTyped<DirectoryIterator>();
 }
 
 DirectoryIterator::DirectoryIterator(CStrRef path) :
@@ -126,14 +135,11 @@ RecursiveIteratorIterator::RecursiveIteratorIterator(CObjRef iterator,
 }
 
 Object f_hphp_recursiveiteratoriterator___construct(CObjRef obj, CObjRef iterator, int64 mode, int64 flags) {
-  c_RecursiveIteratorIterator *c_rii =
-    obj.getTyped<c_RecursiveIteratorIterator>();
-  if (iterator.is<c_RecursiveDirectoryIterator>()) {
-    c_RecursiveDirectoryIterator *c_rdi =
-      iterator.getTyped<c_RecursiveDirectoryIterator>();
-    c_rii->m_rsrc =
-      NEWOBJ(RecursiveIteratorIterator)(c_rdi->m_rsrc, mode, flags);
-    return c_rii;
+  if (iterator->o_instanceof("RecursiveDirectoryIterator")) {
+    CVarRef rsrc = iterator->o_get("rsrc", true, "SplFileInfo");
+    obj->o_set("rsrc", NEWOBJ(RecursiveIteratorIterator)(rsrc, mode, flags),
+               "RecursiveIteratorIterator");
+    return obj;
   }
   throw NotImplementedException("this type of iterator");
 }
@@ -150,10 +156,9 @@ Variant f_hphp_recursiveiteratoriterator_current(CObjRef obj) {
   unsigned int size = rii->m_iterators.size();
   ASSERT(size > 0);
   if (rii->m_iterator.is<RecursiveDirectoryIterator>()) {
-    c_RecursiveDirectoryIterator *c_rdi =
-      NEWOBJ(c_RecursiveDirectoryIterator)();
-    c_rdi->m_rsrc = rii->m_iterators[size-1].first;
-    return f_hphp_recursivedirectoryiterator_current(c_rdi);
+    ObjectData* rdi = SystemLib::AllocRecursiveDirectoryIteratorObject();
+    rdi->o_set("rsrc", rii->m_iterators[size-1].first, "SplFileInfo");
+    return f_hphp_recursivedirectoryiterator_current(rdi);
   }
   throw NotImplementedException("this type of iterator");
 }
@@ -163,10 +168,9 @@ Variant f_hphp_recursiveiteratoriterator_key(CObjRef obj) {
   unsigned int size = rii->m_iterators.size();
   ASSERT(size > 0);
   if (rii->m_iterator.is<RecursiveDirectoryIterator>()) {
-    c_RecursiveDirectoryIterator *c_rdi =
-      NEWOBJ(c_RecursiveDirectoryIterator)();
-    c_rdi->m_rsrc = rii->m_iterators[size-1].first;
-    return f_hphp_recursivedirectoryiterator_key(c_rdi);
+    ObjectData* rdi = SystemLib::AllocRecursiveDirectoryIteratorObject();
+    rdi->o_set("rsrc", rii->m_iterators[size-1].first, "SplFileInfo");
+    return f_hphp_recursivedirectoryiterator_key(rdi);
   }
   throw NotImplementedException("this type of iterator");
 }
@@ -246,10 +250,9 @@ void f_hphp_recursiveiteratoriterator_rewind(CObjRef obj) {
   rii->m_iterators.clear();
   rii->m_iterators.push_back(std::pair<Object,bool>(rii->m_iterator, 0));
   if (rii->m_iterator.is<RecursiveDirectoryIterator>()) {
-    c_RecursiveDirectoryIterator *c_rdi =
-      NEWOBJ(c_RecursiveDirectoryIterator)();
-    c_rdi->m_rsrc = rii->m_iterator;
-    f_hphp_recursivedirectoryiterator_rewind(c_rdi);
+    ObjectData* rdi = SystemLib::AllocRecursiveDirectoryIteratorObject();
+    rdi->o_set("rsrc", rii->m_iterator, "SplFileInfo");
+    f_hphp_recursivedirectoryiterator_rewind(rdi);
     if (!f_hphp_recursiveiteratoriterator_valid(obj)) {
       f_hphp_recursiveiteratoriterator_next(obj);
     }
@@ -285,9 +288,8 @@ bool f_hphp_recursiveiteratoriterator_valid(CObjRef obj) {
 }
 
 bool f_hphp_directoryiterator___construct(CObjRef obj, CStrRef path) {
-  c_DirectoryIterator *c_di = obj.getTyped<c_DirectoryIterator>();
   SmartObject<DirectoryIterator> rsrc = NEWOBJ(DirectoryIterator)(path);
-  c_di->m_rsrc = rsrc;
+  obj->o_set("rsrc", rsrc, "SplFileInfo");
   return !rsrc->m_dir.isNull();
 }
 
@@ -334,11 +336,9 @@ bool f_hphp_directoryiterator_isdot(CObjRef obj) {
 
 bool f_hphp_recursivedirectoryiterator___construct(CObjRef obj, CStrRef path,
     int64 flags) {
-  c_RecursiveDirectoryIterator *c_rdi =
-    obj.getTyped<c_RecursiveDirectoryIterator>();
   SmartObject<RecursiveDirectoryIterator> rsrc =
     NEWOBJ(RecursiveDirectoryIterator)(path, flags);
-  c_rdi->m_rsrc = rsrc;
+  obj->o_set("rsrc", rsrc, "SplFileInfo");
   return !rsrc->m_dir.isNull();
 }
 
@@ -381,8 +381,8 @@ Variant f_hphp_recursivedirectoryiterator_current(CObjRef obj) {
     return pathName;
   }
   if (rdi->m_flags & HPHP::q_RecursiveDirectoryIterator$$CURRENT_AS_FILEINFO) {
-    c_SplFileInfo *c_splfi = NEWOBJ(c_SplFileInfo)();
-    c_splfi->m_rsrc = NEWOBJ(SplFileInfo)(pathName);
+    ObjectData* c_splfi = SystemLib::AllocSplFileInfoObject();
+    c_splfi->o_set("rsrc", NEWOBJ(SplFileInfo)(pathName), "SplFileInfo");
     return c_splfi;
   }
   return obj;
@@ -395,10 +395,12 @@ bool f_hphp_recursivedirectoryiterator_haschildren(CObjRef obj) {
 Object f_hphp_recursivedirectoryiterator_getchildren(CObjRef obj) {
   if (!f_hphp_recursivedirectoryiterator_haschildren(obj)) return Object();
   RecursiveDirectoryIterator *rdi = get_recursivedirectoryiterator(obj);
-  c_RecursiveDirectoryIterator *c_rdi = NEWOBJ(c_RecursiveDirectoryIterator)();
-  c_rdi->m_rsrc =
-    NEWOBJ(RecursiveDirectoryIterator)(rdi->getPathName(), rdi->m_flags);
-  return c_rdi;
+  ObjectData* o_rdi = SystemLib::AllocRecursiveDirectoryIteratorObject();
+  o_rdi->o_set("rsrc",
+               NEWOBJ(RecursiveDirectoryIterator)(rdi->getPathName(),
+                                                  rdi->m_flags),
+               "SplFileInfo");
+  return o_rdi;
 }
 
 String f_hphp_recursivedirectoryiterator_getsubpath(CObjRef obj) {

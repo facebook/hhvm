@@ -26,6 +26,7 @@
 #include <util/hash.h>
 #include <util/lock.h>
 #include <util/alloc.h>
+#include <util/trace.h>
 #include <util/util.h>
 #include <runtime/base/tv_macros.h>
 
@@ -36,6 +37,8 @@
 //#define PEDANTIC
 
 namespace HPHP {
+
+static const Trace::Module TRACEMOD = Trace::runtime;
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_SMART_ALLOCATION(HphpArray, SmartAllocatorImpl::NeedRestoreOnce);
@@ -111,9 +114,9 @@ static inline bool isIntegerKey(CVarRef v) {
 //=============================================================================
 // Construction/destruction.
 
-HphpArray::HphpArray(uint nSize /* = 0 */)
+HphpArray::HphpArray(uint nSize /* = 0 */, bool suppressCow /* = false */)
   : m_data(NULL), m_nextKI(0), m_nElms(0), m_hLoad(0), m_lastE(ElmIndEmpty),
-    m_linear(false), m_siPastEnd(false),
+    m_linear(false), m_siPastEnd(false), m_suppressCow(suppressCow),
 #ifndef USE_JEMALLOC
     m_dataPad(0),
 #endif
@@ -134,7 +137,7 @@ HphpArray::HphpArray(uint nSize /* = 0 */)
 }
 
 // Empty constructor for internal use.
-HphpArray::HphpArray(int,int) {
+HphpArray::HphpArray(int,int,int) {
 }
 
 HphpArray::~HphpArray() {
@@ -142,15 +145,17 @@ HphpArray::~HphpArray() {
   ssize_t lastE = (ssize_t)m_lastE;
   for (ssize_t /*ElmInd*/ pos = 0; pos <= lastE; ++pos) {
     Elm* e = &elms[pos];
-    ASSERT(e->data.m_type != KindOfIndirect);
-    if (e->data.m_type != KindOfTombstone) {
-      if (e->key != NULL) {
-        if (e->key->decRefCount() == 0) {
-          e->key->release();
-        }
+    if (e->data.m_type == KindOfTombstone) {
+      continue;
+    }
+    if (e->key != NULL) {
+      if (e->key->decRefCount() == 0) {
+        e->key->release();
       }
-      TypedValue* tv = &e->data;
-      tvRefcountedDecRef(tv);
+    }
+    TypedValue* tv = &e->data;
+    if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_type != KindOfIndirect) {
+      tvDecRef(tv);
     }
   }
   if (m_data != NULL) {
@@ -205,7 +210,8 @@ void HphpArray::dumpDebugInfo() const {
       VariableSerializer vs(VariableSerializer::DebugDump);
       String s = vs.serialize(v, true);
       if (elms[i].key != NULL) {
-        String k = Util::escapeStringForCPP(elms[i].key->data());
+        String k = Util::escapeStringForCPP(elms[i].key->data(),
+                                            elms[i].key->size());
         fprintf(stderr, "  [%3d] hash=0x%016llx key=\"%s\" data=(%.*s)\n",
                int(i), elms[i].h, k.data(), s.size()-1, s.data());
       } else {
@@ -219,7 +225,8 @@ void HphpArray::dumpDebugInfo() const {
       Variant v = tvAsVariant(fixedLocation);
       VariableSerializer vs(VariableSerializer::DebugDump);
       String s = vs.serialize(v, true);
-      String k = Util::escapeStringForCPP(elms[i].key->data());
+      String k = Util::escapeStringForCPP(elms[i].key->data(),
+                                          elms[i].key->size());
       fprintf(stderr, "  [%3d] hash=0x%016llx key=\"%s\" "
               "fixed location=%p data=(%.*s)\n", int(i), elms[i].h,
               k.data(), fixedLocation, s.size()-1, s.data());
@@ -664,11 +671,31 @@ bool HphpArray::exists(int64 k) const {
 }
 
 bool HphpArray::exists(litstr k) const {
-  return find(k, strlen(k), hash_string(k)) != (ssize_t)ElmIndEmpty;
+  ssize_t /*ElmInd*/ pos = find(k, strlen(k), hash_string(k));
+  if (pos == (ssize_t)ElmIndEmpty) return false;
+  // If we don't have an indirect elements, we are done
+  if (LIKELY(m_nIndirectElms == 0)) return true;
+  // Check if this is an indirect element
+  Elm* elms = data2Elms(m_data);
+  Elm* e = &elms[pos];
+  if (e->data.m_type != KindOfIndirect) return true;
+  // Return true if the type is not KindOfUninit, false otherwise
+  TypedValue* tv = e->data.m_data.ptv;
+  return (tv->m_type != KindOfUninit);
 }
 
 bool HphpArray::exists(CStrRef k) const {
-  return find(k.data(), k.size(), k->hash()) != (ssize_t)ElmIndEmpty;
+  ssize_t /*ElmInd*/ pos = find(k.data(), k.size(), k->hash());
+  if (pos == (ssize_t)ElmIndEmpty) return false;
+  // If we don't have an indirect elements, we are done
+  if (LIKELY(m_nIndirectElms == 0)) return true;
+  // Check if this is an indirect element
+  Elm* elms = data2Elms(m_data);
+  Elm* e = &elms[pos];
+  if (e->data.m_type != KindOfIndirect) return true;
+  // Return true if the type is not KindOfUninit, false otherwise
+  TypedValue* tv = e->data.m_data.ptv;
+  return (tv->m_type != KindOfUninit);
 }
 
 bool HphpArray::exists(CVarRef k) const {
@@ -676,7 +703,17 @@ bool HphpArray::exists(CVarRef k) const {
     return find(k.toInt64()) != (ssize_t)ElmIndEmpty;
   }
   StringData* key = k.getStringData();
-  return find(key->data(), key->size(), key->hash()) != (ssize_t)ElmIndEmpty;
+  ssize_t /*ElmInd*/ pos = find(key->data(), key->size(), key->hash());
+  if (pos == (ssize_t)ElmIndEmpty) return false;
+  // If we don't have an indirect elements, we are done
+  if (LIKELY(m_nIndirectElms == 0)) return true;
+  // Check if this is an indirect element
+  Elm* elms = data2Elms(m_data);
+  Elm* e = &elms[pos];
+  if (e->data.m_type != KindOfIndirect) return true;
+  // Return true if the type is not KindOfUninit, false otherwise
+  TypedValue* tv = e->data.m_data.ptv;
+  return (tv->m_type != KindOfUninit);
 }
 
 bool HphpArray::idxExists(ssize_t idx) const {
@@ -1139,46 +1176,9 @@ void HphpArray::compact(bool renumber /* = false */) {
   }
 }
 
-#define ELEMENT_ASSIGN(fr, to) \
-  if (LIKELY(fr->_count != -1)) { \
-    if (fr->m_type == KindOfVariant) fr = fr->m_data.ptv; \
-    if (to->m_type == KindOfVariant) to = to->m_data.ptv; \
-    DataType oldType = to->m_type; \
-    uint64_t oldDatum = to->m_data.num; \
-    TV_DUP_CELL_NC(fr, to); \
-    tvRefcountedDecRefHelper(oldType, oldDatum); \
-  } else { \
-    fr->_count = 0; \
-    DataType oldType = to->m_type; \
-    uint64_t oldDatum = to->m_data.num; \
-    if (fr->m_type != KindOfVariant) { \
-      tvBox(fr); \
-    } \
-    TV_DUP_VAR_NC(fr, to); \
-    tvRefcountedDecRefHelper(oldType, oldDatum); \
-  } \
-
 #define ELEMENT_CONSTRUCT(fr, to) \
-  if (LIKELY(fr->_count != -1)) { \
-    if (fr->m_type == KindOfVariant) fr = fr->m_data.ptv; \
-    TV_DUP_CELL_NC(fr, to); \
-  } else { \
-    fr->_count = 0; \
-    if (fr->m_type != KindOfVariant) tvBox(fr); \
-    TV_DUP_VAR_NC(fr, to); \
-  } \
-  to->_count = 0; \
-
-#define ELEMENT_CLONE(fr, to, arr) \
-  if (LIKELY(fr->m_type != KindOfVariant)) { \
-    TV_DUP_CELL_NC(fr, to); \
-  } else if (fr->m_data.ptv->_count <= 1 && \
-             fr->m_data.ptv->m_data.parr != arr) { \
-    fr = fr->m_data.ptv; \
-    TV_DUP_CELL_NC(fr, to); \
-  } else { \
-    TV_DUP_VAR_NC(fr, to); \
-  } \
+  if (fr->m_type == KindOfVariant) fr = fr->m_data.ptv; \
+  TV_DUP_CELL_NC(fr, to); \
   to->_count = 0; \
 
 bool HphpArray::nextInsert(CVarRef data) {
@@ -1253,8 +1253,7 @@ bool HphpArray::nextInsertWithRef(CVarRef data) {
   // Set key.
   e->h = ki;
   e->key = NULL;
-  e->data._count = 0;
-  e->data.m_type = KindOfNull;
+  TV_WRITE_NULL(&e->data);
   tvAsVariant(&e->data).setWithRef(data);
   // Update next free element.
   ++m_nextKI;
@@ -1289,8 +1288,7 @@ bool HphpArray::addLvalImpl(int64 ki, Variant** pDest,
   e->h = ki;
   e->key = NULL;
 
-  e->data._count = 0;
-  e->data.m_type = KindOfNull;
+  TV_WRITE_NULL(&e->data);
   *pDest = &(tvAsVariant(&e->data));
 
   if (ki >= m_nextKI && m_nextKI >= 0) {
@@ -1332,8 +1330,7 @@ bool HphpArray::addLvalImpl(StringData* key, int64 h, Variant** pDest,
   e->key->incRefCount();
   // Initialize element to null and store the address of the element into
   // *pDest.
-  e->data._count = 0;
-  e->data.m_type = KindOfNull;
+  TV_WRITE_NULL(&e->data);
   *pDest = &(tvAsVariant(&e->data));
 
   return true;
@@ -1429,8 +1426,7 @@ inline bool HphpArray::addValWithRef(int64 ki, CVarRef data,
 
   Elm* e = allocElm(ei);
 
-  e->data._count = 0;
-  e->data.m_type = KindOfNull;
+  TV_WRITE_NULL(&e->data);
 
   e->h = ki;
   e->key = NULL;
@@ -1463,8 +1459,7 @@ inline bool HphpArray::addValWithRef(StringData* key, CVarRef data,
   e->key = key;
   e->key->incRefCount();
 
-  e->data._count = 0;
-  e->data.m_type = KindOfNull;
+  TV_WRITE_NULL(&e->data);
   tvAsVariant(&e->data).setWithRef(data);
 
   return true;
@@ -1609,6 +1604,9 @@ bool HphpArray::updateRef(StringData* key, CVarRef data) {
 // for this.
 
 TypedValue* HphpArray::migrate(StringData* k, TypedValue* tv) {
+  if (m_linear) {
+    delinearize();
+  }
   int64 h = k->hash();
   ElmInd* ei = findForInsert(k->data(), k->size(), h);
   if (validElmInd(*ei)) {
@@ -1679,6 +1677,9 @@ TypedValue* HphpArray::migrate(StringData* k, TypedValue* tv) {
 
 TypedValue* HphpArray::migrateAndSet(StringData* k, TypedValue* tv) {
   ASSERT(tv != NULL);
+  if (m_linear) {
+    delinearize();
+  }
   int64 h = k->hash();
   ElmInd* ei = findForInsert(k->data(), k->size(), h);
   if (validElmInd(*ei)) {
@@ -1847,7 +1848,17 @@ ArrayData *HphpArray::lvalPtr(int64 k, Variant*& ret, bool copy,
     if (pos != ElmIndEmpty) {
       Elm* elms = data2Elms(m_data);
       Elm* e = &elms[pos];
-      ret = &(tvAsVariant(&e->data));
+      if (LIKELY(e->data.m_type != KindOfIndirect)) {
+        ret = &(tvAsVariant(&e->data));
+      } else {
+        TypedValue* tv = e->data.m_data.ptv;
+        // Check for uninit null
+        if (tv->m_type == KindOfUninit) {
+          ret = NULL;
+        } else {
+          ret = &(tvAsVariant(e->data.m_data.ptv));
+        }
+      }
     } else {
       ret = NULL;
     }
@@ -1856,27 +1867,14 @@ ArrayData *HphpArray::lvalPtr(int64 k, Variant*& ret, bool copy,
 }
 
 ArrayData* HphpArray::lvalNew(Variant*& ret, bool copy) {
-  if (copy) {
-    HphpArray* a = copyImpl();
-    if (UNLIKELY(!a->nextInsert(null))) {
-      ret = &(Variant::lvalBlackHole());
-      return a;
-    }
-    ASSERT(a->m_lastE != ElmIndEmpty);
-    ssize_t lastE = (ssize_t)a->m_lastE;
-    Elm* aElms = data2Elms(a->m_data);
-    ret = &tvAsVariant(&aElms[lastE].data);
-    return a;
-  }
-  if (UNLIKELY(!nextInsert(null))) {
+  TypedValue* tv;
+  ArrayData* a = nvNew(tv, copy);
+  if (tv == NULL) {
     ret = &(Variant::lvalBlackHole());
-    return NULL;
+  } else {
+    ret = &tvAsVariant(tv);
   }
-  ASSERT(m_lastE != ElmIndEmpty);
-  ssize_t lastE = (ssize_t)m_lastE;
-  Elm* elms = data2Elms(m_data);
-  ret = &(tvAsVariant(&elms[lastE].data));
-  return NULL;
+  return a;
 }
 
 ArrayData* HphpArray::set(int64 k, CVarRef v, bool copy) {
@@ -2192,8 +2190,355 @@ ArrayData* HphpArray::copy() const {
   return copyImpl();
 }
 
-HphpArray* HphpArray::copyImpl() const {
-  HphpArray* target = NEW(HphpArray)(0,0);
+//=============================================================================
+// non-variant interface
+
+TypedValue* HphpArray::nvGetCell(int64 ki, bool error /* = false */) const {
+  ElmInd pos = find(ki);
+  if (LIKELY(pos != ElmIndEmpty)) {
+    Elm* elms = data2Elms(m_data);
+    Elm* e = &elms[pos];
+    TypedValue* tv = &e->data;
+    // Integer keys do not support KindOfIndirect
+    ASSERT(tv->m_type != KindOfIndirect);
+    if (tv->m_type != KindOfVariant) {
+      return tv;
+    } else {
+      return tv->m_data.ptv;
+    }
+  }
+  if (error) {
+    raise_notice("Undefined index: %lld", ki);
+  }
+  return NULL;
+}
+
+TypedValue*
+HphpArray::nvGetCell(const StringData* k, bool error /* = false */) const {
+  ElmInd pos = find(k->data(), k->size(), k->hash());
+  if (LIKELY(pos != ElmIndEmpty)) {
+    Elm* elms = data2Elms(m_data);
+    Elm* e = &elms[pos];
+    TypedValue* tv = &e->data;
+    if (tv->m_type < KindOfVariant) {
+      return tv;
+    }
+    if (LIKELY(tv->m_type == KindOfVariant)) {
+      return tv->m_data.ptv;
+    }
+    ASSERT(tv->m_type == KindOfIndirect);
+    tv = tv->m_data.ptv;
+    // Check for uninit null
+    if (tv->m_type == KindOfUninit) {
+      goto undefined_index;
+    }
+    if (tv->m_type != KindOfVariant) {
+      return tv;
+    } else {
+      return tv->m_data.ptv;
+    }
+  }
+undefined_index:
+  if (error) {
+    raise_notice("Undefined index: %s", k->data());
+  }
+  return NULL;
+}
+
+TypedValue*
+HphpArray::nvGetCell(int64 ki1, const StringData* ks2,
+                     bool error /* = false */) const {
+  TypedValue* first = nvGetCell(ki1, error);
+  if (UNLIKELY(first == NULL)) {
+    // nvGet raise_notice'd if necessary
+    return NULL;
+  }
+  ASSERT(first->m_type == KindOfArray); // XXX: not implemented
+
+  // if first :: KindOfArray, things look like this:
+  //   first:(Array, parr -> HphpArray)
+  // if first :: KindOfVariant, instead it had better be
+  //   first:(Variant,
+  //          ptv-> (KindOfArray, parr -> HphpArray))
+  TypedValue *ad = first->m_data.ptv;
+  TRACE(2, "nvGetCell[%d][%s]: ad %p, type %d\n",
+        int(ki1), ks2->data(), ad, first->m_type);
+  HphpArray *innerArr = (HphpArray*)ad;
+  TypedValue *retval  = innerArr->nvGetCell(ks2, error);
+  if (retval) {
+    TRACE(2, "nvGetCell: retval %p of type %d, value %llx / %g\n",
+          retval, retval->m_type, retval->m_data.num,
+          retval->m_data.dbl);
+  } else {
+    TRACE(2, "nvGetCell: returning NULL\n");
+  }
+  return retval;
+}
+
+TypedValue* HphpArray::nvGet(int64 ki, bool error /* = false */) const {
+  ElmInd pos = find(ki);
+  if (LIKELY(pos != ElmIndEmpty)) {
+    Elm* elms = data2Elms(m_data);
+    Elm* e = &elms[pos];
+    return &e->data;
+  }
+  if (error) {
+    raise_notice("Undefined index: %lld", ki);
+  }
+  return NULL;
+}
+
+inline TypedValue*
+HphpArray::nvGetImpl(const StringData* k, int* outHint,
+                     bool error/*=false*/) const {
+  ElmInd pos = find(k->data(), k->size(), k->hash());
+  if (LIKELY(pos != ElmIndEmpty)) {
+    if (outHint) { *outHint = int(pos); }
+    Elm* elms = data2Elms(m_data);
+    Elm* e = &elms[pos];
+    if (LIKELY(e->data.m_type != KindOfIndirect)) {
+      return &e->data;
+    } else {
+      TypedValue* tv = e->data.m_data.ptv;
+      // Check for uninit null
+      if (tv->m_type == KindOfUninit) {
+        goto undefined_index;
+      }
+      return tv;
+    }
+  }
+undefined_index:
+  if (error) {
+    raise_notice("Undefined index: %s", k->data());
+  }
+  return NULL;
+}
+
+TypedValue*
+HphpArray::nvGet(const StringData* k, bool error /* = false */) const {
+  return nvGetImpl(k, NULL, error);
+}
+
+TypedValue*
+HphpArray::nvGet(const StringData* k, int posHint, int *posHintOut,
+                 bool error/*=false*/) const {
+  TRACE(2, "nvGet: hint %d, k %s\n", posHint, k->data());
+  if (LIKELY(posHint < m_nElms)) {
+    Elm* e = data2Elms(m_data) + posHint;
+    TRACE(2, "range check passed\n");
+    if (LIKELY(e->data.m_type != KindOfTombstone &&
+               hitStringKey(e, k->data(), k->size(), k->hash()))) {
+      TRACE(2, "inner hit\n");
+      if (e->data.m_type == KindOfIndirect) {
+        return e->data.m_data.ptv;
+      }
+      return &e->data;
+    } else {
+      TRACE(2, "miss: tombstone %d, KoI %d, key %s\n",
+            e->data.m_type == KindOfTombstone,
+            e->data.m_type == KindOfIndirect,
+            e->key->data());
+    }
+  }
+  TypedValue* ret = nvGetImpl(k, posHintOut, error);
+  TRACE(2, "inner miss; old hint %d, new %d\n",
+        posHint, *posHintOut);
+  return ret;
+}
+
+ArrayData* HphpArray::nvSet(int64 ki, int64 vi, bool copy) {
+  HphpArray* a = this;
+  ArrayData* retval = NULL;
+  if (copy) {
+    retval = a = copyImpl();
+  }
+  a->nvUpdate(ki, vi);
+  return retval;
+}
+
+ArrayData* HphpArray::nvSet(int64 ki, TypedValue* v, bool copy) {
+  HphpArray* a = this;
+  ArrayData* retval = NULL;
+  if (copy) {
+    retval = a = copyImpl();
+  }
+  a->update(ki, tvAsCVarRef(v));
+  return retval;
+}
+
+ArrayData* HphpArray::nvSet(StringData* k, TypedValue* v, bool copy) {
+  HphpArray* a = this;
+  ArrayData* retval = NULL;
+  if (copy) {
+    retval = a = copyImpl();
+  }
+  a->update(k, tvAsCVarRef(v));
+  return retval;
+}
+
+ArrayData* HphpArray::nvBind(int64 ki, TypedValue* v, bool copy) {
+  HphpArray* a = this;
+  ArrayData* retval = NULL;
+  if (copy) {
+    retval = a = copyImpl();
+  }
+  a->updateRef(ki, tvAsCVarRef(v));
+  return retval;
+}
+
+ArrayData* HphpArray::nvBind(StringData* k, TypedValue* v, bool copy) {
+  HphpArray* a = this;
+  ArrayData* retval = NULL;
+  if (copy) {
+    retval = a = copyImpl();
+  }
+  a->updateRef(k, tvAsCVarRef(v));
+  return retval;
+}
+
+ArrayData* HphpArray::nvAppend(TypedValue* v, bool copy) {
+  HphpArray* a = this;
+  ArrayData* retval = NULL;
+  if (copy) {
+    retval = a = copyImpl();
+  }
+  a->nextInsert(tvAsCVarRef(v));
+  return retval;
+}
+
+ArrayData* HphpArray::nvNew(TypedValue*& ret, bool copy) {
+  if (copy) {
+    HphpArray* a = copyImpl();
+    if (UNLIKELY(!a->nextInsert(null))) {
+      ret = NULL;
+      return a;
+    }
+    ASSERT(a->m_lastE != ElmIndEmpty);
+    ssize_t lastE = (ssize_t)a->m_lastE;
+    Elm* aElms = data2Elms(a->m_data);
+    ret = &aElms[lastE].data;
+    return a;
+  }
+  if (UNLIKELY(!nextInsert(null))) {
+    ret = NULL;
+    return NULL;
+  }
+  ASSERT(m_lastE != ElmIndEmpty);
+  ssize_t lastE = (ssize_t)m_lastE;
+  Elm* elms = data2Elms(m_data);
+  ret = &elms[lastE].data;
+  return NULL;
+}
+
+ArrayData* HphpArray::nvRemove(int64 ki, bool copy) {
+  HphpArray* a = this;
+  ArrayData* retval = NULL;
+  if (copy) {
+    retval = a = copyImpl();
+  }
+  a->erase(findForInsert(ki));
+  return retval;
+}
+
+ArrayData* HphpArray::nvRemove(const StringData* k, bool copy) {
+  HphpArray* a = this;
+  ArrayData* retval = NULL;
+  if (copy) {
+    retval = a = copyImpl();
+  }
+  a->erase(findForInsert(k->data(), k->size(), k->hash()));
+  return retval;
+}
+
+ssize_t HphpArray::nvSize() const {
+  return m_nElms;
+}
+
+TypedValue* HphpArray::nvGetValueRef(ssize_t pos) {
+  ASSERT(pos != ArrayData::invalid_index);
+  Elm* elms = data2Elms(m_data);
+  Elm* e = &elms[/*(ElmInd)*/pos];
+  ASSERT(e->data.m_type != KindOfTombstone);
+  if (LIKELY(e->data.m_type != KindOfIndirect)) {
+    return &e->data;
+  } else {
+    return e->data.m_data.ptv;
+  }
+}
+
+// nvGetKey sets out->_count to 0, so out cannot be an inner cell
+void HphpArray::nvGetKey(TypedValue* out, ssize_t pos) {
+  ASSERT(pos != ArrayData::invalid_index);
+  Elm* elms = data2Elms(m_data);
+  Elm* e = &elms[/*(ElmInd)*/pos];
+  ASSERT(e->data.m_type != KindOfTombstone);
+  out->_count = 0;
+  if (e->key != NULL) {
+    out->m_data.pstr = e->key;
+    out->m_type = KindOfString;
+    e->key->incRefCount();
+    return;
+  }
+  out->m_data.num = e->h;
+  out->m_type = KindOfInt64;
+}
+
+bool HphpArray::nvUpdate(int64 ki, int64 vi) {
+  if (m_linear) {
+    delinearize();
+  }
+  ElmInd* ei = findForInsert(ki);
+  if (validElmInd(*ei)) {
+    Elm* elms = data2Elms(m_data);
+    Elm* e = &elms[*ei];
+    TypedValue* to = (TypedValue*)(&e->data);
+    if (to->m_type == KindOfVariant) to = to->m_data.ptv;
+    DataType oldType = to->m_type;
+    uint64_t oldDatum = to->m_data.num;
+    if (IS_REFCOUNTED_TYPE(oldType)) {
+      tvDecRefHelper(oldType, oldDatum);
+    }
+    to->m_data.num = vi;
+    to->m_type = KindOfInt64;
+    return true;
+  }
+  Elm* e = allocElm(ei);
+  if (UNLIKELY(e == NULL)) {
+    resize();
+    ei = findForNewInsert(ki);
+    e = allocElm(ei);
+    ASSERT(e != NULL);
+  }
+  TypedValue* to = (TypedValue*)(&e->data);
+  e->h = ki;
+  e->key = NULL;
+  to->m_data.num = vi;
+  to->_count = 0;
+  to->m_type = KindOfInt64;
+
+  if (ki >= m_nextKI && m_nextKI >= 0) {
+    m_nextKI = ki + 1;
+  }
+
+  return true;
+}
+
+ArrayData* HphpArray::nonSmartCopy() const {
+  return copyImpl(NULL, false);
+}
+
+HphpArray* HphpArray::copyImpl(HphpArray* target /* = NULL */,
+                               bool sma /* = true */) const {
+  if (UNLIKELY(m_suppressCow && sma)) {
+    return const_cast<HphpArray*>(this);
+  }
+  if (LIKELY(target == NULL)) {
+    if (sma) {
+      target = NEW(HphpArray)(0,0,0);
+    } else {
+      target = new HphpArray(0,0,0);
+    }
+  }
   target->m_pos = m_pos;
   target->m_data = NULL;
   target->m_nextKI = m_nextKI;
@@ -2203,6 +2548,7 @@ HphpArray* HphpArray::copyImpl() const {
   target->m_lastE = m_lastE;
   target->m_linear = false;
   target->m_siPastEnd = false;
+  target->m_suppressCow = false;
 #ifndef USE_JEMALLOC
   target->m_dataPad = 0;
 #endif
@@ -2261,7 +2607,7 @@ HphpArray* HphpArray::copyImpl() const {
           fr = &e->data;
         }
         TypedValue* to = &te->data;
-        ELEMENT_CLONE(fr, to, this);
+        TV_DUP_FLATTEN_VARS(fr, to, this);
       } else {
         // Tombstone.
         te->h = 0;
@@ -2332,13 +2678,13 @@ ArrayData* HphpArray::append(const ArrayData* elems, ArrayOp op, bool copy) {
         addValWithRef(key.toInt64(), value);
       } else {
         addValWithRef(key.getStringData(), value);
+        }
       }
-    }
-  } else {
-    ASSERT(op == Merge);
-    for (ArrayIter it(elems); !it.end(); it.next()) {
-      Variant key = it.first();
-      CVarRef value = it.secondRef();
+    } else {
+      ASSERT(op == Merge);
+      for (ArrayIter it(elems); !it.end(); it.next()) {
+        Variant key = it.first();
+        CVarRef value = it.secondRef();
       if (key.isNumeric()) {
         nextInsertWithRef(value);
       } else {
@@ -2353,7 +2699,7 @@ ArrayData* HphpArray::append(const ArrayData* elems, ArrayOp op, bool copy) {
 }
 
 ArrayData* HphpArray::pop(Variant& value) {
-  if (getCount() > 1) {
+  if (getCount() > 1 && !m_suppressCow) {
     HphpArray* a = copyImpl();
     a->pop(value);
     return a;
@@ -2389,7 +2735,7 @@ ArrayData* HphpArray::pop(Variant& value) {
 }
 
 ArrayData* HphpArray::dequeue(Variant& value) {
-  if (getCount() > 1) {
+  if (getCount() > 1 && !m_suppressCow) {
     HphpArray* a = copyImpl();
     a->dequeue(value);
     return a;
@@ -2491,6 +2837,24 @@ void HphpArray::onSetStatic() {
         // Check for uninit null
         if (tv->m_type != KindOfUninit) tvAsVariant(tv).setStatic();
       }
+    }
+  }
+}
+
+void HphpArray::onSetEvalScalar() {
+  Elm* elms = data2Elms(m_data);
+  for (ElmInd pos = 0; pos <= m_lastE; ++pos) {
+    Elm* e = &elms[pos];
+    if (e->data.m_type != KindOfTombstone) {
+      StringData *key = e->key;
+      if (key && !key->isStatic()) {
+        StringData *skey = StringData::GetStaticString(key);
+        if (key->decRefCount() == 0) {
+          DELETE(StringData)(key);
+        }
+        e->key = skey;
+      }
+      tvAsVariant(&e->data).setEvalScalar();
     }
   }
 }
@@ -2645,6 +3009,417 @@ void HphpArray::sweep() {
   }
   m_strongIterators.clear();
 }
+
+//=============================================================================
+// VM runtime support functions.
+namespace VM {
+
+// Helpers for array_setm.
+template<typename Value>
+inline ArrayData* nv_set_with_integer_check(HphpArray* arr, StringData* key,
+                                            Value value, bool copy) {
+  int64 lval;
+  if (UNLIKELY(key->isStrictlyInteger(lval))) {
+    return arr->nvSet(lval, value, copy);
+  } else {
+    return arr->nvSet(key, value, copy);
+  }
+}
+
+template<typename Value>
+ArrayData*
+nvCheckedSet(HphpArray* ha, StringData* sd, Value value, bool copy) {
+  return nv_set_with_integer_check<Value>(ha, sd, value, copy);
+}
+
+template<typename Value>
+ArrayData*
+nvCheckedSet(HphpArray* ha, int64 key, Value value, bool copy) {
+  return ha->nvSet(key, value, copy);
+}
+
+void setmDecRef(int64 i) { /* nop */ }
+void setmDecRef(TypedValue* tv) { tvRefcountedDecRef(tv); }
+void setmDecRef(StringData* sd) { if (sd->decRefCount() == 0) sd->release(); }
+
+static inline HphpArray*
+array_mutate_pre(ArrayData* ad) {
+  ASSERT(ad);
+  return (HphpArray*)ad;
+}
+
+Variant toVar(int64 i)        { return Variant(i); }
+Variant toVar(TypedValue* tv) { return tvCellAsVariant(tv); }
+
+static inline ArrayData*
+array_mutate_post(Cell *cell, ArrayData* old, ArrayData* retval) {
+  if (NULL == retval) {
+    return old;
+  }
+  retval->incRefCount();
+  // TODO: It would be great if there were nvSet() methods that didn't
+  // bump up the refcount so that we didn't have to decrement it here
+  if (old->decRefCount() == 0) old->release();
+  if (cell) cell->m_data.parr = retval;
+  return retval;
+}
+
+template<typename Key, typename Value,
+         bool DecRefValue, bool CheckInt, bool DecRefKey>
+static inline
+ArrayData*
+array_setm(TypedValue* cell, ArrayData* ad, Key key, Value value) {
+  ArrayData* retval;
+  bool copy = ad->getCount() > 1;
+  if (LIKELY(IsHphpArray(ad))) {
+    HphpArray* ha = array_mutate_pre(ad);
+    // nvSet will decRef any old value that may have been overwritten
+    // if appropriate
+    retval = CheckInt ?
+      nvCheckedSet(ha, key, value, copy)
+      : ha->nvSet(key, value, copy);
+  } else {
+    String s(key);
+    Variant vVal = toVar(value);
+    retval = ad->set(s, vVal, copy);
+  }
+  if (DecRefKey) setmDecRef(key);
+  if (DecRefValue) setmDecRef(value);
+  return array_mutate_post(cell, ad, retval);
+}
+
+template<typename Value, bool DecRefValue>
+ArrayData*
+array_append(TypedValue* cell, ArrayData* ad, Value v) {
+  HphpArray* ha = array_mutate_pre(ad);
+  bool copy = ha->getCount() > 1;
+  ArrayData* retval = ha->nvAppend(v, copy);
+  if (DecRefValue) setmDecRef(v);
+  return array_mutate_post(cell, ad, retval);
+}
+
+/**
+ * Unary integer keys.
+ *    array_setm_ik1_iv --
+ *       Integer value.
+ *
+ *    array_setm_ik1_v --
+ *       Polymorphic value.
+ *
+ *    array_setm_ik1_v0 --
+ *       Don't count the array's reference to the polymorphic value.
+ */
+ArrayData*
+array_setm_ik1_iv(TypedValue* cell, ArrayData* ad, int64 key, int64 value) {
+  return
+    array_setm<int64, int64, false, false, false>(cell, ad, key, value);
+}
+
+ArrayData*
+array_setm_ik1_v(TypedValue* cell, ArrayData* ad, int64 key,
+                 TypedValue* value) {
+  return
+    array_setm<int64, TypedValue*, false, false, false>(cell, ad, key, value);
+}
+
+ArrayData*
+array_setm_ik1_v0(TypedValue* cell, ArrayData* ad, int64 key,
+                  TypedValue* value) {
+  return
+    array_setm<int64, TypedValue*, true, false, false>(cell, ad, key, value);
+}
+
+/**
+ * String keys.
+ *
+ *    array_setm_sk1_v --
+ *      $a[$keyOfTypeString] = <polymorphic value>;
+ *
+ *    array_setm_sk1_v0 --
+ *      Like above, but don't count the new reference.
+ *
+ *    array_setm_s0k1_v0 --
+ *    array_setm_s0k1_v0 --
+ *       Skip checks for $key that is really an integer.
+ */
+ArrayData* array_setm_sk1_v(TypedValue* cell, ArrayData* ad, StringData* key,
+                            TypedValue* value) {
+  return array_setm<StringData*, TypedValue*, false, true, false>
+    (cell, ad, key, value);
+}
+
+ArrayData* array_setm_sk1_v0(TypedValue* cell, ArrayData* ad, StringData* key,
+                             TypedValue* value) {
+  return array_setm<StringData*, TypedValue*, true, true, false>(cell, ad, key, value);
+}
+
+ArrayData* array_setm_s0k1_v(TypedValue* cell, ArrayData* ad, StringData* key,
+                             TypedValue* value) {
+  return array_setm<StringData*, TypedValue*, false, true, false>
+    (cell, ad, key, value);
+}
+
+ArrayData* array_setm_s0k1_v0(TypedValue* cell, ArrayData* ad, StringData* key,
+                              TypedValue* value) {
+  return array_setm<StringData*, TypedValue*, true, true, true>
+    (cell, ad, key, value);
+}
+
+/**
+ * Append.
+ *
+ *   array_setm_wk1_v --
+ *      $a[] = <polymorphic value>
+ *   array_setm_wk1_v0 --
+ *      ... but don't count the reference to the new value.
+ */
+ArrayData* array_setm_wk1_v(TypedValue* cell, ArrayData* ad,
+                            TypedValue* value) {
+  return array_append<TypedValue*, false>(cell, ad, value);
+}
+
+ArrayData* array_setm_wk1_v0(TypedValue* cell, ArrayData* ad,
+                             TypedValue* value) {
+  return array_append<TypedValue*, true>(cell, ad, value);
+}
+
+
+// Helpers for getm and friends.
+inline TypedValue* nv_get_cell_with_integer_check(HphpArray* arr,
+                                                  StringData* key) {
+  int64 lval;
+  if (UNLIKELY(key->isStrictlyInteger(lval))) {
+    return arr->nvGetCell(lval, true /* error */);
+  } else {
+    return arr->nvGetCell(key, true /* error */);
+  }
+}
+
+template<typename Key, DataType keyType>
+static void elem(ArrayData* ad, Key k, TypedValue* dest) {
+  // The manual reference counting here is subtly necessary; e.g.,
+  // for a CGetM <R E>, "dest" is the same stack slot as a
+  // reference to ad, so tvAsVariant(dest) = ... will do the
+  // wrong thing.
+  CVarRef value = ad->get(k, true /* error */);
+  TypedValue *tvPtr = (TypedValue*)&value;
+  dest->m_type = tvPtr->m_type;
+  dest->m_data.num = tvPtr->m_data.num;
+  dest->_count = 0; // dest is a root
+  tvRefcountedIncRef(dest);
+}
+
+/**
+ * Array runtime helpers. For code-sharing purposes, all of these handle as
+ * much ref-counting machinery as possible. They differ by -arity, type
+ * signature, and necessity of various costly checks.
+ *
+ * They return the array that was just passed in as a convenience to
+ * callers, which may have "lost" the array in volatile registers before
+ * calling.
+ */
+ArrayData*
+array_getm_i(void* dptr, int64 key, TypedValue* out) {
+  ASSERT(dptr);
+  ArrayData* ad = (ArrayData*)dptr;
+  if (UNLIKELY(!IsHphpArray(ad))) {
+    elem<int64, KindOfInt64>(ad, key, out);
+  } else {
+    HphpArray *ha = (HphpArray*)dptr;
+    TRACE(2, "array_getm_ik1: (%p) <- %p[%lld]\n", out, dptr, key);
+    // Ref-counting the value is the translator's responsibility. We know out
+    // pointed to uninitialized memory, so no need to dec it.
+    TypedValue* ret = ha->nvGetCell(key, true /* error */);
+    if (UNLIKELY(!ret)) {
+      TV_WRITE_NULL(out);
+    } else {
+      tvDup(ret, out);
+    }
+  }
+  return ad;
+}
+
+#define ARRAY_GETM_BODY(dptr, sd, out, body, drKey) do {  \
+  ArrayData* ad = (ArrayData*)dptr;                       \
+  TypedValue* ret;                                        \
+  if (UNLIKELY(!IsHphpArray(ad))) {                       \
+    String s(sd);                                         \
+    elem<String, KindOfString>(ad, s, out);               \
+  } else {                                                \
+    HphpArray* ha = (HphpArray*)(dptr);                   \
+    ARRAY_GETM_TRACE();                                   \
+    do {                                                  \
+      ret = (body);                                       \
+    } while (0);                                          \
+    if (UNLIKELY(!ret)) {                                 \
+      TV_WRITE_NULL(out);                                 \
+    } else {                                              \
+      tvDup((ret), (out));                                \
+    }                                                     \
+  }                                                       \
+  if (drKey && sd->decRefCount() == 0) sd->release();     \
+  return ad;                                              \
+} while(0)
+
+#define ARRAY_GETM_TRACE() do {                           \
+  TRACE(2, "%s: (%p) <- %p[\"%s\"@sd%p]\n", __FUNCTION__, \
+        (out), (dptr), (sd)->data(), (sd));               \
+} while(0)
+
+/**
+ * array_getm_s: conservative unary string key.
+ */
+ArrayData*
+array_getm_s(void* dptr, StringData* sd, TypedValue* out) {
+  ARRAY_GETM_BODY(dptr, sd, out, nv_get_cell_with_integer_check(ha, sd),
+                  true /* drKey */);
+}
+
+/**
+ * array_getm_s0: unary string key where we know there is no need
+ * to decRef the key.
+ */
+ArrayData*
+array_getm_s0(void* dptr, StringData* sd, TypedValue* out) {
+  ARRAY_GETM_BODY(dptr, sd, out, nv_get_cell_with_integer_check(ha, sd),
+                  false /* drKey */);
+}
+
+/**
+ * array_getm_s_fast:
+ * array_getm_s0:
+ *
+ *   array_getm_s[0] but without the integer check on the key
+ */
+ArrayData*
+array_getm_s_fast(void* dptr, StringData* sd, TypedValue* out) {
+  ARRAY_GETM_BODY(dptr, sd, out, ha->nvGetCell(sd, true /* error */),
+                  true /* drKey */);
+}
+
+ArrayData*
+array_getm_s0_fast(void* dptr, StringData* sd, TypedValue* out) {
+  ARRAY_GETM_BODY(dptr, sd, out, ha->nvGetCell(sd, true /* error */),
+                  false /* drKey */);
+}
+#undef ARRAY_GETM_TRACE
+
+#define ARRAY_GETM_TRACE() do {                           \
+  TRACE(2, "%s: (%p) <- %p[%lld][\"%s\"@sd%p]\n",         \
+        __FUNCTION__, (out), (dptr), (ik), (sd)->data(),  \
+        (sd));                                            \
+} while(0)
+
+/**
+ * array_getm_is will increment the refcount of the return value if
+ * appropriate and it will decrement the refcount of the string key
+ */
+ArrayData*
+array_getm_is(void *dptr, int64 ik, StringData* sd, TypedValue *out) {
+  ARRAY_GETM_BODY(dptr, sd, out, ha->nvGetCell(ik, sd),
+                  true /* drKey */);
+}
+
+/**
+ * array_getm_is0 will increment the refcount of the return value if
+ * appropriate
+ */
+ArrayData*
+array_getm_is0(void *dptr, int64 ik, StringData* sd, TypedValue *out) {
+  ARRAY_GETM_BODY(dptr, sd, out,
+                  ha->nvGetCell(ik, sd, true /*error*/),
+                  false /*drKey*/);
+}
+#undef ARRAY_GETM_TRACE
+#undef ARRAY_GETM_BODY
+
+// issetm's DNA.
+static inline bool
+issetMUnary(const void* dptr, StringData* sd,
+            bool decRefKey = true, bool checkInt = true) {
+  const ArrayData* ad = (const ArrayData*)dptr;
+  bool retval;
+  if (UNLIKELY(!IsHphpArray(ad))) {
+    retval = ad->exists(String(sd));
+  } else {
+    const HphpArray* ha = (const HphpArray*)dptr;
+    int64 keyAsInt;
+
+    TypedValue* cell;
+    if (checkInt && sd->isStrictlyInteger(keyAsInt)) {
+      cell = ha->nvGet(keyAsInt);
+    } else {
+      cell = ha->nvGet(sd);
+    }
+    retval = (cell != NULL) && !IS_NULL_TYPE(cell->m_type);
+  }
+
+  TRACE(2, "issetMUnary: %p[\"%s\"@sd%p] -> %d\n",
+        dptr, sd->data(), sd, retval);
+
+  if (decRefKey && sd->decRefCount() == 0) sd->release();
+  return retval;
+}
+
+uint64 array_issetm_s(const void* dptr, StringData* sd)
+{ return issetMUnary(dptr, sd, true  /*decRefKey*/, true  /*checkInt*/); }
+uint64 array_issetm_s0(const void* dptr, StringData* sd)
+{ return issetMUnary(dptr, sd, false /*decRefKey*/, true  /*checkInt*/); }
+uint64 array_issetm_s_fast(const void* dptr, StringData* sd)
+{ return issetMUnary(dptr, sd, true  /*decRefKey*/, false /*checkInt*/); }
+uint64 array_issetm_s0_fast(const void* dptr, StringData* sd)
+{ return issetMUnary(dptr, sd, false /*decRefKey*/, false /*checkInt*/); }
+
+ArrayData* array_add(ArrayData* a1, ArrayData* a2) {
+  if (!a2->empty()) {
+    if (a1->empty()) {
+      if (a1->decRefCount() == 0) a1->release();
+      return a2;
+    }
+    if (a1 != a2) {
+      ArrayData *escalated = a1->append(a2, ArrayData::Plus,
+                                        a1->getCount() > 1);
+      if (escalated) {
+        escalated->incRefCount();
+        if (a2->decRefCount() == 0) a2->release();
+        if (a1->decRefCount() == 0) a1->release();
+        return escalated;
+      }
+    }
+  }
+  if (a2->decRefCount() == 0) a2->release();
+  return a1;
+}
+
+/**
+ * array_unsetm_s --
+ * array_unsetm_s0 --
+ *
+ *   String-key removal. Might trigger copy-on-write. _s0 doesn't decref
+ *   the key.
+ */
+static inline ArrayData* array_unsetm_s_common(ArrayData *ad, StringData* sd,
+                                               bool decRef) {
+  ArrayData* retval = 0;
+  int64 lval;
+  bool copy = ad->getCount() > 1;
+  bool isInt = sd->isStrictlyInteger(lval);
+  retval = isInt ? ad->remove(lval, copy) : ad->remove(*(String*)&sd, copy);
+  if (decRef && sd->decRefCount() == 0) sd->release();
+  return array_mutate_post(NULL, ad, retval);
+}
+
+ArrayData* array_unsetm_s0(ArrayData *ad, StringData* sd) {
+  return array_unsetm_s_common(ad, sd, false);
+}
+
+ArrayData* array_unsetm_s(ArrayData *ad, StringData* sd) {
+  return array_unsetm_s_common(ad, sd, true);
+}
+
+}
+
+//=============================================================================
 
 ///////////////////////////////////////////////////////////////////////////////
 }

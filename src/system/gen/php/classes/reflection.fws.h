@@ -55,6 +55,7 @@ extern StaticString s_sys_ss12c8a8a6;
 extern StaticString s_sys_ss750cda3b;
 extern StaticString s_sys_ss5bfa95ac;
 extern StaticString s_sys_ss8c04b960;
+extern StaticString s_sys_ss7c2c602f;
 extern StaticString s_sys_ssc82dbd12;
 extern StaticString s_sys_ss0415e4a0;
 extern StaticString s_sys_ss4cd61020;
@@ -65,6 +66,8 @@ extern StaticString s_sys_ss9cfa17a6;
 extern StaticString s_sys_ssd04b2eb8;
 extern StaticString s_sys_sse9bf4500;
 extern StaticString s_sys_ssf46d6580;
+extern StaticString s_sys_sscc89b5fb;
+extern StaticString s_sys_sse72cf5e5;
 extern StaticString s_sys_ss8ce7db5b;
 extern StaticString s_sys_ss2145036e;
 extern StaticString s_sys_ssc8396b02;
@@ -110,7 +113,6 @@ extern StaticString s_sys_sse4a1cad7;
 extern StaticString s_sys_ss37217e60;
 extern StaticString s_sys_sse1ffa7cf;
 extern StaticString s_sys_ssf3f5d744;
-extern StaticString s_sys_ss7732a9a6;
 extern StaticString s_sys_ssef52e4e1;
 extern StaticString s_sys_ssc0ff3081;
 extern StaticString s_sys_ss33988b3e;
@@ -197,7 +199,6 @@ extern VarNR s_sys_svs9cfa17a6;
 extern VarNR s_sys_svse9bf4500;
 extern VarNR s_sys_svs8ce7db5b;
 extern VarNR s_sys_svs2145036e;
-extern VarNR s_sys_svs7732a9a6;
 extern VarNR s_sys_svs7228e959;
 extern VarNR s_sys_svscfb8e254;
 extern VarNR s_sys_svs9332a8ac;
@@ -211,6 +212,7 @@ extern VarNR s_sys_svs22824d6b;
 extern VarNR s_sys_svsf65d4a13;
 extern VarNR s_sys_svs77820fcc;
 
+extern VarNR s_sys_sva00000000;
 
 
 ///////////////////////////////////////////////////////////////////////////////

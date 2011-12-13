@@ -26,7 +26,7 @@ run.sh : $(PROJECT_ROOT)/src/rules.mk
 # the tests.
 LDFLAGS += -L. -ltest
 libtest.so: test.c
-	$(CC) -o libtest.so -Wl,-soname,libtest.so -shared test.c
+	$(CC) -fPIC -o libtest.so -Wl,-soname,libtest.so -shared test.c
 run: libtest.so
 
 TMP = $(TEST_DIRS) \

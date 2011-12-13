@@ -53,6 +53,7 @@ typedef Variant Sequence;
  * and ArrayData.
  */
 extern const Variant &null_variant;
+extern const Variant init_null_variant;
 extern const VarNR &null_varNR;
 extern const VarNR &true_varNR;
 extern const VarNR &false_varNR;
@@ -113,6 +114,7 @@ class FiberReferenceMap;
  */
 
 enum DataType {
+  MinDataType   = -0x7fffffff, // Allow KindOf* < 0 in runtime/vm/core_types.h.
   /**
    * Beware if you change the order, as we may have a few type checks in the
    * code that depend on the order.
@@ -134,12 +136,19 @@ enum DataType {
   MaxDataType   = 0x7fffffff // Allow KindOf* > 11 in HphpArray.
 };
 
+std::string tname(DataType t);
+
 inline int getDataTypeIndex(DataType t) {
   return t;
 }
 
 // Helper macro for checking if a given type is refcounted
 #define IS_REFCOUNTED_TYPE(t) ((t) > KindOfStaticString)
+// Helper macro for checking if a type is KindOfInt32 or KindOfInt64.
+#define IS_INT_TYPE(t) (((t-3) & ~1) == 0)
+// Helper macro for checking if a type is KindOfString or KindOfStaticString.
+#define IS_STRING_TYPE(t) (((t) & ~1) == 6)
+#define IS_NULL_TYPE(t) (unsigned(t) <= 1)
 
 enum StringDataMode {
   AttachLiteral, // const char * points to a literal string
@@ -194,6 +203,10 @@ inline RefResult ref(CVarRef v) {
   return *(RefResultValue*)&v;
 }
 
+namespace VM {
+  class Class;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // code injection classes
 
@@ -205,9 +218,9 @@ public:
 
   RequestInjectionData()
     : conditionFlags(0), started(0), timeoutSeconds(-1), debugger(false),
-      debuggerIdle(0) {
+      debuggerIdle(0), dummySandbox(false) {
   }
-  
+
   volatile ssize_t conditionFlags; // condition flags can indicate if a thread
                                    // has exceeded the memory limit, timed out,
                                    // or received a signal
@@ -217,10 +230,11 @@ public:
 
   bool debugger;       // whether there is a DebuggerProxy attached to me
   int  debuggerIdle;   // skipping this many interrupts while proxy is idle
+  bool dummySandbox;   // indicating it is from a dummy sandbox thread
   std::stack<void *> interrupts;   // CmdInterrupts this thread's handling
 
   void reset();
-  
+
   void setMemExceededFlag();
   void setTimedOutFlag();
   void setSignaledFlag();
@@ -251,6 +265,8 @@ public:
 public:
   static DECLARE_THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
 
+  std::vector<ObjectAllocatorBase *> m_allocators;
+  std::vector<ObjectAllocatorBase *> m_instanceSizeAllocators;
   FrameInjection *m_top;
   RequestInjectionData m_reqInjectionData;
 
@@ -279,14 +295,27 @@ public:
   void onSessionInit();
   void onSessionExit();
   void clearPendingException();
+  ObjectAllocatorBase* instanceSizeAllocator(unsigned size) {
+    const_assert(hhvm);
+    if (size >= m_instanceSizeAllocators.size()) {
+      extendInstanceSizeAllocators(size);
+    }
+    return m_instanceSizeAllocators[size];
+  }
+private:
+  void extendInstanceSizeAllocators(unsigned nProps);
 };
 
 extern void throw_infinite_recursion_exception();
 extern void throw_call_non_object() ATTRIBUTE_COLD __attribute__((noreturn));
 
+inline bool stack_in_bounds(ThreadInfo *&info) {
+  return (char*)&info >= info->m_stacklimit;
+}
+
 // The ThreadInfo pointer itself must be from the current stack frame.
 inline void check_recursion(ThreadInfo *&info) {
-  if ((char *)&info < info->m_stacklimit) {
+  if (!stack_in_bounds(info)) {
     throw_infinite_recursion_exception();
   }
 }
@@ -312,7 +341,7 @@ void throw_pending_exception(ThreadInfo *info) ATTRIBUTE_COLD
                                                __attribute__((noreturn));
 
 void check_request_timeout_info(ThreadInfo *info, int lc);
-void check_request_timeout_ex(const FrameInjection &fi, int lc);
+void check_request_timeout_ex(int lc);
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
 extern void begin_profiler_frame(Profiler *p, const char *symbol);
@@ -351,9 +380,11 @@ public:
     Error = 1,
     CheckExist = 2,
     Key = 4,
+    NoHipHop = 8,
 
     Error_Key = Error | Key,
-    CheckExist_Key = CheckExist | Key
+    CheckExist_Key = CheckExist | Key,
+    Error_NoHipHop = Error | NoHipHop,
   };
   static Type IsKey(bool s) { return s ? Key : None; }
   static Type IsError(bool e) { return e ? Error : None; }

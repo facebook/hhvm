@@ -46,10 +46,19 @@ int main(int argc, char **argv) {
     Test::logger.log_url = argv[5];
   }
 
+  // Initialize the runtime options with their default values
+  {
+    Hdf empty;
+    vector<string> emptyConfStrings;
+    RuntimeOption::Load(empty, &emptyConfStrings);
+  }
+
+  if (suite == "TestCodeRunJit" || suite == "TestCodeRunVM") {
+    // We don't want any fiber worker threads to try to initialize the VM.
+    RuntimeOption::FiberCount = 0;
+  }
+
   hphp_process_init();
   Test test;
-  Hdf empty;
-  vector<string> emptyConfStrings;
-  RuntimeOption::Load(empty, &emptyConfStrings);
   return test.RunTests(suite, which, set) ? 0 : -1;
 }

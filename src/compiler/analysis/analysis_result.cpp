@@ -1976,7 +1976,6 @@ AnalysisResult::forceClassVariants(
   if (m_classForcedVariants[doStatic]) {
     return;
   }
-  m_classForcedVariants[doStatic] = true;
 
   AnalysisResultPtr ar = shared_from_this();
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
@@ -1987,6 +1986,8 @@ AnalysisResult::forceClassVariants(
         ar, VariableTable::GetVarClassMask(false, doStatic), false);
     }
   }
+
+  m_classForcedVariants[doStatic] = true;
 }
 
 void AnalysisResult::forceClassVariants(
@@ -2543,8 +2544,8 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
       SCHEDULE_JOB(UtilDecl);
       SCHEDULE_JOB(UtilImpl);
     }
+    getVariables()->canonicalizeStaticGlobals();
     if (output != CodeGenerator::SystemCPP && Option::GenerateCPPMain) {
-      getVariables()->canonicalizeStaticGlobals();
       SCHEDULE_JOB(GlobalDecl);
       SCHEDULE_JOB(Main);
       SCHEDULE_JOB(ScalarArrays);
@@ -2852,6 +2853,31 @@ void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
   if (Option::GenArrayCreate) {
     outputArrayCreateImpl(cg);
   }
+  cg_indentBegin("\nstatic const int64 pre_converted_integers[] = {\n");
+  for (set<int64>::const_iterator it = m_allIntegers.begin();
+       it != m_allIntegers.end(); it++) {
+    if (!String::HasConverted(*(it))) {
+      if (*(it) == LONG_MIN) {
+        cg_printf("(int64)0x%llxLL,\n", (uint64)LONG_MIN);
+      } else {
+        cg_printf("%lldLL,\n", *(it));
+      }
+    }
+  }
+  cg_indentEnd("};\n");
+
+  const char text[] =
+    "static int precompute_integers() {\n"
+    "  for (unsigned int i = 0;\n"
+    "       i < sizeof(pre_converted_integers)/sizeof(int64); i++) {\n"
+    "    String::PreConvertInteger(pre_converted_integers[i]);\n"
+    "  }\n"
+    "  return 0;\n"
+    "}\n"
+    "\n"
+    "static int ATTRIBUTE_UNUSED initIntegers = precompute_integers();\n";
+  cg_printf(text);
+
   cg.namespaceEnd();
 }
 

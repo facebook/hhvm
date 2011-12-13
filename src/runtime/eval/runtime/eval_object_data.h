@@ -50,7 +50,8 @@ public:
 
    // methods
   virtual CStrRef o_getClassNameHook() const;
-  virtual const MethodStatement *getMethodStatement(const char* name) const;
+  virtual const MethodStatement *getMethodStatement(CStrRef name,
+                                                    int &access) const;
   virtual const MethodStatement *getConstructorStatement() const;
 
   virtual bool o_get_call_info_hook(const char *clsname,
@@ -86,7 +87,7 @@ protected:
 
 private:
   EvalObjectData(EvalObjectData *original); // for clone
-  ClassEvalState &m_cls;
+  ClassEvalState &m_ce;
   Array m_privates;
   String m_class_name;
   MethodCallPackage m_invokeMcp;

@@ -38,6 +38,8 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   // Properties
   Variant m_rsrc;
 
+  // Destructor
+  ~c_RecursiveIteratorIterator() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(RecursiveIteratorIterator, RecursiveIteratorIterator, ObjectData)
   static const ClassPropTable os_prop_table;

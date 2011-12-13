@@ -867,15 +867,29 @@ static Variant fb_call_user_func_safe(CVarRef function, CArrRef params,
 Variant f_fb_call_user_func_safe_return(int _argc, CVarRef function,
                                         CVarRef def,
                                         CArrRef _argv /* = null_array */) {
-  bool ok;
-  Variant ret = fb_call_user_func_safe(function, _argv, ok);
-  return ok ? ret : def;
+  if (hhvm) {
+    if (f_is_callable(function)) {
+      return f_call_user_func_array(function, _argv);
+    }
+    return def;
+  } else {
+    bool ok;
+    Variant ret = fb_call_user_func_safe(function, _argv, ok);
+    return ok ? ret : def;
+  }
 }
 
 Array f_fb_call_user_func_array_safe(CVarRef function, CArrRef params) {
-  bool ok;
-  Variant ret = fb_call_user_func_safe(function, params, ok);
-  return CREATE_VECTOR2(ok, ret);
+  if (hhvm) {
+    if (f_is_callable(function)) {
+      return CREATE_VECTOR2(true, f_call_user_func_array(function, params));
+    }
+    return CREATE_VECTOR2(false, null);
+  } else {
+    bool ok;
+    Variant ret = fb_call_user_func_safe(function, params, ok);
+    return CREATE_VECTOR2(ok, ret);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

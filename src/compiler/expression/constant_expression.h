@@ -52,8 +52,9 @@ public:
   const std::string &getDocComment() const {
     return m_docComment;
   }
-  bool isBoolean() const;
   bool isNull() const;
+  bool isBoolean() const;
+  bool isDouble() const;
   bool getBooleanValue() const;
   void pushConst(const std::string &name);
   void popConst();

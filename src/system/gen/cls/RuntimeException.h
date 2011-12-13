@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 235 */
+/* SRC: classes/exception.php line 240 */
 FORWARD_DECLARE_CLASS(RuntimeException);
 extern const ObjectStaticCallbacks cw_RuntimeException;
 class c_RuntimeException : public c_Exception {

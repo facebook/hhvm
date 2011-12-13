@@ -65,6 +65,9 @@
 #include <runtime/eval/runtime/file_repository.h>
 #include <runtime/eval/parser/parser.h>
 
+#include <runtime/vm/vm.h>
+#include <runtime/vm/runtime.h>
+
 using namespace std;
 using namespace boost::program_options;
 extern char **environ;
@@ -284,6 +287,7 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
     Logger::Error("%s", errorMsg.c_str());
     error = true;
   } catch (const Exception &e) {
+    errorMsg = "";
     if (where == HandlerException) {
       errorMsg = "Exception handler threw an exception: ";
     }
@@ -302,6 +306,7 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
       Logger::Error("%s", errorMsg.c_str());
     }
   } catch (const Object &e) {
+    errorMsg = "";
     if (where == HandlerException) {
       errorMsg = "Exception handler threw an object exception: ";
     }
@@ -881,7 +886,6 @@ static int execute_program_impl(int argc, char **argv) {
       while (true) {
         try {
           execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
-
           if (po.debugger_options.extension.empty()) {
             // even if it's empty, still need to call for warmup
             hphp_invoke_simple("", true); // not to run the 1st file if compiled
@@ -890,12 +894,24 @@ static int execute_program_impl(int argc, char **argv) {
           }
           Eval::Debugger::RegisterSandbox(Eval::DSandboxInfo());
           if (!restarting) {
+            if (hhvm) {
+              g_context->enterDebuggerDummyEnv();
+            }
             Eval::Debugger::InterruptSessionStarted(new_argv[0]);
+            if (hhvm) {
+              g_context->exitDebuggerDummyEnv();
+            }
           }
           hphp_invoke_simple(file);
-          Eval::Debugger::InterruptSessionEnded(new_argv[0]);
+          if (!hhvm) {
+            Eval::Debugger::InterruptSessionEnded(new_argv[0]);
+          }
+          restarting = false;
           execute_command_line_end(po.xhprofFlags, true, new_argv[0]);
         } catch (const Eval::DebuggerRestartException &e) {
+          if (hhvm) {
+            g_context->exitDebuggerDummyEnv();
+          }
           execute_command_line_end(0, false, NULL);
 
           if (!e.m_args->empty()) {
@@ -906,6 +922,9 @@ static int execute_program_impl(int argc, char **argv) {
           }
           restarting = true;
         } catch (const Eval::DebuggerClientExitException &e) {
+          if (hhvm) {
+            g_context->exitDebuggerDummyEnv();
+          }
           execute_command_line_end(0, false, NULL);
           break; // end user quitting debugger
         }
@@ -1007,6 +1026,11 @@ void hphp_process_init() {
   Process::InitProcessStatics();
   init_static_variables();
   init_literal_varstrings();
+
+  if (hhvm) {
+    HPHP::VM::ProcessInit();
+  }
+
   PageletServer::Restart();
   XboxServer::Restart();
   FiberAsyncFunc::Restart();
@@ -1087,6 +1111,10 @@ void hphp_session_init(bool blank_warmup /* = false */) {
   SimpleCounter::Enabled = true;
   StackTrace::Enabled = true;
 #endif
+
+  if (hhvm) {
+    g_context->requestInit();
+  }
 
   if (blank_warmup) {
     bool error;
@@ -1205,8 +1233,12 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
       Eval::Debugger::InterruptPSPEnded(program);
     } catch (const Eval::DebuggerException &e) {}
   }
-  if (has_eval_support) {
-    Eval::RequestEvalState::DestructObjects();
+  if (hhvm) {
+    context->requestExit();
+  } else {
+    if (has_eval_support) {
+      Eval::RequestEvalState::DestructObjects();
+    }
   }
   if (shutdown) {
     context->onRequestShutdown();
@@ -1265,6 +1297,7 @@ void hphp_session_exit() {
 
 void hphp_process_exit() {
   FiberAsyncFunc::Stop();
+  XboxServer::Stop();
   Eval::Debugger::Stop();
   Extension::ShutdownModules();
   LightProcess::Close();

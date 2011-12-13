@@ -19,6 +19,8 @@
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/ini_setting.h>
 
+#include <system/lib/systemlib.h>
+
 #define MMC_SERIALIZED 1
 #define MMC_COMPRESSED 2
 
@@ -80,6 +82,7 @@ bool ini_on_update_hash_function(CStrRef value, void *p) {
 c_Memcache::c_Memcache(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb), m_memcache(), m_compress_threshold(0),
     m_min_compress_savings(0.2) {
+  CPP_BUILTIN_CLASS_INIT(Memcache);
   memcached_create(&m_memcache);
 
   if (MEMCACHEG(hash_strategy) == "consistent") {

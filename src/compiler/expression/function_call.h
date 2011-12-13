@@ -17,6 +17,7 @@
 #ifndef __FUNCTION_CALL_H__
 #define __FUNCTION_CALL_H__
 
+#include <compiler/analysis/function_scope.h>
 #include <compiler/expression/static_class_name.h>
 
 namespace HPHP {
@@ -55,7 +56,7 @@ public:
                     int state);
   void deepCopy(FunctionCallPtr exp);
 
-  FunctionScopePtr getFuncScope() const { return m_funcScope; }
+  FunctionScopeRawPtr getFuncScope() const { return m_funcScope; }
   bool canInvokeFewArgs();
   void setArrayParams() { m_arrayParams = true; }
 
@@ -72,8 +73,8 @@ protected:
   // Pointers to the corresponding function scope and class scope for this
   // function call, set during the AnalyzeAll phase. These pointers may be
   // null if the function scope or class scope could not be resolved.
-  FunctionScopePtr m_funcScope;
-  ClassScopePtr m_classScope;
+  FunctionScopeRawPtr m_funcScope;
+  ClassScopeRawPtr m_classScope;
 
   bool m_valid;
   int m_extraArg;

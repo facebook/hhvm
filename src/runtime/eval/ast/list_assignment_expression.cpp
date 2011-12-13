@@ -71,14 +71,24 @@ void SubListElement::set(VariableEnvironment &env, CVarRef val) const {
   for (int i = m_elems.size() - 1; i >= 0; i--) {
     const ListElementPtr &le = m_elems[i];
     if (le) {
-      le->set(env, val[i]);
+      le->set(env, val.rvalAt(i, AccessFlags::Error_NoHipHop));
     }
   }
 }
 
 void SubListElement::dump(std::ostream &out) const {
   out << "list(";
-  Construct::dumpVector(out, m_elems);
+  bool first = true;
+  for (uint i = 0; i < m_elems.size(); i++) {
+    if (first) {
+      first = false;
+    } else {
+      out << ", ";
+    }
+    if (m_elems[i]) {
+      m_elems[i]->dump(out);
+    }
+  }
   out << ")";
 }
 

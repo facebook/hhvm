@@ -41,7 +41,7 @@ public:
     r = eval(env);
     return true;
   }
-  Variant getValue() const;
+  Variant getValue(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:
   enum Kind {

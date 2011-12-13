@@ -22,6 +22,8 @@
 #include <tbb/concurrent_hash_map.h>
 #include <util/logger.h>
 
+#include <system/lib/systemlib.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -60,11 +62,16 @@ Array f_hphpd_get_user_commands() {
 }
 
 void f_hphpd_break(bool condition /* = true */) {
-  if (RuntimeOption::EnableDebugger && condition) {
+  if (!RuntimeOption::EnableDebugger || !condition) {
+    return;
+  }
+  if (hhvm) {
+    Debugger::InterruptVMHook(HardBreakPoint);
+  } else {
     ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
     FrameInjection *frame = FrameInjection::GetStackFrame(1);
     if (frame && ti->m_reqInjectionData.debugger) {
-      Eval::InterruptSite site(frame);
+      Eval::InterruptSiteFI site(frame);
       Eval::Debugger::InterruptHard(site);
     }
   }
@@ -100,6 +107,7 @@ Variant f_hphpd_get_client(CStrRef name /* = null */) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DebuggerProxyCmdUser::c_DebuggerProxyCmdUser(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
+  CPP_BUILTIN_CLASS_INIT(DebuggerProxyCmdUser);
 }
 
 c_DebuggerProxyCmdUser::~c_DebuggerProxyCmdUser() {
@@ -127,6 +135,7 @@ Variant c_DebuggerProxyCmdUser::t___destruct() {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DebuggerClientCmdUser::c_DebuggerClientCmdUser(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
+  CPP_BUILTIN_CLASS_INIT(DebuggerClientCmdUser);
 }
 
 c_DebuggerClientCmdUser::~c_DebuggerClientCmdUser() {
@@ -355,6 +364,7 @@ c_DebuggerClient::c_DebuggerClient(const ObjectStaticCallbacks *cb) : ExtObjectD
 }
 
 c_DebuggerClient::~c_DebuggerClient() {
+  sweep();
 }
 
 void c_DebuggerClient::t___construct() {
@@ -478,8 +488,27 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
     return null;
   }
 
-  // TODO: special handling some command,
-  // e.g. multi-line input("<?php"), macro, etc.
+  static const char *s_allowedCmds[] = {
+    "break", "continue", "down", "exception", "frame", "global",
+    "help", "info", "konstant", "next", "out", "print", "step",
+    "up", "variable", "where", "bt", "set", "inst", "=", "@", NULL
+  };
+
+  bool allowed = false;
+  for (int i = 0; ; i++) {
+    const char *cmd = s_allowedCmds[i];
+    if (cmd == NULL) {
+      break;
+    }
+    if (cmdName.same(cmd)) {
+      allowed = true;
+      break;
+    }
+  }
+  if (!allowed) {
+    raise_warning("unsupported command %s", cmdName.toString().data());
+    return null;
+  }
 
   m_client->setCommand(cmdName.toString().data());
   StringVec *clientArgs = m_client->args();
@@ -504,7 +533,7 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
       raise_warning("not getting an interrupt");
     } else {
       CmdInterruptPtr cmdInterrupt = dynamic_pointer_cast<CmdInterrupt>(cmd);
-      cmdInterrupt->onClient(m_client);
+      cmdInterrupt->onClientD(m_client);
       Logger::Info("debugger client ready for command");
     }
   } catch (DebuggerClientExitException &e) {
@@ -515,7 +544,7 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
     return null;
   }
 
-  return m_client->getPrintString();
+  return m_client->getOutputArray();
 }
 
 Variant c_DebuggerClient::t_interrupt() {
@@ -536,6 +565,10 @@ Variant c_DebuggerClient::t_interrupt() {
 Variant c_DebuggerClient::t___destruct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClient, DebuggerClient::__destruct);
   return null;
+}
+
+void c_DebuggerClient::sweep() {
+  m_client->clearCachedLocal();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

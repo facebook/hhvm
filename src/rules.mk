@@ -197,6 +197,19 @@ CXXFLAGS += -fno-operator-names -ffunction-sections
 # Include frame pointers to make it easier to generate callgraphs in oprofile
 CPPFLAGS += -fno-omit-frame-pointer $(if $(USE_ICC),,-momit-leaf-frame-pointer)
 
+ifeq ($(USE_HHVM),1)
+CPPFLAGS += -DHHVM
+# The user can set the intended install path for systemlib.php as follows if
+# intending to install hhvm somewhere other than HPHP_LIB:
+#
+#   make HHVM_LIB_PATH_DEFAULT=/usr/local/hhvm <target>
+ifeq ($(HHVM_LIB_PATH_DEFAULT),)
+CPPFLAGS += -DHHVM_LIB_PATH_DEFAULT='"$(HPHP_LIB)"'
+else
+CPPFLAGS += -DHHVM_LIB_PATH_DEFAULT='"$(HHVM_LIB_PATH_DEFAULT)"'
+endif
+endif
+
 ifdef MAC_OS_X
 
 CXXFLAGS += \
@@ -220,7 +233,7 @@ ifdef GOOGLE_TCMALLOC
 GOOGLE_TOOLS = 1
 endif
 
-CPPFLAGS += -D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1 -pthread
+CPPFLAGS += -D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1 -pthread -Wno-error=array-bounds -Wno-error=switch
 CXXFLAGS += -ftemplate-depth-60
 
 endif
@@ -391,8 +404,8 @@ endif
 
 # facebook specific stuff
 CPPFLAGS += -DFACEBOOK -DHAVE_QUICKLZ
-CPPFLAGS += -DCUF_ASYNC_DEPRECATION_MSG='"call_user_func_async() is deprecated, please use fb_call_user_func_async() instead"'
-CPPFLAGS += -DCUFA_ASYNC_DEPRECATION_MSG='"call_user_func_array_async() is deprecated, please use fb_call_user_func_array_async() instead"'
+CPPFLAGS += -DCUF_ASYNC_NOT_SUPPORTED_MSG='"call_user_func_async() is no longer supported, please use fb_call_user_func_async() instead"'
+CPPFLAGS += -DCUFA_ASYNC_NOT_SUPPORTED_MSG='"call_user_func_array_async() is no longer supported, please use fb_call_user_func_array_async() instead"'
 
 MYSQL_UNIX_SOCK_ADDR := $(shell mysql_config --socket)
 ifneq ($(MYSQL_UNIX_SOCK_ADDR), "")
@@ -510,7 +523,7 @@ endif
 define COMPILE_IT
 $(ECHO_COMPILE)
 $(CV)$(1) -c $(if $(OUT_TOP),-I$(OUT_TOP)src) \
- $(if $(filter %.pic.o,$@),-fPIC,$(CPP_MALLOC_FLAGS)) \
+ $(sort $(if $(filter %.pic.o,$@),-fPIC,$(CPP_MALLOC_FLAGS))) \
  $(CPPFLAGS) $(2) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
 endef
 
@@ -540,6 +553,9 @@ endif
 $(call OBJECT_FILES,$(CXX_NOOPT_SOURCES) $(GENERATED_CXX_NOOPT_SOURCES),cpp): $(OUT_DIR)%.o:%.cpp
 	$(call COMPILE_IT,$(P_CXX),$(CXXFLAGS))
 
+$(BOOTSTRAP_CXX_SOURCES:.cpp=.o): %.o:%.cpp
+	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
+
 $(call OBJECT_FILES,$(CXX_SOURCES) $(GENERATED_CXX_SOURCES) $(TEST_SOURCES),cpp): $(OUT_DIR)%.o:%.cpp
 	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
 
@@ -554,6 +570,9 @@ $(call OBJECT_FILES,$(ASM_SOURCES),S): $(OUT_DIR)%.o:%.S
 
 $(call PIC_OBJECT_FILES,$(CXX_NOOPT_SOURCES) $(GENERATED_CXX_NOOPT_SOURCES),cpp): $(OUT_DIR)%.pic.o:%.cpp
 	$(call COMPILE_IT,$(P_CXX),$(CXXFLAGS))
+
+$(BOOTSTRAP_CXX_SOURCES:.cpp=.pic.o): %.pic.o:%.cpp
+	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
 
 $(call PIC_OBJECT_FILES,$(CXX_SOURCES) $(GENERATED_CXX_SOURCES),cpp): $(OUT_DIR)%.pic.o:%.cpp
 	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
@@ -623,9 +642,11 @@ $(SHARED_LIB): $(PIC_OBJECTS)
 	$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,$(notdir $@) \
 			$(SO_LDFLAGS) -o $@ $(PIC_OBJECTS) $(EXTERNAL)
 
+ifneq ($(USE_STATIC_LIB_RULE),0)
 $(STATIC_LIB): $(OBJECTS)
 	$(V)$(RM) $@
 	$(AR_CMD) $@ $(OBJECTS) $(ADDITIONAL_OBJS)
+endif
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 	$(LD_CMD) -o $@ $(LDFLAGS) $< $(LIBS)
@@ -637,10 +658,12 @@ $(SHARED_LIB): $(PIC_OBJECTS)
 	$(V)$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,$(notdir $@) \
 		$(SO_LDFLAGS) -o $@ $(PIC_OBJECTS) $(EXTERNAL)
 
+ifneq ($(USE_STATIC_LIB_RULE),0)
 $(STATIC_LIB): $(OBJECTS)
 	@echo 'Linking $@ ...'
 	$(V)$(RM) $@
 	$(V)$(AR_CMD) $@ $(OBJECTS) $(ADDITIONAL_OBJS)
+endif
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 	@echo 'Linking $@ ...'
@@ -651,7 +674,6 @@ endif
 .PHONY:out-of-date do-setup
 
 do-setup: quiet-4
-
 
 ifdef LINK_LOCAL
 #pragma runlocal

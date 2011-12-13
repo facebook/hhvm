@@ -19,6 +19,9 @@
 #include <runtime/eval/ast/method_statement.h>
 #include <runtime/eval/runtime/eval_object_data.h>
 #include <runtime/eval/ast/statement_list_statement.h>
+#include <runtime/eval/ast/use_trait_statement.h>
+#include <runtime/eval/ast/trait_prec_statement.h>
+#include <runtime/eval/ast/trait_alias_statement.h>
 #include <runtime/eval/runtime/eval_state.h>
 #include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/eval/strict_mode.h>
@@ -33,10 +36,12 @@ namespace Eval {
 using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
+static StaticString s___construct("__construct");
+
 ClassVariable::ClassVariable(CONSTRUCT_ARGS, const string &name, int modifiers,
     ExpressionPtr value, const string &doc, ClassStatement *cls)
   : Construct(CONSTRUCT_PASS), m_name(StringData::GetStaticString(name)),
-    m_modifiers(modifiers), m_value(value), m_docComment(doc), m_cls(cls) {
+    m_modifiers(modifiers), m_value(value), m_docComment(doc) {
 }
 
 ClassVariable *ClassVariable::optimize(VariableEnvironment &env) {
@@ -48,7 +53,7 @@ void ClassVariable::set(VariableEnvironment &env, EvalObjectData *self) const {
   if (!(m_modifiers & ClassStatement::Static)) {
     Variant val(m_value ? m_value->eval(env) : null_variant);
     if (m_modifiers & ClassStatement::Private) {
-      self->o_setPrivate(m_cls->name(), m_name, val);
+      self->o_setPrivate(env.currentClass(), m_name, val);
     } else if (!self->o_exists(m_name)) {
       self->o_i_set(m_name, val);
     }
@@ -95,17 +100,77 @@ void ClassVariable::eval(VariableEnvironment &env, Variant &res) const {
 ClassStatement::ClassStatement(STATEMENT_ARGS, const string &name,
                                const string &parent, const string &doc)
   : Statement(STATEMENT_PASS), m_name(StringData::GetStaticString(name)),
-    m_modifiers(0), m_attributes(0),
-    m_parent(StringData::GetStaticString(parent)), m_docComment(doc),
-    m_delayDeclaration(false) { }
+    m_modifiers(0), m_attributes(0), m_needCheckHoist(-1),
+    m_parent(StringData::GetStaticString(parent)), m_docComment(doc) { }
 
 void ClassStatement::finish() {
-  if (findMethod("__get")) m_attributes        |= ObjectData::UseGet;
-  if (findMethod("__set")) m_attributes        |= ObjectData::UseSet;
-  if (findMethod("__isset")) m_attributes      |= ObjectData::UseIsset;
-  if (findMethod("__unset")) m_attributes      |= ObjectData::UseUnset;
-  if (findMethod("__call")) m_attributes       |= ObjectData::HasCall;
-  if (findMethod("__callstatic")) m_attributes |= ObjectData::HasCallStatic;
+  if (findMethod("__get", false, false, false)) {
+    m_attributes |= ObjectData::UseGet;
+  }
+  if (findMethod("__set", false, false, false)) {
+    m_attributes |= ObjectData::UseSet;
+  }
+  if (findMethod("__isset", false, false, false)) {
+    m_attributes |= ObjectData::UseIsset;
+  }
+  if (findMethod("__unset", false, false, false)) {
+    m_attributes |= ObjectData::UseUnset;
+  }
+  if (findMethod("__call", false, false, false)) {
+    m_attributes |= ObjectData::HasCall;
+  }
+  if (findMethod("__callstatic", false, false, false)) {
+    m_attributes |= ObjectData::HasCallStatic;
+  }
+  const MethodStatement *c = findMethod("__construct", false, false, false);
+  if (!c && !(m_modifiers & ClassStatement::Trait)) {
+    c = findMethod(m_name->data(), false, false, false);
+  }
+  if (c) {
+    const_cast<MethodStatement*>(c)->setConstructor();
+  }
+}
+
+bool ClassStatement::isHoistable(std::set<StringData *> &seen) {
+  // shouldn't be called twice on the same class
+  assert(m_needCheckHoist == -1);
+  m_needCheckHoist = 1;
+  const ClassInfo *ci;
+
+  bool allBuiltinInterfaces = true;
+  for (unsigned int i = 0; i < m_bases.size(); i++) {
+    ci = ClassInfo::FindSystemInterface(m_bases[i]);
+    if (!ci) {
+      allBuiltinInterfaces = false;
+      break;
+    }
+  }
+  if (!allBuiltinInterfaces) return false;
+
+  bool allBuiltinTraits = true;
+  for (unsigned int i = 0; i < m_useTraitsVec.size(); i++) {
+    const std::vector<NamePtr> &traitNames = m_useTraitsVec[i]->getNames();
+    for (unsigned int j = 0; j < traitNames.size(); j++) {
+      ci = ClassInfo::FindSystemTrait(traitNames[j]->get());
+      if (!ci) {
+        allBuiltinTraits = false;
+        break;
+      } else {
+        assert(0); // there is no builtin trait
+      }
+    }
+    if (!allBuiltinTraits) break;
+  }
+  if (m_useTraitsVec.size()) assert(!allBuiltinTraits);
+  if (!allBuiltinInterfaces) return false;
+
+  if (m_parent->empty() ||
+      seen.find(m_parent) != seen.end() ||
+      (ClassInfo::FindSystemClass(m_parent))) {
+    m_needCheckHoist = 0;
+    seen.insert(m_name);
+  }
+  return true;
 }
 
 const ClassStatement *ClassStatement::parentStatement() const {
@@ -121,13 +186,13 @@ void ClassStatement::loadInterfaceStatements() const {
   }
 }
 
-void ClassStatement::loadMethodTable(
-  ClassEvalState &ce, std::set<const ClassStatement*> &seen) const {
+void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
   // make sure classes don't define each other as their
   // own parents (no cycles in the inheritance tree).
   // omit this check for builtin classes (since we assume
   // that our builtin runtime is sane, plus it's impossible
   // for a builtin class to extends a user-defind class).
+  std::set<const ClassStatement*> &seen = ce.getSeen();
   if (seen.find(this) != seen.end()) {
     raise_error("%s is defined as its own parent", name().c_str());
   } else {
@@ -138,7 +203,7 @@ void ClassStatement::loadMethodTable(
   if (!m_parent->empty()) {
     const ClassStatement* parent_cls = parentStatement();
     if (parent_cls) {
-      parent_cls->loadMethodTable(ce, seen);
+      parent_cls->loadMethodTable(ce);
     } else {
       // Built in
       ClassInfo::MethodVec meths;
@@ -169,7 +234,7 @@ void ClassStatement::loadMethodTable(
   for (vector<MethodStatementPtr>::const_iterator it = m_methodsVec.begin();
        it != m_methodsVec.end(); ++it) {
     ClassEvalState::MethodTable::iterator mit =
-      mtable.find((*it)->name().c_str());
+      mtable.find((*it)->name());
     if (mit != mtable.end()) {
       int mods = mit->second.second;
       const MethodStatement *mmit = mit->second.first;
@@ -201,14 +266,13 @@ void ClassStatement::loadMethodTable(
       mit->second.first = it->get();
       mit->second.second = (*it)->getModifiers();
     } else {
-      pair<const MethodStatement *, int> &p = mtable[(*it)->name().c_str()];
+      pair<const MethodStatement *, int> &p = mtable[(*it)->name()];
       p.first = it->get();
       p.second = (*it)->getModifiers();
     }
   }
 
-  hphp_const_char_imap<MethodStatementPtr>::const_iterator it =
-    m_methods.find(m_name->data());
+  StringIMap<MethodStatementPtr>::const_iterator it = m_methods.find(m_name);
   if (it != m_methods.end()) {
     ce.getConstructor() = it->second.get();
   }
@@ -216,6 +280,145 @@ void ClassStatement::loadMethodTable(
   if (it != m_methods.end()) {
     ce.getConstructor() = it->second.get();
   }
+  addTraits(ce);
+  bindTraits(ce);
+}
+
+void ClassStatement::addTrait(ClassEvalState &ce,
+                              const UseTraitStatement *useTraitStmt) const {
+  const std::vector<NamePtr> &traitNames = useTraitStmt->getNames();
+  const std::vector<StatementPtr> &traitRules =
+    useTraitStmt->getStmts()->stmts();
+  for (unsigned int i = 0; i < traitNames.size(); i++) {
+    String traitName = traitNames[i]->get();
+    const ClassStatement *trait =
+      RequestEvalState::findClass(traitName, true);
+    if (!trait) {
+      raise_error("Trait '%s' does not exist.", traitName.c_str());
+    }
+    if (!trait->isTrait()) {
+      raise_error("%s cannot use %s - it is not a trait",
+                  ce.getClass()->name().c_str(), traitName.c_str());
+    }
+    ce.implementTrait(trait);
+  }
+  for (unsigned int i = 0; i < traitRules.size(); i++) {
+    TraitPrecStatement *traitPrec =
+      dynamic_cast<TraitPrecStatement*>(traitRules[i].get());
+    if (traitPrec) {
+      ClassEvalState::TraitPrecedence tp(traitPrec->getTraitName()->get(),
+                                         traitPrec->getMethodName()->get(),
+                                         traitPrec);
+      ce.getTraitPrecedences().push_back(tp);
+      continue;
+    }
+    TraitAliasStatement *traitAlias =
+      dynamic_cast<TraitAliasStatement*>(traitRules[i].get());
+    if (traitAlias) {
+      ClassEvalState::TraitAlias ta(traitAlias->getTraitName()->get(),
+                                    traitAlias->getMethodName()->get(),
+                                    traitAlias->getNewMethodName()->get(),
+                                    traitAlias->getModifiers());
+      ce.getTraitAliases().push_back(ta);
+      continue;
+    }
+    assert(false);
+  }
+}
+
+void ClassStatement::addTraits(ClassEvalState &ce) const {
+  ce.initTraits();
+  for (unsigned int i = 0; i < m_useTraitsVec.size(); i++) {
+    addTrait(ce, m_useTraitsVec[i].get());
+  }
+}
+
+void ClassStatement::initTraitStructures(ClassEvalState &ce) const {
+  std::vector<ClassEvalState::TraitPrecedence> &traitPrecedences =
+    ce.getTraitPrecedences();
+  std::vector<ClassEvalState::TraitAlias> &traitAliases =
+    ce.getTraitAliases();
+
+  // resolve class references
+  for (unsigned int i = 0 ; i < traitPrecedences.size(); i++) {
+    ClassEvalState::TraitPrecedence &curPrecedence = traitPrecedences[i];
+    curPrecedence.m_classEvalState =
+      RequestEvalState::findClassState(curPrecedence.m_trait, true);
+    const std::vector<NamePtr> &names = curPrecedence.m_prec->getNames();
+    curPrecedence.m_excludeFromClasses.resize(names.size());
+    for (unsigned int j = 0; j < names.size(); j++) {
+      curPrecedence.m_excludeFromClasses[j] =
+        RequestEvalState::findClassState(names[j]->get(), true);
+    }
+  }
+
+  for (unsigned int i = 0 ; i < traitAliases.size(); i++) {
+    ClassEvalState::TraitAlias &curAlias = traitAliases[i];
+    curAlias.m_classEvalState =
+      RequestEvalState::findClassState(curAlias.m_trait, true);
+  }
+}
+
+void ClassStatement::bindMethods(ClassEvalState &ce) const {
+  std::vector<const ClassStatement *> &traits = ce.getTraits();
+  std::vector<ClassEvalState::MethodTable> methodTables;
+  ClassEvalState::MethodTable resultTable;
+  unsigned int numTraits =  traits.size();
+  methodTables.resize(numTraits);
+
+  // prepare copies of trait method tables for combination
+  for (unsigned int i = 0; i < numTraits; i++) {
+    std::vector<ClassEvalState::TraitPrecedence> &traitPrecedences =
+      ce.getTraitPrecedences();
+    std::vector<ClassEvalState::TraitAlias> &traitAlias = ce.getTraitAliases();
+
+    StringISet excludeTable;
+    if (traitPrecedences.size()) {
+      ce.compileExcludeTable(excludeTable, traitPrecedences, traits[i]);
+    }
+    ce.copyTraitMethodTable(methodTables[i], traits[i],
+                            traitAlias, excludeTable);
+  }
+
+  // now merge trait methods
+  for (unsigned int i = 0; i < numTraits; i++) {
+    ce.mergeTraitMethods(methodTables[i], i, numTraits, methodTables,
+                         resultTable);
+  }
+
+  // Now the resultTable contains all trait methods we would have to
+  // add to the class. The methods are inserted into the method table.
+  // All inherited methods are overridden, methods defined in the class are
+  // left untouched
+  ce.mergeTraitMethodsToClass(resultTable, this);
+}
+
+void ClassStatement::bindProperties(ClassEvalState &ce) const {
+  std::vector<const ClassStatement *> &traits = ce.getTraits();
+  std::vector<ClassVariable *> traitVariables;
+  unsigned int numTraits =  traits.size();
+
+  for (unsigned int i = 0; i < numTraits; i++) {
+    const ClassStatement *trait = traits[i];
+    ClassEvalState *tce = RequestEvalState::findClassState(trait->name());
+    tce->semanticCheck();
+    const std::vector<ClassVariable *> &tvs = tce->getTraitVariables();
+    for (unsigned int j = 0; j < trait->m_variablesVec.size(); j++) {
+      traitVariables.push_back(trait->m_variablesVec[j].get());
+    }
+    for (unsigned int j = 0; j < tvs.size(); j++) {
+      traitVariables.push_back(tvs[j]);
+    }
+  }
+  ce.setTraitVariables(traitVariables);
+}
+
+void ClassStatement::bindTraits(ClassEvalState &ce) const {
+  std::vector<const ClassStatement *> &traits = ce.getTraits();
+  if (traits.size() == 0) return;
+  initTraitStructures(ce);
+  bindMethods(ce);
+  bindProperties(ce);
 }
 
 Statement *ClassStatement::optimize(VariableEnvironment &env) {
@@ -244,14 +447,38 @@ Statement *ClassStatement::optimize(VariableEnvironment &env) {
 
 void ClassStatement::eval(VariableEnvironment &env) const {
   if (env.isGotoing()) return;
-  if (m_delayDeclaration) return;
   evalImpl(env);
 }
 
-void ClassStatement::evalImpl(VariableEnvironment &env) const {
-  ENTER_STMT;
-  RequestEvalState::declareClass(this);
+bool ClassStatement::checkHoist() const {
+  if (!m_parent->empty() &&
+      !RequestEvalState::findClassState(m_parent, false)) {
+    return false;
+  }
+  for (unsigned int i = 0; i < m_bases.size(); i++) {
+    if (RequestEvalState::findClassState(m_bases[i], false)) return false;
+  }
+  for (unsigned int i = 0; i < m_useTraitsVec.size(); i++) {
+    const std::vector<NamePtr> &traitNames = m_useTraitsVec[i]->getNames();
+    for (unsigned int j = 0; j < traitNames.size(); j++) {
+      if (RequestEvalState::findClassState(traitNames[j]->get(), false)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
 
+void ClassStatement::evalImpl(VariableEnvironment &env,
+                              bool fromMarker /* = false */) const {
+  ENTER_STMT;
+  // top level class statement must have m_needCheckHoist set to 0 or 1
+  ASSERT(!m_marker || m_needCheckHoist != -1);
+
+  if (fromMarker || !m_marker ||
+      (!m_needCheckHoist || checkHoist())) {
+    RequestEvalState::declareClass(this);
+  }
   const ClassStatement* parent_cls;
   if (!m_marker) {
     // Not a top level, immediately do semantic check
@@ -339,22 +566,40 @@ Object ClassStatement::create(ClassEvalState &ce,
   return NEWOBJ(EvalObjectData)(ce, builtinParent, root);
 }
 
-void ClassStatement::initializeObject(EvalObjectData *obj) const {
+void ClassStatement::initializeObject(
+  ClassEvalState &ce, EvalObjectData *obj) const {
   DummyVariableEnvironment env;
+  env.setCurrentClass(m_name->data());
   for (vector<ClassVariablePtr>::const_iterator it = m_variablesVec.begin();
        it != m_variablesVec.end(); ++it) {
     (*it)->set(env, obj);
   }
+  const vector<ClassVariable *> &traitVariables = ce.getTraitVariables();
+  for (vector<ClassVariable *>::const_iterator it = traitVariables.begin();
+       it != traitVariables.end(); ++it) {
+    (*it)->set(env, obj);
+  }
   const ClassStatement *cls = parentStatement();
   if (cls) {
-    cls->initializeObject(obj);
+    ClassEvalState *pce = ce.getParentClassEvalState();
+    if (!pce) {
+      pce = RequestEvalState::findClassState(cls->name());
+      ce.setParentClassEvalState(pce);
+    }
+    cls->initializeObject(*pce, obj);
   }
 }
 
-void ClassStatement::initializeStatics(LVariableTable &statics) const {
+void ClassStatement::initializeStatics(ClassEvalState &ce,
+                                       LVariableTable &statics) const {
   DummyVariableEnvironment env;
   for (vector<ClassVariablePtr>::const_iterator it = m_variablesVec.begin();
        it != m_variablesVec.end(); ++it) {
+    (*it)->setStatic(env, statics);
+  }
+  const vector<ClassVariable *> &traitVariables = ce.getTraitVariables();
+  for (vector<ClassVariable *>::const_iterator it =
+       traitVariables.begin(); it != traitVariables.end(); ++it) {
     (*it)->setStatic(env, statics);
   }
 }
@@ -382,7 +627,7 @@ void ClassStatement::addVariable(ClassVariablePtr v) {
 }
 
 void ClassStatement::addMethod(MethodStatementPtr m) {
-  if (m_methods.find(m->name().c_str()) != m_methods.end()) {
+  if (m_methods.find(m->name()) != m_methods.end()) {
     raise_error("Cannot redeclare %s::%s()",
                 m_name->data(), m->name().c_str());
   }
@@ -409,9 +654,13 @@ void ClassStatement::addMethod(MethodStatementPtr m) {
     }
   }
 
-  m_methods[m->name().c_str()] = m;
+  m_methods[m->name()] = m;
   m_methodsVec.push_back(m);
 }
+void ClassStatement::addUseTrait(UseTraitStatementPtr u) {
+  m_useTraitsVec.push_back(u);
+}
+
 void ClassStatement::addConstant(const string &name, ExpressionPtr v) {
   // Array is the only one allowed by the grammer but disallowed semantically
   if (v->isKindOf(Expression::KindOfArrayExpression)) {
@@ -421,10 +670,10 @@ void ClassStatement::addConstant(const string &name, ExpressionPtr v) {
   m_constants[m_constantNames.back()] = v;
 }
 
-bool ClassStatement::instanceOf(const char *c) const {
-  if (strcasecmp(m_name->data(), c) == 0) return true;
+bool ClassStatement::instanceOf(CStrRef c) const {
+  if (m_name->isame(c.get())) return true;
   for (unsigned i = 0; i < m_bases.size(); i++) {
-    if (strcasecmp(m_bases[i]->data(), c) == 0) return true;
+    if (m_bases[i]->isame(c.get())) return true;
   }
   for (unsigned i = 0; i < m_bases.size(); i++) {
     const ClassStatement *iface = RequestEvalState::findClass(m_bases[i]);
@@ -446,7 +695,7 @@ bool ClassStatement::instanceOf(const char *c) const {
   return false;
 }
 
-bool ClassStatement::subclassOf(const char *c) const {
+bool ClassStatement::subclassOf(CStrRef c) const {
   const ClassStatement *cls = this;
   while (cls) {
     if (cls->instanceOf(c)) return true;
@@ -455,13 +704,20 @@ bool ClassStatement::subclassOf(const char *c) const {
   return false;
 }
 
-const MethodStatement* ClassStatement::findMethod(const char* name,
-    bool recursive /* = false */, bool interfaces /* = false */) const {
-  hphp_const_char_imap<MethodStatementPtr>::const_iterator it =
+const MethodStatement* ClassStatement::findMethod(CStrRef name,
+    bool recursive /* = false */, bool interfaces /* = false */,
+    bool trait /* = true */) const {
+  StringIMap<MethodStatementPtr>::const_iterator it =
     m_methods.find(name);
   if (it != m_methods.end()) {
     return it->second.get();
   } else {
+    if (trait && !m_useTraitsVec.empty()) {
+      ClassEvalState *ce = RequestEvalState::findClassState(m_name);
+      int access;
+      const MethodStatement *m = ce->getTraitMethod(name, access);
+      if (m) return m;
+    }
     if (recursive) {
       return findParentMethod(name, interfaces);
     }
@@ -504,6 +760,27 @@ bool ClassStatement::getConstant(Variant &res, const char *c,
     }
   }
   return false;
+}
+
+String ClassStatement::resolveSpInTrait(
+  VariableEnvironment &env, CObjRef currentObj, Name *clsName) {
+  bool sp = clsName->isSp();
+  assert(sp);
+  const std::string &originalText = clsName->getOriginalText();
+  ASSERT(!originalText.empty());
+  if (originalText == "self") {
+    if (currentObj.isNull()) return env.currentClass();
+    return currentObj->o_getClassName();
+  }
+  if (originalText == "parent") {
+    if (currentObj.isNull()) {
+      const char *clsName = env.currentClass();
+      const ClassStatement *cls = RequestEvalState::findClass(clsName);
+      return cls->parent();
+    }
+    return currentObj->o_getParentName();
+  }
+  assert(false);
 }
 
 void ClassStatement::dump(std::ostream &out) const {
@@ -556,6 +833,9 @@ void ClassStatement::dump(std::ostream &out) const {
     m_variablesVec[i]->dump(out);
     out << "\n";
   }
+  for (unsigned int i = 0; i < m_useTraitsVec.size(); i++) {
+    m_useTraitsVec[i]->dump(out);
+  }
   for (unsigned int i = 0; i < m_methodsVec.size(); i++) {
     m_methodsVec[i]->dump(out);
   }
@@ -578,6 +858,16 @@ void ClassStatement::dumpModifiers(std::ostream &out, int m, bool variable) {
 void ClassStatement::getPropertyInfo(ClassInfoEvaled &owner)  const {
   for (vector<ClassVariablePtr>::const_iterator it = m_variablesVec.begin();
        it != m_variablesVec.end(); ++it) {
+    ClassInfo::PropertyInfo *p = new ClassInfo::PropertyInfo;
+    (*it)->getInfo(*p);
+    p->owner = &owner;
+    owner.m_properties[p->name] = p;
+    owner.m_propertiesVec.push_back(p);
+  }
+  ClassEvalState *ce = RequestEvalState::findClassState(name());
+  const vector<ClassVariable *> &traitVariables = ce->getTraitVariables();
+  for (vector<ClassVariable *>::const_iterator it = traitVariables.begin();
+       it != traitVariables.end(); ++it) {
     ClassInfo::PropertyInfo *p = new ClassInfo::PropertyInfo;
     (*it)->getInfo(*p);
     p->owner = &owner;
@@ -625,6 +915,17 @@ void ClassStatement::getInfo(ClassInfoEvaled &info) const {
     info.m_constantsVec.push_back(c);
   }
 
+  for (vector<UseTraitStatementPtr>::const_iterator it = m_useTraitsVec.begin();
+       it != m_useTraitsVec.end(); ++it) {
+    const std::vector<NamePtr> &traitNames = (*it)->getNames();
+    for (unsigned int i = 0; i < traitNames.size(); i++) {
+      String traitName = traitNames[i]->get();
+      if (info.m_traits.find(traitName) == info.m_traits.end()) {
+        info.m_traits.insert(traitName);
+        info.m_traitsVec.push_back(traitName);
+      }
+    }
+  }
   for (vector<MethodStatementPtr>::const_iterator it = m_methodsVec.begin();
        it != m_methodsVec.end(); ++it) {
     if (ParserBase::IsAnonFunctionName((*it)->name())) continue;
@@ -633,19 +934,37 @@ void ClassStatement::getInfo(ClassInfoEvaled &info) const {
     info.m_methods[(*it)->name()] = m;
     info.m_methodsVec.push_back(m);
   }
+  ClassEvalState *ce = RequestEvalState::findClassState(m_name);
+  ClassEvalState::MethodTable &traitMethodTable = ce->getTraitMethodTable();
+  for (ClassEvalState::MethodTable::const_iterator it =
+       traitMethodTable.begin(); it != traitMethodTable.end(); it++) {
+    ClassInfo::MethodInfo *m = new ClassInfo::MethodInfo;
+    const MethodStatement *ms = it->second.first;
+    int access = it->second.second;
+    ms->getInfo(*m, access);
+    info.m_methods[ms->name()] = m;
+    info.m_methodsVec.push_back(m);
+  }
+  const std::vector<ClassEvalState::TraitAlias> &traitAliases =
+    ce->getTraitAliases();
+  for (unsigned int i = 0; i < traitAliases.size(); i++) {
+    const ClassEvalState::TraitAlias &traitAlias = traitAliases[i];
+    info.m_traitAliasesVec.push_back(std::pair<String, String>(
+      traitAlias.m_alias, traitAlias.getFullName()));
+  }
 }
 
-bool ClassStatement::hasAccess(const char *context, Modifier level) const {
+bool ClassStatement::hasAccess(CStrRef context, Modifier level) const {
   ASSERT(context);
   switch (level) {
   case Public: return true;
-  case Private: return strcasecmp(context, m_name->data()) == 0;
+  case Private: return context->isame(m_name);
   case Protected:
     {
       if (!*context) return false;
-      if (strcasecmp(context, m_name->data()) == 0) return true;
+      if (context->isame(m_name)) return true;
       const ClassStatement *cls = RequestEvalState::findClass(context);
-      return cls->subclassOf(m_name->data()) || subclassOf(context);
+      return cls->subclassOf(m_name) || subclassOf(context);
     }
   default:
     ASSERT(false);
@@ -653,7 +972,7 @@ bool ClassStatement::hasAccess(const char *context, Modifier level) const {
   }
 }
 
-bool ClassStatement::attemptPropertyAccess(CStrRef prop, const char *context,
+bool ClassStatement::attemptPropertyAccess(CStrRef prop, CStrRef context,
                                            int &mods,
                                            bool rec /* = false */) const {
   if (g_context->getDebuggerBypassCheck()) {
@@ -680,7 +999,7 @@ bool ClassStatement::attemptPropertyAccess(CStrRef prop, const char *context,
   return hasAccess(context, level);
 }
 
-void ClassStatement::failPropertyAccess(CStrRef prop, const char *context,
+void ClassStatement::failPropertyAccess(CStrRef prop, CStrRef context,
     int mods) const {
   const char *mod = "protected";
   Modifier level = Public;
@@ -689,8 +1008,8 @@ void ClassStatement::failPropertyAccess(CStrRef prop, const char *context,
   if (level == ClassStatement::Private) mod = "private";
   throw FatalErrorException(0, "Attempt to access %s %s::%s%s%s",
       mod, m_name->data(), prop.data(),
-      *context ? " from " : "",
-      *context ? context : "");
+      *context->data() ? " from " : "",
+      *context->data() ? context->data() : "");
 }
 
 void ClassStatement::toArray(Array &props, Array &vals) const {
@@ -699,11 +1018,11 @@ void ClassStatement::toArray(Array &props, Array &vals) const {
        it != m_variablesVec.end(); ++it) {
     ClassVariable *cv = it->get();
     if ((cv->getModifiers() & Static) == 0) {
-      String pname(cv->name().c_str(), cv->name().size(), AttachLiteral);
+      String pname(cv->name());
       if (cv->getModifiers() & Private) {
         String tmp(pname);
         pname = zero;
-        pname += name().c_str();
+        pname += name();
         pname += zero;
         pname += tmp;
       }
@@ -760,27 +1079,30 @@ public:
   inline bool isInterface(const ClassStatement *cs) const {
     return cs->getModifiers() & ClassStatement::Interface;
   }
+  inline bool isTrait(const ClassStatement *cs) const {
+    return cs->getModifiers() & ClassStatement::Trait;
+  }
   inline bool isFinal(const ClassStatement *cs) const {
     return cs->getModifiers() & ClassStatement::Final;
   }
-  inline std::string name(const ClassStatement *cs) const {
-    return cs->name().c_str();
+  inline String name(const ClassStatement *cs) const {
+    return cs->name();
   }
   inline const MethodStatement *
   findEvalMethod(const ClassStatement *cs,
-                 const std::string &name,
+                 CStrRef name,
                  bool ifaces) const {
     const ClassStatement *dc;
     return findEvalMethodWithClass(cs, name, dc, ifaces);
   }
   inline const MethodStatement *
   findEvalMethodWithClass(const ClassStatement *cs,
-                          const std::string &name,
+                          CStrRef name,
                           const ClassStatement *&definingClass,
                           bool ifaces) const {
     definingClass = NULL;
     const MethodStatement* ms =
-      cs->findMethod(name.c_str(), true, ifaces);
+      cs->findMethod(name, true, ifaces);
     if (ms) {
       definingClass = ms->getClass();
       return ms;
@@ -789,14 +1111,14 @@ public:
   }
   inline const ClassInfo::MethodInfo *
   findBuiltinMethod(const ClassStatement *cs,
-                    const std::string &name,
+                    CStrRef name,
                     bool ifaces) const {
     const ClassInfo *dc;
     return findBuiltinMethodWithClass(cs, name, dc, ifaces);
   }
   inline const ClassInfo::MethodInfo *
   findBuiltinMethodWithClass(const ClassStatement *cs,
-                             const std::string &name,
+                             CStrRef name,
                              const ClassInfo *&definingClass,
                              bool ifaces) const {
     definingClass = NULL;
@@ -804,7 +1126,7 @@ public:
     const ClassInfo *pci = cs->getBuiltinParentInfo();
     if (pci) {
       ClassInfo *ci;
-      result = pci->hasMethod(name.c_str(), ci, ifaces);
+      result = pci->hasMethod(name, ci, ifaces);
       definingClass = ci;
     }
     if (result || !ifaces) return result;
@@ -814,7 +1136,7 @@ public:
          it != builtinIfaces.end(); ++it) {
       const ClassInfo *ici = *it;
       ClassInfo *ci;
-      result = ici->hasMethod(name.c_str(), ci, ifaces);
+      result = ici->hasMethod(name, ci, ifaces);
       definingClass = ci;
       if (result) return result;
     }
@@ -829,7 +1151,7 @@ public:
     return extractRawConstPointers(cs->m_variablesVec);
   }
   inline const ClassVariable* findVariable(const ClassStatement *cs,
-                                           const std::string &name) const {
+                                           CStrRef name) const {
     StringMap<ClassVariablePtr>::const_iterator it =
       cs->m_variables.find(name);
     return it == cs->m_variables.end() ? NULL : it->second.get();
@@ -851,8 +1173,8 @@ public:
   inline bool isPrivate(const MethodStatement *ms) const {
     return ms->getModifiers() & ClassStatement::Private;
   }
-  inline std::string name(const MethodStatement *ms) const {
-    return ms->name().c_str();
+  inline String name(const MethodStatement *ms) const {
+    return ms->name();
   }
   inline bool refReturn(const MethodStatement *ms) const {
     return ms->refReturn();
@@ -892,8 +1214,8 @@ public:
   inline bool hasInitialValue(const ClassVariable *cv) const {
     return cv->hasInitialValue();
   }
-  inline std::string name(const ClassVariable *cv) const {
-    return cv->name().c_str();
+  inline String name(const ClassVariable *cv) const {
+    return cv->name();
   }
 
 // ClassInfo* helpers
@@ -906,8 +1228,8 @@ public:
   inline bool isFinal(const ClassInfo *ci) const {
     return ci->getAttribute() & ClassInfo::IsFinal;
   }
-  inline std::string name(const ClassInfo *ci) const {
-    return ci->getName().c_str();
+  inline String name(const ClassInfo *ci) const {
+    return ci->getName();
   }
   inline const std::vector<ClassInfo::MethodInfo*>&
   methods(const ClassInfo *ci) const {
@@ -919,35 +1241,37 @@ public:
   }
   inline ClassInfo::PropertyInfo*
   findVariable(const ClassInfo *ci,
-               const std::string &name) const {
-    return ci->getPropertyInfo(name.c_str());
+               CStrRef name) const {
+    return ci->getPropertyInfo(name);
   }
   inline ClassInfo::MethodInfo*
   findEvalMethod(const ClassInfo* ci,
-                 const std::string &name,
+                 CStrRef name,
                  bool ifaces) const {
     const ClassInfo *cs;
     return findEvalMethodWithClass(ci, name, cs, ifaces);
   }
   inline ClassInfo::MethodInfo*
   findEvalMethodWithClass(const ClassInfo* ci,
-                          const std::string &name,
+                          CStrRef name,
                           const ClassInfo* &definingClass,
                           bool ifaces) const {
+    ASSERT((ci->getAttribute() & ClassInfo::IsSystem) &&
+      !(ci->getAttribute() & (ClassInfo::IsTrait | ClassInfo::UsesTraits)));
     ClassInfo *dci;
-    ClassInfo::MethodInfo *mi = ci->hasMethod(name.c_str(), dci, ifaces);
+    ClassInfo::MethodInfo *mi = ci->hasMethod(name, dci, ifaces);
     definingClass = dci;
     return mi;
   }
   inline ClassInfo::MethodInfo*
   findBuiltinMethod(const ClassInfo* ci,
-                    const std::string &name,
+                    CStrRef name,
                     bool ifaces) const {
     return findEvalMethod(ci, name, ifaces);
   }
   inline ClassInfo::MethodInfo*
   findBuiltinMethodWithClass(const ClassInfo* ci,
-                             const std::string &name,
+                             CStrRef name,
                              const ClassInfo* &definingClass,
                              bool ifaces) const {
     return findEvalMethodWithClass(ci, name, definingClass, ifaces);
@@ -969,8 +1293,8 @@ public:
   inline bool isPrivate(const ClassInfo::MethodInfo *mi) const {
     return mi->attribute & ClassInfo::IsPrivate;
   }
-  inline std::string name(const ClassInfo::MethodInfo *mi) const {
-    return mi->name.c_str();
+  inline String name(const ClassInfo::MethodInfo *mi) const {
+    return mi->name;
   }
   inline bool refReturn(const ClassInfo::MethodInfo *mi) const {
     return mi->attribute & ClassInfo::IsReference;
@@ -1010,8 +1334,8 @@ public:
   inline bool hasInitialValue(const ClassInfo::PropertyInfo *pi) const {
     return false; // TODO: PropertyInfo does not contain this info
   }
-  inline std::string name(const ClassInfo::PropertyInfo *pi) const {
-    return pi->name.c_str();
+  inline String name(const ClassInfo::PropertyInfo *pi) const {
+    return pi->name;
   }
 
 };
@@ -1037,8 +1361,7 @@ bool MethodLevelSemanticCheckImpl(bool extendingAbstractClass,
                                   MethodProxyC child,
                                   const Extractor &x) {
   bool incompatible = false;
-  if (extendingAbstractClass &&
-      strcmp(x.name(child).c_str(), "__construct") == 0) {
+  if (extendingAbstractClass && x.name(child)->same(s___construct.get())) {
     // When a class C extends an abstract class B, the
     // signature of C::__construct does not have to match
     // that of B::__construct
@@ -1475,9 +1798,9 @@ const {
   const ClassStatement *parent = parentStatement();
   const ClassInfo *builtinParent = NULL;
   if (!parent && !m_parent->empty()) {
-    builtinParent = ClassInfo::FindClass(m_parent->data());
+    builtinParent = ClassInfo::FindClass(m_parent);
     if (!builtinParent) {
-      builtinParent = ClassInfo::FindInterface(m_parent->data());
+      builtinParent = ClassInfo::FindInterface(m_parent);
     }
   }
   if (cls) {
@@ -1492,7 +1815,8 @@ const {
     // make sure non-(abstract classes/ifaces) don't declare
     // abstract methods
     if (!s_semanticExtractor.isInterface(this) &&
-        !s_semanticExtractor.isAbstract(this)) {
+        !s_semanticExtractor.isAbstract(this) &&
+        !s_semanticExtractor.isTrait(this)) {
       for (vector<MethodStatementPtr>::const_iterator it =
              m_methodsVec.begin();
            it != m_methodsVec.end(); ++it) {
@@ -1539,7 +1863,7 @@ const {
     for (size_t i = 0; i < m_bases.size(); i++) {
       const ClassStatement *iface = RequestEvalState::findClass(m_bases[i]);
       const ClassInfo *builtinIface =
-        !iface ? ClassInfo::FindInterface(m_bases[i]->data()) : NULL;
+        !iface ? ClassInfo::FindInterface(m_bases[i]) : NULL;
       if (iface) {
         ClassLevelMethodAccessLevelCheck(iface, this);
       } else if (builtinIface) {
@@ -1549,7 +1873,7 @@ const {
 
     // Check for multiple abstract function declarations
     if (!m_parent->empty() || !m_bases.empty()) {
-      hphp_const_char_imap<const char*> abstracts;
+      StringIMap<String> abstracts;
       abstractMethodCheck(abstracts, true);
     }
     cls = this;
@@ -1586,10 +1910,10 @@ const {
     const ClassInfo *builtinIface = NULL;
     if (!iface) {
       // try to find it as a class first (so we can report error)
-      builtinIface = ClassInfo::FindClass(m_bases[i]->data());
+      builtinIface = ClassInfo::FindClass(m_bases[i]);
       if (LIKELY(!builtinIface)) {
         // ok, now try to find it as an interface
-        builtinIface = ClassInfo::FindInterface(m_bases[i]->data());
+        builtinIface = ClassInfo::FindInterface(m_bases[i]);
       }
     }
     if (iface) {
@@ -1614,7 +1938,7 @@ const {
   }
 }
 
-const MethodStatement* ClassStatement::findParentMethod(const char* name,
+const MethodStatement* ClassStatement::findParentMethod(CStrRef name,
     bool interface) const {
   const ClassStatement *parent = parentStatement();
   if (parent) {
@@ -1634,20 +1958,19 @@ const MethodStatement* ClassStatement::findParentMethod(const char* name,
 }
 
 void ClassStatement::abstractMethodCheck(
-    hphp_const_char_imap<const char*> &abstracts, bool ifaces) const {
+  StringIMap<String> &abstracts, bool ifaces) const {
   bool iface = getModifiers() & Interface;
   if (iface || getModifiers() & Abstract)  {
     for (vector<MethodStatementPtr>::const_iterator it = m_methodsVec.begin();
         it != m_methodsVec.end(); ++it) {
       if (iface || (*it)->getModifiers() & Abstract) {
-        hphp_const_char_imap<const char*>::const_iterator ait =
-          abstracts.find((*it)->name().c_str());
-        if (ait != abstracts.end() && ait->second != name().c_str()) {
+        StringIMap<String>::const_iterator ait = abstracts.find((*it)->name());
+        if (ait != abstracts.end() && ait->second != name()) {
           raise_error("Can't inherit abstract function %s::%s (previously "
-              "declared abstract in %s)", name().c_str(), ait->first,
-              ait->second);
+              "declared abstract in %s)", name().c_str(), ait->first.c_str(),
+              ait->second.c_str());
         }
-        abstracts[(*it)->name().c_str()] = name().c_str();
+        abstracts[(*it)->name()] = name();
       }
     }
   }
@@ -1670,13 +1993,13 @@ void ClassStatement::abstractMethodCheck(
           const ClassInfo::MethodVec &meths = ici->getMethodsVec();
           for (ClassInfo::MethodVec::const_iterator mit = meths.begin();
               mit != meths.end(); ++mit) {
-            hphp_const_char_imap<const char*>::const_iterator ait =
+            StringIMap<String>::const_iterator ait =
               abstracts.find((*mit)->name);
             if (ait != abstracts.end() && ait->second != ici->getName()) {
               raise_error("Can't inherit abstract function %s::%s (previously "
                           "declared abstract in %s)",
                           m_bases[i]->data(), (*mit)->name.c_str(),
-                          ait->second);
+                          ait->second.c_str());
             }
             abstracts[(*mit)->name] = ici->getName();
           }
@@ -1688,7 +2011,7 @@ void ClassStatement::abstractMethodCheck(
 const ClassInfo *ClassStatement::getBuiltinParentInfo() const {
   const ClassStatement *parent = parentStatement();
   if (parent) return parent->getBuiltinParentInfo();
-  if (!m_parent->empty()) return ClassInfo::FindClass(m_parent->data());
+  if (!m_parent->empty()) return ClassInfo::FindClass(m_parent);
   return NULL;
 }
 
@@ -1707,7 +2030,7 @@ void ClassStatement::collectBuiltinInterfaceInfos(
     if (iface) {
       iface->collectBuiltinInterfaceInfos(infos, excludeParent);
     } else {
-      const ClassInfo *ci = ClassInfo::FindInterface(m_bases[i]->data());
+      const ClassInfo *ci = ClassInfo::FindInterface(m_bases[i]);
       if (ci) infos.push_back(ci);
     }
   }
@@ -1730,7 +2053,7 @@ void ClassStatementMarker::eval(VariableEnvironment &env) const {
   ClassEvalState *ce = RequestEvalState::findClassState(m_class->name());
   if (!ce || ce->getClass() != m_class) {
     // Delayed due to volatility
-    m_class->evalImpl(env);
+    m_class->evalImpl(env, true);
     ce = RequestEvalState::findClassState(m_class->name());
   }
   ASSERT(ce);

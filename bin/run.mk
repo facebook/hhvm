@@ -22,12 +22,16 @@ endif
 
 -include sep_extensions.mk
 
+EXTRA_LIB :=
+ifdef HPHP_EMITTER
+EXTRA_LIB := -Wl,-u,hphp_compiler_parse,$(HPHP_LIB)/libhphp_analysis.a
+endif
 ifdef HPHPI_THUNK
 CPPFLAGS += -DTHUNK_FILENAME='"/.hphpi-thunk"'
 endif
 
 CPPFLAGS += -I. $(SEP_EXTENSION_INCLUDE_PATHS)
-LIBS = $(SEP_EXTENSION_LIBS) $(HPHP_LIB)/libhphp_runtime.a $(ALL_LIBS)
+LIBS = $(EXTRA_LIB) $(SEP_EXTENSION_LIBS) $(HPHP_LIB)/libhphp_runtime.a $(ALL_LIBS) $(HHVM_EXT_LIB)
 
 include $(HPHP_HOME)/src/rules.mk
 

@@ -27,18 +27,24 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+// Forward declaration.
+namespace VM {
+  class Class;
+}
+
 struct TypedValue;
 
 struct Value {
   mutable union {
-    int64        num;
-    double       dbl;
-    litstr       str;
-    StringData  *pstr;
-    ArrayData   *parr;
-    ObjectData  *pobj;
-    Variant     *pvar;
-    TypedValue  *ptv;
+    int64       num;
+    double      dbl;
+    litstr      str;
+    StringData *pstr;
+    ArrayData  *parr;
+    ObjectData *pobj;
+    VM::Class  *pcls;
+    Variant    *pvar;
+    TypedValue *ptv;
   } m_data;
 };
 
@@ -49,6 +55,7 @@ struct TypedValue : public Value {
    */
   mutable int _count;
   mutable DataType m_type;
+  std::string pretty() const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

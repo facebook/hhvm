@@ -1,0 +1,12 @@
+A::__callStatic: private_func(1,2)
+A::__callStatic: protected_func(1,2)
+In public_func!
+B::__callStatic: private_func(1,2)
+B::__callStatic: protected_func(1,2)
+In public_func!
+In private_func!
+In protected_func!
+In public_func!
+A::__callStatic: private_func(1,2)
+In protected_func!
+In public_func!

@@ -17,6 +17,8 @@
 
 #include <runtime/ext/ext_xmlwriter.h>
 
+#include <system/lib/systemlib.h>
+
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(xmlwriter);
 ///////////////////////////////////////////////////////////////////////////////
@@ -282,6 +284,7 @@ static xmlChar *xmls(CStrRef s) {
 
 c_XMLWriter::c_XMLWriter(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb), m_ptr(NULL), m_output(NULL), m_uri_output(NULL) {
+  CPP_BUILTIN_CLASS_INIT(XMLWriter);
 }
 
 c_XMLWriter::~c_XMLWriter() {

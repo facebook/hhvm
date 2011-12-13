@@ -40,7 +40,6 @@ find_library (LIBDWARF_LIBRARIES
       /sw/lib
       ENV LIBRARY_PATH   # PATH and LIB will also work
       ENV LD_LIBRARY_PATH)
-message(${LIBDWARF_LIBRARIES})
 include (FindPackageHandleStandardArgs)
 
 

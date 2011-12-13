@@ -88,7 +88,7 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
   }
 
   if (RuntimeOption::EnableSSL && m_sslCTX) {
-    SSLInit::Init();
+    ASSERT(SSLInit::IsInited());
     m_pageServer->enableSSL(m_sslCTX, RuntimeOption::SSLPort);
   }
 
@@ -171,6 +171,8 @@ void HttpServer::onServerShutdown() {
   if (RuntimeOption::EnableDebuggerServer) {
     Logger::Info("debugger server stopped");
   }
+
+  XboxServer::Stop();
 
   // When a new instance of HPHP has taken over our page server socket,
   // stop our admin server and satellites so it can acquire those ports.

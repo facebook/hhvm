@@ -35,6 +35,8 @@ class c_IteratorIterator : public ExtObjectData {
   // Properties
   Variant m_iterator;
 
+  // Destructor
+  ~c_IteratorIterator() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(IteratorIterator, IteratorIterator, ObjectData)
   static const ClassPropTable os_prop_table;

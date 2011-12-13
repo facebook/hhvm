@@ -32,7 +32,7 @@ extern const VarNR &s_sys_svif01bca90;
 
 extern VarNR s_sys_svs00000000;
 
-/* SRC: classes/exception.php line 286 */
+/* SRC: classes/exception.php line 291 */
 FORWARD_DECLARE_CLASS(ErrorException);
 extern const ObjectStaticCallbacks cw_ErrorException;
 class c_ErrorException : public c_Exception {
@@ -41,6 +41,8 @@ class c_ErrorException : public c_Exception {
   // Properties
   Variant m_severity;
 
+  // Destructor
+  ~c_ErrorException() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ErrorException, ErrorException, Exception)
   static const ClassPropTable os_prop_table;

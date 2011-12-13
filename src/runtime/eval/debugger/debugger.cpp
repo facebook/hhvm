@@ -120,11 +120,17 @@ void Debugger::InterruptHard(InterruptSite &site) {
 bool Debugger::InterruptException(CVarRef e) {
   if (RuntimeOption::EnableDebugger) {
     ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-    if (ti->m_top && ti->m_reqInjectionData.debugger) {
-      Eval::InterruptSite site(ti->m_top, e);
-      Eval::Debugger::Interrupt(ExceptionThrown, NULL, &site);
-      if (site.isJumping()) {
-        return false;
+    if (ti->m_reqInjectionData.debugger) {
+      if (hhvm) {
+        InterruptVMHook(ExceptionThrown, e);
+      } else {
+        if (ti->m_top) {
+          Eval::InterruptSiteFI site(ti->m_top, e);
+          Eval::Debugger::Interrupt(ExceptionThrown, NULL, &site);
+          if (site.isJumping()) {
+            return false;
+          }
+        }
       }
     }
   }
@@ -162,6 +168,13 @@ void Debugger::Interrupt(int type, const char *program,
       throw DebuggerClientExitException();
     }
   }
+}
+
+void Debugger::InterruptVMHook(int type /* = BreakPointReached */,
+                               CVarRef e /* = null_variant */) {
+  const_assert(hhvm);
+  InterruptSiteVM site(type == HardBreakPoint, e);
+  Interrupt(type, NULL, &site);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -210,8 +223,13 @@ void Debugger::addSandbox(const DSandboxInfo &sandbox) {
   string id = sandbox.id();
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   m_threadInfos[(int64)pthread_self()] = ti;
-  if (m_proxies[id]) {
+  DebuggerProxyPtr proxy = m_proxies[id];
+  if (proxy) {
     ti->m_reqInjectionData.debugger = true;
+    if (hhvm) {
+      DebuggerProxyVM* proxyVM = (DebuggerProxyVM*)proxy.get();
+      proxyVM->writeInjTablesToThread();
+    }
     m_sandboxThreads[id].erase(ti);
   } else {
     m_sandboxThreads[id].insert(ti);
@@ -227,7 +245,9 @@ void Debugger::addSandbox(const DSandboxInfo &sandbox) {
 }
 
 void Debugger::addProxy(SmartPtr<Socket> socket, bool local) {
-  DebuggerProxyPtr proxy(new DebuggerProxy(socket, local));
+  DebuggerProxyPtr proxy(hhvm
+                         ? (DebuggerProxy*) new DebuggerProxyVM(socket, local)
+                         : new DebuggerProxy(socket, local));
   switchSandbox(proxy, proxy->getSandboxId());
   if (!local) {
     proxy->startDummySandbox();

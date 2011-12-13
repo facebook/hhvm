@@ -50,10 +50,10 @@ bool CmdConfig::onClient(DebuggerClient *client) {
       client->print("BypassAccessCheck(bac) set to on.\n"
                     "All code executed from debugger is bypassing "
                     "access check!");
-      client->setBypassAccessCheck(true);
+      client->setDebuggerBypassCheck(true);
     } else if (value == "off") {
       client->print("BypassAccessCheck(bac) set to off");
-      client->setBypassAccessCheck(false);
+      client->setDebuggerBypassCheck(false);
     } else {
       return help(client);
     }
@@ -65,8 +65,31 @@ bool CmdConfig::onClient(DebuggerClient *client) {
       client->error("%d is invalid for PrintLevel(pl)");
       return true;
     }
-    client->setPrintLevel(pl);
+    client->setDebuggerPrintLevel(pl);
     client->print("PrintLevel(pl) is set to %d", pl);
+    return true;
+  }
+  if (var == "SmallStep" || var == "ss") {
+    if (value == "on") {
+      client->print("SmallStep(ss) set to on.\n");
+      client->setDebuggerSmallStep(true);
+    } else if (value == "off") {
+      client->print("SmallStep(ss) set to off");
+      client->setDebuggerSmallStep(false);
+    } else {
+      return help(client);
+    }
+    return true;
+  }
+  if (var == "ApiModeSerialize") {
+    ASSERT(client->isApiMode());
+    if (value == "on") {
+      client->setDebuggerApiModeSerialize(true);
+    } else if (value == "off") {
+      client->setDebuggerApiModeSerialize(false);
+    } else {
+      return true;
+    }
     return true;
   }
 
@@ -74,10 +97,22 @@ bool CmdConfig::onClient(DebuggerClient *client) {
   return true;
 }
 
+void CmdConfig::setClientOutput(DebuggerClient *client) {
+  client->setOutputType(DebuggerClient::OTValues);
+  Array values;
+  values.set("BypassAccessCheck", client->getDebuggerBypassCheck());
+  values.set("PrintLevel", client->getDebuggerPrintLevel());
+  values.set("SmallStep", client->getDebuggerSmallStep());
+  values.set("ApiModeSerialize", client->getDebuggerApiModeSerialize());
+  client->setOTValues(values);
+}
+
 void CmdConfig::listVars(DebuggerClient *client) {
-  client->print("BypassAccessCheck(bac) %s", client->getBypassAccessCheck() ?
+  client->print("BypassAccessCheck(bac) %s", client->getDebuggerBypassCheck() ?
                                              "on" : "off");
-  client->print("PrintLevel(pl) %d", client->getPrintLevel());
+  client->print("PrintLevel(pl) %d", client->getDebuggerPrintLevel());
+  client->print("SmallStep(ss) %s", client->getDebuggerSmallStep() ?
+                                    "on" : "off");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

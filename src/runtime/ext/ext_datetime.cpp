@@ -17,6 +17,8 @@
 
 #include <runtime/ext/ext_datetime.h>
 
+#include <system/lib/systemlib.h>
+
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(date);
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,6 +55,7 @@ const int64 q_DateTimeZone$$PER_COUNTRY = 4096;
 // methods
 
 c_DateTime::c_DateTime(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
+  CPP_BUILTIN_CLASS_INIT(DateTime);
 }
 
 c_DateTime::~c_DateTime() {
@@ -130,6 +133,7 @@ ObjectData *c_DateTime::clone() {
 
 c_DateTimeZone::c_DateTimeZone(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb) {
+  CPP_BUILTIN_CLASS_INIT(DateTimeZone);
 }
 
 c_DateTimeZone::~c_DateTimeZone() {

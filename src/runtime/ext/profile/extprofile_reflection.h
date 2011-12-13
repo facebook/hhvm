@@ -29,6 +29,10 @@ inline Array x_hphp_get_extension_info(CStrRef name) {
   return f_hphp_get_extension_info(name);
 }
 
+inline Array x_hphp_get_method_info(CVarRef cls, CVarRef name) {
+  return f_hphp_get_method_info(cls, name);
+}
+
 inline Array x_hphp_get_class_info(CVarRef name) {
   return f_hphp_get_class_info(name);
 }

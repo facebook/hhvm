@@ -315,7 +315,7 @@ private:
   std::vector<ScopePtrPair> m_scopes;
   std::vector<StaticStatementPtr> &m_staticStatements;
   int m_classVarMods;
-
+  bool m_inTrait;
   std::vector<int> m_foreaches;
 
   // parser output
@@ -325,7 +325,7 @@ private:
 
   void pushClass(ClassStatementPtr cl);
   void popClass();
-  std::string getCurrentClass(); // lexical scope
+  std::string getCurrentClass(bool allowTrait = false); // lexical scope
 
   void pushFunc(FunctionStatementPtr fs);
   void popFunc();

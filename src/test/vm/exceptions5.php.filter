@@ -1,0 +1,2 @@
+#!/bin/bash
+sed -e 's/\\n/\n/g' | sed -e 's/\/.*src/src/g' | sed -e 's/\(.*\)line.*/\1/g' | sort | uniq

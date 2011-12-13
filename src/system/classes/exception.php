@@ -14,6 +14,7 @@ class Exception {
   protected $file;          // source filename of exception
   protected $line;          // source line of exception
   protected $trace;         // full stacktrace
+  protected $inited = false;
 
   /**
    * This may not be implemented in __construct(), because a sub-exception
@@ -22,6 +23,10 @@ class Exception {
    * just to make sure $this->trace is always populated.
    */
   final function __init__() {
+    if ($this->inited) {
+      return;
+    }
+    $this->inited = true;
     $this->trace = debug_backtrace();
 
     // removing exception constructor stacks to be consistent with PHP
@@ -57,7 +62,7 @@ class Exception {
  *
  * @return     mixed   Returns the Exception message as a string.
  */
-  final function getMessage() {
+  function getMessage() {
     return $this->message;
   }
 
@@ -83,7 +88,7 @@ class Exception {
  *
  * @return     mixed   Returns the Exception code as a integer.
  */
-  final function getCode() {
+  function getCode() {
     return $this->code;
   }
 

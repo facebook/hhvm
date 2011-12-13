@@ -45,10 +45,11 @@ bool CmdFrame::onClient(DebuggerClient *client) {
 
   CmdWhere().fetchStackTrace(client);
   client->moveToFrame(CmdUp::ParseNumber(client));
-  if (client->isApiMode()){
-    client->setStackTrace(null_array);
-  }
   return true;
+}
+
+void CmdFrame::setClientOutput(DebuggerClient *client) {
+  client->setOutputType(DebuggerClient::OTStacktrace);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

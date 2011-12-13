@@ -26,6 +26,8 @@ namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+static StaticString s_trait_marker("[trait]");
+
 StaticMemberExpression::StaticMemberExpression(EXPRESSION_ARGS,
     const NamePtr &cls, const NamePtr &variable)
   : LvalExpression(KindOfStaticMemberExpression, EXPRESSION_PASS),
@@ -33,12 +35,18 @@ StaticMemberExpression::StaticMemberExpression(EXPRESSION_ARGS,
 
 void StaticMemberExpression::unset(VariableEnvironment &env) const {
   String cls = m_class->get(env);
+  if (cls.same(s_trait_marker)) {
+    cls = ClassStatement::resolveSpInTrait(env, Object(), m_class.get());
+  }
   String variable(m_variable->get(env));
   throw_fatal_unset_static_property(cls.data(), variable.data());
 }
 
 bool StaticMemberExpression::exist(VariableEnvironment &env, int op) const {
   String cls = m_class->get(env);
+  if (cls.same(s_trait_marker)) {
+    cls = ClassStatement::resolveSpInTrait(env, Object(), m_class.get());
+  }
   String variable(m_variable->get(env));
   Variant *lv = get_static_property_lv(cls, variable.data());
   if (op == T_ISSET) {
@@ -56,6 +64,9 @@ Expression *StaticMemberExpression::optimize(VariableEnvironment &env) {
 
 Variant &StaticMemberExpression::lval(VariableEnvironment &env) const {
   String cls = m_class->get(env);
+  if (cls.same(s_trait_marker)) {
+    cls = ClassStatement::resolveSpInTrait(env, Object(), m_class.get());
+  }
   String variable(m_variable->get(env));
   Variant *lv = get_static_property_lv(cls, variable.data());
   if (lv) {

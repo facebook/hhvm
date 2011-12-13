@@ -51,6 +51,8 @@ void DummySandbox::stop() {
 }
 
 void DummySandbox::run() {
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  ti->m_reqInjectionData.dummySandbox = true;
   while (!m_stopped) {
     try {
       char *argv[] = {"", NULL};

@@ -82,8 +82,7 @@ void VariableEnvironment::InitTempStack() {
 }
 
 VariableEnvironment::VariableEnvironment()
-    : m_currentClass(NULL), m_breakLevel(0), m_returning(false),
-      m_closure(NULL)
+    : m_breakLevel(0), m_returning(false), m_closure(NULL)
 {
 }
 
@@ -114,24 +113,24 @@ void VariableEnvironment::unset(CStrRef name, int64 hash) {
 }
 
 void VariableEnvironment::setCurrentObject(CObjRef co) {
-  ASSERT(!m_currentClass);
+  ASSERT(m_currentClass.empty());
   m_currentObject = co;
   m_currentClass = co->o_getClassName();
   getVar(s_this, SgNormal) = co;
 }
-void VariableEnvironment::setCurrentClass(const char* cls) {
+void VariableEnvironment::setCurrentClass(CStrRef cls) {
   ASSERT(m_currentObject.isNull());
   m_currentClass = cls;
 }
 
-const char* VariableEnvironment::currentClass() const {
+String VariableEnvironment::currentClass() const {
   return m_currentClass;
 }
 const ClassStatement *VariableEnvironment::currentClassStatement() const {
   return NULL;
 }
 String VariableEnvironment::currentContext() const {
-  return m_currentClass ? m_currentClass : "";
+  return m_currentClass ? m_currentClass : empty_string;
 }
 
 void VariableEnvironment::setIdx(int idx, Variant *v) {
@@ -223,7 +222,7 @@ void FuncScopeVariableEnvironment::flagStatic(CStrRef name, int64 hash) {
     }
   }
   ASSERT(m_staticEnv != NULL);
-  if (!m_staticEnv->exists(name.data())) {
+  if (!m_staticEnv->exists(name)) {
     m_staticEnv->getVar(name, SgNormal) = m_func->getStaticValue(*this, name);
   }
   getVar(name, SgNormal).assignRef(m_staticEnv->getVar(name, SgNormal));

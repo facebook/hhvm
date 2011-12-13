@@ -19,11 +19,14 @@
 #include <runtime/eval/runtime/eval_state.h>
 #include <runtime/eval/ast/class_statement.h>
 #include <runtime/eval/ast/method_statement.h>
+#include <runtime/eval/runtime/variable_environment.h>
 
 namespace HPHP {
 namespace Eval {
 using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
+
+static StaticString s_trait_marker("[trait]");
 
 NewObjectExpression::NewObjectExpression(EXPRESSION_ARGS, NamePtr name,
                       const std::vector<ExpressionPtr> &params)
@@ -37,6 +40,9 @@ Expression *NewObjectExpression::optimize(VariableEnvironment &env) {
 
 Variant NewObjectExpression::eval(VariableEnvironment &env) const {
   String name(m_name->get(env));
+  if (name.same(s_trait_marker)) {
+    name = ClassStatement::resolveSpInTrait(env, Object(), m_name.get());
+  }
   Object o(create_object_only(name));
   SET_LINE;
 
@@ -61,11 +67,6 @@ Variant NewObjectExpression::eval(VariableEnvironment &env) const {
     CVarRef a4 = (count > 4) ? evalParam(env, ci, 4) : null;
     CVarRef a5 = (count > 5) ? evalParam(env, ci, 5) : null;
     (ci->getMethFewArgs())(mcp1, count, a0, a1, a2, a3, a4, a5);
-    return o;
-  }
-  if (RuntimeOption::UseArgArray) {
-    ArgArray *args = prepareArgArray(env, ci, count);
-    (ci->getMeth())(mcp1, args);
     return o;
   }
   ArrayInit ai(count);

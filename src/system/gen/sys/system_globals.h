@@ -45,7 +45,13 @@ class SystemGlobals : public Globals {
 public:
   SystemGlobals();
   void initialize();
+  // HHBC global infrastructure
+  Variant hg_global_storage;
+  // HHBC Function/Method Static Variables
+  Array hg_static_storage;
 
+  Array stgv_Array[1];
+  #define s_ReflectionClass$$fetched stgv_Array[0]
   CallInfo* stgv_CallInfoPtr[1];
   RedeclaredObjectStaticCallbacksConst* stgv_RedeclaredObjectStaticCallbacksConstPtr[1];
   Variant stgv_Variant[13];
@@ -87,6 +93,7 @@ extern const int64 k_FB_UNSERIALIZE_UNEXPECTED_END;
 extern const int64 k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE;
 extern const double k_INF;
 extern const int64 k_JSON_FB_LOOSE;
+extern const int64 k_JSON_FB_UNLIMITED;
 extern const int64 k_JSON_FORCE_OBJECT;
 extern const int64 k_JSON_HEX_AMP;
 extern const int64 k_JSON_HEX_APOS;

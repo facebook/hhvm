@@ -44,6 +44,8 @@ class c_SplFileInfo : public ExtObjectData {
   // Properties
   Variant m_rsrc;
 
+  // Destructor
+  ~c_SplFileInfo() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(SplFileInfo, SplFileInfo, ObjectData)
   static const ClassPropTable os_prop_table;

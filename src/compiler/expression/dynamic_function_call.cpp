@@ -54,6 +54,9 @@ ExpressionPtr DynamicFunctionCall::clone() {
 void DynamicFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
   FunctionCall::analyzeProgram(ar);
   if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
+    if (!m_className.empty()) {
+      resolveClass();
+    }
     if (!m_class) {
       addUserClass(ar, m_className);
     }

@@ -241,7 +241,8 @@ const ObjectStaticCallbacks cw_RecursiveDirectoryIterator = {
   c_RecursiveDirectoryIterator::s_call_info_table,c_RecursiveDirectoryIterator::s_call_info_index,
   c_RecursiveDirectoryIterator::s_instanceof_table,c_RecursiveDirectoryIterator::s_instanceof_index,
   &c_RecursiveDirectoryIterator::s_class_name,
-  &c_RecursiveDirectoryIterator::os_prop_table,&c_RecursiveDirectoryIterator::ci___construct,0,&cw_DirectoryIterator,0x0
+  &c_RecursiveDirectoryIterator::os_prop_table,&c_RecursiveDirectoryIterator::ci___construct,0,&cw_DirectoryIterator,0x0,
+  &c_RecursiveDirectoryIterator::s_cls
 };
 /* SRC: classes/directoryiterator.php line 132 */
 void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags //  = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */
@@ -481,7 +482,8 @@ const ObjectStaticCallbacks cw_DirectoryIterator = {
   c_DirectoryIterator::s_call_info_table,c_DirectoryIterator::s_call_info_index,
   c_DirectoryIterator::s_instanceof_table,c_DirectoryIterator::s_instanceof_index,
   &c_DirectoryIterator::s_class_name,
-  &c_SplFileInfo::os_prop_table,&c_DirectoryIterator::ci___construct,0,&cw_SplFileInfo,0x0
+  &c_SplFileInfo::os_prop_table,&c_DirectoryIterator::ci___construct,0,&cw_SplFileInfo,0x0,
+  &c_DirectoryIterator::s_cls
 };
 /* SRC: classes/directoryiterator.php line 14 */
 void c_DirectoryIterator::t___construct(Variant v_path) {

@@ -106,6 +106,7 @@ namespace HPHP {
   public:                                                               \
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \
+  static HPHP::VM::Class* s_cls;                                        \
   static const InstanceOfInfo s_instanceof_table[];                     \
   static const int s_instanceof_index[];                                \
 
@@ -114,6 +115,7 @@ namespace HPHP {
   public:                                                               \
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \
+  static HPHP::VM::Class* s_cls;                                        \
   static const InstanceOfInfo s_instanceof_table[];                     \
   static const int s_instanceof_index[];                                \
 
@@ -136,6 +138,7 @@ namespace HPHP {
 
 #define IMPLEMENT_CLASS_COMMON(cls)                                     \
   StaticString c_##cls::s_class_name(c_##cls::GetClassName());          \
+  HPHP::VM::Class* c_##cls::s_cls = NULL;                               \
 
 #define IMPLEMENT_CLASS(cls)                                            \
   IMPLEMENT_CLASS_COMMON(cls)                                           \
@@ -156,6 +159,12 @@ namespace HPHP {
   static Variant iwfa_##methname(void *self,                            \
                                  int count, INVOKE_FEW_ARGS_IMPL_ARGS); \
   static Variant iw_##methname(void *self, CArrRef params);             \
+
+#define CPP_BUILTIN_CLASS_INIT(name) do { \
+  if (hhvm) { \
+    m_cls = c_##name::s_cls; \
+  } \
+} while (0)
 
 //////////////////////////////////////////////////////////////////////////////
 // jump table entries
@@ -235,7 +244,7 @@ do { \
 #define LOOP_COUNTER(n)
 #define LOOP_COUNTER_CHECK(n)                                           \
   if ((++lc & 1023) == 0) {                                             \
-    check_request_timeout_ex(fi, lc);                                   \
+    check_request_timeout_ex(lc);                                       \
   }
 #define LOOP_COUNTER_CHECK_INFO(n)                                      \
   if ((++lc & 1023) == 0) {                                             \
@@ -249,7 +258,7 @@ do { \
 
 #ifdef EXECUTION_PROFILER
 #define EXECUTION_PROFILER_INJECTION(n) \
-  ExecutionProfiler ep(fi.getThreadInfo(), n);
+  ExecutionProfiler ep(ThreadInfo::s_threadInfo.getNoCheck(), n);
 #else
 #define EXECUTION_PROFILER_INJECTION(n)
 #endif
@@ -263,10 +272,10 @@ do { \
 // Get global variables from thread info.
 #define DECLARE_GLOBAL_VARIABLES_INJECTION(g)       \
   GlobalVariables *g ATTRIBUTE_UNUSED =  \
-    fi.getThreadInfo()->m_globals;
+    ThreadInfo::s_threadInfo->m_globals;
 #define DECLARE_SYSTEM_GLOBALS_INJECTION(g)         \
   SystemGlobals *g ATTRIBUTE_UNUSED =    \
-    (SystemGlobals *)fi.getThreadInfo()->m_globals;
+    (SystemGlobals *)ThreadInfo::s_threadInfo->m_globals;
 
 #define CHECK_ONCE(n)                             \
   {                                               \
@@ -276,6 +285,30 @@ do { \
   }
 
 // Stack frame injection is also for correctness, and cannot be disabled.
+#ifdef HHVM
+
+#define FRAME_INJECTION_FUNCTION_MEM(n) \
+  FrameInjectionVM fi;
+#define FRAME_INJECTION_FUNCTION_NOMEM(n) \
+  FrameInjectionVM fi;
+#define FRAME_INJECTION_FUNCTION_FS(n, fs) \
+  FrameInjectionVM fi;
+#define FRAME_INJECTION_STATIC_METHOD_MEM(n) \
+  FrameInjectionVM fi;
+#define FRAME_INJECTION_STATIC_METHOD_NOMEM(n) \
+  FrameInjectionVM fi;
+#define FRAME_INJECTION_OBJECT_METHOD_MEM(n) \
+  FrameInjectionVM fi;
+#define FRAME_INJECTION_OBJECT_METHOD_NOMEM(n) \
+  FrameInjectionVM fi;
+#define FRAME_INJECTION_OBJECT_METHOD_ROOTLESS_MEM(n) \
+  FrameInjectionVM fi;
+#define FRAME_INJECTION_OBJECT_METHOD_ROOTLESS_NOMEM(n) \
+  FrameInjectionVM fi;
+#define FRAME_INJECTION_NO_PROFILE(n) \
+  FrameInjectionVM fi;
+
+#else
 
 #define FRAME_INJECTION_FUNCTION_MEM(n) \
   FIFunctionMem fi(#n);
@@ -308,6 +341,8 @@ do { \
 
 #define FRAME_INJECTION_NO_PROFILE(n) \
   FIFunctionNP fi(#n);
+
+#endif // #ifdef HHVM
 
 // code injected into beginning of every function/method
 #define FUNCTION_INJECTION(n)                                       \

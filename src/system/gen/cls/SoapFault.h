@@ -41,6 +41,8 @@ class c_SoapFault : public c_Exception {
   Variant m__name;
   Variant m_headerfault;
 
+  // Destructor
+  ~c_SoapFault() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(SoapFault, SoapFault, Exception)
   static const ClassPropTable os_prop_table;

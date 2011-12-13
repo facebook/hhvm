@@ -40,6 +40,13 @@ class ClassPropTable;
 struct ObjectStaticCallbacks;
 struct MethodCallInfoTable;
 
+class HphpArray;
+class TypedValue;
+namespace VM {
+  class PreClass;
+  class Class;
+}
+
 /**
  * Base class of all user-defined classes. All data members and methods in
  * this class should start with "o_" or "os_" to avoid name conflicts.
@@ -61,16 +68,17 @@ struct MethodCallInfoTable;
 class ObjectData : public CountableNF {
  public:
   enum Attribute {
-    InConstructor = 1,    // __construct()
-    InDestructor  = 2,    // __destruct()
-    HasSleep      = 4,    // __sleep()
-    UseSet        = 8,    // __set()
-    UseGet        = 16,   // __get()
-    UseIsset      = 32,   // __isset()
-    UseUnset      = 64,   // __unset()
-    HasLval       = 128,  // defines ___lval
-    HasCall       = 256,  // defines __call
-    HasCallStatic = 512,  // defines __callStatic
+    InConstructor = 0x0001, // __construct()
+    InDestructor  = 0x0002, // __destruct()
+    HasSleep      = 0x0004, // __sleep()
+    UseSet        = 0x0008, // __set()
+    UseGet        = 0x0010, // __get()
+    UseIsset      = 0x0020, // __isset()
+    UseUnset      = 0x0040, // __unset()
+    HasLval       = 0x0080, // defines ___lval
+    HasCall       = 0x0100, // defines __call
+    HasCallStatic = 0x0200, // defines __callStatic
+    IsInstance    = 0x0400  // isInstance()
   };
   enum {
     RealPropCreate = 1,   // Property should be created if it doesnt exist
@@ -79,14 +87,31 @@ class ObjectData : public CountableNF {
     RealPropUnchecked = 8,// Dont check property accessibility
   };
 
-  ObjectData(const ObjectStaticCallbacks *cb, bool isResource) :
-      o_attribute(0), o_callbacks(cb) {
+  ObjectData(const ObjectStaticCallbacks *cb = NULL, bool isResource = false,
+             VM::Class* type = NULL)
+      : o_attribute(0), o_callbacks(cb)
+#ifdef HHVM
+        , m_cls(type), m_propMap(NULL), m_propVec(NULL)
+#endif
+        {
     if (!isResource) {
       o_id = ++(*os_max_id);
     }
   }
 
   virtual ~ObjectData(); // all PHP classes need virtual tables
+
+  HPHP::VM::Class* getVMClass() const {
+    const_assert(hhvm);
+    return m_cls;
+  }
+  static size_t getVMClassOffset() {
+    // For assembly linkage.
+    const_assert(hhvm);
+    return offsetof(ObjectData, m_cls);
+  }
+  HPHP::VM::Class* instanceof(const HPHP::VM::PreClass* pc) const;
+  bool instanceof(const HPHP::VM::Class* c) const;
 
   void setAttributes(int attrs) { o_attribute |= attrs; }
   void setAttributes(const ObjectData *o) { o_attribute |= o->o_attribute; }
@@ -107,6 +132,7 @@ class ObjectData : public CountableNF {
     return oldInCtor;
   }
 
+  Object iterableObject(bool& isInstanceofIterator);
   ArrayIter begin(CStrRef context = null_string);
   MutableArrayIter begin(Variant *key, Variant &val,
                          CStrRef context = null_string);
@@ -123,7 +149,13 @@ class ObjectData : public CountableNF {
   virtual ObjectData *getRedeclaredParent() const { return 0; }
 
   // class info
+#ifdef HHVM
+  virtual
+#endif
   CStrRef o_getClassName() const;
+#ifdef HHVM
+  virtual
+#endif
   CStrRef o_getParentName() const;
   virtual CStrRef o_getClassNameHook() const;
   static CStrRef GetParentName(CStrRef cls);
@@ -167,12 +199,13 @@ class ObjectData : public CountableNF {
   virtual void init() {}
   ObjectData *create() { CountableHelper h(this); init(); return this;}
   virtual void getConstructor(MethodCallPackage &mcp);
-  void release(); // for SmartPtr<T>
+  void release();
   virtual void destruct();
+  virtual void destructNoThrow();
 
   virtual const Eval::MethodStatement* getConstructorStatement() const;
-  virtual const Eval::MethodStatement* getMethodStatement(const char* name)
-      const;
+  virtual const Eval::MethodStatement* getMethodStatement(CStrRef name,
+    int &access) const;
 
   static Variant os_invoke(CStrRef c, CStrRef s,
                            CArrRef params, int64 hash, bool fatal = true);
@@ -334,8 +367,30 @@ public:
   mutable int16 o_attribute;     // various flags
  protected:
   Array         o_properties;    // dynamic properties
-  const ObjectStaticCallbacks *o_callbacks;
+ protected:
+#ifndef HHVM
+  // For non-HHVM builds, avoid the memory overhead of HHVM-specific fields by
+  // overlaying them onto a field that exists regardless.  This is sufficient
+  // for compilation to succeed, but it is critical that the HHVM-specific
+  // fields only be used if hhvm is true.
+  union {
+#endif
+    const ObjectStaticCallbacks *o_callbacks;
 
+    // All of the fields that would ordinarily reside in HPHP::VM::Instance must
+    // reside here, so that it is possible to dynamically compute the offset of
+    // the property vector that follows an "Instance", regardless of whether the
+    // Instance is actually an extension class that derives from ObjectData.
+#ifdef HHVM
+   public:
+#endif
+    HPHP::VM::Class* m_cls;
+    HphpArray* m_propMap;
+    TypedValue* m_propVec;
+#ifndef HHVM
+  };
+#endif
+ protected:
   void          cloneDynamic(ObjectData *orig);
 
 #ifdef FAST_REFCOUNT_FOR_VARIANT
@@ -344,28 +399,33 @@ public:
     CT_ASSERT(offsetof(ObjectData, _count) == FAST_REFCOUNT_OFFSET);
   }
 #endif
+ public:
+  // true : pure user class or user class deriving from builtin
+  // false: pure builtin
+  bool isInstance() const {
+    return getAttribute(IsInstance);
+  }
+
+  template <bool canThrow>
+  void releaseImpl() {
+    ASSERT(getCount() == 0);
+    if (canThrow) {
+      destruct();
+    } else {
+      destructNoThrow();
+    }
+    if (UNLIKELY(getCount() != 0)) {
+      // Object was resurrected.  Make a note to avoid re-running __destruct()
+      setAttribute(InDestructor);
+      return;
+    }
+    delete this;
+  }
 };
 
 template<> inline SmartPtr<ObjectData>::~SmartPtr() {}
 
 typedef ObjectData c_ObjectData; // purely for easier code generation
-
-class ExtObjectData : public ObjectData {
-public:
-  ExtObjectData(const ObjectStaticCallbacks *cb) :
-      ObjectData(cb, false), root(this) {}
-  virtual void setRoot(ObjectData *r) { root = r; }
-  virtual ObjectData *getRoot() { return root; }
-protected: ObjectData *root;
-
-};
-
-template <int flags> class ExtObjectDataFlags : public ExtObjectData {
-public:
-  ExtObjectDataFlags(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
-    ObjectData::setAttributes(flags);
-  }
-};
 
 struct MethodCallInfoTable {
   int64       hash;
@@ -419,6 +479,7 @@ struct ObjectStaticCallbacks {
   int64                       redeclaredParent;
   const ObjectStaticCallbacks *parent;
   int                         attributes;
+  HPHP::VM::Class**           os_cls_ptr;
 };
 
 struct RedeclaredObjectStaticCallbacks {
@@ -461,6 +522,7 @@ class ItemSize {
   };
  public:
   enum {
+    index = ItemSize<prev>::index + (int)(pval < M),
     value = (pval < M ? ALIGN_WORD(pval + (pval >> 1)) : pval)
   };
 };
@@ -469,15 +531,31 @@ template<>
 class ItemSize<UNIT_SIZE> {
  public:
   enum {
+    index = 0,
     value = UNIT_SIZE
   };
+};
+
+typedef ObjectAllocatorBase *(*ObjectAllocatorBaseGetter)(void);
+
+class ObjectAllocatorCollector {
+public:
+  static int AllocSizeToIndex(int size);
+  static std::map<int, ObjectAllocatorBaseGetter> &getWrappers() {
+    static std::map<int, ObjectAllocatorBaseGetter> wrappers;
+    return wrappers;
+  }
 };
 
 template <typename T>
 void *ObjectAllocatorInitSetup() {
   ThreadLocalSingleton<ObjectAllocator<ItemSize<sizeof(T)>::value> > tls;
+  if (hhvm) {
+    ObjectAllocatorCollector::getWrappers()[ItemSize<sizeof(T)>::index] =
+      (ObjectAllocatorBaseGetter)tls.getCheck;
+  }
   GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.getCheck));
-  return (void *)tls.getNoCheck;
+  return (void*)tls.getNoCheck;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

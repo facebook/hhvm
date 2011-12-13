@@ -448,6 +448,37 @@ bool CmdBreak::onClient(DebuggerClient *client) {
   return true;
 }
 
+void CmdBreak::setClientOutput(DebuggerClient *client) {
+  // Output an array of current breakpoints including exceptions
+  client->setOutputType(DebuggerClient::OTValues);
+  Array values;
+  m_breakpoints = client->getBreakPoints();
+  for (int i = 0; i < (int)m_breakpoints->size(); i++) {
+    BreakPointInfoPtr bpi = m_breakpoints->at(i);
+    Array breakpoint;
+    breakpoint.set("id", bpi->index());
+    breakpoint.set("state", bpi->state(false));
+    if (bpi->m_interrupt == ExceptionThrown) {
+      breakpoint.set("is_exception", true);
+    } else {
+      breakpoint.set("is_exception", false);
+      breakpoint.set("file", bpi->m_file);
+      breakpoint.set("line1", bpi->m_line1);
+      breakpoint.set("line2", bpi->m_line2);
+      breakpoint.set("namespace", bpi->getNamespace());
+      breakpoint.set("func", bpi->getFunction());
+    }
+    breakpoint.set("class", bpi->getClass());
+    breakpoint.set("url", bpi->m_url);
+    breakpoint.set("use_regex", bpi->m_regex);
+    breakpoint.set("cluase_type", bpi->m_check ? "if" : "&&");
+    breakpoint.set("clause", bpi->m_clause);
+    breakpoint.set("desc", bpi->desc());
+    values.append(breakpoint);
+  }
+  client->setOTValues(values);
+}
+
 bool CmdBreak::onServer(DebuggerProxy *proxy) {
   if (m_body == "update") {
     proxy->setBreakPoints(m_bps);

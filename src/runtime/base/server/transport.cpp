@@ -356,8 +356,12 @@ void Transport::addHeaderNoLock(const char *name, const char *value) {
 
   if (!m_firstHeaderSet) {
     m_firstHeaderSet = true;
-    m_firstHeaderFile = FrameInjection::GetContainingFileName(true).data();
-    m_firstHeaderLine = FrameInjection::GetLine(true);
+    m_firstHeaderFile = hhvm
+                        ? g_context->getContainingFileName(true).data()
+                        : FrameInjection::GetContainingFileName(true).data();
+    m_firstHeaderLine = hhvm
+                        ? g_context->getLine(true)
+                        : FrameInjection::GetLine(true);
   }
 
   string svalue = value;

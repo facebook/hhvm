@@ -15,6 +15,7 @@
 */
 
 #include <runtime/base/complex_types.h>
+#include <runtime/ext_hhvm/ext_hhvm.h>
 #include <runtime/base/externals.h>
 
 using namespace std;
@@ -107,5 +108,12 @@ void fiber_unmarshal_global_state(GlobalVariables *g1, GlobalVariables *g2,
 }
 
 bool has_eval_support = false;
+
+#ifdef HHVM
+const long long hhbc_ext_funcs_count = 0;
+const HhbcExtFuncInfo hhbc_ext_funcs[] = {};
+const long long hhbc_ext_class_count = 0;
+const HhbcExtClassInfo hhbc_ext_classes[] = {};
+#endif
 ///////////////////////////////////////////////////////////////////////////////
 }

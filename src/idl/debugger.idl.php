@@ -792,7 +792,8 @@ BeginClass(
   array(
     'name'   => "DebuggerClient",
     'desc'   => "",
-    'flags'  =>  HasDocComment | HipHopSpecific,
+    'bases'  => array('Sweepable'),
+    'flags'  =>  HasDocComment | HipHopSpecific | NoDefaultSweep,
     'footer' => <<<EOT
 
  public:

@@ -97,7 +97,9 @@ ArrayData *ArrayData::nonSmartCopy() const {
 // reads
 
 Object ArrayData::toObject() const {
-  return ObjectData::FromArray(const_cast<ArrayData *>(this));
+  return hhvm
+         ? VM::Instance::FromArray(const_cast<ArrayData *>(this))
+         : ObjectData::FromArray(const_cast<ArrayData *>(this));
 }
 
 bool ArrayData::isVectorData() const {

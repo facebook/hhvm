@@ -18,6 +18,7 @@
 #define __HPHP_EVAL_DEBUGGER_CLIENT_H__
 
 #include <runtime/eval/debugger/debugger.h>
+#include <runtime/eval/debugger/inst_point.h>
 #include <runtime/base/debuggable.h>
 #include <util/text_color.h>
 #include <util/hdf.h>
@@ -219,6 +220,8 @@ public:
    */
   BreakPointInfoPtr getCurrentLocation() const { return m_breakpoint;}
   BreakPointInfoPtrVec *getBreakPoints() { return &m_breakpoints;}
+  InstPointInfoPtrVec *getInstPoints() { return &m_instPoints;}
+  void setInstPoints(InstPointInfoPtrVec &ips) { m_instPoints = ips;}
   void setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints);
   void setCurrentLocation(int64 threadId, BreakPointInfoPtr breakpoint);
   BreakPointInfoPtrVec *getMatchedBreakPoints() { return &m_matched;}
@@ -266,15 +269,33 @@ public:
     StateReadyForCommand,
     StateBusy
   };
+  enum OutputType {
+    OTInvalid,
+    OTCodeLoc,
+    OTStacktrace,
+    OTValues,
+    OTText
+  };
   bool isApiMode() const { return m_options.apiMode; }
   void setConfigFileName(const std::string& fn) { m_configFileName = fn;}
   ClientState getClientState() const { return m_clientState; }
   void setClientState(ClientState state) { m_clientState = state; }
   void init(const DebuggerClientOptions &options);
   DebuggerCommandPtr waitForNextInterrupt();
-  std::string getPrintString();
   bool isTakingCommand() const { return m_inputState == TakingCommand; }
   void setTakingInterrupt() { m_inputState = TakingInterrupt; }
+  String getPrintString();
+  Array getOutputArray();
+  void setOutputType(OutputType type) { m_outputType = type; }
+  void setOTFileLine(const std::string& file, int line) {
+    m_otFile = file;
+    m_otLineNo = line;
+  }
+  void setOTValues(CArrRef values) { m_otValues = values; }
+  void clearCachedLocal() {
+    m_stacktrace = null_array;
+    m_otValues = null_array;
+  }
 
   /**
    * Macro functions
@@ -285,13 +306,8 @@ public:
   const MacroPtrVec &getMacros() const { return m_macros;}
   bool deleteMacro(int index);
 
-  /**
-   * Config
-   */
-  bool getBypassAccessCheck() const { return m_bypassAccessCheck;}
-  void setBypassAccessCheck(bool val) { m_bypassAccessCheck = val;}
-  int getPrintLevel() const { return m_printLevel;}
-  void setPrintLevel(int val) { m_printLevel = val;}
+  DECLARE_DBG_SETTING_ACCESSORS
+
 private:
   enum InputState {
     TakingCommand,
@@ -309,8 +325,8 @@ private:
   int m_tutorial;
   std::string m_printFunction;
   std::set<std::string> m_tutorialVisited;
-  bool m_bypassAccessCheck;
-  int m_printLevel;
+
+  DECLARE_DBG_SETTING
 
   DebuggerClientOptions m_options;
   AsyncFunc<DebuggerClient> m_mainThread;
@@ -354,6 +370,7 @@ private:
   BreakPointInfoPtrVec m_breakpoints;
   BreakPointInfoPtr m_breakpoint;
   BreakPointInfoPtrVec m_matched;
+  InstPointInfoPtrVec m_instPoints;
 
   // list command's current location, which may be different from m_breakpoint
   std::string m_listFile;
@@ -402,6 +419,12 @@ private:
 
   DebuggerCommandPtr send(DebuggerCommand *cmd, int expected);
   DebuggerCommandPtr xend(DebuggerCommand *cmd);
+
+  // output
+  OutputType m_outputType;
+  std::string m_otFile;
+  int m_otLineNo;
+  Array m_otValues;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

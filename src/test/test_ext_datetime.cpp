@@ -506,6 +506,10 @@ bool TestExtDatetime::test_strtotime() {
 }
 
 bool TestExtDatetime::test_time() {
+  // XXX This test fails between 12:00AM and 12:59AM on 10/31/11 - 11/6/11
+  // and between 11:00PM and 11:59PM on 3/6/11 - 3/12/11, we should fix this.
+  // This issue appears to have something to do with how strtotime() handles
+  // daylight savings time.
   int nextWeek = f_time() + (7 * 24 * 60 * 60);
   VS(f_date("Y-m-d", nextWeek),
      f_date("Y-m-d", f_strtotime("+1 week")));

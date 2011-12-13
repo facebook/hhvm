@@ -113,7 +113,8 @@ const ObjectStaticCallbacks cw_Directory = {
   c_Directory::s_call_info_table,c_Directory::s_call_info_index,
   c_Directory::s_instanceof_table,c_Directory::s_instanceof_index,
   &c_Directory::s_class_name,
-  &c_Directory::os_prop_table,&c_Directory::ci___construct,0,0,0x0
+  &c_Directory::os_prop_table,&c_Directory::ci___construct,0,0,0x0,
+  &c_Directory::s_cls
 };
 /* SRC: classes/directory.php line 7 */
 void c_Directory::t___construct(Variant v_path) {

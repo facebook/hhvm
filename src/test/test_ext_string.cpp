@@ -673,7 +673,37 @@ bool TestExtString::test_strnatcmp() {
 }
 
 bool TestExtString::test_strcasecmp() {
+  VERIFY(f_strcasecmp("a", "a") == 0);
   VERIFY(f_strcasecmp("a", "A") == 0);
+  VERIFY(f_strcasecmp("A", "a") == 0);
+  VERIFY(f_strcasecmp("A", "A") == 0);
+
+  VERIFY(f_strcasecmp("a", "b") < 0);
+  VERIFY(f_strcasecmp("a", "B") < 0);
+  VERIFY(f_strcasecmp("A", "b") < 0);
+  VERIFY(f_strcasecmp("A", "B") < 0);
+  VERIFY(f_strcasecmp("b", "a") > 0);
+  VERIFY(f_strcasecmp("B", "a") > 0);
+  VERIFY(f_strcasecmp("b", "A") > 0);
+  VERIFY(f_strcasecmp("B", "A") > 0);
+
+  VERIFY(f_strcasecmp("_", "a") < 0);
+  VERIFY(f_strcasecmp("_", "A") < 0);
+  VERIFY(f_strcasecmp("a", "_") > 0);
+  VERIFY(f_strcasecmp("A", "_") > 0);
+
+  VERIFY(f_strcasecmp("@", "`") < 0);
+  VERIFY(f_strcasecmp("`", "@") > 0);
+  
+  VERIFY(f_strcasecmp("a", "a0") < 0);
+  VERIFY(f_strcasecmp("a", "A0") < 0);
+  VERIFY(f_strcasecmp("A", "a0") < 0);
+  VERIFY(f_strcasecmp("A", "A0") < 0);
+  VERIFY(f_strcasecmp("a0", "a") > 0);
+  VERIFY(f_strcasecmp("a0", "A") > 0);
+  VERIFY(f_strcasecmp("A0", "a") > 0);
+  VERIFY(f_strcasecmp("A0", "A") > 0);
+
   return Count(true);
 }
 

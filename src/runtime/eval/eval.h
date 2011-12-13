@@ -36,9 +36,9 @@ ObjectData *eval_create_object_only_hook(CStrRef s, ObjectData *root);
  * When this function returns true, it is the caller's responsibility to check
  * if the given class or interface exists.
  */
-bool eval_try_autoload(const char *s);
+bool eval_try_autoload(CStrRef s);
 bool eval_invoke_static_method_hook(Variant &res, CStrRef s,
-                                    const char* method, CArrRef params,
+                                    CStrRef method, CArrRef params,
                                     bool &foundClass);
 bool eval_get_static_property_hook(Variant &res, CStrRef s,
                                    const char* prop);

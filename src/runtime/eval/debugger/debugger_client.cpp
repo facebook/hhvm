@@ -43,23 +43,29 @@ using namespace HPHP::Util::TextArt;
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-static DebuggerClient s_debugger_client;
+static DebuggerClient& getStaticDebuggerClient() {
+  // DebuggerClient acquires global mutexes in its constructor, so we allocate
+  // s_debugger_client lazily to ensure that all of the global mutexes have
+  // been initialized before we enter the constructor.
+  static DebuggerClient s_debugger_client;
+  return s_debugger_client;
+}
 ///////////////////////////////////////////////////////////////////////////////
 // readline setups
 
 static char* debugger_generator(const char* text, int state) {
-  return s_debugger_client.getCompletion(text, state);
+  return getStaticDebuggerClient().getCompletion(text, state);
 }
 
 static char **debugger_completion(const char *text, int start, int end) {
-  if (s_debugger_client.setCompletion(text, start, end)) {
+  if (getStaticDebuggerClient().setCompletion(text, start, end)) {
     return rl_completion_matches((char*)text, &debugger_generator);
   }
   return NULL;
 }
 
 static void debugger_signal_handler(int sig) {
-  s_debugger_client.onSignal(sig);
+  getStaticDebuggerClient().onSignal(sig);
 }
 
 void DebuggerClient::onSignal(int sig) {
@@ -243,13 +249,13 @@ void DebuggerClient::LoadCodeColor(CodeColor index, Hdf hdf,
 
 SmartPtr<Socket> DebuggerClient::Start(const DebuggerClientOptions &options) {
   Debugger::SetTextColors();
-  SmartPtr<Socket> ret = s_debugger_client.connectLocal();
-  s_debugger_client.start(options);
+  SmartPtr<Socket> ret = getStaticDebuggerClient().connectLocal();
+  getStaticDebuggerClient().start(options);
   return ret;
 }
 
 void DebuggerClient::Stop() {
-  s_debugger_client.stop();
+  getStaticDebuggerClient().stop();
 }
 
 void DebuggerClient::AdjustScreenMetrics() {
@@ -345,7 +351,6 @@ String DebuggerClient::FormatTitle(const char *title) {
 
 DebuggerClient::DebuggerClient()
     : m_tutorial(0), m_printFunction(""),
-      m_bypassAccessCheck(false),
       m_mainThread(this, &DebuggerClient::run), m_stopped(false),
       m_inputState(TakingCommand), m_runState(NotYet),
       m_signum(CmdSignal::SignalNone), m_sigTime(0),
@@ -587,7 +592,11 @@ void DebuggerClient::run() {
 
   hphp_session_init();
   ExecutionContext *context = hphp_context_init();
-  hphp_invoke_simple(m_options.extension);
+  if (m_options.extension.empty()) {
+    hphp_invoke_simple("", true); // warm-up only
+  } else {
+    hphp_invoke_simple(m_options.extension);
+  }
   while (true) {
     try {
       runImpl();
@@ -858,7 +867,7 @@ DebuggerCommandPtr DebuggerClient::waitForNextInterrupt() {
         return DebuggerCommandPtr();
       }
       if (cmd->is(DebuggerCommand::KindOfSignal)) {
-        if (!cmd->onClient(this)) {
+        if (!cmd->onClientD(this)) {
           Logger::Error("Unable to handle signal command.");
           return DebuggerCommandPtr();
         }
@@ -890,7 +899,7 @@ void DebuggerClient::runImpl() {
           throw DebuggerServerLostException();
         }
         if (cmd->is(DebuggerCommand::KindOfSignal)) {
-          if (!cmd->onClient(this)) {
+          if (!cmd->onClientD(this)) {
             Logger::Error("%s: unable to poll signal", func);
             return;
           }
@@ -901,9 +910,11 @@ void DebuggerClient::runImpl() {
           return;
         }
         m_sigTime = 0;
-        if (!cmd->onClient(this)) {
-          Logger::Error("%s: unable to process %d", func, cmd->getType());
-          return;
+        {
+          if (!cmd->onClientD(this)) {
+            Logger::Error("%s: unable to process %d", func, cmd->getType());
+            return;
+          }
         }
         m_machine->m_interrupting = true;
         setClientState(StateReadyForCommand);
@@ -944,9 +955,12 @@ bool DebuggerClient::console() {
       line = readline(getPrompt().c_str());
       if (line == NULL) {
         // treat ^D as quit
-        char *quit_cmd = (char *)malloc(sizeof(char) * 2);
-        strcpy(quit_cmd, "q");
-        line = (const char *)quit_cmd;
+        try {
+          print("quit");
+          quit();
+        } catch (DebuggerClientExitException &e) {
+          return false;
+        }
       }
     } else if (!NoPrompt) {
       print("%s%s", getPrompt().c_str(), line);
@@ -1005,12 +1019,41 @@ bool DebuggerClient::console() {
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
 
-std::string DebuggerClient::getPrintString() {
+String DebuggerClient::getPrintString() {
   int size = m_outputBuf->size();
   if (size) {
-    return std::string(m_outputBuf->detach());
+    return m_outputBuf->detach();
   }
   return "";
+}
+
+Array DebuggerClient::getOutputArray() {
+  Array ret;
+  switch (m_outputType) {
+    case OTCodeLoc:
+      ret.set("output_type", "code_loc");
+      ret.set("file", m_otFile);
+      ret.set("line_no", m_otLineNo);
+      ret.set("watch_values", m_otValues);
+      break;
+    case OTStacktrace:
+      ret.set("output_type", "stacktrace");
+      ret.set("stacktrace", m_stacktrace);
+      ret.set("frame", m_frame);
+      break;
+    case OTValues:
+      ret.set("output_type", "values");
+      ret.set("values", m_otValues);
+      break;
+    case OTText:
+      ret.set("output_type", "text");
+      break;
+    default:
+      ret.set("output_type", "invalid");
+  }
+  ret.set("cmd", m_command);
+  ret.set("text", getPrintString());
+  return ret;
 }
 
 void DebuggerClient::shortCode(BreakPointInfoPtr bp) {
@@ -1310,6 +1353,7 @@ DebuggerCommand *DebuggerClient::createCommand() {
   // give gdb users some love
   if (m_command == "bt") return new CmdWhere();
   if (m_command == "set") return new CmdConfig();
+  if (m_command == "inst") return new CmdInstrument();
 
   switch (tolower(m_command[0])) {
     case 'a': return (match("abort")     ) ? new CmdAbort    () : NULL;
@@ -1347,21 +1391,31 @@ DebuggerCommand *DebuggerClient::createCommand() {
 }
 
 bool DebuggerClient::process() {
+  if (isApiMode()) {
+    // construct m_line based on m_command and m_args
+    m_line = m_command;
+    for (unsigned int i = 0; i < m_args.size(); i++) {
+      m_line += " " + m_args[i];
+    }
+  }
   switch (tolower(m_command[0])) {
     case '@':
     case '=':
     case '$': return processTakeCode();
     case '<': return match("<?php") && processTakeCode();
-    case '?':
-      if (match("?"))  return CmdHelp().onClient(this);
+    case '?': {
+      if (match("?")) {
+        return CmdHelp().onClientD(this);
+      }
       if (match("?>")) return processEval();
       break;
+    }
     default: {
       DebuggerCommand *cmd = createCommand();
       if (cmd) {
         if (cmd->is(DebuggerCommand::KindOfRun)) playMacro("startup");
         DebuggerCommandPtr deleter(cmd);
-        return cmd->onClient(this);
+        return cmd->onClientD(this);
       } else {
         return processTakeCode();
       }
@@ -1548,7 +1602,7 @@ DebuggerCommandPtr DebuggerClient::send(DebuggerCommand *cmd, int expected) {
       }
 
       // eval() can cause more breakpoints
-      if (!res->onClient(this) || !console()) {
+      if (!res->onClientD(this) || !console()) {
         Logger::Error("%s: unable to process %d", func, res->getType());
         throw DebuggerProtocolException();
       }
@@ -1613,7 +1667,7 @@ bool DebuggerClient::processEval() {
   m_runState = Running;
   m_inputState = TakingCommand;
   m_acLiveListsDirty = true;
-  CmdEval().onClient(this);
+  CmdEval().onClientD(this);
   return true;
 }
 
@@ -1903,11 +1957,13 @@ void DebuggerClient::loadConfig() {
 
   m_tutorial = m_config["Tutorial"].getInt32(0);
   std::string pprint = m_config["PrettyPrint"].getString("hphpd_print_value");
-  m_bypassAccessCheck = m_config["BypassAccessCheck"].getBool();
-  m_printLevel = m_config["PrintLevel"].getInt16(3);
-  if (m_printLevel > 0 && m_printLevel < MinPrintLevel) {
-    m_printLevel = MinPrintLevel;
+  setDebuggerBypassCheck(m_config["BypassAccessCheck"].getBool());
+  setDebuggerSmallStep(m_config["SmallStep"].getBool());
+  int printLevel = m_config["PrintLevel"].getInt16(3);
+  if (printLevel > 0 && printLevel < MinPrintLevel) {
+    printLevel = MinPrintLevel;
   }
+  setDebuggerPrintLevel(printLevel);
 
   m_printFunction = (boost::format(
     "(function_exists(\"%s\") ? %s($_) : print_r(print_r($_, true)));")

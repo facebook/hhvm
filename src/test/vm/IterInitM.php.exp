@@ -1,0 +1,28 @@
+v: 0
+v: 1
+v: Array
+v: 4
+array(4) {
+  [0]=>
+  string(1) "v"
+  [1]=>
+  string(1) "v"
+  [2]=>
+  string(1) "v"
+  [3]=>
+  &string(1) "v"
+}
+k: 0, v: 0
+k: 1, v: 1
+k: 2, v: Array
+k: 3, v: 4
+array(4) {
+  [0]=>
+  string(1) "v"
+  [1]=>
+  string(1) "v"
+  [2]=>
+  string(1) "v"
+  [3]=>
+  &string(1) "v"
+}

@@ -1,0 +1,20 @@
+
+generator closure
+int(0)
+int(0)
+int(1)
+int(1)
+int(0)
+int(0)
+int(1)
+int(1)
+
+plain closure:
+012
+012
+
+plain generator:
+int(0)
+int(1)
+int(2)
+int(3)

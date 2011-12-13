@@ -461,6 +461,21 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
   if (m_exp1->isScalar()) {
     if (!m_exp1->getScalarValue(v1)) return ExpressionPtr();
     try {
+      if (hhvm) {
+        // In the VM, don't optimize __CLASS__ if within a trait, since
+        // __CLASS__ is not resolved yet.
+        ClassScopeRawPtr clsScope = getOriginalClass();
+        if (clsScope && clsScope->isTrait()) {
+          ScalarExpressionPtr scalar1 =
+            dynamic_pointer_cast<ScalarExpression>(m_exp1);
+          ScalarExpressionPtr scalar2 =
+            dynamic_pointer_cast<ScalarExpression>(m_exp2);
+          if ((scalar1 && scalar1->getType() == T_CLASS_C) ||
+              (scalar2 && scalar2->getType() == T_CLASS_C)) {
+            return ExpressionPtr();
+          }
+        }
+      }
       Variant result;
       switch (m_op) {
         case T_LOGICAL_XOR:

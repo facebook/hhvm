@@ -35,14 +35,57 @@ class String;
 class VarNR;
 class AtomicString;
 
+// helpers
+StringData* buildStringData(int     n);
+StringData* buildStringData(int64   n);
+StringData* buildStringData(double  n);
+StringData* buildStringData(litstr  s);
+
 /**
  * String type wrapping around StringData to implement copy-on-write and
  * literal string handling (to avoid string copying).
  */
 class String : public SmartPtr<StringData> {
 public:
+  typedef hphp_hash_map<int64, const StringData *, int64_hash>
+    IntegerStringDataMap;
+  static const int MinPrecomputedInteger = SCHAR_MIN;
+  static const int MaxPrecomputedInteger = 65535;
+  static StringData *converted_integers_raw;
+  static StringData *converted_integers;
+  static IntegerStringDataMap integer_string_data_map;
+
+  static bool HasConverted(int64 n) {
+    return MinPrecomputedInteger <= n && n <= MaxPrecomputedInteger;
+  }
+  static bool HasConverted(int n) {
+    return HasConverted((int64)n);
+  }
+  static void PreConvertInteger(int64 n) ATTRIBUTE_COLD;
+
   // create a string from a character
   static String FromChar(char ch);
+  static const StringData *GetIntegerStringData(int64 n) {
+    if (HasConverted(n)) {
+      const StringData *sd = converted_integers + n;
+      return sd;
+    }
+    IntegerStringDataMap::const_iterator it =
+      integer_string_data_map.find(n);
+    if (it != integer_string_data_map.end()) return it->second;
+    return NULL;
+  }
+  static const StringData *GetIntegerStringData(int n) {
+    return GetIntegerStringData((int64)n);
+  }
+  static const char *GetIntegerString(int64 n) {
+    const StringData *sd = GetIntegerStringData(n);
+    if (sd) return sd->data();
+    return NULL;
+  }
+  static const char *GetIntegerString(int n) {
+    return GetIntegerString((int64)n);
+  }
 
 public:
   String() {}
@@ -61,7 +104,7 @@ public:
   String(double  n);
   String(litstr  s) {
     if (s) {
-      m_px = NEW(StringData)(s, AttachLiteral);
+      m_px = buildStringData(s);
       m_px->setRefCount(1);
     }
   }
@@ -182,9 +225,9 @@ public:
   int find(char ch, int pos = 0, bool caseSensitive = true) const;
   int find(const char *s, int pos = 0, bool caseSensitive = true) const;
   int find(CStrRef s, int pos = 0, bool caseSensitive = true) const;
-  int rfind(char ch, int pos = -1, bool caseSensitive = true) const;
-  int rfind(const char *s, int pos = -1, bool caseSensitive = true) const;
-  int rfind(CStrRef s, int pos = -1, bool caseSensitive = true) const;
+  int rfind(char ch, int pos = 0, bool caseSensitive = true) const;
+  int rfind(const char *s, int pos = 0, bool caseSensitive = true) const;
+  int rfind(CStrRef s, int pos = 0, bool caseSensitive = true) const;
 
   /**
    * Replace a substr with another and return replaced one. Note, read
@@ -352,6 +395,7 @@ public:
   void dump() const;
 
  private:
+
   StringOffset lvalAtImpl(int key) {
     StringData *s = StringData::Escalate(m_px);
     SmartPtr<StringData>::operator=(s);
@@ -394,6 +438,20 @@ struct string_data_isame {
   }
 };
 
+struct string_data_lt {
+  bool operator()(const StringData *s1, const StringData *s2) const {
+    int len1 = s1->size();
+    int len2 = s2->size();
+    if (len1 < len2) {
+      return (len1 == 0) || (memcmp(s1->data(), s2->data(), len1) <= 0);
+    } else if (len1 == len2) {
+      return (len1 != 0) && (memcmp(s1->data(), s2->data(), len1) < 0);
+    } else /* len1 > len2 */ {
+      return ((len2 != 0) && (memcmp(s1->data(), s2->data(), len2) < 0));
+    }
+  }
+};
+
 typedef hphp_hash_set<StringData *, string_data_hash, string_data_same>
   StringDataSet;
 
@@ -416,7 +474,7 @@ struct hphp_string_isame {
 };
 
 struct StringDataHashCompare {
-  bool equal(StringData *s1, StringData *s2) const {
+  bool equal(const StringData *s1, const StringData *s2) const {
     ASSERT(s1 && s2);
     return s1->same(s2);
   }
@@ -442,7 +500,7 @@ struct stringHashCompare {
     return s1 == s2;
   }
   size_t hash(const std::string &s) const {
-    return hash_string(s.c_str());
+    return hash_string(s.c_str(), s.size());
   }
 };
 

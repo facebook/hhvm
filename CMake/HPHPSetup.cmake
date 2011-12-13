@@ -46,6 +46,7 @@ include(HPHPFunctions)
 include(HPHPFindLibs)
 
 add_definitions(-D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1)
+add_definitions(-DHHVM_LIB_PATH_DEFAULT="${HPHP_HOME}/bin")
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 	add_definitions(-DRELEASE=1)

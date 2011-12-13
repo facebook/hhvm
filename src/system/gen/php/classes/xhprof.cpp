@@ -86,7 +86,8 @@ const ObjectStaticCallbacks cw_XhprofFrame = {
   c_XhprofFrame::s_call_info_table,c_XhprofFrame::s_call_info_index,
   c_XhprofFrame::s_instanceof_table,c_XhprofFrame::s_instanceof_index,
   &c_XhprofFrame::s_class_name,
-  0,&c_XhprofFrame::ci___construct,0,0,0x0
+  0,&c_XhprofFrame::ci___construct,0,0,0x0,
+  &c_XhprofFrame::s_cls
 };
 /* SRC: classes/xhprof.php line 7 */
 void c_XhprofFrame::t___construct(Variant v_name) {

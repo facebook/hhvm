@@ -31,7 +31,7 @@ extern StaticString s_sys_ss00000000;
 
 extern VarNR s_sys_svs00000000;
 
-/* SRC: classes/reflection.php line 1607 */
+/* SRC: classes/reflection.php line 1627 */
 FORWARD_DECLARE_CLASS(ReflectionMethod);
 extern const ObjectStaticCallbacks cw_ReflectionMethod;
 class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
@@ -41,6 +41,8 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   Variant m_name;
   Variant m_class;
 
+  // Destructor
+  ~c_ReflectionMethod() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionMethod, ReflectionMethod, ReflectionFunctionAbstract)
   static const ClassPropTable os_prop_table;
@@ -51,12 +53,12 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   public: static Variant t_export(Variant v_cls, CVarRef v_name, CVarRef v_ret);
   public: Variant t_invoke(int num_args, CVarRef v_obj, Array args = Array());
   public: Variant t_invokeargs(CVarRef v_obj, CVarRef v_args);
-  public: Variant t_isfinal();
-  public: Variant t_isabstract();
+  public: bool t_isfinal();
+  public: bool t_isabstract();
   public: bool t_ispublic();
   public: bool t_isprivate();
   public: bool t_isprotected();
-  public: Variant t_isstatic();
+  public: bool t_isstatic();
   public: bool t_isconstructor();
   public: bool t_isdestructor();
   public: Variant t_getmodifiers();

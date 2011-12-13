@@ -1,0 +1,2209 @@
+A_Continuation
+HipHop Warning:  Missing argument 1 for Continuation::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_Continuation) (11) {
+  ["obj:private"]=>
+  NULL
+  ["args:private"]=>
+  NULL
+  ["label:private"]=>
+  int(0)
+  ["index:private"]=>
+  int(-1)
+  ["value:private"]=>
+  NULL
+  ["received:private"]=>
+  NULL
+  ["origFuncName:private"]=>
+  NULL
+  ["called_class:private"]=>
+  NULL
+  ["done:private"]=>
+  bool(false)
+  ["running:private"]=>
+  bool(false)
+  ["___x"]=>
+  NULL
+}
+A_GenericContinuation
+HipHop Warning:  Missing argument 1 for GenericContinuation::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_GenericContinuation) (12) {
+  ["vars"]=>
+  NULL
+  ["obj:private"]=>
+  NULL
+  ["args:private"]=>
+  NULL
+  ["label:private"]=>
+  int(0)
+  ["index:private"]=>
+  int(-1)
+  ["value:private"]=>
+  NULL
+  ["received:private"]=>
+  NULL
+  ["origFuncName:private"]=>
+  NULL
+  ["called_class:private"]=>
+  NULL
+  ["done:private"]=>
+  bool(false)
+  ["running:private"]=>
+  bool(false)
+  ["___x"]=>
+  NULL
+}
+A_DateTime
+object(A_DateTime) (1) {
+  ["___x"]=>
+  NULL
+}
+string(35) "O:10:"A_DateTime":1:{s:4:"___x";N;}"
+object(A_DateTime) (1) {
+  ["___x"]=>
+  NULL
+}
+array(10) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(6) "format"
+  [2]=>
+  string(9) "getOffset"
+  [3]=>
+  string(11) "getTimezone"
+  [4]=>
+  string(6) "modify"
+  [5]=>
+  string(7) "setDate"
+  [6]=>
+  string(10) "setISODate"
+  [7]=>
+  string(7) "setTime"
+  [8]=>
+  string(11) "setTimezone"
+  [9]=>
+  string(10) "__destruct"
+}
+A_DateTimeZone
+HipHop Warning:  Missing argument 1 for DateTimeZone::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_DateTimeZone) (1) {
+  ["___x"]=>
+  NULL
+}
+string(39) "O:14:"A_DateTimeZone":1:{s:4:"___x";N;}"
+object(A_DateTimeZone) (1) {
+  ["___x"]=>
+  NULL
+}
+array(7) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "getName"
+  [2]=>
+  string(9) "getOffset"
+  [3]=>
+  string(14) "getTransitions"
+  [4]=>
+  string(17) "listAbbreviations"
+  [5]=>
+  string(15) "listIdentifiers"
+  [6]=>
+  string(10) "__destruct"
+}
+A_DebuggerProxyCmdUser
+object(A_DebuggerProxyCmdUser) (1) {
+  ["___x"]=>
+  NULL
+}
+string(47) "O:22:"A_DebuggerProxyCmdUser":1:{s:4:"___x";N;}"
+object(A_DebuggerProxyCmdUser) (1) {
+  ["___x"]=>
+  NULL
+}
+array(4) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "isLocal"
+  [2]=>
+  string(4) "send"
+  [3]=>
+  string(10) "__destruct"
+}
+A_DebuggerClient
+object(A_DebuggerClient) (1) {
+  ["___x"]=>
+  NULL
+}
+string(41) "O:16:"A_DebuggerClient":1:{s:4:"___x";N;}"
+object(A_DebuggerClient) (1) {
+  ["___x"]=>
+  NULL
+}
+array(6) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(8) "getState"
+  [2]=>
+  string(4) "init"
+  [3]=>
+  string(10) "processCmd"
+  [4]=>
+  string(9) "interrupt"
+  [5]=>
+  string(10) "__destruct"
+}
+A_DOMNode
+object(A_DOMNode) (1) {
+  ["___x"]=>
+  NULL
+}
+string(33) "O:9:"A_DOMNode":1:{s:4:"___x";N;}"
+object(A_DOMNode) (1) {
+  ["___x"]=>
+  NULL
+}
+array(22) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(11) "appendChild"
+  [2]=>
+  string(9) "cloneNode"
+  [3]=>
+  string(9) "getLineNo"
+  [4]=>
+  string(13) "hasAttributes"
+  [5]=>
+  string(13) "hasChildNodes"
+  [6]=>
+  string(12) "insertBefore"
+  [7]=>
+  string(18) "isDefaultNamespace"
+  [8]=>
+  string(10) "isSameNode"
+  [9]=>
+  string(11) "isSupported"
+  [10]=>
+  string(18) "lookupNamespaceUri"
+  [11]=>
+  string(12) "lookupPrefix"
+  [12]=>
+  string(9) "normalize"
+  [13]=>
+  string(11) "removeChild"
+  [14]=>
+  string(12) "replaceChild"
+  [15]=>
+  string(4) "c14n"
+  [16]=>
+  string(8) "c14nfile"
+  [17]=>
+  string(11) "getNodePath"
+  [18]=>
+  string(5) "__get"
+  [19]=>
+  string(5) "__set"
+  [20]=>
+  string(7) "__isset"
+  [21]=>
+  string(10) "__destruct"
+}
+A_DOMAttr
+HipHop Warning:  Missing argument 1 for DOMAttr::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_DOMAttr) (1) {
+  ["___x"]=>
+  NULL
+}
+string(33) "O:9:"A_DOMAttr":1:{s:4:"___x";N;}"
+object(A_DOMAttr) (1) {
+  ["___x"]=>
+  NULL
+}
+array(23) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(4) "isId"
+  [2]=>
+  string(5) "__get"
+  [3]=>
+  string(5) "__set"
+  [4]=>
+  string(7) "__isset"
+  [5]=>
+  string(10) "__destruct"
+  [6]=>
+  string(11) "appendChild"
+  [7]=>
+  string(9) "cloneNode"
+  [8]=>
+  string(9) "getLineNo"
+  [9]=>
+  string(13) "hasAttributes"
+  [10]=>
+  string(13) "hasChildNodes"
+  [11]=>
+  string(12) "insertBefore"
+  [12]=>
+  string(18) "isDefaultNamespace"
+  [13]=>
+  string(10) "isSameNode"
+  [14]=>
+  string(11) "isSupported"
+  [15]=>
+  string(18) "lookupNamespaceUri"
+  [16]=>
+  string(12) "lookupPrefix"
+  [17]=>
+  string(9) "normalize"
+  [18]=>
+  string(11) "removeChild"
+  [19]=>
+  string(12) "replaceChild"
+  [20]=>
+  string(4) "c14n"
+  [21]=>
+  string(8) "c14nfile"
+  [22]=>
+  string(11) "getNodePath"
+}
+A_DOMCharacterData
+object(A_DOMCharacterData) (1) {
+  ["___x"]=>
+  NULL
+}
+string(43) "O:18:"A_DOMCharacterData":1:{s:4:"___x";N;}"
+object(A_DOMCharacterData) (1) {
+  ["___x"]=>
+  NULL
+}
+array(27) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "appendData"
+  [2]=>
+  string(10) "deleteData"
+  [3]=>
+  string(10) "insertData"
+  [4]=>
+  string(11) "replaceData"
+  [5]=>
+  string(13) "substringData"
+  [6]=>
+  string(5) "__get"
+  [7]=>
+  string(5) "__set"
+  [8]=>
+  string(7) "__isset"
+  [9]=>
+  string(10) "__destruct"
+  [10]=>
+  string(11) "appendChild"
+  [11]=>
+  string(9) "cloneNode"
+  [12]=>
+  string(9) "getLineNo"
+  [13]=>
+  string(13) "hasAttributes"
+  [14]=>
+  string(13) "hasChildNodes"
+  [15]=>
+  string(12) "insertBefore"
+  [16]=>
+  string(18) "isDefaultNamespace"
+  [17]=>
+  string(10) "isSameNode"
+  [18]=>
+  string(11) "isSupported"
+  [19]=>
+  string(18) "lookupNamespaceUri"
+  [20]=>
+  string(12) "lookupPrefix"
+  [21]=>
+  string(9) "normalize"
+  [22]=>
+  string(11) "removeChild"
+  [23]=>
+  string(12) "replaceChild"
+  [24]=>
+  string(4) "c14n"
+  [25]=>
+  string(8) "c14nfile"
+  [26]=>
+  string(11) "getNodePath"
+}
+A_DOMComment
+object(A_DOMComment) (1) {
+  ["___x"]=>
+  NULL
+}
+string(37) "O:12:"A_DOMComment":1:{s:4:"___x";N;}"
+object(A_DOMComment) (1) {
+  ["___x"]=>
+  NULL
+}
+array(27) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "__destruct"
+  [2]=>
+  string(10) "appendData"
+  [3]=>
+  string(10) "deleteData"
+  [4]=>
+  string(10) "insertData"
+  [5]=>
+  string(11) "replaceData"
+  [6]=>
+  string(13) "substringData"
+  [7]=>
+  string(5) "__get"
+  [8]=>
+  string(5) "__set"
+  [9]=>
+  string(7) "__isset"
+  [10]=>
+  string(11) "appendChild"
+  [11]=>
+  string(9) "cloneNode"
+  [12]=>
+  string(9) "getLineNo"
+  [13]=>
+  string(13) "hasAttributes"
+  [14]=>
+  string(13) "hasChildNodes"
+  [15]=>
+  string(12) "insertBefore"
+  [16]=>
+  string(18) "isDefaultNamespace"
+  [17]=>
+  string(10) "isSameNode"
+  [18]=>
+  string(11) "isSupported"
+  [19]=>
+  string(18) "lookupNamespaceUri"
+  [20]=>
+  string(12) "lookupPrefix"
+  [21]=>
+  string(9) "normalize"
+  [22]=>
+  string(11) "removeChild"
+  [23]=>
+  string(12) "replaceChild"
+  [24]=>
+  string(4) "c14n"
+  [25]=>
+  string(8) "c14nfile"
+  [26]=>
+  string(11) "getNodePath"
+}
+A_DOMText
+object(A_DOMText) (1) {
+  ["___x"]=>
+  NULL
+}
+string(33) "O:9:"A_DOMText":1:{s:4:"___x";N;}"
+object(A_DOMText) (1) {
+  ["___x"]=>
+  NULL
+}
+array(29) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(28) "isWhitespaceInElementContent"
+  [2]=>
+  string(9) "splitText"
+  [3]=>
+  string(5) "__get"
+  [4]=>
+  string(5) "__set"
+  [5]=>
+  string(7) "__isset"
+  [6]=>
+  string(10) "__destruct"
+  [7]=>
+  string(10) "appendData"
+  [8]=>
+  string(10) "deleteData"
+  [9]=>
+  string(10) "insertData"
+  [10]=>
+  string(11) "replaceData"
+  [11]=>
+  string(13) "substringData"
+  [12]=>
+  string(11) "appendChild"
+  [13]=>
+  string(9) "cloneNode"
+  [14]=>
+  string(9) "getLineNo"
+  [15]=>
+  string(13) "hasAttributes"
+  [16]=>
+  string(13) "hasChildNodes"
+  [17]=>
+  string(12) "insertBefore"
+  [18]=>
+  string(18) "isDefaultNamespace"
+  [19]=>
+  string(10) "isSameNode"
+  [20]=>
+  string(11) "isSupported"
+  [21]=>
+  string(18) "lookupNamespaceUri"
+  [22]=>
+  string(12) "lookupPrefix"
+  [23]=>
+  string(9) "normalize"
+  [24]=>
+  string(11) "removeChild"
+  [25]=>
+  string(12) "replaceChild"
+  [26]=>
+  string(4) "c14n"
+  [27]=>
+  string(8) "c14nfile"
+  [28]=>
+  string(11) "getNodePath"
+}
+A_DOMCDATASection
+HipHop Warning:  Missing argument 1 for DOMCDATASection::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_DOMCDATASection) (1) {
+  ["___x"]=>
+  NULL
+}
+string(42) "O:17:"A_DOMCDATASection":1:{s:4:"___x";N;}"
+object(A_DOMCDATASection) (1) {
+  ["___x"]=>
+  NULL
+}
+array(29) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "__destruct"
+  [2]=>
+  string(28) "isWhitespaceInElementContent"
+  [3]=>
+  string(9) "splitText"
+  [4]=>
+  string(5) "__get"
+  [5]=>
+  string(5) "__set"
+  [6]=>
+  string(7) "__isset"
+  [7]=>
+  string(10) "appendData"
+  [8]=>
+  string(10) "deleteData"
+  [9]=>
+  string(10) "insertData"
+  [10]=>
+  string(11) "replaceData"
+  [11]=>
+  string(13) "substringData"
+  [12]=>
+  string(11) "appendChild"
+  [13]=>
+  string(9) "cloneNode"
+  [14]=>
+  string(9) "getLineNo"
+  [15]=>
+  string(13) "hasAttributes"
+  [16]=>
+  string(13) "hasChildNodes"
+  [17]=>
+  string(12) "insertBefore"
+  [18]=>
+  string(18) "isDefaultNamespace"
+  [19]=>
+  string(10) "isSameNode"
+  [20]=>
+  string(11) "isSupported"
+  [21]=>
+  string(18) "lookupNamespaceUri"
+  [22]=>
+  string(12) "lookupPrefix"
+  [23]=>
+  string(9) "normalize"
+  [24]=>
+  string(11) "removeChild"
+  [25]=>
+  string(12) "replaceChild"
+  [26]=>
+  string(4) "c14n"
+  [27]=>
+  string(8) "c14nfile"
+  [28]=>
+  string(11) "getNodePath"
+}
+A_DOMDocument
+object(A_DOMDocument) (1) {
+  ["___x"]=>
+  NULL
+}
+string(38) "O:13:"A_DOMDocument":1:{s:4:"___x";N;}"
+object(A_DOMDocument) (1) {
+  ["___x"]=>
+  NULL
+}
+array(52) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(15) "createAttribute"
+  [2]=>
+  string(17) "createAttributens"
+  [3]=>
+  string(18) "createCDATASection"
+  [4]=>
+  string(13) "createComment"
+  [5]=>
+  string(22) "createDocumentFragment"
+  [6]=>
+  string(13) "createElement"
+  [7]=>
+  string(15) "createElementNS"
+  [8]=>
+  string(21) "createEntityReference"
+  [9]=>
+  string(27) "createProcessingInstruction"
+  [10]=>
+  string(14) "createTextNode"
+  [11]=>
+  string(14) "getElementById"
+  [12]=>
+  string(20) "getElementsByTagName"
+  [13]=>
+  string(22) "getElementsByTagNameNS"
+  [14]=>
+  string(10) "importNode"
+  [15]=>
+  string(4) "load"
+  [16]=>
+  string(8) "loadHTML"
+  [17]=>
+  string(12) "loadHTMLFile"
+  [18]=>
+  string(7) "loadXML"
+  [19]=>
+  string(17) "normalizeDocument"
+  [20]=>
+  string(17) "registerNodeClass"
+  [21]=>
+  string(15) "relaxNGValidate"
+  [22]=>
+  string(21) "relaxNGValidateSource"
+  [23]=>
+  string(4) "save"
+  [24]=>
+  string(8) "saveHTML"
+  [25]=>
+  string(12) "saveHTMLFile"
+  [26]=>
+  string(7) "saveXML"
+  [27]=>
+  string(14) "schemaValidate"
+  [28]=>
+  string(20) "schemaValidateSource"
+  [29]=>
+  string(8) "validate"
+  [30]=>
+  string(8) "xinclude"
+  [31]=>
+  string(5) "__get"
+  [32]=>
+  string(5) "__set"
+  [33]=>
+  string(7) "__isset"
+  [34]=>
+  string(10) "__destruct"
+  [35]=>
+  string(11) "appendChild"
+  [36]=>
+  string(9) "cloneNode"
+  [37]=>
+  string(9) "getLineNo"
+  [38]=>
+  string(13) "hasAttributes"
+  [39]=>
+  string(13) "hasChildNodes"
+  [40]=>
+  string(12) "insertBefore"
+  [41]=>
+  string(18) "isDefaultNamespace"
+  [42]=>
+  string(10) "isSameNode"
+  [43]=>
+  string(11) "isSupported"
+  [44]=>
+  string(18) "lookupNamespaceUri"
+  [45]=>
+  string(12) "lookupPrefix"
+  [46]=>
+  string(9) "normalize"
+  [47]=>
+  string(11) "removeChild"
+  [48]=>
+  string(12) "replaceChild"
+  [49]=>
+  string(4) "c14n"
+  [50]=>
+  string(8) "c14nfile"
+  [51]=>
+  string(11) "getNodePath"
+}
+A_DOMDocumentFragment
+object(A_DOMDocumentFragment) (1) {
+  ["___x"]=>
+  NULL
+}
+string(46) "O:21:"A_DOMDocumentFragment":1:{s:4:"___x";N;}"
+object(A_DOMDocumentFragment) (1) {
+  ["___x"]=>
+  NULL
+}
+array(23) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(9) "appendXML"
+  [2]=>
+  string(10) "__destruct"
+  [3]=>
+  string(11) "appendChild"
+  [4]=>
+  string(9) "cloneNode"
+  [5]=>
+  string(9) "getLineNo"
+  [6]=>
+  string(13) "hasAttributes"
+  [7]=>
+  string(13) "hasChildNodes"
+  [8]=>
+  string(12) "insertBefore"
+  [9]=>
+  string(18) "isDefaultNamespace"
+  [10]=>
+  string(10) "isSameNode"
+  [11]=>
+  string(11) "isSupported"
+  [12]=>
+  string(18) "lookupNamespaceUri"
+  [13]=>
+  string(12) "lookupPrefix"
+  [14]=>
+  string(9) "normalize"
+  [15]=>
+  string(11) "removeChild"
+  [16]=>
+  string(12) "replaceChild"
+  [17]=>
+  string(4) "c14n"
+  [18]=>
+  string(8) "c14nfile"
+  [19]=>
+  string(11) "getNodePath"
+  [20]=>
+  string(5) "__get"
+  [21]=>
+  string(5) "__set"
+  [22]=>
+  string(7) "__isset"
+}
+A_DOMDocumentType
+object(A_DOMDocumentType) (1) {
+  ["___x"]=>
+  NULL
+}
+string(42) "O:17:"A_DOMDocumentType":1:{s:4:"___x";N;}"
+object(A_DOMDocumentType) (1) {
+  ["___x"]=>
+  NULL
+}
+array(22) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(7) "__isset"
+  [4]=>
+  string(10) "__destruct"
+  [5]=>
+  string(11) "appendChild"
+  [6]=>
+  string(9) "cloneNode"
+  [7]=>
+  string(9) "getLineNo"
+  [8]=>
+  string(13) "hasAttributes"
+  [9]=>
+  string(13) "hasChildNodes"
+  [10]=>
+  string(12) "insertBefore"
+  [11]=>
+  string(18) "isDefaultNamespace"
+  [12]=>
+  string(10) "isSameNode"
+  [13]=>
+  string(11) "isSupported"
+  [14]=>
+  string(18) "lookupNamespaceUri"
+  [15]=>
+  string(12) "lookupPrefix"
+  [16]=>
+  string(9) "normalize"
+  [17]=>
+  string(11) "removeChild"
+  [18]=>
+  string(12) "replaceChild"
+  [19]=>
+  string(4) "c14n"
+  [20]=>
+  string(8) "c14nfile"
+  [21]=>
+  string(11) "getNodePath"
+}
+A_DOMElement
+HipHop Warning:  Missing argument 1 for DOMElement::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_DOMElement) (1) {
+  ["___x"]=>
+  NULL
+}
+string(37) "O:12:"A_DOMElement":1:{s:4:"___x";N;}"
+object(A_DOMElement) (1) {
+  ["___x"]=>
+  NULL
+}
+array(40) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(12) "getAttribute"
+  [2]=>
+  string(16) "getAttributeNode"
+  [3]=>
+  string(18) "getAttributeNodeNS"
+  [4]=>
+  string(14) "getAttributeNS"
+  [5]=>
+  string(20) "getElementsByTagName"
+  [6]=>
+  string(22) "getElementsByTagNameNS"
+  [7]=>
+  string(12) "hasAttribute"
+  [8]=>
+  string(14) "hasAttributeNS"
+  [9]=>
+  string(15) "removeAttribute"
+  [10]=>
+  string(19) "removeAttributeNode"
+  [11]=>
+  string(17) "removeAttributeNS"
+  [12]=>
+  string(12) "setAttribute"
+  [13]=>
+  string(16) "setAttributeNode"
+  [14]=>
+  string(18) "setAttributeNodeNS"
+  [15]=>
+  string(14) "setAttributeNS"
+  [16]=>
+  string(14) "setIDAttribute"
+  [17]=>
+  string(18) "setIDAttributeNode"
+  [18]=>
+  string(16) "setIDAttributeNS"
+  [19]=>
+  string(5) "__get"
+  [20]=>
+  string(5) "__set"
+  [21]=>
+  string(7) "__isset"
+  [22]=>
+  string(10) "__destruct"
+  [23]=>
+  string(11) "appendChild"
+  [24]=>
+  string(9) "cloneNode"
+  [25]=>
+  string(9) "getLineNo"
+  [26]=>
+  string(13) "hasAttributes"
+  [27]=>
+  string(13) "hasChildNodes"
+  [28]=>
+  string(12) "insertBefore"
+  [29]=>
+  string(18) "isDefaultNamespace"
+  [30]=>
+  string(10) "isSameNode"
+  [31]=>
+  string(11) "isSupported"
+  [32]=>
+  string(18) "lookupNamespaceUri"
+  [33]=>
+  string(12) "lookupPrefix"
+  [34]=>
+  string(9) "normalize"
+  [35]=>
+  string(11) "removeChild"
+  [36]=>
+  string(12) "replaceChild"
+  [37]=>
+  string(4) "c14n"
+  [38]=>
+  string(8) "c14nfile"
+  [39]=>
+  string(11) "getNodePath"
+}
+A_DOMEntity
+object(A_DOMEntity) (1) {
+  ["___x"]=>
+  NULL
+}
+string(36) "O:11:"A_DOMEntity":1:{s:4:"___x";N;}"
+object(A_DOMEntity) (1) {
+  ["___x"]=>
+  NULL
+}
+array(22) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(7) "__isset"
+  [4]=>
+  string(10) "__destruct"
+  [5]=>
+  string(11) "appendChild"
+  [6]=>
+  string(9) "cloneNode"
+  [7]=>
+  string(9) "getLineNo"
+  [8]=>
+  string(13) "hasAttributes"
+  [9]=>
+  string(13) "hasChildNodes"
+  [10]=>
+  string(12) "insertBefore"
+  [11]=>
+  string(18) "isDefaultNamespace"
+  [12]=>
+  string(10) "isSameNode"
+  [13]=>
+  string(11) "isSupported"
+  [14]=>
+  string(18) "lookupNamespaceUri"
+  [15]=>
+  string(12) "lookupPrefix"
+  [16]=>
+  string(9) "normalize"
+  [17]=>
+  string(11) "removeChild"
+  [18]=>
+  string(12) "replaceChild"
+  [19]=>
+  string(4) "c14n"
+  [20]=>
+  string(8) "c14nfile"
+  [21]=>
+  string(11) "getNodePath"
+}
+A_DOMEntityReference
+HipHop Warning:  Missing argument 1 for DOMEntityReference::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_DOMEntityReference) (1) {
+  ["___x"]=>
+  NULL
+}
+string(45) "O:20:"A_DOMEntityReference":1:{s:4:"___x";N;}"
+object(A_DOMEntityReference) (1) {
+  ["___x"]=>
+  NULL
+}
+array(22) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "__destruct"
+  [2]=>
+  string(11) "appendChild"
+  [3]=>
+  string(9) "cloneNode"
+  [4]=>
+  string(9) "getLineNo"
+  [5]=>
+  string(13) "hasAttributes"
+  [6]=>
+  string(13) "hasChildNodes"
+  [7]=>
+  string(12) "insertBefore"
+  [8]=>
+  string(18) "isDefaultNamespace"
+  [9]=>
+  string(10) "isSameNode"
+  [10]=>
+  string(11) "isSupported"
+  [11]=>
+  string(18) "lookupNamespaceUri"
+  [12]=>
+  string(12) "lookupPrefix"
+  [13]=>
+  string(9) "normalize"
+  [14]=>
+  string(11) "removeChild"
+  [15]=>
+  string(12) "replaceChild"
+  [16]=>
+  string(4) "c14n"
+  [17]=>
+  string(8) "c14nfile"
+  [18]=>
+  string(11) "getNodePath"
+  [19]=>
+  string(5) "__get"
+  [20]=>
+  string(5) "__set"
+  [21]=>
+  string(7) "__isset"
+}
+A_DOMNotation
+object(A_DOMNotation) (1) {
+  ["___x"]=>
+  NULL
+}
+string(38) "O:13:"A_DOMNotation":1:{s:4:"___x";N;}"
+object(A_DOMNotation) (1) {
+  ["___x"]=>
+  NULL
+}
+array(22) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(7) "__isset"
+  [4]=>
+  string(10) "__destruct"
+  [5]=>
+  string(11) "appendChild"
+  [6]=>
+  string(9) "cloneNode"
+  [7]=>
+  string(9) "getLineNo"
+  [8]=>
+  string(13) "hasAttributes"
+  [9]=>
+  string(13) "hasChildNodes"
+  [10]=>
+  string(12) "insertBefore"
+  [11]=>
+  string(18) "isDefaultNamespace"
+  [12]=>
+  string(10) "isSameNode"
+  [13]=>
+  string(11) "isSupported"
+  [14]=>
+  string(18) "lookupNamespaceUri"
+  [15]=>
+  string(12) "lookupPrefix"
+  [16]=>
+  string(9) "normalize"
+  [17]=>
+  string(11) "removeChild"
+  [18]=>
+  string(12) "replaceChild"
+  [19]=>
+  string(4) "c14n"
+  [20]=>
+  string(8) "c14nfile"
+  [21]=>
+  string(11) "getNodePath"
+}
+A_DOMProcessingInstruction
+HipHop Warning:  Missing argument 1 for DOMProcessingInstruction::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_DOMProcessingInstruction) (1) {
+  ["___x"]=>
+  NULL
+}
+string(51) "O:26:"A_DOMProcessingInstruction":1:{s:4:"___x";N;}"
+object(A_DOMProcessingInstruction) (1) {
+  ["___x"]=>
+  NULL
+}
+array(22) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(7) "__isset"
+  [4]=>
+  string(10) "__destruct"
+  [5]=>
+  string(11) "appendChild"
+  [6]=>
+  string(9) "cloneNode"
+  [7]=>
+  string(9) "getLineNo"
+  [8]=>
+  string(13) "hasAttributes"
+  [9]=>
+  string(13) "hasChildNodes"
+  [10]=>
+  string(12) "insertBefore"
+  [11]=>
+  string(18) "isDefaultNamespace"
+  [12]=>
+  string(10) "isSameNode"
+  [13]=>
+  string(11) "isSupported"
+  [14]=>
+  string(18) "lookupNamespaceUri"
+  [15]=>
+  string(12) "lookupPrefix"
+  [16]=>
+  string(9) "normalize"
+  [17]=>
+  string(11) "removeChild"
+  [18]=>
+  string(12) "replaceChild"
+  [19]=>
+  string(4) "c14n"
+  [20]=>
+  string(8) "c14nfile"
+  [21]=>
+  string(11) "getNodePath"
+}
+A_DOMNodeIterator
+object(A_DOMNodeIterator) (1) {
+  ["___x"]=>
+  NULL
+}
+string(42) "O:17:"A_DOMNodeIterator":1:{s:4:"___x";N;}"
+object(A_DOMNodeIterator) (1) {
+  ["___x"]=>
+  NULL
+}
+array(7) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "current"
+  [2]=>
+  string(3) "key"
+  [3]=>
+  string(4) "next"
+  [4]=>
+  string(6) "rewind"
+  [5]=>
+  string(5) "valid"
+  [6]=>
+  string(10) "__destruct"
+}
+A_DOMNamedNodeMap
+object(A_DOMNamedNodeMap) (1) {
+  ["___x"]=>
+  NULL
+}
+string(42) "O:17:"A_DOMNamedNodeMap":1:{s:4:"___x";N;}"
+object(A_DOMNamedNodeMap) (1) {
+  ["___x"]=>
+  NULL
+}
+array(9) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(12) "getNamedItem"
+  [2]=>
+  string(14) "getNamedItemNS"
+  [3]=>
+  string(4) "item"
+  [4]=>
+  string(5) "__get"
+  [5]=>
+  string(5) "__set"
+  [6]=>
+  string(7) "__isset"
+  [7]=>
+  string(11) "getIterator"
+  [8]=>
+  string(10) "__destruct"
+}
+A_DOMNodeList
+object(A_DOMNodeList) (1) {
+  ["___x"]=>
+  NULL
+}
+string(38) "O:13:"A_DOMNodeList":1:{s:4:"___x";N;}"
+object(A_DOMNodeList) (1) {
+  ["___x"]=>
+  NULL
+}
+array(7) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(4) "item"
+  [2]=>
+  string(5) "__get"
+  [3]=>
+  string(5) "__set"
+  [4]=>
+  string(7) "__isset"
+  [5]=>
+  string(11) "getIterator"
+  [6]=>
+  string(10) "__destruct"
+}
+A_DOMImplementation
+object(A_DOMImplementation) (1) {
+  ["___x"]=>
+  NULL
+}
+string(44) "O:19:"A_DOMImplementation":1:{s:4:"___x";N;}"
+object(A_DOMImplementation) (1) {
+  ["___x"]=>
+  NULL
+}
+array(5) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(14) "createDocument"
+  [2]=>
+  string(18) "createDocumentType"
+  [3]=>
+  string(10) "hasFeature"
+  [4]=>
+  string(10) "__destruct"
+}
+A_DOMXPath
+HipHop Warning:  Missing argument 1 for DOMXPath::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_DOMXPath) (1) {
+  ["___x"]=>
+  NULL
+}
+string(35) "O:10:"A_DOMXPath":1:{s:4:"___x";N;}"
+object(A_DOMXPath) (1) {
+  ["___x"]=>
+  NULL
+}
+array(9) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(8) "evaluate"
+  [2]=>
+  string(5) "query"
+  [3]=>
+  string(17) "registerNamespace"
+  [4]=>
+  string(20) "registerPHPFunctions"
+  [5]=>
+  string(5) "__get"
+  [6]=>
+  string(5) "__set"
+  [7]=>
+  string(7) "__isset"
+  [8]=>
+  string(10) "__destruct"
+}
+A_EncodingDetector
+object(A_EncodingDetector) (1) {
+  ["___x"]=>
+  NULL
+}
+string(43) "O:18:"A_EncodingDetector":1:{s:4:"___x";N;}"
+object(A_EncodingDetector) (1) {
+  ["___x"]=>
+  NULL
+}
+array(6) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "setText"
+  [2]=>
+  string(19) "setDeclaredEncoding"
+  [3]=>
+  string(6) "detect"
+  [4]=>
+  string(9) "detectAll"
+  [5]=>
+  string(10) "__destruct"
+}
+A_EncodingMatch
+object(A_EncodingMatch) (1) {
+  ["___x"]=>
+  NULL
+}
+string(40) "O:15:"A_EncodingMatch":1:{s:4:"___x";N;}"
+object(A_EncodingMatch) (1) {
+  ["___x"]=>
+  NULL
+}
+array(7) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "isValid"
+  [2]=>
+  string(11) "getEncoding"
+  [3]=>
+  string(13) "getConfidence"
+  [4]=>
+  string(11) "getLanguage"
+  [5]=>
+  string(7) "getUTF8"
+  [6]=>
+  string(10) "__destruct"
+}
+A_SpoofChecker
+object(A_SpoofChecker) (1) {
+  ["___x"]=>
+  NULL
+}
+string(39) "O:14:"A_SpoofChecker":1:{s:4:"___x";N;}"
+object(A_SpoofChecker) (1) {
+  ["___x"]=>
+  NULL
+}
+array(6) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(12) "isSuspicious"
+  [2]=>
+  string(13) "areConfusable"
+  [3]=>
+  string(17) "setAllowedLocales"
+  [4]=>
+  string(9) "setChecks"
+  [5]=>
+  string(10) "__destruct"
+}
+A_ImageSprite
+object(A_ImageSprite) (1) {
+  ["___x"]=>
+  NULL
+}
+string(38) "O:13:"A_ImageSprite":1:{s:4:"___x";N;}"
+object(A_ImageSprite) (1) {
+  ["___x"]=>
+  NULL
+}
+array(12) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "addFile"
+  [2]=>
+  string(9) "addString"
+  [3]=>
+  string(6) "addUrl"
+  [4]=>
+  string(5) "clear"
+  [5]=>
+  string(8) "loadDims"
+  [6]=>
+  string(10) "loadImages"
+  [7]=>
+  string(6) "output"
+  [8]=>
+  string(3) "css"
+  [9]=>
+  string(9) "getErrors"
+  [10]=>
+  string(7) "mapping"
+  [11]=>
+  string(10) "__destruct"
+}
+A_Collator
+HipHop Warning:  Missing argument 1 for Collator::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_Collator) (1) {
+  ["___x"]=>
+  NULL
+}
+string(35) "O:10:"A_Collator":1:{s:4:"___x";N;}"
+object(A_Collator) (1) {
+  ["___x"]=>
+  NULL
+}
+array(14) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "asort"
+  [2]=>
+  string(7) "compare"
+  [3]=>
+  string(6) "create"
+  [4]=>
+  string(12) "getattribute"
+  [5]=>
+  string(12) "geterrorcode"
+  [6]=>
+  string(15) "geterrormessage"
+  [7]=>
+  string(9) "getlocale"
+  [8]=>
+  string(11) "getstrength"
+  [9]=>
+  string(12) "setattribute"
+  [10]=>
+  string(11) "setstrength"
+  [11]=>
+  string(16) "sortwithsortkeys"
+  [12]=>
+  string(4) "sort"
+  [13]=>
+  string(10) "__destruct"
+}
+A_Locale
+object(A_Locale) (1) {
+  ["___x"]=>
+  NULL
+}
+string(32) "O:8:"A_Locale":1:{s:4:"___x";N;}"
+object(A_Locale) (1) {
+  ["___x"]=>
+  NULL
+}
+array(2) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "__destruct"
+}
+A_Normalizer
+object(A_Normalizer) (1) {
+  ["___x"]=>
+  NULL
+}
+string(37) "O:12:"A_Normalizer":1:{s:4:"___x";N;}"
+object(A_Normalizer) (1) {
+  ["___x"]=>
+  NULL
+}
+array(4) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(12) "isnormalized"
+  [2]=>
+  string(9) "normalize"
+  [3]=>
+  string(10) "__destruct"
+}
+A_Memcache
+object(A_Memcache) (1) {
+  ["___x"]=>
+  NULL
+}
+string(35) "O:10:"A_Memcache":1:{s:4:"___x";N;}"
+object(A_Memcache) (1) {
+  ["___x"]=>
+  NULL
+}
+array(21) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "connect"
+  [2]=>
+  string(8) "pconnect"
+  [3]=>
+  string(3) "add"
+  [4]=>
+  string(3) "set"
+  [5]=>
+  string(7) "replace"
+  [6]=>
+  string(3) "get"
+  [7]=>
+  string(6) "delete"
+  [8]=>
+  string(9) "increment"
+  [9]=>
+  string(9) "decrement"
+  [10]=>
+  string(10) "getversion"
+  [11]=>
+  string(5) "flush"
+  [12]=>
+  string(12) "setoptimeout"
+  [13]=>
+  string(5) "close"
+  [14]=>
+  string(15) "getserverstatus"
+  [15]=>
+  string(20) "setcompressthreshold"
+  [16]=>
+  string(8) "getstats"
+  [17]=>
+  string(16) "getextendedstats"
+  [18]=>
+  string(15) "setserverparams"
+  [19]=>
+  string(9) "addserver"
+  [20]=>
+  string(10) "__destruct"
+}
+A_Memcached
+object(A_Memcached) (1) {
+  ["___x"]=>
+  NULL
+}
+string(36) "O:11:"A_Memcached":1:{s:4:"___x";N;}"
+object(A_Memcached) (1) {
+  ["___x"]=>
+  NULL
+}
+array(39) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(3) "add"
+  [2]=>
+  string(8) "addByKey"
+  [3]=>
+  string(9) "addServer"
+  [4]=>
+  string(10) "addServers"
+  [5]=>
+  string(6) "append"
+  [6]=>
+  string(11) "appendByKey"
+  [7]=>
+  string(3) "cas"
+  [8]=>
+  string(8) "casByKey"
+  [9]=>
+  string(9) "decrement"
+  [10]=>
+  string(6) "delete"
+  [11]=>
+  string(11) "deleteByKey"
+  [12]=>
+  string(5) "fetch"
+  [13]=>
+  string(8) "fetchAll"
+  [14]=>
+  string(5) "flush"
+  [15]=>
+  string(3) "get"
+  [16]=>
+  string(8) "getByKey"
+  [17]=>
+  string(10) "getDelayed"
+  [18]=>
+  string(15) "getDelayedByKey"
+  [19]=>
+  string(8) "getMulti"
+  [20]=>
+  string(13) "getMultiByKey"
+  [21]=>
+  string(9) "getOption"
+  [22]=>
+  string(13) "getResultCode"
+  [23]=>
+  string(16) "getResultMessage"
+  [24]=>
+  string(14) "getServerByKey"
+  [25]=>
+  string(13) "getServerList"
+  [26]=>
+  string(8) "getStats"
+  [27]=>
+  string(10) "getVersion"
+  [28]=>
+  string(9) "increment"
+  [29]=>
+  string(7) "prepend"
+  [30]=>
+  string(12) "prependByKey"
+  [31]=>
+  string(7) "replace"
+  [32]=>
+  string(12) "replaceByKey"
+  [33]=>
+  string(3) "set"
+  [34]=>
+  string(8) "setByKey"
+  [35]=>
+  string(8) "setMulti"
+  [36]=>
+  string(13) "setMultiByKey"
+  [37]=>
+  string(9) "setOption"
+  [38]=>
+  string(10) "__destruct"
+}
+A_phpmcc
+HipHop Warning:  Missing argument 1 for phpmcc::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_phpmcc) (1) {
+  ["___x"]=>
+  NULL
+}
+string(32) "O:8:"A_phpmcc":1:{s:4:"___x";N;}"
+object(A_phpmcc) (1) {
+  ["___x"]=>
+  NULL
+}
+array(59) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "__destruct"
+  [2]=>
+  string(10) "__tostring"
+  [3]=>
+  string(5) "__set"
+  [4]=>
+  string(5) "__get"
+  [5]=>
+  string(5) "close"
+  [6]=>
+  string(3) "del"
+  [7]=>
+  string(15) "add_accesspoint"
+  [8]=>
+  string(18) "remove_accesspoint"
+  [9]=>
+  string(16) "get_accesspoints"
+  [10]=>
+  string(10) "get_server"
+  [11]=>
+  string(22) "add_mirror_accesspoint"
+  [12]=>
+  string(25) "remove_mirror_accesspoint"
+  [13]=>
+  string(10) "add_server"
+  [14]=>
+  string(13) "remove_server"
+  [15]=>
+  string(12) "server_flush"
+  [16]=>
+  string(14) "server_version"
+  [17]=>
+  string(15) "server_is_alive"
+  [18]=>
+  string(10) "test_proxy"
+  [19]=>
+  string(10) "add_mirror"
+  [20]=>
+  string(13) "remove_mirror"
+  [21]=>
+  string(14) "add_serverpool"
+  [22]=>
+  string(17) "add_serverpool_ex"
+  [23]=>
+  string(17) "remove_serverpool"
+  [24]=>
+  string(24) "add_accesspoint_listener"
+  [25]=>
+  string(27) "remove_accesspoint_listener"
+  [26]=>
+  string(19) "add_server_listener"
+  [27]=>
+  string(22) "remove_server_listener"
+  [28]=>
+  string(18) "add_error_listener"
+  [29]=>
+  string(21) "remove_error_listener"
+  [30]=>
+  string(17) "get_server_by_key"
+  [31]=>
+  string(8) "get_host"
+  [32]=>
+  string(21) "get_serverpool_by_key"
+  [33]=>
+  string(21) "serverpool_add_server"
+  [34]=>
+  string(24) "serverpool_remove_server"
+  [35]=>
+  string(22) "serverpool_get_servers"
+  [36]=>
+  string(41) "serverpool_get_consistent_hashing_enabled"
+  [37]=>
+  string(41) "serverpool_get_consistent_hashing_version"
+  [38]=>
+  string(9) "multi_add"
+  [39]=>
+  string(13) "multi_replace"
+  [40]=>
+  string(9) "multi_set"
+  [41]=>
+  string(15) "multi_lease_set"
+  [42]=>
+  string(3) "add"
+  [43]=>
+  string(4) "decr"
+  [44]=>
+  string(4) "incr"
+  [45]=>
+  string(6) "delete"
+  [46]=>
+  string(14) "delete_details"
+  [47]=>
+  string(3) "get"
+  [48]=>
+  string(9) "lease_get"
+  [49]=>
+  string(12) "detailed_get"
+  [50]=>
+  string(9) "get_multi"
+  [51]=>
+  string(15) "lease_get_multi"
+  [52]=>
+  string(7) "replace"
+  [53]=>
+  string(3) "set"
+  [54]=>
+  string(9) "lease_set"
+  [55]=>
+  string(5) "stats"
+  [56]=>
+  string(13) "traffic_stats"
+  [57]=>
+  string(7) "metaget"
+  [58]=>
+  string(15) "get_mcc_version"
+}
+A_SimpleXMLElement
+HipHop Warning:  Missing argument 1 for SimpleXMLElement::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_SimpleXMLElement) (0) {
+}
+string(30) "O:18:"A_SimpleXMLElement":0:{}"
+object(A_SimpleXMLElement) (0) {
+}
+array(23) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(12) "offsetExists"
+  [2]=>
+  string(9) "offsetGet"
+  [3]=>
+  string(9) "offsetSet"
+  [4]=>
+  string(11) "offsetUnset"
+  [5]=>
+  string(11) "getIterator"
+  [6]=>
+  string(5) "count"
+  [7]=>
+  string(5) "xpath"
+  [8]=>
+  string(22) "registerXPathNamespace"
+  [9]=>
+  string(5) "asXML"
+  [10]=>
+  string(13) "getNamespaces"
+  [11]=>
+  string(16) "getDocNamespaces"
+  [12]=>
+  string(8) "children"
+  [13]=>
+  string(7) "getName"
+  [14]=>
+  string(10) "attributes"
+  [15]=>
+  string(8) "addChild"
+  [16]=>
+  string(12) "addAttribute"
+  [17]=>
+  string(10) "__toString"
+  [18]=>
+  string(5) "__get"
+  [19]=>
+  string(5) "__set"
+  [20]=>
+  string(7) "__isset"
+  [21]=>
+  string(7) "__unset"
+  [22]=>
+  string(10) "__destruct"
+}
+A_LibXMLError
+object(A_LibXMLError) (1) {
+  ["___x"]=>
+  NULL
+}
+string(38) "O:13:"A_LibXMLError":1:{s:4:"___x";N;}"
+object(A_LibXMLError) (1) {
+  ["___x"]=>
+  NULL
+}
+array(2) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "__destruct"
+}
+A_SimpleXMLElementIterator
+object(A_SimpleXMLElementIterator) (1) {
+  ["___x"]=>
+  NULL
+}
+string(51) "O:26:"A_SimpleXMLElementIterator":1:{s:4:"___x";N;}"
+object(A_SimpleXMLElementIterator) (1) {
+  ["___x"]=>
+  NULL
+}
+array(7) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "current"
+  [2]=>
+  string(3) "key"
+  [3]=>
+  string(4) "next"
+  [4]=>
+  string(6) "rewind"
+  [5]=>
+  string(5) "valid"
+  [6]=>
+  string(10) "__destruct"
+}
+A_SoapServer
+HipHop Warning:  Missing argument 1 for SoapServer::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_SoapServer) (1) {
+  ["___x"]=>
+  NULL
+}
+string(37) "O:12:"A_SoapServer":1:{s:4:"___x";N;}"
+object(A_SoapServer) (1) {
+  ["___x"]=>
+  NULL
+}
+array(10) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(8) "setclass"
+  [2]=>
+  string(9) "setobject"
+  [3]=>
+  string(11) "addfunction"
+  [4]=>
+  string(12) "getfunctions"
+  [5]=>
+  string(6) "handle"
+  [6]=>
+  string(14) "setpersistence"
+  [7]=>
+  string(5) "fault"
+  [8]=>
+  string(13) "addsoapheader"
+  [9]=>
+  string(10) "__destruct"
+}
+A_SoapClient
+HipHop Warning:  Missing argument 1 for SoapClient::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_SoapClient) (1) {
+  ["___x"]=>
+  NULL
+}
+string(37) "O:12:"A_SoapClient":1:{s:4:"___x";N;}"
+object(A_SoapClient) (1) {
+  ["___x"]=>
+  NULL
+}
+array(14) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(6) "__call"
+  [2]=>
+  string(10) "__soapcall"
+  [3]=>
+  string(16) "__getlastrequest"
+  [4]=>
+  string(17) "__getlastresponse"
+  [5]=>
+  string(23) "__getlastrequestheaders"
+  [6]=>
+  string(24) "__getlastresponseheaders"
+  [7]=>
+  string(14) "__getfunctions"
+  [8]=>
+  string(10) "__gettypes"
+  [9]=>
+  string(11) "__dorequest"
+  [10]=>
+  string(11) "__setcookie"
+  [11]=>
+  string(13) "__setlocation"
+  [12]=>
+  string(16) "__setsoapheaders"
+  [13]=>
+  string(10) "__destruct"
+}
+A_SoapVar
+HipHop Warning:  Missing argument 1 for SoapVar::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_SoapVar) (1) {
+  ["___x"]=>
+  NULL
+}
+string(33) "O:9:"A_SoapVar":1:{s:4:"___x";N;}"
+object(A_SoapVar) (1) {
+  ["___x"]=>
+  NULL
+}
+array(2) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "__destruct"
+}
+A_SoapParam
+HipHop Warning:  Missing argument 1 for SoapParam::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_SoapParam) (1) {
+  ["___x"]=>
+  NULL
+}
+string(36) "O:11:"A_SoapParam":1:{s:4:"___x";N;}"
+object(A_SoapParam) (1) {
+  ["___x"]=>
+  NULL
+}
+array(2) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "__destruct"
+}
+A_SoapHeader
+HipHop Warning:  Missing argument 1 for SoapHeader::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_SoapHeader) (1) {
+  ["___x"]=>
+  NULL
+}
+string(37) "O:12:"A_SoapHeader":1:{s:4:"___x";N;}"
+object(A_SoapHeader) (1) {
+  ["___x"]=>
+  NULL
+}
+array(2) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "__destruct"
+}
+A_SQLite3
+object(A_SQLite3) (1) {
+  ["___x"]=>
+  NULL
+}
+string(33) "O:9:"A_SQLite3":1:{s:4:"___x";N;}"
+object(A_SQLite3) (1) {
+  ["___x"]=>
+  NULL
+}
+array(18) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(4) "open"
+  [2]=>
+  string(5) "close"
+  [3]=>
+  string(4) "exec"
+  [4]=>
+  string(7) "version"
+  [5]=>
+  string(15) "lastinsertrowid"
+  [6]=>
+  string(13) "lasterrorcode"
+  [7]=>
+  string(12) "lasterrormsg"
+  [8]=>
+  string(13) "loadextension"
+  [9]=>
+  string(7) "changes"
+  [10]=>
+  string(12) "escapestring"
+  [11]=>
+  string(7) "prepare"
+  [12]=>
+  string(5) "query"
+  [13]=>
+  string(11) "querysingle"
+  [14]=>
+  string(14) "createfunction"
+  [15]=>
+  string(15) "createaggregate"
+  [16]=>
+  string(8) "openblob"
+  [17]=>
+  string(10) "__destruct"
+}
+A_SQLite3Stmt
+HipHop Warning:  Missing argument 1 for SQLite3Stmt::__construct() in src/test/vm/builtin_extensions.php on line 253
+object(A_SQLite3Stmt) (1) {
+  ["___x"]=>
+  NULL
+}
+string(38) "O:13:"A_SQLite3Stmt":1:{s:4:"___x";N;}"
+object(A_SQLite3Stmt) (1) {
+  ["___x"]=>
+  NULL
+}
+array(9) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "paramcount"
+  [2]=>
+  string(5) "close"
+  [3]=>
+  string(5) "reset"
+  [4]=>
+  string(5) "clear"
+  [5]=>
+  string(9) "bindparam"
+  [6]=>
+  string(9) "bindvalue"
+  [7]=>
+  string(7) "execute"
+  [8]=>
+  string(10) "__destruct"
+}
+A_SQLite3Result
+object(A_SQLite3Result) (1) {
+  ["___x"]=>
+  NULL
+}
+string(40) "O:15:"A_SQLite3Result":1:{s:4:"___x";N;}"
+object(A_SQLite3Result) (1) {
+  ["___x"]=>
+  NULL
+}
+array(8) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "numcolumns"
+  [2]=>
+  string(10) "columnname"
+  [3]=>
+  string(10) "columntype"
+  [4]=>
+  string(10) "fetcharray"
+  [5]=>
+  string(5) "reset"
+  [6]=>
+  string(8) "finalize"
+  [7]=>
+  string(10) "__destruct"
+}
+A_XMLReader
+object(A_XMLReader) (1) {
+  ["___x"]=>
+  NULL
+}
+string(36) "O:11:"A_XMLReader":1:{s:4:"___x";N;}"
+object(A_XMLReader) (1) {
+  ["___x"]=>
+  NULL
+}
+array(28) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(4) "open"
+  [2]=>
+  string(3) "XML"
+  [3]=>
+  string(5) "close"
+  [4]=>
+  string(4) "read"
+  [5]=>
+  string(4) "next"
+  [6]=>
+  string(10) "readString"
+  [7]=>
+  string(12) "readInnerXML"
+  [8]=>
+  string(12) "readOuterXML"
+  [9]=>
+  string(19) "moveToNextAttribute"
+  [10]=>
+  string(12) "getAttribute"
+  [11]=>
+  string(14) "getAttributeNo"
+  [12]=>
+  string(14) "getAttributeNs"
+  [13]=>
+  string(15) "moveToAttribute"
+  [14]=>
+  string(17) "moveToAttributeNo"
+  [15]=>
+  string(17) "moveToAttributeNs"
+  [16]=>
+  string(13) "moveToElement"
+  [17]=>
+  string(20) "moveToFirstAttribute"
+  [18]=>
+  string(7) "isValid"
+  [19]=>
+  string(6) "expand"
+  [20]=>
+  string(5) "__get"
+  [21]=>
+  string(17) "getParserProperty"
+  [22]=>
+  string(15) "lookupNamespace"
+  [23]=>
+  string(9) "setSchema"
+  [24]=>
+  string(17) "setParserProperty"
+  [25]=>
+  string(16) "setRelaxNGSchema"
+  [26]=>
+  string(22) "setRelaxNGSchemaSource"
+  [27]=>
+  string(10) "__destruct"
+}
+A_XMLWriter
+object(A_XMLWriter) (1) {
+  ["___x"]=>
+  NULL
+}
+string(36) "O:11:"A_XMLWriter":1:{s:4:"___x";N;}"
+object(A_XMLWriter) (1) {
+  ["___x"]=>
+  NULL
+}
+array(44) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "openMemory"
+  [2]=>
+  string(7) "openURI"
+  [3]=>
+  string(15) "setIndentString"
+  [4]=>
+  string(9) "setIndent"
+  [5]=>
+  string(13) "startDocument"
+  [6]=>
+  string(12) "startElement"
+  [7]=>
+  string(14) "startElementNS"
+  [8]=>
+  string(14) "writeElementNS"
+  [9]=>
+  string(12) "writeElement"
+  [10]=>
+  string(10) "endElement"
+  [11]=>
+  string(14) "fullEndElement"
+  [12]=>
+  string(16) "startAttributens"
+  [13]=>
+  string(14) "startAttribute"
+  [14]=>
+  string(16) "writeAttributeNS"
+  [15]=>
+  string(14) "writeAttribute"
+  [16]=>
+  string(12) "endAttribute"
+  [17]=>
+  string(10) "startCData"
+  [18]=>
+  string(10) "writeCData"
+  [19]=>
+  string(8) "endCData"
+  [20]=>
+  string(12) "startComment"
+  [21]=>
+  string(12) "writeComment"
+  [22]=>
+  string(10) "endComment"
+  [23]=>
+  string(11) "endDocument"
+  [24]=>
+  string(7) "startPI"
+  [25]=>
+  string(7) "writePI"
+  [26]=>
+  string(5) "endPI"
+  [27]=>
+  string(4) "text"
+  [28]=>
+  string(8) "writeRaw"
+  [29]=>
+  string(8) "startDTD"
+  [30]=>
+  string(8) "writeDTD"
+  [31]=>
+  string(15) "startDTDElement"
+  [32]=>
+  string(15) "writeDTDElement"
+  [33]=>
+  string(13) "endDTDElement"
+  [34]=>
+  string(15) "startDTDAttlist"
+  [35]=>
+  string(15) "writeDTDAttlist"
+  [36]=>
+  string(13) "endDTDAttlist"
+  [37]=>
+  string(14) "startDTDEntity"
+  [38]=>
+  string(14) "writeDTDEntity"
+  [39]=>
+  string(12) "endDTDEntity"
+  [40]=>
+  string(6) "endDTD"
+  [41]=>
+  string(5) "flush"
+  [42]=>
+  string(12) "outputMemory"
+  [43]=>
+  string(10) "__destruct"
+}
+A_StringBuffer
+object(A_StringBuffer) (1) {
+  ["___x"]=>
+  NULL
+}
+string(39) "O:14:"A_StringBuffer":1:{s:4:"___x";N;}"
+object(A_StringBuffer) (1) {
+  ["___x"]=>
+  NULL
+}
+array(4) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(6) "append"
+  [2]=>
+  string(6) "detach"
+  [3]=>
+  string(10) "__destruct"
+}
+America/Los_Angeles

@@ -18,6 +18,8 @@
 #include <runtime/ext/ext_icu_uspoof.h>
 #include <runtime/base/util/exceptions.h>
 
+#include <system/lib/systemlib.h>
+
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(icu_uspoof);
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,6 +38,7 @@ const int q_SpoofChecker$$CHAR_LIMIT = USPOOF_CHAR_LIMIT;
 ///////////////////////////////////////////////////////////////////////////////
 c_SpoofChecker::c_SpoofChecker(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb) {
+  CPP_BUILTIN_CLASS_INIT(SpoofChecker);
   UErrorCode status = U_ZERO_ERROR;
   m_spoof_checker = uspoof_open(&status);
 

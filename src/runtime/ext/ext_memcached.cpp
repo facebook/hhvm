@@ -21,6 +21,8 @@
 #include <runtime/ext/ext_json.h>
 #include <zlib.h>
 
+#include <system/lib/systemlib.h>
+
 using namespace std;
 
 namespace HPHP {
@@ -180,8 +182,11 @@ public:
 
 
 c_Memcached::c_Memcached(const ObjectStaticCallbacks *cb) :
-    ExtObjectData(cb) { }
-c_Memcached::~c_Memcached() { }
+    ExtObjectData(cb) {
+  CPP_BUILTIN_CLASS_INIT(Memcached);
+}
+c_Memcached::~c_Memcached() {
+}
 
 c_Memcached::Impl::Impl() :
     compression(true),

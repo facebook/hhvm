@@ -55,6 +55,8 @@ public:
     IsReference            = (1 << 11), //                  x      x     x
     IsOptional             = (1 << 12), //                               x
 
+    IsConstructor          = IsOptional,//                         x
+
     // need a non-zero number for const char * maps
     IsNothing              = (1 << 13),
 
@@ -108,8 +110,7 @@ public:
     const char *valueText; // original PHP code
   };
 
-  class MethodInfo {
-  public:
+  struct MethodInfo {
     MethodInfo() : docComment(NULL) {}
     MethodInfo(const char **&p);
     ~MethodInfo();
@@ -187,6 +188,11 @@ public:
   static const ClassInfo *FindClass(CStrRef name);
 
   /**
+   * Locate one system class.
+   */
+  static const ClassInfo *FindSystemClass(CStrRef name);
+
+  /**
    * Return a list of declared interfaces.
    */
   static Array GetInterfaces() { return GetClassLike(IsInterface, IsInterface); }
@@ -202,14 +208,29 @@ public:
   static const ClassInfo *FindInterface(CStrRef name);
 
   /**
+   * Locate one system interface.
+   */
+  static const ClassInfo *FindSystemInterface(CStrRef name);
+
+  /**
    * Locate one trait.
    */
   static const ClassInfo *FindTrait(CStrRef name);
 
   /**
+   * Locate one system trait.
+   */
+  static const ClassInfo *FindSystemTrait(CStrRef name);
+
+  /**
    * Locate either a class, interface, or trait.
    */
   static const ClassInfo *FindClassInterfaceOrTrait(CStrRef name);
+
+  /**
+   * Locate either a system class, system interface, or system trait.
+   */
+  static const ClassInfo *FindSystemClassInterfaceOrTrait(CStrRef name);
 
   /**
    * Locate one constant (excluding dynamic and redeclared constants)
@@ -271,6 +292,8 @@ public:
   virtual const ClassInfo* getCurrentOrNull() const { return this; }
   virtual CStrRef getName() const { return m_name;}
   const char *getDocComment() const { return m_docComment; }
+
+  virtual void postInit();
 
   /**
    * Parents of this class.
@@ -360,6 +383,7 @@ public:
 
   // implementing ClassInfo
   CStrRef getParentClass() const { return m_parent;}
+  const ClassInfo *getParentClassInfo() const;
   const InterfaceSet &getInterfaces() const { return m_interfaces;}
   const InterfaceVec &getInterfacesVec() const { return m_interfacesVec;}
   const TraitSet &getTraits() const { return m_traits;}
@@ -372,8 +396,11 @@ public:
   const ConstantMap &getConstants() const { return m_constants;}
   const ConstantVec &getConstantsVec() const { return m_constantsVec;}
 
+  virtual void postInit();
+
 private:
   String        m_parent;          // parent class name
+  const ClassInfo *m_parentInfo;   // parent class info (or null)
   InterfaceSet  m_interfaces;      // all interfaces
   InterfaceVec  m_interfacesVec;   // all interfaces in declaration order
   TraitSet      m_traits;          // all used traits
@@ -435,6 +462,7 @@ public:
     return current()->getConstantsVec();
   }
 
+  virtual void postInit();
 private:
   std::vector<ClassInfo*> m_redeclaredClasses;
   int m_redeclaredIdOffset;

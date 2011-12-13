@@ -22,6 +22,7 @@
 #include <runtime/base/zend/zend_pack.h>
 #include <runtime/base/hphp_system.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/vm/bytecode.h>
 #include <runtime/base/server/server_stats.h>
 #include <util/parser/scanner.h>
 #include <runtime/eval/runtime/eval_state.h>
@@ -61,7 +62,9 @@ Variant f_constant(CStrRef name) {
 
     // translate "self" or "parent"
     if (className == "self") {
-      String this_class = FrameInjection::GetClassName(true);
+      String this_class = hhvm
+                          ? g_context->getContextClassName(true)
+                          : FrameInjection::GetClassName(true);
       if (this_class.empty()) {
         throw FatalErrorException("Cannot access self:: "
           "when no class scope is active");
@@ -69,7 +72,9 @@ Variant f_constant(CStrRef name) {
         className = this_class;
       }
     } else if (className == "parent") {
-      CStrRef parent_class = FrameInjection::GetParentClassName(true);
+      String parent_class = hhvm
+                            ? g_context->getParentContextClassName(true)
+                            : FrameInjection::GetParentClassName(true);
       if (parent_class.empty()) {
         throw FatalErrorException("Cannot access parent");
       } else {
@@ -93,19 +98,28 @@ Variant f_constant(CStrRef name) {
 
 bool f_define(CStrRef name, CVarRef value,
               bool case_insensitive /* = false */) {
-  if (!has_eval_support) {
-    ASSERT(false); // define() should be turned into constant definition by HPHP
+  if (hhvm) {
+    StringData* sd = NEW(StringData)(name.data(), name.size(), CopyString);
+    sd->incRefCount();
+    bool ret = g_context->setCns(sd, value);
+    LITSTR_DECREF(sd);
+    return ret;
+  } else {
+    if (!has_eval_support) {
+      // define() should be turned into constant definition by HPHP
+      ASSERT(false);
+      return false;
+    }
+    if (!value.isAllowedAsConstantValue()) {
+      raise_warning("Constants may only evaluate to scalar values");
+      return false;
+    }
+    if (!f_defined(name)) {
+      return Eval::RequestEvalState::declareConstant(name, value);
+    }
+    raise_notice("Constant %s already defined", name.data());
     return false;
   }
-  if (!value.isAllowedAsConstantValue()) {
-    raise_warning("Constants may only evaluate to scalar values");
-    return false;
-  }
-  if (!f_defined(name)) {
-    return Eval::RequestEvalState::declareConstant(name, value);
-  }
-  raise_notice("Constant %s already defined", name.data());
-  return false;
 }
 
 bool f_defined(CStrRef name) {
@@ -120,7 +134,9 @@ bool f_defined(CStrRef name) {
 
     // translate "self" or "parent"
     if (className == "self") {
-      String this_class = FrameInjection::GetClassName(true);
+      String this_class = hhvm
+                          ? g_context->getContextClassName(true)
+                          : FrameInjection::GetClassName(true);
       if (this_class.empty()) {
         throw FatalErrorException("Cannot access self:: "
           "when no class scope is active");
@@ -128,7 +144,9 @@ bool f_defined(CStrRef name) {
         className = this_class;
       }
     } else if (className == "parent") {
-      CStrRef parent_class = FrameInjection::GetParentClassName(true);
+      String parent_class = hhvm
+                            ? g_context->getParentContextClassName(true)
+                            : FrameInjection::GetParentClassName(true);
       if (parent_class.empty()) {
         throw FatalErrorException("Cannot access parent");
       } else {
@@ -154,7 +172,9 @@ bool f_defined(CStrRef name) {
     // system/uniquely defined scalar constant
     if (ClassInfo::FindConstant(name)) return true;
     // dynamic/redeclared constant
-    return ((Globals*)get_global_variables())->defined(name);
+    return ((Globals*)get_global_variables())->defined(name)
+            || (hhvm && g_context->defined(name));
+
   }
 }
 

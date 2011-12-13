@@ -141,6 +141,7 @@ bool RuntimeOption::ExpiresActive = true;
 int RuntimeOption::ExpiresDefault = 2592000;
 std::string RuntimeOption::DefaultCharsetName = "utf-8";
 bool RuntimeOption::ForceServerNameToHeader = false;
+bool RuntimeOption::EnableCufAsync = false;
 
 int RuntimeOption::RequestBodyReadLimit = -1;
 
@@ -154,7 +155,7 @@ VirtualHostPtrVec RuntimeOption::VirtualHosts;
 IpBlockMapPtr RuntimeOption::IpBlocks;
 SatelliteServerInfoPtrVec RuntimeOption::SatelliteServerInfos;
 
-int RuntimeOption::XboxServerThreadCount = 0;
+int RuntimeOption::XboxServerThreadCount = 10;
 int RuntimeOption::XboxServerMaxQueueLength = INT_MAX;
 int RuntimeOption::XboxServerPort = 0;
 int RuntimeOption::XboxDefaultLocalTimeoutMilliSeconds = 500;
@@ -165,7 +166,7 @@ std::string RuntimeOption::XboxServerInfoWarmupDoc;
 std::string RuntimeOption::XboxServerInfoReqInitFunc;
 std::string RuntimeOption::XboxServerInfoReqInitDoc;
 bool RuntimeOption::XboxServerInfoAlwaysReset = false;
-bool RuntimeOption::XboxServerLogInfo = true;
+bool RuntimeOption::XboxServerLogInfo = false;
 std::string RuntimeOption::XboxProcessMessageFunc = "xbox_process_message";
 std::string RuntimeOption::XboxPassword;
 std::set<std::string> RuntimeOption::XboxPasswords;
@@ -286,9 +287,8 @@ int RuntimeOption::SocketDefaultTimeout = 5;
 bool RuntimeOption::LockCodeMemory = false;
 bool RuntimeOption::EnableMemoryManager = true;
 bool RuntimeOption::CheckMemory = false;
-bool RuntimeOption::UseHphpArray = false;
+bool RuntimeOption::UseHphpArray = hhvm;
 bool RuntimeOption::UseSmallArray = false;
-bool RuntimeOption::UseArgArray = false;
 bool RuntimeOption::UseDirectCopy = false;
 bool RuntimeOption::EnableApc = true;
 bool RuntimeOption::EnableConstLoad = false;
@@ -341,6 +341,15 @@ int RuntimeOption::TaintTraceMaxStrlen = 127;
 bool RuntimeOption::EnableStrict = false;
 int RuntimeOption::StrictLevel = 1; // StrictBasic, cf strict_mode.h
 bool RuntimeOption::StrictFatal = false;
+bool RuntimeOption::EvalJit = false;
+bool RuntimeOption::EvalJitNoGdb = false;
+bool RuntimeOption::EvalJitStressLease = false;
+bool RuntimeOption::EvalJitKeepDbgFiles = false;
+bool RuntimeOption::EvalJitEnableRenameFunction = false;
+bool RuntimeOption::EvalThreadingJit = false;
+bool RuntimeOption::EvalDumpBytecode = false;
+bool RuntimeOption::EvalDumpAst = false;
+bool RuntimeOption::EvalPeephole = true;
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;
 
@@ -722,10 +731,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
       MemoryManager::TheMemoryManager()->disable();
     }
     CheckMemory = server["CheckMemory"].getBool();
-    UseHphpArray = server["UseHphpArray"].getBool(false);
+    UseHphpArray = server["UseHphpArray"].getBool(hhvm);
     UseSmallArray = server["UseSmallArray"].getBool(false);
-    UseArgArray = server["UseArgArray"].getBool(false);
-    if (!has_eval_support) UseArgArray = false;
     UseDirectCopy = server["UseDirectCopy"].getBool(false);
     AlwaysUseRelativePath = server["AlwaysUseRelativePath"].getBool(false);
 
@@ -803,6 +810,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
 
     ForceServerNameToHeader = server["ForceServerNameToHeader"].getBool();
 
+    EnableCufAsync = server["EnableCufAsync"].getBool();
+
     ServerUser = server["User"].getString("");
   }
   {
@@ -843,7 +852,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
   }
   {
     Hdf xbox = config["Xbox"];
-    XboxServerThreadCount = xbox["ServerInfo.ThreadCount"].getInt32(0);
+    XboxServerThreadCount = xbox["ServerInfo.ThreadCount"].getInt32(10);
     XboxServerMaxQueueLength =
       xbox["ServerInfo.MaxQueueLength"].getInt32(INT_MAX);
     if (XboxServerMaxQueueLength < 0) XboxServerMaxQueueLength = INT_MAX;
@@ -858,7 +867,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     XboxServerInfoReqInitFunc = xbox["ServerInfo.RequestInitFunction"].get("");
     XboxServerInfoReqInitDoc = xbox["ServerInfo.RequestInitDocument"].get("");
     XboxServerInfoAlwaysReset = xbox["ServerInfo.AlwaysReset"].getBool(false);
-    XboxServerLogInfo = xbox["ServerInfo.LogInfo"].getBool(true);
+    XboxServerLogInfo = xbox["ServerInfo.LogInfo"].getBool(false);
     XboxProcessMessageFunc =
       xbox["ProcessMessageFunc"].get("xbox_process_message");
   }
@@ -1045,6 +1054,16 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     EnableStrict = eval["EnableStrict"].getBool();
     StrictLevel = eval["StrictLevel"].getInt32(1); // StrictBasic
     StrictFatal = eval["StrictFatal"].getBool();
+    EvalJit = eval["Jit"].getBool(false);
+    EvalJitNoGdb = eval["JitNoGdb"].getBool(false);
+    EvalThreadingJit = eval["ThreadingJit"].getBool(false);
+    EvalJitStressLease = eval["JitStressLease"].getBool(false);
+    EvalJitKeepDbgFiles = eval["JitKeepDbgFiles"].getBool(false);
+    EvalJitEnableRenameFunction =
+      eval["JitEnableRenameFunction"].getBool(false);
+    EvalDumpBytecode = eval["DumpBytecode"].getBool(false);
+    EvalDumpAst = eval["DumpAst"].getBool(false);
+    EvalPeephole = eval["Peephole"].getBool(true);
     RecordCodeCoverage = eval["RecordCodeCoverage"].getBool();
     if (RecordCodeCoverage) CheckSymLink = true;
     CodeCoverageOutputFile = eval["CodeCoverageOutputFile"].getString();

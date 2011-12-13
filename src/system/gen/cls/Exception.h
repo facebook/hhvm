@@ -44,7 +44,10 @@ class c_Exception : public ExtObjectData {
   Variant m_file;
   Variant m_line;
   Variant m_trace;
+  Variant m_inited;
 
+  // Destructor
+  ~c_Exception() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(Exception, Exception, ObjectData)
   static const ClassPropTable os_prop_table;

@@ -2,6 +2,7 @@ set(CXX_SOURCES)
 auto_sources(files "*.cpp" "")
 list(APPEND CXX_SOURCES ${files})
 
+add_definitions(-DHHVM_PATH="hphpi/hphpi")
 add_definitions(-DHPHPI_PATH="hphpi/hphpi")
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_base_suite.inc ${CMAKE_CURRENT_SOURCE_DIR}/test_suite.inc COPYONLY)

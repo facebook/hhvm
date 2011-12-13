@@ -18,6 +18,7 @@
 #define __HPHP_COUNTABLE_H__
 
 #include <util/base.h>
+#include <util/trace.h>
 #include <util/atomic.h>
 
 namespace HPHP {
@@ -52,22 +53,33 @@ namespace HPHP {
  * have a _count field and define all of the methods from Countable. These
  * macros are provided to avoid code duplication.
  */
-#define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                           \
-  void incRefCount() const { if (isRefCounted()) ++_count; }            \
-  int decRefCount() const {                                             \
-    ASSERT(_count > 0);                                                 \
-    return isRefCounted() ? --_count : _count;                          \
-  }                                                                     \
-  int getCount() const { return _count; }                               \
-  IMPLEMENT_ATOMIC_COUNTABLE_METHODS                                    \
+#define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                        \
+  void incRefCount() const {                                         \
+    if (isRefCounted()) {                                            \
+      TRACE_MOD(Trace::refcount, 5, "incRef: %p %010d++\n", this,    \
+                _count);                                             \
+      ++_count;                                                      \
+    }                                                                \
+  }                                                                  \
+  int decRefCount() const {                                          \
+    if (Trace::moduleEnabled(Trace::refcount, 5) &&                  \
+        isRefCounted()) {                                            \
+      TRACE_MOD(Trace::refcount, 5, "decRef: %p %010d--\n", this,    \
+                _count);                                             \
+    }                                                                \
+    ASSERT(_count > 0);                                              \
+    return isRefCounted() ? --_count : _count;                       \
+  }                                                                  \
+  int getCount() const { return _count; }                            \
+  IMPLEMENT_ATOMIC_COUNTABLE_METHODS                                 \
 
-#define IMPLEMENT_COUNTABLE_METHODS                                     \
-  /* setStatic() is used by StaticString and StaticArray to make  */    \
-  /* sure ref count is "never" going to reach 0, even if multiple */    \
-  /* threads modify it in a non-thread-safe fashion.              */    \
-  void setStatic() const { _count = Countable::STATIC_FLAG; }           \
-  bool isStatic() const { return _count == STATIC_FLAG; }               \
-  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                                 \
+#define IMPLEMENT_COUNTABLE_METHODS                                  \
+  /* setStatic() is used by StaticString and StaticArray to make  */ \
+  /* sure ref count is "never" going to reach 0, even if multiple */ \
+  /* threads modify it in a non-thread-safe fashion.              */ \
+  void setStatic() const { _count = Countable::STATIC_FLAG; }        \
+  bool isStatic() const { return _count == STATIC_FLAG; }            \
+  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                              \
 
 /**
  * Implements reference counting. We could have used boost::shared_ptr<T> for
@@ -89,6 +101,8 @@ class Countable {
   mutable int _count;
 };
 
+const int RefCountStaticValue = Countable::STATIC_FLAG;
+
 /**
  * CountableNF : countable no flags
  */
@@ -99,8 +113,17 @@ class Countable {
   bool isRefCounted() const { return true; }                                  \
   void incAtomicCount() const { ASSERT(false); }                              \
   int decAtomicCount() const { ASSERT(false); return _count; }                \
-  void incRefCount() const { ++_count; }                                      \
-  int decRefCount() const { ASSERT(_count > 0); return --_count; }            \
+  void incRefCount() const {                                                  \
+    TRACE_MOD(Trace::refcount, 7, "incRef: %p %010d++\n", this,               \
+              _count);                                                        \
+    ++_count;                                                                 \
+  }                                                                           \
+  int decRefCount() const {                                                   \
+    TRACE_MOD(Trace::refcount, 7, "decRef: %p %010d++\n", this,               \
+              _count);                                                        \
+    ASSERT(_count > 0);                                                       \
+    return --_count;                                                          \
+  }                                                                           \
   int getCount() const { return _count; }                                     \
 
 class CountableNF : public Countable {

@@ -130,7 +130,11 @@ void f_debug_zval_dump(CVarRef variable) {
 // variable table
 
 Array f_get_defined_vars() {
-  return Array::Create();
+  if (hhvm) {
+    return g_context->getVarEnv()->getDefinedVariables();
+  } else {
+    return Array::Create();
+  }
 }
 
 Array get_defined_vars(LVariableTable *variables) {
@@ -147,8 +151,62 @@ bool f_import_request_variables(CStrRef types, CStrRef prefix /* = "" */) {
 
 int f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
               CStrRef prefix /* = "" */) {
-  throw FatalErrorException("bad HPHP code generation");
+  if (hhvm) {
+    bool reference = extract_type & EXTR_REFS;
+    extract_type &= ~EXTR_REFS;
+
+    HPHP::VM::VarEnv* v = g_context->getVarEnv();
+    int count = 0;
+    for (ArrayIter iter(var_array); iter; ++iter) {
+      String name = iter.first();
+      StringData* nameData = name.get();
+      switch (extract_type) {
+        case EXTR_SKIP:
+          if (v->lookup(nameData) != NULL) {
+            continue;
+          }
+          break;
+        case EXTR_IF_EXISTS:
+          if (v->lookup(nameData) == NULL) {
+            continue;
+          }
+          break;
+        case EXTR_PREFIX_SAME:
+          if (v->lookup(nameData) != NULL) {
+            name = prefix + "_" + name;
+          }
+          break;
+        case EXTR_PREFIX_ALL:
+          name = prefix + "_" + name;
+          break;
+        case EXTR_PREFIX_INVALID:
+          if (!nameData->isValidVariableName()) {
+            name = prefix + "_" + name;
+          }
+          break;
+        case EXTR_PREFIX_IF_EXISTS:
+          if (v->lookup(nameData) == NULL) {
+            continue;
+          }
+          name = prefix + "_" + name;
+          break;
+        default:
+          break;
+      }
+      nameData = name.get();
+      // skip invalid variable names, as in PHP
+      if (!nameData->isValidVariableName()) {
+        continue;
+      }
+      g_context->setVar(nameData, iter.nvSecond(), reference);
+      count++;
+    }
+    return count;
+  } else {
+    throw FatalErrorException("bad HPHP code generation");
+  }
 }
+
 int extract(LVariableTable *variables, CArrRef var_array,
             int extract_type /* = EXTR_OVERWRITE */,
             String prefix /* = "" */) {

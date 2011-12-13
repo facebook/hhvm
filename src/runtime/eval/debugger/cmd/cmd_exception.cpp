@@ -103,5 +103,10 @@ bool CmdException::onClient(DebuggerClient *client) {
   return true;
 }
 
+void CmdException::setClientOutput(DebuggerClient *client) {
+  // Also output an array of all breakpoints which include exceptions
+  CmdBreak().setClientOutput(client);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }}

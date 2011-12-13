@@ -62,14 +62,18 @@ bool ConstantExpression::isLiteralNull() const {
   return isNull();
 }
 
+bool ConstantExpression::isNull() const {
+  string lower = Util::toLower(m_name);
+  return (lower == "null");
+}
+
 bool ConstantExpression::isBoolean() const {
   string lower = Util::toLower(m_name);
   return (lower == "true" || lower == "false");
 }
 
-bool ConstantExpression::isNull() const {
-  string lower = Util::toLower(m_name);
-  return (lower == "null");
+bool ConstantExpression::isDouble() const {
+  return (m_name == "INF" || m_name == "NAN");
 }
 
 bool ConstantExpression::getBooleanValue() const {

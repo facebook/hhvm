@@ -93,9 +93,6 @@ bool CmdWhere::onClient(DebuggerClient *client) {
     }
     if (!DebuggerClient::IsValidNumber(snum)) {
       client->error("The argument, if specified, has to be numeric.");
-      if (client->isApiMode()) {
-        client->setStackTrace(null_array);
-      }
       return true;
     }
     if (num > 0) {
@@ -116,14 +113,20 @@ bool CmdWhere::onClient(DebuggerClient *client) {
     }
   }
 
-  if (client->isApiMode()) {
-    client->setStackTrace(null_array);
-  }
   return true;
+}
+
+void CmdWhere::setClientOutput(DebuggerClient *client) {
+  client->setOutputType(DebuggerClient::OTStacktrace);
 }
 
 bool CmdWhere::onServer(DebuggerProxy *proxy) {
   m_stacktrace = FrameInjection::GetBacktrace(false, true, false);
+  return proxy->send(this);
+}
+
+bool CmdWhere::onServerVM(DebuggerProxy *proxy) {
+  m_stacktrace = g_context->debugBacktrace(false, true, false);
   return proxy->send(this);
 }
 

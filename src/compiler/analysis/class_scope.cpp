@@ -235,7 +235,7 @@ void ClassScope::checkDerivation(AnalysisResultPtr ar, hphp_string_iset &seen) {
     }
     bases.insert(base);
 
-    ClassScopePtrVec parents = ar->findClasses(base);
+    ClassScopePtrVec parents = ar->findClasses(Util::toLower(base));
     for (unsigned int j = 0; j < parents.size(); j++) {
       parents[j]->checkDerivation(ar, seen);
     }
@@ -2737,7 +2737,7 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
     cg_indentBegin("{\n");
   }
   if (isInterface()) {
-    cg_printf("0,0,0,0,0,0,0,0,0,0,0\n");
+    cg_printf("0,0,0,0,0,0,0,0,0,0,0,");
   } else {
     cg_printf("(ObjectData*(*)(ObjectData*))%s%s,\n",
               Option::CreateObjectOnlyPrefix, id.c_str());
@@ -2798,7 +2798,14 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
                        InheritsUnknownMethodHandler)) {
       attributes |= ObjectData::HasCall;
     }
-    cg_printf(",0x%x\n", attributes);
+    cg_printf(",0x%x,", attributes);
+  }
+
+  if (isRedeclaring() && isInterface()) {
+    cg_printf("0\n");
+  } else {
+    cg_printf("\n");
+    cg_printf("&%s%s::s_cls\n", Option::ClassPrefix, id.c_str());
   }
 
   if (isRedeclaring()) {

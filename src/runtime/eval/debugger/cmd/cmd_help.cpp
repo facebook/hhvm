@@ -295,6 +295,7 @@ bool CmdHelp::onClient(DebuggerClient *client) {
     if (!processTutorial(client)) {
       return help(client);
     }
+    return true;
   }
 
   client->swapHelp();

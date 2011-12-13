@@ -1128,9 +1128,10 @@ void Array::sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
   for (int i = 0; i < count; i++) {
     ssize_t pos = opaque.positions[indices[i]];
     if (renumber) {
-      sorted.append(m_px->getValueRef(pos));
+      sorted.appendWithRef(m_px->getValueRef(pos));
     } else {
-      sorted.set(m_px->getKey(pos), m_px->getValueRef(pos));
+      sorted.addLval(m_px->getKey(pos), true).
+        setWithRef(m_px->getValueRef(pos));
     }
   }
   operator=(sorted);

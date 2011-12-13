@@ -363,6 +363,11 @@ void SymbolTable::CountTypes(std::map<std::string, int> &counts) {
   }
 }
 
+void SymbolTable::Purge() {
+  Lock lock(AllSymbolTablesMutex);
+  AllSymbolTables.clear();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 SymbolTable::SymbolTable(BlockScope &blockScope, bool isConst) :

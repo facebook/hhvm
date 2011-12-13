@@ -32,10 +32,12 @@
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/base/taint/taint_data.h>
 #include <runtime/base/taint/taint_warning.h>
+#include <runtime/vm/dyn_tracer.h>
 #include <runtime/ext/ext_string.h>
 #include <util/logger.h>
 #include <util/process.h>
 #include <util/text_color.h>
+#include <runtime/eval/runtime/file_repository.h>
 
 using namespace std;
 
@@ -44,8 +46,17 @@ namespace HPHP {
 
 IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(ExecutionContext, g_context);
 
+int64_t ExecutionContext::s_threadIdxCounter = 0;
+Mutex ExecutionContext::s_threadIdxLock;
+hphp_hash_map<pid_t, int64_t> ExecutionContext::s_threadIdxMap;
+
 ExecutionContext::ExecutionContext()
-  : m_transport(NULL),
+  :
+#define NEAR_FIELD_INIT m_fp(NULL), m_pc(NULL), m_isValid(1), m_dynTracer(NULL),
+#ifdef HHVM
+    NEAR_FIELD_INIT
+#endif
+    m_transport(NULL),
     m_maxMemory(RuntimeOption::RequestMemoryMaxBytes),
     m_maxTime(RuntimeOption::RequestTimeoutSeconds),
     m_cwd(Process::CurrentWorkingDirectory),
@@ -54,11 +65,39 @@ ExecutionContext::ExecutionContext()
     m_errorState(ExecutionContext::NoError),
     m_errorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel),
     m_lastErrorNum(0), m_logErrors(false), m_throwAllErrors(false),
-    m_vhost(NULL), m_debuggerBypassCheck(false), m_debuggerPrintLevel(-1) {
+    m_vhost(NULL), m_staticVars(NULL),
+#ifndef HHVM
+    NEAR_FIELD_INIT
+#endif
+#undef NEAR_FIELD_INIT
+    m_halted(false), m_lambdaCounter(0), m_nesting(0),
+    m_propagateException(false), m_ignoreException(false),
+    m_debuggerFuncEntry(false), m_debuggerLastBreakLoc(NULL),
+    m_injTables(NULL) {
+#ifdef HHVM
+  // Make sure any fields accessed from the TC are within a byte of
+  // ExecutionContext's beginning.
+  CT_ASSERT(offsetof(ExecutionContext, m_stack) <= 0xff);
+  CT_ASSERT(offsetof(ExecutionContext, m_fp) <= 0xff);
+  CT_ASSERT(offsetof(ExecutionContext, m_pc) <= 0xff);
+  CT_ASSERT(offsetof(ExecutionContext, m_isValid) <= 0xff);
+  CT_ASSERT(offsetof(ExecutionContext, m_dynTracer) <= 0xff);
+  CT_ASSERT(offsetof(ExecutionContext, m_currentThreadIdx) <= 0xff);
+#endif
   MemoryManager::TheMemoryManager()->getStats().maxBytes = m_maxMemory;
+  m_transl = VM::Transl::Translator::Get();
   m_include_paths = Array::Create();
   for (unsigned int i = 0; i < RuntimeOption::IncludeSearchPaths.size(); ++i) {
     m_include_paths.append(String(RuntimeOption::IncludeSearchPaths[i]));
+  }
+
+  {
+    Lock lock(s_threadIdxLock);
+    pid_t tid = Process::GetThreadPid();
+    if (!mapGet(s_threadIdxMap, tid, &m_currentThreadIdx)) {
+      m_currentThreadIdx = s_threadIdxCounter++;
+      s_threadIdxMap[tid] = m_currentThreadIdx;
+    }
   }
 }
 
@@ -68,6 +107,36 @@ ExecutionContext::~ExecutionContext() {
        iter != m_buffers.end(); ++iter) {
     delete *iter;
   }
+  // Discard any ConstInfo objects that were created to support reflection.
+  for (ConstInfoMap::const_iterator it = m_constInfo.begin();
+       it != m_constInfo.end(); ++it) {
+    delete it->second;
+  }
+  // decRef all of the PhpFiles in m_evaledFiles. Any PhpFile whose refcount
+  // reaches zero will be destroyed. Currently each PhpFile "owns" its Unit,
+  // so when a PhpFile is destroyed it will free its Unit as well.
+  for (EvaledFilesMap::iterator it = m_evaledFiles.begin();
+       it != m_evaledFiles.end();) {
+    EvaledFilesMap::iterator current = it;
+    ++it;
+    StringData* sd = current->first;
+    current->second->decRef();
+    m_evaledFiles.erase(current);
+    LITSTR_DECREF(sd);
+  }
+  // Discard all units that were created via eval().
+  for (EvaledUnitsVec::const_iterator it = m_evaledUnits.begin();
+       it != m_evaledUnits.end(); ++it) {
+    delete *it;
+  }
+  // delete global varEnv
+  if (!m_varEnvs.empty()) {
+    // can only have one left
+    ASSERT(m_varEnvs.front() == m_varEnvs.back());
+    delete (m_varEnvs.front());
+  }
+  delete m_dynTracer;
+  delete m_injTables;
 }
 
 void ExecutionContext::backupSession() {

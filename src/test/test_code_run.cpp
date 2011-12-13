@@ -25,6 +25,7 @@
 #include <compiler/option.h>
 #include <runtime/base/fiber_async_func.h>
 #include <runtime/base/runtime_option.h>
+#include <pcre.h>
 #include <test/test_mysql_info.inc>
 
 using namespace std;
@@ -32,6 +33,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 static const char *php_path = "/usr/local/php/bin/php";
+const char *TestCodeRun::Filter = 0;
 
 // By default, use shared linking for faster testing.
 bool TestCodeRun::FastMode = true;
@@ -252,12 +254,18 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
       string filearg = "--file=runtime/tmp/";
       if (subdir) filearg = filearg + subdir + "/";
       filearg += "main.php";
+      string jitarg = string("-vEval.Jit=") +
+        (RuntimeOption::EvalJit ? "true" : "false");
+      string jit_rename = string("-vEval.JitEnableRenameFunction=") +
+        (RuntimeOption::EvalJit ? "true" : "false");
       const char *argv[] = {"", filearg.c_str(),
                             "--config=test/config.hdf",
-                            "-v Fiber.ThreadCount=5",
-                            "-v Eval.EnableObjDestructCall=true",
+                            "-vFiber.ThreadCount=5",
+                            "-vEval.EnableObjDestructCall=true",
+                            jitarg.c_str(),
+                            jit_rename.c_str(),
                             NULL};
-      Process::Exec(HPHPI_PATH, argv, NULL, actual, &err);
+      Process::Exec(HHVM_PATH, argv, NULL, actual, &err);
     }
 
     if (perfMode) {
@@ -332,6 +340,15 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
 
 bool TestCodeRun::RecordMulti(const char *input, const char *output,
                               const char *file, int line, bool flag) {
+  if (Filter) {
+    const char *errptr;
+    int erroffset;
+    pcre *re = pcre_compile(Filter, PCRE_CASELESS, &errptr, &erroffset, 0);
+    if (re && pcre_exec(re, 0, input, strlen(input), 0, 0, 0, 0) >= 0) {
+      return true;
+    }
+  }
+
   size_t i = m_infos.size();
   m_infos.push_back(VCRInfo(input, output, file, line, flag));
 
@@ -503,7 +520,8 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestExtSoap);
   RUN_TEST(TestExtCollator);
   RUN_TEST(TestExtSocket);
-  RUN_TEST(TestFiber);
+  // Fibers are no longer supported
+  //RUN_TEST(TestFiber);
   RUN_TEST(TestAPC);
   RUN_TEST(TestInlining);
   RUN_TEST(TestCopyProp);
@@ -522,10 +540,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestNamespace);
 
   // PHP 5.4 features
-  // GO: TODO: remove this check once traits are implemented in hphpi
-  if (Option::EnableEval < Option::FullEval) {
-    RUN_TEST(TestTraits);
-  }
+  RUN_TEST(TestTraits);
 
   // HipHop features
   RUN_TEST(TestYield);
@@ -956,8 +971,16 @@ bool TestCodeRun::TestListAssignment() {
        "function test($a) {"
        "  list($a[0], $a[1], $a) = $a;"
        "  var_dump($a);"
-       "  }"
+       "}"
        "test(array('abc', 'cde', 'fgh'));");
+
+  MVCR("<?php "
+       "function test() {"
+       "  $a = array('abc', 'cde', 'fgh');"
+       "  list($a[0], $a[1], $a) = $a;"
+       "  var_dump($a);"
+       "}"
+       "test();");
 
   MVCR("<?php "
        "function test($a, $b, $i) {"
@@ -2562,7 +2585,7 @@ bool TestCodeRun::TestArrayAccess() {
        "}"
        "var_dump(test());");
 
-  MVCR("<php "
+  MVCR("<?php "
        "function test($x) {"
        "  $a = $x;"
        "  $b = $a;"
@@ -7249,6 +7272,32 @@ bool TestCodeRun::TestUnset() {
        "$b = array();"
        "var_dump(rmv($a, $b));");
 
+  MVCR("<?php\n"
+       "class cls {}\n"
+       "$obj = new cls;\n"
+       "$a = array(1,2);\n"
+       "unset($a[$obj]);\n"
+       "var_dump($a);\n");
+  MVCR("<?php\n"
+       "$a = array(1,2);\n"
+       "unset($a[1.5]);\n"
+       "var_dump($a);\n");
+
+  MVCR("<?php\n"
+       "$a = array(1,2);\n"
+       "unset($a[false]);\n"
+       "var_dump($a);\n");
+
+  MVCR("<?php\n"
+       "$a = array(1,2);\n"
+       "unset($a[true]);\n"
+       "var_dump($a);\n");
+
+  MVCR("<?php\n"
+       "$a = array(1,2, '' => 'foo');\n"
+       "unset($a[null]);\n"
+       "var_dump($a);\n");
+
   return true;
 }
 
@@ -7343,18 +7392,20 @@ bool TestCodeRun::TestReference() {
       "var_dump($a,$b);"
       );
 
-  // reference argument
-  MVCRNW("<?php "
-        "function foo($u, $v, $w) {"
-        "  $u = 10;"
-        "  $v = 20;"
-        "  $w = 20;"
-        "}"
-        "$u = 1;"
-        "$v = 2;"
-        "$w = 3;"
-        "foo(&$u, &$v, $w);"
-        "var_dump($u, $v, $w);");
+  if (!hhvm) {
+    // call-time pass by reference -- not supported in the VM
+    MVCRNW("<?php "
+           "function foo($u, $v, $w) {"
+           "  $u = 10;"
+           "  $v = 20;"
+           "  $w = 20;"
+           "}"
+           "$u = 1;"
+           "$v = 2;"
+           "$w = 3;"
+           "foo(&$u, &$v, $w);"
+           "var_dump($u, $v, $w);");
+  }
 
   // reference self assignment
   MVCR("<?php "
@@ -7852,6 +7903,25 @@ bool TestCodeRun::TestDynamicVariables() {
        "}\n"
        "NULL\n"
        "int(1)\n");
+
+  MVCR("<?php\n"
+       "$MY_VAR_a = 123;\n"
+       "function foo() {\n"
+       "  global $MY_VAR_a;\n"
+       "  $arr = get_defined_vars();\n"
+       "  asort($arr);\n"
+       "  var_dump($arr);\n"
+       "  return $arr;\n"
+       "}\n"
+       "foo();\n");
+
+  MVCR("<?php\n"
+       "function foo() {\n"
+       "  $arr = get_defined_vars();\n"
+       "  var_dump($arr);\n"
+       "  return $arr;\n"
+       "}\n"
+       "foo();\n");
 
   return true;
 }
@@ -9234,6 +9304,22 @@ bool TestCodeRun::TestCompilation() {
        "  }"
        "  $body .= '</table>';"
        "}");
+
+  MVCR("<?php "
+       "class X {"
+       "  function foo() {"
+       "    return function() use(&$this) {"
+       "      return $this->bar();"
+       "    };"
+       "  }"
+       "  function bar() {}"
+       "}");
+
+  MVCRO("<?php "
+        "$x = 1;"
+        "switch ($x++ ?: -1) {};"
+        "var_dump($x);",
+        "int(2)\n");
 
   return true;
 }
@@ -16960,6 +17046,74 @@ bool TestCodeRun::TestExtString() {
       "var_dump($out);");
   MVCR("<?php\n"
        "preg_replace(\"/(..)/e\", 'var_dump(\"$1\")', '\"\"');\n");
+  MVCR("<?php\n"
+      "var_dump(str_replace(array(65), array('a'), 'axAX'));\n"
+      "var_dump(str_ireplace(array(65), array('a'), 'axAX'));\n"
+      "echo \"**************************\\n\";\n"
+      "var_dump(strpos('aA', 65));\n"
+      "var_dump(strpos('aA', 'A'));\n"
+      "var_dump(strpos('aAaXA', 'A', 0));\n"
+      "var_dump(strpos('aAaXA', 'A', 1));\n"
+      "var_dump(strpos('aAaXA', 'A', 2));\n"
+      "var_dump(strpos('aAaXA', 'A', 3));\n"
+      "var_dump(strpos('aAaXA', 'A', 4));\n"
+      "var_dump(strpos('aAaXA', 'A', 5));\n"
+      "var_dump(strpos('aAaXA', 'A', 6));\n"
+      "var_dump(strpos('aAaXA', 'A', -1));\n"
+      "var_dump(strpos('aAaXA', 'A', -2));\n"
+      "var_dump(strpos('aAaXA', 'A', -3));\n"
+      "var_dump(strpos('aAaXA', 'A', -4));\n"
+      "var_dump(strpos('aAaXA', 'A', -5));\n"
+      "var_dump(strpos('aAaXA', 'A', -6));\n"
+      "echo \"**************************\\n\";\n"
+      "var_dump(strrpos('aA', 65));\n"
+      "var_dump(strrpos('aA', 'A'));\n"
+      "var_dump(strrpos('aAaXA', 'A', 0));\n"
+      "var_dump(strrpos('aAaXA', 'A', 1));\n"
+      "var_dump(strrpos('aAaXA', 'A', 2));\n"
+      "var_dump(strrpos('aAaXA', 'A', 3));\n"
+      "var_dump(strrpos('aAaXA', 'A', 4));\n"
+      "var_dump(strrpos('aAaXA', 'A', 5));\n"
+      "var_dump(strrpos('aAaXA', 'A', 6));\n"
+      "var_dump(strrpos('aAaXA', 'A', -1));\n"
+      "var_dump(strrpos('aAaXA', 'A', -2));\n"
+      "var_dump(strrpos('aAaXA', 'A', -3));\n"
+      "var_dump(strrpos('aAaXA', 'A', -4));\n"
+      "var_dump(strrpos('aAaXA', 'A', -5));\n"
+      "var_dump(strrpos('aAaXA', 'A', -6));\n"
+      "echo \"**************************\\n\";\n"
+      "var_dump(stripos('aA', 65));\n"
+      "var_dump(stripos('aA', 'A'));\n"
+      "var_dump(stripos('aAaXA', 'A', 0));\n"
+      "var_dump(stripos('aAaXA', 'A', 1));\n"
+      "var_dump(stripos('aAaXA', 'A', 2));\n"
+      "var_dump(stripos('aAaXA', 'A', 3));\n"
+      "var_dump(stripos('aAaXA', 'A', 4));\n"
+      "var_dump(stripos('aAaXA', 'A', 5));\n"
+      "var_dump(stripos('aAaXA', 'A', 6));\n"
+      "var_dump(stripos('aAaXA', 'A', -1));\n"
+      "var_dump(stripos('aAaXA', 'A', -2));\n"
+      "var_dump(stripos('aAaXA', 'A', -3));\n"
+      "var_dump(stripos('aAaXA', 'A', -4));\n"
+      "var_dump(stripos('aAaXA', 'A', -5));\n"
+      "var_dump(stripos('aAaXA', 'A', -6));\n"
+      "echo \"**************************\\n\";\n"
+      "var_dump(strripos('aA', 65));\n"
+      "var_dump(strripos('aA', 'A'));\n"
+      "var_dump(strripos('aAaXA', 'A', 0));\n"
+      "var_dump(strripos('aAaXA', 'A', 1));\n"
+      "var_dump(strripos('aAaXA', 'A', 2));\n"
+      "var_dump(strripos('aAaXA', 'A', 3));\n"
+      "var_dump(strripos('aAaXA', 'A', 4));\n"
+      "var_dump(strripos('aAaXA', 'A', 5));\n"
+      "var_dump(strripos('aAaXA', 'A', 6));\n"
+      "var_dump(strripos('aAaXA', 'A', -1));\n"
+      "var_dump(strripos('aAaXA', 'A', -2));\n"
+      "var_dump(strripos('aAaXA', 'A', -3));\n"
+      "var_dump(strripos('aAaXA', 'A', -4));\n"
+      "var_dump(strripos('aAaXA', 'A', -5));\n"
+      "var_dump(strripos('aAaXA', 'A', -6));\n");
+
   return true;
 }
 
@@ -18724,6 +18878,31 @@ bool TestCodeRun::TestInlining() {
        "$a =& foo();"
        "$a++;"
        "var_dump($a, $g);");
+
+  MVCR("<?php "
+       "function pid($x) {"
+       "  var_dump($x);"
+       "  return $x;"
+       "}"
+       "function f($x) {"
+       "  return $x;"
+       "}"
+       "function ttest() {"
+       "  return f(pid('arg1'),pid('arg2'));"
+       "}"
+       "ttest();");
+
+  MVCR("<?php "
+       "class X {"
+       "  function __destruct() { var_dump('done'); }"
+       "}"
+       "function f() { $x = new X; }"
+       "function g() {"
+       "  var_dump('start');"
+       "  f();"
+       "  var_dump('end');"
+       "}"
+       "g();");
 
   Option::AutoInline = ai;
   return true;
@@ -21111,6 +21290,23 @@ bool TestCodeRun::TestYield() {
         "int(1)\n"
         "int(2)\n"
         "int(3)\n");
+
+  MVCRO("<?php "
+        "class X {"
+        "  public static function gen() {"
+        "    static $x;"
+        "    yield ++$x;"
+        "    yield 2;"
+        "    yield ++$x;"
+        "  }"
+        "}"
+        "class Y extends X {}"
+        "$g = X::gen();"
+        "foreach ($g as $i) var_dump($i);"
+        ,
+        "int(1)\n"
+        "int(2)\n"
+        "int(2)\n");
 
   return true;
 }
@@ -25637,7 +25833,8 @@ bool TestCodeRun::TestTraits() {
         "var_dump(in_array('T1', $traits));\n"
         "var_dump(in_array('T1', get_declared_traits()));\n"
        ,
-        "NULL\n"
+        "array(0) {\n"
+        "}\n"
         "bool(false)\n"
         "bool(false)\n"
        );

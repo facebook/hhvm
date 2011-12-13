@@ -26,6 +26,13 @@
 #include <runtime/base/tv_macros.h>
 
 namespace HPHP {
+namespace VM {
+class Class;
+class Stack;
+}
+}
+
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Assumes 'tv' is live
@@ -114,7 +121,8 @@ inline void tvDecRefVar(TypedValue* tv) {
   tvDecRefVarInternal(tv->m_data.ptv);
 }
 
-inline void tvReleaseHelper(DataType type, uint64_t datum) {
+template <bool canThrow>
+inline void tvReleaseHelperImpl(DataType type, uint64_t datum) {
   ASSERT(IS_REFCOUNTED_TYPE(type));
   if (type == KindOfString) {
     ((StringData*)datum)->release();
@@ -124,7 +132,7 @@ inline void tvReleaseHelper(DataType type, uint64_t datum) {
       ((ArrayData*)datum)->release();
     } else {
       if (type == KindOfObject) {
-        ((ObjectData*)datum)->release();
+        ((ObjectData*)datum)->releaseImpl<canThrow>();
       } else {
         ASSERT(type == KindOfVariant);
         ((Variant*)datum)->release();
@@ -133,17 +141,21 @@ inline void tvReleaseHelper(DataType type, uint64_t datum) {
   }
 }
 
+#define tvReleaseHelper(type, datum)     tvReleaseHelperImpl<true>(type, datum);
+
 // Assumes 'data' is live
 // Assumes 'IS_REFCOUNTED_TYPE(type)'
 #ifdef FAST_REFCOUNT_FOR_VARIANT
-inline void tvDecRefHelper(DataType type, uint64_t datum) {
+template <bool canThrow>
+inline void tvDecRefHelperImpl(DataType type, uint64_t datum) {
   ASSERT(IS_REFCOUNTED_TYPE(type));
   if (((Variant*)datum)->decRefCount() == 0) {
-    tvReleaseHelper(type, datum);
+    tvReleaseHelperImpl<canThrow>(type, datum);
   }
 }
 #else
-inline void tvDecRefHelper(DataType type, uint64_t datum) {
+template <bool canThrow>
+inline void tvDecRefHelperImpl(DataType type, uint64_t datum) {
   ASSERT(IS_REFCOUNTED_TYPE(type));
   if (type == KindOfString) {
     if (((StringData*)datum)->decRefCount() == 0) {
@@ -158,7 +170,7 @@ inline void tvDecRefHelper(DataType type, uint64_t datum) {
     } else {
       if (type == KindOfObject) {
         if (((ObjectData*)datum)->decRefCount() == 0) {
-          ((ObjectData*)datum)->release();
+          ((ObjectData*)datum)->releaseImpl<canThrow>();
         }
       } else {
         ASSERT(type == KindOfVariant);
@@ -171,6 +183,8 @@ inline void tvDecRefHelper(DataType type, uint64_t datum) {
 }
 #endif
 
+#define tvDecRefHelper(type, datum)      tvDecRefHelperImpl<true>(type, datum)
+
 // Assumes 'tv' is live
 inline void tvRefcountedDecRefHelper(DataType type, uint64_t datum) {
   if (IS_REFCOUNTED_TYPE(type)) {
@@ -180,23 +194,34 @@ inline void tvRefcountedDecRefHelper(DataType type, uint64_t datum) {
 
 // Assumes 'tv' is live
 // Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
-inline void tvDecRef(TypedValue* tv) {
-  tvDecRefHelper(tv->m_type, tv->m_data.num);
+template <bool canThrow>
+inline void tvDecRefImpl(TypedValue* tv) {
+  tvDecRefHelperImpl<canThrow>(tv->m_type, tv->m_data.num);
 }
 
+#define tvDecRef(tv)                     tvDecRefImpl<true>(tv)
+
 // Assumes 'tv' is live
-inline void tvRefcountedDecRef(TypedValue* tv) {
+template <bool canThrow>
+inline void tvRefcountedDecRefImpl(TypedValue* tv) {
   if (IS_REFCOUNTED_TYPE(tv->m_type)) {
-    tvDecRef(tv);
+    tvDecRefImpl<canThrow>(tv);
   }
 }
+
+#define tvRefcountedDecRef(tv)           tvRefcountedDecRefImpl<true>(tv)
 
 // tvBoxHelper sets the refcount of the newly allocated inner cell to 1
 inline TypedValue* tvBoxHelper(DataType type, uint64_t datum) {
   TypedValue* innerCell = (TypedValue*)(NEW(Variant)());
-  innerCell->m_data.num = datum;
   innerCell->_count = 1;
-  innerCell->m_type = type;
+  if (!IS_NULL_TYPE(type)) {
+    innerCell->m_data.num = datum;
+    innerCell->m_type = type;
+  } else {
+    // drop uninit null
+    innerCell->m_type = KindOfNull;
+  }
   return innerCell;
 }
 
@@ -210,9 +235,15 @@ inline void tvBox(TypedValue* tv) {
 
 // Assumes 'tv' is live
 //
-// Assumes 'IS_REFOUNTED_TYPE(tv->m_type)'
+// Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
 inline void tvIncRef(TypedValue* tv) {
   TV_INCREF(tv);
+}
+
+inline void tvRefcountedIncRef(TypedValue* tv) {
+  if (IS_REFCOUNTED_TYPE(tv->m_type)) {
+    tvIncRef(tv);
+  }
 }
 
 // Assumes 'tv' is live

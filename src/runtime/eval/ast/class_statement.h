@@ -32,9 +32,11 @@ DECLARE_AST_PTR(ClassStatement);
 DECLARE_AST_PTR(MethodStatement);
 DECLARE_AST_PTR(ScalarExpression);
 DECLARE_AST_PTR(ClassStatementMarker);
+DECLARE_AST_PTR(UseTraitStatement);
 class EvalObjectData;
 class ClassInfoEvaled;
 class ClassEvalState;
+class Name;
 
 struct SemanticExtractor;
 
@@ -57,7 +59,6 @@ private:
   int m_modifiers;
   ExpressionPtr m_value;
   std::string m_docComment;
-  ClassStatement *m_cls;
 };
 
 class ClassStatement : public Statement {
@@ -72,7 +73,8 @@ public:
     Abstract = 16,
     Final = 32,
     Interface = 64,
-    Trait = 128
+    Trait = 128,
+    Constructor = 256
   };
 
   ClassStatement(STATEMENT_ARGS, const std::string &name,
@@ -80,33 +82,45 @@ public:
   void finish();
   String name() const { return m_name; }
   String parent() const { return m_parent; }
+  bool isTrait() const { return m_modifiers & Trait; }
   const ClassStatement *parentStatement() const;
   void loadInterfaceStatements() const;
   void setModifiers(int m) { m_modifiers = m; }
   int getModifiers() const { return m_modifiers; }
   int getAttributes() const { return m_attributes; }
+  const std::vector<MethodStatementPtr> &getMethods() const {
+    return m_methodsVec;
+  }
+  const std::vector<UseTraitStatementPtr> &getUseTraits() const {
+    return m_useTraitsVec;
+  }
   void addBases(const std::vector<String> &bases);
   void addVariable(ClassVariablePtr v);
   void addMethod(MethodStatementPtr m);
+  void addUseTrait(UseTraitStatementPtr u);
   void addConstant(const std::string &name, ExpressionPtr v);
 
-  bool instanceOf(const char *c) const;
-  bool subclassOf(const char *c) const;
+  bool instanceOf(CStrRef c) const;
+  bool subclassOf(CStrRef c) const;
   bool isBaseClass() const {
     return m_parent->empty() && m_bases.empty();
   }
+  bool isHoistable(std::set<StringData *> &seen);
+  bool checkHoist() const;
 
   virtual Statement *optimize(VariableEnvironment &env);
   // Eval is called at declaration, not invocation
   virtual void eval(VariableEnvironment &env) const;
-  void evalImpl(VariableEnvironment &env) const;
+  void evalImpl(VariableEnvironment &env, bool fromMarker = false) const;
   // Called by create_class
   Object create(ClassEvalState &ce, ObjectData* root = NULL) const;
-  void initializeObject(EvalObjectData *obj) const;
-  void initializeStatics(LVariableTable &statics) const;
-  const MethodStatement* findMethod(const char* name,
+  void initializeObject(ClassEvalState &ce, EvalObjectData *obj) const;
+  void initializeStatics(ClassEvalState &ce, LVariableTable &statics) const;
+
+  const MethodStatement* findMethod(CStrRef name,
                                     bool recursive = false,
-                                    bool interfaces = false) const;
+                                    bool interfaces = false,
+                                    bool trait = true) const;
   const ClassVariable* findVariable(CStrRef name,
                                     bool recursive = false) const;
   bool getConstant(Variant &res, const char *c,
@@ -114,50 +128,56 @@ public:
 
   virtual void dump(std::ostream &out) const;
   static void dumpModifiers(std::ostream &out, int m, bool variable);
+  static String resolveSpInTrait(VariableEnvironment &env, CObjRef currentObj,
+                                 Name *clsName);
 
   void getPropertyInfo(ClassInfoEvaled &owner) const;
   void getInfo(ClassInfoEvaled &info) const;
 
-  bool hasAccess(const char *context, Modifier level) const;
-  bool attemptPropertyAccess(CStrRef prop, const char *context,
+  bool hasAccess(CStrRef context, Modifier level) const;
+  bool attemptPropertyAccess(CStrRef prop, CStrRef context,
       int &mods, bool rec = false) const;
-  void failPropertyAccess(CStrRef prop, const char *context,
+  void failPropertyAccess(CStrRef prop, CStrRef context,
       int mods) const;
   void toArray(Array &props, Array &vals) const;
-  void loadMethodTable(ClassEvalState &ce,
-                       std::set<const ClassStatement*> &seen) const;
+  void addTrait(ClassEvalState &ce,
+                const UseTraitStatement *useTraitStmt) const;
+  void addTraits(ClassEvalState &ce) const;
+  void bindTraits(ClassEvalState &ce) const;
+  void loadMethodTable(ClassEvalState &ce) const;
   void semanticCheck(const ClassStatement *cls) const;
   ClassStatementMarkerPtr getMarker();
-  void delayDeclaration() { m_delayDeclaration = true; }
 protected:
   StringData *m_name;
   int m_modifiers;
   int m_attributes;
-
+  int m_needCheckHoist;
   StringData *m_parent;
   std::vector<StringData *> m_bases;
 
   StringMap<ClassVariablePtr> m_variables;
   std::vector<ClassVariablePtr> m_variablesVec;
-  hphp_const_char_imap<MethodStatementPtr> m_methods;
+  StringIMap<MethodStatementPtr> m_methods;
   std::vector<MethodStatementPtr> m_methodsVec;
+  std::vector<UseTraitStatementPtr> m_useTraitsVec;
   std::vector<StringData *> m_constantNames;
   StringMap<ExpressionPtr> m_constants;
 
   std::string m_docComment;
   ClassStatementMarkerPtr m_marker;
-  bool m_delayDeclaration;
 
   void loadProperties(ClassInfoEvaled &info) const;
-  const MethodStatement* findParentMethod(const char* name,
-      bool interface) const;
+  const MethodStatement* findParentMethod(CStrRef name, bool interface) const;
   const ClassInfo *getBuiltinParentInfo() const;
   void collectBuiltinInterfaceInfos(
       std::vector<const ClassInfo*>& infos,
       bool excludeParent) const;
-  void abstractMethodCheck(hphp_const_char_imap<const char*> &abstracts,
-      bool ifaces) const;
+  void abstractMethodCheck(StringIMap<String> &abstracts,
+                           bool ifaces) const;
 private:
+  void initTraitStructures(ClassEvalState &ce) const;
+  void bindMethods(ClassEvalState &ce) const;
+  void bindProperties(ClassEvalState &ce) const;
 
   template <typename ParentClass, typename ChildClass>
   static void ClassLevelMethodOverrideCheck(ParentClass parent,

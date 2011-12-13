@@ -143,7 +143,7 @@ void TestServer::RunServer() {
                           "--mode=server", portConfig.c_str(), "-v",
                           "--config=test/config-eval.hdf",
                           portConfig.c_str(), "--port-fd", fd.c_str(), NULL};
-    Process::Exec(HPHPI_PATH, argv, NULL, out, &err);
+    Process::Exec(HHVM_PATH, argv, NULL, out, &err);
   }
 }
 
@@ -227,14 +227,16 @@ bool TestServer::TestServerVariables() {
         "var_dump($_SERVER['SCRIPT_NAME']);"
         "var_dump($_SERVER['REQUEST_URI']);"
         "var_dump($_SERVER['SCRIPT_FILENAME']);"
-        "var_dump($_SERVER['QUERY_STRING']);",
+        "var_dump($_SERVER['QUERY_STRING']);"
+        "var_dump(isset($_ENV['HPHP_RPC']));",
 
         "NULL\n"
         "string(24) \"/unittest/rootdoc/string\"\n"
         "string(7) \"/string\"\n"
         "string(15) \"/string?a=1&b=2\"\n"
         "string(24) \"/unittest/rootdoc/string\"\n"
-        "string(7) \"a=1&b=2\"\n",
+        "string(7) \"a=1&b=2\"\n"
+        "bool(false)\n",
 
         "string?a=1&b=2");
 
@@ -639,6 +641,13 @@ bool TestServer::TestRPCServer() {
          "var_dump(100);\n",
          "int(100)\n"
          "int(100)\n",
+         "?include=string&output=1&auth=test",
+         8083);
+
+  VSGETP("<?php\n"
+         "var_dump(isset($_ENV['HPHP_RPC']));\n",
+         "bool(true)\n"
+         "bool(true)\n",
          "?include=string&output=1&auth=test",
          8083);
 

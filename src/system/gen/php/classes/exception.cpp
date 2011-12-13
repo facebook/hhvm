@@ -32,7 +32,7 @@ namespace HPHP {
 /* preface starts */
 extern CallInfo ci_;
 /* preface finishes */
-/* SRC: classes/exception.php line 227 */
+/* SRC: classes/exception.php line 232 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(OutOfRangeException)
 const InstanceOfInfo c_OutOfRangeException::s_instanceof_table[] = {
   {0x4860DC2F9B0E6D4BLL,1,"LogicException",&cw_LogicException},
@@ -49,9 +49,10 @@ const ObjectStaticCallbacks cw_OutOfRangeException = {
   c_OutOfRangeException::s_call_info_table,c_OutOfRangeException::s_call_info_index,
   c_OutOfRangeException::s_instanceof_table,c_OutOfRangeException::s_instanceof_index,
   &c_OutOfRangeException::s_class_name,
-  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_LogicException,0x0
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_LogicException,0x0,
+  &c_OutOfRangeException::s_cls
 };
-/* SRC: classes/exception.php line 235 */
+/* SRC: classes/exception.php line 240 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(RuntimeException)
 const InstanceOfInfo c_RuntimeException::s_instanceof_table[] = {
   {0x1078CB3118A8B3DCLL,0,"RuntimeException",&cw_RuntimeException},
@@ -66,9 +67,10 @@ const ObjectStaticCallbacks cw_RuntimeException = {
   c_RuntimeException::s_call_info_table,c_RuntimeException::s_call_info_index,
   c_RuntimeException::s_instanceof_table,c_RuntimeException::s_instanceof_index,
   &c_RuntimeException::s_class_name,
-  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_Exception,0x0
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_Exception,0x0,
+  &c_RuntimeException::s_cls
 };
-/* SRC: classes/exception.php line 183 */
+/* SRC: classes/exception.php line 188 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(BadFunctionCallException)
 const InstanceOfInfo c_BadFunctionCallException::s_instanceof_table[] = {
   {0x4860DC2F9B0E6D4BLL,1,"LogicException",&cw_LogicException},
@@ -85,9 +87,10 @@ const ObjectStaticCallbacks cw_BadFunctionCallException = {
   c_BadFunctionCallException::s_call_info_table,c_BadFunctionCallException::s_call_info_index,
   c_BadFunctionCallException::s_instanceof_table,c_BadFunctionCallException::s_instanceof_index,
   &c_BadFunctionCallException::s_class_name,
-  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_LogicException,0x0
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_LogicException,0x0,
+  &c_BadFunctionCallException::s_cls
 };
-/* SRC: classes/exception.php line 202 */
+/* SRC: classes/exception.php line 207 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DomainException)
 const InstanceOfInfo c_DomainException::s_instanceof_table[] = {
   {0x4860DC2F9B0E6D4BLL,1,"LogicException",&cw_LogicException},
@@ -104,9 +107,10 @@ const ObjectStaticCallbacks cw_DomainException = {
   c_DomainException::s_call_info_table,c_DomainException::s_call_info_index,
   c_DomainException::s_instanceof_table,c_DomainException::s_instanceof_index,
   &c_DomainException::s_class_name,
-  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_LogicException,0x0
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_LogicException,0x0,
+  &c_DomainException::s_cls
 };
-/* SRC: classes/exception.php line 286 */
+/* SRC: classes/exception.php line 291 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ErrorException)
 const InstanceOfInfo c_ErrorException::s_instanceof_table[] = {
   {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
@@ -175,9 +179,10 @@ const ObjectStaticCallbacks cw_ErrorException = {
   c_ErrorException::s_call_info_table,c_ErrorException::s_call_info_index,
   c_ErrorException::s_instanceof_table,c_ErrorException::s_instanceof_index,
   &c_ErrorException::s_class_name,
-  &c_ErrorException::os_prop_table,&c_ErrorException::ci___construct,0,&cw_Exception,0x0
+  &c_ErrorException::os_prop_table,&c_ErrorException::ci___construct,0,&cw_Exception,0x0,
+  &c_ErrorException::s_cls
 };
-/* SRC: classes/exception.php line 288 */
+/* SRC: classes/exception.php line 293 */
 void c_ErrorException::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
 , Variant v_code //  = 0LL
 , Variant v_severity //  = 0LL
@@ -201,13 +206,13 @@ void c_ErrorException::t___construct(Variant v_message //  = NAMSTR(s_sys_ss0000
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 308 */
+/* SRC: classes/exception.php line 313 */
 Variant c_ErrorException::t_getseverity() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ErrorException, ErrorException::getSeverity);
   return m_severity;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 193 */
+/* SRC: classes/exception.php line 198 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(BadMethodCallException)
 const InstanceOfInfo c_BadMethodCallException::s_instanceof_table[] = {
   {0x06335FF83CDEA590LL,1,"BadMethodCallException",&cw_BadMethodCallException},
@@ -225,9 +230,10 @@ const ObjectStaticCallbacks cw_BadMethodCallException = {
   c_BadMethodCallException::s_call_info_table,c_BadMethodCallException::s_call_info_index,
   c_BadMethodCallException::s_instanceof_table,c_BadMethodCallException::s_instanceof_index,
   &c_BadMethodCallException::s_class_name,
-  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_BadFunctionCallException,0x0
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_BadFunctionCallException,0x0,
+  &c_BadMethodCallException::s_cls
 };
-/* SRC: classes/exception.php line 317 */
+/* SRC: classes/exception.php line 322 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(PDOException)
 const InstanceOfInfo c_PDOException::s_instanceof_table[] = {
   {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
@@ -268,15 +274,16 @@ const ObjectStaticCallbacks cw_PDOException = {
   c_PDOException::s_call_info_table,c_PDOException::s_call_info_index,
   c_PDOException::s_instanceof_table,c_PDOException::s_instanceof_index,
   &c_PDOException::s_class_name,
-  &c_Exception::os_prop_table,&c_PDOException::ci___construct,0,&cw_Exception,0x0
+  &c_Exception::os_prop_table,&c_PDOException::ci___construct,0,&cw_Exception,0x0,
+  &c_PDOException::s_cls
 };
-/* SRC: classes/exception.php line 318 */
+/* SRC: classes/exception.php line 323 */
 void c_PDOException::t___construct() {
   bool oldInCtor = gasInCtor(true);
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 259 */
+/* SRC: classes/exception.php line 264 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(RangeException)
 const InstanceOfInfo c_RangeException::s_instanceof_table[] = {
   {0x6AF83706F76A9D53LL,1,"RangeException",&cw_RangeException},
@@ -293,9 +300,10 @@ const ObjectStaticCallbacks cw_RangeException = {
   c_RangeException::s_call_info_table,c_RangeException::s_call_info_index,
   c_RangeException::s_instanceof_table,c_RangeException::s_instanceof_index,
   &c_RangeException::s_class_name,
-  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_RuntimeException,0x0
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_RuntimeException,0x0,
+  &c_RangeException::s_cls
 };
-/* SRC: classes/exception.php line 277 */
+/* SRC: classes/exception.php line 282 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(UnexpectedValueException)
 const InstanceOfInfo c_UnexpectedValueException::s_instanceof_table[] = {
   {0x5AA2EE582E0D3849LL,1,"UnexpectedValueException",&cw_UnexpectedValueException},
@@ -312,9 +320,10 @@ const ObjectStaticCallbacks cw_UnexpectedValueException = {
   c_UnexpectedValueException::s_call_info_table,c_UnexpectedValueException::s_call_info_index,
   c_UnexpectedValueException::s_instanceof_table,c_UnexpectedValueException::s_instanceof_index,
   &c_UnexpectedValueException::s_class_name,
-  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_RuntimeException,0x0
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_RuntimeException,0x0,
+  &c_UnexpectedValueException::s_cls
 };
-/* SRC: classes/exception.php line 268 */
+/* SRC: classes/exception.php line 273 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(UnderflowException)
 const InstanceOfInfo c_UnderflowException::s_instanceof_table[] = {
   {0x5E623FEAF7B068D4LL,0,"UnderflowException",&cw_UnderflowException},
@@ -331,7 +340,8 @@ const ObjectStaticCallbacks cw_UnderflowException = {
   c_UnderflowException::s_call_info_table,c_UnderflowException::s_call_info_index,
   c_UnderflowException::s_instanceof_table,c_UnderflowException::s_instanceof_index,
   &c_UnderflowException::s_class_name,
-  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_RuntimeException,0x0
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_RuntimeException,0x0,
+  &c_UnderflowException::s_cls
 };
 /* SRC: classes/exception.php line 10 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(Exception)
@@ -503,19 +513,27 @@ const ObjectStaticCallbacks cw_Exception = {
   c_Exception::s_call_info_table,c_Exception::s_call_info_index,
   c_Exception::s_instanceof_table,c_Exception::s_instanceof_index,
   &c_Exception::s_class_name,
-  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,0,0x0
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,0,0x0,
+  &c_Exception::s_cls
 };
 void c_Exception::init() {
   m_message = NAMSTR(s_sys_ss00000000, "");
   m_code = 0LL;
+  m_inited = false;
   {CountableHelper h(this); t___init__();}
 }
-/* SRC: classes/exception.php line 24 */
+/* SRC: classes/exception.php line 25 */
 void c_Exception::t___init__() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::__init__);
   Variant v_top;
   Variant v_frame;
 
+  if (toBoolean(m_inited)) {
+    {
+      return;
+    }
+  }
+  m_inited = true;
   {
     const Array &tmp0((x_debug_backtrace()));
     m_trace = tmp0;
@@ -587,7 +605,7 @@ void c_Exception::t___init__() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 45 */
+/* SRC: classes/exception.php line 50 */
 void c_Exception::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
 , Variant v_code //  = 0LL
 , Variant v_previous //  = null
@@ -604,43 +622,43 @@ void c_Exception::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000,
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 60 */
+/* SRC: classes/exception.php line 65 */
 Variant c_Exception::t_getmessage() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getMessage);
   return m_message;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 73 */
+/* SRC: classes/exception.php line 78 */
 Variant c_Exception::t_getprevious() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getPrevious);
   return m_previous;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 86 */
+/* SRC: classes/exception.php line 91 */
 Variant c_Exception::t_getcode() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getCode);
   return m_code;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 100 */
+/* SRC: classes/exception.php line 105 */
 Variant c_Exception::t_getfile() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getFile);
   return m_file;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 114 */
+/* SRC: classes/exception.php line 119 */
 Variant c_Exception::t_getline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getLine);
   return m_line;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 127 */
+/* SRC: classes/exception.php line 132 */
 Variant c_Exception::t_gettrace() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getTrace);
   return m_trace;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 140 */
+/* SRC: classes/exception.php line 145 */
 String c_Exception::t_gettraceasstring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getTraceAsString);
   int64 v_i = 0;
@@ -692,7 +710,7 @@ String c_Exception::t_gettraceasstring() {
   return v_s;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 159 */
+/* SRC: classes/exception.php line 164 */
 String c_Exception::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::__toString);
   {
@@ -712,7 +730,7 @@ String c_Exception::t___tostring() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 173 */
+/* SRC: classes/exception.php line 178 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(LogicException)
 const InstanceOfInfo c_LogicException::s_instanceof_table[] = {
   {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
@@ -727,9 +745,10 @@ const ObjectStaticCallbacks cw_LogicException = {
   c_LogicException::s_call_info_table,c_LogicException::s_call_info_index,
   c_LogicException::s_instanceof_table,c_LogicException::s_instanceof_index,
   &c_LogicException::s_class_name,
-  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_Exception,0x0
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_Exception,0x0,
+  &c_LogicException::s_cls
 };
-/* SRC: classes/exception.php line 219 */
+/* SRC: classes/exception.php line 224 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(LengthException)
 const InstanceOfInfo c_LengthException::s_instanceof_table[] = {
   {0x3CAE91CFA2AAD16BLL,0,"LengthException",&cw_LengthException},
@@ -746,9 +765,10 @@ const ObjectStaticCallbacks cw_LengthException = {
   c_LengthException::s_call_info_table,c_LengthException::s_call_info_index,
   c_LengthException::s_instanceof_table,c_LengthException::s_instanceof_index,
   &c_LengthException::s_class_name,
-  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_LogicException,0x0
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_LogicException,0x0,
+  &c_LengthException::s_cls
 };
-/* SRC: classes/exception.php line 211 */
+/* SRC: classes/exception.php line 216 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(InvalidArgumentException)
 const InstanceOfInfo c_InvalidArgumentException::s_instanceof_table[] = {
   {0x4860DC2F9B0E6D4BLL,1,"LogicException",&cw_LogicException},
@@ -765,9 +785,10 @@ const ObjectStaticCallbacks cw_InvalidArgumentException = {
   c_InvalidArgumentException::s_call_info_table,c_InvalidArgumentException::s_call_info_index,
   c_InvalidArgumentException::s_instanceof_table,c_InvalidArgumentException::s_instanceof_index,
   &c_InvalidArgumentException::s_class_name,
-  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_LogicException,0x0
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_LogicException,0x0,
+  &c_InvalidArgumentException::s_cls
 };
-/* SRC: classes/exception.php line 311 */
+/* SRC: classes/exception.php line 316 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMException)
 const InstanceOfInfo c_DOMException::s_instanceof_table[] = {
   {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
@@ -810,9 +831,10 @@ const ObjectStaticCallbacks cw_DOMException = {
   c_DOMException::s_call_info_table,c_DOMException::s_call_info_index,
   c_DOMException::s_instanceof_table,c_DOMException::s_instanceof_index,
   &c_DOMException::s_class_name,
-  &c_Exception::os_prop_table,&c_DOMException::ci___construct,0,&cw_Exception,0x0
+  &c_Exception::os_prop_table,&c_DOMException::ci___construct,0,&cw_Exception,0x0,
+  &c_DOMException::s_cls
 };
-/* SRC: classes/exception.php line 312 */
+/* SRC: classes/exception.php line 317 */
 void c_DOMException::t___construct(Variant v_message, Variant v_code) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMException, DOMException::__construct);
   bool oldInCtor = gasInCtor(true);
@@ -820,7 +842,7 @@ void c_DOMException::t___construct(Variant v_message, Variant v_code) {
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 251 */
+/* SRC: classes/exception.php line 256 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(OverflowException)
 const InstanceOfInfo c_OverflowException::s_instanceof_table[] = {
   {0x0E4CCE95F6A727D9LL,1,"OverflowException",&cw_OverflowException},
@@ -837,9 +859,10 @@ const ObjectStaticCallbacks cw_OverflowException = {
   c_OverflowException::s_call_info_table,c_OverflowException::s_call_info_index,
   c_OverflowException::s_instanceof_table,c_OverflowException::s_instanceof_index,
   &c_OverflowException::s_class_name,
-  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_RuntimeException,0x0
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_RuntimeException,0x0,
+  &c_OverflowException::s_cls
 };
-/* SRC: classes/exception.php line 243 */
+/* SRC: classes/exception.php line 248 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(OutOfBoundsException)
 const InstanceOfInfo c_OutOfBoundsException::s_instanceof_table[] = {
   {0x227C70ED5B143841LL,1,"OutOfBoundsException",&cw_OutOfBoundsException},
@@ -856,7 +879,8 @@ const ObjectStaticCallbacks cw_OutOfBoundsException = {
   c_OutOfBoundsException::s_call_info_table,c_OutOfBoundsException::s_call_info_index,
   c_OutOfBoundsException::s_instanceof_table,c_OutOfBoundsException::s_instanceof_index,
   &c_OutOfBoundsException::s_class_name,
-  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_RuntimeException,0x0
+  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_RuntimeException,0x0,
+  &c_OutOfBoundsException::s_cls
 };
 ObjectData *coo_OutOfRangeException() {
   return NEWOBJ(c_OutOfRangeException)();
@@ -913,17 +937,19 @@ ObjectData *coo_OutOfBoundsException() {
 // Class tables
 static const int64 cpt_static_inits[] = {
   (int64)&null_variant,
+  (int64)&false_varNR,
   (int64)&NAMVAR(s_sys_svif01bca90, 0LL),
   (int64)&NAMVAR(s_sys_svs00000000, ""),
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
   {0x4FDAA620FA5F15F9LL,0,0,0,66,10,GET_PROPERTY_OFFSET(c_ErrorException, m_severity),&NAMSTR(s_sys_ssb84c8cfa, "severity") },
 
-  {0x0B197E8F85F4DA21LL,5,0,0,66,10,GET_PROPERTY_OFFSET(c_Exception, m_previous),&NAMSTR(s_sys_ss90291821, "previous") },
-  {0x3CCB986B2CF0A747LL,0,0,0,66,10,GET_PROPERTY_OFFSET(c_Exception, m_trace),&NAMSTR(s_sys_ss94c9ce77, "trace") },
-  {0x58C72230857ACDB9LL,-2,1,0,66,10,GET_PROPERTY_OFFSET(c_Exception, m_code),&NAMSTR(s_sys_ssab7a1dec, "code") },
+  {0x0B197E8F85F4DA21LL,6,0,0,2,10,GET_PROPERTY_OFFSET(c_Exception, m_previous),&NAMSTR(s_sys_ss90291821, "previous") },
+  {0x53B04B608CD9E191LL,0,1,0,66,10,GET_PROPERTY_OFFSET(c_Exception, m_inited),&NAMSTR(s_sys_ss6dd8e35d, "inited") },
+  {0x3CCB986B2CF0A747LL,-1,0,0,66,10,GET_PROPERTY_OFFSET(c_Exception, m_trace),&NAMSTR(s_sys_ss94c9ce77, "trace") },
+  {0x58C72230857ACDB9LL,-3,2,0,66,10,GET_PROPERTY_OFFSET(c_Exception, m_code),&NAMSTR(s_sys_ssab7a1dec, "code") },
   {0x04AB35CACF8C8C9ALL,-2,0,0,66,10,GET_PROPERTY_OFFSET(c_Exception, m_line),&NAMSTR(s_sys_ssddf8728c, "line") },
-  {0x0247CDBB94C9D47BLL,-2,2,0,66,10,GET_PROPERTY_OFFSET(c_Exception, m_message),&NAMSTR(s_sys_ss155366df, "message") },
+  {0x0247CDBB94C9D47BLL,-2,3,0,66,10,GET_PROPERTY_OFFSET(c_Exception, m_message),&NAMSTR(s_sys_ss155366df, "message") },
   {0x7863294A8F33D14FLL,-2,0,0,66,10,GET_PROPERTY_OFFSET(c_Exception, m_file),&NAMSTR(s_sys_ss8ce7db5b, "file") },
 
 };
@@ -935,7 +961,7 @@ static const int cpt_hash_entries[] = {
   -1,
   -1,
   // Exception hash
-  -1,0,-1,-1,-1,-1,-1,1,-1,2,3,4,-1,-1,-1,5,
+  -1,0,-1,-1,-1,-1,-1,2,-1,3,4,5,-1,-1,-1,6,
   // Exception lists
   -1,
   -1,
@@ -946,7 +972,7 @@ const ClassPropTable c_ErrorException::os_prop_table = {
   cpt_hash_entries+0,&c_Exception::os_prop_table,cpt_table_entries+0,cpt_static_inits
 };
 const ClassPropTable c_Exception::os_prop_table = {
-  15,4,-1,-1,-1,-1,17,0,
+  15,5,-1,-1,-1,-1,17,0,
   cpt_hash_entries+11,0,cpt_table_entries+1,cpt_static_inits
 };
 

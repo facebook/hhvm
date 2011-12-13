@@ -28,6 +28,7 @@
 #include <runtime/base/server/static_content_cache.h>
 #include <runtime/base/zend/zend_scanf.h>
 #include <runtime/base/file/pipe.h>
+#include <system/lib/systemlib.h>
 #include <util/logger.h>
 #include <util/util.h>
 #include <util/process.h>
@@ -496,7 +497,9 @@ Variant f_parse_ini_file(CStrRef filename, bool process_sections /* = false */,
   String translated = File::TranslatePath(filename);
   if (translated.empty() || !f_file_exists(translated)) {
     if (filename[0] != '/') {
-      String cfd = FrameInjection::GetContainingFileName(true);
+      String cfd = hhvm
+                   ? g_context->getContainingFileName(true)
+                   : FrameInjection::GetContainingFileName(true);
       if (!cfd.empty()) {
         int npos = cfd.rfind('/');
         if (npos >= 0) {
@@ -1213,52 +1216,9 @@ bool f_rmdir(CStrRef dirname, CVarRef context /* = null */) {
   return true;
 }
 
-static size_t php_dirname(char *path, int len) {
-  if (len == 0) {
-    /* Illegal use of this function */
-    return 0;
-  }
-
-  /* Strip trailing slashes */
-  register char *end = path + len - 1;
-  while (end >= path && *end == '/') {
-    end--;
-  }
-  if (end < path) {
-    /* The path only contained slashes */
-    path[0] = '/';
-    path[1] = '\0';
-    return 1;
-  }
-
-  /* Strip filename */
-  while (end >= path && *end != '/') {
-    end--;
-  }
-  if (end < path) {
-    /* No slash found, therefore return '.' */
-    path[0] = '.';
-    path[1] = '\0';
-    return 1;
-  }
-
-  /* Strip slashes which came before the file name */
-  while (end >= path && *end == '/') {
-    end--;
-  }
-  if (end < path) {
-    path[0] = '/';
-    path[1] = '\0';
-    return 1;
-  }
-  *(end+1) = '\0';
-
-  return end + 1 - path;
-}
-
 String f_dirname(CStrRef path) {
   char *buf = strndup(path.data(), path.size());
-  int len = php_dirname(buf, path.size());
+  int len = Util::dirname_helper(buf, path.size());
   return String(buf, len, AttachString);
 }
 
@@ -1350,10 +1310,10 @@ Variant f_dir(CStrRef directory) {
   if (same(dir, false)) {
     return false;
   }
-  c_Directory *c_d = NEWOBJ(c_Directory)();
-  c_d->m_path = directory;
-  c_d->m_handle = dir;
-  return c_d;
+  ObjectData* d = SystemLib::AllocDirectoryObject();
+  *(d->o_realProp("path", 0)) = directory;
+  *(d->o_realProp("handle", 0)) = dir;
+  return d;
 }
 
 Variant f_opendir(CStrRef path, CVarRef context /* = null */) {

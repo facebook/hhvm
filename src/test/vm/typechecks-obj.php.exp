@@ -1,0 +1,6 @@
+object(C)#1 (0) {
+}
+object(D)#2 (0) {
+}
+NULL
+HipHop Fatal error: Argument 1 passed to f() must be an instance of c, stdClass given in /test/vm/typechecks-obj.php on line 6

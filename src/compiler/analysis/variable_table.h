@@ -145,6 +145,8 @@ public:
   std::string getGlobalVariableName(AnalysisResultConstPtr ar,
                                     const std::string &name) const;
 
+  void getLocalVariableNames(std::vector<std::string> &syms) const;
+
   /**
    * Get all variable's names.
    */
@@ -283,7 +285,7 @@ public:
    */
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPPropertyDecl(CodeGenerator &cg, AnalysisResultPtr ar,
+  bool outputCPPPropertyDecl(CodeGenerator &cg, AnalysisResultPtr ar,
       bool dynamicObject = false);
   void outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPStaticVariables(CodeGenerator &cg, AnalysisResultPtr ar);
@@ -329,8 +331,8 @@ public:
   struct StaticGlobalInfo {
     Symbol *sym;
     VariableTable *variables; // where this variable was from
-    ClassScopePtr cls;
-    FunctionScopePtr func;
+    ClassScopeRawPtr cls;     // these need to be raw to avoid reference cycles
+    FunctionScopeRawPtr func;
 
     // get unique identifier for this variable
     static std::string GetId(ClassScopePtr cls,

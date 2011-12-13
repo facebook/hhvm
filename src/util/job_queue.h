@@ -212,6 +212,7 @@ class JobQueueWorker {
 public:
   typedef TJob JobType;
   static const bool Waitable = waitable;
+  static const bool CountActive = countActive;
   /**
    * Default constructor.
    */
@@ -301,11 +302,16 @@ public:
                      int dropCacheTimeout, bool dropStack, void *opaque,
                      bool lifo = false)
       : m_stopped(true), m_id(0), m_opaque(opaque),
+        m_maxThreadCount(threadCount),
         m_queue(threadCount, threadRoundRobin, dropCacheTimeout, dropStack,
                 lifo) {
     ASSERT(threadCount >= 1);
-    for (int i = 0; i < threadCount; i++) {
-      addWorkerImpl(false);
+    if (!TWorker::CountActive) {
+      // If TWorker does not support counting the number of
+      // active workers, just start all of the workers eagerly
+      for (int i = 0; i < threadCount; i++) {   
+        addWorkerImpl(false);   
+      }
     }
   }
 
@@ -329,12 +335,25 @@ public:
   int getQueuedJobs() {
     return m_queue.getQueuedJobs();
   }
+  int getTargetNumWorkers() {
+    if (TWorker::CountActive) {
+      int target = getActiveWorker() + getQueuedJobs();
+      return (target > m_maxThreadCount) ? m_maxThreadCount : target;
+    } else {
+      return m_maxThreadCount;
+    }
+  }
 
   /**
    * Creates worker threads and start running them. This is non-blocking.
    */
   void start() {
     Lock lock(m_mutex);
+    // Spin up more worker threads if appropriate
+    int target = getTargetNumWorkers();
+    for (int n = m_workers.size(); n < target; ++n) {
+      addWorkerImpl(false);
+    }
     for (typename
            std::set<AsyncFunc<TWorker>*>::iterator iter = m_funcs.begin();
          iter != m_funcs.end(); ++iter) {
@@ -348,6 +367,12 @@ public:
    */
   void enqueue(TJob job) {
     m_queue.enqueue(job);
+    // Spin up another worker thread if appropriate
+    int target = getTargetNumWorkers();
+    int n = m_workers.size();
+    if (n < target) {
+      addWorker();
+    }
   }
 
   /**
@@ -439,6 +464,7 @@ private:
   bool m_stopped;
   int m_id;
   void *m_opaque;
+  int m_maxThreadCount;
   JobQueue<TJob, TWorker::Waitable> m_queue;
 
   Mutex m_mutex;

@@ -68,6 +68,33 @@ VariableTable::VariableTable(BlockScope &blockScope)
       m_forcedVariants(0) {
 }
 
+void VariableTable::getLocalVariableNames(vector<string> &syms) const {
+  FunctionScopeRawPtr fs = getScopePtr()->getContainingFunction();
+  bool dollarThisIsSpecial = (fs->getContainingClass() ||
+                              fs->inPseudoMain());
+
+  for (StringToSymbolMap::const_iterator it = m_symbolMap.begin();
+       it != m_symbolMap.end(); ++it) {
+    // Not all symbols are actually local variables, thus we have to
+    // filter out certain symbols based on their flags
+    if (it->second.isSuperGlobal()) continue;
+    const string& name = it->first;
+    if (name == "this" && dollarThisIsSpecial) {
+      // The "this" variable in methods and pseudo-main is special and is
+      // handled separately below.
+      continue;
+    }
+    syms.push_back(name);
+  }
+  if (fs->containsBareThis()) {
+    ASSERT(dollarThisIsSpecial);
+    // We only need a local variable named "this" if the current function
+    // contains an occurrence of "$this" that is not part of a property
+    // expression or object method call expression
+    syms.push_back("this");
+  }
+}
+
 void VariableTable::getNames(std::set<string> &names,
                              bool collectPrivate /* = true */) const {
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
@@ -403,7 +430,6 @@ TypePtr VariableTable::add(Symbol *sym, TypePtr type,
                            ModifierExpressionPtr modifiers) {
   if (getAttribute(InsideStaticStatement)) {
     addStaticVariable(sym, ar);
-    ClassScopeRawPtr clsScope = getClassScope();
     if (ClassScope::NeedStaticArray(getClassScope(), getFunctionScope())) {
       forceVariant(ar, sym->getName(), AnyVars);
     }
@@ -849,6 +875,13 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     cg_printf("~GlobalVariables();\n");
   }
 
+  if (cg.getOutput() == CodeGenerator::SystemCPP) {
+    cg_printf("// HHBC global infrastructure\n");
+    cg_printf("Variant hg_global_storage;\n");
+    cg_printf("// HHBC Function/Method Static Variables\n");
+    cg_printf("Array hg_static_storage;\n");
+  }
+
   cg_printf("\n");
 
   // We will create one variable[] per type.
@@ -1069,6 +1102,33 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
 
   cg_printf("memset(&%sCallInfoPtr, 0, sizeof(%sCallInfoPtr));\n",
             prefix, prefix);
+
+  if (system) {
+    cg_printf(
+      "// HHBC globals initialization\n"
+      "hg_global_storage = NEW(HphpArray)(0, true);\n"
+      "hg_global_storage.set(\"GLOBALS\", hg_global_storage);\n"
+      "// XXX As a hack, we strongly bind hphpc's superglobals to the matching\n"
+      "// keys in our globals array. While this will work for most PHP\n"
+      "// programs, this is not strictly correct.\n"
+      "hg_global_storage.set(\"argc\", ref(gvm_argc));\n"
+      "hg_global_storage.set(\"argv\", ref(gvm_argv));\n"
+      "hg_global_storage.set(\"_SERVER\", ref(gvm__SERVER));\n"
+      "hg_global_storage.set(\"_GET\", ref(gvm__GET));\n"
+      "hg_global_storage.set(\"_POST\", ref(gvm__POST));\n"
+      "hg_global_storage.set(\"_COOKIE\", ref(gvm__COOKIE));\n"
+      "hg_global_storage.set(\"_FILES\", ref(gvm__FILES));\n"
+      "hg_global_storage.set(\"_ENV\", ref(gvm__ENV));\n"
+      "hg_global_storage.set(\"_REQUEST\", ref(gvm__REQUEST));\n"
+      "hg_global_storage.set(\"_SESSION\", ref(gvm__SESSION));\n"
+      "hg_global_storage.set(\"HTTP_RAW_POST_DATA\",\n"
+      "                      ref(gvm_HTTP_RAW_POST_DATA));\n"
+      "hg_global_storage.set(\"http_response_header\",\n"
+      "                      ref(gvm_http_response_header));\n"
+      "// HHBC function/method statics initialization\n"
+      "hg_static_storage = Array(NEW(HphpArray)());\n\n"
+    );
+  }
 
   cg.printSection("Redeclared Classes");
   ar->outputCPPRedeclaredClassImpl(cg);
@@ -1676,8 +1736,9 @@ void VariableTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
-void VariableTable::outputCPPPropertyDecl(CodeGenerator &cg,
+bool VariableTable::outputCPPPropertyDecl(CodeGenerator &cg,
     AnalysisResultPtr ar, bool dynamicObject /* = false */) {
+  bool destruct = false;
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     const Symbol *sym = m_symbolVec[i];
     if (dynamicObject && !sym->isPrivate()) continue;
@@ -1686,11 +1747,14 @@ void VariableTable::outputCPPPropertyDecl(CodeGenerator &cg,
     // unless it is private or the parent's one is private
     if (sym->isStatic() || sym->isOverride()) continue;
 
+    destruct = true;
     const string &name = sym->getName();
     sym->getFinalType()->outputCPPDecl(cg, ar, getBlockScope());
     cg_printf(" %s%s;\n", Option::PropertyPrefix,
               CodeGenerator::FormatLabel(name).c_str());
   }
+
+  return destruct;
 }
 
 bool VariableTable::outputCPPPrivateSelector(CodeGenerator &cg,

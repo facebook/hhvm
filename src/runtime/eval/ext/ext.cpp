@@ -76,26 +76,6 @@ Variant ExtFunction::directInvoke(VariableEnvironment &env,
   };                                                                   \
   CallInfo Eval##name::s_ci((void*)Eval##name::Invoker, NULL, 0, 0, 0);
 
-
-
-#define EVAL_EXT_DYN(name)                                             \
-  class Eval##name : public ExtFunction {                              \
-  public:                                                              \
-    Variant invokeImpl(VariableEnvironment &env,                       \
-                       CArrRef params) const {                         \
-      return Invoke(params);                                           \
-    }                                                                  \
-    static Variant Invoke(CArrRef params);                             \
-    static Variant Invoker(void *extra, CArrRef params) {              \
-      return Invoke(params);                                           \
-    }                                                                  \
-    const CallInfo *getCallInfo() const {                              \
-      return &s_ci;                                                    \
-    }                                                                  \
-    static CallInfo s_ci;                                              \
-  };                                                                   \
-  CallInfo Eval##name::s_ci((void*)Eval##name::Invoker, NULL, 0, 0, 0);
-
 EVAL_EXT(Extract);
 EVAL_EXT(FuncGetArg);
 EVAL_EXT(FuncGetArgs);
@@ -104,9 +84,7 @@ EVAL_EXT(Compact);
 EVAL_EXT(CreateFunction);
 EVAL_EXT(Assert);
 EVAL_EXT(GetDefinedVars);
-EVAL_EXT_DYN(HphpGetClassInfo);
 #undef EVAL_EXT
-#undef EVAL_EXT_DYN
 
 class EvalFunctionExists : public ExtFunction {
 public:
@@ -139,17 +117,16 @@ EvalOverrides::EvalOverrides() {
   m_functions["assert"] = new EvalAssert();
   m_functions["function_exists"] = new EvalFunctionExists();
   m_functions["get_defined_vars"] = new EvalGetDefinedVars();
-  m_functions["hphp_get_class_info"] = new EvalHphpGetClassInfo();
 }
 EvalOverrides::~EvalOverrides() {
   for (hphp_const_char_imap<const Function*>::iterator it =
-         m_functions.begin(); it != m_functions.end(); ++it) {
+       m_functions.begin(); it != m_functions.end(); ++it) {
     delete it->second;
   }
   m_functions.clear();
 }
 
-const Function *EvalOverrides::findFunction(const char *name) const {
+const Function *EvalOverrides::findFunction(CStrRef name) const {
   hphp_const_char_imap<const Function*>::const_iterator it =
     m_functions.find(name);
   if (it != m_functions.end()) {
@@ -292,15 +269,6 @@ Variant EvalAssert::InvokeImpl(VariableEnvironment &env,
 Variant EvalGetDefinedVars::InvokeImpl(VariableEnvironment &env,
                                        CArrRef params) {
   return env.getDefinedVariables();
-}
-
-
-Variant EvalHphpGetClassInfo::Invoke(CArrRef params) {
-  String cname = params.rvalAt(0);
-  if (!f_class_exists(cname) && !f_interface_exists(cname)) {
-    eval_try_autoload(cname.data());
-  }
-  return f_hphp_get_class_info(cname);
 }
 
 EvalFunctionExists::EvalFunctionExists() {

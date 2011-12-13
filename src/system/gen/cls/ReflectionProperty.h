@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 1355 */
+/* SRC: classes/reflection.php line 1374 */
 FORWARD_DECLARE_CLASS(ReflectionProperty);
 extern const ObjectStaticCallbacks cw_ReflectionProperty;
 class c_ReflectionProperty : public ExtObjectData {
@@ -37,6 +37,8 @@ class c_ReflectionProperty : public ExtObjectData {
   Variant m_name;
   Variant m_class;
 
+  // Destructor
+  ~c_ReflectionProperty() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionProperty, ReflectionProperty, ObjectData)
   static const ClassPropTable os_prop_table;
@@ -49,7 +51,7 @@ class c_ReflectionProperty : public ExtObjectData {
   public: bool t_ispublic();
   public: bool t_isprivate();
   public: bool t_isprotected();
-  public: Variant t_isstatic();
+  public: bool t_isstatic();
   public: Variant t_isdefault();
   public: void t_setaccessible(CVarRef v_accessible);
   public: Variant t_getmodifiers();

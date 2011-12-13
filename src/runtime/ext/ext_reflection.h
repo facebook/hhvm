@@ -26,6 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Array f_hphp_get_extension_info(CStrRef name);
+Array f_hphp_get_method_info(CVarRef cls, CVarRef name);
 Array f_hphp_get_class_info(CVarRef name);
 Array f_hphp_get_function_info(CStrRef name);
 Variant f_hphp_invoke(CStrRef name, CArrRef params);

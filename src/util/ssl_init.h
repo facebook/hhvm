@@ -23,6 +23,7 @@ namespace HPHP {
 class SSLInit {
 public:
   static void Init();
+  static bool IsInited();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

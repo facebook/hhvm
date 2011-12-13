@@ -32,19 +32,30 @@ p_Continuation f_hphp_create_continuation(CStrRef clsname,
                                           CStrRef funcname,
                                           CStrRef origFuncName,
                                           CArrRef args /* = null_array */) {
-  Eval::VariableEnvironment *env =
-    FrameInjection::GetVariableEnvironment(true);
-  if (UNLIKELY(!env)) {
-    throw_fatal("Cannot call hphp_create_continuation in non-eval context");
+  Array definedVariables;
+  Object obj;
+  if (hhvm) {
+    definedVariables = g_context->getVarEnv()->getDefinedVariables();
+    HPHP::VM::ActRec* ar = vm_get_previous_frame();
+    if (ar && ar->hasThis()) {
+      obj = ar->getThis();
+    }
+  } else {
+    Eval::VariableEnvironment *env =
+      FrameInjection::GetVariableEnvironment(true);
+    if (UNLIKELY(!env)) {
+      throw_fatal("Cannot call hphp_create_continuation in non-eval context");
+    }
+    definedVariables = env->getDefinedVariables();
+    obj = FrameInjection::GetThis(true);
   }
   bool isMethod = !clsname.isNull() && !clsname.empty();
   int64 callInfo = f_hphp_get_call_info(clsname, funcname);
   int64 extra = f_hphp_get_call_info_extra(clsname, funcname);
-  CObjRef obj = FrameInjection::GetThis(true);
   p_GenericContinuation cont(
       ((c_GenericContinuation*)coo_GenericContinuation())->
         create(callInfo, extra, isMethod, origFuncName,
-               env->getDefinedVariables(), obj, args));
+               definedVariables, obj, args));
   if (isMethod) {
     CStrRef cls = f_get_called_class();
     cont->setCalledClass(cls);
@@ -53,36 +64,48 @@ p_Continuation f_hphp_create_continuation(CStrRef clsname,
 }
 
 void f_hphp_pack_continuation(CObjRef continuation,
-                              int64 label, CVarRef value) {
-  Eval::VariableEnvironment *env =
-    FrameInjection::GetVariableEnvironment(true);
-  if (UNLIKELY(!env)) {
-    throw_fatal("Cannot call hphp_pack_continuation in non-eval context");
-  }
+                            int64 label, CVarRef value) {
   if (UNLIKELY(!continuation->o_instanceof("GenericContinuation"))) {
     throw_fatal(
         "Cannot call hphp_pack_continuation with a "
         "non-GenericContinuation object");
   }
+  Array definedVariables;
+  if (hhvm) {
+    definedVariables = g_context->getVarEnv()->getDefinedVariables();
+  } else {
+    Eval::VariableEnvironment *env =
+      FrameInjection::GetVariableEnvironment(true);
+    if (UNLIKELY(!env)) {
+      throw_fatal("Cannot call hphp_pack_continuation in non-eval context");
+    }
+    definedVariables = env->getDefinedVariables();
+  }
   p_GenericContinuation c(
       static_cast<c_GenericContinuation*>(continuation.get()));
-  c->t_update(label, value, env->getDefinedVariables());
+  c->t_update(label, value, definedVariables);
 }
 
 void f_hphp_unpack_continuation(CObjRef continuation) {
-  Eval::VariableEnvironment *env =
-    FrameInjection::GetVariableEnvironment(true);
-  if (UNLIKELY(!env)) {
-    throw_fatal("Cannot call hphp_unpack_continuation in non-eval context");
-  }
   if (UNLIKELY(!continuation->o_instanceof("GenericContinuation"))) {
     throw_fatal(
         "Cannot call hphp_pack_continuation with a "
         "non-GenericContinuation object");
   }
-  p_GenericContinuation c(
-      static_cast<c_GenericContinuation*>(continuation.get()));
-  extract(env, c->t_getvars(), 256 /* EXTR_REFS */);
+  if (hhvm) {
+    p_GenericContinuation c(
+        static_cast<c_GenericContinuation*>(continuation.get()));
+    f_extract(c->t_getvars(), 256 /* EXTR_REFS */);
+  } else {
+    Eval::VariableEnvironment *env =
+      FrameInjection::GetVariableEnvironment(true);
+    if (UNLIKELY(!env)) {
+      throw_fatal("Cannot call hphp_unpack_continuation in non-eval context");
+    }
+    p_GenericContinuation c(
+        static_cast<c_GenericContinuation*>(continuation.get()));
+    extract(env, c->t_getvars(), 256 /* EXTR_REFS */);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -94,7 +117,9 @@ c_Continuation::c_Continuation(const ObjectStaticCallbacks *cb) :
     m_label(0LL), m_index(-1LL),
     m_value(Variant::nullInit), m_received(Variant::nullInit),
     m_done(false), m_running(false), m_should_throw(false),
-    m_isMethod(false), m_callInfo(NULL), m_extra(NULL) {}
+    m_isMethod(false), m_callInfo(NULL), m_extra(NULL) {
+  CPP_BUILTIN_CLASS_INIT(Continuation);
+}
 
 c_Continuation::~c_Continuation() {}
 
@@ -173,6 +198,21 @@ bool c_Continuation::php_sleep(Variant &ret) {
   return true;
 }
 
+#ifdef HHVM
+#define NEXT_IMPL_GET_ARGS \
+        MethodCallPackage mcp; \
+        mcp.isObj = false; \
+        mcp.obj = mcp.rootObj = NULL; \
+        mcp.extra = m_extra; \
+        (m_callInfo->getMeth1Args())(mcp, 1, this);
+#define SET_STATIC_CLASS
+#else
+#define NEXT_IMPL_GET_ARGS \
+        (m_callInfo->getFunc1Args())(m_extra, 1, \
+                                     this);
+#define SET_STATIC_CLASS fi.setStaticClassName(m_called_class);
+#endif
+
 #define NEXT_IMPL \
   if (m_done) { \
     throw_exception(Object(SystemLib::AllocExceptionObject( \
@@ -187,13 +227,17 @@ bool c_Continuation::php_sleep(Variant &ret) {
   try { \
     if (m_isMethod) { \
       MethodCallPackage mcp; \
-      mcp.isObj = true; \
-      mcp.obj = mcp.rootObj = m_obj.get(); \
+      mcp.isObj = hhvm || m_obj.get(); \
+      if (mcp.isObj) {                       \
+        mcp.obj = mcp.rootObj = m_obj.get(); \
+      } else {                               \
+        mcp.rootCls = m_called_class.get(); \
+      } \
       mcp.extra = m_extra; \
-      fi.setStaticClassName(m_called_class); \
-      (m_callInfo->getMeth1Args())(mcp, 1, GET_THIS_TYPED(Continuation)); \
+      SET_STATIC_CLASS \
+      (m_callInfo->getMeth1Args())(mcp, 1, this); \
     } else { \
-      (m_callInfo->getFunc1Args())(m_extra, 1, GET_THIS_TYPED(Continuation)); \
+      NEXT_IMPL_GET_ARGS \
     } \
   } catch (Object e) { \
     if (e.instanceof("exception")) { \
@@ -313,5 +357,13 @@ Variant c_GenericContinuation::t___destruct() {
   return null;
 }
 
+HphpArray* c_GenericContinuation::getStaticLocals() {
+  const_assert(hhvm);
+  if (m_VMStatics.get() == NULL) {
+    m_VMStatics = NEW(HphpArray)(1);
+  }
+
+  return m_VMStatics.get();
+}
 ///////////////////////////////////////////////////////////////////////////////
 }

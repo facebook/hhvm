@@ -23,6 +23,7 @@
 #include <math.h>
 #include <monetary.h>
 
+#include <runtime/base/bstring.h>
 #include <runtime/base/util/exceptions.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/util/string_buffer.h>
@@ -160,60 +161,10 @@ char *string_concat(const char *s1, int len1, const char *s2, int len2,
 ///////////////////////////////////////////////////////////////////////////////
 // comparisons
 
-int string_cmp(const char *s1, int len1, const char *s2, int len2) {
-  if (len1 <= len2) {
-    for (int i = 0; i < len1; i++) {
-      char c1 = s1[i];
-      char c2 = s2[i];
-      if (c1 > c2) return 1;
-      if (c1 < c2) return -1;
-    }
-    return len1 < len2 ? -1 : 0;
-  }
-
-  for (int i = 0; i < len2; i++) {
-    char c1 = s1[i];
-    char c2 = s2[i];
-    if (c1 > c2) return 1;
-    if (c1 < c2) return -1;
-  }
-  return 1;
-}
-
-int string_casecmp(const char *s1, int len1, const char *s2, int len2) {
-  if (len1 <= len2) {
-    for (int i = 0; i < len1; i++) {
-      char c1 = toupper(s1[i]);
-      char c2 = toupper(s2[i]);
-      if (c1 > c2) return 1;
-      if (c1 < c2) return -1;
-    }
-    return len1 < len2 ? -1 : 0;
-  }
-
-  for (int i = 0; i < len2; i++) {
-    char c1 = toupper(s1[i]);
-    char c2 = toupper(s2[i]);
-    if (c1 > c2) return 1;
-    if (c1 < c2) return -1;
-  }
-  return 1;
-}
-
 int string_ncmp(const char *s1, const char *s2, int len) {
   for (int i = 0; i < len; i++) {
     char c1 = s1[i];
     char c2 = s2[i];
-    if (c1 > c2) return 1;
-    if (c1 < c2) return -1;
-  }
-  return 0;
-}
-
-int string_ncasecmp(const char *s1, const char *s2, int len) {
-  for (int i = 0; i < len; i++) {
-    char c1 = toupper(s1[i]);
-    char c2 = toupper(s2[i]);
     if (c1 > c2) return 1;
     if (c1 < c2) return -1;
   }
@@ -493,24 +444,17 @@ char *string_substr(const char *s, int &len, int start, int length,
 int string_find(const char *input, int len, char ch, int pos,
                 bool case_sensitive) {
   ASSERT(input);
-  if (len && pos < len) {
-    if (!case_sensitive) {
-      ch = tolower(ch);
-      char *lowered = string_to_lower(input, len);
-      int ret = string_find(lowered, len, ch, pos, true);
-      free(lowered);
-      return ret;
-    }
-
-    int l = 1;
-    if (!string_substr_check(len, pos, l)) {
-      return -1;
-    }
-
-    const void *ptr = memchr(input + pos, ch, len - pos);
-    if (ptr != NULL) {
-      return (int)((const char *)ptr - input);
-    }
+  if (pos < 0 || pos > len) {
+    return -1;
+  }
+  const void *ptr;
+  if (case_sensitive) {
+    ptr = memchr(input + pos, ch, len - pos);
+  } else {
+    ptr = bstrcasechr(input + pos, ch, len - pos);
+  }
+  if (ptr != NULL) {
+    return (int)((const char *)ptr - input);
   }
   return -1;
 }
@@ -518,35 +462,25 @@ int string_find(const char *input, int len, char ch, int pos,
 int string_rfind(const char *input, int len, char ch, int pos,
                  bool case_sensitive) {
   ASSERT(input);
-
-  if (len > 0 && pos < len) {
-    if (!case_sensitive) {
-      ch = tolower(ch);
-      char *lowered = string_to_lower(input, len);
-      int ret = string_rfind(lowered, len, ch, pos, true);
-      free(lowered);
-      return ret;
-    }
-
-    int l = 0;
-    bool stop_at_offset = (pos >= 0);
-
-    if (!string_substr_check(len, pos, l)) {
-      return -1;
-    }
-
-    int start = len - 1, stop = 0;
-    if (stop_at_offset) {
-      stop = pos;
+  if (pos < -len || pos > len) {
+    return -1;
+  }
+  const void *ptr;
+  if (case_sensitive) {
+    if (pos >= 0) {  
+      ptr = memrchr(input + pos, ch, len - pos);
     } else {
-      start = pos;
+      ptr = memrchr(input, ch, len + pos + 1);
     }
-
-    for (int i = start; i >= stop; i--) {
-      if (input[i] == ch) {
-        return i;
-      }
+  } else {
+    if (pos >= 0) {
+      ptr = bstrrcasechr(input + pos, ch, len - pos);
+    } else {
+      ptr = bstrrcasechr(input, ch, len + pos + 1);
     }
+  }
+  if (ptr != NULL) {
+    return (int)((const char *)ptr - input);
   }
   return -1;
 }
@@ -555,28 +489,17 @@ int string_find(const char *input, int len, const char *s, int s_len,
                 int pos, bool case_sensitive) {
   ASSERT(input);
   ASSERT(s);
-  if (!s_len) {
+  if (!s_len || pos < 0 || pos > len) {
     return -1;
   }
-  if (len && pos < len) {
-    if (!case_sensitive) {
-      char *lowered_s = string_to_lower(s, s_len);
-      char *lowered = string_to_lower(input, len);
-      int ret = string_find(lowered, len, lowered_s, s_len, pos, true);
-      free(lowered);
-      free(lowered_s);
-      return ret;
-    }
-
-    int l = 1;
-    if (!string_substr_check(len, pos, l)) {
-      return -1;
-    }
-
-    void *ptr = memmem(input + pos, len - pos, s, s_len);
-    if (ptr != NULL) {
-      return (int)((const char *)ptr - input);
-    }
+  void *ptr;
+  if (case_sensitive) {
+    ptr = (void*)string_memnstr(input + pos, s, s_len, input + len);
+  } else {
+    ptr = bstrcasestr(input + pos, len - pos, s, s_len);
+  }
+  if (ptr != NULL) {
+    return (int)((const char *)ptr - input);
   }
   return -1;
 }
@@ -585,38 +508,25 @@ int string_rfind(const char *input, int len, const char *s, int s_len,
                  int pos, bool case_sensitive) {
   ASSERT(input);
   ASSERT(s);
-  if (!s_len) {
+  if (!s_len || pos < -len || pos > len) {
     return -1;
   }
-
-  if (len && pos < len) {
-    if (!case_sensitive) {
-      char *lowered_s = string_to_lower(s, s_len);
-      char *lowered = string_to_lower(input, len);
-      int ret = string_rfind(lowered, len, lowered_s, s_len, pos, true);
-      free(lowered);
-      free(lowered_s);
-      return ret;
-    }
-
-    int l = 0;
-    bool stop_at_offset = (pos >= 0);
-    if (!string_substr_check(len, pos, l)) {
-      return -1;
-    }
-
-    int start = len, stop = 0;
-    if (stop_at_offset) {
-      stop = pos;
+  void *ptr;
+  if (case_sensitive) {
+    if (pos >= 0) {
+      ptr = bstrrstr(input + pos, len - pos, s, s_len);
     } else {
-      start = pos;
+      ptr = bstrrstr(input, len + pos + 1, s, s_len);
     }
-
-    for (int i = start - 1; i >= stop; i--) {
-      if (input[i] == s[0] && memcmp(input+i, s, s_len) == 0) {
-        return i;
-      }
+  } else {
+    if (pos >= 0) {
+      ptr = bstrrcasestr(input + pos, len - pos, s, s_len);
+    } else {
+      ptr = bstrrcasestr(input, len + pos + 1, s, s_len);
     }
+  }
+  if (ptr != NULL) {
+    return (int)((const char *)ptr - input);
   }
   return -1;
 }
@@ -637,20 +547,6 @@ const char *string_memnstr(const char *haystack, const char *needle,
       return NULL;
     }
     p++;
-  }
-  return NULL;
-}
-
-void *string_memrchr(const void *s, int c, size_t n) {
-  register unsigned char *e;
-
-  if (n <= 0) {
-    return NULL;
-  }
-  for (e = (unsigned char *)s + n - 1; e >= (unsigned char *)s; e--) {
-    if (*e == (unsigned char)c) {
-      return (void *)e;
-    }
   }
   return NULL;
 }

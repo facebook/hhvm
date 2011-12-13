@@ -20,11 +20,36 @@
 #include <util/thread_local.h>
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/execution_context.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class VariableEnvironment;
+
+// The FrameInjectionVM class is used instead of real
+// FrameInjection classes (see macros.h) for the few remaining cases
+// where a FrameInjection object is needed for calling methods. Most of
+// the methods do not appear to get called anywhere during execution
+// but they are needed for successful compilation.
+class FrameInjectionVM {
+ public:
+  FrameInjectionVM () {}
+
+  ObjectData *getThis() const {
+    assert(false);
+  }
+
+  ObjectData *getThisForArrow() {
+    assert(false);
+  }
+
+  void setLine(int n) {
+    assert(false);
+    // Anything relying on this information in the VM is already
+    // broken.
+  }
+};
 
 class FrameInjection {
 public:
@@ -53,6 +78,7 @@ public:
   // what does "static::" resolve to?
   static CStrRef GetStaticClassName(ThreadInfo *info);
   static const String *SetStaticClassName(ThreadInfo *info, CStrRef cls) {
+    const_assert(!hhvm);
     ASSERT(info);
     FrameInjection *t = info->m_top;
     if (t) {
@@ -63,6 +89,7 @@ public:
     return NULL;
   }
   static void ResetStaticClassName(ThreadInfo *info) {
+    const_assert(!hhvm);
     ASSERT(info);
     FrameInjection *t = info->m_top;
     if (t) t->m_staticClass = NULL;
@@ -92,6 +119,7 @@ protected:
     : m_name(name),
       m_staticClass(NULL),
       m_line(0), m_flags(fs) {
+    const_assert(!hhvm);
     m_info = ThreadInfo::s_threadInfo.getNoCheck();
     initCommon();
     // NOTE: hot profiler needs to be called by subclasses

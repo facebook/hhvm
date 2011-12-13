@@ -1,0 +1,1 @@
+HipHop Fatal error: Call to private method D::foo from context C in src/test/vm/priv3.php on line 8

@@ -1127,7 +1127,7 @@ Variant f_getaddrinfo(CStrRef host, CStrRef port, int family /* = 0 */,
   hints.ai_socktype = socktype;
   hints.ai_protocol = protocol;
   hints.ai_flags = flags;
-  error = getaddrinfo(host, port, &hints, &res0);
+  error = getaddrinfo(hptr, pptr, &hints, &res0);
 
   if (error) {
     raise_warning("%s", gai_strerror(error));

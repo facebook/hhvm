@@ -31,6 +31,8 @@
 #include <util/compatibility.h>
 #include <util/hash.h>
 
+#include <runtime/base/execution_context.h>
+
 using namespace std;
 using namespace boost;
 
@@ -96,6 +98,11 @@ static void bt_handler(int sig) {
 
   Logger::Error("Core dumped: %s", strsignal(sig));
 
+  // sync up gdb Dwarf info so that gdb can do a full backtrace
+  // from the core file. Do this at the very end as syncing needs
+  // to allocate memory for the ELF file.
+  g_context->syncGdbState();
+
   // re-raise the signal and pass it to the default handler
   // to terminate the process.
   raise(sig);
@@ -128,7 +135,11 @@ struct NamedBfd {
 
 bool StackTraceBase::Enabled = true;
 string StackTraceBase::ReportEmail;
+#if defined(HPHP_OSS)
 string StackTraceBase::ReportDirectory("/tmp");
+#else
+string StackTraceBase::ReportDirectory("/var/tmp/cores");
+#endif
 
 void StackTraceBase::InstallReportOnSignal(int sig) {
   signal(sig, bt_handler);

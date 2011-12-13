@@ -27,7 +27,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 461 */
+/* SRC: classes/reflection.php line 462 */
 FORWARD_DECLARE_CLASS(ReflectionFunction);
 extern const ObjectStaticCallbacks cw_ReflectionFunction;
 class c_ReflectionFunction : public c_ReflectionFunctionAbstract {

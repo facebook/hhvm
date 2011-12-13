@@ -82,44 +82,48 @@ static void flag_maybe_interrupted(vector<char*> &flags) {
 }
 
 bool register_intercept(CStrRef name, CVarRef callback, CVarRef data) {
-  StringIMap<Variant> &handlers = s_intercept_data->m_intercept_handlers;
-  if (!callback.toBoolean()) {
+  if (hhvm) {
+    return g_context->m_funcDict.interceptFunction(name, callback, data);
+  } else {
+    StringIMap<Variant> &handlers = s_intercept_data->m_intercept_handlers;
+    if (!callback.toBoolean()) {
+      if (name.empty()) {
+        s_intercept_data->m_global_handler.reset();
+        handlers.clear();
+      } else {
+        handlers.erase(name);
+      }
+      return true;
+    }
+
+    Array handler;
+    handler.set("callback", callback);
+    handler.set("data", data);
+
     if (name.empty()) {
-      s_intercept_data->m_global_handler.reset();
+      s_intercept_data->m_global_handler = handler;
       handlers.clear();
     } else {
-      handlers.erase(name);
+      handlers[name] = handler;
     }
+
+    Lock lock(s_mutex);
+    if (name.empty()) {
+      for (hphp_string_imap<vector<char*> >::iterator iter =
+             s_registered_flags.begin();
+           iter != s_registered_flags.end(); ++iter) {
+        flag_maybe_interrupted(iter->second);
+      }
+    } else {
+      hphp_string_imap<vector<char*> >::iterator iter =
+        s_registered_flags.find(name.data());
+      if (iter != s_registered_flags.end()) {
+        flag_maybe_interrupted(iter->second);
+      }
+    }
+
     return true;
   }
-
-  Array handler;
-  handler.set("callback", callback);
-  handler.set("data", data);
-
-  if (name.empty()) {
-    s_intercept_data->m_global_handler = handler;
-    handlers.clear();
-  } else {
-    handlers[name] = handler;
-  }
-
-  Lock lock(s_mutex);
-  if (name.empty()) {
-    for (hphp_string_imap<vector<char*> >::iterator iter =
-           s_registered_flags.begin();
-         iter != s_registered_flags.end(); ++iter) {
-      flag_maybe_interrupted(iter->second);
-    }
-  } else {
-    hphp_string_imap<vector<char*> >::iterator iter =
-      s_registered_flags.find(name.data());
-    if (iter != s_registered_flags.end()) {
-      flag_maybe_interrupted(iter->second);
-    }
-  }
-
-  return true;
 }
 
 Variant get_intercept_handler(CStrRef name, char *flag) {
@@ -167,58 +171,77 @@ void unregister_intercept_flag(char *flag) {
 // fb_rename_function()
 
 void check_renamed_functions(CArrRef names) {
-  s_intercept_data->m_use_allowed_functions = true;
-  StringISet &allowed = s_intercept_data->m_allowed_functions;
-  for (ArrayIter iter(names); iter; ++iter) {
-    String name = iter.second().toString();
-    if (!name.empty()) {
-      allowed.insert(name);
+  if (hhvm) {
+    g_context->addRenameableFunctions(names.get());
+  } else {
+    s_intercept_data->m_use_allowed_functions = true;
+    StringISet &allowed = s_intercept_data->m_allowed_functions;
+    for (ArrayIter iter(names); iter; ++iter) {
+      String name = iter.second().toString();
+      if (!name.empty()) {
+        allowed.insert(name);
+      }
     }
   }
 }
 
 bool check_renamed_function(CStrRef name) {
-  if (s_intercept_data->m_use_allowed_functions) {
-    StringISet &allowed = s_intercept_data->m_allowed_functions;
-    return allowed.find(name) != allowed.end();
+  if (hhvm) {
+    return g_context->isFunctionRenameable(name.get());
+  } else {
+    if (s_intercept_data->m_use_allowed_functions) {
+      StringISet &allowed = s_intercept_data->m_allowed_functions;
+      return allowed.find(name) != allowed.end();
+    }
+    return true;
   }
-  return true;
 }
 
 void rename_function(CStrRef old_name, CStrRef new_name) {
-  StringIMap<String> &funcs = s_intercept_data->m_renamed_functions;
+  if (hhvm) {
+    g_context->renameFunction(old_name.get(), new_name.get());
+  } else {
+    StringIMap<String> &funcs = s_intercept_data->m_renamed_functions;
 
-  String orig_name = old_name;
-  /*
-    Name beginning with '1' is from create_function.
-    We allow such functions to be renamed to multiple
-    different names. They also report that they exist,
-    even after renaming
-  */
-  if (old_name.data()[0] != ParserBase::CharCreateFunction) {
-    StringIMap<String>::iterator iter = funcs.find(old_name);
-    if (iter != funcs.end()) {
-      if (!iter->second.empty()) {
-        orig_name = iter->second;
-        iter->second = empty_string;
+    String orig_name = old_name;
+    /*
+      Name beginning with '1' is from create_function.
+      We allow such functions to be renamed to multiple
+      different names. They also report that they exist,
+      even after renaming
+    */
+    if (old_name.data()[0] != ParserBase::CharCreateFunction) {
+      StringIMap<String>::iterator iter = funcs.find(old_name);
+      if (iter != funcs.end()) {
+        if (!iter->second.empty()) {
+          orig_name = iter->second;
+          iter->second = empty_string;
+        }
+      } else {
+        funcs[old_name] = empty_string;
       }
-    } else {
-      funcs[old_name] = empty_string;
     }
-  }
 
-  if (new_name.data()[0] != ParserBase::CharCreateFunction) {
-    funcs[new_name] = orig_name;
+    if (new_name.data()[0] != ParserBase::CharCreateFunction) {
+      funcs[new_name] = orig_name;
+    }
+    *s_hasRenamedFunction = true;
   }
-  *s_hasRenamedFunction = true;
 }
 
 String get_renamed_function(CStrRef name) {
-  if (*s_hasRenamedFunction) {
-    StringIMap<String> &funcs = s_intercept_data->m_renamed_functions;
-    StringIMap<String>::const_iterator iter = funcs.find(name);
-    if (iter != funcs.end()) {
-      return iter->second;
+  if (hhvm) {
+    HPHP::VM::Func* f = g_context->lookupFunc(name.get());
+    if (f) {
+      return *(String*)(&f->m_name);
+    }
+  } else {
+    if (*s_hasRenamedFunction) {
+      StringIMap<String> &funcs = s_intercept_data->m_renamed_functions;
+      StringIMap<String>::const_iterator iter = funcs.find(name);
+      if (iter != funcs.end()) {
+        return iter->second;
+      }
     }
   }
   return name;

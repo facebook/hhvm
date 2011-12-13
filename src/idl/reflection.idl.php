@@ -68,6 +68,27 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "hphp_get_method_info",
+    'desc'   => "Internally used by ReflectionClass for getting a method's information.",
+    'flags'  =>  HasDocComment | HipHopSpecific | NoInjection,
+    'return' => array(
+      'type'   => VariantMap,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "cls",
+        'type'   => Variant,
+      ),
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
     'name'   => "hphp_get_class_info",
     'desc'   => "Internally used by ReflectionClass for getting a class's information.",
     'flags'  =>  HasDocComment | HipHopSpecific | NoInjection,

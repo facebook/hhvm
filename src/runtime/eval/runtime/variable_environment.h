@@ -43,7 +43,7 @@ public:
   };
   VariableEnvironment();
   void setCurrentObject(CObjRef co);
-  void setCurrentClass(const char* cls);
+  void setCurrentClass(CStrRef cls);
   virtual void flagStatic(CStrRef name, int64 hash = -1) = 0;
   virtual void flagGlobal(CStrRef name);
   virtual void flagGlobal(CStrRef name, int idx);
@@ -52,7 +52,7 @@ public:
   bool isKindOf(KindOf kindOf) { return m_kindOf == kindOf; }
   virtual void setIdx(int idx, Variant *v);
   Variant &currentObject() { return m_currentObject; }
-  virtual const char* currentClass() const;
+  virtual String currentClass() const;
   virtual const ClassStatement *currentClassStatement() const;
   virtual String currentContext() const;
   virtual Array getParams() const = 0;
@@ -118,7 +118,7 @@ public:
   static void InitTempStack();
 protected:
   Variant m_currentObject;
-  const char* m_currentClass;
+  String m_currentClass;
   int m_breakLevel;
   bool m_returning;
   void *m_closure;

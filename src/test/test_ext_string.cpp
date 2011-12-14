@@ -33,6 +33,7 @@ bool TestExtString::RunTests(const std::string &which) {
   RUN_TEST(test_str_shuffle);
   RUN_TEST(test_strrev);
   RUN_TEST(test_strtolower);
+  RUN_TEST(test_lcfirst);
   RUN_TEST(test_strtoupper);
   RUN_TEST(test_ucfirst);
   RUN_TEST(test_ucwords);
@@ -173,6 +174,11 @@ bool TestExtString::test_strrev() {
 
 bool TestExtString::test_strtolower() {
   VS(f_strtolower("ABC"), "abc");
+  return Count(true);
+}
+
+bool TestExtString::test_lcfirst() {
+  VS(f_lcfirst("ABC"), "aBC");
   return Count(true);
 }
 

@@ -23307,6 +23307,7 @@ bool TestCodeRun::TestTaintExt() {
         "  'str_shuffle',\n"
         "  'strrev',\n"
         "  'strtolower',\n"
+        "  'lcfirst',\n"
         "  'strtoupper',\n"
         "  'ucfirst',\n"
         "  'ucwords',\n"

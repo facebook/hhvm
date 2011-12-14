@@ -482,6 +482,7 @@ bool TestExtString::test_htmlentities() {
   VS(f_htmlentities("\xA0", k_ENT_COMPAT), "&nbsp;");
   VS(f_htmlentities("\xc2\xA0", k_ENT_COMPAT, ""), "&nbsp;");
   VS(f_htmlentities("\xc2\xA0", k_ENT_COMPAT, "UTF-8"), "&nbsp;");
+  VS(f_htmlentities(String("a\x00b", 3, AttachLiteral), k_ENT_COMPAT), String("a\x00b", 3, AttachLiteral));
 
   return Count(true);
 }
@@ -505,6 +506,7 @@ bool TestExtString::test_htmlspecialchars() {
   VS(f_bin2hex(f_htmlspecialchars("\xA0", k_ENT_COMPAT)), "a0");
   VS(f_bin2hex(f_htmlspecialchars("\xc2\xA0", k_ENT_COMPAT, "")), "c2a0");
   VS(f_bin2hex(f_htmlspecialchars("\xc2\xA0", k_ENT_COMPAT, "UTF-8")), "c2a0");
+  VS(f_htmlspecialchars(String("a\x00b", 3, AttachLiteral), k_ENT_COMPAT), String("a\x00b", 3, AttachLiteral));
 
   return Count(true);
 }

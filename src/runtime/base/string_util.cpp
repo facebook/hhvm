@@ -345,7 +345,7 @@ String StringUtil::HtmlEncode(CStrRef input, QuoteStyle quoteStyle,
   }
 
   int len = input.size();
-  char *ret = string_html_encode(input, len, quoteStyle != NoQuotes,
+  char *ret = string_html_encode(input.data(), len, quoteStyle != NoQuotes,
                                  quoteStyle == BothQuotes, utf8, nbsp);
   if (!ret) {
     raise_error("HtmlEncode called on too large input (%d)", len);

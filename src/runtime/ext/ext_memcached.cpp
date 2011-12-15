@@ -45,9 +45,9 @@ IMPLEMENT_THREAD_LOCAL(c_Memcached::ImplMap, c_Memcached::s_persistentMap);
 #define MEMC_COMPRESS_THRESHOLD 100
 
 // Class options
-const int q_Memcached$$OPT_COMPRESSION = -1001;
-const int q_Memcached$$OPT_PREFIX_KEY  = -1002;
-const int q_Memcached$$OPT_SERIALIZER  = -1003;
+const int64 q_Memcached$$OPT_COMPRESSION = -1001;
+const int64 q_Memcached$$OPT_PREFIX_KEY  = -1002;
+const int64 q_Memcached$$OPT_SERIALIZER  = -1003;
 
 // Indicate whether igbinary serializer is available
 const bool q_Memcached$$HAVE_IGBINARY = false;
@@ -56,113 +56,113 @@ const bool q_Memcached$$HAVE_IGBINARY = false;
 const bool q_Memcached$$HAVE_JSON = true;
 
 // libmemcached behavior options
-const int q_Memcached$$OPT_HASH
+const int64 q_Memcached$$OPT_HASH
           = MEMCACHED_BEHAVIOR_HASH;
-const int q_Memcached$$HASH_DEFAULT
+const int64 q_Memcached$$HASH_DEFAULT
           = MEMCACHED_HASH_DEFAULT;
-const int q_Memcached$$HASH_MD5
+const int64 q_Memcached$$HASH_MD5
           = MEMCACHED_HASH_MD5;
-const int q_Memcached$$HASH_CRC
+const int64 q_Memcached$$HASH_CRC
           = MEMCACHED_HASH_CRC;
-const int q_Memcached$$HASH_FNV1_64
+const int64 q_Memcached$$HASH_FNV1_64
           = MEMCACHED_HASH_FNV1_64;
-const int q_Memcached$$HASH_FNV1A_64
+const int64 q_Memcached$$HASH_FNV1A_64
           = MEMCACHED_HASH_FNV1A_64;
-const int q_Memcached$$HASH_FNV1_32
+const int64 q_Memcached$$HASH_FNV1_32
           = MEMCACHED_HASH_FNV1_32;
-const int q_Memcached$$HASH_FNV1A_32
+const int64 q_Memcached$$HASH_FNV1A_32
           = MEMCACHED_HASH_FNV1A_32;
-const int q_Memcached$$HASH_HSIEH
+const int64 q_Memcached$$HASH_HSIEH
           = MEMCACHED_HASH_HSIEH;
-const int q_Memcached$$HASH_MURMUR
+const int64 q_Memcached$$HASH_MURMUR
           = MEMCACHED_HASH_MURMUR;
-const int q_Memcached$$OPT_DISTRIBUTION
+const int64 q_Memcached$$OPT_DISTRIBUTION
           = MEMCACHED_BEHAVIOR_DISTRIBUTION;
-const int q_Memcached$$DISTRIBUTION_MODULA
+const int64 q_Memcached$$DISTRIBUTION_MODULA
           = MEMCACHED_DISTRIBUTION_MODULA;
-const int q_Memcached$$DISTRIBUTION_CONSISTENT
+const int64 q_Memcached$$DISTRIBUTION_CONSISTENT
           = MEMCACHED_DISTRIBUTION_CONSISTENT;
-const int q_Memcached$$OPT_LIBKETAMA_COMPATIBLE
+const int64 q_Memcached$$OPT_LIBKETAMA_COMPATIBLE
           = MEMCACHED_BEHAVIOR_KETAMA_WEIGHTED;
-const int q_Memcached$$OPT_BUFFER_WRITES
+const int64 q_Memcached$$OPT_BUFFER_WRITES
           = MEMCACHED_BEHAVIOR_BUFFER_REQUESTS;
-const int q_Memcached$$OPT_BINARY_PROTOCOL
+const int64 q_Memcached$$OPT_BINARY_PROTOCOL
           = MEMCACHED_BEHAVIOR_BINARY_PROTOCOL;
-const int q_Memcached$$OPT_NO_BLOCK
+const int64 q_Memcached$$OPT_NO_BLOCK
           = MEMCACHED_BEHAVIOR_NO_BLOCK;
-const int q_Memcached$$OPT_TCP_NODELAY
+const int64 q_Memcached$$OPT_TCP_NODELAY
           = MEMCACHED_BEHAVIOR_TCP_NODELAY;
-const int q_Memcached$$OPT_SOCKET_SEND_SIZE
+const int64 q_Memcached$$OPT_SOCKET_SEND_SIZE
           = MEMCACHED_BEHAVIOR_SOCKET_SEND_SIZE;
-const int q_Memcached$$OPT_SOCKET_RECV_SIZE
+const int64 q_Memcached$$OPT_SOCKET_RECV_SIZE
           = MEMCACHED_BEHAVIOR_SOCKET_RECV_SIZE;
-const int q_Memcached$$OPT_CONNECT_TIMEOUT
+const int64 q_Memcached$$OPT_CONNECT_TIMEOUT
           = MEMCACHED_BEHAVIOR_CONNECT_TIMEOUT;
-const int q_Memcached$$OPT_RETRY_TIMEOUT
+const int64 q_Memcached$$OPT_RETRY_TIMEOUT
           = MEMCACHED_BEHAVIOR_RETRY_TIMEOUT;
-const int q_Memcached$$OPT_SEND_TIMEOUT
+const int64 q_Memcached$$OPT_SEND_TIMEOUT
           = MEMCACHED_BEHAVIOR_SND_TIMEOUT;
-const int q_Memcached$$OPT_RECV_TIMEOUT
+const int64 q_Memcached$$OPT_RECV_TIMEOUT
           = MEMCACHED_BEHAVIOR_RCV_TIMEOUT;
-const int q_Memcached$$OPT_POLL_TIMEOUT
+const int64 q_Memcached$$OPT_POLL_TIMEOUT
           = MEMCACHED_BEHAVIOR_POLL_TIMEOUT;
-const int q_Memcached$$OPT_CACHE_LOOKUPS
+const int64 q_Memcached$$OPT_CACHE_LOOKUPS
           = MEMCACHED_BEHAVIOR_CACHE_LOOKUPS;
-const int q_Memcached$$OPT_SERVER_FAILURE_LIMIT
+const int64 q_Memcached$$OPT_SERVER_FAILURE_LIMIT
           = MEMCACHED_BEHAVIOR_SERVER_FAILURE_LIMIT;
 
 // libmemcached result codes
-const int q_Memcached$$RES_SUCCESS
+const int64 q_Memcached$$RES_SUCCESS
           = MEMCACHED_SUCCESS;
-const int q_Memcached$$RES_FAILURE
+const int64 q_Memcached$$RES_FAILURE
           = MEMCACHED_FAILURE;
-const int q_Memcached$$RES_HOST_LOOKUP_FAILURE
+const int64 q_Memcached$$RES_HOST_LOOKUP_FAILURE
           = MEMCACHED_HOST_LOOKUP_FAILURE;
-const int q_Memcached$$RES_UNKNOWN_READ_FAILURE
+const int64 q_Memcached$$RES_UNKNOWN_READ_FAILURE
           = MEMCACHED_UNKNOWN_READ_FAILURE;
-const int q_Memcached$$RES_PROTOCOL_ERROR
+const int64 q_Memcached$$RES_PROTOCOL_ERROR
           = MEMCACHED_PROTOCOL_ERROR;
-const int q_Memcached$$RES_CLIENT_ERROR
+const int64 q_Memcached$$RES_CLIENT_ERROR
           = MEMCACHED_CLIENT_ERROR;
-const int q_Memcached$$RES_SERVER_ERROR
+const int64 q_Memcached$$RES_SERVER_ERROR
           = MEMCACHED_SERVER_ERROR;
-const int q_Memcached$$RES_WRITE_FAILURE
+const int64 q_Memcached$$RES_WRITE_FAILURE
           = MEMCACHED_WRITE_FAILURE;
-const int q_Memcached$$RES_DATA_EXISTS
+const int64 q_Memcached$$RES_DATA_EXISTS
           = MEMCACHED_DATA_EXISTS;
-const int q_Memcached$$RES_NOTSTORED
+const int64 q_Memcached$$RES_NOTSTORED
           = MEMCACHED_NOTSTORED;
-const int q_Memcached$$RES_NOTFOUND
+const int64 q_Memcached$$RES_NOTFOUND
           = MEMCACHED_NOTFOUND;
-const int q_Memcached$$RES_PARTIAL_READ
+const int64 q_Memcached$$RES_PARTIAL_READ
           = MEMCACHED_PARTIAL_READ;
-const int q_Memcached$$RES_SOME_ERRORS
+const int64 q_Memcached$$RES_SOME_ERRORS
           = MEMCACHED_SOME_ERRORS;
-const int q_Memcached$$RES_NO_SERVERS
+const int64 q_Memcached$$RES_NO_SERVERS
           = MEMCACHED_NO_SERVERS;
-const int q_Memcached$$RES_END
+const int64 q_Memcached$$RES_END
           = MEMCACHED_END;
-const int q_Memcached$$RES_ERRNO
+const int64 q_Memcached$$RES_ERRNO
           = MEMCACHED_ERRNO;
-const int q_Memcached$$RES_BUFFERED
+const int64 q_Memcached$$RES_BUFFERED
           = MEMCACHED_BUFFERED;
-const int q_Memcached$$RES_TIMEOUT
+const int64 q_Memcached$$RES_TIMEOUT
           = MEMCACHED_TIMEOUT;
-const int q_Memcached$$RES_BAD_KEY_PROVIDED
+const int64 q_Memcached$$RES_BAD_KEY_PROVIDED
           = MEMCACHED_BAD_KEY_PROVIDED;
-const int q_Memcached$$RES_CONNECTION_SOCKET_CREATE_FAILURE
+const int64 q_Memcached$$RES_CONNECTION_SOCKET_CREATE_FAILURE
           = MEMCACHED_CONNECTION_SOCKET_CREATE_FAILURE;
 
 // Our result codes
-const int q_Memcached$$RES_PAYLOAD_FAILURE = -1001;
+const int64 q_Memcached$$RES_PAYLOAD_FAILURE = -1001;
 
 // Serializer types
-const int q_Memcached$$SERIALIZER_PHP      = 1;
-const int q_Memcached$$SERIALIZER_IGBINARY = 2;
-const int q_Memcached$$SERIALIZER_JSON     = 3;
+const int64 q_Memcached$$SERIALIZER_PHP      = 1;
+const int64 q_Memcached$$SERIALIZER_IGBINARY = 2;
+const int64 q_Memcached$$SERIALIZER_JSON     = 3;
 
 // Flags
-const int q_Memcached$$GET_PRESERVE_ORDER = 1;
+const int64 q_Memcached$$GET_PRESERVE_ORDER = 1;
 
 
 namespace {

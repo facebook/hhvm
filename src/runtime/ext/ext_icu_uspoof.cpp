@@ -22,16 +22,16 @@ namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(icu_uspoof);
 ///////////////////////////////////////////////////////////////////////////////
 
-const int q_SpoofChecker$$SINGLE_SCRIPT_CONFUSABLE =
+const int64 q_SpoofChecker$$SINGLE_SCRIPT_CONFUSABLE =
   USPOOF_SINGLE_SCRIPT_CONFUSABLE;
-const int q_SpoofChecker$$MIXED_SCRIPT_CONFUSABLE =
+const int64 q_SpoofChecker$$MIXED_SCRIPT_CONFUSABLE =
   USPOOF_MIXED_SCRIPT_CONFUSABLE;
-const int q_SpoofChecker$$WHOLE_SCRIPT_CONFUSABLE =
+const int64 q_SpoofChecker$$WHOLE_SCRIPT_CONFUSABLE =
   USPOOF_WHOLE_SCRIPT_CONFUSABLE;
-const int q_SpoofChecker$$ANY_CASE = USPOOF_ANY_CASE;
-const int q_SpoofChecker$$SINGLE_SCRIPT = USPOOF_SINGLE_SCRIPT;
-const int q_SpoofChecker$$INVISIBLE = USPOOF_INVISIBLE;
-const int q_SpoofChecker$$CHAR_LIMIT = USPOOF_CHAR_LIMIT;
+const int64 q_SpoofChecker$$ANY_CASE = USPOOF_ANY_CASE;
+const int64 q_SpoofChecker$$SINGLE_SCRIPT = USPOOF_SINGLE_SCRIPT;
+const int64 q_SpoofChecker$$INVISIBLE = USPOOF_INVISIBLE;
+const int64 q_SpoofChecker$$CHAR_LIMIT = USPOOF_CHAR_LIMIT;
 
 ///////////////////////////////////////////////////////////////////////////////
 c_SpoofChecker::c_SpoofChecker(const ObjectStaticCallbacks *cb) :

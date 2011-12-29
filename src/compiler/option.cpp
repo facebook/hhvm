@@ -74,11 +74,7 @@ set<string> Option::VolatileClasses;
 
 map<string, string> Option::FunctionSections;
 
-#if defined(HPHP_OSS)
-string Option::IdPrefix = "___";
-#else
 string Option::IdPrefix = "$$";
-#endif
 
 string Option::LambdaPrefix = "df_";
 string Option::Tab = "  ";

@@ -84,8 +84,6 @@ typedef hphp_hash_map<StringData *, PCREStringList::iterator,
 
 class PCRECache {
 public:
-  PCRECache() : m_entries(0) {}
-
   void cleanup() {
     TAINT_OBSERVER_CAP_STACK();
     for (PCREStringMap::iterator it = m_cache.begin(); it != m_cache.end();
@@ -108,7 +106,7 @@ public:
     PCREStringMap::iterator it = m_cache.find(regex.get());
     if (it != m_cache.end()){
       pcre_cache_entry *ret = it->second->second;
-      m_cachelist.push_front(PCREStringEntry(*(it->second)));
+      m_cachelist.push_front(*(it->second));
       m_cachelist.erase(it->second);
       it->second = m_cachelist.begin();
       return ret;
@@ -126,16 +124,14 @@ public:
       StringData* regex_string = regex->copy(true);
       m_cachelist.push_front(std::make_pair(regex_string, pce));
       m_cache[regex_string] = m_cachelist.begin();
-      ++m_entries;
 
-      if (m_entries > RuntimeOption::PregCacheLimit) {
+      if (m_cachelist.size() > RuntimeOption::PregCacheLimit) {
         m_cache.erase(m_cachelist.back().first);
         delete m_cachelist.back().second;
         if (!m_cachelist.back().first->isStatic()) {
           delete m_cachelist.back().first;
         }
         m_cachelist.pop_back();
-        --m_entries;
       }
     }
   }
@@ -146,7 +142,6 @@ public:
 private:
   PCREStringMap m_cache;
   PCREStringList m_cachelist;
-  unsigned int m_entries;
 };
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(PCRECache, s_pcre_cache);
 

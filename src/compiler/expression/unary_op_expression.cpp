@@ -481,7 +481,7 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     case '-':
       if (Type::SameType(expType, Type::Int64) ||
           Type::SameType(expType, Type::Double)) {
-        rt = expType;
+        rt = m_exp->inferAndCheck(ar, expType, true);;
       }
       break;
     case T_INC:

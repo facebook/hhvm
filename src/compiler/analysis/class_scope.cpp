@@ -112,7 +112,7 @@ std::string ClassScope::getDocName() const {
   if (m_redeclaring < 0) {
     return name;
   }
-  return name + Option::IdPrefix +
+  return name + Option::ScopeIdPrefix +
     boost::lexical_cast<std::string>(m_redeclaring);
 }
 
@@ -121,7 +121,7 @@ std::string ClassScope::getId() const {
   if (m_redeclaring < 0) {
     return name;
   }
-  return name + Option::IdPrefix +
+  return name + Option::ScopeIdPrefix +
     boost::lexical_cast<std::string>(m_redeclaring);
 }
 

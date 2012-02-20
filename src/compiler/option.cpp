@@ -76,9 +76,11 @@ map<string, string> Option::FunctionSections;
 
 #if defined(HPHP_OSS)
 string Option::IdPrefix = "___";
+string Option::ScopeIdPrefix = "___";
 string Option::LabelEscape = "___";
 #else
 string Option::IdPrefix = "$$";
+string Option::ScopeIdPrefix = "$$";
 string Option::LabelEscape = "$";
 #endif
 
@@ -304,6 +306,7 @@ void Option::Load(Hdf &config) {
     }
 
     READ_CG_OPTION(IdPrefix);
+    READ_CG_OPTION(ScopeIdPrefix);
     READ_CG_OPTION(LabelEscape);
     READ_CG_OPTION(LambdaPrefix);
     READ_CG_OPTION(FunctionPrefix);
@@ -516,7 +519,12 @@ std::string Option::MangleFilename(const std::string &name, bool id) {
   ret += name;
 
   if (id) {
+#if defined(HPHP_OSS)
+    Util::replaceAll(ret, "/", "_");
+    Util::replaceAll(ret, "$", "_");
+#else
     Util::replaceAll(ret, "/", "$");
+#endif
     Util::replaceAll(ret, "-", "_");
     Util::replaceAll(ret, ".", "_");
   }

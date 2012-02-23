@@ -118,7 +118,7 @@ void DebuggerProxy::switchThreadMode(ThreadMode mode,
     m_thread = 0;
     notify();
   } else {
-    m_thread = Process::GetThreadId();
+    m_thread = (int64)Process::GetThreadId();
   }
   if (mode == Normal) {
     m_jump.reset();
@@ -576,7 +576,7 @@ const char *DebuggerProxy::getThreadType() const {
 
 DThreadInfoPtr DebuggerProxy::createThreadInfo(const std::string &desc) {
   DThreadInfoPtr info(new DThreadInfo());
-  info->m_id = Process::GetThreadId();
+  info->m_id = (int64)Process::GetThreadId();
   info->m_desc = desc;
   Transport *transport = g_context->getTransport();
   if (transport) {

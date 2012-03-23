@@ -400,16 +400,13 @@ public:
       for (int factor = 3; !done && factor <= 16; ++factor) {
         bufferSize = len * (1 << factor) + 1;
         buffer.resize(bufferSize);
-        fprintf(stdout, "buffer size = %ld\n", bufferSize);
         if (uncompress((Bytef *)buffer.data(), &bufferSize, (const Bytef *)val, len) == Z_OK) {
-          fprintf(stdout, "uncompressing ok\n");
           done = true;
         }
         if (!done) {
           raise_warning("Session data uncompress failed.\n");
         }
 
-        fprintf(stdout, "returning data size %d\n", buffer.size());
         value = String(buffer.data(), bufferSize, CopyString);
 	free(val);
       } 
@@ -425,10 +422,8 @@ public:
     if (value.size() > 100) {
       size_t outLen = compressBound(value.size());
       char *out = (char *)malloc(outLen);
-      fprintf(stdout, "with compression, buffer size: %zd\n", outLen);
       if (out != NULL && compress2((Bytef *)out, &outLen, (const Bytef *)value.data(), value.size(), 6) == Z_OK) {
         flags |= 2;
-        fprintf(stdout, "done, with compression\n");
         m_rc = memcached_set(m_mem, key, strlen(key), out, outLen, m_timeout, flags);
         if (m_rc != MEMCACHED_SUCCESS)
           raise_warning("Error: %s", memcached_strerror(m_mem, m_rc));
@@ -442,7 +437,6 @@ public:
       }
     }
     else {
-      fprintf(stdout, "save without compression\n");
       m_rc = memcached_set(m_mem, key, strlen(key), value.data(), value.size(), m_timeout, flags);
       if (m_rc != MEMCACHED_SUCCESS)
         raise_warning("Error: %s", memcached_strerror(m_mem, m_rc));

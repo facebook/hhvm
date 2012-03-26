@@ -156,13 +156,13 @@ LibEventServer::LibEventServer(const std::string &address, int port,
     m_timeoutThread(&m_timeoutThreadData, &TimeoutThread::run),
     m_dispatcher(thread, RuntimeOption::ServerThreadRoundRobin,
                  RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
-                 RuntimeOption::ServerThreadDropStack,
+		 RuntimeOption::ServerThreadDropStack,
                  this, RuntimeOption::ServerThreadJobLIFO),
     m_dispatcherThread(this, &LibEventServer::dispatch) {
   m_eventBase = event_base_new();
   m_server = evhttp_new(m_eventBase);
   m_server_ssl = NULL;
-  evhttp_set_connection_limit(m_server, RuntimeOption::ServerConnectionLimit);
+  //TODO:  evhttp_set_connection_limit(m_server, RuntimeOption::ServerConnectionLimit);
   evhttp_set_gencb(m_server, on_request, this);
 #ifdef EVHTTP_PORTABLE_READ_LIMITING
   evhttp_set_read_limit(m_server, RuntimeOption::RequestBodyReadLimit);
@@ -187,8 +187,8 @@ LibEventServer::~LibEventServer() {
 int LibEventServer::getAcceptSocket() {
   int ret;
   const char *address = m_address.empty() ? NULL : m_address.c_str();
-  ret = evhttp_bind_socket_backlog_fd(m_server, address,
-                                      m_port, RuntimeOption::ServerBacklog);
+  //  ret = evhttp_bind_socket_backlog_fd(m_server, address,                              m_port, RuntimeOption::ServerBacklog);
+  ret = -1;
   if (ret < 0) {
     Logger::Error("Fail to bind port %d", m_port);
     return -1;
@@ -311,8 +311,8 @@ bool LibEventServer::enableSSL(void *sslCTX, int port) {
 
 int LibEventServer::getAcceptSocketSSL() {
   const char *address = m_address.empty() ? NULL : m_address.c_str();
-  int ret = evhttp_bind_socket_backlog_fd(m_server_ssl, address,
-      m_port_ssl, RuntimeOption::ServerBacklog);
+  int ret = -1;
+  //evhttp_bind_socket_backlog_fd(m_server_ssl, address,      m_port_ssl, RuntimeOption::ServerBacklog);
   if (ret < 0) {
     Logger::Error("Failed to bind port %d for SSL", m_port_ssl);
     return -1;
@@ -362,7 +362,8 @@ void LibEventServer::onResponse(int worker, evhttp_request *request,
 #ifdef EVHTTP_SYNC_SEND_REPORT_TOTAL_LEN
     nwritten = evhttp_send_reply_sync(request, code, reason, NULL, &totalSize);
 #else
-    nwritten = evhttp_send_reply_sync_begin(request, code, reason, NULL);
+    //    nwritten = evhttp_send_reply_sync_begin(request, code, reason, NULL);
+    nwritten = 0;//evhttp_send_reply_sync_begin(request, code, reason, NULL);
 #endif
     gettime(CLOCK_MONOTONIC, &end);
     int64 delay = gettime_diff_us(begin, end);
@@ -492,10 +493,11 @@ void PendingResponseQueue::process() {
         }
         evhttp_send_reply_chunk(request, res.chunk);
       } else {
-        evhttp_send_reply_end(request);
+	//        evhttp_send_reply_end(request);
+	//      TODO:HACK
       }
     } else if (RuntimeOption::LibEventSyncSend && !skip_sync) {
-      evhttp_send_reply_sync_end(res.nwritten, request);
+      //evhttp_send_reply_sync_end(res.nwritten, request);
     } else {
       const char *reason = HttpProtocol::GetReasonString(code);
       evhttp_send_reply(request, code, reason, NULL);

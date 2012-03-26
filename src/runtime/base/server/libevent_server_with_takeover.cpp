@@ -101,7 +101,8 @@ int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
     // shutdown request so that we can still serve AFDT requests (if the new
     // server crashes or something).  The downside is that it will take the LB
     // longer to figure out that we are broken.
-    ret = evhttp_del_accept_socket(m_server, m_accept_sock);
+    //    ret = evhttp_del_accept_socket(m_server, m_accept_sock);
+    ret = -1;
     if (ret < 0) {
       // This will fail if we get a second AFDT request, but the spurious
       // log message is not too harmful.
@@ -125,7 +126,8 @@ int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
     // Close SSL server
     if (m_server_ssl) {
       ASSERT(m_accept_sock_ssl > 0);
-      ret = evhttp_del_accept_socket(m_server_ssl, m_accept_sock_ssl);
+      //      ret = evhttp_del_accept_socket(m_server_ssl, m_accept_sock_ssl);
+      ret = -1;
       if (ret < 0) {
         Logger::Error("Unable to delete accept socket for SSL in evhttp");
         return -1;
@@ -195,8 +197,7 @@ int LibEventServerWithTakeover::getAcceptSocket() {
     m_accept_sock = -1;
   }
 
-  ret = evhttp_bind_socket_backlog_fd(m_server, address,
-                                   m_port, RuntimeOption::ServerBacklog);
+  ret = -1; // evhttp_bind_socket_backlog_fd(m_server, address,                                   m_port, RuntimeOption::ServerBacklog);
   if (ret >= 0) {
     Logger::Info("takeover: bound directly to port %d", m_port);
     m_accept_sock = ret;

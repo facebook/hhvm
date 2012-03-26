@@ -62,7 +62,7 @@ if (NOT HAVE_CUSTOM_LIBEVENT)
 	unset(LIBEVENT_INCLUDE_DIR CACHE)
 	unset(LIBEVENT_LIB CACHE)
 	unset(LibEvent_FOUND CACHE)
-	message(FATAL_ERROR "Custom libevent is required with HipHop patches")
+#	message(FATAL_ERROR "Custom libevent is required with HipHop patches")
 endif ()
 set(CMAKE_REQUIRED_LIBRARIES)
 
@@ -81,14 +81,6 @@ find_package(CURL REQUIRED)
 include_directories(${CURL_INCLUDE_DIR})
 
 set(CMAKE_REQUIRED_LIBRARIES "${CURL_LIBRARIES}")
-CHECK_FUNCTION_EXISTS("curl_multi_select" HAVE_CUSTOM_CURL)
-if (NOT HAVE_CUSTOM_CURL)
-	unset(HAVE_CUSTOM_CURL CACHE)
-	unset(CURL_INCLUDE_DIR CACHE)
-	unset(CURL_LIBRARIES CACHE)
-	unset(CURL_FOUND CACHE)
-        message(FATAL_ERROR "Custom libcurl is required with the HipHop patch")
-endif ()
 set(CMAKE_REQUIRED_LIBRARIES)
 
 # LibXML2 checks

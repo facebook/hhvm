@@ -1,7 +1,7 @@
 include(Options)
 
 if(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE "Release")
+	set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
 IF(NOT DEFINED CMAKE_PREFIX_PATH)
@@ -45,11 +45,11 @@ endif()
 include(HPHPFunctions)
 include(HPHPFindLibs)
 
-add_definitions(-D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1)
+add_definitions(-D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1 -g -O0)
 
-if(${CMAKE_BUILD_TYPE} MATCHES "Release")
-	add_definitions(-DRELEASE=1)
-endif()
+#if(${CMAKE_BUILD_TYPE} MATCHES "Release")
+	add_definitions(-DRELEASE=0)
+#endif()
 
 if(INFINITE_LOOP_DETECTION)
 	add_definitions(-DINFINITE_LOOP_DETECTION=1)

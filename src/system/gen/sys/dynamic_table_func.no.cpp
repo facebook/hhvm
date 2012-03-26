@@ -18558,7 +18558,9 @@ Variant ifa_curl_multi_select(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS)
 	return Variant();
 }
 Variant i_curl_multi_select(void *extra, CArrRef params) {
-  return invoke_func_few_handler(extra, params, &ifa_curl_multi_select);
+  //  return invoke_func_few_handler(extra, params, &ifa_curl_multi_select);
+  Variant ret;
+  return ret;
 }
 Variant ifa_mysql_info(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count > 1)) return throw_toomany_arguments("mysql_info", 1, 1);
@@ -25679,12 +25681,7 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1493:
-      HASH_GUARD(0x43901543EA8625D5LL, curl_multi_select) {
-        ci = &ci_curl_multi_select;
-        return true;
-      }
-      break;
+
     case 1494:
       HASH_GUARD(0x6D265875A19685D6LL, is_float) {
         ci = &ci_is_float;

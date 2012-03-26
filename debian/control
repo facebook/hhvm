@@ -1,14 +1,14 @@
 Source: hiphop-php
 Section: unknown
 Priority: extra
-Maintainer: James Michael DuPont <JamesMikeDuPont@googlemail.com>
-Build-Depends: debhelper (>= 7), cmake, libtbb-dev, libmcrypt-dev, re2c, binutils-dev, libonig-dev, libmysqlclient15-dev, libgd-dev
+Maintainer: James Michael DuPont <JamesMikeDuPont@googlemail.com> Build-Depends: debhelper (>= 7), cmake, libtbb-dev, libmcrypt-dev, re2c, binutils-dev, libonig-dev, libmysqlclient15-dev, libgd-dev, build-essential, git, debhelper, libtbb-dev, libmcrypt-dev, re2c, binutils-dev, libonig-dev, libmysqlclient15-dev, libgd2-xpm-dev, libmemcached-dev, libboost-all-dev, libpcre3-dev, libevent-dev, libboost-all-dev, libxml2-dev, libbz2-dev, libncurses-dev, libreadline-dev, libc-client2007e-dev, libcap-dev, autoconf, automake, autotools-dev, bison, curl, flex, libapr1, libaprutil1, libaprutil1-dbd-sqlite3, libaprutil1-ldap, libcurl4-openssl-dev, libltdl-dev, libltdl7, libmhash2, libqdbm14, libssh2-1-dev, libtool, m4, mcrypt, php5-cli, php5-common, php5-dev, php5-suhosin, shtool, ssl-cert 
 Standards-Version: 3.8.1
 Homepage: http://github.com/h4ck3rm1k3/hiphop-php
 
+
 Package: hiphop-php
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends},  libtbb2, libmcrypt4, mcrypt, libonig2, bison, cmake, curl, flex, libcurl3, libgnutls-dev, libevent-1.4-2,  libevent-dev, php5-dev, libpcre3-dev
+Depends: ${shlibs:Depends}, ${misc:Depends}, libtbb2, libmcrypt4, mcrypt, libonig2, bison, cmake, curl, flex, libcurl3, libgnutls-dev, libevent-1.4-2, libevent-dev, php5-dev, libpcre3-dev
 Description: the php to c++ compiler
  experimental debian packaging
 

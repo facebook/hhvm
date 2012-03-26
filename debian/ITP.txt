@@ -1,0 +1,17 @@
+Package: wnpp
+  Severity: wishlist
+  Owner: James Mike DuPont <jamesmikedupont@googlemail.com>
+ 
+  * Package name    : hiphop-php
+  Version         : http://github.com/h4ck3rm1k3/hiphop-php latest
+  Upstream Author : facebook http://github.com/facebook/hiphop-php
+  * URL             :  http://github.com/facebook/hiphop-php
+  * License         : mixed licenses  The PHP License, version 3.01/
+ The Zend Engine License, version 2.00
+  Programming Lang: c/c++
+  Description     :
+ HipHop is a source code transformer which transforms PHP source code
+ into highly optimized C++ and then compiles it using g++.
+ 
+ First packaging here:
+ http://github.com/h4ck3rm1k3/hiphop-php

@@ -1,0 +1,11 @@
+Package: hiphop-php-doc
+Source: hiphop-php
+Version: 0.1-1
+Architecture: all
+Maintainer: James Michael DuPont <JamesMikeDuPont@googlemail.com>
+Installed-Size: 32
+Section: unknown
+Priority: extra
+Homepage: http://github.com/h4ck3rm1k3/hiphop-php
+Description: documentation for hiphop-php
+  experimental debian packaging

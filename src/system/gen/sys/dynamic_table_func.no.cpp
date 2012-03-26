@@ -18548,11 +18548,14 @@ Variant i_asin(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_asin);
 }
 Variant ifa_curl_multi_select(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+/*
   if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("curl_multi_select", count, 1, 2, 1);
   CVarRef arg0(a0);
   if (count <= 1) return (x_curl_multi_select(arg0));
   CVarRef arg1(a1);
   return (x_curl_multi_select(arg0, arg1));
+*/
+	return Variant();
 }
 Variant i_curl_multi_select(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_curl_multi_select);

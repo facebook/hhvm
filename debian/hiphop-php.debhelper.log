@@ -4,3 +4,5 @@ dh_prep
 dh_installdirs
 dh_prep
 dh_installdirs
+dh_prep
+dh_installdirs

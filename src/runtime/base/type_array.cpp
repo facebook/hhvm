@@ -770,9 +770,9 @@ Variant Array::key(CVarRef search_value, bool strict /* = false */) const {
   return false; // PHP uses "false" over null in many places
 }
 
-Array Array::keys(CVarRef search_value /* = null_variant */,
+Array Array::keys(CVarRef search_value /* = not_given_variant */,
                   bool strict /* = false */) const {
-  if (search_value.isNull()) {
+  if (&search_value == &not_given_variant) {
     ArrayInit ai(size());
     for (ArrayIter iter(*this); iter; ++iter) {
       ai.set(iter.first());

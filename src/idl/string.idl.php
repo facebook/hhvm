@@ -297,6 +297,29 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "lcfirst",
+    'desc'   => "Returns a string with the first character of str lowercased, if that character is alphabetic.\n\nNote that 'alphabetic' is determined by the current locale. For instance,
+ in the default \"C\" locale characters such as umlaut-a (ä) will not be converted.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => String,
+      'desc'   => "Returns the resulting string.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "str",
+        'type'   => String,
+        'desc'   => "The input string.",
+      ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "strtoupper",
     'desc'   => "Returns string with all alphabetic characters converted to uppercase.\n\nNote that 'alphabetic' is determined by the current locale. For instance, in the default \"C\" locale characters such as umlaut-a (ä) will not be converted.",
     'flags'  =>  HasDocComment,

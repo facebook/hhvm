@@ -50,7 +50,7 @@ public:
   ServerPtr getPageServer() { return m_pageServer;}
 
 private:
-  bool m_stopped;
+  bool m_stopped, m_pidFileRemoved;
   void *m_sslCTX;
 
   ServerPtr m_pageServer;

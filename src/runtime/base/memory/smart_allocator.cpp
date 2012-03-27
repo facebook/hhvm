@@ -34,6 +34,10 @@ std::set<AllocatorThreadLocalInit>& GetAllocatorInitList() {
   return allocatorInitList;
 }
 
+void AddAllocatorThreadLocalInit(AllocatorThreadLocalInit init) {
+  GetAllocatorInitList().insert(init);
+}
+
 void InitAllocatorThreadLocal() {
   for (std::set<AllocatorThreadLocalInit>::iterator it =
       GetAllocatorInitList().begin();

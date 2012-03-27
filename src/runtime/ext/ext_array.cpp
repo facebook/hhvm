@@ -164,7 +164,7 @@ bool f_array_key_exists(CVarRef key, CVarRef search) {
   return false;
 }
 
-Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
+Variant f_array_keys(CVarRef input, CVarRef search_value /* = not_given_variant */,
                      bool strict /* = false */) {
   getCheckedArray(input);
   return arr_input.keys(search_value, strict);

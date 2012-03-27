@@ -522,8 +522,8 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
     return NULL;
   }
   char *q = ret;
-  for (const char *p = input; *p; p++) {
-    char c = *p;
+  for (int i = 0; i < len; i++) {
+    char c = input[i];
     switch (c) {
     case '"':
       if (encode_double_quote) {
@@ -549,9 +549,9 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
       *q++ = '&'; *q++ = 'a'; *q++ = 'm'; *q++ = 'p'; *q++ = ';';
       break;
     case '\xc2':
-      if (nbsp && utf8 && *(p+1) == '\xa0') {
+      if (nbsp && utf8 && (i+1 < len) && input[i+1] == '\xa0') {
         *q++ = '&'; *q++ = 'n'; *q++ = 'b'; *q++ = 's'; *q++ = 'p'; *q++ = ';';
-        p++;
+        i++;
       } else {
         *q++ = c;
       }

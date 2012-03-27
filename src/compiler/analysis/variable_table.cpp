@@ -215,7 +215,7 @@ const char *VariableTable::getVariablePrefix(const Symbol *sym) const {
     }
   }
 
-  if (sym->isHidden() && !sym->isParameter()) {
+  if (sym && sym->isHidden() && !sym->isParameter()) {
     return Option::HiddenVariablePrefix;
   }
 

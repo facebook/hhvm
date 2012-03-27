@@ -354,6 +354,9 @@ public:
   void addPregeneratedCPP(const std::string &name, std::string &code);
   const std::string &getPregeneratedCPP(const std::string &name);
 
+  void savePregeneratedClasses(const std::string &name, const StringToClassScopePtrVecMap &classScopes);
+  void loadPregeneratedClasses(const std::string &name, CodeGenerator &cg);
+
   std::set<std::string> m_variableTableFunctions;
   std::set<int> m_concatLengths;
   int m_arrayLitstrKeyMaxSize;
@@ -478,6 +481,10 @@ private:
   typedef std::map<std::string, std::string> StringMap;
   Mutex m_pregenMapMutex;
   StringMap m_pregenMap;
+
+  typedef std::map<std::string, StringToClassScopePtrVecMap> StringToClassesMap;
+  Mutex m_pregenClassesMapMutex;
+  StringToClassesMap m_pregenClassesMap;
 
   typedef std::map<int, LocationPtr> SourceLocationMap;
   typedef std::map<std::string, SourceLocationMap> SourceInfo;

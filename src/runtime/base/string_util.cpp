@@ -28,10 +28,22 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // manipulations
 
-String StringUtil::ToLower(CStrRef input) {
+String StringUtil::ToLower(CStrRef input, ToLowerType type /*= ToLowerAll */) {
   if (input.empty()) return input;
+
   int len = input.size();
-  char *ret = string_to_lower(input.data(), len);
+  char *ret = NULL;
+  switch (type) {
+  case ToLowerAll:
+    ret = string_to_lower(input.data(), len);
+    break;
+  case ToLowerFirst:
+    ret = string_to_lower_first(input.data(), len);
+    break;
+  default:
+    ASSERT(false);
+    break;
+  }
   return String(ret, len, AttachString);
 }
 
@@ -333,7 +345,7 @@ String StringUtil::HtmlEncode(CStrRef input, QuoteStyle quoteStyle,
   }
 
   int len = input.size();
-  char *ret = string_html_encode(input, len, quoteStyle != NoQuotes,
+  char *ret = string_html_encode(input.data(), len, quoteStyle != NoQuotes,
                                  quoteStyle == BothQuotes, utf8, nbsp);
   if (!ret) {
     raise_error("HtmlEncode called on too large input (%d)", len);

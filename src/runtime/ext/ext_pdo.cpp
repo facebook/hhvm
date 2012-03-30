@@ -988,9 +988,11 @@ void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
 
         /* is the connection still alive ? */
         if (m_dbh->support(PDOConnection::MethodCheckLiveness) &&
-            !m_dbh->checkLiveness()) {
+             !m_dbh->checkLiveness()) {
+          /* erase before!!! */
+          s_pdo_request_data->m_persistent_connections.erase(m_dbh.get());
           /* nope... need to kill it */
-          m_dbh = NULL;
+          m_dbh = NULL;     
         }
       }
 

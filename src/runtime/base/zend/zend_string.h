@@ -144,6 +144,7 @@ int string_natural_cmp(char const *a, size_t a_len,
  * Changing string's cases. Return's length is always the same as "len".
  */
 char *string_to_lower(const char *s, int len);
+char *string_to_lower_first(const char *s, int len);
 char *string_to_upper(const char *s, int len);
 char *string_to_upper_first(const char *s, int len);
 char *string_to_upper_words(const char *s, int len);

@@ -1024,14 +1024,7 @@ Variant f_curl_multi_exec(CObjRef mh, VRefParam still_running) {
   return result;
 }
 
-Variant f_curl_multi_select(CObjRef mh, double timeout /* = 1.0 */) {
-  CHECK_MULTI_RESOURCE(curlm);
-  int ret;
-  unsigned long timeout_ms = (unsigned long)(timeout * 1000.0);
-  IOStatusHelper io("curl_multi_select");
-  curl_multi_select(curlm->get(), timeout_ms, &ret);
-  return ret;
-}
+
 
 Variant f_curl_multi_getcontent(CObjRef ch) {
   CHECK_RESOURCE(curl);

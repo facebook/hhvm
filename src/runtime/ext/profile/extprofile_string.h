@@ -91,6 +91,12 @@ inline String x_strtolower(CStrRef str) {
   return f_strtolower(str);
 }
 
+inline String x_lcfirst(CStrRef str) {
+  FUNCTION_INJECTION_BUILTIN(lcfirst);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  return f_lcfirst(str);
+}
+
 inline String x_strtoupper(CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(strtoupper);
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);

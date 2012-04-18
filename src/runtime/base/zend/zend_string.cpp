@@ -345,6 +345,15 @@ char *string_to_lower(const char *s, int len) {
   return ret;
 }
 
+char *string_to_lower_first(const char *s, int len) {
+  ASSERT(s);
+  char *ret = string_duplicate(s, len);
+  if (*ret) {
+    *ret = tolower(*ret);
+  }
+  return ret;
+}
+
 char *string_to_upper(const char *s, int len) {
   ASSERT(s);
   char *ret = (char *)malloc(len + 1);

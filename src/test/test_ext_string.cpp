@@ -33,6 +33,7 @@ bool TestExtString::RunTests(const std::string &which) {
   RUN_TEST(test_str_shuffle);
   RUN_TEST(test_strrev);
   RUN_TEST(test_strtolower);
+  RUN_TEST(test_lcfirst);
   RUN_TEST(test_strtoupper);
   RUN_TEST(test_ucfirst);
   RUN_TEST(test_ucwords);
@@ -173,6 +174,11 @@ bool TestExtString::test_strrev() {
 
 bool TestExtString::test_strtolower() {
   VS(f_strtolower("ABC"), "abc");
+  return Count(true);
+}
+
+bool TestExtString::test_lcfirst() {
+  VS(f_lcfirst("ABC"), "aBC");
   return Count(true);
 }
 
@@ -476,6 +482,7 @@ bool TestExtString::test_htmlentities() {
   VS(f_htmlentities("\xA0", k_ENT_COMPAT), "&nbsp;");
   VS(f_htmlentities("\xc2\xA0", k_ENT_COMPAT, ""), "&nbsp;");
   VS(f_htmlentities("\xc2\xA0", k_ENT_COMPAT, "UTF-8"), "&nbsp;");
+  VS(f_htmlentities(String("a\x00b", 3, AttachLiteral), k_ENT_COMPAT), String("a\x00b", 3, AttachLiteral));
 
   return Count(true);
 }
@@ -499,6 +506,7 @@ bool TestExtString::test_htmlspecialchars() {
   VS(f_bin2hex(f_htmlspecialchars("\xA0", k_ENT_COMPAT)), "a0");
   VS(f_bin2hex(f_htmlspecialchars("\xc2\xA0", k_ENT_COMPAT, "")), "c2a0");
   VS(f_bin2hex(f_htmlspecialchars("\xc2\xA0", k_ENT_COMPAT, "UTF-8")), "c2a0");
+  VS(f_htmlspecialchars(String("a\x00b", 3, AttachLiteral), k_ENT_COMPAT), String("a\x00b", 3, AttachLiteral));
 
   return Count(true);
 }

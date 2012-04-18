@@ -1,0 +1,231 @@
+hiphop-php for Debian
+---------------------
+
+This is the start of the packaging
+
+test with :
+dpkg-buildpackage   -b
+
+
+ -- James Michael DuPont <JamesMikeDuPont@googlemail.com>  Sat, 20 Feb 2010 11:27:49 +0100
+
+
+#1 First Bug :
+cd /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src && /media/NewFoundSpace/usr/local/bin/c++   -D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1 -fPIC -fno-omit-frame-pointer -ftemplate-depth-60 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings  -I/usr/local/include -I/usr/include/mysql -I/usr/include/libxml2 -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libsqlite3 -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/timelib -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/xhp/xhp -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libafdt/src -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libmbfl -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libmbfl/mbfl -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libmbfl/filter -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/lib/system/gen   -o CMakeFiles/hphp_runtime_static.dir/cpp/base/string_offset.cpp.o -c /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/string_offset.cpp
+In file included from /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/zend/zend_string.h:22:0,
+                 from /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/type_string.h:24,
+                 from /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/string_offset.cpp:18:
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/type_variant.h:95:3: error: ‘HPHP::Variant::Variant(ssize_t)’ cannot be overloaded
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/type_variant.h:92:3: error: with ‘HPHP::Variant::Variant(int)’
+
+Problem:
+	int is the same as ssize_t
+
+Fix :
+    remove the definition.
+
+
+bug #2
+
+cd /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src && /media/NewFoundSpace/usr/local/bin/c++   -D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1 -fPIC -fno-omit-frame-pointer -ftemplate-depth-60 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings  -I/usr/local/include -I/usr/include/mysql -I/usr/include/libxml2 -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libsqlite3 -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/timelib -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/xhp/xhp -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libafdt/src -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libmbfl -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libmbfl/mbfl -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libmbfl/filter -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/lib/system/gen   -o CMakeFiles/hphp_runtime_static.dir/cpp/base/program_functions.cpp.o -c /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/program_functions.cpp
+In file included from /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/server/transport.h:23:0,
+                 from /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/execution_context.h:20,
+                 from /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/builtin_functions.h:20,
+                 from /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/program_functions.cpp:18:
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/type_array.h:314:11: error: ‘HPHP::Variant HPHP::Array::rvalAt(ssize_t, HPHP::int64) const’ cannot be overloaded
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/type_array.h:306:11: error: with ‘HPHP::Variant HPHP::Array::rvalAt(int, HPHP::int64) const’
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/type_array.h:337:17: error: ‘const HPHP::Variant HPHP::Array::operator[](ssize_t) const’ cannot be overloaded
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/type_array.h:335:17: error: with ‘const HPHP::Variant HPHP::Array::operator[](int) const’
+In file included from /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/program_functions.cpp:18:0:
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/builtin_functions.h: In function ‘ssize_t HPHP::id(ssize_t)’:
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/builtin_functions.h:569:16: error: redefinition of ‘ssize_t HPHP::id(ssize_t)’
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/builtin_functions.h:566:16: error: ‘int HPHP::id(int)’ previously defined here
+make[3]: *** [src/CMakeFiles/hphp_runtime_static.dir/cpp/base/program_functions.cpp.o] Error 1
+
+Solution : 
+use the ifndef ssize_t_NOT_INT
+
+Changed ssize_t to "long int"
+I think we should make some definitions for ssize_t. 
+
+ bug #3
+
+p_runtime_static.dir/cpp/base/server/libevent_transport.cpp.o -c /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/server/libevent_transport.cpp
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/server/libevent_transport.cpp: In constructor ‘HPHP::LibEventTransport::LibEventTransport(HPHP::LibEventServer*, evhttp_request*, int)’:
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/server/libevent_transport.cpp:69:34: error: ‘struct evhttp_request’ has no member named ‘ext_method’
+
+bug #4 
+cd /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src && /media/NewFoundSpace/usr/local/bin/c++   -D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1 -fPIC -fno-omit-frame-pointer -ftemplate-depth-60 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings  -I/usr/local/include -I/usr/include/mysql -I/usr/include/libxml2 -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libsqlite3 -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/timelib -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/xhp/xhp -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libafdt/src -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libmbfl -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libmbfl/mbfl -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libmbfl/filter -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/lib/system/gen   -o CMakeFiles/hphp_runtime_static.dir/cpp/ext/ext_class.cpp.o -c /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_class.cpp
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_class.cpp: In function ‘bool HPHP::f_class_exists(const HPHP::String&, bool)’:
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_class.cpp:44:9: error: ‘HPHP::ClassInfo::ClassInfo’ names the constructor, not the type
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_class.cpp:46:10: error: ‘info’ was not declared in this scope
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_class.cpp: In function ‘bool HPHP::f_interface_exists(const HPHP::String&, bool)’:
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_class.cpp:50:9: error: ‘HPHP::ClassInfo::ClassInfo’ names the constructor, not the type
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_class.cpp:52:10: error: ‘info’ was not declared in this scope
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_class.cpp:53:1: warning: control reaches end of non-void function
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_class.cpp: In function ‘bool HPHP::f_class_exists(const HPHP::String&, bool)’:
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_class.cpp:47:1: warning: control reaches end of non-void function
+make[3]: *** [src/CMakeFiles/hphp_runtime_static.dir/cpp/ext/ext_class.cpp.o] Error 1
+
+bug #5
+
+[  6%] Building CXX object src/CMakeFiles/hphp_runtime_static.dir/cpp/ext/ext_mb.cpp.o
+cd /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src && /media/NewFoundSpace/usr/local/bin/c++   -D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1 -fPIC -fno-omit-frame-pointer -ftemplate-depth-60 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings  -I/usr/local/include -I/usr/include/mysql -I/usr/include/libxml2 -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libsqlite3 -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/timelib -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/xhp/xhp -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libafdt/src -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libmbfl -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libmbfl/mbfl -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libmbfl/filter -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/lib/system/gen   -o CMakeFiles/hphp_runtime_static.dir/cpp/ext/ext_mb.cpp.o -c /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_mb.cpp
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_mb.cpp:28:31: fatal error: mbfl/mbfl_convert.h: No such file or directory
+compilation terminated.
+
+#6 
+[  9%] Building CXX object src/CMakeFiles/hphp_runtime_static.dir/cpp/ext/ext_icu.cpp.o
+cd /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src && /media/NewFoundSpace/usr/local/bin/c++   -D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1 -fPIC -fno-omit-frame-pointer -ftemplate-depth-60 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings  -I/usr/local/include -I/usr/include/mysql -I/usr/include/libxml2 -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libsqlite3 -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/timelib -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/xhp/xhp -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libafdt/src -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libmbfl -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libmbfl/mbfl -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/third_party/libmbfl/filter -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src -I/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/lib/system/gen   -o CMakeFiles/hphp_runtime_static.dir/cpp/ext/ext_icu.cpp.o -c /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_icu.cpp
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_icu.cpp: In function ‘HPHP::String HPHP::f_icu_transliterate(const HPHP::String&, bool)’:
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_icu.cpp:71:25: error: ‘fromUTF8’ is not a member of ‘icu_4_0::UnicodeString’
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_icu.cpp:81:3: error: ‘CheckedArrayByteSink’ was not declared in this scope
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_icu.cpp:81:24: error: expected ‘;’ before ‘bs’
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_icu.cpp:82:9: error: ‘class icu_4_0::UnicodeString’ has no member named ‘toUTF8’
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/ext/ext_icu.cpp:82:16: error: ‘bs’ was not declared in this scope
+make[3]: *** [src/CMakeFiles/hphp_runtime_static.dir/cpp/ext/ext_icu.cpp.o] Error 1
+
+
+#7 
+Linking CXX executable hphp
+cd /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp && /usr/bin/cmake -E cmake_link_script CMakeFiles/hphp.dir/link.txt --verbose=1
+/media/NewFoundSpace/usr/local/bin/c++   -fPIC -fno-omit-frame-pointer -ftemplate-depth-60 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings   -Wl,-Bsymbolic-functions CMakeFiles/hphp.dir/externals.cpp.o CMakeFiles/hphp.dir/main.cpp.o  -o hphp -rdynamic -ldl ../../../bin/libhphp_analysis.a ../../../bin/libhphp_runtime.a -lboost_system-mt -lboost_program_options-mt -lboost_filesystem-mt -lmysqlclient -lpcre -licuuc -licui18n -lcurl -lcap -lbfd /usr/local/lib/libiberty.a -ldl -lpthread -ltbb -lssl -lcrypto -lz ../../../bin/libtimelib.a -lexpat -lrt -lcrypto -lresolv -lcrypt ../../../bin/libsqlite3.a ../../../bin/libxhp.a ../../../bin/libafdt.a -levent -lmbfl -lxml2 -lonig -lmcrypt -lgd 
+CMakeFiles/hphp.dir/main.cpp.o: In function `prepareOptions(ProgramOptions&, int, char**)':
+main.cpp:(.text+0x3c4): undefined reference to `boost::program_options::options_description::options_description(std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, unsigned int, unsigned int)'
+CMakeFiles/hphp.dir/main.cpp.o: In function `std::basic_string<char, std::char_traits<char>, std::allocator<char> > const& boost::program_options::validators::get_single_string<char>(std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > const&, bool)':
+main.cpp:(.text._ZN5boost15program_options10validators17get_single_stringIcEERKSbIT_St11char_traitsIS3_ESaIS3_EERKSt6vectorIS7_SaIS7_EEb[std::basic_string<char, std::char_traits<char>, std::allocator<char> > const& boost::program_options::validators::get_single_string<char>(std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > const&, bool)]+0x101): undefined reference to `boost::program_options::validation_error::validation_error(boost::program_options::validation_error::kind_t, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)'
+main.cpp:(.text._ZN5boost15program_options10validators17get_single_stringIcEERKSbIT_St11char_traitsIS3_ESaIS3_EERKSt6vectorIS7_SaIS7_EEb[std::basic_string<char, std::char_traits<char>, std::allocator<char> > const& boost::program_options::validators::get_single_string<char>(std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > const&, bool)]+0x1ab): undefined reference to `boost::program_options::validation_error::validation_error(boost::program_options::validation_error::kind_t, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)'
+../../../bin/libhphp_runtime.a(program_functions.cpp.o): In function `HPHP::execute_program(int, char**)':
+program_functions.cpp:(.text+0x1ef8): undefined reference to `boost::program_options::options_description::options_description(std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, unsigned int, unsigned int)'
+collect2: ld returned 1 exit status
+make[3]: *** [src/hphp/hphp] Error 1
+
+
+now we just need to link boost
+I am compiling locally :
+cd
+/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp
+/media/NewFoundSpace/usr/local/bin/c++   -fPIC -fno-omit-frame-pointer -ftemplate-depth-60 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings   -Wl,-Bsymbolic-functions CMakeFiles/hphp.dir/externals.cpp.o CMakeFiles/hphp.dir/main.cpp.o  -o hphp -rdynamic -ldl ../../../bin/libhphp_analysis.a ../../../bin/libhphp_runtime.a -L/usr/local/lib -lboost_system -lboost_program_options -lboost_filesystem -lmysqlclient -lpcre -licuuc -licui18n -lcurl -lcap -lbfd /usr/local/lib/libiberty.a -ldl -lpthread -ltbb -lssl -lcrypto -lz ../../../bin/libtimelib.a -lexpat -lrt -lcrypto -lresolv -lcrypt ../../../bin/libsqlite3.a ../../../bin/libxhp.a ../../../bin/libafdt.a -levent -lmbfl -lxml2 -lonig -lmcrypt -lgd
+
+bug #8
+
+Building hphpi
+cd /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/hphpi && /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp -t cpp -f exe --input-dir . -i hphpi.php -o gen --config hphpi_build.hdf --log=1
+Exception: ParseError: [<string>:1] Unable to parse line hphpi_build.hdf
+make[3]: *** [src/hphp/hphp] Error 255
+make[3]: Leaving directory `/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir'
+make[2]: *** [src/hphp/CMakeFiles/hphp.dir/all] Error 2
+make[2]: Leaving directory `/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir'
+make[1]: *** [all] Error 2
+make[1]: Leaving directory `/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir'
+make: *** [install-arch] Error 2
+dpkg-buildpackage: error: fakeroot debian/rules binary gave error exit status 2
+
+
+bug #9  valgrind.
+
+creating temporary directory /tmp/hphp_vyjjQJ ...
+hphp failed
+running hphp took 0'00" (28 ms) (null)
+==23259== 
+==23259== HEAP SUMMARY:
+==23259==     in use at exit: 12,024 bytes in 319 blocks
+==23259==   total heap usage: 2,832 allocs, 2,513 frees, 161,683 bytes allocated
+==23259== 
+==23259== LEAK SUMMARY:
+==23259==    definitely lost: 617 bytes in 4 blocks
+==23259==    indirectly lost: 9,434 bytes in 300 blocks
+==23259==      possibly lost: 0 bytes in 0 blocks
+==23259==    still reachable: 1,973 bytes in 15 blocks
+==23259==         suppressed: 0 bytes in 0 blocks
+==23259== Rerun with --leak-check=full to see details of leaked memory
+==23259== 
+==23259== For counts of detected and suppressed errors, rerun with: -v
+==23259== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 131 from 12)
+mdupont@introspector-desktop:/media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/hphpi$ valgrind --leak-check=full /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp  -t cpp -f exe --input-dir . -i hphpi.php -o gen --config hphpi_build.hdf --log=3  
+==23315== Memcheck, a memory error detector
+==23315== Copyright (C) 2002-2009, and GNU GPL'd, by Julian Seward et al.
+==23315== Using Valgrind-3.5.0-Debian and LibVEX; rerun with -h for copyright info
+==23315== Command: /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp -t cpp -f exe --input-dir . -i hphpi.php -o gen --config hphpi_build.hdf --log=3
+==23315== 
+Exception: ParseError: [<string>:1] Unable to parse line hphpi_build.hdf
+==23315== 
+==23315== HEAP SUMMARY:
+==23315==     in use at exit: 3,148 bytes in 16 blocks
+==23315==   total heap usage: 2,876 allocs, 2,860 frees, 109,826 bytes allocated
+==23315== 
+==23315== 568 (284 direct, 284 indirect) bytes in 1 blocks are definitely lost in loss record 13 of 16
+==23315==    at 0x4023F5B: calloc (vg_replace_malloc.c:418)
+==23315==    by 0x874F1D1: _err_alloc (in /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp)
+==23315==    by 0x874F455: nerr_passf (in /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp)
+==23315==    by 0x874EA3D: hdf_read_string (in /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp)
+==23315==    by 0x872E9FB: HPHP::Hdf::fromString(char const*) (in /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp)
+==23315==    by 0x847A20C: prepareOptions(ProgramOptions&, int, char**) (in /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp)
+==23315==    by 0x8478DEF: main (in /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp)
+==23315== 
+==23315== 620 bytes in 1 blocks are definitely lost in loss record 14 of 16
+==23315==    at 0x4024C1C: malloc (vg_replace_malloc.c:195)
+==23315==    by 0x8747285: string_check_length (in /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp)
+==23315==    by 0x87474AD: string_appendn (in /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp)
+==23315==    by 0x87475A8: string_appendvf (in /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp)
+==23315==    by 0x8747746: string_appendf (in /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp)
+==23315==    by 0x874F8AA: nerr_error_string (in /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp)
+==23315==    by 0x872EBB2: HPHP::Hdf::CheckNeoError(_neo_err*) (in /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp)
+==23315==    by 0x872EA03: HPHP::Hdf::fromString(char const*) (in /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp)
+==23315==    by 0x847A20C: prepareOptions(ProgramOptions&, int, char**) (in /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp)
+==23315==    by 0x8478DEF: main (in /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/builddir/src/hphp/hphp)
+==23315== 
+==23315== LEAK SUMMARY:
+==23315==    definitely lost: 904 bytes in 2 blocks
+==23315==    indirectly lost: 284 bytes in 1 blocks
+==23315==      possibly lost: 0 bytes in 0 blocks
+==23315==    still reachable: 1,960 bytes in 13 blocks
+==23315==         suppressed: 0 bytes in 0 blocks
+==23315== Reachable blocks (those to which a pointer was found) are not shown.
+==23315== To see them, rerun with: --leak-check=full --show-reachable=yes
+==23315== 
+==23315== For counts of detected and suppressed errors, rerun with: -v
+==23315== ERROR SUMMARY: 2 errors from 2 contexts (suppressed: 131 from 12)
+
+
+bug #11
+
+ /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/hphpi/gen/CMakeLists.txt
+
+Had to change :
+    add_library(mbfl STATIC IMPORTED)
+    SET_PROPERTY(TARGET mbfl PROPERTY IMPORTED_LOCATION "/usr/lib/libmbfl.a")
+
+ Now I have an executable program that segfaults :
+ ./program
+ Give me a file
+ 
+ /program ../../test/perf_ad_hoc.php
+ program: /media/sdd2/home/mdupont/2010/02/hiphop/hiphop-php-0.1/src/cpp/base/builtin_functions.cpp:375:
+ HPHP::Variant HPHP::include_impl(const HPHP::String&, bool,
+ HPHP::LVariableTable*, const char*, bool): Assertion
+ `RuntimeOption::IncludeSearchPaths[0] == "."' failed.
+ Core dumped: Aborted
+ Aborted
+
+bug #12
+Check the debian packaging , it is missing important files.
+
+dpkg -c hiphop-php_0.1-1_i386.deb
+drwxr-xr-x root/root         0 2010-02-21 00:09 ./
+drwxr-xr-x root/root         0 2010-02-21 00:09 ./usr/
+drwxr-xr-x root/root         0 2010-02-21 00:09 ./usr/include/
+-rw-r--r-- root/root     16319 2010-02-20 11:25 ./usr/include/afdt.h
+drwxr-xr-x root/root         0 2010-02-21 00:04 ./usr/bin/
+drwxr-xr-x root/root         0 2010-02-21 00:04 ./usr/sbin/
+drwxr-xr-x root/root         0 2010-02-21 00:09 ./usr/share/
+drwxr-xr-x root/root         0 2010-02-21 00:09 ./usr/share/doc/
+drwxr-xr-x root/root         0 2010-02-21 00:09 ./usr/share/doc/hiphop-php/
+-rw-r--r-- root/root      3900 2010-02-20 23:21 ./usr/share/doc/hiphop-php/README.Debian.gz
+-rw-r--r-- root/root      1778 2010-02-20 11:25 ./usr/share/doc/hiphop-php/README.md
+-rw-r--r-- root/root       186 2010-02-20 11:27 ./usr/share/doc/hiphop-php/changelog.Debian.gz
+-rw-r--r-- root/root       425 2010-02-20 11:25 ./usr/share/doc/hiphop-php/CMakeLists.txt
+-rw-r--r-- root/root       733 2010-02-20 11:30 ./usr/share/doc/hiphop-php/copyright
+drwxr-xr-x root/root         0 2010-02-21 00:09 ./usr/lib/
+-rw-r--r-- root/root    719940 2010-02-21 00:09 ./usr/lib/libxhp.a
+-rw-r--r-- root/root     15552 2010-02-21 00:09 ./usr/lib/libafdt.a

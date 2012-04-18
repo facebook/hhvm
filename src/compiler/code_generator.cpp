@@ -223,20 +223,6 @@ void CodeGenerator::namespaceEnd() {
   printf("}\n");
 }
 
-std::string CodeGenerator::getFormattedName(const std::string &file) {
-  char *fn = strdup(file.c_str());
-  int len = strlen(fn);
-  assert(len == (int)file.size());
-  for (int i = 0; i < len; i++) {
-    if (!isalnum(fn[i])) fn[i] = '_';
-  }
-  string formatted = fn;
-  free(fn);
-  int hash = hash_string(file.data(), file.size());
-  formatted += boost::str(boost::format("%08x") % hash);
-  return formatted;
-}
-
 bool CodeGenerator::ensureInNamespace() {
   if (m_inNamespace) return false;
   namespaceBegin();
@@ -250,7 +236,7 @@ bool CodeGenerator::ensureOutOfNamespace() {
 }
 
 void CodeGenerator::headerBegin(const std::string &file) {
-  string formatted = getFormattedName(file);
+  string formatted = Util::escapeIdentifier(file);
   printf("\n");
   printf("#ifndef __GENERATED_%s__\n", formatted.c_str());
   printf("#define __GENERATED_%s__\n", formatted.c_str());
@@ -258,7 +244,8 @@ void CodeGenerator::headerBegin(const std::string &file) {
 }
 
 void CodeGenerator::headerEnd(const std::string &file) {
-  string formatted = getFormattedName(file);
+  string formatted = Util::escapeIdentifier(file);
+
   printf("\n");
   printf("#endif // __GENERATED_%s__\n", formatted.c_str());
 }
@@ -362,22 +349,7 @@ const char *CodeGenerator::getGlobals(AnalysisResultPtr ar) {
 }
 
 std::string CodeGenerator::FormatLabel(const std::string &name) {
-  string ret;
-  ret.reserve(name.size());
-  for (size_t i = 0; i < name.size(); i++) {
-    unsigned char ch = name[i];
-    if ((ch >= 'a' && ch <= 'z') ||
-        (ch >= 'A' && ch <= 'Z') ||
-        (ch >= '0' && ch <= '9') || ch == '_') {
-      ret += ch;
-    } else {
-      char buf[10];
-      snprintf(buf, sizeof(buf), "%s%02X", Option::LabelEscape.c_str(),
-               (int)ch);
-      ret += buf;
-    }
-  }
-  return ret;
+  return Util::escapeIdentifier(name);
 }
 
 std::string CodeGenerator::EscapeLabel(const std::string &name,

@@ -476,7 +476,7 @@ class ItemSize<UNIT_SIZE> {
 template <typename T>
 void *ObjectAllocatorInitSetup() {
   ThreadLocalSingleton<ObjectAllocator<ItemSize<sizeof(T)>::value> > tls;
-  GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.getCheck));
+  AddAllocatorThreadLocalInit((AllocatorThreadLocalInit)(tls.getCheck));
   return (void *)tls.getNoCheck;
 }
 

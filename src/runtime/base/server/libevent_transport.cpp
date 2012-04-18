@@ -68,7 +68,7 @@ LibEventTransport::LibEventTransport(LibEventServer *server,
     m_method = Transport::UnknownMethod;
     break;
   }
-  m_extended_method = m_request->ext_method;
+  m_extended_method = "TODO"; //m_request->ext_method; TODO:HACK
 
   ASSERT(m_request->input_headers);
   for (evkeyval *p = ((m_evkeyvalq*)m_request->input_headers)->tqh_first; p;
@@ -259,7 +259,7 @@ void LibEventTransport::sendImpl(const void *data, int size, int code,
     if (m_method != HEAD) {
       evbuffer_add(m_request->output_buffer, data, size);
     } else if (!evhttp_find_header(m_request->output_headers,
-                                   "Content-Length")) {
+                                 "Content-Length")) {
       char buf[11];
       snprintf(buf, sizeof(buf), "%d", size);
       addHeaderImpl("Content-Length", buf);

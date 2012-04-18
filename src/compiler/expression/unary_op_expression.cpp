@@ -53,6 +53,11 @@ inline void UnaryOpExpression::ctorInit() {
       m_exp->clearContext(Expression::NoLValueWrapper);
     }
     break;
+  case '@':
+    if (m_exp->is(Expression::KindOfConstantExpression)) {
+      m_localEffects = IOEffect;
+    }
+    break;
   case T_PRINT:
     m_localEffects = IOEffect;
     break;
@@ -481,7 +486,7 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     case '-':
       if (Type::SameType(expType, Type::Int64) ||
           Type::SameType(expType, Type::Double)) {
-        rt = expType;
+        rt = m_exp->inferAndCheck(ar, expType, true);;
       }
       break;
     case T_INC:
@@ -664,7 +669,7 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
   if (m_op == '@') {
     if (isUnused()) m_exp->setUnused(true);
-    bool doit = (state & FixOrder) || m_exp->hasEffect();
+    bool doit = (state & FixOrder) || m_exp->hasEffect() || hasEffect();
     if (doit && cg.inExpression()) {
       cg.wrapExpressionBegin();
       std::string tmp = genCPPTemp(cg, ar);

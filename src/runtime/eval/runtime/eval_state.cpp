@@ -342,6 +342,8 @@ Variant RequestEvalState::findUserConstant(
     return self->m_constants.rvalAt(name);
   }
   const char *s = name.c_str();
+  Variant r = get_constant(s);
+  if (r) return r;
   if (error) raise_notice("Use of undefined constant %s - assumed '%s'", s, s);
   return name;
 }

@@ -30,6 +30,11 @@ extern const StaticString k_HPHP_TRIM_CHARLIST;
  */
 class StringUtil {
 public:
+  enum ToLowerType {
+    ToLowerAll,
+    ToLowerFirst
+  };
+
   enum ToUpperType {
     ToUpperAll,
     ToUpperFirst,
@@ -59,7 +64,7 @@ public:
    * Manipulations. Note, all these functions will create a new string than
    * modifying input, although names of these functions sound like mutating.
    */
-  static String ToLower(CStrRef input);
+  static String ToLower(CStrRef input, ToLowerType type = ToLowerAll);
   static String ToUpper(CStrRef input, ToUpperType type = ToUpperAll);
   static String Trim(CStrRef input, TrimType type = TrimBoth,
                      CStrRef charlist = k_HPHP_TRIM_CHARLIST);

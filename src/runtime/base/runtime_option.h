@@ -142,6 +142,7 @@ public:
   static std::string SessionPath;
   static std::string SessionHandler;
   static long SessionHashBitsPerCharacter;
+  static long SessionMaxLifetime;
 
   // If a request has a body over this limit, switch to on-demand reading.
   // -1 for no limit.
